@@ -9,13 +9,14 @@
  * Date: 30/03/16
  * Time: 18.05
  */
-class RawXliff2ViewTest extends AbstractTest{
+class RawXliff2ViewTest extends AbstractTest
+{
 
     /**
      * @group regression
      * @covers CatUtils::rawXliff2view
      */
-    public function testliff2view1()
+    public function test_raw_X_liff2view1()
     {
         $source_segment = <<<LAB
 <g id="1">[AH1]</g><g id="2">Is fold &amp; crease the same??</g>
@@ -31,7 +32,7 @@ LAB;
      * @group regression
      * @covers CatUtils::rawXliff2view
      */
-    public function testliff2view2()
+    public function test_raw_X_liff2view_2()
     {
         $source_segment = <<<LAB
 <g id="1">SIA “Bio2You”,</g><g id="2"> Reg. no</g><g id="3">40103243404, </g><g id="4">address: Ganibu Dambis 24A, Riga, Latvia  ("the Franchisor")  </g>
@@ -46,7 +47,7 @@ LAB;
      * @group regression
      * @covers CatUtils::rawXliff2view
      */
-    public function testliff2view3()
+    public function test_raw_X_liff2view3()
     {
         $source_segment = <<<LAB
 <g id="1">USB </g><g id="2">(to wake to your USB music)</g><g id="1">DISC </g><g id="2">(to wake to your DISC music)</g><g id="1">BUZZER </g><g id="2">(to wake to a buzzer sound)</g>
@@ -61,7 +62,7 @@ LAB;
      * @group regression
      * @covers CatUtils::rawXliff2view
      */
-    public function testliff2view4()
+    public function test_raw_X_liff2view4()
     {
 
         $source_segment = <<<LAB
@@ -77,7 +78,7 @@ LAB;
      * @group regression
      * @covers CatUtils::rawXliff2view
      */
-    public function testliff2view5()
+    public function test_raw_X_liff2view5()
     {
         $source_segment = <<<LAB
 <g id="1">入院時検査所見</g><g id="2">: TP 5.7 mg</g><g id="3">／</g><g id="4">dL</g><g id="5">，</g><g id="6">Alb</g><g id="7"> </g><g id="8">2.9 mg</g><g id="9">／</g><g id="10">dL</g><g id="11"> と低</g><g id="1">入院時現症</g><g id="2">:</g><g id="3"> 腹部に明らかな腫瘤は触れず，表在リン</g>
@@ -92,7 +93,7 @@ LAB;
      * @group regression
      * @covers CatUtils::rawXliff2view
      */
-    public function testliff2view6()
+    public function test_raw_X_liff2view6()
     {
         $source_segment = <<<LAB
 <g id="1">[0065] </g><g id="2">y</g><g id="3">1</g><g id="4">(</g><g id="5">z</g><g id="6">O</g><g id="7">, t</g><g id="8">m</g><g id="9">) </g><g id="10">= min</g><g id="11">[</g><g id="12">y</g><g id="13">1</g><g id="14">(</g><g id="15">z, t</g><g id="16">m</g><g id="17">)]</g><g id="18">;             </g><g id="19">0 : : : z ::: L                                              </g><g id="20">(Equation 16)</g>
@@ -107,7 +108,7 @@ LAB;
      * @group regression
      * @covers CatUtils::rawXliff2view
      */
-    public function testliff2view7()
+    public function test_raw_X_liff2view7()
     {
         $source_segment = <<<LAB
 <g id="1">•••••••••</g><g id="2"> EMILIA-ROMAGNA</g>
@@ -122,7 +123,7 @@ LAB;
      * @group regression
      * @covers CatUtils::rawXliff2view
      */
-    public function testliff2view8()
+    public function test_raw_X_liff2view8()
     {
         $source_segment = <<<LAB
 <g id="1">lip = </g><g id="2">0 :   </g><g id="3">: <g id="4">lip = </g></g><g id="5">0</g><g id="1">c:::::&gt;</g><g id="2">  200</g><g id="1">\ </g><g id="2">FRONT</g><g id="2">v·    </g><g id="3">• . .</g>
@@ -137,7 +138,7 @@ LAB;
      * @group regression
      * @covers CatUtils::rawXliff2view
      */
-    public function testliff2view9()
+    public function test_raw_X_liff2view9()
     {
         $source_segment = <<<LAB
 In certain embodiments, the value of <g id="2">E </g>may vary or be determined by a user.
@@ -152,7 +153,7 @@ LAB;
      * @group regression
      * @covers CatUtils::rawXliff2view
      */
-    public function testliff2view10()
+    public function test_raw_X_liff2view10()
     {
         $source_segment = <<<LAB
 <g id="2">L  <g id="3">0</g></g>, and <g id="4">C </g>is the orifice flow coefficient.
@@ -167,7 +168,7 @@ LAB;
      * @group regression
      * @covers CatUtils::rawXliff2view
      */
-    public function testliff2view11()
+    public function test_raw_X_liff2view11()
     {
         $source_segment = <<<LAB
 リストン鉗子をかけた大弯口側端へ，<ex id="1"/><g id="2">Bill-roth </g><bx id="3"/>Ⅱ法に準じて胃空腸端側吻合を行った。
@@ -182,7 +183,7 @@ LAB;
      * @group regression
      * @covers CatUtils::rawXliff2view
      */
-    public function testliff2view12()
+    public function test_raw_X_liff2view12()
     {
         $source_segment = <<<LAB
 <g id="1">R-CHOP </g><g id="2">療法中に幽門部狭窄を来し胃空腸バイパス術を施行した</g><g id="3"> </g><g id="4">胃原発 </g><g id="5">Diffuse Large B-Cell Lymphoma</g><g id="6"> の </g><g id="7">1</g><g id="8"> 例</g>
@@ -197,7 +198,7 @@ LAB;
      * @group regression
      * @covers CatUtils::rawXliff2view
      */
-    public function testliff2view13()
+    public function test_raw_X_liff2view13()
     {
         $source_segment = <<<LAB
 <g id="1">•••••••••</g><g id="2"> EMILIA-ROMAGNA</g>
@@ -212,7 +213,7 @@ LAB;
      * @group regression
      * @covers CatUtils::rawXliff2view
      */
-    public function testliff2view14()
+    public function test_raw_X_liff2view14()
     {
         $source_segment = <<<LAB
 <g id="1">[0054] </g><g id="2">y<g id="3">(</g>z</g><g id="4">1</g><g id="5">, t</g><g id="6">m</g><g id="7">) </g><g id="8">= d - r</g><g id="9">O                                                                                                                      </g><g id="10">(Equation 11)</g>
@@ -227,7 +228,7 @@ LAB;
      * @group regression
      * @covers CatUtils::rawXliff2view
      */
-    public function testliff2view15()
+    public function test_raw_X_liff2view15()
     {
         $source_segment = <<<LAB
 In such case Franch<ex id="1"/><bx id="2"/>isor receives back its all instalments, furniture and goods at cost of Franchisee, and the Franchisee must cover all unearned profit of the Franchisor.
@@ -242,7 +243,7 @@ LAB;
      * @group regression
      * @covers CatUtils::rawXliff2view
      */
-    public function testliff2view16()
+    public function test_raw_X_liff2view16()
     {
         $source_segment = <<<LAB
 <g id="1">9.4</g><g id="2"> On expiry of this Agreement all licences referred to in this Clause 9 shall expire and the Franchisee agrees to immediately cease use of all of the Franchisor's intellectual property.</g><g id="1">9.3</g><g id="2"> This Agreement does not convey or transfer to the Franchisee any ownership or interest in any intellectual prop</g><g id="3">erty owned by the Franchisor.</g><g id="1">9.2</g><g id="2"> The Trade Mark shall not be used</g><g id="3"> in any manner liable to invalidate the registration of the Trade Mark and the Franchisee shall not permit them to be used by third parties.</g><g id="1">9.1</g><g id="2"> The Franchisor grants to the Franchisee licence in the Territory to use its logos, trade marks, service marks, trade names, literature, copyrights, database rights and patents subject to the restrictions in Clause 9.2.</g><g id="1">8.3. provide Franchisor with </g><g id="2">daily, weekly and monthly reports.</g>
@@ -257,7 +258,7 @@ LAB;
      * @group regression
      * @covers CatUtils::rawXliff2view
      */
-    public function testliff2view17()
+    public function test_raw_X_liff2view17()
     {
         $source_segment = <<<LAB
 A tale scopo verrà implementato il programma custom “<g id="2">Rilascio Massivo Contratti Migrati E4E</g>” <ex id="1"/><g id="3">(</g><g id="4">ZMM4R_IT_P_RILFDM</g>) che imposterà l’<bx id="5"/>“Indicatore di Rilascio” (EKKO-FRGKE) = 3 (PO Non Changeable) per tutti i Documenti di acquisto indicati in un file di <g id="6">Input</g> in formato Excel da specificare in Selection Screen (vd.
@@ -272,7 +273,7 @@ LAB;
      * @group regression
      * @covers CatUtils::rawXliff2view
      */
-    public function testliff2view18()
+    public function test_raw_X_liff2view18()
     {
         $source_segment = <<<LAB
 <g id="1">总之，通过对</g><g id="2">2012-2015年间美企所中国军情研究的统计和特点分析，可以做出以下判断：美企所是保守主义思想浓</g><bx id="3"/>厚的智库，对中国军事力量的正常发展观点激进，态度偏激；美企所近年来中国军情研究主要聚焦在南海、东海等海洋领土争端问题上；美企所提出的诸如加强“航行自由”、联盟体系的建议在美国政府的政策举措上有所表现。<g id="2">从上文</g><g id="3">对26篇文章的内容简述，可以清晰地看出，美企所非常关注中国海空军力的发展，并以此作为加强美军在亚太地区军力部署、更新作战概念、增加军费预算的理由。</g>
@@ -287,7 +288,7 @@ LAB;
      * @group regression
      * @covers CatUtils::rawXliff2view
      */
-    public function testliff2view19()
+    public function test_raw_X_liff2view19()
     {
         $source_segment = <<<LAB
 </g>
@@ -307,7 +308,7 @@ LAB;
      * @group regression
      * @covers CatUtils::rawXliff2view
      */
-    public function testliff2view20()
+    public function test_raw_X_liff2view20()
     {
         $source_segment = <<<LAB
 <g 𐎆 𐏉</g>
@@ -323,7 +324,7 @@ LAB;
      * @group regression
      * @covers CatUtils::rawXliff2view
      */
-    public function testliff2view21()
+    public function test_raw_X_liff2view21()
     {
         $source_segment = <<<LAB
 <g id="1">ψ</g>😴<g 😆id="2">🛠λ</g>
@@ -334,7 +335,7 @@ LAB;
         $this->assertEquals($expected_segment, CatUtils::rawxliff2view($source_segment));
     }
 
-    public function testliff2view22()
+    public function test_raw_X_liff2view22()
     {
         $source_segment = <<<'LAB'
 <g id="2">sIL-2R</g><g id="3"> は </g><g id="4">447</g><g id="5"> </g><g id="6">U</g><g id="7">／</g>
@@ -457,7 +458,6 @@ LAB;
 LAB;
         $this->assertEquals($expected_segment, CatUtils::rawxliff2view($source_segment));
     }
-
 
 
 }

@@ -9,13 +9,15 @@
  * Date: 31/03/16
  * Time: 15.51
  */
-class PlaceholdxlifftagsTest extends AbstractTest{
+class PlaceholdxlifftagsTest extends AbstractTest
+{
 
     /**
      * @group regression
      * @covers CatUtils::placehold_xliff_tags
      */
-    public function testplaceholdxlifftags_japanese_short() {
+    public function testplaceholdxlifftags_japanese_short()
+    {
         $source_segment = <<<'LAB'
 <g id="1">6) </g><g id="2">阪  眞</g><g id="3">: </g><bx id="4"/>胃術後の栄養障害と栄養補給法．
 LAB;
@@ -29,7 +31,8 @@ LAB;
      * @group regression
      * @covers CatUtils::placehold_xliff_tags
      */
-    public function testplaceholdxlifftags_japanese_long() {
+    public function testplaceholdxlifftags_japanese_long()
+    {
         $source_segment = <<<'LAB'
 <g id="1">προσωπικού </g><g id="2">και<g id="3"> ιατρείο).</g></g>
 <g id="1">ΤΕΥΧΟΣ ΔΕΥΤΕΡΟ</g><g id="2">  </g><g id="3">Αο, Φύλλου 2326</g>
@@ -47,7 +50,8 @@ LAB;
      * @group regression
      * @covers CatUtils::placehold_xliff_tags
      */
-    public function testplaceholdxlifftags_english_short() {
+    public function testplaceholdxlifftags_english_short()
+    {
         $source_segment = <<<'LAB'
 <g id="1">12.3.</g><g id="2"> Upon termination of this Agreement for whatever reasons, the Franchisee shall at the request of the Franchisor promptly return all documentation in the possession or control of the Franchisee relating to the Pr</g><bx id="3"/>oducts, Services or business activities and affairs of the Franchisor.
 LAB;
@@ -61,7 +65,8 @@ LAB;
      * @group regression
      * @covers CatUtils::placehold_xliff_tags
      */
-    public function testplaceholdxlifftags_deustsch() {
+    public function testplaceholdxlifftags_deustsch()
+    {
         $source_segment = <<<'LAB'
 <g id="2">derselbe soll dir den Kopf zertreten“</g>,  (Hinweis auf Satan) und du wirst ihn in die Ferse stechen (Hinweis auf den Tode des Messias, Ferse hat eine wichtige Bedeutung in der semitischen Kultur).
 LAB;
@@ -75,7 +80,8 @@ LAB;
      * @group regression
      * @covers CatUtils::placehold_xliff_tags
      */
-    public function testplaceholdxlifftags_very_long() {
+    public function testplaceholdxlifftags_very_long()
+    {
         $source_segment = <<<'LAB'
 <g id="1">25    </g>would result in uniform displacement front and least risk of water breakthrough.
 <g id="1">20    </g><g id="2">[0080] </g>Placement of FCDs with equal properties in such a situation would result in higher breakthrough risk in the beginning and end parts of the production well.
