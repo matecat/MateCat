@@ -8,6 +8,7 @@
     <link href="../../public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>
     <link href="../../public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css"/>
     <link rel="stylesheet" href="../../public/css/manage.css?build=${build_number}"/>
+    <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
 
     <script type="text/javascript">
         var config = {
@@ -320,22 +321,30 @@
         tdChildren.last().addClass( 'qa_eq_td_last' );
         /* Table Equivalent Translated Score Highlight */
 
-        $( 'a.authLink' ).click( function ( e ) {
-            e.preventDefault();
-            APP.googole_popup( $( this ).attr( 'href' ) );
-        } );
-
         $( "#details-link" ).click( function () {
             $( 'html, body' ).animate( {
                 scrollTop: $( "#highlight" ).offset().top
             }, 1000 );
         } );
+        $('a.authLink').click(function(e){
+            e.preventDefault();
+            $(".login-google").show();
+            return false;
+        });
+        $('#sign-in').click(function(e){
+            e.preventDefault();
+            APP.googole_popup($(this).data('oauth'));
+        })
+    });
+    $( document ).on('click', '.x-popup', function() {
+        $( '.login-google' ).hide();
 
     } );
 </script>
 <script src="${basepath}public/js/lib/snapengage.js"></script>
 
 <div metal:use-macro="cookiebanner.html/cookieBanner"/>
+<div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
 
 </body>
 </html>

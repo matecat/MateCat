@@ -204,12 +204,47 @@ class ProjectManager {
         $this->createProjectRecord();
         $this->saveMetadata();
 
-        //create user (Massidda 2013-01-24)
+        //sort files in order to process TMX first
+        $sortedFiles = array();
+        $firstTMXFileName = "";
+        foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
+
+            //check for glossary files and tmx and put them in front of the list
+            $infoFile = DetectProprietaryXliff::getInfo( $fileName );
+            if ( DetectProprietaryXliff::getMemoryFileType() ) {
+
+                //found TMX, enable language checking routines
+                if ( DetectProprietaryXliff::isTMXFile() ) {
+
+                    //export the name of the first TMX Files for latter use
+                    $firstTMXFileName = ( empty( $firstTMXFileName ) ? $firstTMXFileName = $fileName : null );
+                    $this->checkTMX = 1;
+                }
+
+                //not used at moment but needed if we want to do a poll for status
+                if ( DetectProprietaryXliff::isGlossaryFile() ) {
+                    $this->checkGlossary = 1;
+                }
+
+                //prepend in front of the list
+                array_unshift( $sortedFiles, $fileName );
+            } else {
+
+                //append at the end of the list
+                array_push( $sortedFiles, $fileName );
+            }
+
+        }
+        $this->projectStructure[ 'array_files' ] = $sortedFiles;
+        unset( $sortedFiles );
+
         //check if all the keys are valid MyMemory keys
         if ( !empty( $this->projectStructure[ 'private_tm_key' ] ) ) {
             // TODO: move this 100 lines IF condition elsewhere to reduce scope
 
             foreach ( $this->projectStructure[ 'private_tm_key' ] as $i => $_tmKey ) {
+
+
 
                 $this->tmxServiceWrapper->setTmKey( $_tmKey[ 'key' ] );
 
@@ -255,7 +290,6 @@ class ProjectManager {
                     /**
                      * @var $_memoKey TmKeyManagement_MemoryKeyStruct
                      */
-
                     $userTmKeys[] = $_memoKey->tm_key->key;
                 }
 
@@ -267,8 +301,11 @@ class ProjectManager {
                         $newTmKey->key  = $_tmKey[ 'key' ];
                         $newTmKey->tm   = true;
                         $newTmKey->glos = true;
-                        //TODO: take this from input
-                        $newTmKey->name = $_tmKey[ 'name' ];
+
+                        //THIS IS A NEW KEY and must be inserted into the user keyring
+                        //So, if a TMX file is present in the list of uploaded files, and the Key name provided is empty
+                        // assign TMX name to the key
+                        $newTmKey->name = ( !empty( $_tmKey[ 'name' ] ) ? $_tmKey[ 'name' ] : $firstTMXFileName );
 
                         $newMemoryKey->tm_key = $newTmKey;
                         $newMemoryKey->uid    = $this->projectStructure[ 'uid' ];
@@ -306,36 +343,6 @@ class ProjectManager {
             insertTranslator( $this->projectStructure );
 
         }
-
-        //sort files in order to process TMX first
-        $sortedFiles = array();
-        foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
-
-            //check for glossary files and tmx and put them in front of the list
-            $infoFile = DetectProprietaryXliff::getInfo( $fileName );
-            if ( DetectProprietaryXliff::getMemoryFileType() ) {
-
-                //found TMX, enable language checking routines
-                if ( DetectProprietaryXliff::isTMXFile() ) {
-                    $this->checkTMX = 1;
-                }
-
-                //not used at moment but needed if we want to do a poll for status
-                if ( DetectProprietaryXliff::isGlossaryFile() ) {
-                    $this->checkGlossary = 1;
-                }
-
-                //prepend in front of the list
-                array_unshift( $sortedFiles, $fileName );
-            } else {
-
-                //append at the end of the list
-                array_push( $sortedFiles, $fileName );
-            }
-
-        }
-        $this->projectStructure[ 'array_files' ] = $sortedFiles;
-        unset( $sortedFiles );
 
 
         $uploadDir = $this->uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ];
