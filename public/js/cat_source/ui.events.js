@@ -149,13 +149,16 @@ $.extend(UI, {
         }).bind('keydown', 'Meta+shift+s', function(e) {
 //            e.preventDefault();
             UI.body.toggleClass('tagmode-default-extended');
+        }).on('click', '.lxq-error-seg', function(e) {
+            e.preventDefault();
+            LXQ.toogleHighlightInSegment(UI.currentSegment);
         }).on('click', '.tagModeToggle', function(e) {
             e.preventDefault();
             console.log('click su tagMode toggle');
             $(this).toggleClass('active');
             UI.body.toggleClass('tagmode-default-extended');
             if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment(true);
-		} ).on('click', '.autofillTag', function(e){
+        }).on('click', '.autofillTag', function(e){
 			e.preventDefault();
 
 			//get source tags from the segment
@@ -334,7 +337,6 @@ $.extend(UI, {
 			location.reload(true);
 		}).on('click', '.tag-autocomplete li', function(e) {
 			e.preventDefault();
-
             UI.editarea.html(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
 
             UI.editarea.find('.rangySelectionBoundary').before(UI.editarea.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
@@ -626,7 +628,15 @@ $.extend(UI, {
 		});
 
         $('#outer').click(function(e) {
-            var container = $(UI.currentSegment);
+            //console.log('@@@@@@@@2: outer');
+            //console.dir( $(e.target));
+            var container = $(UI.currentSegment), found = false;;
+            if ($(e.target).hasClass('tooltipa')) {
+                var segmentid = $(e.target).data('errors').trim().split(/\s/gi)[0].split(/_/gi)[1];
+                if (segmentid == UI.currentSegmentId)
+                    found = true;
+            }
+            if (!found)
             if (!container.is(e.target) // if the target of the click isn't the container...
                 && container.has(e.target).length === 0 // ... nor a descendant of the container
                 && !$(e.target).hasClass('translated') // has not clicked on a translated button
@@ -703,7 +713,10 @@ $.extend(UI, {
 		$("#outer").on('click', 'a.percentuage', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-		}).on('mouseup', '.editarea', function() { //mouseupeditarea
+		})
+        .on('mouseup', '.editarea', function(e) { //mouseupeditarea
+            //console.log('@@@@@@@@1');
+            //console.dir( $(e.target));
             if(UI.editarea != '' && !UI.editarea.find('.locked.selected').length) {
                 if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
                     UI.showEditToolbar();
@@ -722,6 +735,8 @@ $.extend(UI, {
                         }
             */
 		}).on('mousedown', '.editarea', function(e) {
+            //console.log('@@@@@@@@3');
+            //console.dir( $(e.target));
             if(e.which == 3) {
                 e.preventDefault();
                 return false;
@@ -740,11 +755,14 @@ $.extend(UI, {
         }).on('click', '.footerSwitcher', function(e) {
             UI.switchFooter();
 		}).on('click', '.editarea', function(e, operation, action) { //clickeditarea
+        //console.log('@@@@@@@@4');
+        //console.dir (e.target);
             if (typeof operation == 'undefined')
 				operation = 'clicking';
 //            console.log('operation: ', operation);
 //            console.log('action: ', action);
             UI.saveInUndoStack('click');
+
 //            if(typeof UI.currentSegment != 'undefined') return true;
             this.onclickEditarea = new Date();
 			UI.notYetOpened = false;
@@ -886,6 +904,7 @@ $.extend(UI, {
                     }, 10);
                 }
             }
+
 		}).on('keydown', '.editor .editarea', function(e) {
 //			console.log('keydown: ', UI.editarea.html());
 /*
@@ -1250,7 +1269,7 @@ $.extend(UI, {
 				}, 10);
 */
 			UI.registerQACheck();
-                if(UI.isKorean && ( (e.which == '60') || (e.which == '62') || (e.which = '32')) ) {
+                if(UI.isKorean && ( (e.which == '60') || (e.which == '62') || (e.which == '32')) ) {
                 } else {
                     UI.lockTags(UI.editarea);
                 }
@@ -1654,6 +1673,7 @@ $.extend(UI, {
 			}
 			$(this).parents('.matches').toggleClass('extended');
         }).on('keyup', '.editor .editarea', function(e) {
+            
 			if ( e.which == 13 ){
 //				$(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
 

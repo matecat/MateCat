@@ -1,3 +1,6 @@
+/* global config */
+/* global MBC */
+/* global UI */
 /*
  Component: mbc.main
  */
@@ -834,6 +837,7 @@ if ( MBC.enabled() )
             if ( $( '.searchbox' ).is( ':visible' ) ) {
                 UI.toggleSearch( ev );
             }
+            $( '.lxq-history-balloon-outer' ).removeClass( 'lxq-visible' );           
         } );
 
         $( document ).on( 'mbc:comment:new', function ( ev, data ) {

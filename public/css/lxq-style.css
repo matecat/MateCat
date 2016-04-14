@@ -1,0 +1,1099 @@
+/*
+ ******
+ ******
+ Balloon basic layout
+ ******
+ ******
+ */
+
+.lxq-comment-balloon-outer {
+  padding-right: 15px
+}
+
+.lxq-comment-balloon-inner {
+  background: #f7f7f7;
+  box-shadow: 0 1px 2px 0px rgba(0,0,0,0.3);
+  margin-top: 4px;
+}
+
+/* Give breathing space to the last comment ballon in page */
+.lxq-comment-balloon-outer:last-of-type {
+  margin-bottom: 100px;
+}
+
+/*
+ ******
+ Post new comment
+ ******
+ */
+.lxq-reply-input {
+  background: #f7f7f7;
+  border-top: 1px solid #dadada;
+  box-shadow: 0px -3px 6px -5px rgba(0,0,0,0.3);
+  position: relative;
+}
+
+
+/*
+ ******
+ Past comments wrap
+ ******
+ */
+
+.lxq-comments-wrap {
+  height: 100%;
+  max-height: 300px;
+  overflow-y: auto;
+  position: relative;
+  width: 100%;
+}
+
+/*
+ ******
+ Past comment wrap common
+ ******
+ */
+.lxq-thread-wrap {
+  padding: 14px 12px;
+}
+
+/*
+ ******
+ Past comment thread wrap status active in history balloon
+ ******
+ */
+.lxq-history-balloon .lxq-thread-wrap-active {
+  border-bottom: 2px solid #dadada;
+}
+
+/*
+ ******
+ Past comment thread wrap status resolved
+ ******
+ */
+.lxq-thread-wrap-resolved {
+  background: rgba(124,197,118,.15);
+  border-bottom: 2px solid rgba(124,197,118,.6); /* #7cc576 */
+}
+
+/*
+ ******
+ Show past comment
+ ******
+ */
+.lxq-show-comment:not(:first-of-type) {
+  margin-top: 14px;
+}
+
+.lxq-comments-wrap .lxq-show-comment:not(:last-of-type) {
+  border-bottom: 1px solid #dadada;
+}
+
+/*
+ ******
+ Past comment details
+ ******
+ */
+.lxq-comment-info-wrap {
+  clear: both;
+  margin: 4px 0;
+}
+
+.lxq-comment-info {
+  color: #7f7f7f;
+  display: inline-block;
+  font-size: 11px;
+  font-weight: lighter;
+  padding-bottom: 2px;
+}
+
+/*
+ Email past comment details
+ */
+.lxq-comment-email-label {
+  color: #7f7f7f;
+  font-weight: normal;
+  width: 90%; /* set width below 100% and allow truncation */
+}
+
+/*
+ Message past comment details
+ */
+.lxq-comment-body {
+  color: #323232;
+  font-size: 14px;
+  margin: 12px 0 16px;
+  word-wrap: break-word;
+}
+
+
+/*
+ ******
+ New incoming message notification
+ ******
+ */
+
+.lxq-new-message-notification {
+  background-color: #FFF9CC;
+  color: #6d6e71;
+  font-size: 14px;
+  left: 0;
+  line-height: 2.2;
+  position: absolute;
+  text-align: center;
+  top: -31px;
+  width: 100%;
+}
+
+/* New message link  */
+a.lxq-new-message-link:link,
+a.lxq-new-message-link:visited {
+  color: #6d6e71;
+  text-decoration: underline;
+}
+
+a.lxq-new-message-link:hover {
+  text-decoration: none;
+}
+
+.lxq-new-message-icon {
+  font-size: 14px;
+  font-weight: bold;
+  padding: 0 6px 0 0;
+}
+
+
+/*
+ ******
+ ******
+ Comment input
+ ******
+ ******
+ */
+
+.lxq-comment-input {
+  border-radius: 2px;
+  float: left;
+  max-width: 186px;
+  outline-width: 0;
+  width: 100%;
+}
+
+.lxq-comment-textarea {
+  -webkit-box-shadow: inset 0 1px 2px #ccc;
+  box-shadow: inset 0 1px 2px #ccc;
+  border: 1px solid #999;
+  font-size: 16px;
+  margin: 0;
+  overflow: hidden;
+  padding: 4px;
+  position: static; /* avoid position relative set for any textarea element in style.css line 169 */
+  resize: none;
+  word-break: normal;
+}
+
+.lxq-comment-textinput {
+  background: #fff;
+  border: 1px solid #999;
+  border-radius: 2px;
+  -webkit-box-shadow: inset 0 1px 2px #ddd;
+  box-shadow: inset 0 1px 2px #ddd;
+  font-size: 14px;
+  height: auto;
+  margin: 0 0 2px;
+  outline: 0;
+  overflow: initial;
+  padding: 2px 5px;
+  text-overflow: initial;
+  white-space: initial;
+}
+
+.lxq-comment-textinput:hover {
+  box-shadow: 0px 0px 0px 1px #ccc;
+  cursor: text;
+}
+
+/*
+ ******
+ ******
+ Labels
+ ******
+ ******
+ */
+
+/*
+ ******
+ Common label
+ ******
+ */
+.lxq-comment-label {
+  display: block;
+  font-size: 14px;
+}
+
+/*
+ Username label
+ */
+.lxq-comment-username-label {
+  color: #323232;
+  font-weight: bold;
+  margin-bottom: 4px;
+  padding: 2px 5px 2px 0;
+}
+/*
+ Anonymous label
+ Account for inline edit functionality and state
+ */
+.lxq-comment-anonymous-label {
+  padding: 2px 5px 2px 0;
+}
+
+.lxq-comment-anonymous-label:hover {
+  box-shadow: 0px 0px 0px 1px #ccc;
+  cursor: text;
+}
+
+/*
+ ******
+ Resolved labels
+ ******
+ */
+.lxq-resolved-comment {
+  margin-top: 10px;
+}
+
+.lxq-comment-resolvedby {
+  /*width: 110px;*/
+}
+
+.lxq-comment-resolved-label {
+  color: #7cc576; /* per-green line 2350 style.css */
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/*
+ ******
+ ******
+ Buttons
+ ******
+ ******
+ */
+
+/*
+ ******
+ Common button
+ ******
+ */
+a:link.lxq-comment-btn,
+a:visited.lxq-comment-btn,
+a:hover.lxq-comment-btn {
+  border-radius: 2px;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 14px;
+  font-weight: bold;
+  margin: 10px 0 0;
+  padding: 6px 12px;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+/*
+ ******
+ Button default
+ ******
+ */
+a:link.lxq-comment-default-btn,
+a:visited.lxq-comment-default-btn {
+  background: #dcdedf;
+  border: 1px solid #999;
+  color: #333;
+}
+
+a:hover.lxq-comment-default-btn {
+  border: 1px solid #666;
+}
+
+a:active.lxq-comment-default-btn {
+  border: 1px solid #000; /* .btn:active line 643 style.css */
+}
+
+/*
+ ******
+ Comment button in comment balloon
+ Now follows translated button common.css line 1188
+ ******
+ */
+a.lxq-comment-send-btn:link,
+a.lxq-comment-send-btn:visited {
+  background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
+  background: -moz-linear-gradient(top,  #09beec,  #119ec4);
+  background: linear-gradient(top,  #09beec,  #119ec4);
+  border: 1px solid #848689;
+  color: #fff;
+}
+
+a.lxq-comment-send-btn:hover {
+  background: #12b4df;
+  border: 1px solid #000;
+  -webkit-box-shadow: 0 1px 2px #ccc;
+  box-shadow: 0 1px 2px #ccc;
+}
+
+a.lxq-comment-send-btn:active {
+  -moz-box-shadow: inset 0 0 1px 1px #888;
+  -webkit-box-shadow: inset 0 0 1px 1px #888;
+  box-shadow: inset 0 0 1px 1px #888;
+}
+
+/*
+ ******
+ Resolve button in comment balloon
+ ******
+ */
+a.lxq-comment-resolve-btn:link,
+a.lxq-comment-resolve-btn:visited {
+  background: #dcdedf;
+  border: 1px solid #999;
+  color: #333;
+}
+
+a.lxq-comment-resolve-btn:hover,
+a.lxq-comment-resolve-btn:active {
+  background: #7cc576;
+  border: 1px solid #7cc576;
+  color: #fff;
+}
+
+/*
+ ******
+ ******
+ Link in comment balloon
+ ******
+ ******
+ */
+a.lxq-comment-link-btn:link,
+a.lxq-comment-link-btn:visited {
+  color: #7f7f7f;
+  display: inline-block;
+  font-size: 14px;
+  text-decoration: underline;
+}
+
+a.lxq-comment-link-btn:hover,
+a.lxq-comment-link-btn:active {
+  text-decoration: none;
+}
+
+/*
+ ******
+ Login invitation link in comment balloon
+ ******
+ */
+a.lxq-login-link:link,
+a.lxq-login-link:visited {
+  padding: 0 4px 10px 0;
+}
+
+/*
+ ******
+ View link in history balloon
+ ******
+ */
+a.lxq-view-link:link,
+a.lxq-view-link:visited {
+  color: #0798bc;
+  padding: 0 4px 6px 0;
+}
+
+/*
+ ******
+ View comment ordinal number
+ ******
+ */
+.lxq-nth-comment-label {
+  display: block;
+  border-bottom: 1px solid #CCCCCC;
+  font-size: 16px;
+  color: #9A9A9A;
+  line-height: 1.8;
+  margin-bottom: 6px;  
+}
+
+
+/*
+ ******
+ ******
+ Close icon duplicate
+ ******
+ ******
+ */
+
+/* style.css line 1612 */
+a.lxq-close-icon:link,
+a.lxq-close-icon:visited {
+  background: #fff;
+  border-radius: 20px;
+  color: #AEAEAE;
+  display: block;
+  font-size: 15px;
+  height: 14px;
+  padding: 0;
+  position: absolute;
+  right: 8px;
+  text-decoration: none;
+  top: 0;
+  vertical-align: middle;
+  width: 14px;
+}
+
+a.lxq-close-icon:hover {
+  background: red;
+  color: #fff;
+  text-align: center;
+}
+
+
+.lxq-close-icon:before {
+  content: "\ea0d";
+  display: block;
+  margin-left: -1px;
+  margin-top: 0px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+
+/*
+ ******
+ ******
+ Comment intent next to each segment
+ ******
+ ******
+ */
+
+/*
+ ******
+ Comment intent element
+ ******
+ */
+.lxq-comment-link {
+  /* styles based on .sid line 376 style.css */
+  color: #999;
+  cursor: default;
+  display: block;
+  font-size: 12px;
+  height: inherit;
+  padding-bottom: 1px;
+  position: absolute;
+  text-align: center;
+  text-decoration: none;
+  right: -8%;
+  width: 8%;
+  z-index: 999;
+}
+
+section:hover .lxq-comment-link {
+  /* styles based on .sid line 460 style.css */
+  color:#6d6e71
+}
+
+/*
+ ******
+ Txt in comment intent element
+ ******
+ */
+.lxq-comment-link .txt {
+  /* styles based on .sid 401 style.css */
+  cursor: pointer;
+  margin: 6px auto 0;
+  padding: 10px 0;
+  position: relative;
+  width: 80px;
+}
+
+/*
+ ******
+ Icon in comment intent element
+ ******
+ */
+.lxq-comment-icon {
+  font-size: 23px;
+}
+
+/*
+ ******
+ ******
+ Notification elements
+ ******
+ ******
+ */
+
+/*
+ ******
+ Common highlight element properties
+ ******
+ */
+.lxq-comment-notification {
+  border: 1px solid #fff;
+  border-radius: 14px;
+  display: block;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 0px 6px;
+  text-align: center;
+}
+
+/*
+ Highlight element unique properties
+ */
+.lxq-comment-highlight {
+  background: #ffe400;
+}
+
+/*
+ Invitation element unique properties
+ */
+.lxq-comment-highlight-invite {
+  background: #1451CC;
+  color: #fff;
+  position: absolute;
+}
+
+/*
+ Highlight element in segment unique properties
+ */
+.lxq-comment-highlight-segment {
+  left: 44px;
+  position: absolute;
+  top: 10px;
+}
+
+/*
+ Highlight element in header unique properties
+ */
+.lxq-comment-highlight-history {
+  color:#6d6e71;
+  position: absolute;
+  right: 7px;
+  top: 10px;
+}
+
+.lxq-comment-highlight-history:hover {
+  color: #6d6e71;
+}
+
+/*
+ Highlight element in history balloon unique properties
+ */
+.lxq-comment-highlight-balloon-history {
+  color: #6d6e71;
+  float: right;
+}
+
+
+/*
+ ******
+ ******
+ Article state follwing comment balloon activation
+ ******
+ ******
+ */
+
+
+/*
+ ******
+ Commenting closed. Article width back to default
+ ******
+ */
+article.lxq-commenting-closed {
+  width: 87.5%; /* add selector to article tag line 874 style.css */
+}
+
+/*
+ ******
+ Commenting closed. Hide comment ballon
+ ******
+ */
+article.lxq-commenting-closed .lxq-comment-balloon-outer {
+  display: none;
+}
+
+/*
+ ******
+ Commenting opened. Article width reduced and room made for comment ballon
+ ******
+ */
+article.lxq-commenting-opened {
+  -webkit-transform: translate3d(0, 0, 0);
+  -webkit-backface-visibility: hidden;
+  -webkit-perspective: 1000;
+  -webkit-transition: width .2s ease;
+  transition: width .2s ease;
+  width: 76.5%;
+}
+
+/*
+ ******
+ Commenting opened. Draw comment ballon
+ ******
+ */
+article.lxq-commenting-opened .lxq-comment-balloon-outer {
+  float: right;
+  margin-right: -245px;
+  position: absolute;
+  right: 0;
+  text-align: left;
+  width: 210px;
+  z-index: 10001;
+}
+
+/*
+ ******
+ ******
+ Ajax error messages
+ ******
+ ******
+ */
+
+.lxq-ajax-message-wrap {
+  padding: 6px 4px;
+}
+/* Warnings style.css line 136 */
+.lxq-warnings {
+  color:#D65959;
+  font-size:14px;
+}
+
+
+/*
+ ******
+ ******
+ Header list item history balloon icon
+ ******
+ ******
+ */
+
+#lxq-history {
+  /* #filterSwitch line 71 style.css */
+  cursor: pointer;
+  font-size: 23px;
+  height: 27px;
+  padding-top: 10px;
+  position: relative;
+  text-align: center;
+  width: 60px;
+}
+
+#lxq-history:hover {
+  /* #filterSwitch:hover line 86 style.css */
+  color:#ccc;
+}
+
+/*
+ No comments icon in header
+ */
+.lxq-history-balloon-icon-has-no-comments {
+  color: #777; /* style.css line 40 #notifbox */
+}
+
+/*
+ Comments icon in header
+ */
+.lxq-history-balloon-icon-has-comment {
+  color: #fff; /* style.css line 40 #notifbox */
+  opacity: .9;
+}
+
+/*
+ ******
+ ******
+ History ballon
+ ******
+ ******
+ */
+
+.lxq-history-balloon-outer {
+  background-color: rgba(247,247,247,1); /* #f7f77f */
+  box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+  margin-top: 56px;
+  padding-top: 10px;
+  position: absolute;
+  right: 200px;
+  width: 300px;
+}
+
+@media screen and (max-width: 1180px) {
+  /* Position follows icons in header */
+  .lxq-history-balloon-outer {
+    right: 70px;
+  }
+}
+
+.lxq-view-comment-wrap {
+  margin-bottom: 10px;
+}
+
+.lxq-comment-segment-number-label {
+  display: block;
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+}
+
+.lxq-history-balloon {
+  background-color: rgba(247,247,247,1); /* #ffffff */
+  padding: 0;
+  position: relative;
+}
+
+.lxq-history-balloon .lxq-thread-wrap {
+  padding: 14px 0;
+}
+
+.lxq-history-balloon .lxq-show-comment {
+  padding: 0 24px;
+}
+
+.lxq-history-balloon .lxq-thread-wrap:not(:last-of-type) .lxq-show-comment {
+  /*border-bottom: 1px solid #dadada;*/
+}
+
+.lxq-history-balloon-has-comment {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+
+/*
+ ******
+ ******
+ Helpers
+ ******
+ ******
+ */
+
+.pull-left {
+  float: left;
+}
+
+.pull-right {
+  float: right;
+}
+
+/*
+  Truncate text in label
+ */
+.lxq-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/*
+  Set box model to border and account for border's width
+ */
+.lxq-comment-balloon-outer *,
+.lxq-history-balloon-outer * {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.divider {
+  background-color: #dadada;
+  display:block; /* for use on default inline elements like span */
+  height: 1px;
+  margin: 0;
+  overflow: hidden;
+  width:100%;
+}
+
+/*
+ ******
+ Triangle in balloon
+ ******
+ */
+.lxq-triangle {
+  height: 0;
+  width: 0;
+}
+
+/*
+ Triangle top top in history balloon
+ */
+.lxq-triangle-top {
+  border-right: 14px solid rgba(247,247,247,1); /* #f7f77f */
+  border-top: 14px solid transparent;
+  -webkit-filter: drop-shadow(-3px -1px 2px rgba(0,0,0,0.1));
+  filter: drop-shadow(-3px -1px 2px rgba(0,0,0,0.1));
+  float: right;
+  margin-right: 20px;
+  margin-top: -24px;
+
+}
+
+/*
+ Triangle top left in comment balloon
+ */
+.lxq-triangle-topleft {
+  border-top: 10px solid rgba(247,247,247,1); /* #f7f77f */
+  border-left: 12px solid transparent;
+  -webkit-filter: drop-shadow(-1px 0px 0px rgba(0,0,0,.2));
+  filter: drop-shadow(-1px 0px 0px rgba(0,0,0,.2));
+  margin-left: -12px;
+}
+
+
+/*
+ ******
+ Clearfix helpers
+ ******
+ */
+.lxq-clearfix {
+  *zoom: 1;
+}
+.lxq-clearfix:before,
+.lxq-clearfix:after {
+  display: table;
+  content: "";
+  line-height: 0;
+}
+
+.lxq-clearfix:after {
+  clear: both;
+}
+
+/*
+ ******
+ Display and visibility helpers
+ ******
+ */
+.lxq-hide {
+  display: none!important;
+}
+
+.lxq-visible {
+  display: block!important;
+}
+
+.n1, .n2, .n3, .n4 {
+    background-color:#D08053;
+}
+.p1, .p2, .p2sub1, .p3, .p4, .p5, .p6, .p7, .p8 {
+    background-color:#3AB45F;
+}
+.c1, .c2, .c3, .c4, .c5 {
+    background-color:#3AB45F;
+}
+.u1, .u2, .u3, .u4, .u5 {
+    background-color:#b8a300;
+}
+.s1, .s2, .s3, .s3sub1, .s3sub1 .s4, .s5 {
+    background-color:#38C0C5;
+}
+.l1, .l2, .l3, .l4 {
+    background-color:#6f4fa1;
+}
+.m {
+    background-color:#EA92B8;
+}
+
+.m, .l1, .l2, .l3, .l4, .n1, .n2, .n3, .n4, .p1, .p2, .p2sub1, .p3, .p4, .p5, .p6, .p7, .p8, .c1, .c2, .c3, .c4, .c5, .u1, .u2, .u3, .u4, .u5, .s1, .s2, .s3, .s3sub1, .s3sub1 .s4, .s5 {
+    padding: 0.3rem;
+}
+
+/*
+ ******
+ Display number of potential errors under target textarea
+ ******
+ */
+ .editarea .toolbar {
+     position: relative;
+ }
+ 
+ .lxq-error-seg {
+    position: absolute;
+    bottom: -0.2rem;
+    left: 8rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 1.5rem;
+    text-align: center;
+    background-color: #efecca;
+    font-size: 1.1rem;
+    font-weight: 100;
+}
+
+ .lxq-error-seg::after {
+    content: attr(numberoferrors);
+    vertical-align: middle;
+    color: #046380;
+ }
+
+ .lxq-error-seg.lxq-error-changed::after {
+     color: #efecca;
+ }
+
+ /*
+ ******
+ Change style of lexiqa comment popup when there is NO error
+ ******
+ */
+ 
+.lxq-triangle-top {
+    border-right: 14px solid #046380;
+ }
+  
+ .lxq-history-balloon-outer {
+     background-color: #046380;
+     width: auto;
+     right: 208px;
+     padding: 1rem 0 0;
+     box-shadow: none;
+ }
+ 
+.lxq-history-balloon.lxq-history-balloon-has-no-comments {
+    color: #efecca;
+    background-color: #046380;
+}
+
+.lxq-history-balloon.lxq-history-balloon-has-no-comments .lxq-comment-label {
+    position: relative;
+    bottom: 0.5rem;
+}
+
+ /*
+ ******
+ Change style of lexiqa comment popup when there are ERRORS
+ ******
+ */
+ 
+ .lxq-history-balloon .lxq-thread-wrap {
+    padding: 0;
+}
+
+.lxq-history-balloon.lxq-history-balloon-has-comment {
+    border: 1px solid #046380;
+}
+
+.lxq-history-balloon-header {
+    background-color: #046380;
+    color: #fff;
+    padding: 0.6rem;
+    font-size: 1rem;
+    font-weight: 100;
+    display: flex;
+}
+
+.lxq-history-balloon-header-text {
+    display: flex;
+    align-self: stretch;
+    position: relative;
+    bottom: 0.625rem;
+    margin-left: 2rem;
+}
+ 
+.lxq-history-balloon-body {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: space-between;
+    white-space: nowrap;
+}
+ 
+ .lxq-history-balloon-row {
+    display: flex;
+    flex-flow: row nowrap;
+    text-align: center;
+    width: 100%;
+}
+
+.lxq-history-balloon-segment {
+    display: flex;
+    align-self: stretch;
+    flex-direction: column;
+    justify-content: center;
+    color: #046380;
+    padding: 0.5rem;
+}
+
+.lxq-history-balloon-header-segment, .lxq-history-balloon-header-total, .lxq-history-balloon-header-ignored {
+    display: flex;
+    flex-flow: row nowrap;
+    flex-grow: 1;
+    flex-basis: 0;
+    color: #fff;
+    background-color: #046380;
+    border-right: 1px solid #fff;
+    border-top: 1px solid #fff;
+    padding: 1rem;
+    flex-direction:column;
+    justify-content:space-around;
+}
+
+.lxq-history-balloon-header-ignored {
+    border-right: none;
+}
+
+.lxq-history-balloon-segment, .lxq-history-balloon-total, .lxq-history-balloon-ignored {
+    display: flex;
+    flex-flow: column nowrap;
+    flex-grow: 1;
+    flex-basis: 0;
+    color: #046380;
+    background-color: #eeebc9;
+    padding: 0.5rem;
+    justify-content:space-around;
+}
+
+.lxq-history-balloon-segment {
+    background-color: #fff;
+    color: #046380;
+    flex-direction: row;
+    align-items: center;
+   justify-content: center;
+}
+
+.lxq-history-balloon-segment-link {
+    display: flex;
+	cursor: pointer;
+}
+
+.lxq-history-balloon-header-link {
+    display: flex;
+    align-self: stretch;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    left: 0.5rem;
+    bottom: 0.625rem;
+}
+
+.lxq-history-balloon-header-link::after {
+    content: url("../img/header-arrow2.svg");
+}
+
+.lxq-history-balloon-segment-link::after {
+    content: url("../img/segment-arrow2.svg");
+    position: relative;
+    left: 5px;
+    top: 2px;
+}
+
+.lxq-history-balloon-header-text {
+
+bottom: 0.5rem;
+
+}
+
+.lxq-invisible {
+    background-color: transparent;
+}
+
+#powerTip.sw::before, #powerTip.se::before {
+
+    border-bottom: 10px solid #046380;
+
+}

@@ -139,7 +139,6 @@ $.extend(UI, {
                 return false;
             }
         }
-
         $(editarea).first().each(function() {
             saveSelection();
             var tx = $(this).html();
@@ -149,11 +148,15 @@ $.extend(UI, {
 //			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"true\">$1</span>" : "<span contenteditable=\"true\" class=\"locked\">$1</span>";
                    tx = tx.replace(/<span/gi, "<pl")
                        .replace(/<\/span/gi, "</pl")
+                        .replace(/<lxqwarning/gi, "<lxqpl")
+                       .replace(/<\/lxqwarning/gi, "</lxqpl")                       
                        .replace(/&lt;/gi, "<")
                        .replace(/(<(g|x|bx|ex|bpt|ept|ph[^a-z]*|it|mrk)\sid[^<]*?&gt;)/gi, brTx1)
                        .replace(/</gi, "&lt;")
                        .replace(/\&lt;pl/gi, "<span")
                        .replace(/\&lt;\/pl/gi, "</span")
+                       .replace(/\&lt;lxqpl/gi, "<lxqwarning")
+                       .replace(/\&lt;\/lxqpl/gi, "</lxqwarning")                       
                        .replace(/\&lt;div\>/gi, "<div>")
                        .replace(/\&lt;\/div\>/gi, "</div>")
                        .replace(/\&lt;br\>/gi, "<br>")
@@ -180,12 +183,15 @@ $.extend(UI, {
                    tx = tx.replace(/(<\/span\>)$(\s){0,}/gi, "</span> ");
                    tx = tx.replace(/(<\/span\>\s)$/gi, "</span><br class=\"end\">");
                    var prevNumTags = $('span.locked', this).length;
+//                   console.log('locktags tx:\n'+tx);
                    $(this).html(tx);
+                   segment = $(this).parents('section');
+                   LXQ.reloadPowertip(segment);
                    restoreSelection();
 
                    if($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
 
-                   segment = $(this).parents('section');
+                   //segment = $(this).parents('section');
 
                    if($('span.locked', this).length) {
                        segment.addClass('hasTags');
@@ -437,8 +443,8 @@ $.extend(UI, {
         tempRange = range;
         UI.editarea.find('.test-invisible').remove();
         pasteHtmlAtCaret('<span class="test-invisible"></span>');
-        coso = $.parseHTML(UI.editarea.html());
-//        console.log('coso: ', coso);
+        coso = $.parseHTML(UI.editarea.html());        
+        
         $.each(coso, function (index) {
             if($(this).hasClass('test-invisible')) {
                 UI.numCharsUntilTagRight = 0;
@@ -469,6 +475,7 @@ $.extend(UI, {
 
     },
     highlightCorrespondingTags: function (el) {
+        var pairEl = null;
 //        console.log('highlighting: ', $(el));
         if(el.hasClass('startTag')) {
 //            console.log('has start tag');
@@ -497,8 +504,9 @@ $.extend(UI, {
 
                 })
 //                console.log('pairEl: ', $(pairEl).text());
-                $(pairEl).addClass('highlight');
-
+                if( pairEl!==undefined) {
+                    $(pairEl).addClass('highlight');
+                }
 
             }
 //            console.log('next endTag: ', el.next('.endTag'));
@@ -529,7 +537,9 @@ $.extend(UI, {
                     }
 
                 });
-                $(pairEl).addClass('highlight');
+                if( pairEl!==null) {
+                    $(pairEl).addClass('highlight');
+                }
             }
         }
 //        console.log('$(el): ', $(el).text());

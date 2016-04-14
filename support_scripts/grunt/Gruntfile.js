@@ -6,11 +6,13 @@ module.exports = function(grunt) {
     var cssFiles = [
         basePath + '../css/common.css',
         basePath + '../css/style.css',
-		basePath + '../css/lexiqa.css',
+        basePath + '../css/jquery.powertip.min.css',
         basePath + '../css/mbc-style.css',
+        basePath + '../css/lxq-style.css',
         basePath + '../css/segment-notes.css',
         basePath + '../css/project-completion-feature.css',
-        basePath + '../css/editlog.css'
+        basePath + '../css/editlog.css',
+        basePath + '../css/lexiqa.css'
     ]
 
     var conf = grunt.file.read( incPath + 'version.ini' );
@@ -71,6 +73,8 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/sse.js',
                     basePath + 'cat_source/mbc.main.js',
                     basePath + 'cat_source/mbc.templates.js',
+                    basePath + 'cat_source/lxq.main.js',
+                    basePath + 'cat_source/lxq.templates.js',
                     basePath + 'cat_source/project_completion.*.js',
                     basePath + 'cat_source/segment_notes.*.js',
                     basePath + 'cat_source/review_improved.*.js',
@@ -91,7 +95,8 @@ module.exports = function(grunt) {
                     basePath + 'lib/jquery.tooltipster.min.js',
                     basePath + 'lib/diff_match_patch.js',
                     basePath + 'lib/rangy-core.js',
-                    basePath + 'lib/rangy-selectionsaverestore.js'
+                    basePath + 'lib/rangy-selectionsaverestore.js',
+                    basePath + 'lib/jquery.powertip.min.js'
                 ],
                 dest: buildPath + 'libs.js'
             },
@@ -107,11 +112,13 @@ module.exports = function(grunt) {
                 src: [
                     basePath + '../css/common.css',
                     basePath + '../css/style.css',
-					basePath + '../css/lexiqa.css',
+                    basePath + '../css/jquery.powertip.min.css',
                     basePath + '../css/mbc-style.css',
+                    basePath + '../css/lxq-style.css',
                     basePath + '../css/segment-notes.css',
                     basePath + '../css/project-completion-feature.css',
-                    basePath + '../holidays/*.css'
+                    basePath + '../holidays/*.css',
+                    basePath + '../css/lexiqa.css'           
                 ],
                 dest: basePath + '../css/app.css'
             }
@@ -144,7 +151,7 @@ module.exports = function(grunt) {
                 src : buildPath + 'app.js',
                 options : {
                     inline : true,
-                    nodes : ['console.log']
+                    nodes : ['console.aaaaa']
                 }
             }
         },

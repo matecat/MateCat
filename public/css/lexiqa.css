@@ -4,71 +4,91 @@
  ==============================
  */
 
-
-@import url(//fonts.googleapis.com/css?family=Open+Sans:300);
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,300,700);
 
 #lexiqabox {   
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 300;
-    letter-spacing: 1px;
     text-align: center;
     width: 60px;
     padding-top: 8px;
     margin-left: 20px;
 }
 
-#lexiqabox.warningbox {
-    background-color: #046380;
-}
-
-#lexiqabox.warningbox:hover {
-    background-color: #068BB4;
-}
-
 #lexiqabox .numbererror {
     color: #046380;
     background: #efecca;
     border: none;
-    font-weight: normal;
-    margin-left: 5px;
-    margin-top: -4px;
+    font-weight: bold;
+    margin-left: 8px;
+    margin-top: 12px;
 }
 
 .lexnotific::before {
-    content: "lexiQA";
-    padding-top: 8px;
+    content: url(../img/lexiqa_whitebg.svg);
     display: block;
-    color: #777;
-}
-
-.lexnotific a {
-    position: absolute;
-    display: none;
-}
-
-#go2lexiqa {
-    color: #efecca;
-    text-decoration: none;
-    height: 100%;
-    width: 100%;
-    display: block;
-    cursor: pointer;
-}
-
-#go2lexiqa:hover {
-    cursor: pointer;
-}
-
-#go2lexiqa::after {
-    content: "lexiQA";
-    padding-top: 12px;
-    display: block;
-    width: 100%;
     height: 100%;
 }
 
-#go2lexiqa::after,
-.lexnotific::before {
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 300;
+#lexiqabox.warningbox {
+    background-color: #046380;
+}
+
+#lexiqabox.warningbox::after {
+    content: url(../img/lexiqa_bluebg.svg);
+    display: block;
+}
+
+
+/*
+ ==============================
+        POWERTIP STYLING
+ ==============================
+ */
+#powerTip {
+	background-color: #046380;
+    color: #fff;
+	border-radius: 0; 
+	font-family: 'Open Sans', sans-serif;
+	font-weight: 100;
+	font-size: 0.8rem;
+	line-height: 1.5rem;
+	padding: 0;
+    transform: scale(1,1);
+    transition-property: transform;
+    transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15);
+}
+
+#powerTip.sw::before {
+    border-bottom: 10px solid #046380;
+} 
+
+#powerTip .tooltip-error-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+}
+
+#powerTip .tooltip-error-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: flex-end;
+    max-width: 100%;
+    border-bottom: 1px solid #efecca;
+}
+
+#powerTip .tooltip-error-category {
+    padding: 0.5rem;
+}
+
+#powerTip .tooltip-error-ignore {
+	background-color: #efecca;
+	color: #046380;
+    padding: 0.5rem;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+#powerTip .tooltip-error-ignore:hover {
+	background-color: white;
 }

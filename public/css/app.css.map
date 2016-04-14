@@ -6,6 +6,7 @@
 		"common.css",
 		"style.css",
 		"mbc-style.css",
+        "lxq-style.css",
 		"segment-notes.css",
 		"project-completion-feature.css",
 		"editlog.css",
