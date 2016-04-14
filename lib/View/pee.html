@@ -105,7 +105,7 @@
             data.push( {
                 SOURCE: langStats[n].source,
                 TARGET: langStats[n].target,
-                PEE: (langStats[n].pee + "% " + " (±" + langStats[n].peeSigma + ")"),
+                PEE: (langStats[n].pee + "% " + " (±" + langStats[n].peeSigma + "%)"),
                 "TOTAL WORD COUNT": (langStats[n].totalwordPEE)
             } );
 
@@ -138,17 +138,69 @@
                         else {
                             
                             if ( attrName == columnOrderCurr ) {
+                                if(attrName=="PEE") {
+                                    if(compareMy(a[attrName], b[attrName])==0){
+                                        if(compareMy(a["SOURCE"], b["SOURCE"])!==0) {
+                                            return -(compareMy( a["SOURCE"], b["SOURCE"] ));
+                                        }
+                                        if(compareMy(a["TARGET"], b["TARGET"])!==0) {
+                                            return -(compareMy( a["TARGET"], b["TARGET"] ));
+                                        }
+                                    }}
 
-                                columnOrderCurr = "";
-                                $( "span" ).remove()
-                                $( "th:contains('" + attrName + "')" ).append( "<span> ↓ </span>" );
+                                if(attrName=="TOTAL WORD COUNT") {
+                                    if(compareMy(a[attrName], b[attrName])==0){
+                                        if(compareMy(a["SOURCE"], b["SOURCE"])!==0) {
+                                            return -(compareMy( a["SOURCE"], b["SOURCE"] ));
+                                        }
+                                        if(compareMy(a["TARGET"], b["TARGET"])!==0) {
+                                            return -(compareMy( a["TARGET"], b["TARGET"] ));
+                                        }
+                                    }}
+
+                                        if(attrName=="TARGET") {
+                                            if(compareMy(a[attrName], b[attrName])==0){
+
+                                                return -(compareMy( a["SOURCE"], b["SOURCE"] ));
+                                        }}
+                                    if(attrName=="SOURCE") {
+                                        if(compareMy(a[attrName], b[attrName])==0){
+                                            return -(compareMy( a["TARGET"], b["TARGET"] ));
+                                    }}
                                 return -(compareMy( a[attrName], b[attrName] ));
                             }
                             else {
-                                columnOrderCurr = attrName;
-                                $( "span" ).remove()
-                                $( "th:contains('" + attrName + "')" ).append( "<span> ↑ </span>" );
 
+                                if(attrName=="PEE") {
+                                    if(compareMy(a[attrName], b[attrName])==0){
+                                        if(compareMy(a["SOURCE"], b["SOURCE"])!==0) {
+                                            return (compareMy( a["SOURCE"], b["SOURCE"] ));
+                                        }
+                                        if(compareMy(a["TARGET"], b["TARGET"])!==0) {
+                                            return (compareMy( a["TARGET"], b["TARGET"] ));
+                                        }
+                                    }}
+
+                                if(attrName=="TOTAL WORD COUNT") {
+                                    if(compareMy(a[attrName], b[attrName])==0){
+                                        if(compareMy(a["SOURCE"], b["SOURCE"])!==0) {
+                                            return (compareMy( a["SOURCE"], b["SOURCE"] ));
+                                        }
+                                        if(compareMy(a["TARGET"], b["TARGET"])!==0) {
+                                            return (compareMy( a["TARGET"], b["TARGET"] ));
+                                        }
+                                    }}
+
+                                    if(attrName=="TARGET") {
+                                        if(compareMy(a[attrName], b[attrName])==0){
+
+                                            return (compareMy( a["SOURCE"], b["SOURCE"] ));
+                                    }}
+                                    if(attrName=="SOURCE") {
+                                        if(compareMy(a[attrName], b[attrName])==0){
+
+                                            return (compareMy( a["TARGET"], b["TARGET"] ));
+                                    }}
                                 return (compareMy( a[attrName], b[attrName] ));
                             }
                         }
@@ -162,14 +214,26 @@
                     .text( function ( d ) { return d[1]; } );
 
 
+
+            if ( attrName == columnOrderCurr ) {
+                columnOrderCurr = "";
+                $( "span" ).remove()
+                $( "th:contains('" + attrName + "')" ).append( "<span> ↓ </span>" );
+            }
+            else {
+                columnOrderCurr = attrName;
+                $( "span" ).remove()
+                $( "th:contains('" + attrName + "')" ).append( "<span> ↑ </span>" );
+            }
+
         }
 
         function compareMy( a, b ) {
 
 
-            if ( a.indexOf( " %" ) > -1 ) {
-                var a = a.split( " %" )[0];
-                var b = b.split( " %" )[0];
+            if ( a.indexOf( "%" ) > -1 ) {
+                var a = a.split( "%" )[0];
+                var b = b.split( "%" )[0];
             }
 
             if ( isNaN( a ) || isNaN( b ) ) {
