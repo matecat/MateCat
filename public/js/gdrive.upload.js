@@ -1,5 +1,5 @@
 APP.tryListGDriveFiles = function() {
-    $.getJSON('/webhooks/gdrive/list', function(listFiles){
+    $.getJSON('/gdrive/list', function(listFiles){
         $('.files-gdrive').html('');
 
         if( listFiles && listFiles.hasOwnProperty('files') ) {
@@ -91,7 +91,7 @@ APP.tryListGDriveFiles = function() {
 APP.restartGDriveConversions = function () {
     var sourceLang = $("#source-lang").val();
     
-    $.getJSON('/webhooks/gdrive/change/' + sourceLang, function(response){
+    $.getJSON('/gdrive/change/' + sourceLang, function(response){
         if(response.success) {
             console.log('Source language changed.');
         }
@@ -99,7 +99,7 @@ APP.restartGDriveConversions = function () {
 };
 
 APP.deleteGDriveFile = function (fileId) {
-    $.getJSON('/webhooks/gdrive/delete/' + fileId, function(response){
+    $.getJSON('/gdrive/delete/' + fileId, function(response){
         if(response.success) {
             APP.tryListGDriveFiles();
         }
