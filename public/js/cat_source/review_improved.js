@@ -155,30 +155,33 @@ if ( ReviewImproved.enabled() && config.isReview ) {
     });
 
     $.extend(ReviewImproved, {
-        submitIssue : function(sid, data, options) {
-
+        submitIssue : function(sid, data_array, options) {
             var path  = sprintf('/api/v2/jobs/%s/%s/segments/%s/translation-issues',
                   config.id_job, config.password, sid);
-
             var segment = UI.Segment.find( sid );
 
-            var submitIssue = function() {
-                $.post( path, data )
+            
+            var deferreds = _.map( data_array, function( data ) {
+                return $.post( path, data )
                 .done(function( data ) {
                     MateCat.db.segment_translation_issues.insert( data.issue ) ;
-                    ReviewImproved.reloadQualityReport();
-
-                    options.done( data );
                 })
-            }
+            });
 
+            var submitIssues = function() {
+                $.when.apply($, deferreds).done(function() {
+                    ReviewImproved.reloadQualityReport();
+                    options.done();
+                });
+            }
+                
             UI.setTranslation({
                 id_segment: segment.id,
                 status: 'rejected',
                 caller: false,
                 byStatus: false,
                 propagate: false,
-                callback : submitIssue
+                callback : submitIssues
             });
         },
         reloadQualityReport : function() {

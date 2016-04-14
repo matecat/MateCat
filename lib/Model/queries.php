@@ -2211,27 +2211,6 @@ function getProjectsNumber( $start, $step, $search_in_pname, $search_source, $se
     $owner       = $_SESSION[ 'cid' ];
     $owner_query = " j.owner='$owner' and";
 
-    //Log::doLog('OWNER QUERY:',$owner);
-
-    //    $owner_query = $owner;
-    //	$owner_query = "";
-
-    /*
-       $status_query = " (j.status_owner='ongoing'";
-    //	if(!$search_showarchived && !$search_showcancelled) {
-    if($filtering) {
-    if($search_showarchived) $status_query .= " or j.status_owner='archived'";
-    if($search_showcancelled) $status_query .= " or j.status_owner='cancelled'";
-    $status_query .= ") and";
-    } else {
-    $status_query = " (j.status_owner='ongoing' or j.status_owner='cancelled' or j.status_owner='archived') and";
-    }
-    //	$status_query = (!$search_showarchived && !$search_showcancelled)? "j.status='ongoing' or j.status='cancelled' and" : "";
-    Log::doLog('STATUS QUERY:',$status_query);
-
-    //	$sa_query = ($search_showarchived)? " j.status='archived' and" : "";
-    //	$sc_query = ($search_showcancelled)? " j.status='cancelled' and" : "";
-     */
     $query_tail        = $pn_query . $ss_query . $st_query . $sst_query . $oc_query . $owner_query;
     $jobs_filter_query = ( $query_tail == '' ) ? '' : 'where ' . $query_tail;
     $jobs_filter_query = preg_replace( '/( and)$/i', '', $jobs_filter_query );
