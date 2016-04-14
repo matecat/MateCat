@@ -145,6 +145,7 @@ $.extend( UI, {
                     }
                 } );
             } );
+
             $.each( d.data.matches, function ( k ) {
                 i++;
                 k1 = UI.decodePlaceholdersToText( k, true );
@@ -156,14 +157,22 @@ $.extend( UI, {
                 k2 = k1.replace( /<\//gi, '<\\/' ).replace( /\(/gi, '\\(' ).replace( /\)/gi, '\\)' );
                 var re = new RegExp( k2.trim(), "gi" );
                 var cs = cleanString;
+                
                 coso = cs.replace( re, '<mark>' + k1 + '</mark>' );
 
                 if ( coso.indexOf( '<mark>' ) == -1 ) return;
-                int = {
-                    x: coso.indexOf( '<mark>' ),
-                    y: coso.indexOf( '</mark>' ) - 6
-                };
-                intervals.push( int );
+
+                var match = re.exec(cs);
+                while(match) {
+
+                    int = {
+                        x: match.index,
+                        y: match.index + match[0].length
+                    };
+
+                    intervals.push( int );
+                    match = re.exec(cs);
+                }
             } );
             UI.intervalsUnion = [];
             UI.checkIntervalsUnions( intervals );
