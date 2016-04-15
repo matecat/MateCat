@@ -18,13 +18,18 @@
             margin-bottom: 20px;
             height: 45px;
         }
+        #tablePEE{
+            width:80%;
+            margin:0 auto;
+
+        }
+
     </style>
 
     <!-- Shim to make HTML5 elements usable in older Internet Explorer versions -->
     <!--[if lt IE 9]>
 
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
-    <script type="text/javascript" src="https://d3js.org/d3.v2.js"></script>
     <script src="${basepath}public/js/lib/jquery.js"></script>
     <script src="${basepath}public/js/common.js"></script>
     <script src="${basepath}public/js/lib/jquery.tablesorter-fork-mottie.js"></script>
@@ -76,17 +81,12 @@
 <script src="${basepath}public/js/new-project.js"></script>
 
 
-<body onLoad="transform('SOURCE');">
+<body >
 
 <div class="wrapper">
 
     <h1 style="align:center; margin-bottom:75px; margin-top: 75px; font-size: 40px;">Post Editing Effort table</h1>
 
-
-    <table class="tablestats revision" width="80%" border="0" cellspacing="0" cellpadding="0">
-        <thead></thead>
-        <tbody></tbody>
-    </table>
 
 
     <script type="text/javascript">
@@ -97,182 +97,33 @@
         ${dataLangStats}
         /*]]>*/
 
-        var data = [];
-        var columnOrderCurr = '';
-
-        var n = 0;
-        for ( key in langStats ) {
-            data.push( {
-                SOURCE: langStats[n].source,
-                TARGET: langStats[n].target,
-                PEE: (langStats[n].pee + "% " + " (±" + langStats[n].peeSigma + "%)"),
-                "TOTAL WORD COUNT": (langStats[n].totalwordPEE)
-            } );
-
-            n++;
-        }
-
-        //        &#8593
-        //        &#8595
-        function transform( attrName ) {
-            d3.select( "tbody" ).selectAll( "tr" ).remove();
-
-// Header
-            var th = d3.select( "thead" ).selectAll( "th" )
-                    .data( jsonToArray( data[0] ) )
-                    .enter().append( "th" )
-                    .attr( "onclick", function ( d, i ) {
-                                return "transform('" + d[0] + "');";
-                            }
-                    )
-                    .text( function ( d ) { return d[0]; } )
-
-// Rows
-            var tr = d3.select( "tbody" ).selectAll( "tr" )
-                    .data( data )
-                    .enter().append( "tr" )
-                    .sort( function ( a, b ) {
-                        if ( a == null || b == null ) {
-                            return 0;
-                        }
-                        else {
-                            
-                            if ( attrName == columnOrderCurr ) {
-                                if(attrName=="PEE") {
-                                    if(compareMy(a[attrName], b[attrName])==0){
-                                        if(compareMy(a["SOURCE"], b["SOURCE"])!==0) {
-                                            return -(compareMy( a["SOURCE"], b["SOURCE"] ));
-                                        }
-                                        if(compareMy(a["TARGET"], b["TARGET"])!==0) {
-                                            return -(compareMy( a["TARGET"], b["TARGET"] ));
-                                        }
-                                    }}
-
-                                if(attrName=="TOTAL WORD COUNT") {
-                                    if(compareMy(a[attrName], b[attrName])==0){
-                                        if(compareMy(a["SOURCE"], b["SOURCE"])!==0) {
-                                            return -(compareMy( a["SOURCE"], b["SOURCE"] ));
-                                        }
-                                        if(compareMy(a["TARGET"], b["TARGET"])!==0) {
-                                            return -(compareMy( a["TARGET"], b["TARGET"] ));
-                                        }
-                                    }}
-
-                                        if(attrName=="TARGET") {
-                                            if(compareMy(a[attrName], b[attrName])==0){
-
-                                                return -(compareMy( a["SOURCE"], b["SOURCE"] ));
-                                        }}
-                                    if(attrName=="SOURCE") {
-                                        if(compareMy(a[attrName], b[attrName])==0){
-                                            return -(compareMy( a["TARGET"], b["TARGET"] ));
-                                    }}
-                                return -(compareMy( a[attrName], b[attrName] ));
-                            }
-                            else {
-
-                                if(attrName=="PEE") {
-                                    if(compareMy(a[attrName], b[attrName])==0){
-                                        if(compareMy(a["SOURCE"], b["SOURCE"])!==0) {
-                                            return (compareMy( a["SOURCE"], b["SOURCE"] ));
-                                        }
-                                        if(compareMy(a["TARGET"], b["TARGET"])!==0) {
-                                            return (compareMy( a["TARGET"], b["TARGET"] ));
-                                        }
-                                    }}
-
-                                if(attrName=="TOTAL WORD COUNT") {
-                                    if(compareMy(a[attrName], b[attrName])==0){
-                                        if(compareMy(a["SOURCE"], b["SOURCE"])!==0) {
-                                            return (compareMy( a["SOURCE"], b["SOURCE"] ));
-                                        }
-                                        if(compareMy(a["TARGET"], b["TARGET"])!==0) {
-                                            return (compareMy( a["TARGET"], b["TARGET"] ));
-                                        }
-                                    }}
-
-                                    if(attrName=="TARGET") {
-                                        if(compareMy(a[attrName], b[attrName])==0){
-
-                                            return (compareMy( a["SOURCE"], b["SOURCE"] ));
-                                    }}
-                                    if(attrName=="SOURCE") {
-                                        if(compareMy(a[attrName], b[attrName])==0){
-
-                                            return (compareMy( a["TARGET"], b["TARGET"] ));
-                                    }}
-                                return (compareMy( a[attrName], b[attrName] ));
-                            }
-                        }
-                    } );
-
-// Cells
-            var td = tr.selectAll( "td" )
-                    .data( function ( d ) { return jsonToArray( d ); } )
-                    .enter().append( "td" )
-                    .attr( "onclick", function ( d, i ) { return "transform('" + d[0] + "');";} )
-                    .text( function ( d ) { return d[1]; } );
-
-
-
-            if ( attrName == columnOrderCurr ) {
-                columnOrderCurr = "";
-                $( "span" ).remove()
-                $( "th:contains('" + attrName + "')" ).append( "<span> ↓ </span>" );
-            }
-            else {
-                columnOrderCurr = attrName;
-                $( "span" ).remove()
-                $( "th:contains('" + attrName + "')" ).append( "<span> ↑ </span>" );
-            }
-
-        }
-
-        function compareMy( a, b ) {
-
-
-            if ( a.indexOf( "%" ) > -1 ) {
-                var a = a.split( "%" )[0];
-                var b = b.split( "%" )[0];
-            }
-
-            if ( isNaN( a ) || isNaN( b ) ) {
-                var a = a.toLowerCase();
-                var b = b.toLowerCase();
-
-                return a > b ? 1 : a == b ? 0 : -1;
-
-            }
-            else {
-
-                return parseFloat( a ) > parseFloat( b ) ? 1 : parseFloat( a ) == parseFloat( b ) ? 0 : -1;
-
-            }
-        }
-
-
-        function jsonKeyValueToArray( k, v ) {
-            return [k,
-                v];
-        }
-
-        function jsonToArray( json ) {
-            var ret = new Array();
-            var key;
-            for ( key in json ) {
-                if ( json.hasOwnProperty( key ) ) {
-                    ret.push( jsonKeyValueToArray( key, json[key] ) );
-                }
-            }
-            return ret;
-        }
-        ;
-
 
     </script>
 
 
+
+
 </div>
+
+
+
+
+    <table id="tablePEE" width="80%" border="0" cellspacing="0" cellpadding="0" class="tablestats revision" >
+        <thead>
+
+        <tr>
+            <th>SOURCE</th>
+            <th>TARGET</th>
+            <th>PEE</th>
+            <th>TOTAL WORD PEE</th>
+        </tr>
+        </thead>
+
+    </table>
+
+
+
+
 
 </body>
 
@@ -313,6 +164,51 @@
 
 <div id="uploadCallback"></div>
 
+
+<script type="text/javascript">
+    tablegenerate (langStats);
+
+    function tablegenerate (data) {
+        var i=0;
+        for(key in data)
+        {
+            var $formrow = '<td>'+data[i].source+'</td><td>'+data[i].target+'</td><td>'+data[i].pee+ "% ("+ data[i].peeSigma +"%)"+ '</td><td>'+data[i].totalwordPEE+'</td>';
+            $('#tablePEE').append("<tr>"  +$formrow+ "</tr>");
+            i++;
+        }
+    }
+
+    $(document).ready(function(el)
+            {
+                $('#tablePEE').tablesorter( {sortList: [[0,0], [1,0]]} );
+            }
+    );
+
+</script>
+
+
+
+
+<script type="text/javascript">
+    var tablePEE = $("#tablePEE");
+
+    $("th:contains('SOURCE')", tablePEE).click(function( el) {
+        $('#tablePEE').tablesorter( {sortList: [[0,0], [1,0]]} );
+    });
+
+    $("th:contains('TARGET')", tablePEE).click(function( el) {
+        $('#tablePEE').tablesorter( {sortList: [[1,0], [0,0]]} );
+    });
+
+    $("th:contains('PEE')", tablePEE).click(function( el) {
+        $('#tablePEE').tablesorter( {sortList: [[2,0], [0,0], [1,0]]} );
+    });
+
+    $("th:contains('TOTAL WORD PEE')", tablePEE).click(function( el) {
+        $('#tablePEE').tablesorter( {sortList: [[3,0], [0,0],[1,0]]} );
+    });
+
+</script>
 
 <script type="text/javascript">
 
@@ -361,6 +257,7 @@
     } );
 
 </script>
+
 
 
 <div metal:use-macro="cookiebanner.html/cookieBanner"/>
