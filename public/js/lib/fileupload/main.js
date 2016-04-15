@@ -303,20 +303,6 @@ $( function () {
         dropzone.show();
     } ).bind( 'fileuploadadd', function ( e, data ) {
 
-        var extension = data.files[0].name.split( '.' )[data.files[0].name.split( '.' ).length - 1];
-        if ( ( extension == 'tmx' || extension == 'g' ) && config.conversionEnabled ) {
-            var tmDisabled = (typeof $( '#disable_tms_engine' ).attr( "checked" ) == 'undefined') ? false : true;
-            if ( tmDisabled ) {
-                APP.alert( {
-                    msg: 'The TM was disabled. It will now be enabled.',
-                    callback: 'TMXloaded'
-                } );
-            } else {
-                UI.createKeyByTMX();
-            }
-
-        }
-
         $( 'body' ).addClass( 'initialized' );
 
         if ( $( '.upload-table tr' ).length >= (config.maxNumberFiles) ) {
@@ -483,6 +469,22 @@ $( function () {
 
             } else {
                 enableAnalyze();
+            }
+
+            /**
+             * Check for TMX file type, we must trigger the creation of a new TM key
+             */
+            var extension = data.files[0].name.split( '.' )[data.files[0].name.split( '.' ).length - 1];
+            if ( ( extension == 'tmx' || extension == 'g' ) && config.conversionEnabled ) {
+                var tmDisabled = (typeof $( '#disable_tms_engine' ).attr( "checked" ) == 'undefined') ? false : true;
+                if ( tmDisabled ) {
+                    APP.alert( {
+                        msg: 'The TM was disabled. It will now be enabled.',
+                        callback: 'TMXloaded'
+                    } );
+                } else {
+                    UI.createKeyByTMX();
+                }
             }
 
         } else if ( fileSpecs.error ) {
