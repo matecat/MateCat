@@ -357,8 +357,7 @@ class CatUtils {
     }
 
     /**
-     * No more used
-     * @deprecated
+     * Used to export Database XML string into TMX files as valid XML
      *
      * @param $segment
      *
@@ -367,7 +366,7 @@ class CatUtils {
     public static function rawxliff2rawview($segment) {
         // input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
         $segment = self::placehold_xliff_tags($segment);
-        $segment = html_entity_decode($segment, ENT_NOQUOTES, 'UTF-8');
+        $segment = htmlspecialchars( $segment, ENT_NOQUOTES, 'UTF-8', false );
         $segment = self::restore_xliff_tags_for_view($segment);
         return $segment;
     }
