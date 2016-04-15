@@ -182,19 +182,19 @@ $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
 });
 route(
     '/webhooks/gdrive/open', 'GET', 
-    'Webhooks\GDrive\OpenController', 'open'
+    'GDriveController', 'open'
 ); 
 route(
-    '/webhooks/gdrive/list', 'GET', 
-    'Webhooks\GDrive\ManageController', 'listImportedFiles'
+    '/gdrive/list', 'GET',
+    'GDriveController', 'listImportedFiles'
 ); 
 route(
-    '/webhooks/gdrive/change/[:sourceLanguage]', 'GET', 
-    'Webhooks\GDrive\ManageController', 'changeSourceLanguage'
+    '/gdrive/change/[:sourceLanguage]', 'GET',
+    'GDriveController', 'changeSourceLanguage'
 ); 
 route(
-    '/webhooks/gdrive/delete/[:fileId]', 'GET',
-    'Webhooks\GDrive\ManageController', 'deleteImportedFile'
+    '/gdrive/delete/[:fileId]', 'GET',
+    'GDriveController', 'deleteImportedFile'
 );
 
 $klein->dispatch();
