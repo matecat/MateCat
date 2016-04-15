@@ -604,38 +604,73 @@ $.extend(UI, {
         this.TMFileUpload(form, '/?action=loadTMX','uploadCallback', file);
 
     },
-    addTMKeyToList: function (uploading) {
-        var r = ($('#new-tm-read').is(':checked'))? 1 : 0;
-        var w = ($('#new-tm-write').is(':checked'))? 1 : 0;
-        var desc = $('#new-tm-description').val();
-        var TMKey = $('#new-tm-key').val();
+    addTMKeyToList: function ( uploading ) {
 
-        newTr = '<tr class="mine" data-tm="1" data-glos="1" data-key="' + TMKey + '" data-owner="' + config.ownerIsMe + '">' +
-                '    <td class="dragrow"><div class="status"></div></td>' +
-                '    <td class="privatekey">' + TMKey + '</td>' +
-                '    <td class="owner">You</td>' +
-                '    <td class="description"><div class="edit-desc">' + desc + '</div></td>' +
-                '    <td class="lookup check text-center"><input type="checkbox"' + ((r)? ' checked="checked"' : '') + ' /></td>' +
-                '    <td class="update check text-center"><input type="checkbox"' + ((w)? ' checked="checked"' : '') + ' /></td>' +
-                '    <td class="action">' +
-                '       <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>'+
-                '          <div class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;'+
-                '              <ul class="dropdown pull-left">' +
-                '                   <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>'+
-                '                  <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>'+
-                '              </ul>'+
-                '          </div>'+
-                '</td>' +
-                '</tr>';
-        $('#activetm tr.new').before(newTr);
-        if(uploading) {
-            $('.mgmt-tm tr.new').addClass('hide');
+        var keyParams = {
+            r: $( '#new-tm-read' ).is( ':checked' ),
+            w: $( '#new-tm-write' ).is( ':checked' ),
+            desc: $( '#new-tm-description' ).val(),
+            TMKey: $( '#new-tm-key' ).val()
+        };
+
+        this.appendNewTmKeyToPanel( keyParams );
+
+        if ( uploading ) {
+            $( '.mgmt-tm tr.new' ).addClass( 'hide' );
         } else {
-            $('.mgmt-tm tr.new .canceladdtmx').click();
+            $( '.mgmt-tm tr.new .canceladdtmx' ).click();
         }
-        UI.pulseTMadded($('#activetm tr.mine').last());
+
+        UI.pulseTMadded( $( '#activetm tr.mine' ).last() );
+
+        if ( APP.isCattool ) UI.saveTMdata( false );
+    },
+
+    /**
+     * Row structure
+     * @var keyParams
+     *
+     * <code>
+     * var keyParams = {
+     *       r: 1|0,
+     *       w: 1|0,
+     *       desc: "string",
+     *       TMKey: "string"
+     *   };
+     * </code>
+     */
+    appendNewTmKeyToPanel: function( keyParams ){
+
+        keyParams = {
+            r: typeof keyParams.r !== 'undefined' ? keyParams.r : 0,
+            w: typeof keyParams.w !== 'undefined' ? keyParams.w : 0,
+            desc: typeof keyParams.desc !== 'undefined' ? keyParams.desc : '',
+            TMKey: typeof keyParams.TMKey !== 'undefined' ? keyParams.TMKey : ''
+        };
+
+        var newTr = '<tr class="mine" data-tm="1" data-glos="1" data-key="' + keyParams.TMKey + '" data-owner="' + config.ownerIsMe + '">' +
+            '    <td class="dragrow"><div class="status"></div></td>' +
+            '    <td class="privatekey">' + keyParams.TMKey + '</td>' +
+            '    <td class="owner">You</td>' +
+            '    <td class="description"><div class="edit-desc">' + keyParams.desc + '</div></td>' +
+            '    <td class="lookup check text-center"><input type="checkbox"' + ( keyParams.r ? ' checked="checked"' : '' ) + ' /></td>' +
+            '    <td class="update check text-center"><input type="checkbox"' + ( keyParams.w ? ' checked="checked"' : '' ) + ' /></td>' +
+            '    <td class="action">' +
+            '       <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>'+
+            '          <div class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;'+
+            '              <ul class="dropdown pull-left">' +
+            '                   <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>'+
+            '                  <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>'+
+            '              </ul>'+
+            '          </div>'+
+            '</td>' +
+            '</tr>';
+
+        $('#activetm').find('tr.new').before( newTr );
+
         UI.setTMsortable();
-        if(APP.isCattool) UI.saveTMdata(false);
+        UI.updateTMAddedMsg();
+
     },
 
     pulseTMadded: function (row) {

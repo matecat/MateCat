@@ -1,30 +1,16 @@
 $(document).ready(function() {
 
 	$('#create_private_tm_btn').click(function() {
+
 		//prevent double click
-		if($(this).hasClass('disabled')) return false;
+		if ( $( this ).hasClass( 'disabled' ) ) return false;
+
 		//show spinner
 		//$('#get-new-tm-spinner').show();
 		//disable button
 		$(this).addClass('disabled');
 		$(this).attr('disabled','');
 		if(typeof $(this).attr('data-key') == 'undefined') {
-			////call API
-			//$.get("https://api.mymemory.translated.net/createranduser",function(data){
-			//	//parse to appropriate type
-			//	//this is to avoid a curious bug in Chrome, that causes 'data' to be already an Object and not a json string
-			//	if(typeof data == 'string'){
-			//		data=jQuery.parseJSON(data);
-			//	}
-			//	//put value into input field
-			//	$('#private-tm-key').val(data.key);
-			//	$('#private-tm-user').val(data.id);
-			//	$('#private-tm-pass').val(data.pass);
-			//	$('#create_private_tm_btn').attr('data-key', data.key);
-			//	//hide spinner
-			//	//$('#get-new-tm-spinner').hide();
-			//	return false;
-			//});
 
             //call API
             APP.doRequest( {
@@ -36,17 +22,33 @@ $(document).ready(function() {
                     $( '#private-tm-user' ).val( d.data.id );
                     $( '#private-tm-pass' ).val( d.data.pass );
                     $( '#create_private_tm_btn' ).attr( 'data-key', d.data.key );
-                    //hide spinner
-                    //$( '#get-new-tm-spinner' ).hide();
+
+					$( 'tr.template-download.fade.ready ').each( function( key, fileUploadedRow ){
+
+						var _fileName = $( fileUploadedRow ).find( '.name' ).text();
+						if ( _fileName.split('.').pop().toLowerCase() == 'tmx' ) {
+
+							UI.appendNewTmKeyToPanel( {
+								r: 1,
+								w: 1,
+								desc: _fileName,
+								TMKey: d.data.key
+							} );
+
+							return true;
+						}
+
+					});
+
                     return false;
                 }
             } );
 
-
 		} else {
 			$('#private-tm-key').val($(this).attr('data-key'));
 		}
-	})
+
+	});
 
 	$(".more").click(function(e){
 		e.preventDefault();
