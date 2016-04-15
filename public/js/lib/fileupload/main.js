@@ -778,6 +778,20 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
                     }
                     //END editing by Roberto Tucci <roberto@translated.net>
 
+                    var notTranslationFileCount = 0;
+                    $( ".name" ).each( function () {
+                        var currSplitLength = $( this ).text().split( "." ).length - 1;
+                        if ( $( this ).text().split( "." )[currSplitLength] == "tmx" ||
+                                $( this ).text().split( "." )[currSplitLength - 1] == "tmx" ||
+                                $( this ).text().split( "." )[currSplitLength] == "g" ||
+                                $( this ).text().split( "." )[currSplitLength - 1] == "g" ||
+                                $( this ).text().split( "." )[currSplitLength] == "zip" ) {
+                            notTranslationFileCount++;
+                        }
+                    } );
+                    if ( notTranslationFileCount == $( ".name" ).length ) {
+                        disableAnalyze();
+                    }
                 }
 
             } else if ( d.code <= 0 ) {
