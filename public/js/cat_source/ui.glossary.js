@@ -129,13 +129,13 @@ $.extend( UI, {
     markGlossaryItemsInSource: function ( d ) {
         if ( Object.size( d.data.matches ) ) {
             i = 0;
-            cleanString = $( '.source', UI.currentSegment ).html();
+            var cleanString = $( '.source', UI.currentSegment ).html();
             var intervals = [];
-            matches = [];
+            var matches = [];
             $.each( d.data.matches, function ( index ) {
                 matches.push( this[0].raw_segment );
             } );
-            matchesToRemove = [];
+            var matchesToRemove = [];
             $.each( matches, function ( index ) {
                 $.each( matches, function ( ind ) {
                     if ( index != ind ) {
@@ -145,26 +145,77 @@ $.extend( UI, {
                     }
                 } );
             } );
+
             $.each( d.data.matches, function ( k ) {
                 i++;
-                k1 = UI.decodePlaceholdersToText( k, true );
-                toRemove = false;
+                var glossaryTerm_noPlaceholders = UI.decodePlaceholdersToText( k, true );
+                var toRemove = false;
+
                 $.each( matchesToRemove, function ( index ) {
-                    if ( this == k1 ) toRemove = true;
+                    if ( this == glossaryTerm_noPlaceholders ) toRemove = true;
                 } );
                 if ( toRemove ) return true;
-                k2 = k1.replace( /<\//gi, '<\\/' ).replace( /\(/gi, '\\(' ).replace( /\)/gi, '\\)' );
-                var re = new RegExp( k2.trim(), "gi" );
-                var cs = cleanString;
-                coso = cs.replace( re, '<mark>' + k1 + '</mark>' );
+                var glossaryTerm_escaped = glossaryTerm_noPlaceholders
+                        .replace( /<\//gi, '<\\/' )
+                        .replace( /\(/gi, '\\(' )
+                        .replace( /\)/gi, '\\)' );
 
-                if ( coso.indexOf( '<mark>' ) == -1 ) return;
-                int = {
-                    x: coso.indexOf( '<mark>' ),
-                    y: coso.indexOf( '</mark>' ) - 6
-                };
-                intervals.push( int );
+                var re = new RegExp( glossaryTerm_escaped.trim(), "gi" );
+                var regexInTags = new RegExp( "<[^>]*?("+glossaryTerm_escaped.trim()+")[^>]*?>" , "gi" );
+
+                var cs = cleanString;
+                
+                var glossaryTerm_marked = cs.replace( re, '<mark>' + glossaryTerm_noPlaceholders + '</mark>' );
+
+                if ( glossaryTerm_marked.indexOf( '<mark>' ) == -1 ) return;
+
+                //find all glossary matches within tags
+                //later we will ignore them
+                var matchInTags = regexInTags.exec(cs);
+                var intervalForTags = [];
+
+                while(matchInTags) {
+                    //regex start index matches the beginning of the tag.
+                    //so we add the position of the glossary entry into the glossary element
+                    var elemIndex = matchInTags.index + matchInTags[0].indexOf(matchInTags[1]);
+
+                    // create an object containing the start and end position of the current match
+                    // into the initial string
+                    int = {
+                        startPos: elemIndex,
+                        endPos: elemIndex + matchInTags[0].length
+                    };
+
+                    intervalForTags.push( int );
+                    matchInTags = regexInTags.exec(cs);
+                }
+
+                //find all glossary matches
+                var match = re.exec(cs);
+                while(match) {
+                    //check if this glossary element was found into a tag.
+                    var matchInTag = intervalForTags.filter(
+                            function(elem){
+                                return elem.startPos == match.index;
+                            }
+                    );
+
+                    //if found, then this match must be ignored
+                    if(matchInTag.length > 0) {
+                        match = re.exec(cs);
+                        continue;
+                    }
+
+                    int = {
+                        startPos: match.index,
+                        endPos: match.index + match[0].length
+                    };
+
+                    intervals.push( int );
+                    match = re.exec(cs);
+                }
             } );
+
             UI.intervalsUnion = [];
             UI.checkIntervalsUnions( intervals );
             UI.startGlossaryMark = '<mark class="inGlossary">';
@@ -176,8 +227,8 @@ $.extend( UI, {
                 if ( this === UI.lastIntervalUnionAnalysed ) return;
                 UI.lastIntervalUnionAnalysed = this;
                 added = markLength * index;
-                sourceString = sourceString.splice( this.x + added, 0, UI.startGlossaryMark );
-                sourceString = sourceString.splice( this.y + added + UI.startGlossaryMark.length, 0, UI.endGlossaryMark );
+                sourceString = sourceString.splice( this.startPos + added, 0, UI.startGlossaryMark );
+                sourceString = sourceString.splice( this.endPos + added + UI.startGlossaryMark.length, 0, UI.endGlossaryMark );
                 $( '.editor .source' ).html( sourceString );
             } );
             UI.lastIntervalUnionAnalysed = null;
@@ -207,9 +258,9 @@ $.extend( UI, {
         mod = 0;
         $.each( intervals, function ( i ) {
             if ( i != smallestIndex ) {
-                if ( (smallest.x <= this.x) && (smallest.y >= this.x) ) { // this item is to be merged to the smallest
+                if ( (smallest.startPos <= this.startPos) && (smallest.endPos >= this.startPos) ) { // this item is to be merged to the smallest
                     mod++;
-//					smallest.y = this.y;
+//					smallest.endPos = this.endPos;
                     intervals.splice( i, 1 );
                     UI.checkIntervalsUnions( intervals );
                 }
@@ -225,7 +276,7 @@ $.extend( UI, {
             UI.checkIntervalsUnions( intervals );
             return false;
         }
-        if ( smallest.x < 1000000 ) {
+        if ( smallest.startPos < 1000000 ) {
 //            console.log('smallest: ', smallest);
 //            console.log('aa: ', UI.intervalsUnion[UI.intervalsUnion.length-1]);
 //            if(UI.intervalsUnion[UI.intervalsUnion.length-1] !== smallest) {
@@ -246,11 +297,11 @@ $.extend( UI, {
 
     smallestInterval: function ( ar ) {
         smallest = {
-            x: 1000000,
-            y: 2000000
+            startPos: 1000000,
+            endPos: 2000000
         };
         $.each( ar, function () {
-            if ( this.x < smallest.x ) smallest = this;
+            if ( this.startPos < smallest.startPos ) smallest = this;
         } );
         return smallest;
     },
