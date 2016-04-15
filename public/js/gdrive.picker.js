@@ -61,18 +61,7 @@
                 exportIds[i] = id;
             }
 
-            var jsonDoc = {
-                "exportIds": exportIds,
-                "action":"open"
-            };
-            
-            var encodedJson = encodeURIComponent(JSON.stringify(jsonDoc));
-            
-            $( '<div/>', {
-                'class': 'modal-gdrive'
-            }).appendTo( $( 'body' ));
-            
-            window.open('/webhooks/gdrive/open?state=' + encodedJson, '_self');
+            APP.addGDriveFile( exportIds );
         }
     }
 

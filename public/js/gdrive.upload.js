@@ -3,6 +3,8 @@ APP.tryListGDriveFiles = function() {
         $('.files-gdrive').html('');
 
         if( listFiles && listFiles.hasOwnProperty('files') ) {
+            APP.displayGDriveFiles();
+
             $.each( listFiles.files, function( index, file ) {
                 var iconClass = '';
 
@@ -83,7 +85,7 @@ APP.tryListGDriveFiles = function() {
                 .appendTo('.files-gdrive');
             });
         } else {
-            window.open('/', '_self');
+            APP.hideGDriveFiles();
         }
     });
 };
@@ -113,6 +115,45 @@ APP.formatBytes = function(bytes,decimals) {
    var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
    var i = Math.floor(Math.log(bytes) / Math.log(k));
    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+};
+
+APP.addGDriveFile = function(exportIds) {
+    var jsonDoc = {
+        "exportIds": exportIds,
+        "action":"open"
+    };
+
+    var encodedJson = encodeURIComponent(JSON.stringify(jsonDoc));
+
+    $( '<div/>', {
+        'class': 'modal-gdrive'
+    }).appendTo( $( 'body' ));
+
+    $.getJSON('/webhooks/gdrive/open?isAsync=true&state=' + encodedJson, function(response) {
+        $('.modal-gdrive').remove();
+
+        if(response.success) {
+            APP.tryListGDriveFiles();
+        } else {
+            console.error('Error when processing request: ' + response);
+        }
+    });
+};
+
+APP.displayGDriveFiles = function() {
+    if( !$('#gdrive-files-list').is(":visible") ) {
+        $('#upload-files-list').hide();
+        $('#gdrive-files-list').show();
+        UI.enableAnalyze();
+    }
+};
+
+APP.hideGDriveFiles = function() {
+    if( $('#gdrive-files-list').is(":visible") ) {
+        $('#gdrive-files-list').hide();
+        $('#upload-files-list').show();
+        UI.disableAnalyze();
+    }
 };
 
 $(document).ready( function() {

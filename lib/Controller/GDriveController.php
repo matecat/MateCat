@@ -23,7 +23,11 @@ class GDriveController extends KleinController {
 
     private $guid = null;
 
+    private $isAsyncReq;
+
     public function open() {
+
+        $this->setIsAsyncReq( $this->request->param('isAsync') );
 
         $this->doAuth();
 
@@ -32,7 +36,7 @@ class GDriveController extends KleinController {
 
             $this->doImport();
 
-            $this->doRedirect();
+            $this->finalize();
         } else {
             $_SESSION[ 'incomingUrl' ] = $this->request->uri();
 
@@ -50,12 +54,13 @@ class GDriveController extends KleinController {
 
         \Log::doLog( $state );
 
-        if( GDrive::sessionHasFiles( $_SESSION )) {
+        if( $this->isAsyncReq && GDrive::sessionHasFiles( $_SESSION )) {
             $this->guid = $_SESSION[ "upload_session" ];
         } else {
             $this->guid = Utils::create_guid();
             setcookie( "upload_session", $this->guid, time() + 86400, '/' );
             $_SESSION[ "upload_session" ] = $this->guid;
+            unset( $_SESSION[ GDrive::SESSION_FILE_LIST ] );
         }
 
         $listOfIds = array();
@@ -204,9 +209,23 @@ class GDriveController extends KleinController {
         $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] = $this->source_lang;
     }
 
+    private function finalize() {
+        if( $this->isAsyncReq ) {
+            $this->doResponse();
+        } else {
+            $this->doRedirect();
+        }
+    }
+
     private function doRedirect() {
-        header("Location: /?gdrive=1", true, 302);
+        header("Location: /", true, 302);
         exit;
+    }
+
+    private function doResponse() {
+        $this->response->json( array(
+            "success" => true
+        ));
     }
 
     public function listImportedFiles() {
@@ -393,6 +412,14 @@ class GDriveController extends KleinController {
 
     protected function afterConstruct() {
         Bootstrap::sessionStart();
+    }
+
+    private function setIsAsyncReq( $isAsyncReq ) {
+        if( $isAsyncReq === 'true' ) {
+            $this->isAsyncReq = true;
+        } else {
+            $this->isAsyncReq = false;
+        }
     }
 
 }

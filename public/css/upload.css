@@ -581,9 +581,9 @@ h2.payoff
 
 
 /*upload table*/
-.upload-table {width:100%;margin:0;table-layout: fixed;}
-.upload-table td{height:auto;padding:5px 10px;text-align:left;border-bottom:1px dashed #ccc}
-.upload-table tr{background:#fff;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;border-bottom:1px dashed #ccc}
+.upload-table, .gdrive-upload-table {width:100%;margin:0;table-layout: fixed;}
+.upload-table td, .gdrive-upload-table td {height:auto;padding:5px 10px;text-align:left;border-bottom:1px dashed #ccc}
+.upload-table tr, .gdrive-upload-table tr {background:#fff;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;border-bottom:1px dashed #ccc}
 .upload-table tr:hover{}
 
 .btncontinue{position:absolute;bottom:0;display:none;float:left;padding:0px 0 0 0 !important;font-size:14px !important;margin:0px 0 0 10px !important;}
@@ -718,7 +718,7 @@ a{color:#39699a}
 .uploaded .upload-footer{display:block !important}
 .file-drop{margin:40px 0 50px 0!important}
 #fileupload{margin:0 !important; /* padding:0 !important */ }
-.upload-files
+.upload-files, .gdrive-upload-files
 	{
 	
     position: relative;
@@ -733,7 +733,7 @@ margin-top: 20px;
 	-moz-transition: all  50ms ease-in;
 	}
 
-.upload-files.uploaded {
+.upload-files.uploaded, .gdrive-upload-files.uploaded {
 padding-bottom: 50px !important;
 min-height: 220px;
 }
@@ -743,7 +743,7 @@ min-height: 220px;
 
 
 
-.uploaded  .upload-files	{	height:auto !important;}
+.uploaded  .upload-files, .uploaded .gdrive-upload-files	{	height:auto !important;}
 
 .drag{text-align:center;overflow:hidden;}
 .drag p{ text-align:center;margin:30px 0 10px 0;font-size:36px;line-height:50px;}
@@ -769,7 +769,8 @@ min-height: 220px;
 */
 	}
 
-.upload-files.uploaded .upload-footer
+.upload-files.uploaded .upload-footer,
+.gdrive-upload-files.uploaded .upload-footer
 	{
 	display: none !important;
 	}
@@ -1259,12 +1260,12 @@ span.load-gdrive:hover,
 }
 
 .modal-gdrive {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 999999;
+    z-index: 9999999999999;
     background: rgba(255, 255, 255, 0.5);
 }
 
@@ -1284,6 +1285,7 @@ span.fileinput-button {
 
 div.continue-gdrive {
     margin: 0 0 10px 10px !important;
+    display: block;
 }
 
 .continue-gdrive span.load-gdrive {
@@ -1296,4 +1298,12 @@ div.continue-gdrive {
 .continue-gdrive span.clear-gdrive {
     float: none;
     margin: 0 !important;
+}
+
+#upload-files-list {
+    display: block;
+}
+
+#gdrive-files-list {
+    display: none;
 }
