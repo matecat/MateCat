@@ -86,7 +86,7 @@ $.extend(UI, {
 		 */
 		this.globalWarnings = [];
 
-		this.shortcuts = {
+		$.extend(UI.shortcuts,  {
 			"translate": {
 				"label" : "Confirm translation",
 				"equivalent": "click on Translated",
@@ -165,8 +165,9 @@ $.extend(UI, {
 					"standard": "alt+k",
 					"mac": "alt+k",
 				}
-			},
-		};
+			}
+		});
+
 		this.setShortcuts();
 		this.setContextMenu();
 		this.createJobMenu();
