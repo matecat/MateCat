@@ -98,7 +98,7 @@ class GDriveController extends KleinController {
 
             if ($downloadUrl) {
 
-                $fileName = $file->getTitle();
+                $fileName = $this->sanetizeFileName( $file->getTitle() );
                 $file_extension = GDrive::officeExtensionFromMime( $file->mimeType );
 
                 if ( substr( $fileName, -5 ) !== $file_extension ) {
@@ -140,6 +140,10 @@ class GDriveController extends KleinController {
         } catch (Exception $e) {
             die( "You don't have permission to access the file or the file is not found." );
         }
+    }
+
+    private function sanetizeFileName( $fileName ) {
+        return str_replace('/', '_', $fileName);
     }
 
     private function addFileToSession( $fileId, $fileName, $fileHash ) {
