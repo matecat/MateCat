@@ -35,11 +35,7 @@ class newProjectController extends viewController {
         $this->project_name      = $__postInput[ "project_name" ];
         $this->private_tm_key = $__postInput[ "private_tm_key" ];
 
-        if( \GDrive::sessionHasFiles( $_SESSION ) ) {
-            $this->guid = $_SESSION[ "upload_session" ];
-        } else {
-            $this->guid = Utils::create_guid();
-        }
+        $this->guid = Utils::create_guid();
 
         $this->lang_handler    = Langs_Languages::getInstance();
         $this->subject_handler = Langs_LanguageDomains::getInstance();
@@ -338,27 +334,11 @@ class newProjectController extends viewController {
         $this->template->isAnonymousUser = var_export( !$this->isLoggedIn(), true );
         $this->template->DQF_enabled = INIT::$DQF_ENABLED;
 
-        $this->template->isGDrive = $this->isGDrive();
-
         $this->template->developerKey = INIT::$OAUTH_BROWSER_API_KEY;
         $this->template->clientId = INIT::$OAUTH_CLIENT_ID;
         $this->template->accessToken = GDrive::getUserToken( $_SESSION );
 
         $this->template->currentTargetLang = $this->getCurrentTargetLang();
-    }
-
-    private function isGDrive() {
-        $gdrive = intval( filter_input(INPUT_GET, 'gdrive') );
-
-        $isGDrive= false;
-
-        if($gdrive === 1 && GDrive::sessionHasFiles( $_SESSION )) {
-            $isGDrive = true;
-        } else {
-            unset( $_SESSION[ GDrive::SESSION_FILE_LIST ] );
-        }
-
-        return $isGDrive;
     }
 
     private function getCurrentTargetLang() {

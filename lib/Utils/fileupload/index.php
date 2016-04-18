@@ -15,6 +15,8 @@ ini_set('max_input_time',3600);
 
 require realpath( dirname(__FILE__) . '/../../../' ) . '/inc/Bootstrap.php';
 @Bootstrap::start();
+@Bootstrap::sessionStart();
+@Bootstrap::sessionClose();
 require('upload.class.php');
 
 $upload_handler = new UploadHandler();
@@ -32,7 +34,11 @@ switch ($_SERVER['REQUEST_METHOD']) {
 		break;
 	case 'HEAD':
 	case 'GET':
-		$upload_handler->get();
+                if( !\GDrive::sessionHasFiles( $_SESSION ) ) {
+                    $upload_handler->get();
+                } else {
+                    echo json_encode( array() );
+                }
 		break;
 	case 'POST':
 		if (isset($_REQUEST['_method']) && $_REQUEST['_method'] === 'DELETE') {

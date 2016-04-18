@@ -76,10 +76,8 @@ $(document).ready(function() {
                 return;
             }
 	});
-        
-        if ( config.isGDrive && config.isGDrive !== false ) {
-            APP.tryListGDriveFiles();
-        }
+
+        APP.tryListGDriveFiles();
 
 	$("#target-lang").change(function(e) {
         UI.checkRTL();
@@ -101,7 +99,7 @@ $(document).ready(function() {
         }
 		$('body').addClass('creating');
 		var files = '';
-		$('.upload-table tr:not(.failed) td.name').each(function () {
+		$('.upload-table tr:not(.failed) td.name, .gdrive-upload-table tr:not(.failed) td.name').each(function () {
 			files += '@@SEP@@' + $(this).text();
 		});
 

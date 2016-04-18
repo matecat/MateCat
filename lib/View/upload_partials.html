@@ -1,8 +1,8 @@
-<div metal:define-macro="gdrive_files"> 
+<div id="gdrive-files-list" metal:define-macro="gdrive_files">
 
-    <div class="upload-files drag uploaded">
-        <table cellpadding="0" cellspacing="0" class="upload-table table-striped" role="presentation">
-            <tbody class="files files-gdrive" data-toggle="modal-gallery" data-target="#modal-gallery">
+    <div class="gdrive-upload-files drag uploaded">
+        <table cellpadding="0" cellspacing="0" class="gdrive-upload-table table-striped" role="presentation">
+            <tbody class="files-gdrive" data-toggle="modal-gallery" data-target="#modal-gallery">
             </tbody>
         </table>
         <div class="btncontinue continue-gdrive">
@@ -15,7 +15,7 @@
         
 </div> 
 
-<div class="upload-files drag" metal:define-macro="upload_files">
+<div id="upload-files-list" class="upload-files drag" metal:define-macro="upload_files">
     <form id="fileupload" action="${basepath}lib/Utils/fileupload/" method="POST" enctype="multipart/form-data">
 
         <div id="overlay"></div>

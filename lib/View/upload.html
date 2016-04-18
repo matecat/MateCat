@@ -62,8 +62,7 @@
             maxNumberFiles: ${maxNumberFiles},
             ownerIsMe: true,
             isAnonymousUser: ${isAnonymousUser},
-            blueimp_dataType: 'json', 
-            isGDrive : ${isGDrive|false}
+            blueimp_dataType: 'json'
         };
     </script>
 
@@ -292,8 +291,9 @@ Connect your TAUS DQF account to measure productivity.
 
 <div class="cl"></div>
 
-<div tal:condition="not: isGDrive" metal:use-macro="upload_partials.html/upload_files"/>
-<div tal:condition="true: isGDrive" metal:use-macro="upload_partials.html/gdrive_files"/>
+<div metal:use-macro="upload_partials.html/upload_files"/>
+
+<div metal:use-macro="upload_partials.html/gdrive_files"/>
 
 <p tal:condition="true:conversion_enabled" class="supported-files">MateCat supports
     <a class="supported-file-formats" href="#">${formats_number} file formats</a>.</p>

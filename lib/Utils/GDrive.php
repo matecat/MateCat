@@ -114,7 +114,9 @@ class GDrive {
 
         $job = Jobs_JobDao::getById( $id_job );
 
-        $fileTitle = substr( $file->filename, 0, -5 );
+        $gdriveFile = $service->files->get( $remoteFile->remote_id );
+
+        $fileTitle = $gdriveFile->getTitle();
 
         $translatedFileTitle = $fileTitle . ' - ' . $job->target;
 
