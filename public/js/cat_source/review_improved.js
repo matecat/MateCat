@@ -173,16 +173,9 @@ if ( ReviewImproved.enabled() && config.isReview ) {
                     ReviewImproved.reloadQualityReport();
                     options.done();
                 });
-            }
-                
-            UI.setTranslation({
-                id_segment: segment.id,
-                status: 'rejected',
-                caller: false,
-                byStatus: false,
-                propagate: false,
-                callback : submitIssues
-            });
+            };
+
+            submitIssues();
         },
         reloadQualityReport : function() {
             var path  = sprintf('/api/v2/jobs/%s/%s/quality-report',

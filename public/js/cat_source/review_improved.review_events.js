@@ -67,12 +67,15 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         UI.changeStatus( this , 'approved', 0);
     });
 
+    $(document).on('click', '.button-reject', function(e) {
+        UI.rejectAndGoToNext();
+    });
 
     var textSelectedInsideSelectionArea = function( selection, container ) {
         return $.inArray( selection.focusNode, container.contents() ) !==  -1 &&
             $.inArray( selection.anchorNode, container.contents() ) !== -1 &&
             selection.toString().length > 0 ;
-    }
+    };
 
     function getSelectionData(selection, container) {
         var data = {};
