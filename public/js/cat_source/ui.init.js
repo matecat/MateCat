@@ -86,6 +86,8 @@ $.extend(UI, {
 		 */
 		this.globalWarnings = [];
 
+		UI.shortcuts = UI.shortcuts || {} ;
+
 		$.extend(UI.shortcuts,  {
 			"translate": {
 				"label" : "Confirm translation",
