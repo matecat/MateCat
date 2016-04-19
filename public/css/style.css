@@ -599,6 +599,21 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
     background: -moz-linear-gradient(top,  #09beec,  #119ec4);
     background: linear-gradient(top,  #09beec,  #119ec4);
 }
+
+.button-reject {
+	border:1px solid ;
+	background: #b02429 ;
+	border:1px solid #848689;
+	color: #333;
+	font-weight: bold;
+	text-decoration: none;
+	padding: 8px 18px;
+	border-radius: 2px;
+	border-radius: 2px;
+	font-size: 18px;
+}
+
+
 article .translated, article .draft, article .approved{margin:0 0px 5px 5px}
 
 
@@ -612,7 +627,7 @@ article .translated, article .draft, article .approved{margin:0 0px 5px 5px}
 
 .buttons li:hover p{display:block;}
 
-.translated{color:#fff !important}
+.translated {color:#fff !important}
 
 article .translated, article .approved {
 	text-transform: uppercase;

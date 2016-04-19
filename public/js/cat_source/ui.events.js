@@ -8,7 +8,6 @@ $.extend(UI, {
 			e.preventDefault();
 			$('.editor .translated').click();
             $('body.review .editor .approved').click();
-//		}).bind('keydown', 'Meta+return', function(e) {
 		}).on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.mac, function(e) {
 			e.preventDefault();
 			$('.editor .translated').click();
