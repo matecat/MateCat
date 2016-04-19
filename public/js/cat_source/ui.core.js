@@ -1968,15 +1968,6 @@ UI = {
         }
 
         var winName ;
-
-        $.each( config.remoteFilesInJob, function( index, item ) {
-            winName = 'window' + item.id ;
-            console.log(winName);
-
-            if ( typeof window.googleDriveWindows[ winName ] == 'undefined' || window.googleDriveWindows[ winName ].opener == null ) {
-                window.googleDriveWindows[ winName ] = window.open( config.basepath + 'public/static/loading-google-drive-file.html' );
-            }
-        });
         
         var driveUpdateDone = function(data) {
             var winName ;
@@ -1988,6 +1979,9 @@ UI = {
 
                 if ( typeof window.googleDriveWindows[ winName ] != 'undefined' && window.googleDriveWindows[ winName ].opener != null ) {
                     window.googleDriveWindows[ winName ].location.href = item.alternateLink ;
+                    window.googleDriveWindow[ winName ].focus();
+                } else {
+                    window.googleDriveWindows[ winName ] = window.open( item.alternateLink );
                 }
             });
         }
