@@ -223,54 +223,92 @@ $.extend(UI, {
     },
 
     // TAG CLEANING
-	cleanDroppedTag: function(area, beforeDropHTML) {
- //       if (area == this.editarea) {
-			this.droppingInEditarea = false;
+    cleanDroppedTag: function ( area, beforeDropHTML ) {
 
-			diff = this.dmp.diff_main(beforeDropHTML, $(area).html());
-			draggedText = '';
-			$(diff).each(function() {
-				if (this[0] == 1) {
-					draggedText += this[1];
-				}
-			});
-			draggedText = draggedText.replace(/^(\&nbsp;)(.*?)(\&nbsp;)$/gi, "$2");
-			dr2 = draggedText.replace(/(<br>)$/, '').replace(/(<span.*?>)\&nbsp;/,'$1');
+        this.droppingInEditarea = false;
 
-			area.html(area.html().replace(draggedText, dr2));
-
-			div = document.createElement("div");
-			div.innerHTML = draggedText;
-			isMarkup = draggedText.match(/^<span style=\"font\-size\: 13px/gi);
-			saveSelection();
-
-			if ( $('span .rangySelectionBoundary', area).length > 1 ) {
-                $('.rangySelectionBoundary', area).last().remove();
+        //detect selected text
+        var html = "";
+        if ( typeof window.getSelection != "undefined" ) {
+            var sel = window.getSelection();
+            if ( sel.rangeCount ) {
+                var container = document.createElement( "div" );
+                for ( var i = 0, len = sel.rangeCount; i < len; ++i ) {
+                    container.appendChild( sel.getRangeAt( i ).cloneContents() );
+                }
+                html = container.innerHTML;
             }
+        } else if ( typeof document.selection != "undefined" ) {
+            if ( document.selection.type == "Text" ) {
+                html = document.selection.createRange().htmlText;
+            }
+        }
+        draggedText = html;
 
-			if($('span .rangySelectionBoundary', area).length) {
-				spel = $('span', area).has('.rangySelectionBoundary');
-				rsb = $('span .rangySelectionBoundary', area).detach();
-				spel.after(rsb);
-			}
-			phcode = $('.rangySelectionBoundary')[0].outerHTML;
-			$('.rangySelectionBoundary').text(this.cursorPlaceholder);
 
-			newTag = $(div).text();
-			var cloneEl = area;
-			// encode br before textification
-			$('br', cloneEl).each(function() {
-				$(this).replaceWith('[**[br class="' + this.className + '"]**]');				
-			});
-			newText = cloneEl.text().replace(draggedText, newTag);
-			cloneEl = null;
-			if(typeof phcode == 'undefined') phcode = '';
+        draggedText = draggedText.replace( /^(\&nbsp;)(.*?)(\&nbsp;)$/gi, "$2" );
+        dr2 = draggedText.replace( /(<br>)$/, '' );
 
-			area.text(newText);
-			area.html(area.html().replace(this.cursorPlaceholder, phcode));
-			restoreSelection();
-			area.html(area.html().replace(this.cursorPlaceholder, '').replace(/\[\*\*\[(.*?)\]\*\*\]/gi, "<$1>"));
-	},
+        area.html( area.html().replace( draggedText, dr2 ) );
+        saveSelection();
+
+        if ( $( 'span .rangySelectionBoundary', area ).length > 1 ) {
+            $( '.rangySelectionBoundary', area ).last().remove();
+        }
+
+        if ( $( 'span .rangySelectionBoundary', area ).length ) {
+            spel = $( 'span', area ).has( '.rangySelectionBoundary' );
+            rsb = $( 'span .rangySelectionBoundary', area ).detach();
+            spel.after( rsb );
+        }
+
+        phcode = $( '.rangySelectionBoundary' )[0].outerHTML;
+        $( '.rangySelectionBoundary' ).text( this.cursorPlaceholder );
+
+
+        //map with special simbols
+        var mapSpecialSimbols = {
+            "<span class=\"tab-marker monad marker _09\">⇥</span>": "##PlaceHolderTABS##"
+        };
+
+        var clonedEl = area.clone();
+        //replace special simbol with placeholder
+        var replacementSpecialSimbol = clonedEl.html();
+        for ( key in mapSpecialSimbols ) {
+            if ( clonedEl.html().indexOf( key ) > -1 ) {
+                var reg = new RegExp( key, "g" );
+                replacementSpecialSimbol = replacementSpecialSimbol.replace( reg, mapSpecialSimbols[key] );
+            }
+        }
+
+        // encode br before textification
+        $( 'br', clonedEl ).each( function () {
+            $( this ).replaceWith( '[**[br class="' + this.className + '"]**]' );
+        } );
+
+        //new target text with placeholder
+        var drag = document.createElement( "drag" );
+        var newText = $( drag ).html( replacementSpecialSimbol ).text().replace( /(<span.*?>)\&nbsp;/, '$1' );
+
+        if ( typeof phcode == 'undefined' ) phcode = '';
+
+        clonedEl.text( newText );
+
+        //replace placeholder with special simbol
+        var areaHTML = clonedEl.html();
+        for ( key in mapSpecialSimbols ) {
+            if ( areaHTML.indexOf( mapSpecialSimbols[key] ) > -1 ) {
+                var reg = new RegExp( mapSpecialSimbols[key], "g" );
+                areaHTML = areaHTML.replace( reg, key );
+            }
+        }
+
+        clonedEl.html( areaHTML );
+        clonedEl.html( clonedEl.html().replace( this.cursorPlaceholder, phcode ) );
+        restoreSelection();
+        area.html( clonedEl.html().replace( this.cursorPlaceholder, '' ).replace( /\[\*\*\[(.*?)\]\*\*\]/gi, "<$1>" ) );
+
+    },
     setTagMode: function () {
         if(this.custom.extended_tagmode) {
             this.setExtendedTagMode();
