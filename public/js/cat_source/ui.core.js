@@ -1718,7 +1718,7 @@ UI = {
 
         if ( downloadable ) {
             if(isGDriveFile){
-                label = 'SAVE TRANSLATION TO GOOGLE DRIVE';
+                label = 'OPEN IN GOOGLE DRIVE';
             } else {
                 label = 'DOWNLOAD TRANSLATION';
             }
@@ -1922,10 +1922,7 @@ UI = {
         var button = $('#downloadProject' ) ;
         var labelDownloading = 'DOWNLOADING';
         if ( config.isGDriveProject && config.isGDriveProject !== 'false') {
-            labelDownloading = 'SAVING...';
-        }
-        if( typeof openOriginalFiles !== 'undefined' && openOriginalFiles === 1 ) {
-            labelDownloading = 'OPENING...';
+            labelDownloading = 'OPENING FILES...';
         }
         button.addClass('disabled' ).data( 'oldValue', button.val() ).val(labelDownloading);
     },
