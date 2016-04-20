@@ -98,7 +98,7 @@ class CatDecorator {
 
       if ( $this->jobStatsStruct->isDownloadable() ) {
           if($this->isGDriveProject) {
-            $label = 'SAVE TRANSLATION TO GOOGLE DRIVE';
+            $label = 'OPEN IN GOOGLE DRIVE';
           } else {
             $label = 'DOWNLOAD TRANSLATION';
           }

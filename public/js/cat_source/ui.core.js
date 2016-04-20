@@ -1718,7 +1718,7 @@ UI = {
 
         if ( downloadable ) {
             if(isGDriveFile){
-                label = 'SAVE TRANSLATION TO GOOGLE DRIVE';
+                label = 'OPEN IN GOOGLE DRIVE';
             } else {
                 label = 'DOWNLOAD TRANSLATION';
             }
@@ -1922,10 +1922,7 @@ UI = {
         var button = $('#downloadProject' ) ;
         var labelDownloading = 'DOWNLOADING';
         if ( config.isGDriveProject && config.isGDriveProject !== 'false') {
-            labelDownloading = 'SAVING...';
-        }
-        if( typeof openOriginalFiles !== 'undefined' && openOriginalFiles === 1 ) {
-            labelDownloading = 'OPENING...';
+            labelDownloading = 'OPENING FILES...';
         }
         button.addClass('disabled' ).data( 'oldValue', button.val() ).val(labelDownloading);
     },
@@ -1968,15 +1965,6 @@ UI = {
         }
 
         var winName ;
-
-        $.each( config.remoteFilesInJob, function( index, item ) {
-            winName = 'window' + item.id ;
-            console.log(winName);
-
-            if ( typeof window.googleDriveWindows[ winName ] == 'undefined' || window.googleDriveWindows[ winName ].opener == null ) {
-                window.googleDriveWindows[ winName ] = window.open( config.basepath + 'public/static/loading-google-drive-file.html' );
-            }
-        });
         
         var driveUpdateDone = function(data) {
             var winName ;
@@ -1988,6 +1976,9 @@ UI = {
 
                 if ( typeof window.googleDriveWindows[ winName ] != 'undefined' && window.googleDriveWindows[ winName ].opener != null ) {
                     window.googleDriveWindows[ winName ].location.href = item.alternateLink ;
+                    window.googleDriveWindow[ winName ].focus();
+                } else {
+                    window.googleDriveWindows[ winName ] = window.open( item.alternateLink );
                 }
             });
         }
