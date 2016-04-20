@@ -1,26 +1,6 @@
 <?php
 
-class Chunks_ChunkStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
-
-    public $id;
-    public $password;
-    public $id_project;
-    public $create_date;
-    public $job_first_segment;
-    public $job_last_segment;
-    public $last_opened_segment;
-    public $owner;
-    public $last_update;
-    public $source;
-    public $target;
-    public $tm_keys;
-
-    public $new_words;
-    public $draft_words;
-    public $translated_words;
-    public $approved_words;
-    public $rejected_words;
-
+class Chunks_ChunkStruct extends Jobs_JobStruct {
 
     /** @return Segments_SegmentStruct[]
      *
@@ -46,31 +26,6 @@ class Chunks_ChunkStruct extends DataAccess_AbstractDaoSilentStruct implements D
         return $dao->getByJobId( $this->id );
     }
 
-    public function findLatestTranslation() {
-        $dao = new Translations_SegmentTranslationDao( Database::obtain() );
-
-        return $dao->lastTranslationByJobOrChunk( $this );
-    }
-
-    /**
-     * getProject
-     *
-     * Returns the project struct, caching the result on the instance to avoid
-     * unnecessary queries.
-     *
-     * @return \Projects_ProjectStruct
-     */
-
-    public function getProject() {
-        return $this->cachable( __function__, $this->getJob(), function ( $job ) {
-            return $job->getProject();
-        } );
-    }
-
-    public function isFeatureEnabled( $feature_code ) {
-        return $this->getJob()->isFeatureEnabled( $feature_code );
-    }
-
     /**
      * @return Jobs_JobStruct
      */
@@ -80,18 +35,5 @@ class Chunks_ChunkStruct extends DataAccess_AbstractDaoSilentStruct implements D
         // database table.
         return new Jobs_JobStruct( $this->attributes() );
     }
-
-    /**
-     *
-     * @return float
-     */
-    public function totalWordsCount() {
-        return $this->new_words +
-            $this->draft_words +
-            $this->translated_words +
-            $this->approved_words +
-            $this->rejected_words;
-    }
-
 
 }
