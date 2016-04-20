@@ -22,6 +22,7 @@ class LanguageStatsRunner extends AbstractDaemon {
 
     function main( $args = null ) {
         $db = Database::obtain();
+        $lsDao = new LanguageStats_LanguageStatsDAO( Database::obtain());
 
         do {
             //TODO: create DAO for this
@@ -39,17 +40,6 @@ class LanguageStatsRunner extends AbstractDaemon {
                         completed = 1
                         AND source = '%s'
                       GROUP BY target";
-
-            $queryInsert = "INSERT into language_stats
-                        (date, source, target, total_word_count, total_post_editing_effort, total_time_to_edit, job_count)
-                        VALUES %s
-                        ON DUPLICATE KEY UPDATE
-                          total_post_editing_effort = values( total_post_editing_effort ),
-                          total_time_to_edit = values( total_time_to_edit ),
-                          job_count = values( job_count ),
-                          total_word_count = values(total_word_count)";
-
-            $updateTuplesTemplate = "( '%s', '%s', '%s', %f, %f, %f, %u )";
 
             $langsObj = Langs_Languages::getInstance();
 
@@ -71,31 +61,30 @@ class LanguageStatsRunner extends AbstractDaemon {
                 $languageTuples = array();
 
                 foreach ( $languageStats as $languageCoupleStat ) {
-                    Log::doLog( "Current language couple: " . $source_language . "-" . $languageCoupleStat[ 'target' ] );
-                    echo "Current language couple: " . $source_language . "-" . $languageCoupleStat[ 'target' ] . "\n";
+                    Log::doLog("Current language couple: " . $source_language . "-" . $languageCoupleStat['target']);
+                    echo "Current language couple: " . $source_language . "-" . $languageCoupleStat['target'] . "\n";
 
-                    $languageTuples[] = sprintf(
-                            $updateTuplesTemplate,
-                            $today,
-                            $languageCoupleStat[ 'source' ],
-                            $languageCoupleStat[ 'target' ],
-                            round( $languageCoupleStat[ 'total_words' ], 4 ),
-                            round( $languageCoupleStat[ 'total_post_editing_effort' ], 4 ),
-                            round( $languageCoupleStat[ 'total_time_to_edit' ], 4 ),
-                            $languageCoupleStat[ 'job_count' ]
-                    );
+                    $langStatsStruct = new LanguageStats_LanguageStatsStruct();
+                    $langStatsStruct->date                     = $today;
+                    $langStatsStruct->source                   = $languageCoupleStat[ 'source' ];
+                    $langStatsStruct->target                   = $languageCoupleStat[ 'target' ];
+                    $langStatsStruct->total_word_count          = round($languageCoupleStat[ 'total_words' ], 4);
+                    $langStatsStruct->total_post_editing_effort = round($languageCoupleStat[ 'total_post_editing_effort' ], 4);
+                    $langStatsStruct->total_time_to_edit       = round($languageCoupleStat[ 'total_time_to_edit' ], 4);
+                    $langStatsStruct->job_count                = $languageCoupleStat[ 'job_count' ];
+
+                    $languageTuples[] = $langStatsStruct;
                 }
 
+                //if there is some data for this language couple, insert it
                 if ( count( $languageTuples ) > 0 ) {
-
                     Log::doLog( "Found some stats. Saving in DB.." );
                     echo "Found some stats. Saving in DB..\n";
-                    $db->query(
-                            sprintf(
-                                    $queryInsert,
-                                    implode( ", ", $languageTuples )
-                            )
-                    );
+
+                    $result = $lsDao->createList( $languageTuples );
+                    if(is_null( $result) ){
+                        echo "ERROR: DAO failed to insert rows";
+                    }
                 }
 
                 usleep( 100 );
