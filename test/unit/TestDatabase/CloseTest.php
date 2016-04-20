@@ -31,7 +31,7 @@ class CloseTest extends AbstractTest
 
     public function tearDown()
     {
-        $this->reflectedClass = Database::obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $this->reflectedClass = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $this->reflectedClass->close();
         startConnection();
     }
@@ -46,7 +46,7 @@ class CloseTest extends AbstractTest
         /**
          * @var Database
          */
-        $instance_to_close = $this->reflectedClass->obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $instance_to_close = $this->reflectedClass->obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $instance_to_close->connect();
         $method = $this->reflector->getMethod("close");
         $method->invoke($instance_to_close);

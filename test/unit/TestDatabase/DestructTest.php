@@ -27,7 +27,7 @@ class DestructTest extends AbstractTest
 
     public function tearDown()
     {
-        $this->reflectedClass = Database::obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $this->reflectedClass = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $this->reflectedClass->close();
         startConnection();
     }
@@ -42,7 +42,7 @@ class DestructTest extends AbstractTest
         /**
          * @var Database
          */
-        $instance_to_destruct = $this->reflectedClass->obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $instance_to_destruct = $this->reflectedClass->obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $instance_to_destruct->connect();
         $method = $this->reflector->getMethod("__destruct");
         $method->invoke($instance_to_destruct);

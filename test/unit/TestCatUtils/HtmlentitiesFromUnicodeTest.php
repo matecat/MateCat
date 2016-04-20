@@ -40,7 +40,6 @@ LAB;
      */
     public function testhtmlentitiesFromUnicode2()
     {
-        //"<g 𐎆 𐏉</g>" real imput string
         $source_segment = <<<'LAB'
 <g 𐎆 𐏉##LESSTHAN##L2c=##GREATERTHAN##
 LAB;
@@ -59,7 +58,6 @@ LAB;
      */
     public function testhtmlentitiesFromUnicode3()
     {
-//<g id="1">ψ</g>😴<g 😆id="2">🛠λ</g> initial string in input
         $source_segment = <<<'LAB'
 ##LESSTHAN##ZyBpZD0iMSI=##GREATERTHAN##ψ##LESSTHAN##L2c=##GREATERTHAN##😴<g 😆id="2">🛠λ##LESSTHAN##L2c=##GREATERTHAN##
 LAB;
@@ -85,8 +83,6 @@ LAB;
         $expected_segment = <<<'LAB'
 &#128564;
 LAB;
-        //$segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'CatUtils::htmlentitiesFromUnicode', $source_segment );
-
         $this->assertEquals($expected_segment, CatUtils::htmlentitiesFromUnicode($source_array));
     }
 
@@ -111,7 +107,6 @@ LAB;
         $expected_segment = <<<'LAB'
 &#128564;&#128736;
 LAB;
-        //$segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'CatUtils::htmlentitiesFromUnicode', $source_segment );
         $current_segment = CatUtils::htmlentitiesFromUnicode($source_array_1) . CatUtils::htmlentitiesFromUnicode($source_array_2);
         $this->assertEquals($expected_segment, $current_segment);
     }

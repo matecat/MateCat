@@ -25,7 +25,7 @@ class UseDbTest extends AbstractTest
 
     public function tearDown()
     {
-        $this->reflectedClass = Database::obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $this->reflectedClass = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $this->reflectedClass->close();
         startConnection();
     }
@@ -38,7 +38,7 @@ class UseDbTest extends AbstractTest
         /**
          * @var Database
          */
-        $instance_after_reset = $this->reflectedClass->obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $instance_after_reset = $this->reflectedClass->obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $instance_after_reset->useDb("information_schema");
         $database = $this->reflector->getProperty('database');
         $database->setAccessible(true);

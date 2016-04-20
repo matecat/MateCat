@@ -28,10 +28,10 @@ class BeginCommitRollbackTest extends AbstractTest
     {
         parent::setUp();
 
-        $copy_server = "localhost";
-        $copy_user = "unt_matecat_user";
-        $copy_password = "unt_matecat_user";
-        $copy_database = "unittest_matecat_local";
+        $copy_server = INIT::$DB_SERVER;
+        $copy_user = INIT::$DB_USER;
+        $copy_password =  INIT::$DB_PASS;
+        $copy_database = INIT::$DB_DATABASE;
         $this->beta_connection = new PDO(
             "mysql:host={$copy_server};dbname={$copy_database};charset=UTF8",
             $copy_user,
@@ -47,7 +47,7 @@ class BeginCommitRollbackTest extends AbstractTest
         $this->reflectedClass->close();
         $property->setAccessible(true);
         $property->setValue($this->reflectedClass, null);
-        $this->alfa_instance = $this->reflectedClass->obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $this->alfa_instance = $this->reflectedClass->obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
 
         $this->sql_create = "CREATE TABLE Persons( PersonID INT)";
         $this->sql_drop="DROP TABLE Persons";
@@ -62,7 +62,7 @@ class BeginCommitRollbackTest extends AbstractTest
     {
 
         $this->alfa_instance->query($this->sql_drop);
-        $this->reflectedClass = Database::obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $this->reflectedClass = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $this->reflectedClass->close();
         startConnection();
     }

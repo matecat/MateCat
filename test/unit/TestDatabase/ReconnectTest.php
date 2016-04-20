@@ -25,7 +25,7 @@ class ReconnectTest extends AbstractTest
 
     public function tearDown()
     {
-        $this->reflectedClass = Database::obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $this->reflectedClass = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $this->reflectedClass->close();
         startConnection();
     }
@@ -39,7 +39,7 @@ class ReconnectTest extends AbstractTest
         /**
          * @var Database
          */
-        $instance_after_reset = $this->reflectedClass->obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $instance_after_reset = $this->reflectedClass->obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $instance_after_reset->reconnect();
         $connection = $this->reflector->getProperty('connection');
         $connection->setAccessible(true);
@@ -56,7 +56,7 @@ class ReconnectTest extends AbstractTest
      */
     public function test_reconnect_with_previous_connection()
     {
-        $this->reflectedClass->obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $this->reflectedClass->obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $this->reflectedClass->connect();
         $connection = $this->reflector->getProperty('connection');
         $connection->setAccessible(true);

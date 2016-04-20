@@ -25,7 +25,7 @@ class ConnectTest extends AbstractTest
 
     public function tearDown()
     {
-        $this->reflectedClass = Database::obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $this->reflectedClass = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $this->reflectedClass->close();
         startConnection();
     }
@@ -39,7 +39,7 @@ class ConnectTest extends AbstractTest
         /**
          * @var Database
          */
-        $instance_after_reset = $this->reflectedClass->obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $instance_after_reset = $this->reflectedClass->obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $instance_after_reset->connect();
         $connection = $this->reflector->getProperty('connection');
         $connection->setAccessible(true);
@@ -55,7 +55,7 @@ class ConnectTest extends AbstractTest
      */
     public function test_connect_not_connected()
     {
-        $this->reflectedClass->obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $this->reflectedClass->obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $connection = $this->reflector->getProperty('connection');
         $connection->setAccessible(true);
         $current_value = $connection->getValue($this->reflectedClass);
@@ -72,7 +72,7 @@ class ConnectTest extends AbstractTest
         /**
          * @var Database
          */
-        $instance_after_first_reset = $this->reflectedClass->obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $instance_after_first_reset = $this->reflectedClass->obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $instance_after_first_reset->connect();
         $connection = $this->reflector->getProperty('connection');
         $connection->setAccessible(true);
@@ -83,7 +83,7 @@ class ConnectTest extends AbstractTest
         /**
          * @var Database
          */
-        $instance_after_second_reset = $instance_after_first_reset->obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $instance_after_second_reset = $instance_after_first_reset->obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $instance_after_second_reset->connect();
         $current_value_second_PDO = $connection->getValue($instance_after_second_reset);
         $hash_second_PDO = spl_object_hash($current_value_second_PDO);

@@ -30,7 +30,8 @@ class LastInsertTest extends AbstractTest
         $this->reflectedClass->close();
         $this->property->setAccessible(true);
         $this->property->setValue($this->reflectedClass, null);
-        $this->alfa_instance = $this->reflectedClass->obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $this->alfa_instance = $this->reflectedClass->obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+
 
         $this->sql_create = "CREATE TABLE Persons( PersonID INT )";
         $this->sql_insert_first_value = "INSERT INTO Persons VALUES (475144 )";

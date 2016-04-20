@@ -20,10 +20,10 @@ class GetConnection extends AbstractTest
     {
         parent::setUp();
 
-        $copy_server = "localhost";
-        $copy_user = "unt_matecat_user";
-        $copy_password = "unt_matecat_user";
-        $copy_database = "unittest_matecat_local";
+        $copy_server = INIT::$DB_SERVER;
+        $copy_user = INIT::$DB_USER;
+        $copy_password =  INIT::$DB_PASS;
+        $copy_database = INIT::$DB_DATABASE;
         $this->expected_value = new PDO(
             "mysql:host={$copy_server};dbname={$copy_database};charset=UTF8",
             $copy_user,
@@ -39,14 +39,14 @@ class GetConnection extends AbstractTest
         $this->reflectedClass->close();
         $property->setAccessible(true);
         $property->setValue($this->reflectedClass, null);
-        $this->instance_after_reset = $this->reflectedClass->obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $this->instance_after_reset = $this->reflectedClass->obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
 
 
     }
 
     public function tearDown()
     {
-        $this->reflectedClass = Database::obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $this->reflectedClass = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->reflectedClass->close();
         startConnection();
     }
