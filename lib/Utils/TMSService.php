@@ -416,11 +416,10 @@ class TMSService {
                 break;
         }
 
-        $chunkDAO = new Chunks_ChunkDao(Database::obtain());
         /**
          * @var $chunks Chunks_ChunkStruct[]
          */
-        $chunks = $chunkDAO->getByJobID($jid);
+        $chunks = Chunks_ChunkDao::getByJobID($jid);
 
         foreach ( $result as $k => $row ) {
 
