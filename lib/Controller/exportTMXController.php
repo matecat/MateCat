@@ -69,7 +69,7 @@ class exportTMXController extends downloadController {
         //get job language and data
         //Fixed Bug: need a specific job, because we need The target Language
         //Removed from within the foreach cycle, the job is always the same...
-        $jobData = $this->jobInfo = new Jobs_JobStruct( getJobData( $this->jobID, $this->jobPass ) );
+        $jobData = $this->jobInfo = Jobs_JobDao::getByIdAndPassword( $this->jobID, $this->jobPass );
 
         $pCheck = new AjaxPasswordCheck();
 

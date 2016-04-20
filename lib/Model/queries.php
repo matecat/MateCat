@@ -1617,11 +1617,13 @@ function getOriginalFile( $id_file ) {
     return $results;
 }
 
-function getUpdatedTranslations( $timestamp, $first_segment, $last_segment ) {
+function getUpdatedTranslations( $timestamp, $first_segment, $last_segment, $id_job ) {
+    
     $query = "SELECT id_segment as sid, status,translation from segment_translations
 		WHERE
 		id_segment BETWEEN $first_segment AND $last_segment
-		AND translation_date > FROM_UNIXTIME($timestamp)";
+		AND translation_date > FROM_UNIXTIME($timestamp)
+		AND id_job = $id_job";
 
     //Log::doLog($query);
     $db      = Database::obtain();

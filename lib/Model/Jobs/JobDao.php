@@ -2,10 +2,6 @@
 
 class Jobs_JobDao extends DataAccess_AbstractDao {
 
-    public static function getChunks() {
-
-    }
-
     /**
      * @param $id_job
      * @param $password
