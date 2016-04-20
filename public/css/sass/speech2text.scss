@@ -1,0 +1,48 @@
+@import '_mixins';
+
+.micSpeech {
+    display: none;
+    position: absolute;
+    height: 20px;
+    bottom: 26px;
+    left: -6px;
+    cursor: default;
+    z-index: 9999999;
+    padding: 2px;
+    border-radius: 3px;
+    border: 1px solid transparent;
+
+    &:hover {
+        @include box-shadow(0 1px 1px rgba(0,0,0,.1));
+        @include linear-gradient(#f8f8f8, top, #f8f8f8, #f1f1f1);
+        border-color: #C6C6C6;
+
+        svg g {
+            fill: #000000;
+        }
+    }
+
+    &.micSpeechActive,
+    &:active {
+        @include box-shadow(inset 0 1px 2px rgba(0,0,0,.1));
+        @include linear-gradient(#eee, top, #eee, #e0e0e0);
+        border-color:#ccc;
+
+        svg g {
+            fill: #09BEEC;
+        }
+    }
+
+    svg g {
+        fill: #737373;
+    }
+}
+
+.editor .editarea {
+    padding-bottom: 32px;
+}
+
+section.opened .micSpeech {
+    display: block;
+}
+

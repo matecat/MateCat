@@ -1,0 +1,13 @@
+@mixin linear-gradient($fallback, $params...){
+    background-color: $fallback;
+    background-image: -webkit-linear-gradient($params);
+    background-image:    -moz-linear-gradient($params);
+    background-image:      -o-linear-gradient($params);
+    background-image:         linear-gradient($params);
+}
+
+@mixin box-shadow($params...) {
+    -webkit-box-shadow: $params;
+       -moz-box-shadow: $params;
+            box-shadow: $params;
+}

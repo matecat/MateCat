@@ -32,6 +32,7 @@ module.exports = function(grunt) {
         cssBase + 'sass/review_improved.scss',
         cssBase + 'sass/segment_filter.scss',
         cssBase + 'sass/cattool.scss',
+        cssBase + 'sass/speech2text.scss',
         cssBase + '../holidays/*.css',
     ];
 
