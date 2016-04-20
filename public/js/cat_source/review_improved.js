@@ -48,13 +48,21 @@ if ( ReviewImproved.enabled() )
         },
 
         highlightIssue : function(issue, node) {
-            console.log('highlightIssue', issue, node );
             var selection = document.getSelection();
             selection.removeAllRanges();
 
-            var contents = node.contents();
             var range = document.createRange();
 
+            /**
+             * The following two lines are necessary to avoid Rangy span to get in the way when
+             * we want to highlight text.
+             * The first line removes rangy tags, while the second line via `normalize()`
+             * rejoins text nodes that may have become splitted due to rangy span insertion.
+             */
+            node.contents('.rangySelectionBoundary').remove();
+            node[0].normalize();
+
+            var contents = node.contents() ; 
             range.setStart( contents[ issue.start_node ], issue.start_offset );
             range.setEnd( contents[ issue.end_node ], issue.end_offset );
 
