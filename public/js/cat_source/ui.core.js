@@ -2664,10 +2664,6 @@ console.log('eccolo: ', typeof token);
 				}
 			}
 
-			if (operation == 'setContribution' && this.code != '-10' && UI.savingMemoryErrorNotificationEnabled) { // is not a password error
-				APP.alert({msg: "Error in saving the segment to the translation memory.<br />Try refreshing the page and click on Translated again.<br />Contact <b>support@matecat.com</b> if this happens often."});
-			}
-
 			if (this.code == '-10' && operation != 'getSegments' ) {
 //				APP.alert("Job canceled or assigned to another translator");
 				APP.alert({
