@@ -196,13 +196,13 @@ $.extend(UI, {
     execAbortedOperations: function( callback_to_execute ) {
 
         callback_to_execute = callback_to_execute || {};
-
+        callback_to_execute.call();
 		//console.log(UI.abortedOperations);
         $.each(UI.abortedOperations, function() {
             var args = this.args;
             var operation = this.operation;
             if(operation == 'setTranslation') {
-                UI[operation](args[0], args[1], args[2], UI.incrementOfflineCacheRemaining );
+                UI[operation](args);
             } else if(operation == 'setCurrentSegment') {
                 UI[operation](args[0]);
             } else if(operation == 'getSegments') {
@@ -212,9 +212,6 @@ $.extend(UI, {
             }
         });
         UI.abortedOperations = [];
-
-        callback_to_execute.call();
-
     },
     checkOfflineCacheSize: function () {
         if ( !UI.offlineCacheRemaining ) {

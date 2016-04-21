@@ -2304,7 +2304,6 @@ UI = {
         var propagate = options.propagate || false;
 
         var segment = UI.Segment.find( id_segment );
-
         //
         //REMOVED Check for to save
         //Send ALL to the queue
@@ -2316,25 +2315,28 @@ UI = {
             byStatus: byStatus,
             propagate: propagate
         };
-
-        if( this.translationIsToSave( segment ) ) {
+        //Check if the traslation is not already in the tail
+        var saveTranslation = this.translationIsToSave( segment );
+        // If not i save it or update
+        if( saveTranslation ) {
             this.addToSetTranslationTail( item );
         } else {
             this.updateToSetTranslationTail( item )
         }
-
+        //If is offline and is in the tail I decrease the counter
+        //else I execute the tail
         if ( this.offline && config.offlineModeEnabled ) {
-
-            if ( toSave ) {
+            if ( saveTranslation ) {
                 this.decrementOfflineCacheRemaining();
-                this.failedConnection( [ id_segment, status, false ], 'setTranslation' );
+                options.callback = UI.incrementOfflineCacheRemaining;
+                this.failedConnection( options, 'setTranslation' );
             }
-
             this.changeStatusOffline( id_segment );
             this.checkConnection( 'Set Translation check Authorized' );
-
         } else {
-            if ( !this.executingSetTranslation ) return this.execSetTranslationTail();
+            if ( !this.executingSetTranslation )  {
+                return this.execSetTranslationTail();
+            }
         }
     },
     alreadyInSetTranslationTail: function (sid) {
