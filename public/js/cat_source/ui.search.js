@@ -209,7 +209,7 @@ $.extend(UI, {
 		}
 		$('.search-display .segments').text(this.numSearchResultsSegments);
 
-		query = '';
+		var query = '';
 		if (this.searchParams['exact-match'])
 			query += ' exactly';
 		if (this.searchParams.source)
@@ -513,9 +513,9 @@ $.extend(UI, {
 	},
 	gotoSearchResultAfter: function(options) {
 		console.log('options: ', options);
-		el = options.el;
-		skipCurrent = (options.skipCurrent || false);
-		unmark = (options.unmark || false);
+		var el = options.el;
+		var skipCurrent = (options.skipCurrent || false);
+		var unmark = (options.unmark || false);
 
 		var p = this.searchParams;
 
@@ -526,7 +526,7 @@ $.extend(UI, {
 				this.scrollSegment($('#' + el).next());
 			} else {
 				if ($('#' + el).nextAll(status).length) { // there is at least one next result loaded after the currently selected
-					nextToGo = $('#' + el).nextAll(status).first();
+					var nextToGo = $('#' + el).nextAll(status).first();
 					nextToGo.addClass('currSearchSegment');
 					this.scrollSegment(nextToGo);
 				} else {
@@ -538,7 +538,7 @@ $.extend(UI, {
 							detectSegmentToScroll: true
 						};
 					} else {
-						seg2scroll = this.nextUnloadedResultSegment();
+						var seg2scroll = this.nextUnloadedResultSegment();
 						$('#outer').empty();
 						this.render({
 							firstLoad: false,
@@ -547,14 +547,13 @@ $.extend(UI, {
 						});
 					}
 				}
-
-
 			}
 		} else { // searchMode: source&target or normal
 			var wh = (this.searchMode == 'source&target')? ' .targetarea' : '';
-			seg = $('section' + wh).has("mark.searchMarker");
-			ss = (this.searchMode == 'source&target')? el + '-editarea' : el;
-			found = false;
+			var seg = $('section' + wh).has("mark.searchMarker");
+			var ss = (this.searchMode == 'source&target')? el + '-editarea' : el;
+			var found = false;
+
 			$.each(seg, function() {
 				if ($(this).attr('id') >= ss) {
 					if (($(this).attr('id') == ss) && (skipCurrent)) {
