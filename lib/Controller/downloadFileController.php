@@ -436,7 +436,7 @@ class downloadFileController extends downloadController {
 
     private function startGDriveService() {
         parent::sessionStart();
-        $this->gdriveService = GDrive::getService( $_SESSION );
+        $this->gdriveService = GDrive::getService( array( 'uid' => $_SESSION[ 'uid' ] ) );
     }
 
 

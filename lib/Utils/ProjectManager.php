@@ -423,7 +423,7 @@ class ProjectManager {
         }
 
         if ( GDrive::sessionHasFiles( $_SESSION ) ) {
-            $this->gdriveService = GDrive::getService( $_SESSION );
+            $this->gdriveService = GDrive::getService( array( 'uid' => $_SESSION[ 'uid' ] ) );
             $this->isGDriveProject = true;
         }
 
