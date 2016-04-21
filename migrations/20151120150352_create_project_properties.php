@@ -1,8 +1,6 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
-
-class CreateProjectProperties extends AbstractMigration {
+class CreateProjectProperties extends AbstractMatecatMigration {
   public $sql_up = <<<EOF
 CREATE TABLE `project_metadata` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -17,11 +15,4 @@ EOF;
 
   public $sql_down = 'DROP TABLE `project_metadata`';
 
-  public function up() {
-    $this->execute($this->sql_up);
-  }
-
-  public function down() {
-    $this->execute($this->sql_down);
-  }
 }

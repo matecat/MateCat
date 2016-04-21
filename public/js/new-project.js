@@ -57,16 +57,27 @@ $(document).ready(function() {
 	});
 
 	$("#source-lang").on('change', function(e){
-		console.log('source language changed');
-        UI.checkRTL();
-		if(!$('.template-download').length) return;
-		if (UI.conversionsAreToRestart()) {
-			APP.confirm({msg: 'Source language has been changed.<br/>The files will be reimported.', callback: 'confirmRestartConversions'});
-		}
-		if( UI.checkTMXLangFailure() ){
-			UI.delTMXLangFailure();
-		}
+            console.log('source language changed');
+            UI.checkRTL();
+            if($('.template-download').length) { //.template-download is present when jquery file upload is used and a file is found
+                if (UI.conversionsAreToRestart()) {
+                    APP.confirm({msg: 'Source language has been changed.<br/>The files will be reimported.', callback: 'confirmRestartConversions'});
+                }
+                if( UI.checkTMXLangFailure() ){
+                    UI.delTMXLangFailure();
+                }
+            }
+            else if ($('.template-gdrive').length) {
+                APP.confirm({
+                    msg: 'Source language has been changed.<br/>The files will be reimported.',
+                    callback: 'confirmGDriveRestartConversions'
+                });
+            } else {
+                return;
+            }
 	});
+
+        APP.tryListGDriveFiles();
 
 	$("#target-lang").change(function(e) {
         UI.checkRTL();
@@ -77,25 +88,29 @@ $(document).ready(function() {
 		if( UI.checkTMXLangFailure() ){
 			UI.delTMXLangFailure();
 		}
-	});
+
+                APP.changeTargetLang( $(this).val() );
+        });
 
 	$("input.uploadbtn").click(function(e) {
+        
         if(!UI.allTMUploadsCompleted()) {
             return false;
         }
 		$('body').addClass('creating');
 		var files = '';
-		$('.upload-table tr:not(.failed) td.name').each(function () {
+		$('.upload-table tr:not(.failed) td.name, .gdrive-upload-table tr:not(.failed) td.name').each(function () {
 			files += '@@SEP@@' + $(this).text();
 		});
 
-//        var private_tm_key = ( !$('#private-tm-key').prop('disabled') ? $('#private-tm-key').val() : "" );
         tm_data = UI.extractTMdataFromTable();
+
+        var filename = files.substr(7) ;
 
 		APP.doRequest({
 			data: {
 				action				: "createProject",
-				file_name			: files.substr(7),
+				file_name			: filename,
 				project_name		: $('#project-name').val(),
 				source_language		: $('#source-lang').val(),
 				target_language		: $('#target-lang').val(),
@@ -121,11 +136,14 @@ $(document).ready(function() {
 					UI.skipLangDetectArr = d.lang_detect;
 				}
 
-				$.each(UI.skipLangDetectArr, function(file, status){
-					if(status == 'ok') 	UI.skipLangDetectArr[file] = 'skip';
-					else UI.skipLangDetectArr[file] = 'detect';
+                if ( UI.skipLangDetectArr != null ) {
+                    $.each(UI.skipLangDetectArr, function(file, status){
+                        if(status == 'ok') 	UI.skipLangDetectArr[file] = 'skip';
+                        else UI.skipLangDetectArr[file] = 'detect';
 
-				});
+                    });
+                }
+
 
 				if( typeof d.errors != 'undefined' && d.errors.length ) {
 
@@ -356,13 +374,10 @@ $(document).ready(function() {
 
 	$("input, select").change(function(e) {
 		$('.error-message').hide();
-		//		        if($('.upload-table tr').length) $('.uploadbtn').removeAttr('disabled').removeClass('disabled');
 	});
 	$("input").keyup(function(e) {
 		$('.error-message').hide();
-		//		        if($('.upload-table tr').length) $('.uploadbtn').removeAttr('disabled').removeClass('disabled');
 	});
-//    		uploadSessionId = $.cookie("upload_session");
 
 });
 
@@ -378,4 +393,14 @@ clearNotCompletedUploads = function() {
         type: 'POST',
         dataType: 'json'
     });
+};
+
+APP.changeTargetLang = function( lang ) {
+    if( localStorage.getItem( 'currentTargetLang' ) != lang ) {
+        localStorage.setItem( 'currentTargetLang', lang );
+    }
+};
+
+APP.displayCurrentTargetLang = function() {
+    $( '#target-lang' ).val( localStorage.getItem( 'currentTargetLang' ) );
 };

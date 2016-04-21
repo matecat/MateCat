@@ -1,8 +1,6 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
-
-class CreateSegmentTranslationVersions extends AbstractMigration {
+class CreateSegmentTranslationVersions extends AbstractMatecatMigration {
   public $sql_up = <<<EOF
 CREATE TABLE `segment_translation_versions` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -21,11 +19,4 @@ EOF;
 
   public $sql_down = 'DROP TABLE `segment_translation_versions`';
 
-  public function up() {
-    $this->execute($this->sql_up);
-  }
-
-  public function down() {
-    $this->execute($this->sql_down);
-  }
 }

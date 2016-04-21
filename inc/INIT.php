@@ -78,7 +78,7 @@ class INIT {
     public static $WARNING_POLLING_INTERVAL  = 20; //seconds
     public static $SEGMENT_QA_CHECK_INTERVAL = 1; //seconds
     public static $SAVE_SHASUM_FOR_FILES_LOADED = true;
-    public static $AUTHCOOKIENAME = 'matecat_login_v2';
+    public static $AUTHCOOKIENAME = 'matecat_login_v3';
     public static $SUPPORT_MAIL = 'the owner of this MateCat instance';//default string is 'the owner of this Matecat instance'
     public static $ANALYSIS_WORDS_PER_DAYS = 3000;
     public static $AUTHCOOKIEDURATION = 5184000;            // 86400 * 60;         // seconds
@@ -198,6 +198,7 @@ class INIT {
     public static $OAUTH_CLIENT_APP_NAME;
     public static $OAUTH_REDIRECT_URL;
     public static $OAUTH_SCOPES;
+    public static $OAUTH_BROWSER_API_KEY;
 
     public static $ENABLE_OMEGAT_DOWNLOAD = false;
     public static $UNLOCKABLE_TAGS = false;
@@ -207,11 +208,15 @@ class INIT {
         self::$OAUTH_CLIENT_ID       = INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_ID' ];
         self::$OAUTH_CLIENT_SECRET   = INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_SECRET' ];
         self::$OAUTH_CLIENT_APP_NAME = INIT::$OAUTH_CONFIG[ 'OAUTH_CLIENT_APP_NAME' ];
+        self::$OAUTH_BROWSER_API_KEY = INIT::$OAUTH_CONFIG[ 'OAUTH_BROWSER_API_KEY' ];
 
         self::$OAUTH_REDIRECT_URL = INIT::$HTTPHOST . "/oauth/response";
         self::$OAUTH_SCOPES       = array(
                 'https://www.googleapis.com/auth/userinfo.email',
-                'https://www.googleapis.com/auth/userinfo.profile'
+                'https://www.googleapis.com/auth/userinfo.profile',
+                'https://www.googleapis.com/auth/drive',
+                'https://www.googleapis.com/auth/drive.install',
+                'profile'
         );
 
     }

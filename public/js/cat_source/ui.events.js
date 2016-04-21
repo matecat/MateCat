@@ -689,9 +689,6 @@ $.extend(UI, {
         }).on('click', '#previewDropdown .downloadTranslation a', function(e) {
             e.preventDefault();
             runDownload();
-        }).on('click', '#previewDropdown .previewLink a', function(e) {
-            e.preventDefault();
-            $('.downloadtr-button.draft').click();
 		}).on('click', '#previewDropdown a.tmx', function(e) {
 			e.preventDefault();
 			window.open($(this).attr('href'));
@@ -709,16 +706,11 @@ $.extend(UI, {
 
                 //console.log( $( e.currentTarget ).attr( 'href' ) );
             }
+        }).on('click', '#previewDropdown .originalsGDrive a', function(e) {
+            UI.continueDownloadWithGoogleDrive( 1 );
         }).on('click', '.alert .close', function(e) {
 			e.preventDefault();
 			$('.alert').remove();
-		}).on('click', '.downloadtr-button.draft', function() {
-			if (UI.isChrome) {
-				$('.download-chrome').addClass('d-open');
-				setTimeout(function() {
-					$('.download-chrome').removeClass('d-open');
-				}, 7000);
-			}
 		}).on('click', '#contextMenu #searchConcordance', function() {
 			if ($('#contextMenu').attr('data-sid') == UI.currentSegmentId) {
 				UI.openConcordance();

@@ -5,6 +5,15 @@ UI = null;
 
 UI = {
 
+    showDownloadCornerTip : function() {
+        if (UI.isChrome) {
+            $('.download-chrome').addClass('d-open');
+            setTimeout(function() {
+                $('.download-chrome').removeClass('d-open');
+            }, 7000);
+        }
+    },
+
     setEditingSegment : function(segment) {
         if ( segment != null ) {
             UI.body.addClass('editing');
@@ -1699,10 +1708,26 @@ UI = {
 
         var downloadable = (t == 'translated' || t == 'approved') ;
 
+        var isGDriveFile = false;
+
+        if ( config.isGDriveProject && config.isGDriveProject !== 'false') {
+            isGDriveFile = true;
+        }
+
+        var label = '';
+
         if ( downloadable ) {
-            var label = 'DOWNLOAD TRANSLATION';
+            if(isGDriveFile){
+                label = 'OPEN IN GOOGLE DRIVE';
+            } else {
+                label = 'DOWNLOAD TRANSLATION';
+            }
         } else {
-            var label = 'PREVIEW';
+            if(isGDriveFile){
+                label = 'PREVIEW ON GOOGLE DRIVE';
+            } else {
+                label = 'PREVIEW';
+            }
         }
 
         $('.downloadtr-button').removeClass("draft translated approved").addClass(t);
@@ -1892,77 +1917,149 @@ UI = {
 		location.href = $('#point2seg').attr('href');
 	},
 
-    continueDownload: function() {
 
-        //check if we are in download status
-        if ( !$('#downloadProject').hasClass('disabled') ) {
-
-            //disable download button
-            $('#downloadProject').addClass('disabled' ).data( 'oldValue', $('#downloadProject' ).val() ).val('DOWNLOADING');
-
-            //create an iFrame element
-            var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop({
-                id:'iframeDownload',
-                src: ''
-            });
-console.log('iFrameDownload: ', iFrameDownload);
-            //append iFrame to the DOM
-            $("body").append( iFrameDownload );
-
-            //generate a token download
-            var downloadToken = new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 );
-
-            //set event listner, on ready, attach an interval that check for finished download
-            iFrameDownload.ready(function () {
-
-                //create a GLOBAL setInterval so in anonymous function it can be disabled
-                downloadTimer = window.setInterval(function () {
-
-                    //check for cookie
-                    var token = $.cookie( downloadToken );
-console.log('eccolo: ', typeof token);
-                    //if the cookie is found, download is completed
-                    //remove iframe an re-enable download button
-                    if ( typeof token != 'undefined' ) {
-                        /*
-                         * the token is a json and must be read with "parseJSON"
-                         * in case of failure:
-                         *      error_message = Object {code: -110, message: "Download failed. Please contact the owner of this MateCat instance"}
-                         *
-                         * in case of success:
-                         *      error_message = Object {code: 0, message: "Download Complete."}
-                         *
-                         */
-                        tokenData = $.parseJSON(token);
-                        if(parseInt(tokenData.code) < 0) {
-                            UI.showMessage({msg: tokenData.message})
-                        }
-                        $('#downloadProject').removeClass('disabled').val( $('#downloadProject' ).data('oldValue') ).removeData('oldValue');
-                        window.clearInterval( downloadTimer );
-                        $.cookie( downloadToken, null, { path: '/', expires: -1 });
-                        iFrameDownload.remove();
-                    }
-
-                }, 2000);
-
-            });
-
-            //clone the html form and append a token for download
-            var iFrameForm = $("#fileDownload").clone().append(
-                    $( document.createElement( 'input' ) ).prop({
-                        type:'hidden',
-                        name:'downloadToken',
-                        value: downloadToken
-                    })
-            );
-
-            //append from to newly created iFrame and submit form post
-            iFrameDownload.contents().find('body').append( iFrameForm );
-            iFrameDownload.contents().find("#fileDownload").submit();
-
-        } else {
-            //we are in download status
+    disableDownloadButtonForDownloadStart : function( openOriginalFiles ) {
+        var button = $('#downloadProject' ) ;
+        var labelDownloading = 'DOWNLOADING';
+        if ( config.isGDriveProject && config.isGDriveProject !== 'false') {
+            labelDownloading = 'OPENING FILES...';
         }
+        button.addClass('disabled' ).data( 'oldValue', button.val() ).val(labelDownloading);
+    },
+
+    reEnableDownloadButton : function() {
+        var button = $('#downloadProject' ) ;
+        button.removeClass('disabled')
+            .val( button.data('oldValue') )
+            .removeData('oldValue');
+    },
+
+    downloadFileURL : function( openOriginalFiles ) {
+        return sprintf( '%s?action=downloadFile&id_job=%s&password=%s&original=%s',
+            config.basepath,
+            config.id_job,
+            config.password,
+            openOriginalFiles
+        );
+    },
+
+    continueDownloadWithGoogleDrive : function ( openOriginalFiles ) {
+        if ( $('#downloadProject').hasClass('disabled') ) {
+            return ;
+        }
+
+        if (typeof openOriginalFiles === 'undefined') {
+            openOriginalFiles = 0;
+        }
+
+        // TODO: this should be relative to the current USER, find a
+        // way to generate this at runtime.
+        //
+        if( !config.isGDriveProject || config.isGDriveProject == 'false' ) {
+            UI.showDownloadCornerTip();
+        }
+        UI.disableDownloadButtonForDownloadStart( openOriginalFiles );
+
+        if ( typeof window.googleDriveWindows == 'undefined' ) {
+            window.googleDriveWindows = {};
+        }
+
+        var winName ;
+        
+        var driveUpdateDone = function(data) {
+            var winName ;
+
+            $.each( data.urls, function(index, item) {
+                winName = 'window' + item.localId ;
+                console.log(winName);
+
+
+                if ( typeof window.googleDriveWindows[ winName ] != 'undefined' && window.googleDriveWindows[ winName ].opener != null ) {
+                    window.googleDriveWindows[ winName ].location.href = item.alternateLink ;
+                    window.googleDriveWindow[ winName ].focus();
+                } else {
+                    window.googleDriveWindows[ winName ] = window.open( item.alternateLink );
+                }
+            });
+        }
+
+        $.getJSON( UI.downloadFileURL( openOriginalFiles ) )
+            .done( driveUpdateDone )
+            .always(function() {
+                UI.reEnableDownloadButton() ;
+            });
+    },
+
+    continueDownload: function() {
+        if ( $('#downloadProject').hasClass('disabled') ) {
+            return ;
+        }
+
+        UI.showDownloadCornerTip();
+
+        UI.disableDownloadButtonForDownloadStart();
+
+        //create an iFrame element
+        var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop({
+            id:'iframeDownload',
+            src: ''
+        });
+
+        //append iFrame to the DOM
+        $("body").append( iFrameDownload );
+
+        //generate a token download
+        var downloadToken = new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 );
+
+        //set event listner, on ready, attach an interval that check for finished download
+        iFrameDownload.ready(function () {
+
+            //create a GLOBAL setInterval so in anonymous function it can be disabled
+            downloadTimer = window.setInterval(function () {
+
+                //check for cookie
+                var token = $.cookie( downloadToken );
+
+                //if the cookie is found, download is completed
+                //remove iframe an re-enable download button
+                if ( typeof token != 'undefined' ) {
+                    /*
+                     * the token is a json and must be read with "parseJSON"
+                     * in case of failure:
+                     *      error_message = Object {code: -110, message: "Download failed.
+                     *      Please contact the owner of this MateCat instance"}
+                     *
+                     * in case of success:
+                     *      error_message = Object {code: 0, message: "Download Complete."}
+                     *
+                     */
+                    tokenData = $.parseJSON(token);
+                    if(parseInt(tokenData.code) < 0) {
+                        UI.showMessage({msg: tokenData.message})
+                    }
+                    UI.reEnableDownloadButton();
+
+                    window.clearInterval( downloadTimer );
+                    $.cookie( downloadToken, null, { path: '/', expires: -1 });
+                    iFrameDownload.remove();
+                }
+
+            }, 2000);
+
+        });
+
+        //clone the html form and append a token for download
+        var iFrameForm = $("#fileDownload").clone().append(
+                $( document.createElement( 'input' ) ).prop({
+                    type:'hidden',
+                    name:'downloadToken',
+                    value: downloadToken
+                })
+        );
+
+        //append from to newly created iFrame and submit form post
+        iFrameDownload.contents().find('body').append( iFrameForm );
+        iFrameDownload.contents().find("#fileDownload").submit();
 
     },
 	/**

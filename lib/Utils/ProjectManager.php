@@ -13,6 +13,10 @@ include_once INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
 
 use FeatureSet ;
 
+use GDrive;
+
+use RemoteFiles_RemoteFileDao;
+
 class ProjectManager {
 
     /**
@@ -47,6 +51,10 @@ class ProjectManager {
      * @var Projects_ProjectStruct
      */
     protected $project ;
+
+    protected $gdriveService;
+
+    protected $isGDriveProject = false;
 
     const TRANSLATED_USER = 'translated_user';
 
@@ -405,13 +413,18 @@ class ProjectManager {
                 );
 
                 //add newly created link to list
-                $linkFiles[ 'conversionHashes' ][ 'sha' ][]                                                                    = $sha1 . "|" . $this->projectStructure[ 'source_language' ];
+                $linkFiles[ 'conversionHashes' ][ 'sha' ][] = $sha1 . "|" . $this->projectStructure[ 'source_language' ];
                 $linkFiles[ 'conversionHashes' ][ 'fileName' ][ $sha1 . "|" . $this->projectStructure[ 'source_language' ] ][] = $fileName;
 
                 //when the same sdlxliff is uploaded more than once with different names
                 $linkFiles[ 'conversionHashes' ][ 'sha' ] = array_unique( $linkFiles[ 'conversionHashes' ][ 'sha' ] );
                 unset( $sha1 );
             }
+        }
+
+        if ( GDrive::sessionHasFiles( $_SESSION ) ) {
+            $this->gdriveService = GDrive::getService( $_SESSION );
+            $this->isGDriveProject = true;
         }
 
         //now, upload dir contains only hash-links
@@ -455,12 +468,23 @@ class ProjectManager {
 
                 //PLEASE NOTE, this can be an array when the same file added more
                 // than once and with different names
+                //
                 foreach ( $_originalFileName as $originalFileName ) {
 
-                    $mimeType = FilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
-                    $fid      = insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path );
+                    $file_insert_params = array();
 
-                    //move the file in the right directory from the packages to the file dir
+                    $gdriveFileId = GDrive::findFileIdByName( $originalFileName, $_SESSION );
+                    
+                    $mimeType = FilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
+                    $fid      = insertFile( $this->projectStructure, $originalFileName, $mimeType,
+                        $fileDateSha1Path, $file_insert_params  );
+
+                    if($gdriveFileId != null) {
+                        RemoteFiles_RemoteFileDao::insert( $fid, 0, $gdriveFileId, 1 );
+
+                        unset( $_SESSION[ GDrive::SESSION_FILE_LIST ][ $gdriveFileId ] );
+                    }
+
                     $this->fileStorage->moveFromCacheToFileDir(
                             $fileDateSha1Path,
                             $this->projectStructure[ 'source_language' ],
@@ -1049,6 +1073,10 @@ class ProjectManager {
                     $this->insertSegmentNotesForFile();
                 }
                 insertFilesJob( $jid, $fid );
+
+                if( $this->isGDriveProject ) {
+                    GDrive::insertRemoteFile( $fid, $jid, $this->gdriveService, $_SESSION );
+                }
             }
         }
 

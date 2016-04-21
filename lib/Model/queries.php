@@ -430,8 +430,14 @@ function tryInsertUserFromOAuth( $data ) {
     } else {
         $cid[ 'email' ] = $data[ 'email' ];
         $cid[ 'uid' ]   = $results[ 'uid' ];
-    }
 
+        // TODO: migrate this to an insert on duplicate key update
+        $sql_update = "UPDATE users set oauth_access_token = ? WHERE uid = ?" ; 
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql_update ); 
+        $stmt->execute( array( $data['oauth_access_token'], $cid['uid'] ) ); 
+    }
+    
     return $cid;
 }
 
@@ -1856,14 +1862,13 @@ function insertJob( ArrayObject $projectStructure, $password, $target_language, 
     return $results[ 'LAST_INSERT_ID()' ];
 }
 
-function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $fileDateSha1Path ) {
+function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $fileDateSha1Path, $params=array() ) {
     $data                         = array();
     $data[ 'id_project' ]         = $projectStructure[ 'id_project' ];
     $data[ 'filename' ]           = $file_name;
     $data[ 'source_language' ]    = $projectStructure[ 'source_language' ];
     $data[ 'mime_type' ]          = $mime_type;
     $data[ 'sha1_original_file' ] = $fileDateSha1Path;
-
 
     $db = Database::obtain();
 

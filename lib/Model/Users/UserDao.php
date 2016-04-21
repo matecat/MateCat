@@ -29,16 +29,11 @@ class Users_UserDao extends DataAccess_AbstractDao {
         return $this->getByUid( $conn->lastInsertId() );
     }
 
-    /**
-     * @param $id
-     *
-     * @return Users_UserStruct
-     */
     public function getByUid( $id ) {
         $conn = $this->con->getConnection();
         $stmt = $conn->prepare( " SELECT * FROM users WHERE uid = ?");
         $stmt->execute( array($id )) ;
-        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Users_UserStruct');
+        $stmt->setFetchMode(PDO::FETCH_CLASS, '\Users_UserStruct');
         return $stmt->fetch();
     }
 

@@ -27,6 +27,7 @@ class OauthClient {
 		$this->client->setRedirectUri(INIT::$OAUTH_REDIRECT_URL);
 		$this->client->setScopes(INIT::$OAUTH_SCOPES);
 		$this->client->setAccessType("offline");
+                $this->client->setPrompt("consent");
 	}
 
 	public function getClient(){

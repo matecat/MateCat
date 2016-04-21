@@ -180,5 +180,21 @@ $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
        'Features\ReviewImproved\Controller\API\QualityReportController', 'show'
     );
 });
+route(
+    '/webhooks/gdrive/open', 'GET', 
+    'GDriveController', 'open'
+); 
+route(
+    '/gdrive/list', 'GET',
+    'GDriveController', 'listImportedFiles'
+); 
+route(
+    '/gdrive/change/[:sourceLanguage]', 'GET',
+    'GDriveController', 'changeSourceLanguage'
+); 
+route(
+    '/gdrive/delete/[:fileId]', 'GET',
+    'GDriveController', 'deleteImportedFile'
+);
 
 $klein->dispatch();

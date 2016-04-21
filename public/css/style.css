@@ -584,7 +584,7 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 
 
 /*done & draft*/
-.translated, .approved
+.translated ,.approved
 {
     background: #09beec;
     border:1px solid #848689;
@@ -661,7 +661,7 @@ article .translated:active, article .draft:active, article .btn:active, article 
 .draft:hover{background:#eee;}
 
 
-.translated:active, .draft:active, .btn:active, .copysource:active{
+.translated:active, .draft:active, .btn:active, .copysource:active {
 	-moz-box-shadow: none;-webkit-box-shadow: none;box-shadow: none;border:1px solid #000
 }
 
@@ -785,14 +785,14 @@ box-shadow: 0 1px 2px #ccc;
 }
 
 .header-menu .wrapper-dropdown-5 .dropdown {
-	  left: -131px;
-  width: 162px;
+    left: -221px;
+    width: 268px;
 }
 
 
 .justdone .header-menu .wrapper-dropdown-5 .dropdown{
-	left: -226px;
-  width: 258px;
+	left: -205px;
+  width: 268px;
 }
 .header-menu .wrapper-dropdown-5 .dropdown[data-download='false'] li.downloadTranslation,
 .header-menu .wrapper-dropdown-5 .dropdown[data-download='true'] li.previewLink
@@ -2695,7 +2695,7 @@ section.modified.editor .status
 	.number{left:-52px;}
 	.editarea, .source{ /* word-break: break-all */}
 	.projectbar ul {margin-left:5px}
-	.Translated, .draft, .approved{padding:7px 6px;}
+	.Translated, .draft, .approved {padding:7px 6px;}
 	.meter {	width:10%;}
 	.con-input{width:63%;}
 	.con-input{width:62% !important;}

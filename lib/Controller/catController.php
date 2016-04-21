@@ -670,6 +670,8 @@ class catController extends viewController {
             $this->template->sse_base_url     = INIT::$SSE_BASE_URL;
         }
 
+        $this->template->isGDriveProject =  $this->isCurrentProjectGDrive();
+
         $this->template->uses_matecat_filters = Utils::isJobBasedOnMateCatFilters($this->jid);
 
         $this->decorator = new CatDecorator( $this, $this->template );
@@ -728,4 +730,11 @@ class catController extends viewController {
         return $return;
     }
 
+    public function getDownloadFileName() {
+        return $this->downloadFileName;
+    }
+
+    public function isCurrentProjectGDrive() {
+        return \Projects_ProjectDao::isGDriveProject($this->job->id_project);
+    }
 }

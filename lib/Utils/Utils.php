@@ -234,6 +234,8 @@ class Utils {
                 substr( $hash, 20, 12 ) .
                 '}';
 
+        \Log::doLog('created GUID', $guid ); 
+
         return $guid;
     }
 
@@ -376,6 +378,16 @@ class Utils {
 
 	}
 
+    /**
+     * uploadDirFromSessionCookie 
+     *
+     * @param $file_name optional file name to append to the upload path
+     */
+    public static function uploadDirFromSessionCookie($guid, $file_name = null) {
+        return INIT::$UPLOAD_REPOSITORY . "/" . 
+            $guid . '/' . 
+            $file_name ; 
+    }
 	/**
 	 * @param      $match
 	 * @param      $job_tm_keys

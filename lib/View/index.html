@@ -63,7 +63,9 @@
                 copySourceInterval: ${copySourceInterval},
                 project_completion_feature_enabled : ${project_completion_feature_enabled | 'false'},
                 status_labels : JSON.parse( '${status_labels}' ),
-                searchable_statuses : JSON.parse( '${ php: json_encode(searchable_statuses)}')
+                searchable_statuses : JSON.parse( '${ php: json_encode(searchable_statuses)}'),
+                isGDriveProject : ${isGDriveProject|string:false},
+                remoteFilesInJob : JSON.parse( '${ php: json_encode(remoteFilesInJob)}')
             };
 
             var renderStart = new Date();
@@ -319,10 +321,11 @@
 
 
 
-        <div class="download-chrome">
+        <div class="download-chrome" tal:condition="not: isGDriveProject">
             <a href="#" class="close"></a>
-            Your downloaded file will appear on the bar below in a few seconds.<br/>
-            <img src="${basepath}public/img/arrowdown.png" width="18px" /> 
+            <span>Your downloaded file will appear on the bar below in a few seconds.</span>
+            <br/>
+            <img src="${basepath}public/img/arrowdown.png" width="18px" />
         </div>
 
         <div class="blacked" ></div>

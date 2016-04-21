@@ -1,8 +1,6 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
-
-class CreateQaChunkReviews extends AbstractMigration {
+class CreateQaChunkReviews extends AbstractMatecatMigration {
 
     public $sql_up = <<<EOF
 CREATE TABLE `qa_chunk_reviews` (
@@ -26,13 +24,5 @@ EOF;
     public $sql_down = <<<EOF
 DROP TABLE `qa_chunk_reviews`;
 EOF;
-
-    public function up() {
-        $this->execute($this->sql_up);
-    }
-
-    public function down() {
-        $this->execute($this->sql_down);
-    }
 
 }

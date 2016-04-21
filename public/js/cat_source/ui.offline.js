@@ -203,9 +203,7 @@ $.extend(UI, {
             var operation = this.operation;
             if(operation == 'setTranslation') {
                 UI[operation](args[0], args[1], args[2], UI.incrementOfflineCacheRemaining );
-            } else if(operation == 'updateContribution') {
-                UI[operation](args[0], args[1]);
-            }  else if(operation == 'setCurrentSegment') {
+            } else if(operation == 'setCurrentSegment') {
                 UI[operation](args[0]);
             } else if(operation == 'getSegments') {
                 UI.reloadWarning();

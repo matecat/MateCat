@@ -16,6 +16,7 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
     public $salt;
     public $api_key;
     public $pass;
+    public $oauth_access_token ; 
 
     public static function getStruct() {
         return new Users_UserStruct();

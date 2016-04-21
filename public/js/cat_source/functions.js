@@ -462,20 +462,29 @@ function selectText(element) {
 }
 
 function runDownload() {
+    var continueDownloadFunction ;
+
     if( $('#downloadProject').hasClass('disabled') ) return false;
+
+    if ( config.isGDriveProject ) {
+        continueDownloadFunction = 'continueDownloadWithGoogleDrive';
+    }
+    else  {
+        continueDownloadFunction = 'continueDownload';
+    }
 
     //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
     if ( $("#notifbox").hasClass("warningbox") && UI.translationMismatches.total != UI.globalWarnings.length ) {
         APP.confirm({
-            name: 'confirmDownload',
+            name: 'confirmDownload', // <-- this is the name of the funciton that gets invoked?
             cancelTxt: 'Fix errors',
             onCancel: 'goToFirstError',
-            callback: 'continueDownload',
+            callback: continueDownloadFunction,
             okTxt: 'Continue',
             msg: "Potential errors (missing tags, numbers etc.) found in the text. <br>If you continue, part of the content could be untranslated - look for the string \"UNTRANSLATED_CONTENT\" in the downloaded file(s).<br><br>Continue downloading or fix the error in MateCat:"
         });
     } else {
-        UI.continueDownload();
+        UI[ continueDownloadFunction ]();
     }
 }
 

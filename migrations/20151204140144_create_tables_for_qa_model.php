@@ -1,8 +1,6 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
-
-class CreateTablesForQaModel extends AbstractMigration {
+class CreateTablesForQaModel extends AbstractMatecatMigration {
 
   public $sql_up = <<<EOF
 CREATE TABLE `qa_entries` (
@@ -57,13 +55,5 @@ DROP TABLE IF EXISTS `qa_entries`;
 ALTER TABLE `projects` DROP COLUMN `id_qa_model` ;
 
 EOF;
-
-    public function up() {
-        $this->execute($this->sql_up);
-    }
-
-    public function down() {
-        $this->execute($this->sql_down);
-    }
 
 }

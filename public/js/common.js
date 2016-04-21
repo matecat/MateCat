@@ -62,7 +62,6 @@ APP = {
         $( '#sign-in-o' ).click( function ( e ) {
             $( '#sign-in' ).trigger( 'click' );
         } );
-
     },
     alert: function ( options ) {
         //FIXME

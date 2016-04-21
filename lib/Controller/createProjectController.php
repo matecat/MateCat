@@ -149,6 +149,7 @@ class createProjectController extends ajaxController {
         }
 
         $arFiles              = explode( '@@SEP@@', html_entity_decode( $this->file_name, ENT_QUOTES, 'UTF-8' ) );
+
         $default_project_name = $arFiles[ 0 ];
         if ( count( $arFiles ) > 1 ) {
             $default_project_name = "MATECAT_PROJ-" . date( "Ymdhi" );
@@ -158,12 +159,12 @@ class createProjectController extends ajaxController {
             $this->project_name = $default_project_name;
         }
 
-        $sourceLangHistory = $_COOKIE[ "sourceLang" ];
-        $targetLangHistory = $_COOKIE[ "targetLang" ];
+        $sourceLangHistory = $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ];
+        $targetLangHistory = $_COOKIE[ \Constants::COOKIE_TARGET_LANG ];
 
         // SET SOURCE COOKIE
 
-        if ( $sourceLangHistory == '_EMPTY_' ) {
+        if ( $sourceLangHistory == \Constants::EMPTY_VAL ) {
             $sourceLangHistory = "";
         }
         $sourceLangAr = explode( '||', urldecode( $sourceLangHistory ) );
@@ -172,7 +173,7 @@ class createProjectController extends ajaxController {
             unset( $sourceLangAr[ $key ] );
         }
         array_unshift( $sourceLangAr, $this->source_language );
-        if ( $sourceLangAr == '_EMPTY_' ) {
+        if ( $sourceLangAr == \Constants::EMPTY_VAL ) {
             $sourceLangAr = "";
         }
         $newCookieVal = "";
@@ -191,11 +192,11 @@ class createProjectController extends ajaxController {
             }
         }
 
-        setcookie( "sourceLang", $newCookieVal, time() + ( 86400 * 365 ) );
+        setcookie( \Constants::COOKIE_SOURCE_LANG, $newCookieVal, time() + ( 86400 * 365 ) );
 
         // SET TARGET COOKIE
 
-        if ( $targetLangHistory == '_EMPTY_' ) {
+        if ( $targetLangHistory == \Constants::EMPTY_VAL ) {
             $targetLangHistory = "";
         }
         $targetLangAr = explode( '||', urldecode( $targetLangHistory ) );
@@ -204,7 +205,7 @@ class createProjectController extends ajaxController {
             unset( $targetLangAr[ $key ] );
         }
         array_unshift( $targetLangAr, $this->target_language );
-        if ( $targetLangAr == '_EMPTY_' ) {
+        if ( $targetLangAr == \Constants::EMPTY_VAL ) {
             $targetLangAr = "";
         }
         $newCookieVal = "";
@@ -223,7 +224,7 @@ class createProjectController extends ajaxController {
             }
         }
 
-        setcookie( "targetLang", $newCookieVal, time() + ( 86400 * 365 ) );
+        setcookie( \Constants::COOKIE_TARGET_LANG, $newCookieVal, time() + ( 86400 * 365 ) );
 
         //search in fileNames if there's a zip file. If it's present, get filenames and add the instead of the zip file.
 
@@ -259,6 +260,9 @@ class createProjectController extends ajaxController {
         }
 
         $arFiles = $newArFiles;
+
+        \Log::doLog( '------------------------------'); 
+        \Log::doLog( $arFiles ); 
 
         $projectManager = new ProjectManager();
 
@@ -297,8 +301,14 @@ class createProjectController extends ajaxController {
         $projectManager = new ProjectManager( $projectStructure );
         $projectManager->createProject();
 
+        $this->clearSessionFiles();
+
         $this->result = $projectStructure[ 'result' ];
 
+    }
+
+    private function clearSessionFiles() {
+        unset( $_SESSION[ GDrive::SESSION_FILE_LIST ] );
     }
 
     private static function sanitizeTmKeyArr( $elem ) {

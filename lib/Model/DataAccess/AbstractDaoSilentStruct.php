@@ -9,7 +9,11 @@
 
 abstract class DataAccess_AbstractDaoSilentStruct extends DataAccess_AbstractDaoObjectStruct {
 
+    /**
+     * @var DataAccess_AbstractValidator
+     */
     protected $validator;
+
     protected $cached_results = array();
 
     public function __construct( Array $array_params = array() ) {
@@ -46,6 +50,8 @@ abstract class DataAccess_AbstractDaoSilentStruct extends DataAccess_AbstractDao
      *
      * FIXME: current implementation is bogus because it only allows to pass one parameter.
      *
+     *
+     * @return mixed
      */
     protected function cachable($method_name, $params, $function) {
       if ( !array_key_exists($method_name,  $this->cached_results) ) {
