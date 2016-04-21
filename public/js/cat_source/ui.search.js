@@ -44,8 +44,10 @@ $.extend(UI, {
 		}
 
 		if ($('#select-status').val() !== '') {
-			this.searchParams.status = $('#select-status').val();
-			this.body.attr('data-filter-status', $('#select-status').val());
+			this.searchParams.status = $('#select-status').val() ;
+			this.searchParams.status = this.searchParams.status.toLowerCase();
+
+			this.body.attr('data-filter-status', this.searchParams.status);
 		} else {
 			delete this.searchParams.status;
 		}
