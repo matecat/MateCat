@@ -435,8 +435,17 @@ class downloadFileController extends downloadController {
     }
 
     private function startGDriveService() {
-        parent::sessionStart();
-        $this->gdriveService = GDrive::getService( array( 'uid' => $_SESSION[ 'uid' ] ) );
+        // Get the user data from the project owner
+        $project = \Projects_ProjectDao::findByJobId( $this->id_job );
+        $userDao = new \Users_UserDao( \Database::obtain() );
+        $user = $userDao->getByEmail( $project->id_customer );
+
+        // This is necessary to ensure the stored token will be valid even for not logged users
+        \AuthCookie::tryToRefreshToken( $project->id_customer );
+
+        $this->gdriveService = GDrive::getService(
+                array( 'access_token' => $user->oauth_access_token )
+        );
     }
 
 
