@@ -120,7 +120,7 @@ $.extend(UI, {
 	},
 	execReplaceAll: function() {
 		$('.search-display .numbers').text('No segments found');
-		$('.editarea mark.searchMarker').remove();
+		$('.targetarea mark.searchMarker').remove();
 		this.applySearch();
 
         if ( $('#search-target').val() !== '' ) {
@@ -280,8 +280,8 @@ $.extend(UI, {
 		var containsFunc = (p['match-case']) ? 'contains' : 'containsNC';
 		var ignoreCase = (p['match-case']) ? '' : 'i';
 
-		var openTagReg = new RegExp(UI.openTagPlaceholder, "g");
-		var closeTagReg = new RegExp(UI.closeTagPlaceholder, "g");
+		window.openTagReg = new RegExp(UI.openTagPlaceholder, "g");
+		window.closeTagReg = new RegExp(UI.closeTagPlaceholder, "g");
 
 		if (this.searchMode == 'onlyStatus') { // search mode: onlyStatus
 
@@ -387,7 +387,7 @@ $.extend(UI, {
 	execSearchResultsMarking: function(areas, regex, testRegex) {
         searchMarker = (UI.searchMode == 'source&target')? 'searchPreMarker' : 'searchMarker';
 		$(areas).each(function() {
-            provaRegex = /(\(S)/;
+
 			if (!testRegex || ($(this).text().match(testRegex) !== null)) {
 				var tt = $(this).html()
                     .replace(/&lt;/g, UI.openTagPlaceholder)
@@ -402,8 +402,8 @@ $.extend(UI, {
 					tt[i] = elem.join(UI.closeTagPlaceholder);
 				});
 				tt = tt.join(UI.openTagPlaceholder)
-						.replace(openTagReg, '&lt;')
-						.replace(closeTagReg, '&gt;')
+						.replace(window.openTagReg, '&lt;')
+						.replace(window.closeTagReg, '&gt;')
                 		.replace(/(<span[^>]+>)[^<]*<mark[^>]*>(.*?)<\/mark>[^<]*(<\/span>?)/gi, "$1$3$4");
                 $(this).html(tt);
 			}
