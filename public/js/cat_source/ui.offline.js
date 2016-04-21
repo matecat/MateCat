@@ -221,6 +221,7 @@ $.extend(UI, {
     },
     decrementOfflineCacheRemaining: function () {
         $('#messageBar .remainingSegments').text( --this.offlineCacheRemaining );
+        UI.showExistingMessage();
         UI.checkOfflineCacheSize();
     },
     incrementOfflineCacheRemaining: function(){

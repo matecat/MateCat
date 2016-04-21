@@ -2217,6 +2217,13 @@ UI = {
         setTimeout(  function() {$('body' ).removeClass('incomingMsg' )} , 5000  );
 
 	},
+    showExistingMessage: function () {
+        if(!$('body').hasClass('incomingMsg')) {
+            $('body' ).addClass('incomingMsg');
+            setTimeout(  function() {$('body' ).removeClass('incomingMsg' )} , 5000  );
+        }
+        setTimeout(  function() {$('body' ).removeClass('incomingMsg' )} , 5000  );
+    },
 	checkVersion: function() {
 		if(this.version != config.build_number) {
 			UI.showMessage({
@@ -2447,7 +2454,7 @@ UI = {
 			context: [reqArguments, options],
 			error: function() {
                 UI.addToSetTranslationTail(this[1]);
-                UI.changeStatusOffline(this[0][0]);
+                UI.changeStatusOffline(this[0][0].id_segment);
                 UI.failedConnection(this[0], 'setTranslation');
                 UI.decrementOfflineCacheRemaining();
             },
