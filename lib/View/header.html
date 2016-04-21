@@ -123,17 +123,11 @@
                         <input id="search-target" class="search-input" type="text" value=""/>
                     </div>
 
-                    <div class="field">
+                    <div class="field" tal:condition="true:showReplaceOptionsInSearch">
                         <input id="enable-replace" type="checkbox" />
                         <label for="enable-replace">Replace with</label>
                         <input id="replace-target" class="search-input" type="text" value=""/>
                     </div>
-
-                    <!--div class="field">
-                        <label for="replace-target">Replace with</label>
-                        <input id="replace-target" class="search-input" type="text" value=""/>
-                    </div-->
-
 
                 </div>
                 <div class="block">
@@ -151,7 +145,7 @@
                         <input id="exec-find" type="button" class="btn" data-func="find" value="Find" />
                     </div>
 
-                    <div class="field">
+                    <div class="field" tal:condition="true:showReplaceOptionsInSearch">
                         <input id="exec-replaceall" type="button" class="btn" disabled="disabled" value="Replace all" />
                         <input id="exec-replace" type="button" class="btn" disabled="disabled" value="Replace" />
                     </div>

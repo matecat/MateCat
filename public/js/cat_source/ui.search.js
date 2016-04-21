@@ -44,8 +44,10 @@ $.extend(UI, {
 		}
 
 		if ($('#select-status').val() !== '') {
-			this.searchParams.status = $('#select-status').val();
-			this.body.attr('data-filter-status', $('#select-status').val());
+			this.searchParams.status = $('#select-status').val() ;
+			this.searchParams.status = this.searchParams.status.toLowerCase();
+
+			this.body.attr('data-filter-status', this.searchParams.status);
 		} else {
 			delete this.searchParams.status;
 		}
@@ -118,7 +120,7 @@ $.extend(UI, {
 	},
 	execReplaceAll: function() {
 		$('.search-display .numbers').text('No segments found');
-		$('.editarea mark.searchMarker').remove();
+		$('.targetarea mark.searchMarker').remove();
 		this.applySearch();
 
         if ( $('#search-target').val() !== '' ) {
@@ -207,7 +209,7 @@ $.extend(UI, {
 		}
 		$('.search-display .segments').text(this.numSearchResultsSegments);
 
-		query = '';
+		var query = '';
 		if (this.searchParams['exact-match'])
 			query += ' exactly';
 		if (this.searchParams.source)
@@ -266,9 +268,9 @@ $.extend(UI, {
 	},
 	markSearchResults: function(options) { // if where is specified mark only the range of segment before or after seg (no previous clear)
         options = options || {};
-		where = options.where;
-		seg = options.seg;
-		singleSegment = options.singleSegment || false;
+		var where = options.where;
+		var seg = options.seg;
+		var singleSegment = options.singleSegment || false;
 
 		if (typeof where == 'undefined') {
 			this.clearSearchMarkers();
@@ -278,24 +280,24 @@ $.extend(UI, {
 		var containsFunc = (p['match-case']) ? 'contains' : 'containsNC';
 		var ignoreCase = (p['match-case']) ? '' : 'i';
 
-		openTagReg = new RegExp(UI.openTagPlaceholder, "g");
-		closeTagReg = new RegExp(UI.closeTagPlaceholder, "g");
+		window.openTagReg = new RegExp(UI.openTagPlaceholder, "g");
+		window.closeTagReg = new RegExp(UI.closeTagPlaceholder, "g");
 
 		if (this.searchMode == 'onlyStatus') { // search mode: onlyStatus
 
 		} else if (this.searchMode == 'source&target') { // search mode: source&target
 			console.log('source & target');
-			status = (p.status == 'all') ? '' : '.status-' + p.status;
-			q = (singleSegment) ? '#' + $(singleSegment).attr('id') : "section" + status + ':not(.status-new)';
-            psource = p.source.replace(/(\W)/gi, "\\$1");
-            ptarget = p.target.replace(/(\W)/gi, "\\$1");
+			var status = (p.status == 'all') ? '' : '.status-' + p.status;
+			var q = (singleSegment) ? '#' + $(singleSegment).attr('id') : "section" + status + ':not(.status-new)';
+            var psource = p.source.replace(/(\W)/gi, "\\$1");
+            var ptarget = p.target.replace(/(\W)/gi, "\\$1");
 
 			var regSource = new RegExp('(' + htmlEncode(psource).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
 			var regTarget = new RegExp('(' + htmlEncode(ptarget).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
-			txtSrc = p.source;
-			txtTrg = p.target;
-			srcHasTags = (txtSrc.match(/<.*?\>/gi) !== null) ? true : false;
-			trgHasTags = (txtTrg.match(/<.*?\>/gi) !== null) ? true : false;
+			var txtSrc = p.source;
+			var txtTrg = p.target;
+			var srcHasTags = (txtSrc.match(/<.*?\>/gi) !== null) ? true : false;
+			var trgHasTags = (txtTrg.match(/<.*?\>/gi) !== null) ? true : false;
 
 			if (typeof where == 'undefined') {
 				UI.doMarkSearchResults(srcHasTags, $(q + " .source:" + containsFunc + "('" + txtSrc + "')"), regSource, q, txtSrc, ignoreCase);
@@ -385,7 +387,7 @@ $.extend(UI, {
 	execSearchResultsMarking: function(areas, regex, testRegex) {
         searchMarker = (UI.searchMode == 'source&target')? 'searchPreMarker' : 'searchMarker';
 		$(areas).each(function() {
-            provaRegex = /(\(S)/;
+
 			if (!testRegex || ($(this).text().match(testRegex) !== null)) {
 				var tt = $(this).html()
                     .replace(/&lt;/g, UI.openTagPlaceholder)
@@ -400,8 +402,8 @@ $.extend(UI, {
 					tt[i] = elem.join(UI.closeTagPlaceholder);
 				});
 				tt = tt.join(UI.openTagPlaceholder)
-						.replace(openTagReg, '&lt;')
-						.replace(closeTagReg, '&gt;')
+						.replace(window.openTagReg, '&lt;')
+						.replace(window.closeTagReg, '&gt;')
                 		.replace(/(<span[^>]+>)[^<]*<mark[^>]*>(.*?)<\/mark>[^<]*(<\/span>?)/gi, "$1$3$4");
                 $(this).html(tt);
 			}
@@ -426,15 +428,17 @@ $.extend(UI, {
 		$('section.currSearchResultSegment').removeClass('currSearchResultSegment');
 	},
 	gotoNextResultItem: function(unmark) {
-
 		var p = this.searchParams;
 
 		if (this.searchMode == 'onlyStatus') {
 
 			var status = (p.status == 'all') ? '' : '.status-' + p.status;
-			el = $('section.currSearchSegment');
+			var el = $('section.currSearchSegment');
+
 			if (p.status == 'all') {
-				this.scrollSegment($(el).next());
+				// TODO: this case should never heppen since onlyStatus and
+				// all combination is denied by UI. Consider removing this block.
+				this.scrollSegment( $(el).next() );
 			} else {
 				if (el.nextAll(status).length) {
 					nextToGo = el.nextAll(status).first();
@@ -442,21 +446,16 @@ $.extend(UI, {
 					nextToGo.addClass('currSearchSegment');
 					this.scrollSegment(nextToGo);
 				} else {
-					this.pendingRender = {
-						firstLoad: false,
-						applySearch: true,
-						detectSegmentToScroll: true,
-						segmentToScroll: this.nextUnloadedResultSegment()
-					};
-					$('#outer').empty();
-					this.render(this.pendingRender);
-					this.pendingRender = false;
+					// We fit this case if the next batch of segments is to load
+					// from the server.
+					this.gotoSearchResultAfter({
+						el: el.attr('id'),
+					});
 				}
 
 			}
 		} else if (this.searchMode == 'source&target') {
-
-			m = $(".targetarea mark.currSearchItem");
+			var m = $(".targetarea mark.currSearchItem");
 
 			if ($(m).nextAll('mark.searchMarker').length) { // there are other subsequent results in the segment
 				console.log('altri item nel segmento');
@@ -467,7 +466,7 @@ $.extend(UI, {
 				UI.goingToNext = false;
 			} else { // jump to results in subsequents segments
 				console.log('m.length: ' + m.length);
-				seg = (m.length) ? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
+				var seg = (m.length) ? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
 				if (seg.length) {
 					skipCurrent = $(seg).has("mark.currSearchItem").length;
 					this.gotoSearchResultAfter({
@@ -483,7 +482,7 @@ $.extend(UI, {
 			}
 
 		} else {
-			m = $("mark.currSearchItem");
+			var m = $("mark.currSearchItem");
 
 			if ($(m).nextAll('mark.searchMarker').length) { // there are other subsequent results in the segment
 				console.log('altri item nel segmento');
@@ -494,14 +493,14 @@ $.extend(UI, {
 				UI.goingToNext = false;
 			} else { // jump to results in subsequents segments
 				seg = (m.length) ? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
-				if (seg.length) {//console.log('a');
+				if (seg.length) {
 					skipCurrent = $(seg).has("mark.currSearchItem").length;
 					this.gotoSearchResultAfter({
 						el: 'segment-' + $(seg).attr('id').split('-')[1],
 						skipCurrent: skipCurrent,
 						unmark: unmark
 					});
-				} else {//console.log('b');
+				} else {
 					setTimeout(function() {
 						UI.gotoNextResultItem(false);
 					}, 500);
@@ -511,9 +510,9 @@ $.extend(UI, {
 	},
 	gotoSearchResultAfter: function(options) {
 		console.log('options: ', options);
-		el = options.el;
-		skipCurrent = (options.skipCurrent || false);
-		unmark = (options.unmark || false);
+		var el = options.el;
+		var skipCurrent = (options.skipCurrent || false);
+		var unmark = (options.unmark || false);
 
 		var p = this.searchParams;
 
@@ -524,7 +523,7 @@ $.extend(UI, {
 				this.scrollSegment($('#' + el).next());
 			} else {
 				if ($('#' + el).nextAll(status).length) { // there is at least one next result loaded after the currently selected
-					nextToGo = $('#' + el).nextAll(status).first();
+					var nextToGo = $('#' + el).nextAll(status).first();
 					nextToGo.addClass('currSearchSegment');
 					this.scrollSegment(nextToGo);
 				} else {
@@ -536,7 +535,7 @@ $.extend(UI, {
 							detectSegmentToScroll: true
 						};
 					} else {
-						seg2scroll = this.nextUnloadedResultSegment();
+						var seg2scroll = this.nextUnloadedResultSegment();
 						$('#outer').empty();
 						this.render({
 							firstLoad: false,
@@ -545,14 +544,13 @@ $.extend(UI, {
 						});
 					}
 				}
-
-
 			}
 		} else { // searchMode: source&target or normal
 			var wh = (this.searchMode == 'source&target')? ' .targetarea' : '';
-			seg = $('section' + wh).has("mark.searchMarker");
-			ss = (this.searchMode == 'source&target')? el + '-editarea' : el;
-			found = false;
+			var seg = $('section' + wh).has("mark.searchMarker");
+			var ss = (this.searchMode == 'source&target')? el + '-editarea' : el;
+			var found = false;
+
 			$.each(seg, function() {
 				if ($(this).attr('id') >= ss) {
 					if (($(this).attr('id') == ss) && (skipCurrent)) {

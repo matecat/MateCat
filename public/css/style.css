@@ -1331,6 +1331,10 @@ margin: 5px 1.5%;
 {
     padding: 0 !important;
 }
+
+.searchbox .search-inputs {
+	height: 64px ;
+}
 .searchbox form
 {
     width: 100%;

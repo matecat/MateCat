@@ -2662,6 +2662,8 @@ UI = {
     },
 
     targetContainerSelector : function() {
+        // TODO: evaluate the need for this given that class "targetarea"
+        // seems to be possible to apply without any side effect.
         return '.editarea';
     },
 
