@@ -122,12 +122,11 @@ class Utils {
           return true ;
         }
 
-		$config = @parse_ini_file( INIT::$UTILS_ROOT . '/Analysis/task_manager_config.ini', true );
 		$mailConf = @parse_ini_file( INIT::$ROOT . '/inc/Error_Mail_List.ini', true );
 		$handler = new \AMQHandler();
 
 		//First Execution, load build object
-		$contextList = ContextList::get( $config[ 'context_definitions' ] );
+		$contextList = ContextList::get( \INIT::$TASK_RUNNER['context_definitions'] );
 
         if( empty( $subject ) ){
 			$subject = 'Alert from MateCat: ' . php_uname('n');
@@ -143,7 +142,7 @@ class Utils {
 		$element->params = $queue_element;
 		$element->classLoad = '\AsyncTasks\Workers\ErrMailWorker';
 
-		$handler->send( $contextList->list['MAIL']->queue_name, $element, array( 'persistent' => true ) );
+		$handler->send( $contextList->list['MAIL']->queue_name, $element, array( 'persistent' => $handler->persistent ) );
 
 		Log::doLog( 'Message has been sent' );
 		return true;

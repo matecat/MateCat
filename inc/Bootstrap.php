@@ -82,6 +82,8 @@ class Bootstrap {
         INIT::$CONTROLLER_ROOT                 = INIT::$ROOT . '/lib/Controller';
         INIT::$UTILS_ROOT                      = INIT::$ROOT . '/lib/Utils';
 
+        INIT::$TASK_RUNNER = @parse_ini_file( INIT::$UTILS_ROOT . '/Analysis/task_manager_config.ini', true );
+
         Database::obtain ( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         Log::$uniqID = ( isset( $_COOKIE['PHPSESSID'] ) ? substr( $_COOKIE['PHPSESSID'], 0 , 13 ) : uniqid() );
 

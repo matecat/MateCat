@@ -44,3 +44,12 @@ MAIL[pid_set_name]  = "ch_pid_set_mail"
 MAIL[max_executors] = 1
 MAIL[redis_key]     = "mail_list"
 MAIL[loggerName]    = "mail_queue.log"
+
+;;##############################
+;;##### Key Name setContribution #####
+;;##############################
+CONTRIBUTION[queue_name]    = "set_contribution"
+CONTRIBUTION[pid_set_name]  = "ch_pid_set_contribution"
+CONTRIBUTION[max_executors] = 5
+CONTRIBUTION[redis_key]     = "set_contribution_list"
+CONTRIBUTION[loggerName]    = "set_contribution.log"

@@ -21,45 +21,6 @@ abstract class DataAccess_AbstractDaoSilentStruct extends DataAccess_AbstractDao
         $this->tryValidator();
     }
 
-    /**
-     * This method returns the same object so to be chainable
-     * and be sure to clear the cache when calling cachable
-     * methods.
-     *
-     * @example assuming the model has a cachable
-     * method called foo();
-     *
-     * $model->foo(); // makes computation the first time and caches
-     * $model->foo(); // returns the cached result
-     * $model->clear()->foo(); // clears the cache and returns fresh data
-     *
-     * @return $this
-     */
-    public function clear() {
-        $this->cached_results = array();
-        return $this;
-    }
-
-    /**
-     * This method makes it possible to define methods on child classes
-     * whose result is cached on the instance.
-     *
-     * @param $method_name
-     * @param $params
-     * @param $function
-     *
-     * FIXME: current implementation is bogus because it only allows to pass one parameter.
-     *
-     *
-     * @return mixed
-     */
-    protected function cachable($method_name, $params, $function) {
-      if ( !array_key_exists($method_name,  $this->cached_results) ) {
-        $this->cached_results[$method_name] = call_user_func($function, $params);
-      }
-      return $this->cached_results[$method_name];
-    }
-
     public function __get( $name ) {
         if ( !property_exists( $this, $name ) ) {
             throw new DomainException( 'Trying to get an undefined property ' . $name );

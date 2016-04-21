@@ -249,7 +249,7 @@ abstract class DataAccess_AbstractDao {
     protected function _destroyCache( $query ){
         $this->_cacheSetConnection();
         if ( isset( $this->cache_con ) && !empty( $this->cache_con ) ) {
-            return $this->cache_con->delete( $query );
+            return $this->cache_con->del( $query );
         }
 
         return false;
