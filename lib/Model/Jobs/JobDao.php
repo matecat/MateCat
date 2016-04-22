@@ -3,6 +3,69 @@
 class Jobs_JobDao extends DataAccess_AbstractDao {
 
     /**
+     * This method is not static and used to cache at Redis level the values for this Job
+     *
+     * Use when counters of the job value are not important but only the metadata are needed
+     *
+     * @param Jobs_JobStruct $job
+     *
+     * @return Jobs_JobStruct[]
+     */
+    public function read( \Jobs_JobStruct $job ){
+
+        $sql = $this->_buildQueryForJobStructCache( $job );
+        $arr_result = $this->_fetch_array( $sql );
+        return $this->_buildResult( $arr_result );
+
+    }
+
+    /**
+     * @param array $array_result
+     *
+     * @return array|Jobs_JobStruct|Jobs_JobStruct[]
+     */
+    protected function _buildResult( $array_result ) {
+        $result = array();
+        foreach ( $array_result as $item ) {
+            $obj = new Jobs_JobStruct( $item );
+            $result[ ] = $obj;
+        }
+        return $result;
+    }
+
+    /**
+     * @param Jobs_JobStruct $job
+     *
+     * @return string
+     */
+    protected function _buildQueryForJobStructCache( \Jobs_JobStruct $job ) {
+        /*
+         * build the query
+         */
+        $sql = "SELECT * FROM jobs WHERE ID = " . (int)$job->id;
+        if ( !empty( $job->password ) ) {
+            $sql .= " AND password = '" . Database::obtain()->escape( $job->password ) . "'";
+        }
+        return $sql;
+    }
+
+    /**
+     * Destroy a cached object
+     *
+     * @param Jobs_JobStruct $job
+     *
+     * @return bool
+     * @throws Exception
+     */
+    public function destroyCache( \Jobs_JobStruct $job ){
+        /*
+        * build the query
+        */
+        $sql = $this->_buildQueryForJobStructCache( $job );
+        return $this->_destroyCache( $sql );
+    }
+
+    /**
      * @param $id_job
      * @param $password
      *
@@ -59,10 +122,6 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         $stmt->execute( array( $id_job ) );
 
         return $stmt->fetch();
-    }
-
-    protected function _buildResult( $array_result ) {
-
     }
 
     /**

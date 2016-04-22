@@ -15,7 +15,7 @@ require( 'SchemaCopy.php');
 require( 'SeedLoader.php');
 require( 'php_versions_override.php');
 
-prepareTestDatabase();
+//prepareTestDatabase();
 setTestConfigFile();
 
 require( PROJECT_ROOT . 'inc/Bootstrap.php' );

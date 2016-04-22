@@ -328,6 +328,12 @@ class INIT {
     public static $PLUGIN_LOAD_PATHS = array();
 
     /**
+     * Definitions for the asynchronous task runner
+     * @var array
+     */
+    public static $TASK_RUNNER = null;
+
+    /**
      * Initialize the Class Instance
      */
     public static function obtain() {
