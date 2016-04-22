@@ -106,12 +106,7 @@ $.extend(UI, {
         } );
 
         $(document).on('segment:status:change', function(e, segment, options) {
-            var staus = options.status ;
-            var byStatus = options.byStatus ;
-
-            UI.setContribution( segment.id, status, byStatus );
-            UI.setContributionMT( segment.id, status, byStatus );
-
+            var status = options.status ;
             var next = UI.getNextSegment( segment.el, 'untranslated' );
 
             if ( ! next ) {
@@ -130,7 +125,8 @@ $.extend(UI, {
 
 		$("body").on('keydown', null, 'ctrl+1', function(e) {
 			e.preventDefault();
-			active = $('.editor .submenu li.active');
+			var tab;
+			var active = $('.editor .submenu li.active');
 			if(active.hasClass('tab-switcher-tm')) {
 				tab = 'matches';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=1]').trigger('dblclick');
@@ -138,10 +134,10 @@ $.extend(UI, {
 				tab = 'alternatives';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=1]').trigger('dblclick');
 			}
-		})
-                .on('keydown', null, 'ctrl+2', function(e) {
+		}).on('keydown', null, 'ctrl+2', function(e) {
 			e.preventDefault();
-			active = $('.editor .submenu li.active');
+			var tab;
+			var active = $('.editor .submenu li.active');
 			if(active.hasClass('tab-switcher-tm')) {
 				tab = 'matches';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=2]').trigger('dblclick');
@@ -149,10 +145,10 @@ $.extend(UI, {
 				tab = 'alternatives';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=2]').trigger('dblclick');
 			}
-		})
-                .on('keydown', null, 'ctrl+3', function(e) {
+		}).on('keydown', null, 'ctrl+3', function(e) {
 			e.preventDefault();
-			active = $('.editor .submenu li.active');
+			var tab;
+			var active = $('.editor .submenu li.active');
 			if(active.hasClass('tab-switcher-tm')) {
 				tab = 'matches';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');
@@ -160,14 +156,11 @@ $.extend(UI, {
 				tab = 'alternatives';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');
 			}
-		})
-                .on('keydown', '.editor .editarea', 'shift+return', function(e) {
+		}).on('keydown', '.editor .editarea', 'shift+return', function(e) {
             UI.handleReturn(e);
-        })
-                .on('keydown', '.editor .editarea', 'return', function(e) {
+        }).on('keydown', '.editor .editarea', 'return', function(e) {
             UI.handleReturn(e);
-		})
-                .on('keydown', '.editor .editarea', 'space', function(e) {
+		}).on('keydown', '.editor .editarea', 'space', function(e) {
             if(UI.markSpacesEnabled) {
                 if(!UI.hiddenTextEnabled) return;
                 e.preventDefault();
@@ -1472,7 +1465,7 @@ $.extend(UI, {
 			});
 		});
 
-// Search and replace
+		// Search and replace
 
 		$(".searchbox input, .searchbox select").bind('keydown', 'return', function(e) {
 			e.preventDefault();
@@ -1525,32 +1518,25 @@ $.extend(UI, {
 		});
 		$("#exec-replace").click(function(e) {
 			e.preventDefault();
-			if ($('#search-target').val() == $('#replace-target').val()) {
+			var replaceTarget = $('#replace-target').val();
+			if ($('#search-target').val() == replaceTarget) {
 				APP.alert({msg: 'Attention: you are replacing the same text!'});
 				return false;
 			}
 
-			if (UI.searchMode == 'onlyStatus') {
+			if (UI.searchMode !== 'onlyStatus') {
 
-//			} else if (UI.searchMode == 'source&target') {
+				// todo: redo marksearchresults on the target
 
-			} else {
-				txt = $('#replace-target').val();
-				// todo: rifai il marksearchresults sul target
+				$("mark.currSearchItem").text(replaceTarget);
+				var segment = $("mark.currSearchItem").parents('section');
+                var status = UI.getStatus(segment);
 
-				$("mark.currSearchItem").text(txt);
-				segment = $("mark.currSearchItem").parents('section');
-                segment_id = $(segment).attr('id').split('-')[1];
-                status = UI.getStatus(segment);
-                byStatus = 0;
-
-//                UI.setTranslation($(segment).attr('id').split('-')[1], status, 'replace');
                 UI.setTranslation({
                     id_segment: $(segment).attr('id').split('-')[1],
                     status: status,
                     caller: 'replace'
                 });
-                UI.setContribution(segment_id, status, byStatus);
 
                 UI.updateSearchDisplayCount(segment);
 				$(segment).attr('data-searchItems', $('mark.searchMarker', segment).length);

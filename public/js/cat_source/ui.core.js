@@ -2217,6 +2217,13 @@ UI = {
         setTimeout(  function() {$('body' ).removeClass('incomingMsg' )} , 5000  );
 
 	},
+    showExistingMessage: function () {
+        if(!$('body').hasClass('incomingMsg')) {
+            $('body' ).addClass('incomingMsg');
+            setTimeout(  function() {$('body' ).removeClass('incomingMsg' )} , 5000  );
+        }
+        setTimeout(  function() {$('body' ).removeClass('incomingMsg' )} , 5000  );
+    },
 	checkVersion: function() {
 		if(this.version != config.build_number) {
 			UI.showMessage({
@@ -2304,7 +2311,6 @@ UI = {
         var propagate = options.propagate || false;
 
         var segment = UI.Segment.find( id_segment );
-
         //
         //REMOVED Check for to save
         //Send ALL to the queue
@@ -2316,25 +2322,28 @@ UI = {
             byStatus: byStatus,
             propagate: propagate
         };
-
-        if( this.translationIsToSave( segment ) ) {
+        //Check if the traslation is not already in the tail
+        var saveTranslation = this.translationIsToSave( segment );
+        // If not i save it or update
+        if( saveTranslation ) {
             this.addToSetTranslationTail( item );
         } else {
             this.updateToSetTranslationTail( item )
         }
-
+        //If is offline and is in the tail I decrease the counter
+        //else I execute the tail
         if ( this.offline && config.offlineModeEnabled ) {
-
-            if ( toSave ) {
+            if ( saveTranslation ) {
                 this.decrementOfflineCacheRemaining();
-                this.failedConnection( [ id_segment, status, false ], 'setTranslation' );
+                options.callback = UI.incrementOfflineCacheRemaining;
+                this.failedConnection( options, 'setTranslation' );
             }
-
             this.changeStatusOffline( id_segment );
             this.checkConnection( 'Set Translation check Authorized' );
-
         } else {
-            if ( !this.executingSetTranslation ) return this.execSetTranslationTail();
+            if ( !this.executingSetTranslation )  {
+                return this.execSetTranslationTail();
+            }
         }
     },
     alreadyInSetTranslationTail: function (sid) {
@@ -2445,7 +2454,7 @@ UI = {
 			context: [reqArguments, options],
 			error: function() {
                 UI.addToSetTranslationTail(this[1]);
-                UI.changeStatusOffline(this[0][0]);
+                UI.changeStatusOffline(this[0][0].id_segment);
                 UI.failedConnection(this[0], 'setTranslation');
                 UI.decrementOfflineCacheRemaining();
             },
@@ -2759,10 +2768,6 @@ UI = {
 				if (this.code != '-10') { // is not a password error
 					APP.alert({msg: "Error in saving the translation. Try the following: <br />1) Refresh the page (Ctrl+F5 twice) <br />2) Clear the cache in the browser <br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>"});
 				}
-			}
-
-			if (operation == 'setContribution' && this.code != '-10' && UI.savingMemoryErrorNotificationEnabled) { // is not a password error
-				APP.alert({msg: "Error in saving the segment to the translation memory.<br />Try refreshing the page and click on Translated again.<br />Contact <b>support@matecat.com</b> if this happens often."});
 			}
 
 			if (this.code == '-10' && operation != 'getSegments' ) {

@@ -5,8 +5,6 @@ $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
 		this.version = "x.x.x";
-		if (this.debug)
-			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
 		this.numDisplayContributionMatches = 3;
 		this.numMatchesResults = 10;
@@ -19,8 +17,6 @@ $.extend(UI, {
 		this.blockGetMoreSegments = true;
 		this.searchParams = {};
 		this.searchParams.search = 0;
-//		var bb = $.cookie('noAlertConfirmTranslation');
-//		this.alertConfirmTranslationEnabled = (typeof bb == 'undefined') ? true : false;
 		this.customSpellcheck = false;
 		this.noGlossary = false;
 		setTimeout(function() {
@@ -30,7 +26,6 @@ $.extend(UI, {
         $('html').trigger('init');
         this.setTagMode();
 		this.detectFirstLast();
-//		this.reinitMMShortcuts();
 		this.initSegmentNavBar();
 		rangy.init();
 		this.savedSel = null;
@@ -55,9 +50,6 @@ $.extend(UI, {
 			UI.autoscrollCorrectionEnabled = false;
 		}, 2000);
 		this.checkSegmentsArray = {};
-		this.firstMarking = true;
-//		this.markTags(true);
-		this.firstMarking = false;
 		this.surveyDisplayed = false;
 		this.warningStopped = false;
 		this.abortedOperations = [];
@@ -67,10 +59,7 @@ $.extend(UI, {
         this.recoverUnsavedSegmentsTimer = false;
         this.savingMemoryErrorNotificationEnabled = false;
         this.setTranslationTail = [];
-        this.setContributionTail = [];
         this.executingSetTranslation = false;
-        this.executingSetContribution = false;
-        this.executingSetContributionMT = false;
         this.localStorageArray = [];
         this.isPrivateSafari = (this.isSafari) && (!this.isLocalStorageNameSupported());
         this.consecutiveCopySourceNum = [];

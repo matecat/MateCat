@@ -152,7 +152,6 @@ APP = {
         }
         $( 'body' ).addClass( 'incomingMsg' );
     },
-
     doRequest: function ( req, log ) {
 
         logTxt = (typeof log == 'undefined') ? '' : '&type=' + log;
