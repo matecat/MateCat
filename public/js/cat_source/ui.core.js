@@ -1966,7 +1966,11 @@ UI = {
             });
         }
 
-        $.getJSON( UI.downloadFileURL( openOriginalFiles ) )
+        $.ajax({
+                cache: false,
+                url: UI.downloadFileURL( openOriginalFiles ),
+                dataType: 'json'
+            })
             .done( driveUpdateDone )
             .always(function() {
                 UI.reEnableDownloadButton() ;
