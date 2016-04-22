@@ -1959,14 +1959,18 @@ UI = {
 
                 if ( typeof window.googleDriveWindows[ winName ] != 'undefined' && window.googleDriveWindows[ winName ].opener != null ) {
                     window.googleDriveWindows[ winName ].location.href = item.alternateLink ;
-                    window.googleDriveWindow[ winName ].focus();
+                    window.googleDriveWindows[ winName ].focus();
                 } else {
                     window.googleDriveWindows[ winName ] = window.open( item.alternateLink );
                 }
             });
         }
 
-        $.getJSON( UI.downloadFileURL( openOriginalFiles ) )
+        $.ajax({
+                cache: false,
+                url: UI.downloadFileURL( openOriginalFiles ),
+                dataType: 'json'
+            })
             .done( driveUpdateDone )
             .always(function() {
                 UI.reEnableDownloadButton() ;
