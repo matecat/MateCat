@@ -331,7 +331,7 @@ class INIT {
      * Definitions for the asynchronous task runner
      * @var array
      */
-    public static $TASK_RUNNER = null;
+    public static $TASK_RUNNER_CONFIG = null;
 
     /**
      * Initialize the Class Instance

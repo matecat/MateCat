@@ -11,6 +11,7 @@ use \AbstractTest;
 
 use \Contribution\ContributionStruct, \Contribution\Set;
 use TaskRunner\Commons\ContextList;
+use \TaskRunner\Commons\QueueElement;
 
 class SetContributionTest extends AbstractTest {
 
@@ -32,7 +33,7 @@ class SetContributionTest extends AbstractTest {
         parent::tearDown();
     }
 
-    public function testSetContribution(){
+    public function testSetContributionEnqueue(){
 
         $contributionStruct = new ContributionStruct();
         $contributionStruct->fromRevision = true;
@@ -47,18 +48,24 @@ class SetContributionTest extends AbstractTest {
         $this->assertTrue( true );
 
         //now check that this value is inside AMQ
-        $contextList = ContextList::get( \INIT::$TASK_RUNNER['context_definitions'] );
+        $contextList = ContextList::get( \INIT::$TASK_RUNNER_CONFIG['context_definitions'] );
         $amqh = new \AMQHandler();
         $amqh->subscribe(  $contextList->list['CONTRIBUTION']->queue_name  );
         $message = $amqh->readFrame();
         $amqh->ack( $message );
 
-        $fromAMQ_ContributionStruct = new ContributionStruct( json_decode( $message->body, true ) );
+        /**
+         * @var $FrameBody \TaskRunner\Commons\QueueElement
+         */
+        $FrameBody = new QueueElement( json_decode( $message->body, true ) );
+        $this->assertEquals( '\Contribution\SetContributionWorker', $FrameBody->classLoad );
+
+        $fromAMQ_ContributionStruct = new ContributionStruct( $FrameBody->params->toArray() );
         $this->assertEquals( $contributionStruct, $fromAMQ_ContributionStruct );
 
     }
 
-    public function testSetContributionException(){
+    public function testSetContributionEnqueueException(){
 
         $contributionStruct = new ContributionStruct();
         $contributionStruct->fromRevision = true;
@@ -72,12 +79,16 @@ class SetContributionTest extends AbstractTest {
         //we want to test that Set::contribution will call send with these parameters
         $stub = $this->getMockBuilder('\AMQHandler')->getMock();
 
-        $contextList = ContextList::get( \INIT::$TASK_RUNNER['context_definitions'] );
+        $contextList = ContextList::get( \INIT::$TASK_RUNNER_CONFIG['context_definitions'] );
+        $queueElement            = new QueueElement();
+        $queueElement->params    = $contributionStruct;
+        $queueElement->classLoad = '\Contribution\SetContributionWorker';
+
         $stub->expects( $this->once() )
                 ->method('send')
                 ->with(
                         $this->stringContains( $contextList->list['CONTRIBUTION']->queue_name ),
-                        $this->identicalTo( $contributionStruct ),
+                        $this->equalTo( $queueElement ),
                         $this->equalTo( array( 'persistent' => 'true' ) )
                 );
 
@@ -86,7 +97,10 @@ class SetContributionTest extends AbstractTest {
 
         //check that this exception is raised up there
         $this->setExpectedExceptionRegExp( \Exception::class, '/Could not connect to .*/' );
-        Set::contribution( $contributionStruct, $stub );
+
+        //init the worker client with the stub Handler
+        \WorkerClient::init( $stub );
+        Set::contribution( $contributionStruct );
 
     }
 

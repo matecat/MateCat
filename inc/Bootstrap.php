@@ -27,9 +27,6 @@ class Bootstrap {
         $mv = parse_ini_file( 'version.ini' );
         self::$_INI_VERSION = $mv['version'];
 
-
-
-
         $this->_setIncludePath();
         spl_autoload_register( 'Bootstrap::loadClass' );
         require_once 'Predis/autoload.php';
@@ -82,7 +79,9 @@ class Bootstrap {
         INIT::$CONTROLLER_ROOT                 = INIT::$ROOT . '/lib/Controller';
         INIT::$UTILS_ROOT                      = INIT::$ROOT . '/lib/Utils';
 
-        INIT::$TASK_RUNNER = @parse_ini_file( INIT::$UTILS_ROOT . '/Analysis/task_manager_config.ini', true );
+        INIT::$TASK_RUNNER_CONFIG = @parse_ini_file( INIT::$UTILS_ROOT . '/Analysis/task_manager_config.ini', true );
+
+        WorkerClient::init();
 
         Database::obtain ( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         Log::$uniqID = ( isset( $_COOKIE['PHPSESSID'] ) ? substr( $_COOKIE['PHPSESSID'], 0 , 13 ) : uniqid() );
@@ -134,9 +133,6 @@ class Bootstrap {
             }
         }
 
-
-        WorkerClient::init();
-
     }
 
 
@@ -148,7 +144,7 @@ class Bootstrap {
                 E_ERROR             => 'E_ERROR',
                 E_USER_ERROR        => 'E_USER_ERROR',
                 E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR',
-            //E_DEPRECATED        => 'DEPRECATION_NOTICE', //From PHP 5.3
+                E_DEPRECATED        => 'DEPRECATION_NOTICE', //From PHP 5.3
         );
 
         # Getting last error

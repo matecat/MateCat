@@ -16,6 +16,7 @@ use \Jobs_JobStruct,
         \TmKeyManagement_Filter,
         \Exception,
         \Log,
+        \WorkerClient,
         \Utils,
         \CatUtils,
         \INIT
@@ -32,22 +33,14 @@ class Set {
 
     /**
      * @param ContributionStruct $contribution
-     * @param \AMQHandler|null   $handler
      *
      * @throws \Exception
      */
-    public static function contribution( ContributionStruct $contribution, \AMQHandler $handler = null ){
+    public static function contribution( ContributionStruct $contribution ){
 
-        //dependency Injection purpose
-        if ( empty( $handler ) ){
-           $handler = new \AMQHandler();
-        }
-
-        //First Execution, load build object
-        $contextList = ContextList::get( \INIT::$TASK_RUNNER['context_definitions'] );
         try{
-            $handler->send( $contextList->list['CONTRIBUTION']->queue_name, $contribution, array( 'persistent' => $handler->persistent ) );
-        } catch ( \Exception $e ){
+            WorkerClient::enqueue( 'CONTRIBUTION', '\Contribution\SetContributionWorker', $contribution, array( 'persistent' => WorkerClient::$_HANDLER->persistent ) );
+        } catch ( Exception $e ){
 
             # Handle the error, logging, ...
             $output  = "**** SetContribution failed. AMQ Connection Error. ****\n\t";
