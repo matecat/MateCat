@@ -44,6 +44,8 @@ class CatDecorator extends \AbstractDecorator {
                     \INIT::$BASEURL . "features/review_improved/quality_report/" .
                     "{$this->controller->getJob()->id}/" .
                     "{$this->controller->getJob()->password}";
+
+            $this->template->showReplaceOptionsInSearch = false ;
         }
 
         $this->template->overall_quality_class = $this->getOverallQualityClass();
