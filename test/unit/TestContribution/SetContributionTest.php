@@ -10,6 +10,7 @@ use \AbstractTest;
  */
 
 use \Contribution\ContributionStruct, \Contribution\Set;
+use TaskRunner\Commons\ContextList;
 
 class SetContributionTest extends AbstractTest {
 
@@ -41,8 +42,52 @@ class SetContributionTest extends AbstractTest {
         $contributionStruct->translation = \CatUtils::view2rawxliff( '<g id="pt2">WASHINGTON </g><g id="pt3">- Il Dipartimento del Tesoro e Agenzia delle Entrate oggi ha chiesto un commento pubblico su questioni relative alle disposizioni di responsabilità condivise incluse nel Affordable Care Act che si applicheranno a certi datori di lavoro a partire dal 2014.</g>' );
         $contributionStruct->email = \INIT::$MYMEMORY_API_KEY;
 
+        //assert there is not an exception by following the flow
         Set::contribution( $contributionStruct );
-        
+        $this->assertTrue( true );
+
+        //now check that this value is inside AMQ
+        $contextList = ContextList::get( \INIT::$TASK_RUNNER['context_definitions'] );
+        $amqh = new \AMQHandler();
+        $amqh->subscribe(  $contextList->list['CONTRIBUTION']->queue_name  );
+        $message = $amqh->readFrame();
+        $amqh->ack( $message );
+
+        $fromAMQ_ContributionStruct = new ContributionStruct( json_decode( $message->body, true ) );
+        $this->assertEquals( $contributionStruct, $fromAMQ_ContributionStruct );
+
+    }
+
+    public function testSetContributionException(){
+
+        $contributionStruct = new ContributionStruct();
+        $contributionStruct->fromRevision = true;
+        $contributionStruct->id_job = 1999999;
+        $contributionStruct->job_password = "1d7903464318";
+        $contributionStruct->segment = \CatUtils::view2rawxliff( '<g id="pt2">WASHINGTON </g><g id="pt3">— The Treasury Department and Internal Revenue Service today requested public comment on issues relating to the shared responsibility provisions included in the Affordable Care Act that will apply to certain employers starting in 2014.</g>' );
+        $contributionStruct->translation = \CatUtils::view2rawxliff( '<g id="pt2">WASHINGTON </g><g id="pt3">- Il Dipartimento del Tesoro e Agenzia delle Entrate oggi ha chiesto un commento pubblico su questioni relative alle disposizioni di responsabilità condivise incluse nel Affordable Care Act che si applicheranno a certi datori di lavoro a partire dal 2014.</g>' );
+        $contributionStruct->email = \INIT::$MYMEMORY_API_KEY;
+
+        // Create a stub for the \AMQHandler class.
+        //we want to test that Set::contribution will call send with these parameters
+        $stub = $this->getMockBuilder('\AMQHandler')->getMock();
+
+        $contextList = ContextList::get( \INIT::$TASK_RUNNER['context_definitions'] );
+        $stub->expects( $this->once() )
+                ->method('send')
+                ->with(
+                        $this->stringContains( $contextList->list['CONTRIBUTION']->queue_name ),
+                        $this->identicalTo( $contributionStruct ),
+                        $this->equalTo( array( 'persistent' => 'true' ) )
+                );
+
+        //simulate \AMQ Server Down and force an exception
+        $stub->method('send')->will( $this->throwException( new \Exception( "Could not connect to localhost:61613 (10/10)" ) ) );
+
+        //check that this exception is raised up there
+        $this->setExpectedExceptionRegExp( \Exception::class, '/Could not connect to .*/' );
+        Set::contribution( $contributionStruct, $stub );
+
     }
 
 }

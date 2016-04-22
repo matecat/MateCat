@@ -30,13 +30,32 @@ use TaskRunner\Commons\ContextList;
  */
 class Set {
 
-    public static function contribution( ContributionStruct $contribution ){
+    /**
+     * @param ContributionStruct $contribution
+     * @param \AMQHandler|null   $handler
+     *
+     * @throws \Exception
+     */
+    public static function contribution( ContributionStruct $contribution, \AMQHandler $handler = null ){
 
-        $handler = new \AMQHandler();
+        //dependency Injection purpose
+        if ( empty( $handler ) ){
+           $handler = new \AMQHandler();
+        }
 
         //First Execution, load build object
         $contextList = ContextList::get( \INIT::$TASK_RUNNER['context_definitions'] );
-        $handler->send( $contextList->list['CONTRIBUTION']->queue_name, $contribution, array( 'persistent' => $handler->persistent ) );
+        try{
+            $handler->send( $contextList->list['CONTRIBUTION']->queue_name, $contribution, array( 'persistent' => $handler->persistent ) );
+        } catch ( \Exception $e ){
+
+            # Handle the error, logging, ...
+            $output  = "**** SetContribution failed. AMQ Connection Error. ****\n\t";
+            $output .= "{$e->getMessage()}";
+            Log::doLog( $output );
+            throw $e;
+
+        }
 
     }
 
