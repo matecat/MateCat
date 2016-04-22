@@ -6,8 +6,8 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
      * @param $id
      * @param $password
      *
-     * @return Chunks_ChunkStruct
-     * @throws Exceptions_RecordNotFound
+     * @return mixed
+     * @throws \Exceptions\NotFoundError
      */
     public static function getByIdAndPassword( $id, $password ) {
         $conn = Database::obtain()->getConnection();
@@ -54,8 +54,8 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
         return $stmt->fetch();
     }
 
-    public function getByJobID( $id_job ) {
-        $conn = $this->con->getConnection();
+    public static function getByJobID( $id_job ) {
+        $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare("SELECT * FROM " .
                 "jobs WHERE id = ?
                 order by job_first_segment asc");

@@ -1044,9 +1044,9 @@ UI = {
 					action: 'getUpdatedTranslations',
 					last_timestamp: lastUpdateRequested.getTime(),
 					first_segment: UI.getSegmentId($('section').first()),
-//					first_segment: $('section').first().attr('id').split('-')[1],
-					last_segment: UI.getSegmentId($('section').last())
-//					last_segment: $('section').last().attr('id').split('-')[1]
+					last_segment: UI.getSegmentId($('section').last()),
+                    id_job: config.id_job,
+                    password: config.password
 				},
 				error: function() {
 					UI.failedConnection(0, 'getUpdatedTranslations');
@@ -2662,6 +2662,8 @@ UI = {
     },
 
     targetContainerSelector : function() {
+        // TODO: evaluate the need for this given that class "targetarea"
+        // seems to be possible to apply without any side effect.
         return '.editarea';
     },
 
