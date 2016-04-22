@@ -681,6 +681,8 @@ UI = {
             deactivated_segment : UI.lastOpenedSegment,
             current_segment : UI.currentSegment
         });
+
+            Speech2Text.disableMicrophone( segment );
 	},
 	detectAdjacentSegment: function(segment, direction, times) { // currently unused
 		if (!times)
