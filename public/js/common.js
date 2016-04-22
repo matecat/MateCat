@@ -475,7 +475,6 @@ APP = {
 //            $('.popup:not(.hide), .popup-outer:not(.hide)').remove();
     },
     fitText: function ( container, child, limitHeight, escapeTextLen, actualTextLow, actualTextHi ) {
-
         if ( typeof escapeTextLen == 'undefined' ) escapeTextLen = 12;
         if ( typeof $( child ).attr( 'data-originalText' ) == 'undefined' ) {
             $( child ).attr( 'data-originalText', $( child ).text() );
@@ -506,10 +505,9 @@ APP = {
 
         var test = true;
         // break recursion for browser width resize below 1024 px to avoid infinite loop and stack overflow
-        while ( container.height() >= limitHeight && $( window ).width() > 1024 && test == true ) {
-            test = this.fitText( container, child, limitHeight, escapeTextLen, actualTextLow, actualTextHi );
+        while ( container.height() >= limitHeight && test == true ) {
+            test = this.fitText(container, child, limitHeight, escapeTextLen, actualTextLow, actualTextHi);
         }
-
         return false;
 
     },

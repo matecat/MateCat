@@ -38,6 +38,19 @@ class Users_UserDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * @param string $email
+     *
+     * @return Users_UserStruct
+     */
+    public function getByEmail( $email ) {
+        $conn = $this->con->getConnection();
+        $stmt = $conn->prepare( " SELECT * FROM users WHERE email = ? " );
+        $stmt->execute( array( $email ) ) ;
+        $stmt->setFetchMode(PDO::FETCH_CLASS, '\Users_UserStruct');
+        return $stmt->fetch();
+    }
+
+    /**
      * @param Users_UserStruct $obj
      *
      * @return Users_UserStruct|Users_UserStruct[]

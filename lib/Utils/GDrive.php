@@ -77,12 +77,23 @@ class GDrive {
         return null;
     }
 
-    public static function getService ( $session ) {
-        if( isset( $session[ 'uid' ] ) && !empty( $session[ 'uid' ] ) ) {
-            $dao = new \Users_UserDao( \Database::obtain() );
-            $user = $dao->getByUid( $session[ 'uid' ] );
-            $token = $user->oauth_access_token ;
+    /**
+     * @param   array   $params   It can contains the access_token or the uid
+     *
+     * @return  Google_Service_Drive
+     */
+    public static function getService ( $params = array() ) {
+        $token = null;
 
+        if( array_key_exists( 'access_token' , $params ) ) {
+            $token = $params[ 'access_token' ];
+        } elseif( array_key_exists( 'uid' , $params ) ) {
+            $dao = new \Users_UserDao( \Database::obtain() );
+            $user = $dao->getByUid( $params[ 'uid' ] );
+            $token = $user->oauth_access_token ;
+        }
+
+        if( $token != null ) {
             $oauthClient = OauthClient::getInstance()->getClient();
             $oauthClient->setAccessToken( $token );
             $oauthClient->setAccessType( "offline" );

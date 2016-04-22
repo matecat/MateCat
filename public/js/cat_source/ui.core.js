@@ -248,19 +248,6 @@ UI = {
         }
 
 	},
-	checkIfFinished: function(closing) {
-		if (((this.progress_perc != this.done_percentage) && (this.progress_perc == '100')) || ((closing) && (this.progress_perc == '100'))) {
-			this.body.addClass('justdone');
-		} else {
-			this.body.removeClass('justdone');
-		}
-	},
-	checkIfFinishedFirst: function() {
-		if ($('section').length == $('section.status-translated, section.status-approved').length) {
-			this.body.addClass('justdone');
-		}
-	},
-
     closeSegment: function(segment, byButton, operation) {
 		if ( typeof segment == 'undefined' ) {
 
@@ -292,9 +279,6 @@ UI = {
 
             $(segment).removeClass("editor waiting_for_check_result opened");
             $('span.locked.mismatch', segment).removeClass('mismatch');
-            if (!this.opening) {
-                this.checkIfFinished(1);
-            }
 
 // close split segment
         	$('.sid .actions .split').removeClass('cancel');
@@ -1777,7 +1761,6 @@ UI = {
 		}
 
 		this.progress_perc = s.PROGRESS_PERC_FORMATTED;
-		this.checkIfFinished();
 
 		this.done_percentage = this.progress_perc;
 
@@ -1976,14 +1959,18 @@ UI = {
 
                 if ( typeof window.googleDriveWindows[ winName ] != 'undefined' && window.googleDriveWindows[ winName ].opener != null ) {
                     window.googleDriveWindows[ winName ].location.href = item.alternateLink ;
-                    window.googleDriveWindow[ winName ].focus();
+                    window.googleDriveWindows[ winName ].focus();
                 } else {
                     window.googleDriveWindows[ winName ] = window.open( item.alternateLink );
                 }
             });
         }
 
-        $.getJSON( UI.downloadFileURL( openOriginalFiles ) )
+        $.ajax({
+                cache: false,
+                url: UI.downloadFileURL( openOriginalFiles ),
+                dataType: 'json'
+            })
             .done( driveUpdateDone )
             .always(function() {
                 UI.reEnableDownloadButton() ;
@@ -2671,6 +2658,8 @@ UI = {
     },
 
     targetContainerSelector : function() {
+        // TODO: evaluate the need for this given that class "targetarea"
+        // seems to be possible to apply without any side effect.
         return '.editarea';
     },
 
