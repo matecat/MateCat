@@ -966,8 +966,6 @@ UI = {
 			startSegmentId = this.segments[0].sid;
 		});
 
-        console.log('startSegmentId', startSegmentId);
-
 		if (typeof this.startSegmentId == 'undefined')
 			this.startSegmentId = startSegmentId;
 
