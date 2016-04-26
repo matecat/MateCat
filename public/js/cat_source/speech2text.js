@@ -5,6 +5,7 @@ Speech2Text = {};
         recognition: null,
         recognizing: false,
         finalTranscript: '',
+        interimTranscript: '',
         ignoreOnEnd: false,
         targetElement: null,
         isToEmptyTargetElement: true,
@@ -34,6 +35,10 @@ Speech2Text = {};
                 }
 
                 microphone.click( Speech2Text.clickMicrophone );
+
+                if( Speech2Text.recognizing ) {
+                    Speech2Text.startSpeechRecognition( microphone );
+                }
             } else {
                 microphone.hide();
 
@@ -43,9 +48,7 @@ Speech2Text = {};
         },
         disableMicrophone: function( segment ) {
             var microphone = segment.find( '.micSpeech' );
-            Speech2Text.stopSpeechRecognition( microphone );
             microphone.unbind( 'click' );
-            Speech2Text.restartVars();
         },
         clickMicrophone: function( event ) {
             var microphone = $( this );
@@ -64,14 +67,21 @@ Speech2Text = {};
             Speech2Text.isToEmptyTargetElement = true;
         },
         startSpeechRecognition: function( microphone ) {
-            microphone.addClass( 'micSpeechActive' );
+            if( !microphone.hasClass( 'micSpeechActive' ) ) {
+                microphone.addClass( 'micSpeechActive' );
+            }
 
             if( Speech2Text.isToEmptyTargetElement ) {
                 Speech2Text.finalTranscript = '';
             } else {
                 Speech2Text.finalTranscript = Speech2Text.targetElement.text() + ' ';
             }
-            Speech2Text.recognition.start();
+
+            Speech2Text.interimTranscript = '';
+
+            if( !Speech2Text.recognizing ) {
+                Speech2Text.recognition.start();
+            }
         },
         stopSpeechRecognition: function( microphone ) {
             microphone.removeClass( 'micSpeechActive' );
@@ -89,20 +99,20 @@ Speech2Text = {};
             Speech2Text.recognizing = false;
         },
         onRecognitionResult: function( event ) {
-            var interim_transcript = '';
+            Speech2Text.interimTranscript = '';
 
             for (var i = event.resultIndex; i < event.results.length; ++i) {
                 if (event.results[i].isFinal) {
                     Speech2Text.finalTranscript += event.results[i][0].transcript;
                 } else {
-                    interim_transcript += event.results[i][0].transcript;
+                    Speech2Text.interimTranscript += event.results[i][0].transcript;
                 }
             }
 
             Speech2Text.finalTranscript = Speech2Text.capitalize(Speech2Text.finalTranscript);
             Speech2Text.targetElement.html(
                     Speech2Text.linebreak( Speech2Text.finalTranscript )
-                    + Speech2Text.linebreak( interim_transcript )
+                    + Speech2Text.linebreak( Speech2Text.interimTranscript )
             );
         },
         capitalize: function ( s ) {
