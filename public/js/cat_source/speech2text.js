@@ -7,6 +7,8 @@ Speech2Text = {};
         finalTranscript: '',
         ignoreOnEnd: false,
         targetElement: null,
+        isToEmptyTargetElement: true,
+        segment: null,
         loadRecognition: function() {
             if ( 'webkitSpeechRecognition' in window ) {
                 Speech2Text.recognition = new webkitSpeechRecognition();
@@ -24,6 +26,18 @@ Speech2Text = {};
 
             if( Speech2Text.recognition ) {
                 Speech2Text.targetElement = microphone.parent().find( '.editarea' );
+
+                var segmentId = '#segment-' + Speech2Text.targetElement.data('sid');
+
+                Speech2Text.segment = $( segmentId );
+
+                if( Speech2Text.segment.hasClass('status-translated')
+                        || Speech2Text.segment.hasClass('status-approved') ) {
+                    Speech2Text.isToEmptyTargetElement = false;
+                } else {
+                    Speech2Text.isToEmptyTargetElement = true;
+                }
+
                 microphone.click( Speech2Text.clickMicrophone );
             } else {
                 microphone.hide();
@@ -49,7 +63,11 @@ Speech2Text = {};
         startSpeechRecognition: function( microphone ) {
             microphone.addClass( 'micSpeechActive' );
 
-            Speech2Text.finalTranscript = '';
+            if( Speech2Text.isToEmptyTargetElement ) {
+                Speech2Text.finalTranscript = '';
+            } else {
+                Speech2Text.finalTranscript = Speech2Text.targetElement.text() + ' ';
+            }
             Speech2Text.recognition.start();
         },
         stopSpeechRecognition: function( microphone ) {
