@@ -10,6 +10,8 @@ Speech2Text = {};
         ignoreOnEnd: false,
         targetElement: null,
         isToEmptyTargetElement: true,
+        isStopingRecognition: false,
+        isToKeepRecognizing: false,
         loadRecognition: function() {
             if ( 'webkitSpeechRecognition' in window ) {
                 Speech2Text.recognition = new webkitSpeechRecognition();
@@ -50,15 +52,17 @@ Speech2Text = {};
         disableMicrophone: function( segment ) {
             var microphone = segment.find( '.micSpeech' );
             microphone.unbind( 'click' );
-            Speech2Text.microphone = null;
+            Speech2Text.stopSpeechRecognition( microphone );
         },
         clickMicrophone: function( event ) {
             var microphone = $( this );
 
             if( microphone.hasClass( 'micSpeechActive' ) ) {
+                Speech2Text.isToKeepRecognizing = false;
                 Speech2Text.stopSpeechRecognition( microphone );
             } else {
                 Speech2Text.startSpeechRecognition( microphone );
+                Speech2Text.isToKeepRecognizing = true;
             }
         },
         restartVars: function() {
@@ -89,6 +93,8 @@ Speech2Text = {};
             microphone.removeClass( 'micSpeechActive' );
 
             Speech2Text.recognition.stop();
+
+            Speech2Text.isStopingRecognition = true;
         },
         onRecognitionStart: function() {
             Speech2Text.recognizing = true;
@@ -99,7 +105,13 @@ Speech2Text = {};
         },
         onRecognitionEnd: function() {
             Speech2Text.recognizing = false;
-            Speech2Text.microphone.removeClass( 'micSpeechActive' );
+            Speech2Text.isStopingRecognition = false;
+
+            if( Speech2Text.isToKeepRecognizing ) {
+                Speech2Text.startSpeechRecognition( Speech2Text.microphone );
+            } else {
+                Speech2Text.microphone.removeClass( 'micSpeechActive' );
+            }
         },
         onRecognitionResult: function( event ) {
             Speech2Text.interimTranscript = '';
@@ -113,11 +125,14 @@ Speech2Text = {};
             }
 
             Speech2Text.finalTranscript = Speech2Text.capitalize(Speech2Text.finalTranscript);
-            Speech2Text.targetElement.html(
-                    Speech2Text.linebreak( Speech2Text.finalTranscript )
-                    + Speech2Text.linebreak( Speech2Text.interimTranscript )
-            );
-        },
+
+            if( !Speech2Text.isStopingRecognition ) {
+                Speech2Text.targetElement.html(
+                        Speech2Text.linebreak( Speech2Text.finalTranscript )
+                        + Speech2Text.linebreak( Speech2Text.interimTranscript )
+                );
+            }
+       },
         capitalize: function ( s ) {
             var first_char = /\S/;
 
