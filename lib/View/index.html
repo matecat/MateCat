@@ -13,7 +13,13 @@
 
             var getStackTrace = function() {
               var obj = {};
-              Error.captureStackTrace(obj, getStackTrace);
+              var stack;
+              //Error.captureStackTrace works on Firefox and Chrome
+              //the else for Safari
+              if (typeof Error.captureStackTrace === "function")
+                  Error.captureStackTrace(obj, getStackTrace);
+              else if (stack = new Error().stack)
+                  obj.stack = stack;
               return obj.stack;
             };
             var config = {
