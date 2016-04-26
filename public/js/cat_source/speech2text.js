@@ -49,7 +49,7 @@ Speech2Text = {};
         disableMicrophone: function( segment ) {
             var microphone = segment.find( '.micSpeech' );
             Speech2Text.stopSpeechRecognition( microphone );
-            microphone.click( false );
+            microphone.unbind( 'click' );
             Speech2Text.restartVars();
         },
         clickMicrophone: function( event ) {
