@@ -28,7 +28,11 @@ body.incomingMsg header
 }
 
 header .wrapper{height:20px; padding:0px 0 0 0;}
-.header-menu{float:right;margin-right:16px}
+.header-menu{
+	float:right;
+	margin-right:16px;
+	margin-left: 15px;
+}
 .header-menu li{
     /*border-left:1px solid #000;*/
     float:left;height:37px;padding:5px 0px;}
@@ -164,15 +168,10 @@ left: -5px;
 .breadcrumbs{
 	color:#fff;
 	padding:19px 0 4px 0px;
-	float: left;
 }
 
 .cattool .breadcrumbs{
 	padding:17px 0 4px 15px;
-	width: 55%;
-}
-.review .breadcrumbs {
-	width: 43%;
 }
 
 
@@ -2649,8 +2648,6 @@ section.modified.editor .status
 	.graysmall li{width:42.5%;}
 	.header-menu{margin-right:18px}
     #stat-completion, #stat-wph {display: block;}
-    .cattool .breadcrumbs {width: 50%;}
-	.review .breadcrumbs {width: 36%}
     p.split-shortcut,.editing .sid .txt {font-size:10px;}
 
 }
@@ -2659,8 +2656,6 @@ section.modified.editor .status
 	.header-menu{margin-right:16px}
 	.text .item,.white li{width: 45.3% !important}
 	.target.item{margin-left:10px !important}
-	.cattool .breadcrumbs {width: 48%;}
-	.review .breadcrumbs {width: 34%}
 	.alternatives .graysmall .sugg-target {width: 37% !important;}
 }
 @media screen and (max-width: 1260px){
@@ -2706,24 +2701,8 @@ section.modified.editor .status
 
 @media screen and (max-width: 1100px){
     #notifbox,#filterSwitch {width: 45px;}
-	.cattool .breadcrumbs {
-		width: 40%;
-	}
-	.review .breadcrumbs  {
-		width: 27%;
-	}
 	.cattool #quality-report {padding:5px 10px!important;}
 	.header-menu li a, .header-menu li input {font-size:14px;}
-}
-
-@media screen and (max-width: 900px){
-	.cattool .breadcrumbs {
-		width: 39%;
-	}
-	.review .breadcrumbs  {
-		width: 26%;
-	}
-
 }
 
 li.tag-mismatch
