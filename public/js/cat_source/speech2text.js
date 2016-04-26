@@ -50,6 +50,7 @@ Speech2Text = {};
             var microphone = segment.find( '.micSpeech' );
             Speech2Text.stopSpeechRecognition( microphone );
             microphone.click( false );
+            Speech2Text.restartVars();
         },
         clickMicrophone: function( event ) {
             var microphone = $( this );
@@ -59,6 +60,13 @@ Speech2Text = {};
             } else {
                 Speech2Text.startSpeechRecognition( microphone );
             }
+        },
+        restartVars: function() {
+            Speech2Text.recognizing = false;
+            Speech2Text.finalTranscript = '';
+            Speech2Text.ignoreOnEnd = false;
+            Speech2Text.targetElement = null;
+            Speech2Text.isToEmptyTargetElement = true;
         },
         startSpeechRecognition: function( microphone ) {
             microphone.addClass( 'micSpeechActive' );
