@@ -541,8 +541,9 @@ APP = {
         return o;
     },
     addDomObserver: function (element, callback) {
+        if (_.isUndefined(element)) return;
         MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
-
+        
         var observer = new MutationObserver(function(mutations, observer) {
             // fired when a mutation occurs
             callback.call();
