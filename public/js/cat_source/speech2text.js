@@ -4,6 +4,7 @@ Speech2Text = {};
     $.extend( Speech2Text, {
         recognition: null,
         recognizing: false,
+        microphone: null,
         finalTranscript: '',
         interimTranscript: '',
         ignoreOnEnd: false,
@@ -22,10 +23,10 @@ Speech2Text = {};
             }
         },
         enableMicrophone: function( segment ) {
-            var microphone = segment.find( '.micSpeech' );
+            Speech2Text.microphone = segment.find( '.micSpeech' );
 
             if( Speech2Text.recognition ) {
-                Speech2Text.targetElement = microphone.parent().find( '.editarea' );
+                Speech2Text.targetElement = Speech2Text.microphone.parent().find( '.editarea' );
 
                 if( segment.hasClass('status-translated')
                         || segment.hasClass('status-approved') ) {
@@ -34,13 +35,13 @@ Speech2Text = {};
                     Speech2Text.isToEmptyTargetElement = true;
                 }
 
-                microphone.click( Speech2Text.clickMicrophone );
+                Speech2Text.microphone.click( Speech2Text.clickMicrophone );
 
                 if( Speech2Text.recognizing ) {
-                    Speech2Text.startSpeechRecognition( microphone );
+                    Speech2Text.startSpeechRecognition( Speech2Text.microphone );
                 }
             } else {
-                microphone.hide();
+                Speech2Text.microphone.hide();
 
                 //TODO: Display a user-friendly error message
                 console.error('Web Speech API is not supported by this browser. Upgrade to Chrome version 25 or later.');
@@ -49,6 +50,7 @@ Speech2Text = {};
         disableMicrophone: function( segment ) {
             var microphone = segment.find( '.micSpeech' );
             microphone.unbind( 'click' );
+            Speech2Text.microphone = null;
         },
         clickMicrophone: function( event ) {
             var microphone = $( this );
@@ -97,6 +99,7 @@ Speech2Text = {};
         },
         onRecognitionEnd: function() {
             Speech2Text.recognizing = false;
+            Speech2Text.microphone.removeClass( 'micSpeechActive' );
         },
         onRecognitionResult: function( event ) {
             Speech2Text.interimTranscript = '';
