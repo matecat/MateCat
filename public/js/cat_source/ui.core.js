@@ -1644,19 +1644,28 @@ UI = {
         }
     },
     renderAlternatives: function(d) {
-        segment = UI.currentSegment;
-        segment_id = UI.currentSegmentId;
-        escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html(), false, segment_id, 'render alternatives');
-        mainStr = UI.currentSegment.find('.editarea').text();
+        var segment = UI.currentSegment;
+        var segment_id = UI.currentSegmentId;
+        var escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html(), false, segment_id, 'render alternatives');
+        // var mainStr = UI.currentSegment.find('.editarea').text();
+        var mainStr = UI.clenaupTextFromPleaceholders(UI.postProcessEditarea(UI.currentSegment));
         $.each(d.data.editable, function(index) {
-            diff_obj = UI.execDiff(mainStr, this.translation);
-            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_obj) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
+            var transDecoded = htmlDecode(this.translation);
+            var diff_obj = UI.execDiff(mainStr, transDecoded);
+            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '">' +
+                '<li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' +
+                escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span -->' +
+                '<span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' +
+                UI.dmp.diff_prettyHtml(diff_obj) + '</span><span class="realData hide">' + this.translation +
+                '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
         });
 
         $.each(d.data.not_editable, function(index1) {
-            diff_obj = UI.execDiff(mainStr, this.translation);
+            var diff_obj = UI.execDiff(mainStr, this.translation);
             $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_obj) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
         });
+        UI.markSuggestionTags(segment);
+
 
     },
     execDiff: function (mainStr, cfrStr) {
