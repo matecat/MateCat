@@ -3112,8 +3112,8 @@ UI = {
 
     start: function () {
         APP.init();
-        // If some icon is added on the top header menu the file name is resized
-        $(".header-menu").bind("DOMSubtreeModified", function() {
+        // If some icon is added on the top header menu, the file name is resized
+        APP.addDomObserver(document.querySelector('.header-menu'), function() {
             APP.fitText($('.breadcrumbs'), $('#pname'), 30);
         });
         setBrowserHistoryBehavior();
