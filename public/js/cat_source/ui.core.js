@@ -3121,7 +3121,10 @@ UI = {
 
     start: function () {
         APP.init();
-        APP.fitText($('.breadcrumbs'), $('#pname'), 30);
+        // If some icon is added on the top header menu, the file name is resized
+        APP.addDomObserver($('.header-menu')[0], function() {
+            APP.fitText($('.breadcrumbs'), $('#pname'), 30);
+        });
         setBrowserHistoryBehavior();
         $("article").each(function() {
             APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30);
@@ -3216,7 +3219,6 @@ $(window).resize(function() {
     UI.fixHeaderHeightChange();
     APP.fitText($('.breadcrumbs'), $('#pname'), 30);
 });
-
 
 (function($, UI) {
     $.extend(UI, {

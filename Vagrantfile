@@ -34,11 +34,6 @@ Vagrant.configure(2) do |config|
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
   #
-  # If you need to run file conversion on your VM you need these 
-  # folders to build dependencies. Checkout repos for okapi 
-  # and MateCat fitlers and sync with your VM to build the project
-  config.vm.synced_folder "../MateCat-Filters", "/filters"
-  config.vm.synced_folder "../okapi", "/okapi"
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.

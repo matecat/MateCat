@@ -11,7 +11,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
     const TABLE = "users";
     const STRUCT_TYPE = "Users_UserStruct";
 
-    public function createUser( $obj ){
+    public function createUser( Users_UserStruct $obj ){
         $conn = $this->con->getConnection();
 
         $obj->create_date = date('Y-m-d H:i:s');
@@ -23,8 +23,15 @@ class Users_UserDao extends DataAccess_AbstractDao {
             " :uid, :email, :salt, :pass, :create_date, " .
             " :first_name, :last_name, :api_key " .
             " )"
-        ) ;
-        $stmt->execute( $obj->toArray() );
+        );
+
+        $stmt->execute( $obj->toArray( array(
+                'uid', 'email',
+                'salt', 'pass',
+                'create_date', 'first_name',
+                'last_name', 'api_key'
+                ))
+        );
 
         return $this->getByUid( $conn->lastInsertId() );
     }

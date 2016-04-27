@@ -538,6 +538,22 @@ APP = {
             o = s + o;
         }
         return o;
+    },
+    addDomObserver: function (element, callback) {
+        if (_.isUndefined(element)) return;
+        MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+        
+        var observer = new MutationObserver(function(mutations, observer) {
+            // fired when a mutation occurs
+            callback.call();
+        });
+        // define what element should be observed by the observer
+        // and what types of mutations trigger the callback
+        observer.observe(element, {
+            childList: true,
+            characterData: false,
+            attributes: false,
+        });
     }
 };
 
