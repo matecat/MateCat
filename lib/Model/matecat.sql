@@ -68,7 +68,7 @@ CREATE TABLE `comments` (
   PRIMARY KEY (`id`),
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `id_segment` (`id_job`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `engines` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -253,6 +253,7 @@ CREATE TABLE `owner_features` (
 
 CREATE TABLE `phinxlog` (
   `version` bigint(20) NOT NULL,
+  `migration_name` varchar(100) DEFAULT NULL,
   `start_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `end_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`version`)
@@ -506,7 +507,7 @@ CREATE TABLE `users` (
   PRIMARY KEY (`uid`),
   UNIQUE KEY `email` (`email`),
   KEY `api_key` (`api_key`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 
         INSERT INTO `engines` (
@@ -552,10 +553,6 @@ CREATE USER 'matecat'@'%' IDENTIFIED BY 'matecat01';
 # Grants for 'matecat'@'%'
 GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE, SHOW VIEW ON `matecat`.* TO 'matecat'@'%';
 
-INSERT INTO `phinxlog` ( version ) VALUES ( '20150918101657' );
-INSERT INTO `phinxlog` ( version ) VALUES ( '20150921114813' );
-INSERT INTO `phinxlog` ( version ) VALUES ( '20150922152051' );
-INSERT INTO `phinxlog` ( version ) VALUES ( '20151001131124' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20151120150352' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20151123141623' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20151126093945' );
@@ -566,7 +563,6 @@ INSERT INTO `phinxlog` ( version ) VALUES ( '20160108101432' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20160115143225' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20160116085841' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20160120143540' );
-INSERT INTO `phinxlog` ( version ) VALUES ( '20160121170252' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20160124101801' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20160301134214' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20160311094715' );

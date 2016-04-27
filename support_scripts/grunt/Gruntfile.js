@@ -13,9 +13,9 @@ module.exports = function(grunt) {
         basePath + '../css/segment-notes.css',
         basePath + '../css/project-completion-feature.css',
         basePath + '../css/editlog.css',
-		basePath + '../css/jquery.powertip.min.css',
-		basePath + '../css/lxq-style.css',
-		basePath + '../css/lexiqa.css'
+	basePath + '../css/jquery.powertip.min.css',
+	basePath + '../css/lxq-style.css',
+	basePath + '../css/lexiqa.css',
     ]
 
     var conf = grunt.file.read( incPath + 'version.ini' );
@@ -30,9 +30,9 @@ module.exports = function(grunt) {
         cssBase + 'segment-notes.css',
         cssBase + 'project-completion-feature.css',
         cssBase + 'editlog.css',
-		cssBase + 'jquery.powertip.min.css',
-		cssBase + 'lxq-style.css',
-		cssBase + 'lexiqa.css'
+	cssBase + 'jquery.powertip.min.css',
+	cssBase + 'lxq-style.css',
+	cssBase + 'lexiqa.css',
         cssBase + 'lib/remodal.css',
         cssBase + 'lib/remodal-default-theme.css',
         cssBase + 'sass/review_improved.scss',
