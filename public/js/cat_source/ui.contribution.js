@@ -248,11 +248,12 @@ $.extend(UI, {
             // start addtmxTmp
 //            $('.sub-editor.matches .overflow', segment).append('<div class="addtmx-tr white-tx"><a class="open-popup-addtm-tr">Add your personal TM</a></div>');
             // end addtmxTmp
-            UI.markSuggestionTags(segment);
+
 
 			UI.setDeleteSuggestion(segment);
 			UI.lockTags();
             UI.setContributionSourceDiff(segment);
+			UI.markSuggestionTags(segment);
 
 //            UI.setContributionSourceDiff_Old();
 			if (editareaLength === 0) {
