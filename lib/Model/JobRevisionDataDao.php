@@ -4,13 +4,16 @@ class JobRevisionDataDao {
   const TABLE = "projects";
   const STRUCT_TYPE = "JobRevisionDataStruct";
 
+    /**
+     * @var PDOConnection
+     */
   private $conn ;
+
   private $page_size = 100 ;
   private $page = 1 ;
 
-  public function __construct( $connection ) {
-      $connection->obtain();
-      $this->conn = $connection->connection ;
+  public function __construct( Database $connection ) {
+      $this->conn = $connection->getConnection() ;
   }
 
   public function getSegments( $job_id, $password, $options=array() ) {
