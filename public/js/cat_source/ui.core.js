@@ -1323,12 +1323,23 @@ UI = {
 					$('#file-' + fid).append(newFile);
 				}
 			}
+            $.each(this.segments,function(i,seg) {
+            if (!starting)
+            if (UI.hasOwnProperty('lexiqaData') && UI.lexiqaData.hasOwnProperty('lexiqaWarnings') && 
+                UI.lexiqaData.lexiqaWarnings.hasOwnProperty(seg.sid)) {
+                    console.log('in loadmore segments, segment: '+seg.sid+' already has qa info...');
+                    //FOTDDD
+                    LXQ.redoHighlighting(seg.sid,true);
+                    LXQ.redoHighlighting(seg.sid,false);
+                }
+            });
 		});
 
         $(document).trigger('files:appended');
 
 		if (starting) {
 			this.init();
+            UI.getLexiqaWarnings();
 		}
 
 	},
@@ -3021,7 +3032,7 @@ UI = {
 		this.currentSegment.removeClass('waiting_for_check_result');
 		this.registerQACheck();
 	},
-	saveInUndoStack: function() {
+	saveInUndoStack: function(fromWhich) {
 //		noRestore = (typeof noRestore == 'undefined')? 0 : 1;
 		currentItem = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition];
 
@@ -3065,11 +3076,36 @@ UI = {
 			this.undoStack.splice(this.undoStack.length - pos, pos);
 			this.undoStackPosition = 0;
 		}
+
+        if (fromWhich === 'space' && !UI.lexiqaData.lexiqaFetching) { 
 		saveSelection();
-		$('.undoCursorPlaceholder').remove();
+        $('.undoCursorPlaceholder').remove();
         $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
-		restoreSelection();
-		this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
+            
+            UI.lexiqaData.lexiqaFetching = true;   
+            var callback1 = function() {
+                LXQ.reloadPowertip(UI.currentSegment);                                           
+                restoreSelection();
+                UI.lexiqaData.lexiqaFetching = false;
+        		UI.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
+            }
+            console.log('space was pressed');
+            //console.dir(UI.currentSegment);
+            var translation = $('.editarea', UI.currentSegment ).text().replace(/\uFEFF/g,'');
+            
+            var id_segment = UI.currentSegment.selector.substring(9);
+
+
+            UI.doLexiQA(UI.currentSegment, translation, id_segment,false, callback1) ;
+        }
+        else {
+		saveSelection();
+        $('.undoCursorPlaceholder').remove();
+        $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
+            
+            restoreSelection();
+    		this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
+        }      
 	},
 	clearUndoStack: function() {
 		this.undoStack = [];
@@ -3122,8 +3158,289 @@ UI = {
             return false;
         }
     },
+    doLexiQA: function(segment,translation,id_segment,isSegmentCompleted,callback) {
+       //FOTD 
+        //console.log('HELO FROM FOTD');
+        console.log('segment: ');
+        console.dir(segment);
+        //var html = $.parseHTML($(segment).find('.source').html());
+        var html = $(segment).find('.source').html();
+        html = html.replace(/<.*?>/g,'');
+        
+        html = html.replace(/\&gt;/g,'>').replace(/\&lt;/g,'<');
+        
+        var sourcetext = $(segment).find('.source').text();
+        console.log('source : '+sourcetext);
+        //console.log(html[0].wholeText);
+        //console.dir();
+        console.log('target: '+ translation);
+        //console.log(segment.context.baseURI);
+        //console.log('segment_id: ' +id_segment);
 
+        //console.log('source_lang: '+ config.source_rfc);
+        //console.log('target_lang: '+ config.target_rfc);
+        // if (!UI.lexiqaData) {
+        //     UI.lexiqaWarnings = {};
+        //     UI.lexiqaWarnings.segments = [];
+        // }
+        
+        //var myWindow = window.open('')
+        $.ajax({type: "POST",
+            url: config.lexiqaServer+"/qasegment",
+            data: {
+            qaData:  {
+                    sourcelanguage: config.source_rfc,
+                    targetlanguage: config.target_rfc,
+                    sourcetext: sourcetext+'',
+                    targettext: translation,
+                    returnUrl: segment.context.baseURI,
+                    segmentId: id_segment,
+                    partnerId: "matecat",
+                    isSegmentCompleted: isSegmentCompleted,
+                    responseMode: "includeQAResults"
+                }
+            },
+            success:function(result){
+                console.dir(result);
+                //myWindow.location =result.qaurl;
+                if (result.qaurl && result.qaurl!=='') {
+                    //do something here -- enable qa errors
+                     var ind;
+                    if ((ind = UI.lexiqaData.segments.indexOf(id_segment))<0) {
+                    UI.lexiqaData.segments.push(id_segment);
+                    $('#lexiqabox').attr('class', 'warningbox').attr("title", "Go to lexiQA for QA analysis")
+                    .find('.numbererror').text(UI.lexiqaData.segments.length);                    
+                    //$('#go2lexiqa').attr('href', result.qaurl);
+                    }
+                    console.log('lexiqa warnings (1): '+UI.lexiqaData.segments.length);
+                    //highlight the segments
+                    var source_val = UI.clearMarks($.trim($(".source", segment).html()));
+                    console.log('source: '+source_val);
+                    var highlights = {
+                            source: {
+                                numbers: [],
+                                punctuation: [],
+                                spaces: [],
+                                urls: [],
+                                spelling: [],
+                                specialchardetect: []
+                            },
+                            target: {
+                                numbers: [],
+                                punctuation: [],
+                                spaces: [],
+                                urls: [],
+                                spelling: [],
+                                specialchardetect: []                                
+                            }
+                    };
+                    var newWarnings = {};
+                    newWarnings[id_segment] = {};
+                    result.qaData.forEach(function (qadata) {
+                        if (UI.lexiqaData.lexiqaWarnings.hasOwnProperty(id_segment) && 
+                            UI.lexiqaData.lexiqaWarnings[id_segment].hasOwnProperty(qadata.errorid)) {
+                            //this error is already here, update it
+                            //basically do thing because each error is unique....
+                            qadata.ignored =  UI.lexiqaData.lexiqaWarnings[id_segment][qadata.errorid].ignored;
+                        }
+                        newWarnings[id_segment][qadata.errorid] = qadata;
+                        if (!qadata.ignored) {
+                        qadata.color = LXQ.colors[qadata.category];
+                        if (qadata.insource) {
+                            highlights.source[qadata.category].push(qadata);
+                        }
+                        else{
+                            highlights.target[qadata.category].push(qadata);                                
+                        }
+                        }
+                    });
+                    console.log('$$$$$$$$$4$$');
+                    console.dir(highlights);
+                    //delete UI.lexiqaWarnings[id_segment];
+                    UI.lexiqaData.lexiqaWarnings[id_segment] = newWarnings[id_segment];
+                    console.dir(UI.lexiqaData.lexiqaWarnings[id_segment]);
+                    var seg = UI.getSegmentById(id_segment);
+                    source_val = LXQ.highLightText(source_val, highlights.source,isSegmentCompleted,LXQ.shouldHighlighWarningsForSegment(seg),true,segment);
+                    
+                    var target_val = UI.clearMarks($(".editarea", segment).html());
+                    console.log('target: '+target_val);
+                    target_val = LXQ.highLightText(target_val,highlights.target,isSegmentCompleted,LXQ.shouldHighlighWarningsForSegment(seg),false,segment);
+                    $(".editarea", segment).html(target_val);
+                    $(".source", segment).html(source_val);  
+                    if (callback!=null)
+                        callback(segment);
+                    else {
+                        LXQ.reloadPowertip(segment);
+                    }                     
+                    //FOTD CHANGE THIS
+                    // $('.lxq-error-seg',segment).attr('numberoferrors',LXQ.getVisibleWarningsCountForSegment(segment)).css("background-color","#efecca").removeClass('lxq-error-changed');
+                    //only reload dropdown menu and link, if there was an error...
+                    if (LXQ.enabled()) LXQ.refreshElements();
+                    $('.lxq-history-balloon-header-link').attr('href', result.qaurl);
+                }
+                else {
+                    //do something else
+                    var ind;
+                    if ((ind = UI.lexiqaData.segments.indexOf(id_segment))>=0) {
+                        UI.lexiqaData.segments.splice(ind,1);
+                        delete UI.lexiqaData.lexiqaWarnings[id_segment];
+                        console.log('lexiqa warnings (1): '+UI.lexiqaData.segments.length);
+                    }
+                    if ( UI.lexiqaData.segments.length ==0) {
+                        //remove link and warning
+                    $('#lexiqabox').attr('class', 'lexnotific').attr("title", "Well done, no errors found!")
+                .find('.numbererror').text('');                    
+                    //$('#go2lexiqa').attr('href', "#");  
+                    result.qaurl = '#';
+                    }
+                    else {
+                         $('#lexiqabox').attr('class', 'warningbox').attr("title", "Go to lexiQA for QA analysis")
+                .find('.numbererror').text(UI.lexiqaData.segments.length);                           
+                    }
+                    var source_val = UI.clearMarks($.trim($(".source", segment).html()));
+                    console.log('source: '+source_val);
+                    source_val = LXQ.cleanUpHighLighting(source_val);
+                    
+                    var target_val = UI.clearMarks($.trim($(".editarea", segment).html()));
+                    console.log('target: '+target_val);
+                    target_val = LXQ.cleanUpHighLighting(target_val);
+                    $(".editarea", segment).html(target_val);
+                    $(".source", segment).html(source_val); 
+                    if (callback!=null)
+                        callback();                    
+                    // $('.lxq-error-seg',segment).attr('numberoferrors','0').css("background-color","#efecca").removeClass('lxq-error-changed');
+                                                                                    
+                }                                              
+            }
+            ,error:function(result){
+                console.log(result);
+                if (callback!=null)
+                    callback();                    
+            }
+        });                
+        
+    },
+    getLexiqaWarnings: function() {
+        //FOTD
+       UI.lexiqaData.lexiqaFetching = true;
+       $.ajax({type: "GET",
+            url: config.lexiqaServer+"/matecaterrors",
+            data: {id: 'matecat-'+config.job_id+'-'+config.password },
+            success:function(results){
+                console.log('matecaterrors returned:')
+                console.dir(results);
+                if (results.errors!=0) {
+                    //only do something if there are errors in lexiqa server
+                    UI.lexiqaData.lexiqaWarnings = {};
+                    
+
+                    results.segments.forEach(function(element) {
+                        if (element.errornum ===0) {
+                            console.log('segment: '+element.segid + ' had no errors, proceed with next..');
+                            return;
+                        }
+                        UI.lexiqaData.segments.push(element.segid);
+                        
+                        //highlight the respective segments here                        
+                        var highlights = {
+                            source: {
+                                numbers: [],
+                                punctuation: [],
+                                spaces: [],
+                                urls: [],
+                                spelling: [],
+                                specialchardetect: []
+                            },
+                            target: {
+                                numbers: [],
+                                punctuation: [],
+                                spaces: [],
+                                urls: [],
+                                spelling: [],
+                                specialchardetect: []                                
+                            }
+                        };
+                        UI.lexiqaData.lexiqaWarnings[element.segid] = {};
+                        var seg = UI.getSegmentById(element.segid);
+                        var translation = $(".editarea", seg).text();
+                        results.results[element.segid].forEach(function (qadata) {
+                            UI.lexiqaData.lexiqaWarnings[element.segid][qadata.errorid] = qadata;
+                            if (!qadata.ignored) {
+                            qadata.color = LXQ.colors[qadata.category];
+                            if (qadata.insource) {
+                                highlights.source[qadata.category].push(qadata);
+                            }
+                            else{
+                                if (qadata.end <= translation.length)
+                                    highlights.target[qadata.category].push(qadata);
+                                else 
+                                    console.log('ignored: '+qadata.errorid);                                
+                            }
+                            }
+                            
+                        });                        
+                        if (seg === false)
+                            return; //this segment has not been loaded yet...
+                        console.log('$$$$$$$$$4$$: '+element.segid);
+                        console.dir(highlights);                        
+                        LXQ.shouldHighlighWarningsForSegment(element.segid,element.show);
+                        //console.dir (seg);
+                        //var segEdit = UI.getEditAreaBySegmentId(element);
+                        //console.dir(segEdit);
+                        var source_val = UI.clearMarks($.trim($(".source", seg).html()));
+                        //console.log('source: '+source_val);
+                                                
+                        source_val = LXQ.highLightText(source_val,highlights.source,true,LXQ.shouldHighlighWarningsForSegment(seg),true,seg);
+                        
+                        var target_val = UI.clearMarks($.trim($(".editarea", seg).html()));
+                        console.log('target: '+target_val);
+                        target_val = LXQ.highLightText(target_val,highlights.target,true,LXQ.shouldHighlighWarningsForSegment(seg),false,seg);
+                        $(".editarea", seg).html(target_val);
+                        $(".source", seg).html(source_val);
+                        // $('.lxq-error-seg',seg).attr('numberoferrors',LXQ.getVisibleWarningsCountForSegment(seg));
+                        // if (element.show) {
+                        //     $('.lxq-error-seg',seg).attr('title','Click to hide warning highlighting').css("background-color","#efecca").removeClass('lxq-error-changed');
+                        // }
+                        // else {
+                        //     $('.lxq-error-seg',seg).attr('title','Click to show warning highlighting').css("background-color","#046380").addClass('lxq-error-changed');
+                        // }            
+                        LXQ.buildPowertipDataForSegment(seg);                
+                        
+                    });
+                    //console.log('UI.lexiqaData.lexiqaWarnings');
+                    //console.dir(UI.lexiqaData.lexiqaWarnings);
+                     $('#lexiqabox').attr('class', 'warningbox').attr("title", "Go to lexiQA for QA analysis")
+                .find('.numbererror').text(results.errors);
+                    $('.tooltipa').powerTip({
+                        placement: 'sw',
+                        mouseOnToPopup: true,
+                        closeDelay: 500
+                    });
+                    $('.tooltipas').powerTip({
+                        placement: 'se',
+                        mouseOnToPopup: true,
+                        closeDelay: 500
+                    });
+                }
+                else {
+                    $('#lexiqabox').attr('class', 'lexnotific').attr("title", "Well done, no errors found!")
+                .find('.numbererror').text('');                    
+                      results.qaurl= "#";  
+                }
+                LXQ.doQAallSegments();
+                if (LXQ.enabled()) LXQ.refreshElements();
+                $('.lxq-history-balloon-header-link').attr('href', results.qaurl);                
+                UI.lexiqaData.lexiqaFetching = false;             
+            }});                
+    },
     start: function () {
+        UI.lexiqaData = {};
+        UI.lexiqaData.lexiqaWarnings = {};
+        UI.lexiqaData.enableHighlighting = true;
+        UI.lexiqaData.lexiqaFetching = false;
+        UI.lexiqaData.segments = [];
+        UI.lexiqaData.segmentsInfo = {}; 
+        
         APP.init();
         // If some icon is added on the top header menu, the file name is resized
         APP.addDomObserver($('.header-menu')[0], function() {
