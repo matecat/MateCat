@@ -206,6 +206,8 @@ $.extend(UI, {
         }).bind('keydown', 'Meta+shift+s', function(e) {
 //            e.preventDefault();
             UI.body.toggleClass('tagmode-default-extended');
+        }).on('click','#cmn-toggle-1',function(e){
+            LXQ.toogleHighlighting();
         }).on('click', '.tagModeToggle', function(e) {
             e.preventDefault();
             console.log('click su tagMode toggle');
@@ -1056,7 +1058,7 @@ $.extend(UI, {
 			}
 
 			UI.registerQACheck();
-                if(UI.isKorean && ( (e.which == '60') || (e.which == '62') || (e.which = '32')) ) {
+                if(UI.isKorean && ( (e.which == '60') || (e.which == '62') || (e.which == '32')) ) {
                 } else {
                     UI.lockTags(UI.editarea);
                 }

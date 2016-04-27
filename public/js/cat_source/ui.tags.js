@@ -111,11 +111,15 @@ $.extend(UI, {
 
         tx = tx.replace(/<span/gi, "<pl")
             .replace(/<\/span/gi, "</pl")
+//			.replace(/<lxqwarning/gi, "<lxqpl")
+//            .replace(/<\/lxqwarning/gi, "</lxqpl")
             .replace(/&lt;/gi, "<")
             .replace(/(<(g|x|bx|ex|bpt|ept|ph[^a-z]*|it|mrk)\sid[^<]*?&gt;)/gi, brTx1)
             .replace(/</gi, "&lt;")
             .replace(/\&lt;pl/gi, "<span")
             .replace(/\&lt;\/pl/gi, "</span")
+            .replace(/\&lt;lxqwarning/gi, "<lxqwarning")
+            .replace(/\&lt;\/lxqwarning/gi, "</lxqwarning")
             .replace(/\&lt;div\>/gi, "<div>")
             .replace(/\&lt;\/div\>/gi, "</div>")
             .replace(/\&lt;br\>/gi, "<br>")
@@ -490,8 +494,9 @@ $.extend(UI, {
 
                 })
 //                console.log('pairEl: ', $(pairEl).text());
-                $(pairEl).addClass('highlight');
-
+                if( pairEl!==undefined) {
+                    $(pairEl).addClass('highlight');
+                }
 
             }
 //            console.log('next endTag: ', el.next('.endTag'));
@@ -522,7 +527,9 @@ $.extend(UI, {
                     }
 
                 });
-                $(pairEl).addClass('highlight');
+                if( pairEl!==null) {
+                    $(pairEl).addClass('highlight');
+                }
             }
         }
 //        console.log('$(el): ', $(el).text());
