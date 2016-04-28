@@ -2455,8 +2455,10 @@ UI = {
                 UI.execSetTranslationTail();
 				UI.setTranslation_success(data, this[1]);
                 $(document).trigger('setTranslation:success', data);
-
                 $(document).trigger('translation:change', data.translation);
+                var translation = $('.editarea', segment ).text().replace(/\uFEFF/g,'');
+                UI.doLexiQA(segment,translation,id_segment,true,null);
+                $(document).trigger('setTranslation:success', d);
 			}
 		});
 	},
@@ -3084,7 +3086,7 @@ UI = {
             //console.dir(UI.currentSegment);
             var translation = $('.editarea', UI.currentSegment ).text().replace(/\uFEFF/g,'');
             
-            var id_segment = UI.currentSegment.selector.substring(9);
+            var id_segment = UI.getSegmentId(UI.currentSegment);
 
 
             UI.doLexiQA(UI.currentSegment, translation, id_segment,false, callback1) ;
@@ -3194,7 +3196,7 @@ UI = {
             success:function(result){
                 console.dir(result);
                 //myWindow.location =result.qaurl;
-                if (result.qaurl && result.qaurl!=='') {
+                if (result.hasOwnProperty('qaData') && result.qaData.length > 0) {
                     //do something here -- enable qa errors
                      var ind;
                     if ((ind = UI.lexiqaData.segments.indexOf(id_segment))<0) {
