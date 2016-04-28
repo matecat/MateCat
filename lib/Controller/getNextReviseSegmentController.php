@@ -54,7 +54,7 @@ class getNextReviseSegmentController extends ajaxController {
 
 		$nextSegmentId = fetchStatus( $this->id_segment, $segmentList, Constants_TranslationStatus::STATUS_TRANSLATED );
 		if ( !$nextSegmentId ) {
-			$nextSegmentId = fetchStatus( $segmentList, Constants_TranslationStatus::STATUS_APPROVED );
+			$nextSegmentId = fetchStatus($this->id_segment, $segmentList, Constants_TranslationStatus::STATUS_APPROVED );
 		}
 
 		$this->result[ 'nextId' ] = $nextSegmentId;
