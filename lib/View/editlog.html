@@ -9,7 +9,7 @@
         <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link href="${basepath}public/css/editlog.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link rel="stylesheet" href="${basepath}public/css/manage.css?build=${build_number}"/>
-        
+        <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
         <script type="text/javascript">
             var config = {
                 basepath: '${basepath | string:/}'
@@ -289,12 +289,21 @@
             $( document ).ready(function() {
                 $('a.authLink').click(function(e){
                     e.preventDefault();
-                    APP.googole_popup($(this).attr('href'));
+                    $(".login-google").show();
+                    return false;
                 });
+                $('#sign-in').click(function(e){
+                    e.preventDefault();
+                    APP.googole_popup($(this).data('oauth'));
+                })
+            });
+            $( document ).on('click', '.x-popup', function() {
+                $( '.login-google' ).hide();
             });
         </script>
         <script src="${basepath}public/js/lib/snapengage.js"></script>
 
         <div metal:use-macro="cookiebanner.html/cookieBanner"/>
+        <div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
     </body>
 </html>

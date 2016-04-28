@@ -13,6 +13,10 @@ include_once INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
 
 use FeatureSet ;
 
+use GDrive;
+
+use RemoteFiles_RemoteFileDao;
+
 class ProjectManager {
 
     /**
@@ -47,6 +51,10 @@ class ProjectManager {
      * @var Projects_ProjectStruct
      */
     protected $project ;
+
+    protected $gdriveService;
+
+    protected $isGDriveProject = false;
 
     const TRANSLATED_USER = 'translated_user';
 
@@ -204,12 +212,47 @@ class ProjectManager {
         $this->createProjectRecord();
         $this->saveMetadata();
 
-        //create user (Massidda 2013-01-24)
+        //sort files in order to process TMX first
+        $sortedFiles = array();
+        $firstTMXFileName = "";
+        foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
+
+            //check for glossary files and tmx and put them in front of the list
+            $infoFile = DetectProprietaryXliff::getInfo( $fileName );
+            if ( DetectProprietaryXliff::getMemoryFileType() ) {
+
+                //found TMX, enable language checking routines
+                if ( DetectProprietaryXliff::isTMXFile() ) {
+
+                    //export the name of the first TMX Files for latter use
+                    $firstTMXFileName = ( empty( $firstTMXFileName ) ? $firstTMXFileName = $fileName : null );
+                    $this->checkTMX = 1;
+                }
+
+                //not used at moment but needed if we want to do a poll for status
+                if ( DetectProprietaryXliff::isGlossaryFile() ) {
+                    $this->checkGlossary = 1;
+                }
+
+                //prepend in front of the list
+                array_unshift( $sortedFiles, $fileName );
+            } else {
+
+                //append at the end of the list
+                array_push( $sortedFiles, $fileName );
+            }
+
+        }
+        $this->projectStructure[ 'array_files' ] = $sortedFiles;
+        unset( $sortedFiles );
+
         //check if all the keys are valid MyMemory keys
         if ( !empty( $this->projectStructure[ 'private_tm_key' ] ) ) {
             // TODO: move this 100 lines IF condition elsewhere to reduce scope
 
             foreach ( $this->projectStructure[ 'private_tm_key' ] as $i => $_tmKey ) {
+
+
 
                 $this->tmxServiceWrapper->setTmKey( $_tmKey[ 'key' ] );
 
@@ -255,7 +298,6 @@ class ProjectManager {
                     /**
                      * @var $_memoKey TmKeyManagement_MemoryKeyStruct
                      */
-
                     $userTmKeys[] = $_memoKey->tm_key->key;
                 }
 
@@ -267,8 +309,11 @@ class ProjectManager {
                         $newTmKey->key  = $_tmKey[ 'key' ];
                         $newTmKey->tm   = true;
                         $newTmKey->glos = true;
-                        //TODO: take this from input
-                        $newTmKey->name = $_tmKey[ 'name' ];
+
+                        //THIS IS A NEW KEY and must be inserted into the user keyring
+                        //So, if a TMX file is present in the list of uploaded files, and the Key name provided is empty
+                        // assign TMX name to the key
+                        $newTmKey->name = ( !empty( $_tmKey[ 'name' ] ) ? $_tmKey[ 'name' ] : $firstTMXFileName );
 
                         $newMemoryKey->tm_key = $newTmKey;
                         $newMemoryKey->uid    = $this->projectStructure[ 'uid' ];
@@ -306,36 +351,6 @@ class ProjectManager {
             insertTranslator( $this->projectStructure );
 
         }
-
-        //sort files in order to process TMX first
-        $sortedFiles = array();
-        foreach ( $this->projectStructure[ 'array_files' ] as $fileName ) {
-
-            //check for glossary files and tmx and put them in front of the list
-            $infoFile = DetectProprietaryXliff::getInfo( $fileName );
-            if ( DetectProprietaryXliff::getMemoryFileType() ) {
-
-                //found TMX, enable language checking routines
-                if ( DetectProprietaryXliff::isTMXFile() ) {
-                    $this->checkTMX = 1;
-                }
-
-                //not used at moment but needed if we want to do a poll for status
-                if ( DetectProprietaryXliff::isGlossaryFile() ) {
-                    $this->checkGlossary = 1;
-                }
-
-                //prepend in front of the list
-                array_unshift( $sortedFiles, $fileName );
-            } else {
-
-                //append at the end of the list
-                array_push( $sortedFiles, $fileName );
-            }
-
-        }
-        $this->projectStructure[ 'array_files' ] = $sortedFiles;
-        unset( $sortedFiles );
 
 
         $uploadDir = $this->uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ];
@@ -398,13 +413,18 @@ class ProjectManager {
                 );
 
                 //add newly created link to list
-                $linkFiles[ 'conversionHashes' ][ 'sha' ][]                                                                    = $sha1 . "|" . $this->projectStructure[ 'source_language' ];
+                $linkFiles[ 'conversionHashes' ][ 'sha' ][] = $sha1 . "|" . $this->projectStructure[ 'source_language' ];
                 $linkFiles[ 'conversionHashes' ][ 'fileName' ][ $sha1 . "|" . $this->projectStructure[ 'source_language' ] ][] = $fileName;
 
                 //when the same sdlxliff is uploaded more than once with different names
                 $linkFiles[ 'conversionHashes' ][ 'sha' ] = array_unique( $linkFiles[ 'conversionHashes' ][ 'sha' ] );
                 unset( $sha1 );
             }
+        }
+
+        if ( GDrive::sessionHasFiles( $_SESSION ) ) {
+            $this->gdriveService = GDrive::getService( array( 'uid' => $_SESSION[ 'uid' ] ) );
+            $this->isGDriveProject = true;
         }
 
         //now, upload dir contains only hash-links
@@ -448,12 +468,23 @@ class ProjectManager {
 
                 //PLEASE NOTE, this can be an array when the same file added more
                 // than once and with different names
+                //
                 foreach ( $_originalFileName as $originalFileName ) {
 
-                    $mimeType = FilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
-                    $fid      = insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path );
+                    $file_insert_params = array();
 
-                    //move the file in the right directory from the packages to the file dir
+                    $gdriveFileId = GDrive::findFileIdByName( $originalFileName, $_SESSION );
+                    
+                    $mimeType = FilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
+                    $fid      = insertFile( $this->projectStructure, $originalFileName, $mimeType,
+                        $fileDateSha1Path, $file_insert_params  );
+
+                    if($gdriveFileId != null) {
+                        RemoteFiles_RemoteFileDao::insert( $fid, 0, $gdriveFileId, 1 );
+
+                        unset( $_SESSION[ GDrive::SESSION_FILE_LIST ][ $gdriveFileId ] );
+                    }
+
                     $this->fileStorage->moveFromCacheToFileDir(
                             $fileDateSha1Path,
                             $this->projectStructure[ 'source_language' ],
@@ -1042,6 +1073,10 @@ class ProjectManager {
                     $this->insertSegmentNotesForFile();
                 }
                 insertFilesJob( $jid, $fid );
+
+                if( $this->isGDriveProject ) {
+                    GDrive::insertRemoteFile( $fid, $jid, $this->gdriveService, $_SESSION );
+                }
             }
         }
 

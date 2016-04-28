@@ -1,6 +1,21 @@
 if ( ReviewImproved.enabled() && config.isReview ) {
 (function($, root, undefined) {
 
+    var originalBindShortcuts = UI.bindShortcuts;
+
+    UI.shortcuts = UI.shortcuts || {} ;
+
+    $.extend(UI.shortcuts, {
+        "reject": {
+            "label" : "Reject translation",
+            "equivalent": "click on Rejected",
+            "keystrokes" : {
+                "standard": "ctrl+shift+down",
+                "mac": "meta+shift+down"
+            }
+        }
+    });
+
     $.extend(UI, {
         /**
          * Search for the next translated segment to propose for revision.
@@ -163,8 +178,36 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
         getSegmentTemplate : function() {
             return MateCat.Templates['review_improved/segment'];
+        },
+
+        rejectAndGoToNext : function() {
+            UI.setTranslation({
+                id_segment: UI.currentSegmentId,
+                status: 'rejected',
+                caller: false,
+                byStatus: false,
+                propagate: false,
+            });
+
+            UI.gotoNextSegment() ;
+        },
+
+        bindShortcuts : function() {
+
+            originalBindShortcuts();
+
+            $('body').on('keydown.shortcuts', null, UI.shortcuts.reject.keystrokes.standard, function(e) {
+                e.preventDefault();
+                UI.rejectAndGoToNext();
+            });
+
+            $('body').on('keydown.shortcuts', null, UI.shortcuts.reject.keystrokes.mac, function(e) {
+                e.preventDefault();
+                UI.rejectAndGoToNext();
+            });
         }
     });
+
 
 
   })(jQuery, window, ReviewImproved) ;

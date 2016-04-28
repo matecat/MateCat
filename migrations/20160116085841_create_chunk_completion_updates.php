@@ -1,8 +1,6 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
-
-class CreateChunkCompletionUpdates extends AbstractMigration {
+class CreateChunkCompletionUpdates extends AbstractMatecatMigration {
 
     public $sql_up = <<<EOF
 CREATE TABLE `chunk_completion_updates` (
@@ -29,12 +27,4 @@ CREATE TABLE `chunk_completion_updates` (
 EOF;
 
     public $sql_down = "DROP table `chunk_completion_updates`";
-
-    public function up() {
-        $this->execute($this->sql_up);
-    }
-
-    public function down() {
-        $this->execute( $this->sql_down);
-    }
 }

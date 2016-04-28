@@ -416,11 +416,10 @@ class TMSService {
                 break;
         }
 
-        $chunkDAO = new Chunks_ChunkDao(Database::obtain());
         /**
          * @var $chunks Chunks_ChunkStruct[]
          */
-        $chunks = $chunkDAO->getByJobID($jid);
+        $chunks = Chunks_ChunkDao::getByJobID($jid);
 
         foreach ( $result as $k => $row ) {
 
@@ -447,11 +446,11 @@ class TMSService {
     <tu tuid="' . $row[ 'id_segment' ] . '" creationdate="' . $dateCreate->format( 'Ymd\THis\Z' ) . '" datatype="plaintext" srclang="' . $sourceLang . '">
         <prop type="x-MateCAT-id_job">' . $row[ 'id_job' ] . '</prop>
         <prop type="x-MateCAT-id_segment">' . $row[ 'id_segment' ] . '</prop>
-        <prop type="x-MateCAT-filename">' . htmlspecialchars( $row[ 'filename' ] ) . '</prop>
+        <prop type="x-MateCAT-filename">' . CatUtils::rawxliff2rawview( $row[ 'filename' ] ) . '</prop>
         <prop type="x-MateCAT-status">' . $row[ 'status' ] . '</prop>
         '.$chunkPropString.'
         <tuv xml:lang="' . $sourceLang . '">
-            <seg>' . htmlspecialchars( $row[ 'segment' ] ) . '</seg>
+            <seg>' . CatUtils::rawxliff2rawview( $row[ 'segment' ] ) . '</seg>
         </tuv>';
 
             //if segment is confirmed or we want show all segments
@@ -465,7 +464,7 @@ class TMSService {
 
                 $tmx .= '
         <tuv xml:lang="' . $targetLang . '">
-            <seg>' . htmlspecialchars( $row[ 'translation' ] ) . '</seg>
+            <seg>' . CatUtils::rawxliff2rawview( $row[ 'translation' ] ) . '</seg>
         </tuv>';
 
             }

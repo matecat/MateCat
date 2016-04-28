@@ -28,7 +28,11 @@ body.incomingMsg header
 }
 
 header .wrapper{height:20px; padding:0px 0 0 0;}
-.header-menu{float:right;margin-right:16px}
+.header-menu{
+	float:right;
+	margin-right:16px;
+	margin-left: 15px;
+}
 .header-menu li{
     /*border-left:1px solid #000;*/
     float:left;height:37px;padding:5px 0px;}
@@ -161,9 +165,14 @@ left: -5px;
 }
 /*ul{margin:0;padding:0;list-style:none}
 .wrapper{width:98%;min-width:960px;margin:0px auto 0 auto;padding:5px 0 0 0;width:92%;font-size:14px;position:relative;text-align:left;}*/
-.breadcrumbs{color:#fff;padding:19px 0 4px 0px;}
+.breadcrumbs{
+	color:#fff;
+	padding:19px 0 4px 0px;
+}
 
-.cattool .breadcrumbs{padding:17px 0 4px 15px;}
+.cattool .breadcrumbs{
+	padding:17px 0 4px 15px;
+}
 
 
 .cattool #quality-report
@@ -584,7 +593,7 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 
 
 /*done & draft*/
-.translated, .approved
+.translated ,.approved
 {
     background: #09beec;
     border:1px solid #848689;
@@ -599,6 +608,21 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
     background: -moz-linear-gradient(top,  #09beec,  #119ec4);
     background: linear-gradient(top,  #09beec,  #119ec4);
 }
+
+.button-reject {
+	border:1px solid ;
+	background: #b02429 ;
+	border:1px solid #848689;
+	color: #333;
+	font-weight: bold;
+	text-decoration: none;
+	padding: 8px 18px;
+	border-radius: 2px;
+	border-radius: 2px;
+	font-size: 18px;
+}
+
+
 article .translated, article .draft, article .approved{margin:0 0px 5px 5px}
 
 
@@ -612,7 +636,7 @@ article .translated, article .draft, article .approved{margin:0 0px 5px 5px}
 
 .buttons li:hover p{display:block;}
 
-.translated{color:#fff !important}
+.translated {color:#fff !important}
 
 article .translated, article .approved {
 	text-transform: uppercase;
@@ -646,7 +670,7 @@ article .translated:active, article .draft:active, article .btn:active, article 
 .draft:hover{background:#eee;}
 
 
-.translated:active, .draft:active, .btn:active, .copysource:active{
+.translated:active, .draft:active, .btn:active, .copysource:active {
 	-moz-box-shadow: none;-webkit-box-shadow: none;box-shadow: none;border:1px solid #000
 }
 
@@ -770,14 +794,14 @@ box-shadow: 0 1px 2px #ccc;
 }
 
 .header-menu .wrapper-dropdown-5 .dropdown {
-	  left: -131px;
-  width: 162px;
+    left: -221px;
+    width: 268px;
 }
 
 
 .justdone .header-menu .wrapper-dropdown-5 .dropdown{
-	left: -226px;
-  width: 258px;
+	left: -205px;
+  width: 268px;
 }
 .header-menu .wrapper-dropdown-5 .dropdown[data-download='false'] li.downloadTranslation,
 .header-menu .wrapper-dropdown-5 .dropdown[data-download='true'] li.previewLink
@@ -1315,6 +1339,10 @@ margin: 5px 1.5%;
 .searchbox
 {
     padding: 0 !important;
+}
+
+.searchbox .search-inputs {
+	height: 64px ;
 }
 .searchbox form
 {
@@ -2461,19 +2489,6 @@ section.modified.editor .status
 
 .end-message-box{height:300px;width:800px;margin:0 auto;position:fixed;padding:0 0 20px 0;display:none;top:50%;left:50%;margin:-200px 0 0 -400px;z-index:999999;background:#fff;box-shadow: 0px 0px 25px #000;border-radius:2px;}
 
-/*
-
-.justdone .end-message-box{display:none !important}
-
-.justdone .editarea{z-index:9 !important}
-
-.end-message-col2{width:415px;float:right;text-align:left}
-.end-message-col1 h3 {margin:20px 0 0 20px !important;font-weight:bold;padding:0;font-size:30px !important;position:absolute;color:#fff}
-.end-message-col2 h4 {margin:25px 0 !important;font-weight:normal;padding:0;font-size:20px !important}
-.end-message-col2 a {color:#333;}
-.end-message-col2 a:hover {text-decoration:none;}
-*/
-
 .sendbox{position:absolute;bottom:25px}
 .end-message-col2 p {color:#8a8a8a;margin:0 0 5px 0;font-size:16px}
 .or-message{text-align:center;width:320px}
@@ -2531,15 +2546,6 @@ section.modified.editor .status
 {
 	cursor: pointer;
 }
-.editarea .locked.selected,
-.source .locked.selected
-{
-	cursor: move !important;
-}
-
-
-
-
 
 /*.source ::selection
 	{
@@ -2593,11 +2599,6 @@ section.modified.editor .status
     border: 2px solid #7EB30C;
 }
 
-.editor .editarea .locked.selected
-{
-	cursor: move !important;
-}
-
 .editarea .locked
 {
 }
@@ -2607,18 +2608,6 @@ section.modified.editor .status
 
 .download-chrome:hover, .alert:hover{background-color: rgba(0, 0, 0, 0.9) }
 
-.source .locked:hover
-{
-	/*
-		color: orange !important;
-	*/
-}
-.review.justdone .breadcrumbs {
-	max-width: 450px;
-}
-.review.justdone .breadcrumbs #pname {
-	width: 200px;
-}
 
 /*media query */
 
@@ -2645,7 +2634,6 @@ section.modified.editor .status
 	.graysmall li{width:42.5%;}
 	.header-menu{margin-right:18px}
     #stat-completion, #stat-wph {display: block;}
-    .review .breadcrumbs a {width: 100%;}
     p.split-shortcut,.editing .sid .txt {font-size:10px;}
 
 }
@@ -2654,7 +2642,6 @@ section.modified.editor .status
 	.header-menu{margin-right:16px}
 	.text .item,.white li{width: 45.3% !important}
 	.target.item{margin-left:10px !important}
-	.review .breadcrumbs a {width: 100%;}
 	.alternatives .graysmall .sugg-target {width: 37% !important;}
 }
 @media screen and (max-width: 1260px){
@@ -2680,12 +2667,11 @@ section.modified.editor .status
 	.number{left:-52px;}
 	.editarea, .source{ /* word-break: break-all */}
 	.projectbar ul {margin-left:5px}
-	.Translated, .draft, .approved{padding:7px 6px;}
+	.Translated, .draft, .approved {padding:7px 6px;}
 	.meter {	width:10%;}
 	.con-input{width:63%;}
 	.con-input{width:62% !important;}
 	.languages{text-indent:-62px }
-    .review .breadcrumbs a {width: 100%;}
 	.review .wrapper {width: 98%;}
 	.text .target{padding-left:45px;}
 	.graysmall li{width:43%;}
@@ -2700,11 +2686,7 @@ section.modified.editor .status
 }
 
 @media screen and (max-width: 1100px){
-	.review .breadcrumbs a {width: 110px; padding-left:15px!important;}
-	.review .breadcrumbs a {width: 150px;}
     #notifbox,#filterSwitch {width: 45px;}
-    .review .breadcrumbs a {width: 100%;}
-	.cattool .breadcrumbs {padding: 19px 0 4px 0px;}
 	.cattool #quality-report {padding:5px 10px!important;}
 	.header-menu li a, .header-menu li input {font-size:14px;}
 }

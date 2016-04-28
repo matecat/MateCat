@@ -430,8 +430,14 @@ function tryInsertUserFromOAuth( $data ) {
     } else {
         $cid[ 'email' ] = $data[ 'email' ];
         $cid[ 'uid' ]   = $results[ 'uid' ];
-    }
 
+        // TODO: migrate this to an insert on duplicate key update
+        $sql_update = "UPDATE users set oauth_access_token = ? WHERE uid = ?" ; 
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql_update ); 
+        $stmt->execute( array( $data['oauth_access_token'], $cid['uid'] ) ); 
+    }
+    
     return $cid;
 }
 
@@ -1611,11 +1617,13 @@ function getOriginalFile( $id_file ) {
     return $results;
 }
 
-function getUpdatedTranslations( $timestamp, $first_segment, $last_segment ) {
+function getUpdatedTranslations( $timestamp, $first_segment, $last_segment, $id_job ) {
+    
     $query = "SELECT id_segment as sid, status,translation from segment_translations
 		WHERE
 		id_segment BETWEEN $first_segment AND $last_segment
-		AND translation_date > FROM_UNIXTIME($timestamp)";
+		AND translation_date > FROM_UNIXTIME($timestamp)
+		AND id_job = $id_job";
 
     //Log::doLog($query);
     $db      = Database::obtain();
@@ -1739,7 +1747,8 @@ function fetchStatus( $sid, $results, $status = Constants_TranslationStatus::STA
     if ( isset( $results[ 0 ][ 'id' ] ) ) {
         //if there are results check for next id,
         //otherwise get the first one in the list
-        $nSegment = $results[ 0 ][ 'id' ];
+//        $nSegment = $results[ 0 ][ 'id' ];
+        //Check if there is translated segment with $seg[ 'id' ] > $sid
         foreach ( $results as $seg ) {
             if ( $seg[ 'status' ] == null ) {
                 $seg[ 'status' ] = Constants_TranslationStatus::STATUS_NEW;
@@ -1749,6 +1758,19 @@ function fetchStatus( $sid, $results, $status = Constants_TranslationStatus::STA
                 break;
             }
         }
+        // If there aren't transleted segments in the next elements -> check starting from the first
+        if (!$nSegment) {
+            foreach ( $results as $seg ) {
+                if ( $seg[ 'status' ] == null ) {
+                    $seg[ 'status' ] = Constants_TranslationStatus::STATUS_NEW;
+                }
+                if ( $statusWeight[ $seg[ 'status' ] ] == $statusWeight[ $status ] ) {
+                    $nSegment = $seg[ 'id' ];
+                    break;
+                }
+            }
+        }
+
     }
 
     return $nSegment;
@@ -1854,14 +1876,13 @@ function insertJob( ArrayObject $projectStructure, $password, $target_language, 
     return $results[ 'LAST_INSERT_ID()' ];
 }
 
-function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $fileDateSha1Path ) {
+function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $fileDateSha1Path, $params=array() ) {
     $data                         = array();
     $data[ 'id_project' ]         = $projectStructure[ 'id_project' ];
     $data[ 'filename' ]           = $file_name;
     $data[ 'source_language' ]    = $projectStructure[ 'source_language' ];
     $data[ 'mime_type' ]          = $mime_type;
     $data[ 'sha1_original_file' ] = $fileDateSha1Path;
-
 
     $db = Database::obtain();
 
@@ -2206,27 +2227,6 @@ function getProjectsNumber( $start, $step, $search_in_pname, $search_source, $se
     $owner       = $_SESSION[ 'cid' ];
     $owner_query = " j.owner='$owner' and";
 
-    //Log::doLog('OWNER QUERY:',$owner);
-
-    //    $owner_query = $owner;
-    //	$owner_query = "";
-
-    /*
-       $status_query = " (j.status_owner='ongoing'";
-    //	if(!$search_showarchived && !$search_showcancelled) {
-    if($filtering) {
-    if($search_showarchived) $status_query .= " or j.status_owner='archived'";
-    if($search_showcancelled) $status_query .= " or j.status_owner='cancelled'";
-    $status_query .= ") and";
-    } else {
-    $status_query = " (j.status_owner='ongoing' or j.status_owner='cancelled' or j.status_owner='archived') and";
-    }
-    //	$status_query = (!$search_showarchived && !$search_showcancelled)? "j.status='ongoing' or j.status='cancelled' and" : "";
-    Log::doLog('STATUS QUERY:',$status_query);
-
-    //	$sa_query = ($search_showarchived)? " j.status='archived' and" : "";
-    //	$sc_query = ($search_showcancelled)? " j.status='cancelled' and" : "";
-     */
     $query_tail        = $pn_query . $ss_query . $st_query . $sst_query . $oc_query . $owner_query;
     $jobs_filter_query = ( $query_tail == '' ) ? '' : 'where ' . $query_tail;
     $jobs_filter_query = preg_replace( '/( and)$/i', '', $jobs_filter_query );

@@ -35,7 +35,8 @@ class newProjectController extends viewController {
         $this->project_name      = $__postInput[ "project_name" ];
         $this->private_tm_key = $__postInput[ "private_tm_key" ];
 
-        $this->guid            = Utils::create_guid();
+        $this->guid = Utils::create_guid();
+
         $this->lang_handler    = Langs_Languages::getInstance();
         $this->subject_handler = Langs_LanguageDomains::getInstance();
 
@@ -50,18 +51,18 @@ class newProjectController extends viewController {
             $this->guid = $_COOKIE[ 'upload_session' ];
         }
 
-        if ( isset ( $_COOKIE[ "sourceLang" ] ) and $_COOKIE[ "sourceLang" ] == "_EMPTY_" ) {
+        if ( isset ( $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ] ) and $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ] == \Constants::EMPTY_VAL ) {
             $this->noSourceLangHistory = true;
         } else {
 
-            if ( !isset( $_COOKIE[ 'sourceLang' ] ) ) {
-                setcookie( "sourceLang", "_EMPTY_", time() + ( 86400 * 365 ) );
+            if ( !isset( $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ] ) ) {
+                setcookie( \Constants::COOKIE_SOURCE_LANG, \Constants::EMPTY_VAL, time() + ( 86400 * 365 ) );
                 $this->noSourceLangHistory = true;
             } else {
 
-                if ( $_COOKIE[ "sourceLang" ] != "_EMPTY_" ) {
+                if ( $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ] != \Constants::EMPTY_VAL ) {
                     $this->noSourceLangHistory = false;
-                    $this->sourceLangHistory   = $_COOKIE[ "sourceLang" ];
+                    $this->sourceLangHistory   = $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ];
                     $this->sourceLangAr        = explode( '||', urldecode( $this->sourceLangHistory ) );
                     $tmpSourceAr               = array();
                     $tmpSourceArAs             = array();
@@ -87,16 +88,16 @@ class newProjectController extends viewController {
             }
         }
 
-        if ( isset( $_COOKIE[ "targetLang" ] ) and $_COOKIE[ "targetLang" ] == "_EMPTY_" ) {
+        if ( isset( $_COOKIE[ \Constants::COOKIE_TARGET_LANG ] ) and $_COOKIE[ \Constants::COOKIE_TARGET_LANG ] == \Constants::EMPTY_VAL ) {
             $this->noTargetLangHistory = true;
         } else {
-            if ( !isset( $_COOKIE[ 'targetLang' ] ) ) {
-                setcookie( "targetLang", "_EMPTY_", time() + ( 86400 * 365 ) );
+            if ( !isset( $_COOKIE[ \Constants::COOKIE_TARGET_LANG ] ) ) {
+                setcookie( \Constants::COOKIE_TARGET_LANG, \Constants::EMPTY_VAL, time() + ( 86400 * 365 ) );
                 $this->noTargetLangHistory = true;
             } else {
-                if ( $_COOKIE[ "targetLang" ] != "_EMPTY_" ) {
+                if ( $_COOKIE[ \Constants::COOKIE_TARGET_LANG ] != \Constants::EMPTY_VAL ) {
                     $this->noTargetLangHistory = false;
-                    $this->targetLangHistory   = $_COOKIE[ "targetLang" ];
+                    $this->targetLangHistory   = $_COOKIE[ \Constants::COOKIE_TARGET_LANG ];
                     $this->targetLangAr        = explode( '||', urldecode( $this->targetLangHistory ) );
 
                     $tmpTargetAr   = array();
@@ -297,8 +298,6 @@ class newProjectController extends viewController {
         $this->template->target_languages = $target_languages;
         $this->template->subjects = $this->subjectArray;
 
-        $this->template->upload_session_id = $this->guid;
-
         $this->template->mt_engines         = $this->mt_engines;
 //        $this->template->tms_engines        = $this->tms_engines;
         $this->template->conversion_enabled = !empty(INIT::$FILTERS_ADDRESS);
@@ -335,6 +334,28 @@ class newProjectController extends viewController {
         $this->template->isAnonymousUser = var_export( !$this->isLoggedIn(), true );
         $this->template->DQF_enabled = INIT::$DQF_ENABLED;
 
+        $this->template->developerKey = INIT::$OAUTH_BROWSER_API_KEY;
+        $this->template->clientId = INIT::$OAUTH_CLIENT_ID;
+        $this->template->accessToken = GDrive::getUserToken( $_SESSION );
+
+        $this->template->currentTargetLang = $this->getCurrentTargetLang();
+    }
+
+    private function getCurrentTargetLang() {
+        if ( isset ( $_COOKIE[ Constants::COOKIE_TARGET_LANG ] ) ) {
+            $ckTargetLang = filter_input( INPUT_COOKIE, Constants::COOKIE_TARGET_LANG );
+
+            if( $ckTargetLang != Constants::EMPTY_VAL ) {
+                $targetLangHistory   = $ckTargetLang;
+                $targetLangAr        = explode( '||', urldecode( $targetLangHistory ) );
+
+                if(count( $targetLangAr ) > 0) {
+                    return $targetLangAr[0];
+                }
+            }
+        }
+
+        return Constants::DEFAULT_TARGET_LANG;
     }
 
 }

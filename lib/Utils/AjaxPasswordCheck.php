@@ -58,7 +58,11 @@ class AjaxPasswordCheck {
         $this->jobData = $jobData;
 
         //array of jobs permitted because of job split
-        if( isset( $this->jobData[0] ) && is_array( $this->jobData[0] ) ){
+        if( isset( $this->jobData[0] ) &&
+                ( is_array( $this->jobData[0] )
+                        || $this->jobData[0] instanceof Jobs_JobStruct
+                        || $this->jobData[0] instanceof Chunks_ChunkStruct )
+        ){
 
             //we have to find at least one job with the correct password inside the job array
             $result = array();

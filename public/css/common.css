@@ -52,7 +52,7 @@ ul
     .wrapper
     {
 	    width: 98%;
-	    min-width: 820px;
+	    min-width: 910px;
 	    margin: 0px auto 0 auto;
 	    padding: 5px 0 0 0;
 	    width: 92%;
@@ -2648,6 +2648,9 @@ font-weight: normal !important;
 .extsrt {background: url(../img/matecat_file_icons.png) 6px -928px no-repeat !important;} /* .srt */
 .extpo {background: url(../img/matecat_file_icons.png) 6px -962px no-repeat !important;} /* .po */
 .extg {background: url(../img/matecat_file_icons.png) 6px -996px no-repeat !important;} /* .g */
+.extgsli {background: url(../img/matecat_file_icons.png) 6px -1033px no-repeat !important;} /* Google Slides */
+.extgdoc {background: url(../img/matecat_file_icons.png) 6px -1070px no-repeat !important;} /* Google Document */
+.extgsheet {background: url(../img/matecat_file_icons.png) 6px -1107px no-repeat !important;} /* Google Sheet */
 
 
 #jobMenu span {height: 25px;
@@ -2749,6 +2752,9 @@ only screen and (in-resolution: 2dppx) {
     .extsrt {background: url(../img/matecat_file_icons2x.png) 6px -928px no-repeat !important;} /* .srt */
     .extpo {background: url(../img/matecat_file_icons2x.png) 6px -962px no-repeat !important;} /* .po */
     .extg {background: url(../img/matecat_file_icons2x.png) 6px -996px no-repeat !important;} /* .g */
+    .extgsli {background: url(../img/matecat_file_icons2x.png) 6px -1033px no-repeat !important;} /* Google Slides */
+    .extgdoc {background: url(../img/matecat_file_icons2x.png) 6px -1070px no-repeat !important;} /* Google Document */
+    .extgsheet {background: url(../img/matecat_file_icons2x.png) 6px -1107px no-repeat !important;} /* Google Sheet */
 
 .popup {background: #fff url(../img/borderfix.png) repeat-x!important;}
 
@@ -2926,6 +2932,7 @@ a.resume-project:after,
 .subfile p:before,
 .notific:before,
 #clear-all-files:before,
+#clear-all-gdrive:before,
 #swaplang:after,
 .more:before,
 .currSegment a:before,
@@ -3150,6 +3157,7 @@ float: left;
     content: "\f002";
 }
 
+#clear-all-gdrive:before,
 #clear-all-files:before {
     content: "\f00d";
       font-size: 14px;
@@ -3604,6 +3612,10 @@ text-align: left;
 
 .icon-stop:before {
     content: "\e603";
+}
+
+.icon-gdrive:before {
+    content: url(../img/logo-drive-16-gray.png);
 }
 
 

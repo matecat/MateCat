@@ -20,6 +20,7 @@ class oauthResponseHandlerController extends viewController{
 		$this->user_logged = true;
 
 		$this->client = OauthClient::getInstance()->getClient();
+                $this->client->setAccessType( "offline" );
 
 		$plus = new Google_Service_Oauth2($this->client);
 
@@ -36,13 +37,13 @@ class oauthResponseHandlerController extends viewController{
 		if(isset($code) && $code){
 			$this->client->authenticate($code);
 
-			$_SESSION['access_token'] = $this->client->getAccessToken();
 			$user = $plus->userinfo->get();
 
 			//get response from third-party
-			$this->userData['email']        = $user['email'];
-			$this->userData['first_name']   = $user['givenName'];
-			$this->userData['last_name']    = $user['familyName'];
+			$this->userData['email']              = $user['email'];
+			$this->userData['first_name']         = $user['givenName'];
+			$this->userData['last_name']          = $user['familyName'];
+            $this->userData['oauth_access_token'] = $this->client->getAccessToken();
 		}
 		else if (isset($error)){
 			$this->user_logged = false;
@@ -65,6 +66,9 @@ class oauthResponseHandlerController extends viewController{
 		if($this->user_logged && !empty($this->userData)){
 			//user has been validated, data was by Google
 			//check if user exists in db; if not, create
+            //
+            \Log::doLog( $this->userData ); 
+
 			$result=tryInsertUserFromOAuth($this->userData);
 
 			if(false==$result){
@@ -74,6 +78,8 @@ class oauthResponseHandlerController extends viewController{
 			//set stuff
 			AuthCookie::setCredentials($this->userData['email'], $result['uid']);
 			//$_SESSION['cid'] = $this->userdata['email'];
+
+                        $_SESSION[ 'uid' ] = $result[ 'uid' ];
 
 			$_theresAnonymousProject = ( isset($_SESSION['_anonym_pid']) && !empty($_SESSION['_anonym_pid']) );
 			$_incomingFromNewProject = ( isset($_SESSION['_newProject']) && !empty($_SESSION['_newProject']) );

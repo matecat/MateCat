@@ -34,6 +34,9 @@ class Analysis_AnalysisModel {
     public $proj_payable_rates;
     public $subject;
 
+
+    public $reference_files ;
+    
     /**
      * @var Projects_ProjectStruct
      */
@@ -52,7 +55,46 @@ class Analysis_AnalysisModel {
         return $this->project;
     }
 
+    /**
+     * Loads the file where to search for __reference folder.
+     *
+     * This function expects one zip file per project.
+     *
+     */
+    private function loadReferenceFiles() {
+        $fs = new FilesStorage();
+        $jobs = $this->project->getJobs();
+        $files = Files_FileDao::getByJobId($jobs[0]->id);
+
+        $zipName = explode( ZipArchiveExtended::INTERNAL_SEPARATOR, $files[0]->filename );
+        $zipName = $zipName[0];
+
+        $originalZipPath = $fs->getOriginalZipPath( $this->project->create_date, $this->project->id, $zipName );
+
+        $zip = new ZipArchive();
+        $zip->open( $originalZipPath );
+
+        $this->reference_files = array() ;
+        $folder = ZipArchiveExtended::REFERENCE_FOLDER ;
+
+        for ( $i = 0; $i < $zip->numFiles; $i++ ) {
+            if ( preg_match( "/$folder\/(\w+)/",$zip->getNameIndex( $i ) )) {
+                $path = preg_replace( "/$folder\/(\w+)/", '${1}', $zip->getNameIndex( $i ));
+
+                $this->reference_files[] = array( 'index' => $i, 'name' => $path ) ;
+            }
+        }
+    }
+
+    /**
+     * This method is basically copied from the analyzeController in
+     * MateCat default. A future refactoring of analyzeController should
+     * make use of this model if possible.
+     */
     public function loadData() {
+
+        $this->loadReferenceFiles();
+
         $project_data = $this->getProjectData();
         $lang_handler = Langs_Languages::getInstance();
 

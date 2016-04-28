@@ -357,8 +357,7 @@ class CatUtils {
     }
 
     /**
-     * No more used
-     * @deprecated
+     * Used to export Database XML string into TMX files as valid XML
      *
      * @param $segment
      *
@@ -367,7 +366,7 @@ class CatUtils {
     public static function rawxliff2rawview($segment) {
         // input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
         $segment = self::placehold_xliff_tags($segment);
-        $segment = html_entity_decode($segment, ENT_NOQUOTES, 'UTF-8');
+        $segment = htmlspecialchars( $segment, ENT_NOQUOTES, 'UTF-8', false );
         $segment = self::restore_xliff_tags_for_view($segment);
         return $segment;
     }
@@ -684,7 +683,7 @@ class CatUtils {
                 // $job_stats['ESTIMATED_COMPLETION'] = number_format( ($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour'],1);
                 // 1 h 32 m
                 // $job_stats['ESTIMATED_COMPLETION'] = date("G",($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour']*3600) . "h " . date("i",($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour']*3600) . "m";
-                $job_stats['ESTIMATED_COMPLETION'] = date("G\h i\m", ($job_stats['DRAFT'] + $job_stats['REJECTED']) / ( !empty( $estimation_temp[0]['words_per_hour'] ) ? $estimation_temp[0]['words_per_hour'] : 1 )* 3600 - 3600);
+                $job_stats['ESTIMATED_COMPLETION'] = date("z\d G\h i\m", ($job_stats['DRAFT'] + $job_stats['REJECTED'])*3600 / ( !empty( $estimation_temp[0]['words_per_hour'] ) ? $estimation_temp[0]['words_per_hour'] : 1 )-3600);
             }
         }
 
@@ -1153,6 +1152,7 @@ class CatUtils {
         return $result;
 
     }
+
 
 }
 

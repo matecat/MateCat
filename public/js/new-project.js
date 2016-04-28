@@ -1,30 +1,16 @@
 $(document).ready(function() {
 
 	$('#create_private_tm_btn').click(function() {
+
 		//prevent double click
-		if($(this).hasClass('disabled')) return false;
+		if ( $( this ).hasClass( 'disabled' ) ) return false;
+
 		//show spinner
 		//$('#get-new-tm-spinner').show();
 		//disable button
 		$(this).addClass('disabled');
 		$(this).attr('disabled','');
 		if(typeof $(this).attr('data-key') == 'undefined') {
-			////call API
-			//$.get("https://api.mymemory.translated.net/createranduser",function(data){
-			//	//parse to appropriate type
-			//	//this is to avoid a curious bug in Chrome, that causes 'data' to be already an Object and not a json string
-			//	if(typeof data == 'string'){
-			//		data=jQuery.parseJSON(data);
-			//	}
-			//	//put value into input field
-			//	$('#private-tm-key').val(data.key);
-			//	$('#private-tm-user').val(data.id);
-			//	$('#private-tm-pass').val(data.pass);
-			//	$('#create_private_tm_btn').attr('data-key', data.key);
-			//	//hide spinner
-			//	//$('#get-new-tm-spinner').hide();
-			//	return false;
-			//});
 
             //call API
             APP.doRequest( {
@@ -36,17 +22,33 @@ $(document).ready(function() {
                     $( '#private-tm-user' ).val( d.data.id );
                     $( '#private-tm-pass' ).val( d.data.pass );
                     $( '#create_private_tm_btn' ).attr( 'data-key', d.data.key );
-                    //hide spinner
-                    //$( '#get-new-tm-spinner' ).hide();
+
+					$( 'tr.template-download.fade.ready ').each( function( key, fileUploadedRow ){
+
+						var _fileName = $( fileUploadedRow ).find( '.name' ).text();
+						if ( _fileName.split('.').pop().toLowerCase() == 'tmx' ) {
+
+							UI.appendNewTmKeyToPanel( {
+								r: 1,
+								w: 1,
+								desc: _fileName,
+								TMKey: d.data.key
+							} );
+
+							return true;
+						}
+
+					});
+
                     return false;
                 }
             } );
 
-
 		} else {
 			$('#private-tm-key').val($(this).attr('data-key'));
 		}
-	})
+
+	});
 
 	$(".more").click(function(e){
 		e.preventDefault();
@@ -55,16 +57,27 @@ $(document).ready(function() {
 	});
 
 	$("#source-lang").on('change', function(e){
-		console.log('source language changed');
-        UI.checkRTL();
-		if(!$('.template-download').length) return;
-		if (UI.conversionsAreToRestart()) {
-			APP.confirm({msg: 'Source language has been changed.<br/>The files will be reimported.', callback: 'confirmRestartConversions'});
-		}
-		if( UI.checkTMXLangFailure() ){
-			UI.delTMXLangFailure();
-		}
+            console.log('source language changed');
+            UI.checkRTL();
+            if($('.template-download').length) { //.template-download is present when jquery file upload is used and a file is found
+                if (UI.conversionsAreToRestart()) {
+                    APP.confirm({msg: 'Source language has been changed.<br/>The files will be reimported.', callback: 'confirmRestartConversions'});
+                }
+                if( UI.checkTMXLangFailure() ){
+                    UI.delTMXLangFailure();
+                }
+            }
+            else if ($('.template-gdrive').length) {
+                APP.confirm({
+                    msg: 'Source language has been changed.<br/>The files will be reimported.',
+                    callback: 'confirmGDriveRestartConversions'
+                });
+            } else {
+                return;
+            }
 	});
+
+        APP.tryListGDriveFiles();
 
 	$("#target-lang").change(function(e) {
         UI.checkRTL();
@@ -75,25 +88,29 @@ $(document).ready(function() {
 		if( UI.checkTMXLangFailure() ){
 			UI.delTMXLangFailure();
 		}
-	});
+
+                APP.changeTargetLang( $(this).val() );
+        });
 
 	$("input.uploadbtn").click(function(e) {
+        
         if(!UI.allTMUploadsCompleted()) {
             return false;
         }
 		$('body').addClass('creating');
 		var files = '';
-		$('.upload-table tr:not(.failed) td.name').each(function () {
+		$('.upload-table tr:not(.failed) td.name, .gdrive-upload-table tr:not(.failed) td.name').each(function () {
 			files += '@@SEP@@' + $(this).text();
 		});
 
-//        var private_tm_key = ( !$('#private-tm-key').prop('disabled') ? $('#private-tm-key').val() : "" );
         tm_data = UI.extractTMdataFromTable();
+
+        var filename = files.substr(7) ;
 
 		APP.doRequest({
 			data: {
 				action				: "createProject",
-				file_name			: files.substr(7),
+				file_name			: filename,
 				project_name		: $('#project-name').val(),
 				source_language		: $('#source-lang').val(),
 				target_language		: $('#target-lang').val(),
@@ -119,11 +136,14 @@ $(document).ready(function() {
 					UI.skipLangDetectArr = d.lang_detect;
 				}
 
-				$.each(UI.skipLangDetectArr, function(file, status){
-					if(status == 'ok') 	UI.skipLangDetectArr[file] = 'skip';
-					else UI.skipLangDetectArr[file] = 'detect';
+                if ( UI.skipLangDetectArr != null ) {
+                    $.each(UI.skipLangDetectArr, function(file, status){
+                        if(status == 'ok') 	UI.skipLangDetectArr[file] = 'skip';
+                        else UI.skipLangDetectArr[file] = 'detect';
 
-				});
+                    });
+                }
+
 
 				if( typeof d.errors != 'undefined' && d.errors.length ) {
 
@@ -354,13 +374,10 @@ $(document).ready(function() {
 
 	$("input, select").change(function(e) {
 		$('.error-message').hide();
-		//		        if($('.upload-table tr').length) $('.uploadbtn').removeAttr('disabled').removeClass('disabled');
 	});
 	$("input").keyup(function(e) {
 		$('.error-message').hide();
-		//		        if($('.upload-table tr').length) $('.uploadbtn').removeAttr('disabled').removeClass('disabled');
 	});
-//    		uploadSessionId = $.cookie("upload_session");
 
 });
 
@@ -376,4 +393,14 @@ clearNotCompletedUploads = function() {
         type: 'POST',
         dataType: 'json'
     });
+};
+
+APP.changeTargetLang = function( lang ) {
+    if( localStorage.getItem( 'currentTargetLang' ) != lang ) {
+        localStorage.setItem( 'currentTargetLang', lang );
+    }
+};
+
+APP.displayCurrentTargetLang = function() {
+    $( '#target-lang' ).val( localStorage.getItem( 'currentTargetLang' ) );
 };

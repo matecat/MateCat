@@ -43,6 +43,8 @@
 
     <script src="${basepath}public/js/lib/jquery.js"></script>
     <script src="${basepath}public/js/common.js"></script>
+    <script src="${basepath}public/js/gdrive.upload.js"></script>
+    <script src="${basepath}public/js/gdrive.picker.js"></script>
     <script src="${basepath}public/js/upload.js"></script>
     <script src="${basepath}public/js/lib/jquery.tablesorter-fork-mottie.js"></script>
     <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
@@ -288,130 +290,22 @@ Connect your TAUS DQF account to measure productivity.
 <p class="error-message"> Error: the errmsg will appear here... </p>
 
 <div class="cl"></div>
-<div class="upload-files drag">
 
-    <form id="fileupload" action="${basepath}lib/Utils/fileupload/" method="POST" enctype="multipart/form-data">
+<div metal:use-macro="upload_partials.html/upload_files"/>
 
-        <div id="overlay"></div>
-        <div id="droptest">
+<div metal:use-macro="upload_partials.html/gdrive_files"/>
 
-            <p tal:condition="true:conversion_enabled" class="file-drag">
-                <strong>Drag and drop</strong> your file here<br/>
-                <span tal:condition="true:isUploadTMXAllowed" class="min">You may also import your own translation memories (TMX)</span><br/>
-                or</p>
-
-            <p tal:condition="not:conversion_enabled" class="file-drag">
-                <strong>Drag and drop</strong> your XLIFF here<br/>
-                or</p>
-
-            <p class="file-drop">
-                <strong>Drop it</strong> here.
-            </p>
-
-            <div class="container">
-                <!-- The file upload form used as target for the file upload widget -->
-
-                <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
-                <div class="row fileupload-buttonbar">
-                    <div class="span7">
-                        <!-- The fileinput-button span is used to style the file input field as button -->
-                                    <span class="btn btn-success fileinput-button">
-<!--                                        <i class="icon-plus icon-white"></i> -->
-                                        <span>Add files...</span>
-                                        <input type="file" name="files[]" multiple="multiple" class="multiple-button"/>
-                                    </span>
-                        <!--
-                                        <button type="submit" class="btn btn-primary start">
-                                            <i class="icon-upload icon-white"></i>
-                                            <span>Start upload</span>
-                                        </button>
-                                        <button type="reset" class="btn btn-warning cancel">
-                                            <i class="icon-ban-circle icon-white"></i>
-                                            <span>Cancel upload</span>
-                                        </button>
-                                        <button type="button" class="btn btn-danger delete">
-                                            <i class="icon-trash icon-white"></i>
-                                            <span>Delete</span>
-                                        </button>
-                                        <input type="checkbox" class="toggle"/>
-                        -->
-                    </div>
-                    <!-- The global progress information -->
-                    <div class="span5 fileupload-progress fade">
-                        <!-- The global progress bar -->
-                        <div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-                            <div class="bar" style="width:0%;"></div>
-                        </div>
-                        <!-- The extended global progress information -->
-                        <div class="progress-extended">&nbsp;</div>
-                    </div>
-                </div>
-                <!-- The loading indicator is shown during file processing -->
-                <div class="fileupload-loading"></div>
-                <!-- The table listing the files available for upload/download -->
-                <table cellpadding="0" cellspacing="0" class="upload-table table-striped" role="presentation">
-                    <tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody>
-                </table>
-
-                <!--
-                <div class="upload-footer">
-                            <p>Continue to drag and drop your XLIFF here or    </p>
-
-                    <span class="btn btn-success fileinput-button">
-                <i class="icon-plus icon-white"></i>
-                <span>Add files...</span>
-                <input type="file" name="files[]" multiple="multiple" class="multiple-button"/>
-                    </span>
-
-                    <div class="cl"></div>
-                </div>
-                -->
-
-                <!-- .upload-footer -->
-
-                <div class="cl"></div>
-
-            </div>
-            <!-- #container -->
-
-
-        </div>
-
-
-        <div class="cl"></div>
-
-        <div class="btncontinue">
-            <p tal:condition="true:conversion_enabled"><strong>Drag and drop</strong> your file here or </p>
-
-            <p tal:condition="not:conversion_enabled"><strong>Drag and drop</strong> your XLIFF here or </p>
-                        <span id="add-files" class="btn fileinput-button">
-<!--                            <i class="icon-plus icon-white"></i> -->
-                            <span>Add files...</span>
-                            <input type="file" name="files[]" multiple="multiple" class="multiple-button"/>
-                        </span>
-                        <span id="clear-all-files" class="btn fileinput-button cancel-btn">
-                            <span>Clear all</span>
-                        </span>
-                        <span id="delete-failed-conversions" class="btn fileinput-button cancel-btn">
-                            <span>Clear all failed</span>
-                        </span>
-        </div>
-    </form>
-</div>
-<!-- .upload-files -->
-<!--
-                        <button type="reset" class="btn btn-warning cancel">
-                <i class="icon-ban-circle icon-white"></i>
-                <span>Cancel upload</span>
-            </button>
--->
 <p tal:condition="true:conversion_enabled" class="supported-files">MateCat supports
     <a class="supported-file-formats" href="#">${formats_number} file formats</a>.</p>
 
 <div class="uploadbtn-box">
     <span class="uploadloader"></span>
-    <input name="" type="button" class="uploadbtn disabled" tal:condition="not:volume_analysis_enabled" value="Translate" disabled="disabled"/>
-    <input name="" type="button" class="uploadbtn disabled" tal:condition="volume_analysis_enabled" value="Analyze" disabled="disabled"/>
+
+    <input name="" type="button" class="uploadbtn disabled" 
+      tal:condition="not:volume_analysis_enabled" value="Translate" disabled="disabled"/>
+
+    <input name="" type="button" class="uploadbtn " 
+      tal:condition="volume_analysis_enabled" value="Analyze" />
 
     <p class="enter">Press Enter</p>
 </div>
@@ -994,6 +888,19 @@ Connect your TAUS DQF account to measure productivity.
 <!-- // SnapEngage -->
 
 <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_upload"/>
+
+<script type="text/javascript">
+    var developerKey = '${developerKey}';
+    var clientId = '${clientId}';
+    var oauthToken = '${accessToken}';
+
+    if( !localStorage.getItem( 'currentTargetLang' ) ) {
+        APP.changeTargetLang('${currentTargetLang}');
+    }
+
+    APP.displayCurrentTargetLang();
+</script>
+<script type="text/javascript" src="//apis.google.com/js/api.js?onload=onApiLoad"></script>
 
 </body>
 

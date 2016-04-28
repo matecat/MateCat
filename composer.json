@@ -8,6 +8,7 @@
         "klein/klein": "^2.1",
         "psr/log": "~1.0",
         "monolog/monolog": "1.17.*",
+        "google/apiclient": "1.*",
         "phpmailer/phpmailer": "~5.2"
     }
 }

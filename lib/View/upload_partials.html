@@ -1,0 +1,129 @@
+<div id="gdrive-files-list" metal:define-macro="gdrive_files">
+
+    <div class="gdrive-upload-files drag uploaded">
+        <table cellpadding="0" cellspacing="0" class="gdrive-upload-table table-striped" role="presentation">
+            <tbody class="files-gdrive" data-toggle="modal-gallery" data-target="#modal-gallery">
+            </tbody>
+        </table>
+        <div class="btncontinue continue-gdrive">
+            <span class="btn load-gdrive">Add from Google Drive</span>
+            <span id="clear-all-gdrive" class="btn fileinput-button cancel-btn clear-gdrive">
+                <span>Clear all</span>
+            </span>
+        </div>
+    </div>
+        
+</div> 
+
+<div id="upload-files-list" class="upload-files drag" metal:define-macro="upload_files">
+    <form id="fileupload" action="${basepath}lib/Utils/fileupload/" method="POST" enctype="multipart/form-data">
+
+        <div id="overlay"></div>
+        <div id="droptest">
+
+            <p tal:condition="true:conversion_enabled" class="file-drag">
+                <strong>Drag and drop</strong> your file here<br/>
+                <span tal:condition="true:isUploadTMXAllowed" class="min">(including TMX)</span><br/>
+            </p>
+
+            <p tal:condition="not:conversion_enabled" class="file-drag">
+                <strong>Drag and drop</strong> your XLIFF here<br/>
+                or</p>
+
+            <p class="file-drop">
+                <strong>Drop it</strong> here.
+            </p>
+
+            <div class="container">
+                <!-- The file upload form used as target for the file upload widget -->
+
+                <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
+                <div class="row fileupload-buttonbar">
+                    <div class="span7">
+                        <!-- The fileinput-button span is used to style the file input field as button -->
+                                    <span class="btn btn-success fileinput-button">
+<!--                                        <i class="icon-plus icon-white"></i> -->
+                                        <span>Add files...</span>
+                                        <input type="file" name="files[]" multiple="multiple" class="multiple-button"/>
+                                    </span>
+                                    <span class="btn-success min">or</span>
+                                    <span class="btn-success btn load-gdrive">Add from Google Drive</span>
+
+                        <!--
+                                        <button type="submit" class="btn btn-primary start">
+                                            <i class="icon-upload icon-white"></i>
+                                            <span>Start upload</span>
+                                        </button>
+                                        <button type="reset" class="btn btn-warning cancel">
+                                            <i class="icon-ban-circle icon-white"></i>
+                                            <span>Cancel upload</span>
+                                        </button>
+                                        <button type="button" class="btn btn-danger delete">
+                                            <i class="icon-trash icon-white"></i>
+                                            <span>Delete</span>
+                                        </button>
+                                        <input type="checkbox" class="toggle"/>
+                        -->
+                    </div>
+                    <!-- The global progress information -->
+                    <div class="span5 fileupload-progress fade">
+                        <!-- The global progress bar -->
+                        <div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+                            <div class="bar" style="width:0%;"></div>
+                        </div>
+                        <!-- The extended global progress information -->
+                        <div class="progress-extended">&nbsp;</div>
+                    </div>
+                </div>
+                <!-- The loading indicator is shown during file processing -->
+                <div class="fileupload-loading"></div>
+                <!-- The table listing the files available for upload/download -->
+                <table cellpadding="0" cellspacing="0" class="upload-table table-striped" role="presentation">
+                    <tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody>
+                </table>
+
+                <!--
+                <div class="upload-footer">
+                            <p>Continue to drag and drop your XLIFF here or    </p>
+
+                    <span class="btn btn-success fileinput-button">
+                <i class="icon-plus icon-white"></i>
+                <span>Add files...</span>
+                <input type="file" name="files[]" multiple="multiple" class="multiple-button"/>
+                    </span>
+
+                    <div class="cl"></div>
+                </div>
+                -->
+
+                <!-- .upload-footer -->
+
+                <div class="cl"></div>
+
+            </div>
+            <!-- #container -->
+
+
+        </div>
+
+
+        <div class="cl"></div>
+
+        <div class="btncontinue">
+            <p tal:condition="true:conversion_enabled"><strong>Drag and drop</strong> your file here or </p>
+
+            <p tal:condition="not:conversion_enabled"><strong>Drag and drop</strong> your XLIFF here or </p>
+                        <span id="add-files" class="btn fileinput-button">
+<!--                            <i class="icon-plus icon-white"></i> -->
+                            <span>Add files...</span>
+                            <input type="file" name="files[]" multiple="multiple" class="multiple-button"/>
+                        </span>
+                        <span id="clear-all-files" class="btn fileinput-button cancel-btn">
+                            <span>Clear all</span>
+                        </span>
+                        <span id="delete-failed-conversions" class="btn fileinput-button cancel-btn">
+                            <span>Clear all failed</span>
+                        </span>
+        </div>
+    </form>
+</div>

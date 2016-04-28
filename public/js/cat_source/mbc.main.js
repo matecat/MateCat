@@ -828,6 +828,9 @@ if ( MBC.enabled() )
 
             refreshElements();
 
+            //New icon inserted in the header -> resize file name
+            APP.fitText($('.breadcrumbs'), $('#pname'), 30);
+
             // open a comment if was asked by hash
             var lastAsked = popLastCommentHash();
             if ( lastAsked ) {

@@ -10,7 +10,10 @@ class createRandUserController extends ajaxController {
     }
 
     public function doAction() {
-//        $tms                    = new TMSService( 1 );
+
+        /**
+         * @var $tms Engines_MyMemory
+         */
         $tms                    = Engine::getInstance( 1 );
         $this->result[ 'data' ] = $tms->createMyMemoryKey();
 

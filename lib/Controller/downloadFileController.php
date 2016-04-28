@@ -11,6 +11,13 @@ class downloadFileController extends downloadController {
     protected $jobInfo;
     protected $forceXliff;
     protected $downloadToken;
+    protected $gdriveService;
+    protected $openOriginalFiles;
+
+    /**
+     * @var Google_Service_Drive_DriveFile
+     */
+    protected $remoteFiles = array() ;
 
     const FILES_CHUNK_SIZE = 3;
 
@@ -32,7 +39,8 @@ class downloadFileController extends downloadController {
                 'downloadToken' => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
-                'forceXliff'    => array()
+                'forceXliff'    => array(),
+                'original'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT )
         );
 
         $__postInput = filter_var_array( $_REQUEST, $filterArgs );
@@ -49,6 +57,7 @@ class downloadFileController extends downloadController {
         $this->downloadToken = $__postInput[ 'downloadToken' ];
 
         $this->forceXliff = ( isset( $__postInput[ 'forceXliff' ] ) && !empty( $__postInput[ 'forceXliff' ] ) && $__postInput[ 'forceXliff' ] == 1 );
+        $this->openOriginalFiles = ( isset( $__postInput[ 'original' ] ) && !empty( $__postInput[ 'original' ] ) && $__postInput[ 'original' ] == 1 );
 
         if ( empty( $this->id_job ) ) {
             $this->id_job = "Unknown";
@@ -79,6 +88,7 @@ class downloadFileController extends downloadController {
 
         $nonew                 = 0;
         $output_content        = array();
+
         /*
            the procedure:
            1)original xliff file is read directly from disk; a file handler is obtained
@@ -308,29 +318,43 @@ class downloadFileController extends downloadController {
 
             try {
 
-                $output_content = $this->getOutputContentsWithZipFiles( $output_content );
+                if ( $this->anyRemoteFile() && !$this->forceXliff ) {
+                    $this->startGDriveService();
 
-                if ( count( $output_content ) > 1 ) {
-
-                    //cast $output_content elements to ZipContentObject
-                    foreach ( $output_content as $key => $__output_content_elem ) {
-                        $output_content[ $key ] = new ZipContentObject( $__output_content_elem );
+                    if( $this->openOriginalFiles ) {
+                        $this->outputResultForOriginalFiles();
+                    } else {
+                        $this->updateRemoteFiles( $output_content );
+                        $this->outputResultForRemoteFiles();
                     }
-
-                    if ( $pathinfo[ 'extension' ] != 'zip' ) {
-                        if ( $this->forceXliff ) {
-                            $this->_filename = $this->id_job . ".zip";
-                        } else {
-                            $this->_filename = $pathinfo[ 'basename' ] . ".zip";
-                        }
-                    }
-
-                    $this->content = self::composeZip( $output_content ); //add zip archive content here;
-
                 } else {
-                    //always an array with 1 element, pop it, Ex: array( array() )
-                    $output_content = array_pop( $output_content );
-                    $this->setContent( $output_content );
+                    $output_content = $this->getOutputContentsWithZipFiles( $output_content );
+
+                    if ( count( $output_content ) > 1 ) {
+
+                        //cast $output_content elements to ZipContentObject
+                        foreach ( $output_content as $key => $__output_content_elem ) {
+                            $output_content[ $key ] = new ZipContentObject( $__output_content_elem );
+                        }
+
+                        if ( $pathinfo[ 'extension' ] != 'zip' ) {
+                            if ( $this->forceXliff ) {
+                                $this->_filename = $this->id_job . ".zip";
+                            } else {
+                                $this->_filename = $pathinfo[ 'basename' ] . ".zip";
+                            }
+                        }
+
+                        $this->content = self::composeZip( $output_content ); //add zip archive content here;
+
+                    } else {
+
+                        # TODO: this is a good point to test transmission back
+                        $output_content = array_pop( $output_content );
+
+                        //always an array with 1 element, pop it, Ex: array( array() )
+                        $this->setContent( $output_content );
+                    }
                 }
             }
             catch ( Exception $e ){
@@ -361,6 +385,44 @@ class downloadFileController extends downloadController {
     }
 
     /**
+     * Initializes remoteFiles property reading entries from database
+     *
+     * @return int
+     */
+    private function anyRemoteFile()  {
+        return \RemoteFiles_RemoteFileDao::jobHasRemoteFiles( $this->id_job );
+    }
+
+    private function outputResultForOriginalFiles() {
+        $files = \RemoteFiles_RemoteFileDao::getOriginalsByJobId( $this->id_job );
+
+        $response = array('urls' => array() );
+
+        foreach ( $files as $file ) {
+            $gdriveFile = $this->gdriveService->files->get( $file->remote_id );
+
+            $response[ 'urls' ][] = array(
+                    'localId'       => $file->id,
+                    'alternateLink' => $gdriveFile[ 'alternateLink' ]
+            );
+        }
+
+        echo json_encode( $response );
+    }
+
+    private function outputResultForRemoteFiles() {
+        $response = array('urls' => array() );
+
+        foreach ( $this->remoteFiles as $localId => $file ) {
+            $response[ 'urls' ][] = array(
+                    'localId'       => $localId,
+                    'alternateLink' => $file[ 'alternateLink' ]
+            );
+        }
+
+        echo json_encode( $response );
+    }
+    /**
      * @param ZipContentObject $output_content
      *
      * @throws Exception
@@ -370,6 +432,46 @@ class downloadFileController extends downloadController {
         $this->_filename = self::sanitizeFileExtension( $output_content->output_filename );
         $this->content   = $output_content->getContent();
 
+    }
+
+    private function startGDriveService() {
+        // Get the user data from the project owner
+        $project = \Projects_ProjectDao::findByJobId( $this->id_job );
+        $userDao = new \Users_UserDao( \Database::obtain() );
+        $user = $userDao->getByEmail( $project->id_customer );
+
+        // This is necessary to ensure the stored token will be valid even for not logged users
+        \AuthCookie::tryToRefreshToken( $project->id_customer );
+
+        $this->gdriveService = GDrive::getService(
+                array( 'access_token' => $user->oauth_access_token )
+        );
+    }
+
+
+
+    private function updateRemoteFiles($output_content) {
+        foreach( $output_content as $id_file => $output_file ) {
+            $remoteFile = \RemoteFiles_RemoteFileDao::getByFileAndJob( $id_file, $this->id_job );
+            $gdriveFile = $this->gdriveService->files->get( $remoteFile->remote_id );
+
+            $this->updateFileOnGDrive( $remoteFile->remote_id, $gdriveFile, $output_file[ 'document_content' ] ) ;
+            $this->remoteFiles[ $remoteFile->id ] = $gdriveFile ;
+        }
+    }
+
+    private function updateFileOnGDrive( $remoteId, $gdriveFile, $content ) {
+        $mimeType = \GDrive::officeMimeFromGoogle( $gdriveFile->mimeType );
+        $gdriveFile->setMimeType( $mimeType );
+
+        $additionalParams = array(
+            'mimeType' => $mimeType,
+            'data' => $content,
+            'uploadType' => 'media',
+            'newRevision' => FALSE
+        );
+
+        $upload = $this->gdriveService->files->update( $remoteId, $gdriveFile, $additionalParams );
     }
 
     protected function createOmegaTZip( $output_content, $sourceLang, $targetLang ) {

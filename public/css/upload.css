@@ -466,8 +466,8 @@ float: left;
   top: -70px;
 }
 
-  .cancel-btn, #clear-all-files {background:#f26522;}
-  .cancel-btn:hover, #clear-all-files:hover {background:#d1581c;}
+  .cancel-btn, #clear-all-files, #clear-all-gdrive {background:#f26522;}
+  .cancel-btn:hover, #clear-all-files:hover, #clear-all-gdrive:hover {background:#d1581c;}
 
 
 
@@ -581,9 +581,9 @@ h2.payoff
 
 
 /*upload table*/
-.upload-table {width:100%;margin:0;table-layout: fixed;}
-.upload-table td{height:auto;padding:5px 10px;text-align:left;border-bottom:1px dashed #ccc}
-.upload-table tr{background:#fff;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;border-bottom:1px dashed #ccc}
+.upload-table, .gdrive-upload-table {width:100%;margin:0;table-layout: fixed;}
+.upload-table td, .gdrive-upload-table td {height:auto;padding:5px 10px;text-align:left;border-bottom:1px dashed #ccc}
+.upload-table tr, .gdrive-upload-table tr {background:#fff;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;border-bottom:1px dashed #ccc}
 .upload-table tr:hover{}
 
 .btncontinue{position:absolute;bottom:0;display:none;float:left;padding:0px 0 0 0 !important;font-size:14px !important;margin:0px 0 0 10px !important;}
@@ -594,7 +594,7 @@ h2.payoff
 .btncontinue p{float:left !important;font-size:14px !important;margin:0px 0 0 0 !important;padding:0;}
 .btncontinue .fileinput-button{float:left ;margin:7px 0 0 10px !important;width:auto;padding:8px 10px 0px 30px}
 
-#add-files, #clear-all-files {
+#add-files, #clear-all-files, #clear-all-gdrive {
 	padding: 8px 10px 0px 10px!important;
 }
 
@@ -718,7 +718,7 @@ a{color:#39699a}
 .uploaded .upload-footer{display:block !important}
 .file-drop{margin:40px 0 50px 0!important}
 #fileupload{margin:0 !important; /* padding:0 !important */ }
-.upload-files
+.upload-files, .gdrive-upload-files
 	{
 	
     position: relative;
@@ -733,7 +733,7 @@ margin-top: 20px;
 	-moz-transition: all  50ms ease-in;
 	}
 
-.upload-files.uploaded {
+.upload-files.uploaded, .gdrive-upload-files.uploaded {
 padding-bottom: 50px !important;
 min-height: 220px;
 }
@@ -743,7 +743,7 @@ min-height: 220px;
 
 
 
-.uploaded  .upload-files	{	height:auto !important;}
+.uploaded  .upload-files, .uploaded .gdrive-upload-files	{	height:auto !important;}
 
 .drag{text-align:center;overflow:hidden;}
 .drag p{ text-align:center;margin:30px 0 10px 0;font-size:36px;line-height:50px;}
@@ -769,7 +769,8 @@ min-height: 220px;
 */
 	}
 
-.upload-files.uploaded .upload-footer
+.upload-files.uploaded .upload-footer,
+.gdrive-upload-files.uploaded .upload-footer
 	{
 	display: none !important;
 	}
@@ -1237,4 +1238,72 @@ z-index: -1000;
     /*content: "\ea58";*/
     margin-left: 15px;
     /*color: #555;*/
+}
+
+span.load-gdrive {
+    display: inline-block;
+    vertical-align: top;
+    width: 200px;
+    font-family: calibri, Arial, Helvetica, sans-serif;
+    font-size: 1.1em;
+    margin: 0;
+    padding: 0.70rem 0.25rem 0.30rem 2.2rem;
+    border: 0.1rem solid #B7B9BC;
+    background: url(../img/logo-drive-16.png) 1.3rem 0.85rem no-repeat;
+    background-color: #F5F5F5;
+    cursor: pointer;
+}
+
+span.load-gdrive:hover,
+.continue-gdrive span.load-gdrive:hover {
+    background-color: #EFEFEF;
+}
+
+.modal-gdrive {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999999999999;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.fileupload-buttonbar span.min {
+    font-size: 24px;
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 42px;
+    margin: 0 1.5rem;
+}
+
+span.fileinput-button {
+    display: inline-block;
+    vertical-align: top;
+    margin: 0;
+}
+
+div.continue-gdrive {
+    margin: 0 0 10px 10px !important;
+    display: block;
+}
+
+.continue-gdrive span.load-gdrive {
+    width: auto;
+    padding: 0.50rem 0.70rem 0.0rem 2.3rem;
+    background: url(../img/logo-drive-16.png) 0.7rem 0.55rem no-repeat;
+    margin-right: 10px;
+}
+
+.continue-gdrive span.clear-gdrive {
+    float: none;
+    margin: 0 !important;
+}
+
+#upload-files-list {
+    display: block;
+}
+
+#gdrive-files-list {
+    display: none;
 }

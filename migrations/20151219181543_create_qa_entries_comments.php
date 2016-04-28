@@ -1,8 +1,6 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
-
-class CreateQaEntriesComments extends AbstractMigration {
+class CreateQaEntriesComments extends AbstractMatecatMigration {
 
     public $sql_up = <<<EOF
 CREATE TABLE `qa_entry_comments` (
@@ -20,13 +18,5 @@ EOF;
     public $sql_down = <<<EOF
 DROP TABLE IF EXISTS `qa_entry_comments`;
 EOF;
-
-    public function up() {
-        $this->execute($this->sql_up);
-    }
-
-    public function down() {
-        $this->execute($this->sql_down);
-    }
 
 }

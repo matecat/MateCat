@@ -5,6 +5,15 @@ UI = null;
 
 UI = {
 
+    showDownloadCornerTip : function() {
+        if (UI.isChrome) {
+            $('.download-chrome').addClass('d-open');
+            setTimeout(function() {
+                $('.download-chrome').removeClass('d-open');
+            }, 7000);
+        }
+    },
+
     setEditingSegment : function(segment) {
         if ( segment != null ) {
             UI.body.addClass('editing');
@@ -239,19 +248,6 @@ UI = {
         }
 
 	},
-	checkIfFinished: function(closing) {
-		if (((this.progress_perc != this.done_percentage) && (this.progress_perc == '100')) || ((closing) && (this.progress_perc == '100'))) {
-			this.body.addClass('justdone');
-		} else {
-			this.body.removeClass('justdone');
-		}
-	},
-	checkIfFinishedFirst: function() {
-		if ($('section').length == $('section.status-translated, section.status-approved').length) {
-			this.body.addClass('justdone');
-		}
-	},
-
     closeSegment: function(segment, byButton, operation) {
 		if ( typeof segment == 'undefined' ) {
 
@@ -283,9 +279,6 @@ UI = {
 
             $(segment).removeClass("editor waiting_for_check_result opened");
             $('span.locked.mismatch', segment).removeClass('mismatch');
-            if (!this.opening) {
-                this.checkIfFinished(1);
-            }
 
 // close split segment
         	$('.sid .actions .split').removeClass('cancel');
@@ -957,8 +950,6 @@ UI = {
 			startSegmentId = this.segments[0].sid;
 		});
 
-        console.log('startSegmentId', startSegmentId);
-
 		if (typeof this.startSegmentId == 'undefined')
 			this.startSegmentId = startSegmentId;
 
@@ -1035,9 +1026,9 @@ UI = {
 					action: 'getUpdatedTranslations',
 					last_timestamp: lastUpdateRequested.getTime(),
 					first_segment: UI.getSegmentId($('section').first()),
-//					first_segment: $('section').first().attr('id').split('-')[1],
-					last_segment: UI.getSegmentId($('section').last())
-//					last_segment: $('section').last().attr('id').split('-')[1]
+					last_segment: UI.getSegmentId($('section').last()),
+                    id_job: config.id_job,
+                    password: config.password
 				},
 				error: function() {
 					UI.failedConnection(0, 'getUpdatedTranslations');
@@ -1637,19 +1628,31 @@ UI = {
         }
     },
     renderAlternatives: function(d) {
-        segment = UI.currentSegment;
-        segment_id = UI.currentSegmentId;
-        escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html(), false, segment_id, 'render alternatives');
-        mainStr = UI.currentSegment.find('.editarea').text();
+        var segment = UI.currentSegment;
+        var segment_id = UI.currentSegmentId;
+        var escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html(), false, segment_id, 'render alternatives');
+        // Take the .editarea content with special characters (Ex: ##$_0A$##) and transform the placeholders
+        var mainStr = UI.clenaupTextFromPleaceholders(UI.postProcessEditarea(UI.currentSegment));
         $.each(d.data.editable, function(index) {
-            diff_obj = UI.execDiff(mainStr, this.translation);
-            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_obj) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
+            // Decode the string from the server
+            var transDecoded = htmlDecode(this.translation);
+            // Make the diff between the text with the same codification
+            var diff_obj = UI.execDiff(mainStr, transDecoded);
+            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '">' +
+                '<li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' +
+                escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span -->' +
+                '<span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' +
+                UI.dmp.diff_prettyHtml(diff_obj) + '</span><span class="realData hide">' + this.translation +
+                '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
         });
 
         $.each(d.data.not_editable, function(index1) {
-            diff_obj = UI.execDiff(mainStr, this.translation);
+            var diff_obj = UI.execDiff(mainStr, this.translation);
             $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_obj) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
         });
+        // Transform the tags
+        UI.markSuggestionTags(segment);
+
 
     },
     execDiff: function (mainStr, cfrStr) {
@@ -1699,10 +1702,26 @@ UI = {
 
         var downloadable = (t == 'translated' || t == 'approved') ;
 
+        var isGDriveFile = false;
+
+        if ( config.isGDriveProject && config.isGDriveProject !== 'false') {
+            isGDriveFile = true;
+        }
+
+        var label = '';
+
         if ( downloadable ) {
-            var label = 'DOWNLOAD TRANSLATION';
+            if(isGDriveFile){
+                label = 'OPEN IN GOOGLE DRIVE';
+            } else {
+                label = 'DOWNLOAD TRANSLATION';
+            }
         } else {
-            var label = 'PREVIEW';
+            if(isGDriveFile){
+                label = 'PREVIEW ON GOOGLE DRIVE';
+            } else {
+                label = 'PREVIEW';
+            }
         }
 
         $('.downloadtr-button').removeClass("draft translated approved").addClass(t);
@@ -1752,7 +1771,6 @@ UI = {
 		}
 
 		this.progress_perc = s.PROGRESS_PERC_FORMATTED;
-		this.checkIfFinished();
 
 		this.done_percentage = this.progress_perc;
 
@@ -1892,77 +1910,153 @@ UI = {
 		location.href = $('#point2seg').attr('href');
 	},
 
-    continueDownload: function() {
 
-        //check if we are in download status
-        if ( !$('#downloadProject').hasClass('disabled') ) {
-
-            //disable download button
-            $('#downloadProject').addClass('disabled' ).data( 'oldValue', $('#downloadProject' ).val() ).val('DOWNLOADING');
-
-            //create an iFrame element
-            var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop({
-                id:'iframeDownload',
-                src: ''
-            });
-console.log('iFrameDownload: ', iFrameDownload);
-            //append iFrame to the DOM
-            $("body").append( iFrameDownload );
-
-            //generate a token download
-            var downloadToken = new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 );
-
-            //set event listner, on ready, attach an interval that check for finished download
-            iFrameDownload.ready(function () {
-
-                //create a GLOBAL setInterval so in anonymous function it can be disabled
-                downloadTimer = window.setInterval(function () {
-
-                    //check for cookie
-                    var token = $.cookie( downloadToken );
-console.log('eccolo: ', typeof token);
-                    //if the cookie is found, download is completed
-                    //remove iframe an re-enable download button
-                    if ( typeof token != 'undefined' ) {
-                        /*
-                         * the token is a json and must be read with "parseJSON"
-                         * in case of failure:
-                         *      error_message = Object {code: -110, message: "Download failed. Please contact the owner of this MateCat instance"}
-                         *
-                         * in case of success:
-                         *      error_message = Object {code: 0, message: "Download Complete."}
-                         *
-                         */
-                        tokenData = $.parseJSON(token);
-                        if(parseInt(tokenData.code) < 0) {
-                            UI.showMessage({msg: tokenData.message})
-                        }
-                        $('#downloadProject').removeClass('disabled').val( $('#downloadProject' ).data('oldValue') ).removeData('oldValue');
-                        window.clearInterval( downloadTimer );
-                        $.cookie( downloadToken, null, { path: '/', expires: -1 });
-                        iFrameDownload.remove();
-                    }
-
-                }, 2000);
-
-            });
-
-            //clone the html form and append a token for download
-            var iFrameForm = $("#fileDownload").clone().append(
-                    $( document.createElement( 'input' ) ).prop({
-                        type:'hidden',
-                        name:'downloadToken',
-                        value: downloadToken
-                    })
-            );
-
-            //append from to newly created iFrame and submit form post
-            iFrameDownload.contents().find('body').append( iFrameForm );
-            iFrameDownload.contents().find("#fileDownload").submit();
-
-        } else {
-            //we are in download status
+    disableDownloadButtonForDownloadStart : function( openOriginalFiles ) {
+        var button = $('#downloadProject' ) ;
+        var labelDownloading = 'DOWNLOADING';
+        if ( config.isGDriveProject && config.isGDriveProject !== 'false') {
+            labelDownloading = 'OPENING FILES...';
         }
+        button.addClass('disabled' ).data( 'oldValue', button.val() ).val(labelDownloading);
+    },
+
+    reEnableDownloadButton : function() {
+        var button = $('#downloadProject' ) ;
+        button.removeClass('disabled')
+            .val( button.data('oldValue') )
+            .removeData('oldValue');
+    },
+
+    downloadFileURL : function( openOriginalFiles ) {
+        return sprintf( '%s?action=downloadFile&id_job=%s&password=%s&original=%s',
+            config.basepath,
+            config.id_job,
+            config.password,
+            openOriginalFiles
+        );
+    },
+
+    continueDownloadWithGoogleDrive : function ( openOriginalFiles ) {
+        if ( $('#downloadProject').hasClass('disabled') ) {
+            return ;
+        }
+
+        if (typeof openOriginalFiles === 'undefined') {
+            openOriginalFiles = 0;
+        }
+
+        // TODO: this should be relative to the current USER, find a
+        // way to generate this at runtime.
+        //
+        if( !config.isGDriveProject || config.isGDriveProject == 'false' ) {
+            UI.showDownloadCornerTip();
+        }
+        UI.disableDownloadButtonForDownloadStart( openOriginalFiles );
+
+        if ( typeof window.googleDriveWindows == 'undefined' ) {
+            window.googleDriveWindows = {};
+        }
+
+        var winName ;
+        
+        var driveUpdateDone = function(data) {
+            var winName ;
+
+            $.each( data.urls, function(index, item) {
+                winName = 'window' + item.localId ;
+                console.log(winName);
+
+
+                if ( typeof window.googleDriveWindows[ winName ] != 'undefined' && window.googleDriveWindows[ winName ].opener != null ) {
+                    window.googleDriveWindows[ winName ].location.href = item.alternateLink ;
+                    window.googleDriveWindows[ winName ].focus();
+                } else {
+                    window.googleDriveWindows[ winName ] = window.open( item.alternateLink );
+                }
+            });
+        }
+
+        $.ajax({
+                cache: false,
+                url: UI.downloadFileURL( openOriginalFiles ),
+                dataType: 'json'
+            })
+            .done( driveUpdateDone )
+            .always(function() {
+                UI.reEnableDownloadButton() ;
+            });
+    },
+
+    continueDownload: function() {
+        if ( $('#downloadProject').hasClass('disabled') ) {
+            return ;
+        }
+
+        UI.showDownloadCornerTip();
+
+        UI.disableDownloadButtonForDownloadStart();
+
+        //create an iFrame element
+        var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop({
+            id:'iframeDownload',
+            src: ''
+        });
+
+        //append iFrame to the DOM
+        $("body").append( iFrameDownload );
+
+        //generate a token download
+        var downloadToken = new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 );
+
+        //set event listner, on ready, attach an interval that check for finished download
+        iFrameDownload.ready(function () {
+
+            //create a GLOBAL setInterval so in anonymous function it can be disabled
+            downloadTimer = window.setInterval(function () {
+
+                //check for cookie
+                var token = $.cookie( downloadToken );
+
+                //if the cookie is found, download is completed
+                //remove iframe an re-enable download button
+                if ( typeof token != 'undefined' ) {
+                    /*
+                     * the token is a json and must be read with "parseJSON"
+                     * in case of failure:
+                     *      error_message = Object {code: -110, message: "Download failed.
+                     *      Please contact the owner of this MateCat instance"}
+                     *
+                     * in case of success:
+                     *      error_message = Object {code: 0, message: "Download Complete."}
+                     *
+                     */
+                    tokenData = $.parseJSON(token);
+                    if(parseInt(tokenData.code) < 0) {
+                        UI.showMessage({msg: tokenData.message})
+                    }
+                    UI.reEnableDownloadButton();
+
+                    window.clearInterval( downloadTimer );
+                    $.cookie( downloadToken, null, { path: '/', expires: -1 });
+                    iFrameDownload.remove();
+                }
+
+            }, 2000);
+
+        });
+
+        //clone the html form and append a token for download
+        var iFrameForm = $("#fileDownload").clone().append(
+                $( document.createElement( 'input' ) ).prop({
+                    type:'hidden',
+                    name:'downloadToken',
+                    value: downloadToken
+                })
+        );
+
+        //append from to newly created iFrame and submit form post
+        iFrameDownload.contents().find('body').append( iFrameForm );
+        iFrameDownload.contents().find("#fileDownload").submit();
 
     },
 	/**
@@ -2117,7 +2211,6 @@ console.log('eccolo: ', typeof token);
 	showMessage: function(options) {
 
         APP.showMessage(options);
-        setTimeout(  function() {$('body' ).removeClass('incomingMsg' )} , 5000  );
 
 	},
 	checkVersion: function() {
@@ -2565,6 +2658,8 @@ console.log('eccolo: ', typeof token);
     },
 
     targetContainerSelector : function() {
+        // TODO: evaluate the need for this given that class "targetarea"
+        // seems to be possible to apply without any side effect.
         return '.editarea';
     },
 
@@ -3030,7 +3125,10 @@ console.log('eccolo: ', typeof token);
 
     start: function () {
         APP.init();
-        APP.fitText($('.breadcrumbs'), $('#pname'), 30);
+        // If some icon is added on the top header menu, the file name is resized
+        APP.addDomObserver($('.header-menu')[0], function() {
+            APP.fitText($('.breadcrumbs'), $('#pname'), 30);
+        });
         setBrowserHistoryBehavior();
         $("article").each(function() {
             APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30);
@@ -3125,7 +3223,6 @@ $(window).resize(function() {
     UI.fixHeaderHeightChange();
     APP.fitText($('.breadcrumbs'), $('#pname'), 30);
 });
-
 
 (function($, UI) {
     $.extend(UI, {
