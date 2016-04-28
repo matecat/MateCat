@@ -1,27 +1,15 @@
 <?php
 
-require_once 'vendor/autoload.php';
-
 require_once './inc/Bootstrap.php' ;
 require_once './lib/Model/queries.php' ;
 
 Bootstrap::start();
 
-// FIXME: apis use PDO in some case which requires a different connection
-// object than the one instantiated by Database::obtain.
-require_once 'lib/Model/PDOConnection.php';
-PDOConnection::connectINIT();
-
-$db = Database::obtain ( INIT::$DB_SERVER, INIT::$DB_USER,
-    INIT::$DB_PASS, INIT::$DB_DATABASE );
-$db->connect ();
-
-Log::$uniqID = uniqid() ;
-
 $klein = new \Klein\Klein();
 
 function route($path, $method, $controller, $action) {
     global $klein;
+
     $klein->respond($method, $path, function() use ($controller, $action) {
         $reflect = new ReflectionClass($controller);
         $instance = $reflect->newInstanceArgs(func_get_args());
@@ -29,11 +17,8 @@ function route($path, $method, $controller, $action) {
     });
 }
 
-$features_router = Features::loadRoutes( $klein );
-
 $klein->onError(function ($klein, $err_msg, $err_type, $exception) {
     // TODO still need to catch fatal errors here with 500 code
-    //
 
     switch( $err_type ) {
         case 'API\V2\AuthenticationError':
