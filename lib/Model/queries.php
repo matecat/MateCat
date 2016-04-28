@@ -1747,7 +1747,8 @@ function fetchStatus( $sid, $results, $status = Constants_TranslationStatus::STA
     if ( isset( $results[ 0 ][ 'id' ] ) ) {
         //if there are results check for next id,
         //otherwise get the first one in the list
-        $nSegment = $results[ 0 ][ 'id' ];
+//        $nSegment = $results[ 0 ][ 'id' ];
+        //Check if there is translated segment with $seg[ 'id' ] > $sid
         foreach ( $results as $seg ) {
             if ( $seg[ 'status' ] == null ) {
                 $seg[ 'status' ] = Constants_TranslationStatus::STATUS_NEW;
@@ -1757,6 +1758,19 @@ function fetchStatus( $sid, $results, $status = Constants_TranslationStatus::STA
                 break;
             }
         }
+        // If there aren't transleted segments in the next elements -> check starting from the first
+        if (!$nSegment) {
+            foreach ( $results as $seg ) {
+                if ( $seg[ 'status' ] == null ) {
+                    $seg[ 'status' ] = Constants_TranslationStatus::STATUS_NEW;
+                }
+                if ( $statusWeight[ $seg[ 'status' ] ] == $statusWeight[ $status ] ) {
+                    $nSegment = $seg[ 'id' ];
+                    break;
+                }
+            }
+        }
+
     }
 
     return $nSegment;
