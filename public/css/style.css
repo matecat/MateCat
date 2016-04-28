@@ -2546,15 +2546,6 @@ section.modified.editor .status
 {
 	cursor: pointer;
 }
-.editarea .locked.selected,
-.source .locked.selected
-{
-	cursor: move !important;
-}
-
-
-
-
 
 /*.source ::selection
 	{
@@ -2606,11 +2597,6 @@ section.modified.editor .status
 {
     border-radius: 8px;
     border: 2px solid #7EB30C;
-}
-
-.editor .editarea .locked.selected
-{
-	cursor: move !important;
 }
 
 .editarea .locked
