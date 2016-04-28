@@ -28,9 +28,12 @@ class UseDbTest extends AbstractTest
         $this->reflectedClass = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $this->reflectedClass->close();
         startConnection();
+        parent::tearDown();
     }
 
     /**
+     * This test confirm that 'useDB' change correctly the value
+     * of the protected variable 'database' in current instance of database.
      * @group regression
      * @covers Database::useDb
      */
@@ -40,9 +43,9 @@ class UseDbTest extends AbstractTest
          */
         $instance_after_reset = $this->reflectedClass->obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $instance_after_reset->useDb("information_schema");
-        $database = $this->reflector->getProperty('database');
-        $database->setAccessible(true);
-        $current_database_value = $database->getValue($instance_after_reset);
+        $this->property = $this->reflector->getProperty('database');
+        $this->property->setAccessible(true);
+        $current_database_value = $this->property->getValue($instance_after_reset);
         $this->assertEquals("information_schema",$current_database_value);
     }
 }

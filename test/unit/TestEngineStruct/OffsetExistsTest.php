@@ -22,6 +22,8 @@ class OffsetExistsTest extends AbstractTest
 
 
     /**
+     * @return bool
+     * It controls if the given field exists ( != NULL)  in the struct.
      * @group regression
      * @covers EnginesModel_EngineStruct::getStruct
      */

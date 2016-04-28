@@ -16,7 +16,7 @@ class uBuildQueryForEngineTest extends AbstractTest
 
     public function setUp()
     {
-
+        parent::setUp();
         $this->reflectedClass = new EnginesModel_EngineDAO(Database::obtain());
         $this->reflector = new ReflectionClass($this->reflectedClass);
         $this->engine_struct = new EnginesModel_EngineStruct();
@@ -25,10 +25,11 @@ class uBuildQueryForEngineTest extends AbstractTest
     }
 
     /**
+     * This test builds a sql query for an engine with an engine struct as @param with id initialized
      * @group regression
      * @covers EnginesModel_EngineDAO::_buildQueryForEngine
      */
-    public function test__buildQueryForEngine_with_given_engine_struct_with_ID_inizialized()
+    public function test__buildQueryForEngine_with_given_engine_struct_with_ID_initialized()
     {
 
         $this->engine_struct->id = 10;
@@ -38,6 +39,7 @@ class uBuildQueryForEngineTest extends AbstractTest
     }
 
     /**
+     * This test builds a sql query for an engine with an engine struct as @param with uid initialized
      * @group regression
      * @covers EnginesModel_EngineDAO::_buildQueryForEngine
      */
@@ -51,6 +53,7 @@ class uBuildQueryForEngineTest extends AbstractTest
     }
 
     /**
+     * This test builds a sql query for an engine with an engine struct as @param with active initialized
      * @group regression
      * @covers EnginesModel_EngineDAO::_buildQueryForEngine
      */
@@ -64,6 +67,7 @@ class uBuildQueryForEngineTest extends AbstractTest
     }
 
     /**
+     * This test builds a sql query for an engine with an engine struct as @param with type initialized
      * @group regression
      * @covers EnginesModel_EngineDAO::_buildQueryForEngine
      */
@@ -77,6 +81,7 @@ class uBuildQueryForEngineTest extends AbstractTest
     }
 
     /**
+     * This test builds a sql query for an engine with an engine struct as @param with fake uid
      * @group regression
      * @covers EnginesModel_EngineDAO::_buildQueryForEngine
      */
@@ -89,10 +94,11 @@ class uBuildQueryForEngineTest extends AbstractTest
     }
 
     /**
+     * This test builds a sql query for an engine with an engine struct as @param without properties initialized
      * @group regression
      * @covers EnginesModel_EngineDAO::_buildQueryForEngine
      */
-    public function test__buildQueryForEngine_with_given_engine_struct_without_parameters_inizialized()
+    public function test__buildQueryForEngine_with_given_engine_struct_without_properties_inizialized()
     {
 
         $this->setExpectedException('\Exception');

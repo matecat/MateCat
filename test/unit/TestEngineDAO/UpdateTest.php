@@ -59,6 +59,7 @@ class UpdateTest extends AbstractTest
     
     
     /**
+     * It updates the struct of an engine checking the righteousness through the field 'name'.
      * @group regression
      * @covers EnginesModel_EngineDAO::update
      */
@@ -93,6 +94,7 @@ class UpdateTest extends AbstractTest
 
 
   /**
+   * It doesn't update the struct of an engine because the @param has wrong 'uid'.
    * @group regression
    * @covers EnginesModel_EngineDAO::update
    */

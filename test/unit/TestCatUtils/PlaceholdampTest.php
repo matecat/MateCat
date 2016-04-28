@@ -11,6 +11,8 @@
  */
 class PlaceholdampTest extends AbstractTest
 {
+    protected $source_segment;
+    protected $expected_segment;
 
     /**
      * @group regression
@@ -18,13 +20,13 @@ class PlaceholdampTest extends AbstractTest
      */
     public function test_placeholdamp_base()
     {
-        $source_segment = <<<'LAB'
+        $this->source_segment = <<<'LAB'
 <&>
 LAB;
-        $expected_segment = <<<'LAB'
+        $this->expected_segment = <<<'LAB'
 <##AMPPLACEHOLDER##>
 LAB;
-        $this->assertEquals($expected_segment, CatUtils::placeholdamp($source_segment));
+        $this->assertEquals($this->expected_segment, CatUtils::placeholdamp($this->source_segment));
     }
 
     /**
@@ -33,9 +35,9 @@ LAB;
      */
     public function test_placeholdamp_null()
     {
-        $source_segment = null;
-        $expected_segment = "";
-        $this->assertEquals($expected_segment, CatUtils::placeholdamp($source_segment));
+        $this->source_segment = null;
+        $this->expected_segment = "";
+        $this->assertEquals($this->expected_segment, CatUtils::placeholdamp($this->source_segment));
     }
 
     /**
@@ -44,13 +46,13 @@ LAB;
      */
     public function test_placeholdamp_nomatches()
     {
-        $source_segment = <<<'LAB'
+        $this->source_segment = <<<'LAB'
 <|\asòhg\\òsaldh<<<<<<<<<<f>
 LAB;
-        $expected_segment = <<<'LAB'
+        $this->expected_segment = <<<'LAB'
 <|\asòhg\\òsaldh<<<<<<<<<<f>
 LAB;
-        $this->assertEquals($expected_segment, CatUtils::placeholdamp($source_segment));
+        $this->assertEquals($this->expected_segment, CatUtils::placeholdamp($this->source_segment));
     }
 
 

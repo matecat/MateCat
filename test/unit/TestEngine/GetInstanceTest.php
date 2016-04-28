@@ -88,6 +88,7 @@ class GetInstanceTest extends AbstractTest
         $this->setExpectedException('Exception');
         Engine::getInstance('');
     }
+
     /**
      * @param null
      * @group regression
@@ -98,6 +99,7 @@ class GetInstanceTest extends AbstractTest
         $this->setExpectedException('Exception');
         Engine::getInstance(null);
     }
+
     /**
      * @param 99
      * @group regression

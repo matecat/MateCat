@@ -11,6 +11,9 @@ class SetInCacheTest extends AbstractTest
 {
     protected $reflector;
     protected $method;
+    /**
+     * @var Predis\Client
+     */
     protected $cache_con;
     protected $cache_TTL;
     protected $cache_key;
@@ -18,7 +21,7 @@ class SetInCacheTest extends AbstractTest
 
     public function setUp()
     {
-
+        parent::setUp();
         $this->reflectedClass = new EnginesModel_EngineDAO(Database::obtain());
         $this->reflector = new ReflectionClass($this->reflectedClass);
         $this->method = $this->reflector->getMethod("_setInCache");
@@ -26,7 +29,6 @@ class SetInCacheTest extends AbstractTest
         $this->cache_con = $this->reflector->getProperty("cache_con");
         $this->cache_con->setAccessible(true);
 
-        require_once 'Predis/autoload.php';
         $this->cache_con->setValue($this->reflectedClass, new Predis\Client(INIT::$REDIS_SERVERS));
 
         $this->cache_TTL= $this->reflector->getProperty("cacheTTL");
@@ -37,9 +39,11 @@ class SetInCacheTest extends AbstractTest
     public function tearDown()
     {
         $this->cache_con->getValue($this->reflectedClass)-> flushdb();
+        parent::tearDown();
     }
 
     /**
+     * It set in cache a (key => value) record and it checks that will be available for the get from cache.
      * @group regression
      * @covers DataAccess_AbstractDao::_setInCache
      */
@@ -50,6 +54,7 @@ class SetInCacheTest extends AbstractTest
         $this->assertEquals($this->cache_value_for_the_key, unserialize(   $this->cache_con->getValue($this->reflectedClass) ->get(md5($this->cache_key))));
     }
     /**
+     * It set in cache a (key => value) record and it checks that will be available for the get from cache.
      * @group regression
      * @covers DataAccess_AbstractDao::_setInCache
      */

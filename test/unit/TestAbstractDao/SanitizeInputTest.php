@@ -11,11 +11,14 @@ class SanitizeInputTest extends AbstractTest
 {
     protected $reflector;
     protected $method;
+    /**
+     * @var EnginesModel_EngineStruct
+     */
     protected $struct_input;
 
     public function setUp()
     {
-
+        parent::setUp();
         $this->reflectedClass = new EnginesModel_EngineDAO(Database::obtain());
         $this->reflector = new ReflectionClass($this->reflectedClass);
         $this->method = $this->reflector->getMethod("_sanitizeInput");
@@ -25,15 +28,15 @@ class SanitizeInputTest extends AbstractTest
     }
 
     /**
+     * @param EnginesModel_EngineStruct
+     * It sanitizes a struct with correct type and particular name with critical characters ( " , ' ).
      * @group regression
      * @covers DataAccess_AbstractDao::_sanitizeInput
      */
     public function test__sanitizeInput_with_correct_type_and_param()
     {
 
-
         $this->struct_input = new EnginesModel_EngineStruct();
-
         $this->struct_input->name = <<<LABEL
 ba""r/foo'
 LABEL;
@@ -44,6 +47,8 @@ LABEL;
 
 
     /**
+     * @param Chunks_ChunkStruct
+     * It trows an exception because the struct isn't an instnce of  'EnginesModel_EngineStruct' .
      * @group regression
      * @covers DataAccess_AbstractDao::_sanitizeInput
      */

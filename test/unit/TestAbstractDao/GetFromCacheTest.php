@@ -18,7 +18,7 @@ class GetFromCacheTest extends AbstractTest
 
     public function setUp()
     {
-
+        parent::setUp();
         $this->reflectedClass = new EnginesModel_EngineDAO(Database::obtain());
         $this->reflector = new ReflectionClass($this->reflectedClass);
         $this->method = $this->reflector->getMethod("_getFromCache");
@@ -26,8 +26,6 @@ class GetFromCacheTest extends AbstractTest
 
         $this->cache_con = $this->reflector->getProperty("cache_con");
         $this->cache_con->setAccessible(true);
-
-        require_once 'Predis/autoload.php';
         $this->cache_con->setValue($this->reflectedClass, new Predis\Client(INIT::$REDIS_SERVERS));
 
         $this->cache_TTL= $this->reflector->getProperty("cacheTTL");
@@ -39,9 +37,11 @@ class GetFromCacheTest extends AbstractTest
     public function tearDown()
     {
         $this->cache_con->getValue($this->reflectedClass)-> flushdb();
+        parent::tearDown();
     }
 
     /**
+     * It gets from the cache a value tied to a simple key.
      * @group regression
      * @covers DataAccess_AbstractDao::_getFromCache
      */
@@ -54,6 +54,7 @@ class GetFromCacheTest extends AbstractTest
     }
 
     /**
+     * It gets from the cache a common value tied to a frequent key.
      * @group regression
      * @covers DataAccess_AbstractDao::_getFromCache
      */

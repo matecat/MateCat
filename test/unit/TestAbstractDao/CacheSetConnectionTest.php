@@ -14,7 +14,7 @@ class CacheSetConnectionTest extends AbstractTest
     protected $cache_conn;
     public function setUp()
     {
-
+        parent::setUp();
         $this->reflectedClass = new EnginesModel_EngineDAO(Database::obtain());
         $this->reflector = new ReflectionClass($this->reflectedClass);
         $this->method = $this->reflector->getMethod("_cacheSetConnection");
@@ -25,6 +25,7 @@ class CacheSetConnectionTest extends AbstractTest
     }
     
     /**
+     * It sets the connection to the DB after the creation of a new EnginesModel_EngineDAO .
      * @group regression
      * @covers DataAccess_AbstractDao::_cacheSetConnection
      */
@@ -36,6 +37,7 @@ class CacheSetConnectionTest extends AbstractTest
     }
 
     /**
+     * It trows an exception because it is unable to set the connection with wrong global constant value.
      * @group regression
      * @covers DataAccess_AbstractDao::_cacheSetConnection
      */

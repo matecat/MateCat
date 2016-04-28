@@ -17,15 +17,14 @@ class ParseSegmentSplitTest extends AbstractTest
     protected $separator;
     protected $expected_segment;
     protected $chunk_position;
-public function setUp(){
-    parent::setUp();
-    $this->separator= " ";
-    $this->chunk_position= array();
-}
-    public function tearDown(){
-        self::assertEquals(array($this->expected_segment, $this->chunk_position), CatUtils::parseSegmentSplit($this->source_segment, $this->separator));
-parent::tearDown();
+
+    public function setUp()
+    {
+        parent::setUp();
+        $this->separator = " ";
+        $this->chunk_position = array();
     }
+
     /**
      * @group regression
      * @covers CatUtils::parseSegmentSplit
@@ -38,6 +37,7 @@ LAB;
         $this->expected_segment = <<<'LAB'
 <g id="1">&#1048766;</g><g id="2"> </g><g id="3">Gâche à mortaiser;</g>
 LAB;
+        self::assertEquals(array($this->expected_segment, $this->chunk_position), CatUtils::parseSegmentSplit($this->source_segment, $this->separator));
 
     }
 
@@ -55,6 +55,7 @@ LAB;
         $this->expected_segment = <<<'LAB'
 <g id="1">&#1048766;</g><g id="2"> </g><bx id="3"/>Porte d'accès au bureau [1-1-13] d'entrée depuis le haut de l'escalier (P118 et P119)
 LAB;
+        self::assertEquals(array($this->expected_segment, $this->chunk_position), CatUtils::parseSegmentSplit($this->source_segment, $this->separator));
 
     }
 
@@ -74,6 +75,7 @@ LAB;
 <g id="1">3.2.124   123 - E</g><g id="2">NSE
 MBLE A   PPUI W	C ET NICCHIA DE S	OUTIEN DU RA    NGEMENT LUMINEUX</g>
 LAB;
+        self::assertEquals(array($this->expected_segment, $this->chunk_position), CatUtils::parseSegmentSplit($this->source_segment, $this->separator));
 
     }
 

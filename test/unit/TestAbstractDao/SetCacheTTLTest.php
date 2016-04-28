@@ -13,7 +13,7 @@ class SetCacheTTLTest extends AbstractTest
     protected $cache_TTL;
     public function setUp()
     {
-
+        parent::setUp();
         $this->reflectedClass = new EnginesModel_EngineDAO(Database::obtain());
         $this->reflector = new ReflectionClass($this->reflectedClass);
         $this->cache_TTL= $this->reflector->getProperty("cacheTTL");
@@ -22,6 +22,7 @@ class SetCacheTTLTest extends AbstractTest
     }
 
     /**
+     It sets the cache TTL to 55.
      * @group regression
      * @covers DataAccess_AbstractDao::setCacheTTL
      */

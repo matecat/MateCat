@@ -30,9 +30,11 @@ class DestructTest extends AbstractTest
         $this->reflectedClass = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $this->reflectedClass->close();
         startConnection();
+        parent::tearDown();
     }
 
     /**
+     * It tests that the destructor works correctly.
      * @group regression
      * @covers Database::__destruct
      */

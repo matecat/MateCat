@@ -15,10 +15,12 @@ class DestroyCacheTest extends AbstractTest
     protected $cache_TTL;
     protected $cache_key;
     protected $cache_value_for_the_key;
+    protected $number_of_keys_removed;
+    protected $bool_cache_hit;
 
     public function setUp()
     {
-
+        parent::setUp();
         $this->reflectedClass = new EnginesModel_EngineDAO(Database::obtain());
         $this->reflector = new ReflectionClass($this->reflectedClass);
         $this->method = $this->reflector->getMethod("_destroyCache");
@@ -26,9 +28,6 @@ class DestroyCacheTest extends AbstractTest
 
         $this->cache_con = $this->reflector->getProperty("cache_con");
         $this->cache_con->setAccessible(true);
-
-
-        require_once 'Predis/autoload.php';
         $this->cache_con->setValue($this->reflectedClass, new Predis\Client(INIT::$REDIS_SERVERS));
 
         $this->cache_TTL= $this->reflector->getProperty("cacheTTL");
@@ -40,9 +39,12 @@ class DestroyCacheTest extends AbstractTest
     public function tearDown()
     {
         $this->cache_con->getValue($this->reflectedClass)-> flushdb();
+        parent::tearDown();
     }
 
     /**
+     * @param string :  key
+     * It destroy the cache memory about a given key.
      * @group regression
      * @covers DataAccess_AbstractDao::_destroyCache
      */
@@ -54,26 +56,30 @@ class DestroyCacheTest extends AbstractTest
         $value = serialize($this->cache_value_for_the_key);
         $this->cache_con->getValue($this->reflectedClass) ->setex( $key, $TTL, $value);
         
-        $number_of_keys_removed= $this->method->invoke($this->reflectedClass,$this->cache_key);
-        $bool_cache_hit= $this->cache_con->getValue($this->reflectedClass)->get($this->cache_key);
-        $this->assertNull($bool_cache_hit );
-        $this->assertEquals(1,$number_of_keys_removed);
+        $this->number_of_keys_removed= $this->method->invoke($this->reflectedClass,$this->cache_key);
+        $this->bool_cache_hit= $this->cache_con->getValue($this->reflectedClass)->get($this->cache_key);
+        $this->assertNull($this->bool_cache_hit );
+        $this->assertEquals(1,$this->number_of_keys_removed);
 
     }
     /**
+     * @param string :  key
+     * It fails to destroy the cache memory about a given key because this key isn't cached.
      * @group regression
      * @covers DataAccess_AbstractDao::_destroyCache
      */
     public function test__destroyCache_not_cached_key_value(){
         $this->cache_key = "key";
         $this->cache_value_for_the_key = "foo_bar";
-        $number_of_keys_removed=$this->method->invoke($this->reflectedClass,$this->cache_key);
-        $bool_cache_hit= $this->cache_con->getValue($this->reflectedClass)->get($this->cache_key);
-        $this->assertNull($bool_cache_hit );
-        $this->assertEquals(0,$number_of_keys_removed);
+        $this->number_of_keys_removed=$this->method->invoke($this->reflectedClass,$this->cache_key);
+        $this->bool_cache_hit= $this->cache_con->getValue($this->reflectedClass)->get($this->cache_key);
+        $this->assertNull($this->bool_cache_hit );
+        $this->assertEquals(0,$this->number_of_keys_removed);
 
     }
     /**
+     * @param string :  key
+     * It destroy the cache memory about a given key.
      * @group regression
      * @covers DataAccess_AbstractDao::_destroyCache
      */
@@ -103,10 +109,10 @@ class DestroyCacheTest extends AbstractTest
         $value = serialize($this->cache_value_for_the_key);
         $this->cache_con->getValue($this->reflectedClass) ->setex( $key, $TTL, $value);
 
-        $number_of_keys_removed= $this->method->invoke($this->reflectedClass,$this->cache_key);
-        $bool_cache_hit= $this->cache_con->getValue($this->reflectedClass)->get($this->cache_key);
-        $this->assertNull($bool_cache_hit );
-        $this->assertEquals(1,$number_of_keys_removed);
+        $this->number_of_keys_removed= $this->method->invoke($this->reflectedClass,$this->cache_key);
+        $this->bool_cache_hit= $this->cache_con->getValue($this->reflectedClass)->get($this->cache_key);
+        $this->assertNull($this->bool_cache_hit );
+        $this->assertEquals(1,$this->number_of_keys_removed);
 
     }
 }

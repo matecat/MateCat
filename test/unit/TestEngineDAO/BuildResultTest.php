@@ -18,7 +18,7 @@ class BuildResultTest extends AbstractTest
 
     public function setUp()
     {
-
+        parent::setUp();
         $this->reflectedClass = new EnginesModel_EngineDAO(Database::obtain());
         $this->reflector = new ReflectionClass($this->reflectedClass);
         $this->method = $this->reflector->getMethod("_buildResult");
@@ -28,6 +28,7 @@ class BuildResultTest extends AbstractTest
     }
 
     /**
+     * This test builds an engine object from an array that describes the properties
      * @group regression
      * @covers EnginesModel_EngineDAO::_buildResult
      */

@@ -56,6 +56,8 @@ class DeleteTest extends AbstractTest
 
 
     /**
+     * This test delete the struct of an engine from the database that corresponds
+     * to the artificially constructed engine passed as @param.
      * @group regression
      * @covers EnginesModel_EngineDAO::delete
      */
@@ -76,6 +78,8 @@ class DeleteTest extends AbstractTest
     }
 
     /**
+     * This test doesn't delete the struct of an engine from the database that corresponds
+     * to the artificially constructed engine passed as @param.
      * @group regression
      * @covers EnginesModel_EngineDAO::delete
      */

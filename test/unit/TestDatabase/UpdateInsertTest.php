@@ -25,7 +25,7 @@ class UpdateInsertTest extends AbstractTest
 
     public function setUp()
     {
-
+        parent::setUp();
         $this->reflectedClass = Database::obtain();
         $this->reflector = new ReflectionClass($this->reflectedClass);
         $this->property = $this->reflector->getProperty('instance');
@@ -59,6 +59,7 @@ class UpdateInsertTest extends AbstractTest
         $this->reflectedClass = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $this->reflectedClass->close();
         startConnection();
+        parent::tearDown();
     }
 
     /**
@@ -89,6 +90,7 @@ class UpdateInsertTest extends AbstractTest
     }
 
     /**
+     * This test perform an insertion in DB and checks if the operation  succeeded
      * @group regression
      * @covers Database::insert
      */

@@ -15,12 +15,16 @@ class Destroy2CacheTest extends AbstractTest
 
     public function setUp()
     {
+        parent::setUp();
         $this->engineDAO = new EnginesModel_EngineDAO(Database::obtain());
 
         $this->engine_struct = new EnginesModel_EngineStruct();
         $this->cache= new Predis\Client(INIT::$REDIS_SERVERS);
     }
+
     /**
+     * @param EnginesModel_EngineStruct
+     * It cleans the cache memory about an engine that corresponds to the struct with initialized id passed as @param
      * @group regression
      * @covers EnginesModel_EngineDAO::destroyCache
      */

@@ -2,12 +2,12 @@
 
 /**
  * @group regression
- * @covers EnginesModel_EngineStruct::offsetSet
+ * @covers EnginesModel_EngineStruct::offsetGet
  * User: dinies
  * Date: 20/04/16
- * Time: 19.18
+ * Time: 19.15
  */
-class OffsetSet extends  AbstractTest
+class OffsetGetTest   extends AbstractTest
 {
 
     /**
@@ -23,16 +23,16 @@ class OffsetSet extends  AbstractTest
 
 
     /**
+     * It takes the value of the variable that correspond to @param string
      * @group regression
-     * @covers EnginesModel_EngineStruct::offsetSet
+     * @covers EnginesModel_EngineStruct::offsetGet
      */
-    public function test_offsetSet_id_field()
+    public function test_offsetGet_id_field()
     {
         $this->engine_struct_param->id = 10 ;
 
-        $this->assertEquals(10,$this->engine_struct_param->id);
-        $this->engine_struct_param->offsetSet("id",999);
-        $this->assertEquals(999,$this->engine_struct_param->id);
-
+        $this->assertEquals(10,$this->engine_struct_param->offsetGet("id"));
     }
+
+
 }

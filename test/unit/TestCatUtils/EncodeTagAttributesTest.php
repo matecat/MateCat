@@ -25,11 +25,6 @@ class EncodeTagAttributesTest extends AbstractTest
         $this->method->setAccessible(true);
     }
 
-    public function tearDown()
-    {
-        $this->assertEquals($this->output_param, $this->method->invoke($this->reflectedClass, $this->input_param));
-        parent::tearDown();
-    }
     /**
      * @group regression
      * @covers CatUtils::__encode_tag_attributes
@@ -42,6 +37,8 @@ LAB;
         $this->output_param = <<<'LAB'
 ##LESSTHAN##ZyBpZD0iMSI=##GREATERTHAN##6) ##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMiI=##GREATERTHAN##阪  眞##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMyI=##GREATERTHAN##: ##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##YnggaWQ9IjQiLw==##GREATERTHAN##胃術後の栄養障害と栄養補給法．
 LAB;
+        $this->assertEquals($this->output_param, $this->method->invoke($this->reflectedClass, $this->input_param));
+
     }
 
 
@@ -61,6 +58,8 @@ LAB;
 ##LESSTHAN##ZyBpZD0iMSI=##GREATERTHAN##ΤΕΥΧΟΣ ΔΕΥΤΕΡΟ##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMiI=##GREATERTHAN##  ##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMyI=##GREATERTHAN##Αο, Φύλλου 2326##LESSTHAN##L2c=##GREATERTHAN##
 ##LESSTHAN##ZyBpZD0iMSI=##GREATERTHAN##2 ##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMiI=##GREATERTHAN##.##LESSTHAN##L2c=##GREATERTHAN##
 LAB;
+        $this->assertEquals($this->output_param, $this->method->invoke($this->reflectedClass, $this->input_param));
+
     }
 
 
@@ -76,6 +75,8 @@ LAB;
         $this->output_param = <<<'LAB'
 ##LESSTHAN##ZyBpZD0iMiI=##GREATERTHAN##derselbe soll dir den Kopf zertreten“##LESSTHAN##L2c=##GREATERTHAN##,  (Hinweis auf Satan) und du wirst ihn in die Ferse stechen (Hinweis auf den Tode des Messias, Ferse hat eine wichtige Bedeutung in der semitischen Kultur).
 LAB;
+        $this->assertEquals($this->output_param, $this->method->invoke($this->reflectedClass, $this->input_param));
+
     }
 
 
@@ -99,6 +100,8 @@ LAB;
 ##LESSTHAN##ZyBpZD0iMiI=##GREATERTHAN##k##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMyI=##GREATERTHAN##0##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iNCI=##GREATERTHAN##k##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iNSI=##GREATERTHAN##'    ##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iNiI=##GREATERTHAN##ap##LESSTHAN##L2c=##GREATERTHAN##
 ##LESSTHAN##ZyBpZD0iMiI=##GREATERTHAN##[0079] ##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMyI=##GREATERTHAN##V##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iNCI=##GREATERTHAN##f ##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iNSI=##GREATERTHAN##= - ##LESSTHAN##L2c=##GREATERTHAN##
 LAB;
+        $this->assertEquals($this->output_param, $this->method->invoke($this->reflectedClass, $this->input_param));
+
     }
 
 

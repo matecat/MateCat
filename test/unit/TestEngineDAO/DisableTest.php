@@ -56,6 +56,8 @@ class DisableTest extends  AbstractTest
 
 
     /**
+     * @param EnginesModel_EngineStruct
+     * It disables the struct of the engine passed as @param
      * @group regression
      * @covers EnginesModel_EngineDAO::disable
      */
@@ -76,12 +78,13 @@ class DisableTest extends  AbstractTest
     }
 
     /**
+     * @param EnginesModel_EngineStruct
+     * It fails in disabling the struct of the engine because the engine passed as @param has wrong uid
      * @group regression
      * @covers EnginesModel_EngineDAO::disable
      */
     public function test_disable_the_struct_of_engine_with_wrong_uid_avoiding_the_disable(){
-
-
+        
         $this->engine_struct_param->id = 10 ;
         $this->engine_struct_param->uid = 66;
         $this->assertNull($this->engine_DAO->disable($this->engine_struct_param));

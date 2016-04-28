@@ -52,7 +52,8 @@ class CreateTempInstanceTest extends AbstractTest
     }
 
     /**
-     * @param id of the engine previously constructed
+     * It checks if the creation of an istance of engine will be successfully created when it invokes the method.
+     * @param EnginesModel_EngineStruct
      * @group regression
      * @covers Engine::createTempInstance
      */

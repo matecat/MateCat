@@ -17,6 +17,9 @@ class ReadTest extends  AbstractTest
     protected $engine_struct_param;
 
     /**
+     * @param EnginesModel_EngineStruct
+     * @return array
+     * It reads a struct of an engine and @return an array of properties of the engine
      * @group regression
      * @covers EnginesModel_EngineDAO::read
      */

@@ -29,9 +29,11 @@ class ObtainTest extends AbstractTest
         $this->reflectedClass = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->reflectedClass->close();
         startConnection();
+        parent::tearDown();
     }
 
     /**
+     * @return Database
      * @group regression
      * @covers Database::obtain
      */
@@ -48,6 +50,9 @@ class ObtainTest extends AbstractTest
     }
 
     /**
+     * It checks that two databases generated with the same method
+     * and the same input values taken by global variables will be anyway
+     * different in terms of memory addresses of the instances.
      * @group regression
      * @covers Database::obtain
      */

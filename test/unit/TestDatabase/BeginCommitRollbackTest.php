@@ -13,6 +13,7 @@ class BeginCommitRollbackTest extends AbstractTest
 {
 
     protected $reflector;
+    protected $property;
     /**
      * @var Database
      */
@@ -43,10 +44,10 @@ class BeginCommitRollbackTest extends AbstractTest
 
         $this->reflectedClass = Database::obtain();
         $this->reflector = new ReflectionClass($this->reflectedClass);
-        $property = $this->reflector->getProperty('instance');
+        $this->property = $this->reflector->getProperty('instance');
         $this->reflectedClass->close();
-        $property->setAccessible(true);
-        $property->setValue($this->reflectedClass, null);
+        $this->property->setAccessible(true);
+        $this->property->setValue($this->reflectedClass, null);
         $this->alfa_instance = $this->reflectedClass->obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
 
         $this->sql_create = "CREATE TABLE Persons( PersonID INT)";
@@ -65,6 +66,7 @@ class BeginCommitRollbackTest extends AbstractTest
         $this->reflectedClass = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $this->reflectedClass->close();
         startConnection();
+        parent::tearDown();
     }
 
     /**

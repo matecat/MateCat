@@ -15,7 +15,7 @@ class SanitizeInputArrayTest extends AbstractTest
 
     public function setUp()
     {
-
+        parent::setUp();
         $this->reflectedClass = new EnginesModel_EngineDAO(Database::obtain());
         $this->reflector = new ReflectionClass($this->reflectedClass);
         $this->method = $this->reflector->getMethod("_sanitizeInputArray");
@@ -25,6 +25,8 @@ class SanitizeInputArrayTest extends AbstractTest
     }
 
     /**
+     * @param array(EnginesModel_EngineStruct,EnginesModel_EngineStruct,EnginesModel_EngineStruct).
+     * It sanitizes an array of EnginesModel_EngineStruct with structs of the correct type of instance.
      * @group regression
      * @covers DataAccess_AbstractDao::_sanitizeInputArray
      */
@@ -46,6 +48,8 @@ class SanitizeInputArrayTest extends AbstractTest
 
 
     /**
+     * @param array(EnginesModel_EngineStruct,Chunks_ChunkStruct,EnginesModel_EngineStruct).
+     * It throws an exception because the second element is of the wrong instance type.
      * @group regression
      * @covers DataAccess_AbstractDao::_sanitizeInputArray
      */

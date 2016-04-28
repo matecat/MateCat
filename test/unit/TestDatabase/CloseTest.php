@@ -34,9 +34,12 @@ class CloseTest extends AbstractTest
         $this->reflectedClass = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $this->reflectedClass->close();
         startConnection();
+        parent::tearDown();
     }
 
     /**
+     * It tests that after the call of the method 'close', the variable connection
+     * of the instance of database will be set NULL.
      * @group regression
      * @covers Database::close
      */

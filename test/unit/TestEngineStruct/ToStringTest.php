@@ -22,6 +22,7 @@ class ToStringTest extends AbstractTest
 
 
     /**
+     * It checks if the string of summary useful for confrontations between instances of engines is created correctly.
      * @group regression
      * @covers EnginesModel_EngineStruct::offsetUnset
      */

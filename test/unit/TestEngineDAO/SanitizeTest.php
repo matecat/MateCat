@@ -18,6 +18,7 @@ class SanitizeTest extends AbstractTest
 
     public function setUp()
     {
+        parent::setUp();
         $this->engine_Dao = new EnginesModel_EngineDAO(Database::obtain());
         $this->engine_struct_input = new EnginesModel_EngineStruct();
         $this->engine_struct_expected = new EnginesModel_EngineStruct();
@@ -25,6 +26,7 @@ class SanitizeTest extends AbstractTest
     }
 
     /**
+     * It sanitizes the field 'name'.
      * @group regression
      * @covers EnginesModel_EngineDAO::sanitize
      */
@@ -43,6 +45,7 @@ LABEL;
     }
 
     /**
+     * It sanitizes the field 'description'.
      * @group regression
      * @covers EnginesModel_EngineDAO::sanitize
      */
@@ -62,6 +65,7 @@ LABEL;
 
 
     /**
+     * It sanitizes the field 'base_url'.
      * @group regression
      * @covers EnginesModel_EngineDAO::sanitize
      */
@@ -81,6 +85,7 @@ LABEL;
 
 
     /**
+     * It sanitizes the field 'translate_relative_url'.
      * @group regression
      * @covers EnginesModel_EngineDAO::sanitize
      */
@@ -100,6 +105,7 @@ LABEL;
 
 
     /**
+     * It sanitizes the field 'contribute_relative_url_field'.
      * @group regression
      * @covers EnginesModel_EngineDAO::sanitize
      */
@@ -119,6 +125,7 @@ LABEL;
 
 
     /**
+     * It sanitizes the field 'delete_relative_url'.
      * @group regression
      * @covers EnginesModel_EngineDAO::sanitize
      */
@@ -138,6 +145,7 @@ LABEL;
 
 
     /**
+     * It sanitizes the field 'others'.
      * @group regression
      * @covers EnginesModel_EngineDAO::sanitize
      */
@@ -156,6 +164,7 @@ LABEL;
 
 
     /**
+     * It sanitizes the field 'class_load'.
      * @group regression
      * @covers EnginesModel_EngineDAO::sanitize
      */
@@ -175,6 +184,7 @@ LABEL;
 
 
     /**
+     * * It sanitizes the field 'extra_parameters'.
      * @group regression
      * @covers EnginesModel_EngineDAO::sanitize
      */
@@ -193,6 +203,7 @@ LABEL;
 
 
     /**
+     * It sanitizes the field 'penalty'.
      * @group regression
      * @covers EnginesModel_EngineDAO::sanitize
      */
@@ -212,6 +223,7 @@ LABEL;
 
 
     /**
+     * It sanitizes the field 'active'.
      * @group regression
      * @covers EnginesModel_EngineDAO::sanitize
      */
@@ -231,6 +243,7 @@ LABEL;
 
 
     /**
+     * It sanitizes the field 'uid'.
      * @group regression
      * @covers EnginesModel_EngineDAO::sanitize
      */
@@ -249,6 +262,7 @@ LABEL;
     }
 
     /**
+     * It sanitizes the field 'others' filled with a realistic value.
      * @group regression
      * @covers EnginesModel_EngineDAO::sanitize
      */

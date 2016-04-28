@@ -28,9 +28,12 @@ class ConnectTest extends AbstractTest
         $this->reflectedClass = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $this->reflectedClass->close();
         startConnection();
+        parent::tearDown();
     }
 
     /**
+     * It verifies that the variable connection of the instance of database is initialized
+     * after the call of the method 'connect'.
      * @group regression
      * @covers Database::connect
      */
@@ -50,6 +53,7 @@ class ConnectTest extends AbstractTest
     }
 
     /**
+     * It checks that the variable 'connection' of the instance of a newly created database is NULL.
      * @group regression
      * @covers Database::connect
      */
@@ -64,6 +68,8 @@ class ConnectTest extends AbstractTest
     }
 
     /**
+     * This test checks the fact that two different databases newly created are different objects
+     * despite the fact that they have the same initial values in their local variables.
      * @group regression
      * @covers Database::connect
      */

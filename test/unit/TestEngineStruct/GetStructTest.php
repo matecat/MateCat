@@ -22,6 +22,8 @@ class GetStructTest extends AbstractTest
     }
 
     /**
+     * @return EnginesModel_EngineStruct
+     * It returns a EnginesModel_EngineStruct
      * @group regression
      * @covers EnginesModel_EngineStruct::getStruct
      */

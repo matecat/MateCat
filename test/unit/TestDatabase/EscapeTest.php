@@ -21,7 +21,7 @@ class EscapeTest extends AbstractTest
 
     public function setUp()
     {
-
+        parent::setUp();
         $this->reflectedClass = Database::obtain();
         $this->reflector = new ReflectionClass($this->reflectedClass);
         $this->property = $this->reflector->getProperty('instance');
@@ -35,7 +35,6 @@ class EscapeTest extends AbstractTest
         $this->sql_read = "SELECT * FROM Phrases";
 
 
-
     }
 
     public function tearDown()
@@ -44,9 +43,12 @@ class EscapeTest extends AbstractTest
         $this->reflectedClass = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $this->reflectedClass->close();
         startConnection();
+        parent::tearDown();
     }
 
     /**
+     * @param string
+     * It checks that a source string will match with the correctly escaped expected string.
      * @group regression
      * @covers Database::escape
      * User: dinies
@@ -55,19 +57,20 @@ class EscapeTest extends AbstractTest
     {
 
 
-        $source=<<<LABEL
+        $source = <<<LABEL
 a wolf isn't a "dog"
 LABEL;
-        $actual= $this->alfa_instance->escape($source);
+        $actual = $this->alfa_instance->escape($source);
 
-        $expected=<<<LABEL
+        $expected = <<<LABEL
 a wolf isn\'t a \"dog\"
 LABEL;
 
-        $this->assertEquals($expected,$actual);
+        $this->assertEquals($expected, $actual);
     }
 
     /**
+     * It checks that the escaped string will be inserted in the database and that it will be visible in the table 'Phrases'.
      * @group regression
      * @covers Database::escape
      * User: dinies
@@ -75,23 +78,23 @@ LABEL;
     public function test_escape_and_insert_the_result_in_db()
     {
 
-        $source=<<<LABEL
+        $source = <<<LABEL
 a w''olf "i"sn'''t a' "dog"
 LABEL;
-        $actual= $this->alfa_instance->escape($source);
+        $actual = $this->alfa_instance->escape($source);
         $sql_insert_source_value = "INSERT INTO Phrases (Piece) VALUES ('$actual')";
-        $expected_string=<<<LABEL
+        $expected_string = <<<LABEL
 a w\'\'olf \"i\"sn\'\'\'t a\' \"dog\"
 LABEL;
-        $this->assertEquals($expected_string,$actual);
+        $this->assertEquals($expected_string, $actual);
 
-        $expected=(array(0 => array("Piece" => $source)));
+        $expected = (array(0 => array("Piece" => $source)));
         $this->alfa_instance->query($this->sql_create);
         $this->alfa_instance->query($sql_insert_source_value);
         $read_result = $this->alfa_instance->query($this->sql_read)->fetchAll(PDO::FETCH_ASSOC);
 
         $this->assertEquals($expected, $read_result);
-        
+
         $this->alfa_instance->query($this->sql_drop);
 
     }

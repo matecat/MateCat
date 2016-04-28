@@ -21,7 +21,9 @@ class ValidatePrimaryKeyTest extends AbstractTest
     protected $engine_struct_param;
 
     public function setUp()
-    {   $this->reflectedClass = new EnginesModel_EngineDAO(Database::obtain());
+    {
+        parent::setUp();
+        $this->reflectedClass = new EnginesModel_EngineDAO(Database::obtain());
         $this->reflector = new ReflectionClass($this->reflectedClass);
         $this->method = $this->reflector->getMethod("_validatePrimaryKey");
         $this->method->setAccessible(true);
@@ -30,24 +32,22 @@ class ValidatePrimaryKeyTest extends AbstractTest
     }
 
     /**
+     * It checks that 'id' and 'uid' aren't null values.
      * @group regression
      * @covers EnginesModel_EngineDAO::_validatePrimaryKey
      */
-    public function test__validatePrimaryKey§_valid_fields()
+    public function test__validatePrimaryKey_valid_fields()
     {
 
-        $this->engine_struct_param->id = <<<LABEL
-33
-LABEL;
+        $this->engine_struct_param->id = 33;
+        $this->engine_struct_param->uid = 1;
 
-        $this->engine_struct_param->uid = <<<LABEL
-1
-LABEL;
         $this->method->invoke($this->reflectedClass, $this->engine_struct_param);
     }
 
 
     /**
+     * It will raise an exception when it checks that 'id' field is NULL.
      * @group regression
      * @covers EnginesModel_EngineDAO::_validatePrimaryKey
      */
@@ -55,25 +55,21 @@ LABEL;
     {
 
         $this->engine_struct_param->id = NULL;
-
-        $this->engine_struct_param->uid = <<<LABEL
-1
-LABEL;
+        $this->engine_struct_param->uid = 1;
         $this->setExpectedException("Exception");
         $this->method->invoke($this->reflectedClass, $this->engine_struct_param);
     }
 
 
     /**
+     * It will raise an exception when it checks that 'uid' field is NULL.
      * @group regression
      * @covers EnginesModel_EngineDAO::_validatePrimaryKey
      */
     public function test__validatePrimaryKey_invalid_uid()
     {
 
-        $this->engine_struct_param->id = <<<LABEL
-33
-LABEL;
+        $this->engine_struct_param->id = 33;
         $this->engine_struct_param->uid = NULL;
         $this->setExpectedException("Exception");
         $this->method->invoke($this->reflectedClass, $this->engine_struct_param);
