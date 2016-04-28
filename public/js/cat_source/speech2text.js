@@ -30,12 +30,11 @@ Speech2Text = {};
             if( Speech2Text.recognition ) {
                 Speech2Text.targetElement = Speech2Text.microphone.parent().find( '.editarea' );
 
-                if( segment.hasClass('status-translated')
-                        || segment.hasClass('status-approved') ) {
-                    Speech2Text.isToEmptyTargetElement = false;
-                } else {
-                    Speech2Text.isToEmptyTargetElement = true;
-                }
+                var segmentId = segment.data('split-original-id');
+                var segmentRecord = MateCat.db.segments.by( 'sid', segmentId );
+
+                Speech2Text.isToEmptyTargetElement = Speech2Text
+                        .shouldEmptyTargetElement( segmentRecord );
 
                 Speech2Text.microphone.click( Speech2Text.clickMicrophone );
 
@@ -143,6 +142,26 @@ Speech2Text = {};
             var one_line = /\n/g;
 
             return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
+        },
+        putSegmentsInStore: function( data ) {
+            $.each(data.files, function() {
+                $.each( this.segments, function() {
+                    MateCat.db.upsert( 'segments', 'sid', _.clone( this ) );
+                });
+            });
+        },
+        shouldEmptyTargetElement: function( segment ) {
+            if( (segment.autopropagated_from && segment.autopropagated_from != "0")
+                    || segment.suggestion_match === "100"
+                    || segment.status === "TRANSLATED"
+                    || segment.status === "REJECTED"
+                    || segment.status === "APPROVED"
+                    || segment.status === "FIXED"
+                    || segment.status === "REBUTTED") {
+                return false;
+            }
+
+            return true;
         }
     });
 

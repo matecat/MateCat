@@ -957,6 +957,8 @@ UI = {
 			success: function(d) {
                 $(document).trigger('segments:load', d.data);
 
+                Speech2Text.putSegmentsInStore( d.data );
+
                 if ($.cookie('tmpanel-open') == '1') UI.openLanguageResourcesPanel();
 				UI.getSegments_success(d, options);
 

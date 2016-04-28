@@ -176,6 +176,8 @@ class getSegmentsController extends ajaxController {
 
             $this->attachNotes( $seg );
 
+            $this->attachSuggestionMatch( $seg );
+
             $this->data["$id_file"]['segments'][] = $seg;
         }
 
@@ -201,6 +203,12 @@ class getSegmentsController extends ajaxController {
         $segment['notes'] = @$this->segment_notes[ (int) $segment['sid'] ] ;
     }
 
+    private function attachSuggestionMatch( &$segment ) {
+        $segment_translation = \Translations_SegmentTranslationDao
+                ::findBySegmentAndJob( $segment['sid'], $this->jid );
+
+        $segment['suggestion_match'] = $segment_translation->suggestion_match;
+    }
 
     private function prepareNotes( $segments ) {
         if ( ! empty( $segments[0] ) ) {
