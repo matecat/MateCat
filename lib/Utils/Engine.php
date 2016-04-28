@@ -44,7 +44,11 @@ class Engine {
         return new $className( $engineRecord );
 
     }
-    
+
+    /**
+     * @param EnginesModel_EngineStruct $engineRecord
+     * @return mixed
+     */
     public static function createTempInstance( $engineRecord ) {
         $className = 'Engines_' . $engineRecord->class_load;
         return new $className( $engineRecord );

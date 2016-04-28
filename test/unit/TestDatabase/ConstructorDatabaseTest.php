@@ -7,7 +7,7 @@
  * Date: 11/04/16
  * Time: 17.51
  */
-class ConstructTest extends AbstractTest
+class ConstructorDatabaseTest extends AbstractTest
 {
 
     protected $reflector;
@@ -26,12 +26,14 @@ class ConstructTest extends AbstractTest
 
     public function tearDown()
     {
-        $this->reflectedClass = Database::obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $this->reflectedClass = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $this->reflectedClass->close();
         startConnection();
+        parent::tearDown();
     }
 
     /**
+     * This test checks that an Exception will be raised if the constructor is called without parameters.
      * @group regression
      * @covers Database::__construct
      */
