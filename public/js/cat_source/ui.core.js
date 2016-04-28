@@ -2211,7 +2211,6 @@ UI = {
 	showMessage: function(options) {
 
         APP.showMessage(options);
-        setTimeout(  function() {$('body' ).removeClass('incomingMsg' )} , 5000  );
 
 	},
 	checkVersion: function() {
