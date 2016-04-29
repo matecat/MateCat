@@ -72,12 +72,14 @@ class GetMyMemoryTest extends AbstractTest
 
 
         $this->engine_MyMemory = new Engines_MyMemory($this->engine_struct_param);
+        
+
     }
 /**
  * @group regression
  * @covers Engines_MyMemory::get
  */
-    public function test_get_segment_deutsch(){
+    public function test_get_segment_dutch(){
         $this->config_param= array(
             'segment' => "- Auf der Fußhaut natürlich vorhandene Hornhautbakterien zersetzen sich durch auftretenden Schweiß an Ihren Füßen.",
             'translation' => "",
@@ -88,6 +90,43 @@ class GetMyMemoryTest extends AbstractTest
             'prop' => NULL,
             'get_mt' => NULL,
             'id_user' => "",
+            'num_result' => 100,
+            'mt_only' => false,
+            'isConcordance' => false,
+            'isGlossary' => true,
+        );
+
+        $result = $this->engine_MyMemory->get($this->config_param);
+        $this->assertEquals(200,$result->responseStatus);
+        $this->assertEquals("",$result->responseDetails);
+        $this->assertCount(2,$result->responseData);
+        $this->assertTrue($result instanceof Engines_Results_MyMemory_TMS);
+        $this->assertEquals(array(),$result->matches);
+
+
+        $this->reflector= new ReflectionClass($result);
+        $property= $this->reflector->getProperty('_rawResponse');
+        $property->setAccessible(true);
+
+        $this->assertEquals("",$property->getValue($result));
+
+    }
+
+    /**
+     * @group regression
+     * @covers Engines_MyMemory::get
+     */
+    public function test_get_segment_dutch_with_id_user_initialized(){
+        $this->config_param= array(
+            'segment' => "- Auf der Fußhaut natürlich vorhandene Hornhautbakterien zersetzen sich durch auftretenden Schweiß an Ihren Füßen.",
+            'translation' => "",
+            'tnote' => NULL,
+            'source' => "en-US",
+            'target' => "fr-FR",
+            'email' => "demo@matecat.com",
+            'prop' => NULL,
+            'get_mt' => NULL,
+            'id_user' => 44,
             'num_result' => 100,
             'mt_only' => false,
             'isConcordance' => false,
