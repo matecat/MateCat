@@ -105,8 +105,13 @@ Speech2Text = {};
             Speech2Text.recognizing = true;
         },
         onRecognitionError: function( event ) {
-            //TODO: Display a user-friendly error message
-            console.error( 'Error found: ' + event.error );
+            if( event.error === 'no-speech' ) {
+                Speech2Text.isToKeepRecognizing = false;
+                Speech2Text.stopSpeechRecognition( Speech2Text.microphone );
+            } else {
+                //TODO: Display a user-friendly error message
+                console.error( 'Error found: ' + event.error );
+            }
         },
         onRecognitionEnd: function() {
             Speech2Text.recognizing = false;
