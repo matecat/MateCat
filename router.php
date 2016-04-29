@@ -17,6 +17,8 @@ function route($path, $method, $controller, $action) {
     });
 }
 
+Features::loadRoutes( $klein );
+
 $klein->onError(function ($klein, $err_msg, $err_type, $exception) {
     // TODO still need to catch fatal errors here with 500 code
 
