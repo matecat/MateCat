@@ -762,12 +762,12 @@ if (LXQ.enabled())
         }
         var reloadPowertip = function(segment) {
             buildPowertipDataForSegment(segment);                
-            $('.tooltipa').powerTip({
+            $('.tooltipa',segment).powerTip({
                 placement: 'sw',
                 mouseOnToPopup: true,
                 closeDelay: 500
             });
-            $('.tooltipas').powerTip({
+            $('.tooltipas',segment).powerTip({
                 placement: 'se',
                 mouseOnToPopup: true,
                 closeDelay: 500
