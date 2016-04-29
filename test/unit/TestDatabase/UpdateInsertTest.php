@@ -25,7 +25,7 @@ class UpdateInsertTest extends AbstractTest
 
     public function setUp()
     {
-
+        parent::setUp();
         $this->reflectedClass = Database::obtain();
         $this->reflector = new ReflectionClass($this->reflectedClass);
         $this->property = $this->reflector->getProperty('instance');
@@ -34,7 +34,7 @@ class UpdateInsertTest extends AbstractTest
         $this->property->setValue($this->reflectedClass, null);
         $this->property = $this->reflector->getProperty('affected_rows');
         $this->property->setAccessible(true);
-        $this->alfa_instance = $this->reflectedClass->obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $this->alfa_instance = $this->reflectedClass->obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
 
         $this->sql_create = "CREATE TABLE Persons( PersonID INT )";
         $this->sql_insert_first_value = "INSERT INTO Persons VALUES (475144 )";
@@ -56,9 +56,10 @@ class UpdateInsertTest extends AbstractTest
     {
 
         $this->alfa_instance->query($this->sql_drop);
-        $this->reflectedClass = Database::obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $this->reflectedClass = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $this->reflectedClass->close();
         startConnection();
+        parent::tearDown();
     }
 
     /**
@@ -89,6 +90,7 @@ class UpdateInsertTest extends AbstractTest
     }
 
     /**
+     * This test perform an insertion in DB and checks if the operation  succeeded
      * @group regression
      * @covers Database::insert
      */

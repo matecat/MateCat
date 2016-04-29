@@ -14,7 +14,7 @@ class OwnerFeatures_OwnerFeatureValidator extends DataAccess_AbstractValidator {
 
     public function ensureValid() {
         if ( !$this->isValid() ) {
-            throw new ValidationError('invalid');
+            throw new \Exceptions\ValidationError('invalid');
         }
     }
 

@@ -64,6 +64,8 @@ class CatDecorator {
             $this->template->remoteFilesInJob = $files ;
         }
 
+        $this->template->showReplaceOptionsInSearch = true ;
+
     }
 
     /**

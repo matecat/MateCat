@@ -1784,7 +1784,12 @@ class TmKeyManagementTest extends AbstractTest {
 
         $this->assertEquals( "0000123JKL", $thirdKey->key );
         $this->assertTrue( $thirdKey->r_transl );
-        $this->assertFalse( $thirdKey->w_transl );
+        if (version_compare(PHP_VERSION, 5.4) >= 0){
+            $this->assertFalse( $thirdKey->w_transl );
+        }
+        else{
+            $this->assertNull( $thirdKey->w_transl );
+        }
         $this->assertEquals( 123, $thirdKey->uid_transl );
         $this->assertFalse( $thirdKey->owner );
         $this->assertNull( $thirdKey->r );
@@ -1854,7 +1859,12 @@ class TmKeyManagementTest extends AbstractTest {
 
         $this->assertEquals( "0000123MNO", $firstKey->key );
         $this->assertTrue( $firstKey->r_transl );
-        $this->assertFalse( $firstKey->w_transl );
+        if (version_compare(PHP_VERSION, 5.4) >= 0){
+            $this->assertFalse( $firstKey->w_transl );
+        }
+        else{
+            $this->assertNull( $firstKey->w_transl );
+        }
         $this->assertEquals( "My MNO", $firstKey->name );
         $this->assertEquals( 123, $firstKey->uid_transl );
         $this->assertEquals( 1, $firstKey->owner );
@@ -1864,7 +1874,12 @@ class TmKeyManagementTest extends AbstractTest {
 
         //This key must be untouched because client sent hashed
         $this->assertEquals( "0000123ABC", $secondKey->key );
-        $this->assertFalse( $secondKey->r_transl );
+        if (version_compare(PHP_VERSION, 5.4) >= 0){
+            $this->assertFalse( $secondKey->r_transl );
+        }
+        else{
+            $this->assertNull( $secondKey->r_transl );
+        }
         $this->assertTrue( $secondKey->w_transl );
         $this->assertEquals( 123, $secondKey->uid_transl );
         $this->assertEquals( "My ABC", $secondKey->name );
@@ -1873,7 +1888,12 @@ class TmKeyManagementTest extends AbstractTest {
         $this->assertEquals( 0, $secondKey->w );
 
         $this->assertEquals( "0000123GHI", $thirdKey->key );
-        $this->assertFalse( $thirdKey->r_transl );
+        if (version_compare(PHP_VERSION, 5.4) >= 0){
+            $this->assertFalse( $thirdKey->r_transl );
+        }
+        else{
+            $this->assertNull( $thirdKey->r_transl );
+        }
         $this->assertTrue( $thirdKey->w_transl );
         $this->assertEquals( 123, $thirdKey->uid_transl );
         $this->assertEquals( "My GHI", $thirdKey->name );

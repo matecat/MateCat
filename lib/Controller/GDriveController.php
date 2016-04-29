@@ -45,7 +45,7 @@ class GDriveController extends KleinController {
     }
 
     private function doAuth() {
-        $this->gdriveService = GDrive::getService( $_SESSION );
+        $this->gdriveService = GDrive::getService( array( 'uid' => $_SESSION[ 'uid' ] ) );
     }
 
     private function doImport() {
