@@ -3416,11 +3416,13 @@ UI = {
                     $('.tooltipa').powerTip({
                         placement: 'sw',
                         mouseOnToPopup: true,
+                        smartPlacement: true,
                         closeDelay: 500
                     });
                     $('.tooltipas').powerTip({
                         placement: 'se',
                         mouseOnToPopup: true,
+                        smartPlacement: true,
                         closeDelay: 500
                     });
                 }

@@ -765,11 +765,13 @@ if (LXQ.enabled())
             $('.tooltipa',segment).powerTip({
                 placement: 'sw',
                 mouseOnToPopup: true,
+                smartPlacement: true,
                 closeDelay: 500
             });
             $('.tooltipas',segment).powerTip({
                 placement: 'se',
                 mouseOnToPopup: true,
+                smartPlacement: true,
                 closeDelay: 500
             });
         }
