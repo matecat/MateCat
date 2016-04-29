@@ -1266,7 +1266,10 @@ UI = {
 		statusMenu.empty().hide();
 	},
 	renderFiles: function(files, where, starting) {
-
+        // If we are going to re-render the articles first we remove them
+        if (where === "center" && !starting) {
+            $('article').remove();
+        }
         $.each(files, function(k) {
 			var newFile = '';
 			var fid = k;

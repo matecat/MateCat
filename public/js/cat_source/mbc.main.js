@@ -130,16 +130,6 @@ if ( MBC.enabled() )
             }
         }, false );
 
-        source.addEventListener( 'open', function ( e ) {
-            // TODO: handle event
-        }, false );
-
-        source.addEventListener( 'error', function ( e ) {
-            if ( e.readyState == EventSource.CLOSED ) {
-                // TODO: handle event
-            }
-        }, false );
-
         var getUsername = function () {
             if ( customUserName ) return customUserName;
             if ( loggedUserName ) return loggedUserName;

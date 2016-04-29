@@ -93,7 +93,9 @@ if ( ReviewImproved.enabled() && config.isReview ) {
                         error: function() {
                         },
                         success: function(d) {
-                            if( d.nextId == null ) return false;
+                            if( d.nextId == null ) {
+                                UI.gotoNextSegment();
+                            }
                             UI.render({
                                 firstLoad: false,
                                 segmentToOpen: d.nextId
