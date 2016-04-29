@@ -22,7 +22,7 @@ class LanguageStatsRunner extends AbstractDaemon {
 
     function main( $args = null ) {
         $db = Database::obtain();
-        $lsDao = new LanguageStats_LanguageStatsDAO( Database::obtain());
+        $lsDao = new LanguageStats_LanguageStatsDAO( Database::obtain() );
 
         do {
             //TODO: create DAO for this
@@ -32,7 +32,7 @@ class LanguageStatsRunner extends AbstractDaemon {
                         target,
                         sum( total_time_to_edit ) as total_time_to_edit,
                         sum( total_raw_wc ) as total_words,
-                        sum( COALESCE (avg_post_editing_effort, 0) / coalesce(total_raw_wc, 1) ) as total_post_editing_effort,
+                        sum( COALESCE ( avg_post_editing_effort, 0) ) / sum( coalesce( total_raw_wc, 1) ) as total_post_editing_effort,
                         count(*) as job_count
                       FROM
                         jobs j
@@ -61,17 +61,22 @@ class LanguageStatsRunner extends AbstractDaemon {
                 $languageTuples = array();
 
                 foreach ( $languageStats as $languageCoupleStat ) {
+
+                    if ( !self::isLanguageStatValid( $languageCoupleStat ) ) {
+                        continue;
+                    }
+
                     Log::doLog("Current language couple: " . $source_language . "-" . $languageCoupleStat['target']);
                     echo "Current language couple: " . $source_language . "-" . $languageCoupleStat['target'] . "\n";
 
-                    $langStatsStruct = new LanguageStats_LanguageStatsStruct();
-                    $langStatsStruct->date                     = $today;
-                    $langStatsStruct->source                   = $languageCoupleStat[ 'source' ];
-                    $langStatsStruct->target                   = $languageCoupleStat[ 'target' ];
-                    $langStatsStruct->total_word_count          = round($languageCoupleStat[ 'total_words' ], 4);
-                    $langStatsStruct->total_post_editing_effort = round($languageCoupleStat[ 'total_post_editing_effort' ], 4);
-                    $langStatsStruct->total_time_to_edit       = round($languageCoupleStat[ 'total_time_to_edit' ], 4);
-                    $langStatsStruct->job_count                = $languageCoupleStat[ 'job_count' ];
+                    $langStatsStruct                            = new LanguageStats_LanguageStatsStruct();
+                    $langStatsStruct->date                      = $today;
+                    $langStatsStruct->source                    = $languageCoupleStat[ 'source' ];
+                    $langStatsStruct->target                    = $languageCoupleStat[ 'target' ];
+                    $langStatsStruct->total_word_count          = round( $languageCoupleStat[ 'total_words' ], 4 );
+                    $langStatsStruct->total_post_editing_effort = round( $languageCoupleStat[ 'total_post_editing_effort' ], 4 );
+                    $langStatsStruct->total_time_to_edit        = round( $languageCoupleStat[ 'total_time_to_edit' ], 4 );
+                    $langStatsStruct->job_count                 = $languageCoupleStat[ 'job_count' ];
 
                     $languageTuples[] = $langStatsStruct;
                 }
@@ -113,6 +118,14 @@ class LanguageStatsRunner extends AbstractDaemon {
      */
     protected function _updateConfiguration() {
         // TODO: Implement _updateConfiguration() method.
+    }
+
+    private static function isLanguageStatValid( $languageStat ) {
+        return (
+                $languageStat[ 'source' ] != $languageStat[ 'target' ] &&
+                preg_match( "#[a-z]-[a-zA-Z-]{2,}#", $languageStat[ 'source' ] ) &&
+                preg_match( "#[a-z]-[a-zA-Z-]{2,}#", $languageStat[ 'target' ] )
+        );
     }
 }
 

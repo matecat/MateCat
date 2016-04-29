@@ -127,7 +127,7 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
                 ON DUPLICATE KEY UPDATE
                           total_post_editing_effort = values( total_post_editing_effort ),
                           total_time_to_edit = values( total_time_to_edit ),
-                          job_count = values( job_count )";;
+                          job_count = values( job_count )";
 
         $tuple_template = "( '%s', '%s', '%s', %f, %f, %f, %u )";
 
@@ -136,6 +136,7 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
         //chunk array using MAX_INSERT_NUMBER
         $objects = array_chunk( $obj_arr, self::MAX_INSERT_NUMBER );
 
+        $allInsertPerformed = true;
         //create an insert query for each chunk
         foreach ( $objects as $i => $chunk ) {
             foreach ( $chunk as $obj ) {
@@ -146,8 +147,8 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
                         $obj->date,
                         $obj->source,
                         $obj->target,
-                        $obj->total_wordcount,
-                        $obj->total_postediting_effort,
+                        $obj->total_word_count,
+                        $obj->total_post_editing_effort,
                         $obj->total_time_to_edit,
                         (int)$obj->job_count
                 );
@@ -158,12 +159,19 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
                     implode( ", ", $values )
             );
 
-            $this->con->query( $insert_query );
+
+            $stmt = $this->con->getConnection()->prepare( $insert_query );
+            $stmt->execute();
+
+            if($stmt->errorCode() > 0 ){
+                $allInsertPerformed = false;
+                break;
+            }
 
             $values = array();
         }
 
-        if ( $this->con->affected_rows > 0 ) {
+        if ( $allInsertPerformed ) {
             return $obj_arr;
         }
 
