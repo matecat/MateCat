@@ -61,11 +61,11 @@ Speech2Text = {};
             var microphone = $( this );
 
             if( microphone.hasClass( 'micSpeechActive' ) ) {
-                Speech2Text.isToKeepRecognizing = false;
+                Speech2Text.disableContinuousRecognizing();
                 Speech2Text.stopSpeechRecognition( microphone );
             } else {
                 Speech2Text.startSpeechRecognition( microphone );
-                Speech2Text.isToKeepRecognizing = true;
+                Speech2Text.enableContinuousRecognizing();
             }
         },
         restartVars: function() {
@@ -106,7 +106,7 @@ Speech2Text = {};
         },
         onRecognitionError: function( event ) {
             if( event.error === 'no-speech' ) {
-                Speech2Text.isToKeepRecognizing = false;
+                Speech2Text.disableContinuousRecognizing();
                 Speech2Text.stopSpeechRecognition( Speech2Text.microphone );
             } else {
                 //TODO: Display a user-friendly error message
@@ -175,6 +175,12 @@ Speech2Text = {};
             }
 
             return true;
+        },
+        enableContinuousRecognizing: function() {
+            Speech2Text.isToKeepRecognizing = true;
+        },
+        disableContinuousRecognizing: function() {
+            Speech2Text.isToKeepRecognizing = false;
         }
     });
 
