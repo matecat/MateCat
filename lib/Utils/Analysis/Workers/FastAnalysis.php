@@ -111,7 +111,12 @@ class FastAnalysis extends AbstractDaemon {
 
                 $perform_Tms_Analysis = true;
                 $status               = ProjectStatus::STATUS_FAST_OK;
-                if ( $project_row[ 'id_tms' ] == 0 && $project_row[ 'id_mt_engine' ] == 0 ) {
+
+                // disable TM analysis
+
+                $disable_Tms_Analysis = $project_row[ 'id_tms' ] == 0 && $project_row[ 'id_mt_engine' ] == 0 ;
+                
+                if ( $disable_Tms_Analysis ) {
 
                     /**
                      * MyMemory disabled and MT Disabled Too
@@ -457,7 +462,7 @@ class FastAnalysis extends AbstractDaemon {
         unset( $chunks_st );
 
         /*
-         * IF NO TM ANALYSIS, upload the jobs global word count
+         * IF NO TM ANALYSIS, update the jobs global word count
          */
         if ( !$perform_Tms_Analysis ) {
 
