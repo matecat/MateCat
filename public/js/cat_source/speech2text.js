@@ -12,6 +12,7 @@ Speech2Text = {};
         isToEmptyTargetElement: true,
         isStopingRecognition: false,
         isToKeepRecognizing: false,
+        animatedCircle: null,
         loadRecognition: function() {
             if ( 'webkitSpeechRecognition' in window ) {
                 Speech2Text.recognition = new webkitSpeechRecognition();
@@ -26,6 +27,9 @@ Speech2Text = {};
         },
         enableMicrophone: function( segment ) {
             Speech2Text.microphone = segment.find( '.micSpeech' );
+            Speech2Text.animatedCircle = document.getElementById(
+                    'svg-mic-' + Speech2Text.microphone.data( 'segment-id' )
+            );
 
             if( Speech2Text.recognition ) {
                 Speech2Text.targetElement = Speech2Text.microphone.parent().find( '.editarea' );
@@ -74,6 +78,7 @@ Speech2Text = {};
         startSpeechRecognition: function( microphone ) {
             if( !microphone.hasClass( 'micSpeechActive' ) ) {
                 microphone.addClass( 'micSpeechActive' );
+                Speech2Text.animatedCircle.setAttribute( 'class', 'micBgSpeechActive' );
             }
 
             if( Speech2Text.isToEmptyTargetElement ) {
@@ -90,6 +95,7 @@ Speech2Text = {};
         },
         stopSpeechRecognition: function( microphone ) {
             microphone.removeClass( 'micSpeechActive' );
+            Speech2Text.animatedCircle.setAttribute( 'class', '' );
 
             Speech2Text.recognition.stop();
 
@@ -118,8 +124,10 @@ Speech2Text = {};
             for (var i = event.resultIndex; i < event.results.length; ++i) {
                 if (event.results[i].isFinal) {
                     Speech2Text.finalTranscript += event.results[i][0].transcript;
+                    Speech2Text.animatedCircle.setAttribute( 'class', 'micBgSpeechActive' );
                 } else {
                     Speech2Text.interimTranscript += event.results[i][0].transcript;
+                    Speech2Text.animatedCircle.setAttribute( 'class', 'micBgSpeechReceiving' );
                 }
             }
 
