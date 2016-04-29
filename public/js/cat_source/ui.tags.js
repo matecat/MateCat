@@ -168,6 +168,8 @@ $.extend(UI, {
         }
 
         $(area).first().each(function() {
+            var segment = $(this).closest('section');
+            $.powerTip.destroy($('.tooltipa',segment));
             saveSelection();
 
             var html = $(this).html() ;
@@ -177,10 +179,10 @@ $.extend(UI, {
             var prevNumTags = $('span.locked', this).length;
 
             restoreSelection();
-
+            LXQ.reloadPowertip(segment);
             if ($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
 
-            var segment = $(this).closest('section');
+            
 
             UI.evalCurrentSegmentTranslationAndSourceTags( segment );
 
@@ -466,6 +468,7 @@ $.extend(UI, {
 
     },
     highlightCorrespondingTags: function (el) {
+        var pairEl;
 //        console.log('highlighting: ', $(el));
         if(el.hasClass('startTag')) {
 //            console.log('has start tag');
@@ -527,7 +530,7 @@ $.extend(UI, {
                     }
 
                 });
-                if( pairEl!==null) {
+                if( pairEl!==undefined) {
                     $(pairEl).addClass('highlight');
                 }
             }

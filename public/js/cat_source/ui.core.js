@@ -2467,7 +2467,7 @@ UI = {
                 $(document).trigger('translation:change', data.translation);
                 var translation = $('.editarea', segment ).text().replace(/\uFEFF/g,'');
                 UI.doLexiQA(segment,translation,id_segment,true,null);
-                $(document).trigger('setTranslation:success', d);
+                $(document).trigger('setTranslation:success', data);
 			}
 		});
 	},
@@ -3476,7 +3476,7 @@ UI = {
      *
      */
     editAreaClick : function(e, operation, action) {
-
+        console.log('dddddddd');
         if (typeof operation == 'undefined') {
             operation = 'clicking';
         }
