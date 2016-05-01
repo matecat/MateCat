@@ -518,39 +518,38 @@ if (LXQ.enabled())
             text = text.replace(/\&gt;/g, '>').replace(/\&lt;/g, '<');
             
             //console.log('--text0: '+ text);
-            var findTags = /(##LESSTHAN##(\w+)\s.*?##GREATERTHAN##)(.*?)(##LESSTHAN##\/\2##GREATERTHAN##)|(##LESSTHAN##[\w]+\s.*?##GREATERTHAN##)/g;            
+            //var findTags = /(##LESSTHAN##(\w+)\s.*?##GREATERTHAN##)(.*?)(##LESSTHAN##\/\2##GREATERTHAN##)|(##LESSTHAN##[\w]+\s.*?##GREATERTHAN##)/g;            
             //match 1: the tag type
             //match 2: the <aaaa asdfafd> part
             //match 3: the part betwen the <> and </>
             //match 4: the </aaa> part
             // *** match 5: means its a short of <xxx yyy zzz> tag
             
-            //var findTags=/(##LESSTHAN##(\w+)\s.*?##GREATERTHAN##)|(##LESSTHAN##\/\2##GREATERTHAN##)/g;
+            var findTags=/(##LESSTHAN##(\w+)\s.*?##GREATERTHAN##)|(##LESSTHAN##\/(\w+)##GREATERTHAN##)/g;
             var match, tags = [];
-            // while ((match = findTags.exec(text)) !== null) {
-            //     text = text.slice(0,match.index) + 
-            //         text.slice(match.index,match.index+match[0].length).replace(/ /g,'***SPACE***');
-            //         +text.slice(match.index+match[0].length);
-            // }
-            // console.log('-- text1: '+text);
-            // findTags.lastIndex = 0;
-            // var selectionFound = false, selectionmatch;
-            while ((match = findTags.exec(text)) !== null) {
-               
-                if (match[5] !== undefined) {
-                    tags.push([match.index, match[5].length,0]);                    
+            //match 1: the <aaaa asdfafd> part
+            //match 2: the aaaa part of match 2
+            //match 3: the </aaaa> part
+            //match 4: the aaa part of match 3
+            //var lastElement;
+            while ((match = findTags.exec(text)) !== null) {               
+                if (match[1] !== undefined) {
+                    tags.push([match.index, match[1].length,0]);
+                    console.log('adding start: '+match.index+' length: '+match[1].length);
+                    //lastElement = {start:match.index,length:match[1].length,tag:match[2]};
                 }
                 else {
-                    // if (match[0].indexOf('selectionBoundary')>0){
-                    //     selectionFound = true;
-                    //     selectionmatch = match[0];
-                    // 
-                    var sub = match[3].length;
-                    if ((match[3] === '\uFEFF')||(match[3] ===LTPLACEHOLDER+'br'+GTPLACEHOLDER))
-                        sub = 0;                    
-                    
-                    tags.push([match.index, match[0].length,sub]);
-                    //tags.push([match.index + match[1].length + match[3].length, match[4].length]);
+                    // var sub = match[3].length;
+                    // if ((match[3] === '\uFEFF')||(match[3] ===LTPLACEHOLDER+'br'+GTPLACEHOLDER))
+                    //     sub = 0;
+                    if (match[4] === 'span' && text[match.index-1] === '\uFEFF') {
+                            tags.push([match.index-1, match[3].length+1,0]);
+                            console.log('adding start 2: '+(match.index-1)+' length: '+(match[3].length+1));       
+                    }
+                    else {
+                        tags.push([match.index, match[3].length,0]);
+                        console.log('adding start 3: '+match.index+' length: '+match[3].length);
+                    }
                 }
             }
             for (var k = 0; k < tags.length-1; k++) {
