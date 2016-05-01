@@ -518,12 +518,14 @@ if (LXQ.enabled())
             text = text.replace(/\&gt;/g, '>').replace(/\&lt;/g, '<');
             
             //console.log('--text0: '+ text);
-            var findTags = /(##LESSTHAN##(\w+)\s.*?##GREATERTHAN##)(.*?)(##LESSTHAN##\/\2##GREATERTHAN##)|(##LESSTHAN##[\w]+\s.*?##GREATERTHAN##)/g;
+            var findTags = /(##LESSTHAN##(\w+)\s.*?##GREATERTHAN##)(.*?)(##LESSTHAN##\/\2##GREATERTHAN##)|(##LESSTHAN##[\w]+\s.*?##GREATERTHAN##)/g;            
             //match 1: the tag type
             //match 2: the <aaaa asdfafd> part
             //match 3: the part betwen the <> and </>
             //match 4: the </aaa> part
             // *** match 5: means its a short of <xxx yyy zzz> tag
+            
+            //var findTags=/(##LESSTHAN##(\w+)\s.*?##GREATERTHAN##)|(##LESSTHAN##\/\2##GREATERTHAN##)/g;
             var match, tags = [];
             // while ((match = findTags.exec(text)) !== null) {
             //     text = text.slice(0,match.index) + 
