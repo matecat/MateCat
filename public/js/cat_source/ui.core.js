@@ -2884,6 +2884,8 @@ UI = {
                 // if status is not set to draft, the segment content is not displayed
                 UI.setStatus($(this), status); // now the status, too, is propagated
                 $( this ).data( 'autopropagated', true );
+                var trans = $('.editarea', this ).text().replace(/\uFEFF/g,'');
+                UI.doLexiQA(this,translation,UI.getSegmentId(this),true,null);
             });
 
             //unset actual segment as autoPropagated because now it is translated
