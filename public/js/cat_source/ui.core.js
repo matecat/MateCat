@@ -3180,6 +3180,8 @@ UI = {
         // }
         
         //var myWindow = window.open('')
+        var returnUrl = window.location.href.split('#')[0]+'#'+id_segment;
+        console.log('returnUrl: '+returnUrl);
         $.ajax({type: "POST",
             url: config.lexiqaServer+"/qasegment",
             data: {
@@ -3188,7 +3190,7 @@ UI = {
                     targetlanguage: config.target_rfc,
                     sourcetext: sourcetext+'',
                     targettext: translation,
-                    returnUrl: segment.context.baseURI,
+                    returnUrl: returnUrl,
                     segmentId: id_segment,
                     partnerId: "matecat",
                     isSegmentCompleted: isSegmentCompleted,
