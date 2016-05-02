@@ -60,6 +60,8 @@ Speech2Text = {};
         clickMicrophone: function( event ) {
             var microphone = $( this );
 
+            Speech2Text.isStopingRecognition = false;
+
             if( microphone.hasClass( 'micSpeechActive' ) ) {
                 Speech2Text.disableContinuousRecognizing();
                 Speech2Text.stopSpeechRecognition( microphone );
@@ -99,7 +101,9 @@ Speech2Text = {};
 
             Speech2Text.recognition.stop();
 
-            Speech2Text.isStopingRecognition = true;
+            if( Speech2Text.recognizing ) {
+                Speech2Text.isStopingRecognition = true;
+            }
         },
         onRecognitionStart: function() {
             Speech2Text.recognizing = true;

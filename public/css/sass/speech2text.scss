@@ -43,7 +43,10 @@
     padding-bottom: 32px;
 }
 
-section.opened .micSpeech {
+section.opened .micSpeech,
+section.opened .micSpeechActive,
+section.opened svg.micBgSpeechActive,
+section.opened svg.micBgSpeechReceiving {
     display: block;
 }
 
@@ -65,12 +68,12 @@ section.opened .micSpeech {
         @include animation-play-state(running);
 
         &.micBgSpeechActive {
-            display: block;
+            display: none;
             @include animation-iteration-count(infinite);
         }
 
         &.micBgSpeechReceiving {
-            display: block;
+            display: none;
             circle {
                 stroke: #FF5555;
                 fill: #FF5555;

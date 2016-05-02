@@ -682,6 +682,10 @@ UI = {
             current_segment : UI.currentSegment
         });
 
+            if( !this.opening && UI.currentSegmentId == segment.data('splitOriginalId') ) {
+                Speech2Text.disableContinuousRecognizing();
+            }
+
             Speech2Text.disableMicrophone( segment );
 	},
 	detectAdjacentSegment: function(segment, direction, times) { // currently unused
