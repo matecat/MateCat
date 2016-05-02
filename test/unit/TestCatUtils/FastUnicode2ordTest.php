@@ -15,6 +15,10 @@
 class FastUnicode2ordTest extends AbstractTest
 {
 
+    protected $source_segment;
+    protected $int_expected;
+
+
     /**
      * @group regression
      * @covers CatUtils::fastUnicode2ord
@@ -22,11 +26,12 @@ class FastUnicode2ordTest extends AbstractTest
     public function test_fastUnicode2ord_1()
     {
 
-        $source_segment = <<<'LAB'
+        $this->source_segment = <<<'LAB'
 🛠
 LAB;
-        $int_expected = 128736;
-        $this->assertEquals($int_expected, CatUtils::fastUnicode2ord($source_segment));
+        $this->int_expected = 128736;
+        $this->assertEquals($this->int_expected, CatUtils::fastUnicode2ord($this->source_segment));
+
     }
 
     /**
@@ -35,11 +40,12 @@ LAB;
      */
     public function test_fastUnicode2ord_2()
     {
-        $source_segment = <<<'LAB'
+        $this->source_segment = <<<'LAB'
 😴
 LAB;
-        $int_expected = 128564;
-        $this->assertEquals($int_expected, CatUtils::fastUnicode2ord($source_segment));
+        $this->int_expected = 128564;
+        $this->assertEquals($this->int_expected, CatUtils::fastUnicode2ord($this->source_segment));
+
     }
 
     /**
@@ -48,11 +54,12 @@ LAB;
      */
     public function test_fastUnicode2ord_3()
     {
-        $source_segment = <<<'LAB'
+        $this->source_segment = <<<'LAB'
 😆
 LAB;
-        $int_expected = 128518;
-        $this->assertEquals($int_expected, CatUtils::fastUnicode2ord($source_segment));
+        $this->int_expected = 128518;
+        $this->assertEquals($this->int_expected, CatUtils::fastUnicode2ord($this->source_segment));
+
     }
 
     /**
@@ -61,11 +68,11 @@ LAB;
      */
     public function test_fastUnicode2ord_4()
     {
-        $source_segment = <<<'LAB'
+        $this->source_segment = <<<'LAB'
 𐎆
 LAB;
-        $int_expected = 66438;
-        $this->assertEquals($int_expected, CatUtils::fastUnicode2ord($source_segment));
+        $this->int_expected = 66438;
+        $this->assertEquals($this->int_expected, CatUtils::fastUnicode2ord($this->source_segment));
 
     }
 
@@ -75,11 +82,12 @@ LAB;
      */
     public function test_fastUnicode2ord_anomalyimput_swichcase1()
     {
-        $source_segment = <<<'LAB'
+        $this->source_segment = <<<'LAB'
 @
 LAB;
-        $int_expected = 64;
-        $this->assertEquals($int_expected, CatUtils::fastUnicode2ord($source_segment));
+        $this->int_expected = 64;
+        $this->assertEquals($this->int_expected, CatUtils::fastUnicode2ord($this->source_segment));
+
 
     }
 
@@ -89,11 +97,11 @@ LAB;
      */
     public function test_fastUnicode2ord_anomalyimput_swichcase2()
     {
-        $source_segment = <<<'LAB'
+        $this->source_segment = <<<'LAB'
 گ
 LAB;
-        $int_expected = 1711;
-        $this->assertEquals($int_expected, CatUtils::fastUnicode2ord($source_segment));
+        $this->int_expected = 1711;
+        $this->assertEquals($this->int_expected, CatUtils::fastUnicode2ord($this->source_segment));
 
     }
 
@@ -103,11 +111,11 @@ LAB;
      */
     public function test_fastUnicode2ord_anomalyimput_swichcase3()
     {
-        $source_segment = <<<'LAB'
+        $this->source_segment = <<<'LAB'
 ◕
 LAB;
-        $int_expected = 9685;
-        $this->assertEquals($int_expected, CatUtils::fastUnicode2ord($source_segment));
+        $this->int_expected = 9685;
+        $this->assertEquals($this->int_expected, CatUtils::fastUnicode2ord($this->source_segment));
 
     }
 }

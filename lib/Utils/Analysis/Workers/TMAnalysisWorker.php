@@ -738,6 +738,12 @@ class TMAnalysisWorker extends AbstractWorker {
 
             $this->_queueHandler->getRedisClient()->expire( RedisKeys::PROJECT_ENDING_SEMAPHORE . $_project_id, 60 * 60 * 24 /* 24 hours TTL */ );
 
+            // TODO: move the initialization of featureSet at earlier stage in
+            // order for other methods to run their own callbacks.
+            $project = \Projects_ProjectDao::findById( $_project_id );
+            $featureSet = \FeatureSet::fromIdCustomer($project->id_customer);
+            $featureSet->run('beforeTMAnalysisCloseProject', $project);
+
             $_analyzed_report = getProjectSegmentsTranslationSummary( $_project_id );
 
             $total_segs = array_pop( $_analyzed_report ); //remove Rollup

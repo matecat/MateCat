@@ -11,7 +11,8 @@
  */
 class RestorexlifftagsforviewTest extends AbstractTest
 {
-
+    protected $source_segment;
+    protected $expected_segment;
     /**
      * @group regression
      * @covers CatUtils::restore_xliff_tags_for_view
@@ -19,13 +20,13 @@ class RestorexlifftagsforviewTest extends AbstractTest
      */
     public function test_restorexlifftagsforview_1()
     {
-        $source_segment = <<<LAB
+        $this->source_segment = <<<LAB
 ##LESSTHAN##ZyBpZD0iMSI=##GREATERTHAN##[AH1]##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMiI=##GREATERTHAN##Is fold & crease the same??##LESSTHAN##L2c=##GREATERTHAN##
 LAB;
-        $expected_segment = <<<LAB
+        $this->expected_segment = <<<LAB
 &lt;g id="1"&gt;[AH1]&lt;/g&gt;&lt;g id="2"&gt;Is fold & crease the same??&lt;/g&gt;
 LAB;
-        self::assertEquals($expected_segment, CatUtils::restore_xliff_tags_for_view($source_segment));
+        self::assertEquals($this->expected_segment, CatUtils::restore_xliff_tags_for_view($this->source_segment));
     }
 
     /**
@@ -35,13 +36,13 @@ LAB;
      */
     public function test_restorexlifftagsforview_2()
     {
-        $source_segment = <<<LAB
+        $this->source_segment = <<<LAB
 ##LESSTHAN##ZyBpZD0iMSI=##GREATERTHAN##SIA “Bio2You”,##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMiI=##GREATERTHAN## Reg. no##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMyI=##GREATERTHAN##40103243404, ##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iNCI=##GREATERTHAN##address: Ganibu Dambis 24A, Riga, Latvia &nbsp;("the Franchisor") &nbsp;##LESSTHAN##L2c=##GREATERTHAN##
 LAB;
-        $expected_segment = <<<LAB
+        $this->expected_segment = <<<LAB
 &lt;g id="1"&gt;SIA “Bio2You”,&lt;/g&gt;&lt;g id="2"&gt; Reg. no&lt;/g&gt;&lt;g id="3"&gt;40103243404, &lt;/g&gt;&lt;g id="4"&gt;address: Ganibu Dambis 24A, Riga, Latvia &nbsp;("the Franchisor") &nbsp;&lt;/g&gt;
 LAB;
-        self::assertEquals($expected_segment, CatUtils::restore_xliff_tags_for_view($source_segment));
+        self::assertEquals($this->expected_segment, CatUtils::restore_xliff_tags_for_view($this->source_segment));
     }
 
     /**
@@ -51,13 +52,13 @@ LAB;
      */
     public function test_restorexlifftagsforview_3()
     {
-        $source_segment = <<<LAB
+        $this->source_segment = <<<LAB
 ##LESSTHAN##ZyBpZD0iMSI=##GREATERTHAN##USB ##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMiI=##GREATERTHAN##(to wake to your USB music)##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMSI=##GREATERTHAN##DISC ##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMiI=##GREATERTHAN##(to wake to your DISC music)##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMSI=##GREATERTHAN##BUZZER ##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMiI=##GREATERTHAN##(to wake to a buzzer sound)##LESSTHAN##L2c=##GREATERTHAN##
 LAB;
-        $expected_segment = <<<LAB
+        $this->expected_segment = <<<LAB
 &lt;g id="1"&gt;USB &lt;/g&gt;&lt;g id="2"&gt;(to wake to your USB music)&lt;/g&gt;&lt;g id="1"&gt;DISC &lt;/g&gt;&lt;g id="2"&gt;(to wake to your DISC music)&lt;/g&gt;&lt;g id="1"&gt;BUZZER &lt;/g&gt;&lt;g id="2"&gt;(to wake to a buzzer sound)&lt;/g&gt;
 LAB;
-        self::assertEquals($expected_segment, CatUtils::restore_xliff_tags_for_view($source_segment));
+        self::assertEquals($this->expected_segment, CatUtils::restore_xliff_tags_for_view($this->source_segment));
     }
 
     /**
@@ -67,13 +68,13 @@ LAB;
      */
     public function test_restorexlifftagsforview_4()
     {
-        $source_segment = <<<LAB
+        $this->source_segment = <<<LAB
 ##LESSTHAN##ZyBpZD0iMSI=##GREATERTHAN##入院時検査所見##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMiI=##GREATERTHAN##: TP 5.7 mg##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMyI=##GREATERTHAN##／##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iNCI=##GREATERTHAN##dL##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iNSI=##GREATERTHAN##，##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iNiI=##GREATERTHAN##Alb##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iNyI=##GREATERTHAN## ##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iOCI=##GREATERTHAN##2.9 mg##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iOSI=##GREATERTHAN##／##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMTAi##GREATERTHAN##dL##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMTEi##GREATERTHAN## と低##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMSI=##GREATERTHAN##入院時現症##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMiI=##GREATERTHAN##:##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMyI=##GREATERTHAN## 腹部に明らかな腫瘤は触れず，表在リン##LESSTHAN##L2c=##GREATERTHAN##
 LAB;
-        $expected_segment = <<<LAB
+        $this->expected_segment = <<<LAB
 &lt;g id="1"&gt;入院時検査所見&lt;/g&gt;&lt;g id="2"&gt;: TP 5.7 mg&lt;/g&gt;&lt;g id="3"&gt;／&lt;/g&gt;&lt;g id="4"&gt;dL&lt;/g&gt;&lt;g id="5"&gt;，&lt;/g&gt;&lt;g id="6"&gt;Alb&lt;/g&gt;&lt;g id="7"&gt; &lt;/g&gt;&lt;g id="8"&gt;2.9 mg&lt;/g&gt;&lt;g id="9"&gt;／&lt;/g&gt;&lt;g id="10"&gt;dL&lt;/g&gt;&lt;g id="11"&gt; と低&lt;/g&gt;&lt;g id="1"&gt;入院時現症&lt;/g&gt;&lt;g id="2"&gt;:&lt;/g&gt;&lt;g id="3"&gt; 腹部に明らかな腫瘤は触れず，表在リン&lt;/g&gt;
 LAB;
-        self::assertEquals($expected_segment, CatUtils::restore_xliff_tags_for_view($source_segment));
+        self::assertEquals($this->expected_segment, CatUtils::restore_xliff_tags_for_view($this->source_segment));
     }
 
     /**
@@ -83,13 +84,13 @@ LAB;
      */
     public function test_restorexlifftagsforview_5()
     {
-        $source_segment = <<<LAB
+        $this->source_segment = <<<LAB
 ##LESSTHAN##ZyBpZD0iMSI=##GREATERTHAN##併症や ##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMiI=##GREATERTHAN##QOL##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMyI=##GREATERTHAN## 低下の観点から外科切除は行わない傾向に##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMSI=##GREATERTHAN##胃悪性リンパ腫の治療は，これまで外科的切除が積極 的に行われてきたが，最近では胃温存療法が外科的切除 に劣らない治療成績を示し##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMiI=##GREATERTHAN##1)##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMyI=##GREATERTHAN##，外科的切除に伴う術後合##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMiI=##GREATERTHAN##考##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMyI=##GREATERTHAN## &nbsp; ##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iNCI=##GREATERTHAN##察##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMSI=##GREATERTHAN##Antecolic gastrojejunostomy with a braun anastomosi##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMiI=##GREATERTHAN##8)##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMyI=##GREATERTHAN##.##LESSTHAN##L2c=##GREATERTHAN##
 LAB;
-        $expected_segment = <<<LAB
+        $this->expected_segment = <<<LAB
 &lt;g id="1"&gt;併症や &lt;/g&gt;&lt;g id="2"&gt;QOL&lt;/g&gt;&lt;g id="3"&gt; 低下の観点から外科切除は行わない傾向に&lt;/g&gt;&lt;g id="1"&gt;胃悪性リンパ腫の治療は，これまで外科的切除が積極 的に行われてきたが，最近では胃温存療法が外科的切除 に劣らない治療成績を示し&lt;/g&gt;&lt;g id="2"&gt;1)&lt;/g&gt;&lt;g id="3"&gt;，外科的切除に伴う術後合&lt;/g&gt;&lt;g id="2"&gt;考&lt;/g&gt;&lt;g id="3"&gt; &nbsp; &lt;/g&gt;&lt;g id="4"&gt;察&lt;/g&gt;&lt;g id="1"&gt;Antecolic gastrojejunostomy with a braun anastomosi&lt;/g&gt;&lt;g id="2"&gt;8)&lt;/g&gt;&lt;g id="3"&gt;.&lt;/g&gt;
 LAB;
-        self::assertEquals($expected_segment, CatUtils::restore_xliff_tags_for_view($source_segment));
+        self::assertEquals($this->expected_segment, CatUtils::restore_xliff_tags_for_view($this->source_segment));
     }
 
     /**
@@ -99,13 +100,13 @@ LAB;
      */
     public function test_restorexlifftagsforview_6()
     {
-        $source_segment = <<<LAB
+        $this->source_segment = <<<LAB
 ##LESSTHAN##ZyBpZD0iMSI=##GREATERTHAN##[0065] ##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMiI=##GREATERTHAN##y##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMyI=##GREATERTHAN##1##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iNCI=##GREATERTHAN##(##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iNSI=##GREATERTHAN##z##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iNiI=##GREATERTHAN##O##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iNyI=##GREATERTHAN##, t##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iOCI=##GREATERTHAN##m##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iOSI=##GREATERTHAN##) ##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMTAi##GREATERTHAN##= min##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMTEi##GREATERTHAN##[##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMTIi##GREATERTHAN##y##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMTMi##GREATERTHAN##1##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMTQi##GREATERTHAN##(##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMTUi##GREATERTHAN##z, t##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMTYi##GREATERTHAN##m##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMTci##GREATERTHAN##)]##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMTgi##GREATERTHAN##; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMTki##GREATERTHAN##0 : : : z ::: L &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMjAi##GREATERTHAN##(Equation 16)##LESSTHAN##L2c=##GREATERTHAN##
 LAB;
-        $expected_segment = <<<LAB
+        $this->expected_segment = <<<LAB
 &lt;g id="1"&gt;[0065] &lt;/g&gt;&lt;g id="2"&gt;y&lt;/g&gt;&lt;g id="3"&gt;1&lt;/g&gt;&lt;g id="4"&gt;(&lt;/g&gt;&lt;g id="5"&gt;z&lt;/g&gt;&lt;g id="6"&gt;O&lt;/g&gt;&lt;g id="7"&gt;, t&lt;/g&gt;&lt;g id="8"&gt;m&lt;/g&gt;&lt;g id="9"&gt;) &lt;/g&gt;&lt;g id="10"&gt;= min&lt;/g&gt;&lt;g id="11"&gt;[&lt;/g&gt;&lt;g id="12"&gt;y&lt;/g&gt;&lt;g id="13"&gt;1&lt;/g&gt;&lt;g id="14"&gt;(&lt;/g&gt;&lt;g id="15"&gt;z, t&lt;/g&gt;&lt;g id="16"&gt;m&lt;/g&gt;&lt;g id="17"&gt;)]&lt;/g&gt;&lt;g id="18"&gt;; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &lt;/g&gt;&lt;g id="19"&gt;0 : : : z ::: L &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&lt;/g&gt;&lt;g id="20"&gt;(Equation 16)&lt;/g&gt;
 LAB;
-        self::assertEquals($expected_segment, CatUtils::restore_xliff_tags_for_view($source_segment));
+        self::assertEquals($this->expected_segment, CatUtils::restore_xliff_tags_for_view($this->source_segment));
     }
 
     /**
@@ -115,13 +116,13 @@ LAB;
      */
     public function test_restorexlifftagsforview_7()
     {
-        $source_segment = <<<LAB
+        $this->source_segment = <<<LAB
 ##LESSTHAN##ZyBpZD0iMSI=##GREATERTHAN##•••••••••##LESSTHAN##L2c=##GREATERTHAN####LESSTHAN##ZyBpZD0iMiI=##GREATERTHAN## EMILIA-ROMAGNA##LESSTHAN##L2c=##GREATERTHAN##
 LAB;
-        $expected_segment = <<<LAB
+        $this->expected_segment = <<<LAB
 &lt;g id="1"&gt;•••••••••&lt;/g&gt;&lt;g id="2"&gt; EMILIA-ROMAGNA&lt;/g&gt;
 LAB;
-        self::assertEquals($expected_segment, CatUtils::restore_xliff_tags_for_view($source_segment));
+        self::assertEquals($this->expected_segment, CatUtils::restore_xliff_tags_for_view($this->source_segment));
     }
 
     /**

@@ -15,15 +15,17 @@ class GetConnection extends AbstractTest
      */
     protected $instance_after_reset;
     protected $expected_value;
+    protected $current_value;
+    protected $property;
 
     public function setUp()
     {
         parent::setUp();
 
-        $copy_server = "localhost";
-        $copy_user = "unt_matecat_user";
-        $copy_password = "unt_matecat_user";
-        $copy_database = "unittest_matecat_local";
+        $copy_server = INIT::$DB_SERVER;
+        $copy_user = INIT::$DB_USER;
+        $copy_password = INIT::$DB_PASS;
+        $copy_database = INIT::$DB_DATABASE;
         $this->expected_value = new PDO(
             "mysql:host={$copy_server};dbname={$copy_database};charset=UTF8",
             $copy_user,
@@ -35,63 +37,70 @@ class GetConnection extends AbstractTest
 
         $this->reflectedClass = Database::obtain();
         $this->reflector = new ReflectionClass($this->reflectedClass);
-        $property = $this->reflector->getProperty('instance');
+        $this->property = $this->reflector->getProperty('instance');
         $this->reflectedClass->close();
-        $property->setAccessible(true);
-        $property->setValue($this->reflectedClass, null);
-        $this->instance_after_reset = $this->reflectedClass->obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $this->property->setAccessible(true);
+        $this->property->setValue($this->reflectedClass, null);
+        $this->instance_after_reset = $this->reflectedClass->obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
 
 
     }
 
     public function tearDown()
     {
-        $this->reflectedClass = Database::obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $this->reflectedClass = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $this->reflectedClass->close();
         startConnection();
+        parent::tearDown();
     }
 
     /**
+     * It checks the correct creation of a instance of PDO caused by 'getConnection';
      * @group regression
      * @covers Database::getConnection
      */
     public function test_getConnection_null_value()
     {
-        $current_value =  $this->instance_after_reset->getConnection();
-        $this->assertTrue($current_value instanceof PDO);
-        $this->assertNotNull($current_value);
-        $this->assertEquals($this->expected_value, $current_value);
-        $this->assertNotEquals(spl_object_hash($this->expected_value), spl_object_hash($current_value));
+        $this->current_value = $this->instance_after_reset->getConnection();
+        $this->assertTrue($this->current_value instanceof PDO);
+        $this->assertNotNull($this->current_value);
+        $this->assertEquals($this->expected_value, $this->current_value);
+        $this->assertNotEquals(spl_object_hash($this->expected_value), spl_object_hash($this->current_value));
     }
 
     /**
+     * This test checks that if the property connection isn't an instance of PDO,
+     * the method getConnection will create a new PDO object like the expected object.
      * @group regression
      * @covers Database::getConnection
      */
     public function test_getConnection_not_instance_of_PDO()
     {
-        $connection = $this->reflector->getProperty('connection');
-        $connection->setAccessible(true);
-        $connection->setValue($this->instance_after_reset, array('x' => "hello", 'y' => "man"));
-        $current_value=$this->instance_after_reset->getConnection();
-        $this->assertTrue($current_value instanceof PDO);
-        $this->assertNotNull($current_value);
-        $this->assertEquals($this->expected_value, $current_value);
+        $this->property = $this->reflector->getProperty('connection');
+        $this->property->setAccessible(true);
+        $this->property->setValue($this->instance_after_reset, array('x' => "hello", 'y' => "man"));
+        $this->current_value = $this->instance_after_reset->getConnection();
+        $this->assertTrue($this->current_value instanceof PDO);
+        $this->assertNotNull($this->current_value);
+        $this->assertEquals($this->expected_value, $this->current_value);
     }
+
     /**
+     * This test checks that the property 'connection' initialized by getConnection is the expected PDO
+     * instance created with the values of the global variables relatives to database
      * @group regression
      * @covers Database::getConnection
      */
     public function test_getConnection_instance_of_PDO()
     {
-        $connection = $this->reflector->getProperty('connection');
-        $connection->setAccessible(true);
-        $connection->setValue($this->instance_after_reset, $this->expected_value);
-        $current_value=$this->instance_after_reset->getConnection();
+        $this->property = $this->reflector->getProperty('connection');
+        $this->property->setAccessible(true);
+        $this->property->setValue($this->instance_after_reset, $this->expected_value);
+        $this->current_value = $this->instance_after_reset->getConnection();
 
-        $this->assertTrue($current_value instanceof PDO);
-        $this->assertNotNull($current_value);
-        $this->assertEquals($this->expected_value, $current_value);
+        $this->assertTrue($this->current_value instanceof PDO);
+        $this->assertNotNull($this->current_value);
+        $this->assertEquals($this->expected_value, $this->current_value);
     }
 
 }

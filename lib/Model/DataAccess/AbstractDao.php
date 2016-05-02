@@ -249,7 +249,7 @@ abstract class DataAccess_AbstractDao {
     protected function _destroyCache( $query ){
         $this->_cacheSetConnection();
         if ( isset( $this->cache_con ) && !empty( $this->cache_con ) ) {
-            return $this->cache_con->del( $query );
+            return $this->cache_con->del( md5 ($query ));
         }
 
         return false;
@@ -342,7 +342,7 @@ abstract class DataAccess_AbstractDao {
      * Updates the struct. The record is found via the primary
      * key attributes provided by the struct.
      *
-     * @param       $struct
+     * @param DataAccess_AbstractDaoObjectStruct $struct
      * @param array $options
      *
      * @return bool

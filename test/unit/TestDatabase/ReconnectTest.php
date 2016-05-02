@@ -25,12 +25,14 @@ class ReconnectTest extends AbstractTest
 
     public function tearDown()
     {
-        $this->reflectedClass = Database::obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $this->reflectedClass = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $this->reflectedClass->close();
         startConnection();
+        parent::tearDown();
     }
 
     /**
+     * It ensures that after a reconnection the instance 'connection' will be reinitialized if isn't an instance of PDO
      * @group regression
      * @covers Database::reconnect
      */
@@ -39,40 +41,40 @@ class ReconnectTest extends AbstractTest
         /**
          * @var Database
          */
-        $instance_after_reset = $this->reflectedClass->obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $instance_after_reset = $this->reflectedClass->obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $instance_after_reset->reconnect();
-        $connection = $this->reflector->getProperty('connection');
-        $connection->setAccessible(true);
-        $current_value = $connection->getValue($instance_after_reset);
+        $this->property = $this->reflector->getProperty('connection');
+        $this->property->setAccessible(true);
+        $current_value = $this->property->getValue($instance_after_reset);
 
         $this->assertNotNull($current_value);
         $this->assertTrue($current_value instanceof PDO);
     }
 
     /**
-     * This asserts that two different instances of connection haven't the same memory reference but they have same values.
+     * This test asserts that two different instances of connection haven't the same memory reference but they have same values.
      * @group regression
      * @covers Database::reconnect
      */
     public function test_reconnect_with_previous_connection()
     {
-        $this->reflectedClass->obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $this->reflectedClass->obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $this->reflectedClass->connect();
-        $connection = $this->reflector->getProperty('connection');
-        $connection->setAccessible(true);
+        $this->property = $this->reflector->getProperty('connection');
+        $this->property->setAccessible(true);
         /**
          * @var Database
          */
-        $first_instance_of_connection = $connection->getValue($this->reflectedClass);
+        $first_instance_of_connection = $this->property->getValue($this->reflectedClass);
         $this->reflectedClass->reconnect();
         /**
          * @var Database
          */
-        $second_instance_of_connection = $connection->getValue($this->reflectedClass);
-        $first_connection_hash=spl_object_hash($first_instance_of_connection);
-        $second_connection_hash=spl_object_hash($second_instance_of_connection);
+        $second_instance_of_connection = $this->property->getValue($this->reflectedClass);
+        $first_connection_hash = spl_object_hash($first_instance_of_connection);
+        $second_connection_hash = spl_object_hash($second_instance_of_connection);
         $this->assertEquals($first_instance_of_connection, $second_instance_of_connection);
-        $this->assertNotEquals($first_connection_hash,$second_connection_hash);
+        $this->assertNotEquals($first_connection_hash, $second_connection_hash);
 
         $this->assertNotNull($first_instance_of_connection);
         $this->assertNotNull($second_instance_of_connection);
