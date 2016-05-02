@@ -1157,24 +1157,7 @@ UI = {
 		$('#contextMenu').hide();
 		$('#spellCheck .words').remove();
 	},
-    reactivateJob: function() {
-        APP.doRequest({
-            data: {
-                action:         "changeJobsStatus",
-                new_status:     "active",
-                res:            "job",
-                id:             config.id_job,
-                password:      config.password,
-            },
-            success: function(d){
-                if(d.data == 'OK') {
-                    setTimeout(function() {
-                        location.reload(true);
-                    }, 300);
-                }
-            }
-        });
-    },
+
     placeCaretAtEnd: function(el) {
 //		console.log(el);
 //		console.log($(el).first().get().className);
