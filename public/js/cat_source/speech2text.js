@@ -72,7 +72,7 @@ Speech2Text = {};
         startSpeechRecognition: function( microphone ) {
             if( !microphone.hasClass( 'micSpeechActive' ) ) {
                 microphone.addClass( 'micSpeechActive' );
-                Speech2Text.animatedCircle.setAttribute( 'class', 'micBgSpeechActive' );
+                Speech2Text.animateSpeechActive();
             }
 
             if( Speech2Text.isToEmptyTargetElement ) {
@@ -91,7 +91,6 @@ Speech2Text = {};
         },
         stopSpeechRecognition: function( microphone ) {
             microphone.removeClass( 'micSpeechActive' );
-            Speech2Text.animatedCircle.setAttribute( 'class', '' );
 
             Speech2Text.recognition.stop();
 
@@ -120,6 +119,7 @@ Speech2Text = {};
                 Speech2Text.startSpeechRecognition( Speech2Text.microphone );
             } else {
                 Speech2Text.microphone.removeClass( 'micSpeechActive' );
+                Speech2Text.stopAnimations();
             }
         },
         onRecognitionResult: function( event ) {
@@ -128,10 +128,10 @@ Speech2Text = {};
             for (var i = event.resultIndex; i < event.results.length; ++i) {
                 if (event.results[i].isFinal) {
                     Speech2Text.finalTranscript += event.results[i][0].transcript;
-                    Speech2Text.animatedCircle.setAttribute( 'class', 'micBgSpeechActive' );
+                    Speech2Text.animateSpeechActive();
                 } else {
                     Speech2Text.interimTranscript += event.results[i][0].transcript;
-                    Speech2Text.animatedCircle.setAttribute( 'class', 'micBgSpeechReceiving' );
+                    Speech2Text.animateSpeechReceiving();
                 }
             }
 
@@ -190,6 +190,15 @@ Speech2Text = {};
             if( !$( 'body' ).hasClass( 'hideMatches' ) ) {
                 $( 'body' ).addClass( 'hideMatches' );
             }
+        },
+        animateSpeechActive: function() {
+            Speech2Text.animatedCircle.setAttribute( 'class', 'micBgSpeechActive' );
+        },
+        animateSpeechReceiving: function() {
+            Speech2Text.animatedCircle.setAttribute( 'class', 'micBgSpeechReceiving' );
+        },
+        stopAnimations: function() {
+            Speech2Text.animatedCircle.setAttribute( 'class', '' );
         }
     });
 
