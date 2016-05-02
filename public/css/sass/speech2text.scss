@@ -40,7 +40,17 @@
 }
 
 .editor .editarea {
-    padding-bottom: 32px;
+    padding-bottom: 40px;
+}
+
+.editor .editarea-separator {
+    position: absolute;
+    width: 45.9%;
+    height: 1px;
+    bottom: 112px;
+    right: 25px;
+    z-index: 998;
+    border-top: 1px dotted #969696;
 }
 
 section.opened .micSpeech,
