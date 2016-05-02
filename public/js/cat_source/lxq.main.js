@@ -172,8 +172,14 @@ if (LXQ.enabled())
                     return 1;
                 else if (parseInt(a)<parseInt(b))
                     return -1;
-                else
-                return 0;
+                else 
+                //for splitted segments 111-1 111-2 etc.
+                    if (a>b)
+                        return 1;
+                    else if (a<b)
+                        return -1
+                    else     
+                        return 0;
             });
             for (var j = 0; j < UI.lexiqaData.segments.length; j++) {
                 var warnings = getVisibleWarningsCountForSegment(UI.lexiqaData.segments[j]);
@@ -954,7 +960,53 @@ if (LXQ.enabled())
             } 
         }
         
-
+        var getNextSegmentWithWarning = function () {
+            //if there are no errors..
+            if (!UI.lexiqaData.hasOwnProperty('segments') || UI.lexiqaData.segments.length == 0) 
+                return UI.getSegmentId(UI.getCurrentSegment());
+            var ind  = -1;
+            var segid_int = parseInt(UI.getSegmentId(UI.getCurrentSegment()));
+            $.each(UI.lexiqaData.segments, function(i,el) {
+                if (parseInt(el) > segid_int) {
+                    ind = i;
+                    return false; //this is a break for an $.each loop
+                }
+                if (parseInt(el) == segid_int) {
+                    if (el>UI.getCurrentSegment()) {
+                        //splitted segments : 111-1 111-2
+                        ind = i;
+                        return false;
+                    }
+                }
+            });
+            if (ind == -1) //this is the largest segmentid
+                ind = 0;
+            return UI.lexiqaData.segments[ind];
+            
+        }
+        var getPreviousSegmentWithWarning = function () {
+            //if there are no errors..
+            if (!UI.lexiqaData.hasOwnProperty('segments') || UI.lexiqaData.segments.length == 0)
+                return UI.getSegmentId(UI.getCurrentSegment());
+            var ind = -1;
+            var segid_int = parseInt(UI.getSegmentId(UI.getCurrentSegment()));
+            for (var i = UI.lexiqaData.segments - 1; i <= 0; i--) {
+                if (parseInt(UI.lexiqaData.segments[i]) < segid_int) {
+                    ind = i;
+                    break;
+                }
+                if (parseInt(UI.lexiqaData.segments[i]) == segid_int) {
+                    if (UI.lexiqaData.segments[i]<UI.getCurrentSegment()) {
+                        //splitted segments : 111-1 111-2
+                        ind = i;
+                        break;
+                    }
+                }
+            }
+            if (ind == -1) //this is the largest segmentid
+                ind = 0;
+            return UI.lexiqaData.segments[UI.lexiqaData.segments - 1];
+        }
         // Interfaces
         $.extend(LXQ, {
             refreshElements: refreshElements,
@@ -973,7 +1025,9 @@ if (LXQ.enabled())
             reloadPowertip : reloadPowertip,
             ignoreError: ignoreError,
             redoHighlighting:redoHighlighting,
-            doQAallSegments: doQAallSegments
+            doQAallSegments: doQAallSegments,
+            getNextSegmentWithWarning: getNextSegmentWithWarning,
+            getPreviousSegmentWithWarning:getPreviousSegmentWithWarning
         });
 
     })(jQuery, config, window, LXQ);
