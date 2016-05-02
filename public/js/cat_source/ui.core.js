@@ -2382,7 +2382,7 @@ UI = {
         var callback = options.callback;
         var byStatus = options.byStatus;
         var propagate = options.propagate;
-
+        var sourceSegment;
         this.executingSetTranslation = true;
         var reqArguments = arguments;
 		var segment = $('#segment-' + id_segment);
@@ -2395,8 +2395,10 @@ UI = {
 		// Attention, to be modified when we will lock tags
 		if( config.brPlaceholdEnabled ) {
 			translation = this.postProcessEditarea(segment);
+            sourceSegment = this.postProcessEditarea(segment, '.source');
 		} else {
             translation = $('.editarea', segment ).text();
+            sourceSegment = $('.source', segment ).text();
 		}
 
 		if (translation === '') {
@@ -2410,7 +2412,10 @@ UI = {
 		var chosen_suggestion = $('.editarea', segment).data('lastChosenSuggestion');
 		autosave = (caller == 'autosave') ? true : false;
         isSplitted = (id_segment.split('-').length > 1) ? true : false;
-        if(isSplitted) translation = this.collectSplittedTranslations(id_segment);
+        if(isSplitted) {
+            translation = this.collectSplittedTranslations(id_segment);
+            sourceSegment = this.collectSplittedTranslations(id_segment, ".source");
+        }
         this.tempReqArguments = {
             id_segment: id_segment,
             id_job: config.id_job,
@@ -2418,6 +2423,7 @@ UI = {
             password: config.password,
             status: status,
             translation: translation,
+            segment : sourceSegment,
             time_to_edit: time_to_edit,
             id_translator: id_translator,
             errors: errors,
@@ -2468,12 +2474,12 @@ UI = {
         });
         return statuses;
     },
-    collectSplittedTranslations: function (sid) {
+    collectSplittedTranslations: function (sid, selector) {
         totalTranslation = '';
         segmentsIds = $('#segment-' + sid).attr('data-split-group').split(',');
         $.each(segmentsIds, function (index) {
             segment = $('#segment-' + this);
-            translation = UI.postProcessEditarea(segment);
+            translation = UI.postProcessEditarea(segment, selector);
             totalTranslation += translation;
 //            totalTranslation += $(segment).find('.editarea').html();
             if(index < (segmentsIds.length - 1)) totalTranslation += UI.splittedTranslationPlaceholder;
