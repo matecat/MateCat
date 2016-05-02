@@ -2861,9 +2861,6 @@ UI = {
 
     propagateTranslation: function(segment, status, evenTranslated) {
         this.tempReqArguments = null;
-        console.log('status: ', status);
-        console.log(status == 'translated');
-        console.log(config.isReview && (status == 'approved'));
         if( (status == 'translated') || (config.isReview && (status == 'approved'))){
             plusApproved = (config.isReview)? ', section[data-hash=' + $(segment).attr('data-hash') + '].status-approved' : '';
 
