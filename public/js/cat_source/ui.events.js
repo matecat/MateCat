@@ -119,13 +119,6 @@ $.extend(UI, {
                     type: "allTranslated"
                 });
             }
-
-            // TODO: not sure this is still useful
-            $(window).trigger({
-                type: "statusChanged",
-                segment: segment.el,
-                status: status
-            });
         });
 
 		$("body").on('keydown', null, 'ctrl+1', function(e) {

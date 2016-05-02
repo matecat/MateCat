@@ -1249,7 +1249,10 @@ UI = {
 		statusMenu.empty().hide();
 	},
 	renderFiles: function(files, where, starting) {
-
+        // If we are going to re-render the articles first we remove them
+        if (where === "center" && !starting) {
+            $('article').remove();
+        }
         $.each(files, function(k) {
 			var newFile = '';
 			var fid = k;
@@ -2841,9 +2844,6 @@ UI = {
 
     propagateTranslation: function(segment, status, evenTranslated) {
         this.tempReqArguments = null;
-        console.log('status: ', status);
-        console.log(status == 'translated');
-        console.log(config.isReview && (status == 'approved'));
         if( (status == 'translated') || (config.isReview && (status == 'approved'))){
             plusApproved = (config.isReview)? ', section[data-hash=' + $(segment).attr('data-hash') + '].status-approved' : '';
 

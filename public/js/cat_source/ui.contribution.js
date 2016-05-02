@@ -426,7 +426,7 @@ $.extend(UI, {
 //                localStorage.removeItem('contribution-' + config.id_job + '-' + segment_id );
                 UI.execSetContributionTail();
 				if (d.errors.length)
-					UI.processErrors(d.error, 'setContribution');
+					UI.processErrors(d.errors, 'setContribution');
 			}
 		});
 	},
