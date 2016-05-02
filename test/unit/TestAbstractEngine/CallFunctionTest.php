@@ -122,7 +122,8 @@ LAB;
 
 
         $this->mock_engine->call($function_name, $this->array_param);
-        $this->assertEquals("maison est rouge.",$this->property->getValue($this->mock_engine)["translation"]);
+        $mock_engine = $this->property->getValue($this->mock_engine) ;
+        $this->assertEquals("maison est rouge.", $mock_engine["translation"]);
     }
 
     /**
@@ -235,7 +236,9 @@ LAB;
         $this->mock_engine->expects($this->any())->method('_call')->with($url_param_mock)->willReturn($json_output_mock);
 
         $this->mock_engine->call($function_name, $this->array_param);
-        $this->assertEquals("maison est rouge et la soupe Apple est vert.",$this->property->getValue($this->mock_engine)["translation"]);
+
+        $mock_engine = $this->property->getValue($this->mock_engine);
+        $this->assertEquals("maison est rouge et la soupe Apple est vert.", $mock_engine["translation"]);
     }
 
 }

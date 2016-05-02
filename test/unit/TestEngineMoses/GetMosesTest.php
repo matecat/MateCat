@@ -109,7 +109,8 @@ LAB;
         $this->configuration['segment'] = "house is red";
         $this->mock_engine->expects($this->any())->method('_call')->with($url_param)->willReturn($json_output);
 
-        $translation = $this->mock_engine->get($this->configuration)["translation"];
+        $mock = $this->mock_engine->get($this->configuration) ;
+        $translation = $mock["translation"];
 
         $this->assertEquals("maison est rouge.", $translation);
 
@@ -220,7 +221,8 @@ LAB;
 
         $this->mock_engine->expects($this->any())->method('_call')->with($url_param)->willReturn($json_output);
 
-        $translation = $this->mock_engine->get($this->configuration)["translation"];
+        $mock = $this->mock_engine->get($this->configuration) ;
+        $translation = $mock["translation"];
 
         $this->assertEquals("maison est rouge et la soupe Apple est vert.", $translation);
 
