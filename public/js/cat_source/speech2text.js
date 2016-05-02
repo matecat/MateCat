@@ -7,7 +7,6 @@ Speech2Text = {};
         microphone: null,
         finalTranscript: '',
         interimTranscript: '',
-        ignoreOnEnd: false,
         targetElement: null,
         isToEmptyTargetElement: true,
         isStopingRecognition: false,
@@ -69,13 +68,6 @@ Speech2Text = {};
                 Speech2Text.startSpeechRecognition( microphone );
                 Speech2Text.enableContinuousRecognizing();
             }
-        },
-        restartVars: function() {
-            Speech2Text.recognizing = false;
-            Speech2Text.finalTranscript = '';
-            Speech2Text.ignoreOnEnd = false;
-            Speech2Text.targetElement = null;
-            Speech2Text.isToEmptyTargetElement = true;
         },
         startSpeechRecognition: function( microphone ) {
             if( !microphone.hasClass( 'micSpeechActive' ) ) {
