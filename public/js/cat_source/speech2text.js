@@ -86,6 +86,7 @@ Speech2Text = {};
 
             if( !Speech2Text.recognizing ) {
                 Speech2Text.recognition.start();
+                Speech2Text.showMatches();
             }
         },
         stopSpeechRecognition: function( microphone ) {
@@ -96,6 +97,7 @@ Speech2Text = {};
 
             if( Speech2Text.recognizing ) {
                 Speech2Text.isStopingRecognition = true;
+                Speech2Text.hideMatches();
             }
         },
         onRecognitionStart: function() {
@@ -178,6 +180,16 @@ Speech2Text = {};
         },
         disableContinuousRecognizing: function() {
             Speech2Text.isToKeepRecognizing = false;
+        },
+        showMatches: function() {
+            if( $( 'body' ).hasClass( 'hideMatches' ) ) {
+                $( 'body' ).removeClass( 'hideMatches' );
+            }
+        },
+        hideMatches: function() {
+            if( !$( 'body' ).hasClass( 'hideMatches' ) ) {
+                $( 'body' ).addClass( 'hideMatches' );
+            }
         }
     });
 
