@@ -870,8 +870,8 @@ class CatUtils {
             unset( $tmp_lang );
         }
 
-        $string = preg_replace( "#<.*?" . ">#si", "", $string );
-        $string = preg_replace( "#<\/.*?" . ">#si", "", $string );
+        $string = preg_replace( "#<.*?>#si", " ", $string );
+        $string = preg_replace( "#<\/.*?>#si", " ", $string );
 
         /*
          * Remove Unicode:
@@ -879,32 +879,32 @@ class CatUtils {
          * Z -> Separator ( but not spaces )
          * C -> Other
          */
-        $string = preg_replace( '#[\p{P}\p{Zl}\p{Zp}\p{C}]+#u', "", $string );
+        $string = preg_replace( '#[\p{P}\p{Zl}\p{Zp}\p{C}]+#u', " ", $string );
 
         //these could be superfluous
-        $string = str_replace( ":", "", $string );
-        $string = str_replace( ";", "", $string );
-        $string = str_replace( "[", "", $string );
-        $string = str_replace( "]", "", $string );
-        $string = str_replace( "?", "", $string );
-        $string = str_replace( "!", "", $string );
-        $string = str_replace( "{", "", $string );
-        $string = str_replace( "}", "", $string );
-        $string = str_replace( "(", "", $string );
-        $string = str_replace( ")", "", $string );
-        $string = str_replace( "/", "", $string );
-        $string = str_replace( "\\", "", $string );
-        $string = str_replace( "|", "", $string );
-        $string = str_replace( "£", "", $string );
-        $string = str_replace( "$", "", $string );
-        $string = str_replace( "%", "", $string );
-        $string = str_replace( "-", "", $string );
-        $string = str_replace( "_", "", $string );
-        $string = str_replace( "#", "", $string );
-        $string = str_replace( "§", "", $string );
-        $string = str_replace( "^", "", $string );
-        $string = str_replace( "â€???", "", $string );
-        $string = str_replace( "&", "", $string );
+        $string = str_replace( ":", " ", $string );
+        $string = str_replace( ";", " ", $string );
+        $string = str_replace( "[", " ", $string );
+        $string = str_replace( "]", " ", $string );
+        $string = str_replace( "?", " ", $string );
+        $string = str_replace( "!", " ", $string );
+        $string = str_replace( "{", " ", $string );
+        $string = str_replace( "}", " ", $string );
+        $string = str_replace( "(", " ", $string );
+        $string = str_replace( ")", " ", $string );
+        $string = str_replace( "/", " ", $string );
+        $string = str_replace( "\\", " ", $string );
+        $string = str_replace( "|", " ", $string );
+        $string = str_replace( "£", " ", $string );
+        $string = str_replace( "$", " ", $string );
+        $string = str_replace( "%", " ", $string );
+        $string = str_replace( "-", " ", $string );
+        $string = str_replace( "_", " ", $string );
+        $string = str_replace( "#", " ", $string );
+        $string = str_replace( "§", " ", $string );
+        $string = str_replace( "^", " ", $string );
+        $string = str_replace( "â€???", " ", $string );
+        $string = str_replace( "&", " ", $string );
 
 
         if ( array_key_exists( $source_lang, self::$cjk ) ) {
@@ -952,6 +952,8 @@ class CatUtils {
             $string = str_replace( " ", "<sep>", $string );
             $string = str_replace( "  ", "<sep>", $string ); //Non breaking space
 
+
+            //TODO verificare che questi servano ancora dopo il clean_raw_string4fast_word_count e la sostituzione degli spazi con i separatori
             $string = str_replace( "„", "<sep>", $string );
             $string = str_replace( "‚", "<sep>", $string ); //single low quotation mark
             $string = str_replace( "‘", "<sep>", $string );
@@ -962,9 +964,9 @@ class CatUtils {
             $string = str_replace( "«", "<sep>", $string );
             $string = str_replace( "»", "<sep>", $string );
 
-            $string = str_replace( ", ", "<sep>", $string );
-            $string = str_replace( ". ", "<sep>", $string );
-            $string = str_replace( "' ", "<sep>", $string );
+            $string = str_replace( ",", "<sep>", $string );
+            $string = str_replace( ".", "<sep>", $string );
+            $string = str_replace( "'", "<sep>", $string );
             $string = str_replace( ".", "<sep>", $string );
             $string = str_replace( "\"", "<sep>", $string );
             $string = str_replace( '\'', "<sep>", $string );
