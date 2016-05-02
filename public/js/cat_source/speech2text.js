@@ -77,6 +77,7 @@ Speech2Text = {};
 
             if( Speech2Text.isToEmptyTargetElement ) {
                 Speech2Text.finalTranscript = '';
+                Speech2Text.targetElement.html( '' );
             } else {
                 Speech2Text.finalTranscript = Speech2Text.targetElement.text() + ' ';
             }
