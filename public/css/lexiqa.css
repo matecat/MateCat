@@ -38,7 +38,7 @@
 	font-family: 'Open Sans', sans-serif;*/
 	/*font-weight: 100;
 	font-size: 0.8rem;*/
-    background-color: #046380;
+    background-color: #4D4D4D;
 	line-height: 1.5rem;
 	padding: 0;
     /*border: 1px solid #046380;*/
@@ -53,7 +53,7 @@
 }
 
 #powerTip.sw::before, #powerTip.se::before {
-    border-bottom: 10px solid #046380;
+    border-bottom: 10px solid #4D4D4D;
 }
 
 #powerTip .tooltip-error-wrapper {
