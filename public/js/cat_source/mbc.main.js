@@ -856,7 +856,10 @@ if ( MBC.enabled() )
             if ( $( '.searchbox' ).is( ':visible' ) ) {
                 UI.toggleSearch( ev );
             }
-            $( '.lxq-history-balloon-outer' ).removeClass( 'lxq-visible' );           
+            $( '.lxq-history-balloon-outer' ).removeClass( 'lxq-visible' );   
+            
+            $('#lexiqa-popup').removeClass('lxq-visible').focus();   
+            $('.cattool.editing').css('margin-top', 0);        
         } );
 
         $( document ).on( 'mbc:comment:new', function ( ev, data ) {
