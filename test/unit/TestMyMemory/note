@@ -1,0 +1,56 @@
+my test with setted match from localhost
+    http://api.mymemory.translated.net/set?seg=Il+Sistema+registra+le+informazioni+sul+nuovo+film.&tra=The+system+records+the+information+on+the+new+movie.&langpair=it-IT%7Cen-US&de=demo%40matecat.com&prop=%7B%22project_id%22%3A%2212%22%2C%22project_name%22%3A%22ForDeleteTest%22%2C%22job_id%22%3A%2212%22%7D      /** removed   &key=a6043e606ac9b5d7ff24
+    http://api.mymemory.translated.net/delete?seg=Il+Sistema+registra+le+informazioni+sul+nuovo+film.&tra=The+system+records+the+information+on+the+new+movie.&langpair=IT%7CEN&de=demo%40matecat.com
+correct it inserts two rows in the TM and delete two rows
+json response affermative
+
+my test without preset
+    http://api.mymemory.translated.net/set?seg=Il+Sistema+registra+le+informazioni+sul+nuovo+film.&tra=The+system+records+the+information+on+the+new+movie.&langpair=it-IT%7Cen-US&de=demo%40matecat.com&prop=%7B%22project_id%22%3A%2212%22%2C%22project_name%22%3A%22ForDeleteTest%22%2C%22job_id%22%3A%2212%22%7D    /** removed   &key=a6043e606ac9b5d7ff24
+    http://api.mymemory.translated.net/set?seg=Il+Sistema+registra+le+informazioni+sul+nuovo+film.&tra=The+system+records+the+information+on+the+new+movie.&langpair=it-IT%7Cen-US&de=demo%40matecat.com&prop=%7B%22project_id%22%3A%2212%22%2C%22project_name%22%3A%22ForDeleteTest%22%2C%22job_id%22%3A%2212%22%7D
+    http://api.mymemory.translated.net/delete?seg=Il+Sistema+registra+le+informazioni+sul+nuovo+film.&tra=The+system+records+the+information+on+the+new+movie.&langpair=IT%7CEN&de=demo%40matecat.com
+    http://api.mymemory.translated.net/delete?seg=Il+Sistema+registra+le+informazioni+sul+nuovo+film.&tra=The+system+records+the+information+on+the+new+movie.&langpair=IT%7CEN&de=demo%40matecat.com
+it inserted the row in TM and TM fails to find the row:
+{"responseData":{"translatedText":"NO ID FOUND"},"responseDetails":"NO ID FOUND","responseStatus":404,"matches":""}
+
+IL PROBLEMA È CHE SE MY MEMORY NON TROVA IL RISULTATO IL JASON DI RISPOSTA HA LA STRINGA VUOTA NEL CAMPO MATCH E QUINDI NEL DECODE IL CONTROLLO ISSET NON HA EFFETTO
+ E SI APPRICA IL FOREACH SU UN OGGETTO CHE NON È UN ARRAY E VA IN ERRORE
+PERCHE MI FALLISCE ? ANCHE SE LE URL GENERATE SONO LE MEDESIME ?
+
+prove sul mio localhost quindi sull'applicazione matecat
+    http://api.mymemory.translated.net/set?seg=Il+Sistema+registra+le+informazioni+sul+nuovo+film.&tra=The+system+records+the+information+on+the+new+movie.&langpair=it-IT%7Cen-US&de=demo%40matecat.com&prop=%7B%22project_id%22%3A%2212%22%2C%22project_name%22%3A%22ForDeleteTest%22%2C%22job_id%22%3A%2212%22%7D
+    http://api.mymemory.translated.net/delete?seg=Il+Sistema+registra+le+informazioni+sul+nuovo+film.&tra=The+system+records+the+information+on+the+new+movie.&langpair=IT%7CEN&de=demo%40matecat.com
+it inserted the row in TM because json response is   {"responseData":"OK","responseStatus":200,"responseDetails":[484542626]}
+and it deleted it with success with this response : {"responseStatus":200,"responseData":"Found and deleted 1 segments"}
+
+
+
+se non viene startato dalla condizione in cui è gia stata inserita una row allora fallisce con questo messaggio:
+Invalid argument supplied for foreach()
+ /home/matecat/cattool/lib/Utils/Engines/MyMemory.php:82
+ /home/matecat/cattool/lib/Utils/Engines/AbstractEngine.php:203
+ /home/matecat/cattool/lib/Utils/Engines/MyMemory.php:187
+ /home/matecat/cattool/test/unit/TestMyMemory/DeleteMyMemoryTest.php:132
+
+
+
+from site with 'book' modification:
+    http://api.mymemory.translated.net/delete?seg=Il+Sistema+registra+le+informazioni+sul+nuovo+film.&tra=The+system+records+the+information+on+the+new+book.&langpair=IT%7CEN&de=demo%40matecat.com
+
+QUESTA URL FUNZIONA     obviusly success: {"responseStatus":200,"responseData":"Found and deleted 1 segments"}
+
+ADESSO CONTROLLO DEBUGGANDO QUALE È LA URL CREATA DAL MIO TEST :
+    http://api.mymemory.translated.net/delete?seg=Il+Sistema+registra+le+informazioni+sul+nuovo+film.&tra=The+system+records+the+information+on+the+new+book.&langpair=IT%7CEN&de=demo%40matecat.com
+UGUALE
+CONTROLLO NUOVAMENTE:
+    http://api.mymemory.translated.net/delete?seg=Il+Sistema+registra+le+informazioni+sul+nuovo+film.&tra=The+system+records+the+information+on+the+new+book.&langpair=IT%7CEN&de=demo%40matecat.com
+E FUNZIONA
+
+
+
+
+non sto capendo
+a volte funziona a volte no.
+
+mi viene da pensare che possa dipendere da come my memory gestisce
+ le informazioni ricevute se le rende subito disponibili oppure se
+  le trattiene finche non scade tipo che so una connessione tcp o robbe.

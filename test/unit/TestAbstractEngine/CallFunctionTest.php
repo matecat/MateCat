@@ -18,6 +18,7 @@ class CallFunctionTest extends AbstractTest
      * @var array
      */
     protected $array_param;
+    protected $others_param;
     protected $reflector;
     protected $property;
     /**
@@ -25,9 +26,13 @@ class CallFunctionTest extends AbstractTest
      */
     protected $mock_engine;
 
-    public function setUp()
+    /**
+     * @group regression
+     * @covers  Engines_AbstractEngine::call
+     */
+    public function test_call_with_simple_segment_triggered_by_get()
     {
-        parent::setUp();
+
         $this->engine_struct_param = new EnginesModel_EngineStruct();
 
         $this->engine_struct_param->id = 10;
@@ -53,15 +58,7 @@ class CallFunctionTest extends AbstractTest
 
 
         $this->mock_engine = $this->getMockBuilder('\Engines_DeepLingo')->setConstructorArgs(array($this->engine_struct_param))->setMethods(array('_call'))->getMock();
-
-    }
-
-    /**
-     * @group regression
-     * @covers  Engines_AbstractEngine::call
-     */
-    public function test_call_with_simple_segment()
-    {
+        //togliere dal setup
         $this->reflector = new ReflectionClass($this->mock_engine);
         $this->property = $this->reflector->getProperty("result");
         $this->property->setAccessible(true);
@@ -129,8 +126,36 @@ LAB;
      * @group regression
      * @covers  Engines_AbstractEngine::call
      */
-    public function test_call_with_more_complex_segment()
+    public function test_call_with_more_complex_segment_triggered_by_get()
     {
+
+        $this->engine_struct_param = new EnginesModel_EngineStruct();
+
+        $this->engine_struct_param->id = 10;
+        $this->engine_struct_param->name = "DeepLingo En/Fr iwslt";
+        $this->engine_struct_param->type = "MT";
+        $this->engine_struct_param->description = "DeepLingo Engine";
+        $this->engine_struct_param->base_url = "http://mtserver01.deeplingo.com:8019";
+        $this->engine_struct_param->translate_relative_url = "translate";
+        $this->engine_struct_param->contribute_relative_url = NULL;
+        $this->engine_struct_param->delete_relative_url = NULL;
+        $this->engine_struct_param->others = array();
+        $this->engine_struct_param->class_load = "DeepLingo";
+        $this->engine_struct_param->extra_parameters = array("client_secret" => "gala15");
+        $this->engine_struct_param->google_api_compliant_version = "2";
+        $this->engine_struct_param->penalty = "14";
+        $this->engine_struct_param->active = "1";
+        $this->engine_struct_param->uid = 44;
+
+        $this->reflectedClass = new Engines_Moses($this->engine_struct_param);
+        $this->reflector = new ReflectionClass($this->reflectedClass);
+        $this->property = $this->reflector->getProperty("result");
+        $this->property->setAccessible(true);
+
+
+        $this->mock_engine = $this->getMockBuilder('\Engines_DeepLingo')->setConstructorArgs(array($this->engine_struct_param))->setMethods(array('_call'))->getMock();
+        //togliere dal setup
+
         $this->reflector = new ReflectionClass($this->mock_engine);
         $this->property = $this->reflector->getProperty("result");
         $this->property->setAccessible(true);
@@ -236,6 +261,694 @@ LAB;
 
         $this->mock_engine->call($function_name, $this->array_param);
         $this->assertEquals("maison est rouge et la soupe Apple est vert.",$this->property->getValue($this->mock_engine)["translation"]);
+    }
+    /**
+     * @group regression
+     * @covers  Engines_AbstractEngine::call
+     */
+    public function test_call_segment_source_italian_target_aragonese_triggered_by_get(){
+
+
+        $this->others_param = array();
+        $this->others_param['gloss_get_relative_url'] = "glossary/get";
+        $this->others_param['gloss_set_relative_url'] = "glossary/set";
+        $this->others_param['gloss_update_relative_url'] = "glossary/update";
+        $this->others_param['gloss_delete_relative_url'] = "glossary/delete";
+        $this->others_param['tmx_import_relative_url'] = "tmx/import";
+        $this->others_param['tmx_status_relative_url'] = "tmx/status";
+        $this->others_param['tmx_export_create_url'] = "tmx/export/create";
+        $this->others_param['tmx_export_check_url'] = "tmx/export/check";
+        $this->others_param['tmx_export_download_url'] = "tmx/export/download";
+        $this->others_param['tmx_export_list_url'] = "tmx/export/list";
+        $this->others_param['api_key_create_user_url'] = "createranduser";
+        $this->others_param['api_key_check_user_url'] = "authkey";
+        $this->others_param['analyze_url'] = "analyze";
+        $this->others_param['detect_language_url'] = "langdetect.php";
+
+
+        $this->engine_struct_param = new EnginesModel_EngineStruct();
+
+        $this->engine_struct_param->id = 1;
+        $this->engine_struct_param->name = "MyMemory (All Pairs)";
+        $this->engine_struct_param->type = "TM";
+        $this->engine_struct_param->description = "Machine translation from Google Translate and Microsoft Translator.";
+        $this->engine_struct_param->base_url = "http://api.mymemory.translated.net";
+        $this->engine_struct_param->translate_relative_url = "get";
+        $this->engine_struct_param->contribute_relative_url = "set";
+        $this->engine_struct_param->delete_relative_url = "delete";
+        $this->engine_struct_param->others = $this->others_param;
+        $this->engine_struct_param->class_load = "MyMemory";
+        $this->engine_struct_param->extra_parameters = array();
+        $this->engine_struct_param->google_api_compliant_version = "1";
+        $this->engine_struct_param->penalty = "0";
+        $this->engine_struct_param->active = "1";
+        $this->engine_struct_param->uid = NULL;
+
+
+        $function_param= "translate_relative_url";
+        $this->array_param= array(
+            'q' => "Il Sistema genera un numero di serie per quella copia e lo stampa (anche sotto forma di codice a barre) su un’etichetta adesiva.",
+            'langpair' => "it-IT|an-ES",
+            'de' => "demo@matecat.com",
+            'mt' => true,
+            'numres' => "3",
+            'key' => "a6043e606ac9b5d7ff24"           
+        );
+
+        $engine= new Engines_MyMemory($this->engine_struct_param);
+        $engine->call($function_param,$this->array_param);
+
+        $this->reflector = new ReflectionClass($engine);
+        $this->property = $this->reflector->getProperty("result");
+        $this->property->setAccessible(true);
+        /**
+         * @var Engines_Results_MyMemory_TMS
+         */
+        $actual_result=$this->property->getValue($engine);
+
+        /**
+         * general check on the keys of TSM object returned
+         */
+        $this->assertTrue($actual_result instanceof Engines_Results_MyMemory_TMS);
+        $this->assertTrue(property_exists($actual_result,'matches'));
+        $this->assertTrue(property_exists($actual_result,'responseStatus'));
+        $this->assertTrue(property_exists($actual_result,'responseDetails'));
+        $this->assertTrue(property_exists($actual_result,'responseData'));
+        $this->assertTrue(property_exists($actual_result,'error'));
+        $this->assertTrue(property_exists($actual_result,'_rawResponse'));
+
+
+
+    }
+
+    /**
+     * @group regression
+     * @covers  Engines_AbstractEngine::call
+     */
+    public function test_call_segment_source_italian_target_english_triggered_by_method_set_from_MyMemory_Engine_general_check_1(){
+
+
+        $this->others_param = array();
+        $this->others_param['gloss_get_relative_url'] = "glossary/get";
+        $this->others_param['gloss_set_relative_url'] = "glossary/set";
+        $this->others_param['gloss_update_relative_url'] = "glossary/update";
+        $this->others_param['gloss_delete_relative_url'] = "glossary/delete";
+        $this->others_param['tmx_import_relative_url'] = "tmx/import";
+        $this->others_param['tmx_status_relative_url'] = "tmx/status";
+        $this->others_param['tmx_export_create_url'] = "tmx/export/create";
+        $this->others_param['tmx_export_check_url'] = "tmx/export/check";
+        $this->others_param['tmx_export_download_url'] = "tmx/export/download";
+        $this->others_param['tmx_export_list_url'] = "tmx/export/list";
+        $this->others_param['api_key_create_user_url'] = "createranduser";
+        $this->others_param['api_key_check_user_url'] = "authkey";
+        $this->others_param['analyze_url'] = "analyze";
+        $this->others_param['detect_language_url'] = "langdetect.php";
+
+
+        $this->engine_struct_param = new EnginesModel_EngineStruct();
+
+        $this->engine_struct_param->id = 1;
+        $this->engine_struct_param->name = "MyMemory (All Pairs)";
+        $this->engine_struct_param->type = "TM";
+        $this->engine_struct_param->description = "Machine translation from Google Translate and Microsoft Translator.";
+        $this->engine_struct_param->base_url = "http://api.mymemory.translated.net";
+        $this->engine_struct_param->translate_relative_url = "get";
+        $this->engine_struct_param->contribute_relative_url = "set";
+        $this->engine_struct_param->delete_relative_url = "delete";
+        $this->engine_struct_param->others = $this->others_param;
+        $this->engine_struct_param->class_load = "MyMemory";
+        $this->engine_struct_param->extra_parameters = array();
+        $this->engine_struct_param->google_api_compliant_version = "1";
+        $this->engine_struct_param->penalty = "0";
+        $this->engine_struct_param->active = "1";
+        $this->engine_struct_param->uid = NULL;
+
+
+        $function_param= "contribute_relative_url";
+
+        $prop=<<<'LABEL'
+{"project_id":"10","project_name":"tyuio","job_id":"10"}
+LABEL;
+
+        $this->array_param= array(
+            'seg' => "Il Sistema registra le informazioni sul nuovo film.",
+            'tra' => "The system records the information on the new movie.",
+            'tnote' => NULL,
+            'langpair' => "it-IT|en-US",
+            'de' => "demo@matecat.com",
+            'prop' => $prop,
+            'key' => "a6043e606ac9b5d7ff24"
+        );
+
+        $engine= new Engines_MyMemory($this->engine_struct_param);
+        $engine->call($function_param,$this->array_param);
+
+        $this->reflector = new ReflectionClass($engine);
+        $this->property = $this->reflector->getProperty("result");
+        $this->property->setAccessible(true);
+        /**
+         * @var Engines_Results_MyMemory_SetContributionResponse
+         */
+        $actual_result=$this->property->getValue($engine);
+
+        /**
+         * general check on the keys of Engines_Results_MyMemory_SetContributionResponse object returned
+         */
+        $this->assertTrue($actual_result instanceof Engines_Results_MyMemory_SetContributionResponse);
+        $this->assertFalse(property_exists($actual_result,'matches'));
+        $this->assertTrue(property_exists($actual_result,'responseStatus'));
+        $this->assertTrue(property_exists($actual_result,'responseDetails'));
+        $this->assertTrue(property_exists($actual_result,'responseData'));
+        $this->assertTrue(property_exists($actual_result,'error'));
+        $this->assertTrue(property_exists($actual_result,'_rawResponse'));
+
+
+
+    }
+
+
+    /**
+     * @group regression
+     * @covers  Engines_AbstractEngine::call
+     */
+    public function test_call_segment_source_italian_target_english_triggered_by_method_set_from_MyMemory_Engine_stubbed__call_with_mock_1(){
+
+
+        $this->others_param = array();
+        $this->others_param['gloss_get_relative_url'] = "glossary/get";
+        $this->others_param['gloss_set_relative_url'] = "glossary/set";
+        $this->others_param['gloss_update_relative_url'] = "glossary/update";
+        $this->others_param['gloss_delete_relative_url'] = "glossary/delete";
+        $this->others_param['tmx_import_relative_url'] = "tmx/import";
+        $this->others_param['tmx_status_relative_url'] = "tmx/status";
+        $this->others_param['tmx_export_create_url'] = "tmx/export/create";
+        $this->others_param['tmx_export_check_url'] = "tmx/export/check";
+        $this->others_param['tmx_export_download_url'] = "tmx/export/download";
+        $this->others_param['tmx_export_list_url'] = "tmx/export/list";
+        $this->others_param['api_key_create_user_url'] = "createranduser";
+        $this->others_param['api_key_check_user_url'] = "authkey";
+        $this->others_param['analyze_url'] = "analyze";
+        $this->others_param['detect_language_url'] = "langdetect.php";
+
+
+        $this->engine_struct_param = new EnginesModel_EngineStruct();
+
+        $this->engine_struct_param->id = 1;
+        $this->engine_struct_param->name = "MyMemory (All Pairs)";
+        $this->engine_struct_param->type = "TM";
+        $this->engine_struct_param->description = "Machine translation from Google Translate and Microsoft Translator.";
+        $this->engine_struct_param->base_url = "http://api.mymemory.translated.net";
+        $this->engine_struct_param->translate_relative_url = "get";
+        $this->engine_struct_param->contribute_relative_url = "set";
+        $this->engine_struct_param->delete_relative_url = "delete";
+        $this->engine_struct_param->others = $this->others_param;
+        $this->engine_struct_param->class_load = "MyMemory";
+        $this->engine_struct_param->extra_parameters = array();
+        $this->engine_struct_param->google_api_compliant_version = "1";
+        $this->engine_struct_param->penalty = "0";
+        $this->engine_struct_param->active = "1";
+        $this->engine_struct_param->uid = NULL;
+
+
+        $function_param= "contribute_relative_url";
+
+        $prop=<<<'LABEL'
+{"project_id":"10","project_name":"tyuio","job_id":"10"}
+LABEL;
+
+        $this->array_param= array(
+            'seg' => "Il Sistema registra le informazioni sul nuovo film.",
+            'tra' => "The system records the information on the new movie.",
+            'tnote' => NULL,
+            'langpair' => "it-IT|en-US",
+            'de' => "demo@matecat.com",
+            'prop' => $prop,
+            'key' => "a6043e606ac9b5d7ff24"
+        );
+        
+        $curl_mock_param=array(
+            '80' => true,
+            '13' => 10
+        );
+        
+        
+        $url_mock_param= "http://api.mymemory.translated.net/set?seg=Il+Sistema+registra+le+informazioni+sul+nuovo+film.&tra=The+system+records+the+information+on+the+new+movie.&langpair=it-IT%7Cen-US&de=demo%40matecat.com&prop=%7B%22project_id%22%3A%2210%22%2C%22project_name%22%3A%22tyuio%22%2C%22job_id%22%3A%2210%22%7D&key=a6043e606ac9b5d7ff24";
+
+        $mock_json_return=<<<'TAB'
+{"responseData":"OK","responseStatus":200,"responseDetails":[484525156]}
+TAB;
+
+
+        /**
+         * @var Engines_MyMemory
+         */
+        $engine_MyMemory= $this->getMockBuilder('\Engines_MyMemory')->setConstructorArgs(array($this->engine_struct_param))->setMethods(array('_call'))->getMock();
+        $engine_MyMemory->expects($this->any())->method('_call')->with($url_mock_param,$curl_mock_param)->willReturn($mock_json_return);
+
+        $engine_MyMemory->call($function_param,$this->array_param);
+
+
+        $this->reflector = new ReflectionClass($engine_MyMemory);
+        $this->property = $this->reflector->getProperty("result");
+        $this->property->setAccessible(true);
+        /**
+         * @var Engines_Results_MyMemory_SetContributionResponse
+         */
+        $returned_object=$this->property->getValue($engine_MyMemory);
+
+        $this->assertTrue($returned_object instanceof Engines_Results_MyMemory_SetContributionResponse);
+        $this->assertEquals(200, $returned_object->responseStatus);
+        $this->assertEquals(array('0' => 484525156), $returned_object->responseDetails);
+        $this->assertEquals("OK", $returned_object->responseData);
+        $this->assertNull($returned_object->error);
+        /**
+         * check of protected property
+         */
+        $this->reflector= new ReflectionClass($returned_object);
+        $property= $this->reflector->getProperty('_rawResponse');
+        $property->setAccessible(true);
+
+        $this->assertEquals("",$property->getValue($returned_object));
+    }
+
+
+    /**
+     * @group regression
+     * @covers  Engines_AbstractEngine::call
+     */
+    public function test_call_segment_source_italian_target_english_triggered_by_method_set_from_MyMemory_Engine_general_check_2(){
+
+
+        $this->others_param = array();
+        $this->others_param['gloss_get_relative_url'] = "glossary/get";
+        $this->others_param['gloss_set_relative_url'] = "glossary/set";
+        $this->others_param['gloss_update_relative_url'] = "glossary/update";
+        $this->others_param['gloss_delete_relative_url'] = "glossary/delete";
+        $this->others_param['tmx_import_relative_url'] = "tmx/import";
+        $this->others_param['tmx_status_relative_url'] = "tmx/status";
+        $this->others_param['tmx_export_create_url'] = "tmx/export/create";
+        $this->others_param['tmx_export_check_url'] = "tmx/export/check";
+        $this->others_param['tmx_export_download_url'] = "tmx/export/download";
+        $this->others_param['tmx_export_list_url'] = "tmx/export/list";
+        $this->others_param['api_key_create_user_url'] = "createranduser";
+        $this->others_param['api_key_check_user_url'] = "authkey";
+        $this->others_param['analyze_url'] = "analyze";
+        $this->others_param['detect_language_url'] = "langdetect.php";
+
+
+        $this->engine_struct_param = new EnginesModel_EngineStruct();
+
+        $this->engine_struct_param->id = 1;
+        $this->engine_struct_param->name = "MyMemory (All Pairs)";
+        $this->engine_struct_param->type = "TM";
+        $this->engine_struct_param->description = "Machine translation from Google Translate and Microsoft Translator.";
+        $this->engine_struct_param->base_url = "http://api.mymemory.translated.net";
+        $this->engine_struct_param->translate_relative_url = "get";
+        $this->engine_struct_param->contribute_relative_url = "set";
+        $this->engine_struct_param->delete_relative_url = "delete";
+        $this->engine_struct_param->others = $this->others_param;
+        $this->engine_struct_param->class_load = "MyMemory";
+        $this->engine_struct_param->extra_parameters = array();
+        $this->engine_struct_param->google_api_compliant_version = "1";
+        $this->engine_struct_param->penalty = "0";
+        $this->engine_struct_param->active = "1";
+        $this->engine_struct_param->uid = NULL;
+
+
+        $function_param= "contribute_relative_url";
+
+        $prop = <<<'LABEL'
+{"project_id":"9","project_name":"eryt","job_id":"9"}
+LABEL;
+        $segment = <<<'LABEL'
+Ad esempio, una copia del film <g id="10">Blade Runner</g> in formato DVD, con numero di serie 6457.
+LABEL;
+
+        $translation = <<<'LABEL'
+For example, a copy of the film <g id="10">Flade Bunner</g> in DVD format, with numbers of 6457 series.
+LABEL;
+
+
+        $this->array_param = array(
+            'seg' => $segment,
+            'tra' => $translation,
+            'tnote' => NULL,
+            'langpair' => "it-IT|en-US",
+            'de' => "demo@matecat.com",
+            'prop' => $prop,
+            'key' => "a6043e606ac9b5d7ff24"
+        );
+
+        $engine= new Engines_MyMemory($this->engine_struct_param);
+        $engine->call($function_param,$this->array_param);
+
+        $this->reflector = new ReflectionClass($engine);
+        $this->property = $this->reflector->getProperty("result");
+        $this->property->setAccessible(true);
+        /**
+         * @var Engines_Results_MyMemory_SetContributionResponse
+         */
+        $actual_result=$this->property->getValue($engine);
+
+        /**
+         * general check on the keys of Engines_Results_MyMemory_SetContributionResponse object returned
+         */
+        $this->assertTrue($actual_result instanceof Engines_Results_MyMemory_SetContributionResponse);
+        $this->assertFalse(property_exists($actual_result,'matches'));
+        $this->assertTrue(property_exists($actual_result,'responseStatus'));
+        $this->assertTrue(property_exists($actual_result,'responseDetails'));
+        $this->assertTrue(property_exists($actual_result,'responseData'));
+        $this->assertTrue(property_exists($actual_result,'error'));
+        $this->assertTrue(property_exists($actual_result,'_rawResponse'));
+
+
+
+    }
+
+
+    /**
+     * @group regression
+     * @covers  Engines_AbstractEngine::call
+     */
+    public function test_call_segment_source_italian_target_english_triggered_by_method_set_from_MyMemory_Engine_stubbed__call_with_mock_2(){
+
+
+        $this->others_param = array();
+        $this->others_param['gloss_get_relative_url'] = "glossary/get";
+        $this->others_param['gloss_set_relative_url'] = "glossary/set";
+        $this->others_param['gloss_update_relative_url'] = "glossary/update";
+        $this->others_param['gloss_delete_relative_url'] = "glossary/delete";
+        $this->others_param['tmx_import_relative_url'] = "tmx/import";
+        $this->others_param['tmx_status_relative_url'] = "tmx/status";
+        $this->others_param['tmx_export_create_url'] = "tmx/export/create";
+        $this->others_param['tmx_export_check_url'] = "tmx/export/check";
+        $this->others_param['tmx_export_download_url'] = "tmx/export/download";
+        $this->others_param['tmx_export_list_url'] = "tmx/export/list";
+        $this->others_param['api_key_create_user_url'] = "createranduser";
+        $this->others_param['api_key_check_user_url'] = "authkey";
+        $this->others_param['analyze_url'] = "analyze";
+        $this->others_param['detect_language_url'] = "langdetect.php";
+
+
+        $this->engine_struct_param = new EnginesModel_EngineStruct();
+
+        $this->engine_struct_param->id = 1;
+        $this->engine_struct_param->name = "MyMemory (All Pairs)";
+        $this->engine_struct_param->type = "TM";
+        $this->engine_struct_param->description = "Machine translation from Google Translate and Microsoft Translator.";
+        $this->engine_struct_param->base_url = "http://api.mymemory.translated.net";
+        $this->engine_struct_param->translate_relative_url = "get";
+        $this->engine_struct_param->contribute_relative_url = "set";
+        $this->engine_struct_param->delete_relative_url = "delete";
+        $this->engine_struct_param->others = $this->others_param;
+        $this->engine_struct_param->class_load = "MyMemory";
+        $this->engine_struct_param->extra_parameters = array();
+        $this->engine_struct_param->google_api_compliant_version = "1";
+        $this->engine_struct_param->penalty = "0";
+        $this->engine_struct_param->active = "1";
+        $this->engine_struct_param->uid = NULL;
+
+
+        $function_param= "contribute_relative_url";
+
+        $prop = <<<'LABEL'
+{"project_id":"9","project_name":"eryt","job_id":"9"}
+LABEL;
+        $segment = <<<'LABEL'
+Ad esempio, una copia del film <g id="10">Blade Runner</g> in formato DVD, con numero di serie 6457.
+LABEL;
+
+        $translation = <<<'LABEL'
+For example, a copy of the film <g id="10">Flade Bunner</g> in DVD format, with numbers of 6457 series.
+LABEL;
+
+
+        $this->array_param = array(
+            'seg' => $segment,
+            'tra' => $translation,
+            'tnote' => NULL,
+            'langpair' => "it-IT|en-US",
+            'de' => "demo@matecat.com",
+            'prop' => $prop,
+            'key' => "a6043e606ac9b5d7ff24"
+        );
+
+        $curl_mock_param=array(
+            '80' => true,
+            '13' => 10
+        );
+
+
+        $url_mock_param= "http://api.mymemory.translated.net/set?seg=Ad+esempio%2C+una+copia+del+film+%3Cg+id%3D%2210%22%3EBlade+Runner%3C%2Fg%3E+in+formato+DVD%2C+con+numero+di+serie+6457.&tra=For+example%2C+a+copy+of+the+film+%3Cg+id%3D%2210%22%3EFlade+Bunner%3C%2Fg%3E+in+DVD+format%2C+with+numbers+of+6457+series.&langpair=it-IT%7Cen-US&de=demo%40matecat.com&prop=%7B%22project_id%22%3A%229%22%2C%22project_name%22%3A%22eryt%22%2C%22job_id%22%3A%229%22%7D&key=a6043e606ac9b5d7ff24";
+
+        $mock_json_return=<<<'TAB'
+{"responseData":"OK","responseStatus":200,"responseDetails":[484540480]}
+TAB;
+
+
+        /**
+         * @var Engines_MyMemory
+         */
+        $engine_MyMemory= $this->getMockBuilder('\Engines_MyMemory')->setConstructorArgs(array($this->engine_struct_param))->setMethods(array('_call'))->getMock();
+        $engine_MyMemory->expects($this->any())->method('_call')->with($url_mock_param,$curl_mock_param)->willReturn($mock_json_return);
+
+        $engine_MyMemory->call($function_param,$this->array_param);
+
+
+        $this->reflector = new ReflectionClass($engine_MyMemory);
+        $this->property = $this->reflector->getProperty("result");
+        $this->property->setAccessible(true);
+        /**
+         * @var Engines_Results_MyMemory_SetContributionResponse
+         */
+        $returned_object=$this->property->getValue($engine_MyMemory);
+
+        $this->assertTrue($returned_object instanceof Engines_Results_MyMemory_SetContributionResponse);
+        $this->assertEquals(200, $returned_object->responseStatus);
+        $this->assertEquals(array('0' => 484540480), $returned_object->responseDetails);
+        $this->assertEquals("OK", $returned_object->responseData);
+        $this->assertNull($returned_object->error);
+        /**
+         * check of protected property
+         */
+        $this->reflector= new ReflectionClass($returned_object);
+        $property= $this->reflector->getProperty('_rawResponse');
+        $property->setAccessible(true);
+
+        $this->assertEquals("",$property->getValue($returned_object));
+    }
+
+    /**
+     * @group regression
+     * @covers  Engines_AbstractEngine::call
+     */
+    public function test_call_segment_source_italian_target_english_triggered_by_method_delete_from_MyMemory_Engine_general_check(){
+
+
+        $this->others_param = array();
+        $this->others_param['gloss_get_relative_url'] = "glossary/get";
+        $this->others_param['gloss_set_relative_url'] = "glossary/set";
+        $this->others_param['gloss_update_relative_url'] = "glossary/update";
+        $this->others_param['gloss_delete_relative_url'] = "glossary/delete";
+        $this->others_param['tmx_import_relative_url'] = "tmx/import";
+        $this->others_param['tmx_status_relative_url'] = "tmx/status";
+        $this->others_param['tmx_export_create_url'] = "tmx/export/create";
+        $this->others_param['tmx_export_check_url'] = "tmx/export/check";
+        $this->others_param['tmx_export_download_url'] = "tmx/export/download";
+        $this->others_param['tmx_export_list_url'] = "tmx/export/list";
+        $this->others_param['api_key_create_user_url'] = "createranduser";
+        $this->others_param['api_key_check_user_url'] = "authkey";
+        $this->others_param['analyze_url'] = "analyze";
+        $this->others_param['detect_language_url'] = "langdetect.php";
+
+
+        $this->engine_struct_param = new EnginesModel_EngineStruct();
+
+        $this->engine_struct_param->id = 1;
+        $this->engine_struct_param->name = "MyMemory (All Pairs)";
+        $this->engine_struct_param->type = "TM";
+        $this->engine_struct_param->description = "Machine translation from Google Translate and Microsoft Translator.";
+        $this->engine_struct_param->base_url = "http://api.mymemory.translated.net";
+        $this->engine_struct_param->translate_relative_url = "get";
+        $this->engine_struct_param->contribute_relative_url = "set";
+        $this->engine_struct_param->delete_relative_url = "delete";
+        $this->engine_struct_param->others = $this->others_param;
+        $this->engine_struct_param->class_load = "MyMemory";
+        $this->engine_struct_param->extra_parameters = array();
+        $this->engine_struct_param->google_api_compliant_version = "1";
+        $this->engine_struct_param->penalty = "0";
+        $this->engine_struct_param->active = "1";
+        $this->engine_struct_param->uid = NULL;
+
+
+
+        /**
+         * initialization of the value to delete
+         */
+
+        $prop=<<<'LABEL'
+{"project_id":"12","project_name":"ForDeleteTest","job_id":"12"}
+LABEL;
+
+        $config_param= array(
+            'segment' => "Il Sistema registra le informazioni sul nuovo film.",
+            'translation' => "The system records the destruction on the new movie.",
+            'tnote' => NULL,
+            'source' => "it-IT",
+            'target' => "en-US",
+            'email' => "demo@matecat.com",
+            'prop' => $prop,
+            'get_mt' => 1,
+            'num_result' => 3,
+            'mt_only' => false,
+            'isConcordance' => false,
+            'isGlossary' => false,
+            'id_user' => array()
+        );
+
+        $engine= new Engines_MyMemory($this->engine_struct_param);
+
+        $engine->set($config_param);
+
+        /**
+         * end of initialization
+         */
+
+        $function_param= "delete_relative_url";
+
+        $this->array_param = array(
+            'seg' => "Il Sistema registra le informazioni sul nuovo film.",
+            'tra' => "The system records the destruction on the new movie.",
+            'langpair' => "IT|EN",
+            'de' => "demo@matecat.com",
+        );
+
+        $engine->call($function_param,$this->array_param);
+
+        $this->reflector = new ReflectionClass($engine);
+        $this->property = $this->reflector->getProperty("result");
+        $this->property->setAccessible(true);
+        /**
+         * @var Engines_Results_MyMemory_TMS
+         */
+        $actual_result=$this->property->getValue($engine);
+
+        /**
+         * general check on the keys of TSM object returned
+         */
+        $this->assertTrue($actual_result instanceof Engines_Results_MyMemory_TMS);
+        $this->assertTrue(property_exists($actual_result,'matches'));
+        $this->assertTrue(property_exists($actual_result,'responseStatus'));
+        $this->assertTrue(property_exists($actual_result,'responseDetails'));
+        $this->assertTrue(property_exists($actual_result,'responseData'));
+        $this->assertTrue(property_exists($actual_result,'error'));
+        $this->assertTrue(property_exists($actual_result,'_rawResponse'));
+
+
+
+    }
+
+
+    /**
+     * @group regression
+     * @covers  Engines_AbstractEngine::call
+     */
+    public function test_call_segment_source_italian_target_english_triggered_by_method_delete_from_MyMemory_Engine_stubbed__call_with_mock(){
+
+
+        $this->others_param = array();
+        $this->others_param['gloss_get_relative_url'] = "glossary/get";
+        $this->others_param['gloss_set_relative_url'] = "glossary/set";
+        $this->others_param['gloss_update_relative_url'] = "glossary/update";
+        $this->others_param['gloss_delete_relative_url'] = "glossary/delete";
+        $this->others_param['tmx_import_relative_url'] = "tmx/import";
+        $this->others_param['tmx_status_relative_url'] = "tmx/status";
+        $this->others_param['tmx_export_create_url'] = "tmx/export/create";
+        $this->others_param['tmx_export_check_url'] = "tmx/export/check";
+        $this->others_param['tmx_export_download_url'] = "tmx/export/download";
+        $this->others_param['tmx_export_list_url'] = "tmx/export/list";
+        $this->others_param['api_key_create_user_url'] = "createranduser";
+        $this->others_param['api_key_check_user_url'] = "authkey";
+        $this->others_param['analyze_url'] = "analyze";
+        $this->others_param['detect_language_url'] = "langdetect.php";
+
+
+        $this->engine_struct_param = new EnginesModel_EngineStruct();
+
+        $this->engine_struct_param->id = 1;
+        $this->engine_struct_param->name = "MyMemory (All Pairs)";
+        $this->engine_struct_param->type = "TM";
+        $this->engine_struct_param->description = "Machine translation from Google Translate and Microsoft Translator.";
+        $this->engine_struct_param->base_url = "http://api.mymemory.translated.net";
+        $this->engine_struct_param->translate_relative_url = "get";
+        $this->engine_struct_param->contribute_relative_url = "set";
+        $this->engine_struct_param->delete_relative_url = "delete";
+        $this->engine_struct_param->others = $this->others_param;
+        $this->engine_struct_param->class_load = "MyMemory";
+        $this->engine_struct_param->extra_parameters = array();
+        $this->engine_struct_param->google_api_compliant_version = "1";
+        $this->engine_struct_param->penalty = "0";
+        $this->engine_struct_param->active = "1";
+        $this->engine_struct_param->uid = NULL;
+
+
+
+        $function_param= "delete_relative_url";
+
+        $this->array_param = array(
+            'seg' => "Il Sistema registra le informazioni sul nuovo film.",
+            'tra' => "The system records the information on the new movie.",
+            'langpair' => "IT|EN",
+            'de' => "demo@matecat.com",
+        );
+
+
+        $curl_mock_param=array(
+            '80' => true,
+            '13' => 10
+        );
+
+
+        $url_mock_param= "http://api.mymemory.translated.net/delete?seg=Il+Sistema+registra+le+informazioni+sul+nuovo+film.&tra=The+system+records+the+information+on+the+new+movie.&langpair=IT%7CEN&de=demo%40matecat.com";
+
+        $mock_json_return=<<<'TAB'
+{"responseStatus":200,"responseData":"Found and deleted 1 segments"}
+TAB;
+
+
+        /**
+         * @var Engines_MyMemory
+         */
+        $engine_MyMemory= $this->getMockBuilder('\Engines_MyMemory')->setConstructorArgs(array($this->engine_struct_param))->setMethods(array('_call'))->getMock();
+        $engine_MyMemory->expects($this->any())->method('_call')->with($url_mock_param,$curl_mock_param)->willReturn($mock_json_return);
+
+        $engine_MyMemory->call($function_param,$this->array_param);
+
+
+        $this->reflector = new ReflectionClass($engine_MyMemory);
+        $this->property = $this->reflector->getProperty("result");
+        $this->property->setAccessible(true);
+        /**
+         * @var Engines_Results_MyMemory_TMS
+         */
+        $actual_result=$this->property->getValue($engine_MyMemory);
+        /**
+         * check on the values of TMS object returned
+         */
+        $this->assertTrue($actual_result instanceof Engines_Results_MyMemory_TMS);
+        $this->assertEquals(array(),$actual_result->matches);
+        $this->assertEquals(200, $actual_result->responseStatus);
+        $this->assertEquals("", $actual_result->responseDetails);
+        $this->assertEquals("Found and deleted 1 segments", $actual_result->responseData);
+        $this->assertNull($actual_result->error);
+        /**
+         * check of protected property
+         */
+        $this->reflector= new ReflectionClass($actual_result);
+        $property= $this->reflector->getProperty('_rawResponse');
+        $property->setAccessible(true);
+
+        $this->assertEquals("",$property->getValue($actual_result));
     }
 
 }
