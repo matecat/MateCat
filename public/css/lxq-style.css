@@ -1293,7 +1293,7 @@ LEXIQA POPUP
 }
 
 .lexiqa-popup-item:nth-of-type(2) .lexiqa-popup-icon {
-    content: url("../img/lexiqa_icons_info2.svg");
+    content: url("../img/lexiqa_icons_info.svg");
 }
 
 .lexiqa-popup-item:nth-of-type(2) .lexiqa-popup-icon,
@@ -1312,15 +1312,15 @@ LEXIQA POPUP
 }
 
 .lexiqa-popup-item:nth-of-type(3) .lexiqa-popup-icon {
-    content: url("../img/lexiqa_icons_report2.svg");
+    content: url("../img/lexiqa_icons_report.svg");
 }
 
 .lexiqa-popup-item:last-of-type .lexiqa-popup-icon:first-of-type {
-    content: url("../img/lexiqa_icons_previous2.svg");
+    content: url("../img/lexiqa_icons_previous.svg");
 }
 
 .lexiqa-popup-item:last-of-type .lexiqa-popup-icon:last-of-type {
-    content: url("../img/lexiqa_icons_next2.svg");
+    content: url("../img/lexiqa_icons_next.svg");
 }
 
 .lexiqa-popup-items .lexiqa-popup-item:last-of-type {
