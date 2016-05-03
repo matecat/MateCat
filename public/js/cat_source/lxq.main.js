@@ -181,27 +181,27 @@ if (LXQ.enabled())
                     else     
                         return 0;
             });
-            for (var j = 0; j < UI.lexiqaData.segments.length; j++) {
-                var warnings = getVisibleWarningsCountForSegment(UI.lexiqaData.segments[j]);
-                var ignores = getIgnoredWarningsCountForSegment(UI.lexiqaData.segments[j]);
-                if (ignores!==0 || warnings!==0) {
-                    var segmentWarningsRow = $(tpls.segmentWarningsRow);
-                    segmentWarningsRow.find('.lxq-history-balloon-segment-number').text(UI.lexiqaData.segments[j]);
-                    segmentWarningsRow.find('.lxq-history-balloon-segment-link').attr('href', '#' + UI.lexiqaData.segments[j]);
-                    segmentWarningsRow.find('.lxq-history-balloon-total').text(warnings);
-                    segmentWarningsRow.find('.lxq-history-balloon-ignored').text(ignores);
+            // for (var j = 0; j < UI.lexiqaData.segments.length; j++) {
+            //     var warnings = getVisibleWarningsCountForSegment(UI.lexiqaData.segments[j]);
+            //     var ignores = getIgnoredWarningsCountForSegment(UI.lexiqaData.segments[j]);
+            //     if (ignores!==0 || warnings!==0) {
+            //         var segmentWarningsRow = $(tpls.segmentWarningsRow);
+            //         segmentWarningsRow.find('.lxq-history-balloon-segment-number').text(UI.lexiqaData.segments[j]);
+            //         segmentWarningsRow.find('.lxq-history-balloon-segment-link').attr('href', '#' + UI.lexiqaData.segments[j]);
+            //         segmentWarningsRow.find('.lxq-history-balloon-total').text(warnings);
+            //         segmentWarningsRow.find('.lxq-history-balloon-ignored').text(ignores);
 
-                    root.append(segmentWarningsRow);
-                }
-                else {
-                    console.log('renderHistoryWithErrors: not adding segment: '+ UI.lexiqaData.segments[j]);
-                }
-            }
+            //         root.append(segmentWarningsRow);
+            //     }
+            //     else {
+            //         console.log('renderHistoryWithErrors: not adding segment: '+ UI.lexiqaData.segments[j]);
+            //     }
+            // }
 
-            $('.lxq-history-balloon-has-comment').remove();
-            $('.lxq-history-balloon-has-no-comments').hide();
+            // $('.lxq-history-balloon-has-comment').remove();
+            // $('.lxq-history-balloon-has-no-comments').hide();
 
-            $('.lxq-history-balloon-outer').append(root);
+            // $('.lxq-history-balloon-outer').append(root);
         }
         
         var renderHistoryWithNoComments = function () {
@@ -223,20 +223,27 @@ if (LXQ.enabled())
                 renderHistoryWithErrors();
             }
         }
-
+        
         var refreshElements = function () {
             //initCommentLinks();
             //renderCommentIconLinks();
             updateHistoryWithLoadedSegments();
         }
-
+        var hidePopUp = function () {
+            if ($('#lexiqa-popup').hasClass('lxq-visible')) {
+                $('#lexiqa-popup').removeClass('lxq-visible').focus();   
+                //$('.cattool.editing').css('margin-top', 0);  
+                $('#outer').css('margin-top', 20);      
+                //LXQ.reloadPowertip();
+            }
+        }
         $(document).on('ready', function () {
             initConstants();
             //console.log('---------- lxq:ready')
             //$( '#lxq-history' ).remove();
-            $('.lxq-history-balloon-outer').remove();
+            //$('.lxq-history-balloon-outer').remove();
             //$( '.header-menu li#filterSwitch' ).before( $( tpls.historyIcon ) );
-            $('.header-menu').append($(tpls.historyOuter).append($(tpls.historyNoComments)));
+            //$('.header-menu').append($(tpls.historyOuter).append($(tpls.historyNoComments)));
 
 
             refreshElements();            
@@ -245,9 +252,9 @@ if (LXQ.enabled())
             //      too in order to prevent bubbling.
             //
             var delegate = '#outer';
-            $(delegate).on('click', function () {
-                $('.lxq-history-balloon-outer').removeClass('lxq-visible');
-            });
+            // $(delegate).on('click', function () {
+            //     $('.lxq-history-balloon-outer').removeClass('lxq-visible');
+            // });
 
         });
 
@@ -272,10 +279,13 @@ if (LXQ.enabled())
         $(document).on('click', '#filterSwitch', function (e) {
             //$('.lxq-history-balloon-outer').removeClass('lxq-visible');
             
-            var lexiqaPopupHeight = $('#lexiqa-popup').height() + 30;
-            
-            $('#lexiqa-popup').removeClass('lxq-visible').focus();   
-            $('.cattool.editing').css('margin-top', 0); 
+            //var lexiqaPopupHeight = $('#lexiqa-popup').height() + 30;
+            // if ($('#lexiqa-popup').hasClass('lxq-visible')) {
+            //     $('#lexiqa-popup').removeClass('lxq-visible').focus();   
+            //     //$('.cattool.editing').css('margin-top', 0);  
+            //     $('#outer').css('margin-top', 20);      
+            //     //LXQ.reloadPowertip();
+            // }            
         });
 
         //$( document ).on( 'click', '#lxq-history', function ( ev ) {
@@ -283,19 +293,23 @@ if (LXQ.enabled())
         $(document).on('click', '#lexiqabox', function (ev) {
             // $('.lxq-history-balloon-outer').toggleClass('lxq-visible');
             ev.preventDefault();
+            if ($('.searchbox').is(':visible')) {
+                UI.toggleSearch(ev);
+            }            
+            
             var lexiqaPopupHeight = $('#lexiqa-popup').height() + 30;
             
             $('#lexiqa-popup').toggleClass('lxq-visible').focus();   
             
             if($('#lexiqa-popup').hasClass('lxq-visible')) {
-               $('.cattool.editing').css('margin-top', lexiqaPopupHeight); 
+              // $('.cattool.editing').css('margin-top', lexiqaPopupHeight);
+              $('#outer').css('margin-top', lexiqaPopupHeight);  
             } else {
-               $('.cattool.editing').css('margin-top', 0); 
+               //$('.cattool.editing').css('margin-top', 0);
+               $('#outer').css('margin-top', 20); 
             }
+            //reloadPowertip();
             
-            if ($('.searchbox').is(':visible')) {
-                UI.toggleSearch(ev);
-            }
             $('.mbc-history-balloon-outer').removeClass('mbc-visible');
         });
         var isNumeric = function (n) {
@@ -784,19 +798,37 @@ if (LXQ.enabled())
             });                     
         }
         var reloadPowertip = function(segment) {
-            buildPowertipDataForSegment(segment);                
-            $('.tooltipa',segment).powerTip({
-                placement: 'sw',
-                mouseOnToPopup: true,
-                smartPlacement: true,
-                closeDelay: 500
-            });
-            $('.tooltipas',segment).powerTip({
-                placement: 'se',
-                mouseOnToPopup: true,
-                smartPlacement: true,
-                closeDelay: 500
-            });
+            if (segment!==undefined && segment!==null) {
+                buildPowertipDataForSegment(segment);                
+                $('.tooltipa',segment).powerTip({
+                    placement: 'sw',
+                    mouseOnToPopup: true,
+                    smartPlacement: true,
+                    closeDelay: 500
+                });
+                $('.tooltipas',segment).powerTip({
+                    placement: 'se',
+                    mouseOnToPopup: true,
+                    smartPlacement: true,
+                    closeDelay: 500
+                });
+            }
+            else {
+                $.powerTip.destroy($('.tooltipas'));
+                $.powerTip.destroy($('.tooltipa'));
+                $('.tooltipa').powerTip({
+                    placement: 'sw',
+                    mouseOnToPopup: true,
+                    smartPlacement: true,
+                    closeDelay: 500
+                });
+                $('.tooltipas').powerTip({
+                    placement: 'se',
+                    mouseOnToPopup: true,
+                    smartPlacement: true,
+                    closeDelay: 500
+                });                
+            }
         }
             
         var ignoreError = function(errorid) {
@@ -1057,7 +1089,8 @@ if (LXQ.enabled())
             doQAallSegments: doQAallSegments,
             getNextSegmentWithWarning: getNextSegmentWithWarning,
             getPreviousSegmentWithWarning:getPreviousSegmentWithWarning,
-            initPopup: initPopup
+            initPopup: initPopup,
+            hidePopUp: hidePopUp
         });
 
     })(jQuery, config, window, LXQ);
