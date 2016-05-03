@@ -302,7 +302,6 @@
                         <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
                    </ul>
                     <ul class="statistics-details">
-<!--                    <ul tal:condition="php: isset( job_stats.WORDS_PER_HOUR )" class="statistics-details"> -->
                         <li id="stat-wph" title="Based on last 10 segments performance">Speed:
                             <strong tal:content="job_stats/WORDS_PER_HOUR|default">---</strong> Words/h
                         </li>
@@ -310,8 +309,7 @@
                             <strong tal:content="job_stats/ESTIMATED_COMPLETION|default">---</strong>
                         </li>
                     </ul>
-
-        </div>
+                </div>
 
                 <div tal:condition="php: !job_stats['ANALYSIS_COMPLETE']" id="analyzing">
                     <p class="progress">Calculating word count...</p>
