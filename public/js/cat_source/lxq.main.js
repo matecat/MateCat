@@ -270,13 +270,29 @@ if (LXQ.enabled())
         });
 
         $(document).on('click', '#filterSwitch', function (e) {
-            $('.lxq-history-balloon-outer').removeClass('lxq-visible');
+            //$('.lxq-history-balloon-outer').removeClass('lxq-visible');
+            
+            var lexiqaPopupHeight = $('#lexiqa-popup').height() + 30;
+            
+            $('#lexiqa-popup').removeClass('lxq-visible').focus();   
+            $('.cattool.editing').css('margin-top', 0); 
         });
 
         //$( document ).on( 'click', '#lxq-history', function ( ev ) {
             
         $(document).on('click', '#lexiqabox', function (ev) {
-            $('.lxq-history-balloon-outer').toggleClass('lxq-visible');
+            // $('.lxq-history-balloon-outer').toggleClass('lxq-visible');
+            ev.preventDefault();
+            var lexiqaPopupHeight = $('#lexiqa-popup').height() + 30;
+            
+            $('#lexiqa-popup').toggleClass('lxq-visible').focus();   
+            
+            if($('#lexiqa-popup').hasClass('lxq-visible')) {
+               $('.cattool.editing').css('margin-top', lexiqaPopupHeight); 
+            } else {
+               $('.cattool.editing').css('margin-top', 0); 
+            }
+            
             if ($('.searchbox').is(':visible')) {
                 UI.toggleSearch(ev);
             }

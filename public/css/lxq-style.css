@@ -1219,6 +1219,134 @@ article.lxq-commenting-opened .lxq-comment-balloon-outer {
     background-color: transparent;
 }
 
+
+/*********************************
+LEXIQA POPUP
+ ********************************/
+.lexiqa-wrapper {
+  background-color: #efefef;
+  padding: 0.8rem;
+  box-shadow: 0 1px 3px #666;
+  border-radius: 0 0 2px 2px;
+  margin-top: 34px;
+  display: none;
+}
+
+.lexiqa-popup-items {
+  font-family: Calibri;
+  color: #333;
+  list-style-type: none;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: row;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  font-size: 0.9rem;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  text-align: center;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  padding: 0;
+  z-index: 9999;
+}
+
+.lexiqa-popup-items .lexiqa-popup-item {
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+-webkit-flex-basis: 0;
+    -ms-flex-preferred-size: 0;
+        flex-basis: 0; 
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;     
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;        
+}
+
+.lexiqa-popup-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    line-height: 1.5rem;
+}
+
+.lexiqa-popup-item:first-of-type .lexiqa-popup-icon {
+    content: url("../img/lexiqa_icons_logo.png");
+    width: auto;
+}
+
+.lexiqa-popup-item:nth-of-type(2) .lexiqa-popup-icon {
+    content: url("../img/lexiqa_icons_info2.svg");
+}
+
+.lexiqa-popup-item:nth-of-type(2) .lexiqa-popup-icon,
+.lexiqa-popup-item:nth-of-type(3) .lexiqa-popup-icon,
+.lexiqa-popup-item:last-of-type .lexiqa-popup-icon:first-of-type,
+.lexiqa-popup-item:last-of-type .lexiqa-popup-icon:last-of-type {
+    background-color: #787878;
+    border-radius: 100%;
+}
+
+.lexiqa-popup-item:nth-of-type(2) .lexiqa-popup-icon:hover,
+.lexiqa-popup-item:nth-of-type(3) .lexiqa-popup-icon:hover,
+.lexiqa-popup-item:last-of-type .lexiqa-popup-icon:first-of-type:hover,
+.lexiqa-popup-item:last-of-type .lexiqa-popup-icon:last-of-type:hover {
+    background-color: #333;
+}
+
+.lexiqa-popup-item:nth-of-type(3) .lexiqa-popup-icon {
+    content: url("../img/lexiqa_icons_report2.svg");
+}
+
+.lexiqa-popup-item:last-of-type .lexiqa-popup-icon:first-of-type {
+    content: url("../img/lexiqa_icons_previous2.svg");
+}
+
+.lexiqa-popup-item:last-of-type .lexiqa-popup-icon:last-of-type {
+    content: url("../img/lexiqa_icons_next2.svg");
+}
+
+.lexiqa-popup-items .lexiqa-popup-item:last-of-type {
+  -webkit-box-flex: 3;
+  -webkit-flex-grow: 3;
+      -ms-flex-positive: 3;
+          flex-grow: 3;
+}
+
+.lexiqa-popup-switch {
+    margin-right: 0.5rem;
+}
+
+.lexiqa-popup-icon {
+  margin-left: 0.5rem;
+  text-decoration: none;
+}
+
+.lexiqa-popup-icon:hover {
+    cursor: pointer;
+}
+
+.filterOpen #lexiqa-popup  {
+ 	display: block;
+ }
+
 /*********************************
  Highlight toggle switch
  ********************************/
@@ -1233,7 +1361,7 @@ article.lxq-commenting-opened .lxq-comment-balloon-outer {
 }
 
 .cmn-toggle + label {
-    display: block;
+    display: inline-block;
     position: relative;
     cursor: pointer;
     outline: none;
@@ -1244,7 +1372,6 @@ article.lxq-commenting-opened .lxq-comment-balloon-outer {
 }
 
 input.cmn-toggle-round + label {
-    padding: 2px;
     width: 45px;
     height: 15px;
     background-color: #dddddd;
@@ -1253,7 +1380,7 @@ input.cmn-toggle-round + label {
 
 input.cmn-toggle-round + label:before,
 input.cmn-toggle-round + label:after {
-    display: block;
+    display: inline-block;
     position: absolute;
     top: 1px;
     left: 1px;
@@ -1281,7 +1408,7 @@ input.cmn-toggle-round + label:after {
 }
 
 input.cmn-toggle-round:checked + label:before {
-    background-color: #0798bc;
+    background-color: #efda35;
     opacity: 0.6;
 }
 

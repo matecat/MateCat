@@ -3482,7 +3482,6 @@ UI = {
      *
      */
     editAreaClick : function(e, operation, action) {
-        console.log('dddddddd');
         if (typeof operation == 'undefined') {
             operation = 'clicking';
         }

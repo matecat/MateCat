@@ -8,24 +8,24 @@ if ( LXQ.enabled() )
             '     <div class="lxq-triangle lxq-triangle-top"></div> ' +
             ' </div> ',
 
-        historyHasErrors: '' +
-            ' <div class="lxq-history-balloon lxq-history-balloon-has-comment"> ' +
-            '   <div class="lxq-thread-wrap"> ' +
-            '       <div class="lxq-history-balloon-header lxq-clearfix"> ' +
-            '           <span class="lxq-history-balloon-header-top"><a href="'+config.lexiqaServer+'/documentation.html" class="lxq-info-link" target="_blank">Info</a> <span class="lxq-highlight-toggle">Highlight <div class="lxq-toggle-switch"><input id="cmn-toggle-1" class="cmn-toggle cmn-toggle-round" type="checkbox" checked><label for="cmn-toggle-1"></label></div></span></span>' +
-            '           <span class="lxq-history-balloon-header-text">See the full lexiQA report <a href="#" class="lxq-history-balloon-header-link" target="_blank"></a> </span>' +
-            '       </div> ' +
-            '       <div class="lxq-history-balloon-body lxq-clearfix"> ' +
-            '            <div class="lxq-history-balloon-row lxq-clearfix"> ' +
-            '                <span class="lxq-history-balloon-header-segment">Segment</span> ' +
-            '                <span class="lxq-history-balloon-header-total">Errors</span>' + 
-            '                <span class="lxq-history-balloon-header-ignored">Ignored</span>' + 
-            '            </div> ' +   
-            '' + //     
-            '       </div> ' +
-            '   </div> ' +    
-            ' ' + 
-            ' </div> ',
+        // historyHasErrors: '' +
+        //     ' <div class="lxq-history-balloon lxq-history-balloon-has-comment"> ' +
+        //     '   <div class="lxq-thread-wrap"> ' +
+        //     '       <div class="lxq-history-balloon-header lxq-clearfix"> ' +
+        //     '           <span class="lxq-history-balloon-header-top"><a href="'+config.lexiqaServer+'/documentation.html" class="lxq-info-link" target="_blank">Info</a> <span class="lxq-highlight-toggle">Highlight <div class="lxq-toggle-switch"><input id="cmn-toggle-1" class="cmn-toggle cmn-toggle-round" type="checkbox" checked><label for="cmn-toggle-1"></label></div></span></span>' +
+        //     '           <span class="lxq-history-balloon-header-text">See the full lexiQA report <a href="#" class="lxq-history-balloon-header-link" target="_blank"></a> </span>' +
+        //     '       </div> ' +
+        //     '       <div class="lxq-history-balloon-body lxq-clearfix"> ' +
+        //     '            <div class="lxq-history-balloon-row lxq-clearfix"> ' +
+        //     '                <span class="lxq-history-balloon-header-segment">Segment</span> ' +
+        //     '                <span class="lxq-history-balloon-header-total">Errors</span>' + 
+        //     '                <span class="lxq-history-balloon-header-ignored">Ignored</span>' + 
+        //     '            </div> ' +   
+        //     '' + //     
+        //     '       </div> ' +
+        //     '   </div> ' +    
+        //     ' ' + 
+        //     ' </div> ',
           
         //   <img src="http://s29.postimg.org/zdbe56c9v/segment_arrow.png" alt="Go to segment" />
         segmentWarningsRow: '' +
