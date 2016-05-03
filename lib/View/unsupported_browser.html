@@ -24,8 +24,8 @@
     Chrome</a></li>
             </tal:block>
 
-            <tal:block tal:condition="php: in_array('safari', enabledBrowsers)">
-    		<li><a href="http://appldnld.apple.com/Safari5/041-5487.20120509.INU8B/SafariSetup.exe"><img src="/public/img/safari.jpg" width="140" /><br />
+            <tal:block tal:condition="php: in_array('safari', enabledBrowsers) AND platform EQ 'mac'">
+    		<li><a href="http://www.apple.com/it/safari/"><img src="/public/img/safari.jpg" width="140" /><br />
     Safari</a></li>
             </tal:block>
         </ul>
@@ -49,12 +49,17 @@
         <h3>1 - Use the tool by visiting MateCat.com from your desktop</h3>
         <p>MateCat works great with the following browsers</p>
         <ul>
-         
-            <li><a href="https://www.google.com/intl/en/chrome/browser/" target="_blank"><img src="/public/img/chrome.jpg" width="140" /><br />
-    Chrome</a></li>
 
-            <li><a href="http://appldnld.apple.com/Safari5/041-5487.20120509.INU8B/SafariSetup.exe"><img src="/public/img/safari.jpg" width="140" /><br />
-    Safari</a></li>
+            <tal:block tal:condition="php: in_array('chrome', enabledBrowsers)">
+                <li><a href="https://www.google.com/intl/en/chrome/browser/" target="_blank"><img src="/public/img/chrome.jpg" width="140" /><br />
+                    Chrome</a></li>
+            </tal:block>
+
+            <tal:block tal:condition="php: in_array('safari', enabledBrowsers) AND platform EQ 'mac'">
+                <li><a href="http://www.apple.com/it/safari/"><img src="/public/img/safari.jpg" width="140" /><br />
+                    Safari</a></li>
+            </tal:block>
+
         </ul>
     </div>
     <div class="col-2 pull-left col-b">

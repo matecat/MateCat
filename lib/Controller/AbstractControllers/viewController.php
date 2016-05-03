@@ -26,7 +26,17 @@ abstract class viewController extends controller {
      * @var bool
      */
     protected $supportedBrowser = false;
-
+    /*
+     * The user os
+     * @var string
+     */
+    protected $userPlatform;
+    /**
+     * The os platform
+     *
+     * @var string
+     */
+    protected $browser_platform;
     /**
      * @var Google_Client
      */
@@ -153,7 +163,7 @@ abstract class viewController extends controller {
         //load Template Engine
         require_once INIT::$ROOT . '/inc/PHPTAL/PHPTAL.php';
 
-        $this->supportedBrowser = $this->isSupportedWebBrowser();
+        $this->setBrowserSupport();
 
         //try to get user name from cookie if it is not present and put it in session
         if ( empty( $_SESSION[ 'cid' ] ) ) {
@@ -265,11 +275,12 @@ abstract class viewController extends controller {
      *
      * @return bool
      */
-    private function isSupportedWebBrowser() {
-        $browser_info = $this->getBrowser();
-        $browser_name = strtolower( $browser_info[ 'name' ] );
+    private function isSupportedWebBrowser($browser_info) {
 
-//	    log::doLog ("bname $browser_name");
+        $browser_name = strtolower( $browser_info[ 'name' ] );
+        $browser_platform = strtolower( $browser_info[ 'platform' ] );
+        $return_value = 0;
+ //	    log::doLog ("bname $browser_name");
 
 /*        if (  ($browser_name=="internet explorer" or $browser_name=="mozilla firefox")  and  $_SERVER[ 'REQUEST_URI' ]=="/" ) {
                 return -2;
@@ -277,7 +288,10 @@ abstract class viewController extends controller {
 */
         foreach ( INIT::$ENABLED_BROWSERS as $enabled_browser ) {
             if ( stripos( $browser_name, $enabled_browser ) !== false ) {
-                return 1;
+                // Safari supported only on Mac
+                if (stripos( "apple safari", $browser_name ) === false ||
+                    (stripos( "apple safari", $browser_name ) !== false && stripos("mac", $browser_platform) !== false) )
+                    return 1;
             }
         }
 
@@ -292,7 +306,16 @@ abstract class viewController extends controller {
 
         return 0;
     }
-
+    /**
+     *
+     * Set the variables for the browser support
+     *
+     */
+    private function setBrowserSupport() {
+        $browser_info = $this->getBrowser();
+        $this->supportedBrowser = $this->isSupportedWebBrowser($browser_info);
+        $this->userPlatform = strtolower( $browser_info[ 'platform' ] );
+    }
     /**
      * Create an instance of skeleton PHPTAL template
      *
@@ -305,6 +328,7 @@ abstract class viewController extends controller {
             $this->template->basepath             = INIT::$BASEURL;
             $this->template->hostpath             = INIT::$HTTPHOST;
             $this->template->supportedBrowser     = $this->supportedBrowser;
+            $this->template->platform             = $this->userPlatform;
             $this->template->enabledBrowsers      = INIT::$ENABLED_BROWSERS;
             $this->template->build_number         = INIT::$BUILD_NUMBER;
             $this->template->use_compiled_assets  = INIT::$USE_COMPILED_ASSETS;
