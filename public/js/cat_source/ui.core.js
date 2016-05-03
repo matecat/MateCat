@@ -3464,6 +3464,7 @@ UI = {
         //launch segments check on opening
         UI.checkWarnings(true);
         $('html').trigger('start');
+        LXQ.initPopup();
     },
     restart: function () {
         $('#outer').empty();
