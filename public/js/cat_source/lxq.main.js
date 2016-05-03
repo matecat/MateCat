@@ -1058,7 +1058,7 @@ if (LXQ.enabled())
         
         var initPopup = function() {
             $('#lexiqa-quide-link').attr('href', config.lexiqaServer+'/documentation.html');
-            $('#lexiqa-report-link').attr('href', config.lexiqaServer+'/errorreport?id=matecat-4'+config.id_job + '-' + config.password);
+            $('#lexiqa-report-link').attr('href', config.lexiqaServer+'/errorreport?id=matecat-'+config.id_job + '-' + config.password);
             $('#lexiqa-prev-seg').on('click', function(e) {
                e.preventDefault();
                UI.gotoSegment(getPreviousSegmentWithWarning());
