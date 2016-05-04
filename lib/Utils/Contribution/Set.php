@@ -39,7 +39,7 @@ class Set {
     public static function contribution( ContributionStruct $contribution ){
 
         try{
-            WorkerClient::enqueue( 'CONTRIBUTION', '\Contribution\SetContributionWorker', $contribution, array( 'persistent' => WorkerClient::$_HANDLER->persistent ) );
+            WorkerClient::enqueue( 'CONTRIBUTION', '\AsyncTasks\Workers\SetContributionWorker', $contribution, array( 'persistent' => WorkerClient::$_HANDLER->persistent ) );
         } catch ( Exception $e ){
 
             # Handle the error, logging, ...

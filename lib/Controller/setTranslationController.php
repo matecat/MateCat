@@ -1,5 +1,6 @@
 <?php
 
+use \Contribution\ContributionStruct, \Contribution\Set;
 use Analysis\DqfQueueHandler;
 
 class setTranslationController extends ajaxController {
@@ -13,6 +14,17 @@ class setTranslationController extends ajaxController {
     protected $id_translator;
     protected $time_to_edit;
     protected $translation;
+
+    /**
+     * @var string
+     */
+    protected $_segment; // this comes from UI but is not used at moment
+
+    /**
+     * @var Segments_SegmentStruct
+     */
+    protected $segment;  // this comes from DAO
+
     protected $split_chunk_lengths;
     protected $chosen_suggestion_index;
     protected $status;
@@ -62,6 +74,7 @@ class setTranslationController extends ajaxController {
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
                 'translation'             => array( 'filter' => FILTER_UNSAFE_RAW ),
+                'segment'                 => array( 'filter' => FILTER_UNSAFE_RAW ),
                 'version'                 => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'chosen_suggestion_index' => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'status'                  => array(
@@ -83,9 +96,9 @@ class setTranslationController extends ajaxController {
         $this->client_target_version = ( empty( $this->__postInput[ 'version' ] ) ? '0' : $this->__postInput[ 'version' ] );
 
         list( $this->translation, $this->split_chunk_lengths ) = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->__postInput[ 'translation' ] ), ' ' );
+        list( $this->_segment, /** not useful assignment */ ) = CatUtils::parseSegmentSplit( CatUtils::view2rawxliff( $this->__postInput[ 'segment' ] ), ' ' );
 
         $this->chosen_suggestion_index = $this->__postInput[ 'chosen_suggestion_index' ];
-
 
         $this->status                  = strtoupper( $this->__postInput[ 'status' ] );
         $this->split_statuses          = explode( ",", strtoupper( $this->__postInput[ 'splitStatuses' ] ) ); //strtoupper transforms null to ""
@@ -237,11 +250,12 @@ class setTranslationController extends ajaxController {
 
         //check tag mismatch
         //get original source segment, first
-        $segment = getSegment( $this->id_segment );
+        $dao = new \Segments_SegmentDao( \Database::obtain() );
+        $this->segment = $dao->getById( $this->id_segment );
 
         //compare segment-translation and get results
         // QA here stands for Quality Assurance
-        $check = new QA( $segment[ 'segment' ], $this->translation );
+        $check = new QA( $this->segment[ 'segment' ], $this->translation );
         $check->performConsistencyCheck();
 
 
@@ -279,9 +293,9 @@ class setTranslationController extends ajaxController {
             $_Translation[ 'id_segment' ]             = (int)$this->id_segment;
             $_Translation[ 'id_job' ]                 = (int)$this->id_job;
             $_Translation[ 'status' ]                 = Constants_TranslationStatus::STATUS_NEW;
-            $_Translation[ 'segment_hash' ]           = $segment[ 'segment_hash' ];
-            $_Translation[ 'translation' ]            = $segment[ 'segment' ];
-            $_Translation[ 'standard_word_count' ]    = $segment[ 'raw_word_count' ];
+            $_Translation[ 'segment_hash' ]           = $this->segment[ 'segment_hash' ];
+            $_Translation[ 'translation' ]            = $this->segment[ 'segment' ];
+            $_Translation[ 'standard_word_count' ]    = $this->segment[ 'raw_word_count' ];
             $_Translation[ 'serialized_errors_list' ] = '';
             $_Translation[ 'suggestion_position' ]    = 0;
             $_Translation[ 'warning' ]                = false;
@@ -388,7 +402,7 @@ class setTranslationController extends ajaxController {
 
             $dqfSegmentStruct->task_id            = $this->id_job;
             $dqfSegmentStruct->segment_id         = $this->id_segment;
-            $dqfSegmentStruct->source_segment     = $segment[ 'segment' ];
+            $dqfSegmentStruct->source_segment     = $this->segment[ 'segment' ];
             $dqfSegmentStruct->new_target_segment = $_Translation[ 'translation' ];
 
             $dqfSegmentStruct->time = $_Translation[ 'time_to_edit' ];
@@ -472,7 +486,7 @@ class setTranslationController extends ajaxController {
         if ( $this->status != $old_translation[ 'status' ] || $old_translation[ 'match_type' ] == 'ICE' ) {
 
             $old_status = $this->statusOrDefault( $old_translation );
-            $old_count = $this->getOldCount( $segment, $old_translation );
+            $old_count = $this->getOldCount( $this->segment, $old_translation );
 
             // if there is not a row in segment_translations because volume analysis is disabled
             // search for a just created row
@@ -565,6 +579,20 @@ class setTranslationController extends ajaxController {
 
         $db->commit();
 
+        /**
+         * Set the new contribution in queue
+         */
+        $contributionStruct = new ContributionStruct();
+        $contributionStruct->fromRevision = self::isRevision();
+        $contributionStruct->id_job = $this->id_job;
+        $contributionStruct->job_password = $this->password;
+        $contributionStruct->segment = $this->segment[ 'segment' ];
+        $contributionStruct->translation = $_Translation[ 'translation' ];
+        $contributionStruct->email = \INIT::$MYMEMORY_API_KEY;
+
+        //assert there is not an exception by following the flow
+        Set::contribution( $contributionStruct );
+
         $this->feature_set->run('setTranslationCommitted', array(
                 'translation' => $_Translation,
                 'old_translation' => $old_translation,
@@ -624,10 +652,8 @@ class setTranslationController extends ajaxController {
 
     //TODO: put this method into Job model and use Segnent object
     private function updateJobPEE( Array $old_translation, Array $new_translation ) {
-        $segmentDao       = new Segments_SegmentDao( Database::obtain() );
-        $segment_original = $segmentDao->getById( $this->id_segment );
 
-        $segmentRawWordCount = $segment_original->raw_word_count;
+        $segmentRawWordCount = $this->segment->raw_word_count;
         $segment             = new EditLog_EditLogSegmentClientStruct(
                 array(
                         'suggestion'     => $old_translation[ 'suggestion' ],

@@ -2488,9 +2488,7 @@ UI = {
         segmentsIds = $('#segment-' + sid).attr('data-split-group').split(',');
         $.each(segmentsIds, function (index) {
             segment = $('#segment-' + this);
-            translation = UI.postProcessEditarea(segment, selector);
-            totalTranslation += translation;
-//            totalTranslation += $(segment).find('.editarea').html();
+            totalTranslation += UI.postProcessEditarea(segment, selector);
             if(index < (segmentsIds.length - 1)) totalTranslation += UI.splittedTranslationPlaceholder;
         });
         return totalTranslation;
