@@ -49,7 +49,7 @@ if (LXQ.enabled())
                  s: ''},                 					
             p4:	{t: 'trailing punctuation mark different from source',
             	 s: 'trailing punctuation mark different from target'},
-            p5:	{t: 'leading capitalization different from source',
+            l2:	{t: 'leading capitalization different from source',
                  s: 'leading capitalization different from target'},
             p6:	{t: 'should be capitalized after punctuation mark',
                  s: ''},										
