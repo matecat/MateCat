@@ -9,7 +9,6 @@
 
 namespace Analysis\Workers;
 use TaskRunner\Commons\AbstractElement;
-use TaskRunner\Commons\Context;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
 use TaskRunner\Exceptions\EmptyElementException;
@@ -17,7 +16,7 @@ use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 
 use Analysis\Queue\RedisKeys;
-use \Exception, \AMQHandler;
+use \Exception;
 use \Database, \PDOException;
 
 include \INIT::$MODEL_ROOT . "/queries.php";
@@ -38,39 +37,13 @@ class TMAnalysisWorker extends AbstractWorker {
      */
     protected $_matches = null;
 
-    /**
-     * Handler to the AMQ server and Redis Server
-     *
-     * @var \AMQHandler
-     */
-    protected $_queueHandler;
-
-    /**
-     * The context object.
-     * It stores the configuration for the worker
-     *
-     * @var Context
-     */
-    protected $_myContext;
-
     const ERR_EMPTY_WORD_COUNT = 4;
     const ERR_WRONG_PROJECT    = 5;
-
-    /**
-     * TMAnalysisWorker constructor.
-     *
-     * @param AMQHandler $queueHandler
-     */
-    public function __construct( AMQHandler $queueHandler ) {
-        \Log::$fileName = 'tm_analysis.log';
-        $this->_queueHandler = $queueHandler;
-    }
 
     /**
      * Concrete Method to start the activity of the worker
      *
      * @param AbstractElement $queueElement
-     * @param Context         $queueContext
      *
      * @return void
      *
@@ -78,14 +51,9 @@ class TMAnalysisWorker extends AbstractWorker {
      * @throws EndQueueException
      * @throws ReQueueException
      */
-    public function process( AbstractElement $queueElement, Context $queueContext ) {
+    public function process( AbstractElement $queueElement ) {
 
         $this->_checkDatabaseConnection();
-
-        /**
-         * @var $queueContext Context
-         */
-        $this->_myContext = $queueContext;
 
         //reset matches vector
         $this->_matches = null;
