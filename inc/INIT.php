@@ -180,13 +180,22 @@ class INIT {
      * - under AUTHORIZED JAVASCRIPT ORIGINS, insert the domain on which you installed MateCat
      * - under REDIRECT URIs, insert "http://<domain>/oauth/response" , where <domain> is the same that you specified in the previous step
      * - click "Create client ID"
-     * Your client ID and client secret are now available.
+     * - Still in Credentials page, click "Create credentials" and select "API key"
+     * - Click "Browser key"
+     * - under Name, insert the name of your Browser API key
+     * - under "Accept requests from these HTTP referrers (web sites)", insert "<domain>/*",
+     *   where <domain> is the same that you specified in the previous steps.
+     * - In the sidebar select Overview and search for Google Picker
+     * - Click on the "Google Picker API" link, and then click on Enable button
+     *
+     * Your client ID, client secret and Browser API key are now available.
      *
      * Edit the file inc/oauth_config.ini.sample with the right parameters obtained in the previous step of this guide.
      * set:
      * OAUTH_CLIENT_ID with your client ID
      * OAUTH_CLIENT_SECRET with your client secret
      * OAUTH_CLIENT_APP_NAME with your custom app name, if you want, or leave Matecat
+     * OAUTH_BROWSER_API_KEY with your browser API key, required to open Google Picker
      *
      * save and rename to oauth_config.ini file.
      *

@@ -16,6 +16,15 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     public $pretranslate_100 ;
     public $id_qa_model ;
 
+
+    /**
+     * @return bool  
+     */
+    public function analysisComplete() {
+        return
+                $this->status_analysis == Constants_ProjectStatus::STATUS_DONE ||
+                $this->status_analysis == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE ;
+    }
     /**
      * @param $feature_code
      *
