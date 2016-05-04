@@ -26,12 +26,14 @@ class ObtainTest extends AbstractTest
 
     public function tearDown()
     {
-        $this->reflectedClass = Database::obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $this->reflectedClass = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->reflectedClass->close();
         startConnection();
+        parent::tearDown();
     }
 
     /**
+     * @return Database
      * @group regression
      * @covers Database::obtain
      */
@@ -41,13 +43,16 @@ class ObtainTest extends AbstractTest
         /**
          * @var Database
          */
-        $instance_after_reset = $this->reflectedClass->obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $instance_after_reset = $this->reflectedClass->obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
 
         $this->assertTrue($instance_after_reset instanceof Database);
         $this->assertNotNull($instance_after_reset);
     }
 
     /**
+     * It checks that two databases generated with the same method
+     * and the same input values taken by global variables will be anyway
+     * different in terms of memory addresses of the instances.
      * @group regression
      * @covers Database::obtain
      */
@@ -56,11 +61,11 @@ class ObtainTest extends AbstractTest
         /**
          * @var Database
          */
-        $first_instance = $this->reflectedClass->obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $first_instance = $this->reflectedClass->obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         /**
          * @var Database
          */
-        $second_instance = $this->reflectedClass->obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $second_instance = $this->reflectedClass->obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $hash_first_instance = spl_object_hash($first_instance);
         $hash_second_instance = spl_object_hash($second_instance);
 

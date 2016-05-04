@@ -216,6 +216,8 @@ class QA {
 
     const ERR_SPACE_MISMATCH = 1100;
 
+    const ERR_SPACE_MISMATCH_TEXT = 1101;
+
     const ERR_SYMBOL_MISMATCH = 1200;
     /**
      * Human Readable error map.
@@ -294,6 +296,7 @@ class QA {
              */
             1100 => 'More/fewer whitespaces found next to the tags.',
 
+            1101 => 'More/fewer whitespaces found in the text.',
             /*
              * grouping 
              * 17 => 'Dollar sign mismatch',
@@ -430,8 +433,23 @@ class QA {
 
             case self::ERR_WS_HEAD:
             case self::ERR_WS_TAIL:
+            $this->exceptionList[ self::INFO ][] = errObject::get( array(
+                    'outcome' => self::ERR_SPACE_MISMATCH_TEXT,
+                    'debug'   => $this->_errorMap[ self::ERR_SPACE_MISMATCH_TEXT ],
+                    'tip'     => $this->_getTipValue( self::ERR_SPACE_MISMATCH_TEXT )
+            ) );
+            break;
+
+
             case self::ERR_TAB_HEAD:
             case self::ERR_TAB_TAIL:
+            $this->exceptionList[ self::INFO ][] = errObject::get( array(
+                    'outcome' => self::ERR_TAB_MISMATCH,
+                    'debug'   => $this->_errorMap[ self::ERR_TAB_MISMATCH ],
+                    'tip'     => $this->_getTipValue( self::ERR_TAB_MISMATCH )
+            ) );
+            break;
+
             case self::ERR_BOUNDARY_HEAD:
             case self::ERR_BOUNDARY_TAIL:
             case self::ERR_BOUNDARY_HEAD_TEXT:

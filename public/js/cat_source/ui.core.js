@@ -950,8 +950,6 @@ UI = {
 			startSegmentId = this.segments[0].sid;
 		});
 
-        console.log('startSegmentId', startSegmentId);
-
 		if (typeof this.startSegmentId == 'undefined')
 			this.startSegmentId = startSegmentId;
 
@@ -1159,24 +1157,7 @@ UI = {
 		$('#contextMenu').hide();
 		$('#spellCheck .words').remove();
 	},
-    reactivateJob: function() {
-        APP.doRequest({
-            data: {
-                action:         "changeJobsStatus",
-                new_status:     "active",
-                res:            "job",
-                id:             config.id_job,
-                password:      config.password,
-            },
-            success: function(d){
-                if(d.data == 'OK') {
-                    setTimeout(function() {
-                        location.reload(true);
-                    }, 300);
-                }
-            }
-        });
-    },
+
     placeCaretAtEnd: function(el) {
 //		console.log(el);
 //		console.log($(el).first().get().className);
@@ -1268,7 +1249,10 @@ UI = {
 		statusMenu.empty().hide();
 	},
 	renderFiles: function(files, where, starting) {
-
+        // If we are going to re-render the articles first we remove them
+        if (where === "center" && !starting) {
+            $('article').remove();
+        }
         $.each(files, function(k) {
 			var newFile = '';
 			var fid = k;
@@ -1630,19 +1614,31 @@ UI = {
         }
     },
     renderAlternatives: function(d) {
-        segment = UI.currentSegment;
-        segment_id = UI.currentSegmentId;
-        escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html(), false, segment_id, 'render alternatives');
-        mainStr = UI.currentSegment.find('.editarea').text();
+        var segment = UI.currentSegment;
+        var segment_id = UI.currentSegmentId;
+        var escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html(), false, segment_id, 'render alternatives');
+        // Take the .editarea content with special characters (Ex: ##$_0A$##) and transform the placeholders
+        var mainStr = UI.clenaupTextFromPleaceholders(UI.postProcessEditarea(UI.currentSegment));
         $.each(d.data.editable, function(index) {
-            diff_obj = UI.execDiff(mainStr, this.translation);
-            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_obj) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
+            // Decode the string from the server
+            var transDecoded = htmlDecode(this.translation);
+            // Make the diff between the text with the same codification
+            var diff_obj = UI.execDiff(mainStr, transDecoded);
+            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '">' +
+                '<li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' +
+                escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span -->' +
+                '<span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' +
+                UI.dmp.diff_prettyHtml(diff_obj) + '</span><span class="realData hide">' + this.translation +
+                '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
         });
 
         $.each(d.data.not_editable, function(index1) {
-            diff_obj = UI.execDiff(mainStr, this.translation);
+            var diff_obj = UI.execDiff(mainStr, this.translation);
             $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_obj) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
         });
+        // Transform the tags
+        UI.markSuggestionTags(segment);
+
 
     },
     execDiff: function (mainStr, cfrStr) {
@@ -2201,7 +2197,6 @@ UI = {
 	showMessage: function(options) {
 
         APP.showMessage(options);
-        setTimeout(  function() {$('body' ).removeClass('incomingMsg' )} , 5000  );
 
 	},
     showExistingMessage: function () {
@@ -2860,9 +2855,6 @@ UI = {
 
     propagateTranslation: function(segment, status, evenTranslated) {
         this.tempReqArguments = null;
-        console.log('status: ', status);
-        console.log(status == 'translated');
-        console.log(config.isReview && (status == 'approved'));
         if( (status == 'translated') || (config.isReview && (status == 'approved'))){
             plusApproved = (config.isReview)? ', section[data-hash=' + $(segment).attr('data-hash') + '].status-approved' : '';
 

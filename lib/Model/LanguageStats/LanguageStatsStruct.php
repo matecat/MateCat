@@ -26,12 +26,12 @@ class LanguageStats_LanguageStatsStruct extends DataAccess_AbstractDaoObjectStru
     /**
      * @var float The wordcount sum of all jobs having this language couple
      */
-    public $total_wordcount;
+    public $total_word_count;
 
     /**
      * @var float The postediting effort sum of all jobs having this language couple
      */
-    public $total_postediting_effort;
+    public $total_post_editing_effort;
 
     /**
      * @var int The time to edit sum of all jobs having this language couple

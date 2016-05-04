@@ -8,7 +8,10 @@
  *
  */
 
-class ServerCheckTest extends AbstractTest {
+/**
+ * Class ServerCheckTest
+ */
+class ServerCheck extends AbstractTest {
 
     public function testSingleInstance(){
         $servCheck = ServerCheck::getInstance();

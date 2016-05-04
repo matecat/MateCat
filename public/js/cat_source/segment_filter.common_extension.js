@@ -49,7 +49,7 @@ if ( SegmentFilter.enabled() )
                 gotoNextSegment.apply(undefined, arguments);
             }
             else {
-                original_gotoNextSegment.apply(undefined, arguments);
+                original_openNextTranslated.apply(undefined, arguments);
             }
         },
         gotoPreviousSegment : function() {

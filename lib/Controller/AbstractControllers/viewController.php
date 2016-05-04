@@ -301,7 +301,7 @@ abstract class viewController extends controller {
      */
     protected function makeTemplate( $skeleton_file ) {
         try {
-            $this->template                       = new PHPTAL( INIT::$TEMPLATE_ROOT . "/$skeleton_file" ); // create a new template object
+            $this->template                       = new PHPTALWithAppend( INIT::$TEMPLATE_ROOT . "/$skeleton_file" ); // create a new template object
             $this->template->basepath             = INIT::$BASEURL;
             $this->template->hostpath             = INIT::$HTTPHOST;
             $this->template->supportedBrowser     = $this->supportedBrowser;
