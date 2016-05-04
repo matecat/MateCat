@@ -897,7 +897,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
      *
      */
     $queryCenter = "
-                    SELECT segments.id AS __sid
+                    ( SELECT segments.id AS __sid
                     FROM segments
                     JOIN segment_translations ON id = id_segment
                     JOIN jobs ON jobs.id = id_job
@@ -905,7 +905,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
                         AND password = '$password'
                         AND show_in_cattool = 1
                         AND segments.id >= $ref_segment
-                    LIMIT %u
+                    LIMIT %u )
                     UNION
                     SELECT * from(
                         SELECT  segments.id AS __sid
