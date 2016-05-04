@@ -11,7 +11,7 @@ RewriteBase /
 RewriteRule ^(.*)$ router.php [QSA,L]
 
 # If the file exists, serve it only if it is included in the whitelist.
-RewriteCond %{REQUEST_FILENAME} !^(.*)\.(json|gif|png|css|jpeg)$
+RewriteCond %{REQUEST_FILENAME} !^(.*)static/build(.*)\.(json|gif|png|css|jpeg|js)$
 RewriteRule ^(.*)$ "-"  [F,L]
 
 

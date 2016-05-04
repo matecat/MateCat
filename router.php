@@ -150,6 +150,8 @@ $klein->respond('POST', '/api/v2/projects/[:id_project]/[:password]/jobs/[:id_jo
 
 
 
+route( '/api/v1/jobs/[:id_job]/[:password]/stats', 'GET',  'API\V1\StatsController', 'stats' );
+
 /**
  * Define additional routes here
  */
