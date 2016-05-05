@@ -54,3 +54,48 @@ a volte funziona a volte no.
 mi viene da pensare che possa dipendere da come my memory gestisce
  le informazioni ricevute se le rende subito disponibili oppure se
   le trattiene finche non scade tipo che so una connessione tcp o robbe.
+
+
+
+Fallisce se il test precedente cancella 2 rows invece di una e quindi suppongo che la row che inserico
+ non riesca ad essere accettata se non quando c'è quel record gia memorizzato.
+
+ Da dove viene quel record inizializzato ?
+ Io non faccio 2 set prima della delete.
+
+
+
+ 572b49c876066  Engines_AbstractEngine-> _call (line:156) : 572b49c87f0621.46143672 ... Received... '{"responseData":"OK","responseStatus":200,"responseDetails":[484600880]}'
+ [2016-05-05 15:25:29] MateCat.DEBUG: [2016-05-05 15:25:29 ()] 572b49c876066  MultiCurlHandler-> multiExec (line:165) :  572b49c8948d57.53676645 ... Called: http://api.mymemory.translated.net/delete?seg=Il+Sistema+registra+le+informazioni+sul+nuovo+film.&tra=The+system+records+the+destruction+on+the+new+movie.&langpair=IT%7CEN&de=demo%40matecat.com
+ [2016-05-05 15:25:29 ()] 572b49c876066  MultiCurlHandler-> multiExec (line:165) :  Timing Array
+ [2016-05-05 15:25:29 ()] 572b49c876066  MultiCurlHandler-> multiExec (line:165) : (
+ [2016-05-05 15:25:29 ()] 572b49c876066  MultiCurlHandler-> multiExec (line:165) :     [Total Time: ] => 0.760855
+ [2016-05-05 15:25:29 ()] 572b49c876066  MultiCurlHandler-> multiExec (line:165) :     [Connect Time: ] => 0.037772
+ [2016-05-05 15:25:29 ()] 572b49c876066  MultiCurlHandler-> multiExec (line:165) :     [Pre-Transfer Time: ] => 0.037804
+ [2016-05-05 15:25:29 ()] 572b49c876066  MultiCurlHandler-> multiExec (line:165) :     [Start Transfer Time: ] => 0.760832
+ [2016-05-05 15:25:29 ()] 572b49c876066  MultiCurlHandler-> multiExec (line:165) :     [Transfer Time: ] => 23μs
+ [2016-05-05 15:25:29 ()] 572b49c876066  MultiCurlHandler-> multiExec (line:165) : )
+ [2016-05-05 15:25:29 ()] 572b49c876066  MultiCurlHandler-> multiExec (line:165) :
+ [2016-05-05 15:25:29] MateCat.DEBUG: [2016-05-05 15:25:29 ()] 572b49c876066  Engines_AbstractEngine-> _call (line:156) : 572b49c8948d57.53676645 ... Received... '{"responseStatus":200,"responseData":"Found and deleted 2 segments"}'
+ [2016-05-05 15:27:01] MateCat.DEBUG: [2016-05-05 15:27:01 ()] 572b4a25bca8c  MultiCurlHandler-> multiExec (line:165) :  572b4a25c04a08.71146326 ... Called: http://api.mymemory.translated.net/set?seg=Il+Sistema+registra+le+informazioni+sul+nuovo+film.&tra=The+system+records+the+destruction+on+the+new+movie.&langpair=it-IT%7Cen-US&de=demo%40matecat.com&prop=%7B%22project_id%22%3A%2212%22%2C%22project_name%22%3A%22ForDeleteTest%22%2C%22job_id%22%3A%2212%22%7D
+ [2016-05-05 15:27:01 ()] 572b4a25bca8c  MultiCurlHandler-> multiExec (line:165) :  Timing Array
+ [2016-05-05 15:27:01 ()] 572b4a25bca8c  MultiCurlHandler-> multiExec (line:165) : (
+ [2016-05-05 15:27:01 ()] 572b4a25bca8c  MultiCurlHandler-> multiExec (line:165) :     [Total Time: ] => 0.179252
+ [2016-05-05 15:27:01 ()] 572b4a25bca8c  MultiCurlHandler-> multiExec (line:165) :     [Connect Time: ] => 0.122505
+ [2016-05-05 15:27:01 ()] 572b4a25bca8c  MultiCurlHandler-> multiExec (line:165) :     [Pre-Transfer Time: ] => 0.122531
+ [2016-05-05 15:27:01 ()] 572b4a25bca8c  MultiCurlHandler-> multiExec (line:165) :     [Start Transfer Time: ] => 0.179171
+ [2016-05-05 15:27:01 ()] 572b4a25bca8c  MultiCurlHandler-> multiExec (line:165) :     [Transfer Time: ] => 81μs
+ [2016-05-05 15:27:01 ()] 572b4a25bca8c  MultiCurlHandler-> multiExec (line:165) : )
+ [2016-05-05 15:27:01 ()] 572b4a25bca8c  MultiCurlHandler-> multiExec (line:165) :
+ [2016-05-05 15:27:01] MateCat.DEBUG: [2016-05-05 15:27:01 ()] 572b4a25bca8c  Engines_AbstractEngine-> _call (line:156) : 572b4a25c04a08.71146326 ... Received... '{"responseData":"OK","responseStatus":200,"responseDetails":[484600891]}'
+ [2016-05-05 15:27:02] MateCat.DEBUG: [2016-05-05 15:27:02 ()] 572b4a25bca8c  MultiCurlHandler-> multiExec (line:165) :  572b4a25ecbb28.71432095 ... Called: http://api.mymemory.translated.net/delete?seg=Il+Sistema+registra+le+informazioni+sul+nuovo+film.&tra=The+system+records+the+destruction+on+the+new+movie.&langpair=IT%7CEN&de=demo%40matecat.com
+ [2016-05-05 15:27:02 ()] 572b4a25bca8c  MultiCurlHandler-> multiExec (line:165) :  Timing Array
+ [2016-05-05 15:27:02 ()] 572b4a25bca8c  MultiCurlHandler-> multiExec (line:165) : (
+ [2016-05-05 15:27:02 ()] 572b4a25bca8c  MultiCurlHandler-> multiExec (line:165) :     [Total Time: ] => 0.334152
+ [2016-05-05 15:27:02 ()] 572b4a25bca8c  MultiCurlHandler-> multiExec (line:165) :     [Connect Time: ] => 0.011098
+ [2016-05-05 15:27:02 ()] 572b4a25bca8c  MultiCurlHandler-> multiExec (line:165) :     [Pre-Transfer Time: ] => 0.011123
+ [2016-05-05 15:27:02 ()] 572b4a25bca8c  MultiCurlHandler-> multiExec (line:165) :     [Start Transfer Time: ] => 0.334135
+ [2016-05-05 15:27:02 ()] 572b4a25bca8c  MultiCurlHandler-> multiExec (line:165) :     [Transfer Time: ] => 17μs
+ [2016-05-05 15:27:02 ()] 572b4a25bca8c  MultiCurlHandler-> multiExec (line:165) : )
+ [2016-05-05 15:27:02 ()] 572b4a25bca8c  MultiCurlHandler-> multiExec (line:165) :
+ [2016-05-05 15:27:02] MateCat.DEBUG: [2016-05-05 15:27:02 ()] 572b4a25bca8c  Engines_AbstractEngine-> _call (line:156) : 572b4a25ecbb28.71432095 ... Received... '{"responseData":{"translatedText":"NO ID FOUND"},"responseDetails":"NO ID FOUND","responseStatus":404,"matches":""}'
