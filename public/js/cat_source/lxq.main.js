@@ -839,7 +839,11 @@ if (LXQ.enabled())
             UI.lexiqaData.lexiqaWarnings[targetSeg][errorid].ignored = true;
             $.powerTip.hide();
             redoHighlighting(targetSeg,inSource);
-            LXQ.refreshElements();
+            refreshElements();
+            if (getVisibleWarningsCountForSegment(targetSeg)<=0) {
+                //remove the segment from database/reduce the number count
+                UI.lxqRemoveSegmentFromWarningList(targetSeg);
+            }  
             postIgnoreError(errorid);
         }
         
