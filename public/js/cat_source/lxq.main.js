@@ -885,7 +885,7 @@ if (LXQ.enabled())
                 $(".editarea", segment).html(html);
                                                     
             }
-            $('.lxq-error-seg',segment).attr('numberoferrors',LXQ.getVisibleWarningsCountForSegment(segment));
+            // $('.lxq-error-seg',segment).attr('numberoferrors',LXQ.getVisibleWarningsCountForSegment(segment));
             reloadPowertip(segment);
                        
         }
