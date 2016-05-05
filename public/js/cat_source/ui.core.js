@@ -3305,20 +3305,21 @@ UI = {
                                                                                     
                 } 
                 if (noVisibleErrorsFound) {
-                    if ((ind = UI.lexiqaData.segments.indexOf(id_segment))>=0) {
-                        UI.lexiqaData.segments.splice(ind,1);
-                        delete UI.lexiqaData.lexiqaWarnings[id_segment];
-                        console.log('lexiqa warnings removing (1): '+UI.lexiqaData.segments.length);
-                    }
-                    if ( UI.lexiqaData.segments.length ==0) {
-                        //remove link and warning
-                    $('#lexiqabox').attr('class', 'lexnotific').attr("title", "Well done, no errors found!").find('.numbererror').text('');                    
-                    //$('#go2lexiqa').attr('href', "#");  
-                    result.qaurl = '#';
-                    }
-                    else {
-                         $('#lexiqabox').attr('class', 'warningbox').attr("title", "Go to lexiQA for QA analysis").find('.numbererror').text(UI.lexiqaData.segments.length);                           
-                    }                    
+                    UI.lxqRemoveSegmentFromWarningList(id_segment);
+                    // if ((ind = UI.lexiqaData.segments.indexOf(id_segment))>=0) {
+                    //     UI.lexiqaData.segments.splice(ind,1);
+                    //     delete UI.lexiqaData.lexiqaWarnings[id_segment];
+                    //     console.log('lexiqa warnings removing (1): '+UI.lexiqaData.segments.length);
+                    // }
+                    // if ( UI.lexiqaData.segments.length ==0) {
+                    //     //remove link and warning
+                    // $('#lexiqabox').attr('class', 'lexnotific').attr("title", "Well done, no errors found!").find('.numbererror').text('');                    
+                    // //$('#go2lexiqa').attr('href', "#");  
+                    // result.qaurl = '#';
+                    // }
+                    // else {
+                    //      $('#lexiqabox').attr('class', 'warningbox').attr("title", "Go to lexiQA for QA analysis").find('.numbererror').text(UI.lexiqaData.segments.length);                           
+                    // }                    
                 }                                             
             }
             ,error:function(result){
@@ -3328,6 +3329,22 @@ UI = {
             }
         });                
         
+    },
+    lxqRemoveSegmentFromWarningList: function(id_segment){
+        if ((ind = UI.lexiqaData.segments.indexOf(id_segment))>=0) {
+            UI.lexiqaData.segments.splice(ind,1);
+            delete UI.lexiqaData.lexiqaWarnings[id_segment];
+            console.log('lexiqa warnings removing (1): '+UI.lexiqaData.segments.length);
+        }
+        if ( UI.lexiqaData.segments.length ==0) {
+            //remove link and warning
+        $('#lexiqabox').attr('class', 'lexnotific').attr("title", "Well done, no errors found!").find('.numbererror').text('');                    
+        //$('#go2lexiqa').attr('href', "#");  
+        result.qaurl = '#';
+        }
+        else {
+                $('#lexiqabox').attr('class', 'warningbox').attr("title", "Go to lexiQA for QA analysis").find('.numbererror').text(UI.lexiqaData.segments.length);                           
+        }                 
     },
     getLexiqaWarnings: function() {
         //FOTD
