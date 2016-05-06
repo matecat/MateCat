@@ -3396,8 +3396,18 @@ UI = {
                             }
                             }
                             
-                        });                        
-                        if (seg === false)
+                        });
+                        if (LXQ.getVisibleWarningsCountForSegment(element.segid)>0) {
+                            errorCnt++;
+                        }
+                        else {
+                            if ((ind = UI.lexiqaData.segments.indexOf(element.segid))>=0) {
+                                UI.lexiqaData.segments.splice(ind,1);
+                                delete UI.lexiqaData.lexiqaWarnings[element.segid];
+                                console.log('lexiqa warnings removing (1): '+UI.lexiqaData.segments.length);
+                            }                            
+                        }                        
+                        if (seg === false) 
                             return; //this segment has not been loaded yet...
                         console.log('$$$$$$$$$4$$: '+element.segid);
                         console.dir(highlights);                        
@@ -3423,16 +3433,7 @@ UI = {
                         //     $('.lxq-error-seg',seg).attr('title','Click to show warning highlighting').css("background-color","#046380").addClass('lxq-error-changed');
                         // }            
                         LXQ.buildPowertipDataForSegment(seg);                
-                        if (LXQ.getVisibleWarningsCountForSegment(seg)>0) {
-                            errorCnt++;
-                        }
-                        else {
-                            if ((ind = UI.lexiqaData.segments.indexOf(element.segid))>=0) {
-                                UI.lexiqaData.segments.splice(ind,1);
-                                delete UI.lexiqaData.lexiqaWarnings[element.segid];
-                                console.log('lexiqa warnings removing (1): '+UI.lexiqaData.segments.length);
-                            }                            
-                        }
+                        
                     });
                     //console.log('UI.lexiqaData.lexiqaWarnings');
                     //console.dir(UI.lexiqaData.lexiqaWarnings);
