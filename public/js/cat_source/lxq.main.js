@@ -1060,16 +1060,41 @@ if (LXQ.enabled())
             return UI.lexiqaData.segments[ind];
         }
         
-        var initPopup = function() {
-            $('#lexiqa-quide-link').attr('href', config.lexiqaServer+'/documentation.html');
-            $('#lexiqa-report-link').attr('href', config.lexiqaServer+'/errorreport?id=matecat-'+config.id_job + '-' + config.password);
-            $('#lexiqa-prev-seg').on('click', function(e) {
-               e.preventDefault();
-               UI.gotoSegment(getPreviousSegmentWithWarning());
+        var initPopup = function () {
+            $('#lexiqa-quide-link').attr('href', config.lexiqaServer + '/documentation.html');
+            $('#lexiqa-report-link').attr('href', config.lexiqaServer + '/errorreport?id=matecat-' + config.id_job + '-' + config.password);
+
+            $('#lexiqa-prev-seg').on('click', function (e) {
+                e.preventDefault();
+                var segid = getPreviousSegmentWithWarning();
+                if (UI.segmentIsLoaded(segid) === true)
+                    UI.gotoSegment(segid);
+                else {
+                    config.last_opened_segment = segid;
+                    //config.last_opened_segment = this.nextUntranslatedSegmentId;
+                    window.location.hash = segid;
+                    $('#outer').empty();
+                    UI.render({
+                        firstLoad: false
+                    });
+                }
             });
-            $('#lexiqa-next-seg').on('click', function(e) {
-               e.preventDefault();
-               UI.gotoSegment(getNextSegmentWithWarning());
+            $('#lexiqa-next-seg').on('click', function (e) {
+                e.preventDefault();
+                //UI.gotoSegment(getNextSegmentWithWarning());
+                var segid = getNextSegmentWithWarning();
+                if (UI.segmentIsLoaded(segid) === true)
+                    UI.gotoSegment(segid);
+                else {                    
+                    //UI.reloadWarning();
+                    config.last_opened_segment = segid;
+                    //config.last_opened_segment = this.nextUntranslatedSegmentId;
+                    window.location.hash = segid;
+                    $('#outer').empty();
+                    UI.render({
+                        firstLoad: false
+                    });                    
+                }
             });
         }
         // Interfaces
