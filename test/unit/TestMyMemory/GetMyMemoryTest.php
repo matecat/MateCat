@@ -46,6 +46,21 @@ class GetMyMemoryTest extends AbstractTest
         $this->engine_struct_param = @$eng[0];
 
 
+        $this->config_param= array(
+            'translation' => "",
+            'tnote' => NULL,
+            'source' => "it-IT",
+            'target' => "en-US",
+            'email' => "demo@matecat.com",
+            'prop' => NULL,
+            'get_mt' => true,
+            'id_user' =>  array(0 => "a6043e606ac9b5d7ff24"),
+            'num_result' => 3,
+            'mt_only' => false,
+            'isConcordance' => false,
+            'isGlossary' => false,
+        );
+
 
 
     }
@@ -57,21 +72,7 @@ class GetMyMemoryTest extends AbstractTest
 
         $this->engine_MyMemory = new Engines_MyMemory($this->engine_struct_param);
 
-        $this->config_param= array(
-            'segment' => "- Auf der Fußhaut natürlich vorhandene Hornhautbakterien zersetzen sich durch auftretenden Schweiß an Ihren Füßen.",
-            'translation' => "",
-            'tnote' => NULL,
-            'source' => "en-US",
-            'target' => "fr-FR",
-            'email' => "demo@matecat.com",
-            'prop' => NULL,
-            'get_mt' => NULL,
-            'id_user' => "",
-            'num_result' => 100,
-            'mt_only' => false,
-            'isConcordance' => false,
-            'isGlossary' => true,
-        );
+        $this->config_param['segment']= "- Auf der Fußhaut natürlich vorhandene Hornhautbakterien zersetzen sich durch auftretenden Schweiß an Ihren Füßen.";
 
         $result = $this->engine_MyMemory->get($this->config_param);
         $this->assertEquals(200,$result->responseStatus);
@@ -97,21 +98,9 @@ class GetMyMemoryTest extends AbstractTest
 
         $this->engine_MyMemory = new Engines_MyMemory($this->engine_struct_param);
 
-        $this->config_param= array(
-            'segment' => "L’Amministratore inserisce titolo, anno di produzione e codice univoco del nuovo film.",
-            'translation' => NULL,
-            'tnote' => NULL,
-            'source' => "it-IT",
-            'target' => "fi-FI",
-            'email' => "demo@matecat.com",
-            'prop' => NULL,
-            'get_mt' => true,
-            'id_user' => array(0 => "a6043e606ac9b5d7ff24"),
-            'num_result' => "3",
-            'mt_only' => false,
-            'isConcordance' => false,
-            'isGlossary' => false,
-        );
+
+        $this->config_param['segment']="L’Amministratore inserisce titolo, anno di produzione e codice univoco del nuovo film.";
+
 
         $result = $this->engine_MyMemory->get($this->config_param);
 
@@ -125,22 +114,6 @@ class GetMyMemoryTest extends AbstractTest
         $this->assertTrue(property_exists($result,'responseData'));
         $this->assertTrue(property_exists($result,'error'));
         $this->assertTrue(property_exists($result,'_rawResponse'));
-
-
-
-      //  $this->assertEquals(200,$result->responseStatus);
-      //  $this->assertEquals("",$result->responseDetails);
-      //  $this->assertCount(2,$result->responseData);
-      //  $this->assertEquals("Ylläpitäjä lisää otsikko, valmistusvuoden ja yksilöllisen koodin uuden elokuvan.",$result->responseData['translatedText']);
-      //  $this->assertRegExp('/^[0-1]\.[0-9]{2}$/',(string)$result->responseData['match']);
-
-      //  $this->assertTrue($result instanceof Engines_Results_MyMemory_TMS);
-
-      //  $this->reflector= new ReflectionClass($result);
-      //  $property= $this->reflector->getProperty('_rawResponse');
-      //  $property->setAccessible(true);
-
-      //  $this->assertEquals("",$property->getValue($result));
 
     }
 
@@ -154,22 +127,8 @@ class GetMyMemoryTest extends AbstractTest
 
         $this->engine_MyMemory = new Engines_MyMemory($this->engine_struct_param);
 
-        $this->config_param= array(
-            'segment' => "Scelta del Piano di studio parziale per il secondo anno ripetente secondo l’Ordinamento D.M. 270/04",
-            'translation' => NULL,
-            'tnote' => NULL,
-            'source' => "en-US",
-            'target' => "fr-FR",
-            'email' => "demo@matecat.com",
-            'prop' => NULL,
-            'get_mt' => true,
-            'id_user' => array(),
-            'num_result' => 3,
-            'mt_only' => false,
-            'isConcordance' => false,
-            'isGlossary' => false,
-        );
 
+        $this->config_param['segment']= "Scelta del Piano di studio parziale per il secondo anno ripetente secondo l’Ordinamento D.M. 270/04";
 
 
         $result = $this->engine_MyMemory->get($this->config_param);
@@ -187,36 +146,6 @@ class GetMyMemoryTest extends AbstractTest
         $this->assertTrue(property_exists($result,'error'));
         $this->assertTrue(property_exists($result,'_rawResponse'));
 
-
-      //  $str_1 = "Scelta del Piano di studio parziale per il secondo anno ripetente secondo l’Ordinamento D.M. 270/04";
-      //  $str_2 = "Scelta del Piano di studio de parziale per il secondo anno ripetente secondo l&#39;Ordinamento DM 270/04";
-      //  $str_3 = "MT!";
-
-       // $this->assertEquals(200,$result->responseStatus);
-       // $this->assertEquals("",$result->responseDetails);
-       // $this->assertCount(2,$result->responseData);
-       // $this->assertTrue($result->matches[0] instanceof Engines_Results_MyMemory_Matches);
-       // $this->assertEquals(0,$result->matches[0]->id);
-       // $this->assertEquals($str_1,$result->matches[0]->raw_segment);
-       // $this->assertEquals($str_1,$result->matches[0]->segment);
-       // $this->assertEquals($str_2,$result->matches[0]->translation);
-       // $this->assertEquals("",$result->matches[0]->target_note);
-       // $this->assertEquals($str_2,$result->matches[0]->raw_translation);
-       // $this->assertEquals(70,$result->matches[0]->quality);
-       // $this->assertEquals("Machine Translation provided by Google, Microsoft, Worldlingo or MyMemory customized engine.",$result->matches[0]->reference);
-       // $this->assertEquals(1,$result->matches[0]->usage_count);
-       // $this->assertFalse($result->matches[0]->subject);
-       // $this->assertEquals($str_3,$result->matches[0]->created_by);
-       // $this->assertEquals($str_3,$result->matches[0]->last_updated_by);
-     //   $this->assertRegExp('/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2][0-9]:[0-5][0-9]:[0-5][0-9]$/',$result->matches[0]->create_date);
-     //   $this->assertRegExp('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/',$result->matches[0]->last_update_date);
-      //  $this->assertRegExp('/^1?[0-9]{1,2}%$/',$result->matches[0]->match);
-
-      //  $this->reflector= new ReflectionClass($result);
-      //  $property= $this->reflector->getProperty('_rawResponse');
-      //  $property->setAccessible(true);
-
-      //  $this->assertEquals("",$property->getValue($result));
     }
     /**
      * It tests the behaviour with the return of the inner method _call simulated by a mock object.
@@ -225,26 +154,14 @@ class GetMyMemoryTest extends AbstractTest
      *@covers Engines_MyMemory::get
      */
     public function test_get_segment_with_mock_for__call(){
-        $this->config_param= array(
-            'segment' => "Il Sistema genera un numero di serie per quella copia e lo stampa (anche sotto forma di codice a barre) su un’etichetta adesiva.",
-            'translation' => NULL,
-            'tnote' => NULL,
-            'source' => "it-IT",
-            'target' => "an-ES",
-            'email' => "demo@matecat.com",
-            'prop' => NULL,
-            'get_mt' => true,
-            'id_user' => array(0 => "a6043e606ac9b5d7ff24"),
-            'num_result' => "3",
-            'mt_only' => false,
-            'isConcordance' => false,
-            'isGlossary' => false,
+
+       $this->config_param['segment']="Il Sistema genera un numero di serie per quella copia e lo stampa (anche sotto forma di codice a barre) su un’etichetta adesiva.";
+
+        $curl_mock_param = array(
+            CURLOPT_HTTPGET => true,
+            CURLOPT_TIMEOUT => 10
         );
-        $curl_mock_param=array(
-            '80' => true,
-            '13' => 10
-        );
-        $url_mock_param= "http://api.mymemory.translated.net/get?q=Il+Sistema+genera+un+numero+di+serie+per+quella+copia+e+lo+stampa+%28anche+sotto+forma+di+codice+a+barre%29+su+un%E2%80%99etichetta+adesiva.&langpair=it-IT%7Can-ES&de=demo%40matecat.com&mt=1&numres=3&key=a6043e606ac9b5d7ff24";
+        $url_mock_param= "http://api.mymemory.translated.net/get?q=Il+Sistema+genera+un+numero+di+serie+per+quella+copia+e+lo+stampa+%28anche+sotto+forma+di+codice+a+barre%29+su+un%E2%80%99etichetta+adesiva.&langpair=it-IT%7Cen-US&de=demo%40matecat.com&mt=1&numres=3&key=a6043e606ac9b5d7ff24";
         $mock_json_return=<<<'TAB'
 {"responseData":{"translatedText":null,"match":null},"responseDetails":"","responseStatus":200,"responderId":null,"matches":[]}
 TAB;
@@ -254,7 +171,7 @@ TAB;
          * @var Engines_MyMemory
          */
         $this->engine_MyMemory= $this->getMockBuilder('\Engines_MyMemory')->setConstructorArgs(array($this->engine_struct_param))->setMethods(array('_call'))->getMock();
-        $this->engine_MyMemory->expects($this->any())->method('_call')->with($url_mock_param,$curl_mock_param)->willReturn($mock_json_return);
+        $this->engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param,$curl_mock_param)->willReturn($mock_json_return);
 
         $result = $this->engine_MyMemory->get($this->config_param);
         /**
@@ -291,24 +208,13 @@ TAB;
      *@covers Engines_MyMemory::get
      */
     public function test_get_segment_with_mock_for__call_and_at_least_one_match_found_in_TM(){
-        $this->config_param= array(
-            'segment' => "Ciascuna copia è dotata di un numero di serie univoco.",
-            'translation' => NULL,
-            'tnote' => NULL,
-            'source' => "it-IT",
-            'target' => "en-US",
-            'email' => "demo@matecat.com",
-            'prop' => NULL,
-            'get_mt' => true,
-            'id_user' => array(0 => "a6043e606ac9b5d7ff24"),
-            'num_result' => "3",
-            'mt_only' => false,
-            'isConcordance' => false,
-            'isGlossary' => false,
-        );
+
+            $this->config_param['segment']= "Ciascuna copia è dotata di un numero di serie univoco.";
+
+
         $curl_mock_param=array(
-            '80' => true,
-            '13' => 10
+            CURLOPT_HTTPGET => true,
+            CURLOPT_TIMEOUT => 10
         );
         $url_mock_param= "http://api.mymemory.translated.net/get?q=Ciascuna+copia+%C3%A8+dotata+di+un+numero+di+serie+univoco.&langpair=it-IT%7Cen-US&de=demo%40matecat.com&mt=1&numres=3&key=a6043e606ac9b5d7ff24";
         $mock_json_return=<<<'TAB'
@@ -320,7 +226,7 @@ TAB;
          * @var Engines_MyMemory
          */
         $this->engine_MyMemory= $this->getMockBuilder('\Engines_MyMemory')->setConstructorArgs(array($this->engine_struct_param))->setMethods(array('_call'))->getMock();
-        $this->engine_MyMemory->expects($this->any())->method('_call')->with($url_mock_param,$curl_mock_param)->willReturn($mock_json_return);
+        $this->engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param,$curl_mock_param)->willReturn($mock_json_return);
 
         $result = $this->engine_MyMemory->get($this->config_param);
         /**

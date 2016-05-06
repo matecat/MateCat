@@ -22,7 +22,7 @@ class OffsetUnset extends AbstractTest
 
 
     /**
-     *It destructs the value of the variable that correspond to @param string
+     *It destructs the value of the variable that correspond to parameter string
      * @group regression
      * @covers EnginesModel_EngineStruct::offsetUnset
      */

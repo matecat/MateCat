@@ -23,7 +23,7 @@ class OffsetSet extends  AbstractTest
 
 
     /**
-     * It sets the value of the variable that correspond to the first @param with the value stored in the second @param
+     * It sets the value of the variable that correspond to the first parameter with the value stored in the second parameter
      * @group regression
      * @covers EnginesModel_EngineStruct::offsetSet
      */
