@@ -3416,7 +3416,8 @@ UI = {
                                 console.log('lexiqa warnings removing (1): '+UI.lexiqaData.segments.length);
                             }                            
                         }                        
-                        if (seg === false) 
+                        //if (seg === false)
+                        if (!UI.segmentIsLoaded(element.segid)) 
                             return; //this segment has not been loaded yet...
                         console.log('$$$$$$$$$4$$: '+element.segid);
                         console.dir(highlights);                        
