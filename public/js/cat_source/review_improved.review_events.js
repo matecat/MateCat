@@ -39,8 +39,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
     function getPreviousTranslationText( segment ) {
         var record = RI.getSegmentRecord(segment);
         var version ;
-        var revertingVersion = segment.el.data('revertingVersion');
-        var prevBase =  revertingVersion ? revertingVersion : record.version_number ;
+        var prevBase = record.version_number ;
         version = db.segment_versions.findObject({
             id_segment : record.sid,
             version_number : (prevBase -1) + ''
@@ -115,8 +114,6 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         var container = segment.el.find('.buttons') ;
         container.empty();
 
-        var revertingVersion = segment.el.data('revertingVersion');
-
         var currentScore = getLatestScoreForSegment( segment ) ;
 
         var buttonData = {
@@ -130,8 +127,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         var buttonsHTML = MateCat.Templates['review_improved/segment_buttons']( buttonData ) ;
 
         var data = {
-            versions : versions.findObjects({ id_segment : segment.id }),
-            revertingVersion : revertingVersion
+            versions : versions.findObjects({ id_segment : segment.id })
         };
 
         container.append(buttonsHTML);
