@@ -15,7 +15,7 @@ if ( ReviewImproved.enabled() ) {
                 status = 'fixed';
             }
             else if (segment.hasClass('status-rebutted')) {
-                status = 'fixed' ;
+                status = 'rebutted' ;
             }
             return status;
         },
