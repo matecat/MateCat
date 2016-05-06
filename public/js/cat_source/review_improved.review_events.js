@@ -113,12 +113,18 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         }
 
         var container = segment.el.find('.buttons') ;
+        container.empty();
+
         var revertingVersion = segment.el.data('revertingVersion');
+
+        var currentScore = getLatestScoreForSegment( segment ) ;
 
         var buttonData = {
             disabled : !container.hasClass('loaded'),
             id_segment : segment.id,
             ctrl : ( (UI.isMac) ? 'CMD' : 'CTRL'),
+            show_approve : currentScore == 0,
+            show_reject : currentScore > 0
         };
 
         var buttonsHTML = MateCat.Templates['review_improved/segment_buttons']( buttonData ) ;
@@ -141,6 +147,31 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         // to show in quality-report button.
         ReviewImproved.reloadQualityReport();
     });
+
+
+    getLatestScoreForSegment = function( segment ) {
+        if (! segment) {
+            return ;
+        }
+        var db_segment = MateCat.db.segments.findObject({ sid : '' + segment.id });
+        var latest_issues = MateCat.db.segment_translation_issues.findObjects({
+            id_segment : '' + segment.id ,
+            translation_version : '' + db_segment.version_number
+        });
+
+        var total_penalty = _.reduce(latest_issues, function(sum, record) {
+            return sum + parseInt(record.penalty_points) ;
+        }, 0) ;
+
+        return total_penalty ;
+    }
+
+    var issuesChanged = function( record ) {
+        var segment = UI.Segment.find(record.id_segment);
+        if ( segment ) renderButtons( segment ) ;
+    }
+
+    MateCat.db.addListener('segment_translation_issues', ['insert', 'delete', 'update'], issuesChanged );
 
 })($, window, ReviewImproved, UI);
 }
