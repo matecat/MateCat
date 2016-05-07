@@ -7,62 +7,68 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
      *
      * Use when counters of the job value are not important but only the metadata are needed
      *
-     * @param Jobs_JobStruct $job
+     * XXX: Be careful, used by the ContributionStruct
      *
+     * @see \AsyncTasks\Workers\SetContributionWorker
+     * @see \Contribution\ContributionStruct
+     *
+     * @param Jobs_JobStruct $jobQuery
      * @return Jobs_JobStruct[]
      */
-    public function read( \Jobs_JobStruct $job ){
+    public function read( \Jobs_JobStruct $jobQuery ){
 
-        $sql = $this->_buildQueryForJobStructCache( $job );
-        $arr_result = $this->_fetch_array( $sql );
-        return $this->_buildResult( $arr_result );
+        $stmt = $this->_getStatementForCache();
+        return $this->_fetchObject( $stmt,
+                $jobQuery,
+                array(
+                        'id_job' => $jobQuery->id,
+                        'password' => $jobQuery->password
+                )
+        );
 
+    }
+
+    /**
+     *
+     * @return PDOStatement
+     */
+    protected function _getStatementForCache() {
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare(
+                "SELECT * FROM jobs WHERE " .
+                " id = :id_job AND password = :password "
+        );
+
+        return $stmt;
     }
 
     /**
      * @param array $array_result
      *
-     * @return array|Jobs_JobStruct|Jobs_JobStruct[]
+     * @return DataAccess_IDaoStruct|DataAccess_IDaoStruct[]|void
      */
-    protected function _buildResult( $array_result ) {
-        $result = array();
-        foreach ( $array_result as $item ) {
-            $obj = new Jobs_JobStruct( $item );
-            $result[ ] = $obj;
-        }
-        return $result;
-    }
-
-    /**
-     * @param Jobs_JobStruct $job
-     *
-     * @return string
-     */
-    protected function _buildQueryForJobStructCache( \Jobs_JobStruct $job ) {
-        /*
-         * build the query
-         */
-        $sql = "SELECT * FROM jobs WHERE ID = " . (int)$job->id;
-        if ( !empty( $job->password ) ) {
-            $sql .= " AND password = '" . Database::obtain()->escape( $job->password ) . "'";
-        }
-        return $sql;
-    }
+    protected function _buildResult( $array_result ){}
 
     /**
      * Destroy a cached object
      *
-     * @param Jobs_JobStruct $job
+     * @param Jobs_JobStruct $jobQuery
      *
      * @return bool
      * @throws Exception
      */
-    public function destroyCache( \Jobs_JobStruct $job ){
+    public function destroyCache( \Jobs_JobStruct $jobQuery ){
         /*
         * build the query
         */
-        $sql = $this->_buildQueryForJobStructCache( $job );
-        return $this->_destroyCache( $sql );
+        $stmt = $this->_getStatementForCache();
+        return $this->_destroyObjectCache( $stmt,
+                array(
+                        'id_job' => $jobQuery->id,
+                        'password' => $jobQuery->password
+                )
+        );
     }
 
     /**

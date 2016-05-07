@@ -1117,6 +1117,7 @@ class CatUtils {
 
     public static function getTMProps( $job_data ){
 
+        //TODO this should use the Project DAO instead and use internal cache system to store the record
         try {
             $redisHandler = new Predis\Client( INIT::$REDIS_SERVERS );
             $redisHandler->get(1); //ping established connection

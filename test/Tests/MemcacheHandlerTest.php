@@ -12,9 +12,8 @@
  *
  * @author domenico
  */
-include_once("AbstractTest.php");
 
-class Tests_MemcacheHandlerTest extends Tests_AbstractTest {
+class Tests_MemcacheHandlerTest extends AbstractTest {
 
     public function setUp() {
         parent::setUp();

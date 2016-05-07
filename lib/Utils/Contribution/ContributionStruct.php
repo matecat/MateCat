@@ -11,17 +11,19 @@ namespace Contribution;
 
 use \DataAccess_AbstractDaoObjectStruct;
 
+use \DataAccess_IDaoStruct;
 use \Jobs_JobStruct,
         \Database,
         \Exceptions\ValidationError,
-        \CatUtils
+        \CatUtils,
+        \Constants_TranslationStatus
     ;
 
 /**
  * Class ContributionStruct
  * @package Contribution
  */
-class ContributionStruct extends DataAccess_AbstractDaoObjectStruct {
+class ContributionStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
 
     protected $cached_results = array();
 
@@ -41,10 +43,20 @@ class ContributionStruct extends DataAccess_AbstractDaoObjectStruct {
     public $translation = "";
 
     /**
+     * @var string
+     */
+    public $oldSegment = "";
+
+    /**
+     * @var string
+     */
+    public $oldTranslation = "";
+
+    /**
      * \INIT::$MYMEMORY_API_KEY
      * @var string
      */
-    public $email = "";
+    public $api_key = "";
 
     /**
      * @var int
@@ -55,6 +67,17 @@ class ContributionStruct extends DataAccess_AbstractDaoObjectStruct {
      * @var string
      */
     public $job_password = "";
+
+    /**
+     * User login info needed to get information about the tm keys of the job
+     * @var int
+     */
+    public $uid = 0;
+
+    /**
+     * @var string
+     */
+    public $oldTranslationStatus = Constants_TranslationStatus::STATUS_NEW;
 
     /**
      * @param $name
@@ -70,25 +93,57 @@ class ContributionStruct extends DataAccess_AbstractDaoObjectStruct {
         return $this->$name;
     }
 
+    /**
+     * Global Cached record for jobs metadata
+     *
+     * WARNING these values are cached only globally and not locally by the "cachable" method ( in the running process )
+     * because we want control the cache eviction from other entrypoints.
+     *
+     * @return mixed
+     *
+     * @throws ValidationError
+     */
     public function getJobStruct( ){
 
         if( empty( $this->id_job ) ){
             throw new ValidationError( "Property " . get_class( $this ) . "::id_job required." );
         }
 
-        return $this->cachable( '_jobStruct', $this, function ( $contributionStruct ) {
-            $JobDao = new \Jobs_JobDao( Database::obtain() );
-            $jobStruct = new \Jobs_JobStruct();
-            $jobStruct->id = $contributionStruct->id_job;
-            $jobStruct->password = $contributionStruct->job_password;
-            return $JobDao->setCacheTTL( 60 * 60 )->read( $jobStruct );
-        } );
+        $JobDao = new \Jobs_JobDao( Database::obtain() );
+        $jobStruct = new \Jobs_JobStruct();
+        $jobStruct->id = $this->id_job;
+        $jobStruct->password = $this->job_password;
+        return $JobDao->setCacheTTL( 60 * 60 )->read( $jobStruct );
 
     }
 
     public function getProp(){
         $jobStruct = $this->getJobStruct();
         return CatUtils::getTMProps( $jobStruct[ 0 ] );
+    }
+
+    /**
+     * Global and Local Cached record for user metadata
+     *
+     * WARNING these values are cached
+     *
+     * @return mixed
+     *
+     * @throws ValidationError
+     */
+    public function getUserInfo(){
+
+        if( empty( $this->uid ) ){
+            throw new ValidationError( "Property " . get_class( $this ) . "::uid required." );
+        }
+
+        return $this->cachable( '_userCredentials', $this, function ( $contributionStruct ) {
+            $userDao = new \Users_UserDao( Database::obtain() );
+            $userCredentials = new \Users_UserStruct();
+            $userCredentials->uid = $contributionStruct->uid;
+            return $userDao->setCacheTTL( 60 * 60 )->read( $userCredentials );
+        } );
+        
     }
 
     /**

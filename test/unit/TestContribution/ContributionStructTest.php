@@ -34,7 +34,11 @@ class ContributionStructTest extends AbstractTest {
         $this->contributionStruct->job_password = "1d7903464318";
         $this->contributionStruct->segment = \CatUtils::view2rawxliff( '<g id="pt2">WASHINGTON </g><g id="pt3">— The Treasury Department and Internal Revenue Service today requested public comment on issues relating to the shared responsibility provisions included in the Affordable Care Act that will apply to certain employers starting in 2014.</g>' );
         $this->contributionStruct->translation = \CatUtils::view2rawxliff( '<g id="pt2">WASHINGTON </g><g id="pt3">- Il Dipartimento del Tesoro e Agenzia delle Entrate oggi ha chiesto un commento pubblico su questioni relative alle disposizioni di responsabilità condivise incluse nel Affordable Care Act che si applicheranno a certi datori di lavoro a partire dal 2014.</g>' );
-        $this->contributionStruct->email = \INIT::$MYMEMORY_API_KEY;
+        $this->contributionStruct->api_key = \INIT::$MYMEMORY_API_KEY;
+        $this->contributionStruct->uid                  = 1234;
+        $this->contributionStruct->oldTranslationStatus = 'NEW';
+        $this->contributionStruct->oldSegment           = $this->contributionStruct->segment; //we do not change the segment source
+        $this->contributionStruct->oldTranslation       = $this->contributionStruct->translation . " TEST";
 
         $this->expected[] = new \Jobs_JobStruct(
 
@@ -107,9 +111,13 @@ class ContributionStructTest extends AbstractTest {
                 'fromRevision' => true,
                 'segment'      => '<g id="pt2">WASHINGTON </g><g id="pt3">— The Treasury Department and Internal Revenue Service today requested public comment on issues relating to the shared responsibility provisions included in the Affordable Care Act that will apply to certain employers starting in 2014.</g>',
                 'translation'  => '<g id="pt2">WASHINGTON </g><g id="pt3">- Il Dipartimento del Tesoro e Agenzia delle Entrate oggi ha chiesto un commento pubblico su questioni relative alle disposizioni di responsabilità condivise incluse nel Affordable Care Act che si applicheranno a certi datori di lavoro a partire dal 2014.</g>',
-                'email'        => "demo@matecat.com",
                 'id_job'       => 1999999,
                 'job_password' => "1d7903464318",
+                'oldSegment' => '<g id="pt2">WASHINGTON </g><g id="pt3">— The Treasury Department and Internal Revenue Service today requested public comment on issues relating to the shared responsibility provisions included in the Affordable Care Act that will apply to certain employers starting in 2014.</g>',
+                'oldTranslation' => '<g id="pt2">WASHINGTON </g><g id="pt3">- Il Dipartimento del Tesoro e Agenzia delle Entrate oggi ha chiesto un commento pubblico su questioni relative alle disposizioni di responsabilità condivise incluse nel Affordable Care Act che si applicheranno a certi datori di lavoro a partire dal 2014.</g> TEST',
+                'api_key' => 'pro@matecat.com',
+                'uid' => 1234,
+                'oldTranslationStatus' => 'NEW',
         );
 
         $this->assertEquals( $expected, $this->contributionStruct->toArray() );
@@ -127,22 +135,32 @@ class ContributionStructTest extends AbstractTest {
 
         $redisHandler = new \Predis\Client( \INIT::$REDIS_SERVERS );
 
-
-        $refMethod = new ReflectionMethod( '\Jobs_JobDao', '_buildQueryForJobStructCache' );
+        $refMethod = new ReflectionMethod( '\Jobs_JobDao', '_getStatementForCache' );
         $refMethod->setAccessible( true );
-        $sql = $refMethod->invoke( new \Jobs_JobDao( Database::obtain() ), $this->expected[0] );
-
-        $_buildResult = new ReflectionMethod( '\Jobs_JobDao', '_buildResult' );
-        $_buildResult->setAccessible( true );
+        $statement = $refMethod->invoke( new \Jobs_JobDao( Database::obtain() ) );
 
         //check that there is no cache
-        $this->assertEmpty( unserialize( $redisHandler->get( md5( $sql ) ) ) );
+        $this->assertEmpty( unserialize(
+                $redisHandler->get( md5( $statement->queryString . serialize(
+                        array(
+                                'id_job'   => (int)$this->expected[ 0 ]->id,
+                                'password' => $this->expected[ 0 ]->password
+                        )
+                ) ) )
+        ) );
 
         //fill the cache
         $this->contributionStruct->getJobStruct();
 
         //check the cached value
-        $JobStruct = $_buildResult->invoke( new \Jobs_JobDao( Database::obtain() ), unserialize( $redisHandler->get( md5( $sql ) ) ) );
+        $JobStruct = unserialize(
+                $redisHandler->get( md5( $statement->queryString . serialize(
+                        array(
+                                'id_job'   => (int)$this->expected[ 0 ]->id,
+                                'password' => $this->expected[ 0 ]->password
+                        )
+                ) ) )
+        );
 
         $this->assertEquals( $JobStruct, $this->contributionStruct->getJobStruct() );
 

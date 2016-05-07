@@ -125,10 +125,10 @@ class Features {
     }
 
     /**
-     * reviewImprovedEnabled
+     * @param $project
      *
+     * @return bool
      */
-
     private static function reviewImprovedEnabled($project) {
         return $project->id_qa_model != null;
     }

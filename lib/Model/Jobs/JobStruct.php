@@ -1,6 +1,7 @@
 <?php
 
 class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, \ArrayAccess {
+    
     public $id;
     public $password;
     public $id_project;
@@ -48,6 +49,9 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     public $dqf_key;
     public $total_raw_wc;
 
+    /**
+     * @return Files_FileStruct[]
+     */
     public function getFile() {
         return Files_FileDao::getByJobId( $this->id );
     }
@@ -60,23 +64,33 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
      *
      * @return \Projects_ProjectStruct
      */
-
     public function getProject() {
         return $this->cachable( __function__, $this, function ( $job ) {
             return Projects_ProjectDao::findById( $job->id_project );
         } );
     }
 
+    /**
+     * @param $feature_code
+     *
+     * @return bool
+     */
     public function isFeatureEnabled( $feature_code ) {
         return $this->getProject()->isFeatureEnabled( $feature_code );
     }
 
+    /**
+     * @return Translations_SegmentTranslationStruct
+     */
     public function findLatestTranslation() {
         $dao = new Translations_SegmentTranslationDao( Database::obtain() );
 
         return $dao->lastTranslationByJobOrChunk( $this );
     }
 
+    /**
+     * @return Chunks_ChunkStruct[]
+     */
     public function getChunks() {
         $dao = new Chunks_ChunkDao( Database::obtain() );
 

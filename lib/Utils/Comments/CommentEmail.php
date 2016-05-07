@@ -32,6 +32,7 @@ class Comments_CommentEmail {
         $queue_element[ 'htmlBody' ] = $this->buildHTMLMessage();
         $queue_element[ 'altBody' ]  = $this->buildTextMessage();
 
+        WorkerClient::init( new AMQHandler() );
         \WorkerClient::enqueue( 'MAIL', '\AsyncTasks\Workers\CommentMailWorker', $queue_element, array( 'persistent' => WorkerClient::$_HANDLER->persistent ) );
 
         Log::doLog( 'Message has been sent' );

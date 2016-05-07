@@ -63,7 +63,7 @@ RewriteRule ^utils/pee$ router.php [L]
 RewriteRule ^TMX/([^/]*)/([^/]*)[/]?$ index.php?action=exportTMX&jid=$1&jpass=$2 [L]
 RewriteRule ^SDLXLIFF/([^/]*)/([^/]*)/([^/]*)[/]?$ index.php?action=downloadFile&id_job=$1&password=$2&filename=$3&forceXliff=1 [L]
 
-
+RedirectMatch 404 /\.git
 </IfModule>
 
 ErrorDocument 404 /support/404.php

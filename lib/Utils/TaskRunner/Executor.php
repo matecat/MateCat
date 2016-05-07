@@ -367,8 +367,8 @@ class Executor implements \SplObserver {
 
 }
 
-$argv = array();
-$argv[ 1 ] = '{"queue_length":0,"queue_name":"set_contribution","pid_set_name":"ch_pid_set_contribution","pid_list":[],"pid_list_len":0,"max_executors":"1","loggerName":"set_contribution.log"}';
+//$argv = array();
+//$argv[ 1 ] = '{"queue_length":0,"queue_name":"set_contribution","pid_set_name":"ch_pid_set_contribution","pid_list":[],"pid_list_len":0,"max_executors":"1","loggerName":"set_contribution.log"}';
 
 /** @var array $argv */
 Executor::getInstance( Context::buildFromArray( json_decode( $argv[ 1 ], true ) ) )->main();

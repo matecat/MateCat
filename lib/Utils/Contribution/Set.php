@@ -45,6 +45,7 @@ class Set {
             # Handle the error, logging, ...
             $output  = "**** SetContribution failed. AMQ Connection Error. ****\n\t";
             $output .= "{$e->getMessage()}";
+            $output .= var_export( $contribution, true );
             Log::doLog( $output );
             throw $e;
 

@@ -134,6 +134,7 @@ class Utils {
 		$queue_element['subject'] = $subject;
 		$queue_element['body'] = '<pre>' . self::_getBackTrace() . "<br />" . $htmlContent . '</pre>';
 
+		WorkerClient::init( new AMQHandler() );
 		\WorkerClient::enqueue( 'MAIL', '\AsyncTasks\Workers\ErrMailWorker', $queue_element, array( 'persistent' => WorkerClient::$_HANDLER->persistent ) );
 
 		Log::doLog( 'Message has been sent' );
