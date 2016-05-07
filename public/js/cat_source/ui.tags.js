@@ -179,7 +179,8 @@ $.extend(UI, {
             var prevNumTags = $('span.locked', this).length;
 
             restoreSelection();
-            LXQ.reloadPowertip(segment);
+            if (LXQ.enabled())
+                LXQ.reloadPowertip(segment);
             if ($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
 
             

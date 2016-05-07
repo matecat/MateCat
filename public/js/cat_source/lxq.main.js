@@ -1,3 +1,4 @@
+/* global LXQ */
 /*
  Component: lxq.main
  */
@@ -5,6 +6,7 @@
 LXQ = {
     enabled: function () {
         return true;
+        //return false;
     }
 }
 
@@ -1123,3 +1125,4 @@ if (LXQ.enabled())
         });
 
     })(jQuery, config, window, LXQ);
+
