@@ -1325,6 +1325,7 @@ UI = {
 					$('#file-' + fid).append(newFile);
 				}
 			}
+            if (LXQ.enabled())
             $.each(this.segments,function(i,seg) {
             if (!starting)
             if (UI.hasOwnProperty('lexiqaData') && UI.lexiqaData.hasOwnProperty('lexiqaWarnings') && 
@@ -3072,7 +3073,7 @@ UI = {
 			this.undoStackPosition = 0;
 		}
 
-        if (fromWhich === 'space' && !UI.lexiqaData.lexiqaFetching) { 
+        if (LXQ.enabled() && fromWhich === 'space' && !UI.lexiqaData.lexiqaFetching) { 
 		saveSelection();
         $('.undoCursorPlaceholder').remove();
         $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
@@ -3154,6 +3155,12 @@ UI = {
         }
     },
     doLexiQA: function(segment,translation,id_segment,isSegmentCompleted,callback) {
+        if (!LXQ.enabled()) {
+            if (callback!==undefined && typeof callback === 'function') {
+                callback();
+            }
+            return;
+        }        
        //FOTD 
         //console.log('HELO FROM FOTD');
         console.log('segment: ');
@@ -3338,9 +3345,12 @@ UI = {
         }                 
     },
     getLexiqaWarnings: function() {
+        if (!LXQ.enabled()) {
+            return;
+        }        
         //FOTD
-       UI.lexiqaData.lexiqaFetching = true;
-       $.ajax({type: "GET",
+        UI.lexiqaData.lexiqaFetching = true;
+        $.ajax({type: "GET",
             url: config.lexiqaServer+"/matecaterrors",
             data: {id: 'matecat-'+config.job_id+'-'+config.password },
             success:function(results){
@@ -3485,7 +3495,12 @@ UI = {
         //launch segments check on opening
         UI.checkWarnings(true);
         $('html').trigger('start');
-        LXQ.initPopup();
+        if (LXQ.enabled()) {
+            LXQ.initPopup();
+        }
+        else {
+            $('#lexiqabox').css("display", "none");
+        }
     },
     restart: function () {
         $('#outer').empty();
