@@ -24,8 +24,6 @@ class ProjectManager {
      */
     protected $projectStructure;
 
-    protected $mysql_link;
-
     protected $tmxServiceWrapper;
 
     /**

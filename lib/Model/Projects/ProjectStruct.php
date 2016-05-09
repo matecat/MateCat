@@ -80,6 +80,11 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
         }
     }
 
+    /**
+     * @param $feature_code
+     *
+     * @return bool
+     */
     public function isFeatureEnabled( $feature_code ) {
         $feature = $this->getOwnerFeature( $feature_code );
         return \Features::enabled($feature, $this);

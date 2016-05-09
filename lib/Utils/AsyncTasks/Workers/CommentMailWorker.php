@@ -11,33 +11,23 @@ namespace AsyncTasks\Workers;
 
 use TaskRunner\Commons\AbstractElement;
 use TaskRunner\Commons\AbstractWorker;
-use TaskRunner\Commons\Context;
 use TaskRunner\Commons\QueueElement;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 
-use \PHPMailer, \AMQHandler;
+use \PHPMailer;
 
 class CommentMailWorker extends AbstractWorker {
 
     /**
-     * Handler to the AMQ server and Redis Server
+     * @param AbstractElement $queueElement
      *
-     * @var \AMQHandler
+     * @return bool
+     * @throws EndQueueException
+     * @throws ReQueueException
+     * @throws \phpmailerException
      */
-    protected $_queueHandler;
-
-    /**
-     * ErrMailWorker constructor.
-     *
-     * @param AMQHandler $queueHandler
-     */
-    public function __construct( AMQHandler $queueHandler ) {
-        \Log::$fileName = 'user_mail.log';
-        $this->_queueHandler = $queueHandler;
-    }
-
-    public function process( AbstractElement $queueElement, Context $queueContext ) {
+    public function process( AbstractElement $queueElement ) {
 
         /**
          * @var $queueElement QueueElement

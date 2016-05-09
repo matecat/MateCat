@@ -11,7 +11,9 @@ $(document).on('afterFooterCreation', function(e, segment) {
 
 $.extend(UI, {
 	chooseSuggestion: function(w) {
-		this.copySuggestionInEditarea(this.currentSegment, $('.editor .tab.matches ul[data-item=' + w + '] li.b .translation').html(), $('.editor .editarea'), $('.editor .tab.matches ul[data-item=' + w + '] ul.graysmall-details .percent').text(), false, false, w);
+		var ulDataItem = '.editor .tab.matches ul[data-item=';
+		this.copySuggestionInEditarea(this.currentSegment, $(ulDataItem + w + '] li.b .translation').html(),
+			$('.editor .editarea'), $(ulDataItem + w + '] ul.graysmall-details .percent').text(), false, false, w);
 		this.lockTags(this.editarea);
 		this.setChosenSuggestion(w);
 
@@ -19,12 +21,10 @@ $.extend(UI, {
 		this.highlightEditarea();
 	},
 	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which) {
-// console.log('translation 1: ', translation);
-//        console.log('copySuggestionInEditarea - editarea: ', editarea);
 		if (typeof (decode) == "undefined") {
 			decode = false;
 		}
-		percentageClass = this.getPercentuageClass(match);
+		var percentageClass = this.getPercentuageClass(match);
 		if ($.trim(translation) !== '') {
 
 			//ANTONIO 20121205 editarea.text(translation).addClass('fromSuggestion');
@@ -151,22 +151,19 @@ $.extend(UI, {
         console.log('getContribution:complete');
         $(document).trigger('getContribution:complete', segment);
     },
-  processContributions: function(d, segment) {
-    if(!d) return true;
-    this.renderContributions(d, segment);
-    this.lockTags(this.editarea);
-    this.spellCheck();
-
+  	processContributions: function(d, segment) {
+		if(!d) return true;
+		this.renderContributions(d, segment);
+		this.lockTags(this.editarea);
+		this.spellCheck();
 		this.saveInUndoStack();
-
 		this.blockButtons = false;
 		if (d.data.matches.length > 0) {
 			$('.submenu li.matches a span', segment).text('(' + d.data.matches.length + ')');
 		} else {
 			$(".sbm > .matches", segment).hide();
 		}
-                this.renderContributionErrors(d.errors, segment);
-
+		this.renderContributionErrors(d.errors, segment);
     },
 
   renderContributions: function(d, segment) {
@@ -325,188 +322,6 @@ $.extend(UI, {
                         '</li><li>' + suggestion_info + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
             });
         },
-	setContribution: function(segment_id, status, byStatus) {
-//        console.log('setContribution');
-        this.addToSetContributionTail('setContribution', segment_id, status, byStatus);
-        if(!this.offline) {
-            if( (!this.executingSetContribution) && (!this.executingSetContributionMT) ) this.execSetContributionTail();
-        }
-    },
-    addToSetContributionTail: function (operation, segment_id, status, byStatus) {
-//        console.log('addToSetContributionTail');
-        var item = {
-            operation: operation,
-            segment_id: segment_id,
-            status: status,
-            byStatus: byStatus
-        }
-        this.setContributionTail.push(item);
-    },
-    execSetContributionTail: function () {
-        if ( UI.setContributionTail.length ) {
-            item = UI.setContributionTail[0];
-            UI.setContributionTail.shift();
-            if ( item.operation == 'setContribution' ) {
-                UI.execSetContribution( item.segment_id, item.status, item.byStatus );
-            } else {
-                UI.execSetContributionMT( item.segment_id, item.status, item.byStatus );
-            }
-        }
-
-    },
-
-    execSetContribution: function(segment_id, status, byStatus) {
-//        console.log('execSetContribution');
-        this.executingSetContribution = true;
-        logData = {
-            segment_id: segment_id,
-            status: status,
-            byStatus: byStatus
-        };
-        this.log('setContribution1', logData);
-		segment = $('#segment-' + segment_id);
-		if ((status == 'draft') || (status == 'rejected'))
-			return false;
-        this.log('setContribution2', {});
-
-        if( config.brPlaceholdEnabled ) {
-            source = this.postProcessEditarea(segment, '.source');
-            target = this.postProcessEditarea(segment);
-            this.log('setContribution3', {});
-        } else {
-            source = $('.source', segment).text();
-            // Attention: to be modified when we will be able to lock tags.
-            target = $('.editarea', segment).text();
-        }
-        this.log('setContribution4', {});
-
-		if ((target === '') && (byStatus)) {
-            this.log('setContribution5', {});
-			APP.alert({msg: 'Cannot change status on an empty segment. Add a translation first!'});
-		}
-		if (target === '') {
-            this.log('setContribution6', {});
-			return false;
-		}
-		this.updateContribution(source, target, segment_id, status, byStatus);
-	},
-	updateContribution: function(source, target, segment_id, status, byStatus) {
-		reqArguments = arguments;
-		source = view2rawxliff(source);
-		target = view2rawxliff(target);
-        logData = {
-            source: source,
-            target: target
-        };
-        this.log('updateContribution', logData);
-
-		APP.doRequest({
-			data: {
-				action: 'setContribution',
-				id_job: config.id_job,
-				source: source,
-				target: target,
-				source_lang: config.source_rfc,
-				target_lang: config.target_rfc,
-				password: config.password,
-				id_translator: config.id_translator,
-				private_translator: config.private_translator,
-				id_customer: config.id_customer,
-				private_customer: config.private_customer
-			},
-			context: reqArguments,
-			error: function() {
-                UI.addToSetContributionTail('setContribution', $(this)[2], $(this)[3], $(this)[4]);
-				UI.failedConnection(this, 'updateContribution');
-			},
-			success: function(d) {
-                console.log('execSetContribution success');
-                UI.executingSetContribution = false;
-                UI.removeFromStorage('contribution-' + config.id_job + '-' + segment_id );
-//                localStorage.removeItem('contribution-' + config.id_job + '-' + segment_id );
-                UI.execSetContributionTail();
-				if (d.errors.length)
-					UI.processErrors(d.errors, 'setContribution');
-			}
-		});
-	},
-    setContributionMT: function(segment_id, status, byStatus) {
-        console.log('setContribution');
-        this.addToSetContributionTail('setContributionMT', segment_id, status, byStatus);
-        if(!this.offline) {
-            if( (!this.executingSetContribution) && (!this.executingSetContributionMT) ) this.execSetContributionTail();
-        }
-    },
-    execSetContributionMT: function(segment_id, status, byStatus) {
-        console.log('execSetContribution');
-        this.executingSetContributionMT = true;
-		segment = $('#segment-' + segment_id);
-		reqArguments = arguments;
-		if ((status == 'draft') || (status == 'rejected'))
-			return false;
-        if( config.brPlaceholdEnabled ) {
-            source = this.postProcessEditarea(segment, '.source');
-            target = this.postProcessEditarea(segment);
-        } else {
-            source = $('.source', segment).text();
-            // Attention: to be modified when we will be able to lock tags.
-            target = $('.editarea', segment).text();
-        }
-//		var source = $('.source', segment).text();
-		source = view2rawxliff(source);
-		// Attention: to be modified when we will be able to lock tags.
-//		var target = $('.editarea', segment).text();
-		if ((target === '') && (byStatus)) {
-			APP.alert({msg: 'Cannot change status on an empty segment. Add a translation first!'});
-		}
-		if (target === '') {
-			return false;
-		}
-        this.updateContributionMT(source, target, segment_id, status, byStatus);
-    },
-    updateContributionMT: function (source, target, segment_id, status, byStatus) {
-        reqArguments = arguments;
-        target = view2rawxliff(target);
-//		var languages = $(segment).parents('article').find('.languages');
-//		var source_lang = $('.source-lang', languages).text();
-//		var target_lang = $('.target-lang', languages).text();
-//		var id_translator = config.id_translator;
-//		var private_translator = config.private_translator;
-//		var id_customer = config.id_customer;
-//		var private_customer = config.private_customer;
-
-		var info = $(segment).attr('id').split('-');
-		var id_segment = info[1];
-		var time_to_edit = UI.editTime;
-		var chosen_suggestion = $('.editarea', segment).data('lastChosenSuggestion');
-
-		APP.doRequest({
-			data: {
-				action: 'setContributionMT',
-				id_segment: id_segment,
-				source: source,
-				target: target,
-				source_lang: config.source_lang,
-				target_lang: config.target_lang,
-				password: config.password,
-				time_to_edit: time_to_edit,
-				id_job: config.id_job,
-				chosen_suggestion_index: chosen_suggestion
-			},
-			context: reqArguments,
-			error: function() {
-                UI.addToSetContributionTail('setContributionMT', $(this)[2], $(this)[3], $(this)[4]);
-				UI.failedConnection(this, 'setContributionMT');
-			},
-			success: function(d) {
-                console.log('execSetContributionMT success');
-                UI.executingSetContributionMT = false;
-                UI.execSetContributionTail();
-				if (d.errors.length)
-					UI.processErrors(d.errors, 'setContributionMT');
-			}
-		});
-	},
 	setDeleteSuggestion: function(segment) {
 
         $('.sub-editor .overflow a.trash', segment).click(function(e) {

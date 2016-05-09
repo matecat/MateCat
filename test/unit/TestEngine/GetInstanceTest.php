@@ -118,7 +118,7 @@ class GetInstanceTest extends AbstractTest
      */
     public function test_getInstance_with_no_mach_for_engine_class_name(){
        
-        $sql_update_engine_class_name="UPDATE `unittest_matecat_local`.`engines` SET class_load='YourMemory' WHERE id='10';";
+        $sql_update_engine_class_name="UPDATE engines SET class_load='YourMemory' WHERE id='10';";
 
         require_once 'Predis/autoload.php';
         $obliterator= new Predis\Client(INIT::$REDIS_SERVERS);

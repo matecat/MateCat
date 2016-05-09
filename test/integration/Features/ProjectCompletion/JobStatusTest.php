@@ -11,22 +11,22 @@ class Features_ProjectCompletion_JobStatusTest extends IntegrationTest {
             'id_job' => 1
         );
 
-        $this->markTestIncomplete();
+        $this->markTestSkipped();
     }
 
     function testsJSONForUncompletedJob() {
-      $this->markTestIncomplete();
+      $this->markTestSkipped();
     }
 
     function testsJSONForCompletedJob() {
-      $this->markTestIncomplete();
+      $this->markTestSkipped();
     }
 
     function testsSubmitCompletedStatus() {
-      $this->markTestIncomplete();
+      $this->markTestSkipped();
     }
 
     function testSubmitOnNonTranslatedProject() {
-      $this->markTestIncomplete();
+      $this->markTestSkipped();
     }
 }
