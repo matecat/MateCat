@@ -993,7 +993,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 
     $db      = Database::obtain();
 
-    try {Log::doLog($query);
+    try {
         $results = $db->fetch_array($query);
     } catch( PDOException $e ) {
         throw new Exception( __METHOD__ . " -> " . $e->getCode() . ": " . $e->getMessage() );
