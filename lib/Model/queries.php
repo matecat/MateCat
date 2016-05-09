@@ -864,6 +864,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
     }
 
     $queryAfter = "
+                SELECT * FROM (
                     SELECT segments.id AS __sid
                     FROM segments
                     JOIN segment_translations ON id = id_segment
@@ -873,21 +874,22 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
                         AND show_in_cattool = 1
                         AND segments.id > $ref_segment
                     LIMIT %u
+                ) AS TT1
                 ";
 
     $queryBefore = "
-                    SELECT * from(
-                        SELECT  segments.id AS __sid
-                        FROM segments
-                        JOIN segment_translations ON id = id_segment
-                        JOIN jobs ON jobs.id =  id_job
-                        WHERE id_job = $jid
-                            AND password = '$password'
-                            AND show_in_cattool = 1
-                            AND segments.id < $ref_segment
-                        ORDER BY __sid DESC
-                        LIMIT %u
-                    ) as TT
+                SELECT * from(
+                    SELECT  segments.id AS __sid
+                    FROM segments
+                    JOIN segment_translations ON id = id_segment
+                    JOIN jobs ON jobs.id =  id_job
+                    WHERE id_job = $jid
+                        AND password = '$password'
+                        AND show_in_cattool = 1
+                        AND segments.id < $ref_segment
+                    ORDER BY __sid DESC
+                    LIMIT %u
+                ) as TT2
                 ";
 
     /*
@@ -897,17 +899,19 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
      *
      */
     $queryCenter = "
-                    ( SELECT segments.id AS __sid
-                    FROM segments
-                    JOIN segment_translations ON id = id_segment
-                    JOIN jobs ON jobs.id = id_job
-                    WHERE id_job = $jid
-                        AND password = '$password'
-                        AND show_in_cattool = 1
-                        AND segments.id >= $ref_segment
-                    LIMIT %u )
-                    UNION
-                    SELECT * from(
+                  SELECT * FROM ( 
+                        SELECT segments.id AS __sid
+                        FROM segments
+                        JOIN segment_translations ON id = id_segment
+                        JOIN jobs ON jobs.id = id_job
+                        WHERE id_job = $jid
+                            AND password = '$password'
+                            AND show_in_cattool = 1
+                            AND segments.id >= $ref_segment
+                        LIMIT %u 
+                  ) AS TT1
+                  UNION
+                  SELECT * from(
                         SELECT  segments.id AS __sid
                         FROM segments
                         JOIN segment_translations ON id = id_segment
@@ -918,7 +922,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
                             AND segments.id < $ref_segment
                         ORDER BY __sid DESC
                         LIMIT %u
-                    ) as TT
+                  ) AS TT2
     ";
 
     switch ( $where ) {
