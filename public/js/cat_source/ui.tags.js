@@ -669,25 +669,46 @@ $.extend(UI, {
     hasSourceOrTargetTags: function ( segment ) {
         return ( $(segment).find( '.locked' ).length > 0 || UI.sourceTags.length > 0 )
     },
+    hasMissingTargetTags: function ( segment ) {
+        if ( segment.length == 0 ) return ;
+        var regExp = this.getXliffRegExpression();
+        var sourceTags = $( '.source', segment ).html()
+            .match( regExp );
+
+        var targetTags = $( '.target', segment ).html()
+            .match( regExp );
+
+        return ( $( sourceTags ).not( targetTags ).length > 0 )
+
+    },
+    /**
+     * Check if the data-original attribute in the source of the segment contains special tags (Ex: <g id=1></g>z)
+     * (Note that in the data-original attribute there are the &amp;lt instead of &lt)
+     * @param segment
+     * @returns {boolean}
+     */
     hasDataOriginalTags: function (segment) {
         var originalText = $(segment).find('.source').data('original');
-        var reg = new RegExp(/(lt;*.*?gt;)/gi);
+        var reg = new RegExp(/(&amp;lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&amp;gt;)/gmi);
         if (!_.isUndefined(originalText) && reg.test(originalText)) {
             return true;
         }
         return false;
     },
-    hasMissingTargetTags: function ( segment ) {
-        if ( segment.length == 0 ) return ;
-
-        var sourceTags = $( '.source', segment ).html()
-            .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
-
-        var targetTags = $( '.target', segment ).html()
-            .match( /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi );
-
-        return ( $( sourceTags ).not( targetTags ).length > 0 )
-
+    /**
+     * Remove all xliff source tags from the string
+     * @param currentString : the string to parse
+     * @returns the decoded String
+     */
+    removeAllTags: function (currentString) {
+        var regExp = this.getXliffRegExpression();
+        return currentString.replace(regExp, '');
+    },
+    /**
+     *  Return the Regular expression to match all xliff source tags
+     */
+    getXliffRegExpression: function () {
+        return /(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gmi;
     }
 
 });

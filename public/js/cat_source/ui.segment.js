@@ -56,10 +56,12 @@
             var decoded_translation;
             var decoded_source;
 
-            //if Tag Projection enabled and there are tags in the segment, remove it
+            /**if Tag Projection enabled and there are tags in the segment, remove it and add the class that identify
+             * tha Tag Projection is enabled
+             */
             if (UI.enableTargetProjection && (UI.getSegmentStatus(segment) === 'draft' || UI.getSegmentStatus(segment) === 'new') ) {
-                decoded_translation = removeAllTags(segment.translation);
-                decoded_source = removeAllTags(segment.segment);
+                decoded_translation = UI.removeAllTags(segment.translation);
+                decoded_source = UI.removeAllTags(segment.segment);
                 classes.push('enableTP');
             } else {
                 decoded_translation = segment.translation;
@@ -114,7 +116,11 @@
         getSegmentStatus: function (segment) {
             return (segment.status)? segment.status.toLowerCase() : 'new';
         },
-        getTagsProjection: function () {
+        /**
+         * Tag Projection: get the tag projection for the current segment
+         * @returns translation with the Tag prjection
+         */
+        getSegmentTagsProjection: function () {
             var source = UI.currentSegment.find('.source').data('original');
             source = htmlDecode(source).replace(/&quot;/g, '\"');
             source = htmlDecode(source);
@@ -138,29 +144,54 @@
                         UI.processErrors(d.errors, 'getTagProjection');
                     }
                     else {
-                        return data.data.translation;
+                        return data.translation;
                     }
                 }
             });
 
         },
-
+        /**
+         * Tag Projection: set the translation with tag projection to the current segment (source and editor)
+         * @param translation
+         */
         copyTagProjectionInCurrentSegment: function (translation) {
-            var source = UI.currentSegment.find('.source').data('original');
-
-            var decoded_translation = UI.decodePlaceholdersToText(translation, true);
-
             var source = UI.currentSegment.find('.source').data('original');
             source = htmlDecode(source).replace(/&quot;/g, '\"');
 
             var decoded_source = UI.decodePlaceholdersToText(source, true);
+            var decoded_translation = UI.decodePlaceholdersToText(translation, true);
+
             $(this.editarea).html(decoded_translation);
             UI.currentSegment.find('.source').html(decoded_source);
-            this.lockTags(this.editarea);
-            this.lockTags(UI.currentSegment.find('.source'));
-            this.editarea.focus();
-            this.highlightEditarea();
-            //Change button to Translate
+        },
+        /**
+         * Tag Projection: set a segment after tag projection is called, remove the class enableTP and set the data-tagprojection
+         * attribute to tagged (after click on Guess Tags button)
+         */
+        setSegmentAsTagged: function () {
+            UI.currentSegment.removeClass('enableTP');
+            UI.currentSegment.data('tagprojection', 'tagged');
+        },
+        /**
+         *
+         */
+
+        /**
+         * Check if in the current segment is enabled the Tag Projection
+         * @returns {boolean}
+         */
+        checkCurrentSegmentTPEnabled: function () {
+            if (this.enableTargetProjection) {
+                // If the segment has tag projection enabled (has tags and has the enableTP class)
+                var tagProjectionEnabled = this.hasDataOriginalTags( this.currentSegment) && this.currentSegment.hasClass('enableTP');
+                // The segment is already been tagged
+                var dataAttribute = UI.currentSegment.data('tagprojection');
+                // If the segment has already be tagged
+                var isCurrentAlreadyTagged = ( !_.isUndefined(dataAttribute) && dataAttribute === 'tagged')? true : false;
+                return ( tagProjectionEnabled && !isCurrentAlreadyTagged ) ? true : false;
+            }
+            return false;
+
         }
     }); 
 })(jQuery); 

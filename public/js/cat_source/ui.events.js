@@ -1159,11 +1159,18 @@ $.extend(UI, {
 			UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
 
 		}).on('click', 'a.guesstags', function(e) {
+			// Tag Projection: handle click on "GuesssTags" button, retrieve the translation and place it
+			// in the current segment
 			e.preventDefault();
 			UI.hideEditToolbar();
-			UI.getTagsProjection().done(function(data) {
-				console.log("Translation" + data.data.translation);
+			UI.getSegmentTagsProjection().done(function(data) {
 				UI.copyTagProjectionInCurrentSegment(data.translation);
+				UI.setSegmentAsTagged();
+				UI.lockTags(this.editarea);
+				UI.lockTags(UI.currentSegment.find('.source'));
+				UI.editarea.focus();
+				UI.highlightEditarea();
+				UI.createButtons();
 			});
 			return false;
 		}).on('click', 'a.d, a.a, a.r, a.f, a.fx, a.rb', function() {

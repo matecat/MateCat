@@ -982,19 +982,3 @@ function hackSnapEngage( on ) {
     }
 }
 
-function removeAllTags(currentString) {
-	var decodedString = htmlDecode(currentString);
-	return decodedString.replace(/<(?:.|\n)*?>/gm, '');
-
-}
-/*function removeAllTags(currentString) {
-	var decodedString = htmlDecode(currentString);
-	var text = "";
-	if (!$.parseHTML(decodedString)) {
-		return currentString;
-	}
-	$.each($.parseHTML(decodedString), function (index) {
-		text = text + this.innerHTML;
-	});
-	return text;
-}*/

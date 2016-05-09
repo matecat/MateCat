@@ -438,10 +438,9 @@ UI = {
         var button_label = config.status_labels.TRANSLATED ;
         var label_first_letter = button_label[0];
         var nextUntranslated, currentButton;
-        var currentIsNew = this.currentSegment.hasClass('enableTP');
+
         //Tag Projection: Identify if is enabled in the current segment
-        this.currentSegmentTPEnabled = (this.enableTargetProjection && this.hasDataOriginalTags( this.currentSegment)
-            && currentIsNew  )? true : false;
+        this.currentSegmentTPEnabled = this.checkCurrentSegmentTPEnabled();
 
 		var disabled = (this.currentSegment.hasClass('loaded')) ? '' : ' disabled="disabled"';
         var nextSegment = this.currentSegment.next();
@@ -963,7 +962,7 @@ UI = {
 
 		$.each(d.data.files, function() {
 			startSegmentId = this.segments[0].sid;
-            //Tag Projection
+            //Tag Projection: check if is enable the Tag Projection 
             if (((this.source_code === 'it-IT' && this.target_code === 'en-GB')
                 || (this.source_code === 'en-GB' && this.target_code === 'it-IT'))
                 && !config.isReview) {

@@ -236,10 +236,11 @@ $.extend(UI, {
                 //
                 suggestionDecodedHtml = UI.decodePlaceholdersToText(this.segment, true, segment_id, 'contribution source');
 				translationDecodedHtml = UI.decodePlaceholdersToText( this.translation, true, segment_id, 'contribution translation' );
-				//If Tags Projection is enable I take out the tags from the contributions
+
+		  		//If Tag Projection is enable I take out the tags from the contributions
 				if (UI.currentSegmentTPEnabled) {
-					suggestionDecodedHtml = removeAllTags(suggestionDecodedHtml);
-					translationDecodedHtml = removeAllTags(translationDecodedHtml);
+					suggestionDecodedHtml = UI.removeAllTags(suggestionDecodedHtml);
+					translationDecodedHtml = UI.removeAllTags(translationDecodedHtml);
 				}
 
                 var toAppend = $('<ul class="suggestion-item graysmall" data-item="' + (index + 1) + '" data-id="' +
