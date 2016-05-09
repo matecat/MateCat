@@ -15,6 +15,16 @@ class Routes {
         $params[ 'password' ];
     }
 
+    /**
+     * @param $params
+     *
+     * @return string
+     */
+    public static function pluginsBase( $options ) {
+        return self::httpHost( $options ) . '/plugins';
+    }
+
+
     public static function httpHost( $params ) {
         $host = INIT::$HTTPHOST;
 
