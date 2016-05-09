@@ -234,10 +234,25 @@ $.extend(UI, {
 				// Attention Bug: We are mixing the view mode and the raw data mode.
 				// before doing a enanched view you will need to add a data-original tag
                 //
-                decodedHtml = UI.decodePlaceholdersToText(this.segment, true, segment_id, 'contribution source');
+                suggestionDecodedHtml = UI.decodePlaceholdersToText(this.segment, true, segment_id, 'contribution source');
+				translationDecodedHtml = UI.decodePlaceholdersToText( this.translation, true, segment_id, 'contribution translation' );
+				//If Tags Projection is enable I take out the tags from the contributions
+				if (UI.currentSegmentTPEnabled) {
+					suggestionDecodedHtml = removeAllTags(suggestionDecodedHtml);
+					translationDecodedHtml = removeAllTags(translationDecodedHtml);
+				}
 
-
-                var toAppend = $('<ul class="suggestion-item graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source" >' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + decodedHtml + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) + '</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + UI.decodePlaceholdersToText( this.translation, true, segment_id, 'contribution translation' ) + '</span></li><ul class="graysmall-details"><li class="percent ' + percentClass + '">' + percentText + '</li><li>' + suggestion_info + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
+                var toAppend = $('<ul class="suggestion-item graysmall" data-item="' + (index + 1) + '" data-id="' +
+					this.id + '"><li class="sugg-source" >' + ((disabled) ? '' : ' <a id="' + segment_id +
+					'-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') +
+					'<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' +
+					suggestionDecodedHtml + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span -->' +
+					'<span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) +
+					'</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' +
+					translationDecodedHtml +
+					'</span></li><ul class="graysmall-details"><li class="percent ' + percentClass + '">' +
+					percentText + '</li><li>' + suggestion_info + '</li><li class="graydesc">Source: <span class="bold">' +
+					cb + '</span></li></ul></ul>');
 
                 toAppend.find('li:first').data('original', this.segment);
 

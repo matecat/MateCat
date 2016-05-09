@@ -437,18 +437,32 @@ UI = {
 	createButtons: function() {
         var button_label = config.status_labels.TRANSLATED ;
         var label_first_letter = button_label[0];
+        var nextUntranslated, currentButton;
+        var currentIsNew = this.currentSegment.hasClass('enableTP');
+        //Tag Projection: Identify if is enabled in the current segment
+        this.currentSegmentTPEnabled = (this.enableTargetProjection && this.hasDataOriginalTags( this.currentSegment)
+            && currentIsNew  )? true : false;
 
 		var disabled = (this.currentSegment.hasClass('loaded')) ? '' : ' disabled="disabled"';
         var nextSegment = this.currentSegment.next();
         var sameButton = (nextSegment.hasClass('status-new')) || (nextSegment.hasClass('status-draft'));
-        var nextUntranslated = (sameButton)? '' : '<li><a id="segment-' + this.currentSegmentId +
-            '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' +
-        this.currentSegmentId + '" title="Translate and go to next untranslated">' + label_first_letter + '+&gt;&gt;</a><p>' +
-        ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
-		UI.segmentButtons = nextUntranslated + '<li><a id="segment-' + this.currentSegmentId +
-            '-button-translated" data-segmentid="segment-' + this.currentSegmentId +
-            '" href="#" class="translated"' + disabled + ' >' + button_label + '</a><p>' +
-            ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
+        if (this.currentSegmentTPEnabled) {
+            nextUntranslated = "";
+            currentButton = '<li><a id="segment-' + this.currentSegmentId +
+                '-button-guesstags" data-segmentid="segment-' + this.currentSegmentId +
+                '" href="#" class="guesstags"' + disabled + ' >' + 'GUESS TAGS' + '</a></li>';
+        } else {
+            nextUntranslated = (sameButton)? '' : '<li><a id="segment-' + this.currentSegmentId +
+                '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' +
+                this.currentSegmentId + '" title="Translate and go to next untranslated">' + label_first_letter + '+&gt;&gt;</a><p>' +
+                ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
+            currentButton = '<li><a id="segment-' + this.currentSegmentId +
+                '-button-translated" data-segmentid="segment-' + this.currentSegmentId +
+                '" href="#" class="translated"' + disabled + ' >' + button_label + '</a><p>' +
+                ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
+        }
+
+        UI.segmentButtons = nextUntranslated + currentButton;
 
 		var buttonsOb = $('#segment-' + this.currentSegmentId + '-buttons');
 
@@ -940,6 +954,7 @@ UI = {
 		});
 	},
 	getSegments_success: function(d, options) {
+        var self = this;
         if (d.errors.length)
 			this.processErrors(d.errors, 'getSegments');
 		where = d.data.where;
@@ -948,6 +963,14 @@ UI = {
 
 		$.each(d.data.files, function() {
 			startSegmentId = this.segments[0].sid;
+            //Tag Projection
+            if (((this.source_code === 'it-IT' && this.target_code === 'en-GB')
+                || (this.source_code === 'en-GB' && this.target_code === 'it-IT'))
+                && !config.isReview) {
+                self.enableTargetProjection = true;
+            } else {
+                self.enableTargetProjection = false;
+            }
 		});
 
 		if (typeof this.startSegmentId == 'undefined')
@@ -1374,7 +1397,6 @@ UI = {
             var readonly = ((this.readonly == 'true')||(UI.body.hasClass('archived'))) ? true : false;
             var autoPropagated = this.autopropagated_from != 0;
             var autoPropagable = (this.repetitions_in_chunk == "1")? false : true;
-            if(typeof this.segment == 'object') console.log(this);
 
             try {
                 if($.parseHTML(this.segment).length) {

@@ -53,14 +53,28 @@
                 var segment_edit_min = segment.parsed_time_to_edit[1]; 
                 var segment_edit_sec = segment.parsed_time_to_edit[2]; 
             }
+            var decoded_translation;
+            var decoded_source;
 
-            var decoded_translation = UI.decodePlaceholdersToText(
-                segment.translation || '', 
+            //if Tag Projection enabled and there are tags in the segment, remove it
+            if (UI.enableTargetProjection && (UI.getSegmentStatus(segment) === 'draft' || UI.getSegmentStatus(segment) === 'new') ) {
+                decoded_translation = removeAllTags(segment.translation);
+                decoded_source = removeAllTags(segment.segment);
+                classes.push('enableTP');
+            } else {
+                decoded_translation = segment.translation;
+                decoded_source = segment.segment;
+            }
+            
+            decoded_translation = UI.decodePlaceholdersToText(
+                decoded_translation || '',
                 true, segment.sid, 'translation'); 
 
-            var decoded_source = UI.decodePlaceholdersToText(
-                segment.segment || '', 
+            decoded_source = UI.decodePlaceholdersToText(
+                decoded_source || '',
                 true, segment.sid, 'source');
+
+
 
             var templateData = {
                 t                       : t,
@@ -83,7 +97,8 @@
                 decoded_translation     : decoded_translation  ,
                 status_change_title     : status_change_title ,
                 segment_edit_sec        : segment_edit_sec,
-                segment_edit_min        : segment_edit_min
+                segment_edit_min        : segment_edit_min,
+                enableTargetProjection  : !this.enableTargetProjection
             }
 
             return templateData ;
@@ -93,8 +108,59 @@
             segment, t, readonly, autoPropagated, autoPropagable,
             escapedSegment, splitAr, splitGroup, originalId
         ) {
-            var data = UI.getSegmentTemplateData.apply( this, arguments )
+            var data = UI.getSegmentTemplateData.apply( this, arguments );
             return UI.getSegmentTemplate()( data );
+        },
+        getSegmentStatus: function (segment) {
+            return (segment.status)? segment.status.toLowerCase() : 'new';
+        },
+        getTagsProjection: function () {
+            var source = UI.currentSegment.find('.source').data('original');
+            source = htmlDecode(source).replace(/&quot;/g, '\"');
+            source = htmlDecode(source);
+            var target = UI.postProcessEditarea(UI.currentSegment, ".editarea");
+            //Before send process with this.postProcessEditarea
+            return APP.doRequest({
+                data: {
+                    action: 'getTagProjection',
+                    password: config.password,
+                    id_job: config.id_job,
+                    source: source,
+                    target: target,
+                    source_lang: config.source_lang,
+                    target_lang: config.target_lang
+                },
+                error: function() {
+                    console.log('getTagProjection error');
+                },
+                success: function(data) {
+                    if (data.errors.length) {
+                        UI.processErrors(d.errors, 'getTagProjection');
+                    }
+                    else {
+                        return data.data.translation;
+                    }
+                }
+            });
+
+        },
+
+        copyTagProjectionInCurrentSegment: function (translation) {
+            var source = UI.currentSegment.find('.source').data('original');
+
+            var decoded_translation = UI.decodePlaceholdersToText(translation, true);
+
+            var source = UI.currentSegment.find('.source').data('original');
+            source = htmlDecode(source).replace(/&quot;/g, '\"');
+
+            var decoded_source = UI.decodePlaceholdersToText(source, true);
+            $(this.editarea).html(decoded_translation);
+            UI.currentSegment.find('.source').html(decoded_source);
+            this.lockTags(this.editarea);
+            this.lockTags(UI.currentSegment.find('.source'));
+            this.editarea.focus();
+            this.highlightEditarea();
+            //Change button to Translate
         }
     }); 
 })(jQuery); 

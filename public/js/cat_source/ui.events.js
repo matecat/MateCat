@@ -131,8 +131,7 @@ $.extend(UI, {
 				tab = 'alternatives';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=1]').trigger('dblclick');
 			}
-		})
-                .on('keydown', null, 'ctrl+2', function(e) {
+		}).on('keydown', null, 'ctrl+2', function(e) {
 			e.preventDefault();
 			active = $('.editor .submenu li.active');
 			if(active.hasClass('tab-switcher-tm')) {
@@ -142,8 +141,7 @@ $.extend(UI, {
 				tab = 'alternatives';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=2]').trigger('dblclick');
 			}
-		})
-                .on('keydown', null, 'ctrl+3', function(e) {
+		}).on('keydown', null, 'ctrl+3', function(e) {
 			e.preventDefault();
 			active = $('.editor .submenu li.active');
 			if(active.hasClass('tab-switcher-tm')) {
@@ -1160,6 +1158,14 @@ $.extend(UI, {
 			UI.changeStatusStop = new Date();
 			UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
 
+		}).on('click', 'a.guesstags', function(e) {
+			e.preventDefault();
+			UI.hideEditToolbar();
+			UI.getTagsProjection().done(function(data) {
+				console.log("Translation" + data.data.translation);
+				UI.copyTagProjectionInCurrentSegment(data.translation);
+			});
+			return false;
 		}).on('click', 'a.d, a.a, a.r, a.f, a.fx, a.rb', function() {
 			var segment = $(this).parents("section");
 			$("a.status", segment).removeClass("col-approved col-rejected col-done col-draft");

@@ -145,7 +145,7 @@ $.extend(UI, {
      * This function replaces tags with monads
      */
 	lockTags: function(el) {
-
+        var self = this;
 		if (this.body.hasClass('tagmarkDisabled')) {
 			return false;
         }
@@ -193,6 +193,8 @@ $.extend(UI, {
             }
 
             $('span.locked', this).addClass('monad');
+
+            if (self.enableTargetProjection) return;
             UI.detectTagType(this);
         });
     },
@@ -667,7 +669,14 @@ $.extend(UI, {
     hasSourceOrTargetTags: function ( segment ) {
         return ( $(segment).find( '.locked' ).length > 0 || UI.sourceTags.length > 0 )
     },
-
+    hasDataOriginalTags: function (segment) {
+        var originalText = $(segment).find('.source').data('original');
+        var reg = new RegExp(/(lt;*.*?gt;)/gi);
+        if (!_.isUndefined(originalText) && reg.test(originalText)) {
+            return true;
+        }
+        return false;
+    },
     hasMissingTargetTags: function ( segment ) {
         if ( segment.length == 0 ) return ;
 
