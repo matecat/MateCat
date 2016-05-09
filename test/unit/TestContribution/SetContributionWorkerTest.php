@@ -14,17 +14,36 @@ use Contribution\ContributionStruct,
 class SetContributionWorkerTest extends AbstractTest implements SplObserver {
 
     /**
-     * SplObserver emulation
      * @param SplSubject $subject
      */
     public function update( SplSubject $subject ) {
-        // Do Nothing, should log
+        // Do Nothing, should be used to log
+        /**
+         * @var $subject \AsyncTasks\Workers\SetContributionWorker
+         */
+        $this->assertNotEmpty( $subject->getLogMsg() );
+
     }
 
     /**
      * @var ContributionStruct
      */
     protected $contributionStruct;
+
+    /**
+     * @var StompFrame
+     */
+    protected $message;
+
+    /**
+     * @var ContextList
+     */
+    protected $contextList;
+
+    /**
+     * @var AMQHandler
+     */
+    protected $amq;
 
     public function setUp(){
 
@@ -46,13 +65,6 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         );
         $curl->multiExec();
 
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function testExecContributionWorker(){
-
         //Queue submission
         $this->contributionStruct = new ContributionStruct();
 
@@ -72,36 +84,63 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
         Set::contribution( $this->contributionStruct );
 
         //now check that this value is inside AMQ
-        $contextList = ContextList::get( \INIT::$TASK_RUNNER_CONFIG[ 'context_definitions' ] );
-        $amqh        = new \AMQHandler();
-        $amqh->subscribe( $contextList->list[ 'CONTRIBUTION' ]->queue_name );
-        $message = $amqh->readFrame();
-        $amqh->ack( $message );
+        $this->contextList = ContextList::get( \INIT::$TASK_RUNNER_CONFIG[ 'context_definitions' ] );
+        $this->amq        = new \AMQHandler();
+        $this->amq->subscribe( $this->contextList->list[ 'CONTRIBUTION' ]->queue_name );
+        $this->message = $this->amq->readFrame();
+        $this->amq->ack( $this->message );
 
-        var_dump( $message );
+    }
+
+    public function tearDown(){
+        $this->amq->disconnect();
+        $this->amq = null;
+        parent::tearDown();
+    }
+
+
+    /**
+     * @throws Exception
+     */
+    public function testExecContributionWithoutKeysWorker(){
 
         /**
          * @var $queueElement \TaskRunner\Commons\QueueElement
          */
-        $queueElement = new QueueElement( json_decode( $message->body, true ) );
+        $queueElement = new QueueElement( json_decode( $this->message->body, true ) );
         $this->assertEquals( '\AsyncTasks\Workers\SetContributionWorker', $queueElement->classLoad );
 
         /**
          * @var $_worker \AsyncTasks\Workers\SetContributionWorker
          */
-        $_worker = new $queueElement->classLoad( $amqh );
+        $_worker = new $queueElement->classLoad( $this->amq );
 
         $_worker->attach( $this ) ;
         $_worker->setPid( posix_getpid() );
-        $_worker->setContext( $contextList->list[ 'CONTRIBUTION' ] );
+        $_worker->setContext( $this->contextList->list[ 'CONTRIBUTION' ] );
 
         //create a stub Engine MyMemory
         $stubEngine               = $this->getMockBuilder( '\Engines_MyMemory' )->disableOriginalConstructor()->getMock();
 
         $stubEngine->method( 'getConfigStruct' )->willReturn( Engine::getInstance( 1 )->getConfigStruct() );
 
+        $_config                  = Engine::getInstance( 1 )->getConfigStruct();
+        $_config[ 'segment' ]     = $this->contributionStruct->segment;
+        $_config[ 'translation' ] = $this->contributionStruct->translation;
+        $_config[ 'tnote' ]       = null;
+        $_config[ 'source' ]      = 'en-US';
+        $_config[ 'target' ]      = 'it-IT';
+        $_config[ 'email' ]       = $this->contributionStruct->api_key;
+        $_config[ 'prop' ]        = json_encode( array(
+                'project_id'   => 6666,
+                'project_name' => "Fake Project",
+                'job_id'       => 1999999
+        ) );
+
         $stubEngine->expects( $this->once() )
-                ->method( 'set' )->willReturn(
+                ->method( 'set' )
+                ->with( $_config )
+                ->willReturn(
                         Engines_Results_MyMemory_SetContributionResponse::getInstance(
                                 json_decode( '{"responseData":"OK","responseStatus":200,"responseDetails":[545482283]}', true )
                         )
@@ -154,6 +193,267 @@ class SetContributionWorkerTest extends AbstractTest implements SplObserver {
 
         $reflectedMethod = new ReflectionMethod( $_worker, '_execContribution' );
         $reflectedMethod->setAccessible( true );
+        $reflectedMethod->invokeArgs( $_worker, array( $mockParams ) );
+
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testExecContributionWithKeysWorker(){
+
+        /**
+         * @var $queueElement \TaskRunner\Commons\QueueElement
+         */
+        $queueElement = new QueueElement( json_decode( $this->message->body, true ) );
+        $this->assertEquals( '\AsyncTasks\Workers\SetContributionWorker', $queueElement->classLoad );
+
+        /**
+         * @var $_worker \AsyncTasks\Workers\SetContributionWorker
+         */
+        $_worker = new $queueElement->classLoad( $this->amq );
+
+        $_worker->attach( $this ) ;
+        $_worker->setPid( posix_getpid() );
+        $_worker->setContext( $this->contextList->list[ 'CONTRIBUTION' ] );
+
+        //create a stub Engine MyMemory
+        $stubEngine               = $this->getMockBuilder( '\Engines_MyMemory' )->disableOriginalConstructor()->getMock();
+
+        $stubEngine->method( 'getConfigStruct' )->willReturn( Engine::getInstance( 1 )->getConfigStruct() );
+
+        $_config                  = Engine::getInstance( 1 )->getConfigStruct();
+        $_config[ 'segment' ]     = $this->contributionStruct->segment;
+        $_config[ 'translation' ] = $this->contributionStruct->translation;
+        $_config[ 'tnote' ]       = null;
+        $_config[ 'source' ]      = 'en-US';
+        $_config[ 'target' ]      = 'it-IT';
+        $_config[ 'email' ]       = $this->contributionStruct->api_key;
+        $_config[ 'id_user' ]     = array(
+                '3c6a7d60684f4e697cfa',
+                '77297ac61e056d8645d0',
+        );
+        $_config[ 'prop' ]        = json_encode( array(
+                'project_id'   => 6666,
+                'project_name' => "Fake Project",
+                'job_id'       => 1999999
+        ) );
+
+        $stubEngine->expects( $this->once() )
+                ->method( 'set' )
+                ->with( $_config )
+                ->willReturn(
+                        Engines_Results_MyMemory_SetContributionResponse::getInstance(
+                                json_decode( '{"responseData":"OK","responseStatus":200,"responseDetails":[545518095,545518096]}', true )
+                        )
+                );
+
+        $_worker->setEngine( $stubEngine );
+
+        /**
+         * @var $queueElement Contribution\ContributionStruct
+         */
+        $mockParams = $this->getMockBuilder( '\Contribution\ContributionStruct' )->getMock();
+
+        $mockParams->expects( $this->once() )
+                ->method( 'getJobStruct' )
+                ->willReturn( array(
+                        new \Jobs_JobStruct(
+                                array(
+                                        'id'       => $this->contributionStruct->id_job,
+                                        'password' => $this->contributionStruct->job_password,
+                                        'source'   => 'en-US',
+                                        'target'   => 'it-IT',
+                                        'id_tms'   => 1,
+                                        'tm_keys'  => '[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"Test","key":"3c6a7d60684f4e697cfa","r":true,"w":true,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null},{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"E tre","key":"77297ac61e056d8645d0","r":true,"w":true,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]'
+                                )
+                        )
+                ) );
+
+        $mockParams->expects( $this->once() )
+                ->method( 'getProp' )->willReturn(
+                        array(
+                                'project_id'   => 6666,
+                                'project_name' => "Fake Project",
+                                'job_id'       => 1999999
+                        )
+                );
+
+        $queueElement->params = $mockParams;
+
+        $queueElement->params->fromRevision          = $this->contributionStruct->fromRevision;
+        $queueElement->params->id_job                = $this->contributionStruct->id_job;
+        $queueElement->params->job_password          = $this->contributionStruct->job_password;
+        $queueElement->params->segment               = $this->contributionStruct->segment;
+        $queueElement->params->translation           = $this->contributionStruct->translation;
+        $queueElement->params->api_key               = $this->contributionStruct->api_key;
+        $queueElement->params->uid                   = $this->contributionStruct->uid;
+        $queueElement->params->oldTranslationStatus  = $this->contributionStruct->oldTranslationStatus;
+        $queueElement->params->oldSegment            = $this->contributionStruct->oldSegment;
+        $queueElement->params->oldTranslation        = $this->contributionStruct->oldTranslation;
+
+
+        $reflectedMethod = new ReflectionMethod( $_worker, '_execContribution' );
+        $reflectedMethod->setAccessible( true );
+        $reflectedMethod->invokeArgs( $_worker, array( $mockParams ) );
+
+    }
+
+    public function testWorkerExceptionForNoTMConfiguredInJob(){
+
+        /**
+         * @var $queueElement \TaskRunner\Commons\QueueElement
+         */
+        $queueElement = new QueueElement( json_decode( $this->message->body, true ) );
+        $this->assertEquals( '\AsyncTasks\Workers\SetContributionWorker', $queueElement->classLoad );
+
+        /**
+         * @var $_worker \AsyncTasks\Workers\SetContributionWorker
+         */
+        $_worker = new $queueElement->classLoad( $this->amq );
+
+        $_worker->attach( $this ) ;
+        $_worker->setPid( posix_getpid() );
+        $_worker->setContext( $this->contextList->list[ 'CONTRIBUTION' ] );
+
+        /**
+         * @var $queueElement Contribution\ContributionStruct
+         */
+        $mockParams = $this->getMockBuilder( '\Contribution\ContributionStruct' )->getMock();
+
+        $mockParams->expects( $this->once() )
+                ->method( 'getJobStruct' )
+                ->willReturn( array(
+                        new \Jobs_JobStruct(
+                                array(
+                                        'id'       => $this->contributionStruct->id_job,
+                                        'password' => $this->contributionStruct->job_password,
+                                        'source'   => 'en-US',
+                                        'target'   => 'it-IT',
+                                        'id_tms'   => 0,
+                                        'tm_keys'  => '[]'
+                                )
+                        )
+                ) );
+
+        //expect no call con getProp
+        $mockParams->expects( $this->exactly( 0 ) )->method( 'getProp' );
+
+        $queueElement->params = $mockParams;
+
+        $queueElement->params->fromRevision          = $this->contributionStruct->fromRevision;
+        $queueElement->params->id_job                = $this->contributionStruct->id_job;
+        $queueElement->params->job_password          = $this->contributionStruct->job_password;
+        $queueElement->params->segment               = $this->contributionStruct->segment;
+        $queueElement->params->translation           = $this->contributionStruct->translation;
+        $queueElement->params->api_key               = $this->contributionStruct->api_key;
+        $queueElement->params->uid                   = $this->contributionStruct->uid;
+        $queueElement->params->oldTranslationStatus  = $this->contributionStruct->oldTranslationStatus;
+        $queueElement->params->oldSegment            = $this->contributionStruct->oldSegment;
+        $queueElement->params->oldTranslation        = $this->contributionStruct->oldTranslation;
+
+        $reflectedMethod = new ReflectionMethod( $_worker, '_execContribution' );
+        $reflectedMethod->setAccessible( true );
+
+        $this->setExpectedException( 'TaskRunner\Exceptions\EndQueueException', "No TM engine configured for the job. Skip, OK" );
+        $reflectedMethod->invokeArgs( $_worker, array( $mockParams ) );
+
+    }
+
+    public function testExceptionForMyMemorySetFailure(){
+
+        /**
+         * @var $queueElement \TaskRunner\Commons\QueueElement
+         */
+        $queueElement = new QueueElement( json_decode( $this->message->body, true ) );
+        $this->assertEquals( '\AsyncTasks\Workers\SetContributionWorker', $queueElement->classLoad );
+
+        /**
+         * @var $_worker \AsyncTasks\Workers\SetContributionWorker
+         */
+        $_worker = new $queueElement->classLoad( $this->amq );
+
+        $_worker->attach( $this ) ;
+        $_worker->setPid( posix_getpid() );
+        $_worker->setContext( $this->contextList->list[ 'CONTRIBUTION' ] );
+
+        //create a stub Engine MyMemory
+        $stubEngine               = $this->getMockBuilder( '\Engines_MyMemory' )->disableOriginalConstructor()->getMock();
+
+        $stubEngine->method( 'getConfigStruct' )->willReturn( Engine::getInstance( 1 )->getConfigStruct() );
+
+        $_config                  = Engine::getInstance( 1 )->getConfigStruct();
+        $_config[ 'segment' ]     = $this->contributionStruct->segment;
+        $_config[ 'translation' ] = $this->contributionStruct->translation;
+        $_config[ 'tnote' ]       = null;
+        $_config[ 'source' ]      = 'en-US';
+        $_config[ 'target' ]      = 'it-IT';
+        $_config[ 'email' ]       = $this->contributionStruct->api_key;
+        $_config[ 'id_user' ]     = array(
+                '3c6a7d60684f4e697cfa',
+                '77297ac61e056d8645d0',
+        );
+
+        $_config[ 'prop' ]        = json_encode( array(
+                'project_id'   => 6666,
+                'project_name' => "Fake Project",
+                'job_id'       => 1999999
+        ) );
+
+        $stubEngine->expects( $this->once() )
+                ->method( 'set' )
+                ->with( $_config )
+                ->willReturn( false );
+
+        $_worker->setEngine( $stubEngine );
+
+        /**
+         * @var $queueElement Contribution\ContributionStruct
+         */
+        $mockParams = $this->getMockBuilder( '\Contribution\ContributionStruct' )->getMock();
+
+        $mockParams->expects( $this->once() )
+                ->method( 'getJobStruct' )
+                ->willReturn( array(
+                        new \Jobs_JobStruct(
+                                array(
+                                        'id'       => $this->contributionStruct->id_job,
+                                        'password' => $this->contributionStruct->job_password,
+                                        'source'   => 'en-US',
+                                        'target'   => 'it-IT',
+                                        'id_tms'   => 1,
+                                        'tm_keys'  => '[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"Test","key":"3c6a7d60684f4e697cfa","r":true,"w":true,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null},{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"E tre","key":"77297ac61e056d8645d0","r":true,"w":true,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]'
+                                )
+                        )
+                ) );
+
+        $mockParams->expects( $this->once() )
+                ->method( 'getProp' )->willReturn(
+                        array(
+                                'project_id'   => 6666,
+                                'project_name' => "Fake Project",
+                                'job_id'       => 1999999
+                        )
+                );
+
+        $queueElement->params = $mockParams;
+
+        $queueElement->params->fromRevision          = $this->contributionStruct->fromRevision;
+        $queueElement->params->id_job                = $this->contributionStruct->id_job;
+        $queueElement->params->job_password          = $this->contributionStruct->job_password;
+        $queueElement->params->segment               = $this->contributionStruct->segment;
+        $queueElement->params->translation           = $this->contributionStruct->translation;
+        $queueElement->params->api_key               = $this->contributionStruct->api_key;
+        $queueElement->params->uid                   = $this->contributionStruct->uid;
+        $queueElement->params->oldTranslationStatus  = $this->contributionStruct->oldTranslationStatus;
+        $queueElement->params->oldSegment            = $this->contributionStruct->oldSegment;
+        $queueElement->params->oldTranslation        = $this->contributionStruct->oldTranslation;
+
+
+        $reflectedMethod = new ReflectionMethod( $_worker, '_execContribution' );
+        $reflectedMethod->setAccessible( true );
+
+        $this->setExpectedException( 'TaskRunner\Exceptions\ReQueueException' );
         $reflectedMethod->invokeArgs( $_worker, array( $mockParams ) );
 
     }

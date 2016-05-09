@@ -136,37 +136,24 @@ class SetContributionWorker extends AbstractWorker {
 
             if ( !empty( $tm_keys ) ) {
 
-                unset($config[ 'id_user' ]); //TODO: verify, exists??? Why unset???
-
+                $config[ 'id_user' ] = array();
                 foreach ( $tm_keys as $i => $tm_info ) {
-
-                    $config[ 'id_user' ] = $tm_info->key;
-
-                    // set the contribution for every key in the job belonging to the user
-                    $res = $this->_tms->set( $config );
-
-                    if ( !$res ) {
-                        throw new ReQueueException( "Set failed on " . get_class( $this->_tms ) . ": Values " . var_export( $config, true ), self::ERR_SET_FAILED );
-                    }
-
-                }
-
-            } else {
-
-                $res = $this->_tms->set( $config );
-
-                if ( !$res ) {
-
-                    if ( !$res ) {
-                        throw new ReQueueException( "Set failed on " . get_class( $this->_tms ) . ": Values " . var_export( $config, true ), self::ERR_SET_FAILED );
-                    }
-
+                    $config[ 'id_user' ][] = $tm_info->key;
                 }
 
             }
 
+            // set the contribution for every key in the job belonging to the user
+            $res = $this->_tms->set( $config );
+
+            if ( !$res ) {
+                throw new ReQueueException( "Set failed on " . get_class( $this->_tms ) . ": Values " . var_export( $config, true ), self::ERR_SET_FAILED );
+            }
+
         } else {
+
             throw new EndQueueException( "No TM engine configured for the job. Skip, OK", self::ERR_NO_TM_ENGINE );
+            
         }
 
     }
