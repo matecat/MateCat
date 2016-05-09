@@ -1102,25 +1102,19 @@ $.extend(UI, {
             UI.hideEditToolbar();
             $('.test-invisible').remove();
 
-
             UI.currentSegment.removeClass('modified');
 			var skipChange = false;
 			if (w == 'next-untranslated') {
 				console.log('next-untranslated');
 				if (!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {
-					console.log('il nextuntranslated non è caricato: ', UI.nextUntranslatedSegmentId);
+
 					UI.changeStatus(this, 'translated', 0);
 					skipChange = true;
 					if (!UI.nextUntranslatedSegmentId) {
-//						console.log('a');
 						$('#' + $(this).attr('data-segmentid') + '-close').click();
 					} else {
-//						console.log('b');
 						UI.reloadWarning();
 					}
-
-				} else {
-					console.log('il nextuntranslated è già caricato: ', UI.nextUntranslatedSegmentId);
 				}
 			} else {
 				if (!$(UI.currentSegment).nextAll('section:not(.readonly)').length) {
@@ -1152,7 +1146,8 @@ $.extend(UI, {
 			if (w == 'translated') {
                 UI.gotoNextSegment();
 			} else {
-                $(".editarea", UI.nextUntranslatedSegment).trigger("click", "translated");
+                // TODO: investigate why this trigger click is necessary.
+                $(".editarea", UI.nextUntranslatedSegment).trigger("click", "translated")
 			}
 
             UI.lockTags($('#' + $(this).attr('data-segmentid') + ' .editarea'));

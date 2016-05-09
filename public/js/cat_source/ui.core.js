@@ -1845,8 +1845,20 @@ UI = {
         $('.editor .editarea').trigger('afterFormatSelection');
 	},
 
+    /**
+     * setStatus
+     *
+     * Set the status at UI level, with potential inconsistent state against what is saved server side.
+     * This is necessary for CSS but also for changeStatus function, which relies on this class to
+     * determine the status to assign to the setTranslation during the autosave.
+     *
+     * @param segment DOM element
+     * @param status
+     */
 	setStatus: function(segment, status) {
-		segment.removeClass("status-draft status-translated status-approved status-rejected status-new status-fixed status-rebutted")
+		segment.removeClass(
+            "status-draft status-translated status-approved " +
+            "status-rejected status-new status-fixed status-rebutted")
         .addClass("status-" + status);
 
         segment
