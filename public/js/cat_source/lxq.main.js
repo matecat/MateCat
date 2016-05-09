@@ -367,21 +367,23 @@ if (LXQ.enabled())
                     }
                 }
             }
+            if (out.length==0) {
+                return null;
+            }
+            out.sort(function (a, b) {
+                if (a.end == b.end) {
+                    return a.start - b.start;
+                }
+                return a.end - b.end;
+            });
+            var textMaxHighlight = out[out.length - 1].end;
+            
             out.sort(function (a, b) {
                 if (a.start == b.start) {
                     return a.end - b.end;
                 }
                 return a.start - b.start;
-            });
-
-            // console.log('*******************');
-            // console.dir(out);
-            // console.log('*******************');
-            if (out.length==0) {
-                return null;
-            }
-            var textMaxHighlight = out[out.length - 1].end;
-
+            });           
             var textMinHighlight = out[0].start;
             var txt = new Array(textMaxHighlight - textMinHighlight + 1);
             for (var i =0 ;i<txt.length;i++)
