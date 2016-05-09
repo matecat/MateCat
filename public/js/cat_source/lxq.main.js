@@ -43,7 +43,7 @@ if (LXQ.enabled())
                  s: ''},					
             p2sub1: {t: 'space before punctuation mark missing',
                    s: ''},
-            p2sub2: {t: 'no space before openning parenthesis',
+            p2sub2: {t: 'no space before opening parenthesis',
                    s: ''},	                   					
             p3: {t:	'space after punctuation mark missing',
                  s: ''},
@@ -76,7 +76,9 @@ if (LXQ.enabled())
             s3sub2: {t: 'bracket not opened',
                  s: ''},	
             s4: {t: 'character missing from source',
-                 s: 'character missing from target'},	                 
+                 s: 'character missing from target'},	
+            s5: {t: 'currency mismatch',
+                s: 'currency mismatch'},                      
             default: {t:'not found in source',
             	      s: 'missing from target' }                 									 
         }
