@@ -34,7 +34,7 @@ class DeleteGlossaryMyMemoryTest extends AbstractTest
      */
     protected $curl_param;
     protected $curl_additional_params;
-    protected $config_param_of_set;
+    protected $config_param_of_delete;
 
     protected $url_set;
     protected $url_delete;
@@ -57,7 +57,7 @@ class DeleteGlossaryMyMemoryTest extends AbstractTest
         $this->engine_struct_param = @$eng[0];
         
 
-        $this->config_param_of_set = array(
+        $this->config_param_of_delete = array(
             'tnote' => NULL,
             'source' => "it-IT",
             'target' => "en-US",
@@ -115,10 +115,10 @@ class DeleteGlossaryMyMemoryTest extends AbstractTest
      */
     public function test_delete_glossary_segment_without_key_id()
     {
-        $this->config_param_of_set['segment'] = $this->segment;
-        $this->config_param_of_set['translation'] = $this->translation;
+        $this->config_param_of_delete['segment'] = $this->segment;
+        $this->config_param_of_delete['translation'] = $this->translation;
 
-        $result = $this->engine_MyMemory->delete($this->config_param_of_set);
+        $result = $this->engine_MyMemory->delete($this->config_param_of_delete);
 
         $this->assertTrue($result);
 
@@ -160,11 +160,11 @@ class DeleteGlossaryMyMemoryTest extends AbstractTest
         $mh->multiCurlCloseAll();
         sleep(2);
         
-        $this->config_param_of_set['segment'] = $this->segment;
-        $this->config_param_of_set['translation'] = $this->translation;
-        $this->config_param_of_set['id_user'] =array('0' => "fc7ba5edf8d5e8401593");
+        $this->config_param_of_delete['segment'] = $this->segment;
+        $this->config_param_of_delete['translation'] = $this->translation;
+        $this->config_param_of_delete['id_user'] =array('0' => "fc7ba5edf8d5e8401593");
 
-        $result = $this->engine_MyMemory->delete($this->config_param_of_set);
+        $result = $this->engine_MyMemory->delete($this->config_param_of_delete);
         sleep(1);
 
         $this->assertTrue($result);

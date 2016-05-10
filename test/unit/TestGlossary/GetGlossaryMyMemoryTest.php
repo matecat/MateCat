@@ -36,7 +36,7 @@ class GetGlossaryMyMemoryTest extends AbstractTest
      */
     protected $curl_param;
     protected $curl_additional_params;
-    protected $config_param_of_set;
+    protected $config_param_of_get;
 
     protected $url_set;
     protected $url_delete;
@@ -60,7 +60,7 @@ class GetGlossaryMyMemoryTest extends AbstractTest
         $this->engine_struct_param = @$eng[0];
 
 
-        $this->config_param_of_set = array(
+        $this->config_param_of_get = array(
             'tnote' => NULL,
             'source' => "it-IT",
             'target' => "en-US",
@@ -120,10 +120,10 @@ class GetGlossaryMyMemoryTest extends AbstractTest
      */
     public function test_get_glossary_segment_without_key_id()
     {
-        $this->config_param_of_set['segment'] = $this->segment;
-        $this->config_param_of_set['translation'] = $this->translation;
+        $this->config_param_of_get['segment'] = $this->segment;
+        $this->config_param_of_get['translation'] = $this->translation;
 
-        $result_object = $this->engine_MyMemory->get($this->config_param_of_set);
+        $result_object = $this->engine_MyMemory->get($this->config_param_of_get);
 
         /**
          * general check on the keys of TSM object returned
@@ -158,11 +158,11 @@ class GetGlossaryMyMemoryTest extends AbstractTest
         $mh->multiCurlCloseAll();
         sleep(3);
 
-        $this->config_param_of_set['segment'] = $this->segment;
-        $this->config_param_of_set['translation'] = $this->translation;
-        $this->config_param_of_set['id_user'] = array('0' => "fc7ba5edf8d5e8401593");
+        $this->config_param_of_get['segment'] = $this->segment;
+        $this->config_param_of_get['translation'] = $this->translation;
+        $this->config_param_of_get['id_user'] = array('0' => "fc7ba5edf8d5e8401593");
 
-        $result_object = $this->engine_MyMemory->get($this->config_param_of_set);
+        $result_object = $this->engine_MyMemory->get($this->config_param_of_get);
         sleep(1);
 
         /**

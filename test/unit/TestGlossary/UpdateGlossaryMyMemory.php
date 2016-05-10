@@ -2,7 +2,7 @@
 
 /**
  * @group regression
- * @covers Engines_MyMemory::delete
+ * @covers Engines_MyMemory::update
  * User: dinies
  * Date: 10/05/16
  * Time: 16.33
@@ -61,7 +61,6 @@ class UpdateGlossaryMyMemory extends AbstractTest
             'tnote' => NULL,
             'source' => "it-IT",
             'target' => "en-US",
-            'email' => "demo@matecat.com",
             'prop' => NULL,
             'get_mt' => NULL,
             'num_result' => 100,
@@ -111,16 +110,16 @@ class UpdateGlossaryMyMemory extends AbstractTest
 
     /**
      * @group regression
-     * @covers Engines_MyMemory::delete
+     * @covers Engines_MyMemory::update
      */
-    public function test_delete_glossary_segment_without_key_id()
+    public function test_update_glossary_segment_without_key_id()
     {
         $this->config_param_of_set['segment'] = $this->segment;
         $this->config_param_of_set['translation'] = $this->translation;
 
-        $result = $this->engine_MyMemory->delete($this->config_param_of_set);
+        $result = $this->engine_MyMemory->update($this->config_param_of_set);
 
-        $this->assertTrue($result);
+        $this->assertFalse($result);
 
         $result_object = $this->property->getValue($this->engine_MyMemory);
         /**
@@ -134,17 +133,17 @@ class UpdateGlossaryMyMemory extends AbstractTest
         $this->assertTrue(property_exists($result_object, 'error'));
         $this->assertTrue(property_exists($result_object, '_rawResponse'));
 
-        $this->assertEquals(404, $result_object->responseStatus);
+        $this->assertEquals(403, $result_object->responseStatus);
 
-        $this->assertEquals("NO ID FOUND", $result_object->responseDetails);
+         $this->assertEquals("GLOSSARY REQUIRES AUTHENTICATION, PROVIDE THE 'KEY' PARAMETER", $result_object->responseDetails);
     }
 
     /**
      * @group regression
-     * @covers Engines_MyMemory::delete
+     * @covers Engines_MyMemory::update
      */
 
-    public function test_delete_glossary_segment()
+    public function test_update_glossary_segment()
     {
 
         $mh= new MultiCurlHandler();
@@ -164,7 +163,7 @@ class UpdateGlossaryMyMemory extends AbstractTest
         $this->config_param_of_set['translation'] = $this->translation;
         $this->config_param_of_set['id_user'] =array('0' => "fc7ba5edf8d5e8401593");
 
-        $result = $this->engine_MyMemory->delete($this->config_param_of_set);
+        $result = $this->engine_MyMemory->update($this->config_param_of_set);
         sleep(1);
 
         $this->assertTrue($result);
@@ -187,7 +186,7 @@ class UpdateGlossaryMyMemory extends AbstractTest
         $this->assertEquals(array(),$result_object->matches);
         $this->assertEquals(200, $result_object->responseStatus);
         $this->assertEquals("", $result_object->responseDetails);
-        $this->assertEquals("Found and deleted 1 segments", $result_object->responseData);
+        $this->assertEquals("OK", $result_object->responseData);
         $this->assertNull($result_object->error);
         /**
          * check of protected property
