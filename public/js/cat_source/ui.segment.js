@@ -173,11 +173,7 @@
             UI.currentSegment.data('tagprojection', 'tagged');
         },
         /**
-         *
-         */
-
-        /**
-         * Check if in the current segment is enabled the Tag Projection
+         * Check if the  the Tag Projection in the current segment is enabled and still not tagged
          * @returns {boolean}
          */
         checkCurrentSegmentTPEnabled: function () {
@@ -191,7 +187,19 @@
                 return ( tagProjectionEnabled && !isCurrentAlreadyTagged ) ? true : false;
             }
             return false;
-
-        }
+        },
+        /**
+         * Enable another time the Tag Projection, for example after clicking on the Translation Matches
+         */
+        enableTPOnSegmentAndSetButton: function () {
+            var tagProjectionEnabled = this.hasDataOriginalTags( this.currentSegment)  && !this.currentSegment.hasClass('enableTP');
+            if (this.enableTargetProjection && tagProjectionEnabled) {
+                UI.currentSegment.addClass('enableTP');
+                UI.currentSegment.data('tagprojection', 'nottagged');
+                UI.createButtons();
+            }
+        },
+        
+        
     }); 
 })(jQuery); 

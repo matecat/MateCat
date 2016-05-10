@@ -14,13 +14,11 @@ $.extend(UI, {
 		this.copySuggestionInEditarea(this.currentSegment, $('.editor .tab.matches ul[data-item=' + w + '] li.b .translation').html(), $('.editor .editarea'), $('.editor .tab.matches ul[data-item=' + w + '] ul.graysmall-details .percent').text(), false, false, w);
 		this.lockTags(this.editarea);
 		this.setChosenSuggestion(w);
-
 		this.editarea.focus();
 		this.highlightEditarea();
+		this.enableTPOnSegmentAndSetButton();
 	},
 	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which) {
-// console.log('translation 1: ', translation);
-//        console.log('copySuggestionInEditarea - editarea: ', editarea);
 		if (typeof (decode) == "undefined") {
 			decode = false;
 		}
@@ -30,19 +28,15 @@ $.extend(UI, {
 			//ANTONIO 20121205 editarea.text(translation).addClass('fromSuggestion');
 
 			if (decode) {
-//				console.log('translation 2: ', translation);
 				translation = htmlDecode(translation);
 			}
 			if (this.body.hasClass('searchActive'))
 				this.addWarningToSearchDisplay();
 
 			this.saveInUndoStack('copysuggestion');
-//			translation = UI.decodePlaceholdersToText(translation, true);
-//			translation = UI.decodePlaceholdersToText(htmlEncode(translation), true);
-// console.log('translation 3: ', translation);
+
 			if(!which) translation = UI.encodeSpacesAsPlaceholders(translation, true);
-//			translation = UI.encodeSpacesAsPlaceholders(translation);
-// console.log('translation 4: ', translation);
+
 			$(editarea).html(translation).addClass('fromSuggestion');
 			this.saveInUndoStack('copysuggestion');
 			$('.percentuage', segment).text(match).removeClass('per-orange per-green per-blue per-yellow').addClass(percentageClass).addClass('visible');

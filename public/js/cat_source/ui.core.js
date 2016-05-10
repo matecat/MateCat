@@ -1667,11 +1667,8 @@ UI = {
             .replace( config.crPlaceholderRegex, "\r" )
             .replace( config.crlfPlaceholderRegex, "\r\n" )
             .replace( config.tabPlaceholderRegex, "\t" )
-            //.replace( config.tabPlaceholderRegex, String.fromCharCode( parseInt( 0x21e5, 10 ) ) )
             .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
-//        _str  = htmlDecode(_str );
         _edit = mainStr.replace( String.fromCharCode( parseInt( 0x21e5, 10 ) ), "\t" );
-//        _edit = UI.currentSegment.find('.editarea').text().replace( String.fromCharCode( parseInt( 0x21e5, 10 ) ), "\t" );
 
         //Prepend Unicode Character 'ZERO WIDTH SPACE' invisible, not printable, no spaced character,
         //used to detect initial and final spaces in html diff
@@ -1683,15 +1680,14 @@ UI = {
         return diff_obj;
     },
 
-    chooseAlternative: function(w) {console.log('chooseAlternative');
-//        console.log( $('.sugg-target .realData', w ) );
+    chooseAlternative: function(w) {
         this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).text(), true, UI.currentSegmentId, 'choose alternative' ) );
         this.lockTags(this.editarea);
         this.editarea.focus();
         this.highlightEditarea();
+        this.enableTPOnSegmentAndSetButton();
     },
 	copyAlternativeInEditarea: function(translation) {
-		console.log('translation: ', translation);
 		if ($.trim(translation) !== '') {
 			if (this.body.hasClass('searchActive'))
 				this.addWarningToSearchDisplay();
@@ -2931,8 +2927,6 @@ UI = {
         }
 
     },
-
-
     setWaypoints: function() {
 		this.firstSegment.waypoint('remove');
 		this.lastSegment.waypoint('remove');
