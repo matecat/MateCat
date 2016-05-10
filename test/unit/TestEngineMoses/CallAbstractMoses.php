@@ -7,7 +7,7 @@
  * Date: 06/05/16
  * Time: 16.39
  */
-class CallFunctionDeepLingoTest extends AbstractTest
+class CallAbstractMosesTest extends AbstractTest
 {
     /**
      * @var EnginesModel_EngineStruct
@@ -15,6 +15,7 @@ class CallFunctionDeepLingoTest extends AbstractTest
     protected $engine_struct_param_DeepLingo;
     /**
      * @var Engines_DeepLingo
+     * DeepLingo is a subclass of Moses
      */
     protected $engine_Deep_Lingo;
     /**

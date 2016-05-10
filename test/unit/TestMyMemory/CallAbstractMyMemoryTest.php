@@ -7,7 +7,7 @@
  * Date: 22/04/16
  * Time: 11.47
  */
-class CallFunctionMyMemoryTest extends AbstractTest
+class CallAbstractMyMemoryTest extends AbstractTest
 {
     /**
      * @var EnginesModel_EngineStruct
@@ -159,7 +159,7 @@ LABEL;
         $this->config_param_of_delete['segment'] = $this->str_seg_3;
         $this->config_param_of_delete['translation'] = $this->str_tra_3;
         $this->engine_MyMemory->delete($this->config_param_of_delete);
-        sleep(1);
+        sleep(2);
         /**
          * setting matches in my memory
          */
@@ -172,7 +172,7 @@ LABEL;
         $this->config_param_of_set['segment'] = $this->str_seg_3;
         $this->config_param_of_set['translation'] = $this->str_tra_3;
         $this->engine_MyMemory->set($this->config_param_of_set);
-        sleep(1);
+        sleep(2);
 
 
     }
@@ -192,7 +192,7 @@ LABEL;
         $this->config_param_of_delete['segment'] = $this->str_seg_3;
         $this->config_param_of_delete['translation'] = $this->str_tra_3;
         $this->engine_MyMemory->delete($this->config_param_of_delete);
-
+        sleep(1);
         parent::tearDown();
 
     }
