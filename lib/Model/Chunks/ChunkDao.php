@@ -80,6 +80,12 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
         return $stmt->fetchAll( ) ;
     }
 
+    /**
+     * @param $id_project
+     * @param $id_job
+     *
+     * @return Chunks_ChunkStruct[]
+     */
     public static function getByJobIdProjectAndIdJob( $id_project, $id_job ) {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare("SELECT * FROM " .

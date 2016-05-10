@@ -18,8 +18,6 @@ class Comments_CommentEmail {
 
     public function deliver() {
 
-        $config = @parse_ini_file( INIT::$UTILS_ROOT . '/Analysis/task_manager_config.ini', true );
-
         $mailConf[ 'Host' ]       = INIT::$SMTP_HOST;
         $mailConf[ 'port' ]       = INIT::$SMTP_PORT;
         $mailConf[ 'sender' ]     = INIT::$SMTP_SENDER;
@@ -28,22 +26,14 @@ class Comments_CommentEmail {
         $mailConf[ 'fromName' ]   = INIT::$MAILER_FROM_NAME;
         $mailConf[ 'returnPath' ] = INIT::$MAILER_RETURN_PATH;
 
-        $handler = new \AMQHandler();
-
-        //First Execution, load build object
-        $contextList = ContextList::get( $config[ 'context_definitions' ] );
-
         $queue_element               = array_merge( array(), $mailConf );
-        $queue_element[ 'address' ] = array( $this->user->email, $this->user->first_name );
-        $queue_element[ 'subject' ] = $this->buildSubject();
+        $queue_element[ 'address' ]  = array( $this->user->email, $this->user->first_name );
+        $queue_element[ 'subject' ]  = $this->buildSubject();
         $queue_element[ 'htmlBody' ] = $this->buildHTMLMessage();
-        $queue_element[ 'altBody' ] = $this->buildTextMessage();
+        $queue_element[ 'altBody' ]  = $this->buildTextMessage();
 
-        $element = new QueueElement();
-        $element->params = $queue_element;
-        $element->classLoad = '\AsyncTasks\Workers\CommentMailWorker';
-
-        $handler->send( $contextList->list['MAIL']->queue_name, $element, array( 'persistent' => true ) );
+        WorkerClient::init( new AMQHandler() );
+        \WorkerClient::enqueue( 'MAIL', '\AsyncTasks\Workers\CommentMailWorker', $queue_element, array( 'persistent' => WorkerClient::$_HANDLER->persistent ) );
 
         Log::doLog( 'Message has been sent' );
         return true;

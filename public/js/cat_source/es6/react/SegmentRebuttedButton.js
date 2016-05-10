@@ -9,7 +9,9 @@ var button = React.createClass({
 
     handleClick : function() {
         var el = UI.Segment.findEl(this.props.sid);
+        el.removeClass('modified');
         UI.changeStatus(el, 'rebutted', true);
+        UI.gotoNextSegment();
     },
 
     handleTranslationSuccess : function(e, data) {

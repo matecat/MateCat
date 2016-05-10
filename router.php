@@ -17,6 +17,8 @@ function route($path, $method, $controller, $action) {
     });
 }
 
+Features::loadRoutes( $klein );
+
 $klein->onError(function ($klein, $err_msg, $err_type, $exception) {
     // TODO still need to catch fatal errors here with 500 code
 
@@ -147,6 +149,8 @@ $klein->respond('POST', '/api/v2/projects/[:id_project]/[:password]/jobs/[:id_jo
 
 
 
+
+route( '/api/v1/jobs/[:id_job]/[:password]/stats', 'GET',  'API\V1\StatsController', 'stats' );
 
 /**
  * Define additional routes here

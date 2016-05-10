@@ -3,8 +3,14 @@
 class CatDecorator {
 
     private $controller;
+
+    /**
+     * @var PHPTALWithAppend
+     */
     private $template;
+
     private $job;
+
     private $review_type;
 
     /**
@@ -25,6 +31,9 @@ class CatDecorator {
     }
 
     public function decorate() {
+        $this->template->footer_js = array();
+        $this->template->css_resources = array();
+
         $this->template->isReview                         = $this->controller->isRevision();
         $this->template->header_quality_report_item_class = '';
         $this->template->review_password                  = $this->controller->getReviewPassword();

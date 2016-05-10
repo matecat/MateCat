@@ -17,15 +17,7 @@
         /*]]>*/
     </script>
 
-    <script src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
-    <tal:block tal:condition="true:use_compiled_assets" >
-        <script src="${basepath}public/js/build/app.min.js?build=${build_number}"></script>
-    </tal:block>
-
-    <tal:block tal:condition="not:use_compiled_assets" >
-        <script src="${basepath}public/js/build/app.js?build=${build_number}"></script>
-    </tal:block>
-
+    <script src="${basepath}public/js/common.js"></script>
 </head>
 <body>
 
@@ -33,11 +25,26 @@
     <script>
         $( "body" ).on( 'click', '#reactivate-job', function ( e ) {
             e.preventDefault();
-            UI.reactivateJob();
+            $.post(
+                    "/",
+                {
+                    action:         "changeJobsStatus",
+                    new_status:     "active",
+                    res:            "job",
+                    id:             config.job_id,
+                    password:      config.password
+                })
+                .done(function(d){
+                    if(d.data == 'OK') {
+                        setTimeout(function() {
+                            location.reload(true);
+                        }, 300);
+                    }
+                });
         } );
+
     </script>
     <a href="${basepath}" class="logoblack"></a><br/>
-
 
     <strong style="font-size:160%">This job has been archived.</strong><br/><br/>
     <img src="/public/img/jobarchived.png"/><br/>

@@ -32,7 +32,11 @@
     }
 
     Segment.find = function( number ) {
-        return new Segment( Segment.findEl( number ) );
+        var el = Segment.findEl( number ) ;
+        if ( el.length == 0 ) {
+            return ;
+        }
+        return new Segment( el );
     }
 
     $.extend(UI, {

@@ -39,8 +39,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
     function getPreviousTranslationText( segment ) {
         var record = RI.getSegmentRecord(segment);
         var version ;
-        var revertingVersion = segment.el.data('revertingVersion');
-        var prevBase =  revertingVersion ? revertingVersion : record.version_number ;
+        var prevBase = record.version_number ;
         version = db.segment_versions.findObject({
             id_segment : record.sid,
             version_number : (prevBase -1) + ''
@@ -113,19 +112,22 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         }
 
         var container = segment.el.find('.buttons') ;
-        var revertingVersion = segment.el.data('revertingVersion');
+        container.empty();
+
+        var currentScore = getLatestScoreForSegment( segment ) ;
 
         var buttonData = {
             disabled : !container.hasClass('loaded'),
             id_segment : segment.id,
             ctrl : ( (UI.isMac) ? 'CMD' : 'CTRL'),
+            show_approve : currentScore == 0,
+            show_reject : currentScore > 0
         };
 
         var buttonsHTML = MateCat.Templates['review_improved/segment_buttons']( buttonData ) ;
 
         var data = {
-            versions : versions.findObjects({ id_segment : segment.id }),
-            revertingVersion : revertingVersion
+            versions : versions.findObjects({ id_segment : segment.id })
         };
 
         container.append(buttonsHTML);
@@ -141,6 +143,31 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         // to show in quality-report button.
         ReviewImproved.reloadQualityReport();
     });
+
+
+    getLatestScoreForSegment = function( segment ) {
+        if (! segment) {
+            return ;
+        }
+        var db_segment = MateCat.db.segments.findObject({ sid : '' + segment.id });
+        var latest_issues = MateCat.db.segment_translation_issues.findObjects({
+            id_segment : '' + segment.id ,
+            translation_version : '' + db_segment.version_number
+        });
+
+        var total_penalty = _.reduce(latest_issues, function(sum, record) {
+            return sum + parseInt(record.penalty_points) ;
+        }, 0) ;
+
+        return total_penalty ;
+    }
+
+    var issuesChanged = function( record ) {
+        var segment = UI.Segment.find(record.id_segment);
+        if ( segment ) renderButtons( segment ) ;
+    }
+
+    MateCat.db.addListener('segment_translation_issues', ['insert', 'delete', 'update'], issuesChanged );
 
 })($, window, ReviewImproved, UI);
 }

@@ -2,6 +2,11 @@
 
 class Segments_SegmentNoteDao extends DataAccess_AbstractDao {
 
+    /**
+     * @param $id_segment
+     *
+     * @return Segments_SegmentNoteStruct[]
+     */
     public static function getBySegmentId( $id_segment ) {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( "SELECT * FROM segment_notes " .

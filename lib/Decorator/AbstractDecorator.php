@@ -21,6 +21,10 @@
  */
 abstract class AbstractDecorator {
     protected $controller;
+
+    /**
+     * @var PHPTAL
+     */
     protected $template;
 
     public function __construct( controller $controller, PHPTAL $template ) {

@@ -3,6 +3,75 @@
 class Jobs_JobDao extends DataAccess_AbstractDao {
 
     /**
+     * This method is not static and used to cache at Redis level the values for this Job
+     *
+     * Use when counters of the job value are not important but only the metadata are needed
+     *
+     * XXX: Be careful, used by the ContributionStruct
+     *
+     * @see \AsyncTasks\Workers\SetContributionWorker
+     * @see \Contribution\ContributionStruct
+     *
+     * @param Jobs_JobStruct $jobQuery
+     * @return Jobs_JobStruct[]
+     */
+    public function read( \Jobs_JobStruct $jobQuery ){
+
+        $stmt = $this->_getStatementForCache();
+        return $this->_fetchObject( $stmt,
+                $jobQuery,
+                array(
+                        'id_job' => $jobQuery->id,
+                        'password' => $jobQuery->password
+                )
+        );
+
+    }
+
+    /**
+     *
+     * @return PDOStatement
+     */
+    protected function _getStatementForCache() {
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare(
+                "SELECT * FROM jobs WHERE " .
+                " id = :id_job AND password = :password "
+        );
+
+        return $stmt;
+    }
+
+    /**
+     * @param array $array_result
+     *
+     * @return DataAccess_IDaoStruct|DataAccess_IDaoStruct[]|void
+     */
+    protected function _buildResult( $array_result ){}
+
+    /**
+     * Destroy a cached object
+     *
+     * @param Jobs_JobStruct $jobQuery
+     *
+     * @return bool
+     * @throws Exception
+     */
+    public function destroyCache( \Jobs_JobStruct $jobQuery ){
+        /*
+        * build the query
+        */
+        $stmt = $this->_getStatementForCache();
+        return $this->_destroyObjectCache( $stmt,
+                array(
+                        'id_job' => $jobQuery->id,
+                        'password' => $jobQuery->password
+                )
+        );
+    }
+
+    /**
      * @param $id_job
      * @param $password
      *
@@ -59,10 +128,6 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         $stmt->execute( array( $id_job ) );
 
         return $stmt->fetch();
-    }
-
-    protected function _buildResult( $array_result ) {
-
     }
 
     /**
