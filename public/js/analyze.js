@@ -363,15 +363,24 @@ UI = {
 
 		var pid = config.id_project;
         var ppassword = config.password ;
-
-		APP.doRequest({
-			data: {
+		if (config.id_job) {
+			data = {
+				action: 'getVolumeAnalysis',
+					pid: pid,
+					jpassword: ppassword
+			};
+		} else {
+			data = {
 				action: 'getVolumeAnalysis',
 				pid: pid,
-                ppassword: ppassword
-			},
+				ppassword: ppassword
+			};
+		}
+
+		APP.doRequest({
+			data: data,
 			success: function ( d ) {
-				if ( d.data && d.data.summary) {
+				if ( d.data) {
 					var s = d.data.summary;
 
 					if ( (s.STATUS == 'NEW') || (s.STATUS == '') || s.IN_QUEUE_BEFORE > 0 ) {
