@@ -1,21 +1,38 @@
 @import '_mixins';
 
-.micSpeech {
-    display: none;
-    position: absolute;
-    height: 20px;
-    bottom: 26px;
-    left: -6px;
-    cursor: default;
-    z-index: 9999999;
-    padding: 2px;
-    border-radius: 3px;
-    border: 1px solid transparent;
-    z-index: 9999;
+.activeSegmentButton {
+    @include box-shadow(inset 0 1px 2px rgba(0,0,0,.1));
+    @include linear-gradient(#eee, top, #eee, #e0e0e0);
+    border-color:#ccc;
+}
 
+.segmentButton {
+    height: 20px;
+    min-width: 20px;
+    cursor: default;
+    border-radius: 3px;
+    padding: 2px;
+    border: 1px solid #C6C6C6;
     @include box-shadow(0 1px 1px rgba(0,0,0,.1));
     @include linear-gradient(#f8f8f8, top, #f8f8f8, #f1f1f1);
-    border-color: #C6C6C6;
+
+    &:hover {
+        color: #000000;
+    }
+
+    &:active {
+        @extend .activeSegmentButton;
+    }
+}
+
+.micSpeech {
+    @extend .segmentButton;
+
+    display: none;
+    position: absolute;
+    bottom: 0;
+    left: -6px;
+    z-index: 9999999;
 
     &:hover {
         svg g {
@@ -25,9 +42,7 @@
 
     &.micSpeechActive,
     &:active {
-        @include box-shadow(inset 0 1px 2px rgba(0,0,0,.1));
-        @include linear-gradient(#eee, top, #eee, #e0e0e0);
-        border-color:#ccc;
+        @extend .activeSegmentButton;
 
         svg g {
             fill: #000000;
@@ -53,26 +68,70 @@
     }
 }
 
-.editor .editarea {
-    padding-bottom: 40px;
-}
-
-.editor .editarea-separator {
-    position: absolute;
-    width: 100%;
-    height: 1px;
-    bottom: 54px;
-    left: -10px;
-    padding: 0px 5px;
-    z-index: 998;
-    border-top: 1px dotted #969696;
-}
-
 section.opened .micSpeech,
 section.opened .micSpeechActive,
 section.opened svg.micBgSpeechActive,
 section.opened svg.micBgSpeechReceiving {
     display: block;
+}
+
+section.opened {
+    ul.buttons {
+        margin-top: -10px;
+    }
+
+    .toolbar {
+        margin-left: 30px;
+    }
+}
+
+$tlbr-btn-bg: -webkit-linear-gradient(top, #f8f8f8, #f1f1f1);
+$tlbr-btn-bg-act: -webkit-linear-gradient(top, #eee, #e0e0e0);
+
+.tlbr-btn-act {
+    opacity: 1.0;
+}
+
+.editToolbar {
+    li {
+        @extend .segmentButton;
+
+        &.uppercase {
+            @include toolbar-button-background(url(../img/edit-uppercase1.png), 28px, $tlbr-btn-bg);
+
+            &:hover {
+                @extend .tlbr-btn-act;
+            }
+
+            &:active {
+                @include toolbar-button-background(url(../img/edit-uppercase1.png), 28px, $tlbr-btn-bg-act);
+            }
+        }
+
+        &.lowercase {
+            @include toolbar-button-background(url(../img/edit-lowercase1.png), 28px, $tlbr-btn-bg);
+
+            &:hover {
+                @extend .tlbr-btn-act;
+            }
+
+            &:active {
+                @include toolbar-button-background(url(../img/edit-lowercase1.png), 28px, $tlbr-btn-bg-act);
+            }
+        }
+
+        &.capitalize {
+            @include toolbar-button-background(url(../img/edit-capitalize.png), 12px, $tlbr-btn-bg);
+
+            &:hover {
+                @extend .tlbr-btn-act;
+            }
+
+            &:active {
+                @include toolbar-button-background(url(../img/edit-capitalize.png), 12px, $tlbr-btn-bg-act);
+            }
+        }
+    }
 }
 
 @include keyframes(speaking) {

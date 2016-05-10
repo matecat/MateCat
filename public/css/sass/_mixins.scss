@@ -59,3 +59,10 @@
         @content;
     }
 }
+
+@mixin toolbar-button-background($icon, $iconSize, $background) {
+    background-image: $icon, $background;
+    background-size: $iconSize $iconSize, auto auto;
+    background-position: center center, 0% 0%;
+    background-repeat: no-repeat, repeat;
+}
