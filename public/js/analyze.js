@@ -368,10 +368,10 @@ UI = {
 			data: {
 				action: 'getVolumeAnalysis',
 				pid: pid,
-                ppassword: ppassword,
+                ppassword: ppassword
 			},
 			success: function ( d ) {
-				if ( d.data ) {
+				if ( d.data && d.data.summary) {
 					var s = d.data.summary;
 
 					if ( (s.STATUS == 'NEW') || (s.STATUS == '') || s.IN_QUEUE_BEFORE > 0 ) {
