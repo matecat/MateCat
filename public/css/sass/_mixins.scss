@@ -36,6 +36,18 @@
           animation-play-state: $play;
 }
 
+@mixin animation-timing-function($function) {
+  -webkit-animation-timing-function: $function;
+     -moz-animation-timing-function: $function;
+          animation-timing-function: $function;
+}
+
+@mixin animation-direction($direction) {
+  -webkit-animation-direction: $direction;
+     -moz-animation-direction: $direction;
+          animation-direction: $direction;
+}
+
 @mixin keyframes($name) {
     @-webkit-keyframes #{$name} {
         @content;

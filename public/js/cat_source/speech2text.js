@@ -11,7 +11,6 @@ Speech2Text = {};
         isToEmptyTargetElement: true,
         isStopingRecognition: false,
         isToKeepRecognizing: false,
-        animatedCircle: null,
         loadRecognition: function() {
             if ( 'webkitSpeechRecognition' in window ) {
                 Speech2Text.recognition = new webkitSpeechRecognition();
@@ -26,9 +25,6 @@ Speech2Text = {};
         },
         enableMicrophone: function( segment ) {
             Speech2Text.microphone = segment.find( '.micSpeech' );
-            Speech2Text.animatedCircle = document.getElementById(
-                    'svg-mic-' + Speech2Text.microphone.data( 'segment-id' )
-            );
 
             if( Speech2Text.recognition ) {
                 Speech2Text.targetElement = Speech2Text.microphone.parent().find( '.editarea' );
@@ -119,7 +115,6 @@ Speech2Text = {};
                 Speech2Text.startSpeechRecognition( Speech2Text.microphone );
             } else {
                 Speech2Text.microphone.removeClass( 'micSpeechActive' );
-                Speech2Text.stopAnimations();
             }
         },
         onRecognitionResult: function( event ) {
@@ -192,13 +187,10 @@ Speech2Text = {};
             }
         },
         animateSpeechActive: function() {
-            Speech2Text.animatedCircle.setAttribute( 'class', 'micBgSpeechActive' );
+            Speech2Text.microphone.removeClass( 'micSpeechReceiving' );
         },
         animateSpeechReceiving: function() {
-            Speech2Text.animatedCircle.setAttribute( 'class', 'micBgSpeechReceiving' );
-        },
-        stopAnimations: function() {
-            Speech2Text.animatedCircle.setAttribute( 'class', '' );
+            Speech2Text.microphone.addClass( 'micSpeechReceiving' );
         }
     });
 

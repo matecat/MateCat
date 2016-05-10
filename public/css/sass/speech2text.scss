@@ -13,11 +13,11 @@
     border: 1px solid transparent;
     z-index: 9999;
 
-    &:hover {
-        @include box-shadow(0 1px 1px rgba(0,0,0,.1));
-        @include linear-gradient(#f8f8f8, top, #f8f8f8, #f1f1f1);
-        border-color: #C6C6C6;
+    @include box-shadow(0 1px 1px rgba(0,0,0,.1));
+    @include linear-gradient(#f8f8f8, top, #f8f8f8, #f1f1f1);
+    border-color: #C6C6C6;
 
+    &:hover {
         svg g {
             fill: #000000;
         }
@@ -31,6 +31,20 @@
 
         svg g {
             fill: #000000;
+        }
+    }
+
+    &.micSpeechReceiving {
+        background: hsl(0, 100%, 55%);
+
+        @include animation-duration(1s);
+        @include animation-name(speaking);
+        @include animation-iteration-count(infinite);
+        @include animation-timing-function(ease-in-out);
+        @include animation-direction(alternate);
+
+        svg g {
+            fill: #FFFFFF;
         }
     }
 
@@ -61,49 +75,11 @@ section.opened svg.micBgSpeechReceiving {
     display: block;
 }
 
-.bg-circle {
-    position: absolute;
-    bottom: 20px;
-    left: -14px;
-    width: 40px;
-    height: 40px;
-    z-index: 999;
-
-    svg {
-        display: none;
-        transform: scale(0.6);
-
-        @include animation-duration(2s);
-        @include animation-name(speaking);
-        @include animation-iteration-count(0);
-        @include animation-play-state(running);
-
-        &.micBgSpeechActive {
-            display: none;
-            @include animation-iteration-count(infinite);
-        }
-
-        &.micBgSpeechReceiving {
-            display: none;
-            circle {
-                stroke: #FF5555;
-                fill: #FF5555;
-            }
-
-            @include animation-duration(0.5s);
-            @include animation-iteration-count(infinite);
-        }
-    }
-}
-
 @include keyframes(speaking) {
     0% {
-        transform: scale(0.6);
-    }
-    50% {
-        transform: scale(1.2);
+        background: hsl(0, 71%, 35%);
     }
     100% {
-        transform: scale(0.6);
+        background: hsl(0, 100%, 55%);
     }
 }
