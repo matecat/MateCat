@@ -460,7 +460,7 @@ class TMAnalysisWorker extends AbstractWorker {
 
         if ( isset( $mt_result ) && !empty( $mt_result ) ) {
             $matches[ ] = $mt_result;
-            usort( $matches, "Executor::_compareScore" );
+            usort( $matches, "self::_compareScore" );
         }
 
         /**
