@@ -13,7 +13,12 @@
 .mbc-comment-balloon-inner {
   background: #f7f7f7;
   box-shadow: 0 1px 2px 0px rgba(0,0,0,0.3);
-  margin-top: 4px;
+  padding-top: 20px;
+  margin-top: -45px;  
+}
+
+section.editor .mbc-comment-balloon-inner {
+  margin-top: -25px;
 }
 
 /* Give breathing space to the last comment ballon in page */
@@ -31,6 +36,7 @@
   border-top: 1px solid #dadada;
   box-shadow: 0px -3px 6px -5px rgba(0,0,0,0.3);
   position: relative;
+  padding:10px 12px 17px!important;
 }
 
 
@@ -54,7 +60,7 @@
  ******
  */
 .mbc-thread-wrap {
-  padding: 14px 12px;
+  padding: 0 12px 17px 12px;
 }
 
 /*
@@ -823,6 +829,7 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
   -webkit-filter: drop-shadow(-1px 0px 0px rgba(0,0,0,.2));
   filter: drop-shadow(-1px 0px 0px rgba(0,0,0,.2));
   margin-left: -12px;
+  float: left;
 }
 
 
