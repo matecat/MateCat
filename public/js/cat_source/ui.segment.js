@@ -151,14 +151,6 @@
                 },
                 error: function() {
                     console.log('getTagProjection error');
-                },
-                success: function(data) {
-                    if (data.errors.length) {
-                        UI.processErrors(d.errors, 'getTagProjection');
-                    }
-                    else {
-                        return data.translation;
-                    }
                 }
             });
 

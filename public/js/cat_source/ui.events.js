@@ -1153,8 +1153,13 @@ $.extend(UI, {
 			// in the current segment
 			e.preventDefault();
 			UI.hideEditToolbar();
-			UI.getSegmentTagsProjection().done(function(data) {
-				UI.copyTagProjectionInCurrentSegment(data.translation);
+			UI.getSegmentTagsProjection().success(function(response) {
+				if (response.errors.length) {
+					UI.processErrors(response.errors, 'getTagProjection');
+					UI.copyTagProjectionInCurrentSegment("");
+				} else {
+					UI.copyTagProjectionInCurrentSegment(response.data.translation);
+				}
 				UI.setSegmentAsTagged();
 				UI.lockTags(this.editarea);
 				UI.lockTags(UI.currentSegment.find('.source'));
