@@ -460,6 +460,11 @@ $(window).resize(function() {
 <script src="${basepath}public/js/lib/snapengage.js"></script>
 <!-- // Snapengage -->
 
+<tal:block  tal:repeat="js_source footer_js">
+  <script type="text/javascript" tal:attributes="src js_source"></script>
+</tal:block>
+
+
 <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_translate"/>
 
 </html>
