@@ -16,9 +16,9 @@ $.extend(UI, {
 			$('.editor .editarea'), $(ulDataItem + w + '] ul.graysmall-details .percent').text(), false, false, w);
 		this.lockTags(this.editarea);
 		this.setChosenSuggestion(w);
-
 		this.editarea.focus();
 		this.highlightEditarea();
+		this.enableTPOnSegmentAndSetButton();
 	},
 	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which) {
 		if (typeof (decode) == "undefined") {
@@ -30,19 +30,15 @@ $.extend(UI, {
 			//ANTONIO 20121205 editarea.text(translation).addClass('fromSuggestion');
 
 			if (decode) {
-//				console.log('translation 2: ', translation);
 				translation = htmlDecode(translation);
 			}
 			if (this.body.hasClass('searchActive'))
 				this.addWarningToSearchDisplay();
 
 			this.saveInUndoStack('copysuggestion');
-//			translation = UI.decodePlaceholdersToText(translation, true);
-//			translation = UI.decodePlaceholdersToText(htmlEncode(translation), true);
-// console.log('translation 3: ', translation);
+
 			if(!which) translation = UI.encodeSpacesAsPlaceholders(translation, true);
-//			translation = UI.encodeSpacesAsPlaceholders(translation);
-// console.log('translation 4: ', translation);
+
 			$(editarea).html(translation).addClass('fromSuggestion');
 			this.saveInUndoStack('copysuggestion');
 			$('.percentuage', segment).text(match).removeClass('per-orange per-green per-blue per-yellow').addClass(percentageClass).addClass('visible');
@@ -186,7 +182,6 @@ $.extend(UI, {
       $(".percentuage", segment).attr("title", '' + perc_t + "Created by " + d.data.matches[0].created_by);
       var match = d.data.matches[0].match;
 
-      var copySuggestionDone = false;
       var segment_id = segment.attr('id');
       $(segment).addClass('loaded');
       $('.sub-editor.matches .overflow', segment).empty();
@@ -231,10 +226,26 @@ $.extend(UI, {
 				// Attention Bug: We are mixing the view mode and the raw data mode.
 				// before doing a enanched view you will need to add a data-original tag
                 //
-                decodedHtml = UI.decodePlaceholdersToText(this.segment, true, segment_id, 'contribution source');
+                suggestionDecodedHtml = UI.decodePlaceholdersToText(this.segment, true, segment_id, 'contribution source');
+				translationDecodedHtml = UI.decodePlaceholdersToText( this.translation, true, segment_id, 'contribution translation' );
 
+		  		//If Tag Projection is enable I take out the tags from the contributions
+				if (UI.currentSegmentTPEnabled) {
+					suggestionDecodedHtml = UI.removeAllTags(suggestionDecodedHtml);
+					translationDecodedHtml = UI.removeAllTags(translationDecodedHtml);
+				}
 
-                var toAppend = $('<ul class="suggestion-item graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source" >' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + decodedHtml + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) + '</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + UI.decodePlaceholdersToText( this.translation, true, segment_id, 'contribution translation' ) + '</span></li><ul class="graysmall-details"><li class="percent ' + percentClass + '">' + percentText + '</li><li>' + suggestion_info + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
+                var toAppend = $('<ul class="suggestion-item graysmall" data-item="' + (index + 1) + '" data-id="' +
+					this.id + '"><li class="sugg-source" >' + ((disabled) ? '' : ' <a id="' + segment_id +
+					'-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') +
+					'<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' +
+					suggestionDecodedHtml + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span -->' +
+					'<span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) +
+					'</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' +
+					translationDecodedHtml +
+					'</span></li><ul class="graysmall-details"><li class="percent ' + percentClass + '">' +
+					percentText + '</li><li>' + suggestion_info + '</li><li class="graydesc">Source: <span class="bold">' +
+					cb + '</span></li></ul></ul>');
 
                 toAppend.find('li:first').data('original', this.segment);
 
@@ -254,21 +265,15 @@ $.extend(UI, {
 
 //            UI.setContributionSourceDiff_Old();
 			if (editareaLength === 0) {
-//				console.log('translation AA: ', translation);
-//				translation = UI.decodePlaceholdersToText(translation, true, segment_id, 'translation');
+
 				translation = $('#' + segment_id + ' .matches ul.graysmall').first().find('.translation').html();
-//				console.log($('#' + segment_id + ' .matches .graysmall'));
-//				console.log('translation BB: ', translation);
+
 				UI.copySuggestionInEditarea(segment, translation, editarea, match, false, true, 1);
+
 				if (UI.body.hasClass('searchActive'))
 					UI.addWarningToSearchDisplay();
 				UI.setChosenSuggestion(1);
-				copySuggestionDone = true;
 			}
-//			if (copySuggestionDone) {
-//				if (isActiveSegment) {
-//				}
-//			}
 
 			$('.translated', segment).removeAttr('disabled');
 			$('.draft', segment).removeAttr('disabled');

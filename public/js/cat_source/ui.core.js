@@ -437,18 +437,31 @@ UI = {
 	createButtons: function() {
         var button_label = config.status_labels.TRANSLATED ;
         var label_first_letter = button_label[0];
+        var nextUntranslated, currentButton;
+
+        //Tag Projection: Identify if is enabled in the current segment
+        this.currentSegmentTPEnabled = this.checkCurrentSegmentTPEnabled();
 
 		var disabled = (this.currentSegment.hasClass('loaded')) ? '' : ' disabled="disabled"';
         var nextSegment = this.currentSegment.next();
         var sameButton = (nextSegment.hasClass('status-new')) || (nextSegment.hasClass('status-draft'));
-        var nextUntranslated = (sameButton)? '' : '<li><a id="segment-' + this.currentSegmentId +
-            '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' +
-        this.currentSegmentId + '" title="Translate and go to next untranslated">' + label_first_letter + '+&gt;&gt;</a><p>' +
-        ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
-		UI.segmentButtons = nextUntranslated + '<li><a id="segment-' + this.currentSegmentId +
-            '-button-translated" data-segmentid="segment-' + this.currentSegmentId +
-            '" href="#" class="translated"' + disabled + ' >' + button_label + '</a><p>' +
-            ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
+        if (this.currentSegmentTPEnabled) {
+            nextUntranslated = "";
+            currentButton = '<li><a id="segment-' + this.currentSegmentId +
+                '-button-guesstags" data-segmentid="segment-' + this.currentSegmentId +
+                '" href="#" class="guesstags"' + disabled + ' >' + 'GUESS TAGS' + '</a></li>';
+        } else {
+            nextUntranslated = (sameButton)? '' : '<li><a id="segment-' + this.currentSegmentId +
+                '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' +
+                this.currentSegmentId + '" title="Translate and go to next untranslated">' + label_first_letter + '+&gt;&gt;</a><p>' +
+                ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
+            currentButton = '<li><a id="segment-' + this.currentSegmentId +
+                '-button-translated" data-segmentid="segment-' + this.currentSegmentId +
+                '" href="#" class="translated"' + disabled + ' >' + button_label + '</a><p>' +
+                ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
+        }
+
+        UI.segmentButtons = nextUntranslated + currentButton;
 
 		var buttonsOb = $('#segment-' + this.currentSegmentId + '-buttons');
 
@@ -945,6 +958,7 @@ UI = {
 		});
 	},
 	getSegments_success: function(d, options) {
+        var self = this;
         if (d.errors.length)
 			this.processErrors(d.errors, 'getSegments');
 		where = d.data.where;
@@ -953,6 +967,14 @@ UI = {
 
 		$.each(d.data.files, function() {
 			startSegmentId = this.segments[0].sid;
+            //Tag Projection: check if is enable the Tag Projection 
+            if (((this.source_code === 'it-IT' && this.target_code === 'en-GB')
+                || (this.source_code === 'en-GB' && this.target_code === 'it-IT'))
+                && !config.isReview) {
+                self.enableTagProjection = true;
+            } else {
+                self.enableTagProjection = false;
+            }
 		});
 
 		if (typeof this.startSegmentId == 'undefined')
@@ -1379,7 +1401,6 @@ UI = {
             var readonly = ((this.readonly == 'true')||(UI.body.hasClass('archived'))) ? true : false;
             var autoPropagated = this.autopropagated_from != 0;
             var autoPropagable = (this.repetitions_in_chunk == "1")? false : true;
-            if(typeof this.segment == 'object') console.log(this);
 
             try {
                 if($.parseHTML(this.segment).length) {
@@ -1651,11 +1672,8 @@ UI = {
             .replace( config.crPlaceholderRegex, "\r" )
             .replace( config.crlfPlaceholderRegex, "\r\n" )
             .replace( config.tabPlaceholderRegex, "\t" )
-            //.replace( config.tabPlaceholderRegex, String.fromCharCode( parseInt( 0x21e5, 10 ) ) )
             .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
-//        _str  = htmlDecode(_str );
         _edit = mainStr.replace( String.fromCharCode( parseInt( 0x21e5, 10 ) ), "\t" );
-//        _edit = UI.currentSegment.find('.editarea').text().replace( String.fromCharCode( parseInt( 0x21e5, 10 ) ), "\t" );
 
         //Prepend Unicode Character 'ZERO WIDTH SPACE' invisible, not printable, no spaced character,
         //used to detect initial and final spaces in html diff
@@ -1667,15 +1685,14 @@ UI = {
         return diff_obj;
     },
 
-    chooseAlternative: function(w) {console.log('chooseAlternative');
-//        console.log( $('.sugg-target .realData', w ) );
+    chooseAlternative: function(w) {
         this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).text(), true, UI.currentSegmentId, 'choose alternative' ) );
         this.lockTags(this.editarea);
         this.editarea.focus();
         this.highlightEditarea();
+        this.enableTPOnSegmentAndSetButton();
     },
 	copyAlternativeInEditarea: function(translation) {
-		console.log('translation: ', translation);
 		if ($.trim(translation) !== '') {
 			if (this.body.hasClass('searchActive'))
 				this.addWarningToSearchDisplay();

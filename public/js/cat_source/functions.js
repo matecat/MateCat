@@ -981,3 +981,4 @@ function hackSnapEngage( on ) {
         button.css( 'z-index', button.data( 'mbc-zindex' ) );
     }
 }
+
