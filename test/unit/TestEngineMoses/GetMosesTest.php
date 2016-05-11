@@ -107,7 +107,7 @@ class GetMosesTest extends AbstractTest
 LAB;
         $url_param = "http://mtserver01.deeplingo.com:8019/translate?q=house+is+red&source=en&target=fr&key=gala15";
         $this->configuration['segment'] = "house is red";
-        $this->mock_engine->expects($this->any())->method('_call')->with($url_param)->willReturn($json_output);
+        $this->mock_engine->expects($this->once())->method('_call')->with($url_param)->willReturn($json_output);
 
         $mock = $this->mock_engine->get($this->configuration) ;
         $translation = $mock["translation"];
@@ -219,7 +219,7 @@ LAB;
 
         $this->configuration['segment'] = "house is red and apple is green soup";
 
-        $this->mock_engine->expects($this->any())->method('_call')->with($url_param)->willReturn($json_output);
+        $this->mock_engine->expects($this->once())->method('_call')->with($url_param)->willReturn($json_output);
 
         $mock = $this->mock_engine->get($this->configuration) ;
         $translation = $mock["translation"];

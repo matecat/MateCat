@@ -504,6 +504,11 @@ UI = {
         var segmentFooter = new UI.SegmentFooter( segment );
         $('.footer', segment).append( segmentFooter.html() );
 
+        // If the Messages Tab is present open it by default
+        if ($('.footer', segment).find('.open.segment-notes').length) {
+            this.forceShowMatchesTab();
+        }
+
         UI.currentSegment.trigger('afterFooterCreation', segment);
 
         // FIXME: arcane. Whatever it does, it should go in the contribution module.
@@ -1862,8 +1867,20 @@ UI = {
         $('.editor .editarea').trigger('afterFormatSelection');
 	},
 
+    /**
+     * setStatus
+     *
+     * Set the status at UI level, with potential inconsistent state against what is saved server side.
+     * This is necessary for CSS but also for changeStatus function, which relies on this class to
+     * determine the status to assign to the setTranslation during the autosave.
+     *
+     * @param segment DOM element
+     * @param status
+     */
 	setStatus: function(segment, status) {
-		segment.removeClass("status-draft status-translated status-approved status-rejected status-new status-fixed status-rebutted")
+		segment.removeClass(
+            "status-draft status-translated status-approved " +
+            "status-rejected status-new status-fixed status-rebutted")
         .addClass("status-" + status);
 
         segment
@@ -2213,6 +2230,13 @@ UI = {
         APP.showMessage(options);
 
 	},
+    showExistingMessage: function () {
+        if(!$('body').hasClass('incomingMsg')) {
+            $('body' ).addClass('incomingMsg');
+            setTimeout(  function() {$('body' ).removeClass('incomingMsg' )} , 5000  );
+        }
+        setTimeout(  function() {$('body' ).removeClass('incomingMsg' )} , 5000  );
+    },
 	checkVersion: function() {
 		if(this.version != config.build_number) {
 			UI.showMessage({
@@ -2300,7 +2324,6 @@ UI = {
         var propagate = options.propagate || false;
 
         var segment = UI.Segment.find( id_segment );
-
         //
         //REMOVED Check for to save
         //Send ALL to the queue
@@ -2312,25 +2335,28 @@ UI = {
             byStatus: byStatus,
             propagate: propagate
         };
-
-        if( this.translationIsToSave( segment ) ) {
+        //Check if the traslation is not already in the tail
+        var saveTranslation = this.translationIsToSave( segment );
+        // If not i save it or update
+        if( saveTranslation ) {
             this.addToSetTranslationTail( item );
         } else {
             this.updateToSetTranslationTail( item )
         }
-
+        //If is offline and is in the tail I decrease the counter
+        //else I execute the tail
         if ( this.offline && config.offlineModeEnabled ) {
-
-            if ( toSave ) {
+            if ( saveTranslation ) {
                 this.decrementOfflineCacheRemaining();
-                this.failedConnection( [ id_segment, status, false ], 'setTranslation' );
+                options.callback = UI.incrementOfflineCacheRemaining;
+                this.failedConnection( options, 'setTranslation' );
             }
-
             this.changeStatusOffline( id_segment );
             this.checkConnection( 'Set Translation check Authorized' );
-
         } else {
-            if ( !this.executingSetTranslation ) return this.execSetTranslationTail();
+            if ( !this.executingSetTranslation )  {
+                return this.execSetTranslationTail();
+            }
         }
     },
     alreadyInSetTranslationTail: function (sid) {
@@ -2382,7 +2408,7 @@ UI = {
         var callback = options.callback;
         var byStatus = options.byStatus;
         var propagate = options.propagate;
-
+        var sourceSegment;
         this.executingSetTranslation = true;
         var reqArguments = arguments;
 		var segment = $('#segment-' + id_segment);
@@ -2395,8 +2421,10 @@ UI = {
 		// Attention, to be modified when we will lock tags
 		if( config.brPlaceholdEnabled ) {
 			translation = this.postProcessEditarea(segment);
+            sourceSegment = this.postProcessEditarea(segment, '.source');
 		} else {
             translation = $('.editarea', segment ).text();
+            sourceSegment = $('.source', segment ).text();
 		}
 
 		if (translation === '') {
@@ -2410,7 +2438,10 @@ UI = {
 		var chosen_suggestion = $('.editarea', segment).data('lastChosenSuggestion');
 		autosave = (caller == 'autosave') ? true : false;
         isSplitted = (id_segment.split('-').length > 1) ? true : false;
-        if(isSplitted) translation = this.collectSplittedTranslations(id_segment);
+        if(isSplitted) {
+            translation = this.collectSplittedTranslations(id_segment);
+            sourceSegment = this.collectSplittedTranslations(id_segment, ".source");
+        }
         this.tempReqArguments = {
             id_segment: id_segment,
             id_job: config.id_job,
@@ -2418,6 +2449,7 @@ UI = {
             password: config.password,
             status: status,
             translation: translation,
+            segment : sourceSegment,
             time_to_edit: time_to_edit,
             id_translator: id_translator,
             errors: errors,
@@ -2441,7 +2473,7 @@ UI = {
 			context: [reqArguments, options],
 			error: function() {
                 UI.addToSetTranslationTail(this[1]);
-                UI.changeStatusOffline(this[0][0]);
+                UI.changeStatusOffline(this[0][0].id_segment);
                 UI.failedConnection(this[0], 'setTranslation');
                 UI.decrementOfflineCacheRemaining();
             },
@@ -2468,14 +2500,12 @@ UI = {
         });
         return statuses;
     },
-    collectSplittedTranslations: function (sid) {
+    collectSplittedTranslations: function (sid, selector) {
         totalTranslation = '';
         segmentsIds = $('#segment-' + sid).attr('data-split-group').split(',');
         $.each(segmentsIds, function (index) {
             segment = $('#segment-' + this);
-            translation = UI.postProcessEditarea(segment);
-            totalTranslation += translation;
-//            totalTranslation += $(segment).find('.editarea').html();
+            totalTranslation += UI.postProcessEditarea(segment, selector);
             if(index < (segmentsIds.length - 1)) totalTranslation += UI.splittedTranslationPlaceholder;
         });
         return totalTranslation;
@@ -2759,10 +2789,6 @@ UI = {
 				}
 			}
 
-			if (operation == 'setContribution' && this.code != '-10' && UI.savingMemoryErrorNotificationEnabled) { // is not a password error
-				APP.alert({msg: "Error in saving the segment to the translation memory.<br />Try refreshing the page and click on Translated again.<br />Contact <b>support@matecat.com</b> if this happens often."});
-			}
-
 			if (this.code == '-10' && operation != 'getSegments' ) {
 //				APP.alert("Job canceled or assigned to another translator");
 				APP.alert({
@@ -2926,6 +2952,9 @@ UI = {
             $.cookie(cookieName + '-' + config.id_job, this.body.hasClass('tagmarkDisabled'), { expires: 30 });
         }
 
+    },
+    forceShowMatchesTab: function () {
+        UI.body.removeClass('hideMatches');
     },
     setWaypoints: function() {
 		this.firstSegment.waypoint('remove');

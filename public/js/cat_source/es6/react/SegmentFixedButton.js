@@ -9,6 +9,7 @@ var SegmentFixedButton = React.createClass({
 
     handleClick: function() {
         var el = UI.Segment.findEl(this.props.sid);
+        el.removeClass('modified');
         UI.changeStatus(el, 'fixed', true);
         UI.gotoNextSegment(); // NOT ideal behaviour, would be better to have a callback chain of sort.
     },

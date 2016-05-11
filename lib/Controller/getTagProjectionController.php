@@ -3,11 +3,15 @@
 
 class getTagProjectionController extends ajaxController {
 
-    private $source;
-    private $target;
-    private $source_lang;
-    private $target_lang;
-    private $id_job;
+    protected $__postInput = array();
+
+    protected $password = "";
+    protected $suggestion = "";
+    protected $source;
+    protected $target;
+    protected $source_lang;
+    protected $target_lang;
+    protected $id_job;
 
 
     public function __construct() {
@@ -19,6 +23,7 @@ class getTagProjectionController extends ajaxController {
             'password'           => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'source'             => array( 'filter' => FILTER_UNSAFE_RAW ),
             'target'             => array( 'filter' => FILTER_UNSAFE_RAW ),
+            'suggestion'         => array( 'filter' => FILTER_UNSAFE_RAW ),
             'source_lang'        => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'target_lang'        => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
         );
@@ -35,6 +40,7 @@ class getTagProjectionController extends ajaxController {
         $this->target              = $this->__postInput[ 'target' ];
         $this->source_lang         = $this->__postInput[ 'source_lang' ];
         $this->target_lang         = $this->__postInput[ 'target_lang' ];
+        $this->suggestion          = $this->__postInput[ 'suggestion' ];
 
     }
 
@@ -76,7 +82,7 @@ class getTagProjectionController extends ajaxController {
             $this->result[ 'errors' ][ ] = array( "code" => -101, "message" => "error fetching job data" );
         }
 
-        if ( empty( $this->result[ 'errors' ] ) && !$pCheck->grantJobAccessByJobData( $job_data, $this->password ) ) {
+        if ( !$pCheck->grantJobAccessByJobData( $job_data, $this->password ) ) {
             $this->result[ 'errors' ][ ] = array( "code" => -10, "message" => "wrong password" );
         }
 
@@ -88,14 +94,11 @@ class getTagProjectionController extends ajaxController {
             return -1;
         }
 
-
-//        $id_tms  = $job_data[ 'id_tms' ];
-//        $tm_keys = $job_data[ 'tm_keys' ];
-
         $config = array();
 
         $config[ 's' ] = CatUtils::view2rawxliff( $this->source );
         $config[ 't' ] = CatUtils::view2rawxliff( $this->target );
+        $config[ 'suggestion' ] = CatUtils::view2rawxliff( $this->suggestion );
 //        $config[ 'i' ] = 1;
         /*if ( $id_tms != 0 ) {
 
@@ -126,24 +129,24 @@ class getTagProjectionController extends ajaxController {
         $url  = "http://52.72.102.16:8045/tags-projection?";
         $url .= http_build_query( $parameters );
 
-        $parsed_url = parse_url( $url );
-
-        $isSSL = stripos( $parsed_url[ 'scheme' ], "https" ) !== false;
+//        $isSSL = stripos( $parsed_url[ 'scheme' ], "https" ) !== false;
 
         $ch = curl_init();
 
         // set URL and other appropriate options
-//        curl_setopt( $ch, CURLOPT_URL, $this->url );
         curl_setopt( $ch, CURLOPT_URL, $url );
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-//        curl_setopt( $ch, CURLOPT_HEADER, 0 );
-//        curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
+        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt( $ch, CURLOPT_HEADER, 0 );
+        curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
 
         // grab URL and pass it to the browser
         $response = curl_exec( $ch );
         $response = json_decode($response);
         $translation = CatUtils::rawxliff2view( $response->{'translation'} );
-        $this->result['translation'] = $translation;
+        //$this->result     = array("errors" => array( array( "code" => -1000, "message" => "Ciccio" ) ), "data" => array() );
+        $this->result[ 'data' ]['translation'] = $translation;
+
+
 
     }
 

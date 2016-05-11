@@ -11,7 +11,6 @@
 namespace AsyncTasks\Workers;
 
 use TaskRunner\Commons\AbstractElement;
-use TaskRunner\Commons\Context;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\Params;
 use TaskRunner\Commons\QueueElement;
@@ -19,7 +18,7 @@ use TaskRunner\Exceptions\EmptyElementException;
 use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\ReQueueException;
 
-use \PHPMailer, \AMQHandler;
+use \PHPMailer;
 
 /**
  * Class TMAnalysisWorker
@@ -31,35 +30,18 @@ use \PHPMailer, \AMQHandler;
 class ErrMailWorker extends AbstractWorker {
 
     /**
-     * Handler to the AMQ server and Redis Server
-     *
-     * @var \AMQHandler
+     * Override to set another logger on the same queue
+     * 
+     * @return string
      */
-    protected $_queueHandler;
-
-    /**
-     * The context object.
-     * It stores the configuration for the worker
-     *
-     * @var Context
-     */
-    protected $_myContext;
-
-    /**
-     * ErrMailWorker constructor.
-     *
-     * @param AMQHandler $queueHandler
-     */
-    public function __construct( AMQHandler $queueHandler ) {
-        \Log::$fileName = 'err_mail.log';
-        $this->_queueHandler = $queueHandler;
+    public function getLoggerName(){
+        return "err_mail.log";
     }
 
     /**
      * Concrete Method to start the activity of the worker
      *
      * @param AbstractElement $queueElement
-     * @param Context         $queueContext
      *
      * @return void
      *
@@ -67,7 +49,7 @@ class ErrMailWorker extends AbstractWorker {
      * @throws EndQueueException
      * @throws ReQueueException
      */
-    public function process( AbstractElement $queueElement, Context $queueContext ) {
+    public function process( AbstractElement $queueElement ) {
 
         /**
          * @var $queueElement QueueElement
