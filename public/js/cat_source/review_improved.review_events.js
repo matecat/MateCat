@@ -55,15 +55,9 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         ReviewImproved.reloadQualityReport();
     });
 
-    $(document).on('segment:status:change', function(e, segment, options) {
-        if ( options.status != 'rejected' ) {
-            // save to database!!
-            UI.openNextTranslated( segment.id );
-        }
-    });
-
     $(document).on('click', 'a.approved', function(e) {
         UI.changeStatus( this , 'approved', 0);
+        UI.openNextTranslated() ;
     });
 
     $(document).on('click', '.button-reject', function(e) {
