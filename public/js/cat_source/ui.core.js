@@ -3505,10 +3505,8 @@ UI = {
         UI.checkWarnings(true);
         $('html').trigger('start');
         if (LXQ.enabled()) {
+            $('#lexiqabox').removeAttr("style");
             LXQ.initPopup();
-        }
-        else {
-            $('#lexiqabox').css("display", "none");
         }
     },
     restart: function () {

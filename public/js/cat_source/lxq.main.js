@@ -5,8 +5,8 @@
 
 LXQ = {
     enabled: function () {
-        return true;
-        //return false;
+        //return true;
+        return config.lxq_enabled;
     }
 }
 
