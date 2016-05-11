@@ -2,22 +2,22 @@
 
 /**
  * @group regression
- * @covers  Engines_AbstractEngine::_call
+ * @covers  Engines_AbstractEngine::call
  * User: dinies
- * Date: 22/04/16
- * Time: 14.40
+ * Date: 06/05/16
+ * Time: 16.39
  */
-class CallprotectedfunctionTest extends AbstractTest
+class CallAbstractMosesTest extends AbstractTest
 {
     /**
      * @var EnginesModel_EngineStruct
      */
-    protected $engine_struct_param;
-
+    protected $engine_struct_param_DeepLingo;
     /**
-     * @var array
+     * @var Engines_DeepLingo
+     * DeepLingo is a subclass of Moses
      */
-    protected $method;
+    protected $engine_Deep_Lingo;
     /**
      * @var Database
      */
@@ -26,18 +26,25 @@ class CallprotectedfunctionTest extends AbstractTest
     protected $sql_insert_engine;
     protected $sql_delete_user;
     protected $sql_delete_engine;
-
     protected $id_user;
     protected $id_database;
 
     /**
-     * @var Engines_Moses
+     * @var array
      */
-    protected $mock_engine;
+    protected $array_param;
+    protected $curl_param;
 
     public function setUp()
     {
         parent::setUp();
+
+        $engine_DAO = new EnginesModel_EngineDAO(Database::obtain());
+        $this->curl_param = array(
+            CURLOPT_HTTPGET => true,
+            CURLOPT_TIMEOUT => 10
+        );
+
         $this->database_instance = Database::obtain();
         /**
          * user insertion
@@ -54,99 +61,43 @@ class CallprotectedfunctionTest extends AbstractTest
         $this->id_database = $this->database_instance->getConnection()->lastInsertId();
 
 
-        $this->sql_delete_user = "DELETE FROM users WHERE uid=" . $this->id_user . ";";
-        $this->sql_delete_engine = "DELETE FROM engines WHERE id=" . $this->id_database . ";";
-
-        $engineDAO = new EnginesModel_EngineDAO(Database::obtain());
-        $engine_struct = EnginesModel_EngineStruct::getStruct();
-        $engine_struct->id = $this->id_database;
-        $eng = $engineDAO->read($engine_struct);
-
         /**
-         * @var $engineRecord EnginesModel_EngineStruct
+         * obtaining DeepLingo Engine
          */
-        $this->engine_struct_param = @$eng[0];
-        $this->mock_engine = $this->getMockBuilder('\Engines_DeepLingo')->setConstructorArgs(array($this->engine_struct_param))->setMethods(array('_call'))->getMock();
+        $engine_struct_DeepLingo = EnginesModel_EngineStruct::getStruct();
+        $engine_struct_DeepLingo->id = $this->id_database;
+        $eng_Deep_Lingo = $engine_DAO->read($engine_struct_DeepLingo);
+
+        $this->engine_struct_param_DeepLingo = @$eng_Deep_Lingo[0];
+
 
     }
 
     public function tearDown()
     {
-
+        $this->sql_delete_user = "DELETE FROM users WHERE uid=" . $this->id_user . ";";
+        $this->sql_delete_engine = "DELETE FROM engines WHERE id=" . $this->id_database . ";";
         $this->database_instance->query($this->sql_delete_user);
         $this->database_instance->query($this->sql_delete_engine);
         $flusher = new Predis\Client(INIT::$REDIS_SERVERS);
         $flusher->flushdb();
         parent::tearDown();
-
     }
 
     /**
      * @group regression
-     * @covers  Engines_AbstractEngine::_call
+     * @covers  Engines_AbstractEngine::call
      */
-    public function test__call_using_mock_object_and_simple_segment()
+    public function test_call_with_simple_segment_triggered_by_get()
     {
 
-        $reflector = new ReflectionClass($this->mock_engine);
-        $this->method = $reflector->getMethod("_call");
-        $this->method->setAccessible(true);
+        $mock_engine = $this->getMockBuilder('\Engines_DeepLingo')->setConstructorArgs(array($this->engine_struct_param_DeepLingo))->setMethods(array('_call'))->getMock();
+        $reflector = new ReflectionClass($mock_engine);
+        $property = $reflector->getProperty("result");
+        $property->setAccessible(true);
 
-
-        $url = "http://mtserver01.deeplingo.com:8019/translate?q=house+is+red&source=en&target=fr&key=gala15";
-
-        $json_output = <<<LAB
-{
-  "data": {
-    "translations": [
-      {
-        "translatedText": "maison est rouge.", 
-        "translatedTextRaw": "maison est rouge .", 
-        "annotatedSource": "house is red", 
-        "tokenization": {
-          "src": [
-            [
-              0, 
-              4
-            ], 
-            [
-              6, 
-              7
-            ], 
-            [
-              9, 
-              11
-            ]
-          ], 
-          "tgt": [
-            [
-              0, 
-              5
-            ], 
-            [
-              7, 
-              9
-            ], 
-            [
-              11, 
-              15
-            ], 
-            [
-              16, 
-              16
-            ]
-          ]
-        }
-      }
-    ]
-  }
-}
-LAB;
-
-        $curl_opt = array(
-            CURLOPT_HTTPGET => true,
-            CURLOPT_TIMEOUT => 10
-        );
+        $this->array_param = array('q' => "house is red", 'source' => "en", 'target' => "fr", 'key' => "gala15");
+        $function_name = "translate_relative_url";
 
         $json_output_mock = <<<LAB
 {
@@ -197,123 +148,28 @@ LAB;
 LAB;
         $url_param_mock = "http://mtserver01.deeplingo.com:8019/translate?q=house+is+red&source=en&target=fr&key=gala15";
 
-        $this->mock_engine->expects($this->once())->method('_call')->with($url_param_mock, $curl_opt)->willReturn($json_output_mock);
+        $mock_engine->expects($this->once())->method('_call')->with($url_param_mock)->willReturn($json_output_mock);
 
 
-        $this->assertEquals($json_output, $this->method->invoke($this->mock_engine, $url, $curl_opt));
+        $mock_engine->call($function_name, $this->array_param);
+        $this->assertEquals("maison est rouge.", $property->getValue($mock_engine)["translation"]);
     }
 
     /**
      * @group regression
-     * @covers  Engines_AbstractEngine::_call
+     * @covers  Engines_AbstractEngine::call
      */
-    public function test__call_using_mock_object_and_long_segment()
+    public function test_call_with_more_complex_segment_triggered_by_get()
     {
 
-        $reflector = new ReflectionClass($this->mock_engine);
-        $this->method = $reflector->getMethod("_call");
-        $this->method->setAccessible(true);
+        $mock_engine = $this->getMockBuilder('\Engines_DeepLingo')->setConstructorArgs(array($this->engine_struct_param_DeepLingo))->setMethods(array('_call'))->getMock();
 
+        $reflector = new ReflectionClass($mock_engine);
+        $property = $reflector->getProperty("result");
+        $property->setAccessible(true);
 
-        $json_output = <<<'LAB'
-{
-  "data": {
-    "translations": [
-      {
-        "translatedText": "maison est rouge et la soupe Apple est vert.", 
-        "translatedTextRaw": "maison est rouge et la soupe Apple est vert .", 
-        "annotatedSource": "house is red and apple is green soup", 
-        "tokenization": {
-          "src": [
-            [
-              0, 
-              4
-            ], 
-            [
-              6, 
-              7
-            ], 
-            [
-              9, 
-              11
-            ], 
-            [
-              13, 
-              15
-            ], 
-            [
-              17, 
-              21
-            ], 
-            [
-              23, 
-              24
-            ], 
-            [
-              26, 
-              30
-            ], 
-            [
-              32, 
-              35
-            ]
-          ], 
-          "tgt": [
-            [
-              0, 
-              5
-            ], 
-            [
-              7, 
-              9
-            ], 
-            [
-              11, 
-              15
-            ], 
-            [
-              17, 
-              18
-            ], 
-            [
-              20, 
-              21
-            ], 
-            [
-              23, 
-              27
-            ], 
-            [
-              29, 
-              33
-            ], 
-            [
-              35, 
-              37
-            ], 
-            [
-              39, 
-              42
-            ], 
-            [
-              43, 
-              43
-            ]
-          ]
-        }
-      }
-    ]
-  }
-}
-LAB;
-
-        $url = "http://mtserver01.deeplingo.com:8019/translate?q=house+is+red+and+apple+is+green+soup&source=en&target=fr&key=gala15";
-
-        $curl_opt = array(
-            CURLOPT_HTTPGET => true,
-            CURLOPT_TIMEOUT => 10
-        );
-
+        $this->array_param = array('q' => "house is red and apple is green soup", 'source' => "en", 'target' => "fr", 'key' => "gala15");
+        $function_name = "translate_relative_url";
 
         $json_output_mock = <<<'LAB'
 {
@@ -409,11 +265,10 @@ LAB;
 
         $url_param_mock = "http://mtserver01.deeplingo.com:8019/translate?q=house+is+red+and+apple+is+green+soup&source=en&target=fr&key=gala15";
 
+        $mock_engine->expects($this->once())->method('_call')->with($url_param_mock)->willReturn($json_output_mock);
 
-        $this->mock_engine->expects($this->once())->method('_call')->with($url_param_mock, $curl_opt)->willReturn($json_output_mock);
-
-
-        $this->assertEquals($json_output, $this->method->invoke($this->mock_engine, $url, $curl_opt));
+        $mock_engine->call($function_name, $this->array_param);
+        $this->assertEquals("maison est rouge et la soupe Apple est vert.", $property->getValue($mock_engine)["translation"]);
     }
 
 }
