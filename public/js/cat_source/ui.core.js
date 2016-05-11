@@ -491,6 +491,11 @@ UI = {
         var segmentFooter = new UI.SegmentFooter( segment );
         $('.footer', segment).append( segmentFooter.html() );
 
+        // If the Messages Tab is present open it by default
+        if ($('.footer', segment).find('.open.segment-notes').length) {
+            this.forceShowMatchesTab();
+        }
+
         UI.currentSegment.trigger('afterFooterCreation', segment);
 
         // FIXME: arcane. Whatever it does, it should go in the contribution module.
@@ -2931,8 +2936,9 @@ UI = {
         }
 
     },
-
-
+    forceShowMatchesTab: function () {
+        UI.body.removeClass('hideMatches');
+    },
     setWaypoints: function() {
 		this.firstSegment.waypoint('remove');
 		this.lastSegment.waypoint('remove');
