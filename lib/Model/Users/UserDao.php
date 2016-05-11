@@ -58,15 +58,23 @@ class Users_UserDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param Users_UserStruct $obj
+     *
+     * This method is not static and used also to cache at Redis level the values for this Job
+     *
+     * Use when only the metadata are needed
+     *
+     * @param Users_UserStruct $UserQuery
      *
      * @return Users_UserStruct|Users_UserStruct[]
      * @throws Exception
      */
-    public function read( DataAccess_IDaoStruct $obj ) {
-        $obj = $this->sanitize( $obj );
+    public function read( Users_UserStruct $UserQuery ) {
+
+        $UserQuery = $this->sanitize( $UserQuery );
 
         $where_conditions = array();
+        $where_parameters = array();
+
         $query            = "SELECT uid,
                                     email,
                                     create_date,
@@ -74,27 +82,40 @@ class Users_UserDao extends DataAccess_AbstractDao {
                                     last_name
                              FROM " . self::TABLE . " WHERE %s";
 
-        if ( $obj->uid !== null ) {
-            $where_conditions[ ] = "uid = " . $obj->uid;
+        if ( $UserQuery->uid !== null ) {
+            $where_conditions[] = "uid = :uid";
+            $where_parameters[ 'uid' ] = $UserQuery->uid;
         }
 
-        if ( $obj->email !== null ) {
-            $where_conditions[ ] = "email = '" . $obj->email . "'";
+        if ( $UserQuery->email !== null ) {
+            $where_conditions[] = "email = :email";
+            $where_parameters[ 'email' ] = $UserQuery->email;
         }
 
         if ( count( $where_conditions ) ) {
             $where_string = implode( " AND ", $where_conditions );
-        }
-        else {
+        } else {
             throw new Exception( "Where condition needed." );
         }
 
         $query = sprintf( $query, $where_string );
+        $stmt = $this->_getStatementForCache( $query );
 
-        $arr_result = $this->con->fetch_array( $query );
+        return $this->_fetchObject( $stmt,
+                $UserQuery,
+                $where_parameters
+        );
 
-        return $this->_buildResult( $arr_result );
     }
+
+    protected function _getStatementForCache( $query ) {
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $query );
+
+        return $stmt;
+    }
+
 
     public function getProjectOwner( $job_id ) {
         $job_id = (int) $job_id ;

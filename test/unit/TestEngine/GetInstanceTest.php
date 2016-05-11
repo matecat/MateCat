@@ -20,17 +20,31 @@ class GetInstanceTest extends AbstractTest
     protected $sql_delete_user;
     protected $sql_delete_engine;
 
+    protected $id_user;
+    protected $id_database;
+
     public function setUp()
     {
 
         parent::setUp();
         $this->database_instance=Database::obtain();
+        /**
+         * user insertion
+         */
         $this->sql_insert_user = "INSERT INTO ".INIT::$DB_DATABASE.".`users` (`uid`, `email`, `salt`, `pass`, `create_date`, `first_name`, `last_name`, `api_key` ) VALUES ('44', 'bar@foo.net', '12345trewq', '987654321qwerty', '2016-04-11 13:41:54', 'Bar', 'Foo', '');";
-        $this->sql_insert_engine = "INSERT INTO ".INIT::$DB_DATABASE.".`engines` (`id`, `name`, `type`, `description`, `base_url`, `translate_relative_url`, `contribute_relative_url`, `delete_relative_url`, `others`, `class_load`, `extra_parameters`, `google_api_compliant_version`, `penalty`, `active`, `uid`) VALUES ('10', 'DeepLingo En/Fr iwslt', 'MT', 'DeepLingo Engine', 'http://mtserver01.deeplingo.com:8019', 'translate', NULL, NULL, '{}', 'DeepLingo', '{\"client_secret\":\"gala15 \"}', '2', '14', '1', '44');";
         $this->database_instance->query($this->sql_insert_user);
+        $this->id_user=$this->database_instance->getConnection()->lastInsertId();
+
+        /**
+         * engine insertion
+         */
+        $this->sql_insert_engine = "INSERT INTO ".INIT::$DB_DATABASE.".`engines` (`id`, `name`, `type`, `description`, `base_url`, `translate_relative_url`, `contribute_relative_url`, `delete_relative_url`, `others`, `class_load`, `extra_parameters`, `google_api_compliant_version`, `penalty`, `active`, `uid`) VALUES ('10', 'DeepLingo En/Fr iwslt', 'MT', 'DeepLingo Engine', 'http://mtserver01.deeplingo.com:8019', 'translate', NULL, NULL, '{}', 'DeepLingo', '{\"client_secret\":\"gala15 \"}', '2', '14', '1', ".$this->id_user.");";
         $this->database_instance->query($this->sql_insert_engine);
-        $this->sql_delete_user ="DELETE FROM users WHERE uid='44';";
-        $this->sql_delete_engine ="DELETE FROM engines WHERE id='10';";
+        $this->id_database=$this->database_instance->getConnection()->lastInsertId();
+
+
+        $this->sql_delete_user ="DELETE FROM users WHERE uid=".$this->id_user.";";
+        $this->sql_delete_engine ="DELETE FROM engines WHERE id=".$this->id_database.";";
     }
 
     public function tearDown()
@@ -51,7 +65,7 @@ class GetInstanceTest extends AbstractTest
      */
     public function test_getInstance_of_constructed_engine(){
 
-        $engine = Engine::getInstance(10);
+        $engine = Engine::getInstance($this->id_database);
         $this->assertTrue($engine instanceof Engines_DeepLingo);
     }
 
@@ -83,7 +97,7 @@ class GetInstanceTest extends AbstractTest
      * @group regression
      * @covers Engine::getInstance
      */
-    public function test_getInstance_whit_out_id(){
+    public function test_getInstance_without_id(){
 
         $this->setExpectedException('Exception');
         Engine::getInstance('');
@@ -108,7 +122,7 @@ class GetInstanceTest extends AbstractTest
     public function test_getInstance_with_no_mach_for_engine_id(){
 
         $this->setExpectedException('Exception');
-        Engine::getInstance(99);
+        Engine::getInstance($this->id_database+1);
     }
 
     /**
@@ -118,14 +132,14 @@ class GetInstanceTest extends AbstractTest
      */
     public function test_getInstance_with_no_mach_for_engine_class_name(){
        
-        $sql_update_engine_class_name="UPDATE `unittest_matecat_local`.`engines` SET class_load='YourMemory' WHERE id='10';";
+        $sql_update_engine_class_name="UPDATE `engines` SET class_load='YourMemory' WHERE id=".$this->id_database.";";
 
         require_once 'Predis/autoload.php';
         $obliterator= new Predis\Client(INIT::$REDIS_SERVERS);
         $obliterator->del($sql_update_engine_class_name);
         $this->database_instance->query($sql_update_engine_class_name);
         $this->setExpectedException('\Exception');
-        Engine::getInstance(10);
+        Engine::getInstance($this->id_database);
     }
 
     
