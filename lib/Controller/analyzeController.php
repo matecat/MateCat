@@ -110,9 +110,16 @@ class analyzeController extends viewController {
         $this->template->total_raw_word_count_print = $this->model->total_raw_word_count_print;
         $this->template->pname                      = $this->model->pname;
         $this->template->pid                        = $this->model->pid;
-        $this->template->project_password           = $this->ppassword;
-        $this->template->fast_wc_time               = $this->model->fast_wc_time;
+
+        if ( empty( $this->jid ) ) {
+            $this->template->project_password = $this->ppassword;
+        } else {
+            $this->template->project_password = $this->jpassword;
+            $this->template->jid              = $this->jid;
+        }
+
         $this->template->tm_wc_time                 = $this->model->tm_wc_time;
+        $this->template->fast_wc_time               = $this->model->fast_wc_time;
         $this->template->tm_wc_unit                 = $this->model->tm_wc_unit;
         $this->template->fast_wc_unit               = $this->model->fast_wc_unit;
         $this->template->standard_wc_unit           = $this->model->standard_wc_unit;
