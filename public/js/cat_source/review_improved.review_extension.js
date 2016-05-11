@@ -16,6 +16,14 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         }
     });
 
+    var rejectKeyDownEvent = function(e) {
+        e.preventDefault();
+
+        if ( $('.button-reject:visible').length ) {
+            UI.rejectAndGoToNext();
+        }
+    }
+
     $.extend(UI, {
         /**
          * Search for the next translated segment to propose for revision.
@@ -30,6 +38,15 @@ if ( ReviewImproved.enabled() && config.isReview ) {
             var translatedList = [];
             var approvedList = [];
             var clickableSelector = UI.targetContainerSelector();
+
+            var clickSegmentIfFound =  function() {
+                if( !$(this).is(UI.currentSegment) ) {
+                translatedList = $(this);
+                translatedList.first().find(UI.targetContainerSelector()).click();
+                return false;
+                }
+            }
+
             // find in next segments in the current file
             if ( el.nextAll('section.status-translated, section.status-approved').length ) {
                 translatedList = el.nextAll('.status-translated');
@@ -43,25 +60,13 @@ if ( ReviewImproved.enabled() && config.isReview ) {
             } else if(el.parents('article').nextAll('section.status-translated, section.status-approved').length) {
                 // find in next segments in the next files
                 file = el.parents('article');
-                file.nextAll('section.status-translated, section.status-approved').each(function () {
+                file.nextAll('section.status-translated, section.status-approved').each( clickSegmentIfFound );
 
-                    if( !$(this).is(UI.currentSegment) ) {
-                        translatedList = $(this);
-                        translatedList.first().find(UI.targetContainerSelector()).click();
-                        return false;
-                    }
-
-                });
                 // else find from the beginning of the currently loaded segments in all files
             } else if ($('section.status-translated, section.status-approved').length) {
                 // else find from the beginning of the currently loaded segments in all files
-                $('section.status-translated, section.status-approved').each(function () {
-                    if( !$(this).is(UI.currentSegment) ) {
-                        translatedList = $(this);
-                        translatedList.first().find(UI.targetContainerSelector()).click();
-                        return false;
-                    }
-                });
+                $('section.status-translated, section.status-approved').each( clickSegmentIfFound );
+
             } else { // find in not loaded segments
                 // Go to the next segment saved before
                 var callback = function() {
@@ -178,14 +183,14 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
             originalBindShortcuts();
 
-            $('body').on('keydown.shortcuts', null, UI.shortcuts.reject.keystrokes.standard, function(e) {
-                e.preventDefault();
-                UI.rejectAndGoToNext();
-            });
+            $('body').on('keydown.shortcuts', null, UI.shortcuts.reject.keystrokes.standard, rejectKeyDownEvent ) ;
+            $('body').on('keydown.shortcuts', null, UI.shortcuts.reject.keystrokes.mac, rejectKeyDownEvent ) ;
+        },
 
-            $('body').on('keydown.shortcuts', null, UI.shortcuts.reject.keystrokes.mac, function(e) {
-                e.preventDefault();
-                UI.rejectAndGoToNext();
+        renderAfterConfirm: function (nextId) {
+            this.render({
+                firstLoad: false,
+                segmentToOpen: nextId
             });
         }
     });

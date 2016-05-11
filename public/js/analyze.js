@@ -366,8 +366,8 @@ UI = {
 		if (config.id_job) {
 			data = {
 				action: 'getVolumeAnalysis',
-					pid: pid,
-					jpassword: ppassword
+				pid: pid,
+				jpassword: ppassword
 			};
 		} else {
 			data = {
