@@ -966,9 +966,9 @@ UI = {
             if (((this.source_code === 'it-IT' && this.target_code === 'en-GB')
                 || (this.source_code === 'en-GB' && this.target_code === 'it-IT'))
                 && !config.isReview) {
-                self.enableTargetProjection = true;
+                self.enableTagProjection = true;
             } else {
-                self.enableTargetProjection = false;
+                self.enableTagProjection = false;
             }
 		});
 

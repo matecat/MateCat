@@ -183,7 +183,6 @@ $.extend(UI, {
       $(".percentuage", segment).attr("title", '' + perc_t + "Created by " + d.data.matches[0].created_by);
       var match = d.data.matches[0].match;
 
-      var copySuggestionDone = false;
       var segment_id = segment.attr('id');
       $(segment).addClass('loaded');
       $('.sub-editor.matches .overflow', segment).empty();
@@ -267,21 +266,15 @@ $.extend(UI, {
 
 //            UI.setContributionSourceDiff_Old();
 			if (editareaLength === 0) {
-//				console.log('translation AA: ', translation);
-//				translation = UI.decodePlaceholdersToText(translation, true, segment_id, 'translation');
+
 				translation = $('#' + segment_id + ' .matches ul.graysmall').first().find('.translation').html();
-//				console.log($('#' + segment_id + ' .matches .graysmall'));
-//				console.log('translation BB: ', translation);
+
 				UI.copySuggestionInEditarea(segment, translation, editarea, match, false, true, 1);
+
 				if (UI.body.hasClass('searchActive'))
 					UI.addWarningToSearchDisplay();
 				UI.setChosenSuggestion(1);
-				copySuggestionDone = true;
 			}
-//			if (copySuggestionDone) {
-//				if (isActiveSegment) {
-//				}
-//			}
 
 			$('.translated', segment).removeAttr('disabled');
 			$('.draft', segment).removeAttr('disabled');

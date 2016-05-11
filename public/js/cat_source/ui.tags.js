@@ -194,7 +194,9 @@ $.extend(UI, {
 
             $('span.locked', this).addClass('monad');
 
-            if (self.enableTargetProjection) return;
+            // If Tag Projection enabled dont detect tags
+            if (self.enableTagProjection) return;
+
             UI.detectTagType(this);
         });
     },

@@ -59,7 +59,7 @@
             /**if Tag Projection enabled and there are tags in the segment, remove it and add the class that identify
              * tha Tag Projection is enabled
              */
-            if (UI.enableTargetProjection && (UI.getSegmentStatus(segment) === 'draft' || UI.getSegmentStatus(segment) === 'new') ) {
+            if (UI.enableTagProjection && (UI.getSegmentStatus(segment) === 'draft' || UI.getSegmentStatus(segment) === 'new') ) {
                 decoded_translation = UI.removeAllTags(segment.translation);
                 decoded_source = UI.removeAllTags(segment.segment);
                 classes.push('enableTP');
@@ -100,7 +100,7 @@
                 status_change_title     : status_change_title ,
                 segment_edit_sec        : segment_edit_sec,
                 segment_edit_min        : segment_edit_min,
-                enableTargetProjection  : !this.enableTargetProjection
+                enableTagProjection  : !this.enableTagProjection
             }
 
             return templateData ;
@@ -125,6 +125,18 @@
             source = htmlDecode(source).replace(/&quot;/g, '\"');
             source = htmlDecode(source);
             var target = UI.postProcessEditarea(UI.currentSegment, ".editarea");
+            var suggestion;
+            //Retrieve the chosen suggestion if exist
+            var chosen_suggestion = $('.editarea', UI.currentSegment).data('lastChosenSuggestion');
+            if (!_.isUndefined(chosen_suggestion)) {
+                var storedContributions = UI.getFromStorage('contribution-' + config.id_job + '-' + UI.getSegmentId(UI.currentSegment));
+                if (!_.isUndefined(storedContributions))
+                var currentContribution = JSON.parse(storedContributions).data.matches[chosen_suggestion-1];
+                // Send the suggestion to Tag Prjection only if is > 89% and is not MT
+                if (currentContribution.match !== "MT" && parseInt(currentContribution.match) > 89) {
+                    suggestion = currentContribution.translation;
+                }
+            }
             //Before send process with this.postProcessEditarea
             return APP.doRequest({
                 data: {
@@ -134,7 +146,8 @@
                     source: source,
                     target: target,
                     source_lang: config.source_lang,
-                    target_lang: config.target_lang
+                    target_lang: config.target_lang,
+                    suggestion: suggestion
                 },
                 error: function() {
                     console.log('getTagProjection error');
@@ -177,7 +190,7 @@
          * @returns {boolean}
          */
         checkCurrentSegmentTPEnabled: function () {
-            if (this.enableTargetProjection) {
+            if (this.enableTagProjection) {
                 // If the segment has tag projection enabled (has tags and has the enableTP class)
                 var tagProjectionEnabled = this.hasDataOriginalTags( this.currentSegment) && this.currentSegment.hasClass('enableTP');
                 // The segment is already been tagged
@@ -193,7 +206,7 @@
          */
         enableTPOnSegmentAndSetButton: function () {
             var tagProjectionEnabled = this.hasDataOriginalTags( this.currentSegment)  && !this.currentSegment.hasClass('enableTP');
-            if (this.enableTargetProjection && tagProjectionEnabled) {
+            if (this.enableTagProjection && tagProjectionEnabled) {
                 UI.currentSegment.addClass('enableTP');
                 UI.currentSegment.data('tagprojection', 'nottagged');
                 UI.createButtons();
