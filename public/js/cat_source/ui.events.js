@@ -1329,7 +1329,13 @@ $.extend(UI, {
 		if (!this.segmentToScrollAtRender)
 			UI.gotoSegment(this.startSegmentId);
 
-		
+		$(".end-message-box a.close").on('click', function(e) {
+			e.preventDefault();
+			UI.body.removeClass('justdone');
+		});
+		this.checkIfFinishedFirst();
+
+
 		$("section .close").bind('keydown', 'Shift+tab', function(e) {
 			e.preventDefault();
 			$(this).parents('section').find('a.translated').focus();
