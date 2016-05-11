@@ -3083,9 +3083,9 @@ UI = {
 		}
 
         if (LXQ.enabled() && fromWhich === 'space' && !UI.lexiqaData.lexiqaFetching) { 
-		saveSelection();
-        $('.undoCursorPlaceholder').remove();
-        $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
+            saveSelection();
+            $('.undoCursorPlaceholder').remove();
+            $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
             
             UI.lexiqaData.lexiqaFetching = true;   
             var callback1 = function() {
@@ -3104,10 +3104,9 @@ UI = {
             UI.doLexiQA(UI.currentSegment, translation, id_segment,false, callback1) ;
         }
         else {
-		saveSelection();
-        $('.undoCursorPlaceholder').remove();
-        $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
-            
+		    saveSelection();
+            $('.undoCursorPlaceholder').remove();
+            $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');      
             restoreSelection();
     		this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
         }      
