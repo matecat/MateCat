@@ -102,6 +102,57 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
         return $arr_result;
     }
 
+
+    /**
+     *
+     * @param Chunks_ChunkStruct $chunk
+     *
+     * @return Comments_BaseCommentStruct[]
+     */
+
+    public static function getCommentsForChunk( Chunks_ChunkStruct $chunk, $options = array() ) {
+
+        $sql = "SELECT " .
+                " id, uid, resolve_date, id_job, id_segment, create_date, full_name, " .
+                " source_page, message_type, message, email, " .
+                " IF ( resolve_date IS NULL, NULL,  " .
+                " MD5( CONCAT( id_job, '-', id_segment, '-', resolve_date ) ) " .
+                " ) AS thread_id FROM comments "  .
+                " WHERE id_job = :id_job " .
+                "  ";
+
+        $params = array(
+            'id_job' => $chunk->id
+        ) ;
+
+        if ( array_key_exists( 'from_id', $options ) && $options['from_id'] != null ) {
+            $sql = $sql . " AND id >= :from_id " ;
+            $params['from_id'] = $options['from_id'] ;
+        }
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute( $params );
+
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, '\Comments_BaseCommentStruct' );
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
+
+    /**
+     *
+     * Returns the list of comments in job.
+     *
+     * @deprecated this does not follow latest conventions, please don't use
+     *             use getCommentsForChunk.
+     *
+     * TODO: refactor this, shoudl return an array of structs
+     * @param $input
+     *
+     * @return array
+     */
     public function getCommentsInJob( $input ) {
         $obj = $this->sanitize( $input );
 
