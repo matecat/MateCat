@@ -631,7 +631,7 @@ if (LXQ.enabled())
                         //calculate the color                        
                         if (range.errors.length == 1) {
                             range.color = ranges.out[range.errors[0]].color;
-                            range.myClass = ranges.out[range.errors[0]].module;
+                            range.myClass = ranges.out[range.errors[0]].module + ' '+ranges.out[range.errors[0]].module[0]+'0'; //.p0 for instance
                             data = 'data-errors="'+ranges.out[range.errors[0]].errorid+'" ';
                         }
                         else {
@@ -1067,6 +1067,18 @@ if (LXQ.enabled())
         }
         
         var initPopup = function () {
+            
+            $.ajax(
+                {type: "GET",
+                url: config.lexiqaServer+"/tooltipwarnings",            
+                success:function(result){
+                    warningMesasges = result;
+                }
+                ,error:function(result){
+                    console.err(result);                   
+                }
+            });
+           
             $('#lexiqa-quide-link').attr('href', config.lexiqaServer + '/documentation.html');
             $('#lexiqa-report-link').attr('href', config.lexiqaServer + '/errorreport?id=matecat-' + config.id_job + '-' + config.password);
 

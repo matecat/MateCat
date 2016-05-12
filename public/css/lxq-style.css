@@ -872,32 +872,53 @@ article.lxq-commenting-opened .lxq-comment-balloon-outer {
   display: block!important;
 }
 
-.n1, .n2, .n3, .n4 {
+.n0 .n1, .n2, .n3, .n4 {
     background-color:#D08053;
 }
-.p1, .p2, .p2sub1, .p2sub2, .p3, .p3sub1, .p4, .p5, .p6, .p7, .p8 {
+.p0 .p1, .p2, .p2sub1, .p2sub2, .p3, .p3sub1, .p4, .p5, .p6, .p7, .p8 {
     background-color:#65C783
 }
-.c1, .c2, .c2sub1, .c3, .c3sub1, .c4, .c5 {
+.c0 .c1, .c2, .c2sub1, .c3, .c3sub1, .c4, .c5 {
     background-color:#65C783;
 }
-.u1, .u2, .u3, .u4, .u5 {
+.u0 .u1, .u2, .u3, .u4, .u5 {
     background-color:#b8a300;
 }
-.s1, .s2, .s3, .s3sub1, .s3sub1, .s4, .s5 {
+.s0 .s1, .s2, .s3, .s3sub1, .s3sub1, .s4, .s5 {
     background-color:#38C0C5;
 }
-.l1, .l2, .l3, .l4 {
+.l0, .l2, .l3, .l4 {
+   background-color:#B792E6;
+}
+
+.n0 {
+    background-color:#D08053;
+}
+.p0 {
+    background-color:#65C783
+}
+.c0 {
+    background-color:#65C783;
+}
+.u0 {
+    background-color:#b8a300;
+}
+.s0 {
+    background-color:#38C0C5;
+}
+.l0 {
    background-color:#B792E6;
 }
 .m {
     background-color:#EA92B8;
 }
-
-.m, .l1, .l2, .l3, .l4, .n1, .n2, .n3, .n4, .p1, .p2, .p2sub1, .p2sub2, .p3, .p3sub1, .p4, .p5, .p6, .p7, .p8, 
-.c1, .c2, .c3, .c2sub1, .c3sub1, .c4, .c5, .u1, .u2, .u3, .u4, .u5, .s1, .s2, .s3, .s3sub1, .s3sub1, .s4, .s5 {
+.m, .l0, .p0, .c0, .u0, .s0 {
     padding: 0.1rem 0.2rem;
 }
+/*.m, .l1, .l2, .l3, .l4, .n1, .n2, .n3, .n4, .p1, .p2, .p2sub1, .p2sub2, .p3, .p3sub1, .p4, .p5, .p6, .p7, .p8, 
+.c1, .c2, .c3, .c2sub1, .c3sub1, .c4, .c5, .u1, .u2, .u3, .u4, .u5, .s1, .s2, .s3, .s3sub1, .s3sub1, .s4, .s5 {
+    padding: 0.1rem 0.2rem;
+}*/
 
 
 /*
