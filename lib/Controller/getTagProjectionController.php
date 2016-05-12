@@ -3,7 +3,7 @@
 class getTagProjectionController extends ajaxController {
 
     protected $__postInput = array();
-    
+
     protected $password = "";
     protected $suggestion = "";
     protected $source;
@@ -143,6 +143,7 @@ class getTagProjectionController extends ajaxController {
         $response = curl_exec( $ch );
         $response = json_decode($response);
         $translation = CatUtils::rawxliff2view( $response->{'translation'} );
+        // Todo gestione errori
 //        $this->result     = array("errors" => array( array( "code" => -1000, "message" => "Ciccio" ) ), "data" => array() );
         $this->result     = array("errors"=> array(), "data" => array() );
         $this->result[ 'data' ]['translation'] = $translation;

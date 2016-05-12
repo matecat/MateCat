@@ -1155,7 +1155,7 @@ $.extend(UI, {
 			UI.hideEditToolbar();
 			UI.getSegmentTagsProjection().success(function(response) {
 				if (response.errors.length) {
-					UI.processErrors(response.errors, 'getTagProjection');
+					// UI.processErrors(response.errors, 'getTagProjection');
 					UI.copyTagProjectionInCurrentSegment();
 				} else {
 					UI.copyTagProjectionInCurrentSegment(response.data.translation);
