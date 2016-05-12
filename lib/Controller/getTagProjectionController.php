@@ -1,10 +1,9 @@
 <?php
 
-
 class getTagProjectionController extends ajaxController {
 
     protected $__postInput = array();
-
+    
     protected $password = "";
     protected $suggestion = "";
     protected $source;
@@ -117,6 +116,7 @@ class getTagProjectionController extends ajaxController {
 
 
             $return = $this->getTagProjection($config);
+            $this->logTagProjection($return);
         /*} else {
             $this->result[ 'code' ] = 1;
             $this->result[ 'data' ] = "NOTAGPROJ_OK";
@@ -146,11 +146,17 @@ class getTagProjectionController extends ajaxController {
 //        $this->result     = array("errors" => array( array( "code" => -1000, "message" => "Ciccio" ) ), "data" => array() );
         $this->result     = array("errors"=> array(), "data" => array() );
         $this->result[ 'data' ]['translation'] = $translation;
-
-
+        return $translation;
 
     }
+    public function logTagProjection ($msg) {
 
+        $logfile = \Log::$fileName;  
+
+        \Log::$fileName = 'tagProjection.log';
+        \Log::doLog( $msg );
+        \Log::$fileName = $logfile;
+    }
 }
 
 

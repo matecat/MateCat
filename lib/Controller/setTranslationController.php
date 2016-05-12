@@ -619,6 +619,8 @@ class setTranslationController extends ajaxController {
         WorkerClient::init( new AMQHandler() );
         Set::contribution( $contributionStruct );
 
+        $this->logForTagProjection(CatUtils::rawxliff2view($this->translation));
+
     }
 
     /**
@@ -794,5 +796,13 @@ class setTranslationController extends ajaxController {
             }
         }
         return $old_count ;
+    }
+
+    private function logForTagProjection($msg) {
+        $logfile = \Log::$fileName;  //Todo: check why is null
+
+        \Log::$fileName = 'tagProjection.log';
+        \Log::doLog( $msg );
+        \Log::$fileName = $logfile;
     }
 }

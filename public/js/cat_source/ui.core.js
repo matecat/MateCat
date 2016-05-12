@@ -968,13 +968,7 @@ UI = {
 		$.each(d.data.files, function() {
 			startSegmentId = this.segments[0].sid;
             //Tag Projection: check if is enable the Tag Projection 
-            if (((this.source_code === 'it-IT' && this.target_code === 'en-GB')
-                || (this.source_code === 'en-GB' && this.target_code === 'it-IT'))
-                && !config.isReview) {
-                self.enableTagProjection = true;
-            } else {
-                self.enableTagProjection = false;
-            }
+            self.enableTagProjection = UI.checkTPEnabled(this);
 		});
 
 		if (typeof this.startSegmentId == 'undefined')

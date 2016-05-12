@@ -117,6 +117,20 @@
             return (segment.status)? segment.status.toLowerCase() : 'new';
         },
         /**
+         * Tag Projection: check if is enable the Tag Projection
+         * @param file
+         */
+        checkTPEnabled: function (file) {
+
+            if (((file.source_code === 'it-IT' && file.target_code.indexOf('en-') > -1)
+                || (file.target_code.indexOf('en-') > -1 && file.target_code === 'it-IT'))
+                && !config.isReview) {
+                return true;
+            } else {
+                return false;
+            }
+        },
+        /**
          * Tag Projection: get the tag projection for the current segment
          * @returns translation with the Tag prjection
          */
@@ -130,11 +144,12 @@
             var chosen_suggestion = $('.editarea', UI.currentSegment).data('lastChosenSuggestion');
             if (!_.isUndefined(chosen_suggestion)) {
                 var storedContributions = UI.getFromStorage('contribution-' + config.id_job + '-' + UI.getSegmentId(UI.currentSegment));
-                if (!_.isUndefined(storedContributions))
-                var currentContribution = JSON.parse(storedContributions).data.matches[chosen_suggestion-1];
-                // Send the suggestion to Tag Prjection only if is > 89% and is not MT
-                if (currentContribution.match !== "MT" && parseInt(currentContribution.match) > 89) {
-                    suggestion = currentContribution.translation;
+                if (storedContributions) {
+                    var currentContribution = JSON.parse(storedContributions).data.matches[chosen_suggestion - 1];
+                    // Send the suggestion to Tag Prjection only if is > 89% and is not MT
+                    if (currentContribution.match !== "MT" && parseInt(currentContribution.match) > 89) {
+                        suggestion = currentContribution.translation;
+                    }
                 }
             }
             //Before send process with this.postProcessEditarea
@@ -162,12 +177,13 @@
         copyTagProjectionInCurrentSegment: function (translation) {
             var source = UI.currentSegment.find('.source').data('original');
             source = htmlDecode(source).replace(/&quot;/g, '\"');
-
             var decoded_source = UI.decodePlaceholdersToText(source, true);
-            var decoded_translation = UI.decodePlaceholdersToText(translation, true);
-
-            $(this.editarea).html(decoded_translation);
             UI.currentSegment.find('.source').html(decoded_source);
+            if (!_.isUndefined(translation)) {
+                var decoded_translation = UI.decodePlaceholdersToText(translation, true);
+                $(this.editarea).html(decoded_translation);
+            }
+
         },
         /**
          * Tag Projection: set a segment after tag projection is called, remove the class enableTP and set the data-tagprojection

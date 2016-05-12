@@ -27,17 +27,45 @@ body.incomingMsg header
 	margin-top: 0px;
 }
 
-header .wrapper{height:20px; padding:0px 0 0 0;}
-.header-menu{
+header .wrapper{
+	height:20px; padding:0px 0 0 0;
+}
+.header-menu {
 	float:right;
 	margin-right:16px;
 	margin-left: 15px;
 }
-.header-menu li{
+.header-menu li {
     /*border-left:1px solid #000;*/
-    float:left;height:37px;padding:5px 0px;}
-#notifbox
+    float:left;height:37px;padding:5px 0px;
+}
+
+.text .item,
+.white li
 {
+	width: 45.5%;
+	table-layout: fixed;
+	float: left;
+	/*    margin: 0px 1px 0px 0;*/
+	padding: 3px 1%;
+	text-align: left;
+	list-style: none;
+	height: 95%;
+	outline: none;
+	word-wrap: break-word;
+	word-break: normal;
+}
+.text .source.item {
+	padding-bottom: 10px;
+}
+
+
+.text a{
+	text-decoration:none;
+	color:#000
+}
+
+#notifbox {
   opacity: 0.9;
   text-align: center;
   width: 60px;
@@ -593,7 +621,7 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 
 
 /*done & draft*/
-.translated ,.approved, .guesstags
+.translated ,.approved
 {
     border:1px solid #848689;
     color: #fff !important;
@@ -614,9 +642,29 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 }
 
 .guesstags {
-	background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
-	background: -moz-linear-gradient(top,  #09beec,  #119ec4);
-	background: linear-gradient(top,  #09beec,  #119ec4);
+	background: -webkit-gradient(linear, left top, left bottom, from(#f6f6f6), to(#e2e3e5));
+	background: -moz-linear-gradient(top, #f6f6f6, #e2e3e5);
+	background: linear-gradient(top, #f6f6f6, #e2e3e5);
+	border:1px solid #848689;
+	font-weight: bold;
+	text-decoration: none;
+	padding: 8px 18px;
+	border-radius: 2px;
+	border-radius: 2px;
+	font-size: 18px;
+	text-transform: uppercase;
+	color: #000;
+}
+.guesstags:hover {
+	cursor:pointer;
+	-webkit-box-shadow: 0 1px 2px #ccc;
+	box-shadow: 0 1px 2px #ccc;
+	border: 1px solid #000;
+}
+.guesstags:active {
+	-moz-box-shadow: inset 0 0 1px 1px #888;
+	-webkit-box-shadow: inset 0 0 1px 1px #888;
+	box-shadow: inset 0 0 1px 1px #888;
 }
 
 .button-reject {
@@ -651,7 +699,6 @@ article .next-untranslated:hover,
 article .draft:hover,
 article .btn:hover,
 article .approved:hover,
-article .guesstags:hover,
 .search .btn:hover
 {
     cursor:pointer;
@@ -662,8 +709,7 @@ article .guesstags:hover,
 article .translated:active,
 article .draft:active,
 article .btn:active,
-article .approved:active,
-article .guesstags:active {
+article .approved:active {
 	-moz-box-shadow: inset 0 0 1px 1px #888;
 	-webkit-box-shadow: inset 0 0 1px 1px #888;
 	box-shadow: inset 0 0 1px 1px #888;
@@ -1787,31 +1833,6 @@ z-index: 10000;
 .grayed-text{color:#4c4c4c;}
 .textarea-container{height: inherit;table-layout: fixed;}
 .editor .textarea-container{position:relative;width:100%;float:right !important;/*padding-bottom:5px;*/}
-
-
-.text .item,
-.white li
-{
-    width: 45.5%;
-    table-layout: fixed;
-    float: left;
-	/*    margin: 0px 1px 0px 0;*/
-	padding: 3px 1%;
-    text-align: left;
-    list-style: none;
-    height: 95%;
-    outline: none;
-    word-wrap: break-word;
-    word-break: normal;
-}
-.text .source.item {
-    padding-bottom: 10px;
-}
-
-
-.text a{text-decoration:none;color:#000 }
-
-
 
 .editarea, .search-editarea, .textarea-container .area
 {
