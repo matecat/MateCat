@@ -926,7 +926,7 @@ class CatUtils {
 
             $words_array = explode( "<sep>", $string );
             $words_array = array_filter( $words_array, function ( $word ) {
-                return $word != "";
+                return trim( $word ) != "";
             } );
 
             $res = @count( $words_array );
