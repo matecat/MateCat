@@ -859,8 +859,9 @@ class CatUtils {
 
     public static function clean_raw_string4fast_word_count( $string, $source_lang = 'en-US' ){
 
-        $app = trim( $string );
-        if ( $app == "" ) {
+        //return empty on string composed only by spaces
+        //do nothing
+        if ( preg_replace( '#[\p{Z}]+#u', '', $string ) == '' ) {
             return '';
         }
 
@@ -870,9 +871,12 @@ class CatUtils {
             unset( $tmp_lang );
         }
 
-        $string = preg_replace( "#<.*?>#si", " ", $string );
-        $string = preg_replace( "#<\/.*?>#si", " ", $string );
+        $string = preg_replace( '#<.*?>#si', ' ', $string );
+        $string = preg_replace( '#<\/.*?>#si', ' ', $string );
 
+        //remove ampersands and entities. Converters returns entities in xml, we want raw strings.
+        $string = html_entity_decode( $string, ENT_XML1, 'UTF-8' );
+        
         /*
          * Remove Unicode:
          * P -> Punctuation
@@ -881,45 +885,19 @@ class CatUtils {
          */
         $string = preg_replace( '#[\p{P}\p{Zl}\p{Zp}\p{C}]+#u', " ", $string );
 
-        //these could be superfluous
-        $string = str_replace( ":", " ", $string );
-        $string = str_replace( ";", " ", $string );
-        $string = str_replace( "[", " ", $string );
-        $string = str_replace( "]", " ", $string );
-        $string = str_replace( "?", " ", $string );
-        $string = str_replace( "!", " ", $string );
-        $string = str_replace( "{", " ", $string );
-        $string = str_replace( "}", " ", $string );
-        $string = str_replace( "(", " ", $string );
-        $string = str_replace( ")", " ", $string );
-        $string = str_replace( "/", " ", $string );
-        $string = str_replace( "\\", " ", $string );
-        $string = str_replace( "|", " ", $string );
-        $string = str_replace( "£", " ", $string );
-        $string = str_replace( "$", " ", $string );
-        $string = str_replace( "%", " ", $string );
-        $string = str_replace( "-", " ", $string );
-        $string = str_replace( "_", " ", $string );
-        $string = str_replace( "#", " ", $string );
-        $string = str_replace( "§", " ", $string );
-        $string = str_replace( "^", " ", $string );
-        $string = str_replace( "â€???", " ", $string );
-        $string = str_replace( "&", " ", $string );
-
-
         if ( array_key_exists( $source_lang, self::$cjk ) ) {
 
             // 17/01/2014
             // sostituiamo i numeri con N nel CJK in modo da non alterare i rapporti carattere/parola
             // in modo che il conteggio
             // parole consideri i segmenti che differiscono per soli numeri come ripetizioni (come TRADOS)
-            $string = preg_replace( "/[0-9]+([\.,][0-9]+)*/", "N", $string );
+            $string = preg_replace( '/[0-9]+([\.,][0-9]+)*/', 'N', $string );
 
         } else {
 
             // 08/02/2011 CONCORDATO CON MARCO : sostituire tutti i numeri con un segnaposto, in modo che il conteggio
             // parole consideri i segmenti che differiscono per soli numeri come ripetizioni (come TRADOS)
-            $string = preg_replace( "/[0-9]+([\.,][0-9]+)*/", "TRANSLATED_NUMBER", $string );
+            $string = preg_replace( '/[0-9]+([\.,][0-9]+)*/', 'TRANSLATED_NUMBER', $string );
 
         }
 
@@ -929,12 +907,6 @@ class CatUtils {
 
     //CONTA LE PAROLE IN UNA STRINGA
     public static function segment_raw_wordcount( $string, $source_lang = 'en-US' ) {
-
-		if(strpos($source_lang,'-')!==FALSE){
-			$tmp_lang=explode('-',$source_lang);
-			$source_lang=$tmp_lang[0];
-			unset($tmp_lang);
-		}
 
         $string = self::clean_raw_string4fast_word_count( $string, $source_lang );
 
@@ -950,37 +922,15 @@ class CatUtils {
         } else {
 
             $string = str_replace( " ", "<sep>", $string );
-            $string = str_replace( "  ", "<sep>", $string ); //Non breaking space
+            $string = str_replace( " ", "<sep>", $string ); //use breaking spaces also
 
+            $words_array = explode( "<sep>", $string );
+            $words_array = array_filter( $words_array, function ( $word ) {
+                return $word != "";
+            } );
 
-            //TODO verificare che questi servano ancora dopo il clean_raw_string4fast_word_count e la sostituzione degli spazi con i separatori
-            $string = str_replace( "„", "<sep>", $string );
-            $string = str_replace( "‚", "<sep>", $string ); //single low quotation mark
-            $string = str_replace( "‘", "<sep>", $string );
-            $string = str_replace( "’", "<sep>", $string );
-            $string = str_replace( "“", "<sep>", $string );
-            $string = str_replace( "”", "<sep>", $string );
-            $string = str_replace( "·", "<sep>", $string ); //Middle dot - Georgian comma
-            $string = str_replace( "«", "<sep>", $string );
-            $string = str_replace( "»", "<sep>", $string );
+            $res = @count( $words_array );
 
-            $string = str_replace( ",", "<sep>", $string );
-            $string = str_replace( ".", "<sep>", $string );
-            $string = str_replace( "'", "<sep>", $string );
-            $string = str_replace( ".", "<sep>", $string );
-            $string = str_replace( "\"", "<sep>", $string );
-            $string = str_replace( '\'', "<sep>", $string );
-
-            $app = explode( "<sep>", $string );
-            foreach ( $app as $a ) {
-                $a = trim( $a );
-                if ( $a != "" ) {
-                    //voglio contare anche i numeri:
-                    $temp[ ] = $a;
-                }
-            }
-
-            $res = @count( $temp );
         }
 
         return $res;
