@@ -161,10 +161,13 @@ route( '/api/v2/jobs/[:id_job]/[:password]/segments-filter', 'GET',
 );
 
 
-/**
- * This should be moved in plugin space
- */
 $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
+    
+    route( '/comments',     'GET', 'API\V2\CommentsController', 'index' );
+
+    /**
+     * This should be moved in plugin space
+     */
     route( '/quality-report', 'GET',
        'Features\ReviewImproved\Controller\API\QualityReportController', 'show'
     );
