@@ -794,14 +794,14 @@ box-shadow: 0 1px 2px #ccc;
 }
 
 .header-menu .wrapper-dropdown-5 .dropdown {
-    left: -221px;
-    width: 268px;
+	left: -132px;
+    width: 164px;
 }
 
 
 .justdone .header-menu .wrapper-dropdown-5 .dropdown{
-	left: -205px;
-  width: 268px;
+    left: -224px;
+    width: 256px;
 }
 .header-menu .wrapper-dropdown-5 .dropdown[data-download='false'] li.downloadTranslation,
 .header-menu .wrapper-dropdown-5 .dropdown[data-download='true'] li.previewLink

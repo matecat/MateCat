@@ -19,12 +19,20 @@ class WorkerClient {
     public static $_HANDLER;
 
 
-    public static function init() {
-        $task_manager_config = @parse_ini_file( INIT::$UTILS_ROOT . '/Analysis/task_manager_config.ini', true );
-        if ( $task_manager_config ) {
-            $contextList = ContextList::get( $task_manager_config[ 'context_definitions' ] );
+    /**
+     * The handler is passed to have a more correct dependency injection
+     *
+     * @param AMQHandler|null $handler
+     */
+    public static function init( AMQHandler $handler = null ) {
+        if ( \INIT::$TASK_RUNNER_CONFIG ) {
+            $contextList = ContextList::get( \INIT::$TASK_RUNNER_CONFIG['context_definitions'] );
             self::$_QUEUES  = $contextList->list;
-            self::$_HANDLER = new AMQHandler();
+            if( !is_null( $handler ) ){
+                self::$_HANDLER = $handler;
+            } else {
+                self::$_HANDLER = new AMQHandler();
+            }
         }
     }
 
@@ -36,7 +44,6 @@ class WorkerClient {
      *
      * @throws Exception
      *
-     * TODO: move this in the abstractWorker itself
      */
     public static function enqueue( $queue, $class_name, $data, $options ) {
         $element            = new QueueElement();

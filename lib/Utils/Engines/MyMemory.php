@@ -78,7 +78,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
                 break;
             default:
 
-                if( isset( $decoded[ 'matches' ] ) ){
+                if( isset( $decoded[ 'matches' ] ) && !empty( $decoded[ 'matches' ] ) ){
                     foreach ( $decoded[ 'matches' ] as $pos => $match ) {
                         $decoded[ 'matches' ][ $pos ][ 'segment' ]     = $this->_resetSpecialStrings( $match[ 'segment' ] );
                         $decoded[ 'matches' ][ $pos ][ 'translation' ] = $this->_resetSpecialStrings( $match[ 'translation' ] );

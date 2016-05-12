@@ -40,8 +40,8 @@ APP = {
             el = $( this ).parents( '.modal' ).find( '.btn-cancel' );
             if ( $( el ).attr( 'data-callback' ) ) {
                 if ( typeof UI[$( el ).attr( 'data-callback' )] === 'function' ) {
-                    var context = $( this ).attr( 'data-context' ) || '';
-                    UI[$( this ).attr( 'data-callback' )]( decodeURI( context ) );
+                    var context = $( el ).attr( 'data-context' ) || '';
+                    UI[$( el ).attr( 'data-callback' )]( decodeURI( context ) );
                 } else {
                     APP.cancelValue = APP.cancelCallbackFunction();
                 }
@@ -152,7 +152,6 @@ APP = {
         }
         $( 'body' ).addClass( 'incomingMsg' );
     },
-
     doRequest: function ( req, log ) {
 
         logTxt = (typeof log == 'undefined') ? '' : '&type=' + log;
@@ -472,8 +471,10 @@ APP = {
     closePopup: function () {
         $( '.modal[data-type=view]' ).hide();
         $( '.modal:not([data-type=view])' ).remove();
-//            $('.popup.hide, .popup-outer.hide').hide();
-//            $('.popup:not(.hide), .popup-outer:not(.hide)').remove();
+        // TODO: not sure this is still useful
+        $(window).trigger({
+            type: "modalClosed"
+        });
     },
     fitText: function ( container, child, limitHeight, escapeTextLen, actualTextLow, actualTextHi ) {
         if ( typeof escapeTextLen == 'undefined' ) escapeTextLen = 12;

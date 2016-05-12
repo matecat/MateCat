@@ -16,7 +16,6 @@ use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\FrameException;
 use TaskRunner\Exceptions\ReQueueException;
 use TaskRunner\Exceptions\WorkerClassException;
-use Analysis\Queue\QueueInfo;
 
 use \Exception, \Bootstrap, \SplObserver, \SplSubject, \AMQHandler;;
 
@@ -231,9 +230,10 @@ class Executor implements \SplObserver {
                     $this->_worker = new $queueElement->classLoad( $this->_queueHandler );
                     $this->_worker->attach( $this );
                     $this->_worker->setPid( $this->_executorPID );
+                    $this->_worker->setContext( $this->_executionContext  );
                 }
 
-                $this->_worker->process( $queueElement, $this->_executionContext );
+                $this->_worker->process( $queueElement );
 
             } catch ( EndQueueException $e ){
 
@@ -355,15 +355,21 @@ class Executor implements \SplObserver {
      * @param SplSubject $subject
      */
     public function update( SplSubject $subject ) {
+
         /**
          * @var $subject AbstractWorker
          */
+        \Log::$fileName = $subject->getLoggerName();
         $this->_logMsg( $subject->getLogMsg() );
+        \Log::$fileName = $this->_executionContext->loggerName;
+
     }
 
 }
 
 //$argv = array();
-//$argv[ 1 ] = '{"redis_key":"mail_list","queue_length":0,"queue_name":"mail_queue","pid_set_name":"ch_pid_set_mail","pid_list":[],"pid_list_len":0,"max_executors":"1","loggerName":"mail_queue.log"}';
+//$argv[ 1 ] = '{"queue_length":0,"queue_name":"set_contribution","pid_set_name":"ch_pid_set_contribution","pid_list":[],"pid_list_len":0,"max_executors":"1","loggerName":"set_contribution.log"}';
+//$argv[ 1 ] = '{"queue_name":"analysis_queue_P3","pid_set_name":"ch_pid_set_p3","max_executors":"1","redis_key":"p3_list","loggerName":"tm_analysis_P3.log"}';
 
+/** @var array $argv */
 Executor::getInstance( Context::buildFromArray( json_decode( $argv[ 1 ], true ) ) )->main();

@@ -16,6 +16,14 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         }
     });
 
+    var rejectKeyDownEvent = function(e) {
+        e.preventDefault();
+
+        if ( $('.button-reject:visible').length ) {
+            UI.rejectAndGoToNext();
+        }
+    }
+
     $.extend(UI, {
         /**
          * Search for the next translated segment to propose for revision.
@@ -29,80 +37,59 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
             var translatedList = [];
             var approvedList = [];
-
             var clickableSelector = UI.targetContainerSelector();
 
-            if ( el.nextAll('.status-translated, .status-approved').length ) {
+            var clickSegmentIfFound =  function() {
+                if( !$(this).is(UI.currentSegment) ) {
+                translatedList = $(this);
+                translatedList.first().find(UI.targetContainerSelector()).click();
+                return false;
+                }
+            }
 
+            // find in next segments in the current file
+            if ( el.nextAll('section.status-translated, section.status-approved').length ) {
                 translatedList = el.nextAll('.status-translated');
                 approvedList   = el.nextAll('.status-approved');
-
                 if ( translatedList.length ) {
                     translatedList.first().find( clickableSelector ).click();
                 } else {
                     approvedList.first().find( clickableSelector ).click();
-
                 }
 
-            } else {
-
+            } else if(el.parents('article').nextAll('section.status-translated, section.status-approved').length) {
+                // find in next segments in the next files
                 file = el.parents('article');
-                file.nextAll(':has(section.status-translated), :has(section.status-approved)').each(function () {
+                file.nextAll('section.status-translated, section.status-approved').each( clickSegmentIfFound );
 
-                    var translatedList = $(this).find('.status-translated');
-                    var approvedList   = $(this).find('.status-approved');
+                // else find from the beginning of the currently loaded segments in all files
+            } else if ($('section.status-translated, section.status-approved').length) {
+                // else find from the beginning of the currently loaded segments in all files
+                $('section.status-translated, section.status-approved').each( clickSegmentIfFound );
 
-                    if( translatedList.length ) {
-                        translatedList.first().find( clickableSelector ).click();
+            } else { // find in not loaded segments
+                // Go to the next segment saved before
+                var callback = function() {
+                    $(window).off('modalClosed');
+                    //Check if the next is inside the view, if not render the file
+                    var next = UI.Segment.findEl(UI.nextUntranslatedSegmentIdByServer);
+                    if (next.length > 0) {
+                        UI.gotoSegment(UI.nextUntranslatedSegmentIdByServer);
                     } else {
-                        UI.reloadWarning();
+                        UI.renderAfterConfirm(UI.nextUntranslatedSegmentIdByServer);
                     }
-
-                    return false;
-
-                });
-                // else
-                if($('section.status-translated, section.status-approved').length) { // find from the beginning of the currently loaded segments
-
-                    translatedList = $('section.status-translated');
-                    approvedList   = $('section.status-approved');
-
-                    if( translatedList.length ) {
-                        if((translatedList.first().is(UI.currentSegment))) {
-                            UI.scrollSegment(translatedList.first());
-                        } else {
-                            translatedList.first().find( clickableSelector ).click();
-                        }
-                    } else {
-                        if((approvedList.first().is(UI.currentSegment))) {
-                            UI.scrollSegment(approvedList.first());
-                        } else {
-                            approvedList.first().find( clickableSelector ).click();
-                        }
-                    }
-
-                } else { // find in not loaded segments
-
-                    APP.doRequest({
-                        data: {
-                            action: 'getNextReviseSegment',
-                            id_job: config.job_id,
-                            password: config.password,
-                            id_segment: sid
-                        },
-                        error: function() {
-                        },
-                        success: function(d) {
-                            if( d.nextId == null ) return false;
-                            UI.render({
-                                firstLoad: false,
-                                segmentToOpen: d.nextId
-                            });
-                        }
+                };
+                // If the modal is open wait the close event
+                if( $(".modal[data-type='confirm']").length ) {
+                    $(window).on('modalClosed', function(e) {
+                        callback();
                     });
-
+                } else {
+                    callback();
                 }
+
             }
+
         },
         /**
          * translationIsToSave
@@ -196,14 +183,14 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
             originalBindShortcuts();
 
-            $('body').on('keydown.shortcuts', null, UI.shortcuts.reject.keystrokes.standard, function(e) {
-                e.preventDefault();
-                UI.rejectAndGoToNext();
-            });
+            $('body').on('keydown.shortcuts', null, UI.shortcuts.reject.keystrokes.standard, rejectKeyDownEvent ) ;
+            $('body').on('keydown.shortcuts', null, UI.shortcuts.reject.keystrokes.mac, rejectKeyDownEvent ) ;
+        },
 
-            $('body').on('keydown.shortcuts', null, UI.shortcuts.reject.keystrokes.mac, function(e) {
-                e.preventDefault();
-                UI.rejectAndGoToNext();
+        renderAfterConfirm: function (nextId) {
+            this.render({
+                firstLoad: false,
+                segmentToOpen: nextId
             });
         }
     });

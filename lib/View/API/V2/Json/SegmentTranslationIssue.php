@@ -27,6 +27,7 @@ class SegmentTranslationIssue {
             'end_offset'          => $record->end_offset,
             'translation_version' => $record->translation_version,
             'target_text'         => $record->target_text,
+            'penalty_points'      => $record->penalty_points
         );
         return $row;
     }
