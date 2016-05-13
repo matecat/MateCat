@@ -217,6 +217,8 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         $parameters               = array();
         $parameters[ 'seg' ]      = $_config[ 'segment' ];
         $parameters[ 'tra' ]      = $_config[ 'translation' ];
+        $parameters[ 'newseg' ]      = $_config[ 'newsegment' ];
+        $parameters[ 'newtra' ]      = $_config[ 'newtranslation' ];
         $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
         $parameters[ 'tnote' ]    = $_config[ 'tnote' ];
         $parameters[ 'prop' ]     = $_config[ 'prop' ];
