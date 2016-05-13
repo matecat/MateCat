@@ -123,12 +123,13 @@ class GetMyMemoryTest extends AbstractTest
      * @group regression
      * @covers Engines_MyMemory::get
      */
-    public function test_get_segment_italian_with_wrong_source_language(){
+    public function test_get_segment_italian_with_wrong_source_language_and_id_user_not_in_array_coverage_purpose(){
 
         $this->engine_MyMemory = new Engines_MyMemory($this->engine_struct_param);
 
 
         $this->config_param['segment']= "Scelta del Piano di studio parziale per il secondo anno ripetente secondo l’Ordinamento D.M. 270/04";
+        $this->config_param['id_user']= "fc7ba5edf8d5e8401593";
 
 
         $result = $this->engine_MyMemory->get($this->config_param);
