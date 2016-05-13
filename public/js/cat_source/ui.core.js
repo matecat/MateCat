@@ -248,7 +248,19 @@ UI = {
         }
 
 	},
-    closeSegment: function(segment, byButton, operation) {
+    checkIfFinished: function(closing) {
+       if (((this.progress_perc != this.done_percentage) && (this.progress_perc == '100')) || ((closing) && (this.progress_perc == '100'))) {
+               this.body.addClass('justdone');
+       } else {
+               this.body.removeClass('justdone');
+       }
+    },
+   checkIfFinishedFirst: function() {
+       if ($('section').length == $('section.status-translated, section.status-approved').length) {
+           this.body.addClass('justdone');
+       }
+   },
+   closeSegment: function(segment, byButton, operation) {
 		if ( typeof segment == 'undefined' ) {
 
 			return true;
@@ -279,8 +291,13 @@ UI = {
 
             $(segment).removeClass("editor waiting_for_check_result opened");
             $('span.locked.mismatch', segment).removeClass('mismatch');
+            
+            
+            if (!this.opening) {
+                this.checkIfFinished(1);
+            }
 
-// close split segment
+            // close split segment
         	$('.sid .actions .split').removeClass('cancel');
         	source = $(segment).find('.source');
         	$(source).removeAttr('style');
@@ -288,7 +305,7 @@ UI = {
         	$('.split-shortcut').html('CTRL + S');
         	$('.splitBar, .splitArea').remove();
         	$('.sid .actions').hide();
-// end split segment
+            // end split segment
 		return true;
         }
 	},
@@ -490,6 +507,11 @@ UI = {
 
         var segmentFooter = new UI.SegmentFooter( segment );
         $('.footer', segment).append( segmentFooter.html() );
+
+        // If the Messages Tab is present open it by default
+        if ($('.footer', segment).find('.open.segment-notes').length) {
+            this.forceShowMatchesTab();
+        }
 
         UI.currentSegment.trigger('afterFooterCreation', segment);
 
@@ -1754,8 +1776,8 @@ UI = {
 		}
 
 		this.progress_perc = s.PROGRESS_PERC_FORMATTED;
-
-		this.done_percentage = this.progress_perc;
+        this.checkIfFinished();
+        this.done_percentage = this.progress_perc;
 
 		$('.approved-bar', m).css('width', a_perc + '%').attr('title', 'Approved ' + a_perc_formatted + '%');
 		$('.translated-bar', m).css('width', t_perc + '%').attr('title', 'Translated ' + t_perc_formatted + '%');
@@ -2931,8 +2953,9 @@ UI = {
         }
 
     },
-
-
+    forceShowMatchesTab: function () {
+        UI.body.removeClass('hideMatches');
+    },
     setWaypoints: function() {
 		this.firstSegment.waypoint('remove');
 		this.lastSegment.waypoint('remove');
