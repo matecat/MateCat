@@ -97,7 +97,9 @@ class getTagProjectionController extends ajaxController {
 
         $config[ 's' ] = CatUtils::view2rawxliff( $this->source );
         $config[ 't' ] = CatUtils::view2rawxliff( $this->target );
-        $config[ 'suggestion' ] = CatUtils::view2rawxliff( $this->suggestion );
+        $config[ 'sl' ] = CatUtils::view2rawxliff( $this->source_lang );
+        $config[ 'tl' ] = CatUtils::view2rawxliff( $this->target_lang );
+        $config[ 'hint' ] = CatUtils::view2rawxliff( $this->suggestion );
 //        $config[ 'i' ] = 1;
         /*if ( $id_tms != 0 ) {
 

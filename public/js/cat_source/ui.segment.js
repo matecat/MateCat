@@ -130,6 +130,22 @@
                 return false;
             }
         },
+        startSegmentTagProjection: function () {
+            UI.getSegmentTagsProjection().success(function(response) {
+                if (response.errors.length) {
+                    // UI.processErrors(response.errors, 'getTagProjection');
+                    UI.copyTagProjectionInCurrentSegment();
+                } else {
+                    UI.copyTagProjectionInCurrentSegment(response.data.translation);
+                }
+                UI.setSegmentAsTagged();
+                UI.lockTags(UI.editarea);
+                UI.lockTags(UI.currentSegment.find('.source'));
+                UI.editarea.focus();
+                UI.highlightEditarea();
+                UI.createButtons();
+            });
+        },
         /**
          * Tag Projection: get the tag projection for the current segment
          * @returns translation with the Tag prjection
@@ -162,7 +178,7 @@
                     target: target,
                     source_lang: config.source_lang,
                     target_lang: config.target_lang,
-                    suggestion: suggestion
+                    sl: suggestion
                 },
                 error: function() {
                     console.log('getTagProjection error');
@@ -179,7 +195,7 @@
             source = htmlDecode(source).replace(/&quot;/g, '\"');
             var decoded_source = UI.decodePlaceholdersToText(source, true);
             UI.currentSegment.find('.source').html(decoded_source);
-            if (!_.isUndefined(translation)) {
+            if (!_.isUndefined(translation) && translation.length > 0) {
                 var decoded_translation = UI.decodePlaceholdersToText(translation, true);
                 $(this.editarea).html(decoded_translation);
             }

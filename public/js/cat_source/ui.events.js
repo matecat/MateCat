@@ -1153,20 +1153,7 @@ $.extend(UI, {
 			// in the current segment
 			e.preventDefault();
 			UI.hideEditToolbar();
-			UI.getSegmentTagsProjection().success(function(response) {
-				if (response.errors.length) {
-					// UI.processErrors(response.errors, 'getTagProjection');
-					UI.copyTagProjectionInCurrentSegment();
-				} else {
-					UI.copyTagProjectionInCurrentSegment(response.data.translation);
-				}
-				UI.setSegmentAsTagged();
-				UI.lockTags(this.editarea);
-				UI.lockTags(UI.currentSegment.find('.source'));
-				UI.editarea.focus();
-				UI.highlightEditarea();
-				UI.createButtons();
-			});
+			UI.startSegmentTagProjection();
 			return false;
 		}).on('click', 'a.d, a.a, a.r, a.f, a.fx, a.rb', function() {
 			var segment = $(this).parents("section");
