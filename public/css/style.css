@@ -133,19 +133,16 @@ left: -5px;
 .warnings, 
 .text .alternatives  
 {
-	clear:left;
-	color:#D65959;
-	float:left;
-	position:relative;
-/*	left:52%;
-	top:-12px;
-	margin-top:-12px;
-*/	
-  margin-left: -10px;
-	padding:2px 0;
-	font-size:14px;
-	max-width:200px;
+	clear: left;
+	color: #D65959;
+	float: left;
+	position: relative;
+	margin-left: -10px;
+	padding: 2px 0;
+	font-size: 14px;
+	max-width: 50%;
 	text-align: left;
+	margin-bottom: 0px;
 }
 .text .alternatives 
 {
