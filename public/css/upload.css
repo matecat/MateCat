@@ -1259,6 +1259,11 @@ span.load-gdrive:hover,
     background-color: #EFEFEF;
 }
 
+span.load-gdrive-disabled {
+    opacity: 0.2;
+    cursor: default;
+}
+
 .modal-gdrive {
     position: fixed;
     top: 0;
