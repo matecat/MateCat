@@ -68,7 +68,7 @@ CREATE TABLE `comments` (
   PRIMARY KEY (`id`),
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `id_segment` (`id_job`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `engines` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -256,6 +256,7 @@ CREATE TABLE `owner_features` (
 
 CREATE TABLE `phinxlog` (
   `version` bigint(20) NOT NULL,
+  `migration_name` varchar(100) DEFAULT NULL,
   `start_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `end_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`version`)
@@ -385,7 +386,7 @@ CREATE TABLE `segment_notes` (
   `note` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `id_segment` (`id_segment`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `segment_revisions` (
   `id_job` bigint(20) NOT NULL,
@@ -509,7 +510,7 @@ CREATE TABLE `users` (
   PRIMARY KEY (`uid`),
   UNIQUE KEY `email` (`email`) USING BTREE,
   KEY `api_key` (`api_key`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 
         INSERT INTO `engines` (
