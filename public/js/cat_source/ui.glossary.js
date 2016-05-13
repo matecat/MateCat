@@ -420,18 +420,6 @@ $.extend( UI, {
     },
     editGlossaryItem: function (elem$, callback) {
         elem$.addClass("editing").attr('contenteditable', true).focus();
-        /*var callback = function () {
-            var glossaryDom = elem$.closest('.graysmall');
-            var id = glossaryDom.data('id');
-            var suggestion = glossaryDom.find('.suggestion_source').text();
-            var newTranslation = glossaryDom.find('.translation').text();
-            var translation = glossaryDom.find('.translation').data('original');
-            $.when(self.updateGlossaryItem(id, suggestion, translation, newTranslation)).done(function( response ) {
-
-            });
-            elem$.removeClass('editing').removeAttr('contenteditable');
-            elem$.off('keypress focusout');
-        };*/
         elem$.focusout(function(e){
             e.stopPropagation();
             callback.call();
