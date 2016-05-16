@@ -291,7 +291,7 @@ module.exports = function(grunt) {
                 src : buildPath + 'app.js',
                 options : {
                     inline : true,
-                    nodes : ['console.aaaaa']
+                    nodes : ['console.log']
                 }
             }
         },
