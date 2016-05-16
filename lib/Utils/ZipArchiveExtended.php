@@ -9,6 +9,7 @@
 class ZipArchiveExtended extends ZipArchive {
 
     const REFERENCE_FOLDER = '__reference'  ;
+    const META_FOLDER = '__meta' ;
 
     const MAX_VISITED_DEPTH = 5;
     const MAX_VISITED_FOLDERS_PER_DEPTH = 10;
