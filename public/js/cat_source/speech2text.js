@@ -11,6 +11,7 @@ Speech2Text = {};
         isToEmptyTargetElement: true,
         isStopingRecognition: false,
         isToKeepRecognizing: false,
+        wereMatchesPreviouslyOpened: false,
         loadRecognition: function() {
             if ( 'webkitSpeechRecognition' in window ) {
                 Speech2Text.recognition = new webkitSpeechRecognition();
@@ -183,11 +184,16 @@ Speech2Text = {};
         showMatches: function() {
             if( $( 'body' ).hasClass( 'hideMatches' ) ) {
                 $( 'body' ).removeClass( 'hideMatches' );
+                Speech2Text.wereMatchesPreviouslyOpened = false;
+            } else {
+                Speech2Text.wereMatchesPreviouslyOpened = true;
             }
         },
         hideMatches: function() {
-            if( !$( 'body' ).hasClass( 'hideMatches' ) ) {
-                $( 'body' ).addClass( 'hideMatches' );
+            if( !Speech2Text.wereMatchesPreviouslyOpened ) {
+                if( !$( 'body' ).hasClass( 'hideMatches' ) ) {
+                    $( 'body' ).addClass( 'hideMatches' );
+                }
             }
         },
         animateSpeechActive: function() {
