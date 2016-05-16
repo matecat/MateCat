@@ -4,7 +4,7 @@
     },
     "require": {
         "php": ">=5.3.0",
-        "robmorgan/phinx": "^0.5.3",
+        "robmorgan/phinx": "^0.4.6",
         "klein/klein": "^2.1",
         "psr/log": "~1.0",
         "monolog/monolog": "1.17.*",
