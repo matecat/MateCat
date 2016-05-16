@@ -83,12 +83,16 @@ Speech2Text = {};
             if( !Speech2Text.recognizing ) {
                 Speech2Text.recognition.start();
                 Speech2Text.showMatches();
+                Speech2Text.targetElement.on( 'blur keyup paste input', function( event ) {
+                    Speech2Text.finalTranscript = $(this).text().trim() + ' ';
+                });
             }
         },
         stopSpeechRecognition: function( microphone ) {
             microphone.removeClass( 'micSpeechActive' );
 
             Speech2Text.recognition.stop();
+            Speech2Text.targetElement.off( 'blur keyup paste input' );
 
             if( Speech2Text.recognizing ) {
                 Speech2Text.isStopingRecognition = true;
