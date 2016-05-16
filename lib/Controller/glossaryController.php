@@ -14,7 +14,9 @@ class glossaryController extends ajaxController {
     private $id_job;
     private $password;
     private $segment;
+    private $newsegment;
     private $translation;
+    private $newtranslation;
     private $comment;
     private $automatic;
     /**
@@ -32,7 +34,9 @@ class glossaryController extends ajaxController {
             'id_job'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'password'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'segment'     => array( 'filter' => FILTER_UNSAFE_RAW ),
+            'newsegment'     => array( 'filter' => FILTER_UNSAFE_RAW ),
             'translation' => array( 'filter' => FILTER_UNSAFE_RAW ),
+            'newtranslation' => array( 'filter' => FILTER_UNSAFE_RAW ),
             'comment'     => array( 'filter' => FILTER_UNSAFE_RAW ),
             'automatic'   => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
         );
@@ -46,7 +50,9 @@ class glossaryController extends ajaxController {
         $this->id_job      = $__postInput[ 'id_job' ];
         $this->password    = $__postInput[ 'password' ];
         $this->segment     = $__postInput[ 'segment' ];
+        $this->newsegment     = $__postInput[ 'newsegment' ];
         $this->translation = $__postInput[ 'translation' ];
+        $this->newtranslation = $__postInput[ 'newtranslation' ];
         $this->comment     = $__postInput[ 'comment' ];
         $this->automatic   = $__postInput[ 'automatic' ];
     }
@@ -79,6 +85,10 @@ class glossaryController extends ajaxController {
             $config[ 'isGlossary' ]  = true;
             $config[ 'get_mt' ]      = null;
             $config[ 'num_result' ]  = 100; //do not want limit the results from glossary: set as a big number
+            if ( $this->newsegment && $this->newtranslation ) {
+                $config[ 'newsegment' ]     = $this->newsegment;
+                $config[ 'newtranslation' ] = $this->newtranslation;
+            }
 
             switch ( $this->exec ) {
 
@@ -328,7 +338,10 @@ class glossaryController extends ajaxController {
         $config[ 'segment' ]     = CatUtils::view2rawxliff( $config[ 'segment' ] );
         $config[ 'translation' ] = CatUtils::view2rawxliff( $config[ 'translation' ] );
         $config[ 'prop' ]        = json_encode( CatUtils::getTMProps( $this->job_info ) );
-
+        if ( $config[ 'newsegment' ] && $config[ 'newtranslation' ] ) {
+            $config[ 'newsegment' ]     = CatUtils::view2rawxliff( $config[ 'newsegment' ] );
+            $config[ 'newtranslation' ] = CatUtils::view2rawxliff( $config[ 'newtranslation' ] );
+        }
         //prepare the error report
         $set_code = array();
         //set the glossary entry for each key with write grants
