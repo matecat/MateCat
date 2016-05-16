@@ -125,4 +125,23 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
         });
     }
 
+    /**
+     * Most of the times only one zip per project is uploaded.
+     * This method is a shortcut to access the zip file path.
+     *
+     * @return string the original zip path.
+     *
+     */
+    public function getFirstOriginalZipPath() {
+        $fs = new FilesStorage();
+        $jobs = $this->getJobs();
+        $files = Files_FileDao::getByJobId($jobs[0]->id);
+
+        $zipName = explode( ZipArchiveExtended::INTERNAL_SEPARATOR, $files[0]->filename );
+        $zipName = $zipName[0];
+
+        $originalZipPath = $fs->getOriginalZipPath( $this->create_date, $this->id, $zipName );
+        return $originalZipPath ;
+    }
+
 }
