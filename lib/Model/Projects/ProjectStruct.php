@@ -55,6 +55,13 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     /**
+     * Proxy to set metadata for the current project 
+     */
+    public function setMetadata($key, $value) {
+        return Projects_MetadataDao::set( $this->id, $key, $value);
+    }
+
+    /**
      *
      * @return array
      */
