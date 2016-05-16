@@ -1,0 +1,117 @@
+/*
+ ==============================
+        LEXIQA OVERRIDES
+ ==============================
+ */
+
+#lexiqabox {   
+    text-align: center;
+    width: 60px;
+    padding-top: 6px;
+    margin-left: 20px;
+}
+
+#lexiqabox .numbererror {
+    background-color: #efda35;
+    color: #333;
+    border: 1px solid #fff;
+    font-weight: bold;
+    margin-left: 8px;
+    margin-top: 4px;
+}
+
+.lexnotific::before, #lexiqabox.warningbox::after {
+    content: url(../img/lexiqa_whitebg.svg);
+    display: block;
+}
+
+/*
+ ==============================
+        POWERTIP STYLING
+ ==============================
+ */
+#powerTip {
+	/*background-color: #efefef;
+    color: #333;
+    border: 1px solid #efefef;
+	border-radius: 0; 
+	font-family: 'Open Sans', sans-serif;*/
+	/*font-weight: 100;
+	font-size: 0.8rem;*/
+    background-color: #4D4D4D;
+	line-height: 1.5rem;
+	padding: 0;
+    /*border: 1px solid #046380;*/
+    /*-webkit-transform: scale(1,1);
+            transform: scale(1,1);
+    -webkit-transition-property: -webkit-transform;
+    transition-property: -webkit-transform;
+    transition-property: transform;
+    transition-property: transform, -webkit-transform;
+    -webkit-transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15);
+            transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.15);*/
+}
+
+#powerTip.sw::before, #powerTip.se::before {
+    border-bottom: 10px solid #4D4D4D;
+}
+
+#powerTip .tooltip-error-wrapper {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+            flex-direction: column;
+    -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+            flex-wrap: wrap;
+}
+
+#powerTip .tooltip-error-container {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+            flex-direction: row;
+    -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+            flex-wrap: wrap;
+    -webkit-box-align: end;
+    -webkit-align-items: flex-end;
+        -ms-flex-align: end;
+            align-items: flex-end;
+    -webkit-box-pack: end;
+    -webkit-justify-content: flex-end;
+        -ms-flex-pack: end;
+            justify-content: flex-end;
+    max-width: 100%;
+    /*border-bottom: 1px solid #fff;*/
+}
+
+#powerTip .tooltip-error-category {
+    padding: 0.5rem;
+}
+
+#powerTip .tooltip-error-ignore {
+	background-color: #efefef;
+	color: #333;
+    padding: 0.5rem;
+	text-decoration: none;
+	cursor: pointer;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    border-radius: 0 4px 4px 0;
+}
+
+#powerTip .tooltip-error-ignore:hover {
+	background-color: #999;
+    color: #fff;
+}
