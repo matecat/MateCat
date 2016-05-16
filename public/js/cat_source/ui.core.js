@@ -65,7 +65,7 @@ UI = {
             if (LXQ.enabled()) {
                 var lexiqaBoxIsOpen = $('#lexiqa-popup').hasClass('lxq-visible');
                 console.log('lexiqaBoxIsOpen: ', lexiqaBoxIsOpen);
-                var lxqBoxHeight =  (lexiqaBoxIsOpen)? $('#lexiqa-popup').outerHeight() + 2 : 0;
+                var lxqBoxHeight =  (lexiqaBoxIsOpen)? $('#lexiqa-popup').outerHeight() + 8 : 0;
                 jobMenu.css('top', (messageBarHeight + lxqBoxHeight + searchBoxHeight + 43 - menuHeight) + "px");
             }
             else {
