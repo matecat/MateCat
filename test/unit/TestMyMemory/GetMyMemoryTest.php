@@ -129,7 +129,7 @@ class GetMyMemoryTest extends AbstractTest
 
 
         $this->config_param['segment']= "Scelta del Piano di studio parziale per il secondo anno ripetente secondo l’Ordinamento D.M. 270/04";
-        $this->config_param['id_user']= "fc7ba5edf8d5e8401593";
+        $this->config_param['id_user']= "bfb9bd80a43253670c8d";
 
 
         $result = $this->engine_MyMemory->get($this->config_param);

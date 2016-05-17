@@ -22,10 +22,22 @@ class GlossaryImportTest extends AbstractTest
     protected $glossary_folder_path;
     protected $filename;
     protected $path_of_file_for_test;
+    protected $key_param;
 
-    public function setUp()
-    {
+    public function setUp(){
         parent::setUp();
+        $this->key_param="a6043e606ac9b5d7ff24";
+        $engineDAO = new EnginesModel_EngineDAO(Database::obtain());
+        $engine_struct = EnginesModel_EngineStruct::getStruct();
+        $engine_struct->id = 1;
+        $eng = $engineDAO->read($engine_struct);
+
+        /**
+         * @var $engineRecord EnginesModel_EngineStruct
+         */
+        $this->engine_struct_param = $eng[0];
+
+        $this->engine_MyMemory = new Engines_MyMemory($this->engine_struct_param);
     }
 
     public function tearDown()
@@ -48,24 +60,11 @@ class GlossaryImportTest extends AbstractTest
 
 
         $file_param = $this->path_of_file_for_test;
-        $key_param = "fc7ba5edf8d5e8401593";
         $name_param = "{$this->filename}"."Temp.g";
 
 
-        $engineDAO = new EnginesModel_EngineDAO(Database::obtain());
-        $engine_struct = EnginesModel_EngineStruct::getStruct();
-        $engine_struct->id = 1;
-        $eng = $engineDAO->read($engine_struct);
-
-        /**
-         * @var $engineRecord EnginesModel_EngineStruct
-         */
-        $this->engine_struct_param = @$eng[0];
-
-        $this->engine_MyMemory = new Engines_MyMemory($this->engine_struct_param);
-
         Langs_Languages::getInstance();
-        $result = $this->engine_MyMemory->glossaryImport($file_param, $key_param, $name_param);
+        $result = $this->engine_MyMemory->glossaryImport($file_param, $this->key_param, $name_param);
 
         $this->assertTrue($result instanceof Engines_Results_MyMemory_TmxResponse);
         $this->assertEquals(202, $result->responseStatus);
@@ -99,26 +98,11 @@ class GlossaryImportTest extends AbstractTest
 
 
         $file_param = $this->path_of_file_for_test;
-        $key_param = "fc7ba5edf8d5e8401593";
         $name_param = "{$this->filename}"."Temp.g";
 
 
-
-
-        $engineDAO = new EnginesModel_EngineDAO(Database::obtain());
-        $engine_struct = EnginesModel_EngineStruct::getStruct();
-        $engine_struct->id = 1;
-        $eng = $engineDAO->read($engine_struct);
-
-        /**
-         * @var $engineRecord EnginesModel_EngineStruct
-         */
-        $this->engine_struct_param = @$eng[0];
-
-        $this->engine_MyMemory = new Engines_MyMemory($this->engine_struct_param);
-
         Langs_Languages::getInstance();
-        $result = $this->engine_MyMemory->glossaryImport($file_param, $key_param, $name_param);
+        $result = $this->engine_MyMemory->glossaryImport($file_param, $this->key_param, $name_param);
 
         $this->assertTrue($result instanceof Engines_Results_MyMemory_TmxResponse);
         $this->assertEquals(406, $result->responseStatus);
@@ -144,25 +128,10 @@ class GlossaryImportTest extends AbstractTest
 
 
         $file_param = $this->path_of_file_for_test;
-        $key_param = "fc7ba5edf8d5e8401593";
         $name_param = "{$this->filename}"."Temp.g";
 
-
-        $engineDAO = new EnginesModel_EngineDAO(Database::obtain());
-        $engine_struct = EnginesModel_EngineStruct::getStruct();
-        $engine_struct->id = 1;
-        $eng = $engineDAO->read($engine_struct);
-
-        /**
-         * @var $engineRecord EnginesModel_EngineStruct
-         */
-        $this->engine_struct_param = @$eng[0];
-
-        $this->engine_MyMemory = new Engines_MyMemory($this->engine_struct_param);
-
-
         Langs_Languages::getInstance();
-        $result = $this->engine_MyMemory->glossaryImport($file_param, $key_param, $name_param);
+        $result = $this->engine_MyMemory->glossaryImport($file_param, $this->key_param, $name_param);
 
         $this->assertTrue($result instanceof Engines_Results_MyMemory_TmxResponse);
         $this->assertEquals(406, $result->responseStatus);
@@ -189,23 +158,10 @@ class GlossaryImportTest extends AbstractTest
 
 
         $file_param = $this->path_of_file_for_test;
-        $key_param = "fc7ba5edf8d5e8401593";
         $name_param = "{$this->filename}"."Temp.g";
 
-        $engineDAO = new EnginesModel_EngineDAO(Database::obtain());
-        $engine_struct = EnginesModel_EngineStruct::getStruct();
-        $engine_struct->id = 1;
-        $eng = $engineDAO->read($engine_struct);
-
-        /**
-         * @var $engineRecord EnginesModel_EngineStruct
-         */
-        $this->engine_struct_param = @$eng[0];
-
-        $this->engine_MyMemory = new Engines_MyMemory($this->engine_struct_param);
-
         Langs_Languages::getInstance();
-        $result = $this->engine_MyMemory->glossaryImport($file_param, $key_param, $name_param);
+        $result = $this->engine_MyMemory->glossaryImport($file_param, $this->key_param, $name_param);
 
         $this->assertTrue($result instanceof Engines_Results_MyMemory_TmxResponse);
         $this->assertEquals(406, $result->responseStatus);
@@ -231,23 +187,10 @@ class GlossaryImportTest extends AbstractTest
 
 
         $file_param = $this->path_of_file_for_test;
-        $key_param = "fc7ba5edf8d5e8401593";
         $name_param = "{$this->filename}"."Temp.g";
 
-        $engineDAO = new EnginesModel_EngineDAO(Database::obtain());
-        $engine_struct = EnginesModel_EngineStruct::getStruct();
-        $engine_struct->id = 1;
-        $eng = $engineDAO->read($engine_struct);
-
-        /**
-         * @var $engineRecord EnginesModel_EngineStruct
-         */
-        $this->engine_struct_param = @$eng[0];
-
-        $this->engine_MyMemory = new Engines_MyMemory($this->engine_struct_param);
-
         Langs_Languages::getInstance();
-        $result = $this->engine_MyMemory->glossaryImport($file_param, $key_param, $name_param);
+        $result = $this->engine_MyMemory->glossaryImport($file_param, $this->key_param, $name_param);
 
         $this->assertTrue($result instanceof Engines_Results_MyMemory_TmxResponse);
         $this->assertEquals(406, $result->responseStatus);
