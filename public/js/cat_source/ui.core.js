@@ -1180,15 +1180,6 @@ UI = {
 	},
 
     placeCaretAtEnd: function(el) {
-//		console.log(el);
-//		console.log($(el).first().get().className);
-//		var range = document.createRange();
-//		var sel = window.getSelection();
-//		range.setStart(el, 1);
-//		range.collapse(true);
-//		sel.removeAllRanges();
-//		sel.addRange(range);
-//		el.focus();
 
 		 $(el).focus();
 		 if (typeof window.getSelection != "undefined" && typeof document.createRange != "undefined") {
@@ -1376,12 +1367,10 @@ UI = {
                     segData = null;
                 });
             } else {
-//                console.log('b');
                 newSegments.push(this);
             }
 
         });
-// console.log('newsegments 1: ', newSegments);
         return newSegments;
     },
 
@@ -1397,9 +1386,10 @@ UI = {
             var autoPropagable = (this.repetitions_in_chunk == "1")? false : true;
 
             try {
-                if($.parseHTML(this.segment).length) {
+                if (!$.parseHTML(this.segment).length) {
+                } else {
                     this.segment = UI.stripSpans(this.segment);
-                };
+                }
             } catch ( e ){
                 //if we split a segment in more than 3 parts and reload the cattool
                 //this exception is raised:
@@ -1684,7 +1674,7 @@ UI = {
         this.lockTags(this.editarea);
         this.editarea.focus();
         this.highlightEditarea();
-        this.enableTPOnSegmentAndSetButton();
+        this.disableTPOnSegment();
     },
 	copyAlternativeInEditarea: function(translation) {
 		if ($.trim(translation) !== '') {

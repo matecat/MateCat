@@ -1,24 +1,24 @@
 (function($, undefined) {
-    $.extend(UI, { 
+    $.extend(UI, {
         getSegmentTemplate : function() {
             return MateCat.Templates['translate/segment'];
         },
         getSegmentTemplateData : function(
-            segment, t, readonly, autoPropagated, autoPropagable, 
+            segment, t, readonly, autoPropagated, autoPropagable,
             escapedSegment, splitAr, splitGroup, originalId
         ) {
             var splitGroup = segment.split_group || splitGroup || '';
 
             var classes = new Array();
             if ( readonly ) {
-                classes.push('readonly'); 
+                classes.push('readonly');
             }
 
             if ( segment.status ) {
-                classes.push( 'status-' + segment.status.toLowerCase() ); 
+                classes.push( 'status-' + segment.status.toLowerCase() );
             }
             else {
-               classes.push('status-new'); 
+               classes.push('status-new');
             }
 
             if ( segment.has_reference == 'true') {
@@ -26,40 +26,41 @@
             }
 
             if ( segment.sid == splitGroup[0] ) {
-                classes.push( 'splitStart' ); 
+                classes.push( 'splitStart' );
             }
             else if ( segment.sid == splitGroup[splitGroup.length - 1] ) {
-                classes.push( 'splitEnd' ); 
+                classes.push( 'splitEnd' );
             }
             else if ( splitGroup.length ) {
-                classes.push('splitInner'); 
+                classes.push('splitInner');
             }
 
-            var editarea_classes = ['targetarea', 'invisible']; 
+            var editarea_classes = ['targetarea', 'invisible'];
             if ( readonly ) {
-                editarea_classes.push( 'area' ); 
+                editarea_classes.push( 'area' );
             } else {
-                editarea_classes.push( 'editarea' ); 
+                editarea_classes.push( 'editarea' );
             }
 
             if ( segment.status ) {
                 var status_change_title = UI
                     .statusHandleTitleAttr( segment.status );
             } else {
-                var status_change_title = 'Change segment status' ; 
+                var status_change_title = 'Change segment status' ;
             }
 
             if ( t ) {
-                var segment_edit_min = segment.parsed_time_to_edit[1]; 
-                var segment_edit_sec = segment.parsed_time_to_edit[2]; 
+                var segment_edit_min = segment.parsed_time_to_edit[1];
+                var segment_edit_sec = segment.parsed_time_to_edit[2];
             }
             var decoded_translation;
             var decoded_source;
 
-            /**if Tag Projection enabled and there are tags in the segment, remove it and add the class that identify
+            /**if Tag Projection enabled and there are not tags in the segment translation, remove it and add the class that identify
              * tha Tag Projection is enabled
              */
-            if (UI.enableTagProjection && (UI.getSegmentStatus(segment) === 'draft' || UI.getSegmentStatus(segment) === 'new') ) {
+            if (UI.enableTagProjection && (UI.getSegmentStatus(segment) === 'draft' || UI.getSegmentStatus(segment) === 'new')
+                && !UI.checkXliffTagsInText(segment.translation) ) {
                 decoded_translation = UI.removeAllTags(segment.translation);
                 decoded_source = UI.removeAllTags(segment.segment);
                 classes.push('enableTP');
@@ -67,10 +68,10 @@
                 decoded_translation = segment.translation;
                 decoded_source = segment.segment;
             }
-            
+
             decoded_translation = UI.decodePlaceholdersToText(
                 decoded_translation || '',
-                true, segment.sid, 'translation'); 
+                true, segment.sid, 'translation');
 
             decoded_source = UI.decodePlaceholdersToText(
                 decoded_source || '',
@@ -117,18 +118,30 @@
             return (segment.status)? segment.status.toLowerCase() : 'new';
         },
         /**
+         * Return che Suggestion, if exist, used by the current segment
+         * retrun json
+         */
+        getCurrentSegmentContribution: function (segment) {
+            var currentSegment = (segment)? segment : UI.currentSegment;
+            var currentContribution;
+            var chosen_suggestion = $('.editarea', currentSegment).data('lastChosenSuggestion');
+            if (!_.isUndefined(chosen_suggestion)) {
+                var storedContributions = UI.getFromStorage('contribution-' + config.id_job + '-' + UI.getSegmentId(currentSegment));
+                if (storedContributions) {
+                    currentContribution = JSON.parse(storedContributions).data.matches[chosen_suggestion - 1];
+
+                }
+            }
+            return currentContribution;
+        },
+        /**
          * Tag Projection: check if is enable the Tag Projection
          * @param file
          */
         checkTPEnabled: function (file) {
-
-            if (((file.source_code === 'it-IT' && file.target_code.indexOf('en-') > -1)
-                || (file.target_code.indexOf('en-') > -1 && file.target_code === 'it-IT'))
-                && !config.isReview) {
-                return true;
-            } else {
-                return false;
-            }
+            return (((file.source_code === 'it-IT' && file.target_code.indexOf('en-') > -1)
+                || (file.source_code.indexOf('en-') > -1 && file.target_code === 'it-IT'))
+                && !config.isReview);
         },
         startSegmentTagProjection: function () {
             UI.getSegmentTagsProjection().success(function(response) {
@@ -154,21 +167,16 @@
             var source = UI.currentSegment.find('.source').data('original');
             source = htmlDecode(source).replace(/&quot;/g, '\"');
             source = htmlDecode(source);
-            var target = UI.postProcessEditarea(UI.currentSegment, ".editarea");
-            var suggestion;
             //Retrieve the chosen suggestion if exist
-            var chosen_suggestion = $('.editarea', UI.currentSegment).data('lastChosenSuggestion');
-            if (!_.isUndefined(chosen_suggestion)) {
-                var storedContributions = UI.getFromStorage('contribution-' + config.id_job + '-' + UI.getSegmentId(UI.currentSegment));
-                if (storedContributions) {
-                    var currentContribution = JSON.parse(storedContributions).data.matches[chosen_suggestion - 1];
-                    // Send the suggestion to Tag Prjection only if is > 89% and is not MT
-                    if (currentContribution.match !== "MT" && parseInt(currentContribution.match) > 89) {
-                        suggestion = currentContribution.translation;
-                    }
-                }
+            var suggestion;
+            var currentContribution = this.getCurrentSegmentContribution();
+            // Send the suggestion to Tag Projection only if is > 89% and is not MT
+            if (!_.isUndefined(currentContribution) && currentContribution.match !== "MT" && parseInt(currentContribution.match) > 89) {
+                suggestion = currentContribution.translation;
             }
+
             //Before send process with this.postProcessEditarea
+            var target = UI.postProcessEditarea(UI.currentSegment, ".editarea");
             return APP.doRequest({
                 data: {
                     action: 'getTagProjection',
@@ -191,10 +199,7 @@
          * @param translation
          */
         copyTagProjectionInCurrentSegment: function (translation) {
-            var source = UI.currentSegment.find('.source').data('original');
-            source = htmlDecode(source).replace(/&quot;/g, '\"');
-            var decoded_source = UI.decodePlaceholdersToText(source, true);
-            UI.currentSegment.find('.source').html(decoded_source);
+            this.copySourcefromDataAttribute();
             if (!_.isUndefined(translation) && translation.length > 0) {
                 var decoded_translation = UI.decodePlaceholdersToText(translation, true);
                 $(this.editarea).html(decoded_translation);
@@ -205,20 +210,22 @@
          * Tag Projection: set a segment after tag projection is called, remove the class enableTP and set the data-tagprojection
          * attribute to tagged (after click on Guess Tags button)
          */
-        setSegmentAsTagged: function () {
-            UI.currentSegment.removeClass('enableTP');
-            UI.currentSegment.data('tagprojection', 'tagged');
+        setSegmentAsTagged: function (segment) {
+            var currentSegment = (segment)? segment : UI.currentSegment;
+            currentSegment.removeClass('enableTP');
+            currentSegment.data('tagprojection', 'tagged');
         },
         /**
          * Check if the  the Tag Projection in the current segment is enabled and still not tagged
          * @returns {boolean}
          */
-        checkCurrentSegmentTPEnabled: function () {
+        checkCurrentSegmentTPEnabled: function (segment) {
+            var currentSegment = (segment)? segment : UI.currentSegment;
             if (this.enableTagProjection) {
                 // If the segment has tag projection enabled (has tags and has the enableTP class)
-                var tagProjectionEnabled = this.hasDataOriginalTags( this.currentSegment) && this.currentSegment.hasClass('enableTP');
+                var tagProjectionEnabled = this.hasDataOriginalTags( currentSegment) && currentSegment.hasClass('enableTP');
                 // The segment is already been tagged
-                var dataAttribute = UI.currentSegment.data('tagprojection');
+                var dataAttribute = currentSegment.data('tagprojection');
                 // If the segment has already be tagged
                 var isCurrentAlreadyTagged = ( !_.isUndefined(dataAttribute) && dataAttribute === 'tagged')? true : false;
                 return ( tagProjectionEnabled && !isCurrentAlreadyTagged ) ? true : false;
@@ -226,17 +233,30 @@
             return false;
         },
         /**
-         * Enable another time the Tag Projection, for example after clicking on the Translation Matches
+         * Disable the Tag Projection, for example after clicking on the Translation Matches
          */
-        enableTPOnSegmentAndSetButton: function () {
-            var tagProjectionEnabled = this.hasDataOriginalTags( this.currentSegment)  && !this.currentSegment.hasClass('enableTP');
+        disableTPOnSegment: function (segment) {
+            var currentSegment = (segment)? segment : UI.currentSegment;
+            var tagProjectionEnabled = this.hasDataOriginalTags( currentSegment)  && currentSegment.hasClass('enableTP');
             if (this.enableTagProjection && tagProjectionEnabled) {
-                UI.currentSegment.addClass('enableTP');
-                UI.currentSegment.data('tagprojection', 'nottagged');
+                currentSegment.removeClass('enableTP');
+                currentSegment.data('tagprojection', 'tagged');
+                this.copySourcefromDataAttribute(segment);
                 UI.createButtons();
             }
         },
-        
-        
+        /**
+         * Copy the source from the data-original to the source decoding the tag
+         */
+        copySourcefromDataAttribute: function (segment) {
+            var currentSegment = (segment)? segment : UI.currentSegment;
+            var source = currentSegment.find('.source').data('original');
+            source = htmlDecode(source).replace(/&quot;/g, '\"');
+            var decoded_source = UI.decodePlaceholdersToText(source, true);
+            currentSegment.find('.source').html(decoded_source);
+            UI.lockTags(currentSegment.find(".source"))
+        }
+
+
     }); 
 })(jQuery); 
