@@ -4,8 +4,18 @@ class getWarningController extends ajaxController {
 
     private $__postInput = null;
 
-    public function __destruct() {
-    }
+    /**
+     * @var Projects_ProjectStruct
+     */
+    private $project ;
+
+    /**
+     * @var Chunks_ChunkStruct
+     */
+    private $chunk ;
+
+    /** @var FeatureSet */
+    private $feature_set ;
 
     public function __construct() {
 
@@ -72,7 +82,17 @@ class getWarningController extends ajaxController {
      *
      */
     public function doAction() {
-        if ( empty( $this->__postInput->id ) ) {
+
+        $this->chunk = Chunks_ChunkDao::getByIdAndPassword(
+                $this->__postInput->id_job,
+                $this->__postInput->password
+        );
+
+        $this->project = $this->chunk->getProject() ;
+
+        $this->loadFeatures() ;
+
+        if ( empty( $this->__postInput->src_content ) ) {
             $this->__globalWarningsCall();
         } else {
             /**
@@ -95,6 +115,10 @@ class getWarningController extends ajaxController {
 
     }
 
+    private function loadFeatures() {
+        $this->feature_set = new FeatureSet() ;
+        $this->feature_set->loadFromIdCustomer( $this->project->id_customer ) ;
+    }
 
     /**
      *
@@ -135,19 +159,15 @@ class getWarningController extends ajaxController {
         $this->result[ 'details' ] = array_values( $result );
         $tMismatch                 = getTranslationsMismatches( $this->__postInput->id_job, $this->__postInput->password );
 
-//        Log::doLog( $tMismatch );
-
         $result = array( 'total' => count( $tMismatch ), 'mine' => 0, 'list_in_my_job' => array() );
 
         foreach ( $tMismatch as $row ) {
             if ( !empty( $row[ 'first_of_my_job' ] ) ) {
                 $result[ 'mine' ]++;
                 $result[ 'list_in_my_job' ][] = $row[ 'first_of_my_job' ];
-//                $result['list_in_my_job'][] = array_shift( explode( "," , $row['first_of_my_job'] ) );
 
                 //append to global list
                 $this->result[ 'details' ][] = $row[ 'first_of_my_job' ];
-//                $this->result[ 'details' ] = array_merge( $this->result[ 'details' ], explode( "," , $row['first_of_my_job'] )  )
 
             }
         }
@@ -176,26 +196,32 @@ class getWarningController extends ajaxController {
             /**
              * FIXME: temporarily disabled due to a bug.
              */
-//            $QA->performGlossaryCheck( $this->__postInput->glossaryList );
         }
 
         if ( $QA->thereAreNotices() ) {
-//        if ( $QA->thereAreErrors() ) {
             $this->result[ 'details' ]                 = array();
             $this->result[ 'details' ][ 'id_segment' ] = $this->__postInput->id;
-//            $this->result[ 'details' ][ 'warnings' ]   = $QA->getErrorsJSON();
-//            $this->result[ 'total' ]                                             = count( $QA->getErrors() );
             $this->result[ 'details' ][ 'warnings' ]                = $QA->getNoticesJSON();
             $this->result[ 'details' ][ 'tag_mismatch' ]            = $QA->getMalformedXmlStructs();
             $this->result[ 'details' ][ 'tag_mismatch' ][ 'order' ] = $QA->getTargetTagPositionError();
             $this->result[ 'total' ]                                = count( $QA->getNotices() );
-//temp
-
-//            Log::doLog($this->__postInput->trg_content);
-//            Log::doLog($this->result);
-
         }
 
+        $this->invokeLocalWarningsOnFeatures();
+    }
+
+    
+    private function invokeLocalWarningsOnFeatures() {
+        $data = array( );
+
+        $data = $this->feature_set->filter( 'filterSegmentWarnings', $data, array(
+                'src_content' => $this->__postInput->src_content,
+                'trg_content' => $this->__postInput->trg_content,
+                'project'     => $this->project,
+                'chunk'       => $this->chunk
+        ) );
+
+        $this->result['data'] = $data ;
     }
 
     private static function filterString( $glossaryWord ) {

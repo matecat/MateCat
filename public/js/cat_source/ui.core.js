@@ -2287,20 +2287,18 @@ UI = {
         $('section.editor .tab.glossary .results .sugg-target .translation').each(function () {
             glossarySourcesAr.push($(this).text());
         })
-//        console.log('glossarySourcesAr: ', glossarySourcesAr);
-//        console.log(JSON.stringify(glossarySourcesAr));
 
 		APP.doRequest({
 			data: {
 				action: 'getWarning',
 				id: this.currentSegmentId,
 				token: token,
+                id_job: config.id_job,
 				password: config.password,
 				src_content: src_content,
 				trg_content: trg_content,
                 segment_status: segment_status,
                 glossaryList: glossarySourcesAr
-//                glossaryList: JSON.stringify(glossarySourcesAr)
 			},
 			error: function() {
 				UI.failedConnection(0, 'getWarning');
