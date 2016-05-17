@@ -134,6 +134,9 @@
             }
             return currentContribution;
         },
+        setGlobalTagProjection: function (file) {
+            UI.enableTagProjection = UI.checkTPEnabled(file);
+        },
         /**
          * Tag Projection: check if is enable the Tag Projection
          * @param file
@@ -146,11 +149,16 @@
         startSegmentTagProjection: function () {
             UI.getSegmentTagsProjection().success(function(response) {
                 if (response.errors.length) {
-                    // UI.processErrors(response.errors, 'getTagProjection');
+                    UI.processErrors(response.errors, 'getTagProjection');
                     UI.copyTagProjectionInCurrentSegment();
                 } else {
                     UI.copyTagProjectionInCurrentSegment(response.data.translation);
                 }
+
+            }).error(function () {
+                UI.copyTagProjectionInCurrentSegment();
+                UI.startOfflineMode();
+            }).complete(function () {
                 UI.setSegmentAsTagged();
                 UI.lockTags(UI.editarea);
                 UI.lockTags(UI.currentSegment.find('.source'));
@@ -187,9 +195,6 @@
                     source_lang: config.source_lang,
                     target_lang: config.target_lang,
                     sl: suggestion
-                },
-                error: function() {
-                    console.log('getTagProjection error');
                 }
             });
 
@@ -256,7 +261,5 @@
             currentSegment.find('.source').html(decoded_source);
             UI.lockTags(currentSegment.find(".source"))
         }
-
-
     }); 
 })(jQuery); 

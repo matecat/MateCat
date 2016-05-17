@@ -266,7 +266,7 @@ $.extend(UI, {
                 /*If Tag Projection is enable and the current contribution is 100% match I leave the tags and i replace
                  * the source with the text with tags, the segment is tagged
                  */
-                if (UI.currentSegmentTPEnabled) {
+                if (UI.checkCurrentSegmentTPEnabled(segment)) {
                     var currentContribution = this.getCurrentSegmentContribution(segment);
                     if (parseInt(currentContribution.match) !== 100) {
                         translation = UI.removeAllTags(translation);

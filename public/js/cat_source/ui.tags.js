@@ -189,7 +189,9 @@ $.extend(UI, {
             $('span.locked', this).addClass('monad');
 
             // If Tag Projection enabled dont transform tags
-            if (self.enableTagProjection) return;
+            /*if (self.enableTagProjection) {
+                UI.toggleTagsMode();
+            }*/
 
             UI.detectTagType(this);
         });
@@ -214,6 +216,14 @@ $.extend(UI, {
 			return false;
         this.editarea.html(this.removeLockTagsFromString(this.editarea.html()));
 	},
+    
+    toggleTagsMode: function (elem) {
+        if (elem) {
+            $(elem).toggleClass('active');
+        }
+        UI.body.toggleClass('tagmode-default-extended');
+    },
+    
     removeLockTagsFromString: function (str) {
         return str.replace(/<span contenteditable=\"false\" class=\"locked\"\>(.*?)<\/span\>/gi, "$1");
     },

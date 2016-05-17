@@ -968,7 +968,7 @@ UI = {
 		$.each(d.data.files, function() {
 			startSegmentId = this.segments[0].sid;
             //Tag Projection: check if is enable the Tag Projection 
-            self.enableTagProjection = UI.checkTPEnabled(this);
+            UI.setGlobalTagProjection(this);
 		});
 
 		if (typeof this.startSegmentId == 'undefined')
@@ -1670,7 +1670,7 @@ UI = {
     },
 
     chooseAlternative: function(w) {
-        this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).text(), true, UI.currentSegmentId, 'choose alternative' ) );
+        this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).html(), true, UI.currentSegmentId, 'choose alternative' ) );
         this.lockTags(this.editarea);
         this.editarea.focus();
         this.highlightEditarea();
@@ -2873,7 +2873,10 @@ UI = {
 
             //NOTE: i've added filter .not( segment ) to exclude current segment from list to be set as draft
             $.each($('section[data-hash=' + $(segment).attr('data-hash') + '].status-new, section[data-hash=' + $(segment).attr('data-hash') + '].status-draft, section[data-hash=' + $(segment).attr('data-hash') + '].status-rejected' + ', section[data-hash=' + $(segment).attr('data-hash') + '].status-translated' + plusApproved ).not( segment ), function() {
-                $('.editarea', this).html( $('.editarea', segment).html() );
+                $('.editarea', $(this)).html( $('.editarea', segment).html() );
+
+                //Tag Projection: disable it if enable
+                UI.disableTPOnSegment($(this));
 
                 // if status is not set to draft, the segment content is not displayed
                 UI.setStatus($(this), status); // now the status, too, is propagated
@@ -2887,7 +2890,7 @@ UI = {
             //NOTE: because this method is called after OpenSegment
             // AS callback return for setTranslation ( whe are here now ),
             // currentSegment pointer was already advanced by openSegment and header already created
-            //Needed because two consecutives segments can have the same hash
+            //Needed because two consecutive segments can have the same hash
             this.createHeader(true);
 
         }

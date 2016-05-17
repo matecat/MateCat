@@ -194,9 +194,7 @@ $.extend(UI, {
             UI.body.toggleClass('tagmode-default-extended');
         }).on('click', '.tagModeToggle', function(e) {
             e.preventDefault();
-            console.log('click su tagMode toggle');
-            $(this).toggleClass('active');
-            UI.body.toggleClass('tagmode-default-extended');
+            UI.toggleTagsMode(this);
             if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment(true);
 		} ).on('click', '.autofillTag', function(e){
 			e.preventDefault();
