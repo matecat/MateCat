@@ -85,7 +85,7 @@ if (LXQ.enabled())
             	      s: 'missing from target' }                 									 
         }
         
-        var modulesNoHighlight = ['bl0','g1','g2','g3'];
+        var modulesNoHighlight = ['b1g','g1g','g2g','g3g'];
         var tpls;
         LXQ.const = {}
 
@@ -646,9 +646,9 @@ if (LXQ.enabled())
                             data = 'data-errors="';
                             multiple = 0;
                             range.errors.forEach(function (element){
-                                range.myClass += ' '+ ranges.out[element].module;
+                                range.myClass += ' '+ ranges.out[element].module + ' '+ranges.out[range.errors[0]].module[0]+'0';
                                 data += ' '+ranges.out[element].errorid;
-                                if (modulesNoHighlight.indexOf(range.module<0))
+                                if (modulesNoHighlight.indexOf(range.module)<0)
                                     multiple++;
                             });
                             data += '" ';
@@ -1099,6 +1099,11 @@ if (LXQ.enabled())
                 url: config.lexiqaServer+"/tooltipwarnings",            
                 success:function(result){
                     warningMesasges = result;
+                    modulesNoHighlight = []
+                    $.each(result, function(key,el) {
+                        if (key[key.length-1] === 'g')
+                            modulesNoHighlight.push(key);   
+                    });
                 }
                 ,error:function(result){
                     console.err(result);                   
