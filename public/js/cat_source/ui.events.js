@@ -190,7 +190,6 @@ $.extend(UI, {
         }).bind('keydown', 'Meta+c', function() {
 			UI.tagSelection = false;
         }).bind('keydown', 'Meta+shift+s', function(e) {
-//            e.preventDefault();
             UI.body.toggleClass('tagmode-default-extended');
         }).on('click','#cmn-toggle-1',function(e){
             LXQ.toogleHighlighting();
@@ -200,7 +199,9 @@ $.extend(UI, {
             $(this).toggleClass('active');
             UI.body.toggleClass('tagmode-default-extended');
             if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment(true);
-		} ).on('click', '.autofillTag', function(e){
+		} );
+
+		$("body").on('click', '.autofillTag', function(e){
 			e.preventDefault();
 
 			//get source tags from the segment

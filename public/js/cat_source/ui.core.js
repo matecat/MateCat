@@ -2221,8 +2221,6 @@ UI = {
 
 
 				UI.setNextWarnedSegment();
-
-				//                $('#point2seg').attr('href', warningPosition);
 			}
 		});
 	},
@@ -2728,6 +2726,15 @@ UI = {
         return '.editarea';
     },
 
+    /**
+     *
+     * This function is used before the text is sent to the server.
+     *
+     *
+     * @param context
+     * @param selector
+     * @returns {*|jQuery}
+     */
     postProcessEditarea: function(context, selector) {
         selector = (typeof selector === "undefined") ? UI.targetContainerSelector() : selector;
         var area = $( selector, context ).clone();
