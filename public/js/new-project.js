@@ -123,7 +123,8 @@ $(document).ready(function() {
 				private_tm_pass		: ( !$('#private-tm-pass').prop('disabled') ? $('#private-tm-pass').val() : "" ),
 				lang_detect_files  	: UI.skipLangDetectArr,
                 pretranslate_100    : ($("#pretranslate100" ).is(':checked')) ? 1 : 0,
-                dqf_key             : ($('#dqf_key' ).length == 1) ? $('#dqf_key' ).val() : null
+                dqf_key             : ($('#dqf_key' ).length == 1) ? $('#dqf_key' ).val() : null,
+				lexiqa				: $("#lxqa_check").prop("checked")
 			},
 			beforeSend: function (){
 				$('.error-message').hide();
