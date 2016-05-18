@@ -228,6 +228,8 @@ class INIT {
                 'profile'
         );
 
+        self::$MIME_TYPES = include( 'Mime2Extension.inc.php' );
+
     }
 
 
@@ -318,6 +320,9 @@ class INIT {
                     'g'           => array( '', '', 'extg' )
             )
     );
+
+    public static $MIME_TYPES = array();
+
 
     public static $UNSUPPORTED_FILE_TYPES = array(
             'fm'   => array( '', "Try converting to MIF" ),

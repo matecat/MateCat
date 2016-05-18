@@ -54,7 +54,15 @@ class Upload {
         }
 
         //Mime White List, take them from ProjectManager.php
-        $this->acceptedMime = array();
+        foreach ( INIT::$MIME_TYPES as $key=>$value ) {
+            foreach ( INIT::$SUPPORTED_FILE_TYPES as $key2 => $value2 ) {
+                if (count(array_intersect(array_keys($value2), array_values($value)))>0)
+                {
+                    array_push($this->acceptedMime, $key);
+                    break;
+                }
+            }
+        }
 
         //flatten to one dimensional list of keys
         foreach ( INIT::$SUPPORTED_FILE_TYPES as $extensions ) {
@@ -105,7 +113,7 @@ class Upload {
 
         $fileName    = $fileUp[ 'name' ];
         $fileTmpName = $fileUp[ 'tmp_name' ];
-//        $fileType    = $fileUp[ 'type' ];
+        $fileType    = $fileUp[ 'type' ];
         $fileError = $fileUp[ 'error' ];
         $fileSize  = $fileUp[ 'size' ];
 
@@ -167,21 +175,27 @@ class Upload {
 
         } else {
 
+            $right_mime=false;
+            if($fileType!==null){
+
+                if ( !$this->_isRightMime( $fileUp ) && (!isset($fileUp->error) || empty($fileUp->error) ) ) {
+                    $right_mime=false;
+                }
+                else{
+                    $right_mime=true;
+                }
+            }
+
+
             $out_filename = ZipArchiveExtended::getFileName( $fileName );
-            if ( !$this->_isRightExtension( $fileUp ) && (!isset($fileUp->error) || empty($fileUp->error) ) ) {
+            if ( !$this->_isRightExtension( $fileUp ) && ( !isset( $fileUp->error ) || empty( $fileUp->error ) ) && !$right_mime) {
                 $this->setObjectErrorOrThrowException(
                         $fileUp,
-                        new Exception ( __METHOD__ . " -> File Extension Not Allowed. '" . $out_filename . "'" )
+                        new Exception ( __METHOD__ . " -> File Extension and Mime type Not Allowed. '" . $out_filename . "'" )
                 );
 
             }
 
-            if ( !$this->_isRightMime( $fileUp ) && (!isset($fileUp->error) || empty($fileUp->error) ) ) {
-                $this->setObjectErrorOrThrowException(
-                        $fileUp,
-                        new Exception ( __METHOD__ . " -> File Mime Not Allowed. '$out_filename'" )
-                );
-            }
 
             // NOTE FOR ZIP FILES
             //This exception is already raised by ZipArchiveExtended when file is unzipped.
@@ -270,7 +284,7 @@ class Upload {
 
         foreach ( INIT::$SUPPORTED_FILE_TYPES as $key => $value ) {
             foreach ( $value as $typeSupported => $value2 ) {
-                if ( preg_match( '/(\.|\/)' . $typeSupported . '$/i', $fileUp->type ) ) {
+                if ( preg_match( '/\.' . $typeSupported . '$/i', $fileUp->type ) ) {
                     return true;
                 }
             }
