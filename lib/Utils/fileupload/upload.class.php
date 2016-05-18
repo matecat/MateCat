@@ -15,8 +15,26 @@ define( "DIRSEP", "//" );
 class UploadHandler {
 
     protected $options;
+    protected $acceptedMime=array();
+    protected $acceptedExtensions=array();
+
 
     function __construct( $options = null ) {
+
+        //Mime White List, take them from ProjectManager.php
+        foreach ( INIT::$MIME_TYPES as $key=>$value ) {
+            foreach ( INIT::$SUPPORTED_FILE_TYPES as $key2 => $value2 ) {
+                if (count(array_intersect(array_keys($value2), array_values($value)))>0)
+                {
+                    array_push($this->acceptedMime, $key);
+                    break;
+                }
+            }
+        }
+        foreach ( INIT::$SUPPORTED_FILE_TYPES as $extensions ) {
+            $this->acceptedExtensions += $extensions;
+        }
+
         $this->options = array(
                 'script_url'              => $this->getFullUrl() . '/',
                 'upload_dir'              => Utils::uploadDirFromSessionCookie($_COOKIE['upload_session']),
@@ -173,6 +191,24 @@ class UploadHandler {
 
     protected function validate( $uploaded_file, $file, $error, $index ) {
         //TODO: these errors are shown in the UI but are not user friendly.
+
+        $right_mime=false;
+        if($file->type!==null){
+
+            if ( !$this->_isRightMime( $file ) && (!isset($file->error) || empty($file->error) ) ) {
+                $right_mime=false;
+            }
+            else{
+                $right_mime=true;
+            }
+        }
+
+        $out_filename = ZipArchiveExtended::getFileName( $file->name );
+        if ( !$this->_isRightExtension( $file ) && ( !isset( $file->error ) || empty( $file->error ) ) && !$right_mime) {
+            $file->error = "File Extension and Mime type Not Allowed";
+            return false;
+
+        }
 
         if ( $error ) {
             $file->error = $error;
@@ -665,6 +701,41 @@ class UploadHandler {
                 unlink( $file );
             }
         }
+    }
+
+    protected function _isRightMime( $fileUp ) {
+
+        //if empty accept ALL File Types
+        if ( empty ( $this->acceptedMime ) ) {
+            return true;
+        }
+
+        foreach ( $this->acceptedMime as $this_mime ) {
+            if ( strpos( $fileUp->type, $this_mime ) !== false ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    protected function _isRightExtension( $fileUp ) {
+
+        $fileNameChunks = explode( ".", $fileUp->name );
+
+        foreach ( INIT::$SUPPORTED_FILE_TYPES as $key => $value ) {
+            foreach ( $value as $typeSupported => $value2 ) {
+                if ( preg_match( '/\.' . $typeSupported . '$/i', $fileUp->type ) ) {
+                    return true;
+                }
+            }
+        }
+        //first Check the extension
+        if ( !array_key_exists( strtolower( $fileNameChunks[ count( $fileNameChunks ) - 1 ] ), $this->acceptedExtensions ) ) {
+            return false;
+        }
+
+        return true;
     }
 
 }

@@ -603,6 +603,8 @@ $.extend(UI, {
 			UI.chooseAlternative($(this));
         }).on('dblclick', '.glossary .sugg-target', function() {
             UI.copyGlossaryItemInEditarea($(this));
+		}).on('click', '.glossary .sugg-target', function() {
+			UI.updateGlossaryTarget($(this).find('span.translation'));
 		}).on('click', '.tab.alternatives .graysmall .goto a', function(e) {
 			e.preventDefault();
 			UI.scrollSegment($('#segment-' + $(this).attr('data-goto')), true);
@@ -1198,27 +1200,7 @@ $.extend(UI, {
 			UI.deleteGlossaryItem($(this).parents('ul.graysmall').first());
 		}).on('click', '.sub-editor.glossary .details .comment', function(e) {
 			e.preventDefault();
-			$(this).attr('contenteditable', true).focus();
-		}).on('blur', '.sub-editor.glossary .details .comment', function(e) {
-			e.preventDefault();
-			$(this).attr('contenteditable', false);
-			item = $(this).parents('.graysmall');
-			APP.doRequest({
-				data: {
-					action: 'glossary',
-					exec: 'update',
-					segment: item.find('.suggestion_source').text(),
-					translation: item.find('.translation').text(),
-					comment: $(this).text(),
-					id_item: item.attr('data-id'),
-					id_job: config.job_id,
-					password: config.password
-				},
-				error: function() {
-					UI.failedConnection(0, 'glossary');
-				},
-				context: [UI.currentSegment, next]
-			});
+			UI.updateGlossaryComment($(this));
 		}).on('keydown', '.sub-editor .cc-search .search-source', function(e) {
 			if (e.which == 13) { // enter
 				e.preventDefault();
@@ -1249,16 +1231,6 @@ $.extend(UI, {
 					$('.editor .sub-editor.concordances .results').empty();
 				}
 			}
-		}).on('click', '.sub-editor .gl-search .search-glossary', function(e) {
-			e.preventDefault();
-			var txt = $(this).parents('.gl-search').find('.search-source').text();
-			segment = $(this).parents('section').first();
-			if (txt.length > 1) {
-				UI.getGlossary(segment, false);
-			} else {
-				APP.alert({msg: 'Please insert a string of two letters at least!'});
-			}
-
 		}).on('keydown', '.sub-editor .gl-search .search-source', function(e) {
 			if (e.which == 13) {
 				e.preventDefault();
@@ -1267,6 +1239,11 @@ $.extend(UI, {
 					segment = $(this).parents('section').first();
 					UI.getGlossary(segment, false);
 				}
+			}
+		}).on('keydown', '.sub-editor .gl-search .search-target, .sub-editor .gl-search .gl-comment', function(e) {
+			if (e.which == 13) {
+				e.preventDefault();
+				UI.setGlossaryItem();
 			}
 		}).on('input', '.sub-editor .gl-search .search-target', function() {
 			gl = $(this).parents('.gl-search').find('.set-glossary');
@@ -1279,12 +1256,7 @@ $.extend(UI, {
 			e.preventDefault();
 		}).on('click', '.sub-editor .gl-search .set-glossary:not(.disabled)', function(e) {
 			e.preventDefault();
-			if($(this).parents('.gl-search').find('.search-source').text() === '') {
-				APP.alert({msg: 'Please insert a glossary term.'});
-				return false;
-			} else {
-				UI.setGlossaryItem();
-			}
+			UI.setGlossaryItem();
 		}).on('click', '.sub-editor .gl-search .comment a', function(e) {
 			e.preventDefault();
 			$(this).parents('.comment').find('.gl-comment').toggle();
@@ -1336,7 +1308,13 @@ $.extend(UI, {
 		if (!this.segmentToScrollAtRender)
 			UI.gotoSegment(this.startSegmentId);
 
-		
+		$(".end-message-box a.close").on('click', function(e) {
+			e.preventDefault();
+			UI.body.removeClass('justdone');
+		});
+		this.checkIfFinishedFirst();
+
+
 		$("section .close").bind('keydown', 'Shift+tab', function(e) {
 			e.preventDefault();
 			$(this).parents('section').find('a.translated').focus();

@@ -161,19 +161,16 @@ left: -5px;
 .warnings, 
 .text .alternatives  
 {
-	clear:left;
-	color:#D65959;
-	float:left;
-	position:relative;
-/*	left:52%;
-	top:-12px;
-	margin-top:-12px;
-*/	
-  margin-left: -10px;
-	padding:2px 0;
-	font-size:14px;
-	max-width:200px;
+	clear: left;
+	color: #D65959;
+	float: left;
+	position: relative;
+	margin-left: -10px;
+	padding: 2px 0;
+	font-size: 14px;
+	max-width: 50%;
 	text-align: left;
+	margin-bottom: 0px;
 }
 .text .alternatives 
 {
@@ -849,14 +846,14 @@ box-shadow: 0 1px 2px #ccc;
 }
 
 .header-menu .wrapper-dropdown-5 .dropdown {
-    left: -221px;
-    width: 268px;
+	left: -132px;
+    width: 164px;
 }
 
 
 .justdone .header-menu .wrapper-dropdown-5 .dropdown{
-	left: -205px;
-  width: 268px;
+    left: -224px;
+    width: 256px;
 }
 .header-menu .wrapper-dropdown-5 .dropdown[data-download='false'] li.downloadTranslation,
 .header-menu .wrapper-dropdown-5 .dropdown[data-download='true'] li.previewLink
@@ -1347,14 +1344,7 @@ margin: 5px 1.5%;
   width: 26px;
   margin: 15px 0 0 0;
   color: #777;
-}    
-.sub-editor .gl-search .search-glossary
-{
-	float: left;
-	margin: 20px 1% 0 0;
-	height:20px; width:20px;
-	/*background: url(../img/searchgl-black.png) no-repeat;*/
-}  
+}
 
 .sub-editor .gl-search .set-glossary.disabled,
 .sub-editor .gl-search .set-glossary.disabled:hover
@@ -1366,7 +1356,7 @@ margin: 5px 1.5%;
 {
 	float: left;
 	text-align: left;
-	width: 100%;
+	width: 96%;
 	margin-bottom: 8px;
 }
 .sub-editor .gl-search .comment a
@@ -1997,8 +1987,8 @@ body.rtl-target .editor .editarea span
     /*padding: 4px;
     margin-left: -4px;*/
 }
-.graysmall .translation.editing
-{
+.graysmall .translation.editing,
+.graysmall .comment.editing {
 	padding: 3px;
 	background: #fff;
 	border: 1px solid #aaa;
@@ -2139,23 +2129,17 @@ body.rtl-target .editor .editarea span
 	padding: 0;
 	margin: 0;
 }
-.graysmall div.comment
-{
+.graysmall div.comment {
 	float: left;
 	margin-left: 30px;
 	width: 60%;
 	padding: 3px 0;
 	border-top: 1px dotted #ccc;
 	font-style: italic;
-	background: transparent url(../img/icon_edit_left.png) right center no-repeat;
+	overflow: hidden;
 }
-.graysmall div.comment[contenteditable=true]
-{
-	background: #fff;
-	border: 1px solid #999;
-	padding: 3px 6px;
-	margin-left: 23px;
-	margin-bottom: 6px;
+.graysmall div.comment.editing {
+	width: 60%;
 }
 .graysmall .b{padding-left:25px!important;position:relative}
 

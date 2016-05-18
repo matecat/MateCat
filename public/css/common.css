@@ -2220,7 +2220,7 @@ background-size: 25px!important;
 body.filterOpen .searchbox
 {
 	display: block;
-    z-index: 10;
+    z-index: 2;
 	}
 
 	.searchbox label, .mgmt-panel label
@@ -2758,14 +2758,6 @@ only screen and (in-resolution: 2dppx) {
 
 .popup {background: #fff url(../img/borderfix.png) repeat-x!important;}
 
-	
-
-   
-.sub-editor .gl-search .search-glossary
-{
-	background: url(../img/searchgl-black2x.png) no-repeat;
-	background-size: 20px;
-}  
 
 .fileinput-button {
 	background: #09beec;
