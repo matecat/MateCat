@@ -188,15 +188,32 @@ function pasteHtmlAtCaret(html, selectPastedContent) {
 }
 
 function setCursorPosition(el, pos) {
+	var isDetatched = $(el).parents('body').length == 0 ;
+	if ( isDetatched ) return ;
+
 	pos = pos || 0;
+
 	var range = document.createRange();
+
 	var sel = window.getSelection();
-	range.setStart(el, pos);
-	if(pos == 'end') range.setStartAfter(el);
+
+	if (pos == 'end') {
+		range.setStartAfter(el);
+	} else {
+		console.debug('setCursorPosition setting start at pos', el, pos);
+		range.setStart(el, pos);
+	}
+
 	range.collapse(true);
+
 	sel.removeAllRanges();
+
 	sel.addRange(range);
-	if(typeof el[0] != 'undefined') el.focus();
+
+	if(typeof el[0] != 'undefined') {
+		console.debug('setCursorPosition setting focus');
+		el.focus();
+	}
 }
 
 function removeSelectedText() {
@@ -419,17 +436,8 @@ function saveSelection() {
 	if (UI.savedSel) {
 		rangy.removeMarkers(UI.savedSel);
 	}
+
 	UI.savedSel = rangy.saveSelection();
-	// this is just to prevent the addiction of a couple of placeholders who may sometimes occur for a Rangy bug
-	// try {
-     //    //we need this try because when we are in revision
-	// 	// and we open a draft segment from a link we have not a editarea.html()
-	// 	//so javascript crash
-     //   UI.editarea.html(UI.editarea.html().replace(UI.cursorPlaceholder, ''));
-	// } catch(e){
-	//  /* create and empty div */
-	// 	UI.editarea = $('<div>');
-    // }
 	UI.savedSelActiveElement = document.activeElement;
 }
 
