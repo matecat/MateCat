@@ -160,6 +160,21 @@ abstract class DataAccess_AbstractDao {
     }
 
     /**
+     * Get a statement object by query string
+     *
+     * @param $query
+     *
+     * @return PDOStatement
+     */
+    protected function _getStatementForCache( $query ) {
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $query );
+
+        return $stmt;
+    }
+
+    /**
      * Cache Initialization
      *
      * @return $this
