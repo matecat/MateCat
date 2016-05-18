@@ -104,7 +104,8 @@ class ProjectManager {
                             'pretranslate_100'     => 0,
                             'dqf_key'              => null,
                             'owner'                => '',
-                            'word_count_type'      => ''
+                            'word_count_type'      => '',
+                            'metadata'             => array(),
                     ) );
         }
 
