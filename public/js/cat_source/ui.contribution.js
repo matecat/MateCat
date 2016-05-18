@@ -60,8 +60,6 @@ $.extend(UI, {
 	getContribution: function(segment, next) {
         var txt;
 		var current = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
-        var id = current.attr('id');
-        var id_segment = id.split('-')[1];
 
 		if ($(current).hasClass('loaded') && current.find('.footer .matches .overflow').text().length) {
             this.spellCheck();
@@ -78,6 +76,9 @@ $.extend(UI, {
 		if ((!current.length) && (next)) {
 			return false;
 		}
+
+        var id = current.attr('id');
+        var id_segment = id.split('-')[1];
 
         if( config.brPlaceholdEnabled ) {
             txt = this.postProcessEditarea(current, '.source');
