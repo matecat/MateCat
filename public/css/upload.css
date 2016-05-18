@@ -592,7 +592,7 @@ float: left;
 .translate-box{float:left;margin:20px 17px 0px 0px}
 .translate-box.qa-box {margin: 32px 0 0!important;}
 .translate-box.qa-box h2 {display: inline;}
-.translate-box.qa-box img {float: right;width: 70px;margin-left: 10px;margin-top: 2px;}
+.translate-box.qa-box img {float: right;width: 70px;margin-left: 5px;margin-top: -4px;}
 .translate-box input[type=checkbox] {float: left; margin-top: 5px;}
 .manage-link{margin-left: -14px}
 .translate-box.source{margin-right:0px}
