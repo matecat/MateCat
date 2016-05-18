@@ -3267,7 +3267,8 @@ UI = {
                                 urls: [],
                                 spelling: [],
                                 specialchardetect: [],
-                                glossary: []
+                                glossary: [],
+                                blacklist: []
                             },
                             target: {
                                 numbers: [],
@@ -3276,7 +3277,8 @@ UI = {
                                 urls: [],
                                 spelling: [],
                                 specialchardetect: [],
-                                glossary: []                               
+                                glossary: [],
+                                blacklist: []                              
                             }
                     };
                     var newWarnings = {};
@@ -3419,7 +3421,8 @@ UI = {
                                 urls: [],
                                 spelling: [],
                                 specialchardetect: [],
-                                glossary: []
+                                glossary: [],
+                                blacklist: []
                             },
                             target: {
                                 numbers: [],
@@ -3428,7 +3431,8 @@ UI = {
                                 urls: [],
                                 spelling: [],
                                 specialchardetect: [] ,
-                                glossary: []                               
+                                glossary: [],
+                                blacklist: []                              
                             }
                         };
                         UI.lexiqaData.lexiqaWarnings[element.segid] = {};

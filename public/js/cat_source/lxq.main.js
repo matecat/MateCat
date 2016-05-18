@@ -21,7 +21,8 @@ if (LXQ.enabled())
             spelling: '#563d7c',
             specialchardetect: '#38C0C5',
             multiple: '#EA92B8',
-            glossary: '#EA92B8'
+            glossary: '#EA92B8',
+            blacklist: '#EA92B8'
         }
         var warningMesasges = {
             u2: {t:	'email not found in source',
@@ -83,6 +84,8 @@ if (LXQ.enabled())
             default: {t:'not found in source',
             	      s: 'missing from target' }                 									 
         }
+        
+        var modulesNoHighlight = ['bl0','g1','g2','g3'];
         var tpls;
         LXQ.const = {}
 
@@ -631,7 +634,7 @@ if (LXQ.enabled())
             ranges.newout.forEach(function (range) {
                 if (range.start != range.end ) {
                     if (range.start < text.length && !range.ignore) {
-                        var data = '';
+                        var data = '', multiple;
                         //calculate the color                        
                         if (range.errors.length == 1) {
                             range.color = ranges.out[range.errors[0]].color;
@@ -641,13 +644,18 @@ if (LXQ.enabled())
                         else {
                             range.myClass ='';
                             data = 'data-errors="';
+                            multiple = 0;
                             range.errors.forEach(function (element){
-                                range.myClass += ' '+ranges.out[element].module;
+                                range.myClass += ' '+ ranges.out[element].module;
                                 data += ' '+ranges.out[element].errorid;
+                                if (modulesNoHighlight.indexOf(range.module<0))
+                                    multiple++;
                             });
                             data += '" ';
                             range.color = colors.multiple;
-                            range.myClass = (range.myClass+' m').trim();
+                            if (multiple>1)
+                                range.myClass += ' m';
+                            range.myClass.trim();
                         }
                         
                         var mark = '##LESSTHAN##lxqwarning id="lexiqahighlight" '
@@ -877,7 +885,8 @@ if (LXQ.enabled())
                         urls: [],
                         spelling: [],
                         specialchardetect: [],
-                        glossary: []
+                        glossary: [],
+                        blacklist: []
                     },
                     target: {
                         numbers: [],
@@ -886,7 +895,8 @@ if (LXQ.enabled())
                         urls: [],
                         spelling: [],
                         specialchardetect: [],
-                        glossary: []                                
+                        glossary: [],
+                        blacklist: []                               
                     }
             }; 
             $.each(UI.lexiqaData.lexiqaWarnings[segmentId],function(key,qadata) {
