@@ -117,17 +117,24 @@ class Filters {
     }
 
     public static function sourceToXliff( $filePath, $sourceLang, $targetLang, $segmentation ) {
-        $filename  = FilesStorage::pathinfo_fix( $filePath, PATHINFO_FILENAME );
+        $basename  = FilesStorage::pathinfo_fix( $filePath, PATHINFO_FILENAME );
         $extension = FilesStorage::pathinfo_fix( $filePath, PATHINFO_EXTENSION );
+        $filename = "$basename.$extension";
 
         $data = array(
-            'documentContent' => "@$filePath;filename=$filename.$extension",
+            // IT'S VERY IMPORTANT TO SEND FILENAME AS ISO-8859-1!
+            // Filters REST API are built with Jersey, and Jersey with MIMEPull, that
+            // expects the filename of the uploaded file to be encoded in ISO-8859-1
+            // (in MIMEPull see MIMEParser.java line 510). This because the filename
+            // is passed as an header, and in HTTP headers must be in ISO-8859-1.
+            'documentContent' => "@$filePath;filename=" .
+              mb_convert_encoding($filename, "ISO-8859-1", mb_detect_encoding($filename)),
             'sourceLocale' => Langs_Languages::getInstance()->getLangRegionCode( $sourceLang ),
             'targetLocale' => Langs_Languages::getInstance()->getLangRegionCode( $targetLang ),
             'segmentation' => $segmentation,
             // The following 2 are needed only by older filters versions
             'fileExtension' => $extension,
-            'fileName'      => "$filename.$extension"
+            'fileName'      => $filename
         );
 
         $filtersResponse = self::sendToFilters(array($data), self::SOURCE_TO_XLIFF_ENDPOINT);
