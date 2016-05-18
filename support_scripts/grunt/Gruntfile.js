@@ -12,7 +12,10 @@ module.exports = function(grunt) {
         basePath + '../css/mbc-style.css',
         basePath + '../css/segment-notes.css',
         basePath + '../css/project-completion-feature.css',
-        basePath + '../css/editlog.css'
+        basePath + '../css/editlog.css',
+	basePath + '../css/jquery.powertip.min.css',
+	basePath + '../css/lxq-style.css',
+	basePath + '../css/lexiqa.css',
     ]
 
     var conf = grunt.file.read( incPath + 'version.ini' );
@@ -27,12 +30,15 @@ module.exports = function(grunt) {
         cssBase + 'segment-notes.css',
         cssBase + 'project-completion-feature.css',
         cssBase + 'editlog.css',
+	cssBase + 'jquery.powertip.min.css',
+	cssBase + 'lxq-style.css',
+	cssBase + 'lexiqa.css',
         cssBase + 'lib/remodal.css',
         cssBase + 'lib/remodal-default-theme.css',
         cssBase + 'sass/review_improved.scss',
         cssBase + 'sass/segment_filter.scss',
         cssBase + 'sass/cattool.scss',
-        cssBase + '../holidays/*.css',
+        cssBase + '../holidays/*.css',		
     ];
 
     var es2015Preset = require('babel-preset-es2015');
@@ -174,7 +180,8 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/db.js',
                     basePath + 'cat_source/mbc.main.js',
                     basePath + 'cat_source/mbc.templates.js',
-
+                    basePath + 'cat_source/lxq.main.js',
+                    basePath + 'cat_source/lxq.templates.js',
                     basePath + 'cat_source/project_completion.*.js',
                     basePath + 'cat_source/segment_notes.*.js',
                     basePath + 'cat_source/review_improved.js',
@@ -211,7 +218,7 @@ module.exports = function(grunt) {
                     basePath + 'lib/handlebars.runtime-v4.0.5.js',
                     basePath + 'lib/lokijs.min.js',
                     basePath + 'lib/sprintf.min.js',
-
+					basePath + 'lib/jquery.powertip.min.js'
                 ],
                 dest: buildPath + 'libs.js'
             }
