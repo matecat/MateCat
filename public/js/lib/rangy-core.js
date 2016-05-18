@@ -699,6 +699,8 @@ rangy.createModule("DomUtil", function(api, module) {
     }
 
     function insertNodeAtPosition(node, n, o) {
+        if ( n === document ) return ; 
+        
         var firstNodeInserted = node.nodeType == 11 ? node.firstChild : node;
         if (dom.isCharacterDataNode(n)) {
             if (o == n.length) {

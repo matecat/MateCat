@@ -75,6 +75,11 @@ rangy.createModule("SaveRestore", function(api, module) {
 
         for (var i = 0, len = ranges.length; i < len; ++i) {
             range = ranges[i];
+
+            if (range.collapsed && range.startContainer === document) {
+                return;
+            }
+            
             if (range.collapsed) {
                 endEl = insertRangeBoundaryMarker(range, false);
                 rangeInfos.push({
