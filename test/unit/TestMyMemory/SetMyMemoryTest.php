@@ -59,7 +59,7 @@ class SetMyMemoryTest extends AbstractTest
         /**
          * @var $engineRecord EnginesModel_EngineStruct
          */
-        $this->engine_struct_param = @$eng[0];
+        $this->engine_struct_param = $eng[0];
 
 
         /**
@@ -238,11 +238,11 @@ TAB;
      * @group regression
      * @covers Engines_MyMemory::set
      */
-    public function test_set_segment_2_general_check()
+    public function test_set_segment_2_general_check_with_id_user_not_in_array_coverage_purpose()
     {
         $this->config_param_of_set['segment'] = $this->str_seg_2;
         $this->config_param_of_set['translation'] = $this->str_tra_2;
-
+        $this->config_param_of_set['id_user']= "a6043e606ac9b5d7ff24";
         $result = $this->engine_MyMemory->set($this->config_param_of_set);
 
         $this->assertTrue($result);

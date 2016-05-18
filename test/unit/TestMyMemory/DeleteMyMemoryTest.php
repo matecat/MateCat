@@ -102,7 +102,7 @@ LABEL;
      * @group regression
      * @covers Engines_MyMemory::delete
      */
-    public function test_delete_segment_general_check_without_time_for_MyMemory_to_make_the_transation()
+    public function test_delete_segment_general_check_without_time_for_MyMemory_to_make_the_transation_and_id_user_not_in_array_purpose_()
     {
 
         /**
@@ -113,6 +113,7 @@ LABEL;
         /**
          * end of initialization
          */
+        $this->config_param_delete['id_user']="fc7ba5edf8d5e8401593";
         $result = $this->engine_MyMemory->delete($this->config_param_delete);
 
         $this->assertTrue($result);
