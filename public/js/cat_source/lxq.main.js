@@ -514,6 +514,9 @@ if (LXQ.enabled())
                 }, {
                     //color: '#563d7c',
                     ranges: results.glossary
+                }, {
+                    //color: '#563d7c',
+                    ranges: results.blacklist
                 }];
 
             console.log('-- text: ' + text);
@@ -646,16 +649,16 @@ if (LXQ.enabled())
                             data = 'data-errors="';
                             multiple = 0;
                             range.errors.forEach(function (element){
-                                range.myClass += ' '+ ranges.out[element].module + ' '+ranges.out[range.errors[0]].module[0]+'0';
+                                range.myClass += ' '+ ranges.out[element].module + ' '+ranges.out[element].module[0]+'0';
                                 data += ' '+ranges.out[element].errorid;
-                                if (modulesNoHighlight.indexOf(range.module)<0)
+                                if (modulesNoHighlight.indexOf(ranges.out[element].module)<0)
                                     multiple++;
                             });
                             data += '" ';
                             range.color = colors.multiple;
                             if (multiple>1)
                                 range.myClass += ' m';
-                            range.myClass.trim();
+                            range.myClass = range.myClass.trim();
                         }
                         
                         var mark = '##LESSTHAN##lxqwarning id="lexiqahighlight" '
@@ -780,9 +783,10 @@ if (LXQ.enabled())
                var root = $(tpls.lxqTooltipWrap);
                $.each(classlist, function(j,cl) {
                    var txt = getWarningForModule(cl,true);
-                   if (cl === 'g3') {
+                   if (cl === 'g3g') { 
                        //need to modify message with word.
-                       var word = UI.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)][errorlist[j]].msg;
+                       var ind =  Math.floor(j/2); //we aredding the x0 classes after each class..
+                       var word = UI.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)][errorlist[ind]].msg;
                        txt = txt.replace('#xxx#',word);
                    }
                    if (txt!==null) {
@@ -806,9 +810,10 @@ if (LXQ.enabled())
                var root = $(tpls.lxqTooltipWrap);
                $.each(classlist,function(j,cl) {
                    var txt = getWarningForModule(cl,false);
-                   if (cl === 'g3') {
+                   if (cl === 'g3g') {
                        //need to modify message with word.
-                       var word = UI.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)][errorlist[j]].msg;
+                       var ind =  Math.floor(j/2); //we aredding the x0 classes after each class..
+                       var word = UI.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)][errorlist[ind]].msg;
                        txt = txt.replace('#xxx#',word);
                    }
                    if (txt!==null) {
