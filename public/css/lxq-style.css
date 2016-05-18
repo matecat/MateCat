@@ -909,10 +909,13 @@ article.lxq-commenting-opened .lxq-comment-balloon-outer {
 .l0 {
    background-color:#B792E6;
 }
+.g0 {
+   background-color: red; 
+}
 .m {
     background-color:#EA92B8;
 }
-.m, .l0, .p0, .c0, .u0, .s0 {
+.m, .l0, .p0, .c0, .u0, .s0 .g0 {
     padding: 0.1rem 0.2rem;
 }
 /*.m, .l1, .l2, .l3, .l4, .n1, .n2, .n3, .n4, .p1, .p2, .p2sub1, .p2sub2, .p3, .p3sub1, .p4, .p5, .p6, .p7, .p8, 

@@ -20,7 +20,8 @@ if (LXQ.enabled())
             urls: '#b8a300',
             spelling: '#563d7c',
             specialchardetect: '#38C0C5',
-            multiple: '#EA92B8'
+            multiple: '#EA92B8',
+            glossary: '#EA92B8'
         }
         var warningMesasges = {
             u2: {t:	'email not found in source',
@@ -507,6 +508,9 @@ if (LXQ.enabled())
                 }, {
                     //color: '#563d7c',
                     ranges: results.spelling
+                }, {
+                    //color: '#563d7c',
+                    ranges: results.glossary
                 }];
 
             console.log('-- text: ' + text);
@@ -768,6 +772,11 @@ if (LXQ.enabled())
                var root = $(tpls.lxqTooltipWrap);
                $.each(classlist, function(j,cl) {
                    var txt = getWarningForModule(cl,true);
+                   if (cl === 'g3') {
+                       //need to modify message with word.
+                       var word = UI.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)][errorlist[j]].msg;
+                       txt = txt.replace('#xxx#',word);
+                   }
                    if (txt!==null) {
                        var row = $(tpls.lxqTooltipBody);
                        row.find('.tooltip-error-category').text(txt);
@@ -789,6 +798,11 @@ if (LXQ.enabled())
                var root = $(tpls.lxqTooltipWrap);
                $.each(classlist,function(j,cl) {
                    var txt = getWarningForModule(cl,false);
+                   if (cl === 'g3') {
+                       //need to modify message with word.
+                       var word = UI.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)][errorlist[j]].msg;
+                       txt = txt.replace('#xxx#',word);
+                   }
                    if (txt!==null) {
                        var row = $(tpls.lxqTooltipBody);
                        row.find('.tooltip-error-category').text(txt);
@@ -862,7 +876,8 @@ if (LXQ.enabled())
                         spaces: [],
                         urls: [],
                         spelling: [],
-                        specialchardetect: []
+                        specialchardetect: [],
+                        glossary: []
                     },
                     target: {
                         numbers: [],
@@ -870,7 +885,8 @@ if (LXQ.enabled())
                         spaces: [],
                         urls: [],
                         spelling: [],
-                        specialchardetect: []                                
+                        specialchardetect: [],
+                        glossary: []                                
                     }
             }; 
             $.each(UI.lexiqaData.lexiqaWarnings[segmentId],function(key,qadata) {
