@@ -134,7 +134,7 @@ class Filters {
             // the following parameter to send filename in UTF-8
             'fileName'      => $filename,
             // The following is needed only by older filters versions
-            'fileExtension' => $extension,
+            'fileExtension' => $extension
         );
 
         $filtersResponse = self::sendToFilters(array($data), self::SOURCE_TO_XLIFF_ENDPOINT);
