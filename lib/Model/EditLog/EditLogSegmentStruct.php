@@ -118,6 +118,12 @@ class EditLog_EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct im
                 ( $secsPerWord  < EditLog_EditLogModel::EDIT_TIME_SLOW_CUT );
     }
 
+    public function isValidForPeeTable(){
+        $secsPerWord = $this->getSecsPerWord();
+
+        return ( $secsPerWord  > EditLog_EditLogModel::EDIT_TIME_FAST_CUT );
+    }
+
     /**
      * @return array
      */
