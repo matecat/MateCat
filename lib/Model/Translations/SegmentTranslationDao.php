@@ -89,6 +89,25 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
 
     }
 
+    public static function updateSeverity( Translations_SegmentTranslationStruct $struct, $severity ) {
+        $sql = "UPDATE segment_translations
+            SET warning = :warning
+              WHERE id_segment = :id_segment
+              AND id_job = :id_job
+              AND segment_hash = :segment_hash";
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+
+        $stmt->execute( array(
+                'id_segment'    => $struct->id_segment ,
+                'id_job'        => $struct->id_job,
+                'segment_hash'  => $struct->segment_hash,
+                'warning'       => $severity
+        ) );
+
+        return $stmt->rowCount();
+    }
     /**
      * @param $data
      *

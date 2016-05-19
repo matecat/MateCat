@@ -580,9 +580,11 @@ class setTranslationController extends ajaxController {
         $db->commit();
 
         $this->feature_set->run('setTranslationCommitted', array(
-                'translation' => $_Translation,
+                'translation'     => $_Translation,
                 'old_translation' => $old_translation,
-                'propagation' => $TPropagation ));
+                'propagation'     => $TPropagation,
+                'chunk'           => $this->chunk
+                ));
 
         //EVERY time an user changes a row in his job when the job is completed,
         // a query to do the update is executed...
