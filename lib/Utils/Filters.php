@@ -122,19 +122,19 @@ class Filters {
         $filename = "$basename.$extension";
 
         $data = array(
-            // IT'S VERY IMPORTANT TO SEND FILENAME AS ISO-8859-1!
-            // Filters REST API are built with Jersey, and Jersey with MIMEPull, that
-            // expects the filename of the uploaded file to be encoded in ISO-8859-1
-            // (in MIMEPull see MIMEParser.java line 510). This because the filename
-            // is passed as an header, and in HTTP headers must be in ISO-8859-1.
-            'documentContent' => "@$filePath;filename=" .
-              mb_convert_encoding($filename, "ISO-8859-1", mb_detect_encoding($filename)),
+            'documentContent' => "@$filePath",
             'sourceLocale' => Langs_Languages::getInstance()->getLangRegionCode( $sourceLang ),
             'targetLocale' => Langs_Languages::getInstance()->getLangRegionCode( $targetLang ),
             'segmentation' => $segmentation,
-            // The following 2 are needed only by older filters versions
+            // This parameter is mandatory for older filters and optional for
+            // newer ones, because it can be obtained by documentContent;
+            // however when new filters extract filename from documentContent
+            // they do it forcing ISO-8859-1 encoding, because of a bug in the
+            // MIMEPull library. So unless this bug is there is better to use
+            // the following parameter to send filename in UTF-8
+            'fileName'      => $filename,
+            // The following is needed only by older filters versions
             'fileExtension' => $extension,
-            'fileName'      => $filename
         );
 
         $filtersResponse = self::sendToFilters(array($data), self::SOURCE_TO_XLIFF_ENDPOINT);
