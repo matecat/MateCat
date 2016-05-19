@@ -1,36 +1,33 @@
-( function() {
+var GDrive = function() {
     'use strict';
     
     var scope = [ 'https://www.googleapis.com/auth/drive.readonly' ];
 
     var pickerApiLoaded = false;
+    var authApiLoaded = false;
+    var isGDriveAccessible = false;
+    var isToOpenPicker = false;
 
     function onAuthApiLoad() {
-        if( !oauthToken ) {
-            if( isToOpenPickerAfterLogin() ) {
-                setOpenPickerAfterLogin( 'false' );
-            } else {
-                $(".login-google").show();
-                setOpenPickerAfterLogin( 'true' );
-            }
+        authApiLoaded = true;
+
+        if( isToOpenPicker ) {
+            createPicker();
         }
     }
 
     function onPickerApiLoad() {
         pickerApiLoaded = true;
-        createPicker();
-    }
 
-    function handleAuthResult( authResult ) {
-        if ( authResult && !authResult.error ) {
-            oauthToken = authResult.access_token;
+        if( isToOpenPicker ) {
             createPicker();
         }
     }
 
     function createPicker() {
-        if ( pickerApiLoaded && oauthToken ) {
-            if( isToOpenPickerAfterLogin() ) {
+        if ( pickerApiLoaded && authApiLoaded && oauthToken && isGDriveAccessible ) {
+            if( isToOpenPicker ) {
+                isToOpenPicker = false;
                 setOpenPickerAfterLogin( 'false' );
             }
 
@@ -45,6 +42,9 @@
                 enableFeature(google.picker.Feature.MULTISELECT_ENABLED).
                 build();
             picker.setVisible(true);
+        } else if( isGDriveAccessible === false ) {
+            displayGoogleLogin();
+            setOpenPickerAfterLogin( 'true' );
         }
     }
 
@@ -74,21 +74,44 @@
     }
 
     function loadPicker() {
-        if ( pickerApiLoaded && oauthToken ) {
-            createPicker();
-        } else {
-            gapi.load( 'auth', { 'callback': onAuthApiLoad } );
-            gapi.load( 'picker', { 'callback': onPickerApiLoad } );
-        }
-    }
+        $('.load-gdrive').removeClass('load-gdrive-disabled');
 
-    $( document ).ready( function () {
         $('.load-gdrive').click( function () {
-            loadPicker();
+            createPicker();
         });
 
-        if( isToOpenPickerAfterLogin() ) {
-            loadPicker();
-        }
-    });
-})();
+        gapi.load( 'auth', { 'callback': onAuthApiLoad } );
+        gapi.load( 'picker', { 'callback': onPickerApiLoad } );
+
+        isToOpenPicker = isToOpenPickerAfterLogin();
+    }
+
+    function displayGoogleLogin() {
+        $("#sign-in").data("oauth", config.gdriveAuthURL);
+        $(".login-google").show();
+
+        $('.modal .x-popup').click( function() {
+            setOpenPickerAfterLogin( 'false' );
+        });
+    }
+
+    function verifyGDrive( data ) {
+        isGDriveAccessible = data.success;
+
+        loadPicker();
+    }
+
+    this.apiLoaded = function () {
+        $.ajax({
+            cache: false,
+            url: '/gdrive/verify',
+            dataType: 'json'
+        }).done( verifyGDrive );
+    };
+};
+
+var gdrive = new GDrive();
+
+function onApiLoad() {
+    gdrive.apiLoaded();
+}
