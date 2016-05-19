@@ -32,6 +32,7 @@ module.exports = function(grunt) {
         cssBase + 'sass/review_improved.scss',
         cssBase + 'sass/segment_filter.scss',
         cssBase + 'sass/cattool.scss',
+        cssBase + 'sass/speech2text.scss',
         cssBase + '../holidays/*.css',
     ];
 
@@ -184,6 +185,8 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/segment_filter.*.js',
 
                     basePath + 'cat_source/handlebars-helpers.js',
+
+                    basePath + 'cat_source/speech2text.js',
 
                     basePath + 'tm.js',
                     basePath + 'logout.js'
