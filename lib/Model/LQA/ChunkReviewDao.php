@@ -108,16 +108,21 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
      */
 
     public static function findChunkReviewsByChunkIds( array $chunk_ids ) {
-        $conditions = array_map( function($ids) {
-            return " ( jobs.id = " . $ids[0] .
+        $sql_condition = '' ;
+
+        if ( count($chunk_ids)  > 0 ) {
+            $conditions = array_map( function($ids) {
+                return " ( jobs.id = " . $ids[0] .
                 " AND jobs.password = '" . $ids[1] . "' ) ";
-        }, $chunk_ids );
+            }, $chunk_ids );
+            $sql_condition =  "WHERE " . implode( ' OR ', $conditions ) ;
+        }
 
         $sql = "SELECT qa_chunk_reviews.* " .
             " FROM jobs INNER JOIN qa_chunk_reviews ON " .
             " jobs.id = qa_chunk_reviews.id_job AND " .
             " jobs.password = qa_chunk_reviews.password " .
-            " WHERE  " . implode( ' OR ', $conditions ) ;
+             $sql_condition ;
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );

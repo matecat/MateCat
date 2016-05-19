@@ -1,5 +1,4 @@
 <?php
-use \AbstractTest;
 
 /**
  * Created by PhpStorm.
@@ -13,7 +12,7 @@ use \Contribution\ContributionStruct, \Contribution\Set;
 use TaskRunner\Commons\ContextList;
 use \TaskRunner\Commons\QueueElement;
 
-class SetContributionTest extends AbstractTest {
+class SetContributionTest extends \AbstractTest {
 
     public function setUp(){
         parent::setUp();

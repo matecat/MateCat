@@ -14,7 +14,8 @@ use TaskRunner\Commons\AbstractDaemon;
  * Date: 18/09/15
  * Time: 19.13
  */
-class JobPEEAndTimeToEditRunner extends AbstractDaemon {
+class JobPEEAndTimeToEditRunner extends AbstractDaemon
+{
     const NR_OF_JOBS = 1000;
     const NR_OF_SEGS = 10000;
 
@@ -49,7 +50,7 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon {
                          from segment_translations st
                          join segments s on st.id_segment = s.id
                             and s.id between %d and %d
-                         where status='translated'
+                         where status in( %s )
                          and id_job = %d
                          and show_in_cattool = 1
                          and id_segment >= %d
@@ -61,11 +62,16 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon {
                                 total_raw_wc = %d
                                 where id = %d and password = '%s'";
 
+            $segment_statuses = array(
+                Constants_TranslationStatus::STATUS_TRANSLATED,
+                Constants_TranslationStatus::STATUS_APPROVED
+            );
+
             $minJobMaxJob = $db->query_first(
-                    sprintf(
-                            $queryMaxJob,
-                            (int)$lastProcessedJob
-                    )
+                sprintf(
+                    $queryMaxJob,
+                    (int)$lastProcessedJob
+                )
             );
             $maxJob       = (int)$minJobMaxJob[ 'max' ];
             $minJob       = (int)$minJobMaxJob[ 'min' ];
@@ -76,11 +82,11 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon {
             for ( $firstJob = $minJob; $this->RUNNING && ( $firstJob < $maxJob ); $firstJob += self::NR_OF_JOBS ) {
 
                 $jobs = $db->fetch_array(
-                        sprintf(
-                                $queryFirst,
-                                $firstJob,
-                                ( $firstJob + self::NR_OF_JOBS )
-                        )
+                    sprintf(
+                        $queryFirst,
+                        $firstJob,
+                        ( $firstJob + self::NR_OF_JOBS )
+                    )
                 );
 
                 //iterate over completed jobs, evaluate incremental PEE and save it in the job row
@@ -113,23 +119,24 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon {
                         echo "starting from segment $firstSeg\n";
 
                         $segments = $db->fetch_array(
-                                sprintf(
-                                        $querySegments,
-                                        $_job_first_segment,
-                                        $_job_last_segment,
-                                        $_jid,
-                                        $firstSeg,
-                                        self::NR_OF_SEGS
-                                )
+                            sprintf(
+                                $querySegments,
+                                $_job_first_segment,
+                                $_job_last_segment,
+                                implode(",", $segment_statuses),
+                                $_jid,
+                                $firstSeg,
+                                self::NR_OF_SEGS
+                            )
                         );
 
                         //iterate over segments.
                         foreach ( $segments as $i => $segment ) {
                             $segment = new EditLog_EditLogSegmentStruct( $segment );
 
-                            $raw_wc_job += $segment->raw_word_count;
-                            $time_to_edit_job += $segment->time_to_edit;
-                            if ( $segment->isValidForEditLog() ) {
+                            if ( $segment->isValidForPeeTable() ) {
+                                $raw_wc_job += $segment->raw_word_count;
+                                $time_to_edit_job += $segment->time_to_edit;
                                 $raw_post_editing_effort_job += $segment->getPEE() * $segment->raw_word_count;
                             }
                         }
@@ -143,14 +150,14 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon {
                     Log::doLog( "job pee: $job_incremental_pee\njob time to edit: $time_to_edit_job\njob total wc:$raw_wc_job\nWriting into DB" );
                     echo "job pee: $job_incremental_pee\njob time to edit: $time_to_edit_job\njob total wc:$raw_wc_job\nWriting into DB\n";
                     $db->query(
-                            sprintf(
-                                    $queryUpdateJob,
-                                    $job_incremental_pee,
-                                    $time_to_edit_job,
-                                    $raw_wc_job,
-                                    $_jid,
-                                    $_password
-                            )
+                        sprintf(
+                            $queryUpdateJob,
+                            $job_incremental_pee,
+                            $time_to_edit_job,
+                            $raw_wc_job,
+                            $_jid,
+                            $_password
+                        )
                     );
 
                     Log::doLog( "done" );
@@ -159,8 +166,8 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon {
                     if ( !file_put_contents( self::$last_job_file_name, $_jid ) ) {
                         $db->rollback();
                         Utils::sendErrMailReport(
-                                "",
-                                "[JobPostEditingEffortRunner] Failed to process job $_jid"
+                            "",
+                            "[JobPostEditingEffortRunner] Failed to process job $_jid"
                         );
                         $this->RUNNING = false;
 
@@ -185,7 +192,8 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon {
                 sleep( self::$sleepTime );
             }
 
-        } while ( $this->RUNNING );
+        }
+        while ( $this->RUNNING );
     }
 
     public static function cleanShutDown() {
