@@ -3,11 +3,33 @@
 
 namespace Translations ;
 
+use Features\Ebay;
+
 class WarningDao extends \DataAccess_AbstractDao {
 
     public static $primary_keys = array();
-
     public static $TABLE = 'translation_warnings' ;
+
+    public static function findByChunkAndScope( \Chunks_ChunkStruct $chunk, $scope ) {
+        $sql = "SELECT * FROM translation_warnings " .
+                " WHERE id_job = :id_job " .
+                " AND scope = :scope " ;
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->setFetchMode(
+                \PDO::FETCH_CLASS,
+                '\Translations\WarningStruct'
+        );
+
+        $stmt->execute(
+                array(
+                        'id_job' => $chunk->id,
+                        'scope'  => $scope,
+                )
+        );
+        return $stmt->fetchAll() ;
+    }
 
     public static function deleteByScope($id_job, $id_segment, $scope) {
         $sql = "DELETE FROM translation_warnings " .

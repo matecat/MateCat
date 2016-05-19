@@ -579,7 +579,8 @@ function getWarning( $jid, $jpassword ) {
 		JOIN jobs ON jobs.id = id_job AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
 		WHERE jobs.id = $jid
 		AND jobs.password = '$jpassword'
-		AND warning != 0";
+		-- following is a condition on bitbask to filter by severity ERROR 
+		AND warning&1 = 1 ";
 
     $results = $db->fetch_array( $query );
 

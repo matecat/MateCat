@@ -978,9 +978,11 @@ UI = {
 		});
 	},
 	getSegments_success: function(d, options) {
-        if (d.errors.length)
+        if (d.errors.length) {
 			this.processErrors(d.errors, 'getSegments');
-		where = d.data.where;
+        }
+        
+		var where = d.data.where;
 
         SegmentNotes.enabled() && SegmentNotes.registerSegments ( d.data );
 
@@ -2221,6 +2223,9 @@ UI = {
 
 
 				UI.setNextWarnedSegment();
+
+                $(document).trigger('getWarning:global:success', { resp : data }) ;
+           
 			}
 		});
 	},

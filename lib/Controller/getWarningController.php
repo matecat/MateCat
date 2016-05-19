@@ -177,6 +177,7 @@ class getWarningController extends ajaxController {
         $this->result[ 'details' ]                = array_values( array_unique( $this->result[ 'details' ] ) );
         $this->result[ 'translation_mismatches' ] = $result;
 
+        $this->invokeGlobalWarningsOnFeatures();
     }
 
     /**
@@ -210,7 +211,17 @@ class getWarningController extends ajaxController {
         $this->invokeLocalWarningsOnFeatures();
     }
 
-    
+
+    private function invokeGlobalWarningsOnFeatures() {
+        $data = array( );
+
+        $data = $this->feature_set->filter( 'filterGlobalWarnings', $data, array(
+                'chunk'       => $this->chunk
+        ) );
+
+        $this->result['data'] = $data ;
+    }
+
     private function invokeLocalWarningsOnFeatures() {
         $data = array( );
 
