@@ -25,6 +25,8 @@ class GDriveController extends KleinController {
 
     private $isAsyncReq;
 
+    private $isImportingSuccessful = true;
+
     public function open() {
 
         $this->setIsAsyncReq( $this->request->param('isAsync') );
@@ -36,11 +38,13 @@ class GDriveController extends KleinController {
 
             $this->doImport();
 
-            $this->finalize();
+            if( $this->isImportingSuccessful ) {
+                $this->finalize();
+            } else {
+                $this->redirectToLogin();
+            }
         } else {
-            $_SESSION[ 'incomingUrl' ] = $this->request->uri();
-
-            $this->response->redirect( '/login' );
+            $this->redirectToLogin();
         }
     }
 
@@ -77,7 +81,7 @@ class GDriveController extends KleinController {
 
         $countIds = count( $listOfIds );
 
-        for( $i = 0; $i < $countIds; $i++ ) {
+        for( $i = 0; $i < $countIds && $this->isImportingSuccessful === true; $i++ ) {
             $this->importFile( $listOfIds[$i] );
         }
     }
@@ -138,7 +142,7 @@ class GDriveController extends KleinController {
                 throw new Exception( 'Unable to get the file URL.' );
             }
         } catch (Exception $e) {
-            die( "You don't have permission to access the file or the file is not found." );
+            $this->isImportingSuccessful = false;
         }
     }
 
@@ -424,6 +428,39 @@ class GDriveController extends KleinController {
         } else {
             $this->isAsyncReq = false;
         }
+    }
+
+    private function redirectToLogin() {
+        $_SESSION[ 'oauthScope' ] = 'GDrive';
+        $_SESSION[ 'incomingUrl' ] = $this->request->uri();
+
+        $this->response->redirect( '/login' );
+    }
+
+    public function isGDriveAccessible() {
+        $message = "";
+        $success = false;
+
+        if( isset($_SESSION[ 'uid' ]) ) {
+            try {
+                $service = GDrive::getService( array( 'uid' => $_SESSION[ 'uid' ] ) );
+
+                $about = $service->about->get();
+
+                $message = "OK";
+
+                $success = true;
+            } catch (Exception $e) {
+                $message = "An error occurred: " . $e->getMessage();
+            }
+        } else {
+            $message = "Not logged in.";
+        }
+
+        $this->response->json(array(
+            "success" => $success,
+            "message" => $message
+        ));
     }
 
 }

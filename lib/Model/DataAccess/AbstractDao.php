@@ -160,6 +160,21 @@ abstract class DataAccess_AbstractDao {
     }
 
     /**
+     * Get a statement object by query string
+     *
+     * @param $query
+     *
+     * @return PDOStatement
+     */
+    protected function _getStatementForCache( $query ) {
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $query );
+
+        return $stmt;
+    }
+
+    /**
      * Cache Initialization
      *
      * @return $this
@@ -249,7 +264,48 @@ abstract class DataAccess_AbstractDao {
     protected function _destroyCache( $query ){
         $this->_cacheSetConnection();
         if ( isset( $this->cache_con ) && !empty( $this->cache_con ) ) {
-            return $this->cache_con->delete( $query );
+            return $this->cache_con->del( md5 ($query ));
+        }
+
+        return false;
+
+    }
+
+    /**
+     * @param PDOStatement          $stmt
+     * @param DataAccess_IDaoStruct $fetchClass
+     * @param array                 $bindParams
+     *
+     * @return bool|DataAccess_IDaoStruct[]
+     */
+    protected function _fetchObject( PDOStatement $stmt, DataAccess_IDaoStruct $fetchClass, Array $bindParams ){
+
+        $_cacheResult = $this->_getFromCache( $stmt->queryString . serialize( $bindParams ) );
+
+        if ( $_cacheResult !== false && $_cacheResult !== null ) {
+            return $_cacheResult;
+        }
+        
+        $stmt->setFetchMode( PDO::FETCH_CLASS, get_class( $fetchClass ) );
+        $stmt->execute( $bindParams );
+        $result = $stmt->fetchAll();
+        
+        $this->_setInCache( $stmt->queryString . serialize( $bindParams ), $result );
+
+        return $result;
+
+    }
+
+    /**
+     * @param PDOStatement          $stmt
+     * @param array                 $bindParams
+     *
+     * @return bool|int
+     */
+    protected function _destroyObjectCache( PDOStatement $stmt, Array $bindParams ){
+        $this->_cacheSetConnection();
+        if ( isset( $this->cache_con ) && !empty( $this->cache_con ) ) {
+            return $this->cache_con->del( md5 ( $stmt->queryString . serialize( $bindParams ) ) );
         }
 
         return false;
@@ -342,7 +398,7 @@ abstract class DataAccess_AbstractDao {
      * Updates the struct. The record is found via the primary
      * key attributes provided by the struct.
      *
-     * @param       $struct
+     * @param DataAccess_AbstractDaoObjectStruct $struct
      * @param array $options
      *
      * @return bool

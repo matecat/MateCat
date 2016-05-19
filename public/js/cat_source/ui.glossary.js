@@ -18,26 +18,19 @@ $.extend( UI, {
         } );
         dad = $( item ).prevAll( '.glossary-item' ).first();
         $( item ).remove();
-
-//		console.log($(dad).next().length);
         if ( ($( dad ).next().hasClass( 'glossary-item' )) || (!$( dad ).next().length) ) {
             $( dad ).remove();
             numLabel = $( '.tab-switcher-gl a .number', UI.currentSegment );
             num = parseInt( numLabel.attr( 'data-num' ) ) - 1;
-//			console.log(num);
             if ( num ) {
-//				console.log('ne rimangono');
                 $( numLabel ).text( '(' + num + ')' ).attr( 'data-num', num );
             } else {
-//				console.log('finiti');
                 $( numLabel ).text( '' ).attr( 'data-num', 0 );
             }
         }
     },
     getGlossary: function ( segment, entireSegment, next ) {
-//		console.log('segment: ', segment);
-//		console.log('entireSegment: ', entireSegment);
-//		console.log('next: ', next);
+
         if ( typeof next != 'undefined' ) {
             if ( entireSegment ) {
                 n = (next === 0) ? $( segment ) : (next == 1) ? $( '#segment-' + this.nextSegmentId ) : $( '#segment-' + this.nextUntranslatedSegmentId );
@@ -45,21 +38,13 @@ $.extend( UI, {
         } else {
             n = segment;
         }
-//		if(($(n).hasClass('glossary-loaded'))&&(entireSegment)) return false;
         $( '.gl-search', n ).addClass( 'loading' );
         if ( config.tms_enabled ) {
             $( '.sub-editor.glossary .overflow .results', n ).empty();
             $( '.sub-editor.glossary .overflow .graysmall.message', n ).empty();
         }
         txt = (entireSegment) ? htmlDecode( $( '.text .source', n ).attr( 'data-original' ) ) : view2rawxliff( $( '.gl-search .search-source', n ).text() );
-//        console.log('txt: ', txt);
         if ( (typeof txt == 'undefined') || (txt == '') ) return false;
-//		console.log('typeof n: ', typeof $(n).attr('id'));
-//		console.log('n: ', $(n).attr('id').split('-')[1]);
-//		if((typeof $(n).attr('id') != 'undefined')&&($(n).attr('id').split('-')[1] == '13735228')) console.log('QUI 1: ', $('.source', n).html()); 
-//		if($(n).attr('id').split('-')[1] == '13735228') {
-//			console.log('QUI 1: ', $('.source', n).html()); 
-//		}
 
         APP.doRequest( {
             data: {
@@ -82,26 +67,17 @@ $.extend( UI, {
                     UI.currentSegmentQA();
                 }
                 $( n ).addClass( 'glossary-loaded' );
-                //temp
-//                d = {"error":[],"data":{"matches":{"is":[{"id":"459372897","raw_segment":"is","segment":"is","translation":"\u00e8","target_note":"","raw_translation":"\u00e8","quality":"0","reference":"","usage_count":1,"subject":"All","created_by":"MyMemory_516024e88d63b62598f5","last_updated_by":"MyMemory_516024e88d63b62598f5","create_date":"2014-12-23 19:33:42","last_update_date":"2014-12-23","match":"62%","prop":[]}],"this":[{"id":"459372893","raw_segment":"this","segment":"this","translation":"questo","target_note":"","raw_translation":"questo","quality":"0","reference":"","usage_count":1,"subject":"All","created_by":"MyMemory_516024e88d63b62598f5","last_updated_by":"MyMemory_516024e88d63b62598f5","create_date":"2014-12-23 19:32:49","last_update_date":"2014-12-23","match":"62%","prop":[]}]}}};
 
                 if ( typeof d.errors != 'undefined' && d.errors.length ) {
                     if ( d.errors[0].code == -1 ) {
                         UI.noGlossary = true;
-//						UI.body.addClass('noGlossary');
                     }
                 }
                 n = this[0];
-//				if($(n).attr('id').split('-')[1] == '13735228') console.log('QUI 2: ', $('.source', n).html()); 
-//				if((typeof $(n).attr('id') != 'undefined')&&($(n).attr('id').split('-')[1] == '13735228')) console.log('QUI 2: ', $('.source', n).html()); 
-
                 UI.processLoadedGlossary( d, this );
-//				if((typeof $(n).attr('id') != 'undefined')&&($(n).attr('id').split('-')[1] == '13735228')) console.log('QUI 3: ', $('.source', n).html()); 
-//				if($(n).attr('id').split('-')[1] == '13735228') console.log('QUI 3: ', $('.source', n).html()); 
-//				console.log('next?: ', this[1]);
+
                 UI.cachedGlossaryData = d;
                 if ( !this[1] && (!UI.body.hasClass( 'searchActive' )) ) UI.markGlossaryItemsInSource( d );
-//				if((typeof $(n).attr('id') != 'undefined')&&($(n).attr('id').split('-')[1] == '13735228')) console.log('QUI 4: ', $('.source', n).html()); 
             },
             complete: function () {
                 $( '.gl-search', UI.currentSegment ).removeClass( 'loading' );
@@ -260,15 +236,9 @@ $.extend( UI, {
             if ( i != smallestIndex ) {
                 if ( (smallest.startPos <= this.startPos) && (smallest.endPos >= this.startPos) ) { // this item is to be merged to the smallest
                     mod++;
-//					smallest.endPos = this.endPos;
                     intervals.splice( i, 1 );
                     UI.checkIntervalsUnions( intervals );
                 }
-//				if((i == (intervals.length -1))&&(!mod)) {
-//					console.log('il primo non ha trovato unioni');
-////					UI.checkIntervalsUnions(intervals);
-//					return false;
-//				}
             }
         } );
         if ( UI.endedIntervalAnalysis ) {
@@ -277,18 +247,12 @@ $.extend( UI, {
             return false;
         }
         if ( smallest.startPos < 1000000 ) {
-//            console.log('smallest: ', smallest);
-//            console.log('aa: ', UI.intervalsUnion[UI.intervalsUnion.length-1]);
-//            if(UI.intervalsUnion[UI.intervalsUnion.length-1] !== smallest) {
             UI.intervalsUnion.push( smallest );
-//            }
         }
-//			console.log('intervals 1: ', JSON.stringify(intervals));
 
         //throws exception when it is undefined
         ( typeof smallestIndex == 'undefined' ? smallestIndex = 0 : null );
         intervals.splice( smallestIndex, 1 );
-//			console.log('intervals 2: ', JSON.stringify(intervals));
         if ( !intervals.length ) return false;
         if ( !mod ) UI.checkIntervalsUnions( intervals );
         UI.endedIntervalAnalysis = true;
@@ -309,7 +273,6 @@ $.extend( UI, {
     renderGlossary: function ( d, seg ) {
         segment = seg;
         segment_id = segment.attr( 'id' );
-//		$('.sub-editor.glossary .overflow .results', segment).empty();
         $( '.sub-editor.glossary .overflow .message', segment ).remove();
         numRes = 0;
 
@@ -354,7 +317,7 @@ $.extend( UI, {
                             '</span>' +
                             '</li>' +
                             '<li class="b sugg-target">' +
-                            '<span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' +
+                            '<span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation" data-original="'+ UI.decodePlaceholdersToText( rightTxt, true ) +'">' +
                             UI.decodePlaceholdersToText( rightTxt, true ) +
                             '</span>' +
                             '</li>' +
@@ -369,21 +332,28 @@ $.extend( UI, {
                     );
                 } );
             } );
-            $( '.sub-editor.glossary .overflow .search-source, .sub-editor.glossary .overflow .search-target', segment ).text( '' );
+            $( '.sub-editor.glossary .overflow .search-source, .sub-editor.glossary .overflow .search-target, .sub-editor.glossary .overflow .gl-comment', segment ).text( '' );
         } else {
             console.log( 'no matches' );
             $( '.sub-editor.glossary .overflow', segment ).append( '<ul class="graysmall message"><li>Sorry. Can\'t help you this time.</li></ul>' );
         }
     },
     setGlossaryItem: function () {
+        var segment = UI.currentSegment.find( '.gl-search .search-source' ).text();
+        var translation = UI.currentSegment.find( '.gl-search .search-target' ).text();
+        var comment = UI.currentSegment.find( '.gl-search .gl-comment' ).text();
+        if(segment.length === 0 ) {
+            APP.alert({msg: 'Please insert a glossary term.'});
+            return false;
+        }
         $( '.gl-search', UI.currentSegment ).addClass( 'setting' );
         APP.doRequest( {
             data: {
                 action: 'glossary',
                 exec: 'set',
-                segment: UI.currentSegment.find( '.gl-search .search-source' ).text(),
-                translation: UI.currentSegment.find( '.gl-search .search-target' ).text(),
-                comment: UI.currentSegment.find( '.gl-search .gl-comment' ).text(),
+                segment: segment,
+                translation: translation,
+                comment: comment,
                 id_job: config.job_id,
                 password: config.password
             },
@@ -413,13 +383,79 @@ $.extend( UI, {
         $( '.editor .editarea .focusOut' ).before( translation + '<span class="tempCopyGlossaryPlaceholder"></span>' ).remove();
         this.lockTags( this.editarea );
         range = window.getSelection().getRangeAt( 0 );
-        node = $( '.editor .editarea .tempCopyGlossaryPlaceholder' )[0];
+        var tempCopyGlossPlaceholder = $( '.editor .editarea .tempCopyGlossaryPlaceholder' );
+        node = tempCopyGlossPlaceholder[0];
         setCursorAfterNode( range, node );
-        $( '.editor .editarea .tempCopyGlossaryPlaceholder' ).remove();
-
-//        this.editarea.focus();
+        tempCopyGlossPlaceholder.remove();
         this.highlightEditarea();
     },
+    updateGlossaryTarget: function (elem$) {
+        var self = this;
+        var setGlossaryTargetAttributes = (function () {
+            var glossaryDom = this.closest('.graysmall');
+            var id = glossaryDom.data('id');
+            var suggestion = glossaryDom.find('.suggestion_source').text();
+            var newTranslation = glossaryDom.find('.translation').text();
+            var translation = glossaryDom.find('.translation').data('original');
+            self.updateGlossaryItem(id, suggestion, translation, newTranslation);
+            this.data('original', newTranslation);
+            this.removeClass('editing').removeAttr('contenteditable');
+            this.off('keypress focusout');
+        }).bind(elem$);
+        this.editGlossaryItem(elem$, setGlossaryTargetAttributes);
+    },
+    updateGlossaryComment: function (elem$) {
+        var self = this;
+        var setGlossaryCommentAttributes = (function () {
+            var glossaryDom = this.closest('.graysmall');
+            var id = glossaryDom.data('id');
+            var suggestion = glossaryDom.find('.suggestion_source').text();
+            var translation = glossaryDom.find('.translation').data('original');
+            var comment = this.text();
+            self.updateGlossaryItem(id, suggestion, translation, null, comment);
+            this.removeClass('editing').removeAttr('contenteditable');
+            this.off('keypress focusout');
+        }).bind(elem$);
+        this.editGlossaryItem(elem$, setGlossaryCommentAttributes);
+    },
+    editGlossaryItem: function (elem$, callback) {
+        elem$.addClass("editing").attr('contenteditable', true).focus();
+        elem$.focusout(function(e){
+            e.stopPropagation();
+            callback.call();
+        });
+        elem$.keypress(function(e) {
+            e.stopPropagation();
+            if(e.which == 13) {
+                callback.call();
+            }
+        });
+    },
+    updateGlossaryItem: function (idItem, segment, translation, newTranslation, comment) {
+        data = {
+            action: 'glossary',
+            exec: 'update',
+            segment: segment,
+            translation: translation,
+            id_item: idItem,
+            id_job: config.job_id,
+            password: config.password
+        };
+        if (newTranslation) {
+            data.newsegment = segment;
+            data.newtranslation = newTranslation;
+        } else if (comment) {
+            data.comment = comment;
+        }
+        return  APP.doRequest( {
+            data: data,
+            context: [UI.currentSegment,
+                next],
+            error: function () {
+                UI.failedConnection( 0, 'glossary' );
+            }
+        });
+    }
 
 } );
 

@@ -71,76 +71,58 @@ if ( Review.enabled() )
         },
 
         openNextTranslated: function (sid) {
-            console.log('openNextTranslated');
             sid = sid || UI.currentSegmentId;
-            el = $('#segment-' + sid);
+            var el = $('#segment-' + sid);
 
             var translatedList = [];
-            var approvedList = [];
-
-            if(el.nextAll('.status-translated').length) { // find in next segments in the current file
+            // find in next segments in the current file
+            if(el.nextAll('.status-translated').length) {
                 translatedList = el.nextAll('.status-translated');
                 if( translatedList.length ) {
-                    translatedList.first().find('.editarea').click();
+                    translatedList.first().find(UI.targetContainerSelector()).click();
                 }
+            // find in next segments in the next files
+            } else if(el.parents('article').nextAll('section.status-translated').length) {
 
-            } else {
                 file = el.parents('article');
-                file.nextAll(':has(section.status-translated)').each(function () { // find in next segments in the next files
-
-                    var translatedList = $(this).find('.status-translated');
-
-                    if( translatedList.length ) {
-                        translatedList.first().find('.editarea').click();
-                    } else {
-                        UI.reloadWarning();
+                file.nextAll('section.status-translated').each(function () {
+                    if (!$(this).is(UI.currentSegment)) {
+                        translatedList = $(this);
+                        translatedList.first().find(UI.targetContainerSelector()).click();
+                        return false;
                     }
-
-                    return false;
-
                 });
-                // else
-                if($('section.status-translated').length) { // find from the beginning of the currently loaded segments
-                    translatedList = $('section.status-translated');
-
-                    if( translatedList.length ) {
-                        if((translatedList.first().is(UI.currentSegment))) {
-                            UI.scrollSegment(translatedList.first());
-                        } else {
-                            translatedList.first().find('.editarea').click();
-                        }
-                    }
-
-                } else { // find in not loaded segments
-
-                    APP.doRequest({
-                        data: {
-                            action: 'getNextReviseSegment',
-                            id_job: config.job_id,
-                            password: config.password,
-                            id_segment: sid
-                        },
-                        error: function() {
-                        },
-                        success: function(d) {
-                            if( d.nextId == null ) return false;
-
-                            if( $(".modal[data-type='confirm']").length ) {
-                                $(window).on('statusChanged', function(e) {
-                                    UI.renderAfterConfirm(d.nextId);
-                                });
-                            } else {
-                                UI.renderAfterConfirm(d.nextId);
-                            }
-
+            // else find from the beginning of the currently loaded segments in all files
+            } else if ($('section.status-translated').length) {
+                    $('section.status-translated').each(function () {
+                        if (!$(this).is(UI.currentSegment)) {
+                            translatedList = $(this);
+                            translatedList.first().find(UI.targetContainerSelector()).click();
+                            return false;
                         }
                     });
+            } else { // find in not loaded segments or go to the next approved
+                // Go to the next segment saved before
+                var callback = function() {
+                    $(window).off('modalClosed');
+                    //Check if the next is inside the view, if not render the file
+                    var next = UI.Segment.findEl(UI.nextUntranslatedSegmentIdByServer);
+                    if (next.length > 0) {
+                        UI.gotoSegment(UI.nextUntranslatedSegmentIdByServer);
+                    } else {
+                        UI.renderAfterConfirm(UI.nextUntranslatedSegmentIdByServer);
+                    }
+                };
+                // If the modal is open wait the close event
+                if( $(".modal[data-type='confirm']").length ) {
+                    $(window).on('modalClosed', function(e) {
+                        callback();
+                    });
+                } else {
+                    callback();
                 }
             }
         }
-
-
-
     });
 })(Review, jQuery);
 

@@ -1,6 +1,6 @@
 <?php
 
-class API_V2_JobRevisionData extends API_V2_ProtectedKleinController {
+class API_V2_JobRevisionData extends API\V2\ProtectedKleinController {
 
     protected function afterConstruct() {
 
@@ -8,8 +8,10 @@ class API_V2_JobRevisionData extends API_V2_ProtectedKleinController {
 
     protected function validateRequest() {
         // TODO: move this query somewhere else
-        $pdo = PDOConnection::connectINIT() ; // TODO this is pre PDO in Database::obtain(), change it.
-        $stmt = $pdo->connection->prepare(
+
+        $pdo = Database::obtain()->getConnection()  ;
+
+        $stmt = $pdo->prepare(
             'SELECT id FROM jobs WHERE id = :id_job AND password = :password'
         );
 
@@ -28,7 +30,7 @@ class API_V2_JobRevisionData extends API_V2_ProtectedKleinController {
     }
 
     public function segments() {
-        $dao = new JobRevisionDataDao( PDOConnection::connectINIT() );
+        $dao = new JobRevisionDataDao( Database::obtain() );
 
         $data = $dao->getSegments(
             $this->request->id_job,
@@ -42,7 +44,7 @@ class API_V2_JobRevisionData extends API_V2_ProtectedKleinController {
     }
 
     public function revisionData() {
-        $dao = new JobRevisionDataDao( PDOConnection::connectINIT() );
+        $dao = new JobRevisionDataDao( Database::obtain() );
 
         $data = $dao->getData(
             $this->request->id_job,

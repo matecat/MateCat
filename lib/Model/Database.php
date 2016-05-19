@@ -70,8 +70,7 @@ class Database implements IDatabase {
     }
 
     /**
-     * @Override
-     * {@inheritdoc}
+     * @return PDO
      */
     public function getConnection() {
         if ( empty( $this->connection ) || !$this->connection instanceof PDO ) {

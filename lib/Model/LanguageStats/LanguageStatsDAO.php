@@ -48,8 +48,8 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
                 $obj->date,
                 $obj->source,
                 $obj->target,
-                $obj->total_wordcount,
-                $obj->total_postediting_effort,
+                $obj->total_word_count,
+                $obj->total_post_editing_effort,
                 $obj->total_time_to_edit,
                 (int)$obj->job_count
         );
@@ -66,8 +66,7 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
 
     /**
      * @param LanguageStats_LanguageStatsStruct $obj
-     *
-     * @return array|void
+     * @return array
      * @throws Exception
      */
     public function read( LanguageStats_LanguageStatsStruct $obj ) {
@@ -106,9 +105,11 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
 
         $query = sprintf( $query, $where_string );
 
-        $arr_result = $this->con->fetch_array( $query );
-
-        return $this->_buildResult( $arr_result );
+        
+        $stmt = $this->con->getConnection()->prepare( $query );
+        $stmt->execute();
+        $stmt->setFetchMode( PDO::FETCH_CLASS, self::STRUCT_TYPE );
+        return $stmt->fetchAll();
     }
 
     /**
@@ -126,7 +127,7 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
                 ON DUPLICATE KEY UPDATE
                           total_post_editing_effort = values( total_post_editing_effort ),
                           total_time_to_edit = values( total_time_to_edit ),
-                          job_count = values( job_count )";;
+                          job_count = values( job_count )";
 
         $tuple_template = "( '%s', '%s', '%s', %f, %f, %f, %u )";
 
@@ -135,6 +136,7 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
         //chunk array using MAX_INSERT_NUMBER
         $objects = array_chunk( $obj_arr, self::MAX_INSERT_NUMBER );
 
+        $allInsertPerformed = true;
         //create an insert query for each chunk
         foreach ( $objects as $i => $chunk ) {
             foreach ( $chunk as $obj ) {
@@ -145,8 +147,8 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
                         $obj->date,
                         $obj->source,
                         $obj->target,
-                        $obj->total_wordcount,
-                        $obj->total_postediting_effort,
+                        $obj->total_word_count,
+                        $obj->total_post_editing_effort,
                         $obj->total_time_to_edit,
                         (int)$obj->job_count
                 );
@@ -157,12 +159,19 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
                     implode( ", ", $values )
             );
 
-            $this->con->query( $insert_query );
+
+            $stmt = $this->con->getConnection()->prepare( $insert_query );
+            $stmt->execute();
+
+            if($stmt->errorCode() > 0 ){
+                $allInsertPerformed = false;
+                break;
+            }
 
             $values = array();
         }
 
-        if ( $this->con->affected_rows > 0 ) {
+        if ( $allInsertPerformed ) {
             return $obj_arr;
         }
 
@@ -235,7 +244,7 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
         /**
          * @var $obj LanguageStats_LanguageStatsStruct
          */
-        if ( is_null( $obj->total_postediting_effort ) || empty( $obj->total_postediting_effort ) ) {
+        if ( is_null( $obj->total_post_editing_effort ) || empty( $obj->total_post_editing_effort ) ) {
             throw new Exception( "Total postediting effort cannot be null" );
         }
 
@@ -248,7 +257,7 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
             throw new Exception( "Job count cannot be null" );
         }
 
-        if ( is_null( $obj->total_wordcount ) ) {
+        if ( is_null( $obj->total_word_count ) ) {
             throw new Exception( "Total wordcount cannot be null" );
         }
 
@@ -262,26 +271,6 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
      * @return LanguageStats_LanguageStatsStruct[] An array containing LanguageStats_LanguageStatsStruct objects
      */
     protected function _buildResult( $array_result ) {
-        $result = array();
-
-        foreach ( $array_result as $item ) {
-
-            $build_arr = array(
-                    'date'                     => $item[ 'date' ],
-                    'source'                   => $item[ 'source' ],
-                    'target'                   => $item[ 'target' ],
-                    'total_wordcount'          => $item[ 'total_word_count' ],
-                    'total_postediting_effort' => $item[ 'total_post_editing_effort' ],
-                    'total_time_to_edit'       => $item[ 'total_time_to_edit' ],
-                    'job_count'                => $item[ 'job_count' ],
-            );
-
-            $obj = new LanguageStats_LanguageStatsStruct( $build_arr );
-
-            $result[] = $obj;
-        }
-
-        return $result;
     }
 
 

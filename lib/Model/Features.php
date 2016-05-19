@@ -125,10 +125,10 @@ class Features {
     }
 
     /**
-     * reviewImprovedEnabled
+     * @param $project
      *
+     * @return bool
      */
-
     private static function reviewImprovedEnabled($project) {
         return $project->id_qa_model != null;
     }
@@ -140,7 +140,7 @@ class Features {
     public static function loadRoutes( \Klein\Klein $klein ) {
         list( $null, $prefix, $class_name) = explode('/', $_SERVER['REQUEST_URI']);
 
-        if ( $prefix  == 'features' ) {
+        if ( $prefix  == 'plugins' ) {
             $cls = '\\Features\\' .  Utils::underscoreToCamelCase( $class_name );
 
             if ( class_exists( $cls ) ) {

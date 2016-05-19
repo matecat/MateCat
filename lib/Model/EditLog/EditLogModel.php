@@ -444,7 +444,7 @@ class EditLog_EditLogModel {
         $this->loadLanguageStats();
 
         return round(
-                $this->languageStatsData->total_time_to_edit / ( 1000 * $this->languageStatsData->total_wordcount ),
+                $this->languageStatsData->total_time_to_edit / ( 1000 * $this->languageStatsData->total_word_count ),
                 2
         );
     }
@@ -456,7 +456,7 @@ class EditLog_EditLogModel {
         $this->loadLanguageStats();
 
         return round(
-                $this->languageStatsData->total_postediting_effort / ( $this->languageStatsData->job_count ),
+                $this->languageStatsData->total_post_editing_effort / ( $this->languageStatsData->job_count ),
                 2
         );
     }

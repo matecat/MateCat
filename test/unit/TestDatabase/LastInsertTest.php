@@ -23,14 +23,15 @@ class LastInsertTest extends AbstractTest
 
     public function setUp()
     {
-
+parent::setUp();
         $this->reflectedClass = Database::obtain();
         $this->reflector = new ReflectionClass($this->reflectedClass);
         $this->property = $this->reflector->getProperty('instance');
         $this->reflectedClass->close();
         $this->property->setAccessible(true);
         $this->property->setValue($this->reflectedClass, null);
-        $this->alfa_instance = $this->reflectedClass->obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $this->alfa_instance = $this->reflectedClass->obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+
 
         $this->sql_create = "CREATE TABLE Persons( PersonID INT )";
         $this->sql_insert_first_value = "INSERT INTO Persons VALUES (475144 )";
@@ -46,12 +47,16 @@ class LastInsertTest extends AbstractTest
     {
 
         $this->alfa_instance->query($this->sql_drop);
-        $this->reflectedClass = Database::obtain("localhost", "unt_matecat_user", "unt_matecat_user", "unittest_matecat_local");
+        $this->reflectedClass = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $this->reflectedClass->close();
         startConnection();
+        parent::tearDown();
     }
 
     /**
+     * It tests that the Increment_index_ID of the last insertion is equal to the expected value,
+     * in this particular case there isn't any insertion with the aid of an incrementation_index
+     * so the return of last_insert will be forced to 0 for any number of single performed insertions made.
      * @group regression
      * @covers Database::last_insert
      * User: dinies

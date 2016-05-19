@@ -1,6 +1,6 @@
 <?php
 
-class Projects_MetadataDao {
+class Projects_MetadataDao extends DataAccess_AbstractDao {
 
     const WORD_COUNT_RAW = 'raw';
     const WORD_COUNT_EQUIVALENT = 'equivalent';
@@ -31,21 +31,27 @@ class Projects_MetadataDao {
       return $stmt->fetchAll();
   }
 
-  public function get($id_project, $key) {
-      $conn = Database::obtain()->getConnection();
-      $stmt = $conn->prepare(
-          "SELECT * FROM project_metadata WHERE " .
-          " id_project = :id_project " .
-          " AND `key` = :key "
+    /**
+     * @param $id_project
+     * @param $key
+     *
+     * @return Projects_MetadataStruct
+     */
+  public function get( $id_project, $key ) {
+
+      $stmt = $this->_getStatementForCache(
+              "SELECT * FROM project_metadata WHERE " .
+              " id_project = :id_project " .
+              " AND `key` = :key "
       );
 
-      $stmt->execute( array(
-          'id_project' => $id_project,
-          'key' => $key
+      $result = $this->_fetchObject( $stmt, new Projects_MetadataStruct(), array(
+              'id_project' => $id_project,
+              'key' => $key
       ) );
 
-      $stmt->setFetchMode(PDO::FETCH_CLASS, 'Projects_MetadataStruct');
-      return $stmt->fetch();
+      return @$result[0];
+
   }
 
   public function set($id_project, $key, $value) {

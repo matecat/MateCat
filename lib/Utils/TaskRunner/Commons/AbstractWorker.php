@@ -10,6 +10,7 @@
 namespace TaskRunner\Commons;
 use \SplObserver;
 use \SplSubject;
+use \AMQHandler;
 
 /**
  * Class AbstractWorker
@@ -43,6 +44,28 @@ abstract class AbstractWorker implements SplSubject {
     protected $_workerPid = 0;
 
     /**
+     * The context object.
+     * It stores the configuration for the worker
+     *
+     * @var Context
+     */
+    protected $_myContext;
+
+    /**
+     * @var AMQHandler
+     */
+    protected $_queueHandler;
+
+    /**
+     * TMAnalysisWorker constructor.
+     *
+     * @param AMQHandler $queueHandler
+     */
+    public function __construct( AMQHandler $queueHandler ) {
+        $this->_queueHandler = $queueHandler;
+    }
+
+    /**
      * Set the caller pid. Needed to log the process Id.
      *
      * @param $_myPid
@@ -52,14 +75,37 @@ abstract class AbstractWorker implements SplSubject {
     }
 
     /**
+     * @param Context $context
+     */
+    public function setContext( Context $context ){
+        $this->_myContext = $context;
+    }
+
+    /**
+     * @return Context
+     */
+    public function getContext(){
+        return $this->_myContext;
+    }
+
+    /**
+     * Override this method in the concrete worker if you need the worker to log in a file
+     * different than the one in context object
+     *
+     * @return string
+     */
+    public function getLoggerName(){
+        return $this->_myContext->loggerName;
+    }
+
+    /**
      * Execution method
      *
      * @param $queueElement AbstractElement
-     * @param $queueContext Context
      *
      * @return mixed
      */
-    abstract public function process( AbstractElement $queueElement, Context $queueContext );
+    abstract public function process( AbstractElement $queueElement );
 
     /**
      * Check how much times the element was re-queued and raise an Exception when the limit is reached ( 100 times )

@@ -8,6 +8,15 @@ if ( ReviewImproved.enabled() ) {
             return true;
         },
 
+        /**
+         * getStatusForAutoSave
+         *
+         * XXX: Overriding this here does not make sens anymore when fixed and
+         * rebutted states will enter MateCat's core.
+         *
+         * @param segment
+         * @returns {*}
+         */
         getStatusForAutoSave : function( segment ) {
             var status = prev_getStatusForAutoSave( segment );
 
@@ -15,7 +24,7 @@ if ( ReviewImproved.enabled() ) {
                 status = 'fixed';
             }
             else if (segment.hasClass('status-rebutted')) {
-                status = 'fixed' ;
+                status = 'rebutted' ;
             }
             return status;
         },

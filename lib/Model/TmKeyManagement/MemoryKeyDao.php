@@ -306,16 +306,6 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
             throw new Exception( "You must set at least one field of the following: uid, gid, tm_key->key" );
         }
 
-        if ( $obj->r !== null ) {
-            $condition    = "read_grants = %d";
-            $set_array[ ] = sprintf( $condition, $obj->r );
-        }
-
-        if ( $obj->w !== null ) {
-            $condition    = "write_grants = %d";
-            $set_array[ ] = sprintf( $condition, $obj->w );
-        }
-
         //tm_key settings
         if ( $obj->tm_key !== null ) {
 

@@ -4,7 +4,7 @@ set_time_limit( 180 );
 
 class downloadOriginalController extends downloadController {
 
-    private $id_job;
+    protected $id_job;
     private $password;
     private $fname;
     private $download_type;
