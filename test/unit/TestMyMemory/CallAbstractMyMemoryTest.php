@@ -62,7 +62,7 @@ class CallAbstractMyMemoryTest extends AbstractTest
 
         $eng_My_Memory = $engine_DAO->read($engine_struct_MyMemory);
 
-        $this->engine_struct_param_My_Memory = @$eng_My_Memory[0];
+        $this->engine_struct_param_My_Memory = $eng_My_Memory[0];
 
         $this->engine_MyMemory = new Engines_MyMemory($this->engine_struct_param_My_Memory);
 

@@ -857,7 +857,15 @@ class CatUtils {
         return $file_stats;
     }
 
-    public static function clean_raw_string4fast_word_count( $string, $source_lang = 'en-US' ){
+    /**
+     * Remove Tags and treat numbers as one word
+     *
+     * @param        $string
+     * @param string $source_lang
+     *
+     * @return mixed|string
+     */
+    public static function clean_raw_string_4_word_count( $string, $source_lang = 'en-US' ){
 
         //return empty on string composed only by spaces
         //do nothing
@@ -876,15 +884,10 @@ class CatUtils {
 
         //remove ampersands and entities. Converters returns entities in xml, we want raw strings.
         $string = html_entity_decode( $string, ENT_XML1, 'UTF-8' );
-        
-        /*
-         * Remove Unicode:
-         * P -> Punctuation
-         * Z -> Separator ( but not spaces )
-         * C -> Other
-         */
-        $string = preg_replace( '#[\p{P}\p{Zl}\p{Zp}\p{C}]+#u', " ", $string );
 
+        /**
+         * Count numbers as One Word
+         */
         if ( array_key_exists( $source_lang, self::$cjk ) ) {
 
             // 17/01/2014
@@ -905,10 +908,40 @@ class CatUtils {
 
     }
 
-    //CONTA LE PAROLE IN UNA STRINGA
+    /**
+     * Count words in a string
+     *
+     * @param        $string
+     * @param string $source_lang
+     *
+     * @return float|int
+     */
     public static function segment_raw_wordcount( $string, $source_lang = 'en-US' ) {
 
-        $string = self::clean_raw_string4fast_word_count( $string, $source_lang );
+        $string = self::clean_raw_string_4_word_count( $string, $source_lang );
+        
+        /**
+         * Escape dash and underscore and replace them with Macro and Cedilla characters!
+         *
+         * Dash and underscore must not be treated as separated words
+         * Macro and Cedilla characters are not replaced by unicode regular expressions below
+         */
+        $string = str_replace( array( '-', '_' ), array( "¯", '¸' ), $string );
+
+        /**
+         * Remove Unicode:
+         * @see http://php.net/manual/en/regexp.reference.unicode.php
+         * P -> Punctuation
+         * Z -> Separator ( but not spaces )
+         * C -> Other
+         */
+        $string = preg_replace( '#[\p{P}\p{Zl}\p{Zp}\p{C}]+#u', " ", $string );
+
+        /**
+         * Now reset chars
+         */
+        $string = str_replace( array( "¯", '¸' ), array( '-', '_' ), $string );
+
 
         //check for a string made of spaces only, after the string was cleaned
         if ( preg_replace( '#[\p{Z}]+#u', "", $string ) == "" ) {
