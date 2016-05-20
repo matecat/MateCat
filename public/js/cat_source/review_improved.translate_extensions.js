@@ -12,8 +12,10 @@ if ( ReviewImproved.enabled() && !config.isReview)
             return false;
         },
         cleanupLegacyButtons : function( segment ) {
-            var buttonsOb = $('#segment-' + segment.id + '-buttons');
+            var segObj = new UI.Segment(segment);
+            var buttonsOb = $('#segment-' + segObj.id + '-buttons');
             buttonsOb.empty();
+            $('p.warnings', segObj.el).empty();
         },
 
         createLegacyButtons : function( segment ) {
