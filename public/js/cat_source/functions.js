@@ -981,3 +981,11 @@ function hackSnapEngage( on ) {
         button.css( 'z-index', button.data( 'mbc-zindex' ) );
     }
 }
+
+function cleanupSplitMarker( string ) {
+	return string.split( UI.splittedTranslationPlaceholder ).join();
+}
+
+function absoluteId( id ) {
+	return id.split('-')[0]; 
+}
