@@ -26,3 +26,5 @@ window.ReviewIssueCategorySelector = require('./ReviewIssueCategorySelector').de
 window.Review_QualityReportButton = require('./review/QualityReportButton').default ;
 
 window.SegmentFilter_MainPanel = require('./segment_filter/MainPanel').default ;
+
+window.NotificationBox = require('./NotificationBox').default;

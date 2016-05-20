@@ -556,6 +556,29 @@ APP = {
             characterData: false,
             attributes: false,
         });
+    },
+    addNotification: function (text, title, type, position) {
+        if (!UI. notificationBox) {
+            UI.notificationBox = ReactDOM.render(
+                React.createElement(NotificationBox),
+                $(".notifications-wrapper")[0]
+            );
+        }
+        var newNotification = {
+            text: text,
+            title: title,
+            type: type,
+            position: position,
+            dismiss: true,
+            allowHtml: true,
+            closeCallback: function () {
+                console.log("Close Notification");
+            },
+            openCallback: function () {
+                console.log("Open Notification");
+            }
+        };
+        UI.notificationBox.addNotification(newNotification);
     }
 };
 
