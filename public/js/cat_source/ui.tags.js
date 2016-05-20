@@ -462,18 +462,15 @@ $.extend(UI, {
 
     },
     highlightCorrespondingTags: function (el) {
-//        console.log('highlighting: ', $(el));
+        var pairEl;
         if(el.hasClass('startTag')) {
-//            console.log('has start tag');
             if(el.next('.endTag').length) {
                 el.next('.endTag').addClass('highlight');
             } else {
-//                console.log('il successivo non è un end tag');
                 num = 1;
                 ind = 0;
                 $(el).nextAll('.locked').each(function () {
                     ind++;
-//                    console.log('ora stiamo valutando: ', $(this));
                     if($(this).hasClass('startTag')) {
                         num++;
                     } else if($(this).hasClass('selfClosingTag')) {
@@ -481,32 +478,25 @@ $.extend(UI, {
                     } else { // end tag
                         num--;
                         if(num == 0) {
-//                            console.log('found el: ', $(this));
                             pairEl = $(this);
                             return false;
                         }
                     }
-//                    $(this).addClass('test-' + num);
 
-                })
-//                console.log('pairEl: ', $(pairEl).text());
-                $(pairEl).addClass('highlight');
+                });
+                if (pairEl)
+                    $(pairEl).addClass('highlight');
 
 
             }
-//            console.log('next endTag: ', el.next('.endTag'));
         } else if(el.hasClass('endTag')) {
-//            console.log('is an end tag');
             if(el.prev('.startTag').length) {
-//                console.log('and the previous element is a start tag');
                 el.prev('.startTag').first().addClass('highlight');
             } else {
-//                console.log('and the previous element is not a start tag');
                 num = 1;
                 ind = 0;
                 $(el).prevAll('.locked').each(function () {
                     ind++;
-//                    console.log('start tag: ', $(this));
 
                     if($(this).hasClass('endTag')) {
                         num++;
@@ -515,25 +505,17 @@ $.extend(UI, {
                     } else { // end tag
                         num--;
                         if(num == 0) {
-//                            console.log('found el: ', $(this));
                             pairEl = $(this);
                             return false;
                         }
                     }
 
                 });
-                $(pairEl).addClass('highlight');
+                if (pairEl)
+                    $(pairEl).addClass('highlight');
             }
         }
-//        console.log('$(el): ', $(el).text());
         $(el).addClass('highlight');
-//        console.log('vediamo: ', UI.editarea.html());
-
-
-//        console.log('$(pairEl).length: ', $(pairEl).length);
-
-//        UI.editarea.find('.locked')
-
     },
     removeHighlightCorrespondingTags: function () {
 //        console.log('REMOVED HIGHLIGHTING');
