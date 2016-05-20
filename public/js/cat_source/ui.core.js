@@ -3575,7 +3575,9 @@ UI = {
         UI.closeTagAutocompletePanel();
         UI.removeHighlightCorrespondingTags();
 
-        if ((!$(this).is(UI.editarea)) || (UI.editarea === '') || (!UI.body.hasClass('editing'))) {
+        var segmentNotYetOpened = ($(this).is(UI.editarea) && !$(this).closest('section').hasClass("opened"));
+
+        if ( !$(this).is(UI.editarea) || (UI.editarea === '') || (!UI.body.hasClass('editing')) || segmentNotYetOpened) {
             if (operation == 'moving') {
                 if ((UI.lastOperation == 'moving') && (UI.recentMoving)) {
                     UI.segmentToOpen = segment;
