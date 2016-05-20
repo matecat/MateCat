@@ -17,6 +17,8 @@ class peeViewController extends viewController {
     public function doAction() {
 
         $languageStats = getLanguageStats();
+        include_once 'lib/Utils/Langs/Languages.php';
+        $instance= Langs_Languages::getInstance();
 
         if( !empty( $languageStats ) ){
             $this->dataLangStats = array();
@@ -25,18 +27,17 @@ class peeViewController extends viewController {
                     "source"       => null,
                     "target"       => null,
                     "pee"          => 0,
-                    "totalwordPEE" => null,
-                    "peeSigma"     => 0
+                    "totalwordPEE" => null
             );
         }
 
         foreach ( $languageStats as $k => $value ) {
             $this->dataLangStats[] = array(
-                    "source"       => $value[ 'source' ],
-                    "target"       => $value[ 'target' ],
+                    "source"       => $instance->getLocalizedName($value[ 'source' ]),
+                    "target"       => $instance->getLocalizedName($value[ 'target' ]),
                     "pee"          => $value[ 'total_post_editing_effort' ],
-                    "totalwordPEE" => $value[ 'total_word_count' ],
-                    "peeSigma"     => $value[ 'pee_sigma' ]
+                    "totalwordPEE" => number_format($value[ 'total_word_count' ],0,",","."),
+                    "payable_rate"=> ""
             );
         }
 
