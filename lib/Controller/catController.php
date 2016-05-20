@@ -674,6 +674,15 @@ class catController extends viewController {
 
         $this->template->uses_matecat_filters = Utils::isJobBasedOnMateCatFilters($this->jid);
 
+        $metadataDao = new Projects_MetadataDao( Database::obtain() );
+        $lexicaMeta = $metadataDao->setCacheTTL( 60 * 60 )->get( $this->pid, 'lexiqa' );
+        if( $lexicaMeta instanceof Projects_MetadataStruct ){
+            $this->template->lxq_enabled = var_export(
+                    $lexicaMeta->value,
+                    true
+            );
+        }
+
         $this->decorator = new CatDecorator( $this, $this->template );
         $this->decorator->decorate();
 

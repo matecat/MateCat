@@ -111,11 +111,15 @@ $.extend(UI, {
 
         tx = tx.replace(/<span/gi, "<pl")
             .replace(/<\/span/gi, "</pl")
+//			.replace(/<lxqwarning/gi, "<lxqpl")
+//            .replace(/<\/lxqwarning/gi, "</lxqpl")
             .replace(/&lt;/gi, "<")
             .replace(/(<(g|x|bx|ex|bpt|ept|ph[^a-z]*|it|mrk)\sid[^<]*?&gt;)/gi, brTx1)
             .replace(/</gi, "&lt;")
             .replace(/\&lt;pl/gi, "<span")
             .replace(/\&lt;\/pl/gi, "</span")
+            .replace(/\&lt;lxqwarning/gi, "<lxqwarning")
+            .replace(/\&lt;\/lxqwarning/gi, "</lxqwarning")
             .replace(/\&lt;div\>/gi, "<div>")
             .replace(/\&lt;\/div\>/gi, "</div>")
             .replace(/\&lt;br\>/gi, "<br>")
@@ -164,6 +168,9 @@ $.extend(UI, {
         }
 
         $(area).first().each(function() {
+            var segment = $(this).closest('section');
+			if (LXQ.enabled())
+            	$.powerTip.destroy($('.tooltipa',segment));
             saveSelection();
 
             var html = $(this).html() ;
@@ -173,10 +180,11 @@ $.extend(UI, {
             var prevNumTags = $('span.locked', this).length;
 
             restoreSelection();
-
+            if (LXQ.enabled())
+                LXQ.reloadPowertip(segment);
             if ($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
 
-            var segment = $(this).closest('section');
+            
 
             UI.evalCurrentSegmentTranslationAndSourceTags( segment );
 
