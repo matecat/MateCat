@@ -97,9 +97,11 @@
 
     var setTimeoutForReview = function() {
         setTimeout(function() {
-            $("html,body").animate({
-                scrollTop: segment.prev().offset().top - $('.header-menu').height()
-            }, 500);
+            if ( segment.prev().length ) {
+                $("html,body").animate({
+                    scrollTop: segment.prev().offset().top - $('.header-menu').height()
+                }, 500);
+            }
         }, 300);
     }
 

@@ -57,7 +57,7 @@ if ( ReviewImproved.enabled() && !config.isReview)
          * alongside the legacy buttons hadled with jquery.
          */
         createButtons: function(segment) {
-            var data = MateCat.db.segments.by('sid', segment.id);
+            var data = MateCat.db.segments.by('sid', segment.absId );
 
             if ( showFixedAndRebuttedButtons( data.status ) ) {
                 var mountpoint = segment.el.find('[data-mount="main-buttons"]')[0];
