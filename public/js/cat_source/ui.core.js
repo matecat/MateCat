@@ -2323,8 +2323,8 @@ UI = {
         var byStatus = options.byStatus || false;
         var propagate = options.propagate || false;
 
-        var segment = UI.Segment.find( id_segment );
-        //
+        var segment = UI.Segment.findAbsolute( id_segment );
+        
         //REMOVED Check for to save
         //Send ALL to the queue
         var item = {
