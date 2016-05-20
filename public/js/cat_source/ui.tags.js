@@ -484,8 +484,9 @@ $.extend(UI, {
                     }
 
                 });
-                if (pairEl)
+                if (pairEl) {
                     $(pairEl).addClass('highlight');
+                }
 
 
             }
@@ -511,8 +512,9 @@ $.extend(UI, {
                     }
 
                 });
-                if (pairEl)
+                if (pairEl) {
                     $(pairEl).addClass('highlight');
+                }
             }
         }
         $(el).addClass('highlight');
