@@ -50,6 +50,16 @@ MAIL[loggerName]    = "mail_queue.log"
 ;;##############################
 CONTRIBUTION[queue_name]    = "set_contribution"
 CONTRIBUTION[pid_set_name]  = "ch_pid_set_contribution"
-CONTRIBUTION[max_executors] = 5
+CONTRIBUTION[max_executors] = 1
 CONTRIBUTION[redis_key]     = "set_contribution_list"
 CONTRIBUTION[loggerName]    = "set_contribution.log"
+
+
+;;##############################
+;;##### Key Name Glossary  #####
+;;##############################
+GLOSSARY[queue_name]    = "glossary"
+GLOSSARY[pid_set_name]  = "ch_pid_glossary"
+GLOSSARY[max_executors] = 1
+GLOSSARY[redis_key]     = "glossary"
+GLOSSARY[loggerName]    = "glossary.log"
