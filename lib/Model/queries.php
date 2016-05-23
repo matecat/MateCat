@@ -963,6 +963,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
                 s.xliff_ext_succ_tags,
                 st.serialized_errors_list,
                 st.warning,
+                st.suggestion_match as suggestion_match,
                 sts.source_chunk_lengths,
                 sts.target_chunk_lengths,
                 IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'false', 'true' ) AS readonly

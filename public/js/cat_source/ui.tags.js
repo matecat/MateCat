@@ -111,11 +111,15 @@ $.extend(UI, {
 
         tx = tx.replace(/<span/gi, "<pl")
             .replace(/<\/span/gi, "</pl")
+//			.replace(/<lxqwarning/gi, "<lxqpl")
+//            .replace(/<\/lxqwarning/gi, "</lxqpl")
             .replace(/&lt;/gi, "<")
             .replace(/(<(g|x|bx|ex|bpt|ept|ph[^a-z]*|it|mrk)\sid[^<]*?&gt;)/gi, brTx1)
             .replace(/</gi, "&lt;")
             .replace(/\&lt;pl/gi, "<span")
             .replace(/\&lt;\/pl/gi, "</span")
+            .replace(/\&lt;lxqwarning/gi, "<lxqwarning")
+            .replace(/\&lt;\/lxqwarning/gi, "</lxqwarning")
             .replace(/\&lt;div\>/gi, "<div>")
             .replace(/\&lt;\/div\>/gi, "</div>")
             .replace(/\&lt;br\>/gi, "<br>")
@@ -164,6 +168,9 @@ $.extend(UI, {
         }
 
         $(area).first().each(function() {
+            var segment = $(this).closest('section');
+			if (LXQ.enabled())
+            	$.powerTip.destroy($('.tooltipa',segment));
             saveSelection();
 
             var html = $(this).html() ;
@@ -173,10 +180,11 @@ $.extend(UI, {
             var prevNumTags = $('span.locked', this).length;
 
             restoreSelection();
-
+            if (LXQ.enabled())
+                LXQ.reloadPowertip(segment);
             if ($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
 
-            var segment = $(this).closest('section');
+            
 
             UI.evalCurrentSegmentTranslationAndSourceTags( segment );
 
@@ -462,18 +470,15 @@ $.extend(UI, {
 
     },
     highlightCorrespondingTags: function (el) {
-//        console.log('highlighting: ', $(el));
+        var pairEl;
         if(el.hasClass('startTag')) {
-//            console.log('has start tag');
             if(el.next('.endTag').length) {
                 el.next('.endTag').addClass('highlight');
             } else {
-//                console.log('il successivo non è un end tag');
                 num = 1;
                 ind = 0;
                 $(el).nextAll('.locked').each(function () {
                     ind++;
-//                    console.log('ora stiamo valutando: ', $(this));
                     if($(this).hasClass('startTag')) {
                         num++;
                     } else if($(this).hasClass('selfClosingTag')) {
@@ -481,32 +486,26 @@ $.extend(UI, {
                     } else { // end tag
                         num--;
                         if(num == 0) {
-//                            console.log('found el: ', $(this));
                             pairEl = $(this);
                             return false;
                         }
                     }
-//                    $(this).addClass('test-' + num);
 
-                })
-//                console.log('pairEl: ', $(pairEl).text());
-                $(pairEl).addClass('highlight');
+                });
+                if (pairEl) {
+                    $(pairEl).addClass('highlight');
+                }
 
 
             }
-//            console.log('next endTag: ', el.next('.endTag'));
         } else if(el.hasClass('endTag')) {
-//            console.log('is an end tag');
             if(el.prev('.startTag').length) {
-//                console.log('and the previous element is a start tag');
                 el.prev('.startTag').first().addClass('highlight');
             } else {
-//                console.log('and the previous element is not a start tag');
                 num = 1;
                 ind = 0;
                 $(el).prevAll('.locked').each(function () {
                     ind++;
-//                    console.log('start tag: ', $(this));
 
                     if($(this).hasClass('endTag')) {
                         num++;
@@ -515,25 +514,18 @@ $.extend(UI, {
                     } else { // end tag
                         num--;
                         if(num == 0) {
-//                            console.log('found el: ', $(this));
                             pairEl = $(this);
                             return false;
                         }
                     }
 
                 });
-                $(pairEl).addClass('highlight');
+                if (pairEl) {
+                    $(pairEl).addClass('highlight');
+                }
             }
         }
-//        console.log('$(el): ', $(el).text());
         $(el).addClass('highlight');
-//        console.log('vediamo: ', UI.editarea.html());
-
-
-//        console.log('$(pairEl).length: ', $(pairEl).length);
-
-//        UI.editarea.find('.locked')
-
     },
     removeHighlightCorrespondingTags: function () {
 //        console.log('REMOVED HIGHLIGHTING');

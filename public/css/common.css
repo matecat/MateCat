@@ -2660,28 +2660,6 @@ font-weight: normal !important;
 	float: left;
 	background-size: 25px!important;}
 
-@media only screen and (max-width : 1280px) {
-.translate-box select {
-width: 210px;
-}
-.translate-box input[type="text"] {
-    width:200px;
-}
-}
-@media only screen and (max-width : 1150px) {
-.translate-box select {
-width: 190px;
-}
-.translate-box input[type="text"] {
-    width:180px!important;
-}
-#private-tm-key {
-width: 169px;
-height: 28px;
-font-size: 17px!important;
-}
-}
-
 
 @media only screen and (max-width : 1100px) {
 
