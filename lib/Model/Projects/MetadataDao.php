@@ -60,7 +60,7 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
      *
      * @return Projects_MetadataStruct
      */
-  public static function set($id_project, $key, $value) {
+  public function set($id_project, $key, $value) {
       $sql = "INSERT INTO project_metadata " .
           " ( id_project, `key`, value ) " .
           " VALUES " .
@@ -74,7 +74,7 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
           'value' => $value
       ) );
 
-      return self::get($id_project, $key);
+      return $this->get($id_project, $key);
   }
 
 
