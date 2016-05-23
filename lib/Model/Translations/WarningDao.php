@@ -13,6 +13,7 @@ class WarningDao extends \DataAccess_AbstractDao {
     public static function findByChunkAndScope( \Chunks_ChunkStruct $chunk, $scope ) {
         $sql = "SELECT * FROM translation_warnings " .
                 " WHERE id_job = :id_job " .
+                " AND id_segment BETWEEN :job_first_segment AND :job_last_segment " .
                 " AND scope = :scope " ;
 
         $conn = \Database::obtain()->getConnection();
@@ -26,6 +27,8 @@ class WarningDao extends \DataAccess_AbstractDao {
                 array(
                         'id_job' => $chunk->id,
                         'scope'  => $scope,
+                        'job_first_segment' => $chunk->job_first_segment,
+                        'job_last_segment' => $chunk->job_last_segment
                 )
         );
         return $stmt->fetchAll() ;
