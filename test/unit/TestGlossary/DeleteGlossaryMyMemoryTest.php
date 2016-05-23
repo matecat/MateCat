@@ -42,6 +42,8 @@ class DeleteGlossaryMyMemoryTest extends AbstractTest
     protected $segment;
     protected $translation;
 
+    protected $test_key;
+
     public function setUp()
     {
         parent::setUp();
@@ -54,7 +56,7 @@ class DeleteGlossaryMyMemoryTest extends AbstractTest
         /**
          * @var $engineRecord EnginesModel_EngineStruct
          */
-        $this->engine_struct_param = @$eng[0];
+        $this->engine_struct_param = $eng[0];
         
 
         $this->config_param_of_delete = array(
@@ -90,10 +92,12 @@ class DeleteGlossaryMyMemoryTest extends AbstractTest
             CURLOPT_SSL_VERIFYHOST => 2
         );
 
+        $this->test_key= "fc7ba5edf8d5e8401593";
+
         $this->segment= "prova";
         $this->translation= "proof";
-        $this->url_set = "http://api.mymemory.translated.net/glossary/set?seg={$this->segment}&tra={$this->translation}&langpair=it-IT%7Cen-US&de=demo%40matecat.com&prop=%7B%22project_id%22%3A%22987654%22%2C%22project_name%22%3A%22barfoo%22%2C%22job_id%22%3A%22321%22%7D&key=fc7ba5edf8d5e8401593";
-        $this->url_delete= "http://api.mymemory.translated.net/glossary/delete?seg={$this->segment}&tra={$this->translation}&langpair=it-IT%7Cen-US&de=demo%40matecat.com&key=fc7ba5edf8d5e8401593";
+        $this->url_set = "http://api.mymemory.translated.net/glossary/set?seg={$this->segment}&tra={$this->translation}&langpair=it-IT%7Cen-US&de=demo%40matecat.com&prop=%7B%22project_id%22%3A%22987654%22%2C%22project_name%22%3A%22barfoo%22%2C%22job_id%22%3A%22321%22%7D&key={$this->test_key}";
+        $this->url_delete= "http://api.mymemory.translated.net/glossary/delete?seg={$this->segment}&tra={$this->translation}&langpair=it-IT%7Cen-US&de=demo%40matecat.com&key={$this->test_key}";
 
     }
 
@@ -162,7 +166,7 @@ class DeleteGlossaryMyMemoryTest extends AbstractTest
         
         $this->config_param_of_delete['segment'] = $this->segment;
         $this->config_param_of_delete['translation'] = $this->translation;
-        $this->config_param_of_delete['id_user'] =array('0' => "fc7ba5edf8d5e8401593");
+        $this->config_param_of_delete['id_user'] =array('0' => "{$this->test_key}");
 
         $result = $this->engine_MyMemory->delete($this->config_param_of_delete);
         sleep(1);
