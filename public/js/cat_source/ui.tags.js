@@ -424,7 +424,6 @@ $.extend(UI, {
         }
     },
     checkTagProximity: function () {
-//        return false;
         if(UI.editarea.html() == '') return false;
 
         selection = window.getSelection();
@@ -433,23 +432,16 @@ $.extend(UI, {
         if(!range.collapsed) return true;
         nextEl = $(range.endContainer.nextElementSibling);
         prevEl = $(range.endContainer.previousElementSibling);
-//        console.log('nextEl: ', nextEl.length);
-//        console.log('prevEl: ', prevEl.length);
         tempRange = range;
         UI.editarea.find('.test-invisible').remove();
         pasteHtmlAtCaret('<span class="test-invisible"></span>');
         coso = $.parseHTML(UI.editarea.html());
-//        console.log('coso: ', coso);
         $.each(coso, function (index) {
             if($(this).hasClass('test-invisible')) {
                 UI.numCharsUntilTagRight = 0;
                 UI.numCharsUntilTagLeft = 0;
-//                console.log('index: ', index);
-//                console.log('sssss: ', UI.nearTagOnRight(index+1, coso));
                 nearTagOnRight = UI.nearTagOnRight(index+1, coso);
-//                console.log('nearTagOnRight: ', nearTagOnRight);
                 nearTagOnLeft = UI.nearTagOnLeft(index-1, coso);
-//                console.log('nearTagOnLeft: ', nearTagOnLeft);
 
                 if((typeof nearTagOnRight != 'undefined')&&(nearTagOnRight)) {//console.log('1');
                     UI.removeHighlightCorrespondingTags();
