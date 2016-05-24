@@ -259,7 +259,7 @@ class UpdateGlossaryMyMemoryTest extends AbstractTest
         $method_call->setAccessible(true);
 
         $raw_value = $method_call->invoke($this->engine_MyMemory, $this->old_url_get, $this->curl_param);
-
+        sleep(1);
         $method_decode = $this->reflector_of_engine->getMethod('_decode');
         $method_decode->setAccessible(true);
 
@@ -382,7 +382,6 @@ class UpdateGlossaryMyMemoryTest extends AbstractTest
 
     public function test_NEW_OLD_update_with_success_of_glossary_word_with_id_not_in_array_coverage_purpose()
     {
-
 
         $mh = new MultiCurlHandler();
         $mh->createResource($this->old_old_url_set, $this->curl_additional_params + $this->curl_param);
