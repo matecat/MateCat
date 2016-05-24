@@ -459,6 +459,7 @@ UI = {
 		}
 	},
 	createButtons: function() {
+
         var button_label = config.status_labels.TRANSLATED ;
         var label_first_letter = button_label[0];
 
@@ -1196,16 +1197,6 @@ UI = {
 	},
 
     placeCaretAtEnd: function(el) {
-//		console.log(el);
-//		console.log($(el).first().get().className);
-//		var range = document.createRange();
-//		var sel = window.getSelection();
-//		range.setStart(el, 1);
-//		range.collapse(true);
-//		sel.removeAllRanges();
-//		sel.addRange(range);
-//		el.focus();
-
 		 $(el).focus();
 		 if (typeof window.getSelection != "undefined" && typeof document.createRange != "undefined") {
 			var range = document.createRange();
@@ -1404,12 +1395,10 @@ UI = {
                     segData = null;
                 });
             } else {
-//                console.log('b');
                 newSegments.push(this);
             }
 
         });
-// console.log('newsegments 1: ', newSegments);
         return newSegments;
     },
 
@@ -3618,6 +3607,69 @@ UI = {
 
         if (UI.debug) { console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea)); }
 
+    },
+    /**
+     * After User click on Translated or T+>> Button
+     * @param e
+     * @param button
+     */
+    clickOnTranslatedButton: function (e, button) {
+        var buttonValue = ($(button).hasClass('translated')) ? 'translated' : 'next-untranslated';
+        e.preventDefault();
+        UI.hideEditToolbar();
+        //??
+        $('.test-invisible').remove();
+
+        UI.currentSegment.removeClass('modified');
+        var skipChange = false;
+        if (buttonValue == 'next-untranslated') {
+            if (!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {
+                UI.changeStatus(button, 'translated', 0);
+                skipChange = true;
+                if (!UI.nextUntranslatedSegmentId) {
+                    $('#' + $(button).attr('data-segmentid') + '-close').click();
+                } else {
+                    UI.reloadWarning();
+                }
+            }
+        } else {
+            if (!$(UI.currentSegment).nextAll('section:not(.readonly)').length) {
+                UI.changeStatus(button, 'translated', 0);
+                skipChange = true;
+            }
+
+        }
+        UI.checkHeaviness();
+        if ( UI.blockButtons ) {
+            if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId === '') {
+            } else {
+
+                if (!UI.noMoreSegmentsAfter) {
+                    UI.reloadWarning();
+                }
+            }
+            return;
+        }
+        if(!UI.offline) UI.blockButtons = true;
+
+        UI.unlockTags();
+        UI.setStatusButtons(button);
+
+        if (!skipChange) {
+            UI.changeStatus(button, 'translated', 0);
+        }
+
+        if (buttonValue == 'translated') {
+            UI.gotoNextSegment();
+        } else {
+            // TODO: investigate why this trigger click is necessary.
+            $(".editarea", UI.nextUntranslatedSegment).trigger("click", "translated")
+        }
+
+        UI.lockTags($('#' + $(button).attr('data-segmentid') + ' .editarea'));
+        UI.lockTags(UI.editarea);
+        UI.changeStatusStop = new Date();
+        UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
     }
 
 
