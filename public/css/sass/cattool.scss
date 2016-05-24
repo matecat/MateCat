@@ -49,8 +49,8 @@ section:hover .segment-side-buttons {
 .notifications-position-bl {
   @extend .notifications-position;
   top: auto;
-  bottom: 20px;
-  left: 0;
+  bottom: 17px;
+  left: 20px;
   right: auto;
 }
 .notifications-position-bc {
@@ -99,10 +99,12 @@ section:hover .segment-side-buttons {
   width: 100%;
   cursor: pointer;
   text-align:left;
+  background-color: #fff;
   @include border-radius(2px);
   font-size: 15px;
   margin: 10px 0 0;
   padding: 10px;
+  box-shadow: 0 1px 10px #666;
   display: block;
   @include box-sizing(border-box);
   opacity: 0;
@@ -111,30 +113,29 @@ section:hover .segment-side-buttons {
 
 .notification-type-success {
   @extend .notification-type;
-  background-color : #f0f5ea;
-  color: #4b583a;
-  @include box-shadow(0, 0, 1px, rgba(94, 164, 0 , 0.9));
+  color: #f0f5ea;
 }
 
 .notification-type-error {
   @extend .notification-type;
-  background-color: #f4e9e9;
-  color: #412f2f;
-  @include box-shadow(0, 0, 1px, rgba(236, 61, 61 , 0.9));
+  border-top: 3px solid #ec3d3d;
 }
 
 .notification-type-warning {
   @extend .notification-type;
-  background-color: #f9f6f0;
-  color: #5a5343;
-  @include box-shadow(0, 0, 1px, rgba(235, 173, 23 , 0.9));
+  border-top: 3px solid #ebad1a;
 }
 
 .notification-type-info {
   @extend .notification-type;
-  background-color: #fff;
-  color: #41555d;
-  @include box-shadow(0, 0, 1px, #ccc);
+  border-top: 3px solid #119ec4;
+}
+
+.notifications-cat-smiling {
+    background: url('/public/img/matecat_smiling.png') no-repeat 90% bottom;
+    padding-top: 64px;
+    background-size: 60px;
+    margin-bottom: -10px;
 }
 
 .notification-close-button {

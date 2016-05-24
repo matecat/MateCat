@@ -90,7 +90,7 @@ class NotificationBox extends React.Component {
                         />;
                         items.push(item);
                     });
-                    return <div key={index} className={ 'notifications-position-' + position } id={'not-' + index}>
+                    return <div key={index} className={ 'notifications-position-' + position } id={'not-' + index}> 
                             { items }
                           </div>
                 }
