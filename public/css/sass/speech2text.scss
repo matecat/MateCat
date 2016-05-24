@@ -6,10 +6,11 @@
     border-color:#ccc;
 }
 
-.segmentButton {
+.segmentButton, .toolbar a {
     height: 20px;
+    zoom: 0.8;
     min-width: 20px;
-    cursor: default;
+    cursor: pointer;
     border-radius: 3px;
     padding: 2px;
     border: 1px solid #C6C6C6;
@@ -31,7 +32,7 @@
     display: none;
     position: absolute;
     bottom: 0;
-    left: -6px;
+    left: -12px;
     z-index: 9999999;
 
     &:hover {
@@ -77,12 +78,19 @@ section.opened svg.micBgSpeechReceiving {
 
 section.opened {
     ul.buttons {
-        margin-top: -10px;
+        margin-top: -13px;
     }
 
     .toolbar {
-        margin-left: 30px;
+        margin-left: 20px;
+        float: left;
+        margin-top: 3px;
+        width: 100%;
     }
+}
+
+.tagModeToggle, .autofillTag {
+    margin-right: 10px;
 }
 
 $tlbr-btn-bg: -webkit-linear-gradient(top, #f8f8f8, #f1f1f1);

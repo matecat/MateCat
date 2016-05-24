@@ -2849,7 +2849,7 @@ color: #000;
 
 .autofillTag:hover, 
 .autofillTag.active {
-    color: #999!important;
+    color: #333!important;
 }
 
 .autofillTag:before {

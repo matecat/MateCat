@@ -2553,7 +2553,7 @@ section.modified.editor .status
 	font-size: 13px;
 	font-style: italic;
 	margin-top: -2px;
-	height: 32px;
+	height: 24px;
 	vertical-align: baseline;
     border: 2px solid transparent;
 	display: inline-block;
@@ -3117,19 +3117,31 @@ del.diff
 	top: -4px;
 */
 }
-section .toolbar .tagModeToggle ,section .toolbar  .autofillTag  {
+section .toolbar .tagModeToggle,
+section .toolbar  .autofillTag  {
     float: left;
     display: none;
     font-size: 60%;
-    margin-right: 5px;
 }
 
 section .toolbar span {
-    font-size: 150%;
+    font-size: 120%;
+    padding-top: 5px;
+    margin-left: 1px;
 }
 
 .tagModeToggle span:before {
 float: left;
+}
+.tagModeToggle.active {
+    padding: 2px 1px 2px 0;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+    background-color: #eee;
+    background-image: -webkit-linear-gradient(top, #eee, #e0e0e0);
+
+}
+.tagModeToggle.active span {
+    font-size: 100%!important;
 }
 .editToolbar
 {
@@ -3306,15 +3318,16 @@ body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.end
 .autofillTag  {
 padding: 4px 2px 0px 2px;
 border: 1px solid #fff;
-color: #444!important;
+color: #666!important;
 }
 .autofillTag{
 	padding-top: 0 ;
 }
 
 
+
 .tagModeToggle:hover, .tagModeToggle.active {
-	color:#999!important;
+	color:#333!important;
 }
 
 .icon-tag-expand {
@@ -3335,9 +3348,7 @@ section.editor .toolbar {
 	float: left;
 }
 
-.tagModeToggle span.icon-chevron-right {
-margin-left: 5px;
-}
+
 
 .tagModeToggle.active span.icon-chevron-right {
 	margin-left: 0px;
@@ -3345,6 +3356,8 @@ margin-left: 5px;
 
 .tagModeToggle.active .icon-tag-expand {
 	display: inline-block;
+	font-weight: bold;
+    padding-top: 6px;
 }
 
 .textarea-container .tagMode {
