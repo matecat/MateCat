@@ -10,16 +10,20 @@
  *
  */
 class Features {
-    const PROJECT_COMPLETION = 'project_completion' ;
-    const TRANSLATION_VERSIONS = 'translation_versions'  ;
-    const REVIEW_IMPROVED = 'review_improved' ;
+    
+    const PROJECT_COMPLETION   = 'project_completion';
+    const TRANSLATION_VERSIONS = 'translation_versions';
+    const REVIEW_IMPROVED      = 'review_improved';
+    const QACHECK_GLOSSARY     = 'qa_check_glossary';
+    const QACHECK_BLACKLIST    = 'qa_check_blacklist';
 
     public static $VALID_CODES = array(
         Features::PROJECT_COMPLETION,
         Features::TRANSLATION_VERSIONS,
-        Features::REVIEW_IMPROVED
+        Features::REVIEW_IMPROVED,
+        Features::QACHECK_GLOSSARY,
+        Features::QACHECK_BLACKLIST
     );
-
 
     /**
      * appendDecorators

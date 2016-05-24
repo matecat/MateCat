@@ -68,6 +68,20 @@ class Translations_SegmentTranslationDao extends DataAccess_AbstractDao {
       return $stmt->fetch();
     }
 
+    public function getSegmentsForPropagation( $params ) {
+        $selectSegmentsToPropagate = " SELECT * FROM segment_translations " .
+                " WHERE id_job = :id_job " .
+                " AND segment_hash = :segment_hash " .
+                " AND id_segment BETWEEN :job_first_segment AND :job_last_segment " .
+                " AND id_segment <> :id_segment " ;
+
+        $conn =  $this->con->getConnection() ;
+        $stmt = $conn->prepare( $selectSegmentsToPropagate );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Translations_SegmentTranslationStruct');
+        $stmt->execute( $params ) ;
+
+        return $stmt->fetchAll();
+    }
     /**
      * @param $id_job
      *

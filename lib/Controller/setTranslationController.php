@@ -449,7 +449,6 @@ class setTranslationController extends ajaxController {
                 if ( $this->VersionsHandler != null ) {
                     $this->VersionsHandler->savePropagation( array(
                             'propagation'             => $TPropagation,
-                            'propagate_to_translated' => $doPropagation, // TODO: remove, this is no longer needed.
                             'old_translation'         => $old_translation,
                             'job_data'                => $this->jobData
                     ));
@@ -459,8 +458,7 @@ class setTranslationController extends ajaxController {
                     $TPropagation,
                         $this->jobData,
                         $this->id_segment,
-                        $this->project,
-                        $doPropagation
+                        $this->project
                 );
 
             } catch ( Exception $e ) {
@@ -498,7 +496,7 @@ class setTranslationController extends ajaxController {
             $newValues   = array();
             $newValues[] = $counter->getUpdatedValues( $old_count );
 
-            foreach ( $propagationTotal as $__pos => $old_value ) {
+            foreach ( $propagationTotal['totals'] as $__pos => $old_value ) {
                 $counter->setOldStatus( $old_value[ 'status' ] );
                 $counter->setNewStatus( $this->status );
                 $newValues[] = $counter->getUpdatedValues( $old_value[ 'total' ] );
@@ -582,9 +580,12 @@ class setTranslationController extends ajaxController {
         $this->feature_set->run('setTranslationCommitted', array(
                 'translation'     => $_Translation,
                 'old_translation' => $old_translation,
-                'propagation'     => $TPropagation,
-                'chunk'           => $this->chunk
+                'propagated_ids'  => $propagationTotal['propagated_ids'],
+                'chunk'           => $this->chunk,
+                'segment'         => $this->segment,
+                'uid'             => $uid
                 ));
+
 
         //EVERY time an user changes a row in his job when the job is completed,
         // a query to do the update is executed...

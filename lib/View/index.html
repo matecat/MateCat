@@ -77,7 +77,9 @@
                 isGDriveProject : ${isGDriveProject|string:false},
                 remoteFilesInJob : JSON.parse( '${ php: json_encode(remoteFilesInJob)}'),
 		        lexiqaServer: 'https://backend.lexiqa.net',
-                lxq_enabled: ${lxq_enabled | string:false}
+                lxq_enabled: ${lxq_enabled | string:false},
+                qa_check_glossary_enabled : ${qa_check_glossary_enabled | string:false },
+                qa_check_blacklist_enabled : ${qa_check_blacklist_enabled | string:false }
             };
 
             var renderStart = new Date();

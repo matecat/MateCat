@@ -26,6 +26,9 @@ function b64_to_utf8(str) { // currently unused
 	return decodeURIComponent(escape(window.atob(str)));
 }
 
+function escapeRegExp(str) {
+	return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+}
 
 // START Get clipboard data at paste event (SEE http://stackoverflow.com/a/6804718)
 function handlepaste(elem, e) {

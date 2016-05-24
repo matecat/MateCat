@@ -36,10 +36,15 @@ abstract class DataAccess_AbstractDao {
      */
     protected $cacheTTL = 0;
 
-    public function __construct( $con ) {
+    public function __construct( $con = null ) {
         /**
          * @var $con Database
          */
+
+        if ( $con == null ) {
+            $con = Database::obtain();
+        }
+
         $this->con = $con;
     }
 

@@ -34,6 +34,16 @@ class WarningDao extends \DataAccess_AbstractDao {
         return $stmt->fetchAll() ;
     }
 
+    /**
+     *
+     * Deletes all translation warnings related to a given scope. 
+     * 
+     * @param $id_job
+     * @param $id_segment
+     * @param $scope
+     *
+     * @return int
+     */
     public static function deleteByScope($id_job, $id_segment, $scope) {
         $sql = "DELETE FROM translation_warnings " .
                 " WHERE id_job = :id_job " .
