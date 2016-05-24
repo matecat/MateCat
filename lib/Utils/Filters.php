@@ -117,17 +117,24 @@ class Filters {
     }
 
     public static function sourceToXliff( $filePath, $sourceLang, $targetLang, $segmentation ) {
-        $filename  = FilesStorage::pathinfo_fix( $filePath, PATHINFO_FILENAME );
+        $basename  = FilesStorage::pathinfo_fix( $filePath, PATHINFO_FILENAME );
         $extension = FilesStorage::pathinfo_fix( $filePath, PATHINFO_EXTENSION );
+        $filename = "$basename.$extension";
 
         $data = array(
-            'documentContent' => "@$filePath;filename=$filename.$extension",
+            'documentContent' => "@$filePath",
             'sourceLocale' => Langs_Languages::getInstance()->getLangRegionCode( $sourceLang ),
             'targetLocale' => Langs_Languages::getInstance()->getLangRegionCode( $targetLang ),
             'segmentation' => $segmentation,
-            // The following 2 are needed only by older filters versions
-            'fileExtension' => $extension,
-            'fileName'      => "$filename.$extension"
+            // This parameter is mandatory for older filters and optional for
+            // newer ones, because it can be obtained by documentContent;
+            // however when new filters extract filename from documentContent
+            // they do it forcing ISO-8859-1 encoding, because of a bug in the
+            // MIMEPull library. So unless this bug is there is better to use
+            // the following parameter to send filename in UTF-8
+            'fileName'      => $filename,
+            // The following is needed only by older filters versions
+            'fileExtension' => $extension
         );
 
         $filtersResponse = self::sendToFilters(array($data), self::SOURCE_TO_XLIFF_ENDPOINT);

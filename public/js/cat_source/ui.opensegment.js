@@ -134,6 +134,8 @@
                 type: "segmentOpened",
                 segment: segment
             });
+
+            Speech2Text.enableMicrophone(segment.el);
         }
     });
 })(jQuery, UI);

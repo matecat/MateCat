@@ -31,6 +31,12 @@ class loginPageController extends viewController {
 			//else, update session
 			$_SESSION['incomingUrl']=$this->incomingUrl;
 		}
+
+                if( isset($_SESSION[ 'oauthScope' ]) && $_SESSION[ 'oauthScope' ] === 'GDrive' ) {
+                        $this->authURL = \GDrive::generateGDriveAuthUrl();
+
+                        unset( $_SESSION[ 'oauthScope' ] );
+                }
 	}
 
 	public function doAction() {

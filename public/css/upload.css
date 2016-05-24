@@ -493,24 +493,73 @@ float: left;
   margin-left: 3px;
 }
 
+@media (min-width: 1300px) and (max-width: 1410px) {
+		.advanced-box .translate-box select {width: 210px!important;}
+}
+
 @media (max-width: 1300px) {
 	.wrapper-upload {
 		width:96%!important;
 	}
 	.translate-box select, .mgmt-table-mt select {
-		width: 230px!important;
+		width: 210px!important;
 	}
 
+
+
 	.translate-box a {
-  display: block;
-  width: 195px;
-  margin-top: 0;
-}
+	  display: block;
+	  width: 195px;
+	  margin-top: 0;
+	}
 }
 
-@media (max-width: 1150px) {
+@media only screen and (max-width : 1280px) {
+    .translate-box select {
+    width: 210px;
+    }
+    .translate-box input[type="text"] {
+        width:200px;
+    }
+    input#dqf_key {
+        width: 126px!important;
+    }
+    .translate-box  #private-tm-key {
+    width: 180px!important;
+    height: 28px;
+    font-size: 17px!important;
+    }
+}
+@media only screen and (max-width : 1150px) {
+    .translate-box select {
+    width: 190px;
+    }
+    .translate-box input[type="text"] {
+        width:180px!important;
+    }
+    input#dqf_key {
+        width: 126px!important;
+    }
+    .translate-box  #private-tm-key {
+    width: 169px!important;
+    height: 28px;
+    font-size: 17px!important;
+    }
+
 	.translate-box select, .mgmt-table-mt select {
-		width: 200px!important;
+		width: 190px!important;
+	}
+
+	.translate-box {
+		margin:20px 12px 0px 0px!important;
+	}
+	.translate-box.qa-box img {
+		width: 60px!important;
+		margin-left: 10px!important;
+	}
+
+	#swaplang {
+		    margin: 51px 12px 0 0px!important;
 	}
 }
 
@@ -539,7 +588,12 @@ float: left;
   }
 }
 
+.translate-box.manage-link {display: none;}
 .translate-box{float:left;margin:20px 17px 0px 0px}
+.translate-box.qa-box {margin: 32px 0 0!important;}
+.translate-box.qa-box h2 {display: inline;}
+.translate-box.qa-box img {float: right;width: 70px;margin-left: 5px;margin-top: -4px;}
+.translate-box input[type=checkbox] {float: left; margin-top: 5px;}
 .manage-link{margin-left: -14px}
 .translate-box.source{margin-right:0px}
 
@@ -1257,6 +1311,11 @@ span.load-gdrive {
 span.load-gdrive:hover,
 .continue-gdrive span.load-gdrive:hover {
     background-color: #EFEFEF;
+}
+
+span.load-gdrive-disabled {
+    opacity: 0.2;
+    cursor: default;
 }
 
 .modal-gdrive {
