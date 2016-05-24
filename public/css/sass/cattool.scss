@@ -31,3 +31,150 @@ section:hover .segment-side-buttons {
   /* styles based on .sid line 460 style.css */
   color: #6d6e71
 }
+
+
+
+/******* Notifications ************/
+
+
+.notifications-position {
+  font-family: inherit;
+  position: fixed;
+  width: $notifications-width;
+  padding: 0 10px 10px 10px;
+  z-index: 99999;
+  @include box-sizing(border-box);
+  height: auto;
+}
+.notifications-position-bl {
+  @extend .notifications-position;
+  top: auto;
+  bottom: 30px;
+  left: 0;
+  right: auto;
+}
+.notifications-position-bc {
+  @extend .notifications-position;
+  top: auto;
+  bottom: 30px;
+  margin: 0 auto;
+  left: 50%;
+  margin-left: -($notifications-width / 2)
+}
+.notifications-position-br {
+  @extend .notifications-position;
+  top: auto;
+  bottom: 30px;
+  left: auto;
+  right: 0px;
+
+}
+.notifications-position-tl {
+  @extend .notifications-position;
+  top: 60px;
+  bottom: auto;
+  left: 0px;
+  right: auto;
+
+}
+.notifications-position-tc {
+  @extend .notifications-position;
+  top: 60px;
+  bottom: auto;
+  margin: 0 auto;
+  left: 50%;
+  margin-left: -($notifications-width / 2);
+
+}
+.notifications-position-tr {
+  @extend .notifications-position;
+  top: 60px;
+  bottom: auto;
+  left: auto;
+  right: 0;
+
+}
+
+.notification-type {
+  position: relative;
+  width: 100%;
+  cursor: pointer;
+  @include border-radius(2px);
+  font-size: 15px;
+  margin: 10px 0 0;
+  padding: 10px;
+  display: block;
+  @include box-sizing(border-box);
+  opacity: 0;
+  @include transition(0.3s ease-in-out);
+}
+
+.notification-type-success {
+  @extend .notification-type;
+  background-color : #f0f5ea;
+  color: #4b583a;
+  @include box-shadow(0, 0, 1px, rgba(94, 164, 0 , 0.9));
+}
+
+.notification-type-error {
+  @extend .notification-type;
+  background-color: #f4e9e9;
+  color: #412f2f;
+  @include box-shadow(0, 0, 1px, rgba(236, 61, 61 , 0.9));
+}
+
+.notification-type-warning {
+  @extend .notification-type;
+  background-color: #f9f6f0;
+  color: #5a5343;
+  @include box-shadow(0, 0, 1px, rgba(235, 173, 23 , 0.9));
+}
+
+.notification-type-info {
+  @extend .notification-type;
+  background-color: #e8f0f4;
+  color: #41555d;
+  @include box-shadow(0, 0, 1px, rgba(54, 156, 199 , 0.9));
+}
+
+.notification-close-button {
+  font-size: 13px;
+  position: absolute;
+  top: 4px;
+  right: 5px;
+  line-height: 15px;
+  background-color: #ADADB1;
+  color: #ffffff;
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  font-weight: bold;
+  text-align: center;
+}
+
+
+.notification-title {
+  font-size: 17px;
+  margin: 0 0 5px 0;
+  padding: 0;
+  font-weight: bold;
+}
+
+.notification-title-success {
+  @extend .notification-title;
+  color: $notification-success;
+}
+.notification-title-error {
+  @extend .notification-title;
+  color: $notification-error;
+}
+.notification-title-warning {
+  @extend .notification-title;
+  color: $notification-warning;
+}
+.notification-title-info {
+  @extend .notification-title;
+  color: $notification-info;
+}
+
+

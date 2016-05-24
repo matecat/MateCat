@@ -27,4 +27,4 @@ window.Review_QualityReportButton = require('./review/QualityReportButton').defa
 
 window.SegmentFilter_MainPanel = require('./segment_filter/MainPanel').default ;
 
-window.NotificationBox = require('./NotificationBox').default;
+window.NotificationBox = require('./notificationsComponent/NotificationBox').default;
