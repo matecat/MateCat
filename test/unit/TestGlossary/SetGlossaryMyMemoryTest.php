@@ -39,9 +39,10 @@ class SetGlossaryMyMemoryTest extends AbstractTest
     protected $curl_additional_params;
     protected $config_param_of_set;
 
-    protected $url_delete;
+    protected $first_url_delete;
+    protected $second_url_delete;
     protected $segment;
-    protected $translation;
+    protected $old_translation;
     protected $new_translation;
     protected $test_key;
 
@@ -102,12 +103,22 @@ LABEL;
         $this->test_key = "fc7ba5edf8d5e8401593";
 
         $this->segment = "tic";
-        $this->translation = "tac";
+        $this->old_translation = "tac";
 
         $this->new_translation="toe";
 
-        $this->url_delete = "http://api.mymemory.translated.net/glossary/delete?seg={$this->segment}&tra={$this->translation}&langpair=it-IT%7Cen-US&de=demo%40matecat.com&key={$this->test_key}";
+        $this->first_url_delete = "http://api.mymemory.translated.net/glossary/delete?seg={$this->segment}&tra={$this->old_translation}&langpair=it-IT%7Cen-US&de=demo%40matecat.com&key={$this->test_key}";
+        $this->second_url_delete="http://api.mymemory.translated.net/glossary/delete?seg={$this->segment}&tra={$this->new_translation}&langpair=it-IT%7Cen-US&de=demo%40matecat.com&key={$this->test_key}";
 
+        $mh = new MultiCurlHandler();
+        $mh->createResource($this->first_url_delete, $this->curl_additional_params + $this->curl_param);
+        $mh->multiExec();
+        $mh->multiCurlCloseAll();
+        $mh = new MultiCurlHandler();
+        $mh->createResource($this->second_url_delete, $this->curl_additional_params + $this->curl_param);
+        $mh->multiExec();
+        $mh->multiCurlCloseAll();
+        sleep(1);
 
     }
 
@@ -116,15 +127,11 @@ LABEL;
 
 
         $mh = new MultiCurlHandler();
-        $mh->createResource($this->url_delete, $this->curl_additional_params + $this->curl_param);
+        $mh->createResource($this->first_url_delete, $this->curl_additional_params + $this->curl_param);
         $mh->multiExec();
         $mh->multiCurlCloseAll();
-        sleep(1);
-
-        $url_delete="http://api.mymemory.translated.net/glossary/delete?seg={$this->segment}&tra={$this->new_translation}&langpair=it-IT%7Cen-US&de=demo%40matecat.com&key={$this->test_key}";
-
         $mh = new MultiCurlHandler();
-        $mh->createResource($url_delete, $this->curl_additional_params + $this->curl_param);
+        $mh->createResource($this->second_url_delete, $this->curl_additional_params + $this->curl_param);
         $mh->multiExec();
         $mh->multiCurlCloseAll();
         sleep(1);
@@ -139,7 +146,7 @@ LABEL;
     public function test_set_glossary_segment_without_key_id()
     {
         $this->config_param_of_set['segment'] = $this->segment;
-        $this->config_param_of_set['translation'] = $this->translation;
+        $this->config_param_of_set['translation'] = $this->old_translation;
 
         $result = $this->engine_MyMemory->set($this->config_param_of_set);
 
@@ -169,18 +176,12 @@ LABEL;
     public function test_set_glossary_segment()
     {
 
-        $mh = new MultiCurlHandler();
-        $mh->createResource($this->url_delete, $this->curl_additional_params + $this->curl_param);
-        $mh->multiExec();
-        $mh->multiCurlCloseAll();
-        sleep(1);
-
         $this->config_param_of_set['segment'] = $this->segment;
-        $this->config_param_of_set['translation'] = $this->translation;
+        $this->config_param_of_set['translation'] = $this->old_translation;
         $this->config_param_of_set['id_user'] = array('0' => "{$this->test_key}");
 
         $result = $this->engine_MyMemory->set($this->config_param_of_set);
-        sleep(1);
+        sleep(2);
 
         $this->assertTrue($result);
 
@@ -213,23 +214,16 @@ LABEL;
 
 
     /**
-     * The actual behaviour is that if there are multiple set call for glossary with the same segment and
-     * different translation, matecat won't manage to handle the json response :
-     * {"translatedText":"NO DUPLICATES ALLOWED IN GLOSSARY"},"responseDetails":"NO DUPLICATES ALLOWED IN GLOSSARY","responseStatus":"403","matches":""}
+     * The actual behaviour is that if there are multiple set call for glossary with the same segment the last inserted will be returned
      * @group regression
      * @covers Engines_MyMemory::update
      */
 
     public function test_set_two_matches_for_the_same_source_word_of_glossary_word_and_verify_that_return_the_last_inserted()
     {
-        $mh = new MultiCurlHandler();
-        $mh->createResource($this->url_delete, $this->curl_additional_params + $this->curl_param);
-        $mh->multiExec();
-        $mh->multiCurlCloseAll();
-        sleep(1);
 
         $this->config_param_of_set['segment'] = $this->segment;
-        $this->config_param_of_set['translation'] = $this->translation;
+        $this->config_param_of_set['translation'] = $this->old_translation;
         $this->config_param_of_set['id_user'] = array('0' => "{$this->test_key}");
 
         /**
@@ -277,10 +271,7 @@ LABEL;
         $result_from_glossary=$method_decode->invoke($this->engine_MyMemory,$raw_value,"gloss_get_relative_url",$decode_parameters);
         $translatedText = $result_from_glossary->responseData['translatedText'];
         $this->assertEquals("{$this->new_translation}", $translatedText);
-
     }
-
-
 
 
 }
