@@ -88,6 +88,14 @@
             background: #fff;
         }
 
+        .notfound{
+            width: 100%;
+            margin: 20px auto;
+            font-size: 26px;
+            font-style: italic;
+            color: #999;
+        }
+
     </style>
     <!-- Shim to make HTML5 elements usable in older Internet Explorer versions -->
     <!--[if lt IE 9]>
@@ -264,16 +272,16 @@
                     var rowsFiltered = $( '#tablePEE tbody tr.filtered' ).length;
 
                     if ( rowTotal - rowsFiltered == 0 ) {
-                        if ( $( '#No-results-row' ).length > 0 ) {
+                        if ( $( '#no-results-row' ).length > 0 ) {
 
                         }
                         else {
-                            $( "body" ).append( "<p id='No-results-row'>No results were found.</p>" );
+                            $( "body" ).append( "<p class='notfound' id='no-results-row'>No results were found.</p>" );
                         }
                     }
                     else {
-                        if ( $( '#No-results-row' ).length > 0 ) {
-                            $( '#No-results-row' ).remove();
+                        if ( $( '#no-results-row' ).length > 0 ) {
+                            $( '#no-results-row' ).remove();
                         }
                     }
 
