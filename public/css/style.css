@@ -3143,6 +3143,9 @@ float: left;
 .tagModeToggle.active span {
     font-size: 100%!important;
 }
+
+
+
 .editToolbar
 {
 	/*float: left;*/	
@@ -3151,6 +3154,7 @@ float: left;
 	visibility: hidden;
 	margin-top: -6px;
 	padding-top: 4px;
+	color:#666;
 }
 .editToolbar.visible
 {
@@ -3164,27 +3168,8 @@ float: left;
 	height: 16px;
 	margin-right: 10px;
 	cursor: pointer;
-	opacity: 0.8;
 }
-.editToolbar li:hover
-{
-	opacity: 0.5;
-}
-.editToolbar li.uppercase
-{
-	background: url(../img/edit-uppercase1.png) center center no-repeat;
-	background-size: 28px;
-}
-.editToolbar li.lowercase
-{
-	background: url(../img/edit-lowercase1.png) center center no-repeat;
-	background-size: 28px;
-}
-.editToolbar li.capitalize
-{
-	background: url(../img/edit-capitalize.png) center 1px no-repeat;
-	background-size: 12px 12px;
-}
+
 
 .editarea span.softReturn,
 .source span.softReturn
@@ -3528,19 +3513,6 @@ body.editlog .breadcrumbs #pname, body.reviselog .breadcrumbs #pname {
 
 }
 
-.editToolbar li.capitalize {
-background: url(../img/edit-capitalize@2x.png) center 1px no-repeat;
-background-size: 12px 11px;
-}
-.editToolbar li.lowercase {
-background: url(../img/edit-lowercase1@2x.png) center center no-repeat;
-background-size: 27px; 
-}
-
-.editToolbar li.uppercase {
-background: url(../img/edit-uppercase1@2x.png) center center no-repeat;
-background-size: 27px;
-}
 
 a.showExtendedTags {
     position: relative;

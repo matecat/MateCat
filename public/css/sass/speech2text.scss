@@ -105,38 +105,32 @@ $tlbr-btn-bg-act: -webkit-linear-gradient(top, #eee, #e0e0e0);
         @extend .segmentButton;
 
         &.uppercase {
-            @include toolbar-button-background(url(../img/edit-uppercase1.png), 28px, $tlbr-btn-bg);
 
             &:hover {
                 @extend .tlbr-btn-act;
             }
 
             &:active {
-                @include toolbar-button-background(url(../img/edit-uppercase1.png), 28px, $tlbr-btn-bg-act);
             }
         }
 
         &.lowercase {
-            @include toolbar-button-background(url(../img/edit-lowercase1.png), 28px, $tlbr-btn-bg);
 
             &:hover {
                 @extend .tlbr-btn-act;
             }
 
             &:active {
-                @include toolbar-button-background(url(../img/edit-lowercase1.png), 28px, $tlbr-btn-bg-act);
             }
         }
 
         &.capitalize {
-            @include toolbar-button-background(url(../img/edit-capitalize.png), 12px, $tlbr-btn-bg);
 
             &:hover {
                 @extend .tlbr-btn-act;
             }
 
             &:active {
-                @include toolbar-button-background(url(../img/edit-capitalize.png), 12px, $tlbr-btn-bg-act);
             }
         }
     }
