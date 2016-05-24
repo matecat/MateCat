@@ -1,4 +1,19 @@
-var Styles = require("./style").default;
+/**
+ * React Component to add notifications to Matecat.
+ * You can add new notifications calling the addNotification method passing a
+ * notification object with the following properties
+ *
+ * title:           (String) Title of the notification.
+ * text:            (String) Message of the notification
+ * type:            (String, Default "info") Level of the notification. Available: success, error, warning and info.
+ * position:        (String, Default "bl") Position of the notification. Available: tr (top right), tl (top left),
+ *                      tc (top center), br (bottom right), bl (bottom left), bc (bottom center)
+ * autoDismiss:     (Boolean, Default true) Set if notification is dismissible by the user.
+ * allowHtml:       (Boolean, Default false) Set to true if the text contains HTML, like buttons
+ * closeCallback    (Function) A callback function that will be called when the notification is about to be removed.
+ * openCallback     (Function) A callback function that will be called when the notification is successfully added.
+ */
+
 var NotificationItem = require('./NotificationItem').default;
 
 class NotificationBox extends React.Component {
@@ -6,7 +21,6 @@ class NotificationBox extends React.Component {
 
     constructor(props) {
         super(props);
-        this._getStyles =  new GetStyles();
         this.state = {
             notifications: []
         };
@@ -31,9 +45,9 @@ class NotificationBox extends React.Component {
             return toCheck.uid !== uid;
         });
 
-        if (notification && notification.onRemove) {
+        /*if (notification ) {
             notification.onRemove(notification);
-        }
+        }*/
 
         this.setState({ notifications: notifications });
     }
@@ -52,7 +66,6 @@ class NotificationBox extends React.Component {
         var self = this;
         var containers = null;
         var notifications = this.state.notifications;
-
         if (notifications.length) {
             containers = Object.keys(this.positions).map(function(position, index) {
                 var _notifications = notifications.filter(function(notification) {
@@ -60,7 +73,6 @@ class NotificationBox extends React.Component {
                 });
 
                 if (_notifications.length) {
-                     var _style = self._getStyles.container(position);
                      var items = [];
                     _notifications.forEach(function (notification, i) {
                         var item = <NotificationItem
@@ -68,16 +80,17 @@ class NotificationBox extends React.Component {
                             position = {notification.position}
                             type = {notification.type}
                             text = {notification.text}
-                            getStyles={ self._getStyles }
-                            dismiss={notification.dismiss}
+                            autoDismiss={notification.autoDismiss}
                             onRemove={self.closeNotification}
                             allowHtml={notification.allowHtml}
-                            key={i}
+                            closeCallback={notification.closeCallback}
+                            openCallback={notification.openCallback}
+                            key={notification.uid}
                             uid={notification.uid}
                         />;
                         items.push(item);
                     });
-                    return <div key={index} className={ 'notifications-' + position } style={_style } >
+                    return <div key={index} className={ 'notifications-position-' + position } id={'not-' + index}>
                             { items }
                           </div>
                 }
@@ -86,7 +99,7 @@ class NotificationBox extends React.Component {
 
 
         return (
-            <div className="notifications-wrapper-inside" style={ this._getStyles.wrapper() }>
+            <div className="notifications-wrapper-inside">
                 { containers }
             </div>
 
@@ -98,53 +111,3 @@ class NotificationBox extends React.Component {
 
 export default NotificationBox ;
 
-function GetStyles() {
-    this.overrideStyle = {};
-
-    this.overrideWidth = null;
-
-    this.setOverrideStyle = function(style) {
-        this.overrideStyle = style;
-    };
-
-    this.wrapper = function() {
-        if (!this.overrideStyle) return {};
-        return $.extend({}, Styles.Wrapper, this.overrideStyle.Wrapper);
-    };
-
-    this.container = function(position) {
-        var override = this.overrideStyle.Containers || {};
-        if (!this.overrideStyle) return {};
-
-        this.overrideWidth = Styles.Containers.DefaultStyle.width;
-
-        if (override.DefaultStyle && override.DefaultStyle.width) {
-            this.overrideWidth = override.DefaultStyle.width;
-        }
-
-        if (override[position] && override[position].width) {
-            this.overrideWidth = override[position].width;
-        }
-
-        return $.extend({}, Styles.Containers.DefaultStyle, Styles.Containers[position], override.DefaultStyle, override[position]);
-    };
-
-    this.elements = {
-        notification: 'NotificationItem',
-            title: 'Title',
-            messageWrapper: 'MessageWrapper',
-            dismiss: 'Dismiss',
-            action: 'Action',
-            actionWrapper: 'ActionWrapper'
-    };
-
-    this.byElement = function(element) {
-        var self = this;
-        return function(level) {
-            var _element = self.elements[element];
-            var override = self.overrideStyle[_element] || {};
-            if (!self.overrideStyle) return {};
-            return $.extend({}, Styles[_element].DefaultStyle, Styles[_element][level], override.DefaultStyle, override[level]);
-        };
-    };
-};
