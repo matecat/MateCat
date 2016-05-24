@@ -7,27 +7,54 @@
  * Date: 21/05/16
  * Time: 12.26
  */
-class FastAnalisysTest extends AbstractTest
+class FastAnalysisTest extends AbstractTest
 {
 
     /**
      * @group regression
      * @covers Engines_MyMemory::fastAnalysis
      */
-    public function test_fastAnalysis()
+    public function test_fastAnalysis_general_check()
     {
+        $segment_third_position = <<<'Z'
+<g id=\"1\">Attività formativa</g><g id=\"2\">	<g id=\"3\">SSD</g>	<g id=\"4\">CFU</g></g>
+
+Z;
+        $segment_fourth_position =<<<'Z'
+<g id=\"1\">Roma ___/___/_____</g><g id=\"2\">	Firma</g>
+Z;
+        $segment_fifth_position =<<<'Z'
+<g id="1">1</g><g id="2"> Indicare con una croce in questa colonna se l'esame è stato già sostenuto e verbalizzato.</g>
+Z;
+
+
         $array_paramemeter = array(
             '0' => array(
-                'jsid' => 38,
-                'segment' => "- Auf der Fußhaut natürlich vorhandene Hornhautbakterien zersetzen sich durch auftretenden Schweiß an Ihren Füßen.",
-                'segment_hash' => "e0170a2e381f1969056a7eb5e5bd0ac9"
+                'jsid' => "76-1:dfc26ab0205e",
+                'segment' => "TOTALE CFU verbalizzati",
+                'segment_hash' => "eccb9938b7ae95cb8f37acdb36a58063"
             ),
             '1' => array(
-                'jsid' => 38,
-                'segment' => "- Auf der Fußhaut natürlich vorhandene Hornhautbakterien zersetzen sich durch auftretenden Schweiß an Ihren Füßen.",
-                'segment_hash' => "e0170a2e381f1969056a7eb5e5bd0ac9"
-
+                'jsid' => "77-1:dfc26ab0205e",
+                'segment' => "Consapevole del fatto che gli esami del primo anno costituiscono un prerequisito fondamentale per esami degli anni successivi, e pertanto il loro studio non va rimandato, chiedo di poter sostenere al secondo anno ripetente i seguenti esami del terzo anno (fino a 20 CFU):",
+                'segment_hash' => "fdcf6cbdcfac919a045675cc82d90927"
+            ),
+            '2' => array(
+                'jsid' => "78-1:dfc26ab0205e",
+                'segment' => $segment_third_position,
+                'segment_hash' => "eac56a5c904d674e15b89b176bded854"
+            ),
+            '3' => array(
+                'jsid' => "79-1:dfc26ab0205e",
+                'segment' => $segment_fourth_position,
+                'segment_hash' => "aece7135923fad6843a1460ee2eb2c4a"
+            ),
+            '4' => array(
+                'jsid' => "81-1:dfc26ab0205e",
+                'segment' => $segment_fifth_position,
+                'segment_hash' => "fdd0bc16ed4ddd492dc4afd79d177257"
             )
+
         );
         $engineDAO = new EnginesModel_EngineDAO(Database::obtain());
         $engine_struct = EnginesModel_EngineStruct::getStruct();
@@ -57,33 +84,45 @@ class FastAnalisysTest extends AbstractTest
      * @group regression
      * @covers Engines_MyMemory::fastAnalysis
      */
-    public function test_fastAnalysis_four_repetitions()
+    public function test_fastAnalysis_specific_check()
     {
+        $segment_third_position = <<<'Z'
+<g id=\"1\">Attività formativa</g><g id=\"2\">	<g id=\"3\">SSD</g>	<g id=\"4\">CFU</g></g>
+
+Z;
+        $segment_fourth_position =<<<'Z'
+<g id=\"1\">Roma ___/___/_____</g><g id=\"2\">	Firma</g>
+Z;
+        $segment_fifth_position =<<<'Z'
+<g id="1">1</g><g id="2"> Indicare con una croce in questa colonna se l'esame è stato già sostenuto e verbalizzato.</g>
+Z;
+
+
         $array_paramemeter = array(
             '0' => array(
-                'jsid' => 39,
-                'segment' => "Come ti chiami ?",
-                'segment_hash' => "a7cc2b1de00f5243a682ad20a9b54306"
+                'jsid' => "76-1:dfc26ab0205e",
+                'segment' => "TOTALE CFU verbalizzati",
+                'segment_hash' => "eccb9938b7ae95cb8f37acdb36a58063"
             ),
             '1' => array(
-                'jsid' => 39,
-                'segment' => "Come ti chiami ?",
-                'segment_hash' => "a7cc2b1de00f5243a682ad20a9b54306"
+                'jsid' => "77-1:dfc26ab0205e",
+                'segment' => "Consapevole del fatto che gli esami del primo anno costituiscono un prerequisito fondamentale per esami degli anni successivi, e pertanto il loro studio non va rimandato, chiedo di poter sostenere al secondo anno ripetente i seguenti esami del terzo anno (fino a 20 CFU):",
+                'segment_hash' => "fdcf6cbdcfac919a045675cc82d90927"
             ),
             '2' => array(
-                'jsid' => 39,
-                'segment' => "Come ti chiami ?",
-                'segment_hash' => "a7cc2b1de00f5243a682ad20a9b54306"
+                'jsid' => "78-1:dfc26ab0205e",
+                'segment' => $segment_third_position,
+                'segment_hash' => "eac56a5c904d674e15b89b176bded854"
             ),
             '3' => array(
-                'jsid' => 39,
-                'segment' => "Come ti chiami ?",
-                'segment_hash' => "a7cc2b1de00f5243a682ad20a9b54306"
+                'jsid' => "79-1:dfc26ab0205e",
+                'segment' => $segment_fourth_position,
+                'segment_hash' => "aece7135923fad6843a1460ee2eb2c4a"
             ),
             '4' => array(
-                'jsid' => 38,
-                'segment' => "- Auf der Fußhaut natürlich vorhandene Hornhautbakterien zersetzen sich durch auftretenden Schweiß an Ihren Füßen.",
-                'segment_hash' => "e0170a2e381f1969056a7eb5e5bd0ac9"
+                'jsid' => "81-1:dfc26ab0205e",
+                'segment' => $segment_fifth_position,
+                'segment_hash' => "fdd0bc16ed4ddd492dc4afd79d177257"
             )
 
         );
@@ -101,116 +140,23 @@ class FastAnalisysTest extends AbstractTest
         $result = $engine_MyMemory->fastAnalysis($array_paramemeter);
 
         /**
-         * general check of the result object structure
+         * Specific check of the result object structure
          */
-        $this->assertTrue($result instanceof Engines_Results_MyMemory_AnalyzeResponse);
-        $this->assertTrue(property_exists($result, 'responseStatus'));
-        $this->assertTrue(property_exists($result, 'responseDetails'));
-        $this->assertTrue(property_exists($result, 'responseData'));
-        $this->assertTrue(property_exists($result, 'error'));
-        $this->assertTrue(property_exists($result, '_rawResponse'));
-    }
-
-
-    /**
-     * @group regression
-     * @covers Engines_MyMemory::fastAnalysis
-     */
-    public function test_fastAnalysis_four_repetitions_mocked()
-    {
-        $array_paramemeter = array(
-            '0' => array(
-                'jsid' => 39,
-                'segment' => "Come ti chiami ?",
-                'segment_hash' => "a7cc2b1de00f5243a682ad20a9b54306"
-            ),
-            '1' => array(
-                'jsid' => 39,
-                'segment' => "Come ti chiami ?",
-                'segment_hash' => "a7cc2b1de00f5243a682ad20a9b54306"
-            ),
-            '2' => array(
-                'jsid' => 39,
-                'segment' => "Come ti chiami ?",
-                'segment_hash' => "a7cc2b1de00f5243a682ad20a9b54306"
-            ),
-            '3' => array(
-                'jsid' => 39,
-                'segment' => "Come ti chiami ?",
-                'segment_hash' => "a7cc2b1de00f5243a682ad20a9b54306"
-            ),
-            '4' => array(
-                'jsid' => 38,
-                'segment' => "- Auf der Fußhaut natürlich vorhandene Hornhautbakterien zersetzen sich durch auftretenden Schweiß an Ihren Füßen.",
-                'segment_hash' => "e0170a2e381f1969056a7eb5e5bd0ac9"
-            )
-
-        );
-
-
-        $segs = <<<'T'
-[{"jsid":39,"segment":"Come ti chiami ?","segment_hash":"a7cc2b1de00f5243a682ad20a9b54306"},{"jsid":39,"segment":"Come ti chiami ?","segment_hash":"a7cc2b1de00f5243a682ad20a9b54306"},{"jsid":39,"segment":"Come ti chiami ?","segment_hash":"a7cc2b1de00f5243a682ad20a9b54306"},{"jsid":39,"segment":"Come ti chiami ?","segment_hash":"a7cc2b1de00f5243a682ad20a9b54306"},{"jsid":38,"segment":"- Auf der Fu\u00dfhaut nat\u00fcrlich vorhandene Hornhautbakterien zersetzen sich durch auftretenden Schwei\u00df an Ihren F\u00fc\u00dfen.","segment_hash":"e0170a2e381f1969056a7eb5e5bd0ac9"}]
-T;
-
-        $curl_opt_mock_param = array(
-            CURLOPT_POSTFIELDS => array(
-                'fast' => "1",
-                'df' => "matecat_array",
-                'segs' => $segs
-            ),
-            CURLOPT_TIMEOUT => 120
-        );
-
-        $url_mock_param = "http://api.mymemory.translated.net/analyze";
-        $mock_raw_value = <<<'T'
-{"responseData":"OK","responseStatus":200,"data":{"39":{"type":"No_match","wc":3},"38":{"type":"No_match","wc":14}}}
-T;
-
-
-        $engineDAO = new EnginesModel_EngineDAO(Database::obtain());
-        $engine_struct = EnginesModel_EngineStruct::getStruct();
-        $engine_struct->id = 1;
-        $eng = $engineDAO->read($engine_struct);
-
-        /**
-         * @var $engineRecord EnginesModel_EngineStruct
-         */
-        $engine_struct_param = $eng[0];
-
-        /**
-         * creation of the engine
-         * @var Engines_MyMemory
-         */
-        $engine_MyMemory = $this->getMockBuilder('\Engines_MyMemory')->setConstructorArgs(array($engine_struct_param))->setMethods(array('_call'))->getMock();
-        $engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param, $curl_opt_mock_param)->willReturn($mock_raw_value);
-
-
-        $result = $engine_MyMemory->fastAnalysis($array_paramemeter);
-
         $this->assertTrue($result instanceof Engines_Results_MyMemory_AnalyzeResponse);
 
         $this->assertEquals(200, $result->responseStatus);
         $this->assertEquals("OK", $result->responseDetails);
-        $this->assertCount(2, $result->responseData);
-        $this->assertArrayHasKey('38', $result->responseData);
-        $this->assertArrayHasKey('39', $result->responseData);
+        $this->assertCount(5, $result->responseData);
+        $this->assertArrayHasKey('76-1:dfc26ab0205e', $result->responseData);
+        $this->assertArrayHasKey('77-1:dfc26ab0205e', $result->responseData);
+        $this->assertArrayHasKey('78-1:dfc26ab0205e', $result->responseData);
+        $this->assertArrayHasKey('79-1:dfc26ab0205e', $result->responseData);
+        $this->assertArrayHasKey('81-1:dfc26ab0205e', $result->responseData);
         /**
          * Checking arrays of result in responseData field
          * first
          */
-        $array_result_data = $result->responseData['38'];
-        $this->assertCount(2, $array_result_data);
-        $this->assertArrayHasKey('type', $array_result_data);
-        $this->assertArrayHasKey('wc', $array_result_data);
-
-        $type = $array_result_data['type'];
-        $this->assertEquals("No_match", $type);
-        $wc = $array_result_data['wc'];
-        $this->assertEquals("14", $wc);
-        /**
-         * second
-         */
-        $array_result_data = $result->responseData['39'];
+        $array_result_data = $result->responseData['76-1:dfc26ab0205e'];
         $this->assertCount(2, $array_result_data);
         $this->assertArrayHasKey('type', $array_result_data);
         $this->assertArrayHasKey('wc', $array_result_data);
@@ -219,9 +165,56 @@ T;
         $this->assertEquals("No_match", $type);
         $wc = $array_result_data['wc'];
         $this->assertEquals("3", $wc);
+        /**
+         * second
+         */
+        $array_result_data = $result->responseData['77-1:dfc26ab0205e'];
+        $this->assertCount(2, $array_result_data);
+        $this->assertArrayHasKey('type', $array_result_data);
+        $this->assertArrayHasKey('wc', $array_result_data);
+
+        $type = $array_result_data['type'];
+        $this->assertEquals("No_match", $type);
+        $wc = $array_result_data['wc'];
+        $this->assertEquals("44", $wc);/**
+         * third
+         */
+        $array_result_data = $result->responseData['78-1:dfc26ab0205e'];
+        $this->assertCount(2, $array_result_data);
+        $this->assertArrayHasKey('type', $array_result_data);
+        $this->assertArrayHasKey('wc', $array_result_data);
+
+        $type = $array_result_data['type'];
+        $this->assertEquals("No_match", $type);
+        $wc = $array_result_data['wc'];
+        $this->assertEquals("2", $wc);/**
+         * fourth
+         */
+        $array_result_data = $result->responseData['79-1:dfc26ab0205e'];
+        $this->assertCount(2, $array_result_data);
+        $this->assertArrayHasKey('type', $array_result_data);
+        $this->assertArrayHasKey('wc', $array_result_data);
+
+        $type = $array_result_data['type'];
+        $this->assertEquals("No_match", $type);
+        $wc = $array_result_data['wc'];
+        $this->assertEquals("2", $wc);/**
+         * fifth
+         */
+        $array_result_data = $result->responseData['81-1:dfc26ab0205e'];
+        $this->assertCount(2, $array_result_data);
+        $this->assertArrayHasKey('type', $array_result_data);
+        $this->assertArrayHasKey('wc', $array_result_data);
+
+        $type = $array_result_data['type'];
+        $this->assertEquals("No_match", $type);
+        $wc = $array_result_data['wc'];
+        $this->assertEquals("16", $wc);
+
+
+
 
         $this->assertNull($result->error);
-
         /**
          * check of protected property
          */
@@ -231,6 +224,10 @@ T;
         $this->assertEquals("", $property->getValue($result));
 
     }
+
+
+
+
 
 
     /**
