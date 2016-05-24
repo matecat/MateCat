@@ -122,7 +122,7 @@ class NotificationItem extends React.Component {
         }
 
         // if (!this.props.autoDismiss) {
-        autoDismiss = <span className={'notification-close-button'} onClick={this.dismissNotification}>x</span>;
+        autoDismiss = <span className={'notification-close-button'} onClick={this.dismissNotification}>×</span>;
         // }
         if (this.props.allowHtml) {
             message = <div className= {'notification-message'} dangerouslySetInnerHTML={ this.allowHTML(this.props.text) }></div>;

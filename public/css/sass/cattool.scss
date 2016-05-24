@@ -49,7 +49,7 @@ section:hover .segment-side-buttons {
 .notifications-position-bl {
   @extend .notifications-position;
   top: auto;
-  bottom: 30px;
+  bottom: 20px;
   left: 0;
   right: auto;
 }
@@ -91,9 +91,8 @@ section:hover .segment-side-buttons {
   top: 60px;
   bottom: auto;
   left: auto;
-  right: 0;
-
 }
+  
 
 .notification-type {
   position: relative;
@@ -133,25 +132,30 @@ section:hover .segment-side-buttons {
 
 .notification-type-info {
   @extend .notification-type;
-  background-color: #e8f0f4;
+  background-color: #fff;
   color: #41555d;
-  @include box-shadow(0, 0, 1px, rgba(54, 156, 199 , 0.9));
+  @include box-shadow(0, 0, 1px, #ccc);
 }
 
 .notification-close-button {
   font-size: 13px;
   position: absolute;
-  top: 4px;
-  right: 5px;
+  top: 10px;
+  right: 10px;
   line-height: 15px;
-  background-color: #ADADB1;
+  background-color: #333;
   color: #ffffff;
   border-radius: 50%;
   width: 14px;
   height: 14px;
   font-weight: bold;
   text-align: center;
+  cursor:pointer;
+  &:hover {
+    background-color: #666;
+  }
 }
+
 
 
 .notification-title {
