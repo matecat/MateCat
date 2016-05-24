@@ -20,55 +20,74 @@
             margin-bottom: 20px;
             height: 45px;
         }
+
         #tablePEE {
             width: 92%;
             margin: 0 auto;
         }
-        h1{
+
+        h1 {
             margin-bottom: 30px;
             margin-top: 60px;
             font-size: 40px;
         }
-        h2{
+
+        h2 {
             margin-bottom: 30px;
         }
+
         .pee.progressbar {
             border: 1px solid #ccc;
             height: 20px;
             position: relative;
             width: 100%;
         }
+
         .pee .progress {
             background: url(https://www.matecat.com/public/img/progressbar-green.gif);
             display: block;
             height: 20px;
         }
+
         .pee.progressbar .label {
             position: absolute;
             top: 1px;
             left: 40%;
             text-shadow: 0px 0px 2px #fff;
         }
+
         .pee .progress {
             background: url(https://www.matecat.com/public/img/progressbar-green.gif);
             display: block;
             height: 20px;
         }
+
         .tablestats.revision td, .tablestats.revision th {
             padding: 15px 20px;
         }
+
         .tablesorter-filter-row input {
             width: 100%;
         }
+
         tr.tablesorter-headerRow th {
             padding: 15px 0 !important;
         }
+
         th.tablesorter-headerUnSorted {
             background: #efefef url(https://www.matecat.com/public/img/bg.gif) right center no-repeat !important;
         }
+
         .tablesorter-filter-row {
             background: #f4f4f4;
         }
+
+        select {
+            width: 100%;
+            height: 23px;
+            background: #fff;
+        }
+
     </style>
     <!-- Shim to make HTML5 elements usable in older Internet Explorer versions -->
     <!--[if lt IE 9]>
@@ -124,9 +143,9 @@
 
 <body>
 <div class="wrapper">
-    <h1 >Post-editing effort and payable
+    <h1>Post-editing effort and payable
         rates</h1>
-    <h2 >Payable rates applied for machine translation post-editing per language pairs </h2>
+    <h2>Payable rates applied for machine translation post-editing per language pairs </h2>
 
     <script type="text/javascript">
 
@@ -183,197 +202,227 @@
 <div id="uploadCallback"></div>
 
 <script type="text/javascript">
-    tablegenerate(langStats);
-    function tablegenerate(data) {
+    tablegenerate( langStats );
+    function tablegenerate( data ) {
         var i = 0;
-        for (key in data) {
+        for ( key in data ) {
             var $formrow = '<td id="col1">' +
                     data[i].source +
                     '</td>' +
-                      '<td id="col2">' +
-                        data[i].target +
-                      '</td>' +
+                    '<td id="col2">' +
+                    data[i].target +
+                    '</td>' +
                     '<td id="col3">' +
-                      '<div class="pee progressbar">' +
-                        '<div class="progress" style="width:'+data[i].pee+'%"></div>' +
-                        '<div class="label">'+data[i].pee+'%</div>' +
-                      '</div>'+
+                    '<div class="pee progressbar">' +
+                    '<div class="progress" style="width:' + data[i].pee + '%"></div>' +
+                    '<div class="label">' + data[i].pee + '%</div>' +
+                    '</div>' +
                     '</td>' +
                     '<td id="col4" style="text-align:right">' +
-                      data[i].totalwordPEE +
+                    data[i].totalwordPEE +
                     '</td> ' +
                     '<td id="col5">' +
-                      data[i].payable_rate +
+                    data[i].payable_rate +
                     '</td>';
-            $('#tablePEE tbody').append("<tr>" + $formrow + "</tr>");
+            $( '#tablePEE tbody' ).append( "<tr>" + $formrow + "</tr>" );
             i++;
         }
     }
-    $(document).ready(function (el) {
-                $('#tablePEE').tablesorter({sortList: [[0, 0], [1, 0]]});
+    $( document ).ready( function ( el ) {
+                $( '#tablePEE' ).tablesorter( {
+                    sortList: [[0,
+                        0],
+                        [1,
+                            0]]
+                } );
             }
     );
 </script>
 
 <script>
-    $('#tablePEE')
-            .bind('filterInit', function () {
+    $( '#tablePEE' )
+            .bind( 'filterInit', function () {
                 // check that storage ulility is loaded
-                if ($.tablesorter.storage) {
+                if ( $.tablesorter.storage ) {
                     // get saved filters
-                    var f = $.tablesorter.storage(this, 'tablesorter-filters') || [];
-                    $(this).trigger('search', [f]);
+                    var f = $.tablesorter.storage( this, 'tablesorter-filters' ) || [];
+                    $( this ).trigger( 'search', [f] );
                 }
-            })
-            .bind('filterEnd', function () {
-                if ($.tablesorter.storage) {
+            } )
+            .bind( 'filterEnd', function () {
+                if ( $.tablesorter.storage ) {
                     // save current filters
-                    var f = $(this).find('.tablesorter-filter').map(function () {
-                        return $(this).val() || '';
-                    }).get();
-                    $.tablesorter.storage(this, 'tablesorter-filters', f);
+                    var f = $( this ).find( '.tablesorter-filter' ).map( function () {
+                        return $( this ).val() || '';
+                    } ).get();
+                    $.tablesorter.storage( this, 'tablesorter-filters', f );
                 }
-            })
-            .tablesorter({
-        // *** APPEARANCE ***
-        // Add a theme - try 'blackice', 'blue', 'dark', 'default'
+            } )
+            .tablesorter( {
+                // *** APPEARANCE ***
+                // Add a theme - try 'blackice', 'blue', 'dark', 'default'
 //        theme: 'blue',
-        // fix the column widths
-        widthFixed: true,
-        // include zebra and any other widgets, options:
-        // 'columns', 'filter', 'stickyHeaders' & 'resizable'
-        // 'uitheme' is another widget, but requires loading
-        // a different skin and a jQuery UI theme.
-        widgets: ['zebra', 'filter'],
-        widgetOptions: {
-            // zebra widget: adding zebra striping, using content and
-            // default styles - the ui css removes the background
-            // from default even and odd class names included for this
-            // demo to allow switching themes
-            // [ "even", "odd" ]
-            zebra: [
-                "ui-widget-content even",
-                "ui-state-default odd"
-            ],
-            // uitheme widget: * Updated! in tablesorter v2.4 **
-            // Instead of the array of icon class names, this option now
-            // contains the name of the theme. Currently jQuery UI ("jui")
-            // and Bootstrap ("bootstrap") themes are supported. To modify
-            // the class names used, extend from the themes variable
-            // look for the "$.extend($.tablesorter.themes.jui" code below
-            uitheme: 'jui',
-            // columns widget: change the default column class names
-            // primary is the 1st column sorted, secondary is the 2nd, etc
-            columns: [
-                "primary",
-                "secondary",
-                "tertiary"
-            ],
-            // columns widget: If true, the class names from the columns
-            // option will also be added to the table tfoot.
-            columns_tfoot: true,
-            // columns widget: If true, the class names from the columns
-            // option will also be added to the table thead.
-            columns_thead: true,
-            // filter widget: If there are child rows in the table (rows with
-            // class name from "cssChildRow" option) and this option is true
-            // and a match is found anywhere in the child row, then it will make
-            // that row visible; default is false
-            filter_childRows: false,
-            // filter widget: If true, a filter will be added to the top of
-            // each table column.
-            filter_columnFilters: true,
-            // filter widget: css class applied to the table row containing the
-            // filters & the inputs within that row
-            filter_cssFilter: "tablesorter-filter",
-            // filter widget: Customize the filter widget by adding a select
-            // dropdown with content, custom options or custom filter functions
-            // see http://goo.gl/HQQLW for more details
-            filter_functions: null,
-            // filter widget: Set this option to true to hide the filter row
-            // initially. The rows is revealed by hovering over the filter
-            // row or giving any filter input/select focus.
-            filter_hideFilters: false,
-            // filter widget: Set this option to false to keep the searches
-            // case sensitive
-            filter_ignoreCase: true,
-            // filter widget: jQuery selector string of an element used to
-            // reset the filters.
-            filter_reset: null,
-            // Delay in milliseconds before the filter widget starts searching;
-            // This option prevents searching for every character while typing
-            // and should make searching large tables faster.
-            filter_searchDelay: 300,
-            // filter widget: Set this option to true to use the filter to find
-            // text from the start of the column. So typing in "a" will find
-            // "albert" but not "frank", both have a's; default is false
-            filter_startsWith: true,
-            // filter widget: If true, ALL filter searches will only use parsed
-            // data. To only use parsed data in specific columns, set this option
-            // to false and add class name "filter-parsed" to the header
-            filter_useParsedData: false,
-            // Resizable widget: If this option is set to false, resized column
-            // widths will not be saved. Previous saved values will be restored
-            // on page reload
-            resizable: true,
-            // saveSort widget: If this option is set to false, new sorts will
-            // not be saved. Any previous saved sort will be restored on page
-            // reload.
-            saveSort: true,
-            // stickyHeaders widget: css class name applied to the sticky header
-            stickyHeaders: "tablesorter-stickyHeader"
-        }
-    });
+                // fix the column widths
+                widthFixed: true,
+                // include zebra and any other widgets, options:
+                // 'columns', 'filter', 'stickyHeaders' & 'resizable'
+                // 'uitheme' is another widget, but requires loading
+                // a different skin and a jQuery UI theme.
+                widgets: ['zebra',
+                    'filter'],
+                widgetOptions: {
+                    // zebra widget: adding zebra striping, using content and
+                    // default styles - the ui css removes the background
+                    // from default even and odd class names included for this
+                    // demo to allow switching themes
+                    // [ "even", "odd" ]
+                    zebra: [
+                        "ui-widget-content even",
+                        "ui-state-default odd"
+                    ],
+                    // uitheme widget: * Updated! in tablesorter v2.4 **
+                    // Instead of the array of icon class names, this option now
+                    // contains the name of the theme. Currently jQuery UI ("jui")
+                    // and Bootstrap ("bootstrap") themes are supported. To modify
+                    // the class names used, extend from the themes variable
+                    // look for the "$.extend($.tablesorter.themes.jui" code below
+                    uitheme: 'jui',
+                    // columns widget: change the default column class names
+                    // primary is the 1st column sorted, secondary is the 2nd, etc
+                    columns: [
+                        "primary",
+                        "secondary",
+                        "tertiary"
+                    ],
+                    // columns widget: If true, the class names from the columns
+                    // option will also be added to the table tfoot.
+                    columns_tfoot: true,
+                    // columns widget: If true, the class names from the columns
+                    // option will also be added to the table thead.
+                    columns_thead: true,
+                    // filter widget: If there are child rows in the table (rows with
+                    // class name from "cssChildRow" option) and this option is true
+                    // and a match is found anywhere in the child row, then it will make
+                    // that row visible; default is false
+                    filter_childRows: false,
+                    // filter widget: If true, a filter will be added to the top of
+                    // each table column.
+                    filter_columnFilters: true,
+                    // filter widget: css class applied to the table row containing the
+                    // filters & the inputs within that row
+                    filter_cssFilter: "tablesorter-filter",
+                    // filter widget: Customize the filter widget by adding a select
+                    // dropdown with content, custom options or custom filter functions
+                    // see http://goo.gl/HQQLW for more details
+                    filter_functions: // filter widget: Set this option to true to hide the filter row
+                    // initially. The rows is revealed by hovering over the filter
+                    // row or giving any filter input/select focus.
+                    {
+                        2: {
+                            "All": function ( e, n, f, i, $r, c, data ) { return n; },
+                            "< 25": function ( e, n, f, i, $r, c, data ) { return n < 25; },
+                            "< 50": function ( e, n, f, i, $r, c, data ) { return n < 50; },
+                            "< 75": function ( e, n, f, i, $r, c, data ) { return n < 75; }
+
+                        },
+
+                        3: {
+                            "All": function ( e, n, f, i, $r, c, data ) { return n; },
+                            "> 100.000": function ( e, n, f, i, $r, c, data ) { return n > 100000; },
+                            "> 200.000": function ( e, n, f, i, $r, c, data ) { return n > 200000; },
+                            "> 500.000": function ( e, n, f, i, $r, c, data ) { return n > 500000; },
+                            "> 1.000.000": function ( e, n, f, i, $r, c, data ) { return n > 1000000; },
+                            "> 2.000.000": function ( e, n, f, i, $r, c, data ) { return n > 2000000; },
+                            "> 5.000.000": function ( e, n, f, i, $r, c, data ) { return n > 5000000; }
+
+                        }
+                    },
+
+                    filter_hideFilters: false,
+                    // filter widget: Set this option to false to keep the searches
+                    // case sensitive
+                    filter_ignoreCase: true,
+                    // filter widget: jQuery selector string of an element used to
+                    // reset the filters.
+                    filter_reset: null,
+                    // Delay in milliseconds before the filter widget starts searching;
+                    // This option prevents searching for every character while typing
+                    // and should make searching large tables faster.
+                    filter_searchDelay: 300,
+                    // filter widget: Set this option to true to use the filter to find
+                    // text from the start of the column. So typing in "a" will find
+                    // "albert" but not "frank", both have a's; default is false
+                    filter_startsWith: true,
+                    // filter widget: If true, ALL filter searches will only use parsed
+                    // data. To only use parsed data in specific columns, set this option
+                    // to false and add class name "filter-parsed" to the header
+                    filter_useParsedData: false,
+                    // Resizable widget: If this option is set to false, resized column
+                    // widths will not be saved. Previous saved values will be restored
+                    // on page reload
+                    resizable: true,
+                    // saveSort widget: If this option is set to false, new sorts will
+                    // not be saved. Any previous saved sort will be restored on page
+                    // reload.
+                    saveSort: true,
+                    // stickyHeaders widget: css class name applied to the sticky header
+                    stickyHeaders: "tablesorter-stickyHeader"
+                }
+            } );
 </script>
 
 <script type="text/javascript">
-    function DropDown(el) {
+    function DropDown( el ) {
         this.dd = el;
         this.initEvents();
     }
     DropDown.prototype = {
         initEvents: function () {
             var obj = this;
-            obj.dd.on('click', function (event) {
-                $(this).toggleClass('active');
+            obj.dd.on( 'click', function ( event ) {
+                $( this ).toggleClass( 'active' );
                 event.stopPropagation();
-            });
+            } );
         }
     };
 
-    $(".open-more").click(function () {
-        $(".hide-payoff").hide();
-        $(".learnmore").slideToggle("700", function () {
+    $( ".open-more" ).click( function () {
+        $( ".hide-payoff" ).hide();
+        $( ".learnmore" ).slideToggle( "700", function () {
             // Animation complete.
-        });
-    });
-    $(".learnmore .open-more").click(function () {
-        $(".hide-payoff").show();
-    });
-    $("a.memory-mgmt").on("click", function (e) {
+        } );
+    } );
+    $( ".learnmore .open-more" ).click( function () {
+        $( ".hide-payoff" ).show();
+    } );
+    $( "a.memory-mgmt" ).on( "click", function ( e ) {
         e.preventDefault();
-        tab = $(this).attr('data-tab') || 'tm';
-        elToClick = $(this).attr('data-el-to-click') || null;
-        UI.openLanguageResourcesPanel(tab, elToClick);
-    });
-    $(function () {
-        var dd = new DropDown($('#dd'));
-        $(document).click(function () {
+        tab = $( this ).attr( 'data-tab' ) || 'tm';
+        elToClick = $( this ).attr( 'data-el-to-click' ) || null;
+        UI.openLanguageResourcesPanel( tab, elToClick );
+    } );
+    $( function () {
+        var dd = new DropDown( $( '#dd' ) );
+        $( document ).click( function () {
             // all dropdowns
-            $('.wrapper-dropdown-5').removeClass('active');
-        });
-    });
+            $( '.wrapper-dropdown-5' ).removeClass( 'active' );
+        } );
+    } );
 </script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener( 'DOMContentLoaded', function () {
 
         $("input[data-column='0']").attr("placeholder","All");
         $("input[data-column='1']").attr("placeholder","All");
-        $("input[data-column='2']").attr("placeholder",">50%");
-        $("input[data-column='3']").attr("placeholder",">100000").val(">100000");
+        $("select[data-column='2']").val("All");
+        $("select[data-column='3']").val("> 100.000");
         $("input[data-column='4']").attr("placeholder",">50%");
-    }, false);
+
+        $("select[data-column='2'] option " ).first().remove();
+        $("select[data-column='3'] option " ).first().remove();
+
+    }, false );
 </script>
 
 <div metal:use-macro="cookiebanner.html/cookieBanner"/>
