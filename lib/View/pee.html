@@ -257,6 +257,29 @@
                     } ).get();
                     $.tablesorter.storage( this, 'tablesorter-filters', f );
                 }
+
+                {
+
+                    var rowTotal = $( '#tablePEE tr' ).length - 2;
+                    var rowsFiltered = $( '#tablePEE tbody tr.filtered' ).length;
+
+                    if ( rowTotal - rowsFiltered == 0 ) {
+                        if ( $( '#No-results-row' ).length > 0 ) {
+
+                        }
+                        else {
+                            $( "body" ).append( "<p id='No-results-row'>No results were found.</p>" );
+                        }
+                    }
+                    else {
+                        if ( $( '#No-results-row' ).length > 0 ) {
+                            $( '#No-results-row' ).remove();
+                        }
+                    }
+
+
+                }
+
             } )
             .tablesorter( {
                 // *** APPEARANCE ***
@@ -368,6 +391,7 @@
                     // stickyHeaders widget: css class name applied to the sticky header
                     stickyHeaders: "tablesorter-stickyHeader"
                 }
+
             } );
 </script>
 
@@ -413,17 +437,18 @@
 <script>
     document.addEventListener( 'DOMContentLoaded', function () {
 
-        $("input[data-column='0']").attr("placeholder","All");
-        $("input[data-column='1']").attr("placeholder","All");
-        $("select[data-column='2']").val("All");
-        $("select[data-column='3']").val("> 100.000");
-        $("input[data-column='4']").attr("placeholder",">50%");
+        $( "input[data-column='0']" ).attr( "placeholder", "All" );
+        $( "input[data-column='1']" ).attr( "placeholder", "All" );
+        $( "select[data-column='2']" ).val( "All" );
+        $( "select[data-column='3']" ).val( "> 100.000" );
+        $( "input[data-column='4']" ).attr( "placeholder", ">50%" );
 
-        $("select[data-column='2'] option " ).first().remove();
-        $("select[data-column='3'] option " ).first().remove();
+        $( "select[data-column='2'] option " ).first().remove();
+        $( "select[data-column='3'] option " ).first().remove();
 
     }, false );
 </script>
+
 
 <div metal:use-macro="cookiebanner.html/cookieBanner"/>
 <!-- SnapEngage -->
