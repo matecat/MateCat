@@ -466,7 +466,8 @@ UI = {
             nextUntranslated = "";
             currentButton = '<li><a id="segment-' + this.currentSegmentId +
                 '-button-guesstags" data-segmentid="segment-' + this.currentSegmentId +
-                '" href="#" class="guesstags"' + disabled + ' >' + 'GUESS TAGS' + '</a></li>';
+                '" href="#" class="guesstags"' + disabled + ' >' + 'GUESS TAGS' + '</a><p>' +
+                ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
         } else {
             nextUntranslated = (sameButton)? '' : '<li><a id="segment-' + this.currentSegmentId +
                 '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' +

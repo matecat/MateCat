@@ -7,6 +7,7 @@ $.extend(UI, {
 		$("body").on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.standard, function(e) {
 			e.preventDefault();
 			$('.editor .translated').click();
+			$('.editor .guesstags').click();
             $('body.review .editor .approved').click();
 		}).on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.mac, function(e) {
 			e.preventDefault();
