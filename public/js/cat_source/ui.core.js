@@ -1866,16 +1866,34 @@ UI = {
 */
 				toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? capStr : d;
 				newStr += toAdd;
-			} else {
+			}
+            else if(this.nodeName == 'LXQWARNING') { 
+                d = this.childNodes[0].data;
+                jump = ((!index)&&(!aa));
+//				console.log(d.charAt(0));
+				capStr = toTitleCase(d);
+				if(jump) {
+					capStr = d.charAt(0) + toTitleCase(d).slice(1);
+				}
+                toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? capStr : d;
+				newStr += toAdd;    
+            }
+            else {
 				newStr += this.outerHTML;
 //				newStr += this.innerText;
 			}
 		});
         console.log('x');
-//        console.log('newStr: ', newStr);
-		replaceSelectedText(newStr);
         console.log('newStr: ', newStr);
-//		replaceSelectedHtml(newStr);
+        if (LXQ.enabled()) {
+            $.powerTip.destroy($('.tooltipa',this.currentSegment));
+            $.powerTip.destroy($('.tooltipas',this.currentSegment));
+            replaceSelectedHtml(newStr);
+            LXQ.reloadPowertip(this.currentSegment);
+        }
+        else {
+            replaceSelectedText(newStr);
+        }
         console.log('a: ', UI.editarea.html());
 		UI.lockTags();
         console.log('b: ', UI.editarea.html());
@@ -3123,7 +3141,7 @@ UI = {
                 LXQ.reloadPowertip(UI.currentSegment);                                           
                 restoreSelection();
                 UI.lexiqaData.lexiqaFetching = false;
-        		UI.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
+        		UI.undoStack.push(UI.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
             }
             console.log('space was pressed');
             //console.dir(UI.currentSegment);
