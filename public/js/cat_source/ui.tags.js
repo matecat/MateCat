@@ -559,33 +559,32 @@ $.extend(UI, {
 		return added;
 	},
 	openTagAutocompletePanel: function() {
-		if(!UI.sourceTags.length) return false;
-        var marker = $('.tag-autocomplete-marker');
-        marker.remove();
-		var node = document.createElement("span");
-		node.setAttribute('class', 'tag-autocomplete-marker');
-		insertNodeAtCursor(node);
-		var endCursor = document.createElement("span");
-		endCursor.setAttribute('class', 'tag-autocomplete-endcursor');
-		insertNodeAtCursor(endCursor);
-		var offset = marker.offset();
-		var addition = ($(':first-child', UI.editarea).hasClass('tag-autocomplete-endcursor'))? 30 : 20;
-        marker.remove();
-		UI.body.append('<div class="tag-autocomplete"><ul></ul></div>');
-		var arrayUnique = function(a) {
-			return a.reduce(function(p, c) {
-				if (p.indexOf(c) < 0) p.push(c);
-				return p;
-			}, []);
-		};
-		UI.sourceTags = arrayUnique(UI.sourceTags);
-		$.each(UI.sourceTags, function(index) {
-			$('.tag-autocomplete ul').append('<li' + ((index === 0)? ' class="current"' : '') + '>' + this + '</li>');
-		});
+        if(!UI.sourceTags.length) return false;
+        $('.tag-autocomplete-marker').remove();
 
-        marker.css('top', offset.top + addition);
-        marker.css('left', offset.left);
-		this.checkAutocompleteTags();
+        var node = document.createElement("span");
+        node.setAttribute('class', 'tag-autocomplete-marker');
+        insertNodeAtCursor(node);
+        var endCursor = document.createElement("span");
+        endCursor.setAttribute('class', 'tag-autocomplete-endcursor');
+        insertNodeAtCursor(endCursor);
+        var offset = $('.tag-autocomplete-marker').offset();
+        var addition = ($(':first-child', UI.editarea).hasClass('tag-autocomplete-endcursor'))? 30 : 20;
+        $('.tag-autocomplete-marker').remove();
+        UI.body.append('<div class="tag-autocomplete"><ul></ul></div>');
+        var arrayUnique = function(a) {
+            return a.reduce(function(p, c) {
+                if (p.indexOf(c) < 0) p.push(c);
+                return p;
+            }, []);
+        };
+        UI.sourceTags = arrayUnique(UI.sourceTags);
+        $.each(UI.sourceTags, function(index) {
+            $('.tag-autocomplete ul').append('<li' + ((index === 0)? ' class="current"' : '') + '>' + this + '</li>');
+        });
+        $('.tag-autocomplete').css('top', offset.top + addition);
+        $('.tag-autocomplete').css('left', offset.left);
+        this.checkAutocompleteTags();
 	},
 	jumpTag: function(range) {
 		if(typeof range.endContainer.data != 'undefined') {
