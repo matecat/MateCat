@@ -236,15 +236,8 @@
             i++;
         }
     }
-    $( document ).ready( function ( el ) {
-                $( '#tablePEE' ).tablesorter( {
-                    sortList: [[0,
-                        0],
-                        [1,
-                            0]]
-                } );
-            }
-    );
+
+
 </script>
 
 <script>
@@ -288,9 +281,29 @@
 
                 }
 
+
+
+
+
+
+
+
             } )
             .tablesorter( {
                 // *** APPEARANCE ***
+
+                sortList:[[0.0],[0,1]],
+
+
+                sortAppend: {
+                    0 : [[ 0, 0 ],[1,0]],
+                    1 : [[1,0],[ 0, 0 ]],
+                    2 : [[2,0],[ 0, 0 ],[1,0]],
+                    3 : [[3,0],[ 0, 0 ],[1,0]],
+                    4 : [[4,0],[ 0, 0 ],[1,0]]
+
+                },
+
                 // Add a theme - try 'blackice', 'blue', 'dark', 'default'
 //        theme: 'blue',
                 // fix the column widths
@@ -321,9 +334,6 @@
                     // columns widget: change the default column class names
                     // primary is the 1st column sorted, secondary is the 2nd, etc
                     columns: [
-                        "primary",
-                        "secondary",
-                        "tertiary"
                     ],
                     // columns widget: If true, the class names from the columns
                     // option will also be added to the table tfoot.
