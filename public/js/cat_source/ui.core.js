@@ -107,7 +107,7 @@ UI = {
             this.editarea = segment.el.find( '.editarea' );
         }
         else {
-            this.editarea = $(editarea);
+            this.editarea = $(".editarea", editarea_or_segment.closest('section'));
             var segment = new UI.Segment( editarea_or_segment.closest('section') );
         }
 
@@ -1052,7 +1052,7 @@ UI = {
 		return status;
 	},
 	getSegmentTarget: function(seg) {
-		editarea = (typeof seg == 'undefined') ? this.editarea : $('.editarea', seg);
+		var editarea = (typeof seg == 'undefined') ? this.editarea : $('.editarea', seg);
 		return editarea.text();
 	},
 	getUpdates: function() {
@@ -1491,7 +1491,7 @@ UI = {
 	spellCheck: function(ed) {
 		if (!UI.customSpellcheck)
 			return false;
-		editarea = (typeof ed == 'undefined') ? UI.editarea : $(ed);
+		var editarea = (typeof ed == 'undefined') ? UI.editarea : $(ed);
 		if ($('#contextMenu').css('display') == 'block')
 			return true;
 
@@ -2500,7 +2500,6 @@ UI = {
                 }
                 UI.execSetTranslationTail();
 				UI.setTranslation_success(data, this[1]);
-                $(document).trigger('setTranslation:success', data);
                 $(document).trigger('translation:change', data.translation);
                 var translation = $('.editarea', segment ).text().replace(/\uFEFF/g,'');
                 UI.doLexiQA(segment,translation,id_segment,true,null);
@@ -3571,18 +3570,14 @@ UI = {
                 if ((UI.lastOperation == 'moving') && (UI.recentMoving)) {
                     UI.segmentToOpen = segment;
                     UI.blockOpenSegment = true;
-
-                    console.log('ctrl+down troppo vicini');
                 } else {
                     UI.blockOpenSegment = false;
                 }
-
                 UI.recentMoving = true;
                 clearTimeout(UI.recentMovingTimeout);
                 UI.recentMovingTimeout = setTimeout(function() {
                     UI.recentMoving = false;
                 }, 1000);
-
             } else {
                 UI.blockOpenSegment = false;
             }

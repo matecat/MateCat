@@ -105,12 +105,14 @@
 
             this.opening = false;
 
-            // this.body.addClass('editing');
+            this.body.addClass('editing');
 
             segment.el.addClass("editor");
 
             if (!this.readonly) {
-                this.editarea.attr('contenteditable', 'true');
+                setTimeout( function() {
+                    UI.editarea.attr('contenteditable', 'true');
+                }, 500);
             }
 
             this.editStart = new Date();
