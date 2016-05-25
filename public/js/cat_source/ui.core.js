@@ -3087,7 +3087,7 @@ UI = {
 		this.registerQACheck();
 	},
 	saveInUndoStack: function(fromWhich) {
-//		noRestore = (typeof noRestore == 'undefined')? 0 : 1;
+//		noRestore = (typeof noRestore == 'undefined')? 0 : 1;        
 		currentItem = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition];
 
 		if (typeof currentItem != 'undefined') {
@@ -3139,9 +3139,9 @@ UI = {
             UI.lexiqaData.lexiqaFetching = true;   
             var callback1 = function() {
                 LXQ.reloadPowertip(UI.currentSegment);                                           
-                restoreSelection();
+                //restoreSelection();
                 UI.lexiqaData.lexiqaFetching = false;
-        		UI.undoStack.push(UI.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
+        		//UI.undoStack.push(UI.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
             }
             console.log('space was pressed');
             //console.dir(UI.currentSegment);
@@ -3151,6 +3151,9 @@ UI = {
 
 
             UI.doLexiQA(UI.currentSegment, translation, id_segment,false, callback1) ;
+            //UI.doLexiQA(UI.currentSegment, translation, id_segment,false, null) ;
+            restoreSelection();
+            UI.undoStack.push(UI.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
         }
         else {
 		    saveSelection();
@@ -3325,12 +3328,16 @@ UI = {
                     UI.lexiqaData.lexiqaWarnings[id_segment] = newWarnings[id_segment];
                     console.dir(UI.lexiqaData.lexiqaWarnings[id_segment]);
                     var seg = UI.getSegmentById(id_segment);
-                    source_val = LXQ.highLightText(source_val, highlights.source,isSegmentCompleted,LXQ.shouldHighlighWarningsForSegment(seg),true,segment);
-                    
+                    source_val = LXQ.highLightText(source_val, highlights.source,isSegmentCompleted,true,true,segment);
+                    if (callback!=null)
+                        saveSelection();
                     target_val = UI.clearMarks($(".editarea", segment).html());
                     console.log('target: '+target_val);
-                    target_val = LXQ.highLightText(target_val,highlights.target,isSegmentCompleted,LXQ.shouldHighlighWarningsForSegment(seg),false,segment);
+                    target_val = LXQ.highLightText(target_val,highlights.target,isSegmentCompleted,true,false,segment);
+                    
                     $(".editarea", segment).html(target_val);
+                    if (callback!=null)
+                        restoreSelection();
                     $(".source", segment).html(source_val);  
                     if (callback!=null)
                         callback(segment);
