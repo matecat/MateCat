@@ -303,18 +303,32 @@ if (LXQ.enabled())
             ev.preventDefault();
             if ($('.searchbox').is(':visible')) {
                 UI.toggleSearch(ev);
-            }            
-            
+            }
+
             var lexiqaPopupHeight = $('#lexiqa-popup').height() + 30;
-            
-            $('#lexiqa-popup').toggleClass('lxq-visible').focus();   
-            
-            if($('#lexiqa-popup').hasClass('lxq-visible')) {
-              // $('.cattool.editing').css('margin-top', lexiqaPopupHeight);
-              $('#outer').css('margin-top', lexiqaPopupHeight);  
+
+            $('#lexiqa-popup').toggleClass('lxq-visible').focus();
+
+            if ($('#lexiqa-popup').hasClass('lxq-visible')) {
+                // $('.cattool.editing').css('margin-top', lexiqaPopupHeight);
+                $('#outer').css('margin-top', lexiqaPopupHeight);  
+                //go the first segment with errors...
+                var segid = getFristSegmentWithWarning();
+                if (UI.segmentIsLoaded(segid) === true)
+                    UI.gotoSegment(segid);
+                else {                    
+                    //UI.reloadWarning();
+                    config.last_opened_segment = segid;
+                    //config.last_opened_segment = this.nextUntranslatedSegmentId;
+                    window.location.hash = segid;
+                    $('#outer').empty();
+                    UI.render({
+                        firstLoad: false
+                    });
+                }
             } else {
-               //$('.cattool.editing').css('margin-top', 0);
-               $('#outer').css('margin-top', 20); 
+                //$('.cattool.editing').css('margin-top', 0);
+                $('#outer').css('margin-top', 20);
             }
             //reloadPowertip();
             
@@ -1047,6 +1061,14 @@ if (LXQ.enabled())
             else {
                 checkNextUncheckedSegment();
             } 
+        }
+        var getFristSegmentWithWarning = function () {
+             if (UI.lexiqaData.hasOwnProperty('segments') && UI.lexiqaData.segments.length > 0) {
+                return UI.lexiqaData.segments[0];
+            }
+            else {
+                return UI.currentSegmentId;
+            }
         }
         
         var getNextSegmentWithWarning = function () {
