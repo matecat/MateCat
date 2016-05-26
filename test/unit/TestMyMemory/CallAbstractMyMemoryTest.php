@@ -79,7 +79,7 @@ class CallAbstractMyMemoryTest extends AbstractTest
             CURLOPT_TIMEOUT => 10
         );
 
-        $this->test_key="a6043e606ac9b5d7ff24";
+        $this->test_key = "a6043e606ac9b5d7ff24";
 
         $this->str_seg_1 = "Il Sistema genera un numero di serie per quella copia e lo stampa (anche sotto forma di codice a barre) su un’etichetta adesiva.";
         $this->str_seg_2 = <<<'LABEL'
@@ -448,4 +448,28 @@ TAB;
         $this->assertEquals("", $property->getValue($actual_result));
     }
 
+
+    /**
+     * @group regression
+     * @covers  Engines_AbstractEngine::call
+     */
+    public function test_call_with_wrong_function_name_for_code_coverage_purpose()
+    {
+
+        $this->array_param_of_call_for_set['seg'] = $this->str_seg_1;
+        $this->array_param_of_call_for_set['tra'] = $this->str_tra_1;
+        $function_param = "bar_and_foo_invalid";
+
+        $this->engine_MyMemory->call($function_param, $this->array_param_of_call_for_set);
+
+        /**
+         * @var Engines_Results_MyMemory_SetContributionResponse
+         */
+        $result_object = $this->property->getValue($this->engine_MyMemory);
+        $code = $result_object['error']['code'];
+        $this->assertEquals(-43, $code);
+        $message = $result_object['error']['message'];
+        $this->assertEquals(" Bad Method Call. Requested method ' . $function_param . ' not Found.", $message);
+
+    }
 }
