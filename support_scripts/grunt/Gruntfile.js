@@ -206,6 +206,7 @@ module.exports = function(grunt) {
                     basePath + 'lib/lodash.min.js',
                     basePath + 'lib/handlebars.runtime-v4.0.5.js',
                     basePath + 'lib/jquery-1.11.0.min.js',
+                    // basePath + 'lib/jquery-1.11.3.js',
                     basePath + 'lib/remodal.min.js',
                     basePath + 'lib/waypoints.min.js',
                     basePath + 'lib/jquery-ui.js',
