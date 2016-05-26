@@ -330,4 +330,65 @@ TAB;
 
     }
 
+    /**
+     *@group regression
+     *@covers Engines_MyMemory::get
+     */
+    public function test_get_with_error_from_mocked__call_for_coverage_purpose(){
+
+        $this->config_param_of_get['segment']="Il Sistema genera un numero di serie per quella copia e lo stampa (anche sotto forma di codice a barre) su un’etichetta adesiva.";
+
+        $curl_mock_param = array(
+            CURLOPT_HTTPGET => true,
+            CURLOPT_TIMEOUT => 10
+        );
+        $url_mock_param= "http://api.mymemory.translated.net/get?q=Il+Sistema+genera+un+numero+di+serie+per+quella+copia+e+lo+stampa+%28anche+sotto+forma+di+codice+a+barre%29+su+un%E2%80%99etichetta+adesiva.&langpair=it-IT%7Cen-US&de=demo%40matecat.com&mt=1&numres=3&key=a6043e606ac9b5d7ff24";
+
+        $rawValue_error = array(
+            'error' => array(
+                'code'      => -6,
+                'message'   => "Could not resolve host: api.mymemory.translated.net. Server Not Available (http status 0)",
+                'response'  => "",
+            ),
+            'responseStatus'    => 0
+        );
+
+
+        /**
+         * @var Engines_MyMemory
+         */
+        $this->engine_MyMemory= $this->getMockBuilder('\Engines_MyMemory')->setConstructorArgs(array($this->engine_struct_param))->setMethods(array('_call'))->getMock();
+        $this->engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param,$curl_mock_param)->willReturn($rawValue_error);
+
+        $result = $this->engine_MyMemory->get($this->config_param_of_get);
+        /**
+         * general check on the keys of TSM object returned
+         */
+        $this->assertTrue($result instanceof Engines_Results_MyMemory_TMS);
+        $this->assertTrue(property_exists($result,'matches'));
+        $this->assertTrue(property_exists($result,'responseStatus'));
+        $this->assertTrue(property_exists($result,'responseDetails'));
+        $this->assertTrue(property_exists($result,'responseData'));
+        $this->assertTrue(property_exists($result,'error'));
+        $this->assertTrue(property_exists($result,'_rawResponse'));
+        /**
+         * specific check
+         */
+        $this->assertEquals(array(),$result->matches);
+        $this->assertEquals(0, $result->responseStatus);
+        $this->assertEquals("", $result->responseDetails);
+        $this->assertEquals("", $result->responseData);
+        $this->assertTrue($result->error instanceof Engines_Results_ErrorMatches);
+
+        $this->assertEquals(-6, $result->error->code);
+        $this->assertEquals("Could not resolve host: api.mymemory.translated.net. Server Not Available (http status 0)", $result->error->message);
+
+        $this->reflector= new ReflectionClass($result);
+        $property= $this->reflector->getProperty('_rawResponse');
+        $property->setAccessible(true);
+
+        $this->assertEquals("",$property->getValue($result));
+
+    }
+
 }
