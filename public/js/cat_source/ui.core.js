@@ -333,7 +333,7 @@ UI = {
 
         this.highlightEditarea();
 
-        this.currentSegmentQA();
+        this.currentSegmentQA();        
         $(this.currentSegment).trigger('copySourceToTarget');
         if(!config.isReview) {
             var alreadyCopied = false;
@@ -1217,7 +1217,7 @@ UI = {
 	registerQACheck: function() {
 		clearTimeout(UI.pendingQACheck);
 		UI.pendingQACheck = setTimeout(function() {
-			UI.currentSegmentQA();
+			UI.currentSegmentQA();            
 		}, config.segmentQACheckInterval);
 	},
 	reloadToSegment: function(segmentId) {
@@ -2283,6 +2283,12 @@ UI = {
 			});
 		}
 	},
+    currentSegmentLexiQA: function() {
+        console.log('in currentSegmentLexiQA...');
+        var translation = $('.editarea', UI.currentSegment ).text().replace(/\uFEFF/g,'');            
+        var id_segment = UI.getSegmentId(UI.currentSegment);
+        UI.doLexiQA(UI.currentSegment, translation, id_segment,false, function () {}) ;
+    },
 	currentSegmentQA: function() {
 		this.currentSegment.addClass('waiting_for_check_result');
 		var dd = new Date();
@@ -2342,6 +2348,7 @@ UI = {
 				}
 			}
 		}, 'local');
+        if (LXQ.enabled()) UI.currentSegmentLexiQA();
 	},
 
     translationIsToSave : function( segment ) {
@@ -3131,7 +3138,8 @@ UI = {
 			this.undoStackPosition = 0;
 		}
 
-        if (LXQ.enabled() && fromWhich === 'space' && !UI.lexiqaData.lexiqaFetching) { 
+        //if (LXQ.enabled() && fromWhich === 'space' && !UI.lexiqaData.lexiqaFetching) {
+        if (1===0) { 
             saveSelection();
             $('.undoCursorPlaceholder').remove();
             $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
