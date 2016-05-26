@@ -193,7 +193,7 @@ LABEL;
         $this->assertTrue($result->matches[0] instanceof Engines_Results_MyMemory_Matches);
 
         $source_note = $result->matches[0]->source_note;
-        $this->assertEquals($substitute_string, $source_note);
+        $this->assertEquals($substitute_string, $source_note, "It WILL fail UNTIL it won't be fixed");
 
 
 
