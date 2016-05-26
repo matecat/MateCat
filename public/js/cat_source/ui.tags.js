@@ -406,10 +406,6 @@ $.extend(UI, {
         tempRange = range;
         UI.editarea.find('.test-invisible').remove();
         pasteHtmlAtCaret('<span class="test-invisible"></span>');
-<<<<<<< Updated upstream
-=======
-        coso = $.parseHTML(UI.editarea.html());
->>>>>>> Stashed changes
         var coso = $.parseHTML(UI.editarea.html());
         $.each(coso, function (index) {
             if($(this).hasClass('test-invisible')) {
