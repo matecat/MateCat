@@ -3406,7 +3406,7 @@ UI = {
             //remove link and warning
         $('#lexiqabox').attr('class', 'lexnotific').attr("title", "Well done, no errors found!").find('.numbererror').text('');                    
         //$('#go2lexiqa').attr('href', "#");  
-        result.qaurl = '#';
+        //result.qaurl = '#';
         }
         else {
                 $('#lexiqabox').attr('class', 'warningbox').attr("title", "Go to lexiQA for QA analysis").find('.numbererror').text(UI.lexiqaData.segments.length);                           
