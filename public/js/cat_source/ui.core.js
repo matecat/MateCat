@@ -1537,12 +1537,9 @@ UI = {
 			UI.currentSegment = undefined;
 		} else {
 			setTimeout(function() {
-//				var hash_value = window.location.hash;
 				window.location.hash = UI.currentSegmentId;
 			}, 300);
 		}
-//        if(id_segment.toString().split('-').length > 1) id_segment = id_segment.toString().split('-');
-//		var file = this.currentFile;
 		if (this.readonly)
 			return;
 		APP.doRequest({
@@ -1550,7 +1547,6 @@ UI = {
 				action: 'setCurrentSegment',
 				password: config.password,
 				id_segment: id_segment.toString(),
-//				id_segment: id_segment.toString().split('-')[0],
 				id_job: config.id_job
 			},
 			context: [reqArguments, id_segment],
@@ -3198,6 +3194,8 @@ UI = {
         UI.closeTagAutocompletePanel();
         UI.removeHighlightCorrespondingTags();
 
+
+
         if ((!$(this).is(UI.editarea)) || (UI.editarea === '') || (!UI.body.hasClass('editing'))) {
             if (operation == 'moving') {
                 if ((UI.lastOperation == 'moving') && (UI.recentMoving)) {
@@ -3218,6 +3216,9 @@ UI = {
             } else {
                 UI.blockOpenSegment = false;
             }
+
+            UI.restoreTagsForTagProjection();
+
             UI.lastOperation = operation;
 
             UI.openSegment(this, operation);

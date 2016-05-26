@@ -56,18 +56,15 @@
             var decoded_translation;
             var decoded_source;
 
-            /**if Tag Projection enabled and there are not tags in the segment translation, remove it and add the class that identify
+            /**if Tag Projection enabled and there are not tags in the segment translation, add the class that identify
              * tha Tag Projection is enabled
              */
             if (UI.enableTagProjection && (UI.getSegmentStatus(segment) === 'draft' || UI.getSegmentStatus(segment) === 'new')
                 && !UI.checkXliffTagsInText(segment.translation) ) {
-                decoded_translation = UI.removeAllTags(segment.translation);
-                decoded_source = UI.removeAllTags(segment.segment);
                 classes.push('enableTP');
-            } else {
-                decoded_translation = segment.translation;
-                decoded_source = segment.segment;
             }
+            decoded_translation = segment.translation;
+            decoded_source = segment.segment;
 
             decoded_translation = UI.decodePlaceholdersToText(
                 decoded_translation || '',
@@ -226,7 +223,7 @@
          */
         checkCurrentSegmentTPEnabled: function (segment) {
             var currentSegment = (segment)? segment : UI.currentSegment;
-            if (this.enableTagProjection) {
+            if (currentSegment && this.enableTagProjection) {
                 // If the segment has tag projection enabled (has tags and has the enableTP class)
                 var tagProjectionEnabled = this.hasDataOriginalTags( currentSegment) && currentSegment.hasClass('enableTP');
                 // The segment is already been tagged
@@ -260,6 +257,30 @@
             var decoded_source = UI.decodePlaceholdersToText(source, true);
             currentSegment.find('.source').html(decoded_source);
             UI.lockTags(currentSegment.find(".source"))
+        },
+        /**
+         * Called when a segment is being opened, if the tag projection is enabled, take ou
+         * the tags
+         * @param segment
+         */
+        removeTagsForTagProjection: function (segment) {
+            var currentSegment = (segment)? segment : UI.currentSegment;
+            if (this.checkCurrentSegmentTPEnabled()) {
+                // decoded_translation = UI.removeAllTags($(this.editarea).html());
+                decoded_source = UI.removeAllTags(currentSegment.find('.source').html());
+                currentSegment.find('.source').html(decoded_source);
+                // $(this.editarea).html(decoded_translation);
+            }
+        },
+        /**
+         * Called before close the current segment, restore the tags in the source.
+         * @param segment
+         */
+        restoreTagsForTagProjection: function (segment) {
+            if (this.checkCurrentSegmentTPEnabled()) {
+                this.copySourcefromDataAttribute();
+            }
         }
+
     }); 
 })(jQuery); 

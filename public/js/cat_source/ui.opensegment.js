@@ -52,6 +52,8 @@
 
             segment.el.trigger('open');
 
+            this.removeTagsForTagProjection();
+
             $('section').first().nextAll('.undoCursorPlaceholder').remove();
             this.getNextSegment(this.currentSegment, 'untranslated');
 
