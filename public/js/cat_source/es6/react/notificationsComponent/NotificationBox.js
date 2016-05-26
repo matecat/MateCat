@@ -74,6 +74,7 @@ class NotificationBox extends React.Component {
 
                 if (_notifications.length) {
                      var items = [];
+                     var cat = "";
                     _notifications.forEach(function (notification, i) {
                         var item = <NotificationItem
                             title = {notification.title}
@@ -90,7 +91,11 @@ class NotificationBox extends React.Component {
                         />;
                         items.push(item);
                     });
-                    return <div key={index} className={ 'notifications-position-' + position } id={'not-' + index}> 
+                    if (position === "bl") {
+                        cat = <div className="notifications-cat-smiling"></div>
+                    }
+                    return <div key={index} className={ 'notifications-position-' + position } id={'not-' + index}>
+                            {cat}
                             { items }
                           </div>
                 }
