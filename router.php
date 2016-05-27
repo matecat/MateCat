@@ -128,6 +128,12 @@ $klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment
     $instance->respond('index');
 });
 
+$klein->respond('POST', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues/[:id_issue]/rebutted-at', function() {
+    $reflect  = new ReflectionClass('API\V2\SegmentTranslationIssueController');
+    $instance = $reflect->newInstanceArgs(func_get_args());
+    $instance->respond('updateRebutted');
+});
+
 $klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation', function() {
     $reflect  = new ReflectionClass('API\V2\TranslationController');
     $instance = $reflect->newInstanceArgs(func_get_args());

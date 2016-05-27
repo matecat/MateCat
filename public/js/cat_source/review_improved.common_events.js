@@ -17,6 +17,24 @@ if ( ReviewImproved.enabled() ) {
                     } ), this );
                 }
             });
+        }).done(function() {
+            var issuesRebutted = MateCat.db.segment_translation_issues.find({
+                rebutted_at: {
+                    '$ne': null
+                }
+            });
+
+            for( var i in issuesRebutted ) {
+                var issue = issuesRebutted[ i ];
+
+                var segmentRecord = MateCat.db.segments.by( 'sid', issue.id_segment );
+
+                if( segmentRecord && segmentRecord.status != 'REBUTTED' ) {
+                    MateCat.db.segments.update(
+                        _.extend( segmentRecord, { 'status': 'REBUTTED' } )
+                    );
+                }
+            }
         });
     });
 
@@ -111,4 +129,37 @@ if ( ReviewImproved.enabled() ) {
         MateCat.db.segments.update( _.extend(record, data) );
     });
 
+    MateCat.db.segment_translation_issues.on( 'update', function( data ) {
+        var issuesRebutted = MateCat.db.segment_translation_issues.find( {
+            '$and': [ {
+                id_segment: data.id_segment,
+            }, {
+                rebutted_at: {
+                    '$ne': null
+                }
+            } ]
+        });
+
+        var segmentRecord = MateCat.db.segments.by( 'sid', data.id_segment );
+
+        var newStatus;
+
+        if( segmentRecord ) {
+            if( issuesRebutted.length > 0 ) {
+                if( segmentRecord.status != 'REBUTTED' ) {
+                    newStatus = 'REBUTTED';
+                }
+            } else {
+                if( segmentRecord.status === 'REBUTTED' ) {
+                    newStatus = 'FIXED';
+                }
+            }
+        }
+
+        if( newStatus ) {
+            MateCat.db.segments.update(
+                _.extend( segmentRecord, { 'status': newStatus } )
+            );
+        }
+    });
 }

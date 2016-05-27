@@ -3616,6 +3616,7 @@ UI = {
         $('.test-invisible').remove();
 
         UI.currentSegment.removeClass('modified');
+        UI.currentSegment.data('modified', false);
         var skipChange = false;
         if (buttonValue == 'next-untranslated') {
             if (!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {

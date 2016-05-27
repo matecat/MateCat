@@ -6,12 +6,23 @@ export default React.createClass({
             replying : false,
             comments : MateCat.db.segment_translation_issue_comments.findObjects({
                 'id_issue' : this.props.issueId
-            })
+            }),
+            rebutLabel : 'Send and Rebut',
+            rebutDisabled : true,
+            rebutVisible : true,
+            undoRebutLabel : 'Undo Rebut',
+            undoRebutDisabled : false,
+            undoRebutVisible : false
         }
     },
 
     replyClick : function() {
         this.setState({ replying: true });
+    },
+
+    undoRebutClick : function() {
+        ReviewImproved.setIssueRebutted( this.props.sid, this.props.issueId, 'false' );
+        this.setState({ undoRebutDisabled : true, undoRebutLabel: 'Undoing' });
     },
 
     commentsChanged : function() {
@@ -20,18 +31,58 @@ export default React.createClass({
             replying : false,
             comments : MateCat.db.segment_translation_issue_comments.findObjects({
                 'id_issue' : this.props.issueId
-            })
+            }),
+            rebutLabel : 'Send and Rebut'
         });
+    },
+
+    issueChanged : function( data ) {
+        if( data.id === this.props.issueId ) {
+            this.checkIssue( data );
+        }
+    },
+
+    checkIssue : function( issue ) {
+        if( issue.rebutted_at ) {
+            if( this.state.rebutVisible ) {
+                this.setState({
+                    rebutVisible : false,
+                    undoRebutVisible : true,
+                    sendDisabled : true,
+                    undoRebutLabel : 'Undo Rebut',
+                    undoRebutDisabled : false
+                });
+            }
+        } else {
+            if( !this.state.rebutVisible ) {
+                this.setState({
+                    rebutVisible : true,
+                    undoRebutVisible : false,
+                    sendDisabled : true,
+                    undoRebutLabel : 'Undo Rebut',
+                    undoRebutDisabled : false
+                });
+            }
+        }
     },
 
     componentDidMount : function() {
         MateCat.db.addListener('segment_translation_issue_comments', 
                                ['insert', 'delete'], this.commentsChanged);
         ReviewImproved.loadComments(this.props.sid, this.props.issueId);
+
+        var issue = MateCat.db.segment_translation_issues.by( 'id', this.props.issueId );
+        this.checkIssue( issue );
+
+        MateCat.db.addListener('segment_translation_issues',
+                               ['insert', 'update', 'delete'], this.issueChanged);
     },
     componentWillUnmount: function() {
         MateCat.db.removeListener('segment_translation_issue_comments', 
                                   ['insert', 'delete'], this.commentsChanged);
+
+        MateCat.db.removeListener('segment_translation_issues',
+                                  ['insert', 'update', 'delete'], this.issueChanged);
     },
     sendClick : function() {
         // send action invokes ReviewImproved function
@@ -44,8 +95,26 @@ export default React.createClass({
           source_page : (config.isReview ? 2 : 1)  // TODO: move this to UI property
         };
 
-        this.setState({ sendLabel : 'Sending', sendDisabled : true });
+        this.setState({ sendLabel : 'Sending', sendDisabled : true, rebutDisabled : true });
         ReviewImproved.submitComment( this.props.sid, this.props.issueId, data ) ;
+    },
+
+    rebutClick : function() {
+        this.setState({ rebutLabel : 'Sending', rebutDisabled : true, sendDisabled : true });
+
+        // send action invokes ReviewImproved function
+        if ( this.state.comment_text.length == 0 ) {
+            return ;
+        }
+
+        var data = {
+          message : this.state.comment_text,
+          source_page : (config.isReview ? 2 : 1)  // TODO: move this to UI property
+        };
+
+        this.setState({ rebutLabel : 'Sending', rebutDisabled : true });
+        ReviewImproved.submitComment( this.props.sid, this.props.issueId, data );
+        ReviewImproved.setIssueRebutted( this.props.sid, this.props.issueId, 'true' );
     },
 
     handleCommentChange : function(event) {
@@ -57,7 +126,8 @@ export default React.createClass({
         }
         this.setState({
             comment_text : text,
-            sendDisabled : disabled
+            sendDisabled : disabled,
+            rebutDisabled : disabled
         });
     },
 
@@ -87,8 +157,24 @@ export default React.createClass({
         }); 
 
         if ( !this.state.replying ) {
+            var undoRebutButton;
+
+            if( !config.isReview && this.state.undoRebutVisible ) {
+                var undoRebutButtonClasses = classnames({
+                    'mc-button' : true,
+                    'red-button' : true,
+                    'disabled' : this.state.undoRebutDisabled
+                });
+
+                undoRebutButton =
+                    <a onClick={this.undoRebutClick} className={undoRebutButtonClasses}>
+                        {this.state.undoRebutLabel}
+                    </a>;
+            }
+
             terminal = <div className="review-issue-comment-buttons">
                 <div className="review-issue-comment-buttons-right">
+                    {undoRebutButton}
                     <a onClick={this.replyClick} className="mc-button blue-button">Reply</a>
                 </div>
             </div>;
@@ -101,6 +187,20 @@ export default React.createClass({
                 'disabled' : this.state.sendDisabled
             });
 
+            var rebutButton;
+
+            if ( !config.isReview && this.state.rebutVisible ) {
+                var rebutButtonClasses = classnames({
+                    'mc-button' : true,
+                    'red-button' : true,
+                    'disabled' : this.state.rebutDisabled
+                });
+                rebutButton =
+                    <a onClick={this.rebutClick} className={rebutButtonClasses}>
+                        {this.state.rebutLabel}
+                    </a>;
+            }
+
             terminal = <div className="review-issue-comment-reply">
                 <div className="review-issue-comment-reply-text">
 
@@ -112,6 +212,7 @@ export default React.createClass({
             </div>
             <div className="review-issue-comment-buttons">
             <div className="review-issue-comment-buttons-right">
+            {rebutButton}
             <a onClick={this.sendClick} className={buttonClasses}>{this.state.sendLabel}</a>
             </div>
             </div>

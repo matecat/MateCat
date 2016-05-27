@@ -102,6 +102,23 @@ if ( ReviewImproved.enabled() )
                 data : data
             }).done( function( data ) {
                 MateCat.db.segment_translation_issue_comments.insert ( data.comment );
+           });
+        },
+        setIssueRebutted : function( id_segment, id_issue, rebutted ) {
+            var issues_path = sprintf(
+                '/api/v2/jobs/%s/%s/segments/%s/translation-issues/%s/rebutted-at',
+                config.id_job, config.password,
+                id_segment,
+                id_issue
+            );
+
+            $.ajax({
+                url: issues_path,
+                type: 'POST',
+                data : { 'rebutted' : rebutted }
+            }).done( function( data ) {
+                var issue = MateCat.db.segment_translation_issues.by( 'id', data.id );
+                MateCat.db.segment_translation_issues.update( _.extend( issue, { 'rebutted_at': data.rebutted_at } ) );
             });
         },
         unmountPanelComponent : function() {

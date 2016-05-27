@@ -13,22 +13,20 @@ var buttons = React.createClass({
         }
     },
     componentDidMount: function() {
-        MateCat.db.segments.on('update', this.handleSegmentUpdate );
+        MateCat.db.addListener('segments', ['insert', 'update'], this.handleSegmentUpdate );
     },
 
     componentWillUnmount: function() {
-        MateCat.db.segments.removeListener('update', this.handleSegmentUpdate );
+        MateCat.db.removeListener('segments', ['insert', 'update'], this.handleSegmentUpdate );
     },
 
     render : function() {
-        var bothButtons = <div className="react-buttons">
-            <MC.SegmentFixedButton status={this.state.status} sid={this.props.sid} />
-            &nbsp;
-            <MC.SegmentRebuttedButton status={this.state.status} sid={this.props.sid} />
+        var disabledFixedButton = <div className="react-buttons">
+            <MC.SegmentFixedButton status={this.state.status} sid={this.props.sid} disabled={true} />
         </div>
 
         var fixedButton = <div className="react-buttons">
-            <MC.SegmentFixedButton status={this.state.status} sid={this.props.sid} />
+            <MC.SegmentFixedButton status={this.state.status} sid={this.props.sid} disabled={false} />
         </div>
 
         var rebuttedButton = <div className="react-buttons">
@@ -36,13 +34,13 @@ var buttons = React.createClass({
         </div>
 
         if ( this.state.status == 'REJECTED' ) {
-            return bothButtons ;
+            return disabledFixedButton ;
         }
         if ( this.state.status == 'FIXED' ) {
-            return rebuttedButton ;
+            return fixedButton ;
         }
         if ( this.state.status == 'REBUTTED' ) {
-            return fixedButton ;
+            return rebuttedButton ;
         }
     }
 
