@@ -21,7 +21,7 @@ class RecursiveArrayObject extends ArrayObject {
     public function __construct( Array $array = array(), $flag = 0, $iteratorClass = 'ArrayIterator' ) {
         foreach ( $array as $key => $value ) {
             if ( is_array( $value ) ) {
-                $value = new self( $value, $flag, $iteratorClass );
+                $value = new static( $value, $flag, $iteratorClass );
             }
             $this->offsetSet( $key, $value );
         }
