@@ -47,10 +47,13 @@ class Features {
             // XXX FIXME TODO: find a better way for this initialiation, $projectStructure is not defined
             // here, so the feature initializer should not need the project strucutre at all.
             // The `id_customer` should be enough. XXX
-            $obj = new $name( $feature );
 
-            if ( method_exists( $obj, $method ) ) {
-                $filterable = call_user_func_array( array( $obj, $method ), $args );
+            if ( class_exists( $name ) ) {
+                $obj = new $name( $feature );
+
+                if ( method_exists( $obj, $method ) ) {
+                    $filterable = call_user_func_array( array( $obj, $method ), $args );
+                }
             }
         }
 
@@ -77,11 +80,14 @@ class Features {
 
         foreach( $features as $feature ) {
             $name = "Features\\" . $feature->toClassName() ;
-            $obj = new $name( $feature );
 
-            if ( method_exists( $obj, $method ) ) {
-                \Log::doLog( " calling $name, $method, with args " . var_export( $args, true) );
-                call_user_func_array( array( $obj, $method ), $args );
+            if ( class_exists( $name ) ) {
+                $obj = new $name( $feature );
+
+                if ( method_exists( $obj, $method ) ) {
+                    \Log::doLog( " calling $name, $method, with args " . var_export( $args, true) );
+                    call_user_func_array( array( $obj, $method ), $args );
+                }
             }
         }
     }

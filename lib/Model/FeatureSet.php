@@ -77,10 +77,13 @@ class FeatureSet {
 
         foreach ( $this->features as $feature ) {
             $name = "Features\\" . $feature->toClassName();
-            $obj  = new $name( $feature );
 
-            if ( method_exists( $obj, $method ) ) {
-                call_user_func_array( array( $obj, $method ), $args );
+            if ( class_exists( $name ) ) {
+                $obj  = new $name( $feature );
+
+                if ( method_exists( $obj, $method ) ) {
+                    call_user_func_array( array( $obj, $method ), $args );
+                }
             }
         }
     }
