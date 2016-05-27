@@ -7,19 +7,18 @@
  * Date: 15/04/16
  * Time: 15.59
  */
-class BuildResultTest extends AbstractTest
+class BuildResultEngineTest extends AbstractTest
 {
 
     protected $array_param;
     protected $reflector;
     protected $method;
-    protected $array_to_build_expected_engine_obj;
 
 
     public function setUp()
     {
         parent::setUp();
-        $this->reflectedClass = new EnginesModel_EngineDAO(Database::obtain());
+        $this->reflectedClass = new EnginesModel_EngineDAO(Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ));
         $this->reflector = new ReflectionClass($this->reflectedClass);
         $this->method = $this->reflector->getMethod("_buildResult");
         $this->method->setAccessible(true);
@@ -38,8 +37,8 @@ class BuildResultTest extends AbstractTest
         $this->array_param = array(0 =>
             array(
            'id' => "0",
-           'name' => "NONE",
-           'type' => "NONE",
+           'name' => "bar",
+           'type' => "foo",
            'description' => "No MT",
            'base_url' => "",
            'translate_relative_url' => "",
@@ -53,26 +52,13 @@ class BuildResultTest extends AbstractTest
            'active' => "0",
            'uid' => NULL
         ));
-        $this->array_to_build_expected_engine_obj = array(
-           'id' => 0,
-           'name' => "NONE",
-           'type' => "NONE",
-           'description' => "No MT",
-           'base_url' => "",
-           'translate_relative_url' => "",
-           'contribute_relative_url' => NULL,
-           'delete_relative_url' => NULL,
-           'others' => array(),
-           'class_load' => "NONE",
-           'extra_parameters' => NULL,
-           'google_api_compliant_version' => NULL,
-           'penalty' => "100",
-           'active' => "0",
-           'uid' => NULL
-        );
 
-        $expected_engine_obj_output=new EnginesModel_EngineStruct($this->array_to_build_expected_engine_obj);
-        $actual_engine_obj_output_actual = $this->method->invoke($this->reflectedClass, $this->array_param);
-        $this->assertEquals(array($expected_engine_obj_output), $actual_engine_obj_output_actual);
+
+        $actual_array_of_engine_structures = $this->method->invoke($this->reflectedClass, $this->array_param);
+        $actual_engine_struct = $actual_array_of_engine_structures['0'];
+        $this->assertTrue($actual_engine_struct instanceof EnginesModel_EngineStruct);
+
+        $this->assertEquals("bar", $actual_engine_struct->name);
+        $this->assertEquals("foo", $actual_engine_struct->type);
     }
 }

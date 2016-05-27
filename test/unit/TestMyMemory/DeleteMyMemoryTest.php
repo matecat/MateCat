@@ -78,7 +78,7 @@ LABEL;
 
      
         
-        $engineDAO        = new EnginesModel_EngineDAO( Database::obtain() );
+        $engineDAO        = new EnginesModel_EngineDAO( Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
         $engine_struct= EnginesModel_EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng = $engineDAO->read( $engine_struct );

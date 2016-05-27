@@ -7,7 +7,7 @@
  * Date: 14/04/16
  * Time: 20.28
  */
-class SanitizeTest extends AbstractTest
+class SanitizeEngineTest extends AbstractTest
 {
     /**
      * @var EnginesModel_EngineDAO
@@ -19,7 +19,7 @@ class SanitizeTest extends AbstractTest
     public function setUp()
     {
         parent::setUp();
-        $this->engine_Dao = new EnginesModel_EngineDAO(Database::obtain());
+        $this->engine_Dao = new EnginesModel_EngineDAO(Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ));
         $this->engine_struct_input = new EnginesModel_EngineStruct();
         $this->engine_struct_expected = new EnginesModel_EngineStruct();
 
