@@ -58,6 +58,9 @@ class FeatureSet {
             $obj = new $name( $feature );
 
             if ( method_exists( $obj, $method ) ) {
+                 array_shift( $args );
+                 array_unshift( $args, $filterable );
+
                 $filterable = call_user_func_array( array( $obj, $method ), $args );
             }
         }
