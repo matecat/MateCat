@@ -12,7 +12,14 @@ if ( ReviewImproved.enabled() && !config.isReview)
             return false;
         },
         cleanupLegacyButtons : function( segment ) {
-            var segObj = new UI.Segment(segment);
+            var segObj ;
+
+            if ( segment instanceof UI.Segment ) {
+                segObj = segment ;
+            } else {
+                segObj = new UI.Segment(segment);
+            }
+            
             var buttonsOb = $('#segment-' + segObj.id + '-buttons');
             buttonsOb.empty();
             $('p.warnings', segObj.el).empty();

@@ -58,15 +58,16 @@ class FeatureSet {
             if ( class_exists( $name ) ) {
                 $obj = new $name( $feature );
 
-            if ( method_exists( $obj, $method ) ) {
-                 array_shift( $args );
-                 array_unshift( $args, $filterable );
+                if ( method_exists( $obj, $method ) ) {
+                    array_shift( $args );
+                    array_unshift( $args, $filterable );
 
-                $filterable = call_user_func_array( array( $obj, $method ), $args );
+                    $filterable = call_user_func_array( array( $obj, $method ), $args );
+                }
             }
-        }
 
-        return $filterable ;
+            return $filterable ;
+        }
     }
 
     /**
