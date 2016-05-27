@@ -145,8 +145,9 @@ class getProjectsController extends ajaxController {
          * for each of them in a separate query.
          */
 
-        $projects = Features::filter('filter_manage_projects_loaded',
-            $_SESSION['cid'], $projects);
+        $featureSet = FeatureSet::fromIdCustomer( $_SESSION['cid'] );
+
+        $projects = $featureSet->filter('filter_manage_projects_loaded', $projects);
 
         $this->result[ 'data' ]     = json_encode( $projects );
         $this->result[ 'page' ]     = $this->page;
