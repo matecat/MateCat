@@ -81,7 +81,7 @@ class glossaryController extends ajaxController {
             $config[ 'source' ]      = $this->job_info[ 'source' ];
             $config[ 'target' ]      = $this->job_info[ 'target' ];
             $config[ 'email' ]       = INIT::$MYMEMORY_API_KEY;
-            $config[ 'id_user' ]     = $this->job_info[ 'id_translator' ];
+            $config[ 'id_user' ]     = array();
             $config[ 'isGlossary' ]  = true;
             $config[ 'get_mt' ]      = null;
             $config[ 'num_result' ]  = 100; //do not want limit the results from glossary: set as a big number
