@@ -3346,12 +3346,9 @@ UI = {
                     $(".editarea", segment).html(target_val);
                     if (callback!=null)
                         restoreSelection();
-                    $(".source", segment).html(source_val);  
-                    if (callback!=null)
-                        callback(segment);
-                    else {
-                        LXQ.reloadPowertip(segment);
-                    }                     
+                    $(".source", segment).html(source_val);                      
+                    LXQ.reloadPowertip(segment);
+                                     
                     //FOTD CHANGE THIS
                     // $('.lxq-error-seg',segment).attr('numberoferrors',LXQ.getVisibleWarningsCountForSegment(segment)).css("background-color","#efecca").removeClass('lxq-error-changed');
                     //only reload dropdown menu and link, if there was an error...
