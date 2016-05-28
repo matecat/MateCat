@@ -12,7 +12,7 @@ LXQ = {
 
 if (LXQ.enabled())
     (function ($, config, window, LXQ, undefined) {
-
+        var partnerid = 'lxqmatecat';
         var colors = {
             numbers: '#D08053',
             punctuation: '#3AB45F',
@@ -1138,7 +1138,7 @@ if (LXQ.enabled())
             });
            
             $('#lexiqa-quide-link').attr('href', config.lexiqaServer + '/documentation.html');
-            $('#lexiqa-report-link').attr('href', config.lexiqaServer + '/errorreport?id=matecat-' + config.id_job + '-' + config.password);
+            $('#lexiqa-report-link').attr('href', config.lexiqaServer + '/errorreport?id='+this.partnerid+'-' + config.id_job + '-' + config.password);
 
             $('#lexiqa-prev-seg').on('click', function (e) {
                 e.preventDefault();
@@ -1195,7 +1195,8 @@ if (LXQ.enabled())
             getNextSegmentWithWarning: getNextSegmentWithWarning,
             getPreviousSegmentWithWarning:getPreviousSegmentWithWarning,
             initPopup: initPopup,
-            hidePopUp: hidePopUp
+            hidePopUp: hidePopUp,
+            partnerid: partnerid
         });
 
     })(jQuery, config, window, LXQ);

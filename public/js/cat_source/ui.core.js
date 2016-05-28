@@ -3267,7 +3267,7 @@ UI = {
                     targettext: translation,
                     returnUrl: returnUrl,
                     segmentId: id_segment,
-                    partnerId: "matecat",
+                    partnerId: LXQ.partnerid,
                     isSegmentCompleted: isSegmentCompleted,
                     responseMode: "includeQAResults"
                 }
@@ -3425,7 +3425,7 @@ UI = {
         UI.lexiqaData.lexiqaFetching = true;
         $.ajax({type: "GET",
             url: config.lexiqaServer+"/matecaterrors",
-            data: {id: 'matecat-'+config.job_id+'-'+config.password },
+            data: {id: LXQ.partnerid+'-'+config.job_id+'-'+config.password },
             success:function(results){
                 console.log('matecaterrors returned:')
                 console.dir(results);
