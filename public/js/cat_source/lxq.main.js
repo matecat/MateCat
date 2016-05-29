@@ -12,7 +12,7 @@ LXQ = {
 
 if (LXQ.enabled())
     (function ($, config, window, LXQ, undefined) {
-        var partnerid = 'lxqmatecat';
+        var partnerid = 'matecat';
         var colors = {
             numbers: '#D08053',
             punctuation: '#3AB45F',
