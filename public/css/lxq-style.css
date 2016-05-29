@@ -872,25 +872,6 @@ article.lxq-commenting-opened .lxq-comment-balloon-outer {
   display: block!important;
 }
 
-.n0 .n1, .n2, .n3, .n4 {
-    background-color:#D08053;
-}
-.p0 .p1, .p2, .p2sub1, .p2sub2, .p3, .p3sub1, .p4, .p5, .p6, .p7, .p8 {
-    background-color:#65C783
-}
-.c0 .c1, .c2, .c2sub1, .c3, .c3sub1, .c4, .c5 {
-    background-color:#65C783;
-}
-.u0 .u1, .u2, .u3, .u4, .u5 {
-    background-color:#b8a300;
-}
-.s0 .s1, .s2, .s3, .s3sub1, .s3sub1, .s4, .s5 {
-    background-color:#38C0C5;
-}
-.l0, .l2, .l3, .l4 {
-   background-color:#B792E6;
-}
-
 .n0 {
     background-color:#D08053;
 }
@@ -909,8 +890,14 @@ article.lxq-commenting-opened .lxq-comment-balloon-outer {
 .l0 {
    background-color:#B792E6;
 }
+.b0 {
+    text-decoration: line-through;
+}
 .g0 {
-   background-color: red; 
+    text-decoration: underline; 
+}
+.d0 {
+    color:  red;
 }
 .m {
     background-color:#EA92B8;

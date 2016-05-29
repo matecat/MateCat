@@ -12,7 +12,7 @@ LXQ = {
 
 if (LXQ.enabled())
     (function ($, config, window, LXQ, undefined) {
-
+        var partnerid = 'lxqmatecat';
         var colors = {
             numbers: '#D08053',
             punctuation: '#3AB45F',
@@ -21,7 +21,8 @@ if (LXQ.enabled())
             spelling: '#563d7c',
             specialchardetect: '#38C0C5',
             multiple: '#EA92B8',
-            glossary: '#EA92B8'
+            glossary: '#EA92B8',
+            blacklist: '#EA92B8'
         }
         var warningMesasges = {
             u2: {t:	'email not found in source',
@@ -83,6 +84,8 @@ if (LXQ.enabled())
             default: {t:'not found in source',
             	      s: 'missing from target' }                 									 
         }
+        
+        var modulesNoHighlight = ['b1g','g1g','g2g','g3g'];
         var tpls;
         LXQ.const = {}
 
@@ -300,18 +303,32 @@ if (LXQ.enabled())
             ev.preventDefault();
             if ($('.searchbox').is(':visible')) {
                 UI.toggleSearch(ev);
-            }            
-            
+            }
+
             var lexiqaPopupHeight = $('#lexiqa-popup').height() + 30;
-            
-            $('#lexiqa-popup').toggleClass('lxq-visible').focus();   
-            
-            if($('#lexiqa-popup').hasClass('lxq-visible')) {
-              // $('.cattool.editing').css('margin-top', lexiqaPopupHeight);
-              $('#outer').css('margin-top', lexiqaPopupHeight);  
+
+            $('#lexiqa-popup').toggleClass('lxq-visible').focus();
+
+            if ($('#lexiqa-popup').hasClass('lxq-visible')) {
+                // $('.cattool.editing').css('margin-top', lexiqaPopupHeight);
+                $('#outer').css('margin-top', lexiqaPopupHeight);  
+                //go the first segment with errors...
+                var segid = getFristSegmentWithWarning();
+                if (UI.segmentIsLoaded(segid) === true)
+                    UI.gotoSegment(segid);
+                else {                    
+                    //UI.reloadWarning();
+                    config.last_opened_segment = segid;
+                    //config.last_opened_segment = this.nextUntranslatedSegmentId;
+                    window.location.hash = segid;
+                    $('#outer').empty();
+                    UI.render({
+                        firstLoad: false
+                    });
+                }
             } else {
-               //$('.cattool.editing').css('margin-top', 0);
-               $('#outer').css('margin-top', 20); 
+                //$('.cattool.editing').css('margin-top', 0);
+                $('#outer').css('margin-top', 20);
             }
             //reloadPowertip();
             
@@ -511,6 +528,9 @@ if (LXQ.enabled())
                 }, {
                     //color: '#563d7c',
                     ranges: results.glossary
+                }, {
+                    //color: '#563d7c',
+                    ranges: results.blacklist
                 }];
 
             console.log('-- text: ' + text);
@@ -631,7 +651,7 @@ if (LXQ.enabled())
             ranges.newout.forEach(function (range) {
                 if (range.start != range.end ) {
                     if (range.start < text.length && !range.ignore) {
-                        var data = '';
+                        var data = '', multiple;
                         //calculate the color                        
                         if (range.errors.length == 1) {
                             range.color = ranges.out[range.errors[0]].color;
@@ -641,13 +661,18 @@ if (LXQ.enabled())
                         else {
                             range.myClass ='';
                             data = 'data-errors="';
+                            multiple = 0;
                             range.errors.forEach(function (element){
-                                range.myClass += ' '+ranges.out[element].module;
+                                range.myClass += ' '+ ranges.out[element].module + ' '+ranges.out[element].module[0]+'0';
                                 data += ' '+ranges.out[element].errorid;
+                                if (modulesNoHighlight.indexOf(ranges.out[element].module)<0)
+                                    multiple++;
                             });
                             data += '" ';
                             range.color = colors.multiple;
-                            range.myClass = (range.myClass+' m').trim();
+                            if (multiple>1)
+                                range.myClass += ' m';
+                            range.myClass = range.myClass.trim();
                         }
                         
                         var mark = '##LESSTHAN##lxqwarning id="lexiqahighlight" '
@@ -772,9 +797,10 @@ if (LXQ.enabled())
                var root = $(tpls.lxqTooltipWrap);
                $.each(classlist, function(j,cl) {
                    var txt = getWarningForModule(cl,true);
-                   if (cl === 'g3') {
+                   if (cl === 'g3g') { 
                        //need to modify message with word.
-                       var word = UI.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)][errorlist[j]].msg;
+                       var ind =  Math.floor(j/2); //we aredding the x0 classes after each class..
+                       var word = UI.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)][errorlist[ind]].msg;
                        txt = txt.replace('#xxx#',word);
                    }
                    if (txt!==null) {
@@ -798,9 +824,10 @@ if (LXQ.enabled())
                var root = $(tpls.lxqTooltipWrap);
                $.each(classlist,function(j,cl) {
                    var txt = getWarningForModule(cl,false);
-                   if (cl === 'g3') {
+                   if (cl === 'g3g') {
                        //need to modify message with word.
-                       var word = UI.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)][errorlist[j]].msg;
+                       var ind =  Math.floor(j/2); //we aredding the x0 classes after each class..
+                       var word = UI.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)][errorlist[ind]].msg;
                        txt = txt.replace('#xxx#',word);
                    }
                    if (txt!==null) {
@@ -877,7 +904,8 @@ if (LXQ.enabled())
                         urls: [],
                         spelling: [],
                         specialchardetect: [],
-                        glossary: []
+                        glossary: [],
+                        blacklist: []
                     },
                     target: {
                         numbers: [],
@@ -886,7 +914,8 @@ if (LXQ.enabled())
                         urls: [],
                         spelling: [],
                         specialchardetect: [],
-                        glossary: []                                
+                        glossary: [],
+                        blacklist: []                               
                     }
             }; 
             $.each(UI.lexiqaData.lexiqaWarnings[segmentId],function(key,qadata) {
@@ -1033,6 +1062,14 @@ if (LXQ.enabled())
                 checkNextUncheckedSegment();
             } 
         }
+        var getFristSegmentWithWarning = function () {
+             if (UI.lexiqaData.hasOwnProperty('segments') && UI.lexiqaData.segments.length > 0) {
+                return UI.lexiqaData.segments[0];
+            }
+            else {
+                return UI.currentSegmentId;
+            }
+        }
         
         var getNextSegmentWithWarning = function () {
             //if there are no errors..
@@ -1089,6 +1126,11 @@ if (LXQ.enabled())
                 url: config.lexiqaServer+"/tooltipwarnings",            
                 success:function(result){
                     warningMesasges = result;
+                    modulesNoHighlight = []
+                    $.each(result, function(key,el) {
+                        if (key[key.length-1] === 'g')
+                            modulesNoHighlight.push(key);   
+                    });
                 }
                 ,error:function(result){
                     console.err(result);                   
@@ -1096,7 +1138,7 @@ if (LXQ.enabled())
             });
            
             $('#lexiqa-quide-link').attr('href', config.lexiqaServer + '/documentation.html');
-            $('#lexiqa-report-link').attr('href', config.lexiqaServer + '/errorreport?id=matecat-' + config.id_job + '-' + config.password);
+            $('#lexiqa-report-link').attr('href', config.lexiqaServer + '/errorreport?id='+this.partnerid+'-' + config.id_job + '-' + config.password);
 
             $('#lexiqa-prev-seg').on('click', function (e) {
                 e.preventDefault();
@@ -1153,7 +1195,8 @@ if (LXQ.enabled())
             getNextSegmentWithWarning: getNextSegmentWithWarning,
             getPreviousSegmentWithWarning:getPreviousSegmentWithWarning,
             initPopup: initPopup,
-            hidePopUp: hidePopUp
+            hidePopUp: hidePopUp,
+            partnerid: partnerid
         });
 
     })(jQuery, config, window, LXQ);
