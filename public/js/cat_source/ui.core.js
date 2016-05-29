@@ -3137,39 +3137,13 @@ UI = {
 			this.undoStack.splice(this.undoStack.length - pos, pos);
 			this.undoStackPosition = 0;
 		}
-
-        //if (LXQ.enabled() && fromWhich === 'space' && !UI.lexiqaData.lexiqaFetching) {
-        if (1===0) { 
-            saveSelection();
-            $('.undoCursorPlaceholder').remove();
-            $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
-            
-            UI.lexiqaData.lexiqaFetching = true;   
-            var callback1 = function() {
-                LXQ.reloadPowertip(UI.currentSegment);                                           
-                //restoreSelection();
-                UI.lexiqaData.lexiqaFetching = false;
-        		//UI.undoStack.push(UI.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
-            }
-            console.log('space was pressed');
-            //console.dir(UI.currentSegment);
-            var translation = $('.editarea', UI.currentSegment ).text().replace(/\uFEFF/g,'');
-            
-            var id_segment = UI.getSegmentId(UI.currentSegment);
-
-
-            UI.doLexiQA(UI.currentSegment, translation, id_segment,false, callback1) ;
-            //UI.doLexiQA(UI.currentSegment, translation, id_segment,false, null) ;
-            restoreSelection();
-            UI.undoStack.push(UI.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
-        }
-        else {
-		    saveSelection();
-            $('.undoCursorPlaceholder').remove();
-            $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');      
-            restoreSelection();
-    		this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
-        }      
+                
+        saveSelection();
+        $('.undoCursorPlaceholder').remove();
+        $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');      
+        restoreSelection();
+        this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
+        
 	},
 	clearUndoStack: function() {
 		this.undoStack = [];
