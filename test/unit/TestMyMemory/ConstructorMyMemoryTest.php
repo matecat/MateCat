@@ -33,7 +33,7 @@ class ConstructorMyMemoryTest extends AbstractTest
         /**
          * @var $engineRecord EnginesModel_EngineStruct
          */
-        $this->engine_struct_param = @$eng[0];
+        $this->engine_struct_param = $eng[0];
     }
 
     /**

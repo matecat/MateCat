@@ -23,6 +23,7 @@
 .lexnotific::before, #lexiqabox.warningbox::after {
     content: url(../img/lexiqa_whitebg.svg);
     display: block;
+    cursor: pointer;
 }
 
 /*

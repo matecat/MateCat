@@ -108,9 +108,12 @@ LAB;
         $this->assertContains(" 'memory_key' => '' ",$actual_return);
         $this->assertContains(" 'sentence_confidence' => NULL ",$actual_return);
         $this->assertCount(19,$actual_return);
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', $actual_return['last_update_date']);
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', $actual_return['create_date']);
-        $this->assertRegExp( '/^1?[0-9]{1,2}%$/', $actual_return['match']);
+        $last_update_date = $actual_return['last_update_date'];
+        $this->assertRegExp( '/^[0-9]{4}-[0,1][0-9]-[0-3][0-9]$/', $last_update_date);
+        $create_date = $actual_return['create_date'];
+        $this->assertRegExp( '/^[0-9]{4}-[0,1][0-9]-[0-3][0-9]$/', $create_date);
+        $match = $actual_return['match'];
+        $this->assertRegExp( '/^1?[0-9]{1,2}%$/', $match);
 
         
         
@@ -148,9 +151,12 @@ LAB;
         $this->assertContains(" 'memory_key' => '' ",$actual_return);
         $this->assertContains(" 'sentence_confidence' => NULL ",$actual_return);
         $this->assertCount(19,$actual_return);
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', $actual_return['last_update_date']);
-        $this->assertRegExp( '/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', $actual_return['create_date']);
-        $this->assertRegExp( '/^1?[0-9]{1,2}%$/', $actual_return['match']);
+        $last_update_date = $actual_return['last_update_date'];
+        $this->assertRegExp( '/^[0-9]{4}-[0,1][0-9]-[0-3][0-9]$/', $last_update_date);
+        $create_date = $actual_return['create_date'];
+        $this->assertRegExp( '/^[0-9]{4}-[0,1][0-9]-[0-3][0-9]$/', $create_date);
+        $match = $actual_return['match'];
+        $this->assertRegExp( '/^1?[0-9]{1,2}%$/', $match);
 
     }
 
