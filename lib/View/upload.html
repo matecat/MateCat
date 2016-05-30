@@ -321,72 +321,158 @@ Connect your TAUS DQF account to measure productivity.
 
 <!-- The template to display files available for upload -->
 <script id="template-upload" type="text/x-tmpl">
+
     {% for (var i=0, file; file=o.files[i]; i++) { %}
     <tr class="template-upload fade">
         <td class="preview">
+
              {% if (typeof(mimeok)=='undefined') {mimeok=0} %}
 
-             {% if (o.files[i].type == "application/zip") { %}
+             {% if ( o.files[i].type == "application/zip" ) { %}
              <span class="extzip"></span>
              {% mimeok=1 } %}
 
-
-            {% if (o.files[i].type == "application/msword" || o.files[i].type == "application/vnd.oasis.opendocument.text" || o.files[i].type == " application/x-vnd.oasis.opendocument.text" || o.files[i].type == "application/vnd.openxmlformats-officedocument.wordprocessingml.template"
-			|| o.files[i].type == "application/vnd.ms-word.document.macroEnabled.12" || o.files[i].type == "application/vnd.sun.xml.writer" || o.files[i].type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-			
-			) { %}
+            {% if (
+                [
+                    "application/msword",
+                    "application/vnd.oasis.opendocument.text",
+                    "application/x-vnd.oasis.opendocument.text",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.template",
+                    "application/vnd.ms-word.document.macroEnabled.12",
+                    "application/vnd.sun.xml.writer",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                ].indexOf( o.files[i].type ) >= 0
+            ) {
+            %}
             <span class="extdoc"></span>
-           
             {% mimeok=1 } %}
-			
-			{% if (o.files[i].type == "application/vnd.ms-powerpoint" || o.files[i].type == "application/mspowerpoint" || o.files[i].type == "application/ms-powerpoint" || o.files[i].type == "application/mspowerpnt" || o.files[i].type == "application/vnd-mspowerpoint" || o.files[i].type == "application/powerpoint" || o.files[i].type == "application/x-powerpoint" || o.files[i].type == "application/x-m" || o.files[i].type == "application/x-powerpoint" || o.files[i].type == "application/x-mspowerpoint"  || o.files[i].type == "application/x-dos_ms_powerpnt"  || o.files[i].type == "application/pot"  || o.files[i].type == "application/x-soffic" || o.files[i].type == "application/vnd.openxmlformats-officedocument.presentationml.template"  || o.files[i].type == "application/vnd.ms-powerpoint.slideshow.macroEnabled.12" || o.files[i].type == "application/vnd.openxmlformats-officedocument.presentationml.slideshow" || o.files[i].type == "application/vnd.ms-powerpoint.presentation.macroEnabled.12" || o.files[i].type == "application/vnd.openxmlformats-officedocument.presentationml.presentation" || o.files[i].type == "application/vnd.oasis.opendocument.presentation" || o.files[i].type == "application/x-vnd.oasis.opendocument.presentation" || o.files[i].type == "application/vnd.sun.xml.impress") { %}
+
+			{% if (
+                [
+                    "application/vnd.ms-powerpoint",
+                    "application/mspowerpoint" ,
+                    "application/ms-powerpoint",
+                    "application/mspowerpnt",
+                    "application/vnd-mspowerpoint",
+                    "application/powerpoint",
+                    "application/x-powerpoint",
+                    "application/x-powerpoint",
+                    "application/x-m",
+                    "application/x-powerpoint",
+                    "application/x-mspowerpoint",
+                    "application/x-dos_ms_powerpnt",
+                    "application/pot",
+                    "application/x-soffic",
+                    "application/vnd.openxmlformats-officedocument.presentationml.template",
+                    "application/vnd.ms-powerpoint.slideshow.macroEnabled.12",
+                    "application/vnd.openxmlformats-officedocument.presentationml.slideshow",
+                    "application/vnd.ms-powerpoint.presentation.macroEnabled.12",
+                    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                    "application/vnd.oasis.opendocument.presentation",
+                    "application/x-vnd.oasis.opendocument.presentation",
+                    "application/vnd.sun.xml.impress"
+                ].indexOf( o.files[i].type ) >= 0
+            ) {
+            %}
             <span class="extppt"></span>
-            {% mimeok=1} %}
-			
-			
-			{% if (o.files[i].type == "text/plain" || o.files[i].type == "application/txt" || o.files[i].type == "browser/internal" || o.files[i].type == "text/anytext" || o.files[i].type == "widetext/plain" || o.files[i].type == "widetext/paragraph" ) { %}
+            {% mimeok=1 } %}
+
+			{% if (
+                [
+                    "text/plain",
+                    "application/txt",
+                    "browser/internal",
+                    "text/anytext",
+                    "widetext/plain",
+                    "widetext/paragraph"
+                ].indexOf( o.files[i].type ) >= 0
+            ) {
+            %}
             <span class="exttxt"></span>
             {% mimeok=1} %}
-			
-			
-			{% if (o.files[i].type == "application/vnd.ms-excel" || o.files[i].type == "application/msexcel" || o.files[i].type == "application/x-msexcel" || o.files[i].type == "application/x-ms-excel" || o.files[i].type == "application/vnd.ms-excel" || o.files[i].type == "application/x-m" || o.files[i].type == "application/x-excel" || o.files[i].type == "application/x-dos_ms_excel"  || o.files[i].type == "application/xls" || o.files[i].type == "application/excel"  || o.files[i].type == "application/xlt" || o.files[i].type == "application/msexcel"  || o.files[i].type == "application/x-msexcel" || o.files[i].type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || o.files[i].type == "application/vnd.oasis.opendocument.spreadsheet" || o.files[i].type == "application/x-vnd.oasis.opendocument.spreadsheet" || o.files[i].type == "application/vnd.sun.xml.calc" || o.files[i].type == "text/comma-separated-values" || o.files[i].type == "text/csv" || o.files[i].type == "application/csv" || o.files[i].type == "application/vnd.msexcel"
-			
-			
-			) { %}
-					
-            <span class="extxls"></span>
+
+			{% if (
+			[
+                "application/vnd.ms-excel",
+                "application/msexcel",
+                "application/x-msexcel",
+                "application/x-ms-excel",
+                "application/vnd.ms-excel",
+                "application/x-m",
+                "application/x-excel",
+                "application/x-dos_ms_excel",
+                "application/xls",
+                "application/excel",
+                "application/xlt",
+                "application/msexcel",
+                "application/x-msexcel",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "application/vnd.oasis.opendocument.spreadsheet",
+                "application/x-vnd.oasis.opendocument.spreadsheet",
+                "application/vnd.sun.xml.calc",
+                "text/comma-separated-values",
+                "text/csv",
+                "application/csv",
+                "application/vnd.msexcel"
+			].indexOf( o.files[i].type ) >= 0
+			) {
+			%}
+			<span class="extxls"></span>
             {% mimeok=1} %}
 			
-		    {% if ( (o.files[i].type == "text/xml" || o.files[i].type == "application/xml" || o.files[i].type =="application/x-xml" ) ) { %}
-                {% if (/resx/.test( o.files[i].name.split('.').pop() ) == false) { %}
+		    {% if (
+		    [
+                "text/xml",
+                "application/xml",
+                "application/x-xml"
+		    ].indexOf( o.files[i].type ) >= 0
+		    ) {
+		    %}
+                {% if ( /resx/.test( o.files[i].name.split('.').pop() ) == false ) { %}
                 <span class="extxml"></span>
                 {% } %}
             {% mimeok=1} %}
 			
-			{% if (o.files[i].type == "text/html" || o.files[i].type == "application/xhtml+xml"  ) { %}
-					
+			{% if (
+			[
+                "text/html",
+                "application/xhtml+xml"
+			].indexOf( o.files[i].type ) >= 0
+			) {
+			%}
             <span class="exthtm"></span>
             {% mimeok=1} %}
-			
-			{% if (o.files[i].type == "application/vnd.mif" || o.files[i].type == "application/x-framemaker" || o.files[i].type == "application/x-maker"|| o.files[i].type == "application/x-mif"  ) { %}
-					
+
+			{% if (
+			[
+                "application/vnd.mif",
+                "application/x-framemaker",
+                "application/x-maker",
+                "application/x-mif"
+			].indexOf( o.files[i].type ) >= 0
+			) {
+			%}
             <span class="extmif"></span>
             {% mimeok=1} %}
 			
-			 {% if (/idml/.test( o.files[i].name.split('.').pop() ) ) { %}
+			{% if (/idml/.test( o.files[i].name.split('.').pop() ) ) { %}
             <span class="extidd"></span>
             {% mimeok=1} %}
 			
-			{% if (o.files[i].type == "application/quarkxpress" || o.files[i].type == "application/x-quark-express" ||  /xtg/.test( o.files[i].name.split('.').pop() )) { %}
-					
+			{% if (
+			o.files[i].type == "application/quarkxpress"
+			|| o.files[i].type == "application/x-quark-express"
+			||  /xtg/.test( o.files[i].name.split('.').pop() )
+			) {
+			%}
             <span class="extqxp"></span>
             {% mimeok=1} %}
 			
-			 {% if (/g/.test( o.files[i].name.split('.').pop() ) ) { %}
+			{% if (/^g$/.test( o.files[i].name.split('.').pop() ) ) { %}
             <span class="exttxt"></span>
             {% mimeok=1} %}
 			
-			 {% if (/ttx/.test( o.files[i].name.split('.').pop() ) ) { %}
+			{% if (/ttx/.test( o.files[i].name.split('.').pop() ) ) { %}
             <span class="extttx"></span>
             {% mimeok=1} %}
 			
@@ -394,11 +480,11 @@ Connect your TAUS DQF account to measure productivity.
             <span class="extxif"></span>
             {% mimeok=1} %}
 			
-			 {% if (/xlf/.test( o.files[i].name.split('.').pop() ) ) { %}
+			{% if (/xlf/.test( o.files[i].name.split('.').pop() ) ) { %}
             <span class="extxlf"></span>
             {% mimeok=1} %}
 			
-			 {% if (/rc/.test( o.files[i].name.split('.').pop() ) ) { %}
+			{% if (/rc/.test( o.files[i].name.split('.').pop() ) ) { %}
             <span class="extrcc"></span>
             {% mimeok=1} %}
 			
@@ -418,13 +504,37 @@ Connect your TAUS DQF account to measure productivity.
             <span class="extpro"></span>
             {% mimeok=1} %}
 
-			{% if (o.files[i].type == "application/pdf" || o.files[i].type == "application/x-pdf" || o.files[i].type == "application/acrobat" || o.files[i].type == "applications/vnd.pdf" || o.files[i].type == "text/pdf" || o.files[i].type == "text/x-pdf") { %}
-			
+			{% if (
+                [
+                    "application/pdf" ,
+                    "application/x-pdf",
+                    "application/acrobat",
+                    "applications/vnd.pdf",
+                    "text/pdf",
+                    "text/x-pdf"
+                ].indexOf( o.files[i].type ) >= 0
+			) {
+			%}
             <span class="extpdf"></span>
             {% mimeok=1} %}
-			
-			{% if ((typeof(mimeok)=='undefined') || mimeok==0) { console.log(o.files[i].type); %}
-			 <span class="extxif"></span>
+
+			{% if (
+			    [
+			        'bmp',
+			        'gif',
+			        'jpg',
+			        'jpeg',
+			        'tif',
+			        'tiff',
+			        'png'
+			    ].indexOf( o.files[i].name.split('.').pop() ) >= 0
+			) {
+			%}
+            <span class="extimg"></span>
+            {% mimeok=1} %}
+
+			{% if ( typeof(mimeok) == 'undefined' || mimeok == 0 ) { %}
+			<span class="extxif"></span>
             {% } %}
 
         </td>
@@ -460,14 +570,14 @@ Connect your TAUS DQF account to measure productivity.
     </tr>
 
     {% } %}
-
-
 </script>
 
 
 <!-- The template to display files available for download -->
 <script id="template-download" type="text/x-tmpl">
+
     {% for (var i=0, file; file=o.files[i]; i++) { %}
+
     <tr class="template-download fade">
         {% if (file.error) { %}
         <td></td>
@@ -478,82 +588,165 @@ Connect your TAUS DQF account to measure productivity.
         </td>
         {% } else { %}
         <td class="preview">
-		     {% if (typeof(mimeok)=='undefined') {mimeok=0} %}
-            {% if (o.files[i].type == "application/msword" || o.files[i].type == "application/vnd.oasis.opendocument.text" || o.files[i].type == " application/x-vnd.oasis.opendocument.text" || o.files[i].type == "application/vnd.openxmlformats-officedocument.wordprocessingml.template"
-			|| o.files[i].type == "application/vnd.ms-word.document.macroEnabled.12" || o.files[i].type == "application/vnd.sun.xml.writer" || o.files[i].type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-			
-			) { %}
-            <span class="extdoc"></span>
-           
-            {% mimeok=1 } %}
+		    {% if (typeof(mimeok)=='undefined') {mimeok=0} %}
 
             {% if (o.files[i].type == "application/zip") { %}
              <span class="extzip"></span>
-             {% mimeok=1 } %}
+            {% mimeok=1 } %}
 			
-			{% if (o.files[i].type == "application/vnd.ms-powerpoint" || o.files[i].type == "application/mspowerpoint" || o.files[i].type == "application/ms-powerpoint" || o.files[i].type == "application/mspowerpnt" || o.files[i].type == "application/vnd-mspowerpoint" || o.files[i].type == "application/powerpoint" || o.files[i].type == "application/x-powerpoint" || o.files[i].type == "application/x-m" || o.files[i].type == "application/x-powerpoint" || o.files[i].type == "application/x-mspowerpoint"  || o.files[i].type == "application/x-dos_ms_powerpnt"  || o.files[i].type == "application/pot"  || o.files[i].type == "application/x-soffic" || o.files[i].type == "application/vnd.openxmlformats-officedocument.presentationml.template"  || o.files[i].type == "application/vnd.ms-powerpoint.slideshow.macroEnabled.12" || o.files[i].type == "application/vnd.openxmlformats-officedocument.presentationml.slideshow" || o.files[i].type == "application/vnd.ms-powerpoint.presentation.macroEnabled.12" || o.files[i].type == "application/vnd.openxmlformats-officedocument.presentationml.presentation" || o.files[i].type == "application/vnd.oasis.opendocument.presentation" || o.files[i].type == "application/x-vnd.oasis.opendocument.presentation" || o.files[i].type == "application/vnd.sun.xml.impress") { %}
+            {% if (
+                [
+                    "application/msword",
+                    "application/vnd.oasis.opendocument.text",
+                    "application/x-vnd.oasis.opendocument.text",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.template",
+                    "application/vnd.ms-word.document.macroEnabled.12",
+                    "application/vnd.sun.xml.writer",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                ].indexOf( o.files[i].type ) >= 0
+            ) {
+            %}
+            <span class="extdoc"></span>
+            {% mimeok=1 } %}
+
+			{% if (
+                [
+                    "application/vnd.ms-powerpoint",
+                    "application/mspowerpoint" ,
+                    "application/ms-powerpoint",
+                    "application/mspowerpnt",
+                    "application/vnd-mspowerpoint",
+                    "application/powerpoint",
+                    "application/x-powerpoint",
+                    "application/x-powerpoint",
+                    "application/x-m",
+                    "application/x-powerpoint",
+                    "application/x-mspowerpoint",
+                    "application/x-dos_ms_powerpnt",
+                    "application/pot",
+                    "application/x-soffic",
+                    "application/vnd.openxmlformats-officedocument.presentationml.template",
+                    "application/vnd.ms-powerpoint.slideshow.macroEnabled.12",
+                    "application/vnd.openxmlformats-officedocument.presentationml.slideshow",
+                    "application/vnd.ms-powerpoint.presentation.macroEnabled.12",
+                    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                    "application/vnd.oasis.opendocument.presentation",
+                    "application/x-vnd.oasis.opendocument.presentation",
+                    "application/vnd.sun.xml.impress"
+                ].indexOf( o.files[i].type ) >= 0
+            ) {
+            %}
             <span class="extppt"></span>
             {% mimeok=1} %}
-			
-			
-			{% if (o.files[i].type == "text/plain" || o.files[i].type == "application/txt" || o.files[i].type == "browser/internal" || o.files[i].type == "text/anytext" || o.files[i].type == "widetext/plain" || o.files[i].type == "widetext/paragraph" ) { %}
+
+			{% if (
+                [
+                    "text/plain",
+                    "application/txt",
+                    "browser/internal",
+                    "text/anytext",
+                    "widetext/plain",
+                    "widetext/paragraph"
+                ].indexOf( o.files[i].type ) >= 0
+            ) {
+            %}
             <span class="exttxt"></span>
             {% mimeok=1} %}
 			
-			
-			{% if (o.files[i].type == "application/vnd.ms-excel" || o.files[i].type == "application/msexcel" || o.files[i].type == "application/x-msexcel" || o.files[i].type == "application/x-ms-excel" || o.files[i].type == "application/vnd.ms-excel" || o.files[i].type == "application/x-m" || o.files[i].type == "application/x-excel" || o.files[i].type == "application/x-dos_ms_excel"  || o.files[i].type == "application/xls" || o.files[i].type == "application/excel"  || o.files[i].type == "application/xlt" || o.files[i].type == "application/msexcel"  || o.files[i].type == "application/x-msexcel" || o.files[i].type == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || o.files[i].type == "application/vnd.oasis.opendocument.spreadsheet" || o.files[i].type == "application/x-vnd.oasis.opendocument.spreadsheet" || o.files[i].type == "application/vnd.sun.xml.calc" || o.files[i].type == "text/comma-separated-values" || o.files[i].type == "text/csv" || o.files[i].type == "application/csv" || o.files[i].type == "application/vnd.msexcel"
-			
-			
-			) { %}
-					
-            <span class="extxls"></span>
+			{% if (
+			[
+                "application/vnd.ms-excel",
+                "application/msexcel",
+                "application/x-msexcel",
+                "application/x-ms-excel",
+                "application/vnd.ms-excel",
+                "application/x-m",
+                "application/x-excel",
+                "application/x-dos_ms_excel",
+                "application/xls",
+                "application/excel",
+                "application/xlt",
+                "application/msexcel",
+                "application/x-msexcel",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "application/vnd.oasis.opendocument.spreadsheet",
+                "application/x-vnd.oasis.opendocument.spreadsheet",
+                "application/vnd.sun.xml.calc",
+                "text/comma-separated-values",
+                "text/csv",
+                "application/csv",
+                "application/vnd.msexcel"
+			].indexOf( o.files[i].type ) >= 0
+			) {
+			%}
+			<span class="extxls"></span>
             {% mimeok=1} %}
 
-			{% if (o.files[i].type == "text/xml" || o.files[i].type == "application/xml" || o.files[i].type == "application/x-xml" ) { %}
-                {% if (/resx/.test( o.files[i].name.split('.').pop() ) == false) { %}
+		    {% if (
+		    [
+                "text/xml",
+                "application/xml",
+                "application/x-xml"
+		    ].indexOf( o.files[i].type ) >= 0
+		    ) {
+		    %}
+                {% if ( /resx/.test( o.files[i].name.split('.').pop() ) == false ) { %}
                 <span class="extxml"></span>
                 {% } %}
             {% mimeok=1} %}
 			
-			
-			{% if (o.files[i].type == "text/html" || o.files[i].type == "application/xhtml+xml"  ) { %}
-					
+			{% if (
+			[
+                "text/html",
+                "application/xhtml+xml"
+			].indexOf( o.files[i].type ) >= 0
+			) {
+			%}
             <span class="exthtm"></span>
             {% mimeok=1} %}
 			
-			{% if (o.files[i].type == "application/vnd.mif" || o.files[i].type == "application/x-framemaker" || o.files[i].type == "application/x-maker"|| o.files[i].type == "application/x-mif"  ) { %}
-					
+			{% if (
+			[
+                "application/vnd.mif",
+                "application/x-framemaker",
+                "application/x-maker",
+                "application/x-mif"
+			].indexOf( o.files[i].type ) >= 0
+			) {
+			%}
             <span class="extmif"></span>
             {% mimeok=1} %}
 			
-			 {% if (/idml/.test( o.files[i].name.split('.').pop() ) ) { %}
+			{% if (/idml/.test( o.files[i].name.split('.').pop() ) ) { %}
             <span class="extidd"></span>
             {% mimeok=1} %}
 			
-			{% if (o.files[i].type == "application/quarkxpress" || o.files[i].type == "application/x-quark-express" ||  /xtg/.test( o.files[i].name.split('.').pop() )) { %}
-					
+			{% if (
+			o.files[i].type == "application/quarkxpress"
+			|| o.files[i].type == "application/x-quark-express"
+			||  /xtg/.test( o.files[i].name.split('.').pop() )
+			) {
+			%}
             <span class="extqxp"></span>
             {% mimeok=1} %}
 
-
-			 {% if (/g/.test( o.files[i].name.split('.').pop() ) ) { %}
+			{% if (/^g$/.test( o.files[i].name.split('.').pop() ) ) { %}
             <span class="exttxt"></span>
             {% mimeok=1} %}
 
-			
-			 {% if (/ttx/.test( o.files[i].name.split('.').pop() ) ) { %}
+			{% if (/ttx/.test( o.files[i].name.split('.').pop() ) ) { %}
             <span class="extttx"></span>
             {% mimeok=1} %}
 			
-			 {% if (/xliff/.test( o.files[i].name.split('.').pop() ) ) { %}
+			{% if (/xliff/.test( o.files[i].name.split('.').pop() ) ) { %}
             <span class="extxif"></span>
             {% mimeok=1} %}
 			
-			 {% if (/xlf/.test( o.files[i].name.split('.').pop() ) ) { %}
+			{% if (/xlf/.test( o.files[i].name.split('.').pop() ) ) { %}
             <span class="extxlf"></span>
             {% mimeok=1} %}
 			
-			 {% if (/rc/.test( o.files[i].name.split('.').pop() ) ) { %}
+			{% if (/rc/.test( o.files[i].name.split('.').pop() ) ) { %}
             <span class="extrcc"></span>
             {% mimeok=1} %}
 
@@ -573,20 +766,43 @@ Connect your TAUS DQF account to measure productivity.
             <span class="extpro"></span>
             {% mimeok=1} %}
 			
-			 {% if (/tmx/.test( o.files[i].name.split('.').pop() ) ) { %}
+			{% if (/tmx/.test( o.files[i].name.split('.').pop() ) ) { %}
             <span class="exttmx"></span>
             {% mimeok=1} %}
 
-			{% if (o.files[i].type == "application/pdf" || o.files[i].type == "application/x-pdf" || o.files[i].type == "application/acrobat" || o.files[i].type == "applications/vnd.pdf" || o.files[i].type == "text/pdf" || o.files[i].type == "text/x-pdf") { %}
-			
+			{% if (
+                [
+                    "application/pdf" ,
+                    "application/x-pdf",
+                    "application/acrobat",
+                    "applications/vnd.pdf",
+                    "text/pdf",
+                    "text/x-pdf"
+                ].indexOf( o.files[i].type ) >= 0
+			) {
+			%}
             <span class="extpdf"></span>
             {% mimeok=1} %}
-			
-			{% if ((typeof(mimeok)=='undefined') || mimeok==0) { console.log(o.files[i].type); %}
-			 <span class="extxif"></span>
+
+			{% if (
+			    [
+			        'bmp',
+			        'gif',
+			        'jpg',
+			        'jpeg',
+			        'tif',
+			        'tiff',
+			        'png'
+			    ].indexOf( o.files[i].name.split('.').pop() ) >= 0
+			) {
+			%}
+            <span class="extimg"></span>
+            {% mimeok=1} %}
+
+			{% if ( typeof(mimeok) == 'undefined' || mimeok == 0 ) { %}
+			<span class="extxif"></span>
             {% } %}
-			
-			
+
         </td>
         <td class="name">{%=file.name%}</td>
         <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
@@ -601,13 +817,10 @@ Connect your TAUS DQF account to measure productivity.
 
     </tr>
 
-
     {% } %}
-
 </script>
 
-<script tal:condition="not:volume_analysis_enabled" id="job-links-list" type="text/x-tmpl">
-    <!-- The template to display links for every language in the job when multi-language selected and no analysis page is available-->
+<!-- script tal:condition="not:volume_analysis_enabled" id="job-links-list" type="text/x-tmpl">
     <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0" id="info-login">
         <thead>
         <tr>
@@ -641,7 +854,7 @@ Connect your TAUS DQF account to measure productivity.
         </tbody>
     </table>
 
-</script>
+</script -->
 
 <!-- <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script> -->
 <script src="${basepath}public/js/lib/jquery-ui-1.8.20.custom.min.js"></script>
