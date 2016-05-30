@@ -31,10 +31,11 @@ class NotificationItem extends React.Component {
                 visible: false,
                 removed: true
             });
+            this.props.hideMateCat(self.props.uid);
         }
         setTimeout(function () {
             self.props.onRemove(self.props.uid);
-        }, 5000);
+        }, 1000);
         
         if (this.props.closeCallback) {
             this.props.closeCallback.call();
@@ -54,12 +55,13 @@ class NotificationItem extends React.Component {
             self.setState({
                 visible: true
             });
+            self.props.showMateCat();
         }, 50);
 
         if (this.props.autoDismiss) {
             this._notificationTimer = setTimeout(function() {
                 self.hideNotification();
-            }, 5000);
+            }, 10000);
         }
         if (this.props.openCallback) {
             this.props.openCallback.call();
@@ -119,6 +121,7 @@ class NotificationItem extends React.Component {
             notificationStyle.marginTop = 0;
             notificationStyle.paddingTop = 0;
             notificationStyle.paddingBottom = 0;
+            notificationStyle.borderTop = 0;
         }
 
         // if (!this.props.autoDismiss) {

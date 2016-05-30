@@ -49,7 +49,7 @@ section:hover .segment-side-buttons {
 .notifications-position-bl {
   @extend .notifications-position;
   top: auto;
-  bottom: 17px;
+  bottom: 30px;
   left: 20px;
   right: auto;
 }
@@ -113,29 +113,33 @@ section:hover .segment-side-buttons {
 
 .notification-type-success {
   @extend .notification-type;
-  color: #f0f5ea;
+  border-top: 3px solid $notification-success;
 }
 
 .notification-type-error {
   @extend .notification-type;
-  border-top: 3px solid #ec3d3d;
+  border-top: 3px solid $notification-error;
 }
 
 .notification-type-warning {
   @extend .notification-type;
-  border-top: 3px solid #ebad1a;
+  border-top: 3px solid $notification-warning;
 }
 
 .notification-type-info {
   @extend .notification-type;
-  border-top: 3px solid #119ec4;
+  border-top: 3px solid $notification-info;
 }
 
 .notifications-cat-smiling {
-    background: url('/public/img/matecat_smiling.png') no-repeat 90% bottom;
-    padding-top: 64px;
-    background-size: 60px;
-    margin-bottom: -10px;
+  background: url('/public/img/matecat_smiling.png') no-repeat 90% bottom;
+  padding-top: 64px;
+  background-size: 60px;
+  margin-bottom: -10px;
+  @include transition(0.3s ease-in-out);
+  opacity: 0;
+  bottom: -200px;
+  position: relative;
 }
 
 .notification-close-button {
