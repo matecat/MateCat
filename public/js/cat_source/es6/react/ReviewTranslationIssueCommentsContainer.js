@@ -86,7 +86,7 @@ export default React.createClass({
     },
     sendClick : function() {
         // send action invokes ReviewImproved function
-        if ( this.state.comment_text.length == 0 ) {
+        if ( !this.state.comment_text || this.state.comment_text.length == 0 ) {
             return ;
         }
 
@@ -100,12 +100,12 @@ export default React.createClass({
     },
 
     rebutClick : function() {
-        this.setState({ rebutLabel : 'Sending', rebutDisabled : true, sendDisabled : true });
-
         // send action invokes ReviewImproved function
-        if ( this.state.comment_text.length == 0 ) {
+        if ( !this.state.comment_text || this.state.comment_text.length == 0 ) {
             return ;
         }
+
+        this.setState({ rebutLabel : 'Sending', rebutDisabled : true, sendDisabled : true });
 
         var data = {
           message : this.state.comment_text,
