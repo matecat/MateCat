@@ -910,7 +910,8 @@ function replaceSelectedHtml(replacementHtml) {
             console.log('UI.editarea.html() 1: ', UI.editarea.html());
             range.deleteContents();
             console.log('UI.editarea.html() 2: ', UI.editarea.html());
-//            pasteHtmlAtCaret(replacementHtml);
+            pasteHtmlAtCaret(replacementHtml);
+//            range.pasteHtml(replacementHtml);
         }
     } else if (document.selection && document.selection.createRange) {
         range = document.selection.createRange();
