@@ -64,18 +64,12 @@ $.extend(UI, {
 		this.preCloseTagAutocomplete = false;
         this.hiddenTextEnabled = true;
         this.markSpacesEnabled = false;
-//        console.log('options: ', options);
-//        console.log('options.tagModesEnabled: ', options.tagModesEnabled);
-//        console.log('1: ', this.tagModesEnabled);
         this.tagModesEnabled = (typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
-//        console.log('2: ', this.tagModesEnabled);
         if(this.tagModesEnabled) {
             UI.body.addClass('tagModes');
         } else {
             UI.body.removeClass('tagModes');
         }
-
-
 
         /**
          * Global Translation mismatches array definition.
@@ -85,15 +79,11 @@ $.extend(UI, {
         this.downOpts = {offset: '130%'};
 		this.upOpts = {offset: '-40%'};
 		this.readonly = (this.body.hasClass('archived')) ? true : false;
-//		this.suggestionShortcutLabel = 'ALT+' + ((UI.isMac) ? "CMD" : "CTRL") + '+';
 		this.suggestionShortcutLabel = 'CTRL+';
 
 		this.taglockEnabled = config.taglockEnabled;
 		this.debug = false;
-//		this.debug = Loader.detect('debug');
-//		this.checkTutorialNeed();
         this.findCommonPartInSegmentIds();
-//        console.log(UI.commonPartInSegmentIds);
 		UI.detectStartSegment(); 
 		options.openCurrentSegmentAfter = ((!seg) && (!this.firstLoad)) ? true : false;
 		
