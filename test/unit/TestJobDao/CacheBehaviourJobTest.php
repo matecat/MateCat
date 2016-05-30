@@ -2,51 +2,48 @@
 
 /**
  * @group regression
- * @covers Jobs_JobDao::destroyCache
+ * @covers Jobs_JobDao
  * User: dinies
- * Date: 27/05/16
- * Time: 11.48
+ * Date: 30/05/16
+ * Time: 18.00
  */
-class DestroyCacheJobTest extends AbstractTest
+class CacheBehaviourJobTest extends AbstractTest
 {
-    /**
-     * @var Jobs_JobDao
-     */
-    protected $job_Dao;
-
     /**
      * @var Jobs_JobStruct
      */
     protected $job_struct;
-
     /**
      * @var Database
      */
     protected $database_instance;
-
-    protected $id;
-    protected $str_password;
-    protected $str_id_project;
-    protected $str_owner;
+    /**
+     * @var Jobs_JobDao
+     */
+    protected $job_Dao;
     /**
      * @var \Predis\Client
      */
     protected $cache;
+    protected $id;
+    protected $str_password;
+    protected $str_id_project;
+    protected $str_owner;
+    protected $sql_delete_job;
 
     public function setUp()
     {
         parent::setUp();
+
+
         /**
          * job initialization
          */
-        $this->id= "808080";
-        $this->str_id_project = "888888";
         $this->str_password = "7barandfoo71";
-        $this->str_owner="barandfoo@translated.net";
         $this->job_struct = new Jobs_JobStruct(
-            array('id' => $this->id, //SET NULL FOR AUTOINCREMENT -> in this case is only stored in cache so i will chose a casual value
+            array('id' => NULL, //SET NULL FOR AUTOINCREMENT -> in this case is only stored in cache so i will chose a casual value
                 'password' => $this->str_password,
-                'id_project' => $this->str_id_project,
+                'id_project' => "4325fake344",
                 'job_first_segment' => "182655137",
                 'job_last_segment' => "182655236",
                 'source' => "nl-NL",
@@ -63,7 +60,7 @@ class DestroyCacheJobTest extends AbstractTest
                 'create_date' => "2016-03-30 13:18:09",
                 'last_update' => "2016-03-30 13:21:02",
                 'disabled' => "0",
-                'owner' => $this->str_owner,
+                'owner' => "barandfoo@translated.net",
                 'status_owner' => "active",
                 'status' => "active",
                 'status_translator' => null,
@@ -93,60 +90,66 @@ class DestroyCacheJobTest extends AbstractTest
 
         $this->database_instance = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
         $this->job_Dao = new Jobs_JobDao($this->database_instance);
-        $this->cache= new Predis\Client(INIT::$REDIS_SERVERS);
+        $this->cache = new Predis\Client(INIT::$REDIS_SERVERS);
+        $this->job_Dao->createFromStruct($this->job_struct);
+
+        $this->id = $this->database_instance->last_insert();
+
+        $this->sql_delete_job = "DELETE FROM jobs WHERE id='" . $this->id . "';";
+
+
     }
 
     public function tearDown()
     {
-
+        $this->database_instance->query($this->sql_delete_job);
         $this->cache->flushdb();
         parent::tearDown();
     }
 
     /**
      * @group regression
-     * @covers Jobs_JobDao::destroyCache
+     * @covers Jobs_JobDao
      */
-    public function test_DestroyCache_with_ID_and_Password()
+    public function test_correct_behaviour_of_cache_with_jobs()
     {
 
-        $cache_key = "SELECT * FROM jobs WHERE id ='". $this->id ."' AND password = '". $this->str_password ." '";
 
-        
-        $key = md5($cache_key);
-        $value = serialize($this->job_struct);
-        $this->cache->setex($key,20, $value);
-        $output_before_destruction=$this->cache->get($key);
-        $this->assertEquals($value,$output_before_destruction);
-        $this->assertTrue(unserialize($output_before_destruction) instanceof Jobs_JobStruct);
-        $this->job_Dao->destroyCache($this->job_struct);
-        $output_after_destruction=$this->cache->get($cache_key);
-        $this->assertNull($output_after_destruction);
-        $this->assertFalse(unserialize($output_after_destruction) instanceof Jobs_JobStruct);
+        $this->job_struct->id=$this->id;
+
+        $reflector = new ReflectionClass($this->job_Dao);
+        $method = $reflector->getMethod("_getStatementForCache");
+        $method->setAccessible(true);
+
+        $statement = $method->invoke($this->job_Dao);
+
+        //check that there is no cache
+        $this->assertEmpty(unserialize(
+            $this->cache->get(md5($statement->queryString . serialize(
+                    array(
+                        'id_job' => $this->id,
+                        'password' => $this->str_password
+                    )
+                )))
+        ));
+
+        $param_job_struct= new Jobs_JobStruct(array());
+        $param_job_struct->id= $this->id;
+        $param_job_struct->password= $this->str_password;
+
+        $this->job_Dao->setCacheTTL(20)->read($param_job_struct);
+
+        $cache_result = (unserialize(
+            $this->cache->get(md5($statement->queryString . serialize(
+                    array(
+                        'id_job' => $this->id,
+                        'password' => $this->str_password
+                    )
+                )))
+        ));
+        $this->cache->flushdb();
+        $struct_of_second_read = $this->job_Dao->read($param_job_struct)['0'];
+        $result_from_cache = $cache_result['0'];
+        $this->assertEquals( $result_from_cache, $struct_of_second_read);
     }
-
-    /**
-     * @group regression
-     * @covers Jobs_JobDao::destroyCache
-     */
-    public function test_DestroyCache_with_ID_Project()
-    {
-
-        $cache_key = "SELECT * FROM ( SELECT * FROM  jobs WHERE id ='". $this->str_id_project ."' ORDER BY id DESC) t GROUP BY id ; ";
-
-
-        $key = md5($cache_key);
-        $value = serialize($this->job_struct);
-        $this->cache->setex($key,20, $value);
-        $output_before_destruction=$this->cache->get($key);
-        $this->assertEquals($value,$output_before_destruction);
-        $this->assertTrue(unserialize($output_before_destruction) instanceof Jobs_JobStruct);
-        $this->job_Dao->destroyCache($this->job_struct);
-        $output_after_destruction=$this->cache->get($cache_key);
-        $this->assertNull($output_after_destruction);
-        $this->assertFalse(unserialize($output_after_destruction) instanceof Jobs_JobStruct);
-    }
-
-
-
 }
