@@ -875,8 +875,7 @@ if ( MBC.enabled() )
         } );
 
         $( window ).on( 'segmentOpened', function ( e ) {
-            var segment = new UI.Segment( $( e.segment ) );
-
+            var segment = e.segment ;
             if ( MBC.wasAskedByCommentHash( segment.absoluteId ) ) {
                 openSegmentComment( $( e.segment ) );
             }

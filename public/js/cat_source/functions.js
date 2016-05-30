@@ -416,21 +416,20 @@ function rawxliff2rawview(segment) { // currently unused
 }
 
 function saveSelection() {
-//	var editarea = (typeof editarea == 'undefined') ? UI.editarea : el;
-	var editarea = UI.editarea;
 	if (UI.savedSel) {
 		rangy.removeMarkers(UI.savedSel);
 	}
 	UI.savedSel = rangy.saveSelection();
 	// this is just to prevent the addiction of a couple of placeholders who may sometimes occur for a Rangy bug
-	try {
-        //we need this try because when we are in revision
-		// and we open a draft segment from a link we have not a editarea.html()
-		//so javascript crash
-//        editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
-	} catch(e){
-	 /* create and empty div */ UI.editarea = $('<div>');
-    }
+	// try {
+     //    //we need this try because when we are in revision
+	// 	// and we open a draft segment from a link we have not a editarea.html()
+	// 	//so javascript crash
+     //   UI.editarea.html(UI.editarea.html().replace(UI.cursorPlaceholder, ''));
+	// } catch(e){
+	//  /* create and empty div */
+	// 	UI.editarea = $('<div>');
+    // }
 	UI.savedSelActiveElement = document.activeElement;
 }
 
@@ -904,9 +903,7 @@ function replaceSelectedText(replacementText) {
 function replaceSelectedHtml(replacementHtml) {
     var sel, range;
     if (window.getSelection) {
-        console.log('UI.editarea.html() 0: ', UI.editarea.html());
         sel = window.getSelection();
-        console.log('sel: ', sel);
         if (sel.rangeCount) {
             range = sel.getRangeAt(0);
             console.log('range: ', range);
@@ -981,4 +978,12 @@ function hackSnapEngage( on ) {
     } else {
         button.css( 'z-index', button.data( 'mbc-zindex' ) );
     }
+}
+
+function cleanupSplitMarker( string ) {
+	return string.split( UI.splittedTranslationPlaceholder ).join();
+}
+
+function absoluteId( id ) {
+	return id.split('-')[0]; 
 }

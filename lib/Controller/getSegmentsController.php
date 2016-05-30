@@ -201,7 +201,6 @@ class getSegmentsController extends ajaxController {
         $segment['notes'] = @$this->segment_notes[ (int) $segment['sid'] ] ;
     }
 
-
     private function prepareNotes( $segments ) {
         if ( ! empty( $segments[0] ) ) {
             $start = $segments[0]['sid'];

@@ -12,8 +12,10 @@ if ( ReviewImproved.enabled() && !config.isReview)
             return false;
         },
         cleanupLegacyButtons : function( segment ) {
-            var buttonsOb = $('#segment-' + segment.id + '-buttons');
+            var segObj = new UI.Segment(segment);
+            var buttonsOb = $('#segment-' + segObj.id + '-buttons');
             buttonsOb.empty();
+            $('p.warnings', segObj.el).empty();
         },
 
         createLegacyButtons : function( segment ) {
@@ -55,7 +57,7 @@ if ( ReviewImproved.enabled() && !config.isReview)
          * alongside the legacy buttons hadled with jquery.
          */
         createButtons: function(segment) {
-            var data = MateCat.db.segments.by('sid', segment.id);
+            var data = MateCat.db.segments.by('sid', segment.absId );
 
             if ( showFixedAndRebuttedButtons( data.status ) ) {
                 var mountpoint = segment.el.find('[data-mount="main-buttons"]')[0];

@@ -13,9 +13,9 @@ module.exports = function(grunt) {
         basePath + '../css/segment-notes.css',
         basePath + '../css/project-completion-feature.css',
         basePath + '../css/editlog.css',
-	basePath + '../css/jquery.powertip.min.css',
-	basePath + '../css/lxq-style.css',
-	basePath + '../css/lexiqa.css',
+	    basePath + '../css/jquery.powertip.min.css',
+	    basePath + '../css/lxq-style.css',
+	    basePath + '../css/lexiqa.css',
     ]
 
     var conf = grunt.file.read( incPath + 'version.ini' );
@@ -30,15 +30,16 @@ module.exports = function(grunt) {
         cssBase + 'segment-notes.css',
         cssBase + 'project-completion-feature.css',
         cssBase + 'editlog.css',
-	cssBase + 'jquery.powertip.min.css',
-	cssBase + 'lxq-style.css',
-	cssBase + 'lexiqa.css',
+	    cssBase + 'jquery.powertip.min.css',
+	    cssBase + 'lxq-style.css',
+	    cssBase + 'lexiqa.css',
         cssBase + 'lib/remodal.css',
         cssBase + 'lib/remodal-default-theme.css',
         cssBase + 'sass/review_improved.scss',
         cssBase + 'sass/segment_filter.scss',
         cssBase + 'sass/cattool.scss',
-        cssBase + '../holidays/*.css',		
+        cssBase + 'sass/speech2text.scss',
+        cssBase + '../holidays/*.css',
     ];
 
     var es2015Preset = require('babel-preset-es2015');
@@ -192,6 +193,8 @@ module.exports = function(grunt) {
 
                     basePath + 'cat_source/handlebars-helpers.js',
 
+                    basePath + 'cat_source/speech2text.js',
+
                     basePath + 'tm.js',
                     basePath + 'logout.js'
                 ],
@@ -203,6 +206,7 @@ module.exports = function(grunt) {
                     basePath + 'lib/lodash.min.js',
                     basePath + 'lib/handlebars.runtime-v4.0.5.js',
                     basePath + 'lib/jquery-1.11.0.min.js',
+                    // basePath + 'lib/jquery-1.11.3.js',
                     basePath + 'lib/remodal.min.js',
                     basePath + 'lib/waypoints.min.js',
                     basePath + 'lib/jquery-ui.js',

@@ -13,38 +13,23 @@ if(config.splitSegmentEnabled) {
     }).on('click', 'body:not([data-offline-mode]) .outersource .actions .split:not(.cancel)', function(e) {
         e.preventDefault();
         segment = $(this).parents('section');
-//        $('.editor .outersource .actions .split').addClass('cancel');
         $('.editor .split-shortcut').html('CTRL + W');
         console.log('split');
         UI.currentSegment.addClass('split-action');
         actions = $(this).parent().find('.actions');
         actions.show();
         UI.createSplitArea(segment);
-//        UI.lastSplitAreaContent = segment.find('.splitArea').html();
     })
-    /*.on('click', '.outersource .actions .split.cancel', function(e) {
-        e.preventDefault();
-        console.log('cancel');
-        $('.source .item').removeAttr('style');
-        $('.editor .outersource .actions .split').removeClass('cancel');
-        segment = $(this).parents('section');
-        UI.currentSegment.removeClass('split-action');
-        $('.editor .split-shortcut').html('CTRL + S');
-        segment.find('.splitBar, .splitArea').remove();
-//        segment.find('.sid .actions').hide();
 
-    })*/
     .on('click', 'body:not([data-offline-mode]) .sid .actions .split', function(e) {
         e.preventDefault();
         $('.sid .actions .split').addClass('cancel');
         $('.split-shortcut').html('CTRL + W');
-//        console.log('split');
         UI.currentSegment.addClass('split-action');
         actions = $(this).parent().find('.actions');
         actions.show();
         segment = $(this).parents('section');
         UI.createSplitArea(segment);
-//        UI.lastSplitAreaContent = segment.find('.splitArea').html();
     }).on('click', 'body[data-offline-mode] .sid .actions .split', function(e) {
         e.preventDefault();
     }).on('click', '.sid .actions .split.cancel', function(e) {
@@ -82,38 +67,10 @@ if(config.splitSegmentEnabled) {
         $(this).remove();
         UI.updateSplitNumber($(segment).find('.splitArea'));
 
-        /*
-                console.log('cliccato');
-                segment = $(this).parents('section');
-                console.log('a');
-                console.log('prima: ', $('.splitArea').html());
-                $(this).addClass('vediamo');
-                $(this).remove();
-                console.log('dopo: ', $('.splitArea').html());
-                console.log('b');
-                UI.updateSplitNumber($(segment).find('.splitArea'));
-                console.log('c');
-
-    }).on('click', '.splitBar .buttons .cancel', function(e) {
-        e.preventDefault();
-        segment = $(this).parents('section');
-        UI.currentSegment.removeClass('split-action');
-        $('.split-shortcut').html('CTRL + S');
-        segment.find('.splitBar, .splitArea').remove();
-        segment.find('.sid .actions').hide();
-   */}).on('click', '.splitBar .buttons .done', function(e) {
+      }).on('click', '.splitBar .buttons .done', function(e) {
         segment = $(this).parents('section');
         e.preventDefault();
         UI.splitSegment(segment);
-
-        /*
-                alreadySplitted = segment.attr('data-split-group') != '';
-                if(alreadySplitted) {
-
-                } else {
-                    UI.splitSegment(segment);
-                }
-        */
     })
 
     $("html").bind('keydown', 'ctrl+s', function(e) {
@@ -129,13 +86,11 @@ if(config.splitSegmentEnabled) {
             ss = this.cleanSplittedSource(segment.find('.splitArea').html());
             splittedSource = ss.split('<span class="splitpoint"><span class="splitpoint-delete"></span></span>');
             segment.find('.splitBar .buttons .cancel').click();
-//            segment.find('.source').removeAttr('style');
             oldSid = segment.attr('id').split('-')[1];
             this.setSegmentSplit(oldSid, splittedSource);
         },
         cleanSplittedSource: function (str) {
             str = str.replace(/<span contenteditable=\"false\" class=\"locked(.*?)\"\>(.*?)<\/span\>/gi, "$2");
-//            console.log('aaaaa: ', str.replace(/<span class=\"currentSplittedSegment\">(.*?)<\/span>/gi, '$1'));
             str = str.replace(/<span class=\"currentSplittedSegment\">(.*?)<\/span>/gi, '$1');
             return str;
         },
@@ -143,13 +98,8 @@ if(config.splitSegmentEnabled) {
         setSegmentSplit: function (sid, splittedSource) {
             splitAr = [0];
             splitIndex = 0;
-//            console.log('splittedSource: ', splittedSource);
             $.each(splittedSource, function (index) {
-//                console.log(UI.removeLockTagsFromString(this));
-//                console.log('prima: ', splittedSource[index]);
                 cc = UI.cleanSplittedSource(splittedSource[index]);
-//                console.log('cc: ', cc);
-//                cc = splittedSource[index].replace(/<span contenteditable=\"false\" class=\"locked(.*?)\"\>(.*?)<\/span\>/gi, "$2");
 
                 //SERVER NEEDS TEXT LENGTH COUNT ( WE MUST PAY ATTENTION TO THE TAGS ), so get html content as text
                 //and perform the count
@@ -158,7 +108,6 @@ if(config.splitSegmentEnabled) {
                 //WARNING for the length count, must be done BEFORE encoding of quotes '"' to &quot;
                 cc = cc.replace(/"/gi, '&quot;');
 
-//                console.log('dopo: ', cc);
                 splitIndex += ll;
                 splitAr.push( splitIndex );
             });
@@ -176,7 +125,6 @@ if(config.splitSegmentEnabled) {
             APP.doRequest({
                 data: {
                     action:              "setSegmentSplit",
-//                    split_points_source: '[' + splitArString + ']',
                     segment:            totalSource,
                     id_segment:          sid,
                     id_job:              config.job_id,
@@ -188,8 +136,6 @@ if(config.splitSegmentEnabled) {
                     splitAr: splitAr
                 },
                 error: function(d){
-                    // temp
- //                   UI.setSegmentSplitSuccess(this);
                     console.log('error');
                     UI.showMessage({
                         msg: d.errors[0].message
@@ -213,12 +159,10 @@ if(config.splitSegmentEnabled) {
             console.log('oldSid: ', oldSid);
             splittedSource = data.splittedSource;
             console.log('splittedSource: ', splittedSource);
-//            console.log('setSegmentSplitSuccess - splittedSource: ', splittedSource);
             splitAr = data.splitAr;
             newSegments = [];
             splitGroup = [];
             onlyOne = ( splittedSource.length == 1 ) ? true : false;
-//            console.log('segmentxx: ', UI.editarea.html());
 
             //get all chunk translations, if this is a merge we want all concatenated targets
             //but we could reload the page? ( TODO, check if we can avoid spaces and special chars problem )
@@ -257,11 +201,9 @@ if(config.splitSegmentEnabled) {
                 newSegments.push(segData);
                 splitGroup.push(oldSid + '-' + (index + 1));
             });
-//            console.log('newSegments: ', newSegments);
             oldSegment = $('#segment-' + oldSid);
             alreadySplitted = (oldSegment.length)? false : true;
             if(onlyOne) splitGroup = [];
-//            console.log('alreadySplitted: ', alreadySplitted);
             $('.test-invisible').remove();
 
             if(alreadySplitted) {
@@ -309,43 +251,21 @@ if(config.splitSegmentEnabled) {
             setTimeout(function() {
                 sourceHeight = $(source).height();
                 splitAreaHeight = $(splitArea).height();
-//                console.log(sourceHeight + ' - ' + splitAreaHeight);
-//                console.log('css height del source: ', $(source).css('height'));
             if(sourceHeight >= splitAreaHeight) {
                     $('.splitBar').css('top', (sourceHeight + 70)+ 'px');
                     $(source).css('height', (sourceHeight)+ 'px');
                     $('.editor .wrap').css('padding-bottom', (splitAreaHeight - targetHeight)+ 'px');
-//                    console.log('caso 1');
             } else if(sourceHeight < splitAreaHeight) {
                     $(source).css('height', (splitAreaHeight + 100)+ 'px');
                     $('.splitBar').css('top', (splitAreaHeight + 70)+ 'px');
-//                    console.log('caso 2');
                 }
             },100);
 
-           /* setTimeout(function() {
-                sourceHeight = $(source).height();
-                splitAreaHeight = $(splitArea).height();
-                console.log(sourceHeight + ' - ' + splitAreaHeight);
-                console.log('css height del source: ', $(source).css('height'));
-                if(sourceHeight > splitAreaHeight) {
-                    $(splitArea).css('height', (splitAreaHeight + 100) +'px');
-                    $('.splitBar').css('top', (splitAreaHeight + 50)+ 'px');
-                    console.log('caso 1');
-                } else if(sourceHeight <= splitAreaHeight){
-                    $(source).css('height', (sourceHeight + 50)+ 'px');
-                    $('.splitBar').css('top', (sourceHeight + 50)+ 'px');
-                      console.log('caso 2');
-                }
-            },100);*/
-
             if(isSplitted) splitArea.removeAttr('style');
             if(isSplitted) {
-//                console.log('ecco: ', '');
                 segments = segment.attr('data-split-group').split(',');
                 totalMarkup = '';
                 $.each(segments, function (index) {
-//                    console.log(this + ' - ' + UI.currentSegmentId);
                     newMarkup = $('#segment-' + this + ' .source').attr('data-original');
                     if(this == UI.currentSegmentId) newMarkup = '<span class="currentSplittedSegment">' + newMarkup + '</span>';
                     totalMarkup += newMarkup;
