@@ -2,12 +2,12 @@
 
 /**
  * @group regression
- * @covers EnginesModel_EngineDAO::disable
+ * @covers EnginesModel_EngineDAO::delete
  * User: dinies
  * Date: 20/04/16
- * Time: 18.38
+ * Time: 17.43
  */
-class DisableTest extends  AbstractTest
+class DeleteEngineTest extends AbstractTest
 {
     protected $reflector;
     protected $property;
@@ -29,7 +29,7 @@ class DisableTest extends  AbstractTest
     public function setUp()
     {
         parent::setUp();
-        $this->database_instance=Database::obtain();
+        $this->database_instance=Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->sql_insert_user = "INSERT INTO ".INIT::$DB_DATABASE.".`users` (`uid`, `email`, `salt`, `pass`, `create_date`, `first_name`, `last_name`, `api_key` ) VALUES ('44', 'bar@foo.net', '12345trewq', '987654321qwerty', '2016-04-11 13:41:54', 'Bar', 'Foo', '');";
         $this->sql_insert_engine = "INSERT INTO ".INIT::$DB_DATABASE.".`engines` (`id`, `name`, `type`, `description`, `base_url`, `translate_relative_url`, `contribute_relative_url`, `delete_relative_url`, `others`, `class_load`, `extra_parameters`, `google_api_compliant_version`, `penalty`, `active`, `uid`) VALUES ('10', 'DeepLingo En/Fr iwslt', 'MT', 'DeepLingo Engine', 'http://mtserver01.deeplingo.com:8019', 'translate', NULL, NULL, '{}', 'DeepLingo', '{\"client_secret\":\"gala15 \"}', '2', '14', '1', '44');";
         $this->database_instance->query($this->sql_insert_user);
@@ -37,7 +37,7 @@ class DisableTest extends  AbstractTest
         $this->sql_delete_user ="DELETE FROM users WHERE uid='44';";
         $this->sql_delete_engine ="DELETE FROM engines WHERE id='10';";
 
-        $this->engine_DAO= new EnginesModel_EngineDAO(Database::obtain());
+        $this->engine_DAO= new EnginesModel_EngineDAO(Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ));
 
         $this->flusher= new Predis\Client(INIT::$REDIS_SERVERS);
         $this->engine_struct_param = new EnginesModel_EngineStruct();
@@ -56,38 +56,39 @@ class DisableTest extends  AbstractTest
 
 
     /**
-     * @param EnginesModel_EngineStruct
-     * It disables the struct of the engine passed as @param
+     * This test delete the struct of an engine from the database that corresponds
+     * to the artificially constructed engine passed as @param.
      * @group regression
-     * @covers EnginesModel_EngineDAO::disable
+     * @covers EnginesModel_EngineDAO::delete
      */
-    public function test_disable_the_struct_of_constructed_engine(){
+    public function test_delete_the_struct_of_constructed_engine(){
 
 
         $this->engine_struct_param->id = 10 ;
         $this->engine_struct_param->uid = 44;
 
 
-        $sql_engine="SELECT active FROM ".INIT::$DB_DATABASE.".`engines` WHERE id=10 and uid=44";
+        $sql_engine="SELECT name FROM ".INIT::$DB_DATABASE.".`engines` WHERE id=10 and uid=44";
         $this->database_instance->query($sql_engine)->fetchAll(PDO::FETCH_ASSOC);
-        $this->assertEquals(array(0 => array('active' => 1)), $this->database_instance->query($sql_engine)->fetchAll(PDO::FETCH_ASSOC));
-        $this->engine_DAO->disable($this->engine_struct_param);
+        $this->assertEquals(array(0 => array('name' => "DeepLingo En/Fr iwslt")), $this->database_instance->query($sql_engine)->fetchAll(PDO::FETCH_ASSOC));
+        $this->engine_DAO->delete($this->engine_struct_param);
         $this->flusher->flushdb();
-        $this->assertEquals(array(0 => array('active' => 0)), $this->database_instance->query($sql_engine)->fetchAll(PDO::FETCH_ASSOC));
+        $this->assertEquals(array(), $this->database_instance->query($sql_engine)->fetchAll(PDO::FETCH_ASSOC));
 
     }
 
     /**
-     * @param EnginesModel_EngineStruct
-     * It fails in disabling the struct of the engine because the engine passed as @param has wrong uid
+     * This test doesn't delete the struct of an engine from the database that corresponds
+     * to the artificially constructed engine passed as @param.
      * @group regression
-     * @covers EnginesModel_EngineDAO::disable
+     * @covers EnginesModel_EngineDAO::delete
      */
-    public function test_disable_the_struct_of_engine_with_wrong_uid_avoiding_the_disable(){
-        
+    public function test_delete_the_struct_of_engine_with_wrong_uid_avoiding_the_delete(){
+
+
         $this->engine_struct_param->id = 10 ;
         $this->engine_struct_param->uid = 66;
-        $this->assertNull($this->engine_DAO->disable($this->engine_struct_param));
+        $this->assertNull($this->engine_DAO->delete($this->engine_struct_param));
 
     }
 }

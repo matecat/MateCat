@@ -2213,10 +2213,6 @@ class ProjectManager {
         return CatUtils::generate_password( $length );
     }
 
-    private function sortByStrLenAsc( $a, $b ) {
-        return strlen( $a ) >= strlen( $b );
-    }
-
     private function addNotesToProjectStructure( $trans_unit ) {
         /**
          * notes structure is the following:
