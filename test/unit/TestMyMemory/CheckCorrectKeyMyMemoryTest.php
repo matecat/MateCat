@@ -17,7 +17,7 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest
      */
     public function test_checkCorrectKey_with_success(){
         $key_param= "bfb9bd80a43253670c8d";
-        $engineDAO = new EnginesModel_EngineDAO(Database::obtain());
+        $engineDAO = new EnginesModel_EngineDAO(Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ));
         $engine_struct = EnginesModel_EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng = $engineDAO->read($engine_struct);
@@ -53,7 +53,7 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest
      */
     public function test_checkCorrectKey_with_failure_with_fake_tmKey(){
         $key_param= "b2invalid2d";
-        $engineDAO = new EnginesModel_EngineDAO(Database::obtain());
+        $engineDAO = new EnginesModel_EngineDAO(Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ));
         $engine_struct = EnginesModel_EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng = $engineDAO->read($engine_struct);
@@ -106,7 +106,7 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest
         );
 
 
-        $engineDAO = new EnginesModel_EngineDAO(Database::obtain());
+        $engineDAO = new EnginesModel_EngineDAO(Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ));
         $engine_struct = EnginesModel_EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng = $engineDAO->read($engine_struct);
@@ -151,6 +151,51 @@ class CheckCorrectKeyMyMemoryTest extends AbstractTest
         $property->setAccessible(true);
         $this->assertEquals("", $property->getValue($object_result));
 
+    }
+
+    /**
+     * @group regression
+     * @covers Engines_MyMemory::checkCorrectKey
+     */
+    public function test_checkCorrectKey_with_error_from_mocked__call_for_coverage_purpose(){
+
+        $key_param= "bfb9bd80a43253670c8d";
+        $url_mock_param="http://api.mymemory.translated.net/authkey?key=bfb9bd80a43253670c8d";
+        $curl_mock_param = array(
+            CURLOPT_HTTPGET => true,
+            CURLOPT_TIMEOUT => 10
+        );
+
+        $rawValue_error = array(
+            'error' => array(
+                'code'      => -6,
+                'message'   => "Could not resolve host: api.mymemory.translated.net. Server Not Available (http status 0)",
+                'response'  => "",
+            ),
+            'responseStatus'    => 0
+        );
+
+
+
+        $engineDAO = new EnginesModel_EngineDAO(Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ));
+        $engine_struct = EnginesModel_EngineStruct::getStruct();
+        $engine_struct->id = 1;
+        $eng = $engineDAO->read($engine_struct);
+
+        /**
+         * @var $engineRecord EnginesModel_EngineStruct
+         */
+        $engine_struct_param = $eng[0];
+
+        /**
+         * creation of the engine
+         * @var Engines_MyMemory
+         */
+        $engine_MyMemory = $this->getMockBuilder('\Engines_MyMemory')->setConstructorArgs(array($engine_struct_param))->setMethods(array('_call'))->getMock();
+        $engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param, $curl_mock_param)->willReturn($rawValue_error);
+
+        $this->setExpectedException('Exception');
+        $engine_MyMemory->checkCorrectKey($key_param);
 
 
     }

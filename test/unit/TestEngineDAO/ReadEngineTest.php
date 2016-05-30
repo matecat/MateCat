@@ -7,7 +7,7 @@
  * Date: 15/04/16
  * Time: 15.56
  */
-class ReadTest extends  AbstractTest
+class ReadEngineTest extends  AbstractTest
 {
 
     /**
@@ -26,7 +26,7 @@ class ReadTest extends  AbstractTest
     public function test_read_given_engine_struct()
     {
 
-        $this->engine_Dao = new EnginesModel_EngineDAO(Database::obtain());
+        $this->engine_Dao = new EnginesModel_EngineDAO(Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ));
 
         $this->engine_struct_param = new EnginesModel_EngineStruct();
 

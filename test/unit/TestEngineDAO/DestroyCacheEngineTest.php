@@ -7,19 +7,34 @@
  * Date: 19/04/16
  * Time: 17.10
  */
-class Destroy2CacheTest extends AbstractTest
+class DestroyCacheEngineTest extends AbstractTest
 {
+    /**
+     * @var EnginesModel_EngineDAO
+     */
     protected $engineDAO;
+    /**
+     * @var \Predis\Client
+     */
     protected $cache;
+    /**
+     * @var EnginesModel_EngineStruct
+     */
     protected $engine_struct;
 
     public function setUp()
     {
         parent::setUp();
-        $this->engineDAO = new EnginesModel_EngineDAO(Database::obtain());
+        $this->engineDAO = new EnginesModel_EngineDAO(Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ));
 
         $this->engine_struct = new EnginesModel_EngineStruct();
         $this->cache= new Predis\Client(INIT::$REDIS_SERVERS);
+    }
+
+    public function tearDown()
+    {
+        $this->cache->flushdb();
+        parent::tearDown();
     }
 
     /**
