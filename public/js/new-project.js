@@ -89,7 +89,8 @@ $(document).ready(function() {
 		if( UI.checkTMXLangFailure() ){
 			UI.delTMXLangFailure();
 		}
-
+		APP.changeTargetLang( $(this).val() );
+		
     });
 
 	$("input.uploadbtn").click(function(e) {
