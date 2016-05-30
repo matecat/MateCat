@@ -56,15 +56,18 @@
             var decoded_translation;
             var decoded_source;
 
-            /**if Tag Projection enabled and there are not tags in the segment translation, add the class that identify
+            /**if Tag Projection enabled and there are not tags in the segment translation, remove it and add the class that identify
              * tha Tag Projection is enabled
              */
             if (UI.enableTagProjection && (UI.getSegmentStatus(segment) === 'draft' || UI.getSegmentStatus(segment) === 'new')
                 && !UI.checkXliffTagsInText(segment.translation) ) {
+                decoded_translation = UI.removeAllTags(segment.translation);
+                decoded_source = UI.removeAllTags(segment.segment);
                 classes.push('enableTP');
+            } else {
+                decoded_translation = segment.translation;
+                decoded_source = segment.segment;
             }
-            decoded_translation = segment.translation;
-            decoded_source = segment.segment;
 
             decoded_translation = UI.decodePlaceholdersToText(
                 decoded_translation || '',
@@ -98,7 +101,7 @@
                 status_change_title     : status_change_title ,
                 segment_edit_sec        : segment_edit_sec,
                 segment_edit_min        : segment_edit_min,
-                enableTagProjection  : !this.enableTagProjection
+                notEnableTagProjection  : !this.enableTagProjection
             }
 
             return templateData ;
@@ -139,6 +142,7 @@
          * @param file
          */
         checkTPEnabled: function (file) {
+            
             return (((file.source_code === 'it-IT' && file.target_code.indexOf('en-') > -1)
                 || (file.source_code.indexOf('en-') > -1 && file.target_code === 'it-IT'))
                 && !config.isReview);
@@ -254,6 +258,11 @@
             var currentSegment = (segment)? segment : UI.currentSegment;
             var source = currentSegment.find('.source').data('original');
             source = htmlDecode(source).replace(/&quot;/g, '\"');
+            source = source.replace(/\n/g , config.lfPlaceholder)
+                    .replace(/\r/g, config.crPlaceholder )
+                    .replace(/\r\n/g, config.crlfPlaceholder )
+                    .replace(/\t/g, config.tabPlaceholder )
+                    .replace(String.fromCharCode( parseInt( 0xA0, 10 ) ), config.nbspPlaceholder );
             var decoded_source = UI.decodePlaceholdersToText(source, true);
             currentSegment.find('.source').html(decoded_source);
             UI.lockTags(currentSegment.find(".source"))

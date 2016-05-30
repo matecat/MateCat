@@ -3216,9 +3216,7 @@ UI = {
             } else {
                 UI.blockOpenSegment = false;
             }
-
-            UI.restoreTagsForTagProjection();
-
+            
             UI.lastOperation = operation;
 
             UI.openSegment(this, operation);

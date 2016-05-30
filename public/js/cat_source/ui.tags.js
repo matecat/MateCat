@@ -187,12 +187,7 @@ $.extend(UI, {
             }
 
             $('span.locked', this).addClass('monad');
-
-            // If Tag Projection enabled dont transform tags
-            /*if (self.enableTagProjection) {
-                UI.toggleTagsMode();
-            }*/
-
+            
             UI.detectTagType(this);
         });
     },
