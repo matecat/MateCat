@@ -23,7 +23,7 @@ class BlacklistFromZip {
     }
 
     /**
-     *
+     * getMatches 
      *
      * @param $string
      *
@@ -32,34 +32,24 @@ class BlacklistFromZip {
     public function getMatches( $string ) {
         $this->ensureCached();
 
-        $key  = "blacklist:trg:" . md5( $string ) ;
-
-        $splitted_string = explode( " ", $string );
         $redis           = new \Predis\Client( \INIT::$REDIS_SERVERS );
-
-        foreach ( $splitted_string as $word ) {
-            $word  = trim( $word );
-            $this->redis->sadd( $key, $word );
-        }
-
-        $this->redis->expire( $key, 60 * 60 * 24 * 30 ) ;
-
-        $results = $redis->sinter(array( $this->getJobCacheKey(), $key ));
-
-        $results = array_filter( $results, function( $item ) {
-            $item = trim($item) ;
-            return strlen( $item ) > 0 ;
-        });
-
-        $results = array_values( $results );
+        $blacklist_rows = $redis->smembers( $this->getJobCacheKey() ) ;
 
         $counter = array()  ;
-
-        foreach( $results as $result ) {
-            $quoted = preg_quote( $result );
+        
+        foreach($blacklist_rows as $blacklist_item) {
+            $blacklist_item = trim( $blacklist_item ) ; 
+            
+            if ( strlen( $blacklist_item ) == 0 ) { 
+                continue ; 
+            }
+                
+            $quoted = preg_quote( $blacklist_item );
             $matches = preg_match_all("/\\b$quoted\\b/", $string) ;
 
-            $counter[ $result ] = $matches ;
+            if ( $matches > 0 ) {
+                $counter[ $blacklist_item ]  = $matches;
+            }
         }
 
         return $counter;
