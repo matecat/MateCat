@@ -333,7 +333,7 @@ UI = {
 
         this.highlightEditarea();
 
-        this.currentSegmentQA();
+        this.currentSegmentQA();        
         $(this.currentSegment).trigger('copySourceToTarget');
         if(!config.isReview) {
             var alreadyCopied = false;
@@ -1216,7 +1216,7 @@ UI = {
 	registerQACheck: function() {
 		clearTimeout(UI.pendingQACheck);
 		UI.pendingQACheck = setTimeout(function() {
-			UI.currentSegmentQA();
+			UI.currentSegmentQA();            
 		}, config.segmentQACheckInterval);
 	},
 	reloadToSegment: function(segmentId) {
@@ -1863,16 +1863,34 @@ UI = {
 */
 				toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? capStr : d;
 				newStr += toAdd;
-			} else {
+			}
+            else if(this.nodeName == 'LXQWARNING') { 
+                d = this.childNodes[0].data;
+                jump = ((!index)&&(!aa));
+//				console.log(d.charAt(0));
+				capStr = toTitleCase(d);
+				if(jump) {
+					capStr = d.charAt(0) + toTitleCase(d).slice(1);
+				}
+                toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? capStr : d;
+				newStr += toAdd;    
+            }
+            else {
 				newStr += this.outerHTML;
 //				newStr += this.innerText;
 			}
 		});
         console.log('x');
-//        console.log('newStr: ', newStr);
-		replaceSelectedText(newStr);
         console.log('newStr: ', newStr);
-//		replaceSelectedHtml(newStr);
+        if (LXQ.enabled()) {
+            $.powerTip.destroy($('.tooltipa',this.currentSegment));
+            $.powerTip.destroy($('.tooltipas',this.currentSegment));
+            replaceSelectedHtml(newStr);
+            LXQ.reloadPowertip(this.currentSegment);
+        }
+        else {
+            replaceSelectedText(newStr);
+        }
         console.log('a: ', UI.editarea.html());
 		UI.lockTags();
         console.log('b: ', UI.editarea.html());
@@ -2262,6 +2280,12 @@ UI = {
 			});
 		}
 	},
+    currentSegmentLexiQA: function() {
+        console.log('in currentSegmentLexiQA...');
+        var translation = $('.editarea', UI.currentSegment ).text().replace(/\uFEFF/g,'');            
+        var id_segment = UI.getSegmentId(UI.currentSegment);
+        UI.doLexiQA(UI.currentSegment, translation, id_segment,false, function () {}) ;
+    },
 	currentSegmentQA: function() {
 		this.currentSegment.addClass('waiting_for_check_result');
 		var dd = new Date();
@@ -2321,6 +2345,7 @@ UI = {
 				}
 			}
 		}, 'local');
+        if (LXQ.enabled()) UI.currentSegmentLexiQA();
 	},
 
     translationIsToSave : function( segment ) {
@@ -3065,7 +3090,7 @@ UI = {
 		this.registerQACheck();
 	},
 	saveInUndoStack: function(fromWhich) {
-//		noRestore = (typeof noRestore == 'undefined')? 0 : 1;
+//		noRestore = (typeof noRestore == 'undefined')? 0 : 1;        
 		currentItem = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition];
 
 		if (typeof currentItem != 'undefined') {
@@ -3108,35 +3133,13 @@ UI = {
 			this.undoStack.splice(this.undoStack.length - pos, pos);
 			this.undoStackPosition = 0;
 		}
-
-        if (LXQ.enabled() && fromWhich === 'space' && !UI.lexiqaData.lexiqaFetching) { 
-            saveSelection();
-            $('.undoCursorPlaceholder').remove();
-            $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
-            
-            UI.lexiqaData.lexiqaFetching = true;   
-            var callback1 = function() {
-                LXQ.reloadPowertip(UI.currentSegment);                                           
-                restoreSelection();
-                UI.lexiqaData.lexiqaFetching = false;
-        		UI.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
-            }
-            console.log('space was pressed');
-            //console.dir(UI.currentSegment);
-            var translation = $('.editarea', UI.currentSegment ).text().replace(/\uFEFF/g,'');
-            
-            var id_segment = UI.getSegmentId(UI.currentSegment);
-
-
-            UI.doLexiQA(UI.currentSegment, translation, id_segment,false, callback1) ;
-        }
-        else {
-		    saveSelection();
-            $('.undoCursorPlaceholder').remove();
-            $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');      
-            restoreSelection();
-    		this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
-        }      
+                
+        saveSelection();
+        $('.undoCursorPlaceholder').remove();
+        $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');      
+        restoreSelection();
+        this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
+        
 	},
 	clearUndoStack: function() {
 		this.undoStack = [];
@@ -3234,7 +3237,7 @@ UI = {
                     targettext: translation,
                     returnUrl: returnUrl,
                     segmentId: id_segment,
-                    partnerId: "matecat",
+                    partnerId: LXQ.partnerid,
                     isSegmentCompleted: isSegmentCompleted,
                     responseMode: "includeQAResults"
                 }
@@ -3262,7 +3265,9 @@ UI = {
                                 spaces: [],
                                 urls: [],
                                 spelling: [],
-                                specialchardetect: []
+                                specialchardetect: [],
+                                glossary: [],
+                                blacklist: []
                             },
                             target: {
                                 numbers: [],
@@ -3270,7 +3275,9 @@ UI = {
                                 spaces: [],
                                 urls: [],
                                 spelling: [],
-                                specialchardetect: []                                
+                                specialchardetect: [],
+                                glossary: [],
+                                blacklist: []                              
                             }
                     };
                     var newWarnings = {};
@@ -3299,18 +3306,19 @@ UI = {
                     UI.lexiqaData.lexiqaWarnings[id_segment] = newWarnings[id_segment];
                     console.dir(UI.lexiqaData.lexiqaWarnings[id_segment]);
                     var seg = UI.getSegmentById(id_segment);
-                    source_val = LXQ.highLightText(source_val, highlights.source,isSegmentCompleted,LXQ.shouldHighlighWarningsForSegment(seg),true,segment);
-                    
+                    source_val = LXQ.highLightText(source_val, highlights.source,isSegmentCompleted,true,true,segment);
+                    if (callback!=null)
+                        saveSelection();
                     target_val = UI.clearMarks($(".editarea", segment).html());
                     console.log('target: '+target_val);
-                    target_val = LXQ.highLightText(target_val,highlights.target,isSegmentCompleted,LXQ.shouldHighlighWarningsForSegment(seg),false,segment);
+                    target_val = LXQ.highLightText(target_val,highlights.target,isSegmentCompleted,true,false,segment);
+                    
                     $(".editarea", segment).html(target_val);
-                    $(".source", segment).html(source_val);  
                     if (callback!=null)
-                        callback(segment);
-                    else {
-                        LXQ.reloadPowertip(segment);
-                    }                     
+                        restoreSelection();
+                    $(".source", segment).html(source_val);                      
+                    LXQ.reloadPowertip(segment);
+                                     
                     //FOTD CHANGE THIS
                     // $('.lxq-error-seg',segment).attr('numberoferrors',LXQ.getVisibleWarningsCountForSegment(segment)).css("background-color","#efecca").removeClass('lxq-error-changed');
                     //only reload dropdown menu and link, if there was an error...
@@ -3373,7 +3381,7 @@ UI = {
             //remove link and warning
         $('#lexiqabox').attr('class', 'lexnotific').attr("title", "Well done, no errors found!").find('.numbererror').text('');                    
         //$('#go2lexiqa').attr('href', "#");  
-        result.qaurl = '#';
+        //result.qaurl = '#';
         }
         else {
                 $('#lexiqabox').attr('class', 'warningbox').attr("title", "Go to lexiQA for QA analysis").find('.numbererror').text(UI.lexiqaData.segments.length);                           
@@ -3387,7 +3395,7 @@ UI = {
         UI.lexiqaData.lexiqaFetching = true;
         $.ajax({type: "GET",
             url: config.lexiqaServer+"/matecaterrors",
-            data: {id: 'matecat-'+config.job_id+'-'+config.password },
+            data: {id: LXQ.partnerid+'-'+config.job_id+'-'+config.password },
             success:function(results){
                 console.log('matecaterrors returned:')
                 console.dir(results);
@@ -3412,7 +3420,9 @@ UI = {
                                 spaces: [],
                                 urls: [],
                                 spelling: [],
-                                specialchardetect: []
+                                specialchardetect: [],
+                                glossary: [],
+                                blacklist: []
                             },
                             target: {
                                 numbers: [],
@@ -3420,7 +3430,9 @@ UI = {
                                 spaces: [],
                                 urls: [],
                                 spelling: [],
-                                specialchardetect: []                                
+                                specialchardetect: [] ,
+                                glossary: [],
+                                blacklist: []                              
                             }
                         };
                         UI.lexiqaData.lexiqaWarnings[element.segid] = {};
