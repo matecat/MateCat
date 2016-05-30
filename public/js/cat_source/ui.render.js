@@ -96,11 +96,8 @@ $.extend(UI, {
 //        console.log(UI.commonPartInSegmentIds);
 		UI.detectStartSegment(); 
 		options.openCurrentSegmentAfter = ((!seg) && (!this.firstLoad)) ? true : false;
-		UI.getSegments(options);
-//		if(highlight) {
-//			console.log('HIGHLIGHT');
-//			UI.highlightEditarea();
-//		}
+		
+		var getSegmentsAjax = UI.getSegments(options);
 
 		if (this.firstLoad && this.autoUpdateEnabled) {
 			this.lastUpdateRequested = new Date();
@@ -108,6 +105,8 @@ $.extend(UI, {
 				UI.getUpdates();
 			}, UI.checkUpdatesEvery);
 		}
+		
+		return getSegmentsAjax ; 
 	},
 });
 

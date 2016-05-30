@@ -954,7 +954,7 @@ UI = {
 		$('#outer').addClass('loading');
 		var seg = (options.segmentToScroll) ? options.segmentToScroll : this.startSegmentId;
 
-		APP.doRequest({
+		return APP.doRequest({
 			data: {
 				action: 'getSegments',
 				jid: config.id_job,
@@ -3554,11 +3554,14 @@ UI = {
         $("article").each(function() {
             APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30);
         });
+        
         UI.render({
             firstLoad: true
+        }).done( function() {
+            // launch segments check on opening
+            UI.checkWarnings(true);
         });
-        //launch segments check on opening
-        UI.checkWarnings(true);
+        
         $('html').trigger('start');
         if (LXQ.enabled()) {
             $('#lexiqabox').removeAttr("style");
