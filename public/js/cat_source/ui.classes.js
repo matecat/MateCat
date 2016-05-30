@@ -3,7 +3,7 @@
     var Segment = function(el) {
         this.el = $(el).closest('section') ;
 
-        this.raw = el ;
+        this.raw = this.el[0] ;
         var that = this;
 
         this.id = UI.getSegmentId(this.el);

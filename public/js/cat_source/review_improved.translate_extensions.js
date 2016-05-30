@@ -69,7 +69,7 @@ if ( ReviewImproved.enabled() && !config.isReview)
 
             } else {
                 unmountReactButtons( segment.el );
-                UI.cleanupLegacyButtons( segment );
+                UI.cleanupLegacyButtons( segment.el );
                 UI.createLegacyButtons( segment ) ;
             }
         }
