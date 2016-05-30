@@ -845,7 +845,8 @@ if ( MBC.enabled() )
             $( '.mbc-history-balloon-outer' ).toggleClass( 'mbc-visible' );
             if ( $( '.searchbox' ).is( ':visible' ) ) {
                 UI.toggleSearch( ev );
-            }
+            }               
+            if (LXQ.enabled()) LXQ.hidePopUp();
         } );
 
         $( document ).on( 'mbc:comment:new', function ( ev, data ) {
@@ -874,8 +875,7 @@ if ( MBC.enabled() )
         } );
 
         $( window ).on( 'segmentOpened', function ( e ) {
-            var segment = new UI.Segment( $( e.segment ) );
-
+            var segment = e.segment ;
             if ( MBC.wasAskedByCommentHash( segment.absoluteId ) ) {
                 openSegmentComment( $( e.segment ) );
             }

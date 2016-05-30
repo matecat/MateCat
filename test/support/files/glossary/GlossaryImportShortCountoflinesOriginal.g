@@ -1,0 +1,2 @@
+fr-FR
+Acide,Acido

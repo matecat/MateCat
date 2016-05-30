@@ -185,5 +185,9 @@ route(
     '/gdrive/delete/[:fileId]', 'GET',
     'GDriveController', 'deleteImportedFile'
 );
+route(
+    '/gdrive/verify', 'GET',
+    'GDriveController', 'isGDriveAccessible'
+);
 
 $klein->dispatch();

@@ -276,11 +276,11 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
                     $bom = pack('H*','EFBBBF');
                     $source_lang = preg_replace("/^$bom/","",$source_lang);
 
-                    if ( !Langs_Languages::isEnabled( $source_lang ) ) {
+                    if ( !Langs_Languages::getInstance()->isEnabled( $source_lang ) ) {
                         throw new RuntimeException( "The source language specified in the glossary is not supported: " . $source_lang );
                     }
 
-                    if ( !Langs_Languages::isEnabled( $target_lang ) ) {
+                    if ( !Langs_Languages::getInstance()->isEnabled( $target_lang ) ) {
                         throw new RuntimeException( "The target language specified in the glossary is not supported: " . $target_lang );
                     }
 
@@ -342,6 +342,17 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
 
         $postFields[ 'key' ] = trim( $key );
 
+
+        if (PHP_MINOR_VERSION >= 5) {
+            /**
+             * Added in PHP 5.5.0 with FALSE as the default value.
+             * PHP 5.6.0 changes the default value to TRUE.
+             */
+            $options[CURLOPT_SAFE_UPLOAD] = false;
+            $this->_setAdditionalCurlParams($options);
+        }
+
+        
         $this->call( "tmx_import_relative_url", $postFields, true );
 
         return $this->result;
@@ -376,8 +387,6 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
      * @param null|string  $source
      * @param null|string  $target
      * @param null|boolean $strict
-     *
-     * @return array
      */
     public function createExport( $key, $source = null, $target = null, $strict = null ) {
 
@@ -578,7 +587,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
      * @return mixed
      */
     public function detectLanguage( $segs_array, $lang_detect_files ) {
-        //In this array we will put a significative string for each job.
+        //In this array we will put a meaningful string for each job.
         $segmentsToBeDetected = array();
 
 
@@ -588,7 +597,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         $arrayIterator = $segs_array->getIterator();
 
         $counter = 0;
-        //iterate through files and extract a significative
+        //iterate through files and extract a meaningful
         //string long at least 150 characters for language detection
         while ( $arrayIterator->valid() ) {
             $currFileName = key( $lang_detect_files );
@@ -630,13 +639,9 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
                 $segmentArray[ $i ] = $singleSegment[ 0 ];
             }
 
-            if ( !function_exists( 'sortByStrLenAsc' ) ) {
-                function sortByStrLenAsc( $a, $b ) {
-                    return strlen( $a ) >= strlen( $b );
-                }
-            }
-
-            usort( $segmentArray, array( 'sortByStrLenAsc' ) );
+            usort( $segmentArray, function ( $a, $b ) {
+                return strlen( $a ) >= strlen( $b );
+            } );
 
             $textToBeDetected = "";
             /**

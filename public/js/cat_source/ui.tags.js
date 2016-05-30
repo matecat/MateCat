@@ -110,6 +110,8 @@ $.extend(UI, {
             .replace(/</gi, "&lt;")
             .replace(/\&lt;pl/gi, "<span")
             .replace(/\&lt;\/pl/gi, "</span")
+            .replace(/\&lt;lxqwarning/gi, "<lxqwarning")
+            .replace(/\&lt;\/lxqwarning/gi, "</lxqwarning")
             .replace(/\&lt;div\>/gi, "<div>")
             .replace(/\&lt;\/div\>/gi, "</div>")
             .replace(/\&lt;br\>/gi, "<br>")
@@ -124,7 +126,6 @@ $.extend(UI, {
 
             tx = tx.replace(/(<\/span\>)$(\s){0,}/gi, "</span> ");
             tx = tx.replace(/(<\/span\>\s)$/gi, "</span><br class=\"end\">");
-
         return tx;
     },
 
@@ -158,19 +159,26 @@ $.extend(UI, {
         }
 
         $(area).first().each(function() {
+            var segment = $(this).closest('section');
+			if (LXQ.enabled()) {
+            	$.powerTip.destroy($('.tooltipa',segment));
+            	$.powerTip.destroy($('.tooltipas',segment));
+            }
             saveSelection();
 
             var html = $(this).html() ;
+
             var tx = UI.transformTextForLockTags( html ) ;
             $(this).html(tx);
 
             var prevNumTags = $('span.locked', this).length;
 
             restoreSelection();
-
+            if (LXQ.enabled())
+                LXQ.reloadPowertip(segment);
             if ($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
 
-            var segment = $(this).closest('section');
+
 
             UI.evalCurrentSegmentTranslationAndSourceTags( segment );
 
@@ -187,7 +195,7 @@ $.extend(UI, {
             }
 
             $('span.locked', this).addClass('monad');
-            
+
             UI.detectTagType(this);
         });
     },
@@ -211,14 +219,14 @@ $.extend(UI, {
 			return false;
         this.editarea.html(this.removeLockTagsFromString(this.editarea.html()));
 	},
-    
+
     toggleTagsMode: function (elem) {
         if (elem) {
             $(elem).toggleClass('active');
         }
         UI.body.toggleClass('tagmode-default-extended');
     },
-    
+
     removeLockTagsFromString: function (str) {
         return str.replace(/<span contenteditable=\"false\" class=\"locked\"\>(.*?)<\/span\>/gi, "$1");
     },
@@ -329,6 +337,7 @@ $.extend(UI, {
         this.custom.extended_tagmode = false;
         this.saveCustomization();
     },
+
     enableTagMode: function () {
         UI.render(
             {tagModesEnabled: true}
@@ -340,7 +349,6 @@ $.extend(UI, {
         )
     },
     nearTagOnRight: function (index, ar) {
-
         if($(ar[index]).hasClass('locked')) {
             if(UI.numCharsUntilTagRight == 0) {
                 // count index of this tag in the tags list
@@ -405,7 +413,7 @@ $.extend(UI, {
         tempRange = range;
         UI.editarea.find('.test-invisible').remove();
         pasteHtmlAtCaret('<span class="test-invisible"></span>');
-        coso = $.parseHTML(UI.editarea.html());
+        var coso = $.parseHTML(UI.editarea.html());
         $.each(coso, function (index) {
             if($(this).hasClass('test-invisible')) {
                 UI.numCharsUntilTagRight = 0;
@@ -432,6 +440,7 @@ $.extend(UI, {
 
     },
     highlightCorrespondingTags: function (el) {
+        var pairEl;
         if(el.hasClass('startTag')) {
             if(el.next('.endTag').length) {
                 el.next('.endTag').addClass('highlight');
@@ -451,8 +460,11 @@ $.extend(UI, {
                             return false;
                         }
                     }
-                })
-                $(pairEl).addClass('highlight');
+
+                });
+                if (pairEl) {
+                    $(pairEl).addClass('highlight');
+                }
 
 
             }
@@ -477,7 +489,9 @@ $.extend(UI, {
                     }
 
                 });
-                $(pairEl).addClass('highlight');
+                if (pairEl) {
+                    $(pairEl).addClass('highlight');
+                }
             }
         }
         $(el).addClass('highlight');
@@ -488,6 +502,7 @@ $.extend(UI, {
 
     // TAG MISMATCH
 	markTagMismatch: function(d) {
+
         if((typeof d.tag_mismatch.order == 'undefined')||(d.tag_mismatch.order === '')) {
             if(typeof d.tag_mismatch.source != 'undefined') {
                 $.each(d.tag_mismatch.source, function(index) {
@@ -517,7 +532,6 @@ $.extend(UI, {
 
 	// TAG AUTOCOMPLETE
 	checkAutocompleteTags: function() {
-
 		added = this.getPartialTagAutocomplete();
 		$('.tag-autocomplete li.hidden').removeClass('hidden');
 		$('.tag-autocomplete li').each(function() {
@@ -540,7 +554,7 @@ $.extend(UI, {
 
 			$('.tag-autocomplete li.current').removeClass('current');
 			$('.tag-autocomplete li:not(.hidden)').first().addClass('current');
-			$('.tag-autocomplete').removeClass('empty');		
+			$('.tag-autocomplete').removeClass('empty');
 			UI.preCloseTagAutocomplete = false;
 		}
 	},

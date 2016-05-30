@@ -105,12 +105,19 @@
 
             this.opening = false;
 
-            // this.body.addClass('editing');
 
             segment.el.addClass("editor");
 
             if (!this.readonly) {
-                this.editarea.attr('contenteditable', 'true');
+                /* Check if is right-to-left language, because there is a bug that make
+                    Chrome crash, this happens without the timer */
+                if (this.body.hasClass('rtl-target')) {
+                    setTimeout(function () {
+                        UI.editarea.attr('contenteditable', 'true');
+                    }, 500);
+                } else {
+                    UI.editarea.attr('contenteditable', 'true');
+                }
             }
 
             this.editStart = new Date();
@@ -134,6 +141,8 @@
                 type: "segmentOpened",
                 segment: segment
             });
+
+            Speech2Text.enableMicrophone(segment.el);
         }
     });
 })(jQuery, UI);

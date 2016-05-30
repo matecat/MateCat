@@ -71,6 +71,11 @@ class catController extends viewController {
      */
     private $review_password = "";
 
+    /**
+     * @var FeatureSet
+     */
+    private $fature_set ;
+
     public function __construct() {
         $this->start_time = microtime( 1 ) * 1000;
 
@@ -120,6 +125,9 @@ class catController extends viewController {
 
         $this->generateAuthURL();
 
+        $this->project = Projects_ProjectDao::findByJobId( $this->jid );
+        $this->feature_set = FeatureSet::fromIdCustomer( $this->project->id_customer );
+
     }
 
     private function doAuth() {
@@ -144,11 +152,8 @@ class catController extends viewController {
      */
     private function findJobByIdAndPassword() {
         if ( self::isRevision() ) {
-            $this->project = Projects_ProjectDao::findByJobId( $this->jid );
-
-            $this->password = Features::filter(
+            $this->password = $this->feature_set->filter(
                 'filter_review_password_to_job_password',
-                $this->project->id_customer,
                 $this->password,
                 $this->jid
             );
@@ -162,7 +167,10 @@ class catController extends viewController {
         $files_found  = array();
         $lang_handler = Langs_Languages::getInstance();
 
+
         try {
+            // TODO: why is this check here and not in constructor? At least it should be moved in a specific
+            // function and not-found handled via exception.
             $this->findJobByIdAndPassword();
         } catch( \Exceptions_RecordNotFound $e ){
             $this->job_not_found = true;
@@ -674,11 +682,19 @@ class catController extends viewController {
 
         $this->template->uses_matecat_filters = Utils::isJobBasedOnMateCatFilters($this->jid);
 
+        $metadataDao = new Projects_MetadataDao( Database::obtain() );
+        $lexicaMeta = $metadataDao->setCacheTTL( 60 * 60 )->get( $this->pid, 'lexiqa' );
+        if( $lexicaMeta instanceof Projects_MetadataStruct ){
+            $this->template->lxq_enabled = var_export(
+                    $lexicaMeta->value,
+                    true
+            );
+        }
+
         $this->decorator = new CatDecorator( $this, $this->template );
         $this->decorator->decorate();
 
-        Features::appendDecorators(
-            $this->getJob()->getProject()->id_customer,
+        $this->feature_set->appendDecorators(
             'CatDecorator',
             $this,
             $this->template
