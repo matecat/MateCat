@@ -127,7 +127,7 @@ class NotificationBox extends React.Component {
                         />;
                         items.push(item);
                     });
-                    if (position === "bl") {
+                    if (position === "bl" && _notifications[0].type === "info") {
                         if (self.state.catVisible ) {
                             catStyle.bottom = "0px";
                             catStyle.opacity = 1;
