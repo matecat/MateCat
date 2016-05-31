@@ -7,10 +7,12 @@ UI = {
 
     showDownloadCornerTip : function() {
         if (UI.isChrome) {
-            $('.download-chrome').addClass('d-open');
-            setTimeout(function() {
-                $('.download-chrome').removeClass('d-open');
-            }, 7000);
+            var newNotification = {
+                text: "Your downloaded file will appear on the bar below in a few seconds.<br><img src='/public/img/arrowdown.png' width='18px' style='margin: 0 auto; display: block;'> ",
+                title: "Download",
+                allowHtml: true
+            };
+            APP.addNotification(newNotification);
         }
     },
 
@@ -443,11 +445,12 @@ UI = {
 	confirmDownload: function(res) {
 		if (res) {
 			if (UI.isChrome) {
-				$('.download-chrome').addClass('d-open');
-				setTimeout(function() {
-					$('.download-chrome').removeClass('d-open');
-				}, 7000);
-
+                var newNotification = {
+                    text: "Your downloaded file will appear on the bar below in a few seconds.<br><img src='/public/img/arrowdown.png' width='18px' style='margin: 0 auto; display: block;'> ",
+                    title: "Download",
+                    allowHtml: true
+                };
+                APP.addNotification(newNotification);
 			}
 		}
 	},

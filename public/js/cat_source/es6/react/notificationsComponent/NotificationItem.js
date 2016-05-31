@@ -61,7 +61,7 @@ class NotificationItem extends React.Component {
         if (this.props.autoDismiss) {
             this._notificationTimer = setTimeout(function() {
                 self.hideNotification();
-            }, 10000);
+            }, this.props.timer);
         }
         if (this.props.openCallback) {
             this.props.openCallback.call();
@@ -148,14 +148,16 @@ NotificationItem.propTypes = {
     autoDismiss: React.PropTypes.bool,
     closeCallback: React.PropTypes.func,
     openCallback: React.PropTypes.func,
-    allowHtml: React.PropTypes.bool
+    allowHtml: React.PropTypes.bool,
+    timer: React.PropTypes.number
 };
 
 NotificationItem.defaultProps = {
     position: "bl",
     type: "info",
     autoDismiss: true,
-    allowHtml: false
+    allowHtml: false,
+    timer: 7000
 };
 
 export default NotificationItem ;
