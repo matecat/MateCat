@@ -142,10 +142,10 @@
          * @param file
          */
         checkTPEnabled: function (file) {
-            
+            var tpCookie = this.getTagProjectionCookie();
             return (((file.source_code === 'it-IT' && file.target_code.indexOf('en-') > -1)
                 || (file.source_code.indexOf('en-') > -1 && file.target_code === 'it-IT'))
-                && !config.isReview);
+                && !config.isReview && tpCookie);
         },
         startSegmentTagProjection: function () {
             UI.getSegmentTagsProjection().success(function(response) {
@@ -268,27 +268,28 @@
             UI.lockTags(currentSegment.find(".source"))
         },
         /**
-         * Called when a segment is being opened, if the tag projection is enabled, take ou
-         * the tags
-         * @param segment
+         * Get the the tag projection cookie if exist, if not set it to true and return true
          */
-        removeTagsForTagProjection: function (segment) {
-            var currentSegment = (segment)? segment : UI.currentSegment;
-            if (this.checkCurrentSegmentTPEnabled()) {
-                // decoded_translation = UI.removeAllTags($(this.editarea).html());
-                decoded_source = UI.removeAllTags(currentSegment.find('.source').html());
-                currentSegment.find('.source').html(decoded_source);
-                // $(this.editarea).html(decoded_translation);
+        getTagProjectionCookie: function () {
+            var cookie = $.cookie('tagprojection-' + config.id_job);
+            if ( _.isUndefined(cookie)) {
+                this.enableTagProjectionCookie();
+                return true;
+            } else {
+                return (cookie === "true");
             }
         },
         /**
-         * Called before close the current segment, restore the tags in the source.
-         * @param segment
+         * Set the tag projection cookie to false
          */
-        restoreTagsForTagProjection: function (segment) {
-            if (this.checkCurrentSegmentTPEnabled()) {
-                this.copySourcefromDataAttribute();
-            }
+        disableTagProjectionCookie: function () {
+            $.cookie('tagprojection-' + config.id_job, false, { expires:30 });
+        },
+        /**
+         * Set the tag projection cookie to true
+         */
+        enableTagProjectionCookie: function () {
+            $.cookie('tagprojection-' + config.id_job, true, { expires:30 });
         }
 
     }); 
