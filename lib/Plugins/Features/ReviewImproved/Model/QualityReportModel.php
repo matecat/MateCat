@@ -149,6 +149,10 @@ class QualityReportModel {
                 $this->structureNestComment( $record );
             }
 
+            if ( $record[ 'warning_scope' ] != null ) {
+                $this->structureNestQaChecks( $record ) ;
+            }
+
             $current_file_id    = $record[ 'file_id' ];
             $current_segment_id = $record[ 'segment_id' ];
             $current_issue_id   = $record[ 'issue_id' ];
@@ -171,7 +175,8 @@ class QualityReportModel {
                 'source'               => $record[ 'segment_source' ],
                 'status'               => $record[ 'translation_status' ],
                 'edit_distance'        => round( $record[ 'edit_distance' ] / 1000, 2 ),
-                'issues'               => array()
+                'issues'               => array(),
+                'qa_checks'            => array()
         ) );
 
         array_push( $this->all_segments, $this->current_segment );
@@ -201,6 +206,18 @@ class QualityReportModel {
 
     }
 
+    private function structureNestQaChecks( $record ) {
+        $qa_check = new ArrayObject( array(
+                'severity'    => $record[ 'warning_severity' ],
+                'scope'       => $record[ 'warning_scope' ] ,
+                'data'        => $record[ 'warning_data' ]
+        ) );
+
+        array_push(
+                $this->current_segment[ 'qa_checks' ],
+                $qa_check
+        );
+    }
     private function structureNestComment( $record ) {
         $comment = new ArrayObject( array(
                 'comment'    => $record[ 'comment_comment' ],

@@ -55,6 +55,14 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     /**
+     * Proxy to set metadata for the current project 
+     */
+    public function setMetadata($key, $value) {
+        $dao = new Projects_MetadataDao( Database::obtain() );
+        return $dao->set( $this->id, $key, $value);
+    }
+
+    /**
      *
      * @return array
      */
@@ -123,6 +131,25 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
         return $this->cachable(__METHOD__, $this->id_qa_model, function($id_qa_model) {
             return \LQA\ModelDao::findById( $id_qa_model ) ;
         });
+    }
+
+    /**
+     * Most of the times only one zip per project is uploaded.
+     * This method is a shortcut to access the zip file path.
+     *
+     * @return string the original zip path.
+     *
+     */
+    public function getFirstOriginalZipPath() {
+        $fs = new FilesStorage();
+        $jobs = $this->getJobs();
+        $files = Files_FileDao::getByJobId($jobs[0]->id);
+
+        $zipName = explode( ZipArchiveExtended::INTERNAL_SEPARATOR, $files[0]->filename );
+        $zipName = $zipName[0];
+
+        $originalZipPath = $fs->getOriginalZipPath( $this->create_date, $this->id, $zipName );
+        return $originalZipPath ;
     }
 
 }
