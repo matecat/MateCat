@@ -12,6 +12,7 @@
  * allowHtml:       (Boolean, Default false) Set to true if the text contains HTML, like buttons
  * closeCallback    (Function) A callback function that will be called when the notification is about to be removed.
  * openCallback     (Function) A callback function that will be called when the notification is successfully added.
+ * timer            (Number, Default 700) The timer to auto dismiss the notification
  */
 
 var NotificationItem = require('./NotificationItem').default;
@@ -55,6 +56,12 @@ class NotificationBox extends React.Component {
         var notifications = this.state.notifications;
         newNotification.uid = this.uid;
         newNotification.dismissed = false;
+        if ( _.isUndefined(newNotification.position)) {
+            newNotification.position = "bl";
+        }
+        if ( _.isUndefined(newNotification.type)) {
+            newNotification.type = "info";
+        }
         this.uid++;
         notifications.push(newNotification);
         this.setState({
@@ -118,6 +125,7 @@ class NotificationBox extends React.Component {
                             autoDismiss={notification.autoDismiss}
                             onRemove={self.closeNotification}
                             allowHtml={notification.allowHtml}
+                            timer={notification.timer}
                             closeCallback={notification.closeCallback}
                             openCallback={notification.openCallback}
                             key={notification.uid}
