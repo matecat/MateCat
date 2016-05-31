@@ -2,47 +2,52 @@
 
 /**
  * @group regression
- * @covers Jobs_JobDao
+ * @covers Jobs_JobDao::read
  * User: dinies
- * Date: 30/05/16
- * Time: 18.00
+ * Date: 31/05/16
+ * Time: 12.32
  */
-class CacheBehaviourJobTest extends AbstractTest
+class ReadJobTest extends AbstractTest
 {
     /**
-     * @var Jobs_JobStruct
+     * @var \Predis\Client
      */
-    protected $job_struct;
-    /**
-     * @var Database
-     */
-    protected $database_instance;
+    protected $flusher;
     /**
      * @var Jobs_JobDao
      */
     protected $job_Dao;
-    /**
-     * @var \Predis\Client
-     */
-    protected $cache;
-    protected $id;
-    protected $str_password;
-    protected $str_id_project;
-    protected $str_owner;
     protected $sql_delete_job;
+    /**
+     * @var Database
+     */
+    protected $database_instance;
+    protected $job_id;
+    protected $job_password;
+    protected $job_owner;
+    /**
+     * @var Jobs_JobStruct
+     */
+    protected $job_struct;
+    protected $job_struct_param;
+
+
 
     public function setUp()
     {
         parent::setUp();
+        $this->database_instance = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->job_Dao = new Jobs_JobDao($this->database_instance);
 
 
         /**
          * job initialization
          */
-        $this->str_password = "7barandfoo71";
+        $this->job_password = "7barandfoo71";
+        $this->job_owner= "barandfoo@translated.net";
         $this->job_struct = new Jobs_JobStruct(
             array('id' => NULL, //SET NULL FOR AUTOINCREMENT -> in this case is only stored in cache so i will chose a casual value
-                'password' => $this->str_password,
+                'password' => $this->job_password,
                 'id_project' => "4325fake344",
                 'job_first_segment' => "182655137",
                 'job_last_segment' => "182655236",
@@ -60,7 +65,7 @@ class CacheBehaviourJobTest extends AbstractTest
                 'create_date' => "2016-03-30 13:18:09",
                 'last_update' => "2016-03-30 13:21:02",
                 'disabled' => "0",
-                'owner' => "barandfoo@translated.net",
+                'owner' => $this->job_owner,
                 'status_owner' => "active",
                 'status' => "active",
                 'status_translator' => null,
@@ -87,69 +92,43 @@ class CacheBehaviourJobTest extends AbstractTest
                 'validator' => "xxxx"
             )
         );
-
-        $this->database_instance = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
-        $this->job_Dao = new Jobs_JobDao($this->database_instance);
-        $this->cache = new Predis\Client(INIT::$REDIS_SERVERS);
         $this->job_Dao->createFromStruct($this->job_struct);
 
-        $this->id = $this->database_instance->getConnection()->lastInsertId();
+        $this->job_id = $this->database_instance->getConnection()->lastInsertId();
 
-        $this->sql_delete_job = "DELETE FROM jobs WHERE id='" . $this->id . "';";
-
+        $this->sql_delete_job = "DELETE FROM jobs WHERE id='" . $this->job_id . "';";
 
     }
-
     public function tearDown()
     {
         $this->database_instance->query($this->sql_delete_job);
-        $this->cache->flushdb();
+        $this->flusher = new Predis\Client(INIT::$REDIS_SERVERS);
+        $this->flusher->flushdb();
         parent::tearDown();
     }
-
     /**
      * @group regression
-     * @covers Jobs_JobDao
+     * @covers Jobs_JobDao::read
      */
-    public function test_correct_behaviour_of_cache_with_jobs()
-    {
+    public function test_read_job_without_params(){
+        $this->job_struct_param=new Jobs_JobStruct(array());
+        $result=$this->job_Dao->read($this->job_struct_param);
+        $this->assertEmpty($result);
 
-
-        $this->job_struct->id=$this->id;
-
-        $reflector = new ReflectionClass($this->job_Dao);
-        $method = $reflector->getMethod("_getStatementForCache");
-        $method->setAccessible(true);
-
-        $statement = $method->invoke($this->job_Dao);
-
-        //check that there is no cache
-        $this->assertEmpty(unserialize(
-            $this->cache->get(md5($statement->queryString . serialize(
-                    array(
-                        'id_job' => $this->id,
-                        'password' => $this->str_password
-                    )
-                )))
-        ));
-
-        $param_job_struct= new Jobs_JobStruct(array());
-        $param_job_struct->id= $this->id;
-        $param_job_struct->password= $this->str_password;
-
-        $this->job_Dao->setCacheTTL(20)->read($param_job_struct);
-
-        $cache_result = (unserialize(
-            $this->cache->get(md5($statement->queryString . serialize(
-                    array(
-                        'id_job' => $this->id,
-                        'password' => $this->str_password
-                    )
-                )))
-        ));
-        $this->cache->flushdb();
-        $struct_of_second_read = $this->job_Dao->read($param_job_struct)['0'];
-        $result_from_cache = $cache_result['0'];
-        $this->assertEquals( $result_from_cache, $struct_of_second_read);
+    }
+    /**
+     * @group regression
+     * @covers Jobs_JobDao::read
+     */
+    public function test_read__job_with_success_id_and_password_given(){
+        $this->job_struct_param=new Jobs_JobStruct(array());
+        $this->job_struct_param->id = $this->job_id;
+        $this->job_struct_param->password = $this->job_password;
+        $result_wrapped= $this->job_Dao->read($this->job_struct_param);
+        $job= $result_wrapped['0'];
+        $this->assertTrue( $job instanceof Jobs_JobStruct);
+        $this->assertEquals($this->job_id, $job->id);
+        $this->assertEquals($this->job_password, $job->password);
+        $this->assertEquals($this->job_owner, $job->owner);
     }
 }
