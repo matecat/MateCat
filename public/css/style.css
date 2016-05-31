@@ -1350,13 +1350,8 @@ margin: 5px 1.5%;
 .search-options
 {
 	margin-top: -38px;
-	width: auto;
-	/*
-			margin-top: -9px;
-			border-top: 1px dotted #bbb;
-			width: 70%;
-	*/
 }
+
 .search-options label
 {
     text-transform: none;
