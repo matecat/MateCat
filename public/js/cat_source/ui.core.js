@@ -8,7 +8,7 @@ UI = {
     showDownloadCornerTip : function() {
         if (UI.isChrome) {
             var newNotification = {
-                text: "Your downloaded file will appear on the bar below in a few seconds.<br><img src='/public/img/arrowdown.png' width='18px' style='margin: 0 auto; display: block;'> ",
+                text: "Your downloaded file will appear on the bar below in a few seconds.<br><img src='/public/img/arrowdown_blu.png' width='18px' style='margin: 0 auto; display: block;'> ",
                 title: "Download",
                 allowHtml: true
             };
@@ -446,7 +446,7 @@ UI = {
 		if (res) {
 			if (UI.isChrome) {
                 var newNotification = {
-                    text: "Your downloaded file will appear on the bar below in a few seconds.<br><img src='/public/img/arrowdown.png' width='18px' style='margin: 0 auto; display: block;'> ",
+                    text: "Your downloaded file will appear on the bar below in a few seconds.<br><img src='/public/img/arrowdown_blu.png' width='18px' style='margin: 0 auto; display: block;'> ",
                     title: "Download",
                     allowHtml: true
                 };
