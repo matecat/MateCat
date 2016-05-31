@@ -1025,6 +1025,7 @@ $.extend(UI, {
 		}).on('input', '.editarea', function( e ) { //inputineditarea
 			UI.currentSegment.addClass('modified').removeClass('waiting_for_check_result');
                         UI.currentSegment.data('modified', true);
+                        UI.currentSegment.trigger('modified:true');
 
 			if (UI.droppingInEditarea) {
 				UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
@@ -1047,7 +1048,6 @@ $.extend(UI, {
                 } else {
                     UI.lockTags(UI.editarea);
                 }
-                        segment_fixed_button.enable();
         }).on('input', '.editor .cc-search .input', function() {
 			UI.markTagsInSearch($(this));
 		}).on('click', '.editor .source .locked,.editor .editarea .locked', function(e) {

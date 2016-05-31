@@ -434,6 +434,7 @@ UI = {
 		segment.addClass('highlighted1');
 		setTimeout(function() {
 			$('.highlighted1').addClass('modified highlighted2');
+			$('.highlighted1').trigger('modified:true');
 		}, 300);
 		setTimeout(function() {
 			$('.highlighted1, .highlighted2').removeClass('highlighted1 highlighted2');
@@ -3617,6 +3618,7 @@ UI = {
 
         UI.currentSegment.removeClass('modified');
         UI.currentSegment.data('modified', false);
+        UI.currentSegment.trigger('modified:false');
         var skipChange = false;
         if (buttonValue == 'next-untranslated') {
             if (!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {

@@ -145,7 +145,7 @@
             Speech2Text.enableMicrophone(segment.el);
 
             if( this.currentSegment.data( 'modified' ) === true ) {
-                segment_fixed_button.enable();
+                segment.el.trigger('fixedButton:enable');
             }
         }
     });

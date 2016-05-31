@@ -14,6 +14,7 @@ var SegmentFixedButton = React.createClass({
         var el = UI.Segment.findEl(this.props.sid);
         el.removeClass('modified');
         el.data('modified', false);
+        el.trigger('modified:false');
         UI.changeStatus(el, 'fixed', true);
         UI.gotoNextSegment(); // NOT ideal behaviour, would be better to have a callback chain of sort.
     },
@@ -22,14 +23,16 @@ var SegmentFixedButton = React.createClass({
         console.log('handleTranslationSuccess', data);
     },
     componentDidMount: function() {
-        window.segment_fixed_button = this;
     },
 
     componentWillUnmount: function() {
-        window.segment_fixed_button = null;
     },
 
     render: function() {
+        if(this.state.disabled != this.props.disabled) {
+            this.state.disabled = this.props.disabled;
+        }
+
         var cmd = ((UI.isMac) ? 'CMD' : 'CTRL');
 
         var fixedButton = <li>
@@ -43,10 +46,6 @@ var SegmentFixedButton = React.createClass({
           ;
 
         return fixedButton ;
-    },
-
-    enable: function() {
-        this.setState( { disabled: false } );
     }
 });
 
