@@ -6,12 +6,11 @@
     <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/themes/base/jquery-ui.css" id="theme"/>
     -->
 
+
     <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>
     <link href="${basepath}public/css/libs/theme.bootstrap.css" rel="stylesheet" type="text/css"/>
     <link rel="stylesheet" href="${basepath}public/css/manage.css?build=${build_number}"/>
     <link rel="stylesheet" href="${basepath}public/js/lib/colorbox/colorbox.css?build=${build_number}"/>
-    <!--<link href="${basepath}public/css/libs/theme.blue.css" rel="stylesheet" type="text/css"/>-->
-    <!--<link rel="stylesheet" href="http://mottie.github.io/tablesorter/css/theme.blue.css"/>-->
     <style>
         header {
             border-bottom: 1px solid #5C5C5C;
@@ -84,6 +83,7 @@
     <!-- Shim to make HTML5 elements usable in older Internet Explorer versions -->
     <!--[if lt IE 9]>
 
+
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
     <script src="${basepath}public/js/lib/jquery.js"></script>
     <script src="${basepath}public/js/common.js"></script>
@@ -132,24 +132,11 @@
 <script src="js/cors/jquery.xdr-transport.js"></script><![endif]-->
 <script src="${basepath}public/js/lib/jquery.cookie.js"></script>
 <script src="${basepath}public/js/lib/jquery.colorbox-min.js"></script>
-
 <body>
 <div class="wrapper">
     <h1 >Post-editing effort and payable
         rates</h1>
     <h2 >Payable rates applied for machine translation post-editing per language pairs </h2>
-
-    <script type="text/javascript">
-
-        /*<![CDATA[*/
-        var langStats =
-        ${dataLangStats}
-        /*]]>*/
-
-    </script>
-
-</div>
-
 <table id="tablePEE" width="80%" border="0" cellspacing="0" cellpadding="0" class="tablestats revision tablesorter"
        data-filter="true">
     <thead>
@@ -165,6 +152,31 @@
     </tbody>
 
 </table>
+=======
+
+
+
+    <table id="tablePEE" width="80%" border="0" cellspacing="0" cellpadding="0" class="tablestats revision tablesorter" data-filter="true">
+        <thead>
+
+        <tr>
+            <th>SOURCE</th>
+            <th>TARGET</th>
+            <th>PEE</th>
+            <th>WORDS</th>
+            <th>PAYABLE</th>
+        </tr>
+
+        </thead>
+        <tbody>
+        </tbody>
+
+
+    </table>
+
+
+
+>>>>>>> c081837... Pee table optimization: title, subtitle, words right, langauges name, filter on columns, remove sigma, add payable rate
 
 </body>
 
@@ -389,7 +401,6 @@
         }
     });
 </script>
-
 <script type="text/javascript">
     function DropDown(el) {
         this.dd = el;
@@ -443,6 +454,7 @@
 
     }, false);
 </script>
+
 
 <div metal:use-macro="cookiebanner.html/cookieBanner"/>
 <!-- SnapEngage -->
