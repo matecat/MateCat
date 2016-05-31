@@ -280,6 +280,20 @@
             }
         },
         /**
+         * Set the tag projection cookie to true and reload file
+         */
+        enableTagProjectionInJob: function () {
+            this.enableTagProjectionCookie();
+            UI.render();
+        },
+        /**
+         * Set the tag projection cookie to true and reload file
+         */
+        disableTagProjectionInJob: function () {
+            this.disableTagProjectionCookie();
+            UI.render();
+        },
+        /**
          * Set the tag projection cookie to false
          */
         disableTagProjectionCookie: function () {
