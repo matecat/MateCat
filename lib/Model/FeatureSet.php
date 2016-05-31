@@ -65,9 +65,9 @@ class FeatureSet {
                     $filterable = call_user_func_array( array( $obj, $method ), $args );
                 }
             }
-
-            return $filterable ;
         }
+
+        return $filterable ;
     }
 
     /**
