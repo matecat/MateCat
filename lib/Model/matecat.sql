@@ -486,6 +486,16 @@ CREATE TABLE `segments` (
   KEY `segment_hash` (`segment_hash`) USING HASH COMMENT 'MD5 hash of segment content'
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
+CREATE TABLE `translation_warnings` (
+  `id_job` bigint(20) NOT NULL,
+  `id_segment` bigint(20) NOT NULL,
+  `severity` tinyint(4) NOT NULL,
+  `scope` varchar(255) NOT NULL,
+  `data` text NOT NULL,
+  KEY `id_job` (`id_job`) USING BTREE,
+  KEY `id_segment` (`id_segment`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+
 CREATE TABLE `translators` (
   `username` varchar(100) NOT NULL,
   `email` varchar(45) DEFAULT NULL,
@@ -580,6 +590,7 @@ INSERT INTO `phinxlog` ( version ) VALUES ( '20160331142550' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20160331210238' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20160406102209' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20160408162842' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20160519093951' );
 
 CREATE SCHEMA `matecat_conversions_log` DEFAULT CHARACTER SET utf8 ;
 USE matecat_conversions_log ;

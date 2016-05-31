@@ -22,7 +22,7 @@ class ValidateNotNullFieldsTest extends AbstractTest
     public function setUp()
     {
         parent::setUp();
-        $this->reflectedClass = new EnginesModel_EngineDAO(Database::obtain());
+        $this->reflectedClass = new EnginesModel_EngineDAO(Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ));
         $this->reflector = new ReflectionClass($this->reflectedClass);
         $this->method = $this->reflector->getMethod("_validateNotNullFields");
         $this->method->setAccessible(true);
@@ -71,7 +71,11 @@ class ValidateNotNullFieldsTest extends AbstractTest
         $this->method->invoke($this->reflectedClass, $this->engine_struct_param);
     }
 
-
+    /**
+     * @group regression
+     * @covers EnginesModel_EngineDAO::_validateNotNullFields
+     * TODO: this test fails until the source code will be fixed
+     */
     public function test__validateNotNullFields_type_field_not_allowed_value_string()
     {
 
@@ -80,7 +84,10 @@ class ValidateNotNullFieldsTest extends AbstractTest
         $this->method->invoke($this->reflectedClass, $this->engine_struct_param);
     }
 
-
+    /**
+     * @group regression
+     * @covers EnginesModel_EngineDAO::_validateNotNullFields
+     */
     public function test__validateNotNullFields_type_field_int_not_present()
     {
 
@@ -89,7 +96,11 @@ class ValidateNotNullFieldsTest extends AbstractTest
         $this->method->invoke($this->reflectedClass, $this->engine_struct_param);
     }
 
-
+    /**
+     * @group regression
+     * @covers EnginesModel_EngineDAO::_validateNotNullFields
+     * TODO: this test fails until the source code will be fixed
+     */
     public function test__validateNotNullFields_type_value_not_between_types1()
     {
 
@@ -98,7 +109,11 @@ class ValidateNotNullFieldsTest extends AbstractTest
         $this->method->invoke($this->reflectedClass, $this->engine_struct_param);
     }
 
-
+    /**
+     * @group regression
+     * @covers EnginesModel_EngineDAO::_validateNotNullFields
+     * TODO: this test fails until the source code will be fixed
+     */
     public function test__validateNotNullFields_type_value_not_between_types2()
     {
 

@@ -15,9 +15,11 @@ $.extend(UI, {
 		}).on('keydown.shortcuts', null, UI.shortcuts.translate_nextUntranslated.keystrokes.standard, function(e) {
 			e.preventDefault();
 			$('.editor .next-untranslated').click();
+			$('.editor .next-unapproved').click();
 		}).on('keydown.shortcuts', null, UI.shortcuts.translate_nextUntranslated.keystrokes.mac, function(e) {
 			e.preventDefault();
 			$('.editor .next-untranslated').click();
+			$('.editor .next-unapproved').click();
 		}).on('keydown.shortcuts', null, 'Ctrl+pageup', function(e) {
 			e.preventDefault();
 		}).on('keydown.shortcuts', null, UI.shortcuts.openNext.keystrokes.standard, function(e) {
@@ -190,7 +192,6 @@ $.extend(UI, {
         }).bind('keydown', 'Meta+c', function() {
 			UI.tagSelection = false;
         }).bind('keydown', 'Meta+shift+s', function(e) {
-//            e.preventDefault();
             UI.body.toggleClass('tagmode-default-extended');
         }).on('click','#cmn-toggle-1',function(e){
             LXQ.toogleHighlighting();
@@ -200,7 +201,9 @@ $.extend(UI, {
             $(this).toggleClass('active');
             UI.body.toggleClass('tagmode-default-extended');
             if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment(true);
-		} ).on('click', '.autofillTag', function(e){
+		} );
+
+		$("body").on('click', '.autofillTag', function(e){
 			e.preventDefault();
 
 			//get source tags from the segment
@@ -1094,64 +1097,7 @@ $.extend(UI, {
         }).on('blur', '.editor .editarea', function() {
             UI.hideEditToolbar();
 		}).on('click', 'a.translated, a.next-untranslated', function(e) {
-			var w = ($(this).hasClass('translated')) ? 'translated' : 'next-untranslated';
-			e.preventDefault();
-            UI.hideEditToolbar();
-            $('.test-invisible').remove();
-
-            UI.currentSegment.removeClass('modified');
-			var skipChange = false;
-			if (w == 'next-untranslated') {
-				console.log('next-untranslated');
-				if (!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {
-
-					UI.changeStatus(this, 'translated', 0);
-					skipChange = true;
-					if (!UI.nextUntranslatedSegmentId) {
-						$('#' + $(this).attr('data-segmentid') + '-close').click();
-					} else {
-						UI.reloadWarning();
-					}
-				}
-			} else {
-				if (!$(UI.currentSegment).nextAll('section:not(.readonly)').length) {
-					UI.changeStatus(this, 'translated', 0);
-					skipChange = true;
-                }
-
-			}
-			UI.checkHeaviness();
-			if ( UI.blockButtons ) {
-				if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId === '') {
-				} else {
-
-					if (!UI.noMoreSegmentsAfter) {
-						UI.reloadWarning();
-					}
-				}
-				return;
-			}
-			if(!UI.offline) UI.blockButtons = true;
-
-			UI.unlockTags();
-			UI.setStatusButtons(this);
-
-            if (!skipChange) {
-                UI.changeStatus(this, 'translated', 0);
-            }
-
-			if (w == 'translated') {
-                UI.gotoNextSegment();
-			} else {
-                // TODO: investigate why this trigger click is necessary.
-                $(".editarea", UI.nextUntranslatedSegment).trigger("click", "translated")
-			}
-
-            UI.lockTags($('#' + $(this).attr('data-segmentid') + ' .editarea'));
-			UI.lockTags(UI.editarea);
-			UI.changeStatusStop = new Date();
-			UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
-
+			UI.clickOnTranslatedButton(e, this);
 		}).on('click', 'a.d, a.a, a.r, a.f, a.fx, a.rb', function() {
 			var segment = $(this).parents("section");
 			$("a.status", segment).removeClass("col-approved col-rejected col-done col-draft");

@@ -8,6 +8,10 @@
         <link rel="icon" href="${basepath}public/img/favicon.ico" />
         <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
 
+        <tal:block  tal:repeat="css_url css_resources">
+            <link rel="stylesheet" tal:attributes="href css_url"></link>
+        </tal:block>
+
         <script type="text/javascript">
             /*<![CDATA[*/
 
@@ -73,7 +77,9 @@
                 isGDriveProject : ${isGDriveProject|string:false},
                 remoteFilesInJob : JSON.parse( '${ php: json_encode(remoteFilesInJob)}'),
 		        lexiqaServer: 'https://backend.lexiqa.net',
-                lxq_enabled: ${lxq_enabled | string:false}
+                lxq_enabled: ${lxq_enabled | string:false},
+                qa_check_glossary_enabled : ${qa_check_glossary_enabled | string:false },
+                qa_check_blacklist_enabled : ${qa_check_blacklist_enabled | string:false }
             };
 
             var renderStart = new Date();
