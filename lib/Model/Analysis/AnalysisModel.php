@@ -62,17 +62,8 @@ class Analysis_AnalysisModel {
      *
      */
     private function loadReferenceFiles() {
-        $fs = new FilesStorage();
-        $jobs = $this->project->getJobs();
-        $files = Files_FileDao::getByJobId($jobs[0]->id);
-
-        $zipName = explode( ZipArchiveExtended::INTERNAL_SEPARATOR, $files[0]->filename );
-        $zipName = $zipName[0];
-
-        $originalZipPath = $fs->getOriginalZipPath( $this->project->create_date, $this->project->id, $zipName );
-
         $zip = new ZipArchive();
-        $zip->open( $originalZipPath );
+        $zip->open( $this->getProject()->getFirstOriginalZipPath() );
 
         $this->reference_files = array() ;
         $folder = ZipArchiveExtended::REFERENCE_FOLDER ;

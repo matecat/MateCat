@@ -534,52 +534,16 @@ $( function () {
         $( '.template-download.failed .delete button, .template-download.has-errors .delete button, .template-upload.failed .cancel button, .template-upload.has-errors .cancel button' ).click();
     } );
 
-    if ( window.location.hostname === 'blueimp.github.com' ) {
-        // Demo settings:
-        $( '#fileupload' ).fileupload( 'option', {
-            url: '//jquery-file-upload.appspot.com/',
-            maxFileSize: 5000000,
-            acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
-            process: [
-                {
-                    action: 'load',
-                    fileTypes: /^image\/(gif|jpeg|png)$/,
-                    maxFileSize: 20000000 // 20MB
-                },
-                {
-                    action: 'resize',
-                    maxWidth: 1440,
-                    maxHeight: 900
-                },
-                {
-                    action: 'save'
-                }
-            ]
+    // Load existing files:
+    $( '#fileupload' ).each( function () {
+        var that = this;
+        $.getJSON( this.action, function ( result ) {
+            if ( result && result.length ) {
+                $( that ).fileupload( 'option', 'done' )
+                        .call( that, null, {result: result} );
+            }
         } );
-        // Upload server status check for browsers with CORS support:
-        if ( $.support.cors ) {
-            $.ajax( {
-                url: '//jquery-file-upload.appspot.com/',
-                type: 'HEAD'
-            } ).fail( function () {
-                $( '<span class="alert alert-error"/>' )
-                        .text( 'Upload server currently unavailable - ' +
-                        new Date() )
-                        .appendTo( '#fileupload' );
-            } );
-        }
-    } else {
-        // Load existing files:
-        $( '#fileupload' ).each( function () {
-            var that = this;
-            $.getJSON( this.action, function ( result ) {
-                if ( result && result.length ) {
-                    $( that ).fileupload( 'option', 'done' )
-                            .call( that, null, {result: result} );
-                }
-            } );
-        } );
-    }
+    } );
 
     // Initialize the theme switcher:
     $( '#theme-switcher' ).change( function () {
@@ -807,7 +771,12 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
                     $( '.operation', filerow ).remove();
                 }, 50 );
                 UI.checkFailedConversionsNumber();
-                return false;
+
+                //filters ocr warning
+                if ( d.code == -20 ){
+                        enableAnalyze();
+                }
+
             } else {
 
             }

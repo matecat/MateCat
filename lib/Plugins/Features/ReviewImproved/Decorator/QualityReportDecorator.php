@@ -8,6 +8,8 @@
 
 namespace Features\ReviewImproved\Decorator;
 
+use Features\QaCheckBlacklist;
+use Features\QaCheckGlossary;
 use Features\ReviewImproved\Model\QualityReportModel;
 use INIT;
 
@@ -66,6 +68,18 @@ class QualityReportDecorator extends \AbstractModelViewDecorator {
        foreach($this->model->getAllSegments() as $segment ) {
            $segment['translate_url'] = $this->getTranslateUrl() . '#' . $segment['id'];
            $segment['is_approved'] =  $segment['status'] == \Constants_TranslationStatus::STATUS_APPROVED;
+           $segment['is_rejected'] =  $segment['status'] == \Constants_TranslationStatus::STATUS_REJECTED;
+           $segment['is_translated'] =  !in_array($segment['status'], array(
+                   \Constants_TranslationStatus::STATUS_APPROVED,
+                    \Constants_TranslationStatus::STATUS_REJECTED
+           ));
+
+           if ( $segment['qa_checks'] ) {
+               foreach( $segment['qa_checks'] as $check ) {
+                   $check['human_scope'] = $this->humanizedScope( $check );
+                   $check['message'] = $this->humanizedWarningText( $check );
+               }
+           }
        }
     }
 
@@ -74,6 +88,32 @@ class QualityReportDecorator extends \AbstractModelViewDecorator {
             "-" . $this->model->getChunk()->id .
             ".html";
         return $filename ;
+    }
+
+    private function humanizedScope( $check ) {
+        if ( $check['scope'] == QaCheckGlossary::GLOSSARY_SCOPE ) {
+            return 'Glossary';
+        }
+        elseif ( $check['scope'] == QaCheckBlacklist::BLACKLIST_SCOPE ) {
+            return 'Blacklist' ;
+        }
+    }
+
+    private function humanizedWarningText( $check ) {
+        $data = json_decode($check['data'], true);
+        $message = '' ;
+        if ( $check['scope'] == QaCheckGlossary::GLOSSARY_SCOPE ) {
+            $source = $data['raw_segment'];
+            $target = $data['raw_translation'];
+            $message = sprintf( "term <i>\"%s\"</i> not found in translation.", $source);
+
+        }
+        elseif ( $check['scope'] == QaCheckBlacklist::BLACKLIST_SCOPE ) {
+            $term = $data['match'];
+            $message = sprintf( "term <i>\"%s\"</i> found in translation.", $term);
+        }
+
+        return $message;
     }
 
     private function getTranslateUrl() {

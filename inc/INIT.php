@@ -74,6 +74,7 @@ class INIT {
     public static $DQF_ENABLED = false;
 
     public static $FORCE_XLIFF_CONVERSION    = false;
+    public static $FILTERS_OCR_CHECK         = true;
     public static $VOLUME_ANALYSIS_ENABLED   = true;
     public static $WARNING_POLLING_INTERVAL  = 20; //seconds
     public static $SEGMENT_QA_CHECK_INTERVAL = 1; //seconds

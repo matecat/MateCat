@@ -19,7 +19,7 @@ class SanitizeInputTest extends AbstractTest
     public function setUp()
     {
         parent::setUp();
-        $this->reflectedClass = new EnginesModel_EngineDAO(Database::obtain());
+        $this->reflectedClass = new EnginesModel_EngineDAO(Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ));
         $this->reflector = new ReflectionClass($this->reflectedClass);
         $this->method = $this->reflector->getMethod("_sanitizeInput");
         $this->method->setAccessible(true);
