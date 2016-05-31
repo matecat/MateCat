@@ -1651,6 +1651,14 @@ UI = {
             tab.find('.number').text('(' + numAlt + ')');
             UI.renderAlternatives(d);
             tab.show();
+            // tab.click();
+            // this.currentSegment.find('.footer').removeClass('showMatches');
+            $('.editor .submenu .active').removeClass('active');
+            tab.addClass('active');
+            $('.editor .sub-editor').removeClass('open');
+            $('.editor .sub-editor.alternatives').addClass('open');
+            this.body.removeClass('hideMatches');
+
         }
     },
     renderAlternatives: function(d) {
