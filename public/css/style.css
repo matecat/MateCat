@@ -1275,10 +1275,11 @@ background: #09beec;
 }
 .sub-editor .gl-search .gl-comment
 {
-float: left;
-display: none;
-width: 80%;
-margin: 5px 1.5%;
+    float: left;
+    display: none;
+    width: 47.8%;
+    margin: 5px 1.5%;
+    clear: both;
 }       
 .sub-editor .gl-search .set-glossary
 {
@@ -1286,7 +1287,7 @@ margin: 5px 1.5%;
   height: 20px;
   font-size: 24px;
   width: 26px;
-  margin: 15px 0 0 0;
+  margin: 21px 0 0 0;
   color: #777;
 }
 
@@ -2110,21 +2111,45 @@ body.rtl-target .editor .editarea span
 .graysmall div.comment.editing {
 	width: 60%;
 }
-.graysmall .b{padding-left:25px!important;position:relative}
+.graysmall .b {
+    padding-left:25px!important;
+    position:relative
+}
 
-.message li{background: url(../img/bad.png) 22px center no-repeat;padding-left:40px !important;background-size:12px 12px}
-.graysmall:hover .trash{height:20px;}
+.message li {
+    background: url(../img/bad.png) 22px center no-repeat;
+    padding-left:40px !important;
+    background-size:12px 12px
+}
+.graysmall:hover .trash{
+    height:20px;
+}
 
-.trash:hover {margin-top:-2px;color:#000;}
+.trash:hover {
+    margin-top:-2px;
+    color:#000;}
 
-.trash{transition: width 2s; transition: width 2s; /* Firefox 4 */ -webkit-transition: width 2s; /* Safari and Chrome */ -o-transition: width 2s; /* Opera */ -webkit-transition: all 0.1s linear;
-	   transition: all 0.1s linear;
-	   color:#999;
-	   text-decoration: none;
-	   -o-transition: all 0.1s linear;
-	   -ms-transition: all 0.1s linear;display:block;height:0;width:20px;
-	   position:absolute;right:5px;top:14px}
-.graysmall-message{bottom:-10px;left:25px;position:absolute;font-size:10px;display:none;color:#999999}
+.trash{
+    transition: width 2s;
+    transition: width 2s; /* Firefox 4 */
+    -webkit-transition: width 2s; /* Safari and Chrome */
+    -o-transition: width 2s; /* Opera */
+    -webkit-transition: all 0.1s linear;
+    transition: all 0.1s linear;
+    color:#999;
+    text-decoration: none;
+    -o-transition: all 0.1s linear;
+    -ms-transition: all 0.1s linear;display:block;height:0;width:20px;
+    position:absolute;right:5px;top:14px
+}
+.graysmall-message{
+    bottom:-10px;
+    left:25px;
+    position:absolute;
+    font-size:10px;
+    display:none;
+    color:#999999
+}
 
 
 
