@@ -152,6 +152,14 @@ APP = {
         }
         $( 'body' ).addClass( 'incomingMsg' );
     },
+    
+    /**
+     * 
+     * @param req
+     * @param log
+     * 
+     * @returns Deferred
+     */
     doRequest: function ( req, log ) {
 
         logTxt = (typeof log == 'undefined') ? '' : '&type=' + log;

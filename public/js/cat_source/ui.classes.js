@@ -37,12 +37,16 @@
         if (el.length == 0) {
             el = UI.getSegmentById( '' + number + '-1' );
         }
-        return el;
+        if ( el.length == 0 ) {
+            return null ; 
+        } else {
+            return el;
+        }
     }
 
     Segment.find = function( number ) {
         var el = Segment.findEl( number ) ;
-        if ( el.length == 0 ) {
+        if ( el == null ) {
             return ;
         }
         return new Segment( el );

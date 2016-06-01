@@ -2,13 +2,19 @@
 
     var segment ;
 
-    var tryToRenderAgain = function() {
+    /**
+     * 
+     * @param segment
+     * @param highlight
+     * 
+     * @returns Deferred
+     */
+    var tryToRenderAgain = function( segment ) {
         $('#outer').empty();
 
-        UI.render({
+        return UI.render({
             firstLoad: false,
-            segmentToScroll: segment.selector.split('-')[1],
-            highlight: highlight
+            segmentToScroll: segment.selector.split('-')[1]
         });
     }
 
@@ -61,54 +67,66 @@
         return destinationTop ;
     }
 
+    var animatedSelector = 'html,body';
+    
+    /**
+     * 
+     * @param inputSegment
+     * @param highlight
+     * @param quick
+     * 
+     * @returns Deferred
+     */
     var scrollSegment = function(inputSegment, highlight, quick) {
-        segment = $(inputSegment);
-
-        if ( !segment.length ) {
-            // TODO: check for this condition to be actually needed
-            // to limit responsiblity of this function we must enforce
-            // the segment to be present, raise otherwise.
-            tryToRenderAgain() ;
-            return ;
-        }
-
         quick = quick || false;
         highlight = highlight || false;
-
-        var pointSpeed = (quick)? 0 : 500;
-
-        $("html,body").stop();
-
-        // if ( config.isReview ) {
-        if ( true ) {
-            // FIXME: experimentally keep the `review` behaviour the default
-            // for translate page too. We are not sure what the other block
-            // of code actually does, so we need to keep this code around for
-            // a while and do some user testing to be sure it is safe to
-            // remove it.
-            setTimeoutForReview() ;
-        } else {
-            scrollToDestination( getDestinationTop(), pointSpeed ) ;
+        
+        var segment = $(inputSegment);
+        var id_segment = inputSegment.selector.split('-')[1]; 
+        var animation ; 
+        var scrollTime = (quick)? 0 : 500
+        
+        if ( !segment.length ) {
+            animation = tryToRenderAgain( segment ) ;
+            animation.pipe(function() {
+                return UI.Segment.find( id_segment ).el ;
+            }); 
+            
+            animation.done( function(segment) {
+                positionSegmentOnTop( segment, scrollTime ); 
+            }); 
+            
+        }
+        else {
+            animation = positionSegmentOnTop( segment, scrollTime ) ;
+            animation.pipe(function() {
+                return segment; 
+            }); 
         }
 
-        // TODO check if this timeout can be avoided in some way
-        setTimeout(function() { UI.goingToNext = false; }, pointSpeed);
+        if ( highlight ) {
+            animation.done(function( segment ) {
+                UI.highlightEditarea( segment );
+            });
+        }
+
+        return animation ; 
     }
 
-    var setTimeoutForReview = function() {
-        setTimeout(function() {
-            if ( segment.prev().length ) {
-                $("html,body").animate({
+    var positionSegmentOnTop = function( segment, scrollTime ) {
+        var animation = $( animatedSelector ).stop() ; 
+        
+        if ( segment.prev().length ) {
+           animation
+               .delay( 300 )
+               .animate({
                     scrollTop: segment.prev().offset().top - $('.header-menu').height()
-                }, 500);
-            }
-        }, 300);
-    }
-
-    var scrollToDestination = function( destinationTop, pointSpeed ) {
-        $("html,body").animate({
-            scrollTop: destinationTop - 20
-        }, pointSpeed);
+                }, scrollTime, function() {
+                   UI.goingToNext = false ; 
+               });
+        }
+        
+        return animation.promise() ; 
     }
 
     $.extend(UI, {
