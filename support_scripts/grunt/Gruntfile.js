@@ -33,8 +33,6 @@ module.exports = function(grunt) {
 	    cssBase + 'jquery.powertip.min.css',
 	    cssBase + 'lxq-style.css',
 	    cssBase + 'lexiqa.css',
-        cssBase + 'lib/remodal.css',
-        cssBase + 'lib/remodal-default-theme.css',
         cssBase + 'sass/review_improved.scss',
         cssBase + 'sass/segment_filter.scss',
         cssBase + 'sass/cattool.scss',
@@ -169,6 +167,9 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/ui.glossary.js',
                     basePath + 'cat_source/ui.search.js',
 
+                    basePath + 'cat_source/qa_check_glossary.js',
+                    basePath + 'cat_source/qa_check_blacklist.js',
+
                     basePath + 'cat_source/functions.js', // TODO: why this depends on this position?
 
                     basePath + 'cat_source/ui.customization.js',
@@ -206,7 +207,6 @@ module.exports = function(grunt) {
                     basePath + 'lib/lodash.min.js',
                     basePath + 'lib/handlebars.runtime-v4.0.5.js',
                     basePath + 'lib/jquery-1.11.0.min.js',
-                    basePath + 'lib/remodal.min.js',
                     basePath + 'lib/waypoints.min.js',
                     basePath + 'lib/jquery-ui.js',
                     basePath + 'lib/jquery.hotkeys.min.js',

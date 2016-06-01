@@ -15,7 +15,7 @@ class PingTest extends AbstractTest
     public function setUp()
     {
         parent::setUp();
-        $this->reflectedClass = Database::obtain();
+        $this->reflectedClass = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->reflector = new ReflectionClass($this->reflectedClass);
         $this->reflectedClass->close();
         $this->property = $this->reflector->getProperty('instance');

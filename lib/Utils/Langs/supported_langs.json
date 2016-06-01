@@ -567,7 +567,7 @@
                 "en":"Haitian Creole French"
             }],
             "isocode":"ht",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
             "rfc3066code":"ht-HT"
         }

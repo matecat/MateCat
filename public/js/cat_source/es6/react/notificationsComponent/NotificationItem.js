@@ -31,10 +31,11 @@ class NotificationItem extends React.Component {
                 visible: false,
                 removed: true
             });
+            this.props.hideMateCat(self.props.uid);
         }
         setTimeout(function () {
             self.props.onRemove(self.props.uid);
-        }, 5000);
+        }, 1000);
         
         if (this.props.closeCallback) {
             this.props.closeCallback.call();
@@ -54,12 +55,13 @@ class NotificationItem extends React.Component {
             self.setState({
                 visible: true
             });
+            self.props.showMateCat();
         }, 50);
 
         if (this.props.autoDismiss) {
             this._notificationTimer = setTimeout(function() {
                 self.hideNotification();
-            }, 5000);
+            }, this.props.timer);
         }
         if (this.props.openCallback) {
             this.props.openCallback.call();
@@ -119,10 +121,11 @@ class NotificationItem extends React.Component {
             notificationStyle.marginTop = 0;
             notificationStyle.paddingTop = 0;
             notificationStyle.paddingBottom = 0;
+            notificationStyle.borderTop = 0;
         }
 
         // if (!this.props.autoDismiss) {
-        autoDismiss = <span className={'notification-close-button'} onClick={this.dismissNotification}>x</span>;
+        autoDismiss = <span className={'notification-close-button'} onClick={this.dismissNotification}>×</span>;
         // }
         if (this.props.allowHtml) {
             message = <div className= {'notification-message'} dangerouslySetInnerHTML={ this.allowHTML(this.props.text) }></div>;
@@ -145,14 +148,16 @@ NotificationItem.propTypes = {
     autoDismiss: React.PropTypes.bool,
     closeCallback: React.PropTypes.func,
     openCallback: React.PropTypes.func,
-    allowHtml: React.PropTypes.bool
+    allowHtml: React.PropTypes.bool,
+    timer: React.PropTypes.number
 };
 
 NotificationItem.defaultProps = {
     position: "bl",
     type: "info",
     autoDismiss: true,
-    allowHtml: false
+    allowHtml: false,
+    timer: 7000
 };
 
 export default NotificationItem ;

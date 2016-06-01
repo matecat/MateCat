@@ -5,14 +5,16 @@ UI = null;
 
 UI = {
 
-    showDownloadCornerTip : function() {
+    /*showDownloadCornerTip : function() {
         if (UI.isChrome) {
-            $('.download-chrome').addClass('d-open');
-            setTimeout(function() {
-                $('.download-chrome').removeClass('d-open');
-            }, 7000);
+            var newNotification = {
+                text: "Your downloaded file will appear on the bar below in a few seconds.<br><img src='/public/img/arrowdown_blu.png' width='18px' style='margin: 0 auto; display: block;'> ",
+                title: "Download",
+                allowHtml: true
+            };
+            APP.addNotification(newNotification);
         }
-    },
+    },*/
 
     setEditingSegment : function(segment) {
         if ( segment != null ) {
@@ -107,7 +109,7 @@ UI = {
             this.editarea = segment.el.find( '.editarea' );
         }
         else {
-            this.editarea = $(editarea);
+            this.editarea = $(".editarea", editarea_or_segment.closest('section'));
             var segment = new UI.Segment( editarea_or_segment.closest('section') );
         }
 
@@ -333,7 +335,7 @@ UI = {
 
         this.highlightEditarea();
 
-        this.currentSegmentQA();
+        this.currentSegmentQA();        
         $(this.currentSegment).trigger('copySourceToTarget');
         if(!config.isReview) {
             var alreadyCopied = false;
@@ -440,17 +442,7 @@ UI = {
 		}, 2000);
 	},
 
-	confirmDownload: function(res) {
-		if (res) {
-			if (UI.isChrome) {
-				$('.download-chrome').addClass('d-open');
-				setTimeout(function() {
-					$('.download-chrome').removeClass('d-open');
-				}, 7000);
-
-			}
-		}
-	},
+	
 	copyToNextIfSame: function(nextUntranslatedSegment) {
 		if ($('.source', this.currentSegment).data('original') == $('.source', nextUntranslatedSegment).data('original')) {
 			if ($('.editarea', nextUntranslatedSegment).hasClass('fromSuggestion')) {
@@ -459,6 +451,7 @@ UI = {
 		}
 	},
 	createButtons: function() {
+
         var button_label = config.status_labels.TRANSLATED ;
         var label_first_letter = button_label[0];
 
@@ -977,9 +970,11 @@ UI = {
 		});
 	},
 	getSegments_success: function(d, options) {
-        if (d.errors.length)
+        if (d.errors.length) {
 			this.processErrors(d.errors, 'getSegments');
-		where = d.data.where;
+        }
+        
+		var where = d.data.where;
 
         SegmentNotes.enabled() && SegmentNotes.registerSegments ( d.data );
 
@@ -1051,7 +1046,7 @@ UI = {
 		return status;
 	},
 	getSegmentTarget: function(seg) {
-		editarea = (typeof seg == 'undefined') ? this.editarea : $('.editarea', seg);
+		var editarea = (typeof seg == 'undefined') ? this.editarea : $('.editarea', seg);
 		return editarea.text();
 	},
 	getUpdates: function() {
@@ -1196,16 +1191,6 @@ UI = {
 	},
 
     placeCaretAtEnd: function(el) {
-//		console.log(el);
-//		console.log($(el).first().get().className);
-//		var range = document.createRange();
-//		var sel = window.getSelection();
-//		range.setStart(el, 1);
-//		range.collapse(true);
-//		sel.removeAllRanges();
-//		sel.addRange(range);
-//		el.focus();
-
 		 $(el).focus();
 		 if (typeof window.getSelection != "undefined" && typeof document.createRange != "undefined") {
 			var range = document.createRange();
@@ -1225,7 +1210,7 @@ UI = {
 	registerQACheck: function() {
 		clearTimeout(UI.pendingQACheck);
 		UI.pendingQACheck = setTimeout(function() {
-			UI.currentSegmentQA();
+			UI.currentSegmentQA();            
 		}, config.segmentQACheckInterval);
 	},
 	reloadToSegment: function(segmentId) {
@@ -1404,12 +1389,10 @@ UI = {
                     segData = null;
                 });
             } else {
-//                console.log('b');
                 newSegments.push(this);
             }
 
         });
-// console.log('newsegments 1: ', newSegments);
         return newSegments;
     },
 
@@ -1502,7 +1485,7 @@ UI = {
 	spellCheck: function(ed) {
 		if (!UI.customSpellcheck)
 			return false;
-		editarea = (typeof ed == 'undefined') ? UI.editarea : $(ed);
+		var editarea = (typeof ed == 'undefined') ? UI.editarea : $(ed);
 		if ($('#contextMenu').css('display') == 'block')
 			return true;
 
@@ -1874,16 +1857,34 @@ UI = {
 */
 				toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? capStr : d;
 				newStr += toAdd;
-			} else {
+			}
+            else if(this.nodeName == 'LXQWARNING') { 
+                d = this.childNodes[0].data;
+                jump = ((!index)&&(!aa));
+//				console.log(d.charAt(0));
+				capStr = toTitleCase(d);
+				if(jump) {
+					capStr = d.charAt(0) + toTitleCase(d).slice(1);
+				}
+                toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? capStr : d;
+				newStr += toAdd;    
+            }
+            else {
 				newStr += this.outerHTML;
 //				newStr += this.innerText;
 			}
 		});
         console.log('x');
-//        console.log('newStr: ', newStr);
-		replaceSelectedText(newStr);
         console.log('newStr: ', newStr);
-//		replaceSelectedHtml(newStr);
+        if (LXQ.enabled()) {
+            $.powerTip.destroy($('.tooltipa',this.currentSegment));
+            $.powerTip.destroy($('.tooltipas',this.currentSegment));
+            replaceSelectedHtml(newStr);
+            LXQ.reloadPowertip(this.currentSegment);
+        }
+        else {
+            replaceSelectedText(newStr);
+        }
         console.log('a: ', UI.editarea.html());
 		UI.lockTags();
         console.log('b: ', UI.editarea.html());
@@ -1992,9 +1993,9 @@ UI = {
         // TODO: this should be relative to the current USER, find a
         // way to generate this at runtime.
         //
-        if( !config.isGDriveProject || config.isGDriveProject == 'false' ) {
+        /*if( !config.isGDriveProject || config.isGDriveProject == 'false' ) {
             UI.showDownloadCornerTip();
-        }
+        }*/
         UI.disableDownloadButtonForDownloadStart( openOriginalFiles );
 
         if ( typeof window.googleDriveWindows == 'undefined' ) {
@@ -2036,7 +2037,7 @@ UI = {
             return ;
         }
 
-        UI.showDownloadCornerTip();
+        //UI.showDownloadCornerTip();
 
         UI.disableDownloadButtonForDownloadStart();
 
@@ -2233,7 +2234,8 @@ UI = {
 
 				UI.setNextWarnedSegment();
 
-				//                $('#point2seg').attr('href', warningPosition);
+                $(document).trigger('getWarning:global:success', { resp : data }) ;
+           
 			}
 		});
 	},
@@ -2273,21 +2275,41 @@ UI = {
 			});
 		}
 	},
+    currentSegmentLexiQA: function() {
+        console.log('in currentSegmentLexiQA...');
+        var translation = $('.editarea', UI.currentSegment ).text().replace(/\uFEFF/g,'');            
+        var id_segment = UI.getSegmentId(UI.currentSegment);
+        UI.doLexiQA(UI.currentSegment, translation, id_segment,false, function () {}) ;
+    },
 	currentSegmentQA: function() {
-		this.currentSegment.addClass('waiting_for_check_result');
+        console.warn(
+            'currentSegmentQA is deprecated, use segmentQA and pass a segment as argument',
+            getStackTrace().split("\n")[2]
+        );
+        
+        var that = this;
+        UI.segmentQA.apply( this, UI.currentSegment );
+    },
+
+    segmentQA : function( segment ) {
+        if ( ! ( segment instanceof UI.Segment) ) {
+            segment = new UI.Segment( segment );
+        }
+
+		segment.el.addClass('waiting_for_check_result');
+        
 		var dd = new Date();
 		ts = dd.getTime();
-		var token = this.currentSegmentId + '-' + ts.toString();
+		var token = segment.id + '-' + ts.toString();
         var segment_status_regex = new RegExp("status-([a-z]*)");
-        var segment_status = this.currentSegment.attr('class' ).match(segment_status_regex);
+        var segment_status = segment.el.attr('class' ).match(segment_status_regex);
         if(segment_status.length > 0){
             segment_status = segment_status[1];
         }
 
-		//var src_content = $('.source', this.currentSegment).attr('data-original');
 		if( config.brPlaceholdEnabled ){
-			src_content = this.postProcessEditarea(this.currentSegment, '.source');
-			trg_content = this.postProcessEditarea(this.currentSegment);
+			src_content = this.postProcessEditarea(segment.el , '.source');
+			trg_content = this.postProcessEditarea(segment.el);
 		} else {
 			src_content = this.getSegmentSource();
 			trg_content = this.getSegmentTarget();
@@ -2298,40 +2320,44 @@ UI = {
         $('section.editor .tab.glossary .results .sugg-target .translation').each(function () {
             glossarySourcesAr.push($(this).text());
         })
-//        console.log('glossarySourcesAr: ', glossarySourcesAr);
-//        console.log(JSON.stringify(glossarySourcesAr));
 
 		APP.doRequest({
 			data: {
 				action: 'getWarning',
-				id: this.currentSegmentId,
+				id: segment.id,
 				token: token,
+                id_job: config.id_job,
 				password: config.password,
 				src_content: src_content,
 				trg_content: trg_content,
                 segment_status: segment_status,
                 glossaryList: glossarySourcesAr
-//                glossaryList: JSON.stringify(glossarySourcesAr)
 			},
 			error: function() {
 				UI.failedConnection(0, 'getWarning');
 			},
 			success: function(d) {
-				if (UI.currentSegment.hasClass('waiting_for_check_result')) {
-					// check conditions for results discard
-					if (!d.total) {
-						$('p.warnings', UI.currentSegment).empty();
-						$('span.locked.mismatch', UI.currentSegment).removeClass('mismatch');
+				if (segment.el.hasClass('waiting_for_check_result')) {
+
+                    // TODO: define d.total more explicitly
+					if ( !d.total ) {
+						$('p.warnings', segment.el).empty();
+						$('span.locked.mismatch', segment.el).removeClass('mismatch');
                         $('.editor .editarea .order-error').removeClass('order-error');
-						return;
+
 					}
-					UI.fillCurrentSegmentWarnings(d.details, false); // update warnings
-					UI.markTagMismatch(d.details);
-					delete UI.checkSegmentsArray[d.token]; // delete the token from the tail
-					UI.currentSegment.removeClass('waiting_for_check_result');
+                    else {
+                        UI.fillCurrentSegmentWarnings(d.details, false); // update warnings
+                        UI.markTagMismatch(d.details);
+                        delete UI.checkSegmentsArray[d.token]; // delete the token from the tail
+                        segment.el.removeClass('waiting_for_check_result');
+                    }
 				}
+
+                $(document).trigger('getWarning:local:success', { resp : d, segment: segment }) ;
 			}
 		}, 'local');
+        if (LXQ.enabled()) UI.currentSegmentLexiQA();
 	},
 
     translationIsToSave : function( segment ) {
@@ -2511,7 +2537,6 @@ UI = {
                 }
                 UI.execSetTranslationTail();
 				UI.setTranslation_success(data, this[1]);
-                $(document).trigger('setTranslation:success', data);
                 $(document).trigger('translation:change', data.translation);
                 var translation = $('.editarea', segment ).text().replace(/\uFEFF/g,'');
                 UI.doLexiQA(segment,translation,id_segment,true,null);
@@ -2722,6 +2747,15 @@ UI = {
         return '.editarea';
     },
 
+    /**
+     *
+     * This function is used before the text is sent to the server.
+     *
+     *
+     * @param context
+     * @param selector
+     * @returns {*|jQuery}
+     */
     postProcessEditarea: function(context, selector) {
         selector = (typeof selector === "undefined") ? UI.targetContainerSelector() : selector;
         var area = $( selector, context ).clone();
@@ -3077,7 +3111,7 @@ UI = {
 		this.registerQACheck();
 	},
 	saveInUndoStack: function(fromWhich) {
-//		noRestore = (typeof noRestore == 'undefined')? 0 : 1;
+//		noRestore = (typeof noRestore == 'undefined')? 0 : 1;        
 		currentItem = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition];
 
 		if (typeof currentItem != 'undefined') {
@@ -3120,35 +3154,13 @@ UI = {
 			this.undoStack.splice(this.undoStack.length - pos, pos);
 			this.undoStackPosition = 0;
 		}
-
-        if (LXQ.enabled() && fromWhich === 'space' && !UI.lexiqaData.lexiqaFetching) { 
-            saveSelection();
-            $('.undoCursorPlaceholder').remove();
-            $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
-            
-            UI.lexiqaData.lexiqaFetching = true;   
-            var callback1 = function() {
-                LXQ.reloadPowertip(UI.currentSegment);                                           
-                restoreSelection();
-                UI.lexiqaData.lexiqaFetching = false;
-        		UI.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
-            }
-            console.log('space was pressed');
-            //console.dir(UI.currentSegment);
-            var translation = $('.editarea', UI.currentSegment ).text().replace(/\uFEFF/g,'');
-            
-            var id_segment = UI.getSegmentId(UI.currentSegment);
-
-
-            UI.doLexiQA(UI.currentSegment, translation, id_segment,false, callback1) ;
-        }
-        else {
-		    saveSelection();
-            $('.undoCursorPlaceholder').remove();
-            $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');      
-            restoreSelection();
-    		this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
-        }      
+                
+        saveSelection();
+        $('.undoCursorPlaceholder').remove();
+        $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');      
+        restoreSelection();
+        this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
+        
 	},
 	clearUndoStack: function() {
 		this.undoStack = [];
@@ -3246,7 +3258,7 @@ UI = {
                     targettext: translation,
                     returnUrl: returnUrl,
                     segmentId: id_segment,
-                    partnerId: "matecat",
+                    partnerId: LXQ.partnerid,
                     isSegmentCompleted: isSegmentCompleted,
                     responseMode: "includeQAResults"
                 }
@@ -3274,7 +3286,9 @@ UI = {
                                 spaces: [],
                                 urls: [],
                                 spelling: [],
-                                specialchardetect: []
+                                specialchardetect: [],
+                                glossary: [],
+                                blacklist: []
                             },
                             target: {
                                 numbers: [],
@@ -3282,7 +3296,9 @@ UI = {
                                 spaces: [],
                                 urls: [],
                                 spelling: [],
-                                specialchardetect: []                                
+                                specialchardetect: [],
+                                glossary: [],
+                                blacklist: []                              
                             }
                     };
                     var newWarnings = {};
@@ -3311,18 +3327,19 @@ UI = {
                     UI.lexiqaData.lexiqaWarnings[id_segment] = newWarnings[id_segment];
                     console.dir(UI.lexiqaData.lexiqaWarnings[id_segment]);
                     var seg = UI.getSegmentById(id_segment);
-                    source_val = LXQ.highLightText(source_val, highlights.source,isSegmentCompleted,LXQ.shouldHighlighWarningsForSegment(seg),true,segment);
-                    
+                    source_val = LXQ.highLightText(source_val, highlights.source,isSegmentCompleted,true,true,segment);
+                    if (callback!=null)
+                        saveSelection();
                     target_val = UI.clearMarks($(".editarea", segment).html());
                     console.log('target: '+target_val);
-                    target_val = LXQ.highLightText(target_val,highlights.target,isSegmentCompleted,LXQ.shouldHighlighWarningsForSegment(seg),false,segment);
+                    target_val = LXQ.highLightText(target_val,highlights.target,isSegmentCompleted,true,false,segment);
+                    
                     $(".editarea", segment).html(target_val);
-                    $(".source", segment).html(source_val);  
                     if (callback!=null)
-                        callback(segment);
-                    else {
-                        LXQ.reloadPowertip(segment);
-                    }                     
+                        restoreSelection();
+                    $(".source", segment).html(source_val);                      
+                    LXQ.reloadPowertip(segment);
+                                     
                     //FOTD CHANGE THIS
                     // $('.lxq-error-seg',segment).attr('numberoferrors',LXQ.getVisibleWarningsCountForSegment(segment)).css("background-color","#efecca").removeClass('lxq-error-changed');
                     //only reload dropdown menu and link, if there was an error...
@@ -3336,13 +3353,19 @@ UI = {
                     //do something else
                     noVisibleErrorsFound = true;                  
                     source_val = UI.clearMarks($.trim($(".source", segment).html()));
-                    console.log('source: '+source_val);
+                    console.log('source1: '+source_val);
                     source_val = LXQ.cleanUpHighLighting(source_val);
                     
+                    
+                                        
+                    if (callback!=null)
+                        saveSelection();
                     target_val = UI.clearMarks($.trim($(".editarea", segment).html()));
                     console.log('target: '+target_val);
                     target_val = LXQ.cleanUpHighLighting(target_val);
                     $(".editarea", segment).html(target_val);
+                    if (callback!=null)
+                        restoreSelection();
                     $(".source", segment).html(source_val); 
                     if (callback!=null)
                         callback();                    
@@ -3385,7 +3408,7 @@ UI = {
             //remove link and warning
         $('#lexiqabox').attr('class', 'lexnotific').attr("title", "Well done, no errors found!").find('.numbererror').text('');                    
         //$('#go2lexiqa').attr('href', "#");  
-        result.qaurl = '#';
+        //result.qaurl = '#';
         }
         else {
                 $('#lexiqabox').attr('class', 'warningbox').attr("title", "Go to lexiQA for QA analysis").find('.numbererror').text(UI.lexiqaData.segments.length);                           
@@ -3399,7 +3422,7 @@ UI = {
         UI.lexiqaData.lexiqaFetching = true;
         $.ajax({type: "GET",
             url: config.lexiqaServer+"/matecaterrors",
-            data: {id: 'matecat-'+config.job_id+'-'+config.password },
+            data: {id: LXQ.partnerid+'-'+config.job_id+'-'+config.password },
             success:function(results){
                 console.log('matecaterrors returned:')
                 console.dir(results);
@@ -3424,7 +3447,9 @@ UI = {
                                 spaces: [],
                                 urls: [],
                                 spelling: [],
-                                specialchardetect: []
+                                specialchardetect: [],
+                                glossary: [],
+                                blacklist: []
                             },
                             target: {
                                 numbers: [],
@@ -3432,7 +3457,9 @@ UI = {
                                 spaces: [],
                                 urls: [],
                                 spelling: [],
-                                specialchardetect: []                                
+                                specialchardetect: [] ,
+                                glossary: [],
+                                blacklist: []                              
                             }
                         };
                         UI.lexiqaData.lexiqaWarnings[element.segid] = {};
@@ -3575,23 +3602,21 @@ UI = {
         UI.closeTagAutocompletePanel();
         UI.removeHighlightCorrespondingTags();
 
-        if ((!$(this).is(UI.editarea)) || (UI.editarea === '') || (!UI.body.hasClass('editing'))) {
+        var segmentNotYetOpened = ($(this).is(UI.editarea) && !$(this).closest('section').hasClass("opened"));
+
+        if ( !$(this).is(UI.editarea) || (UI.editarea === '') || (!UI.body.hasClass('editing')) || segmentNotYetOpened) {
             if (operation == 'moving') {
                 if ((UI.lastOperation == 'moving') && (UI.recentMoving)) {
                     UI.segmentToOpen = segment;
                     UI.blockOpenSegment = true;
-
-                    console.log('ctrl+down troppo vicini');
                 } else {
                     UI.blockOpenSegment = false;
                 }
-
                 UI.recentMoving = true;
                 clearTimeout(UI.recentMovingTimeout);
                 UI.recentMovingTimeout = setTimeout(function() {
                     UI.recentMoving = false;
                 }, 1000);
-
             } else {
                 UI.blockOpenSegment = false;
             }
@@ -3616,6 +3641,69 @@ UI = {
 
         if (UI.debug) { console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea)); }
 
+    },
+    /**
+     * After User click on Translated or T+>> Button
+     * @param e
+     * @param button
+     */
+    clickOnTranslatedButton: function (e, button) {
+        var buttonValue = ($(button).hasClass('translated')) ? 'translated' : 'next-untranslated';
+        e.preventDefault();
+        UI.hideEditToolbar();
+        //??
+        $('.test-invisible').remove();
+
+        UI.currentSegment.removeClass('modified');
+        var skipChange = false;
+        if (buttonValue == 'next-untranslated') {
+            if (!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {
+                UI.changeStatus(button, 'translated', 0);
+                skipChange = true;
+                if (!UI.nextUntranslatedSegmentId) {
+                    $('#' + $(button).attr('data-segmentid') + '-close').click();
+                } else {
+                    UI.reloadWarning();
+                }
+            }
+        } else {
+            if (!$(UI.currentSegment).nextAll('section:not(.readonly)').length) {
+                UI.changeStatus(button, 'translated', 0);
+                skipChange = true;
+            }
+
+        }
+        UI.checkHeaviness();
+        if ( UI.blockButtons ) {
+            if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId === '') {
+            } else {
+
+                if (!UI.noMoreSegmentsAfter) {
+                    UI.reloadWarning();
+                }
+            }
+            return;
+        }
+        if(!UI.offline) UI.blockButtons = true;
+
+        UI.unlockTags();
+        UI.setStatusButtons(button);
+
+        if (!skipChange) {
+            UI.changeStatus(button, 'translated', 0);
+        }
+
+        if (buttonValue == 'translated') {
+            UI.gotoNextSegment();
+        } else {
+            // TODO: investigate why this trigger click is necessary.
+            $(".editarea", UI.nextUntranslatedSegment).trigger("click", "translated")
+        }
+
+        UI.lockTags($('#' + $(button).attr('data-segmentid') + ' .editarea'));
+        UI.lockTags(UI.editarea);
+        UI.changeStatusStop = new Date();
+        UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
     }
 
 

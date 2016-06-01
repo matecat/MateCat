@@ -103,7 +103,7 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
         return $stmt->fetchAll();
     }
 
-    public function savePropagation($propagation, $id_segment, $job_data, $propagate_to_translated) {
+    public function savePropagation($propagation, $id_segment, $job_data) {
 
         $st_approved   = Constants_TranslationStatus::STATUS_APPROVED;
         $st_rejected   = Constants_TranslationStatus::STATUS_REJECTED;
@@ -111,16 +111,7 @@ class Translations_TranslationVersionDao extends DataAccess_AbstractDao {
         $st_new        = Constants_TranslationStatus::STATUS_NEW;
         $st_draft      = Constants_TranslationStatus::STATUS_DRAFT;
 
-        if ( $propagate_to_translated ) {
-            $status_condition = "AND status IN (
-                '$st_draft',
-                '$st_new',
-                '$st_translated',
-                '$st_approved',
-                '$st_rejected' ) " ;
-        } else {
-            $status_condition = '';
-        }
+        $status_condition = ''; 
 
         $where_condition = " WHERE " .
             " id_job = :id_job AND " .

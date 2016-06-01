@@ -51,7 +51,7 @@ class SetMyMemoryTest extends AbstractTest
     {
         parent::setUp();
 
-        $engineDAO = new EnginesModel_EngineDAO(Database::obtain());
+        $engineDAO = new EnginesModel_EngineDAO(Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ));
         $engine_struct = EnginesModel_EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng = $engineDAO->read($engine_struct);
@@ -300,6 +300,65 @@ TAB;
         $this->assertEquals(array('0' => 484540480), $result_object->responseDetails);
         $this->assertEquals("OK", $result_object->responseData);
         $this->assertNull($result_object->error);
+        /**
+         * check of protected property
+         */
+        $this->reflector = new ReflectionClass($result_object);
+        $property = $this->reflector->getProperty('_rawResponse');
+        $property->setAccessible(true);
+
+        $this->assertEquals("", $property->getValue($result_object));
+
+
+    }
+    /**
+     * @group regression
+     * @covers Engines_MyMemory::set
+     */
+    public function test_set_with_error_from_mocked__call_for_coverage_purpose()
+    {
+
+        $this->config_param_of_set['segment'] = $this->str_seg_1;
+        $this->config_param_of_set['translation'] = $this->str_tra_1;
+
+        $url_mock_param = "http://api.mymemory.translated.net/set?seg=Il+Sistema+genera+un+numero+di+serie+per+quella+copia+e+lo+stampa+%28anche+sotto+forma+di+codice+a+barre%29+su+un%E2%80%99etichetta+adesiva.&tra=The+system+becomes+bar+and+thinks+foo.&langpair=it-IT%7Cen-US&de=demo%40matecat.com&prop=%7B%22project_id%22%3A%22987654%22%2C%22project_name%22%3A%22barfoo%22%2C%22job_id%22%3A%22321%22%7D";
+
+        $rawValue_error = array(
+            'error' => array(
+                'code'      => -6,
+                'message'   => "Could not resolve host: api.mymemory.translated.net. Server Not Available (http status 0)",
+                'response'  => "",
+            ),
+            'responseStatus'    => 0
+        );
+
+
+        /**
+         * @var Engines_MyMemory
+         */
+        $this->engine_MyMemory = $this->getMockBuilder('\Engines_MyMemory')->setConstructorArgs(array($this->engine_struct_param))->setMethods(array('_call'))->getMock();
+        $this->engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param, $this->curl_param)->willReturn($rawValue_error);
+
+        $actual_result = $this->engine_MyMemory->set($this->config_param_of_set);
+
+        $this->assertFalse($actual_result);
+
+
+        /**
+         * check of the Engines_Results_MyMemory_SetContributionResponse object
+         * @var Engines_Results_MyMemory_SetContributionResponse
+         */
+        $result_object = $this->property->getValue($this->engine_MyMemory);
+
+        $this->assertTrue($result_object instanceof Engines_Results_MyMemory_SetContributionResponse);
+        $this->assertEquals(0, $result_object->responseStatus);
+        $this->assertEquals("", $result_object->responseDetails);
+        $this->assertEquals("", $result_object->responseData);
+        $this->assertTrue($result_object->error instanceof Engines_Results_ErrorMatches);
+
+        $this->assertEquals(-6, $result_object->error->code);
+        $this->assertEquals("Could not resolve host: api.mymemory.translated.net. Server Not Available (http status 0)", $result_object->error->message);
+
         /**
          * check of protected property
          */
