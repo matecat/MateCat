@@ -544,7 +544,7 @@ APP = {
     addDomObserver: function (element, callback) {
         if (_.isUndefined(element)) return;
         MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
-        
+
         var observer = new MutationObserver(function(mutations, observer) {
             // fired when a mutation occurs
             callback.call();
@@ -556,6 +556,32 @@ APP = {
             characterData: false,
             attributes: false,
         });
+    },
+    /**
+     * Function to add notifications to the interface
+     * notification object with the following properties
+     *
+     * title:           (String) Title of the notification.
+     * text:            (String) Message of the notification
+     * type:            (String, Default "info") Level of the notification. Available: success, error, warning and info.
+     * position:        (String, Default "bl") Position of the notification. Available: tr (top right), tl (top left),
+     *                      tc (top center), br (bottom right), bl (bottom left), bc (bottom center)
+     * closeCallback    (Function) A callback function that will be called when the notification is about to be removed.
+     * openCallback     (Function) A callback function that will be called when the notification is successfully added.
+     * allowHtml:       (Boolean, Default false) Set to true if the text contains HTML, like buttons
+     * autoDismiss:     (Boolean, Default true) Set if notification is dismissible by the user.
+     *
+     */
+
+    addNotification: function (notification) {
+        if (!UI. notificationBox) {
+            UI.notificationBox = ReactDOM.render(
+                React.createElement(NotificationBox),
+                $(".notifications-wrapper")[0]
+            );
+        }
+        
+        UI.notificationBox.addNotification(notification);
     }
 };
 
