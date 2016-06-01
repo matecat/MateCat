@@ -6,13 +6,19 @@ $.extend(UI, {
 		$("body").removeClass('shortcutsDisabled');
 		$("body").on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.standard, function(e) {
 			e.preventDefault();
-			$('.editor .translated').click();
-			$('.editor .guesstags').click();
+			if ($('.editor .translated').length > 0) {
+				$('.editor .translated').click();
+			} else {
+				$('.editor .guesstags').click();
+			}
             $('body.review .editor .approved').click();
 		}).on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.mac, function(e) {
 			e.preventDefault();
-			$('.editor .translated').click();
-			$('.editor .guesstags').click();
+			if ($('.editor .translated').length > 0) {
+				$('.editor .translated').click();
+			} else {
+				$('.editor .guesstags').click();
+			}
             $('body.review .editor .approved').click();
 		}).on('keydown.shortcuts', null, UI.shortcuts.translate_nextUntranslated.keystrokes.standard, function(e) {
 			e.preventDefault();
