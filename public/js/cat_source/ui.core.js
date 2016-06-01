@@ -939,6 +939,14 @@ UI = {
 		}
 		return percentageClass;
 	},
+    /**
+     * getSegments 
+     * 
+     * Starts the ajax request to get segments from server. 
+     * 
+     * @param options
+     * @returns Deferred
+     */
 	getSegments: function(options) {
 
 		where = (this.startSegmentId) ? 'center' : 'after';
@@ -946,7 +954,7 @@ UI = {
 		$('#outer').addClass('loading');
 		var seg = (options.segmentToScroll) ? options.segmentToScroll : this.startSegmentId;
 
-		APP.doRequest({
+		return APP.doRequest({
 			data: {
 				action: 'getSegments',
 				jid: config.id_job,
@@ -987,16 +995,15 @@ UI = {
 
 		this.body.addClass('loaded');
 
-
 		if (typeof d.data.files != 'undefined') {
 			this.renderFiles(d.data.files, where, this.firstLoad);
 			if ((options.openCurrentSegmentAfter) && (!options.segmentToScroll) && (!options.segmentToOpen)) {
                 seg = (UI.firstLoad) ? this.currentSegmentId : UI.startSegmentId;
 				this.gotoSegment(seg);
 			}
-			if (options.segmentToScroll) {
-				this.scrollSegment($('#segment-' + options.segmentToScroll));
-			}
+			// if (options.segmentToScroll) {
+			// 	this.scrollSegment($('#segment-' + options.segmentToScroll));
+			// }
 			if (options.segmentToOpen) {
 				$('#segment-' + options.segmentToOpen + ' ' + UI.targetContainerSelector()).click();
 			}
@@ -1025,14 +1032,10 @@ UI = {
 			}
 		}
 		$('#outer').removeClass('loading loadingBefore');
-		if(options.highlight) {
-			UI.highlightEditarea($('#segment-' + options.segmentToScroll));
-		}
+        
 		this.loadingMore = false;
 		this.setWaypoints();
-//		console.log('prova a: ', $('#segment-13655401 .editarea').html());
 		this.markTags();
-//		console.log('prova b: ', $('#segment-13655401 .editarea').html());
 		this.checkPendingOperations();
         $(document).trigger('getSegments_success');
 

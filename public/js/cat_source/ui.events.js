@@ -608,8 +608,9 @@ $.extend(UI, {
 			UI.updateGlossaryTarget($(this).find('span.translation'));
 		}).on('click', '.tab.alternatives .graysmall .goto a', function(e) {
 			e.preventDefault();
-			UI.scrollSegment($('#segment-' + $(this).attr('data-goto')), true);
-			UI.highlightEditarea($('#segment-' + $(this).attr('data-goto')));
+			var id_segment = $(this).attr('data-goto');
+			var segment = UI.getSegmentById( id_segment ) ; 
+			UI.scrollSegment( segment, true );
 		});
 
 		$(".joblink").click(function(e) {

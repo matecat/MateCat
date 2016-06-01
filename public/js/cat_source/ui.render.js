@@ -8,32 +8,26 @@ $.extend(UI, {
 		segmentToOpen = (options.segmentToOpen || false);
 		segmentToScroll = (options.segmentToScroll || false);
 		scrollToFile = (options.scrollToFile || false);
-		highlight = (options.highlight || false);
+		
 		seg = (segmentToOpen || false);
 		this.segmentToScrollAtRender = (seg) ? seg : false;
-//		this.isWebkit = $.browser.webkit;
-//		this.isChrome = $.browser.webkit && !!window.chrome;
-//		this.isFirefox = $.browser.mozilla;
-//		this.isSafari = $.browser.webkit && !window.chrome;
 		this.isSafari = (navigator.userAgent.search("Safari") >= 0 && navigator.userAgent.search("Chrome") < 0);
 		this.isChrome = (typeof window.chrome != 'undefined');
 		this.isFirefox = (typeof navigator.mozApps != 'undefined');
-//		console.log('body.scrollTop: ', $('body').scrollTop());
-//		console.log('window.scrollTop: ', $(window).scrollTop());
 		this.isMac = (navigator.platform == 'MacIntel') ? true : false;
 		this.body = $('body');
 		this.firstLoad = firstLoad;
 
-//        if (firstLoad)
-//            this.startRender = true;
 		this.initSegNum = 100; // number of segments initially loaded
 		this.moreSegNum = 25;
 		this.numOpenedSegments = 0;
 		this.hasToBeRerendered = false;
 		this.maxMinutesBeforeRerendering = 60;
+		
 		setTimeout(function() {
 			UI.hasToBeRerendered = true;
-		}, this.maxMinutesBeforeRerendering*60000);	
+		}, this.maxMinutesBeforeRerendering*60000);
+		
 		this.loadingMore = false;
 		this.infiniteScroll = true;
 		this.noMoreSegmentsAfter = false;
@@ -64,18 +58,12 @@ $.extend(UI, {
 		this.preCloseTagAutocomplete = false;
         this.hiddenTextEnabled = true;
         this.markSpacesEnabled = false;
-//        console.log('options: ', options);
-//        console.log('options.tagModesEnabled: ', options.tagModesEnabled);
-//        console.log('1: ', this.tagModesEnabled);
         this.tagModesEnabled = (typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
-//        console.log('2: ', this.tagModesEnabled);
         if(this.tagModesEnabled) {
             UI.body.addClass('tagModes');
         } else {
             UI.body.removeClass('tagModes');
         }
-
-
 
         /**
          * Global Translation mismatches array definition.
@@ -85,29 +73,25 @@ $.extend(UI, {
         this.downOpts = {offset: '130%'};
 		this.upOpts = {offset: '-40%'};
 		this.readonly = (this.body.hasClass('archived')) ? true : false;
-//		this.suggestionShortcutLabel = 'ALT+' + ((UI.isMac) ? "CMD" : "CTRL") + '+';
 		this.suggestionShortcutLabel = 'CTRL+';
 
 		this.taglockEnabled = config.taglockEnabled;
 		this.debug = false;
-//		this.debug = Loader.detect('debug');
-//		this.checkTutorialNeed();
         this.findCommonPartInSegmentIds();
-//        console.log(UI.commonPartInSegmentIds);
 		UI.detectStartSegment(); 
 		options.openCurrentSegmentAfter = ((!seg) && (!this.firstLoad)) ? true : false;
-		UI.getSegments(options);
-//		if(highlight) {
-//			console.log('HIGHLIGHT');
-//			UI.highlightEditarea();
-//		}
 
+		var get_segments_promise = UI.getSegments( options );
+		
+		// TODO: check if this timeout can be moved elsewhere 
 		if (this.firstLoad && this.autoUpdateEnabled) {
 			this.lastUpdateRequested = new Date();
 			setTimeout(function() {
 				UI.getUpdates();
 			}, UI.checkUpdatesEvery);
 		}
+		
+		return get_segments_promise ;
 	},
 });
 
