@@ -31,11 +31,11 @@ class ConstructorMosesTest extends AbstractTest
     {
 
         parent::setUp();
-        $this->database_instance=Database::obtain();
+        $this->database_instance=Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         /**
          * user insertion
          */
-        $this->sql_insert_user = "INSERT INTO ".INIT::$DB_DATABASE.".`users` (`uid`, `email`, `salt`, `pass`, `create_date`, `first_name`, `last_name`, `api_key` ) VALUES ('44', 'bar@foo.net', '12345trewq', '987654321qwerty', '2016-04-11 13:41:54', 'Bar', 'Foo', '');";
+        $this->sql_insert_user = "INSERT INTO ".INIT::$DB_DATABASE.".`users` (`uid`, `email`, `salt`, `pass`, `create_date`, `first_name`, `last_name`, `api_key` ) VALUES (NULL, 'bar@foo.net', '12345trewq', '987654321qwerty', '2016-04-11 13:41:54', 'Bar', 'Foo', '');";
         $this->database_instance->query($this->sql_insert_user);
         $this->id_user=$this->database_instance->getConnection()->lastInsertId();
 
@@ -50,7 +50,7 @@ class ConstructorMosesTest extends AbstractTest
         $this->sql_delete_user ="DELETE FROM users WHERE uid=".$this->id_user.";";
         $this->sql_delete_engine ="DELETE FROM engines WHERE id=".$this->id_database.";";
 
-        $engineDAO        = new EnginesModel_EngineDAO( Database::obtain() );
+        $engineDAO        = new EnginesModel_EngineDAO( Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
         $engine_struct= EnginesModel_EngineStruct::getStruct();
         $engine_struct->id = $this->id_database;
         $eng = $engineDAO->read( $engine_struct );

@@ -22,7 +22,6 @@ $.extend(UI, {
 
         $(".popup-tm li.mgmt-tm").click(function(e) {
             e.preventDefault();
-            console.log('questo');
             $(this).addClass("active");
             $(".mgmt-mt").removeClass("active");
             $(".mgmt-table-mt").hide();

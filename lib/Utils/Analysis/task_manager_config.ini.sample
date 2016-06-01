@@ -50,6 +50,15 @@ MAIL[loggerName]    = "mail_queue.log"
 ;;##############################
 CONTRIBUTION[queue_name]    = "set_contribution"
 CONTRIBUTION[pid_set_name]  = "ch_pid_set_contribution"
-CONTRIBUTION[max_executors] = 5
+CONTRIBUTION[max_executors] = 1
 CONTRIBUTION[redis_key]     = "set_contribution_list"
 CONTRIBUTION[loggerName]    = "set_contribution.log"
+
+;;##############################
+;;##### Key Name QAChecks  #####
+;;##############################
+QA_CHECKS[queue_name] = "qa_checks"
+QA_CHECKS[pid_set_name] = "qa_checks_set"
+QA_CHECKS[max_executors] = 1
+QA_CHECKS[redis_key] = "qa_checks_key"
+QA_CHECKS[loggerName] = "qa_checks.log"

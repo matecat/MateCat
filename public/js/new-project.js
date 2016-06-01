@@ -80,6 +80,7 @@ $(document).ready(function() {
         APP.tryListGDriveFiles();
 
 	$("#target-lang").change(function(e) {
+
         UI.checkRTL();
 		$('.popup-languages li.on').each(function(){
 			$(this).removeClass('on').find('input').removeAttr('checked');
@@ -88,9 +89,9 @@ $(document).ready(function() {
 		if( UI.checkTMXLangFailure() ){
 			UI.delTMXLangFailure();
 		}
-
-                APP.changeTargetLang( $(this).val() );
-        });
+		APP.changeTargetLang( $(this).val() );
+		
+    });
 
 	$("input.uploadbtn").click(function(e) {
         
@@ -123,7 +124,8 @@ $(document).ready(function() {
 				private_tm_pass		: ( !$('#private-tm-pass').prop('disabled') ? $('#private-tm-pass').val() : "" ),
 				lang_detect_files  	: UI.skipLangDetectArr,
                 pretranslate_100    : ($("#pretranslate100" ).is(':checked')) ? 1 : 0,
-                dqf_key             : ($('#dqf_key' ).length == 1) ? $('#dqf_key' ).val() : null
+                dqf_key             : ($('#dqf_key' ).length == 1) ? $('#dqf_key' ).val() : null,
+				lexiqa				: ( $("#lxqa_check").prop("checked") && !$("#lxqa_check").prop("disabled") )
 			},
 			beforeSend: function (){
 				$('.error-message').hide();
@@ -284,13 +286,22 @@ $(document).ready(function() {
 		}
 	});
 
-// codice di Daniele 
-	function closeMLPanel() {
+    /**
+     * LexiQA language Enable/Disable
+     */
+    APP.checkForLexiQALangs();
+    $("#source-lang").on('change', function(){ APP.checkForLexiQALangs(); });
+    $("#target-lang").on('change', function(){ APP.checkForLexiQALangs(); });
+
+    function closeMLPanel() {
         $( ".popup-languages.slide").removeClass('open').hide("slide", { direction: "right" }, 400);
         $("#SnapABug_Button").show();
         $(".popup-outer.lang-slide").hide();
         $('body').removeClass('side-popup');
-	};
+
+        APP.checkForLexiQALangs();
+    };
+
 	$("#multiple-link").click(function(e) {
         e.preventDefault();
         $(".popup-languages.slide").addClass('open').show("slide", { direction: "right" }, 400);
@@ -309,27 +320,6 @@ $(document).ready(function() {
 		closeMLPanel();
 	});
 
-
-
-//
-/*
-// old version
-	$("#multiple-link").click(function(e) {
-		e.preventDefault();
-//        $("div.grayed").fadeIn();
-//        $("div.popup-languages").fadeIn('fast');
-		$(".popup-languages").show();
-
-		var tlAr = $('#target-lang').val().split(',');
-		$.each(tlAr, function() {
-			var ll = $('.popup-languages .listlang li #'+this);
-			ll.parent().addClass('on');
-			ll.attr('checked','checked');
-		});
-		$('.popup-languages h1 .number').text($(".popup-languages .listlang li.on").length);
-
-	});
-*/
 	$(".popup-languages .listlang li label").click(function(e) {
 		$(this).parent().toggleClass('on');
 		var c = $(this).parent().find('input');
@@ -403,4 +393,35 @@ APP.changeTargetLang = function( lang ) {
 
 APP.displayCurrentTargetLang = function() {
     $( '#target-lang' ).val( localStorage.getItem( 'currentTargetLang' ) );
+};
+
+
+/**
+ * Disable/Enable languages for LexiQA
+ *
+ */
+APP.checkForLexiQALangs = function(){
+
+	var acceptedLanguages = [
+		'en-US',
+		'en-GB',
+		'fr-FR',
+		'de-DE',
+		'it-IT'
+	];
+
+    var disableLexiQA = acceptedLanguages.concat(
+            [ $( '#source-lang' ).val() ]
+        ).concat(
+            $( '#target-lang' ).val().split(',')
+        ).filter(
+            function ( value, index, self ) {
+                return self.indexOf( value ) === index;
+            }
+        ).length !== acceptedLanguages.length;
+
+    //disable LexiQA
+    $('#lxqa_check').prop( "disabled", disableLexiQA );
+    $('.translate-box.qa-box').css({opacity: ( disableLexiQA ? 0.6 : 1 )  });
+
 };

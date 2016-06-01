@@ -15,46 +15,20 @@ class DecodeMyMemoryTest extends AbstractTest
     protected $engine_struct_param;
     protected $reflector;
     protected $method;
-    protected $others_param;
     protected $array_param;
 
     public function setUp()
     {
         parent::setUp();
-        $this->others_param = array();
-        $this->others_param['gloss_get_relative_url'] = "glossary/get";
-        $this->others_param['gloss_set_relative_url'] = "glossary/set";
-        $this->others_param['gloss_update_relative_url'] = "glossary/update";
-        $this->others_param['gloss_delete_relative_url'] = "glossary/delete";
-        $this->others_param['tmx_import_relative_url'] = "tmx/import";
-        $this->others_param['tmx_status_relative_url'] = "tmx/status";
-        $this->others_param['tmx_export_create_url'] = "tmx/export/create";
-        $this->others_param['tmx_export_check_url'] = "tmx/export/check";
-        $this->others_param['tmx_export_download_url'] = "tmx/export/download";
-        $this->others_param['tmx_export_list_url'] = "tmx/export/list";
-        $this->others_param['api_key_create_user_url'] = "createranduser";
-        $this->others_param['api_key_check_user_url'] = "authkey";
-        $this->others_param['analyze_url'] = "analyze";
-        $this->others_param['detect_language_url'] = "langdetect.php";
+        $engineDAO        = new EnginesModel_EngineDAO( Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
+        $engine_struct= EnginesModel_EngineStruct::getStruct();
+        $engine_struct->id = 1;
+        $eng = $engineDAO->read( $engine_struct );
 
-
-        $this->engine_struct_param = new EnginesModel_EngineStruct();
-
-        $this->engine_struct_param->id = 1;
-        $this->engine_struct_param->name = "MyMemory (All Pairs)";
-        $this->engine_struct_param->type = "TM";
-        $this->engine_struct_param->description = "Machine translation from Google Translate and Microsoft Translator.";
-        $this->engine_struct_param->base_url = "http://api.mymemory.translated.net";
-        $this->engine_struct_param->translate_relative_url = "get";
-        $this->engine_struct_param->contribute_relative_url = "set";
-        $this->engine_struct_param->delete_relative_url = "delete";
-        $this->engine_struct_param->others = $this->others_param;
-        $this->engine_struct_param->class_load = "MyMemory";
-        $this->engine_struct_param->extra_parameters = array();
-        $this->engine_struct_param->google_api_compliant_version = "1";
-        $this->engine_struct_param->penalty = "0";
-        $this->engine_struct_param->active = "1";
-        $this->engine_struct_param->uid = NULL;
+        /**
+         * @var $engineRecord EnginesModel_EngineStruct
+         */
+        $this->engine_struct_param = $eng[0];
 
 
         $this->reflectedClass = new Engines_MyMemory($this->engine_struct_param);

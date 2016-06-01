@@ -56,15 +56,18 @@
             var decoded_translation;
             var decoded_source;
 
-            /**if Tag Projection enabled and there are not tags in the segment translation, add the class that identify
+            /**if Tag Projection enabled and there are not tags in the segment translation, remove it and add the class that identify
              * tha Tag Projection is enabled
              */
             if (UI.enableTagProjection && (UI.getSegmentStatus(segment) === 'draft' || UI.getSegmentStatus(segment) === 'new')
                 && !UI.checkXliffTagsInText(segment.translation) ) {
+                decoded_translation = UI.removeAllTags(segment.translation);
+                decoded_source = UI.removeAllTags(segment.segment);
                 classes.push('enableTP');
+            } else {
+                decoded_translation = segment.translation;
+                decoded_source = segment.segment;
             }
-            decoded_translation = segment.translation;
-            decoded_source = segment.segment;
 
             decoded_translation = UI.decodePlaceholdersToText(
                 decoded_translation || '',
@@ -98,7 +101,7 @@
                 status_change_title     : status_change_title ,
                 segment_edit_sec        : segment_edit_sec,
                 segment_edit_min        : segment_edit_min,
-                enableTagProjection  : !this.enableTagProjection
+                notEnableTagProjection  : !this.enableTagProjection
             }
 
             return templateData ;
@@ -139,9 +142,10 @@
          * @param file
          */
         checkTPEnabled: function (file) {
+            var tpCookie = this.getTagProjectionCookie();
             return (((file.source_code === 'it-IT' && file.target_code.indexOf('en-') > -1)
                 || (file.source_code.indexOf('en-') > -1 && file.target_code === 'it-IT'))
-                && !config.isReview);
+                && !config.isReview && tpCookie);
         },
         startSegmentTagProjection: function () {
             UI.getSegmentTagsProjection().success(function(response) {
@@ -254,32 +258,52 @@
             var currentSegment = (segment)? segment : UI.currentSegment;
             var source = currentSegment.find('.source').data('original');
             source = htmlDecode(source).replace(/&quot;/g, '\"');
+            source = source.replace(/\n/g , config.lfPlaceholder)
+                    .replace(/\r/g, config.crPlaceholder )
+                    .replace(/\r\n/g, config.crlfPlaceholder )
+                    .replace(/\t/g, config.tabPlaceholder )
+                    .replace(String.fromCharCode( parseInt( 0xA0, 10 ) ), config.nbspPlaceholder );
             var decoded_source = UI.decodePlaceholdersToText(source, true);
             currentSegment.find('.source').html(decoded_source);
             UI.lockTags(currentSegment.find(".source"))
         },
         /**
-         * Called when a segment is being opened, if the tag projection is enabled, take ou
-         * the tags
-         * @param segment
+         * Get the the tag projection cookie if exist, if not set it to true and return true
          */
-        removeTagsForTagProjection: function (segment) {
-            var currentSegment = (segment)? segment : UI.currentSegment;
-            if (this.checkCurrentSegmentTPEnabled()) {
-                // decoded_translation = UI.removeAllTags($(this.editarea).html());
-                decoded_source = UI.removeAllTags(currentSegment.find('.source').html());
-                currentSegment.find('.source').html(decoded_source);
-                // $(this.editarea).html(decoded_translation);
+        getTagProjectionCookie: function () {
+            var cookie = $.cookie('tagprojection-' + config.id_job);
+            if ( _.isUndefined(cookie)) {
+                this.enableTagProjectionCookie();
+                return true;
+            } else {
+                return (cookie === "true");
             }
         },
         /**
-         * Called before close the current segment, restore the tags in the source.
-         * @param segment
+         * Set the tag projection cookie to true and reload file
          */
-        restoreTagsForTagProjection: function (segment) {
-            if (this.checkCurrentSegmentTPEnabled()) {
-                this.copySourcefromDataAttribute();
-            }
+        enableTagProjectionInJob: function () {
+            this.enableTagProjectionCookie();
+            UI.render();
+        },
+        /**
+         * Set the tag projection cookie to true and reload file
+         */
+        disableTagProjectionInJob: function () {
+            this.disableTagProjectionCookie();
+            UI.render();
+        },
+        /**
+         * Set the tag projection cookie to false
+         */
+        disableTagProjectionCookie: function () {
+            $.cookie('tagprojection-' + config.id_job, false, { expires:30 });
+        },
+        /**
+         * Set the tag projection cookie to true
+         */
+        enableTagProjectionCookie: function () {
+            $.cookie('tagprojection-' + config.id_job, true, { expires:30 });
         }
 
     }); 

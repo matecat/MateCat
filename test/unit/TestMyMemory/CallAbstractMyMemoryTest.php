@@ -45,12 +45,13 @@ class CallAbstractMyMemoryTest extends AbstractTest
     protected $array_param_of_call_for_get;
 
     protected $property;
+    protected $test_key;
 
     public function setUp()
     {
         parent::setUp();
 
-        $engine_DAO = new EnginesModel_EngineDAO(Database::obtain());
+        $engine_DAO = new EnginesModel_EngineDAO(Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ));
 
 
         /**
@@ -62,7 +63,7 @@ class CallAbstractMyMemoryTest extends AbstractTest
 
         $eng_My_Memory = $engine_DAO->read($engine_struct_MyMemory);
 
-        $this->engine_struct_param_My_Memory = @$eng_My_Memory[0];
+        $this->engine_struct_param_My_Memory = $eng_My_Memory[0];
 
         $this->engine_MyMemory = new Engines_MyMemory($this->engine_struct_param_My_Memory);
 
@@ -78,6 +79,8 @@ class CallAbstractMyMemoryTest extends AbstractTest
             CURLOPT_TIMEOUT => 10
         );
 
+        $this->test_key = "a6043e606ac9b5d7ff24";
+
         $this->str_seg_1 = "Il Sistema genera un numero di serie per quella copia e lo stampa (anche sotto forma di codice a barre) su un’etichetta adesiva.";
         $this->str_seg_2 = <<<'LABEL'
 Ad esempio, una copia del film <g id="10">Blade Runner</g> in formato DVD, con numero di serie 6457.
@@ -88,7 +91,7 @@ LABEL;
         $this->str_tra_2 = <<<'LABEL'
 For example, a copy of the film <g id="10">Flade Bunner</g> in DVD format, with numbers of 6457 series.
 LABEL;
-        $this->str_tra_3 = "The system move the hands up in the air.";
+        $this->str_tra_3 = "The system moves  hands up in the air.";
 
         $this->prop = <<<'LABEL'
 {"project_id":"987654","project_name":"barfoo","job_id":"321"}
@@ -129,7 +132,7 @@ LABEL;
             'langpair' => "it-IT|en-US",
             'de' => $param_de,
             'prop' => $this->prop,
-            'key' => "a6043e606ac9b5d7ff24"
+            'key' => "{$this->test_key}"
         );
 
         $this->array_param_of_call_for_del = array(
@@ -143,7 +146,7 @@ LABEL;
             'de' => $param_de,
             'mt' => true,
             'numres' => "3",
-            'key' => "a6043e606ac9b5d7ff24"
+            'key' => "{$this->test_key}"
         );
 
 
@@ -243,7 +246,7 @@ LABEL;
 
         $function_param = "contribute_relative_url";
 
-        $url_mock_param = "http://api.mymemory.translated.net/set?langpair=it-IT%7Cen-US&de=demo%40matecat.com&prop=%7B%22project_id%22%3A%22987654%22%2C%22project_name%22%3A%22barfoo%22%2C%22job_id%22%3A%22321%22%7D&key=a6043e606ac9b5d7ff24&seg=Il+Sistema+genera+un+numero+di+serie+per+quella+copia+e+lo+stampa+%28anche+sotto+forma+di+codice+a+barre%29+su+un%E2%80%99etichetta+adesiva.&tra=The+system+becomes+bar+and+thinks+foo.";
+        $url_mock_param = "http://api.mymemory.translated.net/set?langpair=it-IT%7Cen-US&de=demo%40matecat.com&prop=%7B%22project_id%22%3A%22987654%22%2C%22project_name%22%3A%22barfoo%22%2C%22job_id%22%3A%22321%22%7D&key={$this->test_key}&seg=Il+Sistema+genera+un+numero+di+serie+per+quella+copia+e+lo+stampa+%28anche+sotto+forma+di+codice+a+barre%29+su+un%E2%80%99etichetta+adesiva.&tra=The+system+becomes+bar+and+thinks+foo.";
 
         $mock_json_return = <<<'TAB'
 {"responseData":"OK","responseStatus":200,"responseDetails":[484525156]}
@@ -325,7 +328,7 @@ TAB;
         $this->array_param_of_call_for_set['seg'] = $this->str_seg_2;
         $this->array_param_of_call_for_set['tra'] = $this->str_tra_2;
 
-        $url_mock_param = "http://api.mymemory.translated.net/set?langpair=it-IT%7Cen-US&de=demo%40matecat.com&prop=%7B%22project_id%22%3A%22987654%22%2C%22project_name%22%3A%22barfoo%22%2C%22job_id%22%3A%22321%22%7D&key=a6043e606ac9b5d7ff24&seg=Ad+esempio%2C+una+copia+del+film+%3Cg+id%3D%2210%22%3EBlade+Runner%3C%2Fg%3E+in+formato+DVD%2C+con+numero+di+serie+6457.&tra=For+example%2C+a+copy+of+the+film+%3Cg+id%3D%2210%22%3EFlade+Bunner%3C%2Fg%3E+in+DVD+format%2C+with+numbers+of+6457+series.";
+        $url_mock_param = "http://api.mymemory.translated.net/set?langpair=it-IT%7Cen-US&de=demo%40matecat.com&prop=%7B%22project_id%22%3A%22987654%22%2C%22project_name%22%3A%22barfoo%22%2C%22job_id%22%3A%22321%22%7D&key={$this->test_key}&seg=Ad+esempio%2C+una+copia+del+film+%3Cg+id%3D%2210%22%3EBlade+Runner%3C%2Fg%3E+in+formato+DVD%2C+con+numero+di+serie+6457.&tra=For+example%2C+a+copy+of+the+film+%3Cg+id%3D%2210%22%3EFlade+Bunner%3C%2Fg%3E+in+DVD+format%2C+with+numbers+of+6457+series.";
 
         $mock_json_return = <<<'TAB'
 {"responseData":"OK","responseStatus":200,"responseDetails":[484540480]}
@@ -406,7 +409,7 @@ TAB;
 
         $function_param = "delete_relative_url";
 
-        $url_mock_param = "http://api.mymemory.translated.net/delete?langpair=IT%7CEN&de=demo%40matecat.com&seg=Il+Sistema+registra+le+informazioni+sul+nuovo+film.&tra=The+system+move+the+hands+up+in+the+air.";
+        $url_mock_param = "http://api.mymemory.translated.net/delete?langpair=IT%7CEN&de=demo%40matecat.com&seg=Il+Sistema+registra+le+informazioni+sul+nuovo+film.&tra=The+system+moves++hands+up+in+the+air.";
 
         $mock_json_return = <<<'TAB'
 {"responseStatus":200,"responseData":"Found and deleted 1 segments"}
@@ -445,4 +448,28 @@ TAB;
         $this->assertEquals("", $property->getValue($actual_result));
     }
 
+
+    /**
+     * @group regression
+     * @covers  Engines_AbstractEngine::call
+     */
+    public function test_call_with_wrong_function_name_for_code_coverage_purpose()
+    {
+
+        $this->array_param_of_call_for_set['seg'] = $this->str_seg_1;
+        $this->array_param_of_call_for_set['tra'] = $this->str_tra_1;
+        $function_param = "bar_and_foo_invalid";
+
+        $this->engine_MyMemory->call($function_param, $this->array_param_of_call_for_set);
+
+        /**
+         * @var Engines_Results_MyMemory_SetContributionResponse
+         */
+        $result_object = $this->property->getValue($this->engine_MyMemory);
+        $code = $result_object['error']['code'];
+        $this->assertEquals(-43, $code);
+        $message = $result_object['error']['message'];
+        $this->assertEquals(" Bad Method Call. Requested method ' . $function_param . ' not Found.", $message);
+
+    }
 }

@@ -166,7 +166,7 @@ $.extend(UI, {
     var isActiveSegment = $(segment).hasClass('editor');
     var editarea = $('.editarea', segment);
 
-    if ( d.data.matches.length) {
+    if ( d.data.hasOwnProperty('matches') && d.data.matches.length) {
       var editareaLength = editarea.text().trim().length;
       if (isActiveSegment) {
         editarea.removeClass("indent");

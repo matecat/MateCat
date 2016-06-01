@@ -44,12 +44,14 @@ class GetGlossaryMyMemoryTest extends AbstractTest
     protected $segment;
     protected $translation;
 
+    protected $test_key;
+
 
     public function setUp()
     {
         parent::setUp();
 
-        $engineDAO = new EnginesModel_EngineDAO(Database::obtain());
+        $engineDAO = new EnginesModel_EngineDAO(Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ));
         $engine_struct = EnginesModel_EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng = $engineDAO->read($engine_struct);
@@ -57,7 +59,7 @@ class GetGlossaryMyMemoryTest extends AbstractTest
         /**
          * @var $engineRecord EnginesModel_EngineStruct
          */
-        $this->engine_struct_param = @$eng[0];
+        $this->engine_struct_param = $eng[0];
 
 
         $this->config_param_of_get = array(
@@ -94,10 +96,12 @@ class GetGlossaryMyMemoryTest extends AbstractTest
             CURLOPT_SSL_VERIFYHOST => 2
         );
 
+        $this->test_key="fc7ba5edf8d5e8401593";
+
         $this->segment= "prova";
         $this->translation= "proof";
-        $this->url_delete= "http://api.mymemory.translated.net/glossary/delete?seg={$this->segment}&tra={$this->translation}&langpair=it-IT%7Cen-US&de=demo%40matecat.com&key=fc7ba5edf8d5e8401593";
-        $this->url_set = "http://api.mymemory.translated.net/glossary/set?seg={$this->segment}&tra={$this->translation}&langpair=it-IT%7Cen-US&de=demo%40matecat.com&prop=%7B%22project_id%22%3A%22987654%22%2C%22project_name%22%3A%22barfoo%22%2C%22job_id%22%3A%22321%22%7D&key=fc7ba5edf8d5e8401593";
+        $this->url_delete= "http://api.mymemory.translated.net/glossary/delete?seg={$this->segment}&tra={$this->translation}&langpair=it-IT%7Cen-US&de=demo%40matecat.com&key={$this->test_key}";
+        $this->url_set = "http://api.mymemory.translated.net/glossary/set?seg={$this->segment}&tra={$this->translation}&langpair=it-IT%7Cen-US&de=demo%40matecat.com&prop=%7B%22project_id%22%3A%22987654%22%2C%22project_name%22%3A%22barfoo%22%2C%22job_id%22%3A%22321%22%7D&key={$this->test_key}";
 
 
     }
@@ -121,7 +125,6 @@ class GetGlossaryMyMemoryTest extends AbstractTest
     public function test_get_glossary_segment_without_key_id()
     {
         $this->config_param_of_get['segment'] = $this->segment;
-        $this->config_param_of_get['translation'] = $this->translation;
 
         $result_object = $this->engine_MyMemory->get($this->config_param_of_get);
 
@@ -159,8 +162,7 @@ class GetGlossaryMyMemoryTest extends AbstractTest
         sleep(3);
 
         $this->config_param_of_get['segment'] = $this->segment;
-        $this->config_param_of_get['translation'] = $this->translation;
-        $this->config_param_of_get['id_user'] = array('0' => "fc7ba5edf8d5e8401593");
+        $this->config_param_of_get['id_user'] = array('0' => "{$this->test_key}");
 
         $result_object = $this->engine_MyMemory->get($this->config_param_of_get);
         sleep(1);
@@ -202,7 +204,7 @@ class GetGlossaryMyMemoryTest extends AbstractTest
         $this->assertRegExp( '/^1?[0-9]{1,2}%$/',$result_object->matches[0]->match);
         $this->assertEquals(array(),$result_object->matches[0]->prop);
         $this->assertEquals("",$result_object->matches[0]->source_note);
-        $this->assertEquals("fc7ba5edf8d5e8401593",$result_object->matches[0]->memory_key);
+        $this->assertEquals("{$this->test_key}",$result_object->matches[0]->memory_key);
 
 
         $this->assertEquals(200,$result_object->responseStatus);
@@ -220,4 +222,7 @@ class GetGlossaryMyMemoryTest extends AbstractTest
         $this->assertEquals("",$property->getValue($result_object));
 
     }
+    
+    
+    
 }

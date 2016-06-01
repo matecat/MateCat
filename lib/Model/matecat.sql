@@ -68,7 +68,7 @@ CREATE TABLE `comments` (
   PRIMARY KEY (`id`),
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `id_segment` (`id_job`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `engines` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -256,6 +256,7 @@ CREATE TABLE `owner_features` (
 
 CREATE TABLE `phinxlog` (
   `version` bigint(20) NOT NULL,
+  `migration_name` varchar(100) DEFAULT NULL,
   `start_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `end_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`version`)
@@ -385,7 +386,7 @@ CREATE TABLE `segment_notes` (
   `note` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `id_segment` (`id_segment`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `segment_revisions` (
   `id_job` bigint(20) NOT NULL,
@@ -485,6 +486,16 @@ CREATE TABLE `segments` (
   KEY `segment_hash` (`segment_hash`) USING HASH COMMENT 'MD5 hash of segment content'
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
+CREATE TABLE `translation_warnings` (
+  `id_job` bigint(20) NOT NULL,
+  `id_segment` bigint(20) NOT NULL,
+  `severity` tinyint(4) NOT NULL,
+  `scope` varchar(255) NOT NULL,
+  `data` text NOT NULL,
+  KEY `id_job` (`id_job`) USING BTREE,
+  KEY `id_segment` (`id_segment`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+
 CREATE TABLE `translators` (
   `username` varchar(100) NOT NULL,
   `email` varchar(45) DEFAULT NULL,
@@ -509,10 +520,10 @@ CREATE TABLE `users` (
   PRIMARY KEY (`uid`),
   UNIQUE KEY `email` (`email`) USING BTREE,
   KEY `api_key` (`api_key`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 
-        INSERT INTO `engines` (
+INSERT INTO `engines` (
   `name` ,
   `type` ,
   `description` ,
@@ -538,7 +549,7 @@ VALUES
 'get',
 'set',
 'delete',
-'{\"gloss_get_relative_url\":\"glossary\/get\",\"gloss_set_relative_url\":\"glossary\/set\",\"gloss_update_relative_url\":\"glossary\/update\",\"gloss_delete_relative_url\":\"glossary\/delete\",\"tmx_import_relative_url\":\"tmx\/import\",\"tmx_status_relative_url\":\"tmx\/status\",\"tmx_export_create_url\":\"tmx\/export\/create\",\"tmx_export_check_url\":\"tmx\/export\/check\",\"tmx_export_download_url\":\"tmx\/export\/download\",\"tmx_export_list_url\":\"tmx\/export\/list\",\"api_key_create_user_url\":\"createranduser\",\"api_key_check_auth_url\":\"authkey\",\"analyze_url\":\"analyze\",\"detect_language_url\":\"langdetect.php\"}',
+ '{"gloss_get_relative_url":"glossary\/get","gloss_set_relative_url":"glossary\/set","gloss_update_relative_url":"glossary\/update","glossary_import_relative_url":"glossary\/import","gloss_delete_relative_url":"glossary\/delete","tmx_import_relative_url":"tmx\/import","tmx_status_relative_url":"tmx\/status","tmx_export_create_url":"tmx\/export\/create","tmx_export_check_url":"tmx\/export\/check","tmx_export_download_url":"tmx\/export\/download","tmx_export_list_url":"tmx\/export\/list","api_key_create_user_url":"createranduser","api_key_check_auth_url":"authkey","analyze_url":"analyze","detect_language_url":"langdetect.php"}',
 'MyMemory',
 '{}',
 '1',
@@ -579,6 +590,7 @@ INSERT INTO `phinxlog` ( version ) VALUES ( '20160331142550' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20160331210238' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20160406102209' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20160408162842' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20160519093951' );
 
 CREATE SCHEMA `matecat_conversions_log` DEFAULT CHARACTER SET utf8 ;
 USE matecat_conversions_log ;

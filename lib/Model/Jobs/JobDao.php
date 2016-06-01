@@ -117,6 +117,10 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
     }
 
     /**
+     *
+     * Warning: This method returns one record on purpose. Job struct should be used to identify just
+     * the language pair.
+     * 
      * @param $id_job
      *
      * @return Jobs_JobStruct
