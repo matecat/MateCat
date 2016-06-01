@@ -37,7 +37,7 @@ class peeViewController extends viewController {
                     "target"       => $instance->getLocalizedName($value[ 'target' ]),
                     "pee"          => $value[ 'total_post_editing_effort' ],
                     "totalwordPEE" => number_format($value[ 'total_word_count' ],0,",","."),
-                    "payable_rate"=> ""
+                    "payable_rate" => Analysis_PayableRates::pee2payable($value[ 'total_post_editing_effort' ])
             );
         }
 
@@ -46,6 +46,4 @@ class peeViewController extends viewController {
     public function setTemplateVars() {
         $this->template->dataLangStats = json_encode( $this->dataLangStats );
     }
-
-
 }

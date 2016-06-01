@@ -1350,13 +1350,8 @@ margin: 5px 1.5%;
 .search-options
 {
 	margin-top: -38px;
-	width: auto;
-	/*
-			margin-top: -9px;
-			border-top: 1px dotted #bbb;
-			width: 70%;
-	*/
 }
+
 .search-options label
 {
     text-transform: none;
@@ -3841,15 +3836,16 @@ body.cattool .nav-tabs li.mgmt-mt {
 .submenu li.footerSwitcher {
 	float: left;
 	width: 23px !important;
-	height: 25px;
+	height: 26px;
 	border: 1px solid #666666;
 	border-left: 0 !important;
 	background: #3aa9dd url(../img/matches-down.png) 5px 9px no-repeat !important;
 	cursor: pointer;
+	border-bottom: 0;
 }
 .submenu li.footerSwitcher:hover {
 	opacity: 0.85;
-	border: 1px solid #000;
+	/*border: 1px solid #000;*/
 }
 
 body.hideMatches .submenu li.footerSwitcher {
@@ -3859,13 +3855,18 @@ body.hideMatches .submenu li.footerSwitcher {
     transform: scaleY(-1);
     filter: FlipV;
     -ms-filter: "FlipV";
+    border-bottom: 1px solid #666666;
+    border-top: 1px solid #3aa9dd;
 }
 
 body.hideMatches .submenu {
-    margin-bottom: 5px;
+	margin-bottom: 0px;
+	border-bottom: none;
 }
 
-
+body.hideMatches .tab-switcher {
+	border-bottom: 1px solid #666;
+}
 /**
  * Ensure all tabbed content in the footer is only visible when
  * the segment completed loading.
