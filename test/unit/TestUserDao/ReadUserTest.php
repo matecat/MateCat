@@ -48,7 +48,6 @@ class ReadUserTest extends AbstractTest
     }
     public function tearDown()
     {
-
         $this->database_instance->query($this->sql_delete_user);
         $this->flusher = new Predis\Client(INIT::$REDIS_SERVERS);
         $this->flusher->flushdb();
@@ -59,9 +58,9 @@ class ReadUserTest extends AbstractTest
      * @covers Users_UserDao::read
      */
     public function test_read_user_without_where_conditions(){
-        $this->user_struct_param=new Users_UserStruct(array());
+        $this->user_struct_param=Users_UserStruct::getStruct();
         $this->setExpectedException('Exception');
-        $this->user_Dao->read($this->user_struct_param);
+        $this->user_Dao->setCacheTTL(2)->read($this->user_struct_param);
 
     }
     /**
@@ -69,9 +68,9 @@ class ReadUserTest extends AbstractTest
      * @covers Users_UserDao::read
      */
     public function test_read_user_with_success_uid_given(){
-        $this->user_struct_param=new Users_UserStruct(array());
+        $this->user_struct_param=Users_UserStruct::getStruct();
         $this->user_struct_param->uid=$this->uid;
-        $result_wrapped= $this->user_Dao->read($this->user_struct_param);
+        $result_wrapped= $this->user_Dao->setCacheTTL(2)->read($this->user_struct_param);
         $user= $result_wrapped['0'];
         $this->assertTrue( $user instanceof Users_UserStruct);
         $this->assertEquals($this->uid, $user->uid);
@@ -83,9 +82,9 @@ class ReadUserTest extends AbstractTest
      * @covers Users_UserDao::read
      */
     public function test_read_user_with_success_email_given(){
-        $this->user_struct_param=new Users_UserStruct(array());
+        $this->user_struct_param=Users_UserStruct::getStruct();
         $this->user_struct_param->email="bar@foo.net";
-        $result_wrapped= $this->user_Dao->read($this->user_struct_param);
+        $result_wrapped= $this->user_Dao->setCacheTTL(2)->read($this->user_struct_param);
         $user= $result_wrapped['0'];
         $this->assertTrue( $user instanceof Users_UserStruct);
         $this->assertEquals($this->uid, $user->uid);
