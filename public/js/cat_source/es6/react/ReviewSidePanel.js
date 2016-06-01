@@ -6,7 +6,11 @@ export default React.createClass({
     },
 
     openPanel : function(e, data) {
-        this.setState({sid: data.sid, visible: true, selection : data.selection }); 
+        this.setState({
+            sid: absoluteId(data.sid),
+            visible: true,
+            selection : data.selection
+        });
     }, 
 
     closePanel : function(e, data) {
@@ -29,7 +33,7 @@ export default React.createClass({
     },
 
     segmentOpened : function(event) {
-        this.setState({sid: event.segment.id, selection: null});
+        this.setState({sid: event.segment.absId, selection: null});
     },
 
     submitIssueCallback : function() {

@@ -181,5 +181,15 @@ class GDrive {
 
         return null;
     }
+
+    /**
+     * Generate OAuth URL with GDrive Scopes added
+     */
+    public static function generateGDriveAuthUrl() {
+        $oauthClient  = OauthClient::getInstance()->setScopesToGDrive()->getClient();
+        $authURL = $oauthClient->createAuthUrl();
+
+        return $authURL;
+    }
 }
 

@@ -2660,28 +2660,6 @@ font-weight: normal !important;
 	float: left;
 	background-size: 25px!important;}
 
-@media only screen and (max-width : 1280px) {
-.translate-box select {
-width: 210px;
-}
-.translate-box input[type="text"] {
-    width:200px;
-}
-}
-@media only screen and (max-width : 1150px) {
-.translate-box select {
-width: 190px;
-}
-.translate-box input[type="text"] {
-    width:180px!important;
-}
-#private-tm-key {
-width: 169px;
-height: 28px;
-font-size: 17px!important;
-}
-}
-
 
 @media only screen and (max-width : 1100px) {
 
@@ -2871,7 +2849,7 @@ color: #000;
 
 .autofillTag:hover, 
 .autofillTag.active {
-    color: #999!important;
+    color: #333!important;
 }
 
 .autofillTag:before {
@@ -2954,6 +2932,9 @@ a.resume-project:after,
 .autofillTag:before,
 input.downloadtr-button:before,
 header .filter:before,
+.editToolbar .uppercase:after,
+.editToolbar .lowercase:after,
+.editToolbar .capitalize:after,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .splitArea .locked.startTag:before,
@@ -3031,6 +3012,27 @@ left: 9999px;
 .splitpoint:before {
     content: "\f03d";
 }
+
+.editToolbar .uppercase:after {
+    content: "\ea6c";
+        font-size: 20px;
+    display: block;
+}
+
+.editToolbar .lowercase:after {
+    content: "\ea6b";
+        font-size: 20px;
+    display: block;
+}
+
+.editToolbar .capitalize:after {
+    content: "\ea5f";
+      font-size: 16px;
+    padding: 3px 2px 1px 2px;
+    display: block;
+}
+
+
 
 
 .splitpoint:hover .splitpoint-delete:after {
@@ -3528,6 +3530,16 @@ text-align: left;
 
 .icon-google-plus-square:before {
     content: "\f0d4";
+}
+
+.icon-text-height:before {
+    content: "\ea5f";
+}
+.icon-superscript2:before {
+    content: "\ea6b";
+}
+.icon-subscript2:before {
+    content: "\ea6c";
 }
 
 .icon-unsorted:before {

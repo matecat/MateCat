@@ -20,6 +20,11 @@ ReviewImproved.enabled = function() {
 if ( ReviewImproved.enabled() )
 (function($, ReviewImproved, undefined) {
 
+    /**
+     * Split segment feature is not compatible with ReviewImproved.
+     */
+    window.config.splitSegmentEnabled = false;
+
     var mountpoint ;
 
     $(function() {
@@ -113,19 +118,23 @@ if ( ReviewImproved.enabled() )
             $('article').addClass('review-panel-opened');
             $('body').addClass('side-tools-opened review-side-panel-opened');
             hackSnapEngage( true );
+            
+            var segment = UI.Segment.findEl( data.sid );
 
             $(document).trigger('review-panel:opened', data);
 
             // simulate the click to activate the segment, we don't want
             // side panel open on deactivted segments.
-            var segment = UI.Segment.findEl( data.sid );
+
             segment.find( UI.targetContainerSelector() ).click();
 
             window.setTimeout( function(data) {
                 var el = UI.Segment.find( data.sid ).el ;
+
                 if ( UI.currentSegmentId != data.sid ) {
                     UI.focusSegment( el );
                 }
+
                 UI.scrollSegment( el );
             }, 500, data);
         },

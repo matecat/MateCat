@@ -36,10 +36,15 @@ abstract class DataAccess_AbstractDao {
      */
     protected $cacheTTL = 0;
 
-    public function __construct( $con ) {
+    public function __construct( $con = null ) {
         /**
          * @var $con Database
          */
+
+        if ( $con == null ) {
+            $con = Database::obtain();
+        }
+
         $this->con = $con;
     }
 
@@ -318,6 +323,39 @@ abstract class DataAccess_AbstractDao {
      * @return DataAccess_IDaoStruct|DataAccess_IDaoStruct[]
      */
     protected abstract function _buildResult( $array_result );
+
+    /**
+     * Returns a string suitable for insert of the fields
+     * provided by the attributes array.
+     *
+     * @param $attrs array of full attributes to update
+     * @param $mask array of attributes to include in the update
+     * @return string
+     */
+
+    protected static function buildInsertStatement( $attrs, $mask ) {
+        $first = array()  ;
+        $second = array() ;
+        $pks = static::$primary_keys;
+
+        if ( empty($mask) ) {
+            $mask = array_keys( $attrs );
+        }
+
+        foreach( $attrs as $key => $value ) {
+            if ( !in_array( $key, $pks ) && in_array($key, $mask) ) {
+                $first[] =  $key;
+                $second[] = ":$key" ;
+            }
+        }
+
+        $sql = "INSERT INTO " . static::$TABLE . "(" .
+                implode(', ', $first ) . ") VALUES (" .
+                implode(', ', $second) . ");" ;
+
+        return $sql ;
+    }
+
 
     /**
      * Returns a string suitable for updates of the fields

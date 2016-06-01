@@ -21,6 +21,8 @@ class newProjectController extends viewController {
 
     private $keyList = array();
 
+    private $gdriveAuthUrl;
+
     public function __construct() {
 
         parent::__construct( false );
@@ -144,6 +146,7 @@ class newProjectController extends viewController {
         $this->doAuth();
 
         $this->generateAuthURL();
+        $this->generateGDriveAuthUrl();
 
         list( $uid, $cid ) = $this->getLoginUserParams();
         $engine = new EnginesModel_EngineDAO( Database::obtain() );
@@ -328,6 +331,7 @@ class newProjectController extends viewController {
 
         $this->template->incomingURL = $this->incomingUrl;
         $this->template->authURL     = $this->authURL;
+        $this->template->gdriveAuthURL = $this->gdriveAuthUrl;
 
         $this->template->user_keys = $this->keyList;
 
@@ -358,5 +362,8 @@ class newProjectController extends viewController {
         return Constants::DEFAULT_TARGET_LANG;
     }
 
-}
+    private function generateGDriveAuthUrl(){
+        $this->gdriveAuthUrl = \GDrive::generateGDriveAuthUrl();
+    }
 
+}

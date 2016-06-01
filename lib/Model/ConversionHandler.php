@@ -29,7 +29,9 @@ class ConversionHandler {
 
 
     public function __construct() {
-        $this->result = array();
+        $this->result = array(
+                'code' => 1 //set OK default
+        );
     }
 
     public function doAction() {
@@ -147,6 +149,15 @@ class ConversionHandler {
         if ( !isset( $cachedXliffPath ) or empty( $cachedXliffPath ) ) {
             //we have to convert it
 
+            $ocrCheck = new \Filters\OCRCheck( $this->source_lang );
+            if ( !$ocrCheck->isValid( $file_path ) ) {
+                $this->result[ 'code' ]     = -20; // No Good, Default
+                $this->result[ 'errors' ][] = array( "code" => -20, "message" =>
+                        "Scanned PDF and image conversion for languages not using the latin script is experimental. 
+                        Please, check the conversion of the file and download a Preview before starting the translation."
+                );
+            }
+
             if ( strpos( $this->target_lang, ',' ) !== false ) {
                 $single_language = explode( ',', $this->target_lang );
                 $single_language = $single_language[ 0 ];
@@ -211,8 +222,6 @@ class ConversionHandler {
                     $this->cookieDir,
                     FilesStorage::basename_fix( $file_path )
             );
-            //a usable package is available, give positive feedback
-            $this->result[ 'code' ] = 1;
 
         }
 

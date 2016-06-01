@@ -2,15 +2,19 @@
 @import 'common';
 @import 'style';
 @import 'mbc-style';
+@import 'jquery.powertip.min';
+@import 'lxq-style';
+@import 'lexiqa';
 @import 'segment-notes';
 @import 'project-completion-feature';
 @import 'editlog';
 @import 'review_improved' ;
 @import 'segment_filter' ;
-
-@import 'remodal';
-@import 'remodal-default-theme';
+@import 'jquery.powertip' ;
 
 @import 'cattool';
 
 @import 'speech2text';
+
+@import 'qa_check_glossary';
+@import 'qa_check_blacklist';

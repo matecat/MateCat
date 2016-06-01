@@ -74,6 +74,7 @@ class INIT {
     public static $DQF_ENABLED = false;
 
     public static $FORCE_XLIFF_CONVERSION    = false;
+    public static $FILTERS_OCR_CHECK         = true;
     public static $VOLUME_ANALYSIS_ENABLED   = true;
     public static $WARNING_POLLING_INTERVAL  = 20; //seconds
     public static $SEGMENT_QA_CHECK_INTERVAL = 1; //seconds
@@ -208,6 +209,7 @@ class INIT {
     public static $OAUTH_REDIRECT_URL;
     public static $OAUTH_SCOPES;
     public static $OAUTH_BROWSER_API_KEY;
+    public static $OAUTH_GDRIVE_SCOPES;
 
     public static $ENABLE_OMEGAT_DOWNLOAD = false;
     public static $UNLOCKABLE_TAGS = false;
@@ -223,11 +225,15 @@ class INIT {
         self::$OAUTH_SCOPES       = array(
                 'https://www.googleapis.com/auth/userinfo.email',
                 'https://www.googleapis.com/auth/userinfo.profile',
+                'profile'
+        );
+        self::$OAUTH_GDRIVE_SCOPES = array(
+                'https://www.googleapis.com/auth/userinfo.email',
+                'https://www.googleapis.com/auth/userinfo.profile',
                 'https://www.googleapis.com/auth/drive',
                 'https://www.googleapis.com/auth/drive.install',
                 'profile'
         );
-
     }
 
 

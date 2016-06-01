@@ -59,7 +59,9 @@ export default React.createClass({
             var previous = this.findPreviousVersion( this.state.segment.version_number );
             return trackChangesHTML(
                 UI.clenaupTextFromPleaceholders(previous.translation),
-                UI.clenaupTextFromPleaceholders( this.state.segment.translation ));
+                UI.clenaupTextFromPleaceholders(
+                    window.cleanupSplitMarker( this.state.segment.translation )
+                ));
         }
     },
 
@@ -102,7 +104,7 @@ export default React.createClass({
             key={'version-0'}
             versionNumber={this.state.segment.version_number}
             isCurrent={true} 
-            translation={this.state.segment.translation} />
+            translation={window.cleanupSplitMarker( this.state.segment.translation ) } />
 
         var fullList = [currentVersion].concat(previousVersions); 
 

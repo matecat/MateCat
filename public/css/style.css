@@ -590,7 +590,8 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 
 
 /*done & draft*/
-.translated ,.approved
+.translated ,
+.approved
 {
     background: #09beec;
     border:1px solid #848689;
@@ -620,7 +621,11 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 }
 
 
-article .translated, article .draft, article .approved{margin:0 0px 5px 5px}
+article .translated,
+article .draft,
+article .approved{
+	margin:0 0px 5px 5px
+}
 
 
 .buttons{float:right;padding:0;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;/*margin: -15px 2% 0 0;*/margin: 0;position:absolute;right:0;}
@@ -635,7 +640,8 @@ article .translated, article .draft, article .approved{margin:0 0px 5px 5px}
 
 .translated {color:#fff !important}
 
-article .translated, article .approved {
+article .translated,
+article .approved {
 	text-transform: uppercase;
 }
 
@@ -644,6 +650,7 @@ article .next-untranslated:hover,
 article .draft:hover,
 article .btn:hover,
 article .approved:hover,
+article .next-unapproved:hover,
 .search .btn:hover
 {
     cursor:pointer;
@@ -651,7 +658,10 @@ article .approved:hover,
     box-shadow: 0 1px 2px #ccc;
     border: 1px solid #000;
 }
-article .translated:active, article .draft:active, article .btn:active, article .approved:active{
+article .translated:active,
+article .draft:active,
+article .btn:active,
+article .approved:active{
 	-moz-box-shadow: inset 0 0 1px 1px #888;
 	-webkit-box-shadow: inset 0 0 1px 1px #888;
 	box-shadow: inset 0 0 1px 1px #888;
@@ -660,19 +670,39 @@ article .translated:active, article .draft:active, article .btn:active, article 
 
 
 .translated:hover,
-.next-untranslated:hover
-{
+.next-untranslated:hover {
     background: #12b4df;
 }
 .draft:hover{background:#eee;}
 
 
-.translated:active, .draft:active, .btn:active, .copysource:active {
+.translated:active,
+.draft:active,
+.btn:active,
+.copysource:active {
 	-moz-box-shadow: none;-webkit-box-shadow: none;box-shadow: none;border:1px solid #000
 }
 
-.approved
-    {
+.next-untranslated,
+.next-unapproved {
+	width: 50px !important;
+	height: 27px !important;
+	background: #09beec;
+	border:1px solid #848689;
+	font-weight: bold;
+	text-decoration: none;
+	padding: 8px 2px 0px 2px;
+	border-radius: 2px;
+	font-size: 18px;
+	background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
+	background: -moz-linear-gradient(top,  #09beec,  #119ec4);
+	background: linear-gradient(top,  #09beec,  #119ec4);
+	margin: -9px 25px -9px 25px;
+	color: #fff !important;
+}
+
+.approved,
+.next-unapproved {
     background:#7cc576;
     color:#fff !important;
 }
@@ -862,39 +892,8 @@ box-shadow: 0 1px 2px #ccc;
 .outersource .copy:hover p
 {
     visibility: visible;
-}    
-
-.next-untranslated
-{
-    width: 50px !important;
-    height: 27px !important;
-    background: #09beec;
-    border:1px solid #848689;
-    color: #333;
-    font-weight: bold;
-    text-decoration: none;
-    padding: 8px 2px 0px 2px;
-    border-radius: 2px;
-    border-radius: 2px;
-    font-size: 18px;
-    background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
-    background: -moz-linear-gradient(top,  #09beec,  #119ec4);
-    background: linear-gradient(top,  #09beec,  #119ec4);
-    margin: -9px 25px -9px 25px;
-    color: #fff !important;
-
-    /*    background: #09beec;
-    margin: -8px 15px -8px 15px;
-    -webkit-transition: all 100ms ease-in;
-    text-align: center;
-    color: #fff;
-    font-weight: bold;
-    font-size: 18px;*/
 }
-.next-untranslated:hover
-{
-    /*margin-right: 20px;*/
-}
+
 .tagmenu{width:40px ;background:#f6f6f6 url(../img/tools/tagmenu.gif) center center no-repeat;float:right;margin:8px -1px 0 0;-webkit-transition: all  100ms ease-in;}
 
 article
@@ -2553,7 +2552,7 @@ section.modified.editor .status
 	font-size: 13px;
 	font-style: italic;
 	margin-top: -2px;
-	height: 32px;
+	height: 24px;
 	vertical-align: baseline;
     border: 2px solid transparent;
 	display: inline-block;
@@ -3117,20 +3116,35 @@ del.diff
 	top: -4px;
 */
 }
-section .toolbar .tagModeToggle ,section .toolbar  .autofillTag  {
+section .toolbar .tagModeToggle,
+section .toolbar  .autofillTag  {
     float: left;
     display: none;
     font-size: 60%;
-    margin-right: 5px;
 }
 
 section .toolbar span {
-    font-size: 150%;
+    font-size: 120%;
+    padding-top: 5px;
+    margin-left: 1px;
 }
 
 .tagModeToggle span:before {
 float: left;
 }
+.tagModeToggle.active {
+    padding: 2px 1px 2px 0;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+    background-color: #eee;
+    background-image: -webkit-linear-gradient(top, #eee, #e0e0e0);
+
+}
+.tagModeToggle.active span {
+    font-size: 100%!important;
+}
+
+
+
 .editToolbar
 {
 	/*float: left;*/	
@@ -3139,6 +3153,7 @@ float: left;
 	visibility: hidden;
 	margin-top: -6px;
 	padding-top: 4px;
+	color:#666;
 }
 .editToolbar.visible
 {
@@ -3152,27 +3167,8 @@ float: left;
 	height: 16px;
 	margin-right: 10px;
 	cursor: pointer;
-	opacity: 0.8;
 }
-.editToolbar li:hover
-{
-	opacity: 0.5;
-}
-.editToolbar li.uppercase
-{
-	background: url(../img/edit-uppercase1.png) center center no-repeat;
-	background-size: 28px;
-}
-.editToolbar li.lowercase
-{
-	background: url(../img/edit-lowercase1.png) center center no-repeat;
-	background-size: 28px;
-}
-.editToolbar li.capitalize
-{
-	background: url(../img/edit-capitalize.png) center 1px no-repeat;
-	background-size: 12px 12px;
-}
+
 
 .editarea span.softReturn,
 .source span.softReturn
@@ -3306,15 +3302,16 @@ body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.end
 .autofillTag  {
 padding: 4px 2px 0px 2px;
 border: 1px solid #fff;
-color: #444!important;
+color: #666!important;
 }
 .autofillTag{
 	padding-top: 0 ;
 }
 
 
+
 .tagModeToggle:hover, .tagModeToggle.active {
-	color:#999!important;
+	color:#333!important;
 }
 
 .icon-tag-expand {
@@ -3335,9 +3332,7 @@ section.editor .toolbar {
 	float: left;
 }
 
-.tagModeToggle span.icon-chevron-right {
-margin-left: 5px;
-}
+
 
 .tagModeToggle.active span.icon-chevron-right {
 	margin-left: 0px;
@@ -3345,6 +3340,8 @@ margin-left: 5px;
 
 .tagModeToggle.active .icon-tag-expand {
 	display: inline-block;
+	font-weight: bold;
+    padding-top: 6px;
 }
 
 .textarea-container .tagMode {
@@ -3515,19 +3512,6 @@ body.editlog .breadcrumbs #pname, body.reviselog .breadcrumbs #pname {
 
 }
 
-.editToolbar li.capitalize {
-background: url(../img/edit-capitalize@2x.png) center 1px no-repeat;
-background-size: 12px 11px;
-}
-.editToolbar li.lowercase {
-background: url(../img/edit-lowercase1@2x.png) center center no-repeat;
-background-size: 27px; 
-}
-
-.editToolbar li.uppercase {
-background: url(../img/edit-uppercase1@2x.png) center center no-repeat;
-background-size: 27px;
-}
 
 a.showExtendedTags {
     position: relative;
