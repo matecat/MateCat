@@ -5,7 +5,7 @@ UI = null;
 
 UI = {
 
-    showDownloadCornerTip : function() {
+    /*showDownloadCornerTip : function() {
         if (UI.isChrome) {
             var newNotification = {
                 text: "Your downloaded file will appear on the bar below in a few seconds.<br><img src='/public/img/arrowdown_blu.png' width='18px' style='margin: 0 auto; display: block;'> ",
@@ -14,7 +14,7 @@ UI = {
             };
             APP.addNotification(newNotification);
         }
-    },
+    },*/
 
     setEditingSegment : function(segment) {
         if ( segment != null ) {
@@ -442,18 +442,7 @@ UI = {
 		}, 2000);
 	},
 
-	confirmDownload: function(res) {
-		if (res) {
-			if (UI.isChrome) {
-                var newNotification = {
-                    text: "Your downloaded file will appear on the bar below in a few seconds.<br><img src='/public/img/arrowdown_blu.png' width='18px' style='margin: 0 auto; display: block;'> ",
-                    title: "Download",
-                    allowHtml: true
-                };
-                APP.addNotification(newNotification);
-			}
-		}
-	},
+	
 	copyToNextIfSame: function(nextUntranslatedSegment) {
 		if ($('.source', this.currentSegment).data('original') == $('.source', nextUntranslatedSegment).data('original')) {
 			if ($('.editarea', nextUntranslatedSegment).hasClass('fromSuggestion')) {
@@ -2004,9 +1993,9 @@ UI = {
         // TODO: this should be relative to the current USER, find a
         // way to generate this at runtime.
         //
-        if( !config.isGDriveProject || config.isGDriveProject == 'false' ) {
+        /*if( !config.isGDriveProject || config.isGDriveProject == 'false' ) {
             UI.showDownloadCornerTip();
-        }
+        }*/
         UI.disableDownloadButtonForDownloadStart( openOriginalFiles );
 
         if ( typeof window.googleDriveWindows == 'undefined' ) {
@@ -2048,7 +2037,7 @@ UI = {
             return ;
         }
 
-        UI.showDownloadCornerTip();
+        //UI.showDownloadCornerTip();
 
         UI.disableDownloadButtonForDownloadStart();
 
