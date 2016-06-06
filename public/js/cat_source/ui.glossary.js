@@ -374,6 +374,9 @@ if (true)
                         var rightTxt = this.translation;
                         rightTxt = rightTxt.replace( /\#\{/gi, "<mark>" );
                         rightTxt = rightTxt.replace( /\}\#/gi, "</mark>" );
+                        var commentOriginal = this.comment;
+                        commentOriginal = commentOriginal.replace( /\#\{/gi, "<mark>" );
+                        commentOriginal = commentOriginal.replace( /\}\#/gi, "</mark>" );
                         var addCommentHtml = '<div class="glossary-add-comment">' +
                             '<a href="#">(+) Comment</a>' +
                             '<div class="input gl-comment" contenteditable="true" ></div>' +
@@ -394,7 +397,7 @@ if (true)
                                 '</span>' +
                                 '</li>' +
                                 '<li class="details">' +
-                                ((this.comment === '') ? addCommentHtml : '<div class="comment">' + this.comment + '</div>') +
+                                ((this.comment === '') ? addCommentHtml : '<div class="comment" data-original="'+ UI.decodePlaceholdersToText( commentOriginal, true ) +'">' + UI.decodePlaceholdersToText( commentOriginal, true ) + '</div>') +
                                 '<ul class="graysmall-details">' +
                                 '<li>' + this.last_update_date + '</li>' +
                                 '<li class="graydesc">Source: <span class="bold">' + cb + '</span></li>' +
@@ -462,6 +465,12 @@ if (true)
         },
         updateGlossary: function (elem$) {
             var self = this;
+            if (elem$.find('span.translation').hasClass('editing')) {
+                elem$.find('span.translation, .details .comment').removeClass('editing').removeAttr('contenteditable');
+                elem$.find('span.translation').html(elem$.find('span.translation').data('original'));
+                elem$.find('.details .comment').html(elem$.find('.details .comment').data('original'));
+                return;
+            }
             var setGlossaryTargetAttributes = (function () {
                 var glossaryDom = this;
                 var id = glossaryDom.data('id');
@@ -478,45 +487,22 @@ if (true)
             this.editGlossaryItem(elem$.find('.details .comment'), setGlossaryTargetAttributes);
             this.editGlossaryItem(elem$.find('span.translation'), setGlossaryTargetAttributes);
         },
-        /*updateGlossaryTarget: function (elem$) {
+        addGlossaryComment: function (elem$) {
             var self = this;
-            var setGlossaryTargetAttributes = (function () {
-                var glossaryDom = this.closest('.graysmall');
-                var id = glossaryDom.data('id');
-                var suggestion = glossaryDom.find('.suggestion_source').text();
-                var newTranslation = glossaryDom.find('.translation').text();
-                var translation = glossaryDom.find('.translation').data('original');
-                var comment = glossaryDom.find('.comment');
-                self.updateGlossaryItem(id, suggestion, translation, newTranslation);
-                elem$.find('span.translation').data('original', newTranslation);
-                this.removeClass('editing').removeAttr('contenteditable');
-                this.find('span.translation').off('keypress focusout');
-                this.find('.details .comment').off('keypress focusout');
-            }).bind(elem$);
-            this.editGlossaryItem(elem$.find('span.translation'), setGlossaryTargetAttributes);
-            this.editGlossaryItem(elem$.find('.details .comment'), setGlossaryTargetAttributes);
+            var glossaryDom = elem$.closest('.graysmall');
+            var id = glossaryDom.data('id');
+            var suggestion = glossaryDom.find('.suggestion_source').text();
+            var translation = glossaryDom.find('.translation').data('original');
+            var comment = elem$.text();
+            this.updateGlossaryItem(id, suggestion, translation, null, comment).done(function (data) {
+                elem$.closest('.graysmall').prev().remove();
+                elem$.closest('.graysmall').remove();
+                UI.processLoadedGlossary(data, UI.currentSegment);
+            });
         },
-        updateGlossaryComment: function (elem$) {
-            var self = this;
-            var setGlossaryCommentAttributes = (function () {
-                var glossaryDom = this.closest('.graysmall');
-                var id = glossaryDom.data('id');
-                var suggestion = glossaryDom.find('.suggestion_source').text();
-                var translation = glossaryDom.find('.translation').data('original');
-                var comment = this.text();
-                self.updateGlossaryItem(id, suggestion, translation, null, comment);
-                this.removeClass('editing').removeAttr('contenteditable');
-                this.off('keypress focusout');
-            }).bind(elem$);
-            this.editGlossaryItem(elem$, setGlossaryCommentAttributes);
-        },*/
 
         editGlossaryItem: function (elem$, callback) {
             elem$.addClass("editing").attr('contenteditable', true).focus();
-            /*elem$.focusout(function(e){
-                e.stopPropagation();
-                callback.call();
-            });*/
             elem$.keypress(function(e) {
                 e.stopPropagation();
                 if(e.which == 13) {
@@ -547,6 +533,9 @@ if (true)
                 ],
                 error: function () {
                     UI.failedConnection( 0, 'glossary' );
+                },
+                success: function (data) {
+                    return data;
                 }
             });
         }
