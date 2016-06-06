@@ -62,8 +62,7 @@
                 segment.segment || '', 
                 true, segment.sid, 'source');
 
-            // If Enabled Speech2Text add micActive class
-            ( !_.isUndefined(Speech2Text) && Speech2Text.isSupported() ) ? editarea_classes.push( 'micActive' ): false;
+            Speech2Text.enabled() && editarea_classes.push( 'micActive' ) ; 
 
             return  {
                 t                       : t,
@@ -86,7 +85,8 @@
                 decoded_translation     : decoded_translation  ,
                 status_change_title     : status_change_title ,
                 segment_edit_sec        : segment_edit_sec,
-                segment_edit_min        : segment_edit_min
+                segment_edit_min        : segment_edit_min, 
+                s2t_enabled             : Speech2Text.enabled() 
             };
 
         },

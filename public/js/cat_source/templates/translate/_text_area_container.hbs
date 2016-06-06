@@ -9,6 +9,8 @@
                         data-sid="{{segment.sid}}"
                         >{{#if segment.translation }}{{{ decoded_translation }}}{{/if}}
   </div>
+
+  {{#if s2t_enabled}}
   <div class="micSpeech" title="Activate voice input" data-segment-id="{{originalId}}">
         <div class="micBg"></div>
         <div class="micBg2">
@@ -20,6 +22,7 @@
           </svg>
         </div>
   </div>
+  {{/if}}
   <div class="toolbar">
     {{{tagLockCustomizable}}}
     {{#if tagModesEnabled }}
