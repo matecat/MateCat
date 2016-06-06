@@ -1,7 +1,18 @@
 Speech2Text = {
     enabled: function () {
-        return !!('webkitSpeechRecognition' in window);
-
+        return !!('webkitSpeechRecognition' in window && config.speech2textEnabled);
+    },
+    disable: function () {
+        if (config.speech2textEnabled) {
+            config.speech2textEnabled = false;
+            UI.render();
+        }
+    },
+    enable: function () {
+        if (!config.speech2textEnabled) {
+            config.speech2textEnabled = true;
+            UI.render();
+        }
     }
 };
 
