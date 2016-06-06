@@ -1959,26 +1959,25 @@ body.rtl-target .editor .editarea span
 }
 .graysmall .translation.editing,
 .graysmall .comment.editing {
-	padding: 3px;
-	background: #fff;
-	border: 1px solid #aaa;
-	border-radius: 2px;
-	box-shadow: inset 0 1px 2px #ddd;
-	outline: none;
+    padding: 2px 0.4%;
+    background: #fff;
+    border: 1px solid #aaa;
+    border-radius: 2px;
+    box-shadow: inset 0 1px 2px #ddd;
+    outline: none;
+    min-height: 20px;
+    line-height: 20px;
 }    
 .graysmall .switch-editing
 {
-    display: none;
-    float: left;
-    position: relative;
-    text-indent: -9999px;
-    margin-left: -26px;
-    margin-right: 10px;
-    width: 16px;
-    height: 16px;   
-    background: transparent url(../img/icon_edit.png) 0 0 no-repeat;
-    cursor: pointer;
-    opacity: 0.6;
+	display: none;
+	float: left;
+	position: absolute;
+	width: 16px;
+	height: 16px;
+	cursor: pointer;
+	right: 40px;
+	top: 16px;
 }
 .graysmall:hover .switch-editing
 {
@@ -1986,7 +1985,8 @@ body.rtl-target .editor .editarea span
 }
 .graysmall:hover .switch-editing:hover
 {
-	opacity: 1;
+	margin-top:-2px;
+	color:#000;
 }
 .graysmall .edit-buttons
 {
@@ -2109,7 +2109,7 @@ body.rtl-target .editor .editarea span
 	overflow: hidden;
 }
 .graysmall div.comment.editing {
-	width: 60%;
+	width: 46%;
 }
 .graysmall .b {
     padding-left:25px!important;
@@ -2127,20 +2127,21 @@ body.rtl-target .editor .editarea span
 
 .trash:hover {
     margin-top:-2px;
-    color:#000;}
+    color:#000;
+}
 
 .trash{
-    transition: width 2s;
-    transition: width 2s; /* Firefox 4 */
-    -webkit-transition: width 2s; /* Safari and Chrome */
-    -o-transition: width 2s; /* Opera */
-    -webkit-transition: all 0.1s linear;
     transition: all 0.1s linear;
-    color:#999;
+    color:#666;
     text-decoration: none;
     -o-transition: all 0.1s linear;
-    -ms-transition: all 0.1s linear;display:block;height:0;width:20px;
-    position:absolute;right:5px;top:14px
+	-webkit-transition: all 0.1s linear;
+	display:block;
+	height:0;
+	width:20px;
+    position:absolute;
+	right:5px;
+	top:14px
 }
 .graysmall-message{
     bottom:-10px;
@@ -2661,7 +2662,7 @@ section.modified.editor .status
 
 @media screen and (min-width: 1181px){
 	.languages{text-indent:-85px; }
-	.graysmall .b{ padding-left:55px !important;width:42% !important}
+	.graysmall .b{ padding-left:85px !important;width:42% !important}
 	.graysmall-message{left:55px !important}
 	
 

@@ -374,10 +374,15 @@ if (true)
                         var rightTxt = this.translation;
                         rightTxt = rightTxt.replace( /\#\{/gi, "<mark>" );
                         rightTxt = rightTxt.replace( /\}\#/gi, "</mark>" );
+                        var addCommentHtml = '<div class="glossary-add-comment">' +
+                            '<a href="#">(+) Comment</a>' +
+                            '<div class="input gl-comment" contenteditable="true" ></div>' +
+                            '</div>' ;
                         $( '.sub-editor.glossary .overflow .results', segment )
                                 .append(
                                 '<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '">' +
                                 '<li class="sugg-source">' +
+                                '<div id="' + segment_id + '-tm-' + this.id + '-edit" class="switch-editing icon-edit" title="Edit"></div>' +
                                 ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') +
                                 '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' +
                                 UI.decodePlaceholdersToText( leftTxt, true ) +
@@ -389,7 +394,7 @@ if (true)
                                 '</span>' +
                                 '</li>' +
                                 '<li class="details">' +
-                                ((this.comment === '') ? '' : '<div class="comment">' + this.comment + '</div>') +
+                                ((this.comment === '') ? addCommentHtml : '<div class="comment">' + this.comment + '</div>') +
                                 '<ul class="graysmall-details">' +
                                 '<li>' + this.last_update_date + '</li>' +
                                 '<li class="graydesc">Source: <span class="bold">' + cb + '</span></li>' +
@@ -455,7 +460,25 @@ if (true)
             tempCopyGlossPlaceholder.remove();
             this.highlightEditarea();
         },
-        updateGlossaryTarget: function (elem$) {
+        updateGlossary: function (elem$) {
+            var self = this;
+            var setGlossaryTargetAttributes = (function () {
+                var glossaryDom = this;
+                var id = glossaryDom.data('id');
+                var suggestion = glossaryDom.find('.suggestion_source').text();
+                var newTranslation = glossaryDom.find('.translation').text();
+                var translation = glossaryDom.find('.translation').data('original');
+                var comment = glossaryDom.find('.comment').text();
+                self.updateGlossaryItem(id, suggestion, translation, newTranslation, comment);
+                this.find('span.translation').data('original', newTranslation);
+                this.find(".editing").removeClass('editing').removeAttr('contenteditable');
+                this.find('span.translation').off('keypress focusout');
+                this.find('.details .comment').off('keypress focusout');
+            }).bind(elem$);
+            this.editGlossaryItem(elem$.find('.details .comment'), setGlossaryTargetAttributes);
+            this.editGlossaryItem(elem$.find('span.translation'), setGlossaryTargetAttributes);
+        },
+        /*updateGlossaryTarget: function (elem$) {
             var self = this;
             var setGlossaryTargetAttributes = (function () {
                 var glossaryDom = this.closest('.graysmall');
@@ -463,12 +486,15 @@ if (true)
                 var suggestion = glossaryDom.find('.suggestion_source').text();
                 var newTranslation = glossaryDom.find('.translation').text();
                 var translation = glossaryDom.find('.translation').data('original');
+                var comment = glossaryDom.find('.comment');
                 self.updateGlossaryItem(id, suggestion, translation, newTranslation);
-                this.data('original', newTranslation);
+                elem$.find('span.translation').data('original', newTranslation);
                 this.removeClass('editing').removeAttr('contenteditable');
-                this.off('keypress focusout');
+                this.find('span.translation').off('keypress focusout');
+                this.find('.details .comment').off('keypress focusout');
             }).bind(elem$);
-            this.editGlossaryItem(elem$, setGlossaryTargetAttributes);
+            this.editGlossaryItem(elem$.find('span.translation'), setGlossaryTargetAttributes);
+            this.editGlossaryItem(elem$.find('.details .comment'), setGlossaryTargetAttributes);
         },
         updateGlossaryComment: function (elem$) {
             var self = this;
@@ -483,14 +509,14 @@ if (true)
                 this.off('keypress focusout');
             }).bind(elem$);
             this.editGlossaryItem(elem$, setGlossaryCommentAttributes);
-        },
+        },*/
 
         editGlossaryItem: function (elem$, callback) {
             elem$.addClass("editing").attr('contenteditable', true).focus();
-            elem$.focusout(function(e){
+            /*elem$.focusout(function(e){
                 e.stopPropagation();
                 callback.call();
-            });
+            });*/
             elem$.keypress(function(e) {
                 e.stopPropagation();
                 if(e.which == 13) {
@@ -505,17 +531,13 @@ if (true)
                 exec: 'update',
                 segment: segment,
                 translation: translation,
+                newsegment: segment,
+                newtranslation: newTranslation,
                 id_item: idItem,
+                comment: comment,
                 id_job: config.job_id,
                 password: config.password
             };
-
-            if (newTranslation) {
-                data.newsegment = segment;
-                data.newtranslation = newTranslation;
-            } else if (comment) {
-                data.comment = comment;
-            }
 
             return  APP.doRequest( {
                 data: data,

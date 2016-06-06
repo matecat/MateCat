@@ -608,13 +608,20 @@ $.extend(UI, {
 			UI.chooseAlternative($(this));
         }).on('dblclick', '.glossary .sugg-target', function() {
             UI.copyGlossaryItemInEditarea($(this));
-		}).on('click', '.glossary .sugg-target', function() {
+		}).on('click', '.glossary .switch-editing', function() {
+			UI.updateGlossary($(this).closest(".graysmall"));
+		})
+			/*.on('click', '.glossary .sugg-target', function() {
 			UI.updateGlossaryTarget($(this).find('span.translation'));
-		}).on('click', '.tab.alternatives .graysmall .goto a', function(e) {
+		}).on('click', '.sub-editor.glossary .details .comment', function(e) {
+			e.preventDefault();
+			UI.updateGlossaryComment($(this));
+		})
+			.on('click', '.tab.alternatives .graysmall .goto a', function(e) {
 			e.preventDefault();
 			UI.scrollSegment($('#segment-' + $(this).attr('data-goto')), true);
 			UI.highlightEditarea($('#segment-' + $(this).attr('data-goto')));
-		});
+		});*/
 
 		$(".joblink").click(function(e) {
 			e.preventDefault();
@@ -1139,9 +1146,6 @@ $.extend(UI, {
 			e.preventDefault();
 			ul = $(this).parents('ul.graysmall').first();
 			UI.deleteGlossaryItem($(this).parents('ul.graysmall').first());
-		}).on('click', '.sub-editor.glossary .details .comment', function(e) {
-			e.preventDefault();
-			UI.updateGlossaryComment($(this));
 		}).on('keydown', '.sub-editor .cc-search .search-source', function(e) {
 			if (e.which == 13) { // enter
 				e.preventDefault();
