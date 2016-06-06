@@ -2481,6 +2481,7 @@ UI = {
 
 		if (translation === '') {
             this.unsavedSegmentsToRecover.push(this.currentSegmentId);
+            this.executingSetTranslation = false;
             return false;
         }
 		var time_to_edit = UI.editTime;
