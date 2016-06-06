@@ -62,7 +62,10 @@
                 segment.segment || '', 
                 true, segment.sid, 'source');
 
-            var templateData = {
+            // If Enabled Speech2Text add micActive class
+            ( !_.isUndefined(Speech2Text) && Speech2Text.isSupported() ) ? editarea_classes.push( 'micActive' ): false;
+
+            return  {
                 t                       : t,
                 originalId              : originalId,
                 autoPropagated          : autoPropagated,
@@ -84,9 +87,8 @@
                 status_change_title     : status_change_title ,
                 segment_edit_sec        : segment_edit_sec,
                 segment_edit_min        : segment_edit_min
-            }
+            };
 
-            return templateData ;
         },
 
         getSegmentMarkup: function (
