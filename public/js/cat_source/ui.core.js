@@ -953,7 +953,7 @@ UI = {
 		$('#outer').addClass('loading');
 		var seg = (options.segmentToScroll) ? options.segmentToScroll : this.startSegmentId;
 
-		APP.doRequest({
+		return APP.doRequest({
 			data: {
 				action: 'getSegments',
 				jid: config.id_job,
@@ -992,7 +992,6 @@ UI = {
 
 		this.body.addClass('loaded');
 
-
 		if (typeof d.data.files != 'undefined') {
 			this.renderFiles(d.data.files, where, this.firstLoad);
 			if ((options.openCurrentSegmentAfter) && (!options.segmentToScroll) && (!options.segmentToOpen)) {
@@ -1000,7 +999,7 @@ UI = {
 				this.gotoSegment(seg);
 			}
 			if (options.segmentToScroll) {
-				this.scrollSegment($('#segment-' + options.segmentToScroll));
+				this.scrollSegment($('#segment-' + options.segmentToScroll), options.highlight );
 			}
 			if (options.segmentToOpen) {
 				$('#segment-' + options.segmentToOpen + ' ' + UI.targetContainerSelector()).click();
@@ -1016,7 +1015,7 @@ UI = {
 			}
 
 			if ($('#segment-' + UI.startSegmentId).hasClass('readonly')) {
-				this.scrollSegment($('#segment-' + UI.startSegmentId));
+                this.scrollSegment($('#segment-' + UI.startSegmentId), options.highlight );
 			}
 
 			if (options.applySearch) {
@@ -1030,14 +1029,10 @@ UI = {
 			}
 		}
 		$('#outer').removeClass('loading loadingBefore');
-		if(options.highlight) {
-			UI.highlightEditarea($('#segment-' + options.segmentToScroll));
-		}
+        
 		this.loadingMore = false;
 		this.setWaypoints();
-//		console.log('prova a: ', $('#segment-13655401 .editarea').html());
 		this.markTags();
-//		console.log('prova b: ', $('#segment-13655401 .editarea').html());
 		this.checkPendingOperations();
         $(document).trigger('getSegments_success');
 
