@@ -1,11 +1,11 @@
 Speech2Text = {
-    isSupported: function () {
+    enabled: function () {
         return !!('webkitSpeechRecognition' in window);
 
     }
 };
 
-if ( Speech2Text.isSupported() ) {
+if ( Speech2Text.enabled() ) {
     (function ($, Speech2Text, undefined) {
         $.extend(Speech2Text, {
             recognition: null,
