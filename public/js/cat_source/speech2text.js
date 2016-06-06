@@ -5,7 +5,7 @@ Speech2Text = {
     }
 };
 
-if (Speech2Text.isSupported) {
+if ( Speech2Text.isSupported() ) {
     (function ($, Speech2Text, undefined) {
         $.extend(Speech2Text, {
             recognition: null,
@@ -19,16 +19,14 @@ if (Speech2Text.isSupported) {
             isToKeepRecognizing: false,
             wereMatchesPreviouslyOpened: false,
             loadRecognition: function () {
-                if ('webkitSpeechRecognition' in window) {
-                    Speech2Text.recognition = new webkitSpeechRecognition();
-                    Speech2Text.recognition.continuous = true;
-                    Speech2Text.recognition.interimResults = true;
-                    Speech2Text.recognition.onstart = Speech2Text.onRecognitionStart;
-                    Speech2Text.recognition.onerror = Speech2Text.onRecognitionError;
-                    Speech2Text.recognition.onend = Speech2Text.onRecognitionEnd;
-                    Speech2Text.recognition.onresult = Speech2Text.onRecognitionResult;
-                    Speech2Text.recognition.lang = config.target_lang;
-                }
+                Speech2Text.recognition = new webkitSpeechRecognition();
+                Speech2Text.recognition.continuous = true;
+                Speech2Text.recognition.interimResults = true;
+                Speech2Text.recognition.onstart = Speech2Text.onRecognitionStart;
+                Speech2Text.recognition.onerror = Speech2Text.onRecognitionError;
+                Speech2Text.recognition.onend = Speech2Text.onRecognitionEnd;
+                Speech2Text.recognition.onresult = Speech2Text.onRecognitionResult;
+                Speech2Text.recognition.lang = config.target_lang;
             },
             enableMicrophone: function (segment) {
                 Speech2Text.microphone = segment.find('.micSpeech');
