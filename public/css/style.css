@@ -27,17 +27,45 @@ body.incomingMsg header
 	margin-top: 0px;
 }
 
-header .wrapper{height:20px; padding:0px 0 0 0;}
-.header-menu{
+header .wrapper{
+	height:20px; padding:0px 0 0 0;
+}
+.header-menu {
 	float:right;
 	margin-right:16px;
 	margin-left: 15px;
 }
-.header-menu li{
+.header-menu li {
     /*border-left:1px solid #000;*/
-    float:left;height:37px;padding:5px 0px;}
-#notifbox
+    float:left;height:37px;padding:5px 0px;
+}
+
+.text .item,
+.white li
 {
+	width: 45.5%;
+	table-layout: fixed;
+	float: left;
+	/*    margin: 0px 1px 0px 0;*/
+	padding: 3px 1%;
+	text-align: left;
+	list-style: none;
+	height: 95%;
+	outline: none;
+	word-wrap: break-word;
+	word-break: normal;
+}
+.text .source.item {
+	padding-bottom: 10px;
+}
+
+
+.text a{
+	text-decoration:none;
+	color:#000
+}
+
+#notifbox {
   opacity: 0.9;
   text-align: center;
   width: 60px;
@@ -593,9 +621,8 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 .translated ,
 .approved
 {
-    background: #09beec;
     border:1px solid #848689;
-    color: #333;
+    color: #fff !important;
     font-weight: bold;
     text-decoration: none;
     padding: 8px 18px;
@@ -605,6 +632,40 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
     background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
     background: -moz-linear-gradient(top,  #09beec,  #119ec4);
     background: linear-gradient(top,  #09beec,  #119ec4);
+	text-transform: uppercase;
+}
+
+.approved {
+	background:#7cc576;
+}
+
+.guesstags {
+    background: #09beec;
+    border:1px solid #666;
+	font-weight: bold;
+	text-decoration: none;
+	padding: 8px 18px;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+	font-size: 18px;
+	text-transform: uppercase;
+	color: #fff !important;
+    -webkit-transition: all  100ms ease-in;
+    -moz-transition: all  100ms ease-in;
+    -moz-box-shadow: 0 1px 2px #ccc;
+    -webkit-box-shadow: 0 1px 2px #ccc;
+    box-shadow: 0 1px 2px #ccc;
+}
+.guesstags:hover {
+	cursor:pointer;
+    -moz-box-shadow: 0 1px 2px #666;
+    -webkit-box-shadow: 0 1px 2px #666;
+    box-shadow: 0 1px 2px #666;
+    background:#12b4df
+}
+.guesstags:active {
+    -moz-box-shadow: inset 0 1px 1px #888;
+    -webkit-box-shadow: inset 0 1px 1px #888;
 }
 
 .button-reject {
@@ -794,19 +855,25 @@ box-shadow: 0 1px 2px #ccc;
  }
 
 .topmenu-drop input.translated, .topmenu-drop input.approved {
-	  width: auto!important;
-	  border-radius: 2px 0 0 2px;
-	    padding: 0 18px!important;
-  text-transform: uppercase;
-  margin: 0!important
+	width: auto!important;
+	border-radius: 2px 0 0 2px;
+	padding: 0 18px!important;
+	text-transform: uppercase;
+	margin: 0!important
 }
 
 
-.topmenu-drop input.approved:hover{background:#76bb70;}
-.topmenu-drop input.translated:hover {background: #12b4df;}
+.topmenu-drop input.approved:hover{
+	background:#76bb70;
+}
+.topmenu-drop input.translated:hover {
+	background: #12b4df;
+}
 
 
-.topmenu-drop .text {margin:0;}
+.topmenu-drop .text {
+	margin:0;
+}
 
 .wrapper-dropdown-5 input {
 	width: auto!important;
@@ -1762,31 +1829,6 @@ z-index: 10000;
 .grayed-text{color:#4c4c4c;}
 .textarea-container{height: inherit;table-layout: fixed;}
 .editor .textarea-container{position:relative;width:100%;float:right !important;/*padding-bottom:5px;*/}
-
-
-.text .item,
-.white li
-{
-    width: 45.5%;
-    table-layout: fixed;
-    float: left;
-	/*    margin: 0px 1px 0px 0;*/
-	padding: 3px 1%;
-    text-align: left;
-    list-style: none;
-    height: 95%;
-    outline: none;
-    word-wrap: break-word;
-    word-break: normal;
-}
-.text .source.item {
-    padding-bottom: 10px;
-}
-
-
-.text a{text-decoration:none;color:#000 }
-
-
 
 .editarea, .search-editarea, .textarea-container .area
 {
