@@ -2,14 +2,20 @@
 
     var segment ;
 
-    var tryToRenderAgain = function() {
+    var scrollSelector = 'html,body'; 
+
+    var tryToRenderAgain = function( segment, highlight ) {
+        
         $('#outer').empty();
+        
+        var id_segment = segment.selector.split('-')[1];
 
         UI.render({
             firstLoad: false,
-            segmentToScroll: segment.selector.split('-')[1],
-            highlight: highlight
+            segmentToScroll: id_segment, 
+            highlight : highlight 
         });
+        
     }
 
     var someOpenSegmentOnPage = function() {
@@ -60,53 +66,49 @@
 
         return destinationTop ;
     }
+    
+    var doDirectScroll = function( segment, highlight, quick ) {
+        var pointSpeed = (quick)? 0 : 500;
+
+        var scrollPromise = animateScroll( segment, pointSpeed ) ;
+        scrollPromise.done( function() {
+            UI.goingToNext = false;
+        });
+        
+        if ( highlight ) { 
+            scrollPromise.done( function() {
+                UI.highlightEditarea( segment ) ;
+            }); 
+        }
+        
+        return scrollPromise ; 
+    }
 
     var scrollSegment = function(inputSegment, highlight, quick) {
-        segment = $(inputSegment);
-
-        if ( !segment.length ) {
-            // TODO: check for this condition to be actually needed
-            // to limit responsiblity of this function we must enforce
-            // the segment to be present, raise otherwise.
-            tryToRenderAgain() ;
-            return ;
-        }
+        var segment = $(inputSegment);
 
         quick = quick || false;
         highlight = highlight || false;
-
-        var pointSpeed = (quick)? 0 : 500;
-
-        $("html,body").stop();
-
-        // if ( config.isReview ) {
-        if ( true ) {
-            // FIXME: experimentally keep the `review` behaviour the default
-            // for translate page too. We are not sure what the other block
-            // of code actually does, so we need to keep this code around for
-            // a while and do some user testing to be sure it is safe to
-            // remove it.
-            setTimeoutForReview() ;
-        } else {
-            scrollToDestination( getDestinationTop(), pointSpeed ) ;
+        
+        if ( segment.length ) {
+            return doDirectScroll( segment, highlight, quick ) ; 
+        }
+        else {
+            return tryToRenderAgain( segment, highlight ) ;
         }
 
-        // TODO check if this timeout can be avoided in some way
-        setTimeout(function() { UI.goingToNext = false; }, pointSpeed);
     }
-
-    var setTimeoutForReview = function() {
-        setTimeout(function() {
-            $("html,body").animate({
+    
+    var animateScroll = function( segment, speed ) {
+        var scrollAnimation = $( scrollSelector ).stop().delay( 300 ); 
+        
+        if ( segment.prev().length ) {
+            scrollAnimation.animate({
                 scrollTop: segment.prev().offset().top - $('.header-menu').height()
-            }, 500);
-        }, 300);
-    }
-
-    var scrollToDestination = function( destinationTop, pointSpeed ) {
-        $("html,body").animate({
-            scrollTop: destinationTop - 20
-        }, pointSpeed);
+            }, speed);
+        }
+        
+        return scrollAnimation.promise() ; 
     }
 
     $.extend(UI, {

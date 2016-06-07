@@ -26,7 +26,7 @@ class GetMyMemoryTest extends AbstractTest
     /**
      * @var array
      */
-    protected $config_param;
+    protected $config_param_of_get;
 
     protected $reflector;
 
@@ -35,7 +35,7 @@ class GetMyMemoryTest extends AbstractTest
     {
         parent::setUp();
 
-        $engineDAO        = new EnginesModel_EngineDAO( Database::obtain() );
+        $engineDAO        = new EnginesModel_EngineDAO( Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ) );
         $engine_struct= EnginesModel_EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng = $engineDAO->read( $engine_struct );
@@ -46,7 +46,7 @@ class GetMyMemoryTest extends AbstractTest
         $this->engine_struct_param = @$eng[0];
 
 
-        $this->config_param= array(
+        $this->config_param_of_get= array(
             'translation' => "",
             'tnote' => NULL,
             'source' => "it-IT",
@@ -72,9 +72,9 @@ class GetMyMemoryTest extends AbstractTest
 
         $this->engine_MyMemory = new Engines_MyMemory($this->engine_struct_param);
 
-        $this->config_param['segment']= "- Auf der Fußhaut natürlich vorhandene Hornhautbakterien zersetzen sich durch auftretenden Schweiß an Ihren Füßen.";
+        $this->config_param_of_get['segment']= "- Auf der Fußhaut natürlich vorhandene Hornhautbakterien zersetzen sich durch auftretenden Schweiß an Ihren Füßen.";
 
-        $result = $this->engine_MyMemory->get($this->config_param);
+        $result = $this->engine_MyMemory->get($this->config_param_of_get);
         $this->assertEquals(200,$result->responseStatus);
         $this->assertEquals("",$result->responseDetails);
         $this->assertCount(2,$result->responseData);
@@ -99,10 +99,10 @@ class GetMyMemoryTest extends AbstractTest
         $this->engine_MyMemory = new Engines_MyMemory($this->engine_struct_param);
 
 
-        $this->config_param['segment']="L’Amministratore inserisce titolo, anno di produzione e codice univoco del nuovo film.";
+        $this->config_param_of_get['segment']="L’Amministratore inserisce titolo, anno di produzione e codice univoco del nuovo film.";
 
 
-        $result = $this->engine_MyMemory->get($this->config_param);
+        $result = $this->engine_MyMemory->get($this->config_param_of_get);
 
         /**
          * general check on the keys of TSM object returned
@@ -128,11 +128,11 @@ class GetMyMemoryTest extends AbstractTest
         $this->engine_MyMemory = new Engines_MyMemory($this->engine_struct_param);
 
 
-        $this->config_param['segment']= "Scelta del Piano di studio parziale per il secondo anno ripetente secondo l’Ordinamento D.M. 270/04";
-        $this->config_param['id_user']= "bfb9bd80a43253670c8d";
+        $this->config_param_of_get['segment']= "Scelta del Piano di studio parziale per il secondo anno ripetente secondo l’Ordinamento D.M. 270/04";
+        $this->config_param_of_get['id_user']= "bfb9bd80a43253670c8d";
 
 
-        $result = $this->engine_MyMemory->get($this->config_param);
+        $result = $this->engine_MyMemory->get($this->config_param_of_get);
 
 
 
@@ -156,7 +156,7 @@ class GetMyMemoryTest extends AbstractTest
      */
     public function test_get_segment_with_mock_for__call(){
 
-       $this->config_param['segment']="Il Sistema genera un numero di serie per quella copia e lo stampa (anche sotto forma di codice a barre) su un’etichetta adesiva.";
+       $this->config_param_of_get['segment']="Il Sistema genera un numero di serie per quella copia e lo stampa (anche sotto forma di codice a barre) su un’etichetta adesiva.";
 
         $curl_mock_param = array(
             CURLOPT_HTTPGET => true,
@@ -174,7 +174,7 @@ TAB;
         $this->engine_MyMemory= $this->getMockBuilder('\Engines_MyMemory')->setConstructorArgs(array($this->engine_struct_param))->setMethods(array('_call'))->getMock();
         $this->engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param,$curl_mock_param)->willReturn($mock_json_return);
 
-        $result = $this->engine_MyMemory->get($this->config_param);
+        $result = $this->engine_MyMemory->get($this->config_param_of_get);
         /**
          * general check on the keys of TSM object returned
          */
@@ -210,7 +210,7 @@ TAB;
      */
     public function test_get_segment_with_mock_for__call_and_at_least_one_match_found_in_TM(){
 
-            $this->config_param['segment']= "Ciascuna copia è dotata di un numero di serie univoco.";
+            $this->config_param_of_get['segment']= "Ciascuna copia è dotata di un numero di serie univoco.";
 
 
         $curl_mock_param=array(
@@ -229,7 +229,7 @@ TAB;
         $this->engine_MyMemory= $this->getMockBuilder('\Engines_MyMemory')->setConstructorArgs(array($this->engine_struct_param))->setMethods(array('_call'))->getMock();
         $this->engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param,$curl_mock_param)->willReturn($mock_json_return);
 
-        $result = $this->engine_MyMemory->get($this->config_param);
+        $result = $this->engine_MyMemory->get($this->config_param_of_get);
         /**
          * general check on the keys of TSM object returned
          */
@@ -322,6 +322,67 @@ TAB;
         /**
          * check of protected property
          */
+        $this->reflector= new ReflectionClass($result);
+        $property= $this->reflector->getProperty('_rawResponse');
+        $property->setAccessible(true);
+
+        $this->assertEquals("",$property->getValue($result));
+
+    }
+
+    /**
+     *@group regression
+     *@covers Engines_MyMemory::get
+     */
+    public function test_get_with_error_from_mocked__call_for_coverage_purpose(){
+
+        $this->config_param_of_get['segment']="Il Sistema genera un numero di serie per quella copia e lo stampa (anche sotto forma di codice a barre) su un’etichetta adesiva.";
+
+        $curl_mock_param = array(
+            CURLOPT_HTTPGET => true,
+            CURLOPT_TIMEOUT => 10
+        );
+        $url_mock_param= "http://api.mymemory.translated.net/get?q=Il+Sistema+genera+un+numero+di+serie+per+quella+copia+e+lo+stampa+%28anche+sotto+forma+di+codice+a+barre%29+su+un%E2%80%99etichetta+adesiva.&langpair=it-IT%7Cen-US&de=demo%40matecat.com&mt=1&numres=3&key=a6043e606ac9b5d7ff24";
+
+        $rawValue_error = array(
+            'error' => array(
+                'code'      => -6,
+                'message'   => "Could not resolve host: api.mymemory.translated.net. Server Not Available (http status 0)",
+                'response'  => "",
+            ),
+            'responseStatus'    => 0
+        );
+
+
+        /**
+         * @var Engines_MyMemory
+         */
+        $this->engine_MyMemory= $this->getMockBuilder('\Engines_MyMemory')->setConstructorArgs(array($this->engine_struct_param))->setMethods(array('_call'))->getMock();
+        $this->engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param,$curl_mock_param)->willReturn($rawValue_error);
+
+        $result = $this->engine_MyMemory->get($this->config_param_of_get);
+        /**
+         * general check on the keys of TSM object returned
+         */
+        $this->assertTrue($result instanceof Engines_Results_MyMemory_TMS);
+        $this->assertTrue(property_exists($result,'matches'));
+        $this->assertTrue(property_exists($result,'responseStatus'));
+        $this->assertTrue(property_exists($result,'responseDetails'));
+        $this->assertTrue(property_exists($result,'responseData'));
+        $this->assertTrue(property_exists($result,'error'));
+        $this->assertTrue(property_exists($result,'_rawResponse'));
+        /**
+         * specific check
+         */
+        $this->assertEquals(array(),$result->matches);
+        $this->assertEquals(0, $result->responseStatus);
+        $this->assertEquals("", $result->responseDetails);
+        $this->assertEquals("", $result->responseData);
+        $this->assertTrue($result->error instanceof Engines_Results_ErrorMatches);
+
+        $this->assertEquals(-6, $result->error->code);
+        $this->assertEquals("Could not resolve host: api.mymemory.translated.net. Server Not Available (http status 0)", $result->error->message);
+
         $this->reflector= new ReflectionClass($result);
         $property= $this->reflector->getProperty('_rawResponse');
         $property->setAccessible(true);

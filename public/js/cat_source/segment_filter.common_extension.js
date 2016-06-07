@@ -92,7 +92,7 @@ if ( SegmentFilter.enabled() )
         editAreaClick : function(e, operation, action) {
             var e = arguments[0];
             if ( ! UI.isMuted(e.target) ) {
-                original_editAreaClick.apply( e.target, arguments );
+                original_editAreaClick.apply( $(e.target).closest('.editarea'), arguments );
             }
         },
 

@@ -38,7 +38,7 @@ class CallprotectedfunctionTest extends AbstractTest
     public function setUp()
     {
         parent::setUp();
-        $this->database_instance = Database::obtain();
+        $this->database_instance = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         /**
          * user insertion
          */
@@ -57,7 +57,7 @@ class CallprotectedfunctionTest extends AbstractTest
         $this->sql_delete_user = "DELETE FROM users WHERE uid=" . $this->id_user . ";";
         $this->sql_delete_engine = "DELETE FROM engines WHERE id=" . $this->id_database . ";";
 
-        $engineDAO = new EnginesModel_EngineDAO(Database::obtain());
+        $engineDAO = new EnginesModel_EngineDAO(Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ));
         $engine_struct = EnginesModel_EngineStruct::getStruct();
         $engine_struct->id = $this->id_database;
         $eng = $engineDAO->read($engine_struct);

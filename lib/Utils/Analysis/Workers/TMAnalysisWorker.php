@@ -41,6 +41,16 @@ class TMAnalysisWorker extends AbstractWorker {
     const ERR_WRONG_PROJECT    = 5;
 
     /**
+     * @var \FeatureSet
+     */
+    protected $featureSet ;
+
+    /**
+     * @var \Projects_ProjectStruct
+     */
+    protected $project ;
+
+    /**
      * Concrete Method to start the activity of the worker
      *
      * @param AbstractElement $queueElement
@@ -82,6 +92,9 @@ class TMAnalysisWorker extends AbstractWorker {
          * @throws EmptyElementException
          */
         $this->_matches = $this->_getMatches( $queueElement );
+
+        $this->project = \Projects_ProjectDao::findById( $queueElement->params->pid );
+        $this->featureSet = \FeatureSet::fromIdCustomer( $this->project->id_customer );
 
         $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Segment {$queueElement->params->id_segment} - Job {$queueElement->params->id_job} matches retrieved." );
         $this->_tryRealignTagID( $queueElement );
@@ -244,11 +257,18 @@ class TMAnalysisWorker extends AbstractWorker {
             $this->_doLog( "Row found: " . $tm_data[ 'id_segment' ] . "-" . $tm_data[ 'id_job' ] . " - UPDATED.");
 
         }
+        
 
         //set redis cache
         $this->_incrementAnalyzedCount( $queueElement->params->pid, $eq_words, $standard_words );
         $this->_decSegmentsToAnalyzeOfWaitingProjects( $queueElement->params->pid );
         $this->_tryToCloseProject( $queueElement->params->pid );
+
+
+        $this->featureSet->run('postTMSegmentAnalyzed', array(
+                'tm_data'       => $tm_data,
+                'queue_element' => $queueElement
+        ));
 
     }
 
@@ -708,9 +728,8 @@ class TMAnalysisWorker extends AbstractWorker {
 
             // TODO: move the initialization of featureSet at earlier stage in
             // order for other methods to run their own callbacks.
-            $project = \Projects_ProjectDao::findById( $_project_id );
-            $featureSet = \FeatureSet::fromIdCustomer($project->id_customer);
-            $featureSet->run('beforeTMAnalysisCloseProject', $project);
+
+            $this->featureSet->run('beforeTMAnalysisCloseProject', $this->project);
 
             $_analyzed_report = getProjectSegmentsTranslationSummary( $_project_id );
 

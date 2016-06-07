@@ -104,7 +104,8 @@ class ProjectManager {
                             'pretranslate_100'     => 0,
                             'dqf_key'              => null,
                             'owner'                => '',
-                            'word_count_type'      => ''
+                            'word_count_type'      => '',
+                            'metadata'             => array(),
                     ) );
         }
 
@@ -2210,10 +2211,6 @@ class ProjectManager {
 
     protected function _generatePassword( $length = 12 ) {
         return CatUtils::generate_password( $length );
-    }
-
-    private function sortByStrLenAsc( $a, $b ) {
-        return strlen( $a ) >= strlen( $b );
     }
 
     private function addNotesToProjectStructure( $trans_unit ) {

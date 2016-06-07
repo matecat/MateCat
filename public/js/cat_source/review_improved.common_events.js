@@ -10,9 +10,12 @@ if ( ReviewImproved.enabled() ) {
 
         loadDataPromise.done(function() {
             $('section [data-mount=translation-issues-button]').each(function() {
-                ReactDOM.render( React.createElement( TranslationIssuesSideButton, {
-                        sid : $(this).data('sid')
+                var segment = new UI.Segment( this )  ;
+                if ( !segment.isSplit() || segment.isFirstOfSplit() ) {
+                    ReactDOM.render( React.createElement( TranslationIssuesSideButton, {
+                        sid : segment.absoluteId
                     } ), this );
+                }
             });
         });
     });

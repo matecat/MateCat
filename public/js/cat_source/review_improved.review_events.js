@@ -25,15 +25,14 @@ if ( ReviewImproved.enabled() && config.isReview ) {
     $(document).on('click', 'section .textarea-container .errorTaggingArea', function(e) {
         var section = $(e.target).closest('section') ;
 
-        if ( section.hasClass('muted') ) {
-            return ; // TODO: this is overlapping with 'segment-filter' feature, should be decoupled instead.
+        if ( section.hasClass('muted') || section.hasClass('readonly') ) {
+            return ; 
         }
 
         if ( ! section.hasClass('opened') ) {
             UI.scrollSegment( section );
             UI.openSegment( section );
         }
-
     });
 
     function getPreviousTranslationText( segment ) {
@@ -121,7 +120,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         var buttonsHTML = MateCat.Templates['review_improved/segment_buttons']( buttonData ) ;
 
         var data = {
-            versions : versions.findObjects({ id_segment : segment.id })
+            versions : versions.findObjects({ id_segment : segment.absId })
         };
 
         container.append(buttonsHTML);
@@ -143,9 +142,9 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         if (! segment) {
             return ;
         }
-        var db_segment = MateCat.db.segments.findObject({ sid : '' + segment.id });
+        var db_segment = MateCat.db.segments.findObject({ sid : '' + segment.absId });
         var latest_issues = MateCat.db.segment_translation_issues.findObjects({
-            id_segment : '' + segment.id ,
+            id_segment : '' + segment.absId ,
             translation_version : '' + db_segment.version_number
         });
 

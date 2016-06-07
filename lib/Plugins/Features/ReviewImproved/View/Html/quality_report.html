@@ -104,7 +104,8 @@
                     <th>Status</th>
                     <td>
                         <strong class="approved-foreground" tal:condition="true: segment/is_approved" tal:content="segment/status"></strong>
-                        <strong class="rejected-foreground" tal:condition="not: segment/is_approved" tal:content="segment/status"></strong>
+                        <strong class="rejected-foreground" tal:condition="true: segment/is_rejected" tal:content="segment/status"></strong>
+                        <strong class="" tal:condition="true: segment/is_translated" tal:content="segment/status"></strong>
                     </td>
                     <th>Post Edited</th>
                     <td style="text-align: left;" tal:content="segment/translation"></td>
@@ -121,9 +122,7 @@
                 </tr>
             </table>
 
-
             <tal:block tal:condition="true: segment/issues">
-
 
             <h3>Issues</h3>
 
@@ -170,6 +169,26 @@
                 </tr>
 
             </table>
+
+            </tal:block>
+
+            <tal:block tal:condition="true: segment/qa_checks">
+
+                <h3>QA Checks</h3>
+
+                <table class="tablestats continue" width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr tal:repeat="qa_check segment/qa_checks">
+                        <th style="vertical-align: top" width="20" tal:content="repeat/qa_check/number"></th>
+                        <td style="text-align:left">
+
+                        <span style="padding-right: 10px;">
+                            <strong tal:content="qa_check/human_scope"></strong>: <span tal:content="structure qa_check/message"></span>
+                        </span>
+
+                        </td>
+                    </tr>
+
+                </table>
 
             </tal:block>
         </div>

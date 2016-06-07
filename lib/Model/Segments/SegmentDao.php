@@ -66,7 +66,7 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     /**
      * @param $id_segment
      *
-     * @return mixed
+     * @return Segments_SegmentStruct
      */
     public function getById( $id_segment ) {
         $conn = $this->con->getConnection();
@@ -78,7 +78,6 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         $stmt->setFetchMode( PDO::FETCH_CLASS, 'Segments_SegmentStruct' );
 
         return $stmt->fetch();
-
     }
 
     protected function _buildResult( $array_result ) {

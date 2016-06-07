@@ -55,10 +55,15 @@ class FeatureSet {
             // XXX FIXME TODO: find a better way for this initialiation, $projectStructure is not defined
             // here, so the feature initializer should not need the project strucutre at all.
             // The `id_customer` should be enough. XXX
-            $obj = new $name( $feature );
+            if ( class_exists( $name ) ) {
+                $obj = new $name( $feature );
 
-            if ( method_exists( $obj, $method ) ) {
-                $filterable = call_user_func_array( array( $obj, $method ), $args );
+                if ( method_exists( $obj, $method ) ) {
+                    array_shift( $args );
+                    array_unshift( $args, $filterable );
+
+                    $filterable = call_user_func_array( array( $obj, $method ), $args );
+                }
             }
         }
 
@@ -73,13 +78,40 @@ class FeatureSet {
 
         foreach ( $this->features as $feature ) {
             $name = "Features\\" . $feature->toClassName();
-            $obj  = new $name( $feature );
 
-            if ( method_exists( $obj, $method ) ) {
-                call_user_func_array( array( $obj, $method ), $args );
+            if ( class_exists( $name ) ) {
+                $obj  = new $name( $feature );
+
+                if ( method_exists( $obj, $method ) ) {
+                    call_user_func_array( array( $obj, $method ), $args );
+                }
             }
         }
     }
 
+    /**
+     * appendDecorators
+     *
+     * Loads feature specific decorators, if any
+     *
+     * @param $name name of the decorator to activate
+     * @param viewController $controller the controller to work on
+     * @param PHPTAL $template the PHPTAL view to add properties to
+     *
+     */
+    public function appendDecorators($name, viewController $controller, PHPTAL $template) {
+        foreach( $this->features as $feature ) {
+            $cls = "Features\\" . $feature->toClassName() . "\\Decorator\\$name" ;
+
+            // XXX: keep this log line because due to a bug in Log class
+            // if this line is missing it won't log load errors.
+            Log::doLog('loading Decorator ' . $cls );
+
+            if ( class_exists( $cls ) ) {
+                $obj = new $cls( $controller, $template) ;
+                $obj->decorate();
+            }
+        }
+    }
 
 }

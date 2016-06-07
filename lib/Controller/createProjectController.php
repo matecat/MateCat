@@ -21,6 +21,7 @@ class createProjectController extends ajaxController {
     private $pretranslate_100;
 
     private $dqf_key;
+    private $metadata;
 
     public function __construct() {
 
@@ -48,6 +49,7 @@ class createProjectController extends ajaxController {
                 'dqf_key'            => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
+                'lexiqa'             => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
 
                 //            This will be sanitized inside the TmKeyManagement class
                 //            SKIP
@@ -116,6 +118,7 @@ class createProjectController extends ajaxController {
         $this->lang_detect_files       = $__postInput[ 'lang_detect_files' ];
         $this->pretranslate_100        = $__postInput[ 'pretranslate_100' ];
         $this->dqf_key                 = $__postInput[ 'dqf_key' ];
+        $this->metadata                = array( 'lexiqa' => $__postInput[ 'lexiqa' ] );
 
         if ( $this->disable_tms_engine_flag ) {
             $this->tms_engine = 0; //remove default MyMemory
@@ -284,6 +287,9 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'lang_detect_files' ]    = $this->lang_detect_files;
         $projectStructure[ 'skip_lang_validation' ] = true;
         $projectStructure[ 'pretranslate_100' ]     = $this->pretranslate_100;
+
+        //TODO enable from CONFIG
+        $projectStructure[ 'metadata' ]             = $this->metadata;
 
         if ( INIT::$DQF_ENABLED ) {
             $projectStructure[ 'dqf_key' ] = $this->dqf_key;
