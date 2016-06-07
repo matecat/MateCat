@@ -3,7 +3,7 @@
  Component: lxq.main
  */
 
-LXQ = {
+var LXQ = {
     enabled: function () {
         //return true;
         return config.lxq_enabled;
