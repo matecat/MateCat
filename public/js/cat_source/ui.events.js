@@ -548,10 +548,6 @@ $.extend(UI, {
 			e.preventDefault();
 			$("#search").toggle();
 		});
-		$('.download-chrome a.close').bind('click', function(e) {
-			e.preventDefault();
-			$('.download-chrome').removeClass('d-open');
-		});
 
 		//overlay
 
