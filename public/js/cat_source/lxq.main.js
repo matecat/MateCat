@@ -7,8 +7,25 @@ LXQ = {
     enabled: function () {
         //return true;
         return config.lxq_enabled;
+    },
+    enable: function () {
+        if (!config.lxq_enabled) {
+            config.lxq_enabled = 1;
+            if ($('#lexiqa-popup').hasClass('lxq-visible')) {
+                $('#lexiqabox').trigger('click');
+            }
+            $('#lexiqabox').removeAttr('style');
+            UI.render();
+        }
+    },
+    disable: function () {
+        if (config.lxq_enabled) {
+            config.lxq_enabled = 0;
+            $('#lexiqabox').css('display', 'none');
+            UI.render();
+        }
     }
-}
+};
 
 if (LXQ.enabled())
     (function ($, config, window, LXQ, undefined) {
