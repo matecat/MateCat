@@ -22,18 +22,25 @@ $.extend(UI, {
 
         $(".popup-tm li.mgmt-tm").click(function(e) {
             e.preventDefault();
-            console.log('questo');
             $(this).addClass("active");
-            $(".mgmt-mt").removeClass("active");
+            $(".mgmt-mt,.mgmt-opt").removeClass("active");
             $(".mgmt-table-mt").hide();
             $(".mgmt-table-tm").show();
+            $(".mgmt-table-options").hide();
         });
         $(".popup-tm .tm-mgmt").click(function(e) {
             e.preventDefault();
             $(".mgmt-mt").addClass("active");
-            $(".mgmt-tm").removeClass("active");
-            $(".mgmt-table-tm").hide();
+            $(".mgmt-tm,.mgmt-opt").removeClass("active");
+            $(".mgmt-table-tm,.mgmt-table-options").hide();
             $(".mgmt-table-mt").show();
+        });
+         $(".popup-tm .mgmt-opt").click(function(e) {
+            e.preventDefault();
+            $(".mgmt-opt").addClass("active");
+            $(".mgmt-tm,.mgmt-mt").removeClass("active");
+            $(".mgmt-table-tm,.mgmt-table-mt").hide();
+            $(".mgmt-table-options").show();
         });
 
         
@@ -41,9 +48,10 @@ $.extend(UI, {
         $(".mgmt-mt").click(function(e) {
             e.preventDefault();
             $(this).addClass("active");
-            $(".mgmt-tm").removeClass("active");
+            $(".mgmt-tm,.mgmt-opt").removeClass("active");
             $(".mgmt-table-tm").hide();
             $(".mgmt-table-mt").show();
+            $(".mgmt-table-options").hide();
         });
         $("#mt_engine").change(function() {
             if($(this).val() == 0) {
