@@ -125,7 +125,7 @@ $(document).ready(function() {
 				lang_detect_files  	: UI.skipLangDetectArr,
                 pretranslate_100    : ($("#pretranslate100" ).is(':checked')) ? 1 : 0,
                 dqf_key             : ($('#dqf_key' ).length == 1) ? $('#dqf_key' ).val() : null,
-				lexiqa				: ( $("#lxqa_check").prop("checked") && !$("#lxqa_check").prop("disabled") )
+				lexiqa				: ( $("#lexi_qa").prop("checked") && !$("#lexi_qa").prop("disabled") )
 			},
 			beforeSend: function (){
 				$('.error-message').hide();
@@ -290,8 +290,15 @@ $(document).ready(function() {
      * LexiQA language Enable/Disable
      */
     APP.checkForLexiQALangs();
-    $("#source-lang").on('change', function(){ APP.checkForLexiQALangs(); });
-    $("#target-lang").on('change', function(){ APP.checkForLexiQALangs(); });
+    APP.checkForTagProjectionLangs();
+    $("#source-lang").on('change', function(){
+		APP.checkForLexiQALangs();
+		APP.checkForTagProjectionLangs();
+	});
+    $("#target-lang").on('change', function(){
+		APP.checkForLexiQALangs();
+		APP.checkForTagProjectionLangs();
+	});
 
     function closeMLPanel() {
         $( ".popup-languages.slide").removeClass('open').hide("slide", { direction: "right" }, 400);
@@ -300,6 +307,7 @@ $(document).ready(function() {
         $('body').removeClass('side-popup');
 
         APP.checkForLexiQALangs();
+        APP.checkForTagProjectionLangs();
     };
 
 	$("#multiple-link").click(function(e) {
@@ -421,7 +429,35 @@ APP.checkForLexiQALangs = function(){
         ).length !== acceptedLanguages.length;
 
     //disable LexiQA
-    $('#lxqa_check').prop( "disabled", disableLexiQA );
-    $('.translate-box.qa-box').css({opacity: ( disableLexiQA ? 0.6 : 1 )  });
+    $('.options-box #lexi_qa').prop( "disabled", disableLexiQA );
+    $('.options-box.qa-box').css({opacity: ( disableLexiQA ? 0.6 : 1 )  });
+
+};
+
+/**
+ * Disable/Enable languages for LexiQA
+ *
+ */
+APP.checkForTagProjectionLangs = function(){
+
+	var acceptedLanguages = [
+		'en-US',
+		'en-GB',
+		'it-IT'
+	];
+
+	var disableTP = acceptedLanguages.concat(
+			[ $( '#source-lang' ).val() ]
+		).concat(
+			$( '#target-lang' ).val().split(',')
+		).filter(
+			function ( value, index, self ) {
+				return self.indexOf( value ) === index;
+			}
+		).length !== acceptedLanguages.length;
+
+	//disable Tag Projection
+	$('.options-box #tagp_check').prop( "disabled", disableTP );
+	$('.options-box.tagp').css({opacity: ( disableTP ? 0.6 : 1 )  });
 
 };

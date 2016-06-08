@@ -381,7 +381,9 @@ $.extend(UI, {
 
     },
     openLanguageResourcesPanel: function(tab, elToClick) {
-        console.log('openLanguageResourcesPanel');
+        if ($(".popup-tm").hasClass('open') ) {
+            return false;
+        }
         tab = tab || 'tm';
         elToClick = elToClick || null;
         $('body').addClass('side-popup');
@@ -391,10 +393,6 @@ $.extend(UI, {
         $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
         if(elToClick) $(elToClick).click();
         $.cookie('tmpanel-open', 1, { path: '/' });
-    },
-    uploadTM: function(form, action_url, div_id) {
-        console.log('div_id: ', div_id);
-
     },
     setTMsortable: function () {
 

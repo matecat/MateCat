@@ -818,6 +818,7 @@
 
 <script src="${basepath}public/js/new-project.js"></script>
 <script src="${basepath}public/js/tm.js"></script>
+<script src="${basepath}public/js/advancedOptionsTab.js"></script>
 
 <!--
         <div style='display:none'>
@@ -871,7 +872,7 @@
     </div>
 </div>
 
-<div class="modal popup-languages" data-type="view">
+<!--<div class="modal popup-languages" data-type="view">
     <div class="popup-outer"></div>
     <div class="popup">
         <a href="#" class="x-popup"></a>
@@ -889,14 +890,14 @@
                 <tal:block tal:repeat="language target_languages">
                     <li tal:attributes="class language/top">
                         <input type="checkbox" tal:attributes="value language/code; id language/code"/>
-                        <label tal:attributes="for language/name" tal:content="language/name" onClick="return false">---</label>
+                        <label tal:attributes="for language/name" tal:content="language/name" onClick="return false">-&#45;&#45;</label>
                     </li>
                 </tal:block>
 
             </ul>
         </div>
     </div>
-</div>
+</div>-->
 
 <div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
 

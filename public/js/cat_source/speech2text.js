@@ -11,13 +11,18 @@ Speech2Text = {
     enable: function () {
         if (!config.speech2textEnabled) {
             config.speech2textEnabled = true;
+            if (!Speech2Text.initialized) {
+                Speech2Text.init();
+                Speech2Text.loadRecognition();
+            }
             UI.render();
         }
     }
 };
 
-if ( Speech2Text.enabled() ) {
-    (function ($, Speech2Text, undefined) {
+Speech2Text.init  = function () {
+    Speech2Text.initialized = true;
+    return (function ($, Speech2Text, undefined) {
         $.extend(Speech2Text, {
             recognition: null,
             recognizing: false,
@@ -225,4 +230,8 @@ if ( Speech2Text.enabled() ) {
             Speech2Text.loadRecognition();
         });
     })(jQuery, Speech2Text);
+};
+
+if (Speech2Text.enabled()) {
+    Speech2Text.init();
 }

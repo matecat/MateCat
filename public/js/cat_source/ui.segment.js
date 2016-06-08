@@ -143,9 +143,20 @@
          */
         checkTPEnabled: function (file) {
             var tpCookie = this.getTagProjectionCookie();
-            return (((file.source_code === 'it-IT' && file.target_code.indexOf('en-') > -1)
+            return (this.checkTpCanActivate(file) && tpCookie);
+        },
+        /**
+         * Tag Projection: check if is possible to enable tag projection:
+         * Condition: Languages it-IT en-GB en-US, not review
+         * @param file
+         */
+        checkTpCanActivate: function (file) {
+            if (_.isUndefined(this.tpCanActivate)) {
+                this.tpCanActivate = (((file.source_code === 'it-IT' && file.target_code.indexOf('en-') > -1)
                 || (file.source_code.indexOf('en-') > -1 && file.target_code === 'it-IT'))
-                && !config.isReview && tpCookie);
+                && !config.isReview);
+            }
+            return this.tpCanActivate;
         },
         startSegmentTagProjection: function () {
             UI.getSegmentTagsProjection().success(function(response) {

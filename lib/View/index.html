@@ -79,7 +79,8 @@
 		        lexiqaServer: 'https://backend.lexiqa.net',
                 lxq_enabled: ${lxq_enabled | string:false},
                 qa_check_glossary_enabled : ${qa_check_glossary_enabled | string:false },
-                qa_check_blacklist_enabled : ${qa_check_blacklist_enabled | string:false }
+                qa_check_blacklist_enabled : ${qa_check_blacklist_enabled | string:false },
+                speech2textEnabled: false
             };
 
             var renderStart = new Date();
@@ -129,7 +130,6 @@
             config.nbspPlaceholder       = '${nbspPlaceholder | null}';
             config.nbspPlaceholderClass  = '${nbspPlaceholderClass | null}';
             config.nbspPlaceholderRegex  = ${nbspPlaceholderRegex | null};
-            config.speech2textEnabled  = true;
             /*]]>*/
         </script>
 
