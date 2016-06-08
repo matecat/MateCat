@@ -52,7 +52,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
      *
      * @return int
      */
-    public static function getScoreForChunk( \Chunks_ChunkStruct $chunk ) {
+    public static function getPenaltyPointsForChunk( \Chunks_ChunkStruct $chunk ) {
         $sql = "select sum(penalty_points) from qa_entries e
             join segment_translations st
             on st.version_number = e.translation_version
@@ -68,8 +68,8 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
         $stmt->execute(array('id_job' => $chunk->id , 'password' => $chunk->password ));
         $count =  $stmt->fetch();
 
-        $score = $count[0] == null ? 0 : $count[0];
-        return $score ;
+        $penalty_points = $count[0] == null ? 0 : $count[0];
+        return $penalty_points ;
     }
 
     /**

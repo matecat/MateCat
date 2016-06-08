@@ -79,7 +79,7 @@ class QualityReportModel {
                         'review' => array(
                                 'percentage'    => $this->getChunkReview()->getReviewedPercentage(),
                                 'is_pass'       => !!$this->getChunkReview()->is_pass,
-                                'score'         => $this->getChunkReview()->score,
+                                'score'         => $this->getChunkReview()->penalty_points,
                                 'reviewer_name' => $this->getReviewerName()
                         ),
                         'files'  => array()
