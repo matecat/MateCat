@@ -142,8 +142,7 @@
          * @param file
          */
         checkTPEnabled: function (file) {
-            var tpCookie = this.getTagProjectionCookie();
-            return (this.checkTpCanActivate(file) && tpCookie);
+            return (this.checkTpCanActivate(file) && config.tag_projection_enabled);
         },
         /**
          * Tag Projection: check if is possible to enable tag projection:
@@ -279,42 +278,32 @@
             UI.lockTags(currentSegment.find(".source"))
         },
         /**
-         * Get the the tag projection cookie if exist, if not set it to true and return true
-         */
-        getTagProjectionCookie: function () {
-            var cookie = $.cookie('tagprojection-' + config.id_job);
-            if ( _.isUndefined(cookie)) {
-                this.enableTagProjectionCookie();
-                return true;
-            } else {
-                return (cookie === "true");
-            }
-        },
-        /**
          * Set the tag projection cookie to true and reload file
          */
         enableTagProjectionInJob: function () {
-            this.enableTagProjectionCookie();
+            this.enableTagProjection();
             UI.render();
         },
         /**
          * Set the tag projection cookie to true and reload file
          */
         disableTagProjectionInJob: function () {
-            this.disableTagProjectionCookie();
+            this.disableTagProjection();
             UI.render();
         },
         /**
          * Set the tag projection cookie to false
          */
-        disableTagProjectionCookie: function () {
-            $.cookie('tagprojection-' + config.id_job, false, { expires:30 });
+        disableTagProjection: function () {
+            config.tag_projection_enabled = false;
+            // Todo Call Service to disable Tag projection
         },
         /**
          * Set the tag projection cookie to true
          */
         enableTagProjectionCookie: function () {
-            $.cookie('tagprojection-' + config.id_job, true, { expires:30 });
+            config.tag_projection_enabled = false;
+            // Todo Call Service to enable Tag projection
         }
 
     }); 

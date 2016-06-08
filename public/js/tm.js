@@ -91,8 +91,8 @@ $.extend(UI, {
         $('#add-mt-provider-confirm').click(function(e) {
             e.preventDefault();
             if($(this).hasClass('disabled')) return false;
-            provider = $("#mt_engine_int").val();
-            providerName = $("#mt_engine_int option:selected").text();
+            var provider = $("#mt_engine_int").val();
+            var providerName = $("#mt_engine_int option:selected").text();
             UI.addMTEngine(provider, providerName);
         });
         $('#add-mt-provider-cancel').click(function(e) {
