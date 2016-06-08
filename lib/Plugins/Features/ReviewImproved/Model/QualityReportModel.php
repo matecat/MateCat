@@ -85,12 +85,14 @@ class QualityReportModel {
     }
 
     private function buildQualityReportStructure( $records ) {
+        $scoreFormatted = number_format( $this->getChunkReviewModel()->getScore(), 2, '.', ',' );
+
         $this->quality_report_structure = array(
                 'chunk'   => array(
                         'review' => array(
                                 'percentage'    => $this->getChunkReview()->getReviewedPercentage(),
                                 'is_pass'       => !!$this->getChunkReview()->is_pass,
-                                'score'         => $this->getChunkReviewModel()->getScore(),
+                                'score'         => $scoreFormatted,
                                 'reviewer_name' => $this->getReviewerName()
                         ),
                         'files'  => array()
