@@ -682,11 +682,11 @@ UI = {
             current_segment : UI.currentSegment
         });
 
-            if( !this.opening && UI.currentSegmentId == segment.data('splitOriginalId') ) {
-                Speech2Text.disableContinuousRecognizing();
-            }
+        if( !this.opening && UI.currentSegmentId == segment.data('splitOriginalId') ) {
+            Speech2Text.enabled() && Speech2Text.disableContinuousRecognizing();
+        }
 
-            Speech2Text.disableMicrophone( segment );
+        Speech2Text.enabled() && Speech2Text.disableMicrophone( segment );
 	},
 	detectAdjacentSegment: function(segment, direction, times) { // currently unused
 		if (!times)
@@ -960,8 +960,6 @@ UI = {
 			},
 			success: function(d) {
                 $(document).trigger('segments:load', d.data);
-
-                Speech2Text.putSegmentsInStore( d.data );
 
                 if ($.cookie('tmpanel-open') == '1') UI.openLanguageResourcesPanel();
 				UI.getSegments_success(d, options);

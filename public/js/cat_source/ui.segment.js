@@ -62,7 +62,9 @@
                 segment.segment || '', 
                 true, segment.sid, 'source');
 
-            var templateData = {
+            Speech2Text.enabled() && editarea_classes.push( 'micActive' ) ; 
+
+            return  {
                 t                       : t,
                 originalId              : originalId,
                 autoPropagated          : autoPropagated,
@@ -83,10 +85,10 @@
                 decoded_translation     : decoded_translation  ,
                 status_change_title     : status_change_title ,
                 segment_edit_sec        : segment_edit_sec,
-                segment_edit_min        : segment_edit_min
-            }
+                segment_edit_min        : segment_edit_min, 
+                s2t_enabled             : Speech2Text.enabled() 
+            };
 
-            return templateData ;
         },
 
         getSegmentMarkup: function (
