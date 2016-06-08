@@ -11,6 +11,7 @@ var LXQ = {
     enable: function () {
         if (!config.lxq_enabled) {
             config.lxq_enabled = 1;
+            // Todo Call Service to enable Tag Lexiqa
             if ($('#lexiqa-popup').hasClass('lxq-visible')) {
                 $('#lexiqabox').trigger('click');
             }
@@ -24,6 +25,7 @@ var LXQ = {
     disable: function () {
         if (config.lxq_enabled) {
             config.lxq_enabled = 0;
+            // Todo Call Service to disable Tag Lexiqa
             $('#lexiqabox').css('display', 'none');
             UI.render();
         }

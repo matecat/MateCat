@@ -23,9 +23,11 @@ $.extend(UI, {
                 (UI.checkTPEnabled()) ? tagProjectionCheck.attr('checked', true) : tagProjectionCheck.attr('checked', false);
                 tagProjectionCheck.on('change', this.toggleTagProjectionOption.bind(this));
             } else {
-                $('.options-box #tagp_check').prop( "disabled", true );
+                $('.options-box #tagp_check').prop( "disabled", true ).attr('checked', false);
                 $('.options-box.tagp').css({opacity: 0.6 });
             }
+        } else {
+
         }
 
     },

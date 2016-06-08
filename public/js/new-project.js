@@ -110,22 +110,24 @@ $(document).ready(function() {
 
 		APP.doRequest({
 			data: {
-				action				: "createProject",
-				file_name			: filename,
-				project_name		: $('#project-name').val(),
-				source_language		: $('#source-lang').val(),
-				target_language		: $('#target-lang').val(),
-                job_subject         : $('#subject').val(),
-                disable_tms_engine	: ( $('#disable_tms_engine').prop('checked') ) ? $('#disable_tms_engine').val() : false,
-				mt_engine			: $('#mt_engine').val(),
-                private_tm_key		: $('#private-tm-key').val(),
-                private_keys_list	: tm_data,
-				private_tm_user		: ( !$('#private-tm-user').prop('disabled') ? $('#private-tm-user').val() : "" ),
-				private_tm_pass		: ( !$('#private-tm-pass').prop('disabled') ? $('#private-tm-pass').val() : "" ),
-				lang_detect_files  	: UI.skipLangDetectArr,
-                pretranslate_100    : ($("#pretranslate100" ).is(':checked')) ? 1 : 0,
-                dqf_key             : ($('#dqf_key' ).length == 1) ? $('#dqf_key' ).val() : null,
-				lexiqa				: ( $("#lexi_qa").prop("checked") && !$("#lexi_qa").prop("disabled") )
+				action						: "createProject",
+				file_name					: filename,
+				project_name				: $('#project-name').val(),
+				source_language				: $('#source-lang').val(),
+				target_language				: $('#target-lang').val(),
+                job_subject         		: $('#subject').val(),
+                disable_tms_engine			: ( $('#disable_tms_engine').prop('checked') ) ? $('#disable_tms_engine').val() : false,
+				mt_engine					: ($('.enable-mt input').prop("checked")) ? 1 : 0,
+                private_tm_key				: $('#private-tm-key').val(),
+                private_keys_list			: tm_data,
+				private_tm_user				: ( !$('#private-tm-user').prop('disabled') ? $('#private-tm-user').val() : "" ),
+				private_tm_pass				: ( !$('#private-tm-pass').prop('disabled') ? $('#private-tm-pass').val() : "" ),
+				lang_detect_files  			: UI.skipLangDetectArr,
+                pretranslate_100    		: ($("#pretranslate100" ).is(':checked')) ? 1 : 0,
+                dqf_key             		: ($('#dqf_key' ).length == 1) ? $('#dqf_key' ).val() : null,
+				lexiqa				        : ( $("#lexi_qa").prop("checked") && !$("#lexi_qa").prop("disabled") ),
+				speech2text         		: ( $("#s2t_check").prop("checked") && !$("#s2t_check").prop("disabled") ),
+				tag_projection			    : ( $("#tagp_check").prop("checked") && !$("#tagp_check").prop("disabled") )
 			},
 			beforeSend: function (){
 				$('.error-message').hide();
@@ -458,6 +460,6 @@ APP.checkForTagProjectionLangs = function(){
 
 	//disable Tag Projection
 	$('.options-box #tagp_check').prop( "disabled", disableTP );
+	(disableTP && $('.options-box #tagp_check').attr('checked', false));
 	$('.options-box.tagp').css({opacity: ( disableTP ? 0.6 : 1 )  });
-
 };
