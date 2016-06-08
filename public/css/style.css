@@ -3918,7 +3918,7 @@ body.hideMatches .submenu {
 }
 
 body.hideMatches .tab-switcher {
-	border-bottom: 1px solid #666;
+	border-bottom: 1px solid rgba(158, 158, 158, 0.46);
 }
 /**
  * Ensure all tabbed content in the footer is only visible when
