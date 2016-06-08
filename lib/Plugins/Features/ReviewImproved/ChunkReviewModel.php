@@ -86,12 +86,18 @@ class ChunkReviewModel
     }
 
     /**
+     * Returns the calculated score
+     */
+    public function getScore() {
+        return $this->chunk_review->score / $this->chunk_review->reviewed_words_count * 1000 ;
+    }
+
+    /**
      *
      * @throws \Exception
      */
     public function updatePassFailResult() {
-        $score_per_mille =  $this->chunk_review->score /
-            $this->chunk_review->reviewed_words_count * 1000 ;
+        $score_per_mille = $this->getScore();
 
         $project = \Projects_ProjectDao::findById( $this->chunk_review->id_project );
         $lqa_model = $project->getLqaModel();
