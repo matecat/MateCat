@@ -142,8 +142,7 @@
     <script type="text/javascript">
 
         /*<![CDATA[*/
-        var langStats =
-        ${dataLangStats}
+        var langStats = ${dataLangStats}
         /*]]>*/
 
     </script>
@@ -214,14 +213,13 @@
                       data[i].totalwordPEE +
                     '</td> ' +
                     '<td id="col5">' +
-                      data[i].payable_rate +
+                      data[i].payable_rate + '%' +
                     '</td>';
             $('#tablePEE tbody').append("<tr>" + $formrow + "</tr>");
             i++;
         }
     }
     $(document).ready(function (el) {
-//        $('#tablePEE').tablesorter({ sortList: [ [0, 0], [1, 0] ] });
         $("#tablePEE").data('tablesorter').sortList = [ [0, 0], [1, 0] ];
         $("#tablePEE").trigger('update');
     });

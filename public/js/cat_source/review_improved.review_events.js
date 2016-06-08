@@ -25,15 +25,14 @@ if ( ReviewImproved.enabled() && config.isReview ) {
     $(document).on('click', 'section .textarea-container .errorTaggingArea', function(e) {
         var section = $(e.target).closest('section') ;
 
-        if ( section.hasClass('muted') ) {
-            return ; // TODO: this is overlapping with 'segment-filter' feature, should be decoupled instead.
+        if ( section.hasClass('muted') || section.hasClass('readonly') ) {
+            return ; 
         }
 
         if ( ! section.hasClass('opened') ) {
             UI.scrollSegment( section );
             UI.openSegment( section );
         }
-
     });
 
     function getPreviousTranslationText( segment ) {
