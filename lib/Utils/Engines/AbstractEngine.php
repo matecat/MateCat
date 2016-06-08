@@ -142,7 +142,7 @@ abstract class Engines_AbstractEngine {
             $rawValue = array(
                     'error' => array(
                             'code'      => -$curl_error[ 'errno' ],
-                            'message'   => " {$curl_error[ 'error' ]}. Server Not Available (http status " . $curl_error[ 'http_code' ] .")",
+                            'message'   => " {$curl_error[ 'error' ]} - Server Error (http status " . $curl_error[ 'http_code' ] .")",
                             'response'  => $responseRawValue // Some useful info might still be contained in the response body
                     ),
                     'responseStatus'    => $curl_error[ 'http_code' ]

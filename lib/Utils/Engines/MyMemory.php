@@ -662,7 +662,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
 
         $curl_parameters = implode( "&", $segmentsToBeDetected ) . "&of=json";
 
-        log::dolog( "DETECT LANG :", $segmentsToBeDetected );
+        Log::doLog( "DETECT LANG :", $segmentsToBeDetected );
 
         $options = array(
                 CURLOPT_HEADER         => false,
@@ -680,12 +680,12 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
 
         $mh        = new MultiCurlHandler();
         $tokenHash = $mh->createResource( $url, $options );
-        Log::dolog( "DETECT LANG TOKENHASH: $tokenHash" );
+        Log::doLog( "DETECT LANG TOKENHASH: $tokenHash" );
 
         $mh->multiExec();
 
         $res = $mh->getAllContents();
-        Log::dolog( "DETECT LANG RES:", $res );
+        Log::doLog( "DETECT LANG RES:", $res );
 
         return json_decode( $res[ $tokenHash ], true );
     }

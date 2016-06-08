@@ -454,18 +454,32 @@ UI = {
 
         var button_label = config.status_labels.TRANSLATED ;
         var label_first_letter = button_label[0];
+        var nextUntranslated, currentButton;
+
+        //Tag Projection: Identify if is enabled in the current segment
+        this.currentSegmentTPEnabled = this.checkCurrentSegmentTPEnabled();
 
 		var disabled = (this.currentSegment.hasClass('loaded')) ? '' : ' disabled="disabled"';
         var nextSegment = this.currentSegment.next();
         var sameButton = (nextSegment.hasClass('status-new')) || (nextSegment.hasClass('status-draft'));
-        var nextUntranslated = (sameButton)? '' : '<li><a id="segment-' + this.currentSegmentId +
-            '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' +
-        this.currentSegmentId + '" title="Translate and go to next untranslated">' + label_first_letter + '+&gt;&gt;</a><p>' +
-        ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
-		UI.segmentButtons = nextUntranslated + '<li><a id="segment-' + this.currentSegmentId +
-            '-button-translated" data-segmentid="segment-' + this.currentSegmentId +
-            '" href="#" class="translated"' + disabled + ' >' + button_label + '</a><p>' +
-            ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
+        if (this.currentSegmentTPEnabled) {
+            nextUntranslated = "";
+            currentButton = '<li><a id="segment-' + this.currentSegmentId +
+                '-button-guesstags" data-segmentid="segment-' + this.currentSegmentId +
+                '" href="#" class="guesstags"' + disabled + ' >' + 'GUESS TAGS' + '</a><p>' +
+                ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
+        } else {
+            nextUntranslated = (sameButton)? '' : '<li><a id="segment-' + this.currentSegmentId +
+                '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' +
+                this.currentSegmentId + '" title="Translate and go to next untranslated">' + label_first_letter + '+&gt;&gt;</a><p>' +
+                ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
+            currentButton = '<li><a id="segment-' + this.currentSegmentId +
+                '-button-translated" data-segmentid="segment-' + this.currentSegmentId +
+                '" href="#" class="translated"' + disabled + ' >' + button_label + '</a><p>' +
+                ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
+        }
+
+        UI.segmentButtons = nextUntranslated + currentButton;
 
 		var buttonsOb = $('#segment-' + this.currentSegmentId + '-buttons');
 
@@ -682,11 +696,11 @@ UI = {
             current_segment : UI.currentSegment
         });
 
-            if( !this.opening && UI.currentSegmentId == segment.data('splitOriginalId') ) {
-                Speech2Text.disableContinuousRecognizing();
-            }
+        if( !this.opening && UI.currentSegmentId == segment.data('splitOriginalId') ) {
+            Speech2Text.enabled() && Speech2Text.disableContinuousRecognizing();
+        }
 
-            Speech2Text.disableMicrophone( segment );
+        Speech2Text.enabled() && Speech2Text.disableMicrophone( segment );
 	},
 	detectAdjacentSegment: function(segment, direction, times) { // currently unused
 		if (!times)
@@ -961,8 +975,6 @@ UI = {
 			success: function(d) {
                 $(document).trigger('segments:load', d.data);
 
-                Speech2Text.putSegmentsInStore( d.data );
-
                 if ($.cookie('tmpanel-open') == '1') UI.openLanguageResourcesPanel();
 				UI.getSegments_success(d, options);
 
@@ -980,6 +992,8 @@ UI = {
 
 		$.each(d.data.files, function() {
 			startSegmentId = this.segments[0].sid;
+            //Tag Projection: check if is enable the Tag Projection 
+            UI.setGlobalTagProjection(this);
 		});
 
 		if (typeof this.startSegmentId == 'undefined')
@@ -1186,6 +1200,7 @@ UI = {
 	},
 
     placeCaretAtEnd: function(el) {
+
 		 $(el).focus();
 		 if (typeof window.getSelection != "undefined" && typeof document.createRange != "undefined") {
 			var range = document.createRange();
@@ -1401,12 +1416,12 @@ UI = {
             var readonly = ((this.readonly == 'true')||(UI.body.hasClass('archived'))) ? true : false;
             var autoPropagated = this.autopropagated_from != 0;
             var autoPropagable = (this.repetitions_in_chunk == "1")? false : true;
-            if(typeof this.segment == 'object') console.log(this);
 
             try {
-                if($.parseHTML(this.segment).length) {
+                if (!$.parseHTML(this.segment).length) {
+                } else {
                     this.segment = UI.stripSpans(this.segment);
-                };
+                }
             } catch ( e ){
                 //if we split a segment in more than 3 parts and reload the cattool
                 //this exception is raised:
@@ -1536,12 +1551,9 @@ UI = {
 			UI.currentSegment = undefined;
 		} else {
 			setTimeout(function() {
-//				var hash_value = window.location.hash;
 				window.location.hash = UI.currentSegmentId;
 			}, 300);
 		}
-//        if(id_segment.toString().split('-').length > 1) id_segment = id_segment.toString().split('-');
-//		var file = this.currentFile;
 		if (this.readonly)
 			return;
 		APP.doRequest({
@@ -1549,7 +1561,6 @@ UI = {
 				action: 'setCurrentSegment',
 				password: config.password,
 				id_segment: id_segment.toString(),
-//				id_segment: id_segment.toString().split('-')[0],
 				id_job: config.id_job
 			},
 			context: [reqArguments, id_segment],
@@ -1681,11 +1692,8 @@ UI = {
             .replace( config.crPlaceholderRegex, "\r" )
             .replace( config.crlfPlaceholderRegex, "\r\n" )
             .replace( config.tabPlaceholderRegex, "\t" )
-            //.replace( config.tabPlaceholderRegex, String.fromCharCode( parseInt( 0x21e5, 10 ) ) )
             .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
-//        _str  = htmlDecode(_str );
         _edit = mainStr.replace( String.fromCharCode( parseInt( 0x21e5, 10 ) ), "\t" );
-//        _edit = UI.currentSegment.find('.editarea').text().replace( String.fromCharCode( parseInt( 0x21e5, 10 ) ), "\t" );
 
         //Prepend Unicode Character 'ZERO WIDTH SPACE' invisible, not printable, no spaced character,
         //used to detect initial and final spaces in html diff
@@ -1697,15 +1705,14 @@ UI = {
         return diff_obj;
     },
 
-    chooseAlternative: function(w) {console.log('chooseAlternative');
-//        console.log( $('.sugg-target .realData', w ) );
-        this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).text(), true, UI.currentSegmentId, 'choose alternative' ) );
+    chooseAlternative: function(w) {
+        this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).html(), true, UI.currentSegmentId, 'choose alternative' ) );
         this.lockTags(this.editarea);
         this.editarea.focus();
         this.highlightEditarea();
+        this.disableTPOnSegment();
     },
 	copyAlternativeInEditarea: function(translation) {
-		console.log('translation: ', translation);
 		if ($.trim(translation) !== '') {
 			if (this.body.hasClass('searchActive'))
 				this.addWarningToSearchDisplay();
@@ -2956,7 +2963,10 @@ UI = {
 
             //NOTE: i've added filter .not( segment ) to exclude current segment from list to be set as draft
             $.each($('section[data-hash=' + $(segment).attr('data-hash') + '].status-new, section[data-hash=' + $(segment).attr('data-hash') + '].status-draft, section[data-hash=' + $(segment).attr('data-hash') + '].status-rejected' + ', section[data-hash=' + $(segment).attr('data-hash') + '].status-translated' + plusApproved ).not( segment ), function() {
-                $('.editarea', this).html( $('.editarea', segment).html() );
+                $('.editarea', $(this)).html( $('.editarea', segment).html() );
+
+                //Tag Projection: disable it if enable
+                UI.disableTPOnSegment($(this));
 
                 // if status is not set to draft, the segment content is not displayed
                 UI.setStatus($(this), status); // now the status, too, is propagated
@@ -2972,7 +2982,7 @@ UI = {
             //NOTE: because this method is called after OpenSegment
             // AS callback return for setTranslation ( whe are here now ),
             // currentSegment pointer was already advanced by openSegment and header already created
-            //Needed because two consecutives segments can have the same hash
+            //Needed because two consecutive segments can have the same hash
             this.createHeader(true);
 
         }
@@ -3624,6 +3634,7 @@ UI = {
             } else {
                 UI.blockOpenSegment = false;
             }
+            
             UI.lastOperation = operation;
 
             UI.openSegment(this, operation);

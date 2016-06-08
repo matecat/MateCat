@@ -51,7 +51,7 @@
             this.activateSegment(segment, getNormally);
 
             segment.el.trigger('open');
-
+            
             $('section').first().nextAll('.undoCursorPlaceholder').remove();
             this.getNextSegment(this.currentSegment, 'untranslated');
 
@@ -142,7 +142,7 @@
                 segment: segment
             });
 
-            Speech2Text.enableMicrophone(segment.el);
+            Speech2Text.enabled() && Speech2Text.enableMicrophone(segment.el);
         }
     });
 })(jQuery, UI);
