@@ -1,17 +1,17 @@
 Speech2Text = {
     enabled: function () {
-        return !!('webkitSpeechRecognition' in window && config.speech2textEnabled);
+        return !!('webkitSpeechRecognition' in window && config.speech2text_enabled);
     },
     disable: function () {
-        if (config.speech2textEnabled) {
-            config.speech2textEnabled = false;
+        if (config.speech2text_enabled) {
+            config.speech2text_enabled = false;
             // Todo Call Service to disable Tag speech2text
             UI.render();
         }
     },
     enable: function () {
-        if (!config.speech2textEnabled) {
-            config.speech2textEnabled = true;
+        if (!config.speech2text_enabled) {
+            config.speech2text_enabled = true;
             // Todo Call Service to enable Tag speech2text
             if (!Speech2Text.initialized) {
                 Speech2Text.init();
