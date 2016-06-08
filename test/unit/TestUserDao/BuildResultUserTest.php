@@ -51,6 +51,12 @@ class BuildResultUserTest extends AbstractTest
         $this->assertTrue($actual_user_struct instanceof Users_UserStruct);
 
         $this->assertEquals("barandfoo@translated.net", $actual_user_struct->email);
+
+        $this->assertRegExp('/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $actual_user_struct->create_date);
+        $this->assertEquals("Edoardo", $actual_user_struct->first_name);
         $this->assertEquals("BarAndFoo", $actual_user_struct->last_name);
+        $this->assertNull( $actual_user_struct->salt);
+        $this->assertNull( $actual_user_struct->pass);
+        $this->assertNull( $actual_user_struct->oauth_access_token);
     }
 }
