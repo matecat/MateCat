@@ -2104,6 +2104,10 @@ body.rtl-target .editor .editarea span
 	-webkit-transition: all 100ms ease-in;
 	transition: all 100ms ease-in;
 }
+.suggestion-item.graysmall > li {
+	min-height: 35px;
+	padding-bottom: 20px;
+}
 .graysmall li.goto
 {
 	width: 10px;
@@ -2127,7 +2131,7 @@ body.rtl-target .editor .editarea span
 	width: 46%;
 }
 .graysmall .b {
-    padding-left:25px!important;
+    padding-left:12px!important;
     position:relative
 }
 
@@ -2159,7 +2163,7 @@ body.rtl-target .editor .editarea span
 	top:14px
 }
 .graysmall-message{
-    bottom:-10px;
+    bottom:0px;
     left:25px;
     position:absolute;
     font-size:10px;
@@ -2684,7 +2688,7 @@ section.modified.editor .status
 		width:42% !important
 	}
 	.graysmall-message{
-		left:55px !important
+		left:15px !important
 	}
 	
 
