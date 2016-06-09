@@ -1,5 +1,4 @@
 <div class="textarea-container">
-
   <span class="loader"></span>
   <div class="{{editarea_classes_string}}"
        {{#if readonly}} contenteditable="false" {{/if}}
@@ -7,9 +6,7 @@
                         lang="{{lang}}"
                         id="segment-{{segment.sid}}-editarea"
                         data-sid="{{segment.sid}}"
-                        >{{#if segment.translation }}{{{ decoded_translation }}}{{/if}}
-  </div>
-
+                        >{{#if segment.translation }}{{{ decoded_translation }}}{{/if}}</div>
   {{#if s2t_enabled}}
   <!-- div class="micSpeech" title="Activate voice input" data-segment-id="{{originalId}}">
         <div class="micBg"></div>
@@ -43,6 +40,6 @@
 
   <p class="save-warning" title="Segment modified but not saved"></p>
 
-  
+
 
 </div>
