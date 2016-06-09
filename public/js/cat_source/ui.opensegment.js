@@ -142,7 +142,7 @@
                 segment: segment
             });
 
-            Speech2Text.enableMicrophone(segment.el);
+            Speech2Text.enabled() && Speech2Text.enableMicrophone(segment.el);
         }
     });
 })(jQuery, UI);
