@@ -110,7 +110,7 @@ class SplitAndMergeTest extends IntegrationTest {
                 $chunks[0]->id, $chunks[0]->password
         );
 
-        $this->assertEquals(3, $review_data->score );
+        $this->assertEquals(3, $review_data->penalty_points );
 
         splitJob(array(
                 'id_job'       => $chunks[0]->id,
@@ -131,8 +131,8 @@ class SplitAndMergeTest extends IntegrationTest {
                 $chunks[1]->id, $chunks[1]->password
         );
 
-        $this->assertEquals(2, $first_chunk_review->score);
-        $this->assertEquals(1, $last_chunk_review->score);
+        $this->assertEquals(2, $first_chunk_review->penalty_points);
+        $this->assertEquals(1, $last_chunk_review->penalty_points);
     }
 
 
@@ -187,8 +187,8 @@ class SplitAndMergeTest extends IntegrationTest {
                 $chunks[1]->id, $chunks[1]->password
         );
 
-        $this->assertEquals(1, $first_chunk_review->score);
-        $this->assertEquals(1, $last_chunk_review->score);
+        $this->assertEquals(1, $first_chunk_review->penalty_points);
+        $this->assertEquals(1, $last_chunk_review->penalty_points);
 
         // Merge and check the count is merged
         mergeJob(array(
@@ -205,7 +205,7 @@ class SplitAndMergeTest extends IntegrationTest {
                 $chunks[0]->id, $chunks[0]->password
         );
 
-        $this->assertEquals(2, $merged_review_record->score);
+        $this->assertEquals(2, $merged_review_record->penalty_points);
     }
 
     private function makeIssueOnChunk( Chunks_ChunkStruct $chunk, $options=array()) {

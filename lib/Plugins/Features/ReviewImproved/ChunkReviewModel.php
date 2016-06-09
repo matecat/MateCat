@@ -19,12 +19,12 @@ class ChunkReviewModel
     private $chunk_review;
 
 
-    private $score;
+    private $penalty_points;
 
 
     public function __construct( \LQA\ChunkReviewStruct $chunk_review ) {
         $this->chunk_review = $chunk_review ;
-        $this->score = $this->chunk_review->score ;
+        $this->penalty_points = $this->chunk_review->penalty_points ;
     }
 
     /**
@@ -49,35 +49,35 @@ class ChunkReviewModel
     }
 
     /**
-     * adds score and updates pass fail result
+     * adds penalty_points and updates pass fail result
      *
-     * @param $score
+     * @param $penalty_points
      */
-    public function addScore( $score ) {
-        $this->chunk_review->score += $score;
+    public function addPenaltyPoints($penalty_points ) {
+        $this->chunk_review->penalty_points += $penalty_points;
         $this->updatePassFailResult();
     }
 
     /**
-     * subtract score and updates pass fail result
+     * subtract penalty_points and updates pass fail result
      *
-     * @param $score
+     * @param $penalty_points
      */
 
-    public function subtractScore( $score ) {
-        $this->chunk_review->score -= $score;
+    public function subtractPenaltyPoints($penalty_points ) {
+        $this->chunk_review->penalty_points -= $penalty_points;
         $this->updatePassFailResult();
     }
 
     /**
      * This method invokes the recount of reviewed_words_count and
-     * score for the chunk and updates the passfail result.
+     * penalty_points for the chunk and updates the passfail result.
      */
     public function recountAndUpdatePassFailResult() {
         $chunk = $this->chunk_review->getChunk();
 
-        $this->chunk_review->score =
-                ChunkReviewDao::getScoreForChunk( $chunk );
+        $this->chunk_review->penalty_points =
+                ChunkReviewDao::getPenaltyPointsForChunk( $chunk );
 
         $this->chunk_review->reviewed_words_count =
                 ChunkReviewDao::getReviewedWordsCountForChunk( $chunk );
@@ -86,12 +86,18 @@ class ChunkReviewModel
     }
 
     /**
+     * Returns the calculated score
+     */
+    public function getScore() {
+        return $this->chunk_review->penalty_points / $this->chunk_review->reviewed_words_count * 1000 ;
+    }
+
+    /**
      *
      * @throws \Exception
      */
     public function updatePassFailResult() {
-        $score_per_mille =  $this->chunk_review->score /
-            $this->chunk_review->reviewed_words_count * 1000 ;
+        $score_per_mille = $this->getScore();
 
         $project = \Projects_ProjectDao::findById( $this->chunk_review->id_project );
         $lqa_model = $project->getLqaModel();
@@ -99,7 +105,7 @@ class ChunkReviewModel
         $this->chunk_review->is_pass = ( $score_per_mille <= $lqa_model->getLimit() ) ;
 
         ChunkReviewDao::updateStruct( $this->chunk_review, array(
-            'fields' => array('reviewed_words_count', 'is_pass', 'score'))
+            'fields' => array('reviewed_words_count', 'is_pass', 'penalty_points'))
         );
     }
 
