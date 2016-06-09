@@ -306,7 +306,7 @@ class CatUtils {
                         "&#0A;", "&#0D;", "&#09;"
                 ), "", $segment
         );
-        
+
         //Replace br placeholders
         $segment = str_replace( self::crlfPlaceholder, "\r\n", $segment );
         $segment = str_replace( self::lfPlaceholder,"\n", $segment );
