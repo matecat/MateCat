@@ -299,6 +299,14 @@ class CatUtils {
 
     public static function view2rawxliff($segment) {
 
+        //normal control characters should not be sent by the client
+        $segment = str_replace(
+                array(
+                        "\r", "\n", "\t",
+                        "&#0A;", "&#0D;", "&#09;"
+                ), "", $segment
+        );
+        
         //Replace br placeholders
         $segment = str_replace( self::crlfPlaceholder, "\r\n", $segment );
         $segment = str_replace( self::lfPlaceholder,"\n", $segment );
