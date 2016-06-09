@@ -290,4 +290,42 @@ class Analysis_PayableRates {
 
     }
 
+
+    /**
+     * This function returns the dynamic payable rate given a post-editing effort
+     * @param $pee float
+     * @return float
+     */
+    public static function pee2payable( $pee ) {
+        $pee = floatval($pee);
+
+        if ( $pee < 0 ) {
+            $pee = 0;
+        }
+        if ( $pee > 100 ) {
+            $pee = 100;
+        }
+
+        $x_2_coef = -0.00032;
+        $x_coef   = 0.034;
+        $constant = 0.1;
+
+        $payable = ($x_2_coef * ( pow( $pee, 2 ) ) + $x_coef * $pee + $constant);
+        $payable = round( 100 * $payable , 1);
+//        $payable = self::roundUpToAny( $payable, 5);
+
+        if ( $payable < 75 ) {
+            $payable = 75;
+        }
+        if ( $payable > 95 ) {
+            $payable = 95;
+        }
+
+        return str_replace( ".", ",", $payable );
+    }
+
+    private static function roundUpToAny($n,$x=5) {
+        return (round($n)%$x === 0) ? round($n) : round(($n+$x/2)/$x)*$x;
+    }
+
 }

@@ -172,7 +172,7 @@ TAB;
          * @var Engines_MyMemory
          */
         $this->engine_MyMemory= $this->getMockBuilder('\Engines_MyMemory')->setConstructorArgs(array($this->engine_struct_param))->setMethods(array('_call'))->getMock();
-        $this->engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param,$curl_mock_param)->willReturn($mock_json_return);
+        $this->engine_MyMemory->expects($this->exactly(1))->method('_call')->with($url_mock_param,$curl_mock_param)->willReturn($mock_json_return);
 
         $result = $this->engine_MyMemory->get($this->config_param_of_get);
         /**

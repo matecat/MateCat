@@ -138,6 +138,33 @@ class GetProjectOwnerTest extends AbstractTest
         $this->assertTrue( $user instanceof Users_UserStruct);
         $this->assertEquals($this->uid_user, $user->uid);
         $this->assertEquals($this->email_owner, $user->email);
+        $this->assertRegExp('/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date);
+        $this->assertEquals("Bar", $user->first_name);
+        $this->assertEquals("Foo", $user->last_name);
+        $this->assertNull( $user->salt);
+        $this->assertNull( $user->pass);
+        $this->assertNull( $user->oauth_access_token);
+    }
+    public function  test_getProjectOwner_mocked(){
+
+        /**
+         * @var Users_UserDao
+         */
+        $mock_user_Dao = $this->getMockBuilder('\Users_UserDao')
+            ->setConstructorArgs(array($this->database_instance))
+            ->setMethods(array('_buildResult','_fetch_array'))
+            ->getMock();
+
+        $mock_user_Dao->expects($this->exactly(1))
+            ->method('_fetch_array');
+
+        $mock_user_Dao->expects($this->exactly(1))
+            ->method('_buildResult');
+
+
+
+        $mock_user_Dao->getProjectOwner($this->id_job);
 
     }
+
 }

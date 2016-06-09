@@ -1,5 +1,5 @@
 <?php
-
+//TODO:: la struttura che mi ritorna ha i campi sotto a partire da salt uguali a null anche se li ho inizializzati verificare!!!!
 /**
  * @group regression
  * @covers Users_UserDao::createUser
@@ -54,7 +54,7 @@ class CreateUserTest extends AbstractTest
         /**
          * queries
          */
-        $this->sql_select_user = "SELECT email FROM users WHERE uid='" . $this->uid . "';";
+        $this->sql_select_user = "SELECT * FROM users WHERE uid='" . $this->uid . "';";
         $this->sql_delete_user = "DELETE FROM users WHERE uid='" . $this->uid . "';";
 
     }
@@ -79,8 +79,17 @@ class CreateUserTest extends AbstractTest
         $this->user_struct_param->uid= $this->uid;
         $this->assertEquals($this->user_struct_param, $this->actual);
 
-        $result=$this->database_instance->query($this->sql_select_user)->fetchAll(PDO::FETCH_ASSOC);
-
-        $this->assertEquals(array(0 => array("email" => "barandfoo@translated.net")), $result);
+        $wrapped_result=$this->database_instance->query($this->sql_select_user)->fetchAll(PDO::FETCH_ASSOC);
+        $result= $wrapped_result['0'];
+        $this->assertCount(9,$result);
+        $this->assertEquals($this->uid, $result['uid']);
+        $this->assertEquals("barandfoo@translated.net", $result['email']);
+        $this->assertEquals("801b32d6a9ce745", $result['salt']);
+        $this->assertEquals("bd40541bFAKE0cbar143033and731foo", $result['pass']);
+        $this->assertRegExp('/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result['create_date']);
+        $this->assertEquals("Edoardo", $result['first_name']);
+        $this->assertEquals("BarAndFoo", $result['last_name']);
+        $this->assertEquals("", $result['api_key']);
+        $this->assertNull($result['oauth_access_token']);
     }
 }

@@ -60,6 +60,7 @@ class glossaryController extends ajaxController {
     public function doAction() {
 
         $this->job_info = getJobData( $this->id_job, $this->password );
+        $job = Jobs_JobDao::getById( $this->id_job );
 
         /**
          * For future reminder
@@ -75,16 +76,21 @@ class glossaryController extends ajaxController {
 
             $config = $this->_TMS->getConfigStruct();
 
+            // segment related
             $config[ 'segment' ]     = $this->segment;
             $config[ 'translation' ] = $this->translation;
             $config[ 'tnote' ]       = $this->comment;
+
+            // job related
+            $config[ 'id_user' ]     = array() ; 
             $config[ 'source' ]      = $this->job_info[ 'source' ];
             $config[ 'target' ]      = $this->job_info[ 'target' ];
-            $config[ 'email' ]       = INIT::$MYMEMORY_API_KEY;
-            $config[ 'id_user' ]     = array();
+
             $config[ 'isGlossary' ]  = true;
             $config[ 'get_mt' ]      = null;
+            $config[ 'email' ]       = INIT::$MYMEMORY_API_KEY;
             $config[ 'num_result' ]  = 100; //do not want limit the results from glossary: set as a big number
+            
             if ( $this->newsegment && $this->newtranslation ) {
                 $config[ 'newsegment' ]     = $this->newsegment;
                 $config[ 'newtranslation' ] = $this->newtranslation;

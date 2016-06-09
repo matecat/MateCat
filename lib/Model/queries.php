@@ -579,7 +579,8 @@ function getWarning( $jid, $jpassword ) {
 		JOIN jobs ON jobs.id = id_job AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
 		WHERE jobs.id = $jid
 		AND jobs.password = '$jpassword'
-		AND warning != 0";
+		-- following is a condition on bitbask to filter by severity ERROR 
+		AND warning&1 = 1 ";
 
     $results = $db->fetch_array( $query );
 
@@ -1204,36 +1205,20 @@ function addTranslation( array $_Translation ) {
  *
  * @param $params
  * @param $job_data
- * @param $propagateToTranslated
  * @param $_idSegment
  *
  * @throws Exception
  * @return int
  */
-function propagateTranslation( $params, $job_data, $_idSegment, Projects_ProjectStruct $project, $propagateToTranslated = false ) {
+function propagateTranslation( $params, $job_data, $_idSegment, Projects_ProjectStruct $project ) {
 
     $db = Database::obtain();
-
-    $st_approved   = Constants_TranslationStatus::STATUS_APPROVED;
-    $st_rejected   = Constants_TranslationStatus::STATUS_REJECTED;
-    $st_translated = Constants_TranslationStatus::STATUS_TRANSLATED;
-    $st_new        = Constants_TranslationStatus::STATUS_NEW;
-    $st_draft      = Constants_TranslationStatus::STATUS_DRAFT;
-
     $q = array();
-    foreach ( $params as $key => $value ) {
+    $propagated_ids = array() ;
 
+    foreach ( $params as $key => $value ) {
         if ( $key == 'status' ) {
-            if ( $propagateToTranslated ) {
-                $q[ ]       = $key . " = '" . $db->escape( $value ) . "' ";
-                $andStatus = "AND status IN (
-                    '$st_draft',
-                    '$st_new',
-                    '$st_translated',
-                    '$st_approved',
-                    '$st_rejected'
-                )";
-            }
+            $q[ ]       = $key . " = '" . $db->escape( $value ) . "' ";
         } elseif( $key == 'segment_hash' ){
             continue; // i don't want overwrite the segment_hash
         } elseif ( is_bool( $value ) ) {
@@ -1251,8 +1236,13 @@ function propagateTranslation( $params, $job_data, $_idSegment, Projects_Project
         $sum_sql = "SUM( IF( match_type != 'ICE', eq_word_count, segments.raw_word_count ) )";
     }
 
-    //if the new status to set is TRANSLATED,
-    // sum the equivalent words of segments equals to me with the status different from MINE
+
+    /**
+     * Sum the word count grouped by status, so that we can later update the count on jobs table.
+     * We only count segments with status different than the current, because we don't need to update
+     * the count for the same status.
+     *
+     */
     $queryTotals = "
            SELECT $sum_sql as total, COUNT(id_segment)as countSeg, status
 
@@ -1279,109 +1269,51 @@ function propagateTranslation( $params, $job_data, $_idSegment, Projects_Project
                 -$e->getCode() );
     }
 
-
-    //the job password seems a better idea to search only the segments in the actual chunk,
-    //but it needs an update in join on 2 tables.
-    //job_first_segment and job_last_segment should do the same thing
-    $TranslationPropagate = "
-        UPDATE segment_translations
-        SET " . implode( ", ", $q ) . "
-        WHERE id_job = {$params['id_job']}
-        AND segment_hash = '" . $params[ 'segment_hash' ] . "'
-        $andStatus
-        AND id_segment BETWEEN {$job_data['job_first_segment']} AND {$job_data['job_last_segment']}
-        AND id_segment != $_idSegment
-    ";;
-
+    $dao = new Translations_SegmentTranslationDao();
     try {
-        $db->query($TranslationPropagate);
+        $segmentsForPropagation = $dao->getSegmentsForPropagation( array(
+                'id_segment'        => $_idSegment,
+                'job_first_segment' => $job_data[ 'job_first_segment' ],
+                'job_last_segment'  => $job_data[ 'job_last_segment' ],
+                'segment_hash'      => $params[ 'segment_hash' ],
+                'id_job'            => $params[ 'id_job' ]
+        ) );
     } catch( PDOException $e ) {
-        throw new Exception( "Error in propagating Translation: " . $e->getCode() . ": " . $e->getMessage()
-            . "\n" . $TranslationPropagate . "\n" . var_export( $params, true ),
-            -$e->getCode() );
-    }
-    return $totals;
-}
-
-/*
-function setTranslationUpdate( $id_segment, $id_job, $status, $time_to_edit, $translation, $errors, $chosen_suggestion_index, $warning = 0 ) {
-
-	// need to use the plain update instead of library function because of the need to update an existent value in db (time_to_edit)
-	$now = date( "Y-m-d H:i:s" );
-	$db  = Database::obtain();
-
-	$translation = $db->escape( $translation );
-	$status      = $db->escape( $status );
-
-	$q = "UPDATE segment_translations
-	            SET status='$status',
-	            suggestion_position='$chosen_suggestion_index',
-	            serialized_errors_list='$errors',
-	            time_to_edit = time_to_edit + $time_to_edit,
-	            translation='$translation',
-	            translation_date='$now',
-	            warning=" . (int)$warning;
-
-    //we put the patch here for convenience
-    if( $status == 'TRANSLATED' ){
-        $q .= ", autopropagated_from = NULL";
+        throw new Exception(
+                sprintf( "Error in querying segments for propagation: %s: %s ", $e->getCode(),  $e->getMessage() ),
+                -$e->getCode()
+        );
     }
 
-	$q .= " WHERE id_segment=$id_segment and id_job=$id_job";
+    if ( !empty( $segmentsForPropagation ) ) {
 
-	if( empty( $translation ) && !is_numeric( $translation ) ){
-		$msg = "\n\n Error setTranslationUpdate \n\n Empty translation found: \n\n " . var_export( array_merge( array( 'db_query' => $q ), $_POST ), true );
-		Log::doLog( $msg );
-		Utils::sendErrMailReport( $msg );
-	}
+        $propagated_ids = array_map(function( Translations_SegmentTranslationStruct $translation ) {
+            return $translation->id_segment ;
+        }, $segmentsForPropagation );
 
-	$db->query( $q );
-	$err   = $db->get_error();
-	$errno = $err[ 'error_code' ];
+        try {
+            $propagationSql = "UPDATE segment_translations SET " . implode( ", ", $q )  .
+                    " WHERE id_job = :id_job AND id_segment IN ( :id_segments ) " ;
 
-	if ( $errno != 0 ) {
-		Log::doLog( "$errno: " . var_export( $err, true ) );
-		return $errno * -1;
-	}
+            $pdo = $db->getConnection() ;
+            $stmt = $pdo->prepare( $propagationSql ) ;
 
-	return $db->affected_rows;
+            $queryParams =  array(
+                    'id_job' => $params['id_job'],
+                    'id_segments' => implode(', ', $propagated_ids),
+            );
+            $stmt->execute( $queryParams );
+
+        } catch( PDOException $e ) {
+            throw new Exception( "Error in propagating Translation: " . $e->getCode() . ": " . $e->getMessage()
+                    . "\n" . $propagationSql . "\n" . var_export( $queryParams, true ),
+                    -$e->getCode() );
+        }
+
+    }
+
+    return array( 'totals' => $totals, 'propagated_ids' => $propagated_ids );
 }
-
-function setTranslationInsert( $id_segment, $id_job, $status, $time_to_edit, $translation, $errors = '', $chosen_suggestion_index, $warning = 0 ) {
-	$data                             = array();
-	$data[ 'id_job' ]                 = $id_job;
-	$data[ 'status' ]                 = $status;
-	$data[ 'time_to_edit' ]           = $time_to_edit;
-	$data[ 'translation' ]            = $translation;
-	$data[ 'translation_date' ]       = date( "Y-m-d H:i:s" );
-	$data[ 'id_segment' ]             = $id_segment;
-	$data[ 'id_job' ]                 = $id_job;
-	$data[ 'serialized_errors_list' ] = $errors;
-	$data[ 'suggestion_position' ]    = $chosen_suggestion_index;
-	$data[ 'warning' ]                = (int)$warning;
-
-	if( empty( $translation ) && !is_numeric( $translation ) ){
-		$msg = "\n\n Error setTranslationUpdate \n\n Empty translation found: \n\n " . var_export( $_POST, true ) . " \n\n " . var_export( $data, true );
-		Log::doLog( $msg );
-		Utils::sendErrMailReport( $msg );
-	}
-
-	$db                               = Database::obtain();
-	$db->insert( 'segment_translations', $data );
-
-	$err   = $db->get_error();
-	$errno = $err[ 'error_code' ];
-
-	if ( $errno != 0 ) {
-		if ( $errno != 1062 ) {
-			Log::doLog( "$errno: " . var_export( $err, true ) );
-		}
-		return $errno * -1;
-	}
-
-	return $db->affected_rows;
-}
-*/
 
 function setSuggestionUpdate( $data ) {
 

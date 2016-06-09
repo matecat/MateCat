@@ -28,7 +28,9 @@ class DestroyCacheJobTest extends AbstractTest
     protected $str_password;
     protected $str_id_project;
     protected $str_owner;
-    protected $sql_delete_job;
+    /**
+     * @var \Predis\Client
+     */
     protected $cache;
 
     public function setUp()
