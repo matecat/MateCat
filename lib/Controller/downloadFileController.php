@@ -453,10 +453,15 @@ class downloadFileController extends downloadController {
     private function updateRemoteFiles($output_content) {
         foreach( $output_content as $id_file => $output_file ) {
             $remoteFile = \RemoteFiles_RemoteFileDao::getByFileAndJob( $id_file, $this->id_job );
-            $gdriveFile = $this->gdriveService->files->get( $remoteFile->remote_id );
 
-            $this->updateFileOnGDrive( $remoteFile->remote_id, $gdriveFile, $output_file[ 'document_content' ] ) ;
-            $this->remoteFiles[ $remoteFile->id ] = $gdriveFile ;
+            try {
+                $gdriveFile = $this->gdriveService->files->get( $remoteFile->remote_id );
+
+                $this->updateFileOnGDrive( $remoteFile->remote_id, $gdriveFile, $output_file[ 'document_content' ] ) ;
+                $this->remoteFiles[ $remoteFile->id ] = $gdriveFile ;
+            } catch ( Exception $e ) {
+                Log::doLog( 'Failed to access file from Google Drive: ' . $e->getMessage() );
+            }
         }
     }
 
