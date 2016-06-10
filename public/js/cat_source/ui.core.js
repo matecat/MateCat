@@ -1695,12 +1695,12 @@ UI = {
         return diff_obj;
     },
 
-    chooseAlternative: function(w) {console.log('chooseAlternative');
-//        console.log( $('.sugg-target .realData', w ) );
-        this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).text(), true, UI.currentSegmentId, 'choose alternative' ) );
+    chooseAlternative: function(w) {
+        this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).html(), true, UI.currentSegmentId, 'choose alternative' ) );
         this.lockTags(this.editarea);
         this.editarea.focus();
         this.highlightEditarea();
+        this.disableTPOnSegment();
     },
 	copyAlternativeInEditarea: function(translation) {
 		console.log('translation: ', translation);
@@ -2770,7 +2770,8 @@ UI = {
 					.replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
 					.replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
 					.replace( config.tabPlaceholderRegex, '<span class="tab-marker monad marker ' + config.tabPlaceholderClass +'" contenteditable="false">&#8677;</span>' )
-					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false">&nbsp;</span>' );
+					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false">&nbsp;</span>' )
+                    .replace(/(<\/span\>)$/gi, "</span><br class=\"end\">"); // For rangy cursor after a monad marker
 
 		return _str;
     },
