@@ -686,7 +686,7 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
 /*
  Comments icon in header
  */
-.mbc-history-balloon-icon-has-comment {
+.mbc-history-balloon-icon-has-comment .icon-bubble2{
   color: #fff; /* style.css line 40 #notifbox */
   opacity: .9;
 }
@@ -702,18 +702,12 @@ article.mbc-commenting-opened .mbc-comment-balloon-outer {
 .mbc-history-balloon-outer {
   background-color: rgba(247,247,247,1); /* #f7f77f */
   box-shadow: 0 8px 16px rgba(0,0,0,0.3);
-  margin-top: 56px;
+  margin-top: 20px;
   padding-top: 10px;
   position: absolute;
-  right: 86px;
+  right: 10px;
   width: 300px;
-}
-
-@media screen and (max-width: 1180px) {
-  /* Position follows icons in header */
-  .mbc-history-balloon-outer {
-    right: 70px;
-  }
+  text-align: left;
 }
 
 .mbc-view-comment-wrap {
