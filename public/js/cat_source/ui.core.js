@@ -1817,15 +1817,15 @@ UI = {
         var str = getSelectionHtml();
         insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
         var newStr = '';
-        var selectionHtml = $("<div/>").html(str);
-        selectionHtml.find('.undoCursorPlaceholder').remove();
-        var rightString = selectionHtml.html();
+        var selection$ = $("<div/>").html(str);
+        selection$.find('.undoCursorPlaceholder').remove();
+        var rightString = selection$.html();
 
         $.each($.parseHTML(rightString), function(index) {
 			var toAdd, d, jump, capStr;
             if(this.nodeName == '#text') {
 				d = this.data;
-				jump = ((!index)&&(!selectionHtml));
+				jump = ((!index)&&(!selection$));
 				capStr = toTitleCase(d);
 				if(jump) {
 					capStr = d.charAt(0) + toTitleCase(d).slice(1);
@@ -1835,7 +1835,7 @@ UI = {
 			}
             else if(this.nodeName == 'LXQWARNING') { 
                 d = this.childNodes[0].data;
-                jump = ((!index)&&(!selectionHtml));
+                jump = ((!index)&&(!selection$));
 				capStr = toTitleCase(d);
 				if(jump) {
 					capStr = d.charAt(0) + toTitleCase(d).slice(1);
