@@ -15,7 +15,7 @@ CHECK_FS = no
 ; Check in new config.ini.sample:
 ; There could be new params to configure.
 ;----------------------------------------
-BUILD_NUMBER = "1.0.3"
+BUILD_NUMBER = "1.0.3a"
 
 ;----------------------------------------
 [development]
