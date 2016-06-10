@@ -234,6 +234,9 @@ class INIT {
                 'https://www.googleapis.com/auth/drive.install',
                 'profile'
         );
+
+        self::$MIME_TYPES = include( 'Mime2Extension.php' );
+
     }
 
 

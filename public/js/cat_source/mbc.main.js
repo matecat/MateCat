@@ -817,7 +817,7 @@ if ( MBC.enabled() )
             $( '#mbc-history' ).remove();
             $( '.mbc-history-balloon-outer' ).remove();
             $( '.header-menu li#filterSwitch' ).before( $( tpls.historyIcon ) );
-            $( '.header-menu' ).append( $( tpls.historyOuter ).append( $( tpls.historyNoComments ) ) );
+            $( '#mbc-history' ).append( $( tpls.historyOuter ).append( $( tpls.historyNoComments ) ) );
 
             refreshElements();
 
