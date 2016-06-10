@@ -19,6 +19,6 @@ class SegmentTranslationObserver implements \SplObserver {
         $model->addOrSubtractCachedReviewedWordsCount();
 
         // we need to recount score globally because of autopropagation.
-        $model->recountScore();
+        $model->recountPenaltyPoints();
     }
 }

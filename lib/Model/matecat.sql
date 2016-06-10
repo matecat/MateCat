@@ -312,7 +312,7 @@ CREATE TABLE `qa_chunk_reviews` (
   `id_job` bigint(20) NOT NULL,
   `password` varchar(45) NOT NULL,
   `review_password` varchar(45) NOT NULL,
-  `score` bigint(20) NOT NULL DEFAULT '0',
+  `penalty_points` bigint(20) NOT NULL DEFAULT '0',
   `num_errors` int(11) NOT NULL DEFAULT '0',
   `is_pass` tinyint(4) NOT NULL DEFAULT '0',
   `force_pass_at` timestamp NULL DEFAULT NULL,

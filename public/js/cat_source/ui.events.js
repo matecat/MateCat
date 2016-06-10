@@ -791,7 +791,7 @@ $.extend(UI, {
                 }
             }
 		}).on('keydown', '.editor .editarea', function(e) {
-
+			UI.hideEditToolbar();
             if ((e.which == 8)&&(!UI.body.hasClass('tagmode-default-extended'))) { return true;
                 var rangeObject = getRangeObject(window.getSelection());
                 for(var key in rangeObject.endContainer) {
