@@ -98,7 +98,7 @@ class GetByProjectIdTest extends AbstractTest
 
         $this->id = $this->database_instance->last_insert();
 
-        $this->sql_delete_job = "DELETE FROM jobs WHERE owner='" . $this->str_owner . "';";
+        $this->sql_delete_job = "DELETE FROM jobs WHERE id='" . $this->id . "';";
 
 
     }

@@ -73,7 +73,6 @@ class AbstractFetchObjectUserTest extends AbstractTest
         /**
          * Params
          */
-       // $this->stmt_param= new PDOStatement();
 
         $this->stmt_param= $this->method_getStatementForCache->invoke($this->user_Dao,"SELECT uid,
                                     email,
