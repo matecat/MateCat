@@ -151,13 +151,13 @@ class ReviewImproved extends BaseFeature {
         $id_job               = $projectStructure[ 'job_to_merge' ];
         $old_reviews          = ChunkReviewDao::findByIdJob( $id_job );
         $first_password       = $old_reviews[ 0 ]->review_password;
-        $score                = 0;
+        $penalty_points       = 0;
         $reviewed_words_count = 0;
 
         ChunkReviewDao::deleteByJobId( $id_job );
 
         foreach($old_reviews as $row ) {
-            $score = $score + $row->score;
+            $penalty_points = $penalty_points + $row->penalty_points;
             $reviewed_words_count = $reviewed_words_count + $row->reviewed_words_count ;
         }
 
@@ -166,7 +166,7 @@ class ReviewImproved extends BaseFeature {
         ));
 
         $new_reviews = ChunkReviewDao::findByIdJob( $id_job );
-        $new_reviews[0]->score = $score;
+        $new_reviews[0]->penalty_points = $penalty_points;
         $new_reviews[0]->reviewed_words_count = $reviewed_words_count ;
 
         $model = new ChunkReviewModel( $new_reviews[0] );

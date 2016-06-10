@@ -44,9 +44,9 @@ class GetByUidsUserTest extends AbstractTest
         /**
          * users insertion
          */
-        $this->sql_insert_user_1 = "INSERT INTO " . INIT::$DB_DATABASE . ".`users` (`uid`, `email`, `salt`, `pass`, `create_date`, `first_name`, `last_name`, `api_key` ) VALUES (NULL, 'bar_first@foo.net', '12345trewq', '76554321qwerty', '2016-04-11 13:41:54', 'Bar_!', 'Foo_1', '');";
-        $this->sql_insert_user_2 = "INSERT INTO " . INIT::$DB_DATABASE . ".`users` (`uid`, `email`, `salt`, `pass`, `create_date`, `first_name`, `last_name`, `api_key` ) VALUES (NULL, 'bar_second@foo.net', '1543trewq', '987654321qwerty', '2016-04-11 13:41:54', 'Bar_2', 'Foo_2', '');";
-        $this->sql_insert_user_3 = "INSERT INTO " . INIT::$DB_DATABASE . ".`users` (`uid`, `email`, `salt`, `pass`, `create_date`, `first_name`, `last_name`, `api_key` ) VALUES (NULL, 'bar_third@foo.net', '16785trewq', '012354321qwerty', '2016-04-11 13:41:54', 'Bar_3', 'Foo_3', '');";
+        $this->sql_insert_user_1 = "INSERT INTO " . INIT::$DB_DATABASE . ".`users` (`uid`, `email`, `salt`, `pass`, `create_date`, `first_name`, `last_name`, `api_key` ) VALUES (NULL, 'bar_first@foo.net', '12345', '76554321qwerty', '2016-04-11 13:41:54', 'Bar_1', 'Foo_1', '');";
+        $this->sql_insert_user_2 = "INSERT INTO " . INIT::$DB_DATABASE . ".`users` (`uid`, `email`, `salt`, `pass`, `create_date`, `first_name`, `last_name`, `api_key` ) VALUES (NULL, 'bar_second@foo.net', '1543', '987654321qwerty', '2016-04-11 13:41:54', 'Bar_2', 'Foo_2', '');";
+        $this->sql_insert_user_3 = "INSERT INTO " . INIT::$DB_DATABASE . ".`users` (`uid`, `email`, `salt`, `pass`, `create_date`, `first_name`, `last_name`, `api_key` ) VALUES (NULL, 'bar_third@foo.net', '16785', '012354321qwerty', '2016-04-11 13:41:54', 'Bar_3', 'Foo_3', '');";
         /**
          * 1st
          */
@@ -104,18 +104,38 @@ class GetByUidsUserTest extends AbstractTest
         $this->assertCount(3, $array_result);
 
 
-        $first_user = $array_result['0'];
-        $this->assertTrue($first_user instanceof Users_UserStruct);
-        $this->assertEquals("bar_first@foo.net", $first_user->email);
+        $user = $array_result['0'];
+        $this->assertTrue($user instanceof Users_UserStruct);
+        $this->assertEquals("{$this->uid_1}", $user->uid);
+        $this->assertEquals("bar_first@foo.net", $user->email);
+        $this->assertRegExp('/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date);
+        $this->assertEquals("Bar_1", $user->first_name);
+        $this->assertEquals("Foo_1", $user->last_name);
+        $this->assertNull( $user->salt);
+        $this->assertNull( $user->pass);
+        $this->assertNull( $user->oauth_access_token);
 
-        $first_user = $array_result['1'];
-        $this->assertTrue($first_user instanceof Users_UserStruct);
-        $this->assertEquals("bar_second@foo.net", $first_user->email);
+        $user = $array_result['1'];
+        $this->assertTrue($user instanceof Users_UserStruct);
+        $this->assertEquals("{$this->uid_2}", $user->uid);
+        $this->assertEquals("bar_second@foo.net", $user->email);
+        $this->assertRegExp('/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date);
+        $this->assertEquals( "Bar_2",$user->first_name);
+        $this->assertEquals( "Foo_2",$user->last_name);
+        $this->assertNull( $user->salt);
+        $this->assertNull( $user->pass);
+        $this->assertNull( $user->oauth_access_token);
 
-        $first_user = $array_result['2'];
-        $this->assertTrue($first_user instanceof Users_UserStruct);
-        $this->assertEquals("bar_third@foo.net", $first_user->email);
-
+        $user = $array_result['2'];
+        $this->assertTrue($user instanceof Users_UserStruct);
+        $this->assertEquals("{$this->uid_3}", $user->uid);
+        $this->assertEquals("bar_third@foo.net", $user->email);
+        $this->assertRegExp('/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $user->create_date);
+        $this->assertEquals( "Bar_3",$user->first_name);
+        $this->assertEquals( "Foo_3",$user->last_name);
+        $this->assertNull( $user->salt);
+        $this->assertNull( $user->pass);
+        $this->assertNull( $user->oauth_access_token);
     }
 
 
@@ -123,9 +143,9 @@ class GetByUidsUserTest extends AbstractTest
      * @group regression
      * @covers Users_UserDao::getByUids
      */
-    public function test_getByUids_with_empty_param()
+    public function test_getByUids_with_empty_param_for_code_coverage_purpose()
     {
-       $this->assertEquals(array(),$this->user_Dao->getByUids(array()));
+     $this->assertEquals(array(),$this->user_Dao->getByUids(array()));
 
 
     }
