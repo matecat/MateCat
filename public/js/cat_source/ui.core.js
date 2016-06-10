@@ -1974,6 +1974,12 @@ UI = {
         var winName ;
         
         var driveUpdateDone = function(data) {
+            if( !data.urls || data.urls.length === 0 ) {
+                APP.alert({msg: "MateCat was not able to update project files on Google Drive. Maybe the project owner revoked privileges to access those files. Ask the project owner to login again and grant Google Drive privileges to MateCat."});
+
+                return;
+            }
+
             var winName ;
 
             $.each( data.urls, function(index, item) {
