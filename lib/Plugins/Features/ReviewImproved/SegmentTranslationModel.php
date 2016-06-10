@@ -46,9 +46,9 @@ class SegmentTranslationModel
 
     }
 
-    public function recountScore() {
-        $score = \LQA\ChunkReviewDao::getScoreForChunk( $this->chunk );
-        $this->chunk_review->score = $score ;
+    public function recountPenaltyPoints() {
+        $penaltyPoints = \LQA\ChunkReviewDao::getPenaltyPointsForChunk( $this->chunk );
+        $this->chunk_review->penalty_points = $penaltyPoints ;
 
         $chunk_review_model = new ChunkReviewModel( $this->chunk_review );
         $chunk_review_model->updatePassFailResult();

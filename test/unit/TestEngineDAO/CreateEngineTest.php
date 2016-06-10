@@ -21,6 +21,7 @@ class CreateEngineTest extends AbstractTest
     protected $engine_struct_param;
     protected $sql_delete_engine;
     protected $sql_select_engine;
+    protected $id;
     /**
      * @var Database
      */
@@ -49,9 +50,9 @@ protected $actual;
         $this->engine_struct_param->uid = 1;
 
         $this->actual = $this->engine_Dao->create($this->engine_struct_param);
-        $id=$this->database_instance->last_insert();
-        $this->sql_select_engine = "SELECT base_url FROM engines WHERE id='" . $id . "';";
-        $this->sql_delete_engine = "DELETE FROM engines WHERE id='" . $id . "';";
+        $this->id=$this->database_instance->last_insert();
+        $this->sql_select_engine = "SELECT * FROM engines WHERE id='" . $this->id . "';";
+        $this->sql_delete_engine = "DELETE FROM engines WHERE id='" . $this->id . "';";
     }
 
 
@@ -72,12 +73,28 @@ protected $actual;
     public function test_create_with_success()
     {
 
-
         $this->assertEquals($this->engine_struct_param, $this->actual);
 
-        $result=$this->database_instance->query($this->sql_select_engine)->fetchAll(PDO::FETCH_ASSOC);
+        $wrapped_result=$this->database_instance->query($this->sql_select_engine)->fetchAll(PDO::FETCH_ASSOC);
+        $result= $wrapped_result['0'];
+        $this->assertCount(15,$result);
+        $this->assertEquals($this->id,$result['id']);
+        $this->assertEquals("Moses_bar_and_foo", $result['name']);
+        $this->assertEquals("TM", $result['type']);
+        $this->assertEquals("Machine translation from bar and foo.", $result['description']);
+        $this->assertEquals("http://mtserver01.deepfoobar.com:8019", $result['base_url']);
+        $this->assertEquals("translate", $result['translate_relative_url']);
+        $this->assertNull($result['contribute_relative_url']);
+        $this->assertNull($result['delete_relative_url']);
+        $this->assertEquals("\"{}\"", $result['others']);
+        $this->assertEquals("foo_bar", $result['class_load']);
+        $this->assertEquals("\"{}\"", $result['extra_parameters']);
+        $this->assertEquals("2", $result['google_api_compliant_version']);
+        $this->assertEquals("1", $result['penalty']);
+        $this->assertEquals("1", $result['active']);
+        $this->assertEquals("1", $result['uid']);
 
-        $this->assertEquals(array(0 => array("base_url" => "http://mtserver01.deepfoobar.com:8019")), $result);
+
     }
 
 

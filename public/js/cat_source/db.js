@@ -63,4 +63,16 @@ if ( true ) // < TODO: investigate: chrome raises weird excetpion if this is mis
         }
     }
 
+    var putSegmentsInStore = function(data) {
+        $.each(data.files, function() {
+            $.each( this.segments, function() {
+                MateCat.db.upsert( 'segments', 'sid', _.clone( this ) );
+            });
+        });
+    }
+
+    $(document).on('segments:load', function(e, data) {
+        putSegmentsInStore( data );
+    });
+
 })(jQuery, window);

@@ -77,9 +77,9 @@
                 decoded_source || '',
                 true, segment.sid, 'source');
 
+            Speech2Text.enabled() && editarea_classes.push( 'micActive' ) ; 
 
-
-            var templateData = {
+            return  {
                 t                       : t,
                 originalId              : originalId,
                 autoPropagated          : autoPropagated,
@@ -101,10 +101,11 @@
                 status_change_title     : status_change_title ,
                 segment_edit_sec        : segment_edit_sec,
                 segment_edit_min        : segment_edit_min,
-                notEnableTagProjection  : !this.enableTagProjection
+                notEnableTagProjection  : !this.enableTagProjection,
+                s2t_enabled             : Speech2Text.enabled()
+                
             }
 
-            return templateData ;
         },
 
         getSegmentMarkup: function (

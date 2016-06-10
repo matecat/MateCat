@@ -27,8 +27,6 @@ class CacheBehaviourJobTest extends AbstractTest
     protected $cache;
     protected $id;
     protected $str_password;
-    protected $str_id_project;
-    protected $str_owner;
     protected $sql_delete_job;
 
     public function setUp()
