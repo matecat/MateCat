@@ -792,14 +792,17 @@ $.extend(UI, {
             }
 		}).on('keydown', '.editor .editarea', function(e) {
 
-            if ((e.which == 8)&&(!UI.body.hasClass('tagmode-default-extended'))) { return true;
-                var rangeObject = getRangeObject(window.getSelection());
-                for(var key in rangeObject.endContainer) {
-                    console.log('key: ' + key + '\n' + 'value: "' + rangeObject[key] + '"');
-                }
+            if ((e.which == 8) && (!UI.body.hasClass('tagmode-default-extended'))) {
+				return true;
+				// ONly for console.log
+                // var rangeObject = getRangeObject(window.getSelection());
+                // for(var key in rangeObject.endContainer) {
+                //     console.log('key: ' + key + '\n' + 'value: "' + rangeObject[key] + '"');
+                // }
             }
 
 			if ((e.which == 8) || (e.which == 46)) { // backspace e canc(mac)
+				console.log("DELETE");
 				if ($('.selected', $(this)).length) {
 					e.preventDefault();
 					$('.selected', $(this)).remove();

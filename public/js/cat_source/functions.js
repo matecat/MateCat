@@ -127,8 +127,7 @@ function insertNodeAtCursor(node) {
 			range = window.getSelection().getRangeAt(0);
 			range.insertNode(node);
 			setCursorAfterNode(range, node);
-		} else {
-		}
+		} 
 	} else if (document.selection && document.selection.createRange) {
 		range = document.selection.createRange();
 		html = (node.nodeType == 3) ? node.data : node.outerHTML;
