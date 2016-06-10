@@ -1,5 +1,4 @@
 <?php
-include('./lib/Utils/RecursiveArrayObject.php');
 
 /**
  * @group regression
