@@ -1814,55 +1814,28 @@ UI = {
 	},
 
 	formatSelection: function(op) {
-		selection = window.getSelection();
-		range = selection.getRangeAt(0);
-
-		prova = $(range.commonAncestorContainer).text().charAt(range.startOffset - 1);
-        str = getSelectionHtml();
+        var str = getSelectionHtml();
         insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
-		aa = prova.match(/\W$/gi);
-        newStr = '';
-        var aa = $("<div/>").html(str);
-        aa.find('.undoCursorPlaceholder').remove();
-        var rightString = aa.html();
+        var newStr = '';
+        var selection$ = $("<div/>").html(str);
+        selection$.find('.undoCursorPlaceholder').remove();
+        var rightString = selection$.html();
 
         $.each($.parseHTML(rightString), function(index) {
-			if(this.nodeName == '#text') {
+			var toAdd, d, jump, capStr;
+            if(this.nodeName == '#text') {
 				d = this.data;
-//				console.log(index + ' - ' + d);
-//				console.log(!index);
-//				console.log(!aa);
-				jump = ((!index)&&(!aa));
-//				console.log(d.charAt(0));
+				jump = ((!index)&&(!selection$));
 				capStr = toTitleCase(d);
 				if(jump) {
 					capStr = d.charAt(0) + toTitleCase(d).slice(1);
 				}
-/*
-				if(op == 'uppercase') {
-					toAdd = d.toUpperCase();
-				} else if(op == 'lowercase') {
-					toAdd = d.toLowerCase();
-				} else if(op == 'capitalize') {
-					console.log(index + ' - ' + d);
-					if(index == 0) {
-						if(!aa) {
-							toAdd = d;
-						} else {
-							toAdd = toTitleCase(d);
-						}
-					} else {
-						toAdd = toTitleCase(d);
-					}
-				}
-*/
 				toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? capStr : d;
 				newStr += toAdd;
 			}
             else if(this.nodeName == 'LXQWARNING') { 
                 d = this.childNodes[0].data;
-                jump = ((!index)&&(!aa));
-//				console.log(d.charAt(0));
+                jump = ((!index)&&(!selection$));
 				capStr = toTitleCase(d);
 				if(jump) {
 					capStr = d.charAt(0) + toTitleCase(d).slice(1);
@@ -1872,11 +1845,8 @@ UI = {
             }
             else {
 				newStr += this.outerHTML;
-//				newStr += this.innerText;
 			}
 		});
-        console.log('x');
-        console.log('newStr: ', newStr);
         if (LXQ.enabled()) {
             $.powerTip.destroy($('.tooltipa',this.currentSegment));
             $.powerTip.destroy($('.tooltipas',this.currentSegment));
@@ -1884,12 +1854,10 @@ UI = {
             LXQ.reloadPowertip(this.currentSegment);
         }
         else {
-            replaceSelectedText(newStr);
+            replaceSelectedHtml(newStr);
         }
-        console.log('a: ', UI.editarea.html());
-		UI.lockTags();
-        console.log('b: ', UI.editarea.html());
-		this.saveInUndoStack('formatSelection');
+        UI.lockTags();
+        this.saveInUndoStack('formatSelection');
 		saveSelection();
 		$('.editor .editarea .formatSelection-placeholder').after($('.editor .editarea .rangySelectionBoundary'));
 		$('.editor .editarea .formatSelection-placeholder').remove();
