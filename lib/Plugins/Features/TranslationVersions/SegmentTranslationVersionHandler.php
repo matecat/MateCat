@@ -52,7 +52,7 @@ class SegmentTranslationVersionHandler {
      */
     public function savePropagation( $params ) {
         $params = Utils::ensure_keys($params, array(
-            'propagation', 'job_data', 'propagate_to_translated'
+            'propagation', 'job_data'
         ));
 
         if ( $this->feature_enalbed !== true ) {
@@ -64,8 +64,7 @@ class SegmentTranslationVersionHandler {
         $this->dao->savePropagation(
             $params['propagation'],
             $this->id_segment,
-            $params['job_data'],
-            $params['propagate_to_translated']
+            $params['job_data']
         );
     }
 

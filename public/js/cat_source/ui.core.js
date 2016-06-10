@@ -5,14 +5,16 @@ UI = null;
 
 UI = {
 
-    showDownloadCornerTip : function() {
+    /*showDownloadCornerTip : function() {
         if (UI.isChrome) {
-            $('.download-chrome').addClass('d-open');
-            setTimeout(function() {
-                $('.download-chrome').removeClass('d-open');
-            }, 7000);
+            var newNotification = {
+                text: "Your downloaded file will appear on the bar below in a few seconds.<br><img src='/public/img/arrowdown_blu.png' width='18px' style='margin: 0 auto; display: block;'> ",
+                title: "Download",
+                allowHtml: true
+            };
+            APP.addNotification(newNotification);
         }
-    },
+    },*/
 
     setEditingSegment : function(segment) {
         if ( segment != null ) {
@@ -440,17 +442,7 @@ UI = {
 		}, 2000);
 	},
 
-	confirmDownload: function(res) {
-		if (res) {
-			if (UI.isChrome) {
-				$('.download-chrome').addClass('d-open');
-				setTimeout(function() {
-					$('.download-chrome').removeClass('d-open');
-				}, 7000);
-
-			}
-		}
-	},
+	
 	copyToNextIfSame: function(nextUntranslatedSegment) {
 		if ($('.source', this.currentSegment).data('original') == $('.source', nextUntranslatedSegment).data('original')) {
 			if ($('.editarea', nextUntranslatedSegment).hasClass('fromSuggestion')) {
@@ -976,9 +968,11 @@ UI = {
 		});
 	},
 	getSegments_success: function(d, options) {
-        if (d.errors.length)
+        if (d.errors.length) {
 			this.processErrors(d.errors, 'getSegments');
-		where = d.data.where;
+        }
+        
+		var where = d.data.where;
 
         SegmentNotes.enabled() && SegmentNotes.registerSegments ( d.data );
 
@@ -1642,6 +1636,14 @@ UI = {
             tab.find('.number').text('(' + numAlt + ')');
             UI.renderAlternatives(d);
             tab.show();
+            // tab.click();
+            // this.currentSegment.find('.footer').removeClass('showMatches');
+            $('.editor .submenu .active').removeClass('active');
+            tab.addClass('active');
+            $('.editor .sub-editor').removeClass('open');
+            $('.editor .sub-editor.alternatives').addClass('open');
+            this.body.removeClass('hideMatches');
+
         }
     },
     renderAlternatives: function(d) {
@@ -1992,9 +1994,9 @@ UI = {
         // TODO: this should be relative to the current USER, find a
         // way to generate this at runtime.
         //
-        if( !config.isGDriveProject || config.isGDriveProject == 'false' ) {
+        /*if( !config.isGDriveProject || config.isGDriveProject == 'false' ) {
             UI.showDownloadCornerTip();
-        }
+        }*/
         UI.disableDownloadButtonForDownloadStart( openOriginalFiles );
 
         if ( typeof window.googleDriveWindows == 'undefined' ) {
@@ -2036,7 +2038,7 @@ UI = {
             return ;
         }
 
-        UI.showDownloadCornerTip();
+        //UI.showDownloadCornerTip();
 
         UI.disableDownloadButtonForDownloadStart();
 
@@ -2233,7 +2235,8 @@ UI = {
 
 				UI.setNextWarnedSegment();
 
-				//                $('#point2seg').attr('href', warningPosition);
+                $(document).trigger('getWarning:global:success', { resp : data }) ;
+           
 			}
 		});
 	},
@@ -2280,20 +2283,34 @@ UI = {
         UI.doLexiQA(UI.currentSegment, translation, id_segment,false, function () {}) ;
     },
 	currentSegmentQA: function() {
-		this.currentSegment.addClass('waiting_for_check_result');
+        console.warn(
+            'currentSegmentQA is deprecated, use segmentQA and pass a segment as argument',
+            getStackTrace().split("\n")[2]
+        );
+        
+        var that = this;
+        UI.segmentQA.apply( this, UI.currentSegment );
+    },
+
+    segmentQA : function( segment ) {
+        if ( ! ( segment instanceof UI.Segment) ) {
+            segment = new UI.Segment( segment );
+        }
+
+		segment.el.addClass('waiting_for_check_result');
+        
 		var dd = new Date();
 		ts = dd.getTime();
-		var token = this.currentSegmentId + '-' + ts.toString();
+		var token = segment.id + '-' + ts.toString();
         var segment_status_regex = new RegExp("status-([a-z]*)");
-        var segment_status = this.currentSegment.attr('class' ).match(segment_status_regex);
+        var segment_status = segment.el.attr('class' ).match(segment_status_regex);
         if(segment_status.length > 0){
             segment_status = segment_status[1];
         }
 
-		//var src_content = $('.source', this.currentSegment).attr('data-original');
 		if( config.brPlaceholdEnabled ){
-			src_content = this.postProcessEditarea(this.currentSegment, '.source');
-			trg_content = this.postProcessEditarea(this.currentSegment);
+			src_content = this.postProcessEditarea(segment.el , '.source');
+			trg_content = this.postProcessEditarea(segment.el);
 		} else {
 			src_content = this.getSegmentSource();
 			trg_content = this.getSegmentTarget();
@@ -2304,38 +2321,41 @@ UI = {
         $('section.editor .tab.glossary .results .sugg-target .translation').each(function () {
             glossarySourcesAr.push($(this).text());
         })
-//        console.log('glossarySourcesAr: ', glossarySourcesAr);
-//        console.log(JSON.stringify(glossarySourcesAr));
 
 		APP.doRequest({
 			data: {
 				action: 'getWarning',
-				id: this.currentSegmentId,
+				id: segment.id,
 				token: token,
+                id_job: config.id_job,
 				password: config.password,
 				src_content: src_content,
 				trg_content: trg_content,
                 segment_status: segment_status,
                 glossaryList: glossarySourcesAr
-//                glossaryList: JSON.stringify(glossarySourcesAr)
 			},
 			error: function() {
 				UI.failedConnection(0, 'getWarning');
 			},
 			success: function(d) {
-				if (UI.currentSegment.hasClass('waiting_for_check_result')) {
-					// check conditions for results discard
-					if (!d.total) {
-						$('p.warnings', UI.currentSegment).empty();
-						$('span.locked.mismatch', UI.currentSegment).removeClass('mismatch');
+				if (segment.el.hasClass('waiting_for_check_result')) {
+
+                    // TODO: define d.total more explicitly
+					if ( !d.total ) {
+						$('p.warnings', segment.el).empty();
+						$('span.locked.mismatch', segment.el).removeClass('mismatch');
                         $('.editor .editarea .order-error').removeClass('order-error');
-						return;
+
 					}
-					UI.fillCurrentSegmentWarnings(d.details, false); // update warnings
-					UI.markTagMismatch(d.details);
-					delete UI.checkSegmentsArray[d.token]; // delete the token from the tail
-					UI.currentSegment.removeClass('waiting_for_check_result');
+                    else {
+                        UI.fillCurrentSegmentWarnings(d.details, false); // update warnings
+                        UI.markTagMismatch(d.details);
+                        delete UI.checkSegmentsArray[d.token]; // delete the token from the tail
+                        segment.el.removeClass('waiting_for_check_result');
+                    }
 				}
+
+                $(document).trigger('getWarning:local:success', { resp : d, segment: segment }) ;
 			}
 		}, 'local');
         if (LXQ.enabled()) UI.currentSegmentLexiQA();
@@ -2729,6 +2749,15 @@ UI = {
         return '.editarea';
     },
 
+    /**
+     *
+     * This function is used before the text is sent to the server.
+     *
+     *
+     * @param context
+     * @param selector
+     * @returns {*|jQuery}
+     */
     postProcessEditarea: function(context, selector) {
         selector = (typeof selector === "undefined") ? UI.targetContainerSelector() : selector;
         var area = $( selector, context ).clone();

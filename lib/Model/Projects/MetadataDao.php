@@ -38,7 +38,6 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
      * @return Projects_MetadataStruct
      */
   public function get( $id_project, $key ) {
-
       $stmt = $this->_getStatementForCache(
               "SELECT * FROM project_metadata WHERE " .
               " id_project = :id_project " .
@@ -54,6 +53,13 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
 
   }
 
+    /**
+     * @param $id_project
+     * @param $key
+     * @param $value
+     *
+     * @return Projects_MetadataStruct
+     */
   public function set($id_project, $key, $value) {
       $sql = "INSERT INTO project_metadata " .
           " ( id_project, `key`, value ) " .
@@ -70,6 +76,7 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
 
       return $this->get($id_project, $key);
   }
+
 
   public function delete($id_project, $key) {
       $sql = "DELETE FROM project_metadata " .

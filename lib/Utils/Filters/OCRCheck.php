@@ -2,8 +2,8 @@
 
 namespace Filters;
 use finfo,
-    INIT,
-    Langs_Languages;
+        INIT,
+        Langs_Languages;
 
 /**
  * Created by PhpStorm.
@@ -55,6 +55,7 @@ class OCRCheck {
             "Danish",
             "Dutch",
             "English",
+            "English US",
             "Esperanto",
             "Estonian",
             "Faroese",
