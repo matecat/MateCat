@@ -1695,12 +1695,12 @@ UI = {
         return diff_obj;
     },
 
-    chooseAlternative: function(w) {console.log('chooseAlternative');
-//        console.log( $('.sugg-target .realData', w ) );
-        this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).text(), true, UI.currentSegmentId, 'choose alternative' ) );
+    chooseAlternative: function(w) {
+        this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).html(), true, UI.currentSegmentId, 'choose alternative' ) );
         this.lockTags(this.editarea);
         this.editarea.focus();
         this.highlightEditarea();
+        this.disableTPOnSegment();
     },
 	copyAlternativeInEditarea: function(translation) {
 		console.log('translation: ', translation);
