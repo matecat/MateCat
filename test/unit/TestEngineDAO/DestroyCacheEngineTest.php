@@ -48,15 +48,14 @@ class DestroyCacheEngineTest extends AbstractTest
 
         $this->engine_struct->id = 0;
         $this->engine_struct->type = "NONE";
-        $this->engine_struct->id = 0;
 
         $cache_key = "SELECT * FROM engines WHERE id = 0 AND active = 0 AND type = 'NONE'";
 
         $key = md5($cache_key);
-        $value = serialize($this->engine_struct);
-        $this->cache->setex($key,20, $value);
+        $cache_value = serialize($this->engine_struct);
+        $this->cache->setex($key,20, $cache_value);
         $output_before_destruction=$this->cache->get($key);
-        $this->assertEquals($value,$output_before_destruction);
+        $this->assertEquals($cache_value,$output_before_destruction);
         $this->assertTrue(unserialize($output_before_destruction) instanceof EnginesModel_EngineStruct);
         $this->engineDAO->destroyCache($this->engine_struct);
         $output_after_destruction=$this->cache->get($cache_key);
