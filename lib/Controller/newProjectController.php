@@ -343,6 +343,9 @@ class newProjectController extends viewController {
         $this->template->accessToken = GDrive::getUserToken( $_SESSION );
 
         $this->template->currentTargetLang = $this->getCurrentTargetLang();
+        
+        $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages ); 
+        $this->template->lexica_languages = json_encode( ProjectOptionsSanitizer::$lexiQA_allowed_languages ); 
     }
 
     private function getCurrentTargetLang() {
