@@ -48,7 +48,15 @@ class ProjectOptionsSanitizer {
         $this->sanitizeTagProjection(); 
         $this->sanitizeLexiQA(); 
         
+        $this->forceInt(); 
+        
         return $this->sanitized ; 
+    }
+    
+    private function forceInt() {
+        foreach( $this->sanitized as $key => $value ) {
+            $this->sanitized[ $key ] = intval( $value ) ;
+        }
     }
     
     private function sanitizeLexiQA() { 
