@@ -2,15 +2,15 @@
  Component: Advanced Options Tab
  */
 
-$.extend(UI, {
-    isInCattol : false,
-
-    initAdvanceOptions: function() {
-        this.isInCattol = $('body').hasClass('cattool');
-        var lexiqaCheck = $('.qa-box #lexi_qa');
-        var speech2textCheck = $('.s2t-box #s2t_check');
-        var tagProjectionCheck = $('.tagp #tagp_check');
-        if (this.isInCattol) {
+if ( true )
+(function($, UI, undefined) {
+    
+    $.extend(UI, {
+        initAdvanceOptions: function() {
+            var lexiqaCheck = $('.qa-box #lexi_qa');
+            var speech2textCheck = $('.s2t-box #s2t_check');
+            var tagProjectionCheck = $('.tagp #tagp_check');
+            
             $('.mgmt-table-options .options-box.seg_rule').hide();
             $('.mgmt-table-options .options-box.dqf_options_box').hide();
 
@@ -26,38 +26,23 @@ $.extend(UI, {
                 $('.options-box #tagp_check').prop( "disabled", true ).attr('checked', false);
                 $('.options-box.tagp').css({opacity: 0.6 });
             }
-        } else {
+        },
 
-        }
-
-    },
-
-    toggleLexiqaOption: function () {
-        var selected = $('.qa-box #lexi_qa').is(':checked');
-        if (this.isInCattol) {
+        toggleLexiqaOption: function () {
+            var selected = $('.qa-box #lexi_qa').is(':checked');
             (selected) ? LXQ.enable() : LXQ.disable();
-        } else {
-            // add to configuration project
-        }
-    },
+        },
 
-    toggleSpeech2TextOption: function () {
-        var selected = $('.s2t-box #s2t_check').is(':checked');
-        if (this.isInCattol) {
+        toggleSpeech2TextOption: function () {
+            var selected = $('.s2t-box #s2t_check').is(':checked');
             (selected) ? Speech2Text.enable() : Speech2Text.disable();
-        } else {
-            // add to configuration project
-        }
-    },
+        },
 
-    toggleTagProjectionOption: function () {
-        var selected = $('.tagp #tagp_check').is(':checked');
-        if (this.isInCattol) {
+        toggleTagProjectionOption: function () {
+            var selected = $('.tagp #tagp_check').is(':checked');
             (selected) ? UI.enableTagProjectionInJob() : UI.disableTagProjectionInJob();
-        } else {
-            // add to configuration project
         }
-    }
 
-
-});
+    });
+    
+})(jQuery, UI ); 

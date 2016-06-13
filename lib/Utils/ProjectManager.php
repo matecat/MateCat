@@ -250,10 +250,8 @@ class ProjectManager {
             // TODO: move this 100 lines IF condition elsewhere to reduce scope
 
             foreach ( $this->projectStructure[ 'private_tm_key' ] as $i => $_tmKey ) {
-
-
-
-                $this->tmxServiceWrapper->setTmKey( $_tmKey[ 'key' ] );
+                
+               $this->tmxServiceWrapper->setTmKey( $_tmKey[ 'key' ] );
 
                 try {
 
