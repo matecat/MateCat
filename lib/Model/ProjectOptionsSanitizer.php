@@ -89,7 +89,7 @@ class ProjectOptionsSanitizer {
         $all_langs = array_unique( $all_langs ) ; 
         
         $found = count( array_intersect( $langs, $all_langs ) ) ;
-        return $found >= 1 ; 
+        return $found == 2 ; 
     }
 
 }
