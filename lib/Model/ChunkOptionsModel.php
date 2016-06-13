@@ -16,8 +16,15 @@ class ChunkOptionsModel {
         $this->project_metadata = $chunk->getProject()->getMetadataAsKeyValue(); 
     }
     
-    public function isEnabled($option) {
-        return $this->getByChunkOrProjectOption( $option ) ; 
+    public function isEnabled($key) {
+        $value = $this->getByChunkOrProjectOption( $key ) ;
+
+        $sanitizer = new ProjectOptionsSanitizer( array( $key => $value ) ) ;
+        $sanitizer->setLanguages( $this->chunk->source, $this->chunk->target ) ;
+
+        $sanitized = $sanitizer->sanitize() ; 
+        return $sanitized[ $key ] ; 
+        
     }
     
     public function setOptions( $options ) { 
