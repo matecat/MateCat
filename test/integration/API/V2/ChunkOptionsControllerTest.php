@@ -53,6 +53,27 @@ class ChunkOptionsControllerTest extends IntegrationTest {
         $this->assertEquals($options_from_database, (array) $json->options ) ; 
     }
 
+    function test_just_one_value_passed_is_fine() {
+        $project = $this->prepareCommonLanguagesProject();
+        $chunks = $project->getChunks();
+
+        $test = new CurlTest() ;
+        $test->path = sprintf("/api/v2/jobs/%s/%s/options", $chunks[0]->id, $chunks[0]->password);
+        $test->method = 'POST';
+        $test->params = array('lexiqa' => false);
+
+        $response = $test->getResponse();
+
+        $json = json_decode( $response['body'] );
+        $this->assertEquals( false, $json->options->lexiqa );
+
+        $model = new ChunkOptionsModel( $chunks[0] ) ;
+
+        $options_from_database = $model->toArray() ;
+
+        $this->assertEquals($options_from_database, (array) $json->options ) ;
+    }
+
 
     private function prepareCommonLanguagesProject() {
         $upload_session = uniqid();
