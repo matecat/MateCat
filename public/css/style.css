@@ -1368,7 +1368,9 @@ background: #09beec;
 
 .search-options
 {
-	margin-top: -38px;
+	margin-top: -32px;
+	width: 200px;
+	clear: left;
 }
 
 .search-options label
