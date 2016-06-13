@@ -81,8 +81,8 @@
                 lxq_enabled: ${lxq_enabled | string:false},
                 qa_check_glossary_enabled : ${qa_check_glossary_enabled | string:false },
                 qa_check_blacklist_enabled : ${qa_check_blacklist_enabled | string:false },
-                speech2text_enabled: false,
-                tag_projection_enabled: true
+                speech2text_enabled: ${speech2text_enabled | string:false},
+                tag_projection_enabled: ${tag_projection_enabled | string:false}
             };
 
             var renderStart = new Date();

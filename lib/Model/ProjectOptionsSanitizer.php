@@ -1,6 +1,6 @@
 <?php
 
-class ProjectOptionsModel {
+class ProjectOptionsSanitizer {
     
     private $options ; 
     private $sanitized = array();  
@@ -27,6 +27,10 @@ class ProjectOptionsModel {
     }
     
     public function setLanguages( $source, $target ) {
+        if ( !is_array( $target ) ) {
+            $target = array( $target ) ; 
+        }
+        
         $this->source_lang = $source ; 
         $this->target_lang = $target ; 
     }
@@ -37,6 +41,9 @@ class ProjectOptionsModel {
         if ( !isset( $this->options['speech2text'] ) ) {
             $this->sanitized['speech2text'] = TRUE  ; 
         }
+        else {
+            $this->sanitized['speech2text'] = !!$this->options['speech2text']; 
+        }
         
         $this->sanitizeTagProjection(); 
         $this->sanitizeLexiQA(); 
@@ -46,21 +53,25 @@ class ProjectOptionsModel {
     
     private function sanitizeLexiQA() { 
         if ( isset($this->options['lexiqa']) && $this->options['lexiqa'] == FALSE ) {
-            return ; 
+            $this->sanitized['lexiqa'] = FALSE;
         }
-        
-        if ( $this->checkSourceAndTargetAreInCombination( $this->tag_projection_allowed_languages ) ) {
+        else if ( $this->checkSourceAndTargetAreInCombination( $this->lexiQA_allowed_languages ) ) {
             $this->sanitized['lexiqa'] = TRUE;
+        }
+        else {
+            $this->sanitized['lexiqa'] = FALSE;
         }
     }
     
     private function sanitizeTagProjection() {
         if ( isset($this->options['tag_projection']) && $this->options['tag_projection'] == FALSE ) {
-            return ; 
+            $this->sanitized['tag_projection'] = FALSE; 
         }
-        
-        if ( $this->checkSourceAndTargetAreInCombination( $this->tag_projection_allowed_languages ) ) {
+        else if ( $this->checkSourceAndTargetAreInCombination( $this->tag_projection_allowed_languages ) ) {
              $this->sanitized['tag_projection'] = TRUE; 
+        }
+        else {
+            $this->sanitized['tag_projection'] = FALSE; 
         }
     }
     
