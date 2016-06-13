@@ -185,7 +185,7 @@ class ProjectManager {
     }
 
     private function sanitizeProjectOptions( $options ) {
-        $sanitizer = new ProjectOptionsModel( $options );
+        $sanitizer = new ProjectOptionsSanitizer( $options );
         
         $sanitizer->setLanguages(
                 $this->projectStructure['source_language'],
