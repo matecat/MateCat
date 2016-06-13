@@ -640,8 +640,6 @@ class NewController extends ajaxController {
 
     }
 
-
-
     private function validateAuthHeader() {
         if ( $_SERVER[ 'HTTP_X_MATECAT_KEY' ] == null ) {
             return true;

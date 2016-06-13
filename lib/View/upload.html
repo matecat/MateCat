@@ -27,10 +27,6 @@
     <meta property="og:url" content="https://www.matecat.com" />
     <meta property="og:image" content="https://www.matecat.com/public/img/fbimg.jpg" />
     <!-- jQuery UI styles -->
-    <!--
-    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/themes/base/jquery-ui.css" id="theme"/>
-    -->
-
 
     <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>
     <link rel="stylesheet" href="${basepath}public/css/upload.css?build=${build_number}"/>
@@ -63,7 +59,12 @@
             ownerIsMe: true,
             isAnonymousUser: ${isAnonymousUser},
             blueimp_dataType: 'json',
-            gdriveAuthURL: ${structure php:json_encode(gdriveAuthURL)}
+            gdriveAuthURL: ${structure php:json_encode(gdriveAuthURL)},
+            defaults : {
+                tag_projection : true,
+                speech2text : true,
+                lexiqa : true,
+            }
         };
     </script>
 
@@ -818,12 +819,6 @@
 
 <script src="${basepath}public/js/new-project.js"></script>
 <script src="${basepath}public/js/tm.js"></script>
-
-<!--
-        <div style='display:none'>
-            <div id='inline_content' style='padding:10px; background:#fff;'></div>
-        </div>
--->
 
 
 <div class="modal supported-formats" data-type="view">
