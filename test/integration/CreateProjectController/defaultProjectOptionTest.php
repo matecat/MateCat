@@ -73,8 +73,8 @@ class createProjectControllerTest extends IntegrationTest {
         $project = Projects_ProjectDao::findById( $id_project );
         $this->assertNotNull( $project->id );
         $metadata = $project->getMetadataAsKeyValue();
-
-        $this->assertFalse( $metadata['speech2text'] );
+        
+        $this->assertFalse( !!$metadata['speech2text'] );
     }
 
     function test_lexiqa_is_enabled_if_language_combination_is_ok() {
@@ -142,7 +142,7 @@ class createProjectControllerTest extends IntegrationTest {
         $this->assertNotNull( $project->id );
         $metadata = $project->getMetadataAsKeyValue();
 
-        $this->assertTrue( !array_key_exists( 'lexiqa', $metadata ) );
+        $this->assertFalse( !!$metadata['lexiqa'] ); 
     }
 
     function test_lexiqa_is_enabled_if_one_language_is_in_list() {
@@ -280,7 +280,7 @@ class createProjectControllerTest extends IntegrationTest {
         $this->assertNotNull( $project->id );
         $metadata = $project->getMetadataAsKeyValue();
 
-        $this->assertFalse( $metadata['tag_projection'] );
+        $this->assertFalse( !!$metadata['tag_projection'] );
     }
 
     function test_tag_projection_is_enabled_if_one_language_is_in_list() {
