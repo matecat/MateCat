@@ -96,7 +96,7 @@ class ReadJobTest extends AbstractTest
 
         $this->job_id = $this->database_instance->getConnection()->lastInsertId();
 
-        $this->sql_delete_job = "DELETE FROM jobs WHERE id='" . $this->job_id . "';";
+        $this->sql_delete_job = "DELETE FROM  ".INIT::$DB_DATABASE.".`jobs` WHERE id='" . $this->job_id . "';";
 
     }
     public function tearDown()
@@ -152,7 +152,7 @@ class ReadJobTest extends AbstractTest
         $this->assertEquals("active", $result->status);
         $this->assertNull($result->status_translator);
 
-//        $this->assertEquals(Binary String: 0x00,$result->completed);
+        $this->assertEquals("\0",$result->completed);
         $this->assertEquals("-12.60", $result->new_words);
         $this->assertEquals("0.00", $result->draft_words);
         $this->assertEquals("728.15", $result->translated_words);

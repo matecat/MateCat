@@ -222,7 +222,7 @@ class AbstractFetchObjectJobTest extends AbstractTest
         $this->assertEquals("active", $result->status);
         $this->assertNull($result->status_translator);
 
-//        $this->assertEquals(Binary String: 0x00,$result->completed);
+        $this->assertEquals("\0",$result->completed);
         $this->assertEquals("-12.60", $result->new_words);
         $this->assertEquals("0.00", $result->draft_words);
         $this->assertEquals("728.15", $result->translated_words);
