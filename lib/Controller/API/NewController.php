@@ -614,6 +614,9 @@ class NewController extends ajaxController {
         }
 
         $projectManager = new ProjectManager( $projectStructure );
+        
+        $projectManager->sanitizeProjectOptions = false ; 
+        
         $projectManager->createProject();
 
         $this->result = $projectStructure[ 'result' ];

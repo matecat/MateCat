@@ -329,11 +329,13 @@ class createProjectController extends ajaxController {
     }
     
     private function setMetadataFromPostInput( $__postInput ) {
-        $this->metadata = array() ;
+        $options = array() ;
 
-        if ( isset( $__postInput['lexiqa']) )           $this->metadata['lexiqa'] = $__postInput[ 'lexiqa' ];
-        if ( isset( $__postInput['speech2text']) )      $this->metadata['speech2text'] = $__postInput[ 'speech2text' ];
-        if ( isset( $__postInput['tag_projection']) )   $this->metadata['tag_projection'] = $__postInput[ 'tag_projection' ];
+        if ( isset( $__postInput['lexiqa']) )           $options['lexiqa'] = $__postInput[ 'lexiqa' ];
+        if ( isset( $__postInput['speech2text']) )      $options['speech2text'] = $__postInput[ 'speech2text' ];
+        if ( isset( $__postInput['tag_projection']) )   $options['tag_projection'] = $__postInput[ 'tag_projection' ];
+        
+        $this->metadata = $options ; 
     }
 
 }

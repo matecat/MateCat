@@ -111,10 +111,10 @@ function integrationSetChunkAsComplete( $options ) {
 }
 
 function do_file_conversion( $params ) {
-    $curlTest = new CurlTest();
-
     $upload_session = $params['upload_session'];
-    unset( $params['upload_session'] ); 
+    unset( $params['upload_session'] );
+    
+    $curlTest = new CurlTest();
     
     $curlTest->path = '/index.php?action=convertFile' ;
     $curlTest->method = 'POST' ;
@@ -131,10 +131,26 @@ function prepare_file_in_upload_folder( $path, $upload_session )  {
         mkdir( $destDir );
     }
     $dest = $destDir . basename( $path );
-    
-    var_dump($path, $dest); 
-    
     copy( $path, $dest ) ; 
+}
+
+function createProjectWithUIParams( $params ) {
+    $upload_session = $params['upload_session'];
+    $files = $params['files'] ; 
+    
+    unset( $params['upload_session'] );
+    unset( $params['files'] );
+
+    $curlTest = new CurlTest();
+
+    $curlTest->path = '/index.php?action=createProject' ;
+    $curlTest->params = $params ;
+
+    $curlTest->cookies[] = array('upload_session', $upload_session );
+    $curlTest->files = $files ; 
+
+    $response = $curlTest->getResponse();
+    return $response ;
 }
 
 /**
