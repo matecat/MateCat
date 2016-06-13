@@ -37,16 +37,16 @@ class ChunkOptionsControllerTest extends IntegrationTest {
         $test = new CurlTest() ; 
         $test->path = sprintf("/api/v2/jobs/%s/%s/options", $chunks[0]->id, $chunks[0]->password); 
         $test->method = 'POST'; 
-        $test->params = array('speech2text' => false, 'tag_projection' => true, 'lexiqa' => true); 
+        $test->params = array('speech2text' => 'false', 'tag_projection' => true, 'lexiqa' => true); 
         
         $response = $test->getResponse(); 
-        
+
         $json = json_decode( $response['body'] );
         $this->assertEquals( false, $json->options->speech2text ); 
         $this->assertEquals( true, $json->options->tag_projection );
         $this->assertEquals( true, $json->options->lexiqa );
         
-        $model = new ChunkOptionsModel( $chunks[0] ) ; 
+        $model = new ChunkOptionsModel( $chunks[0] ) ;
         
         $options_from_database = $model->toArray() ; 
         
@@ -60,7 +60,7 @@ class ChunkOptionsControllerTest extends IntegrationTest {
         $test = new CurlTest() ;
         $test->path = sprintf("/api/v2/jobs/%s/%s/options", $chunks[0]->id, $chunks[0]->password);
         $test->method = 'POST';
-        $test->params = array('lexiqa' => false);
+        $test->params = array('lexiqa' => 'false');
 
         $response = $test->getResponse();
 
