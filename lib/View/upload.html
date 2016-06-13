@@ -46,6 +46,8 @@
     <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
 
     <script type="text/javascript">
+        /*<![CDATA[*/
+
         var config = {
             basepath: '${basepath | string:/}',
             hostpath: '${hostpath | string:/}',
@@ -64,8 +66,11 @@
                 tag_projection : true,
                 speech2text : true,
                 lexiqa : true,
-            }
+            },
+            lexica_languages: ${lexica_languages},
+            tag_projection_languages: ${tag_projection_languages}
         };
+        /*]]>*/
     </script>
 
     <div metal:use-macro="${php: INIT::$ROOT}/public/holidays/holidays.html/upload_holidays"/>
@@ -999,13 +1004,6 @@
        
     } );
 
- /*   $( "a.memory-mgmt" ).on("click", function ( e ) {
-        e.preventDefault();
-        tab = $(this).attr('data-tab') || 'tm';
-        elToClick = $(this).attr('data-el-to-click') || null;
-        UI.openLanguageResourcesPanel(tab, elToClick);
-    } );
-*/
     $( "a.more-options" ).on("click", function ( e ) {
         e.preventDefault();
         tab = $(this).attr('data-tab') || 'options';

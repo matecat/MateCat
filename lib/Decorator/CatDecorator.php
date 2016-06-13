@@ -167,6 +167,9 @@ class CatDecorator {
         $this->template->tag_projection_enabled = $chunk_options_model->isEnabled('speech2text')   ; 
         $this->template->speech2text_enabled = $chunk_options_model->isEnabled( 'speech2text' ) ; 
         $this->template->lxq_enabled = $chunk_options_model->isEnabled( 'lexiqa' ) ; 
+        
+        $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages ); 
+        $this->template->lexica_languages = json_encode( ProjectOptionsSanitizer::$lexiQA_allowed_languages ); 
     }
 
 }

@@ -8,7 +8,7 @@ class ProjectOptionsSanitizer {
     private $source_lang ; 
     private $target_lang ; 
     
-    private $lexiQA_allowed_languages = array(
+    public static $lexiQA_allowed_languages = array(
         'en-US',
         'en-GB',
         'fr-FR',
@@ -16,7 +16,7 @@ class ProjectOptionsSanitizer {
         'it-IT'
     ); 
     
-    private $tag_projection_allowed_languages = array(
+    public static $tag_projection_allowed_languages = array(
         'en-US',
         'en-GB',
         'it-IT'
@@ -63,7 +63,7 @@ class ProjectOptionsSanitizer {
         if ( isset($this->options['lexiqa']) && $this->options['lexiqa'] == FALSE ) {
             $this->sanitized['lexiqa'] = FALSE;
         }
-        else if ( $this->checkSourceAndTargetAreInCombination( $this->lexiQA_allowed_languages ) ) {
+        else if ( $this->checkSourceAndTargetAreInCombination( self::$lexiQA_allowed_languages ) ) {
             $this->sanitized['lexiqa'] = TRUE;
         }
         else {
@@ -75,7 +75,7 @@ class ProjectOptionsSanitizer {
         if ( isset($this->options['tag_projection']) && $this->options['tag_projection'] == FALSE ) {
             $this->sanitized['tag_projection'] = FALSE; 
         }
-        else if ( $this->checkSourceAndTargetAreInCombination( $this->tag_projection_allowed_languages ) ) {
+        else if ( $this->checkSourceAndTargetAreInCombination( self::$tag_projection_allowed_languages ) ) {
              $this->sanitized['tag_projection'] = TRUE; 
         }
         else {
