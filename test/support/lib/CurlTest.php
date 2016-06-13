@@ -6,6 +6,8 @@ class CurlTest {
   public $method;
   public $params ;
   public $files = array();
+  
+  public $cookies ; 
 
   public $enable_xdebug = true ;
 
@@ -16,6 +18,8 @@ class CurlTest {
   private $response_header ;
   private $response_body ;
   private $response_code ;
+  
+  
 
   private $result ;
 
@@ -74,7 +78,19 @@ class CurlTest {
     }
 
     if ( $this->enable_xdebug ) {
-      $this->headers[] = "Cookie: XDEBUG_SESSION=MATECAT_TEST" ;
+      $this->cookies[] = array( "XDEBUG_SESSION", "MATECAT_TEST" ); 
+    }
+    
+    if ( !empty($this->cookies) ) { 
+      $cookieString = "Cookie: "; 
+      
+      foreach( $this->cookies as $cookie ) {
+        $cookieString .= $cookie[0] . '=' . $cookie[1]; 
+        $cookieString .= ';' ; 
+      }
+      
+      $this->headers[] = $cookieString ; 
+      
     }
 
     $this->setHeaders($ch) ;

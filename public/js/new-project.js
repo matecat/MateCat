@@ -293,6 +293,7 @@ $(document).ready(function() {
      */
     APP.checkForLexiQALangs();
     APP.checkForTagProjectionLangs();
+	APP.checkForSpeechToText();
     $("#source-lang").on('change', function(){
 		APP.checkForLexiQALangs();
 		APP.checkForTagProjectionLangs();
@@ -310,6 +311,7 @@ $(document).ready(function() {
 
         APP.checkForLexiQALangs();
         APP.checkForTagProjectionLangs();
+		APP.checkForSpeechToText();
     };
 
 	$("#multiple-link").click(function(e) {
@@ -412,26 +414,18 @@ APP.displayCurrentTargetLang = function() {
  */
 APP.checkForLexiQALangs = function(){
 
-	var acceptedLanguages = [
-		'en-US',
-		'en-GB',
-		'fr-FR',
-		'de-DE',
-		'it-IT'
-	];
+	var acceptedLanguages = config.lexiqa_languages;
 
-    var disableLexiQA = acceptedLanguages.concat(
-            [ $( '#source-lang' ).val() ]
-        ).concat(
-            $( '#target-lang' ).val().split(',')
-        ).filter(
-            function ( value, index, self ) {
-                return self.indexOf( value ) === index;
-            }
-        ).length !== acceptedLanguages.length;
+	var targetLanguages = $( '#target-lang' ).val().split(',');
+	var sourceAccepted = (acceptedLanguages.indexOf($( '#source-lang' ).val() ) > -1);
+	var targetAccepted = targetLanguages.filter(function(n) {
+							return acceptedLanguages.indexOf(n) != -1;
+						}).length > 0;
 
     //disable LexiQA
+	var disableLexiQA = !(sourceAccepted && targetAccepted && config.defaults.lexiqa);
     $('.options-box #lexi_qa').prop( "disabled", disableLexiQA );
+    $('.options-box #lexi_qa').attr('checked', !disableLexiQA);
     $('.options-box.qa-box').css({opacity: ( disableLexiQA ? 0.6 : 1 )  });
 
 };
@@ -442,24 +436,31 @@ APP.checkForLexiQALangs = function(){
  */
 APP.checkForTagProjectionLangs = function(){
 
-	var acceptedLanguages = [
-		'en-US',
-		'en-GB',
-		'it-IT'
-	];
+	var acceptedLanguages = config.tag_projection_languages;
 
-	var disableTP = acceptedLanguages.concat(
-			[ $( '#source-lang' ).val() ]
-		).concat(
-			$( '#target-lang' ).val().split(',')
-		).filter(
-			function ( value, index, self ) {
-				return self.indexOf( value ) === index;
-			}
-		).length !== acceptedLanguages.length;
+	var targetLanguages = $( '#target-lang' ).val().split(',');
+	var sourceAccepted = (acceptedLanguages.indexOf($( '#source-lang' ).val() ) > -1);
+	var targetAccepted = targetLanguages.filter(function(n) {
+							return acceptedLanguages.indexOf(n) != -1;
+						}).length > 0;
 
 	//disable Tag Projection
+	var disableTP = !(sourceAccepted && targetAccepted && config.defaults.tag_projection);
 	$('.options-box #tagp_check').prop( "disabled", disableTP );
-	(disableTP && $('.options-box #tagp_check').attr('checked', false));
+	$('.options-box #tagp_check').attr('checked', !disableTP);
 	$('.options-box.tagp').css({opacity: ( disableTP ? 0.6 : 1 )  });
+};
+/**
+ * Disable/Enable SpeechToText
+ *
+ */
+APP.checkForSpeechToText = function(){
+
+
+
+	//disable Tag Projection
+	var disableS2T = !config.defaults.speech2text;
+	$('.options-box #s2t_check').prop( "disabled", disableS2T );
+	$('.options-box #s2t_check').attr('checked', !disableS2T);
+	$('.options-box.s2t-box').css({opacity: ( disableS2T ? 0.6 : 1 )  });
 };

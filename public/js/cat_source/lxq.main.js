@@ -4,31 +4,67 @@
  */
 
 var LXQ = {
+
     enabled: function () {
-        //return true;
         return config.lxq_enabled;
     },
     enable: function () {
         if (!config.lxq_enabled) {
             config.lxq_enabled = 1;
             // Todo Call Service to enable Tag Lexiqa
-            if ($('#lexiqa-popup').hasClass('lxq-visible')) {
-                $('#lexiqabox').trigger('click');
-            }
-            $('#lexiqabox').removeAttr('style');
-            if (!LXQ.initialized) {
-                LXQ.init();
-            }
-            UI.render();
+            var path = sprintf(
+                '/api/v2/jobs/%s/%s/options',
+                config.id_job, config.password
+            );
+            var data = {
+                'lexiqa': true
+            };
+            $.ajax({
+                url: path,
+                type: 'POST',
+                data : data
+            }).done( function( data ) {
+                if ($('#lexiqa-popup').hasClass('lxq-visible')) {
+                    $('#lexiqabox').trigger('click');
+                }
+                $('#lexiqabox').removeAttr('style');
+                if (!LXQ.initialized) {
+                    LXQ.init();
+                }
+                UI.render();
+            });
+
+
+
         }
     },
     disable: function () {
         if (config.lxq_enabled) {
             config.lxq_enabled = 0;
-            // Todo Call Service to disable Tag Lexiqa
-            $('#lexiqabox').css('display', 'none');
-            UI.render();
+            var path = sprintf(
+                '/api/v2/jobs/%s/%s/options',
+                config.id_job, config.password
+            );
+            var data = {
+                'lexiqa': false
+            };
+            $.ajax({
+                url: path,
+                type: 'POST',
+                data : data
+            }).done( function( data ) {
+                $('#lexiqabox').css('display', 'none');
+                UI.render();
+            });
         }
+    },
+    checkCanActivate: function () {
+        if (_.isUndefined(this.canActivate)) {
+            this.canActivate = config.lexiqa_languages.indexOf(config.source_rfc) > -1 &&
+                config.lexiqa_languages.indexOf(config.target_rfc) > -1 &&
+                !config.isReview;
+        }
+        return this.canActivate;
     },
     const: {}
 };

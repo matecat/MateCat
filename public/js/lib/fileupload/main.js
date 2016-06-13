@@ -28,7 +28,6 @@ UI = {
         config.maxTMXSizePrint = parseInt( Math.pow( 1024, ( base - Math.floor( base ) ) ) + 0.5 ) + ' MB';
 
         this.initTM();
-        this.initAdvanceOptions();
         console.log( $.cookie( 'tmpanel-open' ) );
         if ( $.cookie( 'tmpanel-open' ) == '1' ) UI.openLanguageResourcesPanel();
     },
