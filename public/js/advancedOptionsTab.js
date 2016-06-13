@@ -14,11 +14,18 @@ if ( true )
             $('.mgmt-table-options .options-box.seg_rule').hide();
             $('.mgmt-table-options .options-box.dqf_options_box').hide();
 
-            lexiqaCheck.on('change', this.toggleLexiqaOption.bind(this));
+            //Check Speech to Text
             speech2textCheck.on('change', this.toggleSpeech2TextOption.bind(this));
-            (LXQ.enabled()) ? lexiqaCheck.attr('checked', true) : lexiqaCheck.attr('checked', false);
             (Speech2Text.enabled()) ? speech2textCheck.attr('checked', true) : speech2textCheck.attr('checked', false);
-
+            //Check Lexiqa check
+            if (LXQ.checkCanActivate()) {
+                (LXQ.enabled()) ? lexiqaCheck.attr('checked', true) : lexiqaCheck.attr('checked', false);
+                lexiqaCheck.on('change', this.toggleLexiqaOption.bind(this));
+            } else {
+                $('.options-box #lexi_qa').prop( "disabled", true ).attr('checked', false);
+                $('.options-box.qa-box').css({opacity: 0.6 });
+            }
+            //Checj Tag Projection
             if (UI.checkTpCanActivate()) {
                 (UI.checkTPEnabled()) ? tagProjectionCheck.attr('checked', true) : tagProjectionCheck.attr('checked', false);
                 tagProjectionCheck.on('change', this.toggleTagProjectionOption.bind(this));
