@@ -2593,7 +2593,8 @@ section.modified.editor .status
 }
 
 .editor .editarea .locked,
-.editor .source .locked
+.editor .source .locked,
+.splitArea .locked
 {
 	color: #767676 !important;
 	font-size: 13px;
@@ -3301,17 +3302,17 @@ body.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .translation .locked.startTag,
-body.tagModes .splitArea .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) .splitArea .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTag,
-body.tagModes .splitArea .locked.selfClosingTag,
+body.tagModes:not(.tagmode-default-extended) .splitArea .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .translation .locked.endTag,
-body.tagModes .splitArea .locked.endTag
+body.tagModes:not(.tagmode-default-extended) .endTag
 {
 /*visibility: hidden;*/
 text-indent: -10000px;
@@ -3329,12 +3330,12 @@ body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.startT
 body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.startTag, 
 body.rtl-source.tagModes:not(.tagmode-default-extended) .source .locked.startTag, 
 body.rtl-source.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag,
-body.rtl-target.tagModes .splitArea .locked.startTag,
+body.rtl-target.tagModes:not(.tagmode-default-extended) .splitArea .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.endTag, 
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag, 
 body.tagModes:not(.tagmode-default-extended) .translation .locked.endTag,
-body.tagModes .splitArea .locked.endTag
+body.tagModes:not(.tagmode-default-extended) .splitArea .locked.endTag
 {
  -ms-transform: rotate(-180deg); /* IE 9 */
     -webkit-transform: rotate(-180deg); /* Chrome, Safari, Opera */
@@ -3343,7 +3344,7 @@ body.tagModes .splitArea .locked.endTag
 body.rtl-source.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag, 
 body.rtl-source.tagModes:not(.tagmode-default-extended) .source .locked.endTag, 
 body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag,
-body.rtl-target.tagModes .spliArea .locked.endTag,
+body.rtl-target.tagModes:not(.tagmode-default-extended) .spliArea .locked.endTag,
 body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.endTag
 {
  -ms-transform: rotate(0deg); /* IE 9 */
