@@ -1974,6 +1974,12 @@ UI = {
         var winName ;
         
         var driveUpdateDone = function(data) {
+            if( !data.urls || data.urls.length === 0 ) {
+                APP.alert({msg: "MateCat was not able to update project files on Google Drive. Maybe the project owner revoked privileges to access those files. Ask the project owner to login again and grant Google Drive privileges to MateCat."});
+
+                return;
+            }
+
             var winName ;
 
             $.each( data.urls, function(index, item) {
@@ -2482,8 +2488,8 @@ UI = {
             propagate: propagate
         };
         if(isSplitted) {
+            this.setStatus($('#segment-' + id_segment), status);
             this.tempReqArguments.splitStatuses = this.collectSplittedStatuses(id_segment).toString();
-            this.setStatus($('#segment-' + id_segment), 'translated');
         }
         if(!propagate) {
             this.tempReqArguments.propagate = false;
@@ -2519,7 +2525,7 @@ UI = {
         segmentsIds = $('#segment-' + sid).attr('data-split-group').split(',');
         $.each(segmentsIds, function (index) {
             segment = $('#segment-' + this);
-            status = (this == sid)? 'translated' : UI.getStatus(segment);
+            status = UI.getStatus(segment);
             statuses.push(status);
         });
         return statuses;
