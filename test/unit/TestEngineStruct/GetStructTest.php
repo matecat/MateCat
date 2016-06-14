@@ -29,6 +29,6 @@ class GetStructTest extends AbstractTest
      */
     public function test_getStruct_simple()
     {
-        $this->assertTrue($this->method->invoke(NULL) instanceof EnginesModel_EngineStruct);
+        $this->assertTrue($this->method->invoke($this->reflectedClass,NULL) instanceof EnginesModel_EngineStruct);
     }
 }

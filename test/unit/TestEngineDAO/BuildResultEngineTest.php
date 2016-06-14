@@ -40,17 +40,17 @@ class BuildResultEngineTest extends AbstractTest
            'name' => "bar",
            'type' => "foo",
            'description' => "No MT",
-           'base_url' => "",
-           'translate_relative_url' => "",
-           'contribute_relative_url' => NULL,
-           'delete_relative_url' => NULL,
+           'base_url' => "base/sample",
+           'translate_relative_url' => "translate",
+           'contribute_relative_url' => "contribute",
+           'delete_relative_url' => "delete",
            'others' => "{}",
            'class_load' => "NONE",
            'extra_parameters' => "",
-           'google_api_compliant_version' => NULL,
+           'google_api_compliant_version' => "1.1",
            'penalty' => "100",
            'active' => "0",
-           'uid' => NULL
+           'uid' => "5678"
         ));
 
 
@@ -58,7 +58,20 @@ class BuildResultEngineTest extends AbstractTest
         $actual_engine_struct = $actual_array_of_engine_structures['0'];
         $this->assertTrue($actual_engine_struct instanceof EnginesModel_EngineStruct);
 
+        $this->assertEquals("0", $actual_engine_struct->id);
         $this->assertEquals("bar", $actual_engine_struct->name);
         $this->assertEquals("foo", $actual_engine_struct->type);
+        $this->assertEquals("No MT", $actual_engine_struct->description);
+        $this->assertEquals("base/sample", $actual_engine_struct->base_url);
+        $this->assertEquals("translate", $actual_engine_struct->translate_relative_url);
+        $this->assertEquals("contribute", $actual_engine_struct->contribute_relative_url);
+        $this->assertEquals("delete", $actual_engine_struct->delete_relative_url);
+        $this->assertEquals(array(), $actual_engine_struct->others);
+        $this->assertEquals("NONE", $actual_engine_struct->class_load);
+        $this->assertEquals("", $actual_engine_struct->extra_parameters);
+        $this->assertEquals("1.1", $actual_engine_struct->google_api_compliant_version);
+        $this->assertEquals("100", $actual_engine_struct->penalty);
+        $this->assertEquals("0", $actual_engine_struct->active);
+        $this->assertEquals("5678", $actual_engine_struct->uid);
     }
 }

@@ -101,7 +101,7 @@ class EnginesModel_EngineDAO extends DataAccess_AbstractDao {
                 2,
                 //harcoded because we're planning to implement variable penalty
                 ( $obj->penalty == null ) ? "14" : $obj->penalty,
-                ( $obj->active == null ) ? "1" : $obj->active,
+                ( $obj->active == null ) ? "1" : $obj->active, //TODO BUG This is every time 1!!!
                 ( $obj->uid == null ) ? "NULL" : $obj->uid
         );
 

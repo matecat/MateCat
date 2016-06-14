@@ -18,7 +18,7 @@ class AbstractGetFromCacheEngineTest extends AbstractTest
     protected $cache_con;
     protected $cache_TTL;
     protected $cache_key;
-    protected $cache_value_for_the_key;
+    protected $cache_value;
     /**
      * @var Database
      */
@@ -71,7 +71,7 @@ class AbstractGetFromCacheEngineTest extends AbstractTest
 
 
 
-        $this->cache_value_for_the_key = array(0 =>
+        $this->cache_value = array(0 =>
             array(
                 "id" => "{$this->id}",
                 "name" => "Moses_bar_and_foo",
@@ -102,19 +102,7 @@ class AbstractGetFromCacheEngineTest extends AbstractTest
         $this->cache_con->getValue($this->engine_Dao)-> flushdb();
         parent::tearDown();
     }
-
-    /**
-     * It gets from the cache a engine tied to a simple key.
-     * @group regression
-     * @covers DataAccess_AbstractDao::_getFromCache
-     */
-    public function test__getFromCache_simple_engine_with_basic_key_value(){
-        $this->cache_key = "key";
-        $this->cache_value_for_the_key = "foo_bar";
-        $this->cache_con->getValue($this->engine_Dao) ->setex( md5( $this->cache_key ), $this->cache_TTL->getValue($this->engine_Dao), serialize( $this->cache_value_for_the_key ));
-        $expected_return= $this->method->invoke($this->engine_Dao , $this->cache_key);
-        $this->assertEquals($this->cache_value_for_the_key,  $expected_return );
-    }
+    
 
     /**
      * It gets from the cache a common engine tied to a frequent key.
@@ -123,9 +111,9 @@ class AbstractGetFromCacheEngineTest extends AbstractTest
      */
     public function test__getFromCache_simple_engine_with_artificial_insertion_in_cache(){
 
-        $this->cache_con->getValue($this->engine_Dao) ->setex( md5( $this->cache_key ), $this->cache_TTL->getValue($this->engine_Dao), serialize( $this->cache_value_for_the_key ));
+        $this->cache_con->getValue($this->engine_Dao) ->setex( md5( $this->cache_key ), $this->cache_TTL->getValue($this->engine_Dao), serialize( $this->cache_value ));
         $expected_return= $this->method->invoke($this->engine_Dao , $this->cache_key);
-        $this->assertEquals($this->cache_value_for_the_key,  $expected_return );
+        $this->assertEquals($this->cache_value,  $expected_return );
     }
 
     /**
@@ -137,7 +125,7 @@ class AbstractGetFromCacheEngineTest extends AbstractTest
 
         $this->engine_Dao->read($this->engine_struct_param);
         $expected_return= $this->method->invoke($this->engine_Dao , $this->cache_key);
-        $this->assertEquals($this->cache_value_for_the_key,  $expected_return );
+        $this->assertEquals($this->cache_value,  $expected_return );
     }
 
 }

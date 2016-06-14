@@ -142,18 +142,18 @@
          * @param file
          */
         checkTPEnabled: function (file) {
-            return (this.checkTpCanActivate(file) && config.tag_projection_enabled);
+            return (this.checkTpCanActivate() && config.tag_projection_enabled);
         },
         /**
          * Tag Projection: check if is possible to enable tag projection:
          * Condition: Languages it-IT en-GB en-US, not review
          * @param file
          */
-        checkTpCanActivate: function (file) {
+        checkTpCanActivate: function () {
             if (_.isUndefined(this.tpCanActivate)) {
-                this.tpCanActivate = (((file.source_code === 'it-IT' && file.target_code.indexOf('en-') > -1)
-                || (file.source_code.indexOf('en-') > -1 && file.target_code === 'it-IT'))
-                && !config.isReview);
+                this.tpCanActivate = config.tag_projection_languages.indexOf(config.source_rfc) > -1 &&
+                    config.tag_projection_languages.indexOf(config.target_rfc) > -1 &&
+                    !config.isReview;
             }
             return this.tpCanActivate;
         },
@@ -296,14 +296,36 @@
          */
         disableTagProjection: function () {
             config.tag_projection_enabled = false;
-            // Todo Call Service to disable Tag projection
+            var path = sprintf(
+                '/api/v2/jobs/%s/%s/options',
+                config.id_job, config.password
+            );
+            var data = {
+                'tag_projection': false
+            };
+            $.ajax({
+                url: path,
+                type: 'POST',
+                data : data
+            }).done( function( data ) {});
         },
         /**
          * Set the tag projection cookie to true
          */
         enableTagProjectionCookie: function () {
             config.tag_projection_enabled = false;
-            // Todo Call Service to enable Tag projection
+            var path = sprintf(
+                '/api/v2/jobs/%s/%s/options',
+                config.id_job, config.password
+            );
+            var data = {
+                'tag_projection': true
+            };
+            $.ajax({
+                url: path,
+                type: 'POST',
+                data : data
+            }).done( function( data ) {});
         }
 
     }); 

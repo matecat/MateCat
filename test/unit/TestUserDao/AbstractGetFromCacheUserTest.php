@@ -18,7 +18,7 @@ class AbstractGetFromCacheUserTest  extends AbstractTest
     protected $cache_con;
     protected $cache_TTL;
     protected $cache_key;
-    protected $cache_value_for_the_key;
+    protected $cache_value;
     /**
      * @var Database
      */
@@ -40,6 +40,11 @@ class AbstractGetFromCacheUserTest  extends AbstractTest
 
         $this->method_getFromCache = $this->reflector->getMethod("_getFromCache");
         $this->method_getFromCache->setAccessible(true);
+
+        $this->reflector = new ReflectionClass(Users_UserDao::class);
+        $this->method_getStatementForCache = $this->reflector->getMethod("_getStatementForCache");
+        $this->method_getStatementForCache->setAccessible(true);
+
 
         $this->cache_con = $this->reflector->getProperty("cache_con");
         $this->cache_con->setAccessible(true);
@@ -77,14 +82,11 @@ class AbstractGetFromCacheUserTest  extends AbstractTest
         $user_struct->oauth_access_token = NULL;
         $user_struct->validator = NULL;
 
-        $this->cache_value_for_the_key = array(
+        $this->cache_value = array(
             '0' => $user_struct
         );
 
-        $this->reflector = new ReflectionClass(Users_UserDao::class);
-        $this->method_getStatementForCache = $this->reflector->getMethod("_getStatementForCache");
-        $this->method_getStatementForCache->setAccessible(true);
-
+    
 
         /**
          * Params
@@ -115,25 +117,6 @@ class AbstractGetFromCacheUserTest  extends AbstractTest
         parent::tearDown();
     }
 
-    /**
-     * It gets from the cache a value bound to a simple key.
-     * @group regression
-     * @covers DataAccess_AbstractDao::_getFromCache
-     */
-    public function test__getFromCache_simple_engine_with_basic_key_value(){
-
-        /**
-         * Redefinition of values
-         */
-        $this->cache_key = "key";
-        $this->cache_value_for_the_key = "foo_bar";
-        
-        
-        
-        $this->cache_con->getValue($this->user_Dao) ->setex( md5( $this->cache_key ), $this->cache_TTL->getValue($this->user_Dao), serialize( $this->cache_value_for_the_key ));
-        $expected_return= $this->method_getFromCache->invoke($this->user_Dao , $this->cache_key);
-        $this->assertEquals($this->cache_value_for_the_key,  $expected_return );
-    }
 
     /**
      * It gets from the cache a common engine tied to a frequent key.
@@ -142,9 +125,9 @@ class AbstractGetFromCacheUserTest  extends AbstractTest
      */
     public function test__getFromCache_simple_engine_with_artificial_insertion_in_cache(){
 
-        $this->cache_con->getValue($this->user_Dao) ->setex( md5( $this->cache_key ), $this->cache_TTL->getValue($this->user_Dao), serialize( $this->cache_value_for_the_key ));
+        $this->cache_con->getValue($this->user_Dao) ->setex( md5( $this->cache_key ), $this->cache_TTL->getValue($this->user_Dao), serialize( $this->cache_value ));
         $expected_return= $this->method_getFromCache->invoke($this->user_Dao , $this->cache_key);
-        $this->assertEquals($this->cache_value_for_the_key,  $expected_return );
+        $this->assertEquals($this->cache_value,  $expected_return );
     }
 
     /**
@@ -157,7 +140,7 @@ class AbstractGetFromCacheUserTest  extends AbstractTest
 
         $this->user_Dao->read($this->user_struct_param);
         $expected_return= $this->method_getFromCache->invoke($this->user_Dao , $this->cache_key);
-        $this->assertEquals($this->cache_value_for_the_key,  $expected_return );
+        $this->assertEquals($this->cache_value,  $expected_return );
     }
 
 }
