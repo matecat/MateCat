@@ -1,10 +1,10 @@
 Speech2Text = {
     enabled: function () {
-        return !!('webkitSpeechRecognition' in window && config.speech2text_enabled);
+        return !!('webkitSpeechRecognition' in window && !!config.speech2text_enabled);
     },
     disable: function () {
         if (config.speech2text_enabled) {
-            config.speech2text_enabled = false;
+            config.speech2text_enabled = 0;
             var path = sprintf(
                 '/api/v2/jobs/%s/%s/options',
                 config.id_job, config.password
@@ -23,7 +23,7 @@ Speech2Text = {
     },
     enable: function () {
         if (!config.speech2text_enabled) {
-            config.speech2text_enabled = true;
+            config.speech2text_enabled = 1;
             var path = sprintf(
                 '/api/v2/jobs/%s/%s/options',
                 config.id_job, config.password

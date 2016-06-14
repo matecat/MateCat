@@ -6,7 +6,7 @@
 var LXQ = {
 
     enabled: function () {
-        return config.lxq_enabled;
+        return !!config.lxq_enabled;
     },
     enable: function () {
         if (!config.lxq_enabled) {
@@ -61,8 +61,7 @@ var LXQ = {
     checkCanActivate: function () {
         if (_.isUndefined(this.canActivate)) {
             this.canActivate = config.lexiqa_languages.indexOf(config.source_rfc) > -1 &&
-                config.lexiqa_languages.indexOf(config.target_rfc) > -1 &&
-                !config.isReview;
+                config.lexiqa_languages.indexOf(config.target_rfc) > -1;
         }
         return this.canActivate;
     },

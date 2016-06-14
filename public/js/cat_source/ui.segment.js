@@ -142,7 +142,7 @@
          * @param file
          */
         checkTPEnabled: function (file) {
-            return (this.checkTpCanActivate() && config.tag_projection_enabled);
+            return (this.checkTpCanActivate() && !!config.tag_projection_enabled);
         },
         /**
          * Tag Projection: check if is possible to enable tag projection:
@@ -278,42 +278,10 @@
             UI.lockTags(currentSegment.find(".source"))
         },
         /**
-         * Set the tag projection cookie to true and reload file
+         * Set the tag projection to true and reload file
          */
         enableTagProjectionInJob: function () {
-            this.enableTagProjection();
-            UI.render();
-        },
-        /**
-         * Set the tag projection cookie to true and reload file
-         */
-        disableTagProjectionInJob: function () {
-            this.disableTagProjection();
-            UI.render();
-        },
-        /**
-         * Set the tag projection cookie to false
-         */
-        disableTagProjection: function () {
-            config.tag_projection_enabled = false;
-            var path = sprintf(
-                '/api/v2/jobs/%s/%s/options',
-                config.id_job, config.password
-            );
-            var data = {
-                'tag_projection': false
-            };
-            $.ajax({
-                url: path,
-                type: 'POST',
-                data : data
-            }).done( function( data ) {});
-        },
-        /**
-         * Set the tag projection cookie to true
-         */
-        enableTagProjectionCookie: function () {
-            config.tag_projection_enabled = false;
+            config.tag_projection_enabled = 1;
             var path = sprintf(
                 '/api/v2/jobs/%s/%s/options',
                 config.id_job, config.password
@@ -325,8 +293,31 @@
                 url: path,
                 type: 'POST',
                 data : data
-            }).done( function( data ) {});
-        }
+            }).done( function( data ) {
+                UI.render();
+            });
 
+        },
+        /**
+         * Set the tag projection to true and reload file
+         */
+        disableTagProjectionInJob: function () {
+            config.tag_projection_enabled = 0;
+            var path = sprintf(
+                '/api/v2/jobs/%s/%s/options',
+                config.id_job, config.password
+            );
+            var data = {
+                'tag_projection': false
+            };
+            $.ajax({
+                url: path,
+                type: 'POST',
+                data : data
+            }).done( function( data ) {
+                UI.render();
+            });
+
+        }
     }); 
 })(jQuery); 
