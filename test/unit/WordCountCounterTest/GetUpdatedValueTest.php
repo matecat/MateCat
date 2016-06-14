@@ -56,12 +56,12 @@ class GetUpdatedValueTest extends AbstractTest
         $this->assertTrue($result instanceof WordCount_Struct);
         $this->assertEquals($this->job_id, $result->getIdJob());
         $this->assertEquals($this->job_password, $result->getJobPassword());
+        $this->assertEquals($this->segment_id, $result->getIdSegment());
         $this->assertEquals(0, $result->getNewWords());
         $this->assertEquals(0, $result->getDraftWords());
         $this->assertEquals(0, $result->getTranslatedWords());
         $this->assertEquals(0, $result->getApprovedWords());
         $this->assertEquals(0, $result->getRejectedWords());
-        $this->assertEquals($this->segment_id, $result->getIdSegment());
         $this->assertEquals("TRANSLATED", $result->getOldStatus());
         $this->assertEquals("TRANSLATED", $result->getNewStatus());
     }
@@ -90,12 +90,12 @@ class GetUpdatedValueTest extends AbstractTest
         $this->assertTrue($result instanceof WordCount_Struct);
         $this->assertEquals($this->job_id, $result->getIdJob());
         $this->assertEquals($this->job_password, $result->getJobPassword());
+        $this->assertEquals($this->segment_id, $result->getIdSegment());
         $this->assertEquals(0, $result->getNewWords());
         $this->assertEquals(0, $result->getDraftWords());
         $this->assertEquals("-15.00", $result->getTranslatedWords());
         $this->assertEquals(0, $result->getApprovedWords());
         $this->assertEquals("+15.00", $result->getRejectedWords());
-        $this->assertEquals($this->segment_id, $result->getIdSegment());
         $this->assertEquals("TRANSLATED", $result->getOldStatus());
         $this->assertEquals("REJECTED", $result->getNewStatus());
     }
@@ -125,12 +125,12 @@ class GetUpdatedValueTest extends AbstractTest
         $this->assertTrue($result instanceof WordCount_Struct);
         $this->assertEquals($this->job_id, $result->getIdJob());
         $this->assertEquals($this->job_password, $result->getJobPassword());
+        $this->assertEquals($this->segment_id, $result->getIdSegment());
         $this->assertEquals(0, $result->getNewWords());
         $this->assertEquals("-15.00", $result->getDraftWords());
         $this->assertEquals(0, $result->getTranslatedWords());
         $this->assertEquals("+15.00", $result->getApprovedWords());
         $this->assertEquals(0, $result->getRejectedWords());
-        $this->assertEquals($this->segment_id, $result->getIdSegment());
         $this->assertEquals("DRAFT", $result->getOldStatus());
         $this->assertEquals("APPROVED", $result->getNewStatus());
     }
