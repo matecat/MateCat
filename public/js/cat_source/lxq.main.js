@@ -6,7 +6,7 @@
 var LXQ = {
 
     enabled: function () {
-        return config.lxq_enabled;
+        return !!config.lxq_enabled;
     },
     enable: function () {
         if (!config.lxq_enabled) {
