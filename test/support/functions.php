@@ -110,37 +110,85 @@ function integrationSetChunkAsComplete( $options ) {
     return json_decode( $response['body'] )  ;
 }
 
+function do_file_conversion( $params ) {
+    $upload_session = $params['upload_session'];
+    unset( $params['upload_session'] );
+    
+    $curlTest = new CurlTest();
+    
+    $curlTest->path = '/index.php?action=convertFile' ;
+    $curlTest->method = 'POST' ;
+    $curlTest->params = $params ; 
+    $curlTest->cookies[] = array('upload_session', $upload_session );
+
+    $conversionResponse = $curlTest->getResponse();
+    return $conversionResponse ; 
+}
+
+function prepare_file_in_upload_folder( $path, $upload_session )  { 
+    $destDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $upload_session . DIRECTORY_SEPARATOR  ; 
+    if ( !is_dir( $destDir ) ) {
+        mkdir( $destDir );
+    }
+    $dest = $destDir . basename( $path );
+    copy( $path, $dest ) ; 
+}
+
+function createProjectWithUIParams( $params ) {
+    $upload_session = $params['upload_session'];
+    $files = $params['files'] ; 
+    
+    unset( $params['upload_session'] );
+    unset( $params['files'] );
+
+    $curlTest = new CurlTest();
+
+    $curlTest->path = '/index.php?action=createProject' ;
+    $curlTest->params = $params ;
+
+    $curlTest->cookies[] = array('upload_session', $upload_session );
+    $curlTest->files = $files ; 
+
+    $response = $curlTest->getResponse();
+    return $response ;
+}
+
 /**
  * Creates a project via API call
  */
 function integrationCreateTestProject( $options=array() ) {
-  $test = new CurlTest();
+    $test = new CurlTest();
 
-  if ( array_key_exists( 'headers' , $options ) ) {
-      $test->headers = $options['headers'];
-  }
+    $test->method = 'POST';
+    $test->path = '/api/new' ;
 
-  $test->path = '/api/new' ;
-  $test->method = 'POST';
-  $test->params = array(
-    'project_name' => 'foo',
-    'target_lang' => 'it',
-    'source_lang' => 'en'
-  );
+    if ( array_key_exists( 'headers' , $options ) ) {
+        $test->headers = $options['headers'];
+    }
+
+    if ( array_key_exists( 'path' , $options ) ) {
+        $test->path = $options['path'];
+    }
+
+    $test->params = array(
+            'project_name' => 'foo',
+            'target_lang' => 'it',
+            'source_lang' => 'en'
+    );
 
     if ( array_key_exists( 'params', $options )) {
         $test->params = array_merge($test->params, $options['params']);
     }
 
-  if ( array_key_exists('files', $options) ) {
-      $test->files = $options['files'];
-  } else {
-      $test->files[] = test_file_path('xliff/amex-test.docx.xlf');
-  }
+    if ( array_key_exists('files', $options) ) {
+        $test->files = $options['files'];
+    } else {
+        $test->files[] = test_file_path('xliff/amex-test.docx.xlf');
+    }
 
-  $response = $test->getResponse();
+    $response = $test->getResponse();
 
-  return json_decode( $response['body'] ) ;
+    return json_decode( $response['body'] ) ;
 }
 
 function splitJob( $params, $options=array() ) {

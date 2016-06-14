@@ -134,6 +134,7 @@ $klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment
     $instance->respond('index');
 });
 
+
 $klein->respond('GET', '/utils/pee', function() {
     $reflect  = new ReflectionClass('peeViewController');
     $instance = $reflect->newInstanceArgs(func_get_args());
@@ -152,14 +153,11 @@ $klein->respond('POST', '/api/v2/projects/[:id_project]/[:password]/jobs/[:id_jo
 
 route( '/api/v1/jobs/[:id_job]/[:password]/stats', 'GET',  'API\V1\StatsController', 'stats' );
 
-/**
- * Define additional routes here
- */
-
 route( '/api/v2/jobs/[:id_job]/[:password]/segments-filter', 'GET',
         'Features\SegmentFilter\Controller\API\FilterController', 'index'
 );
 
+route( '/api/v2/jobs/[:id_job]/[:password]/options', 'POST', 'API\V2\ChunkOptionsController', 'update' ); 
 
 /**
  * This should be moved in plugin space
