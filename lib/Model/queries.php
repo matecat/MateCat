@@ -1292,21 +1292,23 @@ function propagateTranslation( $params, $job_data, $_idSegment, Projects_Project
         }, $segmentsForPropagation );
 
         try {
-            $propagationSql = "UPDATE segment_translations SET " . implode( ", ", $q )  .
-                    " WHERE id_job = :id_job AND id_segment IN ( :id_segments ) " ;
+            $propagationSql = "UPDATE segment_translations SET " . implode( ", ", $q ) .
+                    " WHERE id_job = %d AND id_segment IN ( %s ) ";
 
-            $pdo = $db->getConnection() ;
-            $stmt = $pdo->prepare( $propagationSql ) ;
-
-            $queryParams =  array(
-                    'id_job' => $params['id_job'],
-                    'id_segments' => implode(', ', $propagated_ids),
+            $pdo  = $db->getConnection();
+            $stmt = $pdo->prepare(
+                    sprintf(
+                            $propagationSql,
+                            $params[ 'id_job' ],
+                            implode( ', ', $propagated_ids )
+                    )
             );
-            $stmt->execute( $queryParams );
 
-        } catch( PDOException $e ) {
+            $stmt->execute();
+
+        } catch ( PDOException $e ) {
             throw new Exception( "Error in propagating Translation: " . $e->getCode() . ": " . $e->getMessage()
-                    . "\n" . $propagationSql . "\n" . var_export( $queryParams, true ),
+                    . "\n" . $propagationSql . "\n",
                     -$e->getCode() );
         }
 
