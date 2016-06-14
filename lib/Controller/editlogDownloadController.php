@@ -1,4 +1,6 @@
 <?php
+use ActivityLog\Activity;
+use ActivityLog\ActivityLogStruct;
 
 /**
  * Description of catController
@@ -115,6 +117,20 @@ class editlogDownloadController extends downloadController {
             $this->content .= $row;
         }
 
+        /**
+         * Retrieve user information
+         */
+        $this->checkLogin();
+
+        $activity = new ActivityLogStruct();
+        $activity->id_job = $this->jid;
+        $activity->id_project = $data[0]['id_project']; //assume that all rows have the same project id
+        $activity->action = ActivityLogStruct::DOWNLOAD_ANALYSIS_LOG;
+        $activity->ip = Utils::getRealIpAddr();
+        $activity->uid = $this->uid;
+        $activity->event_date = date( 'Y-m-d H:i:s' );
+        Activity::save( $activity );
+        
     }
 
 }

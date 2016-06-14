@@ -1,6 +1,22 @@
 CREATE DATABASE matecat;
 USE matecat;
 
+CREATE TABLE `activity_log` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `id_project` int(10) unsigned NOT NULL,
+  `id_job` int(10) unsigned NOT NULL,
+  `action` int(10) unsigned NOT NULL,
+  `ip` varchar(45) NOT NULL,
+  `uid` int(10) unsigned NOT NULL,
+  `event_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`ID`),
+  KEY `ip_idx` (`ip`) USING BTREE,
+  KEY `id_job_idx` (`id_job`) USING BTREE,
+  KEY `id_project_idx` (`id_project`) USING BTREE,
+  KEY `uid_idx` (`uid`) USING BTREE,
+  KEY `event_date_idx` (`event_date`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1; 
+
 CREATE TABLE `api_keys` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `uid` bigint(20) NOT NULL,
@@ -80,8 +96,8 @@ CREATE TABLE `engines` (
   `contribute_relative_url` varchar(100) DEFAULT NULL,
   `delete_relative_url` varchar(100) DEFAULT NULL,
   `others` varchar(2048) NOT NULL DEFAULT '{}' COMMENT 'json key_value for api end points',
-  `extra_parameters` varchar(2048) NOT NULL DEFAULT '{}',
   `class_load` varchar(255) DEFAULT NULL,
+  `extra_parameters` varchar(2048) NOT NULL DEFAULT '{}',
   `google_api_compliant_version` varchar(45) DEFAULT NULL COMMENT 'credo sia superfluo',
   `penalty` int(11) NOT NULL DEFAULT '14',
   `active` tinyint(4) NOT NULL DEFAULT '1',
@@ -112,12 +128,11 @@ CREATE TABLE `files` (
   `xliff_file` longblob,
   `sha1_original_file` varchar(100) DEFAULT NULL,
   `original_file` longblob,
-  `segmentation_rule` varchar(512) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `id_project` (`id_project`),
   KEY `sha1` (`sha1_original_file`) USING HASH,
   KEY `filename` (`filename`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `files_job` (
   `id_job` int(11) NOT NULL,
@@ -138,13 +153,12 @@ CREATE TABLE `jobs` (
   `id_project` int(11) NOT NULL,
   `job_first_segment` bigint(20) unsigned NOT NULL,
   `job_last_segment` bigint(20) unsigned NOT NULL,
-  `id_translator` varchar(100) NOT NULL DEFAULT 'generic_translator',
+  `id_translator` varchar(100) DEFAULT '',
   `tm_keys` text NOT NULL,
   `job_type` varchar(45) DEFAULT NULL,
   `source` varchar(45) DEFAULT NULL,
   `target` varchar(45) DEFAULT NULL,
   `total_time_to_edit` bigint(20) DEFAULT '0',
-  `avg_post_editing_effort` float DEFAULT '0',
   `id_job_to_revise` int(11) DEFAULT NULL,
   `last_opened_segment` int(11) DEFAULT NULL,
   `id_tms` int(11) DEFAULT '1',
@@ -175,6 +189,7 @@ CREATE TABLE `jobs` (
   `revision_stats_language_quality_maj` int(11) NOT NULL DEFAULT '0',
   `revision_stats_style_maj` int(11) NOT NULL DEFAULT '0',
   `dqf_key` varchar(255) DEFAULT NULL,
+  `avg_post_editing_effort` float DEFAULT '0',
   `total_raw_wc` bigint(20) DEFAULT '1',
   UNIQUE KEY `primary_id_pass` (`id`,`password`),
   KEY `id_job_to_revise` (`id_job_to_revise`),
@@ -186,9 +201,9 @@ CREATE TABLE `jobs` (
   KEY `password` (`password`),
   KEY `source` (`source`),
   KEY `target` (`target`),
-  KEY `status_owner_idx` (`status_owner`) USING BTREE,
-  KEY `status_idx` (`status`) USING BTREE,
-  KEY `create_date_idx` (`create_date`) USING BTREE
+  KEY `status_owner_idx` (`status_owner`),
+  KEY `status_idx` (`status`),
+  KEY `create_date_idx` (`create_date`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `language_stats` (
@@ -216,11 +231,9 @@ CREATE TABLE `memory_keys` (
   `update_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `deleted` int(11) DEFAULT '0',
   PRIMARY KEY (`uid`,`key_value`),
-  KEY `uid_idx` (`uid`) USING BTREE,
-  KEY `key_value_idx` (`key_value`) USING BTREE,
-  KEY `creation_date` (`creation_date`),
-  KEY `update_date` (`update_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT; 
+  KEY `uid_idx` (`uid`),
+  KEY `key_value_idx` (`key_value`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `notifications` (
   `id` int(11) NOT NULL,
@@ -256,7 +269,6 @@ CREATE TABLE `owner_features` (
 
 CREATE TABLE `phinxlog` (
   `version` bigint(20) NOT NULL,
-  `migration_name` varchar(100) DEFAULT NULL,
   `start_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `end_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`version`)
@@ -270,7 +282,7 @@ CREATE TABLE `project_metadata` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_project_and_key` (`id_project`,`key`) USING BTREE,
   KEY `id_project` (`id_project`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `projects` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -312,7 +324,7 @@ CREATE TABLE `qa_chunk_reviews` (
   `id_job` bigint(20) NOT NULL,
   `password` varchar(45) NOT NULL,
   `review_password` varchar(45) NOT NULL,
-  `penalty_points` bigint(20) NOT NULL DEFAULT '0',
+  `penalty_points` bigint(20) DEFAULT NULL,
   `num_errors` int(11) NOT NULL DEFAULT '0',
   `is_pass` tinyint(4) NOT NULL DEFAULT '0',
   `force_pass_at` timestamp NULL DEFAULT NULL,
@@ -386,7 +398,7 @@ CREATE TABLE `segment_notes` (
   `note` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `id_segment` (`id_segment`) USING BTREE
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `segment_revisions` (
   `id_job` bigint(20) NOT NULL,
@@ -398,7 +410,7 @@ CREATE TABLE `segment_revisions` (
   `err_language` varchar(512) NOT NULL,
   `err_style` varchar(512) NOT NULL,
   PRIMARY KEY (`id_job`,`id_segment`),
-  KEY `segm_key` (`id_segment`,`id_job`) USING BTREE
+  KEY `segm_key` (`id_segment`,`id_job`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `segment_translation_versions` (
@@ -458,7 +470,7 @@ CREATE TABLE `segment_translations_splits` (
   `source_chunk_lengths` varchar(1024) NOT NULL DEFAULT '[]',
   `target_chunk_lengths` varchar(1024) NOT NULL DEFAULT '{"len":[0],"statuses":["DRAFT"]}',
   PRIMARY KEY (`id_segment`,`id_job`),
-  KEY `id_job` (`id_job`) USING BTREE,
+  KEY `id_job` (`id_job`),
   KEY `id_segment` (`id_segment`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
@@ -518,12 +530,12 @@ CREATE TABLE `users` (
   `api_key` varchar(100) NOT NULL,
   `oauth_access_token` text,
   PRIMARY KEY (`uid`),
-  UNIQUE KEY `email` (`email`) USING BTREE,
+  UNIQUE KEY `email` (`email`),
   KEY `api_key` (`api_key`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 
-INSERT INTO `engines` (
+        INSERT INTO `engines` (
   `name` ,
   `type` ,
   `description` ,
@@ -549,7 +561,7 @@ VALUES
 'get',
 'set',
 'delete',
- '{"gloss_get_relative_url":"glossary\/get","gloss_set_relative_url":"glossary\/set","gloss_update_relative_url":"glossary\/update","glossary_import_relative_url":"glossary\/import","gloss_delete_relative_url":"glossary\/delete","tmx_import_relative_url":"tmx\/import","tmx_status_relative_url":"tmx\/status","tmx_export_create_url":"tmx\/export\/create","tmx_export_check_url":"tmx\/export\/check","tmx_export_download_url":"tmx\/export\/download","tmx_export_list_url":"tmx\/export\/list","api_key_create_user_url":"createranduser","api_key_check_auth_url":"authkey","analyze_url":"analyze","detect_language_url":"langdetect.php"}',
+'{\"gloss_get_relative_url\":\"glossary\/get\",\"gloss_set_relative_url\":\"glossary\/set\",\"gloss_update_relative_url\":\"glossary\/update\",\"glossary_import_relative_url\":\"glossary\/import\",\"gloss_delete_relative_url\":\"glossary\/delete\",\"tmx_import_relative_url\":\"tmx\/import\",\"tmx_status_relative_url\":\"tmx\/status\",\"tmx_export_create_url\":\"tmx\/export\/create\",\"tmx_export_check_url\":\"tmx\/export\/check\",\"tmx_export_download_url\":\"tmx\/export\/download\",\"tmx_export_list_url\":\"tmx\/export\/list\",\"api_key_create_user_url\":\"createranduser\",\"api_key_check_auth_url\":\"authkey\",\"analyze_url\":\"analyze\",\"detect_language_url\":\"langdetect.php\"}',
 'MyMemory',
 '{}',
 '1',
@@ -591,6 +603,8 @@ INSERT INTO `phinxlog` ( version ) VALUES ( '20160331210238' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20160406102209' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20160408162842' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20160519093951' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20160608130816' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20160613103347' );
 
 CREATE SCHEMA `matecat_conversions_log` DEFAULT CHARACTER SET utf8 ;
 USE matecat_conversions_log ;
