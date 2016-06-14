@@ -48,7 +48,7 @@ class ReadJobTest extends AbstractTest
         $this->job_struct = new Jobs_JobStruct(
             array('id' => NULL, //SET NULL FOR AUTOINCREMENT -> in this case is only stored in cache so i will chose a casual value
                 'password' => $this->job_password,
-                'id_project' => "4325fake344",
+                'id_project' => "432999999",
                 'job_first_segment' => "182655137",
                 'job_last_segment' => "182655236",
                 'source' => "nl-NL",
@@ -125,10 +125,55 @@ class ReadJobTest extends AbstractTest
         $this->job_struct_param->id = $this->job_id;
         $this->job_struct_param->password = $this->job_password;
         $result_wrapped= $this->job_Dao->read($this->job_struct_param);
-        $job= $result_wrapped['0'];
-        $this->assertTrue( $job instanceof Jobs_JobStruct);
-        $this->assertEquals($this->job_id, $job->id);
-        $this->assertEquals($this->job_password, $job->password);
-        $this->assertEquals($this->job_owner, $job->owner);
+        $result= $result_wrapped['0'];
+        $this->assertTrue( $result instanceof Jobs_JobStruct);
+        $this->assertEquals($this->job_id, $result->id);
+        $this->assertEquals($this->job_password, $result->password);
+        $this->assertEquals("432999999", $result->id_project);
+        $this->assertEquals("182655137", $result->job_first_segment);
+        $this->assertEquals("182655236", $result->job_last_segment);
+        $this->assertEquals("nl-NL", $result->source);
+        $this->assertEquals("de-DE", $result->target);
+        $tm_keys = '[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"","key":"e1f9153f48c4c7e9328d","r":true,"w":true,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
+        $this->assertEquals($tm_keys, $result->tm_keys);
+        $this->assertEquals("", $result->id_translator);
+        $this->assertNull($result->job_type);
+        $this->assertEquals("156255", $result->total_time_to_edit);
+        $this->assertEquals("0", $result->avg_post_editing_effort);
+        $this->assertNull($result->id_job_to_revise);
+        $this->assertEquals("182655204", $result->last_opened_segment);
+        $this->assertEquals("1", $result->id_tms);
+        $this->assertEquals("1", $result->id_mt_engine);
+        $this->assertRegExp('/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result->create_date);
+        $this->assertRegExp('/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result->last_update);
+        $this->assertEquals("0", $result->disabled);
+        $this->assertEquals($this->job_owner, $result->owner);
+        $this->assertEquals("active", $result->status_owner);
+        $this->assertEquals("active", $result->status);
+        $this->assertNull($result->status_translator);
+
+//        $this->assertEquals(Binary String: 0x00,$result->completed);
+        $this->assertEquals("-12.60", $result->new_words);
+        $this->assertEquals("0.00", $result->draft_words);
+        $this->assertEquals("728.15", $result->translated_words);
+        $this->assertEquals("0.00", $result->approved_words);
+        $this->assertEquals("0.00", $result->rejected_words);
+        $this->assertEquals("general", $result->subject);
+        $payable_rates = '{"NO_MATCH":100,"50%-74%":100,"75%-84%":60,"85%-94%":60,"95%-99%":60,"100%":30,"100%_PUBLIC":30,"REPETITIONS":30,"INTERNAL":60,"MT":85}';
+        $this->assertEquals($payable_rates, $result->payable_rates);
+        $this->assertEquals("0", $result->revision_stats_typing_min);
+        $this->assertEquals("0", $result->revision_stats_translations_min);
+        $this->assertEquals("0", $result->revision_stats_terminology_min);
+        $this->assertEquals("0", $result->revision_stats_language_quality_min);
+        $this->assertEquals("0", $result->revision_stats_style_min);
+        $this->assertEquals("0", $result->revision_stats_typing_maj);
+        $this->assertEquals("0", $result->revision_stats_translations_maj);
+        $this->assertEquals("0", $result->revision_stats_terminology_maj);
+        $this->assertEquals("0", $result->revision_stats_language_quality_maj);
+        $this->assertEquals("0", $result->revision_stats_style_maj);
+        $this->assertEquals("", $result->dqf_key);
+        $this->assertEquals("1", $result->total_raw_wc);
+        $this->assertNull($result->validator);
+
     }
 }

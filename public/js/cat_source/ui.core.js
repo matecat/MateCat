@@ -1823,55 +1823,28 @@ UI = {
 	},
 
 	formatSelection: function(op) {
-		selection = window.getSelection();
-		range = selection.getRangeAt(0);
-
-		prova = $(range.commonAncestorContainer).text().charAt(range.startOffset - 1);
-        str = getSelectionHtml();
+        var str = getSelectionHtml();
         insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
-		aa = prova.match(/\W$/gi);
-        newStr = '';
-        var aa = $("<div/>").html(str);
-        aa.find('.undoCursorPlaceholder').remove();
-        var rightString = aa.html();
+        var newStr = '';
+        var selection$ = $("<div/>").html(str);
+        selection$.find('.undoCursorPlaceholder').remove();
+        var rightString = selection$.html();
 
         $.each($.parseHTML(rightString), function(index) {
-			if(this.nodeName == '#text') {
+			var toAdd, d, jump, capStr;
+            if(this.nodeName == '#text') {
 				d = this.data;
-//				console.log(index + ' - ' + d);
-//				console.log(!index);
-//				console.log(!aa);
-				jump = ((!index)&&(!aa));
-//				console.log(d.charAt(0));
+				jump = ((!index)&&(!selection$));
 				capStr = toTitleCase(d);
 				if(jump) {
 					capStr = d.charAt(0) + toTitleCase(d).slice(1);
 				}
-/*
-				if(op == 'uppercase') {
-					toAdd = d.toUpperCase();
-				} else if(op == 'lowercase') {
-					toAdd = d.toLowerCase();
-				} else if(op == 'capitalize') {
-					console.log(index + ' - ' + d);
-					if(index == 0) {
-						if(!aa) {
-							toAdd = d;
-						} else {
-							toAdd = toTitleCase(d);
-						}
-					} else {
-						toAdd = toTitleCase(d);
-					}
-				}
-*/
 				toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? capStr : d;
 				newStr += toAdd;
 			}
             else if(this.nodeName == 'LXQWARNING') { 
                 d = this.childNodes[0].data;
-                jump = ((!index)&&(!aa));
-//				console.log(d.charAt(0));
+                jump = ((!index)&&(!selection$));
 				capStr = toTitleCase(d);
 				if(jump) {
 					capStr = d.charAt(0) + toTitleCase(d).slice(1);
@@ -1881,11 +1854,8 @@ UI = {
             }
             else {
 				newStr += this.outerHTML;
-//				newStr += this.innerText;
 			}
 		});
-        console.log('x');
-        console.log('newStr: ', newStr);
         if (LXQ.enabled()) {
             $.powerTip.destroy($('.tooltipa',this.currentSegment));
             $.powerTip.destroy($('.tooltipas',this.currentSegment));
@@ -1893,12 +1863,10 @@ UI = {
             LXQ.reloadPowertip(this.currentSegment);
         }
         else {
-            replaceSelectedText(newStr);
+            replaceSelectedHtml(newStr);
         }
-        console.log('a: ', UI.editarea.html());
-		UI.lockTags();
-        console.log('b: ', UI.editarea.html());
-		this.saveInUndoStack('formatSelection');
+        UI.lockTags();
+        this.saveInUndoStack('formatSelection');
 		saveSelection();
 		$('.editor .editarea .formatSelection-placeholder').after($('.editor .editarea .rangySelectionBoundary'));
 		$('.editor .editarea .formatSelection-placeholder').remove();
@@ -2015,6 +1983,12 @@ UI = {
         var winName ;
         
         var driveUpdateDone = function(data) {
+            if( !data.urls || data.urls.length === 0 ) {
+                APP.alert({msg: "MateCat was not able to update project files on Google Drive. Maybe the project owner revoked privileges to access those files. Ask the project owner to login again and grant Google Drive privileges to MateCat."});
+
+                return;
+            }
+
             var winName ;
 
             $.each( data.urls, function(index, item) {
@@ -2811,7 +2785,8 @@ UI = {
 					.replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
 					.replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
 					.replace( config.tabPlaceholderRegex, '<span class="tab-marker monad marker ' + config.tabPlaceholderClass +'" contenteditable="false">&#8677;</span>' )
-					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false">&nbsp;</span>' );
+					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false">&nbsp;</span>' )
+                    .replace(/(<\/span\>)$/gi, "</span><br class=\"end\">"); // For rangy cursor after a monad marker
 
 		return _str;
     },

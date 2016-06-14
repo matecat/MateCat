@@ -27,9 +27,9 @@ class CreateFromStructJobTest  extends AbstractTest
      */
     protected $cache;
     protected $id;
-    protected $str_password;
-    protected $str_id_project;
-    protected $str_owner;
+    protected $job_password;
+    protected $job_id_project;
+    protected $job_owner;
     protected $sql_delete_job;
 
     public function setUp()
@@ -40,13 +40,13 @@ class CreateFromStructJobTest  extends AbstractTest
         /**
          * job initialization
          */
-        $this->str_password = "7barandfoo71";
-        $this->str_id_project = "4325344";
-        $this->str_owner = "barandfoo@translated.net";
+        $this->job_password = "7barandfoo71";
+        $this->job_id_project = "4325344";
+        $this->job_owner = "barandfoo@translated.net";
         $this->job_struct = new Jobs_JobStruct(
             array('id' => NULL, //SET NULL FOR AUTOINCREMENT -> in this case is only stored in cache so i will chose a casual value
-                'password' => $this->str_password,
-                'id_project' => $this->str_id_project,
+                'password' => $this->job_password,
+                'id_project' => $this->job_id_project,
                 'job_first_segment' => "182655137",
                 'job_last_segment' => "182655236",
                 'source' => "nl-NL",
@@ -63,7 +63,7 @@ class CreateFromStructJobTest  extends AbstractTest
                 'create_date' => "2016-03-30 13:18:09",
                 'last_update' => "2016-03-30 13:21:02",
                 'disabled' => "0",
-                'owner' => $this->str_owner,
+                'owner' => $this->job_owner,
                 'status_owner' => "active",
                 'status' => "active",
                 'status_translator' => null,
@@ -121,8 +121,8 @@ class CreateFromStructJobTest  extends AbstractTest
 
 
         $this->assertEquals($this->id, $result->id);
-        $this->assertEquals($this->str_password, $result->password);
-        $this->assertEquals($this->str_id_project, $result->id_project);
+        $this->assertEquals($this->job_password, $result->password);
+        $this->assertEquals($this->job_id_project, $result->id_project);
         $this->assertEquals("182655137", $result->job_first_segment);
         $this->assertEquals("182655236", $result->job_last_segment);
         $this->assertEquals("nl-NL", $result->source);
@@ -140,7 +140,7 @@ class CreateFromStructJobTest  extends AbstractTest
         $this->assertRegExp('/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result->create_date);
         $this->assertRegExp('/^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-2]?[0-9]:[0-5][0-9]:[0-5][0-9]$/', $result->last_update);
         $this->assertEquals("0", $result->disabled);
-        $this->assertEquals($this->str_owner, $result->owner);
+        $this->assertEquals($this->job_owner, $result->owner);
         $this->assertEquals("active", $result->status_owner);
         $this->assertEquals("active", $result->status);
         $this->assertNull($result->status_translator);
