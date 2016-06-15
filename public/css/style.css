@@ -66,12 +66,13 @@ header .wrapper{
 }
 
 #notifbox {
-  opacity: 0.9;
-  text-align: center;
-  width: 60px;
-  color: #777;
-  height: 27px;
-  padding-top: 12px;
+    opacity: 0.9;
+    text-align: center;
+    width: 45px;
+    margin-left: 10px;
+    color: #777;
+    height: 27px;
+    padding-top: 13px;
 }
 
 #notifbox a
@@ -89,15 +90,14 @@ header .wrapper{
     display: none !important;
 }
 
-#filterSwitch
-{
-  text-align: center;
-  width: 60px;
-  height: 27px;
-  padding-top: 10px;
-  color: #fff;
-  font-size: 23px;
-  cursor: pointer;
+#filterSwitch {
+    text-align: center;
+    width: 45px;
+    height: 27px;
+    padding-top: 11px;
+    color: #eee;
+    font-size: 23px;
+    cursor: pointer;
 }
 
 #point2seg {
@@ -2949,6 +2949,25 @@ body.filterOpen #outer
 section.modified .save-warning
 {
 	display: none;
+}
+
+#advancedOptions .more-options {
+    font-size: 26px;
+    color: #eee;
+    padding: 0;
+    margin-top: 0px;
+    display: block;
+    text-align: center;
+    width: 45px;
+    cursor: pointer;
+}
+
+#advancedOptions .more-options:hover {
+	    color: #ccc;
+}
+
+#advancedOptions .more-options:before {
+	margin-right: 0;
 }
 
 #filterSwitch .numbererror

@@ -991,6 +991,7 @@ color:#333;}
 .onoffswitch {
     position: relative; 
     width: 60px;
+    zoom:0.7;
     float: left;
     -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
 }
@@ -1051,11 +1052,15 @@ color:#333;}
     color: #999999;
 }
 
+.onoffswitch-label:hover {
+    border-color: #A1A1A1;
+}
+
 .onoffswitch-label-status-active,
 .onoffswitch-label-status-inactive {    
     position: absolute;
     left: 80px;
-    font-size: 17px;
+    font-size: 24px;
     top: 5px;
     line-height: 20px;
 }
@@ -3306,7 +3311,7 @@ float: left;
 
 #point2seg:after {
       content: "\f071";
-  font-size: 25px;
+  font-size: 24px;
 }
 
 #filterSwitch:before {
