@@ -1213,29 +1213,12 @@ function addTranslation( array $_Translation ) {
 function propagateTranslation( $params, $job_data, $_idSegment, Projects_ProjectStruct $project ) {
 
     $db = Database::obtain();
-    $q = array();
-    $propagated_ids = array() ;
-
-    foreach ( $params as $key => $value ) {
-        if ( $key == 'status' ) {
-            $q[ ]       = $key . " = '" . $db->escape( $value ) . "' ";
-        } elseif( $key == 'segment_hash' ){
-            continue; // i don't want overwrite the segment_hash
-        } elseif ( is_bool( $value ) ) {
-            $q[ ] = $key . " = " . var_export( (bool)$value, true );
-        } elseif ( !is_numeric( $value ) || $key == 'translation' ) {
-            $q[ ] = $key . " = '" . $db->escape( $value ) . "'";
-        } else {
-            $q[ ] = $key . " = " . (float)$value;
-        }
-    }
 
     if ( $project->getWordCountType() == Projects_MetadataDao::WORD_COUNT_RAW ) {
         $sum_sql = "SUM(segments.raw_word_count)";
     } else {
         $sum_sql = "SUM( IF( match_type != 'ICE', eq_word_count, segments.raw_word_count ) )";
     }
-
 
     /**
      * Sum the word count grouped by status, so that we can later update the count on jobs table.
@@ -1285,6 +1268,8 @@ function propagateTranslation( $params, $job_data, $_idSegment, Projects_Project
         );
     }
 
+    $propagated_ids = array();
+
     if ( !empty( $segmentsForPropagation ) ) {
 
         $propagated_ids = array_map(function( Translations_SegmentTranslationStruct $translation ) {
@@ -1292,23 +1277,39 @@ function propagateTranslation( $params, $job_data, $_idSegment, Projects_Project
         }, $segmentsForPropagation );
 
         try {
-            $propagationSql = "UPDATE segment_translations SET " . implode( ", ", $q ) .
-                    " WHERE id_job = %d AND id_segment IN ( %s ) ";
 
-            $pdo  = $db->getConnection();
-            $stmt = $pdo->prepare(
-                    sprintf(
-                            $propagationSql,
-                            $params[ 'id_job' ],
-                            implode( ', ', $propagated_ids )
-                    )
+            $place_holders_fields = array();
+            foreach ( $params as $key => $value ) {
+                $place_holders_fields[ ] = "$key = ?";
+            }
+            $place_holders_fields = implode( ",", $place_holders_fields );
+            $place_holders_id = implode( ',', array_fill( 0, count( $propagated_ids ), '?' ) );
+
+            $values = array_merge(
+                    array_values( $params ),
+                    array( $params[ 'id_job' ] ),
+                    $propagated_ids
             );
 
-            $stmt->execute();
+            $propagationSql = "
+                  UPDATE segment_translations SET $place_holders_fields
+                  WHERE id_job = ? AND id_segment IN ( $place_holders_id )
+            ";
+
+            $pdo  = $db->getConnection();
+            $stmt = $pdo->prepare( $propagationSql );
+
+            $stmt->execute( $values );
 
         } catch ( PDOException $e ) {
             throw new Exception( "Error in propagating Translation: " . $e->getCode() . ": " . $e->getMessage()
-                    . "\n" . $propagationSql . "\n",
+                    . "\n" .
+                    $propagationSql
+                    . "\n"
+                    . var_export( $params, true )
+                    . "\n"
+                    . var_export( $propagated_ids, true )
+                    . "\n",
                     -$e->getCode() );
         }
 
