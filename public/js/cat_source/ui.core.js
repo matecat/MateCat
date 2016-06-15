@@ -252,7 +252,7 @@ UI = {
     },
 
     checkHeaviness: function() {
-        if ($('section').length > config.maxNumSegments) {
+        if ($('section').length > config.maxNumSegments && !UI.offline) {
             UI.reloadToSegment(UI.currentSegmentId);
         }
 
