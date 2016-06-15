@@ -528,6 +528,10 @@ $.extend(UI, {
 		$("#filterSwitch").bind('click', function(e) {
 			UI.toggleSearch(e);
 		});
+		$("#advancedOptions").bind('click', function(e) {
+			e.preventDefault();
+			UI.openOptionsPanel();
+		});
 		$("#segmentPointer").click(function(e) {
 			e.preventDefault();
 			UI.pointToOpenSegment();
