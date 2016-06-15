@@ -7,7 +7,7 @@ UI.offlineCacheRemaining = UI.offlineCacheSize;
 UI.checkingConnection = false;
 
 UI.currentConnectionCountdown = null;
-UI._backupEvents = {};
+UI._backupEvents = null;
 
 $.extend(UI, {
     startOfflineMode: function(){
@@ -51,8 +51,10 @@ $.extend(UI, {
                 $('.noConnection').addClass('reConnection');
                 setTimeout(function() {
                     $('.noConnection, .noConnectionMsg').remove();
-                    $._data( $("body")[0] ).events = UI._backupEvents;
-                    UI._backupEvents = {};
+                    if (UI._backupEvents) {
+                        $._data($("body")[0]).events = UI._backupEvents;
+                        UI._backupEvents = null;
+                    }
                 }, 500);
             }, 3000);
 

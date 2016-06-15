@@ -172,6 +172,9 @@ left: -5px;
 	text-align: left;
 	margin-bottom: 0px;
 }
+.warnings:last-child {
+	margin-bottom: 25px;
+}
 .text .alternatives 
 {
 	max-width: 300px;
