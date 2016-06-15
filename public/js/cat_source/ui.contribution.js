@@ -152,7 +152,7 @@ $.extend(UI, {
 		this.spellCheck();
 		this.saveInUndoStack();
 		this.blockButtons = false;
-		if (d.data.matches.length > 0) {
+		if (d.data.matches && d.data.matches.length > 0) {
 			$('.submenu li.matches a span', segment).text('(' + d.data.matches.length + ')');
 		} else {
 			$(".sbm > .matches", segment).hide();

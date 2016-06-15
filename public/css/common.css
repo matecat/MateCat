@@ -2395,7 +2395,7 @@ body.filterOpen .searchbox
 	{
 		display: inline;
 		width: auto !important;
-/*		margin-right: 5px;*/
+		margin-right: 5px;
 		text-transform: uppercase;
 }
 

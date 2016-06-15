@@ -2497,8 +2497,8 @@ UI = {
             propagate: propagate
         };
         if(isSplitted) {
+            this.setStatus($('#segment-' + id_segment), status);
             this.tempReqArguments.splitStatuses = this.collectSplittedStatuses(id_segment).toString();
-            this.setStatus($('#segment-' + id_segment), 'translated');
         }
         if(!propagate) {
             this.tempReqArguments.propagate = false;
@@ -2534,7 +2534,7 @@ UI = {
         segmentsIds = $('#segment-' + sid).attr('data-split-group').split(',');
         $.each(segmentsIds, function (index) {
             segment = $('#segment-' + this);
-            status = (this == sid)? 'translated' : UI.getStatus(segment);
+            status = UI.getStatus(segment);
             statuses.push(status);
         });
         return statuses;
