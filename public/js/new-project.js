@@ -415,27 +415,28 @@ APP.displayCurrentTargetLang = function() {
 APP.checkForLexiQALangs = function(){
 
 	var acceptedLanguages = config.lexiqa_languages;
+	var LXQCheck = $('.options-box.qa-box');
 
 	var targetLanguages = $( '#target-lang' ).val().split(',');
 	var sourceAccepted = (acceptedLanguages.indexOf($( '#source-lang' ).val() ) > -1);
 	var targetAccepted = targetLanguages.filter(function(n) {
 							return acceptedLanguages.indexOf(n) != -1;
 						}).length > 0;
-
+	LXQCheck.removeClass('option-unavailable');
     //disable LexiQA
 	var disableLexiQA = !(sourceAccepted && targetAccepted && config.defaults.lexiqa);
 	if (!(sourceAccepted && targetAccepted)) {
-		var LXQCheck = $('.options-box.qa-box');
 		LXQCheck.find('.onoffswitch').on('click', function () {
 			LXQCheck.find('.option-qa-box-languages').addClass('pulse');
 			setTimeout(function () {
 				LXQCheck.find('.option-qa-box-languages').removeClass('pulse');
 			}, 1200)
 		});
+		LXQCheck.addClass('option-unavailable');
 	}
     $('.options-box #lexi_qa').prop( "disabled", disableLexiQA );
     $('.options-box #lexi_qa').attr('checked', !disableLexiQA);
-    $('.options-box.qa-box').css({opacity: ( disableLexiQA ? 0.6 : 1 )  });
+    // $('.options-box.qa-box').css({opacity: ( disableLexiQA ? 0.6 : 1 )  });
 
 };
 
@@ -446,27 +447,28 @@ APP.checkForLexiQALangs = function(){
 APP.checkForTagProjectionLangs = function(){
 
 	var acceptedLanguages = config.tag_projection_languages;
-
+	var tpCheck = $('.options-box.tagp');
 	var targetLanguages = $( '#target-lang' ).val().split(',');
 	var sourceAccepted = (acceptedLanguages.indexOf($( '#source-lang' ).val() ) > -1);
 	var targetAccepted = targetLanguages.filter(function(n) {
 							return acceptedLanguages.indexOf(n) != -1;
 						}).length > 0;
+	tpCheck.removeClass('option-unavailable');
 
 	//disable Tag Projection
 	var disableTP = !(sourceAccepted && targetAccepted && config.defaults.tag_projection);
 	if (!(sourceAccepted && targetAccepted)) {
-		var tpCheck = $('.options-box.tagp');
 		tpCheck.find('.onoffswitch').on('click', function () {
 			tpCheck.find('.option-tagp-languages').addClass('pulse');
 			setTimeout(function () {
 				tpCheck.find('.option-tagp-languages').removeClass('pulse');
 			}, 1200)
 		});
+		tpCheck.addClass('option-unavailable');
 	}
 	$('.options-box #tagp_check').prop( "disabled", disableTP );
 	$('.options-box #tagp_check').attr('checked', !disableTP);
-	$('.options-box.tagp').css({opacity: ( disableTP ? 0.6 : 1 )  });
+	// $('.options-box.tagp').css({opacity: ( disableTP ? 0.6 : 1 )  });
 };
 /**
  * Disable/Enable SpeechToText
@@ -476,10 +478,10 @@ APP.checkForSpeechToText = function(){
 
 	//disable Tag Projection
 	var disableS2T = !config.defaults.speech2text;
-	// if (true) {
+	var speech2textCheck = $('.s2t-box');
+	speech2textCheck.removeClass('option-unavailable');
 	if (!('webkitSpeechRecognition' in window)) {
 		disableS2T = true;
-		var speech2textCheck = $('.s2t-box');
 		speech2textCheck.find('.option-s2t-box-chrome-label').css('display', 'inline');
 		speech2textCheck.find('.onoffswitch').on('click', function () {
 			speech2textCheck.find('.option-s2t-box-chrome-label').addClass('pulse');
@@ -487,9 +489,10 @@ APP.checkForSpeechToText = function(){
 				speech2textCheck.find('.option-s2t-box-chrome-label').removeClass('pulse');
 			}, 1200)
 		});
+		speech2textCheck.addClass('option-unavailable');
 	}
 	// var disableS2T = ('webkitSpeechRecognition' in window && !config.defaults.speech2text);
 	$('.options-box #s2t_check').prop( "disabled", disableS2T );
 	$('.options-box #s2t_check').attr('checked', !disableS2T);
-	$('.options-box.s2t-box').css({opacity: ( disableS2T ? 0.6 : 1 )  });
+	// $('.options-box.s2t-box').css({opacity: ( disableS2T ? 0.6 : 1 )  });
 };

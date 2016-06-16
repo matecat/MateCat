@@ -2186,13 +2186,17 @@ UI = {
 				UI.startWarning();
 				var warningPosition = '';
 				UI.globalWarnings = data.details.sort();
+                //The tags with tag projection enabled doesn't show the tags in the source, so tdont show the warning
+                UI.globalWarnings = UI.filterTagsWithTagProjection(UI.globalWarnings);
 				UI.firstWarnedSegment = UI.globalWarnings[0];
 				UI.translationMismatches = data.translation_mismatches;
 
 				//check for errors
 				if (UI.globalWarnings.length > 0) {
 					//for now, put only last in the pointer to segment id
-					warningPosition = '#' + data.details[ Object.keys(data.details).sort().shift() ].id_segment;
+					// warningPosition = '#' + data.details[ Object.keys(data.details).sort().shift() ].id_segment;
+
+                    // data.details = UI.filterTagsWithTagProjection(data.details);
 
 					if (openingSegment)
 						UI.fillCurrentSegmentWarnings(data.details, true);

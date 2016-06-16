@@ -22,13 +22,14 @@ if ( true )
             } else {
                 var LXQContainer = $('.options-box.qa-box');
                 $('.options-box #lexi_qa').prop( "disabled", true ).attr('checked', false);
-                LXQContainer.css({opacity: 0.6 });
+                // LXQContainer.css({opacity: 0.6 });
                 LXQContainer.find('.onoffswitch').on('click', function () {
                     LXQContainer.find('.option-qa-box-languages').addClass('pulse');
                     setTimeout(function () {
                         LXQContainer.find('.option-qa-box-languages').removeClass('pulse');
                     }, 1200)
                 });
+                LXQContainer.addClass('option-unavailable');
             }
             //Check Tag Projection
             if (UI.checkTpCanActivate()) {
@@ -37,21 +38,21 @@ if ( true )
             } else {
                 var tpContainer= $('.options-box.tagp');
                 $('.options-box #tagp_check').prop( "disabled", true ).attr('checked', false);
-                tpContainer.css({opacity: 0.6 });
+                // tpContainer.css({opacity: 0.6 });
                 tpContainer.find('.onoffswitch').on('click', function () {
                     tpContainer.find('.option-tagp-languages').addClass('pulse');
                     setTimeout(function () {
                         tpContainer.find('.option-tagp-languages').removeClass('pulse');
                     }, 1200)
                 });
-
+                tpContainer.addClass('option-unavailable');
 
             }
             //Check Speech To Text
             if (!('webkitSpeechRecognition' in window)) {
                 var speech2textContainer = $('.s2t-box');
                 speech2textCheck.prop( "disabled", true ).attr('checked', false);
-                speech2textContainer.css({opacity: 0.6 });
+                // speech2textContainer.css({opacity: 0.6 });
                 speech2textContainer.find('.option-s2t-box-chrome-label').css('display', 'inline');
                 speech2textContainer.find('.onoffswitch').on('click', function () {
                     speech2textContainer.find('.option-s2t-box-chrome-label').addClass('pulse');
@@ -59,7 +60,7 @@ if ( true )
                         speech2textContainer.find('.option-s2t-box-chrome-label').removeClass('pulse');
                     }, 1200)
                 });
-
+                speech2textCheck.addClass('option-unavailable');
             } else {
                 //Check Speech to Text
                 speech2textCheck.on('change', this.toggleSpeech2TextOption.bind(this));

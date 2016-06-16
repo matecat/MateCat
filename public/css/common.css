@@ -1044,12 +1044,13 @@ color:#333;}
     transition: all 0.3s ease-in 0s; 
 }
 
-.onoffswitch-label-status-active {
+.onoffswitch-label-status-active{
     display: none;
     font-weight: bold;
     color:#22c4ee;
 } 
-.onoffswitch-label-status-inactive {
+.onoffswitch-label-status-inactive,
+.onoffswitch-label-status-unavailable {
     display: block;
     color: #999999;
 }
@@ -1059,12 +1060,22 @@ color:#333;}
 }
 
 .onoffswitch-label-status-active,
-.onoffswitch-label-status-inactive {    
+.onoffswitch-label-status-inactive,
+.onoffswitch-label-status-unavailable {
     position: absolute;
     left: 80px;
     font-size: 24px;
     top: 5px;
     line-height: 20px;
+}
+.onoffswitch-label-status-unavailable {
+    display: none;
+}
+.option-unavailable .onoffswitch-label-status-unavailable {
+    display: inline;
+}
+.option-unavailable .onoffswitch-label-status-inactive {
+    display: none;
 }
 
 .onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-label-status-active {
@@ -1095,10 +1106,9 @@ color:#333;}
 .option-s2t-box-chrome-label {
     display: none;
 }
-span.option-tagp-languages {
-    line-height: 25px;
-}
-.options-box span.pulse {
+
+.options-box p span.pulse {
+    display: none;
     -webkit-animation: pulse 1s ease-in-out;
     animation: pulse 1s ease-in-out;
 }
@@ -1123,6 +1133,18 @@ span.option-tagp-languages {
     100% {
         background: transparent;
     }
+}
+
+.options-box p span {
+    line-height: 25px;
+    display: none;
+    font-weight: bold;
+}
+.option-unavailable.options-box p span {
+    display: inline;
+}
+.option-unavailable .onoffswitch-label {
+    cursor: not-allowed;
 }
 
 span.notify {
