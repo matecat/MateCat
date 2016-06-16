@@ -424,6 +424,15 @@ APP.checkForLexiQALangs = function(){
 
     //disable LexiQA
 	var disableLexiQA = !(sourceAccepted && targetAccepted && config.defaults.lexiqa);
+	if (!(sourceAccepted && targetAccepted)) {
+		var LXQCheck = $('.options-box.qa-box');
+		LXQCheck.find('.onoffswitch').on('click', function () {
+			LXQCheck.find('.option-qa-box-languages').addClass('pulse');
+			setTimeout(function () {
+				LXQCheck.find('.option-qa-box-languages').removeClass('pulse');
+			}, 1200)
+		});
+	}
     $('.options-box #lexi_qa').prop( "disabled", disableLexiQA );
     $('.options-box #lexi_qa').attr('checked', !disableLexiQA);
     $('.options-box.qa-box').css({opacity: ( disableLexiQA ? 0.6 : 1 )  });
@@ -446,6 +455,15 @@ APP.checkForTagProjectionLangs = function(){
 
 	//disable Tag Projection
 	var disableTP = !(sourceAccepted && targetAccepted && config.defaults.tag_projection);
+	if (!(sourceAccepted && targetAccepted)) {
+		var tpCheck = $('.options-box.tagp');
+		tpCheck.find('.onoffswitch').on('click', function () {
+			tpCheck.find('.option-tagp-languages').addClass('pulse');
+			setTimeout(function () {
+				tpCheck.find('.option-tagp-languages').removeClass('pulse');
+			}, 1200)
+		});
+	}
 	$('.options-box #tagp_check').prop( "disabled", disableTP );
 	$('.options-box #tagp_check').attr('checked', !disableTP);
 	$('.options-box.tagp').css({opacity: ( disableTP ? 0.6 : 1 )  });
@@ -456,10 +474,21 @@ APP.checkForTagProjectionLangs = function(){
  */
 APP.checkForSpeechToText = function(){
 
-
-
 	//disable Tag Projection
 	var disableS2T = !config.defaults.speech2text;
+	// if (true) {
+	if (!('webkitSpeechRecognition' in window)) {
+		disableS2T = true;
+		var speech2textCheck = $('.s2t-box');
+		speech2textCheck.find('.option-s2t-box-chrome-label').css('display', 'inline');
+		speech2textCheck.find('.onoffswitch').on('click', function () {
+			speech2textCheck.find('.option-s2t-box-chrome-label').addClass('pulse');
+			setTimeout(function () {
+				speech2textCheck.find('.option-s2t-box-chrome-label').removeClass('pulse');
+			}, 1200)
+		});
+	}
+	// var disableS2T = ('webkitSpeechRecognition' in window && !config.defaults.speech2text);
 	$('.options-box #s2t_check').prop( "disabled", disableS2T );
 	$('.options-box #s2t_check').attr('checked', !disableS2T);
 	$('.options-box.s2t-box').css({opacity: ( disableS2T ? 0.6 : 1 )  });
