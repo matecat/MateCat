@@ -298,6 +298,7 @@
                 data : data
             }).done( function( data ) {
                 UI.render();
+                UI.checkWarnings(false);
             });
 
         },
@@ -318,7 +319,8 @@
                 type: 'POST',
                 data : data
             }).done( function( data ) {
-                UI.render();
+                UI.render(false);
+                UI.checkWarnings(false);
             });
 
         },
