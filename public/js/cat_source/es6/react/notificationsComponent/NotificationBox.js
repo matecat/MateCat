@@ -67,6 +67,15 @@ class NotificationBox extends React.Component {
         this.setState({
             notifications: notifications
         });
+        return newNotification;
+    }
+    removeNotification(notification) {
+        var self = this;
+        Object.keys(this.refs).forEach(function(container) {
+            if (container.indexOf('container') > -1) {
+                self.refs[container].hideNotification();
+            }
+        });
     }
     showMateCat() {
         this.setState({
@@ -118,6 +127,7 @@ class NotificationBox extends React.Component {
                      var cat = "";
                     _notifications.forEach(function (notification) {
                         var item = <NotificationItem
+                            ref={ 'container-' + position }
                             title = {notification.title}
                             position = {notification.position}
                             type = {notification.type}

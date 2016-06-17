@@ -16,9 +16,26 @@ $.extend(UI, {
 
             UI.offline = true;
             UI.body.attr('data-offline-mode', 'light-off');
-            UI.showMessage({
-                msg: '<span class="icon-power-cord"></span><span class="icon-power-cord2"></span>No connection available. You can still translate <span class="remainingSegments">' + UI.offlineCacheSize + '</span> segments in offline mode. Do not refresh or you lose the segments!'
-            });
+
+            if (typeof this.offlineNotification != 'undefined') {
+                APP.removeNotification(this.offlineNotification);
+            }
+            var notification = {
+                title: '<div class="message-offline-icons"><span class="icon-power-cord"></span><span class="icon-power-cord2"></span></div>No connection available',
+                text: 'You can still translate <span class="remainingSegments">' + UI.offlineCacheSize + '</span> segments in offline mode. Do not refresh or you lose the segments!',
+                type: 'warning',
+                position: "bl",
+                autoDismiss: false,
+                allowHtml: true,
+                closeCallback: function() {
+                    console.log("Notification close");
+                },
+                openCallback: function() {
+                    console.log("Notification open");
+                },
+                timer: 7000
+            }
+            this.offlineNotification = APP.addNotification(notification);
 
             UI.checkingConnection = setInterval( function() {
                 UI.checkConnection( 'Recursive Check authorized' );
@@ -30,10 +47,18 @@ $.extend(UI, {
         if ( UI.offline ) {
 
             UI.offline = false;
-
-            UI.showMessage( {
-                msg: "Connection is back. We are saving translated segments in the database."
-            } );
+            if (typeof this.offlineNotification != 'undefined') {
+                APP.removeNotification(this.offlineNotification);
+            }
+            var notification = {
+                title: 'Connection is back',
+                text: 'We are saving translated segments in the database.',
+                type: 'success',
+                position: "bl",
+                autoDismiss: true,
+                timer: 10000
+            };
+            this.offlineNotification = APP.addNotification(notification);
 
             setTimeout( function () {
                 $( '#messageBar .close' ).click();
@@ -89,6 +114,9 @@ $.extend(UI, {
             $._data( $("body")[0] ).events = {}
         }, 300 );
 
+        if (typeof this.offlineNotification != 'undefined') {
+            APP.removeNotification(this.offlineNotification);
+        }
 
         //clear previous Interval and set a new one
         UI.currentConnectionCountdown = $( ".noConnectionMsg .countdown" ).countdown( function () {
@@ -158,19 +186,7 @@ $.extend(UI, {
         $.each(UI.abortedOperations, function() {
             var args = this.args;
             var operation = this.operation;
-            if(operation == 'setTranslation') {
-                /**
-                 * No Op because
-                 * @see UI.checkConnection
-                 * already perform a
-                 * UI.execSetTranslationTail();
-                 */
-            } else if(operation == 'setCurrentSegment') {
-                /**
-                 * No OP, Not Useful
-                 */
-                //UI[operation](args[0]);
-            } else if(operation == 'getSegments') {
+            if(operation == 'getSegments') {
                 UI.reloadWarning();
             } else if( operation == 'setRevision' ){
                 UI[operation](args);
@@ -181,12 +197,23 @@ $.extend(UI, {
     checkOfflineCacheSize: function () {
         if ( UI.offlineCacheRemaining <= 0 ) {
             UI.activateOfflineCountdown( 'No connection available.' );
-            //console.log( 'la cache è piena, andate in pace' );
         }
     },
     decrementOfflineCacheRemaining: function () {
-        $('#messageBar .remainingSegments').text( --this.offlineCacheRemaining );
-        UI.showExistingMessage();
+        if (typeof this.offlineNotification != 'undefined') {
+            APP.removeNotification(this.offlineNotification);
+        }
+        var notification = {
+            title: '<div class="message-offline-icons"><span class="icon-power-cord"></span><span class="icon-power-cord2"></span></div>No connection available',
+            text: 'You can still translate <span class="remainingSegments">' + --this.offlineCacheRemaining + '</span> segments in offline mode. Do not refresh or you lose the segments!',
+            type: 'warning',
+            position: "bl",
+            autoDismiss: false,
+            allowHtml: true,
+            timer: 7000
+        };
+        this.offlineNotification = APP.addNotification(notification);
+
         UI.checkOfflineCacheSize();
     },
     incrementOfflineCacheRemaining: function(){

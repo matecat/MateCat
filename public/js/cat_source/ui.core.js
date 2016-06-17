@@ -384,16 +384,30 @@ UI = {
             error: function() {
                 console.log('error');
                 APP.closePopup();
-                UI.showMessage({
+                var notification = {
+                    title: 'Error',
+                    text: 'Error copying all sources to target. Try again!',
+                    type: 'error',
+                    position: "bl"
+                };
+                APP.addNotification(notification);
+                /*UI.showMessage({
                     msg: 'Error copying all sources to target. Try again!'
-                });
+                });*/
             },
             success: function(d) {
                 if(d.errors.length) {
                     APP.closePopup();
-                    UI.showMessage({
+                    var notification = {
+                        title: 'Error',
+                        text: d.errors[0].message,
+                        type: 'error',
+                        position: "bl"
+                    };
+                    APP.addNotification(notification);
+                    /*UI.showMessage({
                         msg: d.errors[0].message
-                    });
+                    });*/
                 } else {
                     $.cookie('source_copied_to_target-' + config.id_job + "-" + config.password, '1', { expires:1 });
                     APP.closePopup();
@@ -2052,7 +2066,13 @@ UI = {
                      */
                     tokenData = $.parseJSON(token);
                     if(parseInt(tokenData.code) < 0) {
-                        UI.showMessage({msg: tokenData.message})
+                        var notification = {
+                            title: 'Error',
+                            text: tokenData.message,
+                            type: 'warning'
+                        };
+                        APP.addNotification(notification);
+                        // UI.showMessage({msg: tokenData.message})
                     }
                     UI.reEnableDownloadButton();
 
@@ -2215,16 +2235,26 @@ UI = {
 		});
 	},
 	displayMessage: function(messages) {
+        var self = this;
 		if($('body').hasClass('incomingMsg')) return false;
         $.each(messages, function() {
-            if(typeof $.cookie('msg-' + this.token) == 'undefined' && ( new Date( this.expire ) > ( new Date() ) )  ) {
-                UI.showMessage({
-                    msg: this.msg,
-                    token: this.token,
-                    showOnce: true,
-                    expire: this.expire
-                });
-
+            var elem = this;
+            if(typeof $.cookie('msg-' + this.token) == 'undefined' && ( new Date( this.expire ) > ( new Date() ) ) &&
+                (typeof self.displayedMessages !== 'undefined' && self.displayedMessages.indexOf(this.token) < 0 )) {
+                var notification = {
+                    title: 'Notice',
+                    text: this.msg,
+                    type: 'warning',
+                    autoDismiss: false,
+                    position: "bl",
+                    allowHtml: true,
+                    closeCallback: function () {
+                        var expireDate = new Date(elem.expire);
+                        $.cookie('msg-' + elem.token, '', {expires: expireDate});
+                    }
+                };
+                APP.addNotification(notification);
+                self.displayedMessages.push(elem.token);
                 return false;
             }
         });
@@ -2234,20 +2264,16 @@ UI = {
         APP.showMessage(options);
 
 	},
-    showExistingMessage: function () {
-        if(!$('body').hasClass('incomingMsg')) {
-            $('body' ).addClass('incomingMsg');
-            setTimeout(  function() {$('body' ).removeClass('incomingMsg' )} , 5000  );
-        }
-        setTimeout(  function() {$('body' ).removeClass('incomingMsg' )} , 5000  );
-    },
 	checkVersion: function() {
 		if(this.version != config.build_number) {
-			UI.showMessage({
-				msg: 'A new version of MateCat has been released. Please <a href="#" class="reloadPage">click here</a> or clic CTRL+F5 (or CMD+R on Mac) to update.',
-				token: false,
-				fixed: true
-			});
+            var notification = {
+                title: 'Eew version of MateCat',
+                text: 'A new version of MateCat has been released. Please <a href="#" class="reloadPage">click here</a> or clic CTRL+F5 (or CMD+R on Mac) to update.',
+                type: 'warning',
+                allowHtml: true,
+                position: "bl"
+            };
+            APP.addNotification(notification);
 		}
 	},
     currentSegmentLexiQA: function() {
