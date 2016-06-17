@@ -56,10 +56,10 @@ class NotificationBox extends React.Component {
         var notifications = this.state.notifications;
         newNotification.uid = this.uid;
         newNotification.dismissed = false;
-        if ( _.isUndefined(newNotification.position)) {
+        if ( typeof newNotification.position === 'undefined') {
             newNotification.position = "bl";
         }
-        if ( _.isUndefined(newNotification.type)) {
+        if ( typeof newNotification.type  === 'undefined') {
             newNotification.type = "info";
         }
         this.uid++;
