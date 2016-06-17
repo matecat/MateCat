@@ -9,7 +9,7 @@ class ChunkReviewStruct extends \DataAccess_AbstractDaoSilentStruct implements \
     public $id_job ;
     public $password ;
     public $review_password ;
-    public $score ;
+    public $penalty_points ;
     public $num_errors ;
     public $is_pass ;
     public $force_pass_at ;

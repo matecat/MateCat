@@ -144,6 +144,9 @@ left: -5px;
 	text-align: left;
 	margin-bottom: 0px;
 }
+.warnings:last-child {
+	margin-bottom: 25px;
+}
 .text .alternatives 
 {
 	max-width: 300px;
@@ -1275,10 +1278,11 @@ background: #09beec;
 }
 .sub-editor .gl-search .gl-comment
 {
-float: left;
-display: none;
-width: 80%;
-margin: 5px 1.5%;
+    float: left;
+    display: none;
+    width: 47.8%;
+    margin: 5px 1.5%;
+    clear: both;
 }       
 .sub-editor .gl-search .set-glossary
 {
@@ -1286,7 +1290,7 @@ margin: 5px 1.5%;
   height: 20px;
   font-size: 24px;
   width: 26px;
-  margin: 15px 0 0 0;
+  margin: 21px 0 0 0;
   color: #777;
 }
 
@@ -1303,18 +1307,36 @@ margin: 5px 1.5%;
 	width: 96%;
 	margin-bottom: 8px;
 }
-.sub-editor .gl-search .comment a
+.sub-editor .gl-search .comment a,
+.sub-editor .glossary-add-comment a
 {
 	float:left;
 	margin: 0 1.5% 0 1.5%;
 	text-decoration: none;
 	color: #666;
-	width:7%;
+	width:50%;
 	font-size: 80%;
 }
-.sub-editor .gl-search .comment a:hover
+.sub-editor .gl-search .comment a:hover,
+.sub-editor .glossary-add-comment a:hover
 {
 	color: #000;
+}
+.glossary-add-comment
+{
+	float: left;
+	text-align: left;
+	width: 50%;
+	margin-bottom: 8px;
+}
+.sub-editor .glossary-add-comment a {
+	font-size: 90%;
+	margin-bottom: 11px;
+	margin-left: 29px;
+}
+.glossary-add-comment .input.gl-comment {
+	width: 93%;
+	margin-left: 30px;
 }
 .content { float: left; clear: both; border: 1px solid #ccf; border-top: none; border-left: none; background: #eef; padding: 10px 20px 20px; width: 400px; }
 
@@ -1329,7 +1351,14 @@ margin: 5px 1.5%;
 {
     padding: 0 !important;
 }
+.search-inputs input#enable-replace {
+    float:left;
+}
+.search-inputs label[for="enable-replace"] {
+    float:left;
+    margin-top: 4px;
 
+}
 .searchbox .search-inputs {
 	height: 64px ;
 }
@@ -1349,17 +1378,20 @@ margin: 5px 1.5%;
 
 .search-options
 {
-	margin-top: -38px;
-	width: auto;
-	/*
-			margin-top: -9px;
-			border-top: 1px dotted #bbb;
-			width: 70%;
-	*/
+	margin-top: -35px;
+	width: 220px;
+	clear: left;
 }
+
 .search-options label
 {
     text-transform: none;
+    float: left;
+    margin-top: 4px;
+}
+.search-options input
+{
+    float: left;
 }
 .search-display
 {
@@ -1957,27 +1989,28 @@ body.rtl-target .editor .editarea span
     margin-left: -4px;*/
 }
 .graysmall .translation.editing,
-.graysmall .comment.editing {
-	padding: 3px;
-	background: #fff;
-	border: 1px solid #aaa;
-	border-radius: 2px;
-	box-shadow: inset 0 1px 2px #ddd;
-	outline: none;
+.graysmall .comment.editing,
+.graysmall .glossary-add-comment .gl-comment
+{
+    padding: 2px 0.4%;
+    background: #fff;
+    border: 1px solid #aaa;
+    border-radius: 2px;
+    box-shadow: inset 0 1px 2px #ddd;
+    outline: none;
+    min-height: 20px;
+    line-height: 20px;
 }    
 .graysmall .switch-editing
 {
-    display: none;
-    float: left;
-    position: relative;
-    text-indent: -9999px;
-    margin-left: -26px;
-    margin-right: 10px;
-    width: 16px;
-    height: 16px;   
-    background: transparent url(../img/icon_edit.png) 0 0 no-repeat;
-    cursor: pointer;
-    opacity: 0.6;
+	display: none;
+	float: left;
+	position: absolute;
+	width: 16px;
+	height: 16px;
+	cursor: pointer;
+	right: 40px;
+	top: 16px;
 }
 .graysmall:hover .switch-editing
 {
@@ -1985,7 +2018,8 @@ body.rtl-target .editor .editarea span
 }
 .graysmall:hover .switch-editing:hover
 {
-	opacity: 1;
+	margin-top:-2px;
+	color:#000;
 }
 .graysmall .edit-buttons
 {
@@ -2075,10 +2109,10 @@ body.rtl-target .editor .editarea span
 /*.overflow{overflow-y:auto;min-height:8px;margin-bottom:-1px;position:relative;z-index:9999999999999999999999999999999;}*/
 .graysmall li
 {
-	width:45%;
+	width:48%;
 	float:left;
-	margin:2px 1px 10px 0;
-	padding:12px 20px 12px 30px;
+	margin:2px 1px 0px 0;
+	padding:12px 20px 12px 34px;
 	text-align:left;
 	color:#666;
 	list-style:none;
@@ -2087,6 +2121,10 @@ body.rtl-target .editor .editarea span
 	cursor:text;
 	-webkit-transition: all 100ms ease-in;
 	transition: all 100ms ease-in;
+}
+.suggestion-item.graysmall > li {
+	min-height: 35px;
+	padding-bottom: 20px;
 }
 .graysmall li.goto
 {
@@ -2108,23 +2146,48 @@ body.rtl-target .editor .editarea span
 	overflow: hidden;
 }
 .graysmall div.comment.editing {
-	width: 60%;
+	width: 46%;
 }
-.graysmall .b{padding-left:25px!important;position:relative}
+.graysmall .b {
+    padding-left:12px!important;
+    position:relative
+}
 
-.message li{background: url(../img/bad.png) 22px center no-repeat;padding-left:40px !important;background-size:12px 12px}
-.graysmall:hover .trash{height:20px;}
+.message li {
+    background: url(../img/bad.png) 22px center no-repeat;
+    padding-left:40px !important;
+    background-size:12px 12px
+}
+.graysmall:hover .trash{
+    height:20px;
+}
 
-.trash:hover {margin-top:-2px;color:#000;}
+.trash:hover {
+    margin-top:-2px;
+    color:#000;
+}
 
-.trash{transition: width 2s; transition: width 2s; /* Firefox 4 */ -webkit-transition: width 2s; /* Safari and Chrome */ -o-transition: width 2s; /* Opera */ -webkit-transition: all 0.1s linear;
-	   transition: all 0.1s linear;
-	   color:#999;
-	   text-decoration: none;
-	   -o-transition: all 0.1s linear;
-	   -ms-transition: all 0.1s linear;display:block;height:0;width:20px;
-	   position:absolute;right:5px;top:14px}
-.graysmall-message{bottom:-10px;left:25px;position:absolute;font-size:10px;display:none;color:#999999}
+.trash{
+    transition: all 0.1s linear;
+    color:#666;
+    text-decoration: none;
+    -o-transition: all 0.1s linear;
+	-webkit-transition: all 0.1s linear;
+	display:block;
+	height:0;
+	width:20px;
+    position:absolute;
+	right:5px;
+	top:14px
+}
+.graysmall-message{
+    bottom:0px;
+    left:25px;
+    position:absolute;
+    font-size:10px;
+    display:none;
+    color:#999999
+}
 
 
 
@@ -2546,7 +2609,8 @@ section.modified.editor .status
 }
 
 .editor .editarea .locked,
-.editor .source .locked
+.editor .source .locked,
+.splitArea .locked
 {
 	color: #767676 !important;
 	font-size: 13px;
@@ -2635,9 +2699,16 @@ section.modified.editor .status
 }
 
 @media screen and (min-width: 1181px){
-	.languages{text-indent:-85px; }
-	.graysmall .b{ padding-left:55px !important;width:42% !important}
-	.graysmall-message{left:55px !important}
+	.languages{
+		text-indent:-85px;
+	}
+	.graysmall .b{
+		/*padding-left:85px !important;*/
+		width:42% !important
+	}
+	.graysmall-message{
+		left:15px !important
+	}
 	
 
 }
@@ -3247,17 +3318,17 @@ body.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .translation .locked.startTag,
-body.tagModes .splitArea .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) .splitArea .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTag,
-body.tagModes .splitArea .locked.selfClosingTag,
+body.tagModes:not(.tagmode-default-extended) .splitArea .locked.selfClosingTag,
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .translation .locked.endTag,
-body.tagModes .splitArea .locked.endTag
+body.tagModes:not(.tagmode-default-extended) .endTag
 {
 /*visibility: hidden;*/
 text-indent: -10000px;
@@ -3275,12 +3346,12 @@ body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.startT
 body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.startTag, 
 body.rtl-source.tagModes:not(.tagmode-default-extended) .source .locked.startTag, 
 body.rtl-source.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.startTag,
-body.rtl-target.tagModes .splitArea .locked.startTag,
+body.rtl-target.tagModes:not(.tagmode-default-extended) .splitArea .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag,
 body.tagModes:not(.tagmode-default-extended) .source .locked.endTag, 
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag, 
 body.tagModes:not(.tagmode-default-extended) .translation .locked.endTag,
-body.tagModes .splitArea .locked.endTag
+body.tagModes:not(.tagmode-default-extended) .splitArea .locked.endTag
 {
  -ms-transform: rotate(-180deg); /* IE 9 */
     -webkit-transform: rotate(-180deg); /* Chrome, Safari, Opera */
@@ -3289,7 +3360,7 @@ body.tagModes .splitArea .locked.endTag
 body.rtl-source.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.endTag, 
 body.rtl-source.tagModes:not(.tagmode-default-extended) .source .locked.endTag, 
 body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.endTag,
-body.rtl-target.tagModes .spliArea .locked.endTag,
+body.rtl-target.tagModes:not(.tagmode-default-extended) .spliArea .locked.endTag,
 body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.endTag
 {
  -ms-transform: rotate(0deg); /* IE 9 */
@@ -3841,15 +3912,16 @@ body.cattool .nav-tabs li.mgmt-mt {
 .submenu li.footerSwitcher {
 	float: left;
 	width: 23px !important;
-	height: 25px;
+	height: 26px;
 	border: 1px solid #666666;
 	border-left: 0 !important;
 	background: #3aa9dd url(../img/matches-down.png) 5px 9px no-repeat !important;
 	cursor: pointer;
+	border-bottom: 0;
 }
 .submenu li.footerSwitcher:hover {
 	opacity: 0.85;
-	border: 1px solid #000;
+	/*border: 1px solid #000;*/
 }
 
 body.hideMatches .submenu li.footerSwitcher {
@@ -3859,13 +3931,18 @@ body.hideMatches .submenu li.footerSwitcher {
     transform: scaleY(-1);
     filter: FlipV;
     -ms-filter: "FlipV";
+    border-bottom: 1px solid #666666;
+    border-top: 1px solid #3aa9dd;
 }
 
 body.hideMatches .submenu {
-    margin-bottom: 5px;
+	margin-bottom: 0px;
+	border-bottom: none;
 }
 
-
+body.hideMatches .tab-switcher {
+	border-bottom: 1px solid rgba(158, 158, 158, 0.46);
+}
 /**
  * Ensure all tabbed content in the footer is only visible when
  * the segment completed loading.

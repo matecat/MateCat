@@ -18,6 +18,9 @@ error_reporting(~E_DEPRECATED);
 class GlossaryImportTest extends AbstractTest
 {
     protected $engine_struct_param;
+    /**
+     * @var Engines_MyMemory
+     */
     protected $engine_MyMemory;
     protected $glossary_folder_path;
     protected $filename;
@@ -27,7 +30,7 @@ class GlossaryImportTest extends AbstractTest
     public function setUp(){
         parent::setUp();
         $this->key_param="a6043e606ac9b5d7ff24";
-        $engineDAO = new EnginesModel_EngineDAO(Database::obtain());
+        $engineDAO = new EnginesModel_EngineDAO(Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ));
         $engine_struct = EnginesModel_EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng = $engineDAO->read($engine_struct);
@@ -46,6 +49,10 @@ class GlossaryImportTest extends AbstractTest
         parent::tearDown();
     }
 
+    /**
+     * @group regression
+     * @covers Engines_MyMemory::glossaryImport
+     */
     public function test_glossaryImport_correct_behaviour()
     {
         $this->filename= "GlossaryImportcorrectBehaviour";
@@ -81,6 +88,10 @@ class GlossaryImportTest extends AbstractTest
 
     }
 
+    /**
+     * @group regression
+     * @covers Engines_MyMemory::glossaryImport
+     */
     public function test_glossaryImport_short_count_of_lines()
     {
 
@@ -111,6 +122,10 @@ class GlossaryImportTest extends AbstractTest
 
     }
 
+    /**
+     * @group regression
+     * @covers Engines_MyMemory::glossaryImport
+     */
     public function test_glossaryImport_wrong_source_lang()
     {
 
@@ -141,6 +156,10 @@ class GlossaryImportTest extends AbstractTest
 
     }
 
+    /**
+     * @group regression
+     * @covers Engines_MyMemory::glossaryImport
+     */
     public function test_glossaryImport_wrong_target_lang()
     {
 
@@ -169,7 +188,10 @@ class GlossaryImportTest extends AbstractTest
         $this->assertEquals("",$result->responseData);
 
     }
-
+    /**
+     * @group regression
+     * @covers Engines_MyMemory::glossaryImport
+     */
     public function test_glossaryImport_empty_languages()
     {
 
@@ -199,5 +221,72 @@ class GlossaryImportTest extends AbstractTest
 
 
     }
+
+    /**
+     * @group regression
+     * @covers Engines_MyMemory::glossaryImport
+     */
+    public function test_glossaryImport_with_error_from_mocked__call_for_coverage_purpose(){
+
+
+        $rawValue_error = array(
+            'error' => array(
+                'code'      => -6,
+                'message'   => "Could not resolve host: api.mymemory.translated.net. Server Not Available (http status 0)",
+                'response'  => "",
+            ),
+            'responseStatus'    => 0
+        );
+        
+        /**
+         * @var Engines_MyMemory
+         * mocking _call
+         */
+        $this->engine_MyMemory = $this->getMockBuilder('\Engines_MyMemory')->setConstructorArgs(array($this->engine_struct_param))->setMethods(array('_call'))->getMock();
+        $this->engine_MyMemory->expects($this->once())->method('_call')->willReturn($rawValue_error);
+
+
+
+        $this->filename= "GlossaryImportcorrectBehaviour";
+
+        $path_of_the_original_file = TEST_DIR . '/support/files/glossary/' . "{$this->filename}" . "Original.g";
+        $this->path_of_file_for_test = TEST_DIR . '/support/files/glossary/' . "{$this->filename}" . "Temp.g";
+
+
+        chmod($path_of_the_original_file, 0644);
+
+        copy($path_of_the_original_file,$this->path_of_file_for_test);
+
+
+        $file_param = $this->path_of_file_for_test;
+        $name_param = "{$this->filename}"."Temp.g";
+
+
+        Langs_Languages::getInstance();
+        $result = $this->engine_MyMemory->glossaryImport($file_param, $this->key_param, $name_param);
+
+        $this->assertTrue($result instanceof Engines_Results_MyMemory_TmxResponse);
+        $this->assertNull($result->id);
+        $this->assertEquals(0, $result->responseStatus);
+        $this->assertEquals("", $result->responseDetails);
+        $this->assertEquals("", $result->responseData);
+        $this->assertTrue($result->error instanceof Engines_Results_ErrorMatches);
+
+        $this->assertEquals(-6, $result->error->code);
+        $this->assertEquals("Could not resolve host: api.mymemory.translated.net. Server Not Available (http status 0)", $result->error->message);
+
+
+
+        $reflector = new ReflectionClass($result);
+        $property = $reflector->getProperty('_rawResponse');
+        $property->setAccessible(true);
+
+        $this->assertEquals("", $property->getValue($result));
+
+
+    }
+
+
+
 
 }

@@ -15,9 +15,11 @@ $.extend(UI, {
 		}).on('keydown.shortcuts', null, UI.shortcuts.translate_nextUntranslated.keystrokes.standard, function(e) {
 			e.preventDefault();
 			$('.editor .next-untranslated').click();
+			$('.editor .next-unapproved').click();
 		}).on('keydown.shortcuts', null, UI.shortcuts.translate_nextUntranslated.keystrokes.mac, function(e) {
 			e.preventDefault();
 			$('.editor .next-untranslated').click();
+			$('.editor .next-unapproved').click();
 		}).on('keydown.shortcuts', null, 'Ctrl+pageup', function(e) {
 			e.preventDefault();
 		}).on('keydown.shortcuts', null, UI.shortcuts.openNext.keystrokes.standard, function(e) {
@@ -540,10 +542,6 @@ $.extend(UI, {
 			e.preventDefault();
 			$("#search").toggle();
 		});
-		$('.download-chrome a.close').bind('click', function(e) {
-			e.preventDefault();
-			$('.download-chrome').removeClass('d-open');
-		});
 
 		//overlay
 
@@ -606,12 +604,8 @@ $.extend(UI, {
 			UI.chooseAlternative($(this));
         }).on('dblclick', '.glossary .sugg-target', function() {
             UI.copyGlossaryItemInEditarea($(this));
-		}).on('click', '.glossary .sugg-target', function() {
-			UI.updateGlossaryTarget($(this).find('span.translation'));
-		}).on('click', '.tab.alternatives .graysmall .goto a', function(e) {
-			e.preventDefault();
-			UI.scrollSegment($('#segment-' + $(this).attr('data-goto')), true);
-			UI.highlightEditarea($('#segment-' + $(this).attr('data-goto')));
+		}).on('click', '.glossary .switch-editing', function() {
+			UI.updateGlossary($(this).closest(".graysmall"));
 		});
 
 		$(".joblink").click(function(e) {
@@ -798,11 +792,13 @@ $.extend(UI, {
             }
 		}).on('keydown', '.editor .editarea', function(e) {
 
-            if ((e.which == 8)&&(!UI.body.hasClass('tagmode-default-extended'))) { return true;
-                var rangeObject = getRangeObject(window.getSelection());
-                for(var key in rangeObject.endContainer) {
-                    console.log('key: ' + key + '\n' + 'value: "' + rangeObject[key] + '"');
-                }
+            if ((e.which == 8) && (!UI.body.hasClass('tagmode-default-extended'))) {
+				return true;
+				// ONly for console.log
+                // var rangeObject = getRangeObject(window.getSelection());
+                // for(var key in rangeObject.endContainer) {
+                //     console.log('key: ' + key + '\n' + 'value: "' + rangeObject[key] + '"');
+                // }
             }
 
 			if ((e.which == 8) || (e.which == 46)) { // backspace e canc(mac)
@@ -1137,9 +1133,6 @@ $.extend(UI, {
 			e.preventDefault();
 			ul = $(this).parents('ul.graysmall').first();
 			UI.deleteGlossaryItem($(this).parents('ul.graysmall').first());
-		}).on('click', '.sub-editor.glossary .details .comment', function(e) {
-			e.preventDefault();
-			UI.updateGlossaryComment($(this));
 		}).on('keydown', '.sub-editor .cc-search .search-source', function(e) {
 			if (e.which == 13) { // enter
 				e.preventDefault();
@@ -1179,10 +1172,15 @@ $.extend(UI, {
 					UI.getGlossary(segment, false);
 				}
 			}
-		}).on('keydown', '.sub-editor .gl-search .search-target, .sub-editor .gl-search .gl-comment', function(e) {
+		}).on('keydown', '.sub-editor .gl-search .search-target, .sub-editor .gl-search .comment .gl-comment', function(e) {
 			if (e.which == 13) {
 				e.preventDefault();
 				UI.setGlossaryItem();
+			}
+		}).on('keydown', '.sub-editor .glossary-add-comment .gl-comment', function(e) {
+			if (e.which == 13) {
+				e.preventDefault();
+				UI.addGlossaryComment($(this));
 			}
 		}).on('input', '.sub-editor .gl-search .search-target', function() {
 			gl = $(this).parents('.gl-search').find('.set-glossary');
@@ -1196,9 +1194,9 @@ $.extend(UI, {
 		}).on('click', '.sub-editor .gl-search .set-glossary:not(.disabled)', function(e) {
 			e.preventDefault();
 			UI.setGlossaryItem();
-		}).on('click', '.sub-editor .gl-search .comment a', function(e) {
+		}).on('click', '.sub-editor .gl-search .comment a, .sub-editor .glossary-add-comment a', function(e) {
 			e.preventDefault();
-			$(this).parents('.comment').find('.gl-comment').toggle();
+			$(this).parents('.comment, .glossary-add-comment').find('.gl-comment').toggle().focus();
 		}).on('paste', '.editarea', function(e) {
 			console.log('paste in editarea');
 

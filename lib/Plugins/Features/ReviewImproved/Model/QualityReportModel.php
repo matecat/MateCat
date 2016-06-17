@@ -8,6 +8,7 @@
 
 namespace Features\ReviewImproved\Model;
 
+use Features\ReviewImproved\ChunkReviewModel;
 use Log,
         ArrayObject;
 use LQA\ChunkReviewDao;
@@ -29,6 +30,8 @@ class QualityReportModel {
     private $current_issue = array();
 
     private $chunk_review;
+
+    private $chunk_review_model;
 
     private $all_segments = array();
 
@@ -66,6 +69,14 @@ class QualityReportModel {
         return $this->chunk_review;
     }
 
+    public function getChunkReviewModel() {
+        if ( $this->chunk_review_model == null ) {
+            $this->chunk_review_model = new ChunkReviewModel( $this->getChunkReview() );
+        }
+
+        return $this->chunk_review_model;
+    }
+
     /**
      * @param $format
      */
@@ -74,12 +85,14 @@ class QualityReportModel {
     }
 
     private function buildQualityReportStructure( $records ) {
+        $scoreFormatted = number_format( $this->getChunkReviewModel()->getScore(), 2, '.', ',' );
+
         $this->quality_report_structure = array(
                 'chunk'   => array(
                         'review' => array(
                                 'percentage'    => $this->getChunkReview()->getReviewedPercentage(),
                                 'is_pass'       => !!$this->getChunkReview()->is_pass,
-                                'score'         => $this->getChunkReview()->score,
+                                'score'         => $scoreFormatted,
                                 'reviewer_name' => $this->getReviewerName()
                         ),
                         'files'  => array()

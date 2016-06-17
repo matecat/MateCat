@@ -26,35 +26,6 @@ class Features {
     );
 
     /**
-     * appendDecorators
-     *
-     * Loads feature specific decorators, if any
-     *
-     * @param $id_customer string Id customer to find active features
-     * @param $name name of the decorator to activate
-     * @param viewController $controller the controller to work on
-     * @param PHPTAL $template the PHPTAL view to add properties to
-     *
-     */
-
-    public static function appendDecorators($id_customer, $name, viewController $controller, PHPTAL $template) {
-        $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
-
-        foreach( $features as $feature ) {
-            $cls = "Features\\" . $feature->toClassName() . "\\Decorator\\$name" ;
-
-            // XXX: keep this log line because due to a bug in Log class
-            // if this line is missing it won't log load errors.
-            Log::doLog('loading Decorator ' . $cls );
-
-            if ( class_exists( $cls ) ) {
-                $obj = new $cls( $controller, $template) ;
-                $obj->decorate();
-            }
-        }
-    }
-
-    /**
      * Returns the filtered subject variable passed to all enabled features.
      *
      * @param $method
@@ -76,10 +47,13 @@ class Features {
             // XXX FIXME TODO: find a better way for this initialiation, $projectStructure is not defined
             // here, so the feature initializer should not need the project strucutre at all.
             // The `id_customer` should be enough. XXX
-            $obj = new $name( $feature );
 
-            if ( method_exists( $obj, $method ) ) {
-                $filterable = call_user_func_array( array( $obj, $method ), $args );
+            if ( class_exists( $name ) ) {
+                $obj = new $name( $feature );
+
+                if ( method_exists( $obj, $method ) ) {
+                    $filterable = call_user_func_array( array( $obj, $method ), $args );
+                }
             }
         }
 
@@ -106,11 +80,14 @@ class Features {
 
         foreach( $features as $feature ) {
             $name = "Features\\" . $feature->toClassName() ;
-            $obj = new $name( $feature );
 
-            if ( method_exists( $obj, $method ) ) {
-                \Log::doLog( " calling $name, $method, with args " . var_export( $args, true) );
-                call_user_func_array( array( $obj, $method ), $args );
+            if ( class_exists( $name ) ) {
+                $obj = new $name( $feature );
+
+                if ( method_exists( $obj, $method ) ) {
+                    \Log::doLog( " calling $name, $method, with args " . var_export( $args, true) );
+                    call_user_func_array( array( $obj, $method ), $args );
+                }
             }
         }
     }

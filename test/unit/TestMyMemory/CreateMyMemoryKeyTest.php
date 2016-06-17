@@ -29,7 +29,7 @@ class CreateMyMemoryKeyTest extends AbstractTest
 T;
 
 
-        $engineDAO = new EnginesModel_EngineDAO(Database::obtain());
+        $engineDAO = new EnginesModel_EngineDAO(Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ));
         $engine_struct = EnginesModel_EngineStruct::getStruct();
         $engine_struct->id = 1;
         $eng = $engineDAO->read($engine_struct);
@@ -62,6 +62,79 @@ T;
         $this->assertTrue($result->error instanceof Engines_Results_ErrorMatches);
         $this->assertEquals(0, $result->error->code);
         $this->assertEquals("", $result->error->message);
+        /**
+         * check of protected property
+         */
+        $reflector= new ReflectionClass($result);
+        $property = $reflector->getProperty('_rawResponse');
+        $property->setAccessible(true);
+        $this->assertEquals("", $property->getValue($result));
+
+
+    }
+
+    /**
+     * @group regression
+     * @covers Engines_MyMemory::createMyMemoryKey
+     */
+    public function test_createMyMemoryKey_with_error_from_mocked__call_for_coverage_purpose()
+    {
+
+
+        $curl_mock_param = array(
+            CURLOPT_HTTPGET => true,
+            CURLOPT_TIMEOUT => 10
+        );
+
+
+        $url_mock_param = "http://api.mymemory.translated.net/createranduser?";
+        $rawValue_error = array(
+            'error' => array(
+                'code'      => -6,
+                'message'   => "Could not resolve host: api.mymemory.translated.net. Server Not Available (http status 0)",
+                'response'  => "",
+            ),
+            'responseStatus'    => 0
+        );
+
+
+        $engineDAO = new EnginesModel_EngineDAO(Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE ));
+        $engine_struct = EnginesModel_EngineStruct::getStruct();
+        $engine_struct->id = 1;
+        $eng = $engineDAO->read($engine_struct);
+
+        /**
+         * @var $engineRecord EnginesModel_EngineStruct
+         */
+        $engine_struct_param = $eng[0];
+
+        /**
+         * creation of the engine
+         * @var Engines_MyMemory
+         */
+        $engine_MyMemory = $this->getMockBuilder('\Engines_MyMemory')->setConstructorArgs(array($engine_struct_param))->setMethods(array('_call'))->getMock();
+
+        $engine_MyMemory->expects($this->once())->method('_call')->with($url_mock_param, $curl_mock_param)->willReturn($rawValue_error);
+
+
+        $result = $engine_MyMemory->createMyMemoryKey();
+
+        /**
+         * check on the values of TMS object returned
+         */
+        $this->assertTrue($result instanceof Engines_Results_MyMemory_CreateUserResponse);
+        $this->assertEquals("", $result->key);
+        $this->assertEquals("", $result->id);
+        $this->assertEquals("", $result->pass);
+        $this->assertFalse(key_exists('responseStatus',$result ));
+        $this->assertFalse(key_exists('responseDetails',$result ));
+        $this->assertFalse(key_exists('responseData',$result ));
+
+        $this->assertTrue($result->error instanceof Engines_Results_ErrorMatches);
+
+        $this->assertEquals(-6, $result->error->code);
+        $this->assertEquals("Could not resolve host: api.mymemory.translated.net. Server Not Available (http status 0)", $result->error->message);
+
         /**
          * check of protected property
          */

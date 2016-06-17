@@ -2094,13 +2094,12 @@ class ProjectManager {
 
     public static function getExtensionFromMimeType( $mime_type ) {
 
-        $reference = include( 'mime2extension.inc.php' );
-        if ( array_key_exists( $mime_type, $reference ) ) {
-            if ( array_key_exists( 'default', $reference[ $mime_type ] ) ) {
-                return $reference[ $mime_type ][ 'default' ];
+        if ( array_key_exists( $mime_type, INIT::$MIME_TYPES ) ) {
+            if ( array_key_exists( 'default', INIT::$MIME_TYPES[ $mime_type ] ) ) {
+                return INIT::$MIME_TYPES[ $mime_type ][ 'default' ];
             }
 
-            return $reference[ $mime_type ][ array_rand( $reference[ $mime_type ] ) ]; // rand :D
+            return INIT::$MIME_TYPES[ $mime_type ][ array_rand( INIT::$MIME_TYPES[ $mime_type ] ) ]; // rand :D
         }
 
         return null;
@@ -2211,10 +2210,6 @@ class ProjectManager {
 
     protected function _generatePassword( $length = 12 ) {
         return CatUtils::generate_password( $length );
-    }
-
-    private function sortByStrLenAsc( $a, $b ) {
-        return strlen( $a ) >= strlen( $b );
     }
 
     private function addNotesToProjectStructure( $trans_unit ) {
