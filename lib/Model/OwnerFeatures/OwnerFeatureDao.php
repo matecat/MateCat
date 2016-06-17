@@ -72,6 +72,22 @@ class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
         return $stmt->fetch();
     }
 
+    /**
+     * @param $feature_code
+     * @param $email
+     *
+     * @return bool
+     */
+    public function isFeatureEnabled( $feature_code, $email ) {
+        $feature = self::getByOwnerEmailAndCode( $feature_code, $email );
+
+        if($feature != null) {
+            return !!$feature->enabled;
+        }
+
+        return false;
+    }
+
     protected function _buildResult( $array_result ) {
 
     }
