@@ -142,11 +142,11 @@
                 segment: segment
             });
 
-            Speech2Text.enableMicrophone(segment.el);
-
             if( this.currentSegment.data( 'modified' ) === true ) {
                 segment.el.trigger('fixedButton:enable');
             }
+            
+            Speech2Text.enabled() && Speech2Text.enableMicrophone(segment.el);
         }
     });
 })(jQuery, UI);

@@ -38,21 +38,10 @@ if ( ReviewImproved.enabled() ) {
         });
     });
 
-    var putSegmentsInStore = function(data) {
-        $.each(data.files, function() {
-            $.each( this.segments, function() {
-                MateCat.db.upsert( 'segments', 'sid', _.clone( this ) );
-            });
-        });
-    }
-
     $(document).on('ready', function() {
         ReviewImproved.mountPanelComponent();
     });
 
-    $(document).on('segments:load', function(e, data) {
-        putSegmentsInStore( data );
-    });
 
     $(document).on('segment-filter:filter-data:load', function() {
         ReviewImproved.closePanel();

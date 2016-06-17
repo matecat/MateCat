@@ -163,8 +163,10 @@ $.extend(UI, {
 
         $(area).first().each(function() {
             var segment = $(this).closest('section');
-			if (LXQ.enabled())
+			if (LXQ.enabled()) {
             	$.powerTip.destroy($('.tooltipa',segment));
+            	$.powerTip.destroy($('.tooltipas',segment));
+            }
             saveSelection();
 
             var html = $(this).html() ;
@@ -175,7 +177,7 @@ $.extend(UI, {
             var prevNumTags = $('span.locked', this).length;
 
             restoreSelection();
-            if (LXQ.enabled())
+            if (LXQ.enabled()) 
                 LXQ.reloadPowertip(segment);
             if ($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
 

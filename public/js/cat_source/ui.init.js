@@ -257,7 +257,7 @@ UI.SegmentFooter.registerTab({
 UI.SegmentFooter.registerTab({
     code                : 'al',
     tab_class           : 'alternatives',
-    label               : 'Translation conflicts',
+    label               : 'Translation conflicts ',
     activation_priority : 30,
     tab_position        : 40,
     is_enabled          : function(segment) {

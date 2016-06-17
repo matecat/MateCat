@@ -4,84 +4,63 @@
  * @group regression
  * @covers DataAccess_AbstractDao::_getFromCache
  * User: dinies
- * Date: 18/04/16
- * Time: 17.31
+ * Date: 09/06/16
+ * Time: 21.31
  */
 class GetFromCacheTest extends AbstractTest
 {
+    /**
+     * @var Jobs_JobDao
+     */
+    protected $job_Dao;
     protected $reflector;
-    protected $method;
+    protected $method_getFromCache;
     protected $cache_con;
     protected $cache_TTL;
-    protected $cache_key;
-    protected $cache_value_for_the_key;
+    /**
+     * @var Database
+     */
+    protected $database_instance;
+
 
     public function setUp()
     {
         parent::setUp();
-        $this->reflectedClass = new EnginesModel_EngineDAO(Database::obtain());
-        $this->reflector = new ReflectionClass($this->reflectedClass);
-        $this->method = $this->reflector->getMethod("_getFromCache");
-        $this->method->setAccessible(true);
+        $this->database_instance = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE);
+        $this->job_Dao = new Jobs_JobDao($this->database_instance);
+        $this->reflector = new ReflectionClass($this->job_Dao);
+
+        $this->method_getFromCache = $this->reflector->getMethod("_getFromCache");
+        $this->method_getFromCache->setAccessible(true);
 
         $this->cache_con = $this->reflector->getProperty("cache_con");
         $this->cache_con->setAccessible(true);
-        $this->cache_con->setValue($this->reflectedClass, new Predis\Client(INIT::$REDIS_SERVERS));
+        $this->cache_con->setValue($this->job_Dao, new Predis\Client(INIT::$REDIS_SERVERS));
 
         $this->cache_TTL= $this->reflector->getProperty("cacheTTL");
         $this->cache_TTL->setAccessible(true);
-        $this->cache_TTL->setValue($this->reflectedClass, 30);
-
-
+        $this->cache_TTL->setValue($this->job_Dao, 30);
     }
     public function tearDown()
     {
-        $this->cache_con->getValue($this->reflectedClass)-> flushdb();
+
+        $this->cache_con->getValue($this->job_Dao)-> flushdb();
         parent::tearDown();
     }
-
     /**
-     * It gets from the cache a value tied to a simple key.
+     * It gets from the cache a value bound to a simple key.
      * @group regression
      * @covers DataAccess_AbstractDao::_getFromCache
      */
-    public function test__getFromCache_basic_key_value(){
-        $this->cache_key = "key";
-        $this->cache_value_for_the_key = "foo_bar";
-        $this->cache_con->getValue($this->reflectedClass) ->setex( md5( $this->cache_key ), $this->cache_TTL->getValue($this->reflectedClass), serialize( $this->cache_value_for_the_key ));
-        $expected_return= $this->method->invoke($this->reflectedClass , $this->cache_key);
-        $this->assertEquals($this->cache_value_for_the_key,  $expected_return );
+    public function test__getFromCache_simple_engine_with_basic_key_value(){
+
+        $cache_key = "key";
+        $cache_value = "foo_bar";
+
+
+
+        $this->cache_con->getValue($this->job_Dao) ->setex( md5( $cache_key ), $this->cache_TTL->getValue($this->job_Dao), serialize( $cache_value ));
+        $expected_return= $this->method_getFromCache->invoke($this->job_Dao , $cache_key);
+        $this->assertEquals($cache_value,  $expected_return );
     }
-
-    /**
-     * It gets from the cache a common value tied to a frequent key.
-     * @group regression
-     * @covers DataAccess_AbstractDao::_getFromCache
-     */
-    public function test__getFromCache_frequent_key_value(){
-        $this->cache_key = "SELECT * FROM engines WHERE id = 0 AND active = 0 AND type = 'NONE'";
-
-        $this->cache_value_for_the_key = array(0 =>
-            array(
-                "id" => "0",
-                "name" => "NONE",
-                "type" => "NONE",
-                "description" => "No MT",
-                "base_url" => "",
-                "translate_relative_url" => "",
-                "contribute_relative_url" => NULL,
-                "delete_relative_url" => NULL,
-                "others" => "{}",
-                "class_load" => "NONE",
-                "extra_parameters" => "",
-                "google_api_compliant_version" => NULL,
-                "penalty" => "100",
-                "active" => "0",
-                "uid" => NULL
-            ));
-        $this->cache_con->getValue($this->reflectedClass) ->setex( md5( $this->cache_key ), $this->cache_TTL->getValue($this->reflectedClass), serialize( $this->cache_value_for_the_key ));
-        $expected_return= $this->method->invoke($this->reflectedClass , $this->cache_key);
-        $this->assertEquals($this->cache_value_for_the_key,  $expected_return );
-    }
-
 }

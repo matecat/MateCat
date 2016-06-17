@@ -18,21 +18,21 @@ class ToStringTest extends AbstractTest
     {
         parent::setUp();
         $this->engine_struct_param = new EnginesModel_EngineStruct();
+        $this->engine_struct_param->id = 999 ; //sample value
+        $this->engine_struct_param->name = "Moses_bar_and_foo";
+        $this->engine_struct_param->description = "Machine translation from bar and foo.";
     }
 
 
     /**
-     * It checks if the string of summary useful for confrontations between instances of engines is created correctly.
+     * It checks if the string of summary useful for confrontations between instances of engines is being created correctly.
      * @group regression
      * @covers EnginesModel_EngineStruct::offsetUnset
      */
-    public function test_offsetUnset_id_field()
+    public function test_toString_field()
     {
-        $this->engine_struct_param->id = 10 ;
-        $this->engine_struct_param->name = "bar" ;
-        $this->engine_struct_param->description = "bar and foo and foo again but suddenly bar" ;
-        $expected_string="10barbar and foo and foo again but suddenly bar";
-
+        $expected_string= '999Moses_bar_and_fooMachine translation from bar and foo.';
+        
         $this->assertEquals($expected_string,$this->engine_struct_param->__toString());
     }
 }

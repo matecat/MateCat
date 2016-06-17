@@ -46,7 +46,7 @@ class TranslationIssueModel
     public function delete() {
         \LQA\EntryDao::deleteEntry($this->issue);
         $chunk_review_model = new ChunkReviewModel( $this->chunk_review );
-        $chunk_review_model->subtractScore( $this->issue->penalty_points );
+        $chunk_review_model->subtractPenaltyPoints( $this->issue->penalty_points );
     }
 
 
@@ -60,7 +60,7 @@ class TranslationIssueModel
         $this->issue = \LQA\EntryDao::createEntry( $data );
 
         $chunk_review_model = new ChunkReviewModel( $this->chunk_review );
-        $chunk_review_model->addScore( $this->issue->penalty_points );
+        $chunk_review_model->addPenaltyPoints( $this->issue->penalty_points );
 
         return $this->issue;
     }

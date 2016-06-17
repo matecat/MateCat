@@ -5,8 +5,8 @@ declare( ticks = 10 );
 require( 'functions.php' );
 setupSignalHandler();
 
-define('PROJECT_ROOT', realpath( dirname(__FILE__)) . '/../' );
-define('TEST_DIR', realpath( dirname(__FILE__)));
+define( 'PROJECT_ROOT', realpath( dirname(__FILE__) . '/../' ) . DIRECTORY_SEPARATOR );
+define( 'TEST_DIR', realpath( dirname(__FILE__) ) );
 
 set_include_path ( get_include_path() . PATH_SEPARATOR . TEST_DIR );
 

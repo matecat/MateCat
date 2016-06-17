@@ -556,7 +556,7 @@ table.review-issue-category-list {
 
 body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.selfClosingTag,
-body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.endTag
 {
 /*visibility: hidden;*/
 text-indent: -10000px;
@@ -571,13 +571,13 @@ padding-top: 0px;
 
 
 body.rtl-target.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.startTag,
-body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.endTag
 {
  -ms-transform: rotate(-180deg); /* IE 9 */
     -webkit-transform: rotate(-180deg); /* Chrome, Safari, Opera */
     transform: rotate(-180deg);
 }
-body.rtl-target.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.endTag,
+body.rtl-target.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.endTag
 {
  -ms-transform: rotate(0deg); /* IE 9 */
     -webkit-transform: rotate(0deg); /* Chrome, Safari, Opera */
@@ -585,7 +585,7 @@ body.rtl-target.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locke
 }
 
 body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.startTag:before,
-body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.endTag:before,
+body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.endTag:before
 {
 content: "\f04b";
 visibility: visible;
@@ -597,8 +597,7 @@ transform: scaleY(1.4);
 left: 10000px;
 }
 
-body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.selfClosingTag:before,
-{
+body.tagModes:not(.tagmode-default-extended) .errorTaggingArea .locked.selfClosingTag:before {
 content: "\e603";
 visibility: visible;
 position: absolute;
@@ -606,3 +605,18 @@ font-size: 10px;
 top: -2px;
 left: 9999px;
 }
+
+section:not(.editor).highlighted1 .targetarea {
+    color: #00C1E6;
+}
+
+section:not(.editor).highlighted2 .targetarea {
+    -moz-transition: color 3s;
+    -webkit-transition: color 3s !important;
+    -o-transition: color 3s;
+    transition: color 3s !important;
+    color: #4d4d4f;
+}
+
+
+

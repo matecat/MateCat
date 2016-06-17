@@ -27,7 +27,7 @@ class GetInstanceTest extends AbstractTest
     {
 
         parent::setUp();
-        $this->database_instance=Database::obtain();
+        $this->database_instance=Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         /**
          * user insertion
          */
