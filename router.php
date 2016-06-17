@@ -41,12 +41,9 @@ $klein->onError(function ($klein, $err_msg, $err_type, $exception) {
             $klein->response()->send();
             break;
         default:
-            \Log::doLog("$err_msg" );
             $klein->response()->code(500);
-            // TODO: log exceptions to default loader
-            Log::doLog(
-                "Error: {$exception->getMessage()} "
-            );
+            \Utils::sendErrMailReport( $exception->getMessage() . "" . $exception->getTraceAsString(), 'Generic error' );
+            \Log::doLog("Error: {$exception->getMessage()} ");
             \Log::doLog( $exception->getTraceAsString() );
             break;
     }
