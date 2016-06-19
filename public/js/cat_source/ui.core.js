@@ -3498,18 +3498,7 @@ UI = {
                     //console.log('UI.lexiqaData.lexiqaWarnings');
                     //console.dir(UI.lexiqaData.lexiqaWarnings);
                      $('#lexiqabox').attr('class', 'warningbox').attr("title", "Go to lexiQA for QA analysis").find('.numbererror').text(errorCnt);
-                    $('.tooltipa').powerTip({
-                        placement: 'sw',
-                        mouseOnToPopup: true,
-                        smartPlacement: true,
-                        closeDelay: 500
-                    });
-                    $('.tooltipas').powerTip({
-                        placement: 'se',
-                        mouseOnToPopup: true,
-                        smartPlacement: true,
-                        closeDelay: 500
-                    });
+                     LXQ.reloadPowertip();
                 }
                 else {
                     $('#lexiqabox').attr('class', 'lexnotific').attr("title", "Well done, no errors found!").find('.numbererror').text('');                    
