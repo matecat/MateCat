@@ -507,8 +507,13 @@ table.review-issue-category-list {
 }
 
 .review-issue-buttons-right {
-    float: right;
     margin-top: 15px;
+    margin-right: 10px;
+    height: 50px;
+
+    .mc-button {
+        float: right;
+    }
 }
 
 .review-side-inner1 {
