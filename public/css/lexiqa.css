@@ -6,9 +6,9 @@
 
 #lexiqabox {   
     text-align: center;
-    width: 60px;
+    width: 40px;
     padding-top: 6px;
-    margin-left: 20px;
+    margin-left: 10px;
 }
 
 #lexiqabox .numbererror {
@@ -24,6 +24,7 @@
     content: url(../img/lexiqa_whitebg.svg);
     display: block;
     cursor: pointer;
+    width: 60px;
 }
 
 /*

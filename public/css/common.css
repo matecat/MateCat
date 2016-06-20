@@ -1644,7 +1644,7 @@ margin:0 auto; overflow:hidden; width:100%;
 
 .mgmt-tm .description {
 	/*width:32%!important;*/
-	width:470px!important;
+	width:320px!important;
 }
 
 .owner {width: 57px!important;}
@@ -1656,23 +1656,19 @@ margin:0 auto; overflow:hidden; width:100%;
 
 .mgmt-tm .check {
 		/*width:6%!important;*/
-		width:55px!important;
+		width:50px!important;
 		text-align: center;
 }
-.mgmt-tm .lookup input[type="checkbox"] {
-    margin-left: -87px;
-}
 
-.mgmt-tm .update input[type="checkbox"] {
-    margin-left: -30px;
-}
+
 .mgmt-tm .action {
         /*width:22%!important;*/
-        width: 212px!important;
+        width: 160px!important;
 }
+
 .mgmt-mt .action {
 		/*width:22%!important;*/
-		width: 160px!important;
+		width: 155px!important;
 }
 
 
@@ -1770,9 +1766,9 @@ box-shadow: inset 0 0 1px 1px #888;}
 input.error {border: 1px solid red !important; font-size: inherit;}
 
 .mgmt-tm .btn-ok, .mgmt-tm .btn-grey {
-padding: 7px 30px!important;
+padding: 7px 29px!important;
 cursor: pointer!important;
-margin: 0px 5px 0px 2px;
+margin: 0px 5px 0px 0px;
 font-size:14px;
 }
 
@@ -1855,7 +1851,8 @@ text-align: center;}
 .popup-tm td.engine-name .edit-desc
 {
     height: 18px;
-    width: 350px;
+/*    width: 350px;*/
+    max-width: 280px!important;
     height: 18px;
     padding: 2px 5px;
     border-radius: 2px;
@@ -1863,6 +1860,11 @@ text-align: center;}
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+.popup-tm td.engine-name .edit-desc {
+    max-width: 350px!important;
+}
+
 .popup-tm tr.mine td.description .edit-desc[contenteditable='true'],
 .popup-tm td.engine-name .edit-desc[contenteditable='true']
 {
@@ -2027,6 +2029,7 @@ top: 17%;
 
 #activetm th.privatekey, #inactivetm th.privatekey {
 	padding-left:15px;
+    padding-right: 6px;
 }
 
 
@@ -2642,7 +2645,7 @@ border: 1px solid #999;
 }
 
 .description .mgmt-input {
-width: 350px;
+width: 310px;
 }
 
 
@@ -2900,13 +2903,6 @@ column-count: 4;
 -moz-column-count: 4;
 }
 
-.popup-languages.slide, .popup-tm {
-width: 1000px!important;
-}
-
-.mgmt-tm .description {
-width: 370px!important;
-}
 
 }
 
@@ -2918,9 +2914,7 @@ column-count: 3;
 -moz-column-count: 3;
 }
 
-.popup-languages.slide, .popup-tm {
-width: 750px!important;
-}
+
 
 }
 /* retina display query */
