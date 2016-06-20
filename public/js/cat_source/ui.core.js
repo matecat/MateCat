@@ -252,7 +252,7 @@ UI = {
     },
 
     checkHeaviness: function() {
-        if ($('section').length > config.maxNumSegments) {
+        if ($('section').length > config.maxNumSegments && !UI.offline) {
             UI.reloadToSegment(UI.currentSegmentId);
         }
 
@@ -2186,13 +2186,17 @@ UI = {
 				UI.startWarning();
 				var warningPosition = '';
 				UI.globalWarnings = data.details.sort();
+                //The tags with tag projection enabled doesn't show the tags in the source, so tdont show the warning
+                UI.globalWarnings = UI.filterTagsWithTagProjection(UI.globalWarnings);
 				UI.firstWarnedSegment = UI.globalWarnings[0];
 				UI.translationMismatches = data.translation_mismatches;
 
 				//check for errors
 				if (UI.globalWarnings.length > 0) {
 					//for now, put only last in the pointer to segment id
-					warningPosition = '#' + data.details[ Object.keys(data.details).sort().shift() ].id_segment;
+					// warningPosition = '#' + data.details[ Object.keys(data.details).sort().shift() ].id_segment;
+
+                    // data.details = UI.filterTagsWithTagProjection(data.details);
 
 					if (openingSegment)
 						UI.fillCurrentSegmentWarnings(data.details, true);
@@ -2497,8 +2501,8 @@ UI = {
             propagate: propagate
         };
         if(isSplitted) {
+            this.setStatus($('#segment-' + id_segment), status);
             this.tempReqArguments.splitStatuses = this.collectSplittedStatuses(id_segment).toString();
-            this.setStatus($('#segment-' + id_segment), 'translated');
         }
         if(!propagate) {
             this.tempReqArguments.propagate = false;
@@ -2534,7 +2538,7 @@ UI = {
         segmentsIds = $('#segment-' + sid).attr('data-split-group').split(',');
         $.each(segmentsIds, function (index) {
             segment = $('#segment-' + this);
-            status = (this == sid)? 'translated' : UI.getStatus(segment);
+            status = UI.getStatus(segment);
             statuses.push(status);
         });
         return statuses;
@@ -3694,7 +3698,19 @@ UI = {
         UI.lockTags(UI.editarea);
         UI.changeStatusStop = new Date();
         UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
-    }
+    },
+    openOptionsPanel: function() {
+        if ($(".popup-tm").hasClass('open') ) {
+            return false;
+        }
+        var tab = 'opt';
+        $('body').addClass('side-popup');
+        $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
+        $("#SnapABug_Button").hide();
+        $(".outer-tm").show();
+        $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
+        $.cookie('tmpanel-open', 1, { path: '/' });
+    },
 
 
 };

@@ -64,9 +64,11 @@
                 decoded_translation = UI.removeAllTags(segment.translation);
                 decoded_source = UI.removeAllTags(segment.segment);
                 classes.push('enableTP');
+                dataAttrTagged = "nottagged";
             } else {
                 decoded_translation = segment.translation;
                 decoded_source = segment.segment;
+                dataAttrTagged = "tagged";
             }
 
             decoded_translation = UI.decodePlaceholdersToText(
@@ -102,7 +104,8 @@
                 segment_edit_sec        : segment_edit_sec,
                 segment_edit_min        : segment_edit_min, 
                 s2t_enabled             : Speech2Text.enabled(),
-                notEnableTagProjection  : !this.enableTagProjection
+                notEnableTagProjection  : !this.enableTagProjection,
+                dataAttrTagged          : dataAttrTagged
             };
 
         },
@@ -244,7 +247,7 @@
                 var dataAttribute = currentSegment.data('tagprojection');
                 // If the segment has already be tagged
                 var isCurrentAlreadyTagged = ( !_.isUndefined(dataAttribute) && dataAttribute === 'tagged')? true : false;
-                return ( tagProjectionEnabled && !isCurrentAlreadyTagged ) ? true : false;
+                return ( tagProjectionEnabled && !isCurrentAlreadyTagged );
             }
             return false;
         },
@@ -295,6 +298,7 @@
                 data : data
             }).done( function( data ) {
                 UI.render();
+                UI.checkWarnings(false);
             });
 
         },
@@ -315,9 +319,19 @@
                 type: 'POST',
                 data : data
             }).done( function( data ) {
-                UI.render();
+                UI.render(false);
+                UI.checkWarnings(false);
             });
 
+        },
+        filterTagsWithTagProjection: function (array) {
+            var returnArray = array;
+            if (UI.enableTagProjection) {
+                returnArray = array.filter(function (value) {
+                    return !UI.checkCurrentSegmentTPEnabled($('#segment-' + value));
+                });
+            }
+            return returnArray;
         }
     }); 
 })(jQuery); 
