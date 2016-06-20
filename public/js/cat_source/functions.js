@@ -1011,3 +1011,23 @@ function cleanupSplitMarker( string ) {
 function absoluteId( id ) {
 	return id.split('-')[0]; 
 }
+
+/**
+ * Returns a clickable link with mailto support.
+ */
+function linkedSupportEmail() {
+	return sprintf('<a href="mailto:%s">%s</a>', config.support_mail, config.support_mail );
+}
+
+/**
+ * A generic error message to show in modal window.
+ *
+ * @returns {*}
+ */
+function genericErrorAlertMessage() {
+	return APP.alert({
+		msg: sprintf('There was an error while saving data to server, please try again. ' +
+			'If the problem persists please contact %s reporting the web address of the current browser tab.',
+			linkedSupportEmail() )
+	});
+}
