@@ -167,6 +167,7 @@ $.extend(UI, {
 		APP.initMessageBar();
 		this.checkVersion();
         this.initTM();
+		this.initAdvanceOptions();
         this.storeClientInfo();
 
         // SET EVENTS
