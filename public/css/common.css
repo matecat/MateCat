@@ -1659,9 +1659,6 @@ margin:0 auto; overflow:hidden; width:100%;
 		width:50px!important;
 		text-align: center;
 }
-.mgmt-tm .lookup input[type="checkbox"] {
-    margin-left: -87px;
-}
 
 
 .mgmt-tm .action {
