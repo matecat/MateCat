@@ -27,7 +27,8 @@ class SegmentTranslationIssue {
             'end_offset'          => $record->end_offset,
             'translation_version' => $record->translation_version,
             'target_text'         => $record->target_text,
-            'penalty_points'      => $record->penalty_points
+            'penalty_points'      => $record->penalty_points,
+            'rebutted_at'         => $this->getDateValue( $record->rebutted_at )
         );
         return $row;
     }
@@ -45,6 +46,14 @@ class SegmentTranslationIssue {
         }
 
         return $out;
+    }
+
+    private function getDateValue( $strDate ) {
+        if( $strDate != null ) {
+            return date( 'c', strtotime( $strDate ) );
+        }
+
+        return null;
     }
 
 }

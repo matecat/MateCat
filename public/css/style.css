@@ -4007,10 +4007,17 @@ section:hover .segment-side-buttons {
     opacity: 0.9;
     text-align: center;
     padding: 5px 10px;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-left: 10px;
 }
 
 .blue-button {
     background: #09beec;
+}
+
+.red-button {
+    background: #b02429;
 }
 
 
