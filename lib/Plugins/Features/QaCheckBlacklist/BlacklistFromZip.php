@@ -45,7 +45,7 @@ class BlacklistFromZip {
             }
                 
             $quoted = preg_quote( $blacklist_item );
-            $matches = preg_match_all("/\\b$quoted\\b/", $string) ;
+            $matches = preg_match_all("/\\b$quoted\\b/u", $string) ;
 
             if ( $matches > 0 ) {
                 $counter[ $blacklist_item ]  = $matches;
