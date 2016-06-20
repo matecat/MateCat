@@ -2339,6 +2339,11 @@ section.status-approved .status{background-color:#639d5e !important;}
 /* section.status-draft .status{background-color:#dddedf !important;} */
 section.status-rejected .status{background-color:#b02429 !important;}
 
+.message-offline-icons {
+	float: left;
+	margin-right: 10px;
+	margin-top: 2px;
+}
 
 body[data-offline-mode="light-off"] section.setTranslationPending .status
  {	

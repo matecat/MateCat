@@ -56,16 +56,25 @@ class NotificationBox extends React.Component {
         var notifications = this.state.notifications;
         newNotification.uid = this.uid;
         newNotification.dismissed = false;
-        if ( _.isUndefined(newNotification.position)) {
+        if ( typeof newNotification.position === 'undefined') {
             newNotification.position = "bl";
         }
-        if ( _.isUndefined(newNotification.type)) {
+        if ( typeof newNotification.type  === 'undefined') {
             newNotification.type = "info";
         }
         this.uid++;
         notifications.push(newNotification);
         this.setState({
             notifications: notifications
+        });
+        return newNotification;
+    }
+    removeNotification(notification) {
+        var self = this;
+        Object.keys(this.refs).forEach(function(container) {
+            if (container.indexOf('container') > -1) {
+                self.refs[container].hideNotification();
+            }
         });
     }
     showMateCat() {
@@ -118,6 +127,7 @@ class NotificationBox extends React.Component {
                      var cat = "";
                     _notifications.forEach(function (notification) {
                         var item = <NotificationItem
+                            ref={ 'container-' + position }
                             title = {notification.title}
                             position = {notification.position}
                             type = {notification.type}
