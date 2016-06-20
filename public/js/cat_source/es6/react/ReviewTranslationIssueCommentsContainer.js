@@ -33,6 +33,10 @@ export default React.createClass({
         MateCat.db.removeListener('segment_translation_issue_comments', 
                                   ['insert', 'delete'], this.commentsChanged);
     },
+    handleFail: function() {
+        genericErrorAlertMessage() ;
+        this.setState({ sendLabel : 'Send', sendDisabled : false });
+    },
     sendClick : function() {
         // send action invokes ReviewImproved function
         if ( this.state.comment_text.length == 0 ) {
@@ -45,7 +49,10 @@ export default React.createClass({
         };
 
         this.setState({ sendLabel : 'Sending', sendDisabled : true });
-        ReviewImproved.submitComment( this.props.sid, this.props.issueId, data ) ;
+        ReviewImproved
+            .submitComment( this.props.sid, this.props.issueId, data )
+            .fail( this.handleFail );
+
     },
 
     handleCommentChange : function(event) {

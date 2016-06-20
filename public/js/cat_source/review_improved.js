@@ -96,7 +96,7 @@ if ( ReviewImproved.enabled() )
                 id_issue
             );
 
-            $.ajax({
+            return $.ajax({
                 url: replies_path,
                 type: 'POST',
                 data : data
