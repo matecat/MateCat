@@ -17,7 +17,7 @@
         <h1>
 
             <a href="#" class="btn-ok right">Close</a>
-            Language Resources
+            Options
         </h1>
 
         <div class="popup-box">
@@ -25,10 +25,11 @@
             <div class="mgmt-panel mgmt-panel-tm">
                 <div class="mgmt-wrapper">
                     <ul class="nav nav-tabs hide" role="tablist">
-                        <li class="active mgmt-tm"><a href="#tm">Translation Memory</a></li>
+                        <li class="mgmt-tm"><a href="#tm">Translation Memory</a></li>
                         <li class="mgmt-mt"><a href="#mt">Machine Translation</a></li>
+                        <li class="mgmt-opt active"><a href="#options">Advanced Options</a></li>
                     </ul>
-                    <div class="mgmt-table-tm">
+                    <div class="mgmt-table-tm hide">
 
                         <div class="mgmt-container" id="list-search">
 
@@ -37,8 +38,10 @@
 
                             <tal:block tal:condition="php: page != 'cattool'">
                             <div class="boxed">
-                                <input type="checkbox" id="pretranslate100" />
-                                <label>Pre-translate 100% matches from TM</label>
+                                <label>
+                                    <input type="checkbox" id="pretranslate100" />
+                                    Pre-translate 100% matches from TM
+                                </label>
                             </div>
                             </tal:block>
 
@@ -354,6 +357,90 @@
                         </div>
 
                     </div>
+                    <div class="mgmt-panel mgmt-table-options">
+                        <div class="advanced-options-box">
+                           <h2>Advanced Options</h2>
+                            <div class="options-box seg_rule">
+                                <h3>Segmentation Rule</h3>
+                                <p>Select segmentation rules to be applied for specific type of contents.</p>
+                                <select name="segm_rule" id="segm_rule">
+                                    <option value="">General</option>
+                                    <option value="patent">Patent</option>
+                                </select>
+                            </div>
+
+
+                          <!-- <div tal:condition="true:DQF_enabled" class="options-box"> -->
+                            <div class="options-box dqf_options_box">
+                                <h3>DQF key</h3>
+                                <p>Connect your TAUS DQF account to measure productivity.</p>
+                                <input name="dqf_key" type="text" class="upload-input" id="dqf_key"/>
+                            </div>
+
+                            <div class="options-box qa-box">
+                                <h3>QA by <img src="/public/img/lexiqa2_2x.png" /></h3>
+                                <p>Linguistic QA with automated checks for punctuation, numerals, links, symbols, etc. <span class="option-qa-box-languages">Supported languages: EN, FR, IT, DE.</span></p>
+                                
+                                <div class="onoffswitch">
+                                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="lexi_qa" />
+                                    <label class="onoffswitch-label" for="lexi_qa">
+                                        <span class="onoffswitch-inner"></span>
+                                        <span class="onoffswitch-switch"></span>
+                                        <span class="onoffswitch-label-status-active">Active</span>
+                                        <span class="onoffswitch-label-status-inactive">Inactive</span>
+                                        <span class="onoffswitch-label-status-unavailable">Unavailable</span>
+
+                                    </label>
+
+                                </div>  
+
+                            </div>
+
+                            <div class="options-box s2t-box">
+                                <h3>Dictation</h3>
+                                <p>A speech-to-text component to dictate your translations instead of typing them. <span class="option-s2t-box-chrome-label">Available on Chrome</span></p>
+                                 <div class="onoffswitch">
+                                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="s2t_check" />
+                                    <label class="onoffswitch-label" for="s2t_check">
+                                        <span class="onoffswitch-inner"></span>
+                                        <span class="onoffswitch-switch"></span>
+                                        <span class="onoffswitch-label-status-active">Active</span>
+                                        <span class="onoffswitch-label-status-inactive">Inactive</span>
+                                        <span class="onoffswitch-label-status-unavailable">Unavailable</span>
+
+                                    </label>
+
+                                </div>  
+                            </div>
+
+                             <div class="options-box tagp">
+                                <h3>Tag projection</h3>
+                                <p>Enable this functionality to let MateCat automatically place the tags where they belong. <span class="option-tagp-languages">Currently supported languages: EN, IT.</span></p>
+                                 <div class="onoffswitch">
+                                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="tagp_check" checked="checked" />
+                                    <label class="onoffswitch-label" for="tagp_check">
+                                        <span class="onoffswitch-inner"></span>
+                                        <span class="onoffswitch-switch"></span>
+                                        <span class="onoffswitch-label-status-active">Active</span>
+                                        <span class="onoffswitch-label-status-inactive">Inactive</span>
+                                        <span class="onoffswitch-label-status-unavailable">Unavailable</span>
+
+                                    </label>
+
+                                </div>  
+                            </div>
+
+                            <!-- div class="translate-checkbox">
+                                <span class="tms-checkbox" id="disable_tms_checkbox">
+                                    <label class="tms-label" for="disable_tms_engine">Disable TM, Concordance and Glossary</label>
+                                    <input type="checkbox" value="true" id="disable_tms_engine" name="no_tms_engine"/>
+                                </span>
+                            </div -->
+
+                            <!-- img id='get-new-tm-spinner' alt="Loading..." src="public/img/loader.gif" class="tm-button"/ -->
+
+                        </div>
+                    </div>
                 </div>
             </div>
             <!-- fine tm mgmt -->
@@ -371,6 +458,7 @@
     <div metal:use-macro="mt_engines.html/template-letsmt" />
     <div metal:use-macro="mt_engines.html/template-apertium" />
     <div metal:use-macro="mt_engines.html/template-altlang" />
+
 </div>
 
 

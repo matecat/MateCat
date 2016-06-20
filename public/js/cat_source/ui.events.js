@@ -6,11 +6,19 @@ $.extend(UI, {
 		$("body").removeClass('shortcutsDisabled');
 		$("body").on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.standard, function(e) {
 			e.preventDefault();
-			$('.editor .translated').click();
+			if ($('.editor .translated').length > 0) {
+				$('.editor .translated').click();
+			} else {
+				$('.editor .guesstags').click();
+			}
             $('body.review .editor .approved').click();
 		}).on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.mac, function(e) {
 			e.preventDefault();
-			$('.editor .translated').click();
+			if ($('.editor .translated').length > 0) {
+				$('.editor .translated').click();
+			} else {
+				$('.editor .guesstags').click();
+			}
             $('body.review .editor .approved').click();
 		}).on('keydown.shortcuts', null, UI.shortcuts.translate_nextUntranslated.keystrokes.standard, function(e) {
 			e.preventDefault();
@@ -197,9 +205,7 @@ $.extend(UI, {
             LXQ.toogleHighlighting();
         }).on('click', '.tagModeToggle', function(e) {
             e.preventDefault();
-            console.log('click su tagMode toggle');
-            $(this).toggleClass('active');
-            UI.body.toggleClass('tagmode-default-extended');
+            UI.toggleTagsMode(this);
             if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment(true);
 		} );
 
@@ -521,6 +527,10 @@ $.extend(UI, {
 
 		$("#filterSwitch").bind('click', function(e) {
 			UI.toggleSearch(e);
+		});
+		$("#advancedOptions").bind('click', function(e) {
+			e.preventDefault();
+			UI.openOptionsPanel();
 		});
 		$("#segmentPointer").click(function(e) {
 			e.preventDefault();
@@ -1092,6 +1102,13 @@ $.extend(UI, {
             UI.hideEditToolbar();
 		}).on('click', 'a.translated, a.next-untranslated', function(e) {
 			UI.clickOnTranslatedButton(e, this);
+		}).on('click', 'a.guesstags', function(e) {
+			// Tag Projection: handle click on "GuesssTags" button, retrieve the translation and place it
+			// in the current segment
+			e.preventDefault();
+			UI.hideEditToolbar();
+			UI.startSegmentTagProjection();
+			return false;
 		}).on('click', 'a.d, a.a, a.r, a.f, a.fx, a.rb', function() {
 			var segment = $(this).parents("section");
 			$("a.status", segment).removeClass("col-approved col-rejected col-done col-draft");

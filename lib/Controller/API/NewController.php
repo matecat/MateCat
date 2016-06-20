@@ -614,6 +614,9 @@ class NewController extends ajaxController {
         }
 
         $projectManager = new ProjectManager( $projectStructure );
+        
+        $projectManager->sanitizeProjectOptions = false ; 
+        
         $projectManager->createProject();
 
         $this->result = $projectStructure[ 'result' ];
@@ -636,8 +639,6 @@ class NewController extends ajaxController {
         }
 
     }
-
-
 
     private function validateAuthHeader() {
         if ( $_SERVER[ 'HTTP_X_MATECAT_KEY' ] == null ) {

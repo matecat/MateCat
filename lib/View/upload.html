@@ -27,10 +27,6 @@
     <meta property="og:url" content="https://www.matecat.com" />
     <meta property="og:image" content="https://www.matecat.com/public/img/fbimg.jpg" />
     <!-- jQuery UI styles -->
-    <!--
-    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/themes/base/jquery-ui.css" id="theme"/>
-    -->
-
 
     <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>
     <link rel="stylesheet" href="${basepath}public/css/upload.css?build=${build_number}"/>
@@ -50,6 +46,8 @@
     <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
 
     <script type="text/javascript">
+        /*<![CDATA[*/
+
         var config = {
             basepath: '${basepath | string:/}',
             hostpath: '${hostpath | string:/}',
@@ -63,8 +61,16 @@
             ownerIsMe: true,
             isAnonymousUser: ${isAnonymousUser},
             blueimp_dataType: 'json',
-            gdriveAuthURL: ${structure php:json_encode(gdriveAuthURL)}
+            gdriveAuthURL: ${structure php:json_encode(gdriveAuthURL)},
+            defaults : {
+                tag_projection : true,
+                speech2text : true,
+                lexiqa : true,
+            },
+            lexiqa_languages: ${lexiqa_languages},
+            tag_projection_languages: ${tag_projection_languages}
         };
+        /*]]>*/
     </script>
 
     <div metal:use-macro="${php: INIT::$ROOT}/public/holidays/holidays.html/upload_holidays"/>
@@ -207,87 +213,11 @@
         <option value="telecommunications">Telecommunications</option>
         <option value="travel_tourism">Travel &amp; Tourism</option>
     </select>
+    <a href="#" class="more-options"><span>Options</span></a>
 </div>
 
-<div class="cl"></div>
-<a href="#" class="more"><span>Options</span></a>
 
 
-<div class="cl"></div>
-<div class="advanced-box">
-    <div class="cl"></div>
-    <div class="translate-box seg_rule">
-        <h2>Segmentation Rule</h2>
-        <select name="segm_rule" id="segm_rule">
-            <option value="">General</option>
-            <option value="patent">Patent</option>
-        </select>
-    </div>
-    <div class="translate-box">
-        <h2>Machine Translation</h2>
-        <select name="mt_engine" id="mt_engine" tal:define="mt_engine php:array()">
-            <option value="0">NONE</option>
-            <option value="1" selected="selected">MyMemory (All Pairs)</option>
-            <tal:block tal:repeat="mt_engine mt_engines">
-                <option value="--" tal:attributes="value mt_engine/id" tal:content="mt_engine/name">---</option>
-            </tal:block>
-        </select>
-        <br/>
-    <a href="#" class="memory-mgmt tm-mgmt" data-tab="mt" data-el-to-click=".add-mt-engine">Add MT engine</a>
-    </div>
-
-    <div class="translate-box">
-        <h2>Private TM key</h2>
-        <input name="private-tm-key" type="text" tal:attributes="value private_tm_key|nothing"  class="upload-input" id="private-tm-key" pattern="[a-z0-9]{20}"/>
-        <input name="private-tm-user" type="hidden" id="private-tm-user"/>
-        <input name="private-tm-pass" type="hidden" id="private-tm-pass"/>
-          <br/>
-        <a href="#" class="memory-mgmt tm-mgmt" data-tab="tm" data-el-to-click=".add-your-personal-tm">Add your personal TM  <span class="tm-added">(<span class="num"></span><span class="msg"> TM added</span>)</span></a>
-    </div>
-
-    <div class="translate-box">
-        <span class="btn btn-success fileinput-button" id="create_private_tm_btn">
- <span>Create</span>
-        </span>
-    </div>
-    <div class="translate-box manage-link">
-        <h2 class="resource" style="display:none;"><span class="numResources">4</span> Resources selected</h2>
-
-        <div class="cl"></div>
-        <!--
-                <div class="memory-mgmt">
-                    <input type="checkbox" /><label>Pre-translate 100% match from TM</label>
-                </div>
-        -->
-    </div>
-
-  <div tal:condition="true:DQF_enabled" class="translate-box">
-
-        <h2><span class="pull-left">DQF key</span>
-		<a class="tooltip gray">?
-		<span style="text-align:left">
-			
-Connect your TAUS DQF account to measure productivity. 
-	     	</span>
-		</a>
-	</h2>
-        <input name="dqf_key" type="text" class="upload-input" id="dqf_key"/>
-    </div>
-
-    <div class="translate-box qa-box">
-        <label><input type="checkbox" id="lxqa_check" /> <h2>QA by <img src="/public/img/lexiqa2_2x.png" /></h2></label>
-    </div>
-
-    <!-- div class="translate-checkbox">
-        <span class="tms-checkbox" id="disable_tms_checkbox">
-            <label class="tms-label" for="disable_tms_engine">Disable TM, Concordance and Glossary</label>
-            <input type="checkbox" value="true" id="disable_tms_engine" name="no_tms_engine"/>
-        </span>
-    </div -->
-
-    <!-- img id='get-new-tm-spinner' alt="Loading..." src="public/img/loader.gif" class="tm-button"/ -->
-
-</div>
 
 
 <div class="cl"></div>
@@ -895,12 +825,6 @@ Connect your TAUS DQF account to measure productivity.
 <script src="${basepath}public/js/new-project.js"></script>
 <script src="${basepath}public/js/tm.js"></script>
 
-<!--
-        <div style='display:none'>
-            <div id='inline_content' style='padding:10px; background:#fff;'></div>
-        </div>
--->
-
 
 <div class="modal supported-formats" data-type="view">
     <div class="popup-outer closeClickingOutside"></div>
@@ -947,7 +871,7 @@ Connect your TAUS DQF account to measure productivity.
     </div>
 </div>
 
-<div class="modal popup-languages" data-type="view">
+<!--<div class="modal popup-languages" data-type="view">
     <div class="popup-outer"></div>
     <div class="popup">
         <a href="#" class="x-popup"></a>
@@ -965,14 +889,14 @@ Connect your TAUS DQF account to measure productivity.
                 <tal:block tal:repeat="language target_languages">
                     <li tal:attributes="class language/top">
                         <input type="checkbox" tal:attributes="value language/code; id language/code"/>
-                        <label tal:attributes="for language/name" tal:content="language/name" onClick="return false">---</label>
+                        <label tal:attributes="for language/name" tal:content="language/name" onClick="return false">-&#45;&#45;</label>
                     </li>
                 </tal:block>
 
             </ul>
         </div>
     </div>
-</div>
+</div>-->
 
 <div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
 
@@ -1080,9 +1004,9 @@ Connect your TAUS DQF account to measure productivity.
        
     } );
 
-    $( "a.memory-mgmt" ).on("click", function ( e ) {
+    $( "a.more-options" ).on("click", function ( e ) {
         e.preventDefault();
-        tab = $(this).attr('data-tab') || 'tm';
+        tab = $(this).attr('data-tab') || 'options';
         elToClick = $(this).attr('data-el-to-click') || null;
         UI.openLanguageResourcesPanel(tab, elToClick);
     } );

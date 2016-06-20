@@ -51,7 +51,7 @@
             this.activateSegment(segment, getNormally);
 
             segment.el.trigger('open');
-
+            
             $('section').first().nextAll('.undoCursorPlaceholder').remove();
             this.getNextSegment(this.currentSegment, 'untranslated');
 
