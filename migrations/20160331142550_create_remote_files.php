@@ -11,7 +11,7 @@ CREATE TABLE `remote_files` (
   PRIMARY KEY (`id`),
   KEY `id_file` (`id_file`) USING BTREE,
   KEY `id_job` (`id_job`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 ;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 ;
 EOF;
 
     public $sql_down = "DROP table `remote_files`;";
