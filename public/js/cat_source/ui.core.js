@@ -3543,15 +3543,20 @@ UI = {
                     //console.log('UI.lexiqaData.lexiqaWarnings');
                     //console.dir(UI.lexiqaData.lexiqaWarnings);
                      $('#lexiqabox').attr('class', 'warningbox').attr("title", "Go to lexiQA for QA analysis").find('.numbererror').text(errorCnt);
-                     LXQ.reloadPowertip();
+                    if( LXQ.enabled() ) {
+                        LXQ.reloadPowertip();
+                    }
                 }
                 else {
                     $('#lexiqabox').attr('class', 'lexnotific').attr("title", "Well done, no errors found!").find('.numbererror').text('');                    
                       results.qaurl= "#";  
                 }
-                LXQ.doQAallSegments();
-                if (LXQ.enabled()) LXQ.refreshElements();
-                //$('.lxq-history-balloon-header-link').attr('href', results.qaurl);     
+
+                if (LXQ.enabled()){
+                    LXQ.doQAallSegments();
+                    LXQ.refreshElements();
+                }
+                //$('.lxq-history-balloon-header-link').attr('href', results.qaurl);
                 UI.lexiqaData.lexiqaFetching = false;             
             }});                
     },
