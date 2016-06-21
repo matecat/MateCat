@@ -13,6 +13,8 @@ use Chunks_ChunkDao  ;
 use SegmentTranslationModel;
 use Features\ReviewImproved\Observer\SegmentTranslationObserver ;
 use Features\ReviewImproved\Controller;
+use Projects_MetadataDao;
+use ChunkOptionsModel;
 
 class ReviewImproved extends BaseFeature {
 
@@ -172,6 +174,26 @@ class ReviewImproved extends BaseFeature {
         $model = new ChunkReviewModel( $new_reviews[0] );
         $model->updatePassFailResult();
 
+    }
+
+    /**
+     * Clean up the chunks options before the job merging
+     *
+     * @param $jobs   Associative array with the Jobs
+     */
+    public function cleanupChunksOptions( $jobs ) {
+        $dao = new Projects_MetadataDao() ;
+
+        foreach ( $jobs as $job ) {
+            $chunk = Chunks_ChunkDao::getByIdAndPassword( $job[ 'id' ], $job[ 'password' ] );
+
+            foreach ( ChunkOptionsModel::$valid_keys as $key ) {
+                $dao->delete(
+                    $chunk->id_project,
+                    Projects_MetadataDao::buildChunkKey( $key, $chunk )
+                );
+            }
+        }
     }
 
     /**

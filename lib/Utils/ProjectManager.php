@@ -1474,6 +1474,10 @@ class ProjectManager {
 
         $rows = $this->dbHandler->fetch_array( $query_job );
 
+        $this->features->run('cleanupChunksOptions',
+            $rows
+        );
+
         //get the min and
         $first_job         = reset( $rows );
         $job_first_segment = $first_job[ 'job_first_segment' ];
