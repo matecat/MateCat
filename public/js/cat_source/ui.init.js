@@ -19,6 +19,7 @@ $.extend(UI, {
 		this.searchParams.search = 0;
 		this.customSpellcheck = false;
 		this.noGlossary = false;
+		this.displayedMessages = [];
 		setTimeout(function() {
 			UI.blockGetMoreSegments = false;
 		}, 200);

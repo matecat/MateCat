@@ -144,6 +144,9 @@ left: -5px;
 	text-align: left;
 	margin-bottom: 0px;
 }
+.warnings:last-child {
+	margin-bottom: 25px;
+}
 .text .alternatives 
 {
 	max-width: 300px;
@@ -2336,6 +2339,11 @@ section.status-approved .status{background-color:#639d5e !important;}
 /* section.status-draft .status{background-color:#dddedf !important;} */
 section.status-rejected .status{background-color:#b02429 !important;}
 
+.message-offline-icons {
+	float: left;
+	margin-right: 10px;
+	margin-top: 2px;
+}
 
 body[data-offline-mode="light-off"] section.setTranslationPending .status
  {	
@@ -3999,10 +4007,17 @@ section:hover .segment-side-buttons {
     opacity: 0.9;
     text-align: center;
     padding: 5px 10px;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-left: 10px;
 }
 
 .blue-button {
     background: #09beec;
+}
+
+.red-button {
+    background: #b02429;
 }
 
 
