@@ -112,7 +112,7 @@ if ( ReviewImproved.enabled() )
                 id_issue
             );
 
-            $.ajax({
+            return $.ajax({
                 url: issues_path,
                 type: 'POST',
                 data : { 'rebutted' : rebutted }

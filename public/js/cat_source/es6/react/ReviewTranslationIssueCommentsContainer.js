@@ -21,8 +21,13 @@ export default React.createClass({
     },
 
     undoRebutClick : function() {
-        ReviewImproved.setIssueRebutted( this.props.sid, this.props.issueId, 'false' );
         this.setState({ undoRebutDisabled : true, undoRebutLabel: 'Undoing' });
+        ReviewImproved.setIssueRebutted( this.props.sid, this.props.issueId, 'false' )
+            .fail( this.handleFail )
+            .fail(function() {
+                this.setState({ undoRebutDisabled : false, undoRebutLabel: this.getInitialState().undoRebutLabel });
+            }.bind(this) );
+
     },
 
     commentsChanged : function() {
@@ -112,16 +117,18 @@ export default React.createClass({
             return ;
         }
 
-        this.setState({ rebutLabel : 'Sending', rebutDisabled : true, sendDisabled : true });
-
         var data = {
           message : this.state.comment_text,
           source_page : (config.isReview ? 2 : 1)  // TODO: move this to UI property
         };
+        
+        this.setState({ rebutLabel : 'Sending', rebutDisabled : true, sendDisabled : true });
 
-        this.setState({ rebutLabel : 'Sending', rebutDisabled : true });
-        ReviewImproved.submitComment( this.props.sid, this.props.issueId, data );
-        ReviewImproved.setIssueRebutted( this.props.sid, this.props.issueId, 'true' );
+        $.when(
+            ReviewImproved.submitComment( this.props.sid, this.props.issueId, data ),
+            ReviewImproved.setIssueRebutted( this.props.sid, this.props.issueId, 'true' )
+        ).fail( this.handleFail );
+
     },
 
     handleCommentChange : function(event) {
