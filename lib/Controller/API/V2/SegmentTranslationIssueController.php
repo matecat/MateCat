@@ -4,6 +4,7 @@ namespace API\V2  ;
 use API\V2\Json\SegmentTranslationIssue as JsonFormatter;
 use Features\ReviewImproved;
 use LQA\EntryDao as EntryDao ;
+use Database;
 
 class SegmentTranslationIssueController extends ProtectedKleinController {
 
@@ -104,6 +105,19 @@ class SegmentTranslationIssueController extends ProtectedKleinController {
 
     private function validateAdditionalPassword() {
         // TODO: check password is good for deletion
+    }
+
+    public function updateRebutted() {
+        $rebutted_at = $this->request->rebutted;
+
+        if( $rebutted_at == '' ) {
+            $rebutted_at = null;
+        }
+
+        $entryDao = new EntryDao( Database::obtain()->getConnection() );
+        $data = $entryDao->updateRebutted( $this->validator->issue->id,  $rebutted_at);
+
+        $this->response->json( $data );
     }
 
 }

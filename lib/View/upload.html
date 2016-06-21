@@ -28,9 +28,7 @@
     <meta property="og:image" content="https://www.matecat.com/public/img/fbimg.jpg" />
     <!-- jQuery UI styles -->
 
-    <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>
-    <link rel="stylesheet" href="${basepath}public/css/upload.css?build=${build_number}"/>
-    <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
+    <link rel="stylesheet" href="${basepath}public/css/upload-build.css?build=${build_number}"/>
     <link rel="stylesheet" href="${basepath}public/js/lib/colorbox/colorbox.css?build=${build_number}"/>
 
     <!-- Shim to make HTML5 elements usable in older Internet Explorer versions -->
@@ -68,6 +66,7 @@
                 lexiqa : true,
             },
             lexiqa_languages: ${lexiqa_languages},
+            deny_lexiqa: ${deny_lexiqa | string:false},
             tag_projection_languages: ${tag_projection_languages}
         };
         /*]]>*/
@@ -818,6 +817,8 @@
 <!-- The XDomainRequest Transport is included for cross-domain file deletion for IE8+ -->
 <!--[if gte IE 8]>
 <script src="js/cors/jquery.xdr-transport.js"></script><![endif]-->
+<script src="${basepath}public/js/build/react.js"></script>
+<script src="${basepath}public/js/build/cat-react.js"></script>
 
 <script src="${basepath}public/js/lib/jquery.cookie.js"></script>
 <script src="${basepath}public/js/lib/jquery.colorbox-min.js"></script>
@@ -899,7 +900,7 @@
 </div>-->
 
 <div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
-
+<div class="notifications-wrapper"></div>
 <footer>
 
     <div class="wrapper">

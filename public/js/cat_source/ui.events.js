@@ -1031,6 +1031,8 @@ $.extend(UI, {
 
 		}).on('input', '.editarea', function( e ) { //inputineditarea
 			UI.currentSegment.addClass('modified').removeClass('waiting_for_check_result');
+                        UI.currentSegment.data('modified', true);
+                        UI.currentSegment.trigger('modified:true');
 
 			if (UI.droppingInEditarea) {
 				UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);

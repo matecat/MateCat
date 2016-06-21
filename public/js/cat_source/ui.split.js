@@ -137,17 +137,29 @@ if(config.splitSegmentEnabled) {
                 },
                 error: function(d){
                     console.log('error');
-                    UI.showMessage({
+                    var notification = {
+                        title: 'Error',
+                        text: d.errors[0].message,
+                        type: 'error'
+                    };
+                    APP.addNotification(notification);
+                    /*UI.showMessage({
                         msg: d.errors[0].message
-                    });
+                    });*/
 
                 },
                 success: function(d){
                     console.log('success');
                     if(d.errors.length) {
-                        UI.showMessage({
+                        var notification = {
+                            title: 'Error',
+                            text: d.errors[0].message,
+                            type: 'error'
+                        };
+                        APP.addNotification(notification);
+                        /*UI.showMessage({
                             msg: d.errors[0].message
-                        });
+                        });*/
                     } else {
                         UI.setSegmentSplitSuccess(this);
                     }

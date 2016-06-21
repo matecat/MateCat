@@ -362,7 +362,7 @@
                            <h2>Advanced Options</h2>
                             <div class="options-box seg_rule">
                                 <h3>Segmentation Rule</h3>
-                                <p>Select segmentation rules to be applied for specific type of contents.</p>
+                                <p>Select segmentation rules to be applied for specific types of content.</p>
                                 <select name="segm_rule" id="segm_rule">
                                     <option value="">General</option>
                                     <option value="patent">Patent</option>
@@ -377,7 +377,7 @@
                                 <input name="dqf_key" type="text" class="upload-input" id="dqf_key"/>
                             </div>
 
-                            <div class="options-box qa-box">
+                            <div tal:condition="not: deny_lexiqa" class="options-box qa-box">
                                 <h3>QA by <img src="/public/img/lexiqa2_2x.png" /></h3>
                                 <p>Linguistic QA with automated checks for punctuation, numerals, links, symbols, etc. <span class="option-qa-box-languages">Supported languages: EN, FR, IT, DE.</span></p>
                                 

@@ -2385,6 +2385,11 @@ section.status-approved .status{background-color:#639d5e !important;}
 /* section.status-draft .status{background-color:#dddedf !important;} */
 section.status-rejected .status{background-color:#b02429 !important;}
 
+.message-offline-icons {
+	float: left;
+	margin-right: 10px;
+	margin-top: 2px;
+}
 
 body[data-offline-mode="light-off"] section.setTranslationPending .status
  {	
@@ -2969,10 +2974,10 @@ section.modified .save-warning
 }
 
 #advancedOptions .more-options {
-    font-size: 26px;
+    font-size: 27px;
     color: #eee;
     padding: 0;
-    margin-top: 0px;
+    margin-top: 2px;
     display: block;
     text-align: center;
     width: 45px;
@@ -4067,10 +4072,17 @@ section:hover .segment-side-buttons {
     opacity: 0.9;
     text-align: center;
     padding: 5px 10px;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-left: 10px;
 }
 
 .blue-button {
     background: #09beec;
+}
+
+.red-button {
+    background: #b02429;
 }
 
 

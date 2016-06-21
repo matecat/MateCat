@@ -3,6 +3,7 @@ module.exports = function(grunt) {
 
     var basePath = '../../public/js/';
     var buildPath = '../../public/js/build/';
+    var buildPathCss = '../../public/css/build/';
     var incPath = '../../inc/';
     var cssBase = '../../public/css/';
 
@@ -37,7 +38,15 @@ module.exports = function(grunt) {
         cssBase + 'sass/segment_filter.scss',
         cssBase + 'sass/cattool.scss',
         cssBase + 'sass/speech2text.scss',
-        cssBase + '../holidays/*.css',
+        cssBase + 'sass/notifications.scss',
+        cssBase + '../holidays/*.css'
+    ];
+    var cssWatchFilesUploadPage = [
+        cssBase + 'sass/variables.scss',
+        cssBase + 'common.css',
+        cssBase + 'upload.css',
+        cssBase + 'popup.css',
+        cssBase + 'sass/notifications.scss'
     ];
 
     var es2015Preset = require('babel-preset-es2015');
@@ -263,9 +272,17 @@ module.exports = function(grunt) {
                     livereload : true
                 }
             },
-            css: {
+            cssCattol: {
                 files: cssWatchFiles ,
-                tasks: ['sass'],
+                tasks: ['sass:distCattol'],
+                options: {
+                    interrupt: true,
+                    livereload : true
+                }
+            },
+            cssUpload: {
+                files:  cssWatchFilesUploadPage,
+                tasks: ['sass:distUpload'],
                 options: {
                     interrupt: true,
                     livereload : true
@@ -273,7 +290,7 @@ module.exports = function(grunt) {
             }
         },
         sass: {
-            dist: {
+            distCattol: {
                 options : {
                     sourceMap : false,
                     includePaths: [ cssBase, cssBase + 'libs/' ]
@@ -282,6 +299,16 @@ module.exports = function(grunt) {
                     cssBase + 'sass/main.scss'
                 ],
                 dest: cssBase + 'app.css'
+            },
+            distUpload: {
+                options : {
+                    sourceMap : false,
+                    includePaths: [ cssBase, cssBase + 'libs/' ]
+                },
+                src: [
+                    cssBase + 'sass/upload-main.scss'
+                ],
+                dest: cssBase + 'upload-build.css'
             }
         },
         jshint: {
@@ -387,7 +414,7 @@ module.exports = function(grunt) {
     grunt.registerTask('deploy', [
         'bundle:js',
         // 'strip',
-        'sass',
+        'sass'
     ]);
 };
 

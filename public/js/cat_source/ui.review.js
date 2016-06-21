@@ -305,6 +305,7 @@ if ( Review.enabled() && Review.type == 'simple' ) {
             UI.tempDisablingReadonlyAlert = true;
             UI.hideEditToolbar();
             UI.currentSegment.removeClass('modified');
+            UI.currentSegment.data('modified', false);
 
             var noneSelected = !((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked')) || (UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')));
 

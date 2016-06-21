@@ -313,13 +313,20 @@ function fileUpload(form, action_url, div_id) {
 
 //    document.getElementById(div_id).innerHTML = "Uploading...";
     $('.popup-addtm-tr .x-popup').click();
-    UI.showMessage({
+	var notification = {
+		title: 'Upload',
+		text: 'Uploading your TM...',
+		type: 'warning',
+		position: "bl"
+	};
+	APP.addNotification(notification);
+    /*UI.showMessage({
         msg: 'Uploading your TM...'
-    });
+    });*/
     $('#messageBar .msg').after('<span class="progress"></span>');
     TMKey = $('#addtm-tr-key').val();
     TMName = $('#uploadTMX').text();
-console.log('TMKey 1: ', TMKey);
+	console.log('TMKey 1: ', TMKey);
     console.log('TMName 1: ', TMName);
 //    UI.pollForUploadProgress(TMKey, TMName);
 

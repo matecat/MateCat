@@ -6,10 +6,10 @@
 var LXQ = {
 
     enabled: function () {
-        return !!config.lxq_enabled;
+        return !!config.lxq_enabled && !config.deny_lexiqa;
     },
     enable: function () {
-        if (!config.lxq_enabled) {
+        if (!config.lxq_enabled && !config.deny_lexiqa) {
             config.lxq_enabled = 1;
             // Todo Call Service to enable Tag Lexiqa
             var path = sprintf(
@@ -61,7 +61,8 @@ var LXQ = {
     checkCanActivate: function () {
         if (_.isUndefined(this.canActivate)) {
             this.canActivate = config.lexiqa_languages.indexOf(config.source_rfc) > -1 &&
-                config.lexiqa_languages.indexOf(config.target_rfc) > -1;
+                config.lexiqa_languages.indexOf(config.target_rfc) > -1 &&
+                !config.deny_lexiqa;
         }
         return this.canActivate;
     },

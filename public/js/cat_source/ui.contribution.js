@@ -43,8 +43,11 @@ $.extend(UI, {
 			this.saveInUndoStack('copysuggestion');
 			$('.percentuage', segment).text(match).removeClass('per-orange per-green per-blue per-yellow').addClass(percentageClass).addClass('visible');
             $('.repetition', segment).hide();
-			if (which)
+			if (which) {
 				this.currentSegment.addClass('modified');
+                                this.currentSegment.data('modified', true);
+                                this.currentSegment.trigger('modified:true');
+                        }
 		}
 
 		// a value of 0 for 'which' means the choice has been made by the
