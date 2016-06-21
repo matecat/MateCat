@@ -52,11 +52,41 @@ class SplitAndMergeTest extends IntegrationTest {
 
         $this->assertEquals($original_password, $new_password, 'password changed after split');
 
+        $speech2text_key = 'speech2text';
+
+        foreach ($chunks as $chunk) {
+            $metadata_dao = new \Projects_MetadataDao();
+
+            toggleChunkOptions(array(
+                'id_job'       => $chunk->id,
+                'job_pass'     => $chunk->password,
+                'features'     => array( $speech2text_key => true )
+            ));
+
+            $chunk_option = $metadata_dao->get(
+                $project->id,
+                \Projects_MetadataDao::buildChunkKey( $speech2text_key, $chunk )
+            );
+
+            $this->assertNotNull( $chunk_option, 'chunk option created' );
+        }
+
         mergeJob(array(
                 'id_job'       => $chunks[0]->id,
                 'id_project'   => $project->id,
                 'project_pass' => $project->password,
         ));
+
+        foreach ($chunks as $chunk) {
+            $metadata_dao = new \Projects_MetadataDao();
+
+            $chunk_option = $metadata_dao->get(
+                $project->id,
+                \Projects_MetadataDao::buildChunkKey( $speech2text_key, $chunk )
+            );
+
+            $this->assertNull( $chunk_option, 'chunk option removed' );
+        }
 
         $review_chunks = ChunkReviewDao::findByProjectId( $project->id );
         $new_password = $review_chunks[0]->review_password ;
