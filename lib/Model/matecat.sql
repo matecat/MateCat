@@ -341,9 +341,10 @@ CREATE TABLE `qa_entries` (
   `comment` text,
   `replies_count` int(11) NOT NULL DEFAULT '0',
   `create_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `rebutted_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `job_and_segment` (`id_job`,`id_segment`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `qa_entry_comments` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -355,7 +356,7 @@ CREATE TABLE `qa_entry_comments` (
   PRIMARY KEY (`id`),
   KEY `id_qa_entry` (`id_qa_entry`),
   KEY `create_date` (`create_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `qa_models` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -590,6 +591,7 @@ INSERT INTO `phinxlog` ( version ) VALUES ( '20160331210238' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20160406102209' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20160408162842' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20160519093951' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20160524122147' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20160608130816' );
 
 CREATE SCHEMA `matecat_conversions_log` DEFAULT CHARACTER SET utf8 ;
