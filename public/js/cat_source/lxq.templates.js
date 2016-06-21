@@ -1,4 +1,3 @@
-if ( LXQ.enabled() )
 (function($,LXQ) {
 
     var tpls = { // TODO: make this local
