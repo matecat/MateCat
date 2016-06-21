@@ -12,6 +12,11 @@ $.extend(UI, {
 			};
 			this.saveCustomization();
 		}
+		//Tag Projection: the tag-mode is always extended
+		if (this.enableTagProjection) {
+			// Disable Tag Crunched Mode
+			this.custom.extended_tagmode = true;
+		}
 	},
 	saveCustomization: function() {
 		$.cookie('user_customization', JSON.stringify(this.custom), { expires: 3650 });

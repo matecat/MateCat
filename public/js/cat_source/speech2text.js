@@ -1,12 +1,54 @@
 Speech2Text = {
     enabled: function () {
-        return !!('webkitSpeechRecognition' in window);
-
+        return !!('webkitSpeechRecognition' in window && !!config.speech2text_enabled);
+    },
+    disable: function () {
+        if (config.speech2text_enabled) {
+            config.speech2text_enabled = 0;
+            var path = sprintf(
+                '/api/v2/jobs/%s/%s/options',
+                config.id_job, config.password
+            );
+            var data = {
+                'speech2text': false
+            };
+            $.ajax({
+                url: path,
+                type: 'POST',
+                data : data
+            }).done( function( data ) {
+                UI.render();
+            });
+        }
+    },
+    enable: function () {
+        if (!config.speech2text_enabled) {
+            config.speech2text_enabled = 1;
+            var path = sprintf(
+                '/api/v2/jobs/%s/%s/options',
+                config.id_job, config.password
+            );
+            var data = {
+                'speech2text': true
+            };
+            $.ajax({
+                url: path,
+                type: 'POST',
+                data : data
+            }).done( function( data ) {
+                if (!Speech2Text.initialized) {
+                    Speech2Text.init();
+                    Speech2Text.loadRecognition();
+                }
+                UI.render();
+            });
+        }
     }
 };
 
-if ( Speech2Text.enabled() ) {
-    (function ($, Speech2Text, undefined) {
+Speech2Text.init  = function () {
+    Speech2Text.initialized = true;
+    return (function ($, Speech2Text, undefined) {
         $.extend(Speech2Text, {
             recognition: null,
             recognizing: false,
@@ -214,4 +256,8 @@ if ( Speech2Text.enabled() ) {
             Speech2Text.loadRecognition();
         });
     })(jQuery, Speech2Text);
+};
+
+if (Speech2Text.enabled()) {
+    Speech2Text.init();
 }

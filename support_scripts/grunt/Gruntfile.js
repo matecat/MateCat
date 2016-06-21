@@ -206,6 +206,7 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/speech2text.js',
 
                     basePath + 'tm.js',
+                    basePath + 'advancedOptionsTab.js',
                     basePath + 'logout.js'
                 ],
                 dest: buildPath + 'app.js'
@@ -263,6 +264,7 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/templates/**/*.hbs',
                     basePath + 'cat_source/*.js',
                     basePath + 'tm.js',
+                    basePath + 'advancedOptionsTab.js'
                 ],
                 tasks: ['concat:js'],
                 options: {
