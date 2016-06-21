@@ -2974,10 +2974,10 @@ section.modified .save-warning
 }
 
 #advancedOptions .more-options {
-    font-size: 27px;
+    font-size: 25px;
     color: #eee;
     padding: 0;
-    margin-top: 2px;
+    margin-top: 0px;
     display: block;
     text-align: center;
     width: 45px;
