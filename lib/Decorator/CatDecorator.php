@@ -73,6 +73,7 @@ class CatDecorator {
             $this->template->remoteFilesInJob = $files ;
         }
 
+        $this->template->support_mail = INIT::$SUPPORT_MAIL ;
         $this->template->showReplaceOptionsInSearch = true ;
 
     }

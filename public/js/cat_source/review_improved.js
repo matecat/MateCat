@@ -96,7 +96,7 @@ if ( ReviewImproved.enabled() )
                 id_issue
             );
 
-            $.ajax({
+            return $.ajax({
                 url: replies_path,
                 type: 'POST',
                 data : data
@@ -172,11 +172,10 @@ if ( ReviewImproved.enabled() && config.isReview ) {
     });
 
     $.extend(ReviewImproved, {
-        submitIssue : function(sid, data_array, options) {
+        submitIssue : function(sid, data_array) {
             var path  = sprintf('/api/v2/jobs/%s/%s/segments/%s/translation-issues',
                   config.id_job, config.password, sid);
             var segment = UI.Segment.find( sid );
-
             
             var deferreds = _.map( data_array, function( data ) {
                 return $.post( path, data )
@@ -185,14 +184,9 @@ if ( ReviewImproved.enabled() && config.isReview ) {
                 })
             });
 
-            var submitIssues = function() {
-                $.when.apply($, deferreds).done(function() {
-                    ReviewImproved.reloadQualityReport();
-                    options.done();
-                });
-            };
-
-            submitIssues();
+            return $.when.apply($, deferreds).done(function() {
+                ReviewImproved.reloadQualityReport();
+            });
         },
         reloadQualityReport : function() {
             var path  = sprintf('/api/v2/jobs/%s/%s/quality-report',
