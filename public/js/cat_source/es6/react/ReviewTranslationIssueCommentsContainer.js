@@ -32,6 +32,7 @@ export default React.createClass({
 
     commentsChanged : function() {
         this.setState({
+            comment_text: '', 
             sendLabel : 'Send',
             replying : false,
             comments : MateCat.db.segment_translation_issue_comments.findObjects({
@@ -221,6 +222,7 @@ export default React.createClass({
             <textarea data-minheight="40" data-maxheight="90"
                 className="mc-textinput mc-textarea mc-resizable-textarea"
                 placeholder="Write a comment..."
+                value={this.state.comment_text}
                 onChange={this.handleCommentChange} />
 
             </div>
