@@ -61,11 +61,15 @@ export default React.createClass({
                 'end_offset'          : this.props.selection.end_offset, 
                 'comment'             : message,
             };
-        }.bind(this) ),
-        { done : this.props.submitIssueCallback }
-        ); 
+        }.bind(this) ))
+            .done( this.props.submitIssueCallback )
+            .fail( this.handleFail ) ;
     },
 
+    handleFail : function() {
+        genericErrorAlertMessage() ;
+        this.setState({ submitDone : false, submitDisabled : false });
+    },
     render : function() {
         var categoryComponents = []; 
         var withSeverities = 0;

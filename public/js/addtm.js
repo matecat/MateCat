@@ -1,5 +1,4 @@
 var file = [], p = true;
-console.log('ECCO');
 
 function upload(blobOrFile) {
     var xhr = new XMLHttpRequest();

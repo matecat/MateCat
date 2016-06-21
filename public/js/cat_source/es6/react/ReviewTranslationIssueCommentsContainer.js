@@ -21,12 +21,18 @@ export default React.createClass({
     },
 
     undoRebutClick : function() {
-        ReviewImproved.setIssueRebutted( this.props.sid, this.props.issueId, 'false' );
         this.setState({ undoRebutDisabled : true, undoRebutLabel: 'Undoing' });
+        ReviewImproved.setIssueRebutted( this.props.sid, this.props.issueId, 'false' )
+            .fail( this.handleFail )
+            .fail(function() {
+                this.setState({ undoRebutDisabled : false, undoRebutLabel: this.getInitialState().undoRebutLabel });
+            }.bind(this) );
+
     },
 
     commentsChanged : function() {
         this.setState({
+            comment_text: '', 
             sendLabel : 'Send',
             replying : false,
             comments : MateCat.db.segment_translation_issue_comments.findObjects({
@@ -84,6 +90,10 @@ export default React.createClass({
         MateCat.db.removeListener('segment_translation_issues',
                                   ['insert', 'update', 'delete'], this.issueChanged);
     },
+    handleFail: function() {
+        genericErrorAlertMessage() ;
+        this.setState({ sendLabel : 'Send', sendDisabled : false });
+    },
     sendClick : function() {
         // send action invokes ReviewImproved function
         if ( !this.state.comment_text || this.state.comment_text.length == 0 ) {
@@ -96,7 +106,10 @@ export default React.createClass({
         };
 
         this.setState({ sendLabel : 'Sending', sendDisabled : true, rebutDisabled : true });
-        ReviewImproved.submitComment( this.props.sid, this.props.issueId, data ) ;
+        ReviewImproved
+            .submitComment( this.props.sid, this.props.issueId, data )
+            .fail( this.handleFail );
+
     },
 
     rebutClick : function() {
@@ -105,16 +118,18 @@ export default React.createClass({
             return ;
         }
 
-        this.setState({ rebutLabel : 'Sending', rebutDisabled : true, sendDisabled : true });
-
         var data = {
           message : this.state.comment_text,
           source_page : (config.isReview ? 2 : 1)  // TODO: move this to UI property
         };
+        
+        this.setState({ rebutLabel : 'Sending', rebutDisabled : true, sendDisabled : true });
 
-        this.setState({ rebutLabel : 'Sending', rebutDisabled : true });
-        ReviewImproved.submitComment( this.props.sid, this.props.issueId, data );
-        ReviewImproved.setIssueRebutted( this.props.sid, this.props.issueId, 'true' );
+        $.when(
+            ReviewImproved.submitComment( this.props.sid, this.props.issueId, data ),
+            ReviewImproved.setIssueRebutted( this.props.sid, this.props.issueId, 'true' )
+        ).fail( this.handleFail );
+
     },
 
     handleCommentChange : function(event) {
@@ -207,6 +222,7 @@ export default React.createClass({
             <textarea data-minheight="40" data-maxheight="90"
                 className="mc-textinput mc-textarea mc-resizable-textarea"
                 placeholder="Write a comment..."
+                value={this.state.comment_text}
                 onChange={this.handleCommentChange} />
 
             </div>

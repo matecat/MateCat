@@ -91,6 +91,10 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
       ) );
 
   }
+    
+    public static function buildChunkKey( $key, Chunks_ChunkStruct $chunk ) {
+        return "{$key}_chunk_{$chunk->id}_{$chunk->password}" ;
+    }
 
   protected function _buildResult( $array_result ) {
   }
