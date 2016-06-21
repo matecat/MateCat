@@ -3402,6 +3402,10 @@ float: left;
     margin-right: 7px;
     vertical-align: middle;
 }
+.translate-box .more-options:before {
+    margin-top: -3px;
+    display: inline-block;
+}
 
 .graysmall:hover .trash:before {
     content: "\f014"; 
