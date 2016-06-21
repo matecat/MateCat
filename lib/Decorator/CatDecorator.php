@@ -9,6 +9,9 @@ class CatDecorator {
      */
     private $template;
 
+    /**
+     * @var Chunks_ChunkStruct
+     */
     private $job;
 
     private $review_type;
@@ -74,6 +77,11 @@ class CatDecorator {
         }
 
         $this->template->showReplaceOptionsInSearch = true ;
+        
+        
+        $this->assignOptions(); 
+        
+
 
     }
 
@@ -152,4 +160,17 @@ class CatDecorator {
         $this->template->quality_report_href =
                 INIT::$BASEURL . "revise-summary/{$this->job->id}-{$this->job->password}";
     }
+
+    private function assignOptions() {
+        $chunk_options_model = new ChunkOptionsModel( $this->job ) ; 
+        
+        $this->template->tag_projection_enabled = $chunk_options_model->isEnabled('tag_projection')   ; 
+        $this->template->speech2text_enabled = $chunk_options_model->isEnabled( 'speech2text' ) ; 
+        $this->template->lxq_enabled = $chunk_options_model->isEnabled( 'lexiqa' ) ; 
+        $this->template->deny_lexiqa = false ;
+        
+        $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages ); 
+        $this->template->lexiqa_languages = json_encode( ProjectOptionsSanitizer::$lexiQA_allowed_languages ); 
+    }
+
 }
