@@ -726,10 +726,13 @@ class TMAnalysisWorker extends AbstractWorker {
 
             $this->_queueHandler->getRedisClient()->expire( RedisKeys::PROJECT_ENDING_SEMAPHORE . $_project_id, 60 * 60 * 24 /* 24 hours TTL */ );
 
-            // TODO: move the initialization of featureSet at earlier stage in
-            // order for other methods to run their own callbacks.
-
-            $this->featureSet->run('beforeTMAnalysisCloseProject', $this->project);
+            try {
+                $this->featureSet->run('beforeTMAnalysisCloseProject', $this->project);
+            } catch(\Exception $e) {
+                $this->_queueHandler->getRedisClient()->del( RedisKeys::PROJECT_ENDING_SEMAPHORE . $_project_id );
+                $this->_doLog("Requeueing project_id $_project_id because of error {$e->getMessage()}");
+                throw new ReQueueException();
+            }
 
             $_analyzed_report = getProjectSegmentsTranslationSummary( $_project_id );
 
