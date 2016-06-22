@@ -1251,6 +1251,12 @@ $.extend(UI, {
             e.preventDefault();
             UI.setExtendedTagMode();
         });
+
+		$("#outer").on('click', '.tab.alternatives .graysmall .goto a', function(e) {
+			e.preventDefault();
+			UI.scrollSegment($('#segment-' + $(this).attr('data-goto')), true);
+			UI.highlightEditarea($('#segment-' + $(this).attr('data-goto')));
+		});
 		UI.toSegment = true;
 
         if(!$('#segment-' + this.startSegmentId).length) {
@@ -1258,7 +1264,7 @@ $.extend(UI, {
                 if ( typeof this.startSegmentId != 'undefined' ) {
                     this.startSegmentId = this.startSegmentId + '-1';
                 }
-            };
+            }
         }
 
 		if (!this.segmentToScrollAtRender)
