@@ -104,9 +104,10 @@ class MacroFunzionalMyMemoryTest extends AbstractTest
         $ready = false;
         $tmx_max_id = 0;
         $result_tmx = array();
-
-        while (!$ready) {
+        $time=0;
+        while ((!$ready) && ($time<100)) {
             usleep(500000);//0.5 sec
+            $time ++;
             $result = $engine_MyMemory->getStatus($key_param, $name_param);
 
             /**
@@ -124,7 +125,6 @@ class MacroFunzionalMyMemoryTest extends AbstractTest
 
             $ready = $result_tmx['status'] == 1;
         }
-
 
         $this->assertTrue($result instanceof Engines_Results_MyMemory_TmxResponse);
         $this->assertNull($result->id);
@@ -193,9 +193,11 @@ class MacroFunzionalMyMemoryTest extends AbstractTest
         /**
          * Checking Export
          */
-        $ready = false;
-        while (!$ready) {
-            usleep(500000); //0.5 sec
+        $time=0;
+        $ready=false;
+        while ((!$ready) && ($time<100)) {
+            usleep(500000);//0.5 sec
+            $time ++;
             $result = $engine_MyMemory->checkExport($key_param);
             $ready = $result->responseDetails == "READY";
         }

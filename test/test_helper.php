@@ -25,6 +25,7 @@ register_shutdown_function(function() {
 });
 
 Bootstrap::start();
+require_once INIT::$MODEL_ROOT . '/queries.php';
 
 function startConnection() {
     $conn = Database::obtain (
