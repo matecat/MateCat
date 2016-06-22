@@ -104,7 +104,7 @@
         
         if ( segment.prev().length ) {
             scrollAnimation.animate({
-                scrollTop: segment.prev().offset().top - $('.header-menu').height()
+                scrollTop: segment.offset().top - $('.header-menu').height()
             }, speed);
         }
         
