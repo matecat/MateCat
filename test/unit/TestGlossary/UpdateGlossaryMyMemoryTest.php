@@ -272,7 +272,6 @@ class UpdateGlossaryMyMemoryTest extends AbstractTest
     /**
      * @group regression
      * @covers Engines_MyMemory::update
-     * TODO: this tests will FAIL because MyMemory responds error 500, on the other side MyMemory updates the glossary and this behaviour is clear and verified by the previous test
      * @see    UpdateGlossaryMyMemoryTest::test_OLD_NEW_update_with_success_glossary_word_checking_through_get_verification
      */
 
@@ -376,7 +375,6 @@ class UpdateGlossaryMyMemoryTest extends AbstractTest
     /**
      * @group regression
      * @covers Engines_MyMemory::update
-     * TODO: this tests will FAIL because MyMemory responds error 500, on the other side MyMemory updates the glossary and this behaviour is clear and verified by the previous test
      * @see    UpdateGlossaryMyMemoryTest::test_NEW_OLD_update_with_success_of_glossary_word_with_id_not_in_array_coverage_purpose_checking_through_get_verification
      */
 
