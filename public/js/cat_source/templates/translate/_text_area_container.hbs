@@ -1,4 +1,5 @@
 <div class="textarea-container">
+
   <span class="loader"></span>
   <div class="{{editarea_classes_string}}"
        {{#if readonly}} contenteditable="false" {{/if}}
@@ -7,8 +8,9 @@
                         id="segment-{{segment.sid}}-editarea"
                         data-sid="{{segment.sid}}"
                         >{{#if segment.translation }}{{{ decoded_translation }}}{{/if}}</div>
+
   {{#if s2t_enabled}}
-  <!-- div class="micSpeech" title="Activate voice input" data-segment-id="{{originalId}}">
+  <div class="micSpeech" title="Activate voice input" data-segment-id="{{originalId}}">
         <div class="micBg"></div>
         <div class="micBg2">
           <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="20" height="20" viewBox="0 0 20 20">
@@ -18,18 +20,22 @@
             </g>
           </svg>
         </div>
-  </div -->
+  </div>
   {{/if}}
   <div class="toolbar">
     {{{tagLockCustomizable}}}
-    {{#if tagModesEnabled }}
+    {{#if tagModesEnabled}}
+    {{#if notEnableTagProjection}}
     <a href="#" class="tagModeToggle" alt="Display full/short tags" title="Display full/short tags">
       <span class="icon-chevron-left"></span>
       <span class="icon-tag-expand"></span>
       <span class="icon-chevron-right"></span>
     </a>
-    <a href="#" class="autofillTag" alt="Copy missing tags from source to target" title="Copy missing tags from source to target"></a>
     {{/if}}
+    {{/if}}
+    <a href="#" class="autofillTag" alt="Copy missing tags from source to target" title="Copy missing tags from source to target"></a>
+
+
 
     <ul class="editToolbar">
       <li class="uppercase" title="Uppercase"></li>
@@ -40,6 +46,6 @@
 
   <p class="save-warning" title="Segment modified but not saved"></p>
 
-
+  
 
 </div>

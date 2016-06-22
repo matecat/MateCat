@@ -100,7 +100,7 @@ class NotificationItem extends React.Component {
     }
 
     render() {
-        var autoDismiss, message = null;
+        var autoDismiss, message, title = null;
         var notificationStyle = {};
         var cssByPos = this.getCssPropertyByPosition();
         if (!this.state.visible && !this.state.removed) {
@@ -128,13 +128,15 @@ class NotificationItem extends React.Component {
         autoDismiss = <span className={'notification-close-button'} onClick={this.dismissNotification}>×</span>;
         // }
         if (this.props.allowHtml) {
+            title = <h2 className={this.styleNameTitle} dangerouslySetInnerHTML={ this.allowHTML(this.props.title) }></h2>;
             message = <div className= {'notification-message'} dangerouslySetInnerHTML={ this.allowHTML(this.props.text) }></div>;
         } else {
+            title = <h2 className={this.styleNameTitle} > {this.props.title}</h2>
             message = <div className= {'notification-message'} >{this.props.text}</div>;
         }
         return <div className={this.styleNameContainer} style={notificationStyle}>
             {autoDismiss}
-            <h2 className={this.styleNameTitle} > {this.props.title}</h2>
+            {title}
             {message}
         </div> ;
     }

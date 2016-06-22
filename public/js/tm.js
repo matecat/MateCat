@@ -22,18 +22,25 @@ $.extend(UI, {
 
         $(".popup-tm li.mgmt-tm").click(function(e) {
             e.preventDefault();
-            console.log('questo');
             $(this).addClass("active");
-            $(".mgmt-mt").removeClass("active");
+            $(".mgmt-mt,.mgmt-opt").removeClass("active");
             $(".mgmt-table-mt").hide();
             $(".mgmt-table-tm").show();
+            $(".mgmt-table-options").hide();
         });
         $(".popup-tm .tm-mgmt").click(function(e) {
             e.preventDefault();
             $(".mgmt-mt").addClass("active");
-            $(".mgmt-tm").removeClass("active");
-            $(".mgmt-table-tm").hide();
+            $(".mgmt-tm,.mgmt-opt").removeClass("active");
+            $(".mgmt-table-tm,.mgmt-table-options").hide();
             $(".mgmt-table-mt").show();
+        });
+         $(".popup-tm .mgmt-opt").click(function(e) {
+            e.preventDefault();
+            $(".mgmt-opt").addClass("active");
+            $(".mgmt-tm,.mgmt-mt").removeClass("active");
+            $(".mgmt-table-tm,.mgmt-table-mt").hide();
+            $(".mgmt-table-options").show();
         });
 
         
@@ -41,9 +48,10 @@ $.extend(UI, {
         $(".mgmt-mt").click(function(e) {
             e.preventDefault();
             $(this).addClass("active");
-            $(".mgmt-tm").removeClass("active");
+            $(".mgmt-tm,.mgmt-opt").removeClass("active");
             $(".mgmt-table-tm").hide();
             $(".mgmt-table-mt").show();
+            $(".mgmt-table-options").hide();
         });
         $("#mt_engine").change(function() {
             if($(this).val() == 0) {
@@ -83,8 +91,8 @@ $.extend(UI, {
         $('#add-mt-provider-confirm').click(function(e) {
             e.preventDefault();
             if($(this).hasClass('disabled')) return false;
-            provider = $("#mt_engine_int").val();
-            providerName = $("#mt_engine_int option:selected").text();
+            var provider = $("#mt_engine_int").val();
+            var providerName = $("#mt_engine_int option:selected").text();
             UI.addMTEngine(provider, providerName);
         });
         $('#add-mt-provider-cancel').click(function(e) {
@@ -373,7 +381,9 @@ $.extend(UI, {
 
     },
     openLanguageResourcesPanel: function(tab, elToClick) {
-        console.log('openLanguageResourcesPanel');
+        if ($(".popup-tm").hasClass('open') ) {
+            return false;
+        }
         tab = tab || 'tm';
         elToClick = elToClick || null;
         $('body').addClass('side-popup');
@@ -383,10 +393,6 @@ $.extend(UI, {
         $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
         if(elToClick) $(elToClick).click();
         $.cookie('tmpanel-open', 1, { path: '/' });
-    },
-    uploadTM: function(form, action_url, div_id) {
-        console.log('div_id: ', div_id);
-
     },
     setTMsortable: function () {
 

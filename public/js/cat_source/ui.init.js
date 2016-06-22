@@ -19,6 +19,7 @@ $.extend(UI, {
 		this.searchParams.search = 0;
 		this.customSpellcheck = false;
 		this.noGlossary = false;
+		this.displayedMessages = [];
 		setTimeout(function() {
 			UI.blockGetMoreSegments = false;
 		}, 200);
@@ -166,6 +167,7 @@ $.extend(UI, {
 		APP.initMessageBar();
 		this.checkVersion();
         this.initTM();
+		this.initAdvanceOptions();
         this.storeClientInfo();
 
         // SET EVENTS

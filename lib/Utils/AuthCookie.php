@@ -102,7 +102,7 @@ class AuthCookie {
 
         $client->setAccessToken( $accessToken );
         
-        if ($client->isAccessTokenExpired()) {
+        if ( $client->isAccessTokenExpired() && $client->getRefreshToken() != null ) {
             $client->refreshToken( $client->getRefreshToken() );
             
             $newToken = $client->getAccessToken();

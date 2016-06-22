@@ -64,18 +64,12 @@ $.extend(UI, {
 		this.preCloseTagAutocomplete = false;
         this.hiddenTextEnabled = true;
         this.markSpacesEnabled = false;
-//        console.log('options: ', options);
-//        console.log('options.tagModesEnabled: ', options.tagModesEnabled);
-//        console.log('1: ', this.tagModesEnabled);
         this.tagModesEnabled = (typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
-//        console.log('2: ', this.tagModesEnabled);
         if(this.tagModesEnabled) {
             UI.body.addClass('tagModes');
         } else {
             UI.body.removeClass('tagModes');
         }
-
-
 
         /**
          * Global Translation mismatches array definition.
@@ -92,14 +86,17 @@ $.extend(UI, {
         this.findCommonPartInSegmentIds();
 		UI.detectStartSegment(); 
 		options.openCurrentSegmentAfter = ((!seg) && (!this.firstLoad)) ? true : false;
-		UI.getSegments(options);
 		
+		var getSegmentsAjax = UI.getSegments(options);
+
 		if (this.firstLoad && this.autoUpdateEnabled) {
 			this.lastUpdateRequested = new Date();
 			setTimeout(function() {
 				UI.getUpdates();
 			}, UI.checkUpdatesEvery);
 		}
+		
+		return getSegmentsAjax ; 
 	},
 });
 

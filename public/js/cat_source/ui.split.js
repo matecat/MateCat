@@ -137,17 +137,29 @@ if(config.splitSegmentEnabled) {
                 },
                 error: function(d){
                     console.log('error');
-                    UI.showMessage({
+                    var notification = {
+                        title: 'Error',
+                        text: d.errors[0].message,
+                        type: 'error'
+                    };
+                    APP.addNotification(notification);
+                    /*UI.showMessage({
                         msg: d.errors[0].message
-                    });
+                    });*/
 
                 },
                 success: function(d){
                     console.log('success');
                     if(d.errors.length) {
-                        UI.showMessage({
+                        var notification = {
+                            title: 'Error',
+                            text: d.errors[0].message,
+                            type: 'error'
+                        };
+                        APP.addNotification(notification);
+                        /*UI.showMessage({
                             msg: d.errors[0].message
-                        });
+                        });*/
                     } else {
                         UI.setSegmentSplitSuccess(this);
                     }
@@ -241,16 +253,17 @@ if(config.splitSegmentEnabled) {
         },
 
         createSplitArea: function (segment) {
-            isSplitted = segment.attr('data-split-group') != '';
-            source = $(segment).find('.source');
+            var splitAreaMarkup = '';
+            var isSplitted = segment.attr('data-split-group') != '';
+            var source = $(segment).find('.source');
             $(source).removeAttr('style');
-            targetHeight = $('.targetarea').height();
+            var targetHeight = $('.targetarea').height();
             segment.find('.splitContainer').remove();
             source.after('<div class="splitContainer"><div class="splitArea" contenteditable="true"></div><div class="splitBar"><div class="buttons"><a class="cancel hide" href="#">Cancel</a><a href="#" class="done btn-ok pull-right">Confirm</a></div><div class="splitNum pull-right">Split in <span class="num">1</span> segment<span class="plural"></span></div></div></div>');
-            splitArea = segment.find('.splitArea');
+            var splitArea = segment.find('.splitArea');
             setTimeout(function() {
-                sourceHeight = $(source).height();
-                splitAreaHeight = $(splitArea).height();
+                var sourceHeight = $(source).height();
+                var splitAreaHeight = $(splitArea).height();
             if(sourceHeight >= splitAreaHeight) {
                     $('.splitBar').css('top', (sourceHeight + 70)+ 'px');
                     $(source).css('height', (sourceHeight)+ 'px');
@@ -261,12 +274,13 @@ if(config.splitSegmentEnabled) {
                 }
             },100);
 
-            if(isSplitted) splitArea.removeAttr('style');
             if(isSplitted) {
-                segments = segment.attr('data-split-group').split(',');
-                totalMarkup = '';
+                splitArea.removeAttr('style');
+                var segments = segment.attr('data-split-group').split(',');
+                var totalMarkup = '';
                 $.each(segments, function (index) {
-                    newMarkup = $('#segment-' + this + ' .source').attr('data-original');
+                    var newMarkup = $('#segment-' + this + ' .source').attr('data-original');
+                    newMarkup = htmlDecode(newMarkup).replace(/&quot;/g, '\"');
                     if(this == UI.currentSegmentId) newMarkup = '<span class="currentSplittedSegment">' + newMarkup + '</span>';
                     totalMarkup += newMarkup;
 
@@ -275,6 +289,7 @@ if(config.splitSegmentEnabled) {
                 splitAreaMarkup = totalMarkup;
             } else {
                 splitAreaMarkup = source.attr('data-original');
+                splitAreaMarkup = htmlDecode(splitAreaMarkup).replace(/&quot;/g, '\"');
             }
             splitArea.html(splitAreaMarkup);
             this.lockTags(splitArea);

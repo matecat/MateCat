@@ -27,6 +27,7 @@
               return obj.stack;
             };
             var config = {
+                is_cattool : true,
                 basepath: '${basepath | string:/}',
                 maxFileSize: ${maxFileSize},
                 maxTMXFileSize: ${maxTMXFileSize},
@@ -79,7 +80,14 @@
 		        lexiqaServer: 'https://backend.lexiqa.net',
                 lxq_enabled: ${lxq_enabled | string:false},
                 qa_check_glossary_enabled : ${qa_check_glossary_enabled | string:false },
-                qa_check_blacklist_enabled : ${qa_check_blacklist_enabled | string:false }
+                qa_check_blacklist_enabled : ${qa_check_blacklist_enabled | string:false },
+                support_mail : '${support_mail}',
+                qa_check_blacklist_enabled : ${qa_check_blacklist_enabled | string:false },
+                speech2text_enabled: ${speech2text_enabled | string:false},
+                tag_projection_enabled: ${tag_projection_enabled | string:false},
+                lexiqa_languages: ${lexiqa_languages},
+                deny_lexiqa: ${deny_lexiqa | string:false},
+                tag_projection_languages: ${tag_projection_languages}
             };
 
             var renderStart = new Date();

@@ -51,7 +51,7 @@
             this.activateSegment(segment, getNormally);
 
             segment.el.trigger('open');
-
+            
             $('section').first().nextAll('.undoCursorPlaceholder').remove();
             this.getNextSegment(this.currentSegment, 'untranslated');
 
@@ -142,6 +142,10 @@
                 segment: segment
             });
 
+            if( this.currentSegment.data( 'modified' ) === true ) {
+                segment.el.trigger('fixedButton:enable');
+            }
+            
             Speech2Text.enabled() && Speech2Text.enableMicrophone(segment.el);
         }
     });

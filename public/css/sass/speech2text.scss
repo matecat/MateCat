@@ -22,17 +22,26 @@
     }
 
     &:active {
-        @extend .activeSegmentButton;
+        background-color: #fff;
+        background-image: -webkit-linear-gradient(top, #fff, #f4f4f4);
+        border-color:red;
     }
 }
 
+.editarea.micActive {
+    width: 94%;
+    padding-right: 7%;
+}
+
 .micSpeech {
-    @extend .segmentButton;
+    /* @extend .segmentButton; */
 
     display: none;
     position: absolute;
-    bottom: 0;
-    left: -12px;
+    top: 10px;
+    right: 10px;
+    cursor:pointer;
+    padding:3px 4px 5px 4px;
     z-index: 9999999;
 
     &:hover {
@@ -41,18 +50,35 @@
         }
     }
 
-    &.micSpeechActive,
-    &:active {
-        @extend .activeSegmentButton;
 
+    
+
+   
+    &.micSpeechActive {
         svg g {
-            fill: #000000;
+            fill: red;
         }
     }
 
     &.micSpeechReceiving {
-        background: hsl(0, 100%, 55%);
+      /*  @extend .activeSegmentButton; */
 
+        svg g {
+            fill: #fff;
+        }
+    }
+
+/*    &.micSpeechActive .micBg, */
+    &.micSpeechReceiving .micBg {
+        background: red;
+          -webkit-border-radius: 60px;
+          -moz-border-radius: 60px;
+          border-radius: 60px;
+          height: 50px;
+          width: 50px;
+          position: absolute;
+        right: -11px;
+        top: -10px;
         @include animation-duration(1s);
         @include animation-name(speaking);
         @include animation-iteration-count(infinite);
@@ -137,11 +163,31 @@ $tlbr-btn-bg-act: -webkit-linear-gradient(top, #eee, #e0e0e0);
     }
 }
 
+.micBg2 {
+    position: absolute;
+    background: transparent;
+    width: 20px;
+    right: 4px;
+    height: 20px;
+    border-radius: 20px;
+}
+
+.micSpeech {
+    zoom: 0.8;
+}
+
+
 @include keyframes(speaking) {
     0% {
-        background: hsl(0, 71%, 35%);
+    -webkit-transform: scale(0.6);
+    opacity: 0.6;
+}
+ 50% {
+    -webkit-transform: scale(0.8);
+    opacity: 0.8;
     }
-    100% {
-        background: hsl(0, 100%, 55%);
-    }
+ 100% {
+    -webkit-transform: scale(0.6);
+    opacity: 0.6;
+ }
 }

@@ -41,12 +41,9 @@ $klein->onError(function ($klein, $err_msg, $err_type, $exception) {
             $klein->response()->send();
             break;
         default:
-            \Log::doLog("$err_msg" );
             $klein->response()->code(500);
-            // TODO: log exceptions to default loader
-            Log::doLog(
-                "Error: {$exception->getMessage()} "
-            );
+            \Utils::sendErrMailReport( $exception->getMessage() . "" . $exception->getTraceAsString(), 'Generic error' );
+            \Log::doLog("Error: {$exception->getMessage()} ");
             \Log::doLog( $exception->getTraceAsString() );
             break;
     }
@@ -128,11 +125,18 @@ $klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment
     $instance->respond('index');
 });
 
+$klein->respond('POST', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues/[:id_issue]/rebutted-at', function() {
+    $reflect  = new ReflectionClass('API\V2\SegmentTranslationIssueController');
+    $instance = $reflect->newInstanceArgs(func_get_args());
+    $instance->respond('updateRebutted');
+});
+
 $klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation', function() {
     $reflect  = new ReflectionClass('API\V2\TranslationController');
     $instance = $reflect->newInstanceArgs(func_get_args());
     $instance->respond('index');
 });
+
 
 $klein->respond('GET', '/utils/pee', function() {
     $reflect  = new ReflectionClass('peeViewController');
@@ -152,19 +156,19 @@ $klein->respond('POST', '/api/v2/projects/[:id_project]/[:password]/jobs/[:id_jo
 
 route( '/api/v1/jobs/[:id_job]/[:password]/stats', 'GET',  'API\V1\StatsController', 'stats' );
 
-/**
- * Define additional routes here
- */
-
 route( '/api/v2/jobs/[:id_job]/[:password]/segments-filter', 'GET',
         'Features\SegmentFilter\Controller\API\FilterController', 'index'
 );
 
+route( '/api/v2/jobs/[:id_job]/[:password]/options', 'POST', 'API\V2\ChunkOptionsController', 'update' ); 
 
-/**
- * This should be moved in plugin space
- */
 $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
+    
+    route( '/comments',     'GET', 'API\V2\CommentsController', 'index' );
+
+    /**
+     * This should be moved in plugin space
+     */
     route( '/quality-report', 'GET',
        'Features\ReviewImproved\Controller\API\QualityReportController', 'show'
     );

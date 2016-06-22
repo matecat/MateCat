@@ -127,8 +127,7 @@ function insertNodeAtCursor(node) {
 			range = window.getSelection().getRangeAt(0);
 			range.insertNode(node);
 			setCursorAfterNode(range, node);
-		} else {
-		}
+		} 
 	} else if (document.selection && document.selection.createRange) {
 		range = document.selection.createRange();
 		html = (node.nodeType == 3) ? node.data : node.outerHTML;
@@ -314,13 +313,20 @@ function fileUpload(form, action_url, div_id) {
 
 //    document.getElementById(div_id).innerHTML = "Uploading...";
     $('.popup-addtm-tr .x-popup').click();
-    UI.showMessage({
+	var notification = {
+		title: 'Upload',
+		text: 'Uploading your TM...',
+		type: 'warning',
+		position: "bl"
+	};
+	APP.addNotification(notification);
+    /*UI.showMessage({
         msg: 'Uploading your TM...'
-    });
+    });*/
     $('#messageBar .msg').after('<span class="progress"></span>');
     TMKey = $('#addtm-tr-key').val();
     TMName = $('#uploadTMX').text();
-console.log('TMKey 1: ', TMKey);
+	console.log('TMKey 1: ', TMKey);
     console.log('TMName 1: ', TMName);
 //    UI.pollForUploadProgress(TMKey, TMName);
 
@@ -1011,4 +1017,24 @@ function cleanupSplitMarker( string ) {
 
 function absoluteId( id ) {
 	return id.split('-')[0]; 
+}
+
+/**
+ * Returns a clickable link with mailto support.
+ */
+function linkedSupportEmail() {
+	return sprintf('<a href="mailto:%s">%s</a>', config.support_mail, config.support_mail );
+}
+
+/**
+ * A generic error message to show in modal window.
+ *
+ * @returns {*}
+ */
+function genericErrorAlertMessage() {
+	return APP.alert({
+		msg: sprintf('There was an error while saving data to server, please try again. ' +
+			'If the problem persists please contact %s reporting the web address of the current browser tab.',
+			linkedSupportEmail() )
+	});
 }
