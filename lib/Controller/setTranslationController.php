@@ -582,10 +582,8 @@ class setTranslationController extends ajaxController {
                 'old_translation' => $old_translation,
                 'propagated_ids'  => $propagationTotal['propagated_ids'],
                 'chunk'           => $this->chunk,
-                'segment'         => $this->segment,
-                'uid'             => $uid
+                'segment'         => $this->segment
                 ));
-
 
         //EVERY time an user changes a row in his job when the job is completed,
         // a query to do the update is executed...
