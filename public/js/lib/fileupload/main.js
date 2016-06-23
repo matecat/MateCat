@@ -202,24 +202,26 @@ UI = {
     },
 
     TMXloaded: function () {
-        console.log( 'ecco: ', $( '#private-tm-key' ).val() );
-        $( '#disable_tms_engine' ).trigger( 'click' );
+        // $( '#disable_tms_engine' ).trigger( 'click' );
         this.createKeyByTMX();
     },
 
-    createKeyByTMX: function () {
+    createKeyByTMX: function (extension) {
         if ( !isTMXAllowed() ) return false;
-        if ( $( '#create_private_tm_btn' ).hasClass( 'disabled' ) ) return false; //ajax call already running
+        if ( $(".mgmt-tm .new .privatekey .btn-ok").hasClass( 'disabled' ) ) return false; //ajax call already running
         if( $( '.mgmt-panel #activetm tbody tr.mine' ).length ) return false; //a key is already selected in TMKey management panel
-        if ( $( '#create_private_tm_btn[data-key]' ).length || $( '#private-tm-key' ).val().length ) { // a key has already been created
-            if ( $( '#private-tm-key' ).val() == '' ) {
-                $( '#private-tm-key' ).val( $( '#create_private_tm_btn' ).attr( 'data-key' ) );
-            }
-        } else {
-            if ( !$( ".more" ).hasClass( 'minus' ) ) $( ".more" ).trigger( 'click' );
-            $( '#create_private_tm_btn' ).trigger( 'click' );
-            $( '.warning-message' ).html( '<span>A Private TM Key has been generated for the TMX you uploaded. You can replace the generated Key with a different one.<br/>If you do not use a Private TM Key, the content of your TMX will be saved in a public TM</span>' ).show();
+
+        APP.createTMKey();
+        var textToDisplay = '<span>A Private TM Key has been generated for the TMX you uploaded. You can manage your private TM in the  <a href="#" class="translation-memory-option-panel">Translation Memory panel</a>.</span>';
+        if (extension && extension === "g") {
+            textToDisplay = '<span>A Private TM Key has been generated for the Glossary uploaded. You can manage your private TM in the  <a href="#" class="translation-memory-option-panel">Translation Memory panel</a>.</span>';
         }
+
+
+        $( '.warning-message' ).html( textToDisplay ).show();
+        $('.warning-message .translation-memory-option-panel').off('click').on('click', function() {
+            APP.openOptionsPanel("tm");
+        } );
     },
 
     checkFailedConversionsNumber: function () {
@@ -479,15 +481,7 @@ $( function () {
              */
             var extension = data.files[0].name.split( '.' )[data.files[0].name.split( '.' ).length - 1];
             if ( ( extension == 'tmx' || extension == 'g' ) && config.conversionEnabled ) {
-                var tmDisabled = (typeof $( '#disable_tms_engine' ).attr( "checked" ) == 'undefined') ? false : true;
-                if ( tmDisabled ) {
-                    APP.alert( {
-                        msg: 'The TM was disabled. It will now be enabled.',
-                        callback: 'TMXloaded'
-                    } );
-                } else {
-                    UI.createKeyByTMX();
-                }
+                UI.createKeyByTMX(extension);
             }
 
         } else if ( fileSpecs.error ) {

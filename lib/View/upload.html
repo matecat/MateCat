@@ -1005,13 +1005,6 @@
        
     } );
 
-    $( "a.more-options" ).on("click", function ( e ) {
-        e.preventDefault();
-        tab = $(this).attr('data-tab') || 'options';
-        elToClick = $(this).attr('data-el-to-click') || null;
-        UI.openLanguageResourcesPanel(tab, elToClick);
-    } );
-
     $( function () {
 
         var dd = new DropDown( $( '#dd' ) );
