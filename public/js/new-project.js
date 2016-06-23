@@ -482,6 +482,7 @@ APP.checkForSpeechToText = function(){
 	speech2textCheck.removeClass('option-unavailable');
 	if (!('webkitSpeechRecognition' in window)) {
 		disableS2T = true;
+		$('.options-box #s2t_check').prop( "disabled", disableS2T );
 		speech2textCheck.find('.option-s2t-box-chrome-label').css('display', 'inline');
 		speech2textCheck.find('.onoffswitch').on('click', function () {
 			speech2textCheck.find('.option-s2t-box-chrome-label').addClass('pulse');
@@ -491,8 +492,5 @@ APP.checkForSpeechToText = function(){
 		});
 		speech2textCheck.addClass('option-unavailable');
 	}
-	// var disableS2T = ('webkitSpeechRecognition' in window && !config.defaults.speech2text);
-	$('.options-box #s2t_check').prop( "disabled", disableS2T );
 	$('.options-box #s2t_check').attr('checked', !disableS2T);
-	// $('.options-box.s2t-box').css({opacity: ( disableS2T ? 0.6 : 1 )  });
 };
