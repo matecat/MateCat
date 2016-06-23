@@ -177,26 +177,6 @@ class ReviewImproved extends BaseFeature {
     }
 
     /**
-     * Clean up the chunks options before the job merging
-     *
-     * @param $jobs   Associative array with the Jobs
-     */
-    public function cleanupChunksOptions( $jobs ) {
-        $dao = new Projects_MetadataDao() ;
-
-        foreach ( $jobs as $job ) {
-            $chunk = Chunks_ChunkDao::getByIdAndPassword( $job[ 'id' ], $job[ 'password' ] );
-
-            foreach ( ChunkOptionsModel::$valid_keys as $key ) {
-                $dao->delete(
-                    $chunk->id_project,
-                    Projects_MetadataDao::buildChunkKey( $key, $chunk )
-                );
-            }
-        }
-    }
-
-    /**
      * Entry point for project data validation for this feature.
      */
     public function validateProjectCreation($projectStructure)  {
