@@ -94,6 +94,10 @@ export default React.createClass({
         genericErrorAlertMessage() ;
         this.setState({ sendLabel : 'Send', sendDisabled : false });
     },
+    handleFail: function() {
+        genericErrorAlertMessage() ;
+        this.setState({ sendLabel : 'Send', sendDisabled : false });
+    },
     sendClick : function() {
         // send action invokes ReviewImproved function
         if ( !this.state.comment_text || this.state.comment_text.length == 0 ) {
