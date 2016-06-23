@@ -7,7 +7,7 @@ CREATE TABLE `activity_log` (
   `id_job` int(10) unsigned NOT NULL,
   `action` int(10) unsigned NOT NULL,
   `ip` varchar(45) NOT NULL,
-  `uid` int(10) unsigned NOT NULL,
+  `uid` int(10) unsigned DEFAULT NULL,
   `event_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`ID`),
   KEY `ip_idx` (`ip`) USING BTREE,

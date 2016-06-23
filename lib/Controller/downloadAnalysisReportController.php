@@ -1,4 +1,7 @@
 <?php
+use ActivityLog\Activity;
+use ActivityLog\ActivityLogStruct;
+
 /**
  * User: gremorian
  * Date: 11/05/15
@@ -7,6 +10,21 @@
  */
 
 class downloadAnalysisReportController extends downloadController {
+
+    /**
+     * @var int
+     */
+    protected $id_project;
+
+    /**
+     * @var string
+     */
+    protected $password;
+
+    /**
+     * @var string
+     */
+    protected $download_type;  // switch flag, for now not important
 
     public function __construct() {
 
@@ -54,6 +72,20 @@ class downloadAnalysisReportController extends downloadController {
 
         $this->content = $this->composeZip( $_project_data[0][ 'pname' ], $outputContent );
         $this->_filename = $_project_data[0][ 'pname' ] . ".zip";
+
+        /**
+         * Retrieve user information
+         */
+        $this->checkLogin();
+
+        $activity             = new ActivityLogStruct();
+        $activity->id_job     = $_project_data[ 0 ][ 'jid' ];
+        $activity->id_project = $this->id_project; //assume that all rows have the same project id
+        $activity->action     = ActivityLogStruct::DOWNLOAD_ANALYSIS_REPORT;
+        $activity->ip         = Utils::getRealIpAddr();
+        $activity->uid        = $this->uid;
+        $activity->event_date = date( 'Y-m-d H:i:s' );
+        Activity::save( $activity );
 
     }
 

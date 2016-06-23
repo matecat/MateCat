@@ -189,7 +189,6 @@ abstract class viewController extends controller {
              * @var $userObject Users_UserStruct
              */
             $userObject = $userObject[0];
-//            $this->logged_user = getUserData( $_SESSION[ 'cid' ] );
             $this->logged_user = $userObject;
         }
 

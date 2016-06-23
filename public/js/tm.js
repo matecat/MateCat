@@ -1148,6 +1148,21 @@ $.extend(UI, {
                     } )
             );
 
+            if ( typeof config.id_job !== 'undefined' ){
+                iFrameForm.append(
+                    $( document.createElement( 'input' ) ).prop( {
+                        type: 'hidden',
+                        name: 'id_job',
+                        value: config.id_job
+                    } ),
+                    $( document.createElement( 'input' ) ).prop( {
+                        type: 'hidden',
+                        name: 'password',
+                        value: config.password
+                    } )
+                );
+            }
+
             //append from to newly created iFrame and submit form post
             iFrameDownload.contents().find( 'body' ).append( iFrameForm );
             console.log( iFrameDownload.contents().find( "#" + formID ) );

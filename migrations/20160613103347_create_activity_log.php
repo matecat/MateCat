@@ -7,19 +7,20 @@ class CreateActivityLog extends AbstractMatecatMigration
 
     public $sql_up = <<<EOF
 CREATE TABLE `activity_log` (
-  `ID` INT NOT NULL AUTO_INCREMENT,
-  `id_project` INT UNSIGNED NOT NULL,
-  `id_job` INT UNSIGNED NOT NULL,
-  `action` INT UNSIGNED NOT NULL,
-  `ip` VARCHAR(45) NOT NULL,
-  `uid` INT UNSIGNED NOT NULL,
-  `event_date` DATETIME NOT NULL DEFAULT NOW(),
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `id_project` int(10) unsigned DEFAULT NULL,
+  `id_job` int(10) unsigned DEFAULT NULL,
+  `action` int(10) unsigned NOT NULL,
+  `ip` varchar(45) NOT NULL,
+  `uid` int(10) unsigned DEFAULT NULL,
+  `event_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`ID`),
-  INDEX `ip_idx` USING BTREE (`ip` ASC),
-  INDEX `id_job_idx` USING BTREE (`id_job` DESC),
-  INDEX `id_project_idx` USING BTREE (`id_project` DESC),
-  INDEX `uid_idx` USING BTREE (`uid` ASC),
-  INDEX `event_date_idx` USING BTREE (`event_date` ASC));
+  KEY `ip_idx` (`ip`) USING BTREE,
+  KEY `id_job_idx` (`id_job`) USING BTREE,
+  KEY `id_project_idx` (`id_project`) USING BTREE,
+  KEY `uid_idx` (`uid`) USING BTREE,
+  KEY `event_date_idx` (`event_date`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8
 EOF;
 
     public $sql_down = 'DROP TABLE `activity_log`';

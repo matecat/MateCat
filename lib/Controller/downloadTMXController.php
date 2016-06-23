@@ -1,4 +1,7 @@
 <?php
+use ActivityLog\Activity;
+use ActivityLog\ActivityLogStruct;
+
 /**
  * Created by PhpStorm.
  * @author domenico domenico@translated.net / ostico@gmail.com
@@ -8,6 +11,16 @@
  */
 
 class downloadTMXController extends downloadController {
+
+    /**
+     * @var int
+     */
+    protected $id_job;
+
+    /**
+     * @var string
+     */
+    protected $password;
 
     /**
      * MyMemory key
@@ -62,10 +75,16 @@ class downloadTMXController extends downloadController {
 
     public function __construct() {
 
-        parent::sessionStart();
+        /**
+         * Retrieve user information
+         */
+        $this->checkLogin();
 
         $filterArgs = array(
-
+            'id_job'                  => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+            'password'                => array(
+                    'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+            ),
             'tm_key' =>  array(
                     'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
             ),
@@ -92,11 +111,10 @@ class downloadTMXController extends downloadController {
         $this->target        = $__postInput[ 'target' ];
         $this->downloadToken = $__postInput[ 'downloadToken' ];
 
-        parent::disableSessions();
+        $this->id_job        = $__postInput[ 'id_job' ];
+        $this->password      = $__postInput[ 'password' ];
 
-        $userIsLogged   = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) );
-
-        if( !$userIsLogged ){
+        if( !$this->userIsLogged ){
 
             $output = "<pre>\n";
             $output .=  " - REQUEST URI: " . print_r( @$_SERVER['REQUEST_URI'], true ) . "\n";
@@ -113,9 +131,6 @@ class downloadTMXController extends downloadController {
             exit;
         }
 
-        $this->uid      = ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) ? $_SESSION[ 'uid' ] : null );
-        $this->userMail = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ? $_SESSION[ 'cid' ] : null );
-
         $this->tmxHandler = new TMSService();
         $this->tmxHandler->setTmKey( $this->tm_key );
 
@@ -131,6 +146,14 @@ class downloadTMXController extends downloadController {
         try {
 
             $this->streamFilePointer = $this->tmxHandler->downloadTMX();
+
+            $activity             = new ActivityLogStruct();
+            $activity->id_job     = $this->id_job;
+            $activity->action     = ActivityLogStruct::DOWNLOAD_KEY_TMX;
+            $activity->ip         = Utils::getRealIpAddr();
+            $activity->uid        = $this->uid;
+            $activity->event_date = date( 'Y-m-d H:i:s' );
+            Activity::save( $activity );
 
         } catch( Exception $e ){
 

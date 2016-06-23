@@ -54,6 +54,8 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass {
      * @param $params
      * @param $function
      *
+     * @return mixed
+     * 
      * FIXME: current implementation is bogus because it only allows to pass one parameter.
      *
      */

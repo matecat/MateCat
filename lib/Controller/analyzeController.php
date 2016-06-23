@@ -1,5 +1,7 @@
 <?php
 
+use ActivityLog\Activity;
+use ActivityLog\ActivityLogStruct;
 use \Analysis\Status;
 
 class analyzeController extends viewController {
@@ -22,6 +24,7 @@ class analyzeController extends viewController {
     protected $_outsource_login_API = '//signin.translated.net/';
 
     private $pid;
+    private $jid;
     private $ppassword;
     private $jpassword;
 
@@ -90,6 +93,18 @@ class analyzeController extends viewController {
 
         $this->model = new Analysis_AnalysisModel( $this->project, $this->chunk );
         $this->model->loadData();
+
+        list( $uid, $email ) = $this->getLoginUserParams();
+
+        $activity             = new ActivityLogStruct();
+        $activity->id_job     = $this->jid;
+        $activity->id_project = $this->pid;
+        $activity->action     = ActivityLogStruct::ACCESS_ANALYZE_PAGE;
+        $activity->ip         = Utils::getRealIpAddr();
+        $activity->uid        = $uid;
+        $activity->event_date = date( 'Y-m-d H:i:s' );
+        Activity::save( $activity );
+        
     }
 
     public function setTemplateVars() {
