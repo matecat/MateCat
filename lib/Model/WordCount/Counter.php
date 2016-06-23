@@ -309,11 +309,8 @@ class WordCount_Counter {
      * @return string
      */
     private function methodNameForStatusCall( $name ) {
-        if ( strtoupper($name) == Constants_TranslationStatus::STATUS_FIXED ) {
-            return 'TranslatedWords';
-        }
-        if ( strtoupper($name) == Constants_TranslationStatus::STATUS_REBUTTED ) {
-            return 'RejectedWords';
+        if ( in_array( strtoupper($name), Constants_TranslationStatus::$POST_REVISION_STATUSES  ) ) {
+            return 'TranslatedWords' ;
         }
         return ucfirst( strtolower( $name ) ) . 'Words';
 
