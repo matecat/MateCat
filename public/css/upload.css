@@ -504,14 +504,6 @@ float: left;
 	.translate-box select, .mgmt-table-mt select {
 		width: 210px!important;
 	}
-
-
-
-	.translate-box a {
-	  display: block;
-	  width: 195px;
-	  margin-top: 0;
-	}
 }
 
 @media only screen and (max-width : 1280px) {

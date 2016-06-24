@@ -345,7 +345,7 @@ $(document).ready(function() {
 		$("div.grayed").hide();
 	});
 
-	/*$("#disable_tms_engine").change(function(e){
+	$("#disable_tms_engine").change(function(e){
 		if(this.checked){
 			$("input[id^='private-tm-']").prop("disabled", true);
 			// $("#create_private_tm_btn").addClass("disabled", true);
@@ -355,7 +355,7 @@ $(document).ready(function() {
 				$("#create_private_tm_btn").removeClass("disabled");
 			}
 		}
-	});*/
+	});
 
 	/*$("#private-tm-key").on('keyup', function(e) {
 		if($(this).val() == '') {
