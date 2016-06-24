@@ -147,13 +147,16 @@ class downloadTMXController extends downloadController {
 
             $this->streamFilePointer = $this->tmxHandler->downloadTMX();
 
-            $activity             = new ActivityLogStruct();
-            $activity->id_job     = $this->id_job;
-            $activity->action     = ActivityLogStruct::DOWNLOAD_KEY_TMX;
-            $activity->ip         = Utils::getRealIpAddr();
-            $activity->uid        = $this->uid;
-            $activity->event_date = date( 'Y-m-d H:i:s' );
-            Activity::save( $activity );
+            // TODO: Not used at moment, will be enabled when will be built the Log Activity Keys
+            /*
+                $activity             = new ActivityLogStruct();
+                $activity->id_job     = $this->id_job;
+                $activity->action     = ActivityLogStruct::DOWNLOAD_KEY_TMX;
+                $activity->ip         = Utils::getRealIpAddr();
+                $activity->uid        = $this->uid;
+                $activity->event_date = date( 'Y-m-d H:i:s' );
+                Activity::save( $activity );
+            */
 
         } catch( Exception $e ){
 

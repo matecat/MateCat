@@ -27,7 +27,8 @@ class ActivityLogDao extends DataAccess_AbstractDao {
                         'uid',
                         'action',
                         'ip',
-                        'event_date'
+                        'event_date',
+                        'memory_key'
                 )
         );
         $columns = array_keys( $jobStructToArray );

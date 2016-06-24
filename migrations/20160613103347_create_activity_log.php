@@ -12,6 +12,7 @@ CREATE TABLE `activity_log` (
   `ip` varchar(45) NOT NULL,
   `uid` int(10) unsigned DEFAULT NULL,
   `event_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `memory_key` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`ID`,`event_date`),
   KEY `ip_idx` (`ip`) USING BTREE,
   KEY `id_job_idx` (`id_job`) USING BTREE,
