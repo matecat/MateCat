@@ -154,11 +154,11 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass {
         $publicProperties = $reflectionClass->getProperties( ReflectionProperty::IS_PUBLIC ) ;
         foreach( $publicProperties as $property ) {
             if ( !empty($mask) ) {
-                if (! in_array( $property->getName(), $mask)) {
+                if ( !in_array( $property->getName(), $mask ) ) {
                     continue;
                 }
             }
-            $attributes[$property->getName()] = $property->getValue($this);
+            $attributes[ $property->getName() ] = $property->getValue( $this );
         }
         return $attributes;
 

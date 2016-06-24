@@ -20,7 +20,16 @@ class ActivityLogDao extends DataAccess_AbstractDao {
     public function create( ActivityLogStruct $activityStruct ) {
 
         $conn = Database::obtain()->getConnection();
-        $jobStructToArray = $activityStruct->toArray();
+        $jobStructToArray = $activityStruct->toArray(
+                array(
+                        'id_job',
+                        'id_project',
+                        'uid',
+                        'action',
+                        'ip',
+                        'event_date'
+                )
+        );
         $columns = array_keys( $jobStructToArray );
         $values = array_values( $jobStructToArray );
 
@@ -32,7 +41,6 @@ class ActivityLogDao extends DataAccess_AbstractDao {
 
         $stmt->execute();
 
-//        return static::getByID( $conn->lastInsertId() );
         return $conn->lastInsertId();
         
     }
@@ -57,7 +65,6 @@ class ActivityLogDao extends DataAccess_AbstractDao {
         return $this->_fetchObject( $stmt,
                 $activityQuery,
                 array(
-                        'id_job' => $activityQuery->id,
                         'id_project' => $activityQuery->id_project
                 )
         );
@@ -72,8 +79,10 @@ class ActivityLogDao extends DataAccess_AbstractDao {
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
-                "SELECT * FROM activity_log WHERE " .
-                " id = :id_job AND id_project = :id_project "
+                "SELECT * FROM activity_log " .
+                " LEFT JOIN users USING( uid ) " .
+                " WHERE " .
+                " id_project = :id_project "
         );
 
         return $stmt;
@@ -101,7 +110,6 @@ class ActivityLogDao extends DataAccess_AbstractDao {
         $stmt = $this->_getStatementForCache();
         return $this->_destroyObjectCache( $stmt,
                 array(
-                        'id_job' => $activityQuery->id_job,
                         'id_project' => $activityQuery->id_project
                 )
         );

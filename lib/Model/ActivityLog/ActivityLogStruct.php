@@ -2,9 +2,8 @@
 
 namespace ActivityLog;
 
-use DataAccess_AbstractDaoObjectStruct,
-        DataAccess_IDaoStruct,
-        DateTime;
+use DataAccess_AbstractDaoSilentStruct,
+        DataAccess_IDaoStruct;
 
 /**
  * Created by PhpStorm.
@@ -12,14 +11,14 @@ use DataAccess_AbstractDaoObjectStruct,
  * Date: 13/06/16
  * Time: 12:30
  */
-class ActivityLogStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
+class ActivityLogStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
 
     /**
      * MAP to convert the values to the right string definition
      * ( easy to put in another file or change localization )
      * @var array
      */
-    protected $actionsStrings = array(
+    protected static $actionsStrings = array(
 
         /* DOWNLOADS */
             self::DOWNLOAD_EDIT_LOG           => "Edit log downloaded.",
@@ -107,12 +106,27 @@ class ActivityLogStruct extends DataAccess_AbstractDaoObjectStruct implements Da
     public $event_date;
 
     /**
+     * @var string
+     */
+    public $email;
+
+    /**
+     * @var string
+     */
+    public $first_name;
+
+    /**
+     * @var string
+     */
+    public $last_name;
+
+    /**
      * @param $actionID int
      *
      * @return string
      */
-    public function getAction( $actionID ){
-        return $this->actionsStrings[ $actionID ];
+    public static function getAction( $actionID ){
+        return self::$actionsStrings[ $actionID ];
     }
 
 }
