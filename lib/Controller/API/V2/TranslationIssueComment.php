@@ -2,6 +2,8 @@
 namespace API\V2  ;
 use API\V2\Json\TranslationIssueComment as JsonFormatter;
 use LQA\EntryCommentDao ;
+use LQA\EntryDao ;
+use Database ;
 
 class TranslationIssueComment extends ProtectedKleinController {
     private $validator ;
@@ -32,7 +34,16 @@ class TranslationIssueComment extends ProtectedKleinController {
         $json = new JsonFormatter( );
         $rendered = $json->renderItem( $result );
 
-        $this->response->json( array('comment' => $rendered) );
+        $rebutted_entry = null;
+
+        if( $this->request->rebutted === 'true' ) {
+            $entryDao = new EntryDao( Database::obtain()->getConnection() );
+            $rebutted_entry = $entryDao->updateRebutted(
+                $this->validator->issue->id, true
+            );
+        }
+
+        $this->response->json( array('comment' => $rendered, 'rebutted_entry' => $rebutted_entry) );
     }
 
     protected function afterConstruct() {

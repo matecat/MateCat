@@ -71,6 +71,18 @@ class SegmentTranslationIssueController extends ProtectedKleinController {
         $this->response->json( array('issue' => $rendered) );
     }
 
+    public function update() {
+        $rebutted_entry = null;
+
+        if( $this->request->rebutted === 'false' ) {
+            $entryDao = new EntryDao( Database::obtain()->getConnection() );
+            $rebutted_entry = $entryDao->updateRebutted(
+                $this->validator->issue->id, false
+            );
+        }
+
+        $this->response->json( array('rebutted_entry' => $rebutted_entry) );
+    }
 
     public function delete() {
         $this->validateAdditionalPassword();
@@ -105,19 +117,6 @@ class SegmentTranslationIssueController extends ProtectedKleinController {
 
     private function validateAdditionalPassword() {
         // TODO: check password is good for deletion
-    }
-
-    public function updateRebutted() {
-        $rebutted_at = $this->request->rebutted;
-
-        if( $rebutted_at == '' ) {
-            $rebutted_at = null;
-        }
-
-        $entryDao = new EntryDao( Database::obtain()->getConnection() );
-        $data = $entryDao->updateRebutted( $this->validator->issue->id,  $rebutted_at);
-
-        $this->response->json( $data );
     }
 
 }
