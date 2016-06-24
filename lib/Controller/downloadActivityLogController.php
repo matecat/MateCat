@@ -10,7 +10,11 @@ use ActivityLog\ActivityLogStruct;
  * 
  */
 
-class downloadActivityLogController extends downloadController {
+class downloadActivityLogController extends viewController {
+
+    protected $_filename;
+    protected $content;
+
 
     /**
      * @var int
@@ -28,6 +32,8 @@ class downloadActivityLogController extends downloadController {
     protected $download_type;  // switch flag, for now not important
 
     public function __construct() {
+
+        parent::__construct();
 
         $filterArgs = array(
             'id_project'    => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
@@ -77,6 +83,10 @@ class downloadActivityLogController extends downloadController {
                 )
         );
 
+        if ( empty( $rawContent ) ){
+            $this->emptyActivity();
+        }
+
         $jobKeys = array();
         foreach ( $_project_data as $val ){
             $jobKeys[ $val[ 'jid' ] ] = $val[ 'lang_pair' ];
@@ -125,6 +135,41 @@ class downloadActivityLogController extends downloadController {
 
         return $fileContent;
 
+    }
+
+    public function setTemplateVars() {
+        // TODO: Implement setTemplateVars() method.
+    }
+
+    public function emptyActivity(){
+        parent::makeTemplate("activity_not_found.html");
+        parent::finalize();
+        die();
+    }
+
+    public function finalize() {
+        try {
+
+            $buffer = ob_get_contents();
+            ob_get_clean();
+            ob_start("ob_gzhandler");  // compress page before sending
+            $this->nocache();
+            header("Content-Type: application/force-download");
+            header("Content-Type: application/octet-stream");
+            header("Content-Type: application/download");
+            header("Content-Disposition: attachment; filename=\"$this->_filename\""); // enclose file name in double quotes in order to avoid duplicate header error. Reference https://github.com/prior/prawnto/pull/16
+            header("Expires: 0");
+            header("Connection: close");
+            echo $this->content;
+            exit;
+
+        } catch (Exception $e) {
+            echo "<pre>";
+            print_r($e);
+            echo "\n\n\n";
+            echo "</pre>";
+            exit;
+        }
     }
 
 }
