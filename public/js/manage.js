@@ -10,8 +10,7 @@ UI = {
         this.body = $('body');
         this.firstLoad = firstLoad;
         this.pageStep = 25;
-        this.isMac = (navigator.platform == 'MacIntel')? true : false;
-        
+
         var page = location.pathname.split('/')[2];
         this.page = ('undefined'==typeof(page)||page == '')? 1 : parseInt(page);
 

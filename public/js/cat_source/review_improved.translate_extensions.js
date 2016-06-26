@@ -9,7 +9,49 @@ if ( ReviewImproved.enabled() && !config.isReview)
 
     var original_createButtons = UI.createButtons ;
 
+    var originalBindShortcuts = UI.bindShortcuts ;
+
+    var clickOnRebutted = function(sid) {
+        var el = UI.Segment.findEl(sid);
+        el.removeClass('modified');
+        UI.changeStatus(el, 'rebutted', true);
+        UI.gotoNextSegment();
+    };
+
+    var clickOnFixed = function(disabled, sid) {
+        if ( disabled )
+            return;
+
+        var el = UI.Segment.findEl( sid );
+        el.removeClass('modified');
+        el.data('modified', false);
+        el.trigger('modified:false');
+        UI.changeStatus(el, 'fixed', true);
+        UI.gotoNextSegment(); // NOT ideal behaviour, would be better to have a callback chain of sort.
+
+    };
+    var handleKeyPressOnMainButton = function(e) {
+        if ( $('.editor .buttons .button-rebutted').length ) {
+            clickOnRebutted(UI.currentSegmentId);
+        }
+        else if ( $('.editor .buttons .button-fixed').length ) {
+            clickOnFixed(UI.currentSegmentId);
+        }
+    }
+
+    $.extend(ReviewImproved, {
+        clickOnRebutted : clickOnRebutted,
+        clickOnFixed : clickOnFixed,
+    });
+
     $.extend(UI, {
+
+        bindShortcuts: function() {
+            originalBindShortcuts();
+            $("body").on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.standard, handleKeyPressOnMainButton );
+            $("body").on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.mac, handleKeyPressOnMainButton );
+        },
+
         showRevisionStatuses : function() {
             return false;
         },

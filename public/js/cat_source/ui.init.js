@@ -3,6 +3,10 @@
  */
 $.extend(UI, {
 	init: function() {
+
+		this.isMac = (navigator.platform == 'MacIntel')? true : false;
+		this.shortcutLeader = (this.isMac) ? 'CMD' : 'CTRL' ;
+
 		this.initStart = new Date();
 		this.version = "x.x.x";
 		this.numContributionMatchesResults = 3;
