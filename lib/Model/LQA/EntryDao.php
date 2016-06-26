@@ -181,6 +181,9 @@ class EntryDao extends \DataAccess_AbstractDao {
      *
      * @param Integer   $id         ID of the Entry
      * @param Boolean   $isToRebut  If true rebut, else undo rebut
+     *
+     * @return EntryStruct
+     *
      */
     public function updateRebutted( $id, $isToRebut ) {
         $rebutted_at = null;
@@ -202,7 +205,7 @@ class EntryDao extends \DataAccess_AbstractDao {
 
         $stmt->execute( $opts );
 
-        return $opts;
+        return $this->findById( $opts['id'] );
     }
 
 }

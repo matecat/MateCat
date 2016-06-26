@@ -18,14 +18,14 @@ if ( ReviewImproved.enabled() && !config.isReview)
         UI.gotoNextSegment();
     };
 
-    var clickOnFixed = function(disabled, sid) {
-        if ( disabled )
-            return;
-
+    var clickOnFixed = function(sid) {
         var el = UI.Segment.findEl( sid );
+        if ( el.find('.button-fixed').attr('disabled') == 'disabled' ) {
+            return ;
+        }
+
         el.removeClass('modified');
-        el.data('modified', false);
-        el.trigger('modified:false');
+        el.data('modified',  false);
         UI.changeStatus(el, 'fixed', true);
         UI.gotoNextSegment(); // NOT ideal behaviour, would be better to have a callback chain of sort.
 

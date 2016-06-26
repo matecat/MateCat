@@ -103,18 +103,13 @@ if ( ReviewImproved.enabled() )
             }).done( function( data ) {
                 MateCat.db.segment_translation_issue_comments.insert ( data.comment );
 
-                if( data.rebutted_entry ) {
-                    ReviewImproved.updateIssueRebutted( data.rebutted_entry );
+                if( data.issue ) {
+                    ReviewImproved.updateIssueRebutted( data.issue );
                 }
            });
         },
-        updateIssueRebutted : function ( rebutted_entry ) {
-            var issue = MateCat.db.segment_translation_issues.by(
-                'id', rebutted_entry.id
-            );
-            MateCat.db.segment_translation_issues.update(
-                _.extend( issue, { 'rebutted_at': rebutted_entry.rebutted_at } )
-            );
+        updateIssueRebutted : function ( issue ) {
+            MateCat.db.upsert('segment_translation_issues', 'id', issue );
         },
         undoRebutIssue : function ( id_segment, id_issue ) {
             var issue_update_path = sprintf(
@@ -127,10 +122,10 @@ if ( ReviewImproved.enabled() )
             return $.ajax({
                 url: issue_update_path,
                 type: 'POST',
-                data : { rebutted : false }
+                data : { rebutted_at : null }
             }).done( function( data ) {
-                if( data.rebutted_entry ) {
-                    ReviewImproved.updateIssueRebutted( data.rebutted_entry );
+                if( data.issue ) {
+                    ReviewImproved.updateIssueRebutted( data.issue );
                 }
             });
         },

@@ -6,10 +6,15 @@ use LQA\EntryDao ;
 use Database ;
 
 class TranslationIssueComment extends ProtectedKleinController {
+    /**
+     * @var Validators\SegmentTranslationIssue
+     */
     private $validator ;
 
     public function index() {
-        $comments = EntryCommentDao::findByIssueId(
+        $dao = new EntryCommentDao();
+
+        $comments = $dao->findByIssueId(
             $this->validator->issue->id
         );
 
@@ -29,21 +34,36 @@ class TranslationIssueComment extends ProtectedKleinController {
             'uid' => $uid
         );
 
-        $result = EntryCommentDao::createComment( $data );
+        $dao = new EntryCommentDao();
+
+        $result = $dao->createComment( $data );
 
         $json = new JsonFormatter( );
         $rendered = $json->renderItem( $result );
 
-        $rebutted_entry = null;
+        $response = array('comment' => $rendered );
 
-        if( $this->request->rebutted === 'true' ) {
-            $entryDao = new EntryDao( Database::obtain()->getConnection() );
-            $rebutted_entry = $entryDao->updateRebutted(
-                $this->validator->issue->id, true
-            );
+        $postParams = $this->request->paramsPost() ;
+
+        if(  $postParams['rebutted'] === 'true' ) {
+            $issue = $this->updateIssueWithRebutted();
+            if ( $issue ) {
+                $formatter = new  \API\V2\Json\SegmentTranslationIssue();
+                $response['issue'] = $formatter->renderItem( $issue ) ;
+            }
         }
 
-        $this->response->json( array('comment' => $rendered, 'rebutted_entry' => $rebutted_entry) );
+        $this->response->json( $response );
+    }
+
+    /**
+     * @return \LQA\EntryStruct
+     */
+    private function updateIssueWithRebutted() {
+        $entryDao = new EntryDao( Database::obtain()->getConnection() );
+        return $entryDao->updateRebutted(
+                $this->validator->issue->id, true
+        );
     }
 
     protected function afterConstruct() {

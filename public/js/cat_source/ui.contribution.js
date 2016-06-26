@@ -46,7 +46,7 @@ $.extend(UI, {
 			if (which) {
 				this.currentSegment.addClass('modified');
                                 this.currentSegment.data('modified', true);
-                                this.currentSegment.trigger('modified:true');
+                                this.currentSegment.trigger('modified');
                         }
 		}
 

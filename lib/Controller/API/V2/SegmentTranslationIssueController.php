@@ -72,16 +72,20 @@ class SegmentTranslationIssueController extends ProtectedKleinController {
     }
 
     public function update() {
-        $rebutted_entry = null;
+        $issue = null;
 
-        if( $this->request->rebutted === 'false' ) {
+        $postParams = $this->request->paramsPost() ;
+        if (  $postParams['rebutted_at'] == null ) {
             $entryDao = new EntryDao( Database::obtain()->getConnection() );
-            $rebutted_entry = $entryDao->updateRebutted(
+            $issue = $entryDao->updateRebutted(
                 $this->validator->issue->id, false
             );
         }
 
-        $this->response->json( array('rebutted_entry' => $rebutted_entry) );
+        $json = new JsonFormatter( $this->findCategories() );
+        $rendered = $json->renderItem( $issue );
+
+        $this->response->json( array('issue' => $rendered) );
     }
 
     public function delete() {
@@ -117,6 +121,14 @@ class SegmentTranslationIssueController extends ProtectedKleinController {
 
     private function validateAdditionalPassword() {
         // TODO: check password is good for deletion
+    }
+
+    private function findCategories() {
+        $categories = $this->validator->translation
+                ->getJob()->getProject()
+                ->getLqaModel()->getCategories();
+
+        return $categories ;
     }
 
 }
