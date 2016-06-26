@@ -102,23 +102,36 @@ if ( ReviewImproved.enabled() )
                 data : data
             }).done( function( data ) {
                 MateCat.db.segment_translation_issue_comments.insert ( data.comment );
+
+                if( data.rebutted_entry ) {
+                    ReviewImproved.updateIssueRebutted( data.rebutted_entry );
+                }
            });
         },
-        setIssueRebutted : function( id_segment, id_issue, rebutted ) {
-            var issues_path = sprintf(
-                '/api/v2/jobs/%s/%s/segments/%s/translation-issues/%s/rebutted-at',
+        updateIssueRebutted : function ( rebutted_entry ) {
+            var issue = MateCat.db.segment_translation_issues.by(
+                'id', rebutted_entry.id
+            );
+            MateCat.db.segment_translation_issues.update(
+                _.extend( issue, { 'rebutted_at': rebutted_entry.rebutted_at } )
+            );
+        },
+        undoRebutIssue : function ( id_segment, id_issue ) {
+            var issue_update_path = sprintf(
+                '/api/v2/jobs/%s/%s/segments/%s/translation-issues/%s',
                 config.id_job, config.password,
                 id_segment,
                 id_issue
             );
 
             return $.ajax({
-                url: issues_path,
+                url: issue_update_path,
                 type: 'POST',
-                data : { 'rebutted' : rebutted }
+                data : { rebutted : false }
             }).done( function( data ) {
-                var issue = MateCat.db.segment_translation_issues.by( 'id', data.id );
-                MateCat.db.segment_translation_issues.update( _.extend( issue, { 'rebutted_at': data.rebutted_at } ) );
+                if( data.rebutted_entry ) {
+                    ReviewImproved.updateIssueRebutted( data.rebutted_entry );
+                }
             });
         },
         unmountPanelComponent : function() {
