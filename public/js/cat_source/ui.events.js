@@ -6,12 +6,15 @@ $.extend(UI, {
 		$("body").removeClass('shortcutsDisabled');
 		$("body").on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.standard, function(e) {
 			e.preventDefault();
-			if ($('.editor .translated').length > 0) {
-				$('.editor .translated').click();
+			if ( config.isReview ) {
+				$('body.review .editor .approved').click();
 			} else {
-				$('.editor .guesstags').click();
+				if ( $('.editor .translated').length > 0 ) {
+					$('.editor .translated').click();
+				} else if ( $('.editor .guesstags').length > 0 ) {
+					$('.editor .guesstags').click();
+				}
 			}
-            $('body.review .editor .approved').click();
 		}).on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.mac, function(e) {
 			e.preventDefault();
 			if ($('.editor .translated').length > 0) {
@@ -1031,8 +1034,8 @@ $.extend(UI, {
 
 		}).on('input', '.editarea', function( e ) { //inputineditarea
 			UI.currentSegment.addClass('modified').removeClass('waiting_for_check_result');
-                        UI.currentSegment.data('modified', true);
-                        UI.currentSegment.trigger('modified:true');
+			UI.currentSegment.data('modified', true);
+			UI.currentSegment.trigger('modified');
 
 			if (UI.droppingInEditarea) {
 				UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
