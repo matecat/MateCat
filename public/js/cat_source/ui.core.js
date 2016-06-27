@@ -1452,10 +1452,7 @@ UI = {
             originalId = this.sid.split('-')[0];
             if((typeof this.split_points_source == 'undefined') || (!this.split_points_source.length) || justCreated) {
                 newSegments += UI.getSegmentMarkup(this, t, readonly, autoPropagated, autoPropagable, escapedSegment, splitAr, splitGroup, originalId, 0);
-            } else {
-
             }
-
         });
 
 
