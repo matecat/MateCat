@@ -4,8 +4,16 @@
 
 if ( true )
 (function($, UI, undefined) {
-    
+    function showModalNotSupportedLanguages(notAcceptedLanguages, acceptedLanguages) {
+        APP.alert({
+            title: 'Option not available',
+            okTxt: 'Continue',
+            msg: "Not available in " + notAcceptedLanguages.join(", ") +
+            ".</br> Only available in " + acceptedLanguages.join(", ") +"."
+        });
+    }
     $.extend(UI, {
+        
         initAdvanceOptions: function() {
             var lexiqaCheck = $('.qa-box #lexi_qa');
             var speech2textCheck = $('.s2t-box #s2t_check');
@@ -14,21 +22,21 @@ if ( true )
             $('.mgmt-table-options .options-box.seg_rule').hide();
             $('.mgmt-table-options .options-box.dqf_options_box').hide();
 
-
             //Check Lexiqa check
             if (LXQ.checkCanActivate()) {
                 (LXQ.enabled()) ? lexiqaCheck.attr('checked', true) : lexiqaCheck.attr('checked', false);
                 lexiqaCheck.on('change', this.toggleLexiqaOption.bind(this));
             } else {
                 var LXQContainer = $('.options-box.qa-box');
+
                 $('.options-box #lexi_qa').prop( "disabled", true ).attr('checked', false);
-                // LXQContainer.css({opacity: 0.6 });
+
+
+
                 LXQContainer.find('.onoffswitch').on('click', function () {
-                    LXQContainer.find('.option-qa-box-languages').addClass('pulse');
-                    setTimeout(function () {
-                        LXQContainer.find('.option-qa-box-languages').removeClass('pulse');
-                    }, 1200)
+                    // showModalNotSupportedLanguages(notAcceptedLanguages, acceptedLanguages);
                 });
+
                 LXQContainer.addClass('option-unavailable');
             }
             //Check Tag Projection
@@ -38,12 +46,9 @@ if ( true )
             } else {
                 var tpContainer= $('.options-box.tagp');
                 $('.options-box #tagp_check').prop( "disabled", true ).attr('checked', false);
-                // tpContainer.css({opacity: 0.6 });
+
                 tpContainer.find('.onoffswitch').on('click', function () {
-                    tpContainer.find('.option-tagp-languages').addClass('pulse');
-                    setTimeout(function () {
-                        tpContainer.find('.option-tagp-languages').removeClass('pulse');
-                    }, 1200)
+                    // showModalNotSupportedLanguages(notAcceptedLanguages, acceptedLanguages);
                 });
                 tpContainer.addClass('option-unavailable');
 
@@ -55,10 +60,11 @@ if ( true )
                 // speech2textContainer.css({opacity: 0.6 });
                 speech2textContainer.find('.option-s2t-box-chrome-label').css('display', 'inline');
                 speech2textContainer.find('.onoffswitch').on('click', function () {
-                    speech2textContainer.find('.option-s2t-box-chrome-label').addClass('pulse');
-                    setTimeout(function () {
-                        speech2textContainer.find('.option-s2t-box-chrome-label').removeClass('pulse');
-                    }, 1200)
+                    APP.alert({
+                        title: 'Option not available',
+                        okTxt: 'Continue',
+                        msg: "This options is only available on Chrome browser."
+                    });
                 });
                 speech2textCheck.addClass('option-unavailable');
             } else {

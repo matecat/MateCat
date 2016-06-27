@@ -401,13 +401,22 @@ APP.displayCurrentTargetLang = function() {
 };
 
 
+function showModalNotSupportedLanguages(notAcceptedLanguages, acceptedLanguages) {
+	APP.alert({
+		title: 'Option not available',
+		okTxt: 'Continue',
+		msg: "Not available in " + notAcceptedLanguages.join(", ") +
+		".</br> Only available in " + acceptedLanguages.join(", ") +"."
+	});
+}
+
 /**
  * Disable/Enable languages for LexiQA
  *
  */
 APP.checkForLexiQALangs = function(){
 
-	var acceptedLanguages = config.lexiqa_languages;
+	var acceptedLanguages = config.lexiqa_languages.slice();
 	var LXQCheck = $('.options-box.qa-box');
 
 	var targetLanguages = $( '#target-lang' ).val().split(',');
@@ -419,11 +428,20 @@ APP.checkForLexiQALangs = function(){
     //disable LexiQA
 	var disableLexiQA = !(sourceAccepted && targetAccepted && config.defaults.lexiqa);
 	if (!(sourceAccepted && targetAccepted)) {
-		LXQCheck.find('.onoffswitch').on('click', function () {
-			LXQCheck.find('.option-qa-box-languages').addClass('pulse');
-			setTimeout(function () {
-				LXQCheck.find('.option-qa-box-languages').removeClass('pulse');
-			}, 1200)
+		var notAcceptedLanguages = targetLanguages.filter(function(n) {
+				return acceptedLanguages.indexOf(n) === -1;
+			});
+		if (!sourceAccepted) {
+			notAcceptedLanguages.push($( '#source-lang' ).val());
+		}
+		notAcceptedLanguages.forEach(function (value, index, array) {
+			array[index] = $( '#target-lang option[value='+value+']' ).first().text();
+		});
+		acceptedLanguages.forEach(function (value, index, array) {
+			array[index] = $( '#target-lang option[value='+value+']' ).first().text();
+		});
+		LXQCheck.find('.onoffswitch').off("click").on('click', function () {
+			showModalNotSupportedLanguages(notAcceptedLanguages, acceptedLanguages);
 		});
 		LXQCheck.addClass('option-unavailable');
 	}
@@ -439,7 +457,7 @@ APP.checkForLexiQALangs = function(){
  */
 APP.checkForTagProjectionLangs = function(){
 
-	var acceptedLanguages = config.tag_projection_languages;
+	var acceptedLanguages = config.tag_projection_languages.slice();
 	var tpCheck = $('.options-box.tagp');
 	var targetLanguages = $( '#target-lang' ).val().split(',');
 	var sourceAccepted = (acceptedLanguages.indexOf($( '#source-lang' ).val() ) > -1);
@@ -451,11 +469,20 @@ APP.checkForTagProjectionLangs = function(){
 	//disable Tag Projection
 	var disableTP = !(sourceAccepted && targetAccepted && config.defaults.tag_projection);
 	if (!(sourceAccepted && targetAccepted)) {
-		tpCheck.find('.onoffswitch').on('click', function () {
-			tpCheck.find('.option-tagp-languages').addClass('pulse');
-			setTimeout(function () {
-				tpCheck.find('.option-tagp-languages').removeClass('pulse');
-			}, 1200)
+		var notAcceptedLanguages = targetLanguages.filter(function(n) {
+			return acceptedLanguages.indexOf(n) === -1;
+		});
+		if (!sourceAccepted) {
+			notAcceptedLanguages.push($( '#source-lang' ).val());
+		}
+		notAcceptedLanguages.forEach(function (value, index, array) {
+			array[index] = $( '#target-lang option[value='+value+']' ).first().text();
+		});
+		acceptedLanguages.forEach(function (value, index, array) {
+			array[index] = $( '#target-lang option[value='+value+']' ).first().text();
+		});
+		tpCheck.find('.onoffswitch').off('click').on('click', function () {
+			showModalNotSupportedLanguages(notAcceptedLanguages, acceptedLanguages);
 		});
 		tpCheck.addClass('option-unavailable');
 	}
@@ -463,6 +490,7 @@ APP.checkForTagProjectionLangs = function(){
 	$('.options-box #tagp_check').attr('checked', !disableTP);
 	// $('.options-box.tagp').css({opacity: ( disableTP ? 0.6 : 1 )  });
 };
+
 /**
  * Disable/Enable SpeechToText
  *
@@ -478,10 +506,11 @@ APP.checkForSpeechToText = function(){
 		$('.options-box #s2t_check').prop( "disabled", disableS2T );
 		speech2textCheck.find('.option-s2t-box-chrome-label').css('display', 'inline');
 		speech2textCheck.find('.onoffswitch').on('click', function () {
-			speech2textCheck.find('.option-s2t-box-chrome-label').addClass('pulse');
-			setTimeout(function () {
-				speech2textCheck.find('.option-s2t-box-chrome-label').removeClass('pulse');
-			}, 1200)
+			APP.alert({
+				title: 'Option not available',
+				okTxt: 'Continue',
+				msg: "This options is only available on Chrome browser."
+			});
 		});
 		speech2textCheck.addClass('option-unavailable');
 	}
