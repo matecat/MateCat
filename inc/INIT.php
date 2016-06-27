@@ -14,7 +14,6 @@ class INIT {
     public static $DB_DATABASE;
     public static $DB_USER;
     public static $DB_PASS;
-    public static $MEMCACHE_SERVERS    = array();
     public static $REDIS_SERVERS       = array();
     public static $QUEUE_BROKER_ADDRESS;
     public static $QUEUE_DQF_ADDRESS;
