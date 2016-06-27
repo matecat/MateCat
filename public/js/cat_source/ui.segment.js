@@ -5,11 +5,11 @@
         },
         getSegmentTemplateData : function(
             segment, t, readonly, autoPropagated, autoPropagable,
-            escapedSegment, splitAr, splitGroup, originalId
+            escapedSegment, splitAr, splitGroupParam, originalId
         ) {
-            var splitGroup = segment.split_group || splitGroup || '';
-
-            var classes = new Array();
+            var splitGroup = segment.split_group || splitGroupParam || '';
+            var status_change_title;
+            var classes = [];
             if ( readonly ) {
                 classes.push('readonly');
             }
@@ -35,18 +35,17 @@
                 classes.push('splitInner');
             }
 
-            var editarea_classes = ['targetarea', 'invisible'];
-            if ( readonly ) {
-                editarea_classes.push( 'area' );
-            } else {
-                editarea_classes.push( 'editarea' );
-            }
+            // var editarea_classes = ['targetarea', 'invisible'];
+            // if ( readonly ) {
+            //     editarea_classes.push( 'area' );
+            // } else {
+            //     editarea_classes.push( 'editarea' );
+            // }
 
             if ( segment.status ) {
-                var status_change_title = UI
-                    .statusHandleTitleAttr( segment.status );
+                status_change_title = UI.statusHandleTitleAttr( segment.status );
             } else {
-                var status_change_title = 'Change segment status' ;
+                status_change_title = 'Change segment status' ;
             }
 
             if ( t ) {
@@ -79,7 +78,7 @@
                 decoded_source || '',
                 true, segment.sid, 'source');
 
-            Speech2Text.enabled() && editarea_classes.push( 'micActive' ) ; 
+            // Speech2Text.enabled() && editarea_classes.push( 'micActive' ) ; 
 
             return  {
                 t                       : t,
