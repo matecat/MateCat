@@ -11,12 +11,6 @@ ENV = "production"    ; set to "production" for production environment
 CHECK_FS = no
 
 
-; Update this number every time you get a new Matecat Version according to the new version.
-; Check in new config.ini.sample:
-; There could be new params to configure.
-;----------------------------------------
-BUILD_NUMBER = "1.0.4"
-
 ;----------------------------------------
 [development]
 DB_SERVER = "localhost"
