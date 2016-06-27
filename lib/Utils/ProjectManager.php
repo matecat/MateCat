@@ -610,7 +610,7 @@ class ProjectManager {
             //we need compare the number of segments with translations, but take an eye to the opensource
 
             $query_visible_segments = "SELECT count(*) as cattool_segments
-				FROM segments WHERE id_file IN ( %s ) and show_in_cattool = 1";
+				FROM segments USE INDEX(id_file) WHERE id_file IN ( %s ) and show_in_cattool = 1";
 
             $string_file_list       = implode( ",", $this->projectStructure[ 'file_id_list' ]->getArrayCopy() );
             $query_visible_segments = sprintf( $query_visible_segments, $string_file_list );

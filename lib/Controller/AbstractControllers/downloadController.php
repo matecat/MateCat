@@ -12,6 +12,10 @@ abstract class downloadController extends controller {
     protected $content = "";
     protected $_filename = "unknown";
 
+    protected $uid;
+    protected $userIsLogged = false;
+    protected $userMail;
+
     protected function unlockToken( $tokenContent = null ) {
 
         if ( isset( $this->downloadToken ) && !empty( $this->downloadToken ) ) {
@@ -132,6 +136,19 @@ abstract class downloadController extends controller {
         }
 
         return $filename;
+
+    }
+
+    public function checkLogin( $close = true ) {
+        //Warning, sessions enabled, disable them after check, $_SESSION is in read only mode after disable
+        parent::sessionStart();
+        $this->userIsLogged = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) );
+        $this->userMail     = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ? $_SESSION[ 'cid' ] : null );
+        $this->uid          = ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) ? $_SESSION[ 'uid' ] : null );
+
+        if ( $close ) {
+            parent::disableSessions();
+        }
 
     }
 

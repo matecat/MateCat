@@ -3113,6 +3113,7 @@ a.cancel-project:before,
 a.archive-project:before,
 a.resume-project:before,
 a.unarchive-project:before,
+a.activity-log:before,
 a.unarchive-project:after, 
 a.resume-project:after,
 .splitpoint:before,
@@ -3455,6 +3456,9 @@ a.cancel-project:before, a.resume-project:before{
 	content: "\f014";
 }
 
+a.activity-log:before {
+    content: "Download Activity Log";
+}
 
 a.archive-project:before, a.unarchive-project:before {
     content: "\e605";

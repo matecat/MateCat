@@ -1591,7 +1591,8 @@ function getEditLog( $jid, $pass ) {
 		j.source AS source_lang,
 		j.target AS target_lang,
 		s.raw_word_count rwc,
-		p.name as pname
+		p.name as pname,
+		p.id as id_project
 			FROM
 			jobs j 
 			INNER JOIN segment_translations st ON j.id=st.id_job 
