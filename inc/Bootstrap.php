@@ -312,7 +312,7 @@ class Bootstrap {
 
         $env = self::$CONFIG[ self::$CONFIG['ENV'] ];
 
-        INIT::$BUILD_NUMBER = self::$CONFIG['BUILD_NUMBER'];
+        INIT::$BUILD_NUMBER = self::$_INI_VERSION;
 
         foreach( $env as $KEY => $value ){
 

@@ -154,6 +154,7 @@ class INIT {
     /**
      * The MateCat Version
      */
+    //TODO: Rename variable to MATECAT_VERSION
     public static $BUILD_NUMBER;
 
     /**
