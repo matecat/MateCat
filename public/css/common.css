@@ -969,7 +969,8 @@ color:#333;}
     line-height: 22px;
 }
 
-.advanced-options-box .options-box.option-unavailable p {
+.advanced-options-box .options-box.option-unavailable p,
+.advanced-options-box .options-box.option-unavailable h3 {
     opacity: 0.6;
 }
 

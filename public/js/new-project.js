@@ -410,6 +410,31 @@ function showModalNotSupportedLanguages(notAcceptedLanguages, acceptedLanguages)
 	});
 }
 
+function createSupportedLanguagesArrays(acceptedLanguages, targetLanguages, sourceAccepted) {
+	var notAcceptedLanguagesNames = [], acceptedLanguagesNames = [];
+	var notAcceptedLanguagesCodes = [], acceptedLanguagesCodes = [];
+	var notAcceptedLanguages = targetLanguages.filter(function(n) {
+		return acceptedLanguages.indexOf(n) === -1;
+	});
+	if (!sourceAccepted) {
+		notAcceptedLanguages.push($( '#source-lang' ).val());
+	}
+
+	notAcceptedLanguages.forEach(function (value, index, array) {
+		notAcceptedLanguagesNames.push($( '#target-lang option[value='+value+']' ).first().text());
+		notAcceptedLanguagesCodes.push(value.split("-")[1]);
+	});
+	acceptedLanguages.forEach(function (value, index, array) {
+		acceptedLanguagesNames.push($( '#target-lang option[value='+value+']' ).first().text());
+		acceptedLanguagesCodes.push(value.split("-")[1]);
+	});
+	return {
+		accepted: acceptedLanguagesNames,
+		acceptedCodes: acceptedLanguagesCodes,
+		notAccepted: notAcceptedLanguagesNames,
+		notAcceptedCodes: notAcceptedLanguagesCodes
+	};
+}
 /**
  * Disable/Enable languages for LexiQA
  *
@@ -428,27 +453,16 @@ APP.checkForLexiQALangs = function(){
     //disable LexiQA
 	var disableLexiQA = !(sourceAccepted && targetAccepted && config.defaults.lexiqa);
 	if (!(sourceAccepted && targetAccepted)) {
-		var notAcceptedLanguages = targetLanguages.filter(function(n) {
-				return acceptedLanguages.indexOf(n) === -1;
-			});
-		if (!sourceAccepted) {
-			notAcceptedLanguages.push($( '#source-lang' ).val());
-		}
-		notAcceptedLanguages.forEach(function (value, index, array) {
-			array[index] = $( '#target-lang option[value='+value+']' ).first().text();
-		});
-		acceptedLanguages.forEach(function (value, index, array) {
-			array[index] = $( '#target-lang option[value='+value+']' ).first().text();
-		});
+		var arrays = createSupportedLanguagesArrays(acceptedLanguages, targetLanguages, sourceAccepted);
+		LXQCheck.find('.option-supported-languages').html(arrays.acceptedCodes.join(', '));
+		LXQCheck.find('.option-notsupported-languages').html(arrays.notAcceptedCodes.join(', '));
 		LXQCheck.find('.onoffswitch').off("click").on('click', function () {
-			showModalNotSupportedLanguages(notAcceptedLanguages, acceptedLanguages);
+			showModalNotSupportedLanguages(arrays.notAccepted, arrays.accepted);
 		});
 		LXQCheck.addClass('option-unavailable');
 	}
     $('.options-box #lexi_qa').prop( "disabled", disableLexiQA );
     $('.options-box #lexi_qa').attr('checked', !disableLexiQA);
-    // $('.options-box.qa-box').css({opacity: ( disableLexiQA ? 0.6 : 1 )  });
-
 };
 
 /**
@@ -469,26 +483,16 @@ APP.checkForTagProjectionLangs = function(){
 	//disable Tag Projection
 	var disableTP = !(sourceAccepted && targetAccepted && config.defaults.tag_projection);
 	if (!(sourceAccepted && targetAccepted)) {
-		var notAcceptedLanguages = targetLanguages.filter(function(n) {
-			return acceptedLanguages.indexOf(n) === -1;
-		});
-		if (!sourceAccepted) {
-			notAcceptedLanguages.push($( '#source-lang' ).val());
-		}
-		notAcceptedLanguages.forEach(function (value, index, array) {
-			array[index] = $( '#target-lang option[value='+value+']' ).first().text();
-		});
-		acceptedLanguages.forEach(function (value, index, array) {
-			array[index] = $( '#target-lang option[value='+value+']' ).first().text();
-		});
+		var arrays = createSupportedLanguagesArrays(acceptedLanguages, targetLanguages, sourceAccepted);
+		tpCheck.find('.option-supported-languages').html(arrays.acceptedCodes.join(', '));
+		tpCheck.find('.option-notsupported-languages').html(arrays.notAcceptedCodes.join(', '));
 		tpCheck.find('.onoffswitch').off('click').on('click', function () {
-			showModalNotSupportedLanguages(notAcceptedLanguages, acceptedLanguages);
+			showModalNotSupportedLanguages(arrays.notAccepted, arrays.accepted);
 		});
 		tpCheck.addClass('option-unavailable');
 	}
 	$('.options-box #tagp_check').prop( "disabled", disableTP );
 	$('.options-box #tagp_check').attr('checked', !disableTP);
-	// $('.options-box.tagp').css({opacity: ( disableTP ? 0.6 : 1 )  });
 };
 
 /**
