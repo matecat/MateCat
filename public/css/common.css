@@ -1441,6 +1441,16 @@ margin-left: 10px;
     	background: #09beec!important;
     }
 
+
+.popup .btn-ok,
+.popup .btn-cancel
+{
+    padding: 1px 18px;
+    margin: 16px 0 16px 20px;
+    display: inline-block;
+
+    }
+
 	.mgmt-panel-tm .btn-ok,
 	.mgmt-panel-gl .btn-ok,
     .popup .btn-ok,
@@ -1465,7 +1475,10 @@ margin-left: 10px;
 }
 
 
+.btn-cancel.in-popup {
+            padding: 7px 18px!important;
 
+}
 
 
 
@@ -1499,14 +1512,6 @@ float: none!important;
 }
 
 
-.popup .btn-ok,
-.popup .btn-cancel
-{
-	padding: 1px 18px;
-    margin: 16px 0 16px 20px;
-    display: inline-block;
-
-    }
 
 .popup .btnsplit .btn-cancel {
     margin: 0;
