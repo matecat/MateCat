@@ -1,11 +1,8 @@
 /**
- * React Component for the editare to Matecat.
+ * React Component for the editarea.
  
  */
-    
-
 class Editarea extends React.Component {
-
 
     constructor(props) {
         super(props);
@@ -13,40 +10,28 @@ class Editarea extends React.Component {
 
         };
     }
-
-    renderEditArea(segment) {
-        var decoded_translation;
-        this.props.segment = segment;
-        this.classes = this.createClassAttribute(segment);
-
-    }
     
     createClassAttribute(segment) {
-        var editarea_classes = ['targetarea', 'invisible'];
+        /*var editarea_classes = ['targetarea', 'invisible'];
         if ( segment.readonly ) {
             editarea_classes.push( 'area' );
         } else {
             editarea_classes.push( 'editarea' );
         }
-        Speech2Text.enabled() && editarea_classes.push( 'micActive' ) ;
+        Speech2Text.enabled() && editarea_classes.push( 'micActive' );
+        return true;*/
     }
 
     render() {
         if (this.props.segment)
         return (
-            <div class="{{editarea_classes_string}}"
-                {{#if readonly}} contenteditable="false" {{/if}}
-                 spellcheck="true"
-                 lang="{{lang}}"
-                 id="segment-{{segment.sid}}-editarea"
-                 data-sid="{{segment.sid}}"
-            >{{#if segment.translation }}{{{ decoded_translation }}}{{/if}}</div>
+            <div className={'editarea'}
+                 id={'segment-' + this.props.segment.sid + '-editarea'}
+                 data-sid={this.props.segment.sid}
+            >ciao</div>
 
         );
     }
 }
-
-
-
 export default Editarea ;
 
