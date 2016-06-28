@@ -1349,13 +1349,14 @@ UI = {
 					$('#file-' + fid).append(newFile);
 				}
 			}
+
+            UI.addEditAreaComponents(this.segments);
+
             if (LXQ.enabled())
             $.each(this.segments,function(i,seg) {
-            if (!starting)
-            if (UI.hasOwnProperty('lexiqaData') && UI.lexiqaData.hasOwnProperty('lexiqaWarnings') && 
-                UI.lexiqaData.lexiqaWarnings.hasOwnProperty(seg.sid)) {
-                    console.log('in loadmore segments, segment: '+seg.sid+' already has qa info...');
-                    //FOTDDD
+                if (!starting)
+                if (UI.hasOwnProperty('lexiqaData') && UI.lexiqaData.hasOwnProperty('lexiqaWarnings') &&
+                                    UI.lexiqaData.lexiqaWarnings.hasOwnProperty(seg.sid)) {
                     LXQ.redoHighlighting(seg.sid,true);
                     LXQ.redoHighlighting(seg.sid,false);
                 }
@@ -1370,6 +1371,14 @@ UI = {
 		}
 
 	},
+    addEditAreaComponents: function (segments) {
+        $.each(segments,function(i,seg) {
+            var mountPoint = $('#editarea-container-' + seg.sid)[0];
+            ReactDOM.render( React.createElement( EditArea, {
+                segment: seg,
+            } ), mountPoint );
+        });
+    },
     stripSpans: function (str) {
         return str.replace(/<span(.*?)>/gi, '').replace(/<\/span>/gi, '');
     },
@@ -3539,7 +3548,6 @@ UI = {
         if ( !$(this).is(UI.editarea) || (UI.editarea === '') || (!UI.body.hasClass('editing')) || segmentNotYetOpened) {
             if (operation == 'moving') {
                 if ((UI.lastOperation == 'moving') && (UI.recentMoving)) {
-                    UI.segmentToOpen = segment;
                     UI.blockOpenSegment = true;
                 } else {
                     UI.blockOpenSegment = false;
@@ -3560,7 +3568,7 @@ UI = {
                 UI.openConcordance();
 
             if (operation != 'moving') {
-                segment = $('#segment-' + $(this).data('sid'));
+                var segment = $('#segment-' + $(this).data('sid'));
                 if(!(config.isReview && (segment.hasClass('status-new') || segment.hasClass('status-draft')))) {
                     UI.scrollSegment($('#segment-' + $(this).data('sid')));
                 }

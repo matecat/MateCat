@@ -35,12 +35,12 @@
                 classes.push('splitInner');
             }
 
-            // var editarea_classes = ['targetarea', 'invisible'];
-            // if ( readonly ) {
-            //     editarea_classes.push( 'area' );
-            // } else {
-            //     editarea_classes.push( 'editarea' );
-            // }
+            var editarea_classes = ['targetarea', 'invisible'];
+            if ( readonly ) {
+                editarea_classes.push( 'area' );
+            } else {
+                editarea_classes.push( 'editarea' );
+            }
 
             if ( segment.status ) {
                 status_change_title = UI.statusHandleTitleAttr( segment.status );
@@ -78,7 +78,7 @@
                 decoded_source || '',
                 true, segment.sid, 'source');
 
-            // Speech2Text.enabled() && editarea_classes.push( 'micActive' ) ; 
+            Speech2Text.enabled() && editarea_classes.push( 'micActive' ) ;
 
             return  {
                 t                       : t,
