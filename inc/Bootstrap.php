@@ -79,7 +79,7 @@ class Bootstrap {
         INIT::$CONTROLLER_ROOT                 = INIT::$ROOT . '/lib/Controller';
         INIT::$UTILS_ROOT                      = INIT::$ROOT . '/lib/Utils';
 
-        INIT::$TASK_RUNNER_CONFIG = @parse_ini_file( INIT::$UTILS_ROOT . '/Analysis/task_manager_config.ini', true );
+        INIT::$TASK_RUNNER_CONFIG = @parse_ini_file( 'task_manager_config.ini', true );
 
         WorkerClient::init();
 

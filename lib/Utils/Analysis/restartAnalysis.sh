@@ -16,8 +16,8 @@ if [[ ${rc} -eq 0 ]]; then
 fi
 
 
-pid_fast=`ps faux|grep FastAnalysis.php task_manager_config.ini|grep -v grep|grep -v SCREEN|awk '{print $2}'`
-pid_tm=`ps faux|grep TmAnalysis.php task_manager_config.ini|grep -v grep|grep -v SCREEN|awk '{print $2}'`
+pid_fast=`ps faux|grep FastAnalysis.php ../../../inc/task_manager_config.ini|grep -v grep|grep -v SCREEN|awk '{print $2}'`
+pid_tm=`ps faux|grep TmAnalysis.php ../../../inc/task_manager_config.ini|grep -v grep|grep -v SCREEN|awk '{print $2}'`
 
 #if up, exit, ERROR
 if [[ -n ${pid_fast} ]] || [[ -n ${pid_tm} ]];
@@ -29,7 +29,7 @@ fi
 
 #spawn new
 echo "spawning daemons"
-screen -d -m -S fast php FastAnalysis.php task_manager_config.ini
-screen -d -m -S tm php TmAnalysis.php task_manager_config.ini
+screen -d -m -S fast php FastAnalysis.php ../../../inc/task_manager_config.ini
+screen -d -m -S tm php TmAnalysis.php ../../../inc/task_manager_config.ini
 
 exit 0;
