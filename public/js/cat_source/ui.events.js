@@ -1380,7 +1380,7 @@ $.extend(UI, {
 
         });
 		$("#enable-replace").on('change', function() {
-			if ($('#enable-replace').is(':checked')) {
+			if ($('#enable-replace').is(':checked') && $('#search-target').val() != "") {
 				$('#exec-replace, #exec-replaceall').removeAttr('disabled');
 			} else {
 				$('#exec-replace, #exec-replaceall').attr('disabled', 'disabled');
@@ -1389,6 +1389,7 @@ $.extend(UI, {
 		$("#search-source, #search-target").on('input', function() {
 			if (UI.checkSearchChanges()) {
 				UI.setFindFunction('find');
+				$("#enable-replace").change();
 			}
 		});
         $('#replace-target').on('focus', function() {
