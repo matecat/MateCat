@@ -405,8 +405,8 @@ function showModalNotSupportedLanguages(notAcceptedLanguages, acceptedLanguages)
 	APP.alert({
 		title: 'Option not available',
 		okTxt: 'Continue',
-		msg: "Not available in " + notAcceptedLanguages.join(", ") +
-		".</br> Only available in " + acceptedLanguages.join(", ") +"."
+		msg: "Not available for " + notAcceptedLanguages.join(", ") +
+		".</br> Only available for " + acceptedLanguages.join(", ") +"."
 	});
 }
 
