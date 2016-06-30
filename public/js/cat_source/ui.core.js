@@ -1187,11 +1187,6 @@ UI = {
             SegmentActivator.activate(id);
         }
     },
-	initSegmentNavBar: function() {
-		if (config.firstSegmentOfFiles.length == 1) {
-			$('#segmentNavBar .prevfile, #segmentNavBar .nextfile').addClass('disabled');
-		}
-	},
 	justSelecting: function(what) {
 		if (window.getSelection().isCollapsed)
 			return false;
