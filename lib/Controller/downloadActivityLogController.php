@@ -108,7 +108,7 @@ class downloadActivityLogController extends viewController {
         }
 
         $this->content = $this->composeZip( $_project_data[0][ 'pname' ], $outputContent );
-        $this->_filename = $_project_data[0][ 'pname' ] . ".zip";
+        $this->_filename = $_project_data[0][ 'pname' ] . "_activity_log.zip";
 
     }
 
