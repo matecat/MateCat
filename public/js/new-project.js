@@ -460,8 +460,8 @@ APP.checkForLexiQALangs = function(){
 			showModalNotSupportedLanguages(arrays.notAccepted, arrays.accepted);
 		});
 		LXQCheck.addClass('option-unavailable');
+		$('.options-box #lexi_qa').prop( "disabled", disableLexiQA );
 	}
-    $('.options-box #lexi_qa').prop( "disabled", disableLexiQA );
     $('.options-box #lexi_qa').attr('checked', !disableLexiQA);
 };
 
@@ -490,8 +490,8 @@ APP.checkForTagProjectionLangs = function(){
 			showModalNotSupportedLanguages(arrays.notAccepted, arrays.accepted);
 		});
 		tpCheck.addClass('option-unavailable');
+		$('.options-box #tagp_check').prop( "disabled", disableTP );
 	}
-	$('.options-box #tagp_check').prop( "disabled", disableTP );
 	$('.options-box #tagp_check').attr('checked', !disableTP);
 };
 
