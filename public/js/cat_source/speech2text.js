@@ -56,7 +56,6 @@ Speech2Text.init  = function () {
             finalTranscript: '',
             interimTranscript: '',
             targetElement: null,
-            isToEmptyTargetElement: true,
             isStopingRecognition: false,
             isToKeepRecognizing: false,
             wereMatchesPreviouslyOpened: false,
@@ -74,13 +73,8 @@ Speech2Text.init  = function () {
                 Speech2Text.microphone = segment.find('.micSpeech');
 
                 if (Speech2Text.recognition) {
+
                     Speech2Text.targetElement = Speech2Text.microphone.parent().find('.editarea');
-
-                    var segmentId = segment.data('split-original-id');
-                    var segmentRecord = MateCat.db.segments.by('sid', segmentId);
-
-                    Speech2Text.isToEmptyTargetElement = Speech2Text
-                        .shouldEmptyTargetElement(segmentRecord);
 
                     Speech2Text.microphone.on('click', Speech2Text.clickMicrophone );
 
@@ -102,6 +96,8 @@ Speech2Text.init  = function () {
             },
             clickMicrophone: function (event) {
                 var microphone = $(this);
+                var segmentObj = new UI.Segment( microphone.closest('section') );
+                var segmentRecord = MateCat.db.segments.by('sid', segmentObj.absId );
 
                 Speech2Text.isStopingRecognition = false;
 
@@ -109,20 +105,25 @@ Speech2Text.init  = function () {
                     Speech2Text.disableContinuousRecognizing();
                     Speech2Text.stopSpeechRecognition(microphone);
                 } else {
-                    Speech2Text.startSpeechRecognition(microphone);
+                    Speech2Text.startSpeechRecognition(microphone, segmentRecord);
                     Speech2Text.enableContinuousRecognizing();
                 }
             },
             startSpeechRecognition: function (microphone) {
+                var segment = microphone.closest('section');
+                var segmentId = new UI.Segment( segment ).absId ;
+                var segmentRecord = MateCat.db.segments.by('sid', segmentId);
+
                 if (!microphone.hasClass('micSpeechActive')) {
                     microphone.addClass('micSpeechActive');
                     Speech2Text.animateSpeechActive();
                 }
 
-                if (Speech2Text.isToEmptyTargetElement) {
+                if (Speech2Text.shouldEmptyTargetElement( segmentRecord )) {
                     Speech2Text.finalTranscript = '';
                     Speech2Text.targetElement.html('');
                 } else {
+
                     Speech2Text.finalTranscript = Speech2Text.targetElement.text() + ' ';
                 }
 
@@ -189,6 +190,7 @@ Speech2Text.init  = function () {
                         Speech2Text.linebreak(Speech2Text.finalTranscript)
                         + Speech2Text.linebreak(Speech2Text.interimTranscript)
                     );
+                    UI.setSegmentModified( Speech2Text.targetElement.closest('section'), true );
                 }
             },
             capitalize: function (s) {
@@ -204,26 +206,13 @@ Speech2Text.init  = function () {
 
                 return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
             },
-            putSegmentsInStore: function (data) {
-                $.each(data.files, function () {
-                    $.each(this.segments, function () {
-                        MateCat.db.upsert('segments', 'sid', _.clone(this));
-                    });
-                });
-            },
             shouldEmptyTargetElement: function (segment) {
-                if ((segment.autopropagated_from && segment.autopropagated_from != "0")
+                if ( (segment.autopropagated_from && segment.autopropagated_from != "0")
                     || segment.suggestion_match === "100"
-                    || segment.status === "TRANSLATED"
-                    || segment.status === "REJECTED"
-                    || segment.status === "APPROVED"
-                    || segment.status === "FIXED"
-                    || segment.status === "REBUTTED"
-                    || segment.status === "DRAFT"
+                    || segment.status !== "NEW"
                 ) {
                     return false;
                 }
-
                 return true;
             },
             enableContinuousRecognizing: function () {
@@ -252,6 +241,23 @@ Speech2Text.init  = function () {
             },
             animateSpeechReceiving: function () {
                 Speech2Text.microphone.addClass('micSpeechReceiving');
+            },
+
+            /**
+             * This method checks if a contribution match is to be copied insied the edit area.
+             * If speech is active, then only contributions with match 100% are to be copied.
+             *
+             * @param match
+             * @returns {boolean}
+             */
+            isContributionToBeAllowed : function( match ) {
+                return !Speech2Text.recognizing || match == "100%" ;
+            }
+        });
+
+        $(document).on('contribution:copied', function( ev, data) {
+            if ( Speech2Text.microphone.closest('section').attr('id') == data.segment.attr('id') ) {
+                Speech2Text.finalTranscript = data.translation ;
             }
         });
 
