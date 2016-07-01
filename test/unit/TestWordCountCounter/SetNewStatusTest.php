@@ -110,7 +110,7 @@ class SetNewStatusTest extends AbstractTest
     public function test_setNewStatus_REBUTTED()
     {
         $this->word_counter->setNewStatus( "REBUTTED" );
-        $this->assertEquals("RejectedWords", $this->new_status_call->getValue($this->word_counter));
+        $this->assertEquals("TranslatedWords", $this->new_status_call->getValue($this->word_counter));
         $this->assertEquals("REBUTTED", $this->new_status->getValue($this->word_counter));
     }
 
