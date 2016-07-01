@@ -41,7 +41,7 @@ class EquivalentStatusesTest extends AbstractTest
     public function test_equivalentStatuses_true_2(){
         $this->word_counter->setOldStatus("REJECTED");
         $this->word_counter->setNewStatus("REBUTTED");
-        $this->assertTrue($this->method_equivalentStatuses->invoke($this->word_counter));
+        $this->assertFalse($this->method_equivalentStatuses->invoke($this->word_counter));
 
     }
 
@@ -53,7 +53,7 @@ class EquivalentStatusesTest extends AbstractTest
     public function test_equivalentStatuses_false(){
         $this->word_counter->setOldStatus("FIXED");
         $this->word_counter->setNewStatus("REBUTTED");
-        $this->assertFalse($this->method_equivalentStatuses->invoke($this->word_counter));
+        $this->assertTrue($this->method_equivalentStatuses->invoke($this->word_counter));
 
     }
 }
