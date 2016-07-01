@@ -2,12 +2,12 @@
 
 /**
  * @group regression
- * @covers Chunks_ChunkDao::getByIdAndPassword
+ * @covers Chunks_ChunkDao::getByJobId
  * User: dinies
- * Date: 22/06/16
- * Time: 12.47
+ * Date: 30/06/16
+ * Time: 18.17
  */
-class GetByIdAndPasswordChunkTest extends AbstractTest
+class GetByJobIdChunkTest extends AbstractTest
 {
     /**
      * @var Chunks_ChunkDao
@@ -24,26 +24,27 @@ class GetByIdAndPasswordChunkTest extends AbstractTest
     protected $database_instance;
 
 
-public function setUp(){
-    parent::setUp();
+    public function setUp(){
+        parent::setUp();
 
-    $this->database_instance = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-    $this->chunk_Dao = new Chunks_ChunkDao($this->database_instance);
-    
-    $test_initializer= new UnitTestInitializer($this->database_instance);
-    $this->job= $test_initializer->getJob();
+        $this->database_instance = Database::obtain(INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        $this->chunk_Dao = new Chunks_ChunkDao($this->database_instance);
+
+        $test_initializer= new UnitTestInitializer($this->database_instance);
+        $this->job= $test_initializer->getJob();
 
 
-}
+    }
 
     /**
      * @group regression
-     * @covers Chunks_ChunkDao::getByIdAndPassword
+     * @covers Chunks_ChunkDao::getByJobId
      */
-    function test_getByIdAndPassword_with_success()
+    function test_getByJobId()
     {
 
-        $result=$this->chunk_Dao->getByIdAndPassword($this->job['id'],$this->job['password']);
+        $wrapped_result=$this->chunk_Dao->getByJobId($this->job['id']);
+        $result= $wrapped_result['0'];
         $this->assertTrue($result instanceof Chunks_ChunkStruct);
         $this->assertEquals($this->job['id'],$result['id']);
         $this->assertEquals($this->job['password'], $result['password']);
@@ -88,18 +89,7 @@ public function setUp(){
         $this->assertEquals($this->job['revision_stats_style_maj'], $result['revision_stats_style_maj']);
         $this->assertEquals($this->job['dqf_key'], $result['dqf_key']);
         $this->assertEquals($this->job['total_raw_wc'], $result['total_raw_wc']);
-    }
-
-    /**
-     * @group regression
-     * @covers Chunks_ChunkDao::getByIdAndPassword
-     */
-    function test_getByIdAndPassword_with_failure()
-    {
-
-        $this->job['id']+=100;
-        $this->setExpectedException('Exception');
-        $this->chunk_Dao->getByIdAndPassword($this->job['id'],$this->job['password']);
 
     }
+
 }
