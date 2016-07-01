@@ -61,15 +61,13 @@ header .wrapper{
 
 
 .text a{
-	text-decoration:none;
-	color:#000
+	text-color:#000
 }
 
 #notifbox {
     opacity: 0.9;
     text-align: center;
     width: 45px;
-    margin-left: 10px;
     color: #777;
     height: 27px;
     padding-top: 13px;
@@ -892,6 +890,10 @@ box-shadow: 0 1px 2px #ccc;
 	box-shadow: none;
 	width: 13px;
 	padding: 6px 10px !important;
+}
+
+.header-menu li:first-child {
+    margin-right: 15px;
 }
 
 .header-menu .wrapper-dropdown-5 .dropdown {
@@ -2974,10 +2976,9 @@ section.modified .save-warning
 }
 
 #advancedOptions .more-options {
-    font-size: 26px;
+    font-size: 25px;
     color: #eee;
     padding: 0;
-    margin-top: 3px;
     display: block;
     text-align: center;
     width: 45px;

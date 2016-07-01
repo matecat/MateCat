@@ -994,6 +994,7 @@ color:#333;}
     position: relative; 
     width: 60px;
     zoom:0.7;
+    margin-top:8px;
     float: left;
     -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
 }
@@ -3022,11 +3023,11 @@ color: #000;
 
 @font-face {
 	font-family: 'icomoon';
-	src:url('fonts/icomoon.eot?-ad2p15');
-	src:url('fonts/icomoon.eot?#iefix-ad2p15') format('embedded-opentype'),
-		url('fonts/icomoon.woff?-ad2p15') format('woff'),
-		url('fonts/icomoon.ttf?-ad2p15') format('truetype'),
-		url('fonts/icomoon.svg?-ad2p15#icomoon') format('svg');
+	src:url('fonts/icomoon.eot?-v13f1k');
+	src:url('fonts/icomoon.eot?#iefix-v13f1k') format('embedded-opentype'),
+		url('fonts/icomoon.woff?-v13f1k') format('woff'),
+		url('fonts/icomoon.ttf?-v13f1k') format('truetype'),
+		url('fonts/icomoon.svg?-v13f1k#icomoon') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -3036,6 +3037,13 @@ color: #000;
 /* mbc extend iconmoon set with icons for matecat chat
 /* TODO: add icons to main set
 */
+
+.icon-download-logs:before {
+    content: "\e900";
+}
+.icon-zip:before {
+    content: "\e901";
+}
 
 .icon-settings:before {
     content: "\e8b8";
@@ -3457,7 +3465,9 @@ a.cancel-project:before, a.resume-project:before{
 }
 
 a.activity-log:before {
-    content: "Download Activity Log";
+    content: "\e900";
+     font-size: 18px;
+     vertical-align: top;
 }
 
 a.archive-project:before, a.unarchive-project:before {
