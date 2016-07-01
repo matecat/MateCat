@@ -14,17 +14,26 @@ if ( true )
     }
     function createSupportedLanguagesArrays(acceptedLanguages) {
         var notAcceptedLanguages = [];
+        var notAcceptedLanguagesCodes = [], acceptedLanguagesCodes = [];
         var source_lan = config.source_rfc;
         var target_lan = config.target_rfc;
         if (acceptedLanguages.indexOf(source_lan) === -1 ) {
             notAcceptedLanguages.push((_.find(config.languages_array, function (e) {
-                return e.code === source_lan;
+                if (e.code === source_lan) {
+                    notAcceptedLanguagesCodes.push(e.code.split("-")[0].toUpperCase());
+                    return true;
+                }
+                return false;
             })).name);
         }
 
         if (acceptedLanguages.indexOf(target_lan) === -1) {
             notAcceptedLanguages.push((_.find(config.languages_array, function (e) {
-                return e.code === target_lan;
+                if (e.code === target_lan) {
+                    notAcceptedLanguagesCodes.push(e.code.split("-")[0].toUpperCase());
+                    return true;
+                }
+                return false;
             })).name);
         }
         acceptedLanguages.forEach(function (value, index, array) {
@@ -32,10 +41,15 @@ if ( true )
                 return e.code === value;
             });
             array[index] = result.name;
+            if (acceptedLanguagesCodes.indexOf(result.code.split("-")[0].toUpperCase()) === -1) {
+                acceptedLanguagesCodes.push(result.code.split("-")[0].toUpperCase() );
+            }
         });
         return {
             accepted: acceptedLanguages,
-            notAccepted: notAcceptedLanguages
+            acceptedCodes: acceptedLanguagesCodes,
+            notAccepted: notAcceptedLanguages,
+            notAcceptedCodes: notAcceptedLanguagesCodes
         }
     }
     $.extend(UI, {
@@ -44,7 +58,7 @@ if ( true )
             var lexiqaCheck = $('.qa-box #lexi_qa');
             var speech2textCheck = $('.s2t-box #s2t_check');
             var tagProjectionCheck = $('.tagp #tagp_check');
-            var acceptedLanguages;
+
 
             $('.mgmt-table-options .options-box.seg_rule').hide();
             $('.mgmt-table-options .options-box.dqf_options_box').hide();
@@ -58,11 +72,12 @@ if ( true )
                 var LXQContainer = $('.options-box.qa-box');
                 $('.options-box #lexi_qa').prop( "disabled", true ).attr('checked', false);
 
-                acceptedLanguages = config.lexiqa_languages.slice();
-                var languagesArrays = createSupportedLanguagesArrays(acceptedLanguages);
-
+                var acceptedLanguagesLXQ = config.lexiqa_languages.slice();
+                var languagesArraysLXQ = createSupportedLanguagesArrays(acceptedLanguagesLXQ);
+                LXQContainer.find('.option-supported-languages').html(languagesArraysLXQ.acceptedCodes.join(', '));
+                LXQContainer.find('.option-notsupported-languages').html(languagesArraysLXQ.notAcceptedCodes.join(', '));
                 LXQContainer.find('.onoffswitch').off('click').on('click', function () {
-                    showModalNotSupportedLanguages(languagesArrays.notAccepted, languagesArrays.accepted);
+                    showModalNotSupportedLanguages(languagesArraysLXQ.notAccepted, languagesArraysLXQ.accepted);
                 });
 
                 LXQContainer.addClass('option-unavailable');
@@ -75,11 +90,12 @@ if ( true )
                 var tpContainer= $('.options-box.tagp');
                 $('.options-box #tagp_check').prop( "disabled", true ).attr('checked', false);
 
-                acceptedLanguages = config.tag_projection_languages.slice();
-                var languagesArrays = createSupportedLanguagesArrays(acceptedLanguages);
-
+                var acceptedLanguagesTP = config.tag_projection_languages.slice();
+                var languagesArraysTP = createSupportedLanguagesArrays(acceptedLanguagesTP);
+                tpContainer.find('.option-supported-languages').html(languagesArraysTP.acceptedCodes.join(', '));
+                tpContainer.find('.option-notsupported-languages').html(languagesArraysTP.notAcceptedCodes.join(', '));
                 tpContainer.find('.onoffswitch').off('click').on('click', function () {
-                    showModalNotSupportedLanguages(languagesArrays.notAccepted, languagesArrays.accepted);
+                    showModalNotSupportedLanguages(languagesArraysTP.notAccepted, languagesArraysTP.accepted);
                 });
                 tpContainer.addClass('option-unavailable');
 
