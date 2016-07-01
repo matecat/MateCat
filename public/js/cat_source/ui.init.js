@@ -31,7 +31,6 @@ $.extend(UI, {
         $('html').trigger('init');
         this.setTagMode();
 		this.detectFirstLast();
-		this.initSegmentNavBar();
 		rangy.init();
 		this.savedSel = null;
 		this.savedSelActiveElement = null;

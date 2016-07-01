@@ -76,7 +76,7 @@ class MethodNameForStatusCallTest extends AbstractTest
      */
     public function test_methodNameForStatusCall_REBUTTED(){
 
-        $this->assertEquals("RejectedWords", $this->method_methodNameForStatusCall->invoke($this->word_counter, "REBUTTED"));
+        $this->assertEquals("TranslatedWords", $this->method_methodNameForStatusCall->invoke($this->word_counter, "REBUTTED"));
     }/**
      * @group regression
      * @covers WordCount_Counter::methodNameForStatusCall

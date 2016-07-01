@@ -997,6 +997,7 @@ UI = {
 		});
 	},
 	getSegments_success: function(d, options) {
+        var startSegmentId;
         if (d.errors.length) {
 			this.processErrors(d.errors, 'getSegments');
         }
@@ -1058,6 +1059,7 @@ UI = {
 		this.setWaypoints();
 		this.markTags();
 		this.checkPendingOperations();
+        this.retrieveStatistics();
         $(document).trigger('getSegments_success');
 
 	},
@@ -1187,11 +1189,6 @@ UI = {
             SegmentActivator.activate(id);
         }
     },
-	initSegmentNavBar: function() {
-		if (config.firstSegmentOfFiles.length == 1) {
-			$('#segmentNavBar .prevfile, #segmentNavBar .nextfile').addClass('disabled');
-		}
-	},
 	justSelecting: function(what) {
 		if (window.getSelection().isCollapsed)
 			return false;
@@ -1773,6 +1770,20 @@ UI = {
 		$('#downloadProject').attr('value', label);
         $('#previewDropdown').attr('data-download', downloadable);
 	},
+    retrieveStatistics: function () {
+        var path = sprintf(
+            '/api/v1/jobs/%s/%s/stats',
+            config.id_job, config.password
+        );
+        $.ajax({
+            url: path,
+            type: 'get',
+        }).done( function( data ) {
+            if (data.stats){
+                UI.setProgress(data.stats);
+            }
+        });
+    },
 	setProgress: function(stats) {
 		var s = stats;
 		m = $('footer .meter');

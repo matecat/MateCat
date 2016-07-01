@@ -192,7 +192,6 @@ $.extend(UI, {
             UI.checkTMKey('key');
             UI.saveTMkey($(this));
 
-            // script per appendere le tmx fra quelle attive e inattive, preso da qui: https://stackoverflow.com/questions/24355817/move-table-rows-that-are-selected-to-another-table-javscript
         }).on('click', 'tr.mine .uploadfile .addtmxfile:not(.disabled), tr.ownergroup .uploadfile .addtmxfile:not(.disabled)', function() {
 
             $(this).addClass('disabled');
@@ -362,6 +361,7 @@ $.extend(UI, {
             $("#activetm tr.new .addtmxfile").removeClass('disabled');
             $("#activetm tr.uploadpanel").addClass('hide');
             $(".mgmt-table-tm .add-tm").show();
+            UI.clearTMUploadPanel();
             UI.clearAddTMRow();
         });
 
@@ -413,15 +413,11 @@ $.extend(UI, {
     },
 
     checkTMKey: function(operation) {
-        console.log('checkTMKey');
-        console.log('operation: ', operation);
-
         //check if the key already exists, it can not be sent nor added twice
         var keys_of_the_job = $('#activetm tbody tr:not(".new") .privatekey' );
         var keyIsAlreadyPresent = false;
         $( keys_of_the_job ).each( function( index, value ){
             if( $(value).text().slice(-5) == $('#new-tm-key').val().slice(-5) ){
-                console.log('key is bad');
                 $('#activetm tr.new').addClass('badkey');
                 $('#activetm tr.new .error .tm-error-key').text('The key is already present in this project.').show();
                 $('#activetm tr.new .error').show();
@@ -445,8 +441,6 @@ $.extend(UI, {
             },
             success: function(d) {
                 if(d.success === true) {
-                    console.log('key is good');
-                    console.log('adding a tm');
                     $('#activetm tr.new').removeClass('badkey');
                     $('#activetm tr.new .error .tm-error-key').text('').hide();
                     $('#activetm tr.new .error').hide();
@@ -460,7 +454,6 @@ $.extend(UI, {
                     }
 
                 } else {
-                    console.log('key is bad');
                     $('#activetm tr.new').addClass('badkey');
                     $('#activetm tr.new .error .tm-error-key').text('The key is not valid').show();
                     $('#activetm tr.new .error').show();
@@ -470,7 +463,6 @@ $.extend(UI, {
         });
     },
     checkTMAddAvailability: function () {
-        console.log('checkTMAddAvailability');
         if(($('#activetm tr.new').hasClass('badkey'))||($('#activetm tr.new').hasClass('badgrants'))) {
             $('#activetm tr.new .uploadtm').addClass('disabled');
             $('#activetm tr.uploadpanel .addtmxfile').addClass('disabled');
@@ -482,19 +474,16 @@ $.extend(UI, {
     },
 
     checkTMgrants: function() {
-        console.log('checkTMgrants');
         panel = $('.mgmt-tm tr.new');
         var r = ($(panel).find('.r').is(':checked'))? 1 : 0;
         var w = ($(panel).find('.w').is(':checked'))? 1 : 0;
         if(!r && !w) {
-            console.log('checkTMgrants NEGATIVE');
             $('#activetm tr.new').addClass('badgrants');
             $(panel).find('.action .error .tm-error-grants').text('Either "Lookup" or "Update" must be checked').show();
             UI.checkTMAddAvailability();
 
             return false;
         } else {
-            console.log('checkTMgrants POSITIVE');
             $('#activetm tr.new').removeClass('badgrants');
             $(panel).find('.action .error .tm-error-grants').text('').hide();
             UI.checkTMAddAvailability();
@@ -503,7 +492,6 @@ $.extend(UI, {
         }
     },
     checkTMGrantsModifications: function (el) {
-        console.log('el: ', el);
         tr = $(el).parents('tr.mine');
         isActive = ($(tr).parents('table').attr('id') == 'activetm')? true : false;
         if((!tr.find('.lookup input').is(':checked')) && (!tr.find('.update input').is(':checked'))) {
@@ -675,8 +663,6 @@ $.extend(UI, {
         $('#activetm').find('tr.new').before( newTr );
 
         UI.setTMsortable();
-        UI.updateTMAddedMsg();
-
     },
 
     pulseTMadded: function (row) {
@@ -969,10 +955,6 @@ $.extend(UI, {
             UI.closeTMPanel();
             UI.clearTMPanel();
         }
-        if(!APP.isCattool) {
-            UI.updateTMAddedMsg();
-            return false;
-        }
 
         data = this.extractTMdataFromTable();
         APP.doRequest({
@@ -1046,6 +1028,7 @@ $.extend(UI, {
 //                    APP.showMessage({msg: d.errors[0].message});
                 } else {
                     console.log('TM key saved!!');
+                    UI.clearTMUploadPanel();
                 }
             }
         });

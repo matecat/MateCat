@@ -13,6 +13,8 @@ use Chunks_ChunkDao  ;
 use SegmentTranslationModel;
 use Features\ReviewImproved\Observer\SegmentTranslationObserver ;
 use Features\ReviewImproved\Controller;
+use Projects_MetadataDao;
+use ChunkOptionsModel;
 
 class ReviewImproved extends BaseFeature {
 

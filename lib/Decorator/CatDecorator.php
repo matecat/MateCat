@@ -23,6 +23,8 @@ class CatDecorator {
 
     private $isGDriveProject ;
 
+    private $lang_handler ;
+
     public function __construct( catController $controller, PHPTAL $template ) {
 
         $this->controller     = $controller;
@@ -31,6 +33,8 @@ class CatDecorator {
         $this->jobStatsStruct = new JobStatsStruct( $this->controller->getJobStats() );
 
         $this->isGDriveProject = $controller->isCurrentProjectGDrive();
+
+        $this->lang_handler = Langs_Languages::getInstance();
     }
 
     public function decorate() {
@@ -78,12 +82,11 @@ class CatDecorator {
 
         $this->template->support_mail = INIT::$SUPPORT_MAIL ;
         $this->template->showReplaceOptionsInSearch = true ;
-        
-        
+
+        $this->template->languages_array = json_encode(  $this->lang_handler->getEnabledLanguages( 'en' ) ) ;
+
         $this->assignOptions(); 
         
-
-
     }
 
     /**

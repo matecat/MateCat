@@ -284,14 +284,9 @@ class newProjectController extends viewController {
 
     public function setTemplateVars() {
         $source_languages = $this->lang_handler->getEnabledLanguages( 'en' );
-
         $target_languages = $this->lang_handler->getEnabledLanguages( 'en' );
-//        foreach ( $target_languages as $k => $v ) {
-//            if (in_array($v['code'],array('ko-KR', 'zh-CN','zh-TW','ja-JP'))){
-//            if ( in_array( $v[ 'code' ], array( 'ja-JP' ) ) ) {
-//                unset ( $target_languages[ $k ] );
-//            }
-//        }
+
+        $this->template->languages_array = json_encode(  $this->lang_handler->getEnabledLanguages( 'en' ) ) ;
 
         $this->template->project_name=$this->project_name;
         $this->template->private_tm_key=$this->private_tm_key;
@@ -302,7 +297,6 @@ class newProjectController extends viewController {
         $this->template->subjects = $this->subjectArray;
 
         $this->template->mt_engines         = $this->mt_engines;
-//        $this->template->tms_engines        = $this->tms_engines;
         $this->template->conversion_enabled = !empty(INIT::$FILTERS_ADDRESS);
 
         $this->template->isUploadTMXAllowed = false;
@@ -348,6 +342,7 @@ class newProjectController extends viewController {
         $this->template->lexiqa_languages = json_encode( ProjectOptionsSanitizer::$lexiQA_allowed_languages ); 
 
         $this->template->deny_lexiqa = $this->isToDenyLexiQA();
+
     }
 
     private function getCurrentTargetLang() {

@@ -44,6 +44,7 @@ class SetGlossaryMyMemoryTest extends AbstractTest
     protected $segment;
     protected $old_translation;
     protected $new_translation;
+    protected $unset_seg;
     protected $test_key;
 
 
@@ -106,6 +107,7 @@ LABEL;
         $this->old_translation = "tac";
 
         $this->new_translation="toe";
+        $this->unset_seg="tol";
 
         $this->first_url_delete = "http://api.mymemory.translated.net/glossary/delete?seg={$this->segment}&tra={$this->old_translation}&langpair=it-IT%7Cen-US&de=demo%40matecat.com&key={$this->test_key}";
         $this->second_url_delete="http://api.mymemory.translated.net/glossary/delete?seg={$this->segment}&tra={$this->new_translation}&langpair=it-IT%7Cen-US&de=demo%40matecat.com&key={$this->test_key}";
@@ -118,12 +120,30 @@ LABEL;
         $mh->createResource($this->second_url_delete, $this->curl_additional_params + $this->curl_param);
         $mh->multiExec();
         $mh->multiCurlCloseAll();
-        sleep(1);
+
+        /**
+         * Unsetting
+         */
+        $this->config_param_of_set['segment'] = $this->segment;
+        $this->config_param_of_set['translation'] = $this->unset_seg;
+        $this->config_param_of_set['id_user'] = array('0' => "{$this->test_key}");
+
+        $this->engine_MyMemory->set($this->config_param_of_set);
+        sleep(2);
 
     }
 
     public function tearDown()
     {
+        /**
+         * Unsetting
+         */
+        $this->config_param_of_set['segment'] = $this->segment;
+        $this->config_param_of_set['translation'] = $this->unset_seg;
+        $this->config_param_of_set['id_user'] = array('0' => "{$this->test_key}");
+
+        $this->engine_MyMemory->set($this->config_param_of_set);
+
 
 
         $mh = new MultiCurlHandler();
@@ -134,7 +154,7 @@ LABEL;
         $mh->createResource($this->second_url_delete, $this->curl_additional_params + $this->curl_param);
         $mh->multiExec();
         $mh->multiCurlCloseAll();
-        sleep(1);
+        sleep(2);
 
         parent::tearDown();
     }
@@ -147,7 +167,7 @@ LABEL;
     {
         $this->config_param_of_set['segment'] = $this->segment;
         $this->config_param_of_set['translation'] = $this->old_translation;
-
+        $this->config_param_of_set['id_user'] = array();
         $result = $this->engine_MyMemory->set($this->config_param_of_set);
 
         $this->assertNotTrue($result);

@@ -620,7 +620,8 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 
 /*done & draft*/
 .translated ,
-.approved
+.approved,
+.guesstags
 {
     border:1px solid #848689;
     color: #fff !important;
@@ -640,7 +641,7 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 	background:#7cc576;
 }
 
-.guesstags {
+/*.guesstags {
     background: #fff;
     border:1px solid #09beec;
 	font-weight: bold;
@@ -671,7 +672,7 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 	-moz-box-shadow: inset 0 1px 1px #09beec;
 	-webkit-box-shadow: inset 0 1px 1px #09beec;
 	color: #09beec;
-}
+}*/
 
 .button-reject {
 	border:1px solid ;
@@ -688,6 +689,7 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
 
 
 article .translated,
+.guesstags,
 article .draft,
 article .approved{
 	margin:0 0px 5px 5px
@@ -707,12 +709,14 @@ article .approved{
 .translated {color:#fff !important}
 
 article .translated,
-article .approved {
+article .approved,
+.guesstags {
 	text-transform: uppercase;
 }
 
 article .translated:hover,
 article .next-untranslated:hover,
+.guesstags:hover,
 article .draft:hover,
 article .btn:hover,
 article .approved:hover,
@@ -725,6 +729,7 @@ article .next-unapproved:hover,
     border: 1px solid #000;
 }
 article .translated:active,
+.guesstags:active,
 article .draft:active,
 article .btn:active,
 article .approved:active{
@@ -736,7 +741,8 @@ article .approved:active{
 
 
 .translated:hover,
-.next-untranslated:hover {
+.next-untranslated:hover,
+.guesstags:hover {
     background: #12b4df;
 }
 .draft:hover{background:#eee;}
@@ -744,6 +750,7 @@ article .approved:active{
 
 .translated:active,
 .draft:active,
+.guesstags:active,
 .btn:active,
 .copysource:active {
 	-moz-box-shadow: none;-webkit-box-shadow: none;box-shadow: none;border:1px solid #000
@@ -2774,7 +2781,12 @@ section.modified.editor .status
 	.number{left:-52px;}
 	.editarea, .source{ /* word-break: break-all */}
 	.projectbar ul {margin-left:5px}
-	.Translated, .draft, .approved {padding:7px 6px;}
+	.translated,
+	.draft,
+	.approved,
+	.guesstags {
+		padding:7px 6px;
+	}
 	.meter {	width:10%;}
 	.con-input{width:63%;}
 	.con-input{width:62% !important;}
@@ -2889,38 +2901,6 @@ p.percent
 	display: none;
 }
 
-
-
-#navSwitcher
-{
-    float: right;
-    display: block;
-    width: 30px;
-    height: 30px;
-    margin-right: 2px;
-    text-indent: -9999px;
-    text-align: center;
-    background: transparent url(../img/nav-icons.png) -10px -10px no-repeat;
-}
-
-#segmentNavBar .jobstart
-{
-    background-position: -60px -10px;
-}
-
-#segmentNavBar .prevfile
-{
-    background-position: -60px -60px;
-}
-#segmentNavBar .currseg
-{
-    background-position: -10px -60px;
-}
-#segmentNavBar .nextfile
-{
-    background-position: -60px -210px;
-}
-
 .misspelled
 {
     border-bottom: 1px dashed red;
@@ -2979,6 +2959,7 @@ section.modified .save-warning
     font-size: 25px;
     color: #eee;
     padding: 0;
+    margin-top: 0px;
     display: block;
     text-align: center;
     width: 45px;

@@ -61,13 +61,14 @@
             blueimp_dataType: 'json',
             gdriveAuthURL: ${structure php:json_encode(gdriveAuthURL)},
             defaults : {
-                tag_projection : true,
+                tag_projection : false,
                 speech2text : false,
                 lexiqa : true,
             },
             lexiqa_languages: ${lexiqa_languages},
             deny_lexiqa: ${deny_lexiqa | string:false},
-            tag_projection_languages: ${tag_projection_languages}
+            tag_projection_languages: ${tag_projection_languages},
+            languages_array : ${languages_array}
         };
         /*]]>*/
     </script>

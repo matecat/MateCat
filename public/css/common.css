@@ -798,35 +798,6 @@ color:#333;}
   font-size: 17px;
 }
 
-.slideMenu
-{
-	position: fixed;
-	right: 0;
-	bottom: -273px;
-	width: 30px;
-	background: #6d6e71;
-	border-top: 1px solid #333;
-	border-right: 1px solid #333;
-	border-left: 1px solid #333;
-	z-index: 999999999;
-    }
-    .slideMenu ul.bar li
-    {
-	    background: transparent url(../img/nav-icons.png) -10px -10px no-repeat;
-    }
-    .slideMenu ul.bar li a
-    {
-	    display: block;
-	    width: 30px;
-	    height: 30px;
-	    text-indent: -9999px;
-	    margin-bottom: 5px;
-    }
-    .slideMenu ul.bar li.disabled a
-    {
-	    visibility: hidden;
-}
-
 #contextMenu
 {
 	position: absolute;
@@ -968,6 +939,12 @@ color:#333;}
     margin: 0px 2% 0 5%;
     line-height: 22px;
 }
+
+.advanced-options-box .options-box.option-unavailable p,
+.advanced-options-box .options-box.option-unavailable h3 {
+    opacity: 0.6;
+}
+
 .advanced-options-box .options-box.qa-box img {
      width: 55px!important;
     margin-right: 10px!important;
@@ -1106,34 +1083,6 @@ color:#333;}
 }
 .option-s2t-box-chrome-label {
     display: none;
-}
-
-.options-box p span.pulse {
-    display: none;
-    -webkit-animation: pulse 1s ease-in-out;
-    animation: pulse 1s ease-in-out;
-}
-@-webkit-keyframes pulse {
-    0% {
-        background: transparent;
-    }
-    50% {
-        background: yellow;
-    }
-    100% {
-        background: transparent;
-    }
-}
-@keyframes pulse {
-    0% {
-        background: transparent;
-    }
-    50% {
-        background: yellow;
-    }
-    100% {
-        background: transparent;
-    }
 }
 
 .options-box p span {
@@ -1442,6 +1391,16 @@ margin-left: 10px;
     	background: #09beec!important;
     }
 
+
+.popup .btn-ok,
+.popup .btn-cancel
+{
+    padding: 1px 18px;
+    margin: 16px 0 16px 20px;
+    display: inline-block;
+
+    }
+
 	.mgmt-panel-tm .btn-ok,
 	.mgmt-panel-gl .btn-ok,
     .popup .btn-ok,
@@ -1466,7 +1425,10 @@ margin-left: 10px;
 }
 
 
+.btn-cancel.in-popup {
+            padding: 7px 18px!important;
 
+}
 
 
 
@@ -1500,14 +1462,6 @@ float: none!important;
 }
 
 
-.popup .btn-ok,
-.popup .btn-cancel
-{
-	padding: 1px 18px;
-    margin: 16px 0 16px 20px;
-    display: inline-block;
-
-    }
 
 .popup .btnsplit .btn-cancel {
     margin: 0;
