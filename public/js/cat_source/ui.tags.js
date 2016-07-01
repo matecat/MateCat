@@ -115,6 +115,8 @@ $.extend(UI, {
             .replace(/\&lt;div\>/gi, "<div>")
             .replace(/\&lt;\/div\>/gi, "</div>")
             .replace(/\&lt;br\>/gi, "<br>")
+            .replace(/\&lt;mark/gi, "<mark")
+            .replace(/\&lt;\/mark/gi, "</mark")
             .replace(/\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />')
             .replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2);
 
