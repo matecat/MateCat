@@ -1474,6 +1474,9 @@ class ProjectManager {
 
         $rows = $this->dbHandler->fetch_array( $query_job );
 
+        $metadata_dao = new Projects_MetadataDao();
+        $metadata_dao->cleanupChunksOptions( $rows );
+
         //get the min and
         $first_job         = reset( $rows );
         $job_first_segment = $first_job[ 'job_first_segment' ];

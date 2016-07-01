@@ -96,6 +96,24 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
         return "{$key}_chunk_{$chunk->id}_{$chunk->password}" ;
     }
 
+    /**
+     * Clean up the chunks options before the job merging
+     *
+     * @param $jobs   Associative array with the Jobs
+     */
+    public function cleanupChunksOptions( $jobs ) {
+        foreach ( $jobs as $job ) {
+            $chunk = Chunks_ChunkDao::getByIdAndPassword( $job[ 'id' ], $job[ 'password' ] );
+
+            foreach ( ChunkOptionsModel::$valid_keys as $key ) {
+                $this->delete(
+                    $chunk->id_project,
+                    self::buildChunkKey( $key, $chunk )
+                );
+            }
+        }
+    }
+
   protected function _buildResult( $array_result ) {
   }
 }
