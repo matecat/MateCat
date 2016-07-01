@@ -422,11 +422,15 @@ function createSupportedLanguagesArrays(acceptedLanguages, targetLanguages, sour
 
 	notAcceptedLanguages.forEach(function (value, index, array) {
 		notAcceptedLanguagesNames.push($( '#target-lang option[value='+value+']' ).first().text());
-		notAcceptedLanguagesCodes.push(value.split("-")[1]);
+		if (notAcceptedLanguagesCodes.indexOf(value.split("-")[0].toUpperCase()) === -1) {
+			notAcceptedLanguagesCodes.push(value.split("-")[0].toUpperCase() );
+		}
 	});
 	acceptedLanguages.forEach(function (value, index, array) {
 		acceptedLanguagesNames.push($( '#target-lang option[value='+value+']' ).first().text());
-		acceptedLanguagesCodes.push(value.split("-")[1]);
+		if (acceptedLanguagesCodes.indexOf(value.split("-")[0].toUpperCase()) === -1) {
+			acceptedLanguagesCodes.push(value.split("-")[0].toUpperCase());
+		}
 	});
 	return {
 		accepted: acceptedLanguagesNames,
