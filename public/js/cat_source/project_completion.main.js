@@ -98,8 +98,6 @@ if ( ProjectCompletion.enabled() ) {
     });
 
     $(document).on('setTranslation:success', function(ev, data) {
-        console.log('setTranslation:success');
-
         evalSendButtonStatus( data.stats );
     });
 
