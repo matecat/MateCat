@@ -270,6 +270,7 @@ class UpdateGlossaryMyMemoryTest extends AbstractTest
 
 
     /**
+     * SOMETIMES IT FAILS IF LAUNCHED WITH ALL THE OTHER UNIT TESTS
      * @group regression
      * @covers Engines_MyMemory::update
      * @see    UpdateGlossaryMyMemoryTest::test_OLD_NEW_update_with_success_glossary_word_checking_through_get_verification
