@@ -26,7 +26,7 @@ var LXQ = {
             }).done( function( data ) {
                 if ($('#lexiqa-popup').hasClass('lxq-visible')) {
                     $('#lexiqabox').trigger('click');
-    }
+                }
                 $('#lexiqabox').removeAttr('style');
                 if (!LXQ.initialized) {
                     LXQ.init();
@@ -53,6 +53,9 @@ var LXQ = {
                 type: 'POST',
                 data : data
             }).done( function( data ) {
+                if ($('#lexiqa-popup').hasClass('lxq-visible')) {
+                    $('#lexiqabox').trigger('click');
+                }
                 $('#lexiqabox').css('display', 'none');
                 UI.render();
             });
@@ -266,22 +269,8 @@ LXQ.init  = function () {
             // }
         });
 
-        $(document).on('click', '#filterSwitch', function (e) {
-            //$('.lxq-history-balloon-outer').removeClass('lxq-visible');
-            
-            //var lexiqaPopupHeight = $('#lexiqa-popup').height() + 30;
-            // if ($('#lexiqa-popup').hasClass('lxq-visible')) {
-            //     $('#lexiqa-popup').removeClass('lxq-visible').focus();   
-            //     //$('.cattool.editing').css('margin-top', 0);  
-            //     $('#outer').css('margin-top', 20);      
-            //     //LXQ.reloadPowertip();
-            // }            
-        });
-
-        //$( document ).on( 'click', '#lxq-history', function ( ev ) {
             
         $(document).on('click', '#lexiqabox', function (ev) {
-            // $('.lxq-history-balloon-outer').toggleClass('lxq-visible');
             ev.preventDefault();
             if ($('.searchbox').is(':visible')) {
                 UI.toggleSearch(ev);
@@ -292,16 +281,13 @@ LXQ.init  = function () {
             $('#lexiqa-popup').toggleClass('lxq-visible').focus();
 
             if ($('#lexiqa-popup').hasClass('lxq-visible')) {
-                // $('.cattool.editing').css('margin-top', lexiqaPopupHeight);
-                $('#outer').css('margin-top', lexiqaPopupHeight);  
+                $('#outer').css('margin-top', lexiqaPopupHeight);
                 //go the first segment with errors...
                 var segid = getFristSegmentWithWarning();
                 if (UI.segmentIsLoaded(segid) === true)
                     UI.gotoSegment(segid);
                 else {                    
-                    //UI.reloadWarning();
                     config.last_opened_segment = segid;
-                    //config.last_opened_segment = this.nextUntranslatedSegmentId;
                     window.location.hash = segid;
                     $('#outer').empty();
                     UI.render({
@@ -309,11 +295,8 @@ LXQ.init  = function () {
                     });
                 }
             } else {
-                //$('.cattool.editing').css('margin-top', 0);
                 $('#outer').css('margin-top', 20);
             }
-            //reloadPowertip();
-            
             $('.mbc-history-balloon-outer').removeClass('mbc-visible');
         });
         var isNumeric = function (n) {

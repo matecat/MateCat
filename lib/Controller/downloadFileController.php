@@ -1,5 +1,8 @@
 <?php
 
+use ActivityLog\Activity;
+use ActivityLog\ActivityLogStruct;
+
 set_time_limit( 180 );
 
 class downloadFileController extends downloadController {
@@ -13,6 +16,8 @@ class downloadFileController extends downloadController {
     protected $downloadToken;
     protected $gdriveService;
     protected $openOriginalFiles;
+
+    protected $trereIsARemoteFile = null;
 
     /**
      * @var Google_Service_Drive_DriveFile
@@ -382,15 +387,54 @@ class downloadFileController extends downloadController {
         catch(Exception $e){
             Log::doLog( 'Failed to delete dir:'.$e->getMessage() );
         }
+
+        $this->_saveActivity();
+
+    }
+
+    protected function _saveActivity(){
+
+        $redisHandler = new RedisHandler();
+        $job_complete   = $redisHandler->getConnection()->get( 'job_completeness:' . $this->id_job );
+
+        if( $this->download_type == 'omegat' ){
+            $action = ActivityLogStruct::DOWNLOAD_OMEGAT;
+        } elseif( $this->forceXliff ){
+            $action = ActivityLogStruct::DOWNLOAD_XLIFF;
+        } elseif( $this->anyRemoteFile() ){
+            $action = ( $job_complete ? ActivityLogStruct::DOWNLOAD_GDRIVE_TRANSLATION : ActivityLogStruct::DOWNLOAD_GDRIVE_PREVIEW );
+        } else {
+            $action = ( $job_complete ? ActivityLogStruct::DOWNLOAD_TRANSLATION : ActivityLogStruct::DOWNLOAD_PREVIEW );
+        }
+        
+        /**
+         * Retrieve user information
+         */
+        $this->checkLogin();
+
+        $activity             = new ActivityLogStruct();
+        $activity->id_job     = $this->id_job;
+        $activity->id_project = $this->jobInfo['id_project'];
+        $activity->action     = $action;
+        $activity->ip         = Utils::getRealIpAddr();
+        $activity->uid        = $this->uid;
+        $activity->event_date = date( 'Y-m-d H:i:s' );
+        Activity::save( $activity );
+
     }
 
     /**
      * Initializes remoteFiles property reading entries from database
      *
-     * @return int
+     * Cached result to avoid query executed more than once
+     *
+     * @return bool
      */
-    private function anyRemoteFile()  {
-        return \RemoteFiles_RemoteFileDao::jobHasRemoteFiles( $this->id_job );
+    private function anyRemoteFile() {
+        if( is_null( $this->trereIsARemoteFile ) ){
+            $this->trereIsARemoteFile = \RemoteFiles_RemoteFileDao::jobHasRemoteFiles( $this->id_job );
+        }
+        return $this->trereIsARemoteFile;
     }
 
     private function outputResultForOriginalFiles() {

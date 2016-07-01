@@ -22,7 +22,7 @@ export default React.createClass({
 
     undoRebutClick : function() {
         this.setState({ undoRebutDisabled : true, undoRebutLabel: 'Undoing' });
-        ReviewImproved.setIssueRebutted( this.props.sid, this.props.issueId, 'false' )
+        ReviewImproved.undoRebutIssue( this.props.sid, this.props.issueId )
             .fail( this.handleFail )
             .fail(function() {
                 this.setState({ undoRebutDisabled : false, undoRebutLabel: this.getInitialState().undoRebutLabel });
@@ -94,6 +94,10 @@ export default React.createClass({
         genericErrorAlertMessage() ;
         this.setState({ sendLabel : 'Send', sendDisabled : false });
     },
+    handleFail: function() {
+        genericErrorAlertMessage() ;
+        this.setState({ sendLabel : 'Send', sendDisabled : false });
+    },
     sendClick : function() {
         // send action invokes ReviewImproved function
         if ( !this.state.comment_text || this.state.comment_text.length == 0 ) {
@@ -119,6 +123,7 @@ export default React.createClass({
         }
 
         var data = {
+          rebutted : true,
           message : this.state.comment_text,
           source_page : (config.isReview ? 2 : 1)  // TODO: move this to UI property
         };
@@ -126,8 +131,7 @@ export default React.createClass({
         this.setState({ rebutLabel : 'Sending', rebutDisabled : true, sendDisabled : true });
 
         $.when(
-            ReviewImproved.submitComment( this.props.sid, this.props.issueId, data ),
-            ReviewImproved.setIssueRebutted( this.props.sid, this.props.issueId, 'true' )
+            ReviewImproved.submitComment( this.props.sid, this.props.issueId, data )
         ).fail( this.handleFail );
 
     },

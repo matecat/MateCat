@@ -6,12 +6,15 @@ $.extend(UI, {
 		$("body").removeClass('shortcutsDisabled');
 		$("body").on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.standard, function(e) {
 			e.preventDefault();
-			if ($('.editor .translated').length > 0) {
-				$('.editor .translated').click();
+			if ( config.isReview ) {
+				$('body.review .editor .approved').click();
 			} else {
-				$('.editor .guesstags').click();
+				if ( $('.editor .translated').length > 0 ) {
+					$('.editor .translated').click();
+				} else if ( $('.editor .guesstags').length > 0 ) {
+					$('.editor .guesstags').click();
+				}
 			}
-            $('body.review .editor .approved').click();
 		}).on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.mac, function(e) {
 			e.preventDefault();
 			if ($('.editor .translated').length > 0) {
@@ -1031,8 +1034,8 @@ $.extend(UI, {
 
 		}).on('input', '.editarea', function( e ) { //inputineditarea
 			UI.currentSegment.addClass('modified').removeClass('waiting_for_check_result');
-                        UI.currentSegment.data('modified', true);
-                        UI.currentSegment.trigger('modified:true');
+			UI.currentSegment.data('modified', true);
+			UI.currentSegment.trigger('modified');
 
 			if (UI.droppingInEditarea) {
 				UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
@@ -1251,6 +1254,12 @@ $.extend(UI, {
             e.preventDefault();
             UI.setExtendedTagMode();
         });
+
+		$("#outer").on('click', '.tab.alternatives .graysmall .goto a', function(e) {
+			e.preventDefault();
+			UI.scrollSegment($('#segment-' + $(this).attr('data-goto')), true);
+			UI.highlightEditarea($('#segment-' + $(this).attr('data-goto')));
+		});
 		UI.toSegment = true;
 
         if(!$('#segment-' + this.startSegmentId).length) {
@@ -1258,7 +1267,7 @@ $.extend(UI, {
                 if ( typeof this.startSegmentId != 'undefined' ) {
                     this.startSegmentId = this.startSegmentId + '-1';
                 }
-            };
+            }
         }
 
 		if (!this.segmentToScrollAtRender)
@@ -1285,61 +1294,9 @@ $.extend(UI, {
 			UI.setNextWarnedSegment();
 		});
 
-		$("#navSwitcher").on('click', function(e) {
-			e.preventDefault();
-		});
 		$("#pname").on('click', function(e) {
 			e.preventDefault();
 			UI.toggleFileMenu();
-		});
-		$("#jobNav .jobstart").on('click', function(e) {
-			e.preventDefault();
-			UI.scrollSegment($('#segment-' + config.firstSegmentOfFiles[0].first_segment));
-		});
-		$("#jobMenu").on('click', 'li:not(.currSegment)', function(e) {
-			e.preventDefault();
-			UI.renderAndScrollToSegment($(this).attr('data-segment'));
-		});
-		$("#jobMenu").on('click', 'li.currSegment', function(e) {
-			e.preventDefault();
-			UI.pointToOpenSegment();
-		});
-		$("#jobNav .prevfile").on('click', function(e) {
-			e.preventDefault();
-			currArtId = $(UI.currentFile).attr('id').split('-')[1];
-			$.each(config.firstSegmentOfFiles, function() {
-				if (currArtId == this.id_file)
-					firstSegmentOfCurrentFile = this.first_segment;
-			});
-			UI.scrollSegment($('#segment-' + firstSegmentOfCurrentFile));
-		});
-		$("#jobNav .currseg").on('click', function(e) {
-			e.preventDefault();
-
-			if (!($('#segment-' + UI.currentSegmentId).length)) {
-				$('#outer').empty();
-				UI.render({
-					firstLoad: false
-				});
-			} else {
-				UI.scrollSegment(UI.currentSegment);
-			}
-		});
-		$("#jobNav .nextfile").on('click', function(e) {
-			e.preventDefault();
-			if (UI.tempViewPoint === '') { // the user have not used yet the Job Nav
-				// go to current file first segment
-				currFileFirstSegmentId = $(UI.currentFile).attr('id').split('-')[1];
-				$.each(config.firstSegmentOfFiles, function() {
-					if (this.id_file == currFileFirstSegmentId)
-						firstSegId = this.first_segment;
-				});
-				UI.scrollSegment($('#segment-' + firstSegId));
-				UI.tempViewPoint = $(UI.currentFile).attr('id').split('-')[1];
-			}
-			$.each(config.firstSegmentOfFiles, function() {
-				console.log(this.id_file);
-			});
 		});
 
 		// Search and replace
@@ -1423,7 +1380,7 @@ $.extend(UI, {
 
         });
 		$("#enable-replace").on('change', function() {
-			if ($('#enable-replace').is(':checked')) {
+			if ($('#enable-replace').is(':checked') && $('#search-target').val() != "") {
 				$('#exec-replace, #exec-replaceall').removeAttr('disabled');
 			} else {
 				$('#exec-replace, #exec-replaceall').attr('disabled', 'disabled');
@@ -1432,6 +1389,7 @@ $.extend(UI, {
 		$("#search-source, #search-target").on('input', function() {
 			if (UI.checkSearchChanges()) {
 				UI.setFindFunction('find');
+				$("#enable-replace").change();
 			}
 		});
         $('#replace-target').on('focus', function() {

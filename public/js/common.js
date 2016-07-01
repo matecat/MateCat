@@ -72,14 +72,13 @@ APP = {
             options.callback = false;
             options.msg = options;
         }
-        ;
         var callback = (typeof options == 'string') ? false : options.callback;
         var content = (typeof options == 'string') ? options : options.msg;
         this.popup( {
             type: 'alert',
             onConfirm: callback,
             closeClickingOutside: true,
-            title: 'Warning',
+            title: (options.title || 'Warning'),
             content: content
         } );
     },

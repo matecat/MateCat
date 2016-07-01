@@ -573,14 +573,16 @@ function getFirstSegmentOfFilesInJob( $jid ) {
 function getWarning( $jid, $jpassword ) {
     $db  = Database::obtain();
     $jid = $db->escape( $jid );
+    $status_new = Constants_TranslationStatus::STATUS_NEW ;
 
     $query = "SELECT id_segment, serialized_errors_list
 		FROM segment_translations
 		JOIN jobs ON jobs.id = id_job AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
 		WHERE jobs.id = $jid
 		AND jobs.password = '$jpassword'
-		-- following is a condition on bitbask to filter by severity ERROR 
-		AND warning&1 = 1 ";
+		AND segment_translations.status != '$status_new' 
+		-- following is a condition on bitmask to filter by severity ERROR
+		AND warning & 1 = 1 ";
 
     $results = $db->fetch_array( $query );
 
@@ -1589,7 +1591,8 @@ function getEditLog( $jid, $pass ) {
 		j.source AS source_lang,
 		j.target AS target_lang,
 		s.raw_word_count rwc,
-		p.name as pname
+		p.name as pname,
+		p.id as id_project
 			FROM
 			jobs j 
 			INNER JOIN segment_translations st ON j.id=st.id_job 

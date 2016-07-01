@@ -117,7 +117,7 @@
     var animateScroll = function( segment, speed ) {
         var scrollAnimation = $( scrollSelector ).stop().delay( 300 ); 
         var pos ;
-        var prev = segment.prev('segment') ;
+        var prev = segment.prev('section') ;
 
         // XXX: this condition is necessary **only** because in case of first segment of a file,
         // the previous element (<ul>) has display:none style. Such elements are ignored by the

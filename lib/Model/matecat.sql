@@ -1,6 +1,29 @@
 CREATE DATABASE matecat;
 USE matecat;
 
+CREATE TABLE `activity_log` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `id_project` int(10) unsigned DEFAULT NULL,
+  `id_job` int(10) unsigned DEFAULT NULL,
+  `action` int(10) unsigned NOT NULL,
+  `ip` varchar(45) NOT NULL,
+  `uid` int(10) unsigned DEFAULT NULL,
+  `event_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `memory_key` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`ID`,`event_date`),
+  KEY `ip_idx` (`ip`) USING BTREE,
+  KEY `id_job_idx` (`id_job`) USING BTREE,
+  KEY `id_project_idx` (`id_project`) USING BTREE,
+  KEY `uid_idx` (`uid`) USING BTREE,
+  KEY `event_date_idx` (`event_date`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
+/*!50100 PARTITION BY RANGE ( YEAR(event_date))
+(PARTITION p2016 VALUES LESS THAN (2017) ENGINE = InnoDB,
+ PARTITION p2017 VALUES LESS THAN (2018) ENGINE = InnoDB,
+ PARTITION p2018 VALUES LESS THAN (2019) ENGINE = InnoDB,
+ PARTITION p2019 VALUES LESS THAN (2020) ENGINE = InnoDB,
+ PARTITION p9999 VALUES LESS THAN MAXVALUE ENGINE = InnoDB) */; 
+
 CREATE TABLE `api_keys` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `uid` bigint(20) NOT NULL,
@@ -11,7 +34,7 @@ CREATE TABLE `api_keys` (
   `enabled` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `api_key` (`api_key`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `chunk_completion_events` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -344,7 +367,7 @@ CREATE TABLE `qa_entries` (
   `rebutted_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `job_and_segment` (`id_job`,`id_segment`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `qa_entry_comments` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -356,7 +379,7 @@ CREATE TABLE `qa_entry_comments` (
   PRIMARY KEY (`id`),
   KEY `id_qa_entry` (`id_qa_entry`),
   KEY `create_date` (`create_date`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `qa_models` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -377,7 +400,7 @@ CREATE TABLE `remote_files` (
   PRIMARY KEY (`id`),
   KEY `id_file` (`id_file`) USING BTREE,
   KEY `id_job` (`id_job`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=MyISAM DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `segment_notes` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -593,6 +616,7 @@ INSERT INTO `phinxlog` ( version ) VALUES ( '20160408162842' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20160519093951' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20160524122147' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20160608130816' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20160613103347' );
 
 CREATE SCHEMA `matecat_conversions_log` DEFAULT CHARACTER SET utf8 ;
 USE matecat_conversions_log ;

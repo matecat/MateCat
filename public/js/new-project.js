@@ -1,60 +1,9 @@
 $(document).ready(function() {
 
-	$('#create_private_tm_btn').click(function() {
-
-		//prevent double click
-		if ( $( this ).hasClass( 'disabled' ) ) return false;
-
-		//show spinner
-		//$('#get-new-tm-spinner').show();
-		//disable button
-		$(this).addClass('disabled');
-		$(this).attr('disabled','');
-		if(typeof $(this).attr('data-key') == 'undefined') {
-
-            //call API
-            APP.doRequest( {
-                data: {
-                    action: 'createRandUser'
-                },
-                success: function ( d ) {
-                    $( '#private-tm-key' ).val( d.data.key );
-                    $( '#private-tm-user' ).val( d.data.id );
-                    $( '#private-tm-pass' ).val( d.data.pass );
-                    $( '#create_private_tm_btn' ).attr( 'data-key', d.data.key );
-
-					$( 'tr.template-download.fade.ready ').each( function( key, fileUploadedRow ){
-
-						var _fileName = $( fileUploadedRow ).find( '.name' ).text();
-						if ( _fileName.split('.').pop().toLowerCase() == 'tmx' ) {
-
-							UI.appendNewTmKeyToPanel( {
-								r: 1,
-								w: 1,
-								desc: _fileName,
-								TMKey: d.data.key
-							} );
-
-							return true;
-						}
-
-					});
-
-                    return false;
-                }
-            } );
-
-		} else {
-			$('#private-tm-key').val($(this).attr('data-key'));
-		}
-
-	});
-
-	$(".more").click(function(e){
+	$( "a.more-options" ).on("click", function ( e ) {
 		e.preventDefault();
-		$(".advanced-box").toggle('fast');
-		$(".more").toggleClass('minus');
-	});
+		APP.openOptionsPanel("opt")
+	} );
 
 	$("#source-lang").on('change', function(e){
             console.log('source language changed');
@@ -249,9 +198,6 @@ $(document).ready(function() {
 								}).css({height: '50px'}).fadeIn(1000);
 
 								$('.translate-box input, .translate-box select').attr({disabled:'disabled'});
-								$(".more, #multiple-link").unbind('click').on('click',function(e){
-									e.preventDefault();
-								}).addClass('disabledLink');
 								$('td.delete').empty();
 								$('#info-login').fadeIn(1000);
 								$('#project-' + d.id_project).fadeIn(1000);
@@ -302,6 +248,53 @@ $(document).ready(function() {
 		APP.checkForLexiQALangs();
 		APP.checkForTagProjectionLangs();
 	});
+
+	APP.openOptionsPanel = function (tab, elem) {
+		elToClick = $(elem).attr('data-el-to-click') || null;
+		UI.openLanguageResourcesPanel(tab, elToClick);
+	};
+
+	APP.createTMKey = function () {
+
+		if($(".mgmt-tm .new .privatekey .btn-ok").hasClass('disabled')) {
+			return false;
+		}
+
+
+		//call API
+		APP.doRequest( {
+			data: {
+				action: 'createRandUser'
+			},
+			success: function ( d ) {
+				/*$( '#private-tm-key' ).val( d.data.key );
+				$( '#private-tm-user' ).val( d.data.id );
+				$( '#private-tm-pass' ).val( d.data.pass );
+				$( '#create_private_tm_btn' ).attr( 'data-key', d.data.key );*/
+
+				$( 'tr.template-download.fade.ready ').each( function( key, fileUploadedRow ){
+
+					var _fileName = $( fileUploadedRow ).find( '.name' ).text();
+					if ( _fileName.split('.').pop().toLowerCase() == 'tmx' || _fileName.split('.').pop().toLowerCase() == 'g' ) {
+
+						UI.appendNewTmKeyToPanel( {
+							r: 1,
+							w: 1,
+							desc: _fileName,
+							TMKey: d.data.key
+						} );
+
+						return true;
+					}
+
+				});
+
+				return false;
+			}
+		} );
+
+
+	};
 
     function closeMLPanel() {
         $( ".popup-languages.slide").removeClass('open').hide("slide", { direction: "right" }, 400);
@@ -355,7 +348,7 @@ $(document).ready(function() {
 	$("#disable_tms_engine").change(function(e){
 		if(this.checked){
 			$("input[id^='private-tm-']").prop("disabled", true);
-			$("#create_private_tm_btn").addClass("disabled", true);
+			// $("#create_private_tm_btn").addClass("disabled", true);
 		} else {
 			if(!$('#create_private_tm_btn[data-key]').length) {
 				$("input[id^='private-tm-']").prop("disabled", false);
@@ -364,7 +357,7 @@ $(document).ready(function() {
 		}
 	});
 
-	$("#private-tm-key").on('keyup', function(e) {
+	/*$("#private-tm-key").on('keyup', function(e) {
 		if($(this).val() == '') {
 			$('#create_private_tm_btn').removeClass('disabled');
 			$('#create_private_tm_btn').removeAttr('disabled');
@@ -372,7 +365,7 @@ $(document).ready(function() {
 			$('#create_private_tm_btn').addClass('disabled');
 			$('#create_private_tm_btn').attr('disabled','disabled');
 		};
-	});
+	});*/
 
 	$("input, select").change(function(e) {
 		$('.error-message').hide();
@@ -408,13 +401,47 @@ APP.displayCurrentTargetLang = function() {
 };
 
 
+function showModalNotSupportedLanguages(notAcceptedLanguages, acceptedLanguages) {
+	APP.alert({
+		title: 'Option not available',
+		okTxt: 'Continue',
+		msg: "Not available for " + notAcceptedLanguages.join(", ") +
+		".</br> Only available for " + acceptedLanguages.join(", ") +"."
+	});
+}
+
+function createSupportedLanguagesArrays(acceptedLanguages, targetLanguages, sourceAccepted) {
+	var notAcceptedLanguagesNames = [], acceptedLanguagesNames = [];
+	var notAcceptedLanguagesCodes = [], acceptedLanguagesCodes = [];
+	var notAcceptedLanguages = targetLanguages.filter(function(n) {
+		return acceptedLanguages.indexOf(n) === -1;
+	});
+	if (!sourceAccepted) {
+		notAcceptedLanguages.push($( '#source-lang' ).val());
+	}
+
+	notAcceptedLanguages.forEach(function (value, index, array) {
+		notAcceptedLanguagesNames.push($( '#target-lang option[value='+value+']' ).first().text());
+		notAcceptedLanguagesCodes.push(value.split("-")[1]);
+	});
+	acceptedLanguages.forEach(function (value, index, array) {
+		acceptedLanguagesNames.push($( '#target-lang option[value='+value+']' ).first().text());
+		acceptedLanguagesCodes.push(value.split("-")[1]);
+	});
+	return {
+		accepted: acceptedLanguagesNames,
+		acceptedCodes: acceptedLanguagesCodes,
+		notAccepted: notAcceptedLanguagesNames,
+		notAcceptedCodes: notAcceptedLanguagesCodes
+	};
+}
 /**
  * Disable/Enable languages for LexiQA
  *
  */
 APP.checkForLexiQALangs = function(){
 
-	var acceptedLanguages = config.lexiqa_languages;
+	var acceptedLanguages = config.lexiqa_languages.slice();
 	var LXQCheck = $('.options-box.qa-box');
 
 	var targetLanguages = $( '#target-lang' ).val().split(',');
@@ -426,18 +453,16 @@ APP.checkForLexiQALangs = function(){
     //disable LexiQA
 	var disableLexiQA = !(sourceAccepted && targetAccepted && config.defaults.lexiqa);
 	if (!(sourceAccepted && targetAccepted)) {
-		LXQCheck.find('.onoffswitch').on('click', function () {
-			LXQCheck.find('.option-qa-box-languages').addClass('pulse');
-			setTimeout(function () {
-				LXQCheck.find('.option-qa-box-languages').removeClass('pulse');
-			}, 1200)
+		var arrays = createSupportedLanguagesArrays(acceptedLanguages, targetLanguages, sourceAccepted);
+		LXQCheck.find('.option-supported-languages').html(arrays.acceptedCodes.join(', '));
+		LXQCheck.find('.option-notsupported-languages').html(arrays.notAcceptedCodes.join(', '));
+		LXQCheck.find('.onoffswitch').off("click").on('click', function () {
+			showModalNotSupportedLanguages(arrays.notAccepted, arrays.accepted);
 		});
 		LXQCheck.addClass('option-unavailable');
+		$('.options-box #lexi_qa').prop( "disabled", disableLexiQA );
 	}
-    $('.options-box #lexi_qa').prop( "disabled", disableLexiQA );
     $('.options-box #lexi_qa').attr('checked', !disableLexiQA);
-    // $('.options-box.qa-box').css({opacity: ( disableLexiQA ? 0.6 : 1 )  });
-
 };
 
 /**
@@ -446,7 +471,7 @@ APP.checkForLexiQALangs = function(){
  */
 APP.checkForTagProjectionLangs = function(){
 
-	var acceptedLanguages = config.tag_projection_languages;
+	var acceptedLanguages = config.tag_projection_languages.slice();
 	var tpCheck = $('.options-box.tagp');
 	var targetLanguages = $( '#target-lang' ).val().split(',');
 	var sourceAccepted = (acceptedLanguages.indexOf($( '#source-lang' ).val() ) > -1);
@@ -458,18 +483,18 @@ APP.checkForTagProjectionLangs = function(){
 	//disable Tag Projection
 	var disableTP = !(sourceAccepted && targetAccepted && config.defaults.tag_projection);
 	if (!(sourceAccepted && targetAccepted)) {
-		tpCheck.find('.onoffswitch').on('click', function () {
-			tpCheck.find('.option-tagp-languages').addClass('pulse');
-			setTimeout(function () {
-				tpCheck.find('.option-tagp-languages').removeClass('pulse');
-			}, 1200)
+		var arrays = createSupportedLanguagesArrays(acceptedLanguages, targetLanguages, sourceAccepted);
+		tpCheck.find('.option-supported-languages').html(arrays.acceptedCodes.join(', '));
+		tpCheck.find('.option-notsupported-languages').html(arrays.notAcceptedCodes.join(', '));
+		tpCheck.find('.onoffswitch').off('click').on('click', function () {
+			showModalNotSupportedLanguages(arrays.notAccepted, arrays.accepted);
 		});
 		tpCheck.addClass('option-unavailable');
+		$('.options-box #tagp_check').prop( "disabled", disableTP );
 	}
-	$('.options-box #tagp_check').prop( "disabled", disableTP );
 	$('.options-box #tagp_check').attr('checked', !disableTP);
-	// $('.options-box.tagp').css({opacity: ( disableTP ? 0.6 : 1 )  });
 };
+
 /**
  * Disable/Enable SpeechToText
  *
@@ -482,17 +507,16 @@ APP.checkForSpeechToText = function(){
 	speech2textCheck.removeClass('option-unavailable');
 	if (!('webkitSpeechRecognition' in window)) {
 		disableS2T = true;
+		$('.options-box #s2t_check').prop( "disabled", disableS2T );
 		speech2textCheck.find('.option-s2t-box-chrome-label').css('display', 'inline');
 		speech2textCheck.find('.onoffswitch').on('click', function () {
-			speech2textCheck.find('.option-s2t-box-chrome-label').addClass('pulse');
-			setTimeout(function () {
-				speech2textCheck.find('.option-s2t-box-chrome-label').removeClass('pulse');
-			}, 1200)
+			APP.alert({
+				title: 'Option not available',
+				okTxt: 'Continue',
+				msg: "This options is only available on Chrome browser."
+			});
 		});
 		speech2textCheck.addClass('option-unavailable');
 	}
-	// var disableS2T = ('webkitSpeechRecognition' in window && !config.defaults.speech2text);
-	$('.options-box #s2t_check').prop( "disabled", disableS2T );
 	$('.options-box #s2t_check').attr('checked', !disableS2T);
-	// $('.options-box.s2t-box').css({opacity: ( disableS2T ? 0.6 : 1 )  });
 };
