@@ -82,11 +82,12 @@ Speech2Text.init  = function () {
                     Speech2Text.isToEmptyTargetElement = Speech2Text
                         .shouldEmptyTargetElement(segmentRecord);
 
-                    Speech2Text.microphone.click(Speech2Text.clickMicrophone);
+                    Speech2Text.microphone.on('click', Speech2Text.clickMicrophone );
 
                     if (Speech2Text.recognizing) {
                         Speech2Text.startSpeechRecognition(Speech2Text.microphone);
                     }
+
                 } else {
                     Speech2Text.microphone.hide();
 
@@ -217,7 +218,9 @@ Speech2Text.init  = function () {
                     || segment.status === "REJECTED"
                     || segment.status === "APPROVED"
                     || segment.status === "FIXED"
-                    || segment.status === "REBUTTED") {
+                    || segment.status === "REBUTTED"
+                    || segment.status === "DRAFT"
+                ) {
                     return false;
                 }
 
