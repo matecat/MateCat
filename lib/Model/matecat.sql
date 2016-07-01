@@ -8,7 +8,7 @@ CREATE TABLE `activity_log` (
   `action` int(10) unsigned NOT NULL,
   `ip` varchar(45) NOT NULL,
   `uid` int(10) unsigned DEFAULT NULL,
-  `event_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `event_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `memory_key` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`ID`,`event_date`),
   KEY `ip_idx` (`ip`) USING BTREE,
@@ -16,13 +16,7 @@ CREATE TABLE `activity_log` (
   KEY `id_project_idx` (`id_project`) USING BTREE,
   KEY `uid_idx` (`uid`) USING BTREE,
   KEY `event_date_idx` (`event_date`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8
-/*!50100 PARTITION BY RANGE ( YEAR(event_date))
-(PARTITION p2016 VALUES LESS THAN (2017) ENGINE = InnoDB,
- PARTITION p2017 VALUES LESS THAN (2018) ENGINE = InnoDB,
- PARTITION p2018 VALUES LESS THAN (2019) ENGINE = InnoDB,
- PARTITION p2019 VALUES LESS THAN (2020) ENGINE = InnoDB,
- PARTITION p9999 VALUES LESS THAN MAXVALUE ENGINE = InnoDB) */; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `api_keys` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -367,7 +361,7 @@ CREATE TABLE `qa_entries` (
   `rebutted_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `job_and_segment` (`id_job`,`id_segment`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `qa_entry_comments` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -379,7 +373,7 @@ CREATE TABLE `qa_entry_comments` (
   PRIMARY KEY (`id`),
   KEY `id_qa_entry` (`id_qa_entry`),
   KEY `create_date` (`create_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `qa_models` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
