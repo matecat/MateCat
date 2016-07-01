@@ -74,9 +74,9 @@ $(document).ready(function() {
 				lang_detect_files  			: UI.skipLangDetectArr,
                 pretranslate_100    		: ($("#pretranslate100" ).is(':checked')) ? 1 : 0,
                 dqf_key             		: ($('#dqf_key' ).length == 1) ? $('#dqf_key' ).val() : null,
-				lexiqa				        : ( $("#lexi_qa").prop("checked") && !$("#lexi_qa").prop("disabled") ),
-				speech2text         		: ( $("#s2t_check").prop("checked") && !$("#s2t_check").prop("disabled") ),
-				tag_projection			    : ( $("#tagp_check").prop("checked") && !$("#tagp_check").prop("disabled") )
+				lexiqa				        : !!( $("#lexi_qa").prop("checked") && !$("#lexi_qa").prop("disabled") ),
+				speech2text         		: !!( $("#s2t_check").prop("checked") && !$("#s2t_check").prop("disabled") ),
+				tag_projection			    : !!( $("#tagp_check").prop("checked") && !$("#tagp_check").prop("disabled") )
 			},
 			beforeSend: function (){
 				$('.error-message').hide();
