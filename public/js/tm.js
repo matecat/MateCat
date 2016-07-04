@@ -226,6 +226,7 @@ $.extend(UI, {
         }).on('click', '.mgmt-mt td.engine-name .edit-desc', function() {
 
             $('.mgmt-mt .edit-desc[contenteditable=true]').blur();
+            if (APP.isCattool) return;
             $(this).attr('contenteditable', true);
 
         }).on('blur', '.mgmt-mt td.engine-name .edit-desc', function() {

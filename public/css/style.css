@@ -3857,17 +3857,23 @@ box-shadow: inset 0 0 1px 1px #888;
     text-decoration: none;
 }
 
-body.cattool table.mgmt-mt th.enable-mt {
+body.cattool table.mgmt-mt th.action {
     display: none;
 }
-body.cattool table.mgmt-mt tbody .enable-mt {
+body.cattool table.mgmt-mt tbody .action {
     display: none;
 }
 body.isAnonymous .add-mt-engine {
     display: none;
 }
-body.cattool .nav-tabs li.mgmt-mt {
+body.cattool .mgmt-table-mt .add-mt-engine {
     display: none;
+}
+body.cattool .mgmt-table-mt tbody tr {
+    opacity: 0.6;
+}
+body.cattool .mgmt-table-mt .activemt {
+    opacity: 1 !important;
 }
 
 .splitArea {
