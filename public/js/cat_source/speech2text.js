@@ -95,7 +95,7 @@ Speech2Text.init  = function () {
                 Speech2Text.stopSpeechRecognition(microphone);
             },
             clickMicrophone: function (event) {
-                var microphone = $(this);
+                var microphone = $(event.target);
                 var segmentObj = new UI.Segment( microphone.closest('section') );
                 var segmentRecord = MateCat.db.segments.by('sid', segmentObj.absId );
 
@@ -124,7 +124,7 @@ Speech2Text.init  = function () {
                     Speech2Text.targetElement.html('');
                 } else {
 
-                    Speech2Text.finalTranscript = Speech2Text.targetElement.text() + ' ';
+                    Speech2Text.finalTranscript = Speech2Text.targetElement.html() + ' ';
                 }
 
                 Speech2Text.interimTranscript = '';
@@ -133,7 +133,7 @@ Speech2Text.init  = function () {
                     Speech2Text.recognition.start();
                     Speech2Text.showMatches();
                     Speech2Text.targetElement.on('blur keyup paste input', function (event) {
-                        Speech2Text.finalTranscript = $(this).text().trim() + ' ';
+                        Speech2Text.finalTranscript = $(this).html().trim() + ' ';
                     });
                 }
             },
@@ -257,7 +257,7 @@ Speech2Text.init  = function () {
 
         $(document).on('contribution:copied', function( ev, data) {
             if ( Speech2Text.microphone.closest('section').attr('id') == data.segment.attr('id') ) {
-                Speech2Text.finalTranscript = data.translation ;
+                Speech2Text.finalTranscript = data.translation + ' ';
             }
         });
 
