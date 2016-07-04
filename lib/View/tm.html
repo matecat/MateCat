@@ -324,7 +324,7 @@
                                                         <div class="edit-desc">${engine/description}</div>
                                                     </td>
                                                     <td class="enable-mt text-center">
-                                                        <input type="checkbox" checked="checked" />
+                                                        <input type="checkbox" checked="checked" disabled="true" />
                                                     </td>
                                                     <td class="action">
                                                         <a tal:condition="php: engine.id != 1 && jobOwnerIsMe" class="deleteMT btn pull-left"><span class="text">Delete</span></a>
@@ -341,7 +341,7 @@
                                                         <div class="edit-desc">${engine/description}</div>
                                                     </td>
                                                     <td class="enable-mt text-center">
-                                                        <input type="checkbox"/>
+                                                        <input type="checkbox" disabled="true"/>
                                                     </td>
                                                     <td class="action">
                                                         <a tal:condition="php: engine.id != 1" class="deleteMT btn pull-left"><span class="text">Delete</span></a>

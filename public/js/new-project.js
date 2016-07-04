@@ -66,7 +66,7 @@ $(document).ready(function() {
 				target_language				: $('#target-lang').val(),
                 job_subject         		: $('#subject').val(),
                 disable_tms_engine			: ( $('#disable_tms_engine').prop('checked') ) ? $('#disable_tms_engine').val() : false,
-				mt_engine					: ($('.enable-mt input').prop("checked")) ? 1 : 0,
+				mt_engine					: $('.mgmt-mt .activemt').data("id"),
                 private_tm_key				: $('#private-tm-key').val(),
                 private_keys_list			: tm_data,
 				private_tm_user				: ( !$('#private-tm-user').prop('disabled') ? $('#private-tm-user').val() : "" ),
