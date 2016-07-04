@@ -119,32 +119,6 @@ $.extend(UI, {
             }
         });
 
-        $(".mgmt-tm .new .privatekey .btn-ok").click(function(e) {
-            e.preventDefault();
-            //prevent double click
-
-            if($(this).hasClass('disabled')) return false;
-            $(this).addClass('disabled');
-            $('#new-tm-key').attr('disabled','disabled');
-
-            //call API
-            APP.doRequest( {
-                data: {
-                    action: 'createRandUser'
-                },
-                success: function ( d ) {
-                    data = d.data;
-                    //put value into input field
-                    $('#new-tm-key').val(data.key);
-                    $('#activetm tr.new').removeClass('badkey');
-                    $('#activetm tr.new .error .tm-error-key').text('').hide();
-                    UI.checkTMAddAvailability();
-                    return false;
-                }
-            } );
-
-        });
-
         // script per fare apparire e scomparire la riga con l'upload della tmx
         $('body').on('click', 'tr.mine a.canceladdtmx, tr.ownergroup a.canceladdtmx, #inactivetm tr.new .action .addtmxfile', function() {
 
@@ -354,7 +328,7 @@ $.extend(UI, {
         });
         $(".mgmt-table-tm .add-tm").click(function() {
             $(this).hide();
-            $(".mgmt-table-tm tr.new").removeClass('hide').show();
+            UI.openAddNewTm();
         });
         $(".mgmt-tm tr.new .canceladdtmx").click(function() {
             $("#activetm tr.new").hide();
@@ -679,13 +653,11 @@ $.extend(UI, {
     clearTMUploadPanel: function () {
         $('#new-tm-key, #new-tm-description').val('');
         $('#new-tm-key').removeAttr('disabled');
-        $('.mgmt-tm tr.new .privatekey .btn-ok').removeClass('disabled');
         $('#new-tm-read, #new-tm-write').prop('checked', true);
     },
     clearAddTMRow: function() {
         $('#new-tm-description').val('');
         $('#new-tm-key').removeAttr('disabled');
-        $('.mgmt-tm tr.new .privatekey .btn-ok').removeClass('disabled');
         $('#activetm .fileupload').val('');
         $('.mgmt-tm tr.new').removeClass('badkey badgrants');
         $('.mgmt-tm tr.new .message').text('');
@@ -1400,5 +1372,25 @@ $.extend(UI, {
         if (typeof renderMTConfigCallback == 'function') {
             renderMTConfigCallback();
         }
+    },
+
+    openAddNewTm: function () {
+        $(".mgmt-table-tm tr.new").removeClass('hide').show();
+        // $('#new-tm-key').attr('disabled','disabled');
+        //call API
+        APP.doRequest( {
+            data: {
+                action: 'createRandUser'
+            },
+            success: function ( d ) {
+                data = d.data;
+                //put value into input field
+                $('#new-tm-key').val(data.key);
+                $('#activetm tr.new').removeClass('badkey');
+                $('#activetm tr.new .error .tm-error-key').text('').hide();
+                UI.checkTMAddAvailability();
+                return false;
+            }
+        } );
     }
 });
