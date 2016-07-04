@@ -12,7 +12,6 @@ class newProjectController extends viewController {
     private $subjectArray = array();
 
     private $project_name='';
-    private $private_tm_key='';
 
     /**
      * @var string The actual URL
@@ -29,13 +28,11 @@ class newProjectController extends viewController {
         parent::makeTemplate( "upload.html" );
 
         $filterArgs = array(
-                'project_name'      => array( 'filter' => FILTER_SANITIZE_STRING ),
-                'private_tm_key' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+                'project_name'      => array( 'filter' => FILTER_SANITIZE_STRING )
         );
 
         $__postInput = filter_input_array( INPUT_GET, $filterArgs );
         $this->project_name      = $__postInput[ "project_name" ];
-        $this->private_tm_key = $__postInput[ "private_tm_key" ];
 
         $this->guid = Utils::create_guid();
 
@@ -289,7 +286,6 @@ class newProjectController extends viewController {
         $this->template->languages_array = json_encode(  $this->lang_handler->getEnabledLanguages( 'en' ) ) ;
 
         $this->template->project_name=$this->project_name;
-        $this->template->private_tm_key=$this->private_tm_key;
 
         $this->template->page = 'home';
         $this->template->source_languages = $source_languages;
