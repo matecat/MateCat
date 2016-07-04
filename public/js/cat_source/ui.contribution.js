@@ -39,15 +39,26 @@ $.extend(UI, {
 
 			if(!which) translation = UI.encodeSpacesAsPlaceholders(translation, true);
 
-			$(editarea).html(translation).addClass('fromSuggestion');
+            // XXX we are modifing the APP state so that MateCat will know that the object is changed
+            // in particular this is needed for the Speech2Text to know that the newly added text is coming
+            // from a 100% match.
+            var segmentObj = MateCat.db.segments.by('sid', UI.getSegmentId( segment ) );
+            segmentObj.suggestion_match = match.replace('%', '');
+            MateCat.db.segments.update( segmentObj );
+
+			$(editarea).html( translation );
+            $(document).trigger('contribution:copied', { translation: translation, segment: segment });
+
+            $(editarea).addClass('fromSuggestion');
+
 			this.saveInUndoStack('copysuggestion');
 			$('.percentuage', segment).text(match).removeClass('per-orange per-green per-blue per-yellow').addClass(percentageClass).addClass('visible');
             $('.repetition', segment).hide();
 			if (which) {
 				this.currentSegment.addClass('modified');
-                                this.currentSegment.data('modified', true);
-                                this.currentSegment.trigger('modified');
-                        }
+                this.currentSegment.data('modified', true);
+                this.currentSegment.trigger('modified');
+            }
 		}
 
 		// a value of 0 for 'which' means the choice has been made by the
@@ -188,8 +199,9 @@ $.extend(UI, {
       $('.sub-editor.matches .overflow', segment).empty();
 
       $.each(d.data.matches, function(index) {
-        if ((this.segment === '') || (this.translation === ''))
-          return;
+
+        if ((this.segment === '') || (this.translation === '')) return;
+
         var disabled = (this.id == '0') ? true : false;
         cb = this.created_by;
 
@@ -203,23 +215,22 @@ $.extend(UI, {
                 typeof this.sentence_confidence != 'undefined'
                 )
             ) {
-                    suggestion_info = "Quality: <b>" + this.sentence_confidence + "</b>";
-                } else if (this.match != 'MT') {
+                suggestion_info = "Quality: <b>" + this.sentence_confidence + "</b>";
+            } else if (this.match != 'MT') {
           suggestion_info = this.last_update_date;
         } else {
           suggestion_info = '';
         }
-//                console.log('typeof fieldTest: ', typeof d.data.fieldTest);
-                if (typeof d.data.fieldTest == 'undefined') {
-                    percentClass = UI.getPercentuageClass(this.match);
-                    percentText = this.match;
-                } else {
-                    quality = parseInt(this.quality);
-//                    console.log('quality: ', quality);
-                    percentClass = (quality > 98)? 'per-green' : (quality == 98)? 'per-red' : 'per-gray';
-                    percentText = 'MT';
-                }
-//				cl_suggestion = UI.getPercentuageClass(this.match);
+
+
+        if (typeof d.data.fieldTest == 'undefined') {
+            percentClass = UI.getPercentuageClass(this.match);
+            percentText = this.match;
+        } else {
+            quality = parseInt(this.quality);
+            percentClass = (quality > 98)? 'per-green' : (quality == 98)? 'per-red' : 'per-gray';
+            percentText = 'MT';
+        }
 
 				if (!$('.sub-editor.matches', segment).length) {
 					UI.createFooter(segment);
@@ -279,10 +290,20 @@ $.extend(UI, {
                         UI.disableTPOnSegment(segment);
                     }
                 }
-				UI.copySuggestionInEditarea(segment, translation, editarea, match, false, true, 1);
 
-				if (UI.body.hasClass('searchActive'))
+                var copySuggestion = function() {
+                    UI.copySuggestionInEditarea(segment, translation, editarea, match, false, true, 1);
+                }
+
+                if ( Speech2Text.enabled() && Speech2Text.isContributionToBeAllowed( match ) ) {
+				    copySuggestion();
+                } else if ( !Speech2Text.enabled() ) {
+                    copySuggestion();
+                }
+
+				if (UI.body.hasClass('searchActive')) {
 					UI.addWarningToSearchDisplay();
+                }
 
 			}
 
@@ -476,54 +497,5 @@ $.extend(UI, {
         });
     },
 
-    setContributionSourceDiff_Old: function (segment) {
-        sourceText = '';
-        $.each($.parseHTML($('.editor .source').html()), function (index) {
-            if(this.nodeName == '#text') {
-                sourceText += this.data;
-            } else {
-                sourceText += this.innerText;
-            }
-        });
-        console.log('sourceText: ', sourceText);
-        UI.currentSegment.find('.sub-editor.matches ul.suggestion-item').each(function () {
-            ss = $(this).find('.suggestion_source');
-
-            suggestionSourceText = '';
-            $.each($.parseHTML($(ss).html()), function (index) {
-                if(this.nodeName == '#text') {
-                    suggestionSourceText += this.data;
-                } else {
-                    suggestionSourceText += this.innerText;
-                }
-            });
-            console.log('suggestionSourceText: ', suggestionSourceText);
-            console.log('diff: ', UI.execDiff(sourceText, suggestionSourceText));
-
-//            console.log('a: ', $('.editor .source').html());
-//            console.log($.parseHTML($('.editor .source').html()));
-//            console.log('b: ', $(ss).html());
-//            console.log($(this).find('.graysmall-details .percent').text());
-
-            diff = UI.dmp.diff_main(sourceText, suggestionSourceText);
-            diffTxt = '';
-            $.each(diff, function (index) {
-                if(this[0] == -1) {
-                    diffTxt += '<del>' + this[1] + '</del>';
-                } else if(this[0] == 1) {
-                    diffTxt += '<ins>' + this[1] + '</ins>';
-                } else {
-                    diffTxt += this[1];
-                }
-            });
-            console.log('diffTxt: ', diffTxt);
-            $(ss).html(diffTxt);
-            UI.lockTags();
-
-
-        })
-
-
-    },
 
 });

@@ -179,7 +179,9 @@ UI = {
 	},
     autopropagateConfirmNeeded: function () {
         var segment = UI.currentSegment;
-        if(this.currentSegmentTranslation.trim() == this.editarea.text().trim()) { //segment not modified
+        // TODO: this is relying on a comparison between strings to determine if the segment
+        // was modified. There should be a more consistent way to read this state, see UI.setSegmentModified .
+        if (this.currentSegmentTranslation.trim() == this.editarea.text().trim()) { //segment not modified
             return false;
         }
 
@@ -2422,8 +2424,9 @@ UI = {
         } else {
             this.updateToSetTranslationTail( item )
         }
-        //If is offline and is in the tail I decrease the counter
-        //else I execute the tail
+
+        // If is offline and is in the tail I decrease the counter
+        // else I execute the tail
         if ( this.offline && config.offlineModeEnabled ) {
             if ( saveTranslation ) {
                 this.decrementOfflineCacheRemaining();
@@ -2564,13 +2567,43 @@ UI = {
                 }
                 UI.execSetTranslationTail();
 				UI.setTranslation_success(data, this[1]);
+
+                var record = MateCat.db.segments.by('sid', data.translation.sid);
+                MateCat.db.segments.update( _.extend(record, data.translation) );
+
                 $(document).trigger('translation:change', data.translation);
+
                 var translation = $('.editarea', segment ).text().replace(/\uFEFF/g,'');
                 UI.doLexiQA(segment,translation,id_segment,true,null);
                 $(document).trigger('setTranslation:success', data);
 			}
 		});
 	},
+    /**
+     * This function is an attempt to centralize all distributed logic used to mark
+     * the segment as modified. When a segment is modified we set the class and we set
+     * data. And we trigger an event.
+     *
+     * Preferred way would be to use MateCat.db.segments to save this data, and have the
+     * UI redraw after this change. This would help transition to component based architecture.
+     *
+     * @param el
+     */
+    setSegmentModified : function( el, isModified ) {
+        if ( typeof isModified == 'undefined' ) {
+            throw new Exception('isModified parameter is missing.');
+        }
+
+        if ( isModified ) {
+            el.addClass('modified');
+            el.data('modified', true);
+            el.trigger('modified');
+        } else {
+            el.removeClass('modified');
+            el.data('modified', false);
+            el.trigger('modified');
+        }
+    },
     collectSplittedStatuses: function (sid) {
         statuses = [];
         segmentsIds = $('#segment-' + sid).attr('data-split-group').split(',');
@@ -3683,9 +3716,8 @@ UI = {
         //??
         $('.test-invisible').remove();
 
-        UI.currentSegment.removeClass('modified');
-        UI.currentSegment.data('modified', false);
-        UI.currentSegment.trigger('modified');
+        UI.setSegmentModified( UI.currentSegment, false ) ;
+
         var skipChange = false;
         if (buttonValue == 'next-untranslated') {
             if (!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {
