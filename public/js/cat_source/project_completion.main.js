@@ -10,7 +10,7 @@ if ( ProjectCompletion.enabled() ) {
     var sentLabel = 'Marked as complete' ;
     var sendingLabel = 'Marking';
 
-    var button ;
+    var button, reviseNotification ;
 
     $(function() {
         button = $('#markAsCompleteButton');
@@ -149,6 +149,18 @@ if ( ProjectCompletion.enabled() ) {
         });
     };
 
+    var evalReviseNotice = function() {
+        if ( config.isReview && config.job_completion_current_phase == 'translate' ) {
+            warningNotification = APP.addNotification({
+                type: 'warning',
+                title: 'Warning',
+                text: 'Translator/post-editor did not mark this job as complete yet. Please wait for vendor phase to complete before making any change.',
+                dismissable : false,
+                autoDismiss : false
+            });
+        }
+    };
+
     $(document).on('click', '#markAsCompleteButton', function(ev) {
         ev.preventDefault();
         if ( !button.hasClass('isMarkableAsComplete') ) {
@@ -167,8 +179,8 @@ if ( ProjectCompletion.enabled() ) {
     });
 
     $(document).on('ready',  function() {
-        translateAndReadonly() &&
-        showWarningModalWindow();
+        translateAndReadonly() && showWarningModalWindow();
+        evalReviseNotice();
     });
 
 
