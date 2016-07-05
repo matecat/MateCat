@@ -35,12 +35,12 @@
                 classes.push('splitInner');
             }
 
-            var editarea_classes = ['targetarea', 'invisible'];
-            if ( readonly ) {
-                editarea_classes.push( 'area' );
-            } else {
-                editarea_classes.push( 'editarea' );
-            }
+            // var editarea_classes = ['targetarea', 'invisible'];
+            // if ( readonly ) {
+            //     editarea_classes.push( 'area' );
+            // } else {
+            //     editarea_classes.push( 'editarea' );
+            // }
 
             if ( segment.status ) {
                 status_change_title = UI.statusHandleTitleAttr( segment.status );
@@ -52,7 +52,7 @@
                 var segment_edit_min = segment.parsed_time_to_edit[1];
                 var segment_edit_sec = segment.parsed_time_to_edit[2];
             }
-            var decoded_translation;
+            // var decoded_translation;
             var decoded_source;
 
             /**if Tag Projection enabled and there are not tags in the segment translation, remove it and add the class that identify
@@ -60,19 +60,19 @@
              */
             if (UI.enableTagProjection && (UI.getSegmentStatus(segment) === 'draft' || UI.getSegmentStatus(segment) === 'new')
                 && !UI.checkXliffTagsInText(segment.translation) ) {
-                decoded_translation = UI.removeAllTags(segment.translation);
+                // decoded_translation = UI.removeAllTags(segment.translation);
                 decoded_source = UI.removeAllTags(segment.segment);
                 classes.push('enableTP');
                 dataAttrTagged = "nottagged";
             } else {
-                decoded_translation = segment.translation;
+                // decoded_translation = segment.translation;
                 decoded_source = segment.segment;
                 dataAttrTagged = "tagged";
             }
 
-            decoded_translation = UI.decodePlaceholdersToText(
-                decoded_translation || '',
-                true, segment.sid, 'translation');
+            // decoded_translation = UI.decodePlaceholdersToText(
+            //     decoded_translation || '',
+            //     true, segment.sid, 'translation');
 
             decoded_source = UI.decodePlaceholdersToText(
                 decoded_source || '',
@@ -94,11 +94,11 @@
                 start_job_marker        : segment.sid == config.first_job_segment,
                 end_job_marker          : segment.sid == config.last_job_segment ,
                 decoded_text            : decoded_source,
-                editarea_classes_string : editarea_classes.join(' '),
+                // editarea_classes_string : editarea_classes.join(' '),
                 lang                    : config.target_lang.toLowerCase(),
                 tagLockCustomizable     : ( segment.segment.match( /\&lt;.*?\&gt;/gi ) ? $('#tpl-taglock-customize').html() : null ),
                 tagModesEnabled         : UI.tagModesEnabled,
-                decoded_translation     : decoded_translation  ,
+                // decoded_translation     : decoded_translation  ,
                 status_change_title     : status_change_title ,
                 segment_edit_sec        : segment_edit_sec,
                 segment_edit_min        : segment_edit_min, 

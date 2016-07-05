@@ -2787,16 +2787,9 @@ UI = {
      * @param str
      * @returns {XML|string}
      */
-    decodePlaceholdersToText: function (str, jumpSpacesEncode) {
+    decodePlaceholdersToText: function (str) {
         if(!UI.hiddenTextEnabled) return str;
-		jumpSpacesEncode = jumpSpacesEncode || false;
 		var _str = str;
-        if(UI.markSpacesEnabled) {
-            if(jumpSpacesEncode) {
-                _str = this.encodeSpacesAsPlaceholders(htmlDecode(_str), true);
-            }
-        }
-
 		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker softReturn ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' )
 					.replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
 					.replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )

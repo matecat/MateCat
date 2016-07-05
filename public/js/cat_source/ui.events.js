@@ -166,23 +166,7 @@ $.extend(UI, {
             UI.handleReturn(e);
         }).on('keydown', '.editor .editarea', 'return', function(e) {
             UI.handleReturn(e);
-		}).on('keydown', '.editor .editarea', 'space', function(e) {
-            if(UI.markSpacesEnabled) {
-                if(!UI.hiddenTextEnabled) return;
-                e.preventDefault();
-                UI.editarea.find('.lastInserted').removeClass('lastInserted');
-
-                var node = document.createElement("span");
-                node.setAttribute('class', 'marker monad space-marker lastInserted');
-                node.setAttribute('contenteditable', 'false');
-                node.textContent = htmlDecode(" ");
-
-                insertNodeAtCursor(node);
-                UI.unnestMarkers();
-            }
-
-		})
-                .on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
+		}).on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
             if(!UI.hiddenTextEnabled) return;
 			e.preventDefault();
             UI.editarea.find('.lastInserted').removeClass('lastInserted');
