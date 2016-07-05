@@ -53,11 +53,10 @@ $klein->onError(function ($klein, $err_msg, $err_type, $exception) {
 // This is unreleased APIs. I'm no longer fond of the [i:id_job] in the path,
 // so before releasing change it use a querystring.
 //
-$klein->respond('GET', '/api/v2/jobs/[i:id_job]/revision-data', function() {
-    $reflect  = new ReflectionClass('API_V2_JobRevisionData');
-    $instance = $reflect->newInstanceArgs(func_get_args());
-    $instance->respond('revisionData');
-});
+route(
+    '/api/v2/jobs/[i:id_job]/revision-data', 'GET',
+    'API_V2_JobRevisionData', 'revisionData'
+);
 
 $klein->respond('GET', '/api/v2/jobs/[i:id_job]/revision-data/segments', function() {
     $reflect  = new ReflectionClass('API_V2_JobRevisionData');
