@@ -2,8 +2,6 @@ APP = null;
 
 APP = {
     init: function () {
-//        this.waitingConfirm = false;
-//        this.confirmValue = null;
         this.isCattool = $( 'body' ).hasClass( 'cattool' );
         $( "body" ).on( 'click', '.modal .x-popup', function ( e ) {
             e.preventDefault();
@@ -22,7 +20,6 @@ APP = {
             var dataType = $('.modal' ).attr('data-type');
 
             if ( !$( '.modal[data-type='+dataType+']' ).hasClass( 'closeOnSuccess' ) ) APP.closePopup();
-//            APP.closePopup();
             if ( $( this ).attr( 'data-callback' ) ) {
                 if ( typeof UI[$( this ).attr( 'data-callback' )] === 'function' ) {
                     var context = $( this ).attr( 'data-context' ) || '';
@@ -105,7 +102,7 @@ APP = {
             context: options.context,
             closeOnSuccess: (options.closeOnSuccess || false)
         } );
-        return APP.confirmValue;
+        return APP.confirmValue; // TODO: this return value is clearly meaningless
     },
     confirmAndCheckbox: function(options){
         this.waitingConfirm = true;
