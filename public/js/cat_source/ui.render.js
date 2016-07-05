@@ -63,7 +63,6 @@ $.extend(UI, {
 		this.goingToNext = false;
 		this.preCloseTagAutocomplete = false;
         this.hiddenTextEnabled = true;
-        this.markSpacesEnabled = false;
         this.tagModesEnabled = (typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
         if(this.tagModesEnabled) {
             UI.body.addClass('tagModes');
