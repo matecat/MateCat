@@ -30,8 +30,8 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         }
 
         if ( ! section.hasClass('opened') ) {
-            UI.scrollSegment( section );
             UI.openSegment( section );
+            UI.scrollSegment( section );
         }
     });
 
