@@ -1174,10 +1174,8 @@ UI = {
 			prev = $('.editor').parents('article').prevAll( selector ).first();
 			if (prev.length) {
 				$(UI.targetContainerSelector() , prev).click();
-			} else {
-				UI.topReached();
 			}
-		}
+        }
 		if (prev.length)
 			UI.scrollSegment(prev);
 	},
@@ -3136,14 +3134,6 @@ UI = {
         $.cookie('client_info', JSON.stringify(clientInfo), { expires: 3650 });
     },
 
-    topReached: function() {
-//        var jumpto = $(this.currentSegment).offset().top;
-//        $("html,body").animate({
-//            scrollTop: 0
-//        }, 200).animate({
-//            scrollTop: jumpto - 50
-//        }, 200);
-	},
 	browserScrollPositionRestoreCorrection: function() {
 		// detect if the scroll is a browser generated scroll position restore, and if this is the case rescroll to the segment
 		if (this.firstOpenedSegment == 1) { // if the current segment is the first opened in the current UI
