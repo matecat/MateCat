@@ -93,11 +93,10 @@ route(
     'API_V2_SegmentVersion', 'detail'
 );
 
-$klein->respond('POST', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues', function() {
-    $reflect  = new ReflectionClass('API\V2\SegmentTranslationIssueController');
-    $instance = $reflect->newInstanceArgs(func_get_args());
-    $instance->respond('create');
-});
+route(
+    '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues', 'POST',
+    'API\V2\SegmentTranslationIssueController', 'create'
+);
 
 $klein->respond('DELETE', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues/[:id_issue]', function() {
     $reflect  = new ReflectionClass('API\V2\SegmentTranslationIssueController');
