@@ -120,6 +120,13 @@
           /*]]>*/
         </script>
 
+        <script tal:condition="true:project_completion_feature_enabled" type="text/javascript">
+            /*<![CDATA[*/
+            config.job_marked_complete = ${job_marked_complete|false};
+            config.job_completion_current_phase = '${job_completion_current_phase}' ;
+            /*]]>*/
+        </script>
+
         <script tal:condition="true:brPlaceholdEnabled" type="text/javascript">
             /*<![CDATA[*/
             config.lfPlaceholder = '${lfPlaceholder | null}';
@@ -330,16 +337,9 @@
 
         <div metal:use-macro="tm.html/tm_panel"></div>
 
-
         <div class="blacked" ></div>
 
         <ul id="contextMenu">
-			<!--
-						<li id="spellCheck">
-							<span class="label">Maybe you were searching for:</span>
-							<a class="add" href="#">Add word</a>
-						</li>
-			-->
             <li id="searchConcordance">
                 <span class="label">Concordance</span>
                 <span class="shortcut"><span class="alt">&#x2325;</span><span class="cmd">&#8984;</span> C</span>
