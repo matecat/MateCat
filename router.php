@@ -108,11 +108,10 @@ route(
     'API\V2\SegmentTranslationIssueController', 'update'
 );
 
-$klein->respond('POST', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues/[:id_issue]/comments', function() {
-    $reflect  = new ReflectionClass('API\V2\TranslationIssueComment');
-    $instance = $reflect->newInstanceArgs(func_get_args());
-    $instance->respond('create');
-});
+route(
+    '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues/[:id_issue]/comments', 'POST',
+    'API\V2\TranslationIssueComment', 'create'
+);
 
 $klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues/[:id_issue]/comments', function() {
     $reflect  = new ReflectionClass('API\V2\TranslationIssueComment');
