@@ -75,15 +75,14 @@ if (QaCheckBlacklist.enabled() )
 
         _.each(Object.keys( mapped ) , function(item, index) {
             var segment = UI.Segment.find( item );
-            if ( !segment ) return ;
+            if ( !segment || segment.isReadonly() ) return ;
 
             var matched_words = _.chain( mapped[item]).map( function( match ) {
                 return match.match ;
             }).uniq().value() ;
 
             var editarea = segment.el.find(  UI.targetContainerSelector() ) ;
-
-            updateBlacklistItemsInSegment(  editarea, matched_words );
+            updateBlacklistItemsInSegment( editarea, matched_words ) ;
         });
 
         globalReceived = true ;
@@ -105,9 +104,9 @@ if (QaCheckBlacklist.enabled() )
     });
 
     $(document).on('getWarning:local:success', function(e, data) {
-
-        if ( !data.resp.data.blacklist ) {
+        if ( !data.resp.data.blacklist || data.segment.isReadonly() ) {
             // No blacklist data contained in response, skip it
+            // or segment is readonly, skip
             return ;
         }
 

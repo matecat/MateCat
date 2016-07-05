@@ -11,7 +11,7 @@ if ( ReviewImproved.enabled() ) {
         loadDataPromise.done(function() {
             $('section [data-mount=translation-issues-button]').each(function() {
                 var segment = new UI.Segment( this )  ;
-                if ( !segment.isSplit() || segment.isFirstOfSplit() ) {
+                if ( issuesPanelSideButtonEnabled( segment ) ) {
                     ReactDOM.render( React.createElement( TranslationIssuesSideButton, {
                         sid : segment.absoluteId
                     } ), this );
@@ -24,6 +24,9 @@ if ( ReviewImproved.enabled() ) {
         ReviewImproved.mountPanelComponent();
     });
 
+    var issuesPanelSideButtonEnabled = function( segment ) {
+        return !segment.isReadonly() && ( !segment.isSplit() || segment.isFirstOfSplit() );
+    }
 
     $(document).on('segment-filter:filter-data:load', function() {
         ReviewImproved.closePanel();
