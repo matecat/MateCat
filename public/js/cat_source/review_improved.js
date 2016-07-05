@@ -146,6 +146,9 @@ if ( ReviewImproved.enabled() )
 
             $(document).trigger('review-panel:opened', data);
 
+            var segment = UI.Segment.findEl( data.sid );
+            segment.find( UI.targetContainerSelector() ).click();
+
             window.setTimeout( function(data) {
                 var el = UI.Segment.find( data.sid ).el ;
 
