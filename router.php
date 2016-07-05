@@ -88,11 +88,10 @@ route(
     '\API\V2\SegmentVersion', 'index'
 );
 
-$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-versions/[:version_number]', function() {
-    $reflect  = new ReflectionClass('API_V2_SegmentVersion');
-    $instance = $reflect->newInstanceArgs(func_get_args());
-    $instance->respond('detail');
-});
+route(
+    '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-versions/[:version_number]', 'GET',
+    'API_V2_SegmentVersion', 'detail'
+);
 
 $klein->respond('POST', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues', function() {
     $reflect  = new ReflectionClass('API\V2\SegmentTranslationIssueController');
