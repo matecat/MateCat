@@ -83,11 +83,10 @@ route(
     '\API\V2\ChunkTranslationVersionController', 'index'
 );
 
-$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-versions', function() {
-    $reflect  = new ReflectionClass('\API\V2\SegmentVersion');
-    $instance = $reflect->newInstanceArgs(func_get_args());
-    $instance->respond('index');
-});
+route(
+    '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-versions', 'GET',
+    '\API\V2\SegmentVersion', 'index'
+);
 
 $klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-versions/[:version_number]', function() {
     $reflect  = new ReflectionClass('API_V2_SegmentVersion');
