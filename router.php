@@ -131,11 +131,10 @@ $klein->respond('GET', '/utils/pee', function() {
     $instance->finalize();
 });
 
-$klein->respond('POST', '/api/v2/projects/[:id_project]/[:password]/jobs/[:id_job]/merge', function() {
-    $reflect  = new ReflectionClass('API\V2\JobMergeController');
-    $instance = $reflect->newInstanceArgs(func_get_args());
-    $instance->respond('merge');
-});
+route(
+    '/api/v2/projects/[:id_project]/[:password]/jobs/[:id_job]/merge', 'POST',
+    'API\V2\JobMergeController', 'merge'
+);
 
 
 
