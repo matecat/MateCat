@@ -30,6 +30,10 @@
         this.isFooterCreated = function() {
             return $('.footer', this.el).text() === '';
         }
+        
+        this.isReadonly = function() {
+            return this.el.hasClass('readonly');
+        }
     }
 
     Segment.findEl = function( number ) {
