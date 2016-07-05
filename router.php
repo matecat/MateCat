@@ -63,11 +63,10 @@ route(
     'API_V2_JobRevisionData', 'segments'
 );
 
-$klein->respond('GET', '/api/v2/project-completion-status/[i:id_project]', function() {
-    $reflect  = new ReflectionClass('\API\V2\ProjectCompletionStatus');
-    $instance = $reflect->newInstanceArgs(func_get_args());
-    $instance->respond('status');
-});
+route(
+    '/api/v2/project-completion-status/[i:id_project]', 'GET',
+    '\API\V2\ProjectCompletionStatus', 'status'
+);
 
 $klein->respond('GET', '/api/v2/project-translation/[i:id_project]', function() {
     $reflect  = new ReflectionClass('API_V2_ProjectTranslation');
