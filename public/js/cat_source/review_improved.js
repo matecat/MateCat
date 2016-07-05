@@ -143,15 +143,8 @@ if ( ReviewImproved.enabled() )
             $('article').addClass('review-panel-opened');
             $('body').addClass('side-tools-opened review-side-panel-opened');
             hackSnapEngage( true );
-            
-            var segment = UI.Segment.findEl( data.sid );
 
             $(document).trigger('review-panel:opened', data);
-
-            // simulate the click to activate the segment, we don't want
-            // side panel open on deactivted segments.
-
-            segment.find( UI.targetContainerSelector() ).click();
 
             window.setTimeout( function(data) {
                 var el = UI.Segment.find( data.sid ).el ;
