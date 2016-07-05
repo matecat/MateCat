@@ -51,7 +51,10 @@ class createProjectController extends ajaxController {
                 ),
                 'lexiqa'             => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
                 'speech2text'        => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
-                'tag_projection'     => array( 'filter' => FILTER_VALIDATE_BOOLEAN )
+                'tag_projection'     => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
+                'segmentation_rule'  => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                )
 
                 //            This will be sanitized inside the TmKeyManagement class
                 //            SKIP
@@ -334,7 +337,8 @@ class createProjectController extends ajaxController {
         if ( isset( $__postInput['lexiqa']) )           $options['lexiqa'] = $__postInput[ 'lexiqa' ];
         if ( isset( $__postInput['speech2text']) )      $options['speech2text'] = $__postInput[ 'speech2text' ];
         if ( isset( $__postInput['tag_projection']) )   $options['tag_projection'] = $__postInput[ 'tag_projection' ];
-        
+        if ( isset( $__postInput['segmentation_rule']) ) $options['segmentation_rule'] = $__postInput[ 'segmentation_rule' ];
+
         $this->metadata = $options ; 
     }
 

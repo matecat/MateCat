@@ -46,10 +46,11 @@ class ProjectOptionsSanitizer {
         }
         
         $this->sanitizeTagProjection(); 
-        $this->sanitizeLexiQA(); 
-        
-        $this->forceInt(); 
-        
+        $this->sanitizeLexiQA();
+        $this->forceInt();
+
+        $this->sanitizeSegmentationRule(); //do not force int because it is a string value
+
         return $this->sanitized ; 
     }
     
@@ -58,7 +59,14 @@ class ProjectOptionsSanitizer {
             $this->sanitized[ $key ] = intval( $value ) ;
         }
     }
-    
+
+    private function sanitizeSegmentationRule() {
+        $rules = array( 'patent' );
+        if ( array_search( $this->options[ 'segmentation_rule' ], $rules ) !== false ) {
+            $this->sanitized[ 'segmentation_rule' ] = $this->options[ 'segmentation_rule' ];
+        }
+    }
+
     private function sanitizeLexiQA() { 
         if ( isset($this->options['lexiqa']) && $this->options['lexiqa'] == FALSE ) {
             $this->sanitized['lexiqa'] = FALSE;
