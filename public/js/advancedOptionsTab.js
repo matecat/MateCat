@@ -63,6 +63,13 @@ if ( true )
 
             $('.mgmt-table-options .options-box.dqf_options_box').hide();
             $('.mgmt-table-options .options-box.seg_rule select#segm_rule').val(config.segmentation_rule).attr("disabled", true);
+            $('.mgmt-table-options .options-box.seg_rule').on("click", function () {
+                APP.alert({
+                    title: 'Option not editable',
+                    okTxt: 'Continue',
+                    msg: "Segment rules settings can only be edited <br/> when creating the project.    "
+                });
+            });
             //Check Lexiqa check
             if (LXQ.checkCanActivate()) {
                 (LXQ.enabled()) ? lexiqaCheck.attr('checked', true) : lexiqaCheck.attr('checked', false);
