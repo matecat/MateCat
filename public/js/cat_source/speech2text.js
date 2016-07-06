@@ -95,16 +95,19 @@ Speech2Text.init  = function () {
                 Speech2Text.stopSpeechRecognition(microphone);
             },
             clickMicrophone: function (event) {
-                var microphone = $(event.target);
-                var segmentObj = new UI.Segment( microphone.closest('section') );
-                var segmentRecord = MateCat.db.segments.by('sid', segmentObj.absId );
+                var microphone = $(event.currentTarget);
 
                 Speech2Text.isStopingRecognition = false;
 
                 if (microphone.hasClass('micSpeechActive')) {
+
                     Speech2Text.disableContinuousRecognizing();
                     Speech2Text.stopSpeechRecognition(microphone);
+
                 } else {
+                    var segmentObj = new UI.Segment( microphone.closest('section') );
+                    var segmentRecord = MateCat.db.segments.by('sid', segmentObj.absId );
+
                     Speech2Text.startSpeechRecognition(microphone, segmentRecord);
                     Speech2Text.enableContinuousRecognizing();
                 }
