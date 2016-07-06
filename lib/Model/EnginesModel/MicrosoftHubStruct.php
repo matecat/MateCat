@@ -50,7 +50,8 @@ class EnginesModel_MicrosoftHubStruct extends EnginesModel_EngineStruct {
             'token'         => null,
             'token_endlife' => 0,
             'client_id'     => "",
-            'client_secret' => ""
+            'client_secret' => "",
+            'category'      => "",
     );
 
     /**
