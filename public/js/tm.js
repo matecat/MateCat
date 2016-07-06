@@ -66,7 +66,7 @@ $.extend(UI, {
             $('#mt-provider-details .error').empty();
 
             $(".insert-tm").show();
-            provider = $(this).val();
+            var provider = $(this).val();
             if(provider == 'none') {
                 $('.step2 .fields').html('');
                 $(".step2").hide();

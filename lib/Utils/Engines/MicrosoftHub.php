@@ -110,9 +110,10 @@ TAG;
         $_config[ 'target' ] = $this->_fixLangCode( $_config[ 'target' ] );
 
         $parameters = array();
-        $parameters['text'] = $_config[ 'segment' ];
-        $parameters['from'] = $_config[ 'source' ];
-        $parameters['to']   = $_config[ 'target' ];
+        $parameters['text']       = $_config[ 'segment' ];
+        $parameters['from']       = $_config[ 'source' ];
+        $parameters['to']         = $_config[ 'target' ];
+        $parameters['category']   = $this->engineRecord->extra_parameters[ 'category' ];
 
         try {
 
