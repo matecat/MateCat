@@ -186,8 +186,6 @@ Speech2Text.init  = function () {
                     }
                 }
 
-                Speech2Text.finalTranscript = Speech2Text.capitalize(Speech2Text.finalTranscript);
-
                 if (!Speech2Text.isStopingRecognition) {
                     Speech2Text.targetElement.html(
                         Speech2Text.linebreak(Speech2Text.finalTranscript)
@@ -195,13 +193,6 @@ Speech2Text.init  = function () {
                     );
                     UI.setSegmentModified( Speech2Text.targetElement.closest('section'), true );
                 }
-            },
-            capitalize: function (s) {
-                var first_char = /\S/;
-
-                return s.replace(first_char, function (m) {
-                    return m.toUpperCase();
-                });
             },
             linebreak: function (s) {
                 var two_line = /\n\n/g;
