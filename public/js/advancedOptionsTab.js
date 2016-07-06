@@ -60,9 +60,9 @@ if ( true )
             var tagProjectionCheck = $('.tagp #tagp_check');
 
 
-            $('.mgmt-table-options .options-box.seg_rule').hide();
-            $('.mgmt-table-options .options-box.dqf_options_box').hide();
 
+            $('.mgmt-table-options .options-box.dqf_options_box').hide();
+            $('.mgmt-table-options .options-box.seg_rule select#segm_rule').val(config.segmentation_rule).attr("disabled", true);
             //Check Lexiqa check
             if (LXQ.checkCanActivate()) {
                 (LXQ.enabled()) ? lexiqaCheck.attr('checked', true) : lexiqaCheck.attr('checked', false);
