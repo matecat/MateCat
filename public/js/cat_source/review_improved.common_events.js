@@ -77,11 +77,11 @@ if ( ReviewImproved.enabled() ) {
     });
 
     $(document).on('click', function( e ) {
-        if (e.target.closest('body') == null ) {
+        if ($(e.target).closest('body') == null ) {
             // it's a detatched element, likely the APPROVE button.
             return ;
         }
-        if (e.target.closest('header, .modal, section, #review-side-panel') == null) {
+        if ($(e.target).closest('header, .modal, section, #review-side-panel') == null) {
             ReviewImproved.closePanel( );
         }
     });

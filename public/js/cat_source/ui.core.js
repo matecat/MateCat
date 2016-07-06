@@ -104,13 +104,14 @@ UI = {
         this.currentSegmentTranslation = segment.find( UI.targetContainerSelector() ).text();
     },
 	cacheObjects: function( editarea_or_segment ) {
+        var segment;
         if ( editarea_or_segment instanceof UI.Segment ) {
-            var segment = editarea_or_segment ;
+            segment = editarea_or_segment ;
             this.editarea = segment.el.find( '.editarea' );
         }
         else {
-            this.editarea = $(".editarea", editarea_or_segment.closest('section'));
-            var segment = new UI.Segment( editarea_or_segment.closest('section') );
+            this.editarea = $(".editarea", $(editarea_or_segment).closest('section'));
+            segment = new UI.Segment( $(editarea_or_segment).closest('section') );
         }
 
 		this.lastOpenedSegment = this.currentSegment; // this.currentSegment
