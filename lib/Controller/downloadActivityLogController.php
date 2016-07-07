@@ -121,9 +121,9 @@ class downloadActivityLogController extends viewController {
         // Staff with content
         foreach ( $outputContent as $jobName => $activityLog ) {
             if( $jobName == "-" ){
-                $zip->addFromString( "Project-" . $projectName . ".txt", implode( "\n", $activityLog ) );
+                $zip->addFromString( "Project-" . $projectName . ".txt", implode( "\r\n", $activityLog ) );
             } else {
-                $zip->addFromString( "Job-" . $jobName . ".txt", implode( "\n", $activityLog ) );
+                $zip->addFromString( "Job-" . $jobName . ".txt", implode( "\r\n", $activityLog ) );
             }
         }
 
