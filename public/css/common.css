@@ -3369,7 +3369,6 @@ float: left;
 .more.minus:before,
 .more-options:before {
     margin-right: 7px;
-    vertical-align: middle;
 }
 .translate-box .more-options:before {
     margin-top: -3px;

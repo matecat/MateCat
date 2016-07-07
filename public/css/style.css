@@ -88,7 +88,7 @@ header .wrapper{
     display: none !important;
 }
 
-#filterSwitch {
+#filterSwitch,#advancedOptions {
     text-align: center;
     width: 45px;
     height: 27px;
@@ -2955,15 +2955,9 @@ section.modified .save-warning
 	display: none;
 }
 
+
 #advancedOptions .more-options {
     font-size: 25px;
-    color: #eee;
-    padding: 0;
-    margin-top: 0px;
-    display: block;
-    text-align: center;
-    width: 45px;
-    cursor: pointer;
 }
 
 #advancedOptions .more-options:hover {
