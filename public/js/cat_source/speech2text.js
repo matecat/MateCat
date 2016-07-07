@@ -141,7 +141,7 @@ Speech2Text.init  = function () {
                 }
             },
             stopSpeechRecognition: function (microphone) {
-                microphone.removeClass('micSpeechActive');
+                microphone.removeClass('micSpeechActive micSpeechReceiving');
 
                 Speech2Text.recognition.stop();
                 Speech2Text.targetElement.off('blur keyup paste input');
