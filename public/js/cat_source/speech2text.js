@@ -95,16 +95,19 @@ Speech2Text.init  = function () {
                 Speech2Text.stopSpeechRecognition(microphone);
             },
             clickMicrophone: function (event) {
-                var microphone = $(event.target);
-                var segmentObj = new UI.Segment( microphone.closest('section') );
-                var segmentRecord = MateCat.db.segments.by('sid', segmentObj.absId );
+                var microphone = $(event.currentTarget);
 
                 Speech2Text.isStopingRecognition = false;
 
                 if (microphone.hasClass('micSpeechActive')) {
+
                     Speech2Text.disableContinuousRecognizing();
                     Speech2Text.stopSpeechRecognition(microphone);
+
                 } else {
+                    var segmentObj = new UI.Segment( microphone.closest('section') );
+                    var segmentRecord = MateCat.db.segments.by('sid', segmentObj.absId );
+
                     Speech2Text.startSpeechRecognition(microphone, segmentRecord);
                     Speech2Text.enableContinuousRecognizing();
                 }
@@ -183,8 +186,6 @@ Speech2Text.init  = function () {
                     }
                 }
 
-                Speech2Text.finalTranscript = Speech2Text.capitalize(Speech2Text.finalTranscript);
-
                 if (!Speech2Text.isStopingRecognition) {
                     Speech2Text.targetElement.html(
                         Speech2Text.linebreak(Speech2Text.finalTranscript)
@@ -192,13 +193,6 @@ Speech2Text.init  = function () {
                     );
                     UI.setSegmentModified( Speech2Text.targetElement.closest('section'), true );
                 }
-            },
-            capitalize: function (s) {
-                var first_char = /\S/;
-
-                return s.replace(first_char, function (m) {
-                    return m.toUpperCase();
-                });
             },
             linebreak: function (s) {
                 var two_line = /\n\n/g;
