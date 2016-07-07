@@ -897,7 +897,7 @@ article.lxq-commenting-opened .lxq-comment-balloon-outer {
     text-decoration: underline; 
 }
 .d0 {
-    color:  red;
+    border-bottom: 2px red dotted;
 }
 .m {
     background-color:#EA92B8;
@@ -1228,6 +1228,8 @@ article.lxq-commenting-opened .lxq-comment-balloon-outer {
 
 .lxq-invisible {
     background-color: transparent;
+    border-bottom: none;
+    text-decoration: none;
 }
 
 

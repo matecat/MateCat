@@ -8,7 +8,7 @@
     text-align: center;
     width: 60px;
     padding-top: 6px;
-    margin-left: 20px;
+    margin-right: -10px;
 }
 
 #lexiqabox .numbererror {
@@ -16,14 +16,13 @@
     color: #333;
     border: 1px solid #fff;
     font-weight: bold;
-    margin-left: 8px;
+    margin-left: 4px;
     margin-top: 4px;
 }
 
 .lexnotific::before, #lexiqabox.warningbox::after {
     content: url(../img/lexiqa_whitebg.svg);
     display: block;
-    cursor: pointer;
 }
 
 /*

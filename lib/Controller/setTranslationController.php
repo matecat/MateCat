@@ -582,10 +582,8 @@ class setTranslationController extends ajaxController {
                 'old_translation' => $old_translation,
                 'propagated_ids'  => $propagationTotal['propagated_ids'],
                 'chunk'           => $this->chunk,
-                'segment'         => $this->segment,
-                'uid'             => $uid
+                'segment'         => $this->segment
                 ));
-
 
         //EVERY time an user changes a row in his job when the job is completed,
         // a query to do the update is executed...
@@ -621,6 +619,8 @@ class setTranslationController extends ajaxController {
         //assert there is not an exception by following the flow
         WorkerClient::init( new AMQHandler() );
         Set::contribution( $contributionStruct );
+
+        $this->logForTagProjection(CatUtils::rawxliff2view($this->translation));
 
     }
 
@@ -797,5 +797,13 @@ class setTranslationController extends ajaxController {
             }
         }
         return $old_count ;
+    }
+
+    private function logForTagProjection($msg) {
+        $logfile = \Log::$fileName;  //Todo: check why is null
+
+        \Log::$fileName = 'tagProjection.log';
+        \Log::doLog( $msg );
+        \Log::$fileName = $logfile;
     }
 }

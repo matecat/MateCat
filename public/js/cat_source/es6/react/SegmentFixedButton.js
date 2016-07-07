@@ -1,38 +1,22 @@
 
 var SegmentFixedButton = React.createClass({
 
-    getInitialState: function() {
-        return {
-            disabled: false,
-        };
-    },
-
     handleClick: function() {
-        var el = UI.Segment.findEl(this.props.sid);
-        el.removeClass('modified');
-        UI.changeStatus(el, 'fixed', true);
-        UI.gotoNextSegment(); // NOT ideal behaviour, would be better to have a callback chain of sort.
-    },
-
-    handleTranslationSuccess : function(e, data) {
-        console.log('handleTranslationSuccess', data);
-    },
-    componentDidMount: function() {
-    },
-
-    componentWillUnmount: function() {
+        if ( !this.props.disabled ) {
+            window.ReviewImproved.clickOnFixed(this.props.sid);
+        }
     },
 
     render: function() {
-        var cmd = ((UI.isMac) ? 'CMD' : 'CTRL');
 
         var fixedButton = <li>
-            <a className="button status-fixed"
+            <a className="button button-fixed status-fixed"
                 onClick={this.handleClick}
                 href="javascript:;"
-                disabled={!this.state.disabled} >
+                disabled={this.props.disabled} >
                 FIXED
             </a>
+            <p>{window.UI.shortcutLeader}+ENTER</p>
           </li>
           ;
 

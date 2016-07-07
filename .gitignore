@@ -17,6 +17,7 @@ inc/.globalmessage.ini
 # Ignore artifacts
 public/css/app.css
 public/css/app.css.map
+public/css/upload-build.css
 public/js/build
 
 # NodeJs stuff

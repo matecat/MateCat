@@ -156,8 +156,6 @@ LABEL;
      * @covers Engines_MyMemory::update
      * @covers Engines_MyMemory::set
      * @covers Engines_MyMemory::get
-     * TODO: this tests will FAIL because MyMemory returns a result with the OLD source_note
-
      */
     public function test_set_update_get_word_with_note_glossary(){
 

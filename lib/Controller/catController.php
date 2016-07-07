@@ -1,4 +1,6 @@
 <?php
+use ActivityLog\Activity;
+use ActivityLog\ActivityLogStruct;
 
 
 /**
@@ -84,13 +86,14 @@ class catController extends viewController {
         parent::makeTemplate( "index.html" );
 
         $filterArgs = array(
-            'jid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'jid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'password' => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
                 'start'    => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'page'     => array( 'filter' => FILTER_SANITIZE_NUMBER_INT )
         );
+
         $getInput   = (object)filter_input_array( INPUT_GET, $filterArgs );
 
         $this->jid        = $getInput->jid;
@@ -523,6 +526,32 @@ class catController extends viewController {
          */
         $this->translation_engines = array_unique( array_merge( $active_mt_engine, $tms_engine, $mt_engines ) );
 
+        $this->_saveActivity();
+
+    }
+
+    protected function _saveActivity(){
+
+        if( $this->isRevision() ){
+            $action = ActivityLogStruct::ACCESS_REVISE_PAGE;
+        } else {
+            $action = ActivityLogStruct::ACCESS_TRANSLATE_PAGE;
+        }
+
+        /**
+         * Retrieve user information
+         */
+        list( $uid, $email ) = $this->getLoginUserParams();
+
+        $activity             = new ActivityLogStruct();
+        $activity->id_job     = $this->jid;
+        $activity->id_project = $this->pid;
+        $activity->action     = $action;
+        $activity->ip         = Utils::getRealIpAddr();
+        $activity->uid        = $uid;
+        $activity->event_date = date( 'Y-m-d H:i:s' );
+        Activity::save( $activity );
+
     }
 
     public function setTemplateVars() {
@@ -681,15 +710,6 @@ class catController extends viewController {
         $this->template->isGDriveProject =  $this->isCurrentProjectGDrive();
 
         $this->template->uses_matecat_filters = Utils::isJobBasedOnMateCatFilters($this->jid);
-
-        $metadataDao = new Projects_MetadataDao( Database::obtain() );
-        $lexicaMeta = $metadataDao->setCacheTTL( 60 * 60 )->get( $this->pid, 'lexiqa' );
-        if( $lexicaMeta instanceof Projects_MetadataStruct ){
-            $this->template->lxq_enabled = var_export(
-                    $lexicaMeta->value,
-                    true
-            );
-        }
 
         $this->decorator = new CatDecorator( $this, $this->template );
         $this->decorator->decorate();

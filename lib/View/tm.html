@@ -17,7 +17,7 @@
         <h1>
 
             <a href="#" class="btn-ok right">Close</a>
-            Language Resources
+            Options
         </h1>
 
         <div class="popup-box">
@@ -25,10 +25,11 @@
             <div class="mgmt-panel mgmt-panel-tm">
                 <div class="mgmt-wrapper">
                     <ul class="nav nav-tabs hide" role="tablist">
-                        <li class="active mgmt-tm"><a href="#tm">Translation Memory</a></li>
+                        <li class="mgmt-tm"><a href="#tm">Translation Memory</a></li>
                         <li class="mgmt-mt"><a href="#mt">Machine Translation</a></li>
+                        <li class="mgmt-opt active"><a href="#options">Advanced Options</a></li>
                     </ul>
-                    <div class="mgmt-table-tm">
+                    <div class="mgmt-table-tm hide">
 
                         <div class="mgmt-container" id="list-search">
 
@@ -37,8 +38,10 @@
 
                             <tal:block tal:condition="php: page != 'cattool'">
                             <div class="boxed">
-                                <input type="checkbox" id="pretranslate100" />
-                                <label>Pre-translate 100% matches from TM</label>
+                                <label>
+                                    <input type="checkbox" id="pretranslate100" />
+                                    Pre-translate 100% matches from TM
+                                </label>
                             </div>
                             </tal:block>
 
@@ -276,7 +279,12 @@
                                 <tr>
                                     <th class="privatekey">MT provider</th>
                                     <th class="description">Engine name</th>
-                                    <th class="enable-mt text-center">Use in this project</th>   
+                                    <tal:block tal:condition="php: page == 'home'">
+                                        <th class="enable-mt text-center">Use in this project</th>
+                                    </tal:block>
+                                    <tal:block tal:condition="php: page == 'cattool'">
+                                        <th class="enable-mt text-center"></th>
+                                    </tal:block>
                                     <th class="action">Action</th>
                                 </tr>
                                 </thead>
@@ -320,8 +328,8 @@
                                                     <td class="engine-name">
                                                         <div class="edit-desc">${engine/description}</div>
                                                     </td>
-                                                    <td class="enable-mt text-center">
-                                                        <input type="checkbox" checked="checked" />
+                                                    <td class="enable-mt text-center" title="MT settings can only be edited when creating the project.">
+                                                        <div class="engine-check-disabled" style="line-height: 21px;">Enabled</div>
                                                     </td>
                                                     <td class="action">
                                                         <a tal:condition="php: engine.id != 1 && jobOwnerIsMe" class="deleteMT btn pull-left"><span class="text">Delete</span></a>
@@ -338,7 +346,6 @@
                                                         <div class="edit-desc">${engine/description}</div>
                                                     </td>
                                                     <td class="enable-mt text-center">
-                                                        <input type="checkbox"/>
                                                     </td>
                                                     <td class="action">
                                                         <a tal:condition="php: engine.id != 1" class="deleteMT btn pull-left"><span class="text">Delete</span></a>
@@ -353,6 +360,89 @@
                             </table>
                         </div>
 
+                    </div>
+                    <div class="mgmt-panel mgmt-table-options">
+                        <div class="advanced-options-box">
+                           <h2>Advanced Options</h2>
+                            <div class="options-box seg_rule">
+                                <h3>Segmentation Rules</h3>
+                                <p>Select segmentation rules to be applied for specific types of content.</p>
+                                <select name="segm_rule" id="segm_rule">
+                                    <option value="">General</option>
+                                    <option value="patent">Patent</option>
+                                </select>
+                            </div>
+
+
+                          <!-- <div tal:condition="true:DQF_enabled" class="options-box"> -->
+                            <div class="options-box dqf_options_box">
+                                <h3>DQF key</h3>
+                                <p>Connect your TAUS DQF account to measure productivity.</p>
+                                <input name="dqf_key" type="text" class="upload-input" id="dqf_key"/>
+                            </div>
+
+                            <!--<div class="options-box tagp">
+                                <h3>Guess tag position</h3>
+                                <p><span class="option-tagp-languages">Not available for: <span class="option-notsupported-languages"></span>. Currently supported languages: <span class="option-supported-languages"></span>. <br/></span>Enable this functionality to let MateCat automatically place the tags where they belong.</p>
+                                <div class="onoffswitch">
+                                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="tagp_check" checked="checked" />
+                                    <label class="onoffswitch-label" for="tagp_check">
+                                        <span class="onoffswitch-inner"></span>
+                                        <span class="onoffswitch-switch"></span>
+                                        <span class="onoffswitch-label-status-active">Active</span>
+                                        <span class="onoffswitch-label-status-inactive">Inactive</span>
+                                        <span class="onoffswitch-label-status-unavailable">Unavailable</span>
+
+                                    </label>
+
+                                </div>
+                            </div>-->
+
+                            <div class="options-box s2t-box">
+                                <h3>Dictation</h3>
+                                <p><span class="option-s2t-box-chrome-label">Available on Chrome. </span>Improved accessibility thanks to a speech-to-text component to dictate your translations instead of typing them.</p>
+                                 <div class="onoffswitch">
+                                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="s2t_check" />
+                                    <label class="onoffswitch-label" for="s2t_check">
+                                        <span class="onoffswitch-inner"></span>
+                                        <span class="onoffswitch-switch"></span>
+                                        <span class="onoffswitch-label-status-active">Active</span>
+                                        <span class="onoffswitch-label-status-inactive">Inactive</span>
+                                        <span class="onoffswitch-label-status-unavailable">Unavailable</span>
+
+                                    </label>
+
+                                </div>  
+                            </div>
+
+                            <div tal:condition="not: deny_lexiqa" class="options-box qa-box">
+                                <h3>QA by <img src="/public/img/lexiqa2_2x.png" /></h3>
+                                <p><span class="option-qa-box-languages">Not available for: <span class="option-notsupported-languages"></span>. Supported languages: <span class="option-supported-languages"></span>. <br/></span>Linguistic QA with automated checks for punctuation, numerals, links, symbols, etc.</p>
+
+                                <div class="onoffswitch">
+                                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="lexi_qa" />
+                                    <label class="onoffswitch-label" for="lexi_qa">
+                                        <span class="onoffswitch-inner"></span>
+                                        <span class="onoffswitch-switch"></span>
+                                        <span class="onoffswitch-label-status-active">Active</span>
+                                        <span class="onoffswitch-label-status-inactive">Inactive</span>
+                                        <span class="onoffswitch-label-status-unavailable">Unavailable</span>
+
+                                    </label>
+
+                                </div>
+
+                            </div>
+                            <!-- div class="translate-checkbox">
+                                <span class="tms-checkbox" id="disable_tms_checkbox">
+                                    <label class="tms-label" for="disable_tms_engine">Disable TM, Concordance and Glossary</label>
+                                    <input type="checkbox" value="true" id="disable_tms_engine" name="no_tms_engine"/>
+                                </span>
+                            </div -->
+
+                            <!-- img id='get-new-tm-spinner' alt="Loading..." src="public/img/loader.gif" class="tm-button"/ -->
+
+                        </div>
                     </div>
                 </div>
             </div>
@@ -371,6 +461,7 @@
     <div metal:use-macro="mt_engines.html/template-letsmt" />
     <div metal:use-macro="mt_engines.html/template-apertium" />
     <div metal:use-macro="mt_engines.html/template-altlang" />
+
 </div>
 
 

@@ -22,18 +22,25 @@ $.extend(UI, {
 
         $(".popup-tm li.mgmt-tm").click(function(e) {
             e.preventDefault();
-            console.log('questo');
             $(this).addClass("active");
-            $(".mgmt-mt").removeClass("active");
+            $(".mgmt-mt,.mgmt-opt").removeClass("active");
             $(".mgmt-table-mt").hide();
             $(".mgmt-table-tm").show();
+            $(".mgmt-table-options").hide();
         });
         $(".popup-tm .tm-mgmt").click(function(e) {
             e.preventDefault();
             $(".mgmt-mt").addClass("active");
-            $(".mgmt-tm").removeClass("active");
-            $(".mgmt-table-tm").hide();
+            $(".mgmt-tm,.mgmt-opt").removeClass("active");
+            $(".mgmt-table-tm,.mgmt-table-options").hide();
             $(".mgmt-table-mt").show();
+        });
+         $(".popup-tm .mgmt-opt").click(function(e) {
+            e.preventDefault();
+            $(".mgmt-opt").addClass("active");
+            $(".mgmt-tm,.mgmt-mt").removeClass("active");
+            $(".mgmt-table-tm,.mgmt-table-mt").hide();
+            $(".mgmt-table-options").show();
         });
 
         
@@ -41,9 +48,10 @@ $.extend(UI, {
         $(".mgmt-mt").click(function(e) {
             e.preventDefault();
             $(this).addClass("active");
-            $(".mgmt-tm").removeClass("active");
+            $(".mgmt-tm,.mgmt-opt").removeClass("active");
             $(".mgmt-table-tm").hide();
             $(".mgmt-table-mt").show();
+            $(".mgmt-table-options").hide();
         });
         $("#mt_engine").change(function() {
             if($(this).val() == 0) {
@@ -83,8 +91,8 @@ $.extend(UI, {
         $('#add-mt-provider-confirm').click(function(e) {
             e.preventDefault();
             if($(this).hasClass('disabled')) return false;
-            provider = $("#mt_engine_int").val();
-            providerName = $("#mt_engine_int option:selected").text();
+            var provider = $("#mt_engine_int").val();
+            var providerName = $("#mt_engine_int option:selected").text();
             UI.addMTEngine(provider, providerName);
         });
         $('#add-mt-provider-cancel').click(function(e) {
@@ -184,7 +192,6 @@ $.extend(UI, {
             UI.checkTMKey('key');
             UI.saveTMkey($(this));
 
-            // script per appendere le tmx fra quelle attive e inattive, preso da qui: https://stackoverflow.com/questions/24355817/move-table-rows-that-are-selected-to-another-table-javscript
         }).on('click', 'tr.mine .uploadfile .addtmxfile:not(.disabled), tr.ownergroup .uploadfile .addtmxfile:not(.disabled)', function() {
 
             $(this).addClass('disabled');
@@ -219,6 +226,7 @@ $.extend(UI, {
         }).on('click', '.mgmt-mt td.engine-name .edit-desc', function() {
 
             $('.mgmt-mt .edit-desc[contenteditable=true]').blur();
+            if (APP.isCattool) return;
             $(this).attr('contenteditable', true);
 
         }).on('blur', '.mgmt-mt td.engine-name .edit-desc', function() {
@@ -354,6 +362,7 @@ $.extend(UI, {
             $("#activetm tr.new .addtmxfile").removeClass('disabled');
             $("#activetm tr.uploadpanel").addClass('hide');
             $(".mgmt-table-tm .add-tm").show();
+            UI.clearTMUploadPanel();
             UI.clearAddTMRow();
         });
 
@@ -373,7 +382,9 @@ $.extend(UI, {
 
     },
     openLanguageResourcesPanel: function(tab, elToClick) {
-        console.log('openLanguageResourcesPanel');
+        if ($(".popup-tm").hasClass('open') ) {
+            return false;
+        }
         tab = tab || 'tm';
         elToClick = elToClick || null;
         $('body').addClass('side-popup');
@@ -383,10 +394,6 @@ $.extend(UI, {
         $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
         if(elToClick) $(elToClick).click();
         $.cookie('tmpanel-open', 1, { path: '/' });
-    },
-    uploadTM: function(form, action_url, div_id) {
-        console.log('div_id: ', div_id);
-
     },
     setTMsortable: function () {
 
@@ -407,15 +414,11 @@ $.extend(UI, {
     },
 
     checkTMKey: function(operation) {
-        console.log('checkTMKey');
-        console.log('operation: ', operation);
-
         //check if the key already exists, it can not be sent nor added twice
         var keys_of_the_job = $('#activetm tbody tr:not(".new") .privatekey' );
         var keyIsAlreadyPresent = false;
         $( keys_of_the_job ).each( function( index, value ){
             if( $(value).text().slice(-5) == $('#new-tm-key').val().slice(-5) ){
-                console.log('key is bad');
                 $('#activetm tr.new').addClass('badkey');
                 $('#activetm tr.new .error .tm-error-key').text('The key is already present in this project.').show();
                 $('#activetm tr.new .error').show();
@@ -439,8 +442,6 @@ $.extend(UI, {
             },
             success: function(d) {
                 if(d.success === true) {
-                    console.log('key is good');
-                    console.log('adding a tm');
                     $('#activetm tr.new').removeClass('badkey');
                     $('#activetm tr.new .error .tm-error-key').text('').hide();
                     $('#activetm tr.new .error').hide();
@@ -454,7 +455,6 @@ $.extend(UI, {
                     }
 
                 } else {
-                    console.log('key is bad');
                     $('#activetm tr.new').addClass('badkey');
                     $('#activetm tr.new .error .tm-error-key').text('The key is not valid').show();
                     $('#activetm tr.new .error').show();
@@ -464,7 +464,6 @@ $.extend(UI, {
         });
     },
     checkTMAddAvailability: function () {
-        console.log('checkTMAddAvailability');
         if(($('#activetm tr.new').hasClass('badkey'))||($('#activetm tr.new').hasClass('badgrants'))) {
             $('#activetm tr.new .uploadtm').addClass('disabled');
             $('#activetm tr.uploadpanel .addtmxfile').addClass('disabled');
@@ -476,19 +475,16 @@ $.extend(UI, {
     },
 
     checkTMgrants: function() {
-        console.log('checkTMgrants');
         panel = $('.mgmt-tm tr.new');
         var r = ($(panel).find('.r').is(':checked'))? 1 : 0;
         var w = ($(panel).find('.w').is(':checked'))? 1 : 0;
         if(!r && !w) {
-            console.log('checkTMgrants NEGATIVE');
             $('#activetm tr.new').addClass('badgrants');
             $(panel).find('.action .error .tm-error-grants').text('Either "Lookup" or "Update" must be checked').show();
             UI.checkTMAddAvailability();
 
             return false;
         } else {
-            console.log('checkTMgrants POSITIVE');
             $('#activetm tr.new').removeClass('badgrants');
             $(panel).find('.action .error .tm-error-grants').text('').hide();
             UI.checkTMAddAvailability();
@@ -497,7 +493,6 @@ $.extend(UI, {
         }
     },
     checkTMGrantsModifications: function (el) {
-        console.log('el: ', el);
         tr = $(el).parents('tr.mine');
         isActive = ($(tr).parents('table').attr('id') == 'activetm')? true : false;
         if((!tr.find('.lookup input').is(':checked')) && (!tr.find('.update input').is(':checked'))) {
@@ -669,8 +664,6 @@ $.extend(UI, {
         $('#activetm').find('tr.new').before( newTr );
 
         UI.setTMsortable();
-        UI.updateTMAddedMsg();
-
     },
 
     pulseTMadded: function (row) {
@@ -963,10 +956,6 @@ $.extend(UI, {
             UI.closeTMPanel();
             UI.clearTMPanel();
         }
-        if(!APP.isCattool) {
-            UI.updateTMAddedMsg();
-            return false;
-        }
 
         data = this.extractTMdataFromTable();
         APP.doRequest({
@@ -1040,6 +1029,7 @@ $.extend(UI, {
 //                    APP.showMessage({msg: d.errors[0].message});
                 } else {
                     console.log('TM key saved!!');
+                    UI.clearTMUploadPanel();
                 }
             }
         });
@@ -1141,6 +1131,21 @@ $.extend(UI, {
                         value: $( '.privatekey', tm ).text()
                     } )
             );
+
+            if ( typeof config.id_job !== 'undefined' ){
+                iFrameForm.append(
+                    $( document.createElement( 'input' ) ).prop( {
+                        type: 'hidden',
+                        name: 'id_job',
+                        value: config.id_job
+                    } ),
+                    $( document.createElement( 'input' ) ).prop( {
+                        type: 'hidden',
+                        name: 'password',
+                        value: config.password
+                    } )
+                );
+            }
 
             //append from to newly created iFrame and submit form post
             iFrameDownload.contents().find( 'body' ).append( iFrameForm );

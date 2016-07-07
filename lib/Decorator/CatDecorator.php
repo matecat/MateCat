@@ -9,6 +9,9 @@ class CatDecorator {
      */
     private $template;
 
+    /**
+     * @var Chunks_ChunkStruct
+     */
     private $job;
 
     private $review_type;
@@ -20,6 +23,8 @@ class CatDecorator {
 
     private $isGDriveProject ;
 
+    private $lang_handler ;
+
     public function __construct( catController $controller, PHPTAL $template ) {
 
         $this->controller     = $controller;
@@ -28,6 +33,8 @@ class CatDecorator {
         $this->jobStatsStruct = new JobStatsStruct( $this->controller->getJobStats() );
 
         $this->isGDriveProject = $controller->isCurrentProjectGDrive();
+
+        $this->lang_handler = Langs_Languages::getInstance();
     }
 
     public function decorate() {
@@ -76,6 +83,10 @@ class CatDecorator {
         $this->template->support_mail = INIT::$SUPPORT_MAIL ;
         $this->template->showReplaceOptionsInSearch = true ;
 
+        $this->template->languages_array = json_encode(  $this->lang_handler->getEnabledLanguages( 'en' ) ) ;
+
+        $this->assignOptions(); 
+        
     }
 
     /**
@@ -153,4 +164,18 @@ class CatDecorator {
         $this->template->quality_report_href =
                 INIT::$BASEURL . "revise-summary/{$this->job->id}-{$this->job->password}";
     }
+
+    private function assignOptions() {
+        $chunk_options_model = new ChunkOptionsModel( $this->job ) ; 
+        
+        $this->template->tag_projection_enabled = $chunk_options_model->isEnabled('tag_projection')   ; 
+        $this->template->speech2text_enabled = $chunk_options_model->isEnabled( 'speech2text' ) ; 
+        $this->template->lxq_enabled = $chunk_options_model->isEnabled( 'lexiqa' ) ; 
+        $this->template->deny_lexiqa = false ;
+        $this->template->segmentation_rule = $chunk_options_model->project_metadata[ 'segmentation_rule' ];
+        
+        $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages ); 
+        $this->template->lexiqa_languages = json_encode( ProjectOptionsSanitizer::$lexiQA_allowed_languages ); 
+    }
+
 }

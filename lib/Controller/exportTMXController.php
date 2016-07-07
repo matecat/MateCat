@@ -1,4 +1,6 @@
 <?php
+use ActivityLog\Activity;
+use ActivityLog\ActivityLogStruct;
 
 /**
  * Created by PhpStorm.
@@ -105,6 +107,26 @@ class exportTMXController extends downloadController {
                 $this->fileName = $projectData[0][ 'name' ] . "-" . $this->jobID . ".tmx";
                 break;
         }
+
+        $this->_saveActivity();
+
+    }
+
+    protected function _saveActivity(){
+
+        /**
+         * Retrieve user information
+         */
+        $this->checkLogin();
+
+        $activity             = new ActivityLogStruct();
+        $activity->id_job     = $this->jobID;
+        $activity->id_project = $this->jobInfo['id_project'];
+        $activity->action     = ActivityLogStruct::DOWNLOAD_JOB_TMX;
+        $activity->ip         = Utils::getRealIpAddr();
+        $activity->uid        = $this->uid;
+        $activity->event_date = date( 'Y-m-d H:i:s' );
+        Activity::save( $activity );
 
     }
 

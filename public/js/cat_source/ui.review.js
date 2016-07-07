@@ -31,7 +31,7 @@ if ( Review.enabled() )
             callback: 'openNextTranslated',
             okTxt: 'Open next translated segment',
             context: sid,
-            msg: "This segment is not translated yet.<br /> Only translated segments can be revised."
+            msg: UI.alertNotTranslatedMessage 
         });
     }
 
@@ -46,6 +46,8 @@ if ( Review.enabled() )
     });
 
     $.extend(UI, {
+
+        alertNotTranslatedMessage : "This segment is not translated yet.<br /> Only translated segments can be revised.",
 
         trackChanges: function (editarea) {
             var source = UI.currentSegment.find('.original-translation').text();
@@ -305,6 +307,7 @@ if ( Review.enabled() && Review.type == 'simple' ) {
             UI.tempDisablingReadonlyAlert = true;
             UI.hideEditToolbar();
             UI.currentSegment.removeClass('modified');
+            UI.currentSegment.data('modified', false);
 
             var noneSelected = !((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked')) || (UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')));
 

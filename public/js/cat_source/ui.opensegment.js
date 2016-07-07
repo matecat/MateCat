@@ -2,14 +2,14 @@
 
     $.extend(UI, {
         openSegment: function(editarea_or_segment, operation) {
-
+            var editarea, segment;
             if ( editarea_or_segment instanceof UI.Segment ) {
-                var editarea = $('.editarea', editarea_or_segment.el);
-                var segment = editarea_or_segment ;
+                editarea = $('.editarea', editarea_or_segment.el);
+                segment = editarea_or_segment ;
             }
             else {
-                var editarea = editarea_or_segment ;
-                var segment = new UI.Segment( editarea_or_segment.closest('section') );
+                editarea = $(editarea_or_segment) ;
+                segment = new UI.Segment( editarea.closest('section') );
             }
 
             if ( Review.enabled() && !Review.evalOpenableSegment( segment.el ) ) {
@@ -51,7 +51,7 @@
             this.activateSegment(segment, getNormally);
 
             segment.el.trigger('open');
-
+            
             $('section').first().nextAll('.undoCursorPlaceholder').remove();
             this.getNextSegment(this.currentSegment, 'untranslated');
 

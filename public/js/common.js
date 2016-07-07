@@ -72,14 +72,13 @@ APP = {
             options.callback = false;
             options.msg = options;
         }
-        ;
         var callback = (typeof options == 'string') ? false : options.callback;
         var content = (typeof options == 'string') ? options : options.msg;
         this.popup( {
             type: 'alert',
             onConfirm: callback,
             closeClickingOutside: true,
-            title: 'Warning',
+            title: (options.title || 'Warning'),
             content: content
         } );
     },
@@ -134,17 +133,10 @@ APP = {
             e.preventDefault();
             $( 'body' ).removeClass( 'incomingMsg' );
             $( '#messageBar' ).html( '<span class="msg"></span><a href="#" class="close"></a>' );
-            if ( typeof $( '#messageBar' ).attr( 'data-token' ) != 'undefined' ) {
-                var expireDate = new Date( $( '#messageBar' ).attr( 'data-expire' ) );
-                $.cookie( $( '#messageBar' ).attr( 'data-token' ), '', {expires: expireDate} );
-            }
         } );
     },
     showMessage: function ( options ) {
         $( '#messageBar .msg' ).html( options.msg );
-        if ( options.showOnce ) {
-            $( '#messageBar' ).attr( {'data-token': 'msg-' + options.token, 'data-expire': options.expire} );
-        }
         if ( typeof options.fixed != 'undefined' ) {
             $( '#messageBar' ).addClass( 'fixed' );
         } else {
@@ -581,7 +573,12 @@ APP = {
             );
         }
         
-        UI.notificationBox.addNotification(notification);
+        return UI.notificationBox.addNotification(notification);
+    },
+    removeNotification: function (notification) {
+        if (UI. notificationBox) {
+            UI.notificationBox.removeNotification(notification);
+        }
     }
 };
 

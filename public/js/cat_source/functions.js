@@ -313,13 +313,20 @@ function fileUpload(form, action_url, div_id) {
 
 //    document.getElementById(div_id).innerHTML = "Uploading...";
     $('.popup-addtm-tr .x-popup').click();
-    UI.showMessage({
+	var notification = {
+		title: 'Upload',
+		text: 'Uploading your TM...',
+		type: 'warning',
+		position: "bl"
+	};
+	APP.addNotification(notification);
+    /*UI.showMessage({
         msg: 'Uploading your TM...'
-    });
+    });*/
     $('#messageBar .msg').after('<span class="progress"></span>');
     TMKey = $('#addtm-tr-key').val();
     TMName = $('#uploadTMX').text();
-console.log('TMKey 1: ', TMKey);
+	console.log('TMKey 1: ', TMKey);
     console.log('TMName 1: ', TMName);
 //    UI.pollForUploadProgress(TMKey, TMName);
 
@@ -340,39 +347,6 @@ function stackTrace() {
     var err = new Error();
     return err.stack;
 }
-// addTM webworker
-/*
-function werror(e) {
-    console.log('ERROR: Line ', e.lineno, ' in ', e.filename, ': ', e.message);
-}
-
-function handleFileSelect(evt) {
-    evt.stopPropagation();
-    evt.preventDefault();
-
-    var files = evt.dataTransfer.files||evt.target.files;
-    // FileList object.
-
-    worker.postMessage({
-        'files' : files
-    });
-    //Sending File list to worker
-    // files is a FileList of File objects. List some properties.
-    var output = [];
-    for (var i = 0, f; f = files[i]; i++) {
-        output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ', f.size, ' bytes, last modified: ', f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a', '</li>');
-    }
-    document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
-}
-
-function handleDragOver(evt) {
-    evt.stopPropagation();
-    evt.preventDefault();
-    evt.dataTransfer.dropEffect = 'copy';
-    // Explicitly show this is a copy.
-}
-*/
-
 
 /* FORMATTING FUNCTION  TO TEST */
 

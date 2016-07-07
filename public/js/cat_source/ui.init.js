@@ -3,6 +3,10 @@
  */
 $.extend(UI, {
 	init: function() {
+
+		this.isMac = (navigator.platform == 'MacIntel')? true : false;
+		this.shortcutLeader = (this.isMac) ? 'CMD' : 'CTRL' ;
+
 		this.initStart = new Date();
 		this.version = "x.x.x";
 		this.numContributionMatchesResults = 3;
@@ -19,6 +23,7 @@ $.extend(UI, {
 		this.searchParams.search = 0;
 		this.customSpellcheck = false;
 		this.noGlossary = false;
+		this.displayedMessages = [];
 		setTimeout(function() {
 			UI.blockGetMoreSegments = false;
 		}, 200);
@@ -26,7 +31,6 @@ $.extend(UI, {
         $('html').trigger('init');
         this.setTagMode();
 		this.detectFirstLast();
-		this.initSegmentNavBar();
 		rangy.init();
 		this.savedSel = null;
 		this.savedSelActiveElement = null;
@@ -166,6 +170,7 @@ $.extend(UI, {
 		APP.initMessageBar();
 		this.checkVersion();
         this.initTM();
+		this.initAdvanceOptions();
         this.storeClientInfo();
 
         // SET EVENTS

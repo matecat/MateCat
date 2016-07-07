@@ -27,6 +27,7 @@
               return obj.stack;
             };
             var config = {
+                is_cattool : true,
                 basepath: '${basepath | string:/}',
                 maxFileSize: ${maxFileSize},
                 maxTMXFileSize: ${maxTMXFileSize},
@@ -80,7 +81,15 @@
                 lxq_enabled: ${lxq_enabled | string:false},
                 qa_check_glossary_enabled : ${qa_check_glossary_enabled | string:false },
                 qa_check_blacklist_enabled : ${qa_check_blacklist_enabled | string:false },
-                support_mail : '${support_mail}'
+                support_mail : '${support_mail}',
+                qa_check_blacklist_enabled : ${qa_check_blacklist_enabled | string:false },
+                speech2text_enabled: ${speech2text_enabled | string:false},
+                tag_projection_enabled: ${tag_projection_enabled | string:false},
+                lexiqa_languages: ${lexiqa_languages},
+                deny_lexiqa: ${deny_lexiqa | string:false},
+                tag_projection_languages: ${tag_projection_languages},
+                languages_array : ${languages_array},
+                segmentation_rule : '${segmentation_rule}'
             };
 
             var renderStart = new Date();
@@ -207,15 +216,6 @@
         <div id="outer">
 
        	</div>
-
-        <nav id="jobNav" class="slideMenu">
-            <ul id="segmentNavBar" class="bar">
-                <li class="jobstart"><a href="#" title="Go to job start">Job start</a></li>
-                <li class="prevfile"><a href="#" title="Go to the current file header">This/Previous file start</a></li>
-                <li class="currseg"><a href="#" title="Go to the current opened segment">Current segment</a></li>
-				<!--                <li class="nextfile"><a href="#" title="Go to next file header">Next file start</a></li>   -->             
-            </ul>
-        </nav>
 
 <div class="modal popup-settings" data-type="view">
     <div class="popup-outer"></div>

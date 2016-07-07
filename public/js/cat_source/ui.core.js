@@ -104,13 +104,14 @@ UI = {
         this.currentSegmentTranslation = segment.find( UI.targetContainerSelector() ).text();
     },
 	cacheObjects: function( editarea_or_segment ) {
+        var segment;
         if ( editarea_or_segment instanceof UI.Segment ) {
-            var segment = editarea_or_segment ;
+            segment = editarea_or_segment ;
             this.editarea = segment.el.find( '.editarea' );
         }
         else {
-            this.editarea = $(".editarea", editarea_or_segment.closest('section'));
-            var segment = new UI.Segment( editarea_or_segment.closest('section') );
+            this.editarea = $(".editarea", $(editarea_or_segment).closest('section'));
+            segment = new UI.Segment( $(editarea_or_segment).closest('section') );
         }
 
 		this.lastOpenedSegment = this.currentSegment; // this.currentSegment
@@ -179,7 +180,9 @@ UI = {
 	},
     autopropagateConfirmNeeded: function () {
         var segment = UI.currentSegment;
-        if(this.currentSegmentTranslation.trim() == this.editarea.text().trim()) { //segment not modified
+        // TODO: this is relying on a comparison between strings to determine if the segment
+        // was modified. There should be a more consistent way to read this state, see UI.setSegmentModified .
+        if (this.currentSegmentTranslation.trim() == this.editarea.text().trim()) { //segment not modified
             return false;
         }
 
@@ -252,7 +255,7 @@ UI = {
     },
 
     checkHeaviness: function() {
-        if ($('section').length > config.maxNumSegments) {
+        if ($('section').length > config.maxNumSegments && !UI.offline) {
             UI.reloadToSegment(UI.currentSegmentId);
         }
 
@@ -384,16 +387,30 @@ UI = {
             error: function() {
                 console.log('error');
                 APP.closePopup();
-                UI.showMessage({
+                var notification = {
+                    title: 'Error',
+                    text: 'Error copying all sources to target. Try again!',
+                    type: 'error',
+                    position: "bl"
+                };
+                APP.addNotification(notification);
+                /*UI.showMessage({
                     msg: 'Error copying all sources to target. Try again!'
-                });
+                });*/
             },
             success: function(d) {
                 if(d.errors.length) {
                     APP.closePopup();
-                    UI.showMessage({
+                    var notification = {
+                        title: 'Error',
+                        text: d.errors[0].message,
+                        type: 'error',
+                        position: "bl"
+                    };
+                    APP.addNotification(notification);
+                    /*UI.showMessage({
                         msg: d.errors[0].message
-                    });
+                    });*/
                 } else {
                     $.cookie('source_copied_to_target-' + config.id_job + "-" + config.password, '1', { expires:1 });
                     APP.closePopup();
@@ -436,6 +453,7 @@ UI = {
 		segment.addClass('highlighted1');
 		setTimeout(function() {
 			$('.highlighted1').addClass('modified highlighted2');
+			segment.trigger('modified');
 		}, 300);
 		setTimeout(function() {
 			$('.highlighted1, .highlighted2').removeClass('highlighted1 highlighted2');
@@ -454,18 +472,32 @@ UI = {
 
         var button_label = config.status_labels.TRANSLATED ;
         var label_first_letter = button_label[0];
+        var nextUntranslated, currentButton;
+
+        //Tag Projection: Identify if is enabled in the current segment
+        this.currentSegmentTPEnabled = this.checkCurrentSegmentTPEnabled();
 
 		var disabled = (this.currentSegment.hasClass('loaded')) ? '' : ' disabled="disabled"';
         var nextSegment = this.currentSegment.next();
         var sameButton = (nextSegment.hasClass('status-new')) || (nextSegment.hasClass('status-draft'));
-        var nextUntranslated = (sameButton)? '' : '<li><a id="segment-' + this.currentSegmentId +
-            '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' +
-        this.currentSegmentId + '" title="Translate and go to next untranslated">' + label_first_letter + '+&gt;&gt;</a><p>' +
-        ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
-		UI.segmentButtons = nextUntranslated + '<li><a id="segment-' + this.currentSegmentId +
-            '-button-translated" data-segmentid="segment-' + this.currentSegmentId +
-            '" href="#" class="translated"' + disabled + ' >' + button_label + '</a><p>' +
-            ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
+        if (this.currentSegmentTPEnabled) {
+            nextUntranslated = "";
+            currentButton = '<li><a id="segment-' + this.currentSegmentId +
+                '-button-guesstags" data-segmentid="segment-' + this.currentSegmentId +
+                '" href="#" class="guesstags"' + disabled + ' >' + 'GUESS TAGS' + '</a><p>' +
+                ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
+        } else {
+            nextUntranslated = (sameButton)? '' : '<li><a id="segment-' + this.currentSegmentId +
+                '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' +
+                this.currentSegmentId + '" title="Translate and go to next untranslated">' + label_first_letter + '+&gt;&gt;</a><p>' +
+                ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
+            currentButton = '<li><a id="segment-' + this.currentSegmentId +
+                '-button-translated" data-segmentid="segment-' + this.currentSegmentId +
+                '" href="#" class="translated"' + disabled + ' >' + button_label + '</a><p>' +
+                ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
+        }
+
+        UI.segmentButtons = nextUntranslated + currentButton;
 
 		var buttonsOb = $('#segment-' + this.currentSegmentId + '-buttons');
 
@@ -968,6 +1000,7 @@ UI = {
 		});
 	},
 	getSegments_success: function(d, options) {
+        var startSegmentId;
         if (d.errors.length) {
 			this.processErrors(d.errors, 'getSegments');
         }
@@ -978,6 +1011,8 @@ UI = {
 
 		$.each(d.data.files, function() {
 			startSegmentId = this.segments[0].sid;
+            //Tag Projection: check if is enable the Tag Projection 
+            UI.setGlobalTagProjection(this);
 		});
 
 		if (typeof this.startSegmentId == 'undefined')
@@ -1027,6 +1062,7 @@ UI = {
 		this.setWaypoints();
 		this.markTags();
 		this.checkPendingOperations();
+        this.retrieveStatistics();
         $(document).trigger('getSegments_success');
 
 	},
@@ -1156,11 +1192,6 @@ UI = {
             SegmentActivator.activate(id);
         }
     },
-	initSegmentNavBar: function() {
-		if (config.firstSegmentOfFiles.length == 1) {
-			$('#segmentNavBar .prevfile, #segmentNavBar .nextfile').addClass('disabled');
-		}
-	},
 	justSelecting: function(what) {
 		if (window.getSelection().isCollapsed)
 			return false;
@@ -1184,6 +1215,7 @@ UI = {
 	},
 
     placeCaretAtEnd: function(el) {
+
 		 $(el).focus();
 		 if (typeof window.getSelection != "undefined" && typeof document.createRange != "undefined") {
 			var range = document.createRange();
@@ -1399,12 +1431,12 @@ UI = {
             var readonly = ((this.readonly == 'true')||(UI.body.hasClass('archived'))) ? true : false;
             var autoPropagated = this.autopropagated_from != 0;
             var autoPropagable = (this.repetitions_in_chunk == "1")? false : true;
-            if(typeof this.segment == 'object') console.log(this);
 
             try {
-                if($.parseHTML(this.segment).length) {
+                if (!$.parseHTML(this.segment).length) {
+                } else {
                     this.segment = UI.stripSpans(this.segment);
-                };
+                }
             } catch ( e ){
                 //if we split a segment in more than 3 parts and reload the cattool
                 //this exception is raised:
@@ -1534,12 +1566,9 @@ UI = {
 			UI.currentSegment = undefined;
 		} else {
 			setTimeout(function() {
-//				var hash_value = window.location.hash;
 				window.location.hash = UI.currentSegmentId;
 			}, 300);
 		}
-//        if(id_segment.toString().split('-').length > 1) id_segment = id_segment.toString().split('-');
-//		var file = this.currentFile;
 		if (this.readonly)
 			return;
 		APP.doRequest({
@@ -1547,7 +1576,6 @@ UI = {
 				action: 'setCurrentSegment',
 				password: config.password,
 				id_segment: id_segment.toString(),
-//				id_segment: id_segment.toString().split('-')[0],
 				id_job: config.id_job
 			},
 			context: [reqArguments, id_segment],
@@ -1679,11 +1707,8 @@ UI = {
             .replace( config.crPlaceholderRegex, "\r" )
             .replace( config.crlfPlaceholderRegex, "\r\n" )
             .replace( config.tabPlaceholderRegex, "\t" )
-            //.replace( config.tabPlaceholderRegex, String.fromCharCode( parseInt( 0x21e5, 10 ) ) )
             .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
-//        _str  = htmlDecode(_str );
         _edit = mainStr.replace( String.fromCharCode( parseInt( 0x21e5, 10 ) ), "\t" );
-//        _edit = UI.currentSegment.find('.editarea').text().replace( String.fromCharCode( parseInt( 0x21e5, 10 ) ), "\t" );
 
         //Prepend Unicode Character 'ZERO WIDTH SPACE' invisible, not printable, no spaced character,
         //used to detect initial and final spaces in html diff
@@ -1703,7 +1728,6 @@ UI = {
         this.disableTPOnSegment();
     },
 	copyAlternativeInEditarea: function(translation) {
-		console.log('translation: ', translation);
 		if ($.trim(translation) !== '') {
 			if (this.body.hasClass('searchActive'))
 				this.addWarningToSearchDisplay();
@@ -1749,6 +1773,20 @@ UI = {
 		$('#downloadProject').attr('value', label);
         $('#previewDropdown').attr('data-download', downloadable);
 	},
+    retrieveStatistics: function () {
+        var path = sprintf(
+            '/api/v1/jobs/%s/%s/stats',
+            config.id_job, config.password
+        );
+        $.ajax({
+            url: path,
+            type: 'get',
+        }).done( function( data ) {
+            if (data.stats){
+                UI.setProgress(data.stats);
+            }
+        });
+    },
 	setProgress: function(stats) {
 		var s = stats;
 		m = $('footer .meter');
@@ -1814,55 +1852,28 @@ UI = {
 	},
 
 	formatSelection: function(op) {
-		selection = window.getSelection();
-		range = selection.getRangeAt(0);
-
-		prova = $(range.commonAncestorContainer).text().charAt(range.startOffset - 1);
-        str = getSelectionHtml();
+        var str = getSelectionHtml();
         insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
-		aa = prova.match(/\W$/gi);
-        newStr = '';
-        var aa = $("<div/>").html(str);
-        aa.find('.undoCursorPlaceholder').remove();
-        var rightString = aa.html();
+        var newStr = '';
+        var selection$ = $("<div/>").html(str);
+        selection$.find('.undoCursorPlaceholder').remove();
+        var rightString = selection$.html();
 
         $.each($.parseHTML(rightString), function(index) {
-			if(this.nodeName == '#text') {
+			var toAdd, d, jump, capStr;
+            if(this.nodeName == '#text') {
 				d = this.data;
-//				console.log(index + ' - ' + d);
-//				console.log(!index);
-//				console.log(!aa);
-				jump = ((!index)&&(!aa));
-//				console.log(d.charAt(0));
+				jump = ((!index)&&(!selection$));
 				capStr = toTitleCase(d);
 				if(jump) {
 					capStr = d.charAt(0) + toTitleCase(d).slice(1);
 				}
-/*
-				if(op == 'uppercase') {
-					toAdd = d.toUpperCase();
-				} else if(op == 'lowercase') {
-					toAdd = d.toLowerCase();
-				} else if(op == 'capitalize') {
-					console.log(index + ' - ' + d);
-					if(index == 0) {
-						if(!aa) {
-							toAdd = d;
-						} else {
-							toAdd = toTitleCase(d);
-						}
-					} else {
-						toAdd = toTitleCase(d);
-					}
-				}
-*/
 				toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? capStr : d;
 				newStr += toAdd;
 			}
             else if(this.nodeName == 'LXQWARNING') { 
                 d = this.childNodes[0].data;
-                jump = ((!index)&&(!aa));
-//				console.log(d.charAt(0));
+                jump = ((!index)&&(!selection$));
 				capStr = toTitleCase(d);
 				if(jump) {
 					capStr = d.charAt(0) + toTitleCase(d).slice(1);
@@ -1872,11 +1883,8 @@ UI = {
             }
             else {
 				newStr += this.outerHTML;
-//				newStr += this.innerText;
 			}
 		});
-        console.log('x');
-        console.log('newStr: ', newStr);
         if (LXQ.enabled()) {
             $.powerTip.destroy($('.tooltipa',this.currentSegment));
             $.powerTip.destroy($('.tooltipas',this.currentSegment));
@@ -1884,12 +1892,10 @@ UI = {
             LXQ.reloadPowertip(this.currentSegment);
         }
         else {
-            replaceSelectedText(newStr);
+            replaceSelectedHtml(newStr);
         }
-        console.log('a: ', UI.editarea.html());
-		UI.lockTags();
-        console.log('b: ', UI.editarea.html());
-		this.saveInUndoStack('formatSelection');
+        UI.lockTags();
+        this.saveInUndoStack('formatSelection');
 		saveSelection();
 		$('.editor .editarea .formatSelection-placeholder').after($('.editor .editarea .rangySelectionBoundary'));
 		$('.editor .editarea .formatSelection-placeholder').remove();
@@ -2006,6 +2012,12 @@ UI = {
         var winName ;
         
         var driveUpdateDone = function(data) {
+            if( !data.urls || data.urls.length === 0 ) {
+                APP.alert({msg: "MateCat was not able to update project files on Google Drive. Maybe the project owner revoked privileges to access those files. Ask the project owner to login again and grant Google Drive privileges to MateCat."});
+
+                return;
+            }
+
             var winName ;
 
             $.each( data.urls, function(index, item) {
@@ -2078,7 +2090,13 @@ UI = {
                      */
                     tokenData = $.parseJSON(token);
                     if(parseInt(tokenData.code) < 0) {
-                        UI.showMessage({msg: tokenData.message})
+                        var notification = {
+                            title: 'Error',
+                            text: tokenData.message,
+                            type: 'warning'
+                        };
+                        APP.addNotification(notification);
+                        // UI.showMessage({msg: tokenData.message})
                     }
                     UI.reEnableDownloadButton();
 
@@ -2203,13 +2221,17 @@ UI = {
 				UI.startWarning();
 				var warningPosition = '';
 				UI.globalWarnings = data.details.sort();
+                //The tags with tag projection enabled doesn't show the tags in the source, so tdont show the warning
+                UI.globalWarnings = UI.filterTagsWithTagProjection(UI.globalWarnings);
 				UI.firstWarnedSegment = UI.globalWarnings[0];
 				UI.translationMismatches = data.translation_mismatches;
 
 				//check for errors
 				if (UI.globalWarnings.length > 0) {
 					//for now, put only last in the pointer to segment id
-					warningPosition = '#' + data.details[ Object.keys(data.details).sort().shift() ].id_segment;
+					// warningPosition = '#' + data.details[ Object.keys(data.details).sort().shift() ].id_segment;
+
+                    // data.details = UI.filterTagsWithTagProjection(data.details);
 
 					if (openingSegment)
 						UI.fillCurrentSegmentWarnings(data.details, true);
@@ -2241,16 +2263,26 @@ UI = {
 		});
 	},
 	displayMessage: function(messages) {
+        var self = this;
 		if($('body').hasClass('incomingMsg')) return false;
         $.each(messages, function() {
-            if(typeof $.cookie('msg-' + this.token) == 'undefined' && ( new Date( this.expire ) > ( new Date() ) )  ) {
-                UI.showMessage({
-                    msg: this.msg,
-                    token: this.token,
-                    showOnce: true,
-                    expire: this.expire
-                });
-
+            var elem = this;
+            if(typeof $.cookie('msg-' + this.token) == 'undefined' && ( new Date( this.expire ) > ( new Date() ) ) &&
+                (typeof self.displayedMessages !== 'undefined' && self.displayedMessages.indexOf(this.token) < 0 )) {
+                var notification = {
+                    title: 'Notice',
+                    text: this.msg,
+                    type: 'warning',
+                    autoDismiss: false,
+                    position: "bl",
+                    allowHtml: true,
+                    closeCallback: function () {
+                        var expireDate = new Date(elem.expire);
+                        $.cookie('msg-' + elem.token, '', {expires: expireDate});
+                    }
+                };
+                APP.addNotification(notification);
+                self.displayedMessages.push(elem.token);
                 return false;
             }
         });
@@ -2260,20 +2292,16 @@ UI = {
         APP.showMessage(options);
 
 	},
-    showExistingMessage: function () {
-        if(!$('body').hasClass('incomingMsg')) {
-            $('body' ).addClass('incomingMsg');
-            setTimeout(  function() {$('body' ).removeClass('incomingMsg' )} , 5000  );
-        }
-        setTimeout(  function() {$('body' ).removeClass('incomingMsg' )} , 5000  );
-    },
 	checkVersion: function() {
 		if(this.version != config.build_number) {
-			UI.showMessage({
-				msg: 'A new version of MateCat has been released. Please <a href="#" class="reloadPage">click here</a> or clic CTRL+F5 (or CMD+R on Mac) to update.',
-				token: false,
-				fixed: true
-			});
+            var notification = {
+                title: 'Eew version of MateCat',
+                text: 'A new version of MateCat has been released. Please <a href="#" class="reloadPage">click here</a> or clic CTRL+F5 (or CMD+R on Mac) to update.',
+                type: 'warning',
+                allowHtml: true,
+                position: "bl"
+            };
+            APP.addNotification(notification);
 		}
 	},
     currentSegmentLexiQA: function() {
@@ -2397,8 +2425,9 @@ UI = {
         } else {
             this.updateToSetTranslationTail( item )
         }
-        //If is offline and is in the tail I decrease the counter
-        //else I execute the tail
+
+        // If is offline and is in the tail I decrease the counter
+        // else I execute the tail
         if ( this.offline && config.offlineModeEnabled ) {
             if ( saveTranslation ) {
                 this.decrementOfflineCacheRemaining();
@@ -2514,8 +2543,8 @@ UI = {
             propagate: propagate
         };
         if(isSplitted) {
+            this.setStatus($('#segment-' + id_segment), status);
             this.tempReqArguments.splitStatuses = this.collectSplittedStatuses(id_segment).toString();
-            this.setStatus($('#segment-' + id_segment), 'translated');
         }
         if(!propagate) {
             this.tempReqArguments.propagate = false;
@@ -2539,19 +2568,49 @@ UI = {
                 }
                 UI.execSetTranslationTail();
 				UI.setTranslation_success(data, this[1]);
+
+                var record = MateCat.db.segments.by('sid', data.translation.sid);
+                MateCat.db.segments.update( _.extend(record, data.translation) );
+
                 $(document).trigger('translation:change', data.translation);
+
                 var translation = $('.editarea', segment ).text().replace(/\uFEFF/g,'');
                 UI.doLexiQA(segment,translation,id_segment,true,null);
                 $(document).trigger('setTranslation:success', data);
 			}
 		});
 	},
+    /**
+     * This function is an attempt to centralize all distributed logic used to mark
+     * the segment as modified. When a segment is modified we set the class and we set
+     * data. And we trigger an event.
+     *
+     * Preferred way would be to use MateCat.db.segments to save this data, and have the
+     * UI redraw after this change. This would help transition to component based architecture.
+     *
+     * @param el
+     */
+    setSegmentModified : function( el, isModified ) {
+        if ( typeof isModified == 'undefined' ) {
+            throw new Exception('isModified parameter is missing.');
+        }
+
+        if ( isModified ) {
+            el.addClass('modified');
+            el.data('modified', true);
+            el.trigger('modified');
+        } else {
+            el.removeClass('modified');
+            el.data('modified', false);
+            el.trigger('modified');
+        }
+    },
     collectSplittedStatuses: function (sid) {
         statuses = [];
         segmentsIds = $('#segment-' + sid).attr('data-split-group').split(',');
         $.each(segmentsIds, function (index) {
             segment = $('#segment-' + this);
-            status = (this == sid)? 'translated' : UI.getStatus(segment);
+            status = UI.getStatus(segment);
             statuses.push(status);
         });
         return statuses;
@@ -2955,7 +3014,10 @@ UI = {
 
             //NOTE: i've added filter .not( segment ) to exclude current segment from list to be set as draft
             $.each($('section[data-hash=' + $(segment).attr('data-hash') + '].status-new, section[data-hash=' + $(segment).attr('data-hash') + '].status-draft, section[data-hash=' + $(segment).attr('data-hash') + '].status-rejected' + ', section[data-hash=' + $(segment).attr('data-hash') + '].status-translated' + plusApproved ).not( segment ), function() {
-                $('.editarea', this).html( $('.editarea', segment).html() );
+                $('.editarea', $(this)).html( $('.editarea', segment).html() );
+
+                //Tag Projection: disable it if enable
+                UI.disableTPOnSegment($(this));
 
                 // if status is not set to draft, the segment content is not displayed
                 UI.setStatus($(this), status); // now the status, too, is propagated
@@ -2971,7 +3033,7 @@ UI = {
             //NOTE: because this method is called after OpenSegment
             // AS callback return for setTranslation ( whe are here now ),
             // currentSegment pointer was already advanced by openSegment and header already created
-            //Needed because two consecutives segments can have the same hash
+            //Needed because two consecutive segments can have the same hash
             this.createHeader(true);
 
         }
@@ -3526,26 +3588,20 @@ UI = {
                     //console.log('UI.lexiqaData.lexiqaWarnings');
                     //console.dir(UI.lexiqaData.lexiqaWarnings);
                      $('#lexiqabox').attr('class', 'warningbox').attr("title", "Go to lexiQA for QA analysis").find('.numbererror').text(errorCnt);
-                    $('.tooltipa').powerTip({
-                        placement: 'sw',
-                        mouseOnToPopup: true,
-                        smartPlacement: true,
-                        closeDelay: 500
-                    });
-                    $('.tooltipas').powerTip({
-                        placement: 'se',
-                        mouseOnToPopup: true,
-                        smartPlacement: true,
-                        closeDelay: 500
-                    });
+                    if( LXQ.enabled() ) {
+                        LXQ.reloadPowertip();
+                    }
                 }
                 else {
                     $('#lexiqabox').attr('class', 'lexnotific').attr("title", "Well done, no errors found!").find('.numbererror').text('');                    
                       results.qaurl= "#";  
                 }
-                LXQ.doQAallSegments();
-                if (LXQ.enabled()) LXQ.refreshElements();
-                //$('.lxq-history-balloon-header-link').attr('href', results.qaurl);     
+
+                if (LXQ.enabled()){
+                    LXQ.doQAallSegments();
+                    LXQ.refreshElements();
+                }
+                //$('.lxq-history-balloon-header-link').attr('href', results.qaurl);
                 UI.lexiqaData.lexiqaFetching = false;             
             }});                
     },
@@ -3566,11 +3622,14 @@ UI = {
         $("article").each(function() {
             APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30);
         });
+        
         UI.render({
             firstLoad: true
+        }).done( function() {
+            // launch segments check on opening
+            UI.checkWarnings(true);
         });
-        //launch segments check on opening
-        UI.checkWarnings(true);
+        
         $('html').trigger('start');
         if (LXQ.enabled()) {
             $('#lexiqabox').removeAttr("style");
@@ -3623,6 +3682,7 @@ UI = {
             } else {
                 UI.blockOpenSegment = false;
             }
+            
             UI.lastOperation = operation;
 
             UI.openSegment(this, operation);
@@ -3657,7 +3717,8 @@ UI = {
         //??
         $('.test-invisible').remove();
 
-        UI.currentSegment.removeClass('modified');
+        UI.setSegmentModified( UI.currentSegment, false ) ;
+
         var skipChange = false;
         if (buttonValue == 'next-untranslated') {
             if (!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {
@@ -3707,7 +3768,19 @@ UI = {
         UI.lockTags(UI.editarea);
         UI.changeStatusStop = new Date();
         UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
-    }
+    },
+    openOptionsPanel: function() {
+        if ($(".popup-tm").hasClass('open') ) {
+            return false;
+        }
+        var tab = 'opt';
+        $('body').addClass('side-popup');
+        $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
+        $("#SnapABug_Button").hide();
+        $(".outer-tm").show();
+        $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
+        $.cookie('tmpanel-open', 1, { path: '/' });
+    },
 
 
 };

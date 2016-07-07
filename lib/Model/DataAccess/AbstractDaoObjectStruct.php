@@ -54,6 +54,8 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass {
      * @param $params
      * @param $function
      *
+     * @return mixed
+     * 
      * FIXME: current implementation is bogus because it only allows to pass one parameter.
      *
      */
@@ -152,11 +154,11 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass {
         $publicProperties = $reflectionClass->getProperties( ReflectionProperty::IS_PUBLIC ) ;
         foreach( $publicProperties as $property ) {
             if ( !empty($mask) ) {
-                if (! in_array( $property->getName(), $mask)) {
+                if ( !in_array( $property->getName(), $mask ) ) {
                     continue;
                 }
             }
-            $attributes[$property->getName()] = $property->getValue($this);
+            $attributes[ $property->getName() ] = $property->getValue( $this );
         }
         return $attributes;
 

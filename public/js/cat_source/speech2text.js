@@ -1,12 +1,54 @@
 Speech2Text = {
     enabled: function () {
-        return !!('webkitSpeechRecognition' in window);
-
+        return !!('webkitSpeechRecognition' in window && !!config.speech2text_enabled);
+    },
+    disable: function () {
+        if (config.speech2text_enabled) {
+            config.speech2text_enabled = 0;
+            var path = sprintf(
+                '/api/v2/jobs/%s/%s/options',
+                config.id_job, config.password
+            );
+            var data = {
+                'speech2text': false
+            };
+            $.ajax({
+                url: path,
+                type: 'POST',
+                data : data
+            }).done( function( data ) {
+                UI.render();
+            });
+        }
+    },
+    enable: function () {
+        if (!config.speech2text_enabled) {
+            config.speech2text_enabled = 1;
+            var path = sprintf(
+                '/api/v2/jobs/%s/%s/options',
+                config.id_job, config.password
+            );
+            var data = {
+                'speech2text': true
+            };
+            $.ajax({
+                url: path,
+                type: 'POST',
+                data : data
+            }).done( function( data ) {
+                if (!Speech2Text.initialized) {
+                    Speech2Text.init();
+                    Speech2Text.loadRecognition();
+                }
+                UI.render();
+            });
+        }
     }
 };
 
-if ( Speech2Text.enabled() ) {
-    (function ($, Speech2Text, undefined) {
+Speech2Text.init  = function () {
+    Speech2Text.initialized = true;
+    return (function ($, Speech2Text, undefined) {
         $.extend(Speech2Text, {
             recognition: null,
             recognizing: false,
@@ -14,7 +56,6 @@ if ( Speech2Text.enabled() ) {
             finalTranscript: '',
             interimTranscript: '',
             targetElement: null,
-            isToEmptyTargetElement: true,
             isStopingRecognition: false,
             isToKeepRecognizing: false,
             wereMatchesPreviouslyOpened: false,
@@ -32,19 +73,15 @@ if ( Speech2Text.enabled() ) {
                 Speech2Text.microphone = segment.find('.micSpeech');
 
                 if (Speech2Text.recognition) {
+
                     Speech2Text.targetElement = Speech2Text.microphone.parent().find('.editarea');
 
-                    var segmentId = segment.data('split-original-id');
-                    var segmentRecord = MateCat.db.segments.by('sid', segmentId);
-
-                    Speech2Text.isToEmptyTargetElement = Speech2Text
-                        .shouldEmptyTargetElement(segmentRecord);
-
-                    Speech2Text.microphone.click(Speech2Text.clickMicrophone);
+                    Speech2Text.microphone.on('click', Speech2Text.clickMicrophone );
 
                     if (Speech2Text.recognizing) {
                         Speech2Text.startSpeechRecognition(Speech2Text.microphone);
                     }
+
                 } else {
                     Speech2Text.microphone.hide();
 
@@ -58,29 +95,39 @@ if ( Speech2Text.enabled() ) {
                 Speech2Text.stopSpeechRecognition(microphone);
             },
             clickMicrophone: function (event) {
-                var microphone = $(this);
+                var microphone = $(event.currentTarget);
 
                 Speech2Text.isStopingRecognition = false;
 
                 if (microphone.hasClass('micSpeechActive')) {
+
                     Speech2Text.disableContinuousRecognizing();
                     Speech2Text.stopSpeechRecognition(microphone);
+
                 } else {
-                    Speech2Text.startSpeechRecognition(microphone);
+                    var segmentObj = new UI.Segment( microphone.closest('section') );
+                    var segmentRecord = MateCat.db.segments.by('sid', segmentObj.absId );
+
+                    Speech2Text.startSpeechRecognition(microphone, segmentRecord);
                     Speech2Text.enableContinuousRecognizing();
                 }
             },
             startSpeechRecognition: function (microphone) {
+                var segment = microphone.closest('section');
+                var segmentId = new UI.Segment( segment ).absId ;
+                var segmentRecord = MateCat.db.segments.by('sid', segmentId);
+
                 if (!microphone.hasClass('micSpeechActive')) {
                     microphone.addClass('micSpeechActive');
                     Speech2Text.animateSpeechActive();
                 }
 
-                if (Speech2Text.isToEmptyTargetElement) {
+                if (Speech2Text.shouldEmptyTargetElement( segmentRecord )) {
                     Speech2Text.finalTranscript = '';
                     Speech2Text.targetElement.html('');
                 } else {
-                    Speech2Text.finalTranscript = Speech2Text.targetElement.text() + ' ';
+
+                    Speech2Text.finalTranscript = Speech2Text.targetElement.html() + ' ';
                 }
 
                 Speech2Text.interimTranscript = '';
@@ -89,12 +136,12 @@ if ( Speech2Text.enabled() ) {
                     Speech2Text.recognition.start();
                     Speech2Text.showMatches();
                     Speech2Text.targetElement.on('blur keyup paste input', function (event) {
-                        Speech2Text.finalTranscript = $(this).text().trim() + ' ';
+                        Speech2Text.finalTranscript = $(this).html().trim() + ' ';
                     });
                 }
             },
             stopSpeechRecognition: function (microphone) {
-                microphone.removeClass('micSpeechActive');
+                microphone.removeClass('micSpeechActive micSpeechReceiving');
 
                 Speech2Text.recognition.stop();
                 Speech2Text.targetElement.off('blur keyup paste input');
@@ -139,21 +186,13 @@ if ( Speech2Text.enabled() ) {
                     }
                 }
 
-                Speech2Text.finalTranscript = Speech2Text.capitalize(Speech2Text.finalTranscript);
-
                 if (!Speech2Text.isStopingRecognition) {
                     Speech2Text.targetElement.html(
                         Speech2Text.linebreak(Speech2Text.finalTranscript)
                         + Speech2Text.linebreak(Speech2Text.interimTranscript)
                     );
+                    UI.setSegmentModified( Speech2Text.targetElement.closest('section'), true );
                 }
-            },
-            capitalize: function (s) {
-                var first_char = /\S/;
-
-                return s.replace(first_char, function (m) {
-                    return m.toUpperCase();
-                });
             },
             linebreak: function (s) {
                 var two_line = /\n\n/g;
@@ -161,24 +200,13 @@ if ( Speech2Text.enabled() ) {
 
                 return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
             },
-            putSegmentsInStore: function (data) {
-                $.each(data.files, function () {
-                    $.each(this.segments, function () {
-                        MateCat.db.upsert('segments', 'sid', _.clone(this));
-                    });
-                });
-            },
             shouldEmptyTargetElement: function (segment) {
-                if ((segment.autopropagated_from && segment.autopropagated_from != "0")
+                if ( (segment.autopropagated_from && segment.autopropagated_from != "0")
                     || segment.suggestion_match === "100"
-                    || segment.status === "TRANSLATED"
-                    || segment.status === "REJECTED"
-                    || segment.status === "APPROVED"
-                    || segment.status === "FIXED"
-                    || segment.status === "REBUTTED") {
+                    || segment.status !== "NEW"
+                ) {
                     return false;
                 }
-
                 return true;
             },
             enableContinuousRecognizing: function () {
@@ -207,6 +235,23 @@ if ( Speech2Text.enabled() ) {
             },
             animateSpeechReceiving: function () {
                 Speech2Text.microphone.addClass('micSpeechReceiving');
+            },
+
+            /**
+             * This method checks if a contribution match is to be copied insied the edit area.
+             * If speech is active, then only contributions with match 100% are to be copied.
+             *
+             * @param match
+             * @returns {boolean}
+             */
+            isContributionToBeAllowed : function( match ) {
+                return !Speech2Text.recognizing || match == "100%" ;
+            }
+        });
+
+        $(document).on('contribution:copied', function( ev, data) {
+            if ( Speech2Text.microphone.closest('section').attr('id') == data.segment.attr('id') ) {
+                Speech2Text.finalTranscript = data.translation + ' ';
             }
         });
 
@@ -214,4 +259,8 @@ if ( Speech2Text.enabled() ) {
             Speech2Text.loadRecognition();
         });
     })(jQuery, Speech2Text);
+};
+
+if (Speech2Text.enabled()) {
+    Speech2Text.init();
 }

@@ -155,6 +155,7 @@ class Langs_Languages {
 
     /**
      * get list of enabled languages
+     *
      * @param string $localizationLang
      *
      * @return array

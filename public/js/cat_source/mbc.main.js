@@ -357,8 +357,6 @@ if ( MBC.enabled() )
         }
 
         var renderSegmentBalloon = function ( el ) {
-            if ( !$( el ).is( ':visible' ) ) return;
-
             var segment = new UI.Segment( el );
             var comments = db.getCommentsBySegment( segment.absoluteId );
             if ( comments.length > 0 ) {
@@ -374,17 +372,22 @@ if ( MBC.enabled() )
             var someMarginOnTop = 100;
             var headerMenu = $( '.header-menu' ).height();
 
-            $( "html,body" ).animate( {
+            var animation = $( "html,body" ).animate( {
                 scrollTop: section.offset().top - headerMenu - someMarginOnTop
             }, 500 );
+            
+            return animation ;
         }
 
         var openSegmentComment = function ( el ) {
-            $( 'article' ).addClass( 'mbc-commenting-opened' );
-            $( 'body' ).addClass( 'side-tools-opened' );
+            popLastCommentHash(); 
             hackSnapEngage( true );
-            renderSegmentBalloon( el );
-            scrollSegment( el );
+
+            scrollSegment( el ).promise().done( function() {
+                $( 'article' ).addClass( 'mbc-commenting-opened' );
+                $( 'body' ).addClass( 'side-tools-opened' );
+                renderSegmentBalloon( el );
+            }); 
         }
 
         var openSegmentCommentNoScroll = function ( el ) {
@@ -646,7 +649,7 @@ if ( MBC.enabled() )
          * of the page.
          */
         $(document).on('click', function(e) {
-            if (e.target.closest('section') == null) {
+            if ($(e.target).closest('section') == null) {
                 closeBalloon();
             }
         });
@@ -814,7 +817,7 @@ if ( MBC.enabled() )
             $( '#mbc-history' ).remove();
             $( '.mbc-history-balloon-outer' ).remove();
             $( '.header-menu li#filterSwitch' ).before( $( tpls.historyIcon ) );
-            $( '.header-menu' ).append( $( tpls.historyOuter ).append( $( tpls.historyNoComments ) ) );
+            $( '#mbc-history' ).append( $( tpls.historyOuter ).append( $( tpls.historyNoComments ) ) );
 
             refreshElements();
 

@@ -50,6 +50,11 @@ class createProjectController extends ajaxController {
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
                 'lexiqa'             => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
+                'speech2text'        => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
+                'tag_projection'     => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
+                'segmentation_rule'  => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                )
 
                 //            This will be sanitized inside the TmKeyManagement class
                 //            SKIP
@@ -101,9 +106,9 @@ class createProjectController extends ajaxController {
 
         $__postPrivateTmKey = array_filter( $private_keyList, array( "self", "sanitizeTmKeyArr" ) );
 
-        //NOTE: This is for debug purpose only,
-        //NOTE: Global $_POST Overriding from CLI
-//        $__postInput = filter_var_array( $_POST, $filterArgs );
+        // NOTE: This is for debug purpose only,
+        // NOTE: Global $_POST Overriding from CLI
+        // $__postInput = filter_var_array( $_POST, $filterArgs );
 
         $this->file_name               = $__postInput[ 'file_name' ];       // da cambiare, FA SCHIFO la serializzazione
         $this->project_name            = $__postInput[ 'project_name' ];
@@ -118,7 +123,8 @@ class createProjectController extends ajaxController {
         $this->lang_detect_files       = $__postInput[ 'lang_detect_files' ];
         $this->pretranslate_100        = $__postInput[ 'pretranslate_100' ];
         $this->dqf_key                 = $__postInput[ 'dqf_key' ];
-        $this->metadata                = array( 'lexiqa' => $__postInput[ 'lexiqa' ] );
+        
+        $this->setMetadataFromPostInput( $__postInput ) ;
 
         if ( $this->disable_tms_engine_flag ) {
             $this->tms_engine = 0; //remove default MyMemory
@@ -323,6 +329,17 @@ class createProjectController extends ajaxController {
 
         return $elem->toArray();
 
+    }
+    
+    private function setMetadataFromPostInput( $__postInput ) {
+        $options = array() ;
+
+        if ( isset( $__postInput['lexiqa']) )           $options['lexiqa'] = $__postInput[ 'lexiqa' ];
+        if ( isset( $__postInput['speech2text']) )      $options['speech2text'] = $__postInput[ 'speech2text' ];
+        if ( isset( $__postInput['tag_projection']) )   $options['tag_projection'] = $__postInput[ 'tag_projection' ];
+        if ( isset( $__postInput['segmentation_rule']) ) $options['segmentation_rule'] = $__postInput[ 'segmentation_rule' ];
+
+        $this->metadata = $options ; 
     }
 
 }

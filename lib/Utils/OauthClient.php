@@ -26,8 +26,6 @@ class OauthClient {
 		$this->client->setClientSecret(INIT::$OAUTH_CLIENT_SECRET);
 		$this->client->setRedirectUri(INIT::$OAUTH_REDIRECT_URL);
 		$this->client->setScopes(INIT::$OAUTH_SCOPES);
-		$this->client->setAccessType("offline");
-                $this->client->setPrompt("consent");
 	}
 
 	public function getClient(){
@@ -41,6 +39,8 @@ class OauthClient {
          */
         public function setScopesToGDrive() {
                 $this->client->setScopes(INIT::$OAUTH_GDRIVE_SCOPES);
+                $this->client->setAccessType("offline");
+                $this->client->setPrompt("consent");
 		return self::$instance;
         }
 } 

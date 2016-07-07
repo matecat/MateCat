@@ -7,7 +7,51 @@ if ( ReviewImproved.enabled() && !config.isReview)
         ReactDOM.unmountComponentAtNode( mountpoint );
     };
 
+    var original_createButtons = UI.createButtons ;
+
+    var originalBindShortcuts = UI.bindShortcuts ;
+
+    var clickOnRebutted = function(sid) {
+        var el = UI.Segment.findEl(sid);
+        el.removeClass('modified');
+        UI.changeStatus(el, 'rebutted', true);
+        UI.gotoNextSegment();
+    };
+
+    var clickOnFixed = function(sid) {
+        var el = UI.Segment.findEl( sid );
+        if ( el.find('.button-fixed').attr('disabled') == 'disabled' ) {
+            return ;
+        }
+
+        el.removeClass('modified');
+        el.data('modified',  false);
+        UI.changeStatus(el, 'fixed', true);
+        UI.gotoNextSegment(); // NOT ideal behaviour, would be better to have a callback chain of sort.
+
+    };
+    var handleKeyPressOnMainButton = function(e) {
+        if ( $('.editor .buttons .button-rebutted').length ) {
+            clickOnRebutted(UI.currentSegmentId);
+        }
+        else if ( $('.editor .buttons .button-fixed').length ) {
+            clickOnFixed(UI.currentSegmentId);
+        }
+    }
+
+    $.extend(ReviewImproved, {
+        clickOnRebutted : clickOnRebutted,
+        clickOnFixed : clickOnFixed,
+    });
+
     $.extend(UI, {
+
+        bindShortcuts: function() {
+            originalBindShortcuts();
+            $("body").on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.standard, handleKeyPressOnMainButton );
+            $("body").on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.mac, handleKeyPressOnMainButton );
+        },
+
         showRevisionStatuses : function() {
             return false;
         },
@@ -25,36 +69,6 @@ if ( ReviewImproved.enabled() && !config.isReview)
             $('p.warnings', segObj.el).empty();
         },
 
-        createLegacyButtons : function( segment ) {
-            var seg_el = segment.el ;
-
-            var button_label = config.status_labels.TRANSLATED ;
-            var label_first_letter = button_label[0];
-
-            var disabled = (seg_el.hasClass('loaded')) ? '' : ' disabled="disabled"';
-            var nextSegment = segment.el.next();
-            var sameButton = (nextSegment.hasClass('status-new')) || (nextSegment.hasClass('status-draft'));
-            var nextUntranslated = (sameButton)? '' : '<li><a id="segment-' + segment.id +
-                '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' +
-                segment.id + '" title="Translate and go to next untranslated">' +
-                label_first_letter + '+&gt;&gt;</a><p>' +
-
-            ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li>';
-
-            UI.segmentButtons = nextUntranslated + '<li><a id="segment-' + segment.id +
-                '-button-translated" data-segmentid="segment-' + segment.id +
-                '" href="#" class="translated"' + disabled + ' >' + button_label + '</a><p>' +
-                ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
-
-            var buttonsOb = $('#segment-' + segment.id + '-buttons');
-
-            // HACK, remove all but the react-buttons
-            buttonsOb.append(UI.segmentButtons);
-            buttonsOb.before('<p class="warnings"></p>');
-
-            UI.segmentButtons = null ;
-        },
-
         removeButtons : function(byButton, segment) {
             unmountReactButtons( segment );
             UI.cleanupLegacyButtons( segment );
@@ -64,6 +78,10 @@ if ( ReviewImproved.enabled() && !config.isReview)
          * alongside the legacy buttons hadled with jquery.
          */
         createButtons: function(segment) {
+            if ( typeof segment == 'undefined' ) {
+                segment  = new UI.Segment( UI.currentSegment );
+            }
+
             var data = MateCat.db.segments.by('sid', segment.absId );
 
             if ( showFixedAndRebuttedButtons( data.status ) ) {
@@ -77,7 +95,7 @@ if ( ReviewImproved.enabled() && !config.isReview)
             } else {
                 unmountReactButtons( segment.el );
                 UI.cleanupLegacyButtons( segment.el );
-                UI.createLegacyButtons( segment ) ;
+                original_createButtons.apply(this, segment) ;
             }
         }
     })

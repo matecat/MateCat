@@ -80,7 +80,8 @@ $.extend(UI, {
 		});
 		this.setFindFunction('next');
 		this.body.addClass('searchActive');
-
+		//Save the current segment to not lose the translation
+		UI.saveSegment(UI.currentSegment);
 		var dd = new Date();
 		APP.doRequest({
 			data: {

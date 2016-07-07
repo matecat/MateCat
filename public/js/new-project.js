@@ -1,60 +1,9 @@
 $(document).ready(function() {
 
-	$('#create_private_tm_btn').click(function() {
-
-		//prevent double click
-		if ( $( this ).hasClass( 'disabled' ) ) return false;
-
-		//show spinner
-		//$('#get-new-tm-spinner').show();
-		//disable button
-		$(this).addClass('disabled');
-		$(this).attr('disabled','');
-		if(typeof $(this).attr('data-key') == 'undefined') {
-
-            //call API
-            APP.doRequest( {
-                data: {
-                    action: 'createRandUser'
-                },
-                success: function ( d ) {
-                    $( '#private-tm-key' ).val( d.data.key );
-                    $( '#private-tm-user' ).val( d.data.id );
-                    $( '#private-tm-pass' ).val( d.data.pass );
-                    $( '#create_private_tm_btn' ).attr( 'data-key', d.data.key );
-
-					$( 'tr.template-download.fade.ready ').each( function( key, fileUploadedRow ){
-
-						var _fileName = $( fileUploadedRow ).find( '.name' ).text();
-						if ( _fileName.split('.').pop().toLowerCase() == 'tmx' ) {
-
-							UI.appendNewTmKeyToPanel( {
-								r: 1,
-								w: 1,
-								desc: _fileName,
-								TMKey: d.data.key
-							} );
-
-							return true;
-						}
-
-					});
-
-                    return false;
-                }
-            } );
-
-		} else {
-			$('#private-tm-key').val($(this).attr('data-key'));
-		}
-
-	});
-
-	$(".more").click(function(e){
+	$( "a.more-options" ).on("click", function ( e ) {
 		e.preventDefault();
-		$(".advanced-box").toggle('fast');
-		$(".more").toggleClass('minus');
-	});
+		APP.openOptionsPanel("opt")
+	} );
 
 	$("#source-lang").on('change', function(e){
             console.log('source language changed');
@@ -110,22 +59,25 @@ $(document).ready(function() {
 
 		APP.doRequest({
 			data: {
-				action				: "createProject",
-				file_name			: filename,
-				project_name		: $('#project-name').val(),
-				source_language		: $('#source-lang').val(),
-				target_language		: $('#target-lang').val(),
-                job_subject         : $('#subject').val(),
-                disable_tms_engine	: ( $('#disable_tms_engine').prop('checked') ) ? $('#disable_tms_engine').val() : false,
-				mt_engine			: $('#mt_engine').val(),
-                private_tm_key		: $('#private-tm-key').val(),
-                private_keys_list	: tm_data,
-				private_tm_user		: ( !$('#private-tm-user').prop('disabled') ? $('#private-tm-user').val() : "" ),
-				private_tm_pass		: ( !$('#private-tm-pass').prop('disabled') ? $('#private-tm-pass').val() : "" ),
-				lang_detect_files  	: UI.skipLangDetectArr,
-                pretranslate_100    : ($("#pretranslate100" ).is(':checked')) ? 1 : 0,
-                dqf_key             : ($('#dqf_key' ).length == 1) ? $('#dqf_key' ).val() : null,
-				lexiqa				: ( $("#lxqa_check").prop("checked") && !$("#lxqa_check").prop("disabled") )
+				action						: "createProject",
+				file_name					: filename,
+				project_name				: $('#project-name').val(),
+				source_language				: $('#source-lang').val(),
+				target_language				: $('#target-lang').val(),
+                job_subject         		: $('#subject').val(),
+                disable_tms_engine			: ( $('#disable_tms_engine').prop('checked') ) ? $('#disable_tms_engine').val() : false,
+				mt_engine					: $('.mgmt-mt .activemt').data("id"),
+                private_tm_key				: $('#private-tm-key').val(),
+                private_keys_list			: tm_data,
+				private_tm_user				: ( !$('#private-tm-user').prop('disabled') ? $('#private-tm-user').val() : "" ),
+				private_tm_pass				: ( !$('#private-tm-pass').prop('disabled') ? $('#private-tm-pass').val() : "" ),
+				lang_detect_files  			: UI.skipLangDetectArr,
+                pretranslate_100    		: ($("#pretranslate100" ).is(':checked')) ? 1 : 0,
+                dqf_key             		: ($('#dqf_key' ).length == 1) ? $('#dqf_key' ).val() : null,
+				lexiqa				        : !!( $("#lexi_qa").prop("checked") && !$("#lexi_qa").prop("disabled") ),
+				speech2text         		: !!( $("#s2t_check").prop("checked") && !$("#s2t_check").prop("disabled") ),
+				tag_projection			    : !!( $("#tagp_check").prop("checked") && !$("#tagp_check").prop("disabled") ),
+				segmentation_rule			: $( '#segm_rule' ).val()
 			},
 			beforeSend: function (){
 				$('.error-message').hide();
@@ -247,9 +199,6 @@ $(document).ready(function() {
 								}).css({height: '50px'}).fadeIn(1000);
 
 								$('.translate-box input, .translate-box select').attr({disabled:'disabled'});
-								$(".more, #multiple-link").unbind('click').on('click',function(e){
-									e.preventDefault();
-								}).addClass('disabledLink');
 								$('td.delete').empty();
 								$('#info-login').fadeIn(1000);
 								$('#project-' + d.id_project).fadeIn(1000);
@@ -290,8 +239,63 @@ $(document).ready(function() {
      * LexiQA language Enable/Disable
      */
     APP.checkForLexiQALangs();
-    $("#source-lang").on('change', function(){ APP.checkForLexiQALangs(); });
-    $("#target-lang").on('change', function(){ APP.checkForLexiQALangs(); });
+    APP.checkForTagProjectionLangs();
+	APP.checkForSpeechToText();
+    $("#source-lang").on('change', function(){
+		APP.checkForLexiQALangs();
+		APP.checkForTagProjectionLangs();
+	});
+    $("#target-lang").on('change', function(){
+		APP.checkForLexiQALangs();
+		APP.checkForTagProjectionLangs();
+	});
+
+	APP.openOptionsPanel = function (tab, elem) {
+		elToClick = $(elem).attr('data-el-to-click') || null;
+		UI.openLanguageResourcesPanel(tab, elToClick);
+	};
+
+	APP.createTMKey = function () {
+
+		if($(".mgmt-tm .new .privatekey .btn-ok").hasClass('disabled')) {
+			return false;
+		}
+
+
+		//call API
+		APP.doRequest( {
+			data: {
+				action: 'createRandUser'
+			},
+			success: function ( d ) {
+				/*$( '#private-tm-key' ).val( d.data.key );
+				$( '#private-tm-user' ).val( d.data.id );
+				$( '#private-tm-pass' ).val( d.data.pass );
+				$( '#create_private_tm_btn' ).attr( 'data-key', d.data.key );*/
+
+				$( 'tr.template-download.fade.ready ').each( function( key, fileUploadedRow ){
+
+					var _fileName = $( fileUploadedRow ).find( '.name' ).text();
+					if ( _fileName.split('.').pop().toLowerCase() == 'tmx' || _fileName.split('.').pop().toLowerCase() == 'g' ) {
+
+						UI.appendNewTmKeyToPanel( {
+							r: 1,
+							w: 1,
+							desc: _fileName,
+							TMKey: d.data.key
+						} );
+
+						return true;
+					}
+
+				});
+
+				return false;
+			}
+		} );
+
+
+	};
 
     function closeMLPanel() {
         $( ".popup-languages.slide").removeClass('open').hide("slide", { direction: "right" }, 400);
@@ -300,6 +304,8 @@ $(document).ready(function() {
         $('body').removeClass('side-popup');
 
         APP.checkForLexiQALangs();
+        APP.checkForTagProjectionLangs();
+		APP.checkForSpeechToText();
     };
 
 	$("#multiple-link").click(function(e) {
@@ -343,7 +349,7 @@ $(document).ready(function() {
 	$("#disable_tms_engine").change(function(e){
 		if(this.checked){
 			$("input[id^='private-tm-']").prop("disabled", true);
-			$("#create_private_tm_btn").addClass("disabled", true);
+			// $("#create_private_tm_btn").addClass("disabled", true);
 		} else {
 			if(!$('#create_private_tm_btn[data-key]').length) {
 				$("input[id^='private-tm-']").prop("disabled", false);
@@ -352,7 +358,7 @@ $(document).ready(function() {
 		}
 	});
 
-	$("#private-tm-key").on('keyup', function(e) {
+	/*$("#private-tm-key").on('keyup', function(e) {
 		if($(this).val() == '') {
 			$('#create_private_tm_btn').removeClass('disabled');
 			$('#create_private_tm_btn').removeAttr('disabled');
@@ -360,7 +366,7 @@ $(document).ready(function() {
 			$('#create_private_tm_btn').addClass('disabled');
 			$('#create_private_tm_btn').attr('disabled','disabled');
 		};
-	});
+	});*/
 
 	$("input, select").change(function(e) {
 		$('.error-message').hide();
@@ -396,32 +402,126 @@ APP.displayCurrentTargetLang = function() {
 };
 
 
+function showModalNotSupportedLanguages(notAcceptedLanguages, acceptedLanguages) {
+	APP.alert({
+		title: 'Option not available',
+		okTxt: 'Continue',
+		msg: "Not available for " + notAcceptedLanguages.join(", ") +
+		".</br> Only available for " + acceptedLanguages.join(", ") +"."
+	});
+}
+
+function createSupportedLanguagesArrays(acceptedLanguages, targetLanguages, sourceAccepted) {
+	var notAcceptedLanguagesNames = [], acceptedLanguagesNames = [];
+	var notAcceptedLanguagesCodes = [], acceptedLanguagesCodes = [];
+	var notAcceptedLanguages = targetLanguages.filter(function(n) {
+		return acceptedLanguages.indexOf(n) === -1;
+	});
+	if (!sourceAccepted) {
+		notAcceptedLanguages.push($( '#source-lang' ).val());
+	}
+
+	notAcceptedLanguages.forEach(function (value, index, array) {
+		notAcceptedLanguagesNames.push($( '#target-lang option[value='+value+']' ).first().text());
+		if (notAcceptedLanguagesCodes.indexOf(value.split("-")[0].toUpperCase()) === -1) {
+			notAcceptedLanguagesCodes.push(value.split("-")[0].toUpperCase() );
+		}
+	});
+	acceptedLanguages.forEach(function (value, index, array) {
+		acceptedLanguagesNames.push($( '#target-lang option[value='+value+']' ).first().text());
+		if (acceptedLanguagesCodes.indexOf(value.split("-")[0].toUpperCase()) === -1) {
+			acceptedLanguagesCodes.push(value.split("-")[0].toUpperCase());
+		}
+	});
+	return {
+		accepted: acceptedLanguagesNames,
+		acceptedCodes: acceptedLanguagesCodes,
+		notAccepted: notAcceptedLanguagesNames,
+		notAcceptedCodes: notAcceptedLanguagesCodes
+	};
+}
 /**
  * Disable/Enable languages for LexiQA
  *
  */
 APP.checkForLexiQALangs = function(){
 
-	var acceptedLanguages = [
-		'en-US',
-		'en-GB',
-		'fr-FR',
-		'de-DE',
-		'it-IT'
-	];
+	var acceptedLanguages = config.lexiqa_languages.slice();
+	var LXQCheck = $('.options-box.qa-box');
 
-    var disableLexiQA = acceptedLanguages.concat(
-            [ $( '#source-lang' ).val() ]
-        ).concat(
-            $( '#target-lang' ).val().split(',')
-        ).filter(
-            function ( value, index, self ) {
-                return self.indexOf( value ) === index;
-            }
-        ).length !== acceptedLanguages.length;
-
+	var targetLanguages = $( '#target-lang' ).val().split(',');
+	var sourceAccepted = (acceptedLanguages.indexOf($( '#source-lang' ).val() ) > -1);
+	var targetAccepted = targetLanguages.filter(function(n) {
+							return acceptedLanguages.indexOf(n) != -1;
+						}).length > 0;
+	LXQCheck.removeClass('option-unavailable');
     //disable LexiQA
-    $('#lxqa_check').prop( "disabled", disableLexiQA );
-    $('.translate-box.qa-box').css({opacity: ( disableLexiQA ? 0.6 : 1 )  });
+	var disableLexiQA = !(sourceAccepted && targetAccepted && config.defaults.lexiqa);
+	if (!(sourceAccepted && targetAccepted)) {
+		var arrays = createSupportedLanguagesArrays(acceptedLanguages, targetLanguages, sourceAccepted);
+		LXQCheck.find('.option-supported-languages').html(arrays.acceptedCodes.join(', '));
+		LXQCheck.find('.option-notsupported-languages').html(arrays.notAcceptedCodes.join(', '));
+		LXQCheck.find('.onoffswitch').off("click").on('click', function () {
+			showModalNotSupportedLanguages(arrays.notAccepted, arrays.accepted);
+		});
+		LXQCheck.addClass('option-unavailable');
+		$('.options-box #lexi_qa').prop( "disabled", disableLexiQA );
+	}
+    $('.options-box #lexi_qa').attr('checked', !disableLexiQA);
+};
 
+/**
+ * Disable/Enable languages for LexiQA
+ *
+ */
+APP.checkForTagProjectionLangs = function(){
+
+	var acceptedLanguages = config.tag_projection_languages.slice();
+	var tpCheck = $('.options-box.tagp');
+	var targetLanguages = $( '#target-lang' ).val().split(',');
+	var sourceAccepted = (acceptedLanguages.indexOf($( '#source-lang' ).val() ) > -1);
+	var targetAccepted = targetLanguages.filter(function(n) {
+							return acceptedLanguages.indexOf(n) != -1;
+						}).length > 0;
+	tpCheck.removeClass('option-unavailable');
+
+	//disable Tag Projection
+	var disableTP = !(sourceAccepted && targetAccepted && config.defaults.tag_projection);
+	if (!(sourceAccepted && targetAccepted)) {
+		var arrays = createSupportedLanguagesArrays(acceptedLanguages, targetLanguages, sourceAccepted);
+		tpCheck.find('.option-supported-languages').html(arrays.acceptedCodes.join(', '));
+		tpCheck.find('.option-notsupported-languages').html(arrays.notAcceptedCodes.join(', '));
+		tpCheck.find('.onoffswitch').off('click').on('click', function () {
+			showModalNotSupportedLanguages(arrays.notAccepted, arrays.accepted);
+		});
+		tpCheck.addClass('option-unavailable');
+		$('.options-box #tagp_check').prop( "disabled", disableTP );
+	}
+	$('.options-box #tagp_check').attr('checked', !disableTP);
+};
+
+/**
+ * Disable/Enable SpeechToText
+ *
+ */
+APP.checkForSpeechToText = function(){
+
+	//disable Tag Projection
+	var disableS2T = !config.defaults.speech2text;
+	var speech2textCheck = $('.s2t-box');
+	speech2textCheck.removeClass('option-unavailable');
+	if (!('webkitSpeechRecognition' in window)) {
+		disableS2T = true;
+		$('.options-box #s2t_check').prop( "disabled", disableS2T );
+		speech2textCheck.find('.option-s2t-box-chrome-label').css('display', 'inline');
+		speech2textCheck.find('.onoffswitch').on('click', function () {
+			APP.alert({
+				title: 'Option not available',
+				okTxt: 'Continue',
+				msg: "This options is only available on Chrome browser."
+			});
+		});
+		speech2textCheck.addClass('option-unavailable');
+	}
+	$('.options-box #s2t_check').attr('checked', !disableS2T);
 };

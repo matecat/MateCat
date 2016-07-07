@@ -8,15 +8,9 @@ var button = React.createClass({
     },
 
     handleClick : function() {
-        var el = UI.Segment.findEl(this.props.sid);
-        el.removeClass('modified');
-        UI.changeStatus(el, 'rebutted', true);
-        UI.gotoNextSegment();
+        window.ReviewImproved.clickOnRebutted(this.props.sid);
     },
 
-    handleTranslationSuccess : function(e, data) {
-        console.log('handleTranslationSuccess', data);
-    },
     componentDidMount: function() {
     },
 
@@ -27,12 +21,13 @@ var button = React.createClass({
         var cmd = ((UI.isMac) ? 'CMD' : 'CTRL');
 
         return <li>
-            <a className="button status-rebutted"
+            <a className="button button-rebutted status-rebutted"
                 onClick={this.handleClick}
                 href="javascript:;"
                 disabled={!this.state.disabled} >
                 Rebutted
             </a>
+            <p>{window.UI.shortcutLeader}+ENTER</p>
           </li>
           ;
 

@@ -1,4 +1,3 @@
-if ( LXQ.enabled() )
 (function($,LXQ) {
 
     var tpls = { // TODO: make this local
@@ -51,7 +50,10 @@ if ( LXQ.enabled() )
         lxqTooltipBody: ''+
             '<div class="tooltip-error-container"> '+
                 '<span class="tooltip-error-category">xxxx</span> '+
-                '<a class="tooltip-error-ignore">ignore</a> </div> ' 
+                '<a class="tooltip-error-ignore">ignore</a> </div> ',
+        lxqTooltipSpellcheckBody: ''+
+            '<div class="tooltip-error-container"> '+
+                '<a class="tooltip-error-category">xxxx</a> '                 
 
     };
 

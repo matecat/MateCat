@@ -504,14 +504,6 @@ float: left;
 	.translate-box select, .mgmt-table-mt select {
 		width: 210px!important;
 	}
-
-
-
-	.translate-box a {
-	  display: block;
-	  width: 195px;
-	  margin-top: 0;
-	}
 }
 
 @media only screen and (max-width : 1280px) {
@@ -777,7 +769,7 @@ a{color:#39699a}
 	
     position: relative;
 	border:1px dashed #ccc;
-margin-top: 20px;
+margin-top: 30px;
 /*	min-height:150px;*/
 	min-height: 270px;
 	-moz-border-radius: 4px;
@@ -903,14 +895,17 @@ text-align: right!important; padding-right:20px;
 
 tr.ready .size span{visibility: visible;}
 
-.advanced-box{display:none;margin:0px 0 10px 0;float:left;width:auto;}
-.advanced-box h2{margin-top:-17px !important; padding-top:0 !important}
+.advanced-box{margin:0px 0 10px 0;float:left;    width: 96%;
+    padding: 20px;}
+.advanced-box h2{font-size: 30px;text-align: left;}
 .more {margin-bottom:5px;float:left; text-decoration: none;}
 .more span {text-decoration: underline;}
 .more:hover span {text-decoration: none;}
 .translate-box .fileinput-button{margin-top:8px;text-align:center;padding:4px 0px}
-
-
+.more-options {float:right!important; margin-left: 20px;    font-size: 16px;
+    margin-top: 8px !important;}
+.more-options,.more-options span:hover {text-decoration: none;}
+.more-options span {text-decoration: underline;}
 @-moz-document url-prefix() {
 	
 	.translate-box .fileinput-button{margin-top:7px;}
@@ -1301,7 +1296,7 @@ span.load-gdrive {
     font-family: calibri, Arial, Helvetica, sans-serif;
     font-size: 1.1em;
     margin: 0;
-    padding: 0.70rem 0.25rem 0.30rem 2.2rem;
+    padding: 0.60rem 0.25rem 0.40rem 2.2rem;
     border: 0.1rem solid #B7B9BC;
     background: url(../img/logo-drive-16.png) 1.3rem 0.85rem no-repeat;
     background-color: #F5F5F5;

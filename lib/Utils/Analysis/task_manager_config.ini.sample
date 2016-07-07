@@ -62,3 +62,12 @@ QA_CHECKS[pid_set_name] = "qa_checks_set"
 QA_CHECKS[max_executors] = 1
 QA_CHECKS[redis_key] = "qa_checks_key"
 QA_CHECKS[loggerName] = "qa_checks.log"
+
+;;##############################
+;;##### Key Name activity_log #####
+;;##############################
+ACTIVITYLOG[queue_name]    = "activity_log"
+ACTIVITYLOG[pid_set_name]  = "ch_pid_activity_log"
+ACTIVITYLOG[max_executors] = 1
+ACTIVITYLOG[redis_key]     = "activity_log_list"
+ACTIVITYLOG[loggerName]    = "activity_log.log"

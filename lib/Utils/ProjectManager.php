@@ -18,6 +18,8 @@ use GDrive;
 use RemoteFiles_RemoteFileDao;
 
 class ProjectManager {
+    
+    public $sanitizeProjectOptions = true ; 
 
     /**
      * @var ArrayObject|RecursiveArrayObject
@@ -153,24 +155,46 @@ class ProjectManager {
 
 
     /**
-     *
+     * 
+     * Save in project metadata. This is where, among other things, we put 
+     * project options. 
+     * 
+     * Project options may need to be sanitized so that we can silently ignore impossible combinations, 
+     * and we can apply defaults when those are missing. 
+     * 
      */
     private function saveMetadata() {
-        if ( empty($this->projectStructure['metadata'] ) ) {
-            return ;
+        $options = $this->projectStructure['metadata']; 
+        
+        if ( $this->sanitizeProjectOptions ) {
+            $options = $this->sanitizeProjectOptions( $options ) ; 
         }
 
+        if ( empty( $options ) ) {
+            return ;
+        }
+            
         $dao = new Projects_MetadataDao( Database::obtain() );
-        foreach( $this->projectStructure['metadata'] as $key => $value ) {
+        foreach( $options as $key => $value ) {
             $dao->set(
                     $this->projectStructure['id_project'],
                     $key,
                     $value
             );
         }
-
     }
 
+    private function sanitizeProjectOptions( $options ) {
+        $sanitizer = new ProjectOptionsSanitizer( $options );
+        
+        $sanitizer->setLanguages(
+                $this->projectStructure['source_language'],
+                $this->projectStructure['target_language']
+        );
+        
+        return $sanitizer->sanitize(); 
+    }
+        
     /**
      * Creates record in projects tabele and instantiates the project struct
      * internally.
@@ -250,10 +274,8 @@ class ProjectManager {
             // TODO: move this 100 lines IF condition elsewhere to reduce scope
 
             foreach ( $this->projectStructure[ 'private_tm_key' ] as $i => $_tmKey ) {
-
-
-
-                $this->tmxServiceWrapper->setTmKey( $_tmKey[ 'key' ] );
+                
+               $this->tmxServiceWrapper->setTmKey( $_tmKey[ 'key' ] );
 
                 try {
 
@@ -588,7 +610,7 @@ class ProjectManager {
             //we need compare the number of segments with translations, but take an eye to the opensource
 
             $query_visible_segments = "SELECT count(*) as cattool_segments
-				FROM segments WHERE id_file IN ( %s ) and show_in_cattool = 1";
+				FROM segments USE INDEX(id_file) WHERE id_file IN ( %s ) and show_in_cattool = 1";
 
             $string_file_list       = implode( ",", $this->projectStructure[ 'file_id_list' ]->getArrayCopy() );
             $query_visible_segments = sprintf( $query_visible_segments, $string_file_list );
@@ -1452,6 +1474,9 @@ class ProjectManager {
 
         $rows = $this->dbHandler->fetch_array( $query_job );
 
+        $metadata_dao = new Projects_MetadataDao();
+        $metadata_dao->cleanupChunksOptions( $rows );
+
         //get the min and
         $first_job         = reset( $rows );
         $job_first_segment = $first_job[ 'job_first_segment' ];
@@ -2094,13 +2119,12 @@ class ProjectManager {
 
     public static function getExtensionFromMimeType( $mime_type ) {
 
-        $reference = include( 'mime2extension.inc.php' );
-        if ( array_key_exists( $mime_type, $reference ) ) {
-            if ( array_key_exists( 'default', $reference[ $mime_type ] ) ) {
-                return $reference[ $mime_type ][ 'default' ];
+        if ( array_key_exists( $mime_type, INIT::$MIME_TYPES ) ) {
+            if ( array_key_exists( 'default', INIT::$MIME_TYPES[ $mime_type ] ) ) {
+                return INIT::$MIME_TYPES[ $mime_type ][ 'default' ];
             }
 
-            return $reference[ $mime_type ][ array_rand( $reference[ $mime_type ] ) ]; // rand :D
+            return INIT::$MIME_TYPES[ $mime_type ][ array_rand( INIT::$MIME_TYPES[ $mime_type ] ) ]; // rand :D
         }
 
         return null;

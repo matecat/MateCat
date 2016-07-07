@@ -225,6 +225,12 @@ section {
         .status-fixed {
             background: $approved-color;
             border:1px solid #848689;
+
+            &[disabled] {
+                background: $disabled-color;
+                border: 1px solid $disabled-border-color;
+                cursor: default;
+            }
         }
     }
 
