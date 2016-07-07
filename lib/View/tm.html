@@ -279,7 +279,12 @@
                                 <tr>
                                     <th class="privatekey">MT provider</th>
                                     <th class="description">Engine name</th>
-                                    <th class="enable-mt text-center">Use in this project</th>   
+                                    <tal:block tal:condition="php: page == 'home'">
+                                        <th class="enable-mt text-center">Use in this project</th>
+                                    </tal:block>
+                                    <tal:block tal:condition="php: page == 'cattool'">
+                                        <th class="enable-mt text-center"></th>
+                                    </tal:block>
                                     <th class="action">Action</th>
                                 </tr>
                                 </thead>
@@ -323,8 +328,8 @@
                                                     <td class="engine-name">
                                                         <div class="edit-desc">${engine/description}</div>
                                                     </td>
-                                                    <td class="enable-mt text-center">
-                                                        <input type="checkbox" checked="checked" disabled="true" />
+                                                    <td class="enable-mt text-center" title="MT settings can only be edited when creating the project.">
+                                                        <div class="engine-check-disabled" style="line-height: 21px;">Enabled</div>
                                                     </td>
                                                     <td class="action">
                                                         <a tal:condition="php: engine.id != 1 && jobOwnerIsMe" class="deleteMT btn pull-left"><span class="text">Delete</span></a>
@@ -341,7 +346,6 @@
                                                         <div class="edit-desc">${engine/description}</div>
                                                     </td>
                                                     <td class="enable-mt text-center">
-                                                        <input type="checkbox" disabled="true"/>
                                                     </td>
                                                     <td class="action">
                                                         <a tal:condition="php: engine.id != 1" class="deleteMT btn pull-left"><span class="text">Delete</span></a>
