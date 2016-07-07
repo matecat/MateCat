@@ -649,7 +649,7 @@ if ( MBC.enabled() )
          * of the page.
          */
         $(document).on('click', function(e) {
-            if (e.target.closest('section') == null) {
+            if ($(e.target).closest('section') == null) {
                 closeBalloon();
             }
         });
