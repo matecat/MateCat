@@ -11,7 +11,7 @@ class MainPanel extends React.Component {
             searchSettingsOpen : false, 
             selectedStatus : '',
             samplingEnabled : false,
-            samplingType : 'edit_distance',
+            samplingType : 'edit_distance_high_to_low',
             samplingSize : '10',
             filtering : false,
             filteredCount : 0
@@ -82,7 +82,8 @@ class MainPanel extends React.Component {
         var map = {
             'segment_length' : 'Segment length',
             'regular_intervals' : 'Regular intervals',
-            'edit_distance' : 'Edit distance'
+            'edit_distance_high_to_low' : 'Edit distance (high to low)',
+            'edit_distance_low_to_high' : 'Edit distance (low to high)'
         };
 
         return map[this.state.samplingType];
@@ -143,10 +144,18 @@ class MainPanel extends React.Component {
 
                         <div className="block">
                             <input onChange={this.samplingTypeChecked.bind(this)}
-                                id="sample-edit-distance"
-                                checked={this.state.samplingType == 'edit_distance'}
-                                value="edit_distance"
-                                name="samplingType" type="radio" /><label htmlFor="sample-edit-distance">Edit distance</label>
+                                id="sample-edit-distance-high-to-low"
+                                checked={this.state.samplingType == 'edit_distance_high_to_low'}
+                                value="edit_distance_high_to_low"
+                                name="samplingType" type="radio" /><label htmlFor="sample-edit-distance-high-to-low">Edit distance (high to low)</label>
+                        </div>
+
+                        <div className="block">
+                            <input onChange={this.samplingTypeChecked.bind(this)}
+                                   id="sample-edit-distance-low-to-high"
+                                   checked={this.state.samplingType == 'edit_distance_low_to_high'}
+                                   value="edit_distance_low_to_high"
+                                   name="samplingType" type="radio" /><label htmlFor="sample-edit-distance-low-to-high">Edit distance (low to high)</label>
                         </div>
 
                         <div className="block">
