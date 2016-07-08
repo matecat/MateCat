@@ -209,7 +209,7 @@ UI = {
     createKeyByTMX: function (extension) {
         if ( !isTMXAllowed() ) return false;
         if ( $(".mgmt-tm .new .privatekey .btn-ok").hasClass( 'disabled' ) ) return false; //ajax call already running
-        if( $( '.mgmt-panel #activetm tbody tr.mine' ).length ) return false; //a key is already selected in TMKey management panel
+        if( $( '.mgmt-panel #activetm tbody tr.mine' ).length && $( '.mgmt-panel #activetm tbody tr.mine .update input' ).is(":checked")) return false; //a key is already selected in TMKey management panel
 
         APP.createTMKey();
         var textToDisplay = '<span>A Private TM Key has been generated for the TMX you uploaded. You can manage your private TM in the  <a href="#" class="translation-memory-option-panel">Translation Memory panel</a>.</span>';
