@@ -640,8 +640,12 @@ $.extend(UI, {
      * @returns the decoded String
      */
     removeAllTags: function (currentString) {
-        var regExp = this.getXliffRegExpression();
-        return currentString.replace(regExp, '');
+        if (currentString) {
+            var regExp = this.getXliffRegExpression();
+            return currentString.replace(regExp, '');
+        } else {
+            return '';
+        }
     },
     /**
      *  Return the Regular expression to match all xliff source tags
