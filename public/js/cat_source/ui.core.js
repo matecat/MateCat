@@ -2295,8 +2295,8 @@ UI = {
 	checkVersion: function() {
 		if(this.version != config.build_number) {
             var notification = {
-                title: 'Eew version of MateCat',
-                text: 'A new version of MateCat has been released. Please <a href="#" class="reloadPage">click here</a> or clic CTRL+F5 (or CMD+R on Mac) to update.',
+                title: 'New version of MateCat',
+                text: 'A new version of MateCat has been released. Please <a href="#" class="reloadPage">click here</a> or press CTRL+F5 (or CMD+R on Mac) to update.',
                 type: 'warning',
                 allowHtml: true,
                 position: "bl"

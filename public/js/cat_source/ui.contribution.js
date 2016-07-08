@@ -43,8 +43,10 @@ $.extend(UI, {
             // in particular this is needed for the Speech2Text to know that the newly added text is coming
             // from a 100% match.
             var segmentObj = MateCat.db.segments.by('sid', UI.getSegmentId( segment ) );
-            segmentObj.suggestion_match = match.replace('%', '');
-            MateCat.db.segments.update( segmentObj );
+            if ( segmentObj ) {
+                segmentObj.suggestion_match = match.replace('%', '');
+                MateCat.db.segments.update( segmentObj );
+            }
 
 			$(editarea).html( translation );
             $(document).trigger('contribution:copied', { translation: translation, segment: segment });
