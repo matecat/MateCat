@@ -80,7 +80,8 @@ class MainPanel extends React.Component {
 
     humanSampleType() {
         var map = {
-            'segment_length' : 'Segment length',
+            'segment_length_high_to_low' : 'Segment length (high to low)',
+            'segment_length_low_to_high' : 'Segment length (low to high)',
             'regular_intervals' : 'Regular intervals',
             'edit_distance_high_to_low' : 'Edit distance (high to low)',
             'edit_distance_low_to_high' : 'Edit distance (low to high)'
@@ -160,6 +161,24 @@ class MainPanel extends React.Component {
 
                         <div className="block">
                             <input
+                                id="sample-segment-length-high-to-low"
+                                onChange={this.samplingTypeChecked.bind(this)}
+                                checked={this.state.samplingType == 'segment_length_high_to_low'}
+                                value="segment_length_high_to_low"
+                                name="samplingType" type="radio" /><label htmlFor="sample-segment-length-high-to-low">Segment length (high to low)</label>
+                        </div>
+
+                        <div className="block">
+                            <input
+                                id="sample-segment-length-low-to-high"
+                                onChange={this.samplingTypeChecked.bind(this)}
+                                checked={this.state.samplingType == 'segment_length_low_to_high'}
+                                value="segment_length_low_to_high"
+                                name="samplingType" type="radio" /><label htmlFor="sample-segment-length-low-to-high">Segment length (low to high)</label>
+                        </div>
+
+                        <div className="block">
+                            <input
                                 id="sample-regular-intervals"
                                 onChange={this.samplingTypeChecked.bind(this)}
                                 checked={this.state.samplingType == 'regular_intervals'}
@@ -167,14 +186,6 @@ class MainPanel extends React.Component {
                                 name="samplingType" type="radio" /><label htmlFor="sample-regular-intervals">Regular interval</label>
                         </div>
 
-                        <div className="block">
-                            <input
-                                id="sample-segment-length"
-                                onChange={this.samplingTypeChecked.bind(this)}
-                                checked={this.state.samplingType == 'segment_length'}
-                                value="segment_length"
-                                name="samplingType" type="radio" /><label htmlFor="sample-segment-length">Segment length</label>
-                        </div>
                     </div>
                 </div>;
 
