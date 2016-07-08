@@ -139,9 +139,13 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
                 $data = self::__getData( $chunk, $filter );
                 $sql = self::getSqlForSegmentLength( $limit, $where );
                 break;
-            case 'edit_distance':
+            case 'edit_distance_high_to_low':
                 $data = self::__getData( $chunk, $filter );
-                $sql = self::getSqlForEditDistance( $limit, $where );
+                $sql = self::getSqlForEditDistance( $limit, $where, 'high_to_low' );
+                break;
+            case 'edit_distance_low_to_high':
+                $data = self::__getData( $chunk, $filter );
+                $sql = self::getSqlForEditDistance( $limit, $where, 'low_to_high' );
                 break;
             case 'regular_intervals':
                 $data = self::__getData( $chunk, $filter );
@@ -189,9 +193,16 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
         return $sql ;
     }
 
-    public static function getSqlForEditDistance( $limit, $where ) {
-        $sql = "SELECT id FROM (
-            SELECT st.id_segment AS id
+    public static function getSqlForEditDistance( $limit, $where, $sort ) {
+        $sqlSort = '';
+
+        if( $sort === 'high_to_low' ) {
+            $sqlSort = 'DESC';
+        } else if( $sort === 'low_to_high' ) {
+            $sqlSort = 'ASC';
+        }
+
+        $sql = "SELECT st.id_segment AS id
           FROM
            segment_translations st JOIN jobs
            ON jobs.id = st.id_job
@@ -202,8 +213,8 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
            JOIN segments s ON s.id = st.id_segment
            WHERE 1
            $where->sql
-           ORDER BY st.edit_distance DESC
-           LIMIT $limit->limit ) sub ORDER BY 1";
+           ORDER BY st.edit_distance $sqlSort
+           LIMIT $limit->limit ";
 
         return $sql ;
     }
