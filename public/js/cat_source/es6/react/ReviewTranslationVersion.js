@@ -32,16 +32,7 @@ export default React.createClass({
     getMarkupForTrackChanges : function() {
         return { __html :  this.props.trackChangesMarkup  };
     },
-
-    componentDidMount : function() {
-        var node = ReactDOM.findDOMNode( this.refs.highlightArea );
-        UI.lockTags( $( node ) );
-    },
-    componentDidUpdate : function( prevProps, prevState ) {
-        var node = ReactDOM.findDOMNode( this.refs.highlightArea );
-        UI.lockTags( $( node ) );
-    },
-
+    
     render : function() {
         var cs = classnames({
             collapsed : this.state.collapsed,
