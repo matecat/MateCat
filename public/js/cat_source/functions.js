@@ -725,9 +725,17 @@ function goodbye(e) {
 
 }
 
+function cleanupHTMLCharsForDiff( string ) {
+	return string.replace(/&nbsp;/g, '');
+}
+
 function trackChangesHTML(source, target) {
-    var diff   = UI.dmp.diff_main( source, target );
-    UI.dmp.diff_cleanupSemantic( diff )
+    var diff   = UI.dmp.diff_main(
+		cleanupHTMLCharsForDiff( source ),
+		cleanupHTMLCharsForDiff( target )
+	);
+
+    UI.dmp.diff_cleanupSemantic( diff ) ;
 
     var diffTxt = '';
 
