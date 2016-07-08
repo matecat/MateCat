@@ -75,8 +75,9 @@ export default React.createClass({
         if ( version.version_number != "0" ) {
             var previous = this.findPreviousVersion( version.version_number );
             return trackChangesHTML(
-                UI.clenaupTextFromPleaceholders(previous.translation),
-                UI.clenaupTextFromPleaceholders( version.translation ));
+                UI.clenaupTextFromPleaceholders( previous.translation ),
+                UI.clenaupTextFromPleaceholders( version.translation )
+            );
         }
     },
 
