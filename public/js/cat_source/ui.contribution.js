@@ -355,8 +355,7 @@ $.extend(UI, {
 
                 $('.tab.sub-editor.matches .engine-errors', segment).append('<ul class="engine-error-item graysmall"><li class="engine-error">' +
                         '<div class="' + imgClass + '"></div><span class="engine-error-message ' + messageClass + '">' + messageTypeText + this.message +
-                        '</span></li><ul class="graysmall-details"><li class="percent ' + percentClass + '">' + percentText +
-                        '</li><li>' + suggestion_info + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
+                        '</span></li></ul>');
             });
         },
 	setDeleteSuggestion: function(segment) {
