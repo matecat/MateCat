@@ -257,10 +257,10 @@ $(document).ready(function() {
 
 	APP.createTMKey = function () {
 
-		if($(".mgmt-tm .new .privatekey .btn-ok").hasClass('disabled')) {
+		if($(".mgmt-tm .new .privatekey .btn-ok").hasClass('disabled') || APP.pendingCreateTMkey) {
 			return false;
 		}
-
+		APP.pendingCreateTMkey = true;
 
 		//call API
 		APP.doRequest( {
@@ -272,9 +272,9 @@ $(document).ready(function() {
 				$( '#private-tm-user' ).val( d.data.id );
 				$( '#private-tm-pass' ).val( d.data.pass );
 				$( '#create_private_tm_btn' ).attr( 'data-key', d.data.key );*/
-
+				APP.pendingCreateTMkey = false;
 				$( 'tr.template-download.fade.ready ').each( function( key, fileUploadedRow ){
-
+					if( $( '.mgmt-panel #activetm tbody tr.mine' ).length && $( '.mgmt-panel #activetm tbody tr.mine .update input' ).is(":checked")) return false;
 					var _fileName = $( fileUploadedRow ).find( '.name' ).text();
 					if ( _fileName.split('.').pop().toLowerCase() == 'tmx' || _fileName.split('.').pop().toLowerCase() == 'g' ) {
 
