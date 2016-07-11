@@ -33,6 +33,8 @@ class MainPanel extends React.Component {
 
         SegmentFilter.closeFilter();
         // TODO
+
+        $('body').removeClass('sampling-enabled');
     }
 
     submitClick(e) {
@@ -44,6 +46,8 @@ class MainPanel extends React.Component {
                 type : this.state.samplingType,
                 size : this.state.samplingSize,
             }
+
+            $('body').addClass('sampling-enabled');
         }
 
         SegmentFilter.filterSubmit({
