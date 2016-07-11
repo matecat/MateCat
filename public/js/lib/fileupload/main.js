@@ -47,6 +47,9 @@ UI = {
     enableAnalyze: function () {
         enableAnalyze();
     },
+    disableAnalyze: function () {
+        disableAnalyze();
+    },
     checkRTL: function () {
         if(!this.RTLCheckDone) {
             sourceDirection = $('#source-lang option[value="' + $('#source-lang').val() + '"]').attr('data-direction');
