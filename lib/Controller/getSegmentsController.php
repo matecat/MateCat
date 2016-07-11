@@ -142,6 +142,12 @@ class getSegmentsController extends ajaxController {
                 $this->data["$id_file"]['segments'] = array();
             }
 
+            if( isset($seg['edit_distance']) ) {
+                $seg['edit_distance'] = round( $seg['edit_distance'] / 1000, 2 );
+            } else {
+                $seg['edit_distance'] = 0;
+            }
+
             unset($seg['id_file']);
             unset($seg['source']);
             unset($seg['target']);
@@ -192,6 +198,12 @@ class getSegmentsController extends ajaxController {
 
         if ( $feature ) {
             $options['optional_fields'] = array('st.version_number');
+        }
+
+        $feature_review_improved = $job->getProject()->getOwnerFeature('review_improved');
+
+        if ( $feature_review_improved ) {
+            $options['optional_fields'][] = 'edit_distance';
         }
 
         return $options;
