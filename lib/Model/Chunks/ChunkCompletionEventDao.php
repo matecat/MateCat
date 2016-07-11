@@ -2,6 +2,9 @@
 
 class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
 
+    const REVISE = 'revise' ;
+    const TRANSLATE = 'translate';
+
     public static function validSources() {
         return array(
             'user' => Chunks_ChunkCompletionEventStruct::SOURCE_USER,
@@ -36,6 +39,19 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
         ));
     }
 
+
+    public function currentPhase(Chunks_ChunkStruct $chunk) {
+        $lastTranslate = $this->lastCompletionRecord( $chunk, array('is_review' => false) );
+        if ( $lastTranslate ) {
+            $lastRevise = $this->lastCompletionRecord( $chunk, array('is_review' => true ));
+            if ( $lastRevise && new DateTime($lastTranslate['create_date']) < new DateTime( $lastRevise['create_date']) ) {
+                return self::TRANSLATE ;
+            } else {
+                return self::REVISE ;
+            }
+        }
+        return self::TRANSLATE ;
+    }
     /**
      *
      * Returns true or false if the chunk is completed. Requires 'is_review' to be passed
