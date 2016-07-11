@@ -35,6 +35,10 @@ section.reviewImproved.opened .textarea-container {
     font-size:18px;
 }
 
+section.reviewImproved.opened .edit-distance {
+    display: block;
+}
+
 section.reviewImproved .errorTaggingArea {
     padding: 3px;
     line-height: 27px;
