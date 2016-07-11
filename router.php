@@ -53,89 +53,75 @@ $klein->onError(function ($klein, $err_msg, $err_type, $exception) {
 // This is unreleased APIs. I'm no longer fond of the [i:id_job] in the path,
 // so before releasing change it use a querystring.
 //
-$klein->respond('GET', '/api/v2/jobs/[i:id_job]/revision-data', function() {
-    $reflect  = new ReflectionClass('API_V2_JobRevisionData');
-    $instance = $reflect->newInstanceArgs(func_get_args());
-    $instance->respond('revisionData');
-});
+route(
+    '/api/v2/jobs/[i:id_job]/revision-data', 'GET',
+    'API_V2_JobRevisionData', 'revisionData'
+);
 
-$klein->respond('GET', '/api/v2/jobs/[i:id_job]/revision-data/segments', function() {
-    $reflect  = new ReflectionClass('API_V2_JobRevisionData');
-    $instance = $reflect->newInstanceArgs(func_get_args());
-    $instance->respond('segments');
-});
+route(
+    '/api/v2/jobs/[i:id_job]/revision-data/segments', 'GET',
+    'API_V2_JobRevisionData', 'segments'
+);
 
-$klein->respond('GET', '/api/v2/project-completion-status/[i:id_project]', function() {
-    $reflect  = new ReflectionClass('\API\V2\ProjectCompletionStatus');
-    $instance = $reflect->newInstanceArgs(func_get_args());
-    $instance->respond('status');
-});
+route(
+    '/api/v2/project-completion-status/[i:id_project]', 'GET',
+    '\API\V2\ProjectCompletionStatus', 'status'
+);
 
-$klein->respond('GET', '/api/v2/project-translation/[i:id_project]', function() {
-    $reflect  = new ReflectionClass('API_V2_ProjectTranslation');
-    $instance = $reflect->newInstanceArgs(func_get_args());
-    $instance->respond('status');
-});
+route(
+    '/api/v2/project-translation/[i:id_project]', 'GET',
+    'API_V2_ProjectTranslation', 'status'
+);
 
-$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/translation-issues', function() {
-    $reflect  = new ReflectionClass('API\V2\ChunkTranslationIssueController');
-    $instance = $reflect->newInstanceArgs(func_get_args());
-    $instance->respond('index');
-});
+route(
+    '/api/v2/jobs/[:id_job]/[:password]/translation-issues', 'GET',
+    'API\V2\ChunkTranslationIssueController', 'index'
+);
 
-$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/translation-versions', function() {
-    $reflect  = new ReflectionClass('\API\V2\ChunkTranslationVersionController');
-    $instance = $reflect->newInstanceArgs(func_get_args());
-    $instance->respond('index');
-});
+route(
+    '/api/v2/jobs/[:id_job]/[:password]/translation-versions', 'GET',
+    '\API\V2\ChunkTranslationVersionController', 'index'
+);
 
-$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-versions', function() {
-    $reflect  = new ReflectionClass('\API\V2\SegmentVersion');
-    $instance = $reflect->newInstanceArgs(func_get_args());
-    $instance->respond('index');
-});
+route(
+    '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-versions', 'GET',
+    '\API\V2\SegmentVersion', 'index'
+);
 
-$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-versions/[:version_number]', function() {
-    $reflect  = new ReflectionClass('API_V2_SegmentVersion');
-    $instance = $reflect->newInstanceArgs(func_get_args());
-    $instance->respond('detail');
-});
+route(
+    '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-versions/[:version_number]', 'GET',
+    'API_V2_SegmentVersion', 'detail'
+);
 
-$klein->respond('POST', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues', function() {
-    $reflect  = new ReflectionClass('API\V2\SegmentTranslationIssueController');
-    $instance = $reflect->newInstanceArgs(func_get_args());
-    $instance->respond('create');
-});
+route(
+    '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues', 'POST',
+    'API\V2\SegmentTranslationIssueController', 'create'
+);
 
-$klein->respond('DELETE', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues/[:id_issue]', function() {
-    $reflect  = new ReflectionClass('API\V2\SegmentTranslationIssueController');
-    $instance = $reflect->newInstanceArgs(func_get_args());
-    $instance->respond('delete');
-});
+route(
+    '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues/[:id_issue]', 'DELETE',
+    'API\V2\SegmentTranslationIssueController', 'delete'
+);
 
-$klein->respond('POST', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues/[:id_issue]', function() {
-    $reflect  = new ReflectionClass('API\V2\SegmentTranslationIssueController');
-    $instance = $reflect->newInstanceArgs(func_get_args());
-    $instance->respond('update');
-});
+route(
+    '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues/[:id_issue]', 'POST',
+    'API\V2\SegmentTranslationIssueController', 'update'
+);
 
-$klein->respond('POST', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues/[:id_issue]/comments', function() {
-    $reflect  = new ReflectionClass('API\V2\TranslationIssueComment');
-    $instance = $reflect->newInstanceArgs(func_get_args());
-    $instance->respond('create');
-});
+route(
+    '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues/[:id_issue]/comments', 'POST',
+    'API\V2\TranslationIssueComment', 'create'
+);
 
-$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues/[:id_issue]/comments', function() {
-    $reflect  = new ReflectionClass('API\V2\TranslationIssueComment');
-    $instance = $reflect->newInstanceArgs(func_get_args());
-    $instance->respond('index');
-});
+route(
+    '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues/[:id_issue]/comments', 'GET',
+    'API\V2\TranslationIssueComment', 'index'
+);
 
-$klein->respond('GET', '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation', function() {
-    $reflect  = new ReflectionClass('API\V2\TranslationController');
-    $instance = $reflect->newInstanceArgs(func_get_args());
-    $instance->respond('index');
-});
+route(
+    '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation', 'GET',
+    'API\V2\TranslationController', 'index'
+);
 
 
 $klein->respond('GET', '/utils/pee', function() {
@@ -145,11 +131,10 @@ $klein->respond('GET', '/utils/pee', function() {
     $instance->finalize();
 });
 
-$klein->respond('POST', '/api/v2/projects/[:id_project]/[:password]/jobs/[:id_job]/merge', function() {
-    $reflect  = new ReflectionClass('API\V2\JobMergeController');
-    $instance = $reflect->newInstanceArgs(func_get_args());
-    $instance->respond('merge');
-});
+route(
+    '/api/v2/projects/[:id_project]/[:password]/jobs/[:id_job]/merge', 'POST',
+    'API\V2\JobMergeController', 'merge'
+);
 
 
 
