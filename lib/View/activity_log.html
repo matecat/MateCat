@@ -1,0 +1,90 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Volume Analysis - MateCat</title>
+    <meta name="description" content="MateCat allows you to get more matches than any other CAT tool."/>
+    <meta name="viewport" content="width=device-width"/>
+    <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="${basepath}public/css/analyze.css?build=${build_number}"/>
+
+    <script type="text/javascript" src="${basepath}public/js/lib/jquery.js"></script>
+    <script type='text/javascript' src="${basepath}public/js/login.js?build=${build_number}"></script>
+
+    <div metal:use-macro="${php: INIT::$ROOT}/public/holidays/holidays.html/analyze_holidays"/>
+
+</head>
+<body>
+<header>
+    <div class="wrapper">
+        <a href="${basepath}" class="logo"></a>
+    </div>
+</header>
+
+<div class="">
+
+    <h1>
+        <a href="${projectUrl}">Project: ${projectID} - ${projectName}</a>
+    </h1>
+
+    <div tal:define="activity php:array()" tal:repeat="jobActivity outputContent">
+
+        <h3 tal:condition="php: repeat.jobActivity.key EQ '_project_related' ">Project Related Activities:</h3>
+        <h3 tal:condition="php: repeat.jobActivity.key NE '_project_related' ">Job: ${repeat/jobActivity/key}</h3>
+        <table class="tablestats continue" width="100%" border="0" cellspacing="0" cellpadding="0">
+
+            <tr>
+                <th>User IP</th>
+                <th>Event Date</th>
+                <th>User Name</th>
+                <th>User Email</th>
+                <th>Action</th>
+            </tr>
+
+            <tr tal:define="activity php:array()" tal:repeat="activity jobActivity">
+                <td tal:content="activity/ip | default">Unknown</td>
+                <td tal:content="activity/event_date | default">Unkwnown</td>
+                <td tal:content="activity/name | default">Unknown</td>
+                <td tal:content="activity/email | default">Unkwnown</td>
+                <td tal:content="activity/action | default">Unkwnown</td>
+            </tr>
+
+        </table>
+    </div>
+
+
+</div>
+
+<footer>
+    <div class="wrapper">
+
+        <nav>
+            <ul>
+                <li><a tal:attributes="href string:${basepath}manage/">Manage</a></li>
+                <li><a href="https://www.matecat.com/support/" target="_blank">User Guide</a></li>
+            </ul>
+
+            <tal:block tal:condition="php: empty(logged_user)">
+                <div id='welcomebox'>
+                    <span>Anonymous</span> (<a id='loginlink' tal:attributes="href incomingUrl">login</a>)
+                </div>
+            </tal:block>
+
+            <tal:block tal:condition="php: !empty(logged_user)">
+                <div id='welcomebox' tal:attributes="title extended_user">
+                    <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)
+                </div>
+            </tal:block>
+
+        </nav>
+
+    </div>
+</footer>
+
+<script type="text/javascript"></script>
+
+<script src="${basepath}public/js/lib/snapengage.js"></script>
+<div metal:use-macro="cookiebanner.html/cookieBanner"/>
+
+</body>
+</html>
