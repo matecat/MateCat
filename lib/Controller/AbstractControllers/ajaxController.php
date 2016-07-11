@@ -38,7 +38,7 @@ abstract class ajaxController extends controller {
         header('Content-Type: application/json; charset=utf-8');
 
 
-	    if( !parent::isRightVersion() ) {
+	    if( !Bootstrap::areMandatoryKeysPresent() ) {
 			$output = INIT::$CONFIG_VERSION_ERR_MESSAGE;
 			$this->result     = array("errors" => array( array( "code" => -1000, "message" => $output ) ), "data" => array() );
 			$this->api_output = array("errors" => array( array( "code" => -1000, "message" => $output ) ), "data" => array() );
