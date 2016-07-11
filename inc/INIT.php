@@ -3,6 +3,15 @@
 
 class INIT {
 
+    public static $MANDATORY_KEYS      = array(
+            'ENV',
+            'CHECK_FS',
+            'DB_SERVER',
+            'DB_DATABASE',
+            'DB_USER',
+            'DB_PASS'
+    );
+
     public static $ENV ;
     public static $ROOT;
     public static $BASEURL;
@@ -145,6 +154,7 @@ class INIT {
     /**
      * The MateCat Version
      */
+    //TODO: Rename variable to MATECAT_VERSION
     public static $BUILD_NUMBER;
 
     /**

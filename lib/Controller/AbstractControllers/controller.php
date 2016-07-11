@@ -55,18 +55,6 @@ abstract class controller {
 
     }
 
-	/**
-	 *
-	 * @return bool true if version is up to date, false otherwise
-	 */
-
-    public static function isRightVersion() {
-
-//		Log::doLog("Same version number? ".($version == INIT::$BUILD_NUMBER));
-        return Bootstrap::$_INI_VERSION == INIT::$BUILD_NUMBER;
-
-    }
-
     /**
      * When Called it perform the controller action to retrieve/manipulate data
      *

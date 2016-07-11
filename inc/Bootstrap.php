@@ -312,7 +312,7 @@ class Bootstrap {
 
         $env = self::$CONFIG[ self::$CONFIG['ENV'] ];
 
-        INIT::$BUILD_NUMBER = self::$CONFIG['BUILD_NUMBER'];
+        INIT::$BUILD_NUMBER = self::$_INI_VERSION;
 
         foreach( $env as $KEY => $value ){
 
@@ -341,6 +341,22 @@ class Bootstrap {
             );
         }
 
+    }
+
+    /**
+     * Check if all mandatory keys are present
+     *
+     * @return bool true if all mandatory keys are present, false otherwise
+     */
+    public static function areMandatoryKeysPresent() {
+        foreach ( INIT::$MANDATORY_KEYS as $key ) {
+            if( self::$CONFIG[ $key ] == null
+                    && self::$CONFIG[ INIT::$ENV ][ $key ] == null ) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 }

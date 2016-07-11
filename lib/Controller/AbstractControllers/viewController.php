@@ -152,7 +152,7 @@ abstract class viewController extends controller {
      */
     public function __construct( $isAuthRequired = false ) {
 
-	    if( !parent::isRightVersion() ) {
+	    if( !Bootstrap::areMandatoryKeysPresent() ) {
 		    header("Location: " . INIT::$HTTPHOST . INIT::$BASEURL . "badConfiguration" , true, 303);
 		    exit;
 	    }
