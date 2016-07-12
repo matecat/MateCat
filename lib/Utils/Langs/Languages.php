@@ -180,17 +180,19 @@ class Langs_Languages {
     }
 
     /**
-     *
+     * 
      * Get corresponding ISO 639-1 code given a localized name
+     *
      * @param        $code
      * @param string $lang
+     *
+     * @throws Exception
      *
      * @return mixed
      */
     public function getLocalizedName( $code, $lang = 'en' ) {
-        //convert ISO code in RFC
-        if ( strlen( $code ) < 5 ) {
-            $code = self::$map_iso2rfc[ $code ];
+        if ( !array_key_exists( $code, self::$map_rfc2obj ) ) {
+            throw new Exception('Invalid language code: ' . $code ) ;
         }
 
         return self::$map_rfc2obj[ $code ][ 'localized' ][ $lang ];
