@@ -1164,7 +1164,8 @@ background: #7eaf3e;
 }
 
 td.action {
-padding: 10px 5px!important;
+padding: 12px 5px 0 5px!important;
+    width: 165px;
 }
 
 .mgmt-table-mt th.description {
@@ -1605,7 +1606,7 @@ margin:0 auto; overflow:hidden; width:100%;
 
 .mgmt-tm .description {
 	/*width:32%!important;*/
-	width:355px!important;
+	width:315px!important;
 }
 
 .owner {width: 57px!important;}
@@ -1622,10 +1623,7 @@ margin:0 auto; overflow:hidden; width:100%;
 }
 
 
-.mgmt-tm .action {
-        /*width:22%!important;*/
-        width: 160px!important;
-}
+
 
 .mgmt-mt .action {
 		/*width:22%!important;*/
@@ -1633,10 +1631,12 @@ margin:0 auto; overflow:hidden; width:100%;
 }
 
 
-
+#inactivetm tbody {
+    background: #f3f3f3;
+}
 .new .privatekey {
-	width: 190px!important;
-padding: 15px 70px 10px 10px;
+	width: 110px!important;
+padding: 15px 31px 10px 10px;
 }
 
 select#mt_engine_int {
@@ -1726,12 +1726,32 @@ box-shadow: inset 0 0 1px 1px #888;}
 
 input.error {border: 1px solid red !important; font-size: inherit;}
 
+.mgmt-tm .btn-grey {
+padding: 7px 0px!important;
+}
+
 .mgmt-tm .btn-ok, .mgmt-tm .btn-grey {
-padding: 7px 29px!important;
 cursor: pointer!important;
-margin: 0px 5px 0px 0px;
 font-size:14px;
 }
+
+.mgmt-tm .btn-ok {
+    margin-left: 12px;
+}
+
+.mgmt-tm .canceladdtmx {
+    width: 35px;
+}
+
+.canceladdtmx {
+    margin: 0;
+    cursor: pointer;
+}
+
+.mgmt-tm .btn-ok {
+    padding: 7px 5px!important
+}
+
 
 span.mt-error-key {
     display: none;
@@ -1741,7 +1761,7 @@ span.mt-error-key {
 }
 
 .uploadtm.btn-ok {
-    margin-bottom: 10px;
+    margin-bottom: 0px;
 
 }
 .mgmt-table-mt .uploadtm.btn-ok {
@@ -1777,22 +1797,25 @@ body.cattool .mgmt-tm.mine thead,
 {
     color: #999;
 }
-.canceladdtmx {
-    cursor: pointer;
-    margin-bottom: 30px;
-}
+
 
 .btn-grey .text,
 .canceladdtmx.btn-grey .text, 
 .addtmxfile.btn-ok .text, 
 .uploadtm.btn-ok .text
 
- {width: 90px;
+ {
 display: block;
 text-align: center;}
 
-.btn-grey .text {
-    width: 55px;
+.canceladdtmx.btn-grey .text, 
+.addtmxfile.btn-ok .text, 
+.uploadtm.btn-ok .text {
+    width: 90px;
+}
+
+.mgmt-tm .btn-grey .text {
+    width: auto!important;
 }
 
 .canceladdtmx.btn-grey .text,
@@ -2599,14 +2622,14 @@ width: 90%;
 padding: 2px 5px;
 font-size: 15px !important;
 margin-top: 0px;
-margin-bottom: 15px;
+margin-bottom: 0px;
 -moz-border-radius: 2px;
 border-radius: 2px;
 border: 1px solid #999;
 }
 
 .description .mgmt-input {
-width: 310px;
+width: 285px;
 }
 
 
@@ -2636,9 +2659,9 @@ input#new-tm-key {
 }
 
 #activetm input#new-tm-key {
-	width: 182px;
+	width: 155px;
 	padding: 12px 5px;
-	margin: 0 0 10px 0;
+	margin: 0;
 	height: 0px;
 	box-shadow: inset 0 1px 2px #ddd;
 -webkit-box-shadow: inset 0 1px 2px #ddd;
@@ -3401,8 +3424,11 @@ float: left;
 }
 .canceladdtmx.btn-grey .text:before {
 	content: "\f00d";
-	padding-right: 8px;
 	vertical-align: text-top;
+}
+
+.insert-tm .canceladdtmx.btn-grey .text:before {
+    padding-right: 8px;
 }
 .deleteTM .text:before {
 content: "\f014";
