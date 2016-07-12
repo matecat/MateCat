@@ -443,18 +443,6 @@ UI = {
         str = str.replace(/(<mark class="inGlossary">)/gi, '').replace(/<\/mark>/gi, '');
         return str;
     },
-	highlightEditarea: function(seg) {
-		segment = seg || this.currentSegment;
-		segment.addClass('highlighted1');
-		setTimeout(function() {
-			$('.highlighted1').addClass('modified highlighted2');
-			segment.trigger('modified');
-		}, 300);
-		setTimeout(function() {
-			$('.highlighted1, .highlighted2').removeClass('highlighted1 highlighted2');
-		}, 2000);
-	},
-
 	
 	copyToNextIfSame: function(nextUntranslatedSegment) {
 		if ($('.source', this.currentSegment).data('original') == $('.source', nextUntranslatedSegment).data('original')) {
@@ -1730,7 +1718,7 @@ UI = {
         this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).html(), true, UI.currentSegmentId, 'choose alternative' ) );
         this.lockTags(this.editarea);
         this.editarea.focus();
-        this.highlightEditarea();
+        SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
         this.disableTPOnSegment();
     },
 	copyAlternativeInEditarea: function(translation) {

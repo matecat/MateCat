@@ -461,7 +461,7 @@ if (true)
             node = tempCopyGlossPlaceholder[0];
             setCursorAfterNode( range, node );
             tempCopyGlossPlaceholder.remove();
-            this.highlightEditarea();
+            SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
         },
         updateGlossary: function (elem$) {
             var self = this;

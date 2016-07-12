@@ -18,10 +18,17 @@ var SegmentActions = {
     /**
      * @param  {int} sid
      */
-    highlightEditArea: function(sid) {
+    highlightEditarea: function(sid) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.HIGHLIGHT_EDITAREA,
             id: sid
+        });
+    },
+    replaceContent: function(sid, text) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.REPLACE_CONTENT,
+            id: sid,
+            text: text
         });
     }
 

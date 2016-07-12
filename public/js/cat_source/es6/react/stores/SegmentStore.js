@@ -7,7 +7,7 @@ var EventEmitter = require('events').EventEmitter;
 var SegmentConstants = require('../constants/SegmentConstants');
 var assign = require('object-assign');
 
-
+EventEmitter.prototype.setMaxListeners(0);
 // Todo : Possiamo gestire la persistenza qui dentro con LokiJS
 
 var SegmentStore = assign({}, EventEmitter.prototype, {
@@ -40,8 +40,10 @@ AppDispatcher.register(function(action) {
         case SegmentConstants.HIGHLIGHT_EDITAREA:
             SegmentStore.emitChange(action.id);
             break;
+        case SegmentConstants.REPLACE_CONTENT:
+            SegmentStore.emitChange(action.id, action.text);
+            break;
         default:
-        // no op
     }
 });
 

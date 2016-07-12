@@ -3,6 +3,7 @@
  
  */
 var SegmentConstants = require('../constants/SegmentConstants');
+var SegmentStore = require('../stores/SegmentStore');
 class Editarea extends React.Component {
 
     constructor(props) {
@@ -12,6 +13,14 @@ class Editarea extends React.Component {
 
         };
         this.hightlightEditarea = this.hightlightEditarea.bind(this);
+    }
+    componentDidMount() {
+        SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
+        SegmentStore.addListener(SegmentConstants.REPLACE_CONTENT, this.replaceContent);
+    }
+    componentWillUnmount() {
+        SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA);
+        SegmentStore.removeListener(SegmentConstants.REPLACE_CONTENT);
     }
     componentWillMount() {
         var decoded_translation;
@@ -36,31 +45,36 @@ class Editarea extends React.Component {
         });
 
     }
-
     allowHTML(string) {
         return { __html: string };
     }
-
-    componentDidMount() {
-        SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
-    }
     hightlightEditarea(sid) {
         if (this.props.segment.sid == sid) {
+            var self = this;
             var editareaClasses = this.state.editareaClasses;
             editareaClasses.push('highlighted1');
             this.setState({
                 editareaClasses: editareaClasses
             });
+            setTimeout(function() {
+                editareaClasses.push.apply(editareaClasses, ['highlighted2']);
+                self.setState({
+                    editareaClasses: editareaClasses
+                });
+            }, 300);
+            setTimeout(function() {
+                var index = editareaClasses.indexOf('highlighted1');
+                editareaClasses.splice(index, 1);
+                index = editareaClasses.indexOf('highlighted2');
+                editareaClasses.splice(index, 1);
+                self.setState({
+                    editareaClasses: editareaClasses
+                });
+            }, 2000);
         }
-        /*segment = seg || this.currentSegment;
-        segment.addClass('highlighted1');
-        setTimeout(function() {
-            $('.highlighted1').addClass('modified highlighted2');
-            segment.trigger('modified');
-        }, 300);
-        setTimeout(function() {
-            $('.highlighted1, .highlighted2').removeClass('highlighted1 highlighted2');
-        }, 2000);*/
+    }
+    replaceContent() {
+
     }
     render() {
         if (this.props.segment){

@@ -30,6 +30,6 @@ window.SegmentFilter_MainPanel = require('./segment_filter/MainPanel').default ;
 window.EditArea = require('./editAreaComponent/Editarea').default;
 window.NotificationBox = require('./notificationsComponent/NotificationBox').default;
 
-window.AppDispatcher = require('./dispatcher/AppDispatcher');
-window.SegmentStore = require('./stores/SegmentStore');
+// window.AppDispatcher = require('./dispatcher/AppDispatcher');
+// window.SegmentStore = require('./stores/SegmentStore');
 window.SegmentActions = require('./actions/SegmentActions');

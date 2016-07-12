@@ -17,7 +17,7 @@ $.extend(UI, {
 		this.lockTags(this.editarea);
 		this.setChosenSuggestion(w);
 		this.editarea.focus();
-		this.highlightEditarea();
+		SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
 		this.disableTPOnSegment();
 	},
 	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which) {
