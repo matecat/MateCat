@@ -1739,8 +1739,11 @@ font-size:14px;
     margin-left: 12px;
 }
 
-.canceladdtmx {
+.mgmt-tm .canceladdtmx {
     width: 35px;
+}
+
+.canceladdtmx {
     margin: 0;
     cursor: pointer;
 }
@@ -1811,7 +1814,7 @@ text-align: center;}
     width: 90px;
 }
 
-.btn-grey .text {
+.mgmt-tm .btn-grey .text {
     width: auto!important;
 }
 
@@ -3422,6 +3425,10 @@ float: left;
 .canceladdtmx.btn-grey .text:before {
 	content: "\f00d";
 	vertical-align: text-top;
+}
+
+.insert-tm .canceladdtmx.btn-grey .text:before {
+    padding-right: 8px;
 }
 .deleteTM .text:before {
 content: "\f014";
