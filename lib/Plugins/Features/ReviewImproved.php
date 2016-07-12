@@ -59,6 +59,20 @@ class ReviewImproved extends BaseFeature {
     }
 
 
+    public function filter_get_segments_segment_data( $seg ) {
+        if( isset($seg['edit_distance']) ) {
+            $seg['edit_distance'] = round( $seg['edit_distance'] / 1000, 2 );
+        } else {
+            $seg['edit_distance'] = 0;
+        }
+        return $seg;
+    }
+
+    public function filter_get_segments_optional_fields( $options ) {
+        $options['optional_fields'][] = 'edit_distance';
+        return $options ;
+    }
+
     /**
      * This filter is to store the review_password in the data strucutre
      * to be passed back to the javascript.
