@@ -44,11 +44,13 @@
     }
 
 
-.login-google .outer{
+.login-google .outer,
+.login-google-drive .outer{
     margin-top: 10px;
 }
 
-.login-google .popup-box{
+.login-google .popup-box,
+.login-google-drive .popup-box{
     width: 100%;
     min-height: 100px;
 }
