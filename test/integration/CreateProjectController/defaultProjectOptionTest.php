@@ -152,14 +152,14 @@ class createProjectControllerTest extends IntegrationTest {
         prepare_file_in_upload_folder( $file, $upload_session );
 
         do_file_conversion(array(
-                'source_lang' => 'my-MM',
+                'source_lang' => 'en-US',
                 'target_lang' => 'it-IT,be-BY',
                 'file_name' => 'amex-test.docx.xlf',
                 'upload_session' => $upload_session
         ));
 
         $response = createProjectWithUIParams( array(
-                'source_language' => 'my-MM',
+                'source_language' => 'en-US',
                 'target_language' => 'it-IT,be-BY',
                 'pretranslate_100' => 1,
                 'job_subject' => 'general',
@@ -290,14 +290,14 @@ class createProjectControllerTest extends IntegrationTest {
         prepare_file_in_upload_folder( $file, $upload_session );
 
         do_file_conversion(array(
-                'source_lang' => 'my-MM',
+                'source_lang' => 'en-US',
                 'target_lang' => 'it-IT,be-BY',
                 'file_name' => 'amex-test.docx.xlf',
                 'upload_session' => $upload_session
         ));
 
         $response = createProjectWithUIParams( array(
-                'source_language' => 'my-MM',
+                'source_language' => 'en-US',
                 'target_language' => 'it-IT,be-BY',
                 'pretranslate_100' => 1,
                 'job_subject' => 'general',
