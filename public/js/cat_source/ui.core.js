@@ -1420,7 +1420,7 @@ UI = {
     },
 
     isReadonlySegment : function( segment ) {
-       return ( (this.readonly == 'true') ||(UI.body.hasClass('archived'))) ? true : false;
+       return ( (segment.readonly == 'true') ||(UI.body.hasClass('archived'))) ? true : false;
     },
 
     renderSegments: function (segments, justCreated, splitAr, splitGroup) {
