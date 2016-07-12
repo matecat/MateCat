@@ -42,7 +42,7 @@ class UnitTestInitializer
                     test_file_path('xliff/file-with-hello-world.xliff')
                 ),
                 'params' => array(
-                    'target_lang' => 'fr'
+                    'target_lang' => 'fr-FR'
                 )
             )
         );

@@ -23,6 +23,8 @@ class createProjectController extends ajaxController {
     private $dqf_key;
     private $metadata;
 
+    private $lang_handler ;
+
     public function __construct() {
 
         //SESSION ENABLED
@@ -149,6 +151,10 @@ class createProjectController extends ajaxController {
         if ( $this->pretranslate_100 !== 1 && $this->pretranslate_100 !== 0 ) {
             $this->result[ 'errors' ][ ] = array( "code" => -6, "message" => "invalid pretranslate_100 value" );
         }
+
+        $this->lang_handler = Langs_Languages::getInstance();
+        $this->validateSourceLang();
+        $this->validateTargetLangs();
     }
 
     public function doAction() {
@@ -317,6 +323,39 @@ class createProjectController extends ajaxController {
 
         $this->result = $projectStructure[ 'result' ];
 
+    }
+
+    private function validateTargetLangs() {
+        $targets = explode( ',', $this->target_language );
+        $targets = array_map('trim',$targets);
+        $targets = array_unique($targets);
+
+        if ( empty( $targets ) ) {
+            $this->result[ 'errors' ][]    = array( "code" => -4, "message" => "Missing target language." );
+        }
+
+        try {
+            foreach ( $targets as $target ) {
+                $this->lang_handler->getLocalizedName( $target );
+            }
+        } catch ( Exception $e ) {
+            $this->result[ 'errors' ][]    = array( "code" => -4, "message" => $e->getMessage() );
+        }
+
+        $this->target_language = implode(',', $targets);
+    }
+
+    private function validateSourceLang() {
+        if ( empty( $this->source_language ) ) {
+            $this->result[ 'errors' ][]    = array( "code" => -3, "message" => "Missing source language." );
+        }
+
+        try {
+            $this->lang_handler->getLocalizedName( $this->source_language ) ;
+
+        } catch ( Exception $e ) {
+            $this->result[ 'errors' ][]    = array( "code" => -3, "message" => $e->getMessage() );
+        }
     }
 
     private function clearSessionFiles() {

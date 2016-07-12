@@ -348,14 +348,13 @@ class Bootstrap {
      *
      * @return bool true if all mandatory keys are present, false otherwise
      */
-    public static function areMandatoryKeysPresent() {
+    public static function areMandatoryKeysPresent()  {
+        $merged_config = array_merge(self::$CONFIG, self::$CONFIG[ INIT::$ENV ] );
         foreach ( INIT::$MANDATORY_KEYS as $key ) {
-            if( self::$CONFIG[ $key ] == null
-                    && self::$CONFIG[ INIT::$ENV ][ $key ] == null ) {
+            if (! array_key_exists($key, $merged_config ) || empty( $merged_config[$key] ) ) {
                 return false;
             }
         }
-
         return true;
     }
 
