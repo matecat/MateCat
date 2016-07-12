@@ -42,7 +42,10 @@ var GDrive = function() {
                 enableFeature(google.picker.Feature.MULTISELECT_ENABLED).
                 build();
             picker.setVisible(true);
-        } else if( isGDriveAccessible === false ) {
+        } else if( isGDriveAccessible === false && oauthToken) {
+            displayGoogleLogin("drive");
+            setOpenPickerAfterLogin( 'true' );
+        } else if( isGDriveAccessible === false) {
             displayGoogleLogin();
             setOpenPickerAfterLogin( 'true' );
         }
@@ -86,9 +89,13 @@ var GDrive = function() {
         isToOpenPicker = isToOpenPickerAfterLogin();
     }
 
-    function displayGoogleLogin() {
+    function displayGoogleLogin(param) {
         $("#sign-in").data("oauth", config.gdriveAuthURL);
-        $(".login-google").show();
+        if (param && param === "drive") {
+            $(".login-google-drive").show();
+        } else {
+            $(".login-google").show();
+        }
 
         $('.modal .x-popup').click( function() {
             setOpenPickerAfterLogin( 'false' );
