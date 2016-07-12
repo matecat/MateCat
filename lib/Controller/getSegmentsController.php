@@ -18,6 +18,21 @@ class getSegmentsController extends ajaxController {
     private $start_from = 0;
     private $page = 0;
 
+    /**
+     * @var Chunks_ChunkStruct
+     */
+    private $job;
+
+    /**
+     * @var Projects_ProjectStruct
+     */
+    private $project ;
+
+    /**
+     * @var FeatureSet
+     */
+    private $feature_set ;
+
     private $segment_notes ;
 
 
@@ -59,11 +74,16 @@ class getSegmentsController extends ajaxController {
             return;
         }
 
+        $this->job = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
+        $this->project = $this->job->getProject();
+        $this->feature_set = FeatureSet::fromIdCustomer($this->project->id_customer);
+
 		$lang_handler = Langs_Languages::getInstance();
 
 		if ($this->ref_segment == '') {
 			$this->ref_segment = 0;
 		}
+
 
         $data = getMoreSegments(
                 $this->jid, $this->password, $this->step,
@@ -142,6 +162,8 @@ class getSegmentsController extends ajaxController {
                 $this->data["$id_file"]['segments'] = array();
             }
 
+            $seg = $this->feature_set->filter('filter_get_segments_segment_data', $seg) ;
+
             unset($seg['id_file']);
             unset($seg['source']);
             unset($seg['target']);
@@ -186,13 +208,14 @@ class getSegmentsController extends ajaxController {
 
 
     private function getOptionalQueryFields() {
-        $job = Jobs_JobDao::getById( $this->jid );
-        $feature = $job->getProject()->getOwnerFeature('translation_versions');
+        $feature = $this->job->getProject()->getOwnerFeature('translation_versions');
         $options = array();
 
         if ( $feature ) {
             $options['optional_fields'] = array('st.version_number');
         }
+
+        $options = $this->feature_set->filter('filter_get_segments_optional_fields', $options);
 
         return $options;
     }

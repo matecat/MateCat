@@ -34,6 +34,9 @@ class WorkerClient {
                 self::$_HANDLER = new AMQHandler();
             }
         }
+        else {
+            throw new Exception('Missing task runner config'); 
+        }
     }
 
     /**

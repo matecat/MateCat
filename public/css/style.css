@@ -4067,5 +4067,13 @@ section:hover .segment-side-buttons {
     background: #b02429;
 }
 
+.edit-distance {
+	display: none;
+	position: absolute;
+	top: 4px;
+	right: 6px;
+	font-size: 0.8rem;
+	color: #999;
+}
 
 
