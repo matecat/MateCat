@@ -138,6 +138,7 @@ class activityLogController extends viewController {
 
         parent::makeTemplate("activity_log_not_found.html");
         $this->nocache();
+        $this->template->projectID = $this->id_project;
         header( 'Content-Type: text/html; charset=utf-8' );
         echo $this->template->execute();
         exit;
