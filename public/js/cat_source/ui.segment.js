@@ -176,7 +176,7 @@
                 UI.lockTags(UI.editarea);
                 UI.lockTags(UI.currentSegment.find('.source'));
                 UI.editarea.focus();
-                UI.highlightEditarea();
+                SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
                 UI.createButtons();
             });
         },

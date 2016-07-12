@@ -1150,7 +1150,8 @@ $.extend(UI, {
 		$("#outer").on('click', '.tab.alternatives .graysmall .goto a', function(e) {
 			e.preventDefault();
 			UI.scrollSegment($('#segment-' + $(this).attr('data-goto')), true);
-			UI.highlightEditarea($('#segment-' + $(this).attr('data-goto')));
+			// UI.highlightEditarea($('#segment-' + $(this).attr('data-goto')));
+			SegmentActions.highlightEditarea($(this).attr('data-goto'));
 		});
 		UI.toSegment = true;
 
