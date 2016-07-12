@@ -17,10 +17,6 @@ class ActivityLogDecorator {
 
     public function decorate() {
 
-        if ( empty( $this->controller->rawLogContent ) ){
-            $this->controller->showEmptyActivity();
-        }
-
         if( $this->controller->download ){
             $this->downloadZip( $this->controller->jobLanguageDefinition, $this->controller->rawLogContent );
 
