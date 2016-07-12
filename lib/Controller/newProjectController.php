@@ -104,17 +104,15 @@ class newProjectController extends viewController {
 
                     foreach ( $this->targetLangAr as $key => $lang ) {
                         if ( $lang != '' ) {
-                            $prova = explode( ',', urldecode( $lang ) );
+                            $langs = explode( ',', urldecode( $lang ) );
 
                             $cl = "";
-                            foreach ( $prova as $ll ) {
+                            foreach ( $langs as $ll ) {
                                 $cl .= $this->lang_handler->getLocalizedName( $ll ) . ',';
                             }
                             $cl = substr_replace( $cl, "", -1 );
 
-
                             $tmpTargetAr[ $lang ] = $cl;
-                            //					$tmpTargetAr[$lang] = $this->lang_handler->getLocalizedName($lang,'en');
 
                             $ar               = array();
                             $ar[ 'name' ]     = $cl;
