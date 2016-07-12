@@ -583,29 +583,9 @@ $.extend(UI, {
 				UI.removeStatusMenu(statusMenu);
 			});
 		}).on('click', 'section.readonly, section.readonly a.status', function(e) {
-
             e.preventDefault();
-
-            var section = $(e.target).closest('section');
-
-			if ( UI.justSelecting('readonly') )   return;
-			if ( UI.someUserSelection )           return;
-
-            var doShowAlert = function () {
-                return true ;
-                // return ! ( MBC.enabled() && MBC.popLastSelectedOnHistory() == sid ) ;
-            }
-
-            if ( doShowAlert() ) {
-                var msgArchived = 'Job has been archived and cannot be edited.' ;
-                var msgOther = 'This part has not been assigned to you.' ;
-                var msg = (UI.body.hasClass('archived'))? msgArchived : msgOther ;
-
-                UI.selectingReadonly = setTimeout(function() {
-                    APP.alert({msg: msg});
-                }, 200);
-            }
-
+			var section = $(e.target).closest('section');
+			UI.handleClickOnReadOnly( section );
 		}).on('mousedown', 'section.readonly, section.readonly a.status', function() {
 			sel = window.getSelection();
 			UI.someUserSelection = (sel.type == 'Range') ? true : false;

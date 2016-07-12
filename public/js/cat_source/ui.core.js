@@ -1174,10 +1174,8 @@ UI = {
 			prev = $('.editor').parents('article').prevAll( selector ).first();
 			if (prev.length) {
 				$(UI.targetContainerSelector() , prev).click();
-			} else {
-				UI.topReached();
 			}
-		}
+        }
 		if (prev.length)
 			UI.scrollSegment(prev);
 	},
@@ -1421,6 +1419,10 @@ UI = {
         return newSegments;
     },
 
+    isReadonlySegment : function( segment ) {
+       return ( (this.readonly == 'true') ||(UI.body.hasClass('archived'))) ? true : false;
+    },
+
     renderSegments: function (segments, justCreated, splitAr, splitGroup) {
         segments = this.normalizeSplittedSegments(segments);
         splitAr = splitAr || [];
@@ -1428,7 +1430,9 @@ UI = {
         var t = config.time_to_edit_enabled;
         newSegments = '';
         $.each(segments, function(index) {
-            var readonly = ((this.readonly == 'true')||(UI.body.hasClass('archived'))) ? true : false;
+
+            var readonly = UI.isReadonlySegment( this );
+
             var autoPropagated = this.autopropagated_from != 0;
             var autoPropagable = (this.repetitions_in_chunk == "1")? false : true;
 
@@ -1569,8 +1573,9 @@ UI = {
 				window.location.hash = UI.currentSegmentId;
 			}, 300);
 		}
-		if (this.readonly)
-			return;
+
+		if (this.readonly) return;
+
 		APP.doRequest({
 			data: {
 				action: 'setCurrentSegment',
@@ -3129,14 +3134,6 @@ UI = {
         $.cookie('client_info', JSON.stringify(clientInfo), { expires: 3650 });
     },
 
-    topReached: function() {
-//        var jumpto = $(this.currentSegment).offset().top;
-//        $("html,body").animate({
-//            scrollTop: 0
-//        }, 200).animate({
-//            scrollTop: jumpto - 50
-//        }, 200);
-	},
 	browserScrollPositionRestoreCorrection: function() {
 		// detect if the scroll is a browser generated scroll position restore, and if this is the case rescroll to the segment
 		if (this.firstOpenedSegment == 1) { // if the current segment is the first opened in the current UI
@@ -3769,6 +3766,22 @@ UI = {
         UI.changeStatusStop = new Date();
         UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
     },
+
+    handleClickOnReadOnly : function(section) {
+        if ( UI.justSelecting('readonly') )   return;
+        if ( UI.someUserSelection )           return;
+
+        UI.selectingReadonly = setTimeout(function() {
+            APP.alert({msg: UI.messageForClickOnReadonly() });
+        }, 200);
+    },
+
+    messageForClickOnReadonly : function() {
+        var msgArchived = 'Job has been archived and cannot be edited.' ;
+        var msgOther = 'This part has not been assigned to you.' ;
+        return (UI.body.hasClass('archived'))? msgArchived : msgOther ;
+    },
+
     openOptionsPanel: function() {
         if ($(".popup-tm").hasClass('open') ) {
             return false;
