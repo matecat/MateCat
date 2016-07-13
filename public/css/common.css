@@ -3979,10 +3979,13 @@ table.left-aligned tr th { text-align: left; }
 
 .activity-log-container h1 {
     text-align: left;
-    margin-top: 40px;
+    margin-top: 20px;
 }
 
-
+.activity-log-container h1:first-child {
+    font-size: 40px;
+    margin-top: 30px;
+}
 
 .activity-log-container table td,
 .activity-log-container table th {
@@ -4012,12 +4015,15 @@ table.activitylog {
     width: 20%;
 }
 
+
+
 .activity-log-container h3 {
     margin-bottom: 10px;
+        font-size: 20px;
 }
 .activity-log-entry {
     line-height: 20px;
-    padding: 2% 0;
+    padding: 3% 0 0% 0;
     text-align: left;
 }
 
