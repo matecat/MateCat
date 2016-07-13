@@ -2131,6 +2131,8 @@ p.required {
   margin-bottom: 10px;
 }
 
+
+
 .mgmt-add-tm input, .mgmt-add-gl input {
  font-size: 12px !important;
 height: 22px;
@@ -3966,3 +3968,59 @@ width: 250px;
 
 table.left-aligned tr td { text-align: left; }
 table.left-aligned tr th { text-align: left; }
+
+/* activity log */
+
+.activity-log-container {
+    width: 92%;
+    padding-bottom: 4%;
+    margin: 0 auto;
+}
+
+.activity-log-container h1 {
+    text-align: left;
+    margin-top: 40px;
+}
+
+
+
+.activity-log-container table td,
+.activity-log-container table th {
+        border-bottom: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+    padding: 6px 8px;
+    margin: 1px 0;
+    text-align: left;
+        line-height: 25px;
+}
+
+.activity-log-container table th {
+    font-size:16px;
+    font-weight: bold;
+    background-color: #efefef;
+}
+table.activitylog {
+    border-top: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+}
+.activity-log-page {
+    background: #fff;
+}
+
+.activity-log-container table td {
+    font-size:15px;
+    width: 20%;
+}
+
+.activity-log-container h3 {
+    margin-bottom: 10px;
+}
+.activity-log-entry {
+    line-height: 20px;
+    padding: 2% 0;
+    text-align: left;
+}
+
+table.activitylog tr:hover {
+    background: #f7f8f9;
+}
