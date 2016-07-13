@@ -194,10 +194,26 @@ class Langs_Languages {
      * @return mixed
      */
     public function getLocalizedName( $code, $lang = 'en' ) {
+        if ( strlen( $code ) < 5 ) {
+            $code = self::$map_iso2rfc[ $code ];
+        }
+        return self::$map_rfc2obj[ $code ][ 'localized' ][ $lang ];
+    }
+
+    /**
+     *
+     * Be strict when and only find localized name with an RFC expected input
+     * 
+     * @param        $code
+     * @param string $lang
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    public function getLocalizedNameRFC( $code, $lang = 'en') {
         if ( !array_key_exists( $code, self::$map_rfc2obj ) ) {
             throw new Lang_InvalidLanguageException('Invalid language code: ' . $code ) ;
         }
-
         return self::$map_rfc2obj[ $code ][ 'localized' ][ $lang ];
     }
 

@@ -641,7 +641,7 @@ class NewController extends ajaxController {
         }
 
         try {
-            $this->lang_handler->getLocalizedName( $this->source_lang ) ;
+            $this->lang_handler->getLocalizedNameRFC( $this->source_lang ) ;
 
         } catch ( Exception $e ) {
             $this->api_output['message'] = $e->getMessage();
@@ -661,7 +661,7 @@ class NewController extends ajaxController {
 
         try {
             foreach ( $targets as $target ) {
-               $this->lang_handler->getLocalizedName( $target );
+               $this->lang_handler->getLocalizedNameRFC( $target );
             }
         } catch ( Exception $e ) {
             $this->api_output['message'] = $e->getMessage();
