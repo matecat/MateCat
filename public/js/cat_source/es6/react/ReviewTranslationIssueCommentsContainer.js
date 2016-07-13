@@ -154,6 +154,9 @@ export default React.createClass({
         this.setState({ replying: false });
     },
 
+    handleRootClick : function(event) {
+        event.stopPropagation();
+    },
     render : function() {
 
         var terminal ;
@@ -239,7 +242,7 @@ export default React.createClass({
             </div>;
         }
 
-        return <div className="review-issue-comment-container" >
+        return <div onClick={this.handleRootClick} className="review-issue-comment-container" >
             <div className="review-issue-comment-entries">
             {commentLines}
             </div>

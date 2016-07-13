@@ -44,11 +44,11 @@
     }
 
 
-.login-google .outer{
+.modal .outer{
     margin-top: 10px;
 }
 
-.login-google .popup-box{
+.modal .popup-box{
     width: 100%;
     min-height: 100px;
 }

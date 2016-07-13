@@ -172,8 +172,8 @@ function integrationCreateTestProject( $options=array() ) {
 
     $test->params = array(
             'project_name' => 'foo',
-            'target_lang' => 'it',
-            'source_lang' => 'en'
+            'target_lang' => 'it-IT',
+            'source_lang' => 'en-US'
     );
 
     if ( array_key_exists( 'params', $options )) {

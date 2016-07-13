@@ -25,8 +25,6 @@ class ProjectValidator {
   public function validate() {
     $this->project = \Projects_ProjectDao::findById( $this->id_project );
 
-    \Log::doLog( $this->project );
-
     if ($this->project == false) {
       return false;
     }

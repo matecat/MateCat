@@ -115,6 +115,11 @@ class activityLogController extends viewController {
                 )
         );
 
+        //NO ACTIVITY DATA FOR THIS PROJECT
+        if ( empty( $this->rawLogContent ) ){
+            $this->finalizeEmptyActivity();
+        }
+
         foreach ( $this->project_data as $val ){
             $this->jobLanguageDefinition[ $val[ 'jid' ] ] = $val[ 'lang_pair' ];
         }
@@ -129,10 +134,14 @@ class activityLogController extends viewController {
 
     }
 
-    public function showEmptyActivity(){
+    public function finalizeEmptyActivity(){
 
         parent::makeTemplate("activity_log_not_found.html");
         $this->nocache();
+        $this->template->projectID = $this->id_project;
+        header( 'Content-Type: text/html; charset=utf-8' );
+        echo $this->template->execute();
+        exit;
 
     }
 

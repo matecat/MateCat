@@ -30,8 +30,8 @@ class NewWithRevisionTypeTest extends IntegrationTest {
 
         $this->params = array(
             'project_name' => 'foo',
-            'target_lang' => 'it',
-            'source_lang' => 'en',
+            'target_lang' => 'it-IT',
+            'source_lang' => 'en-US',
             'metadata' => '{ "project_type" : "HT"}'
         );
 
