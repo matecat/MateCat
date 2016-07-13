@@ -124,7 +124,7 @@ class NotificationItem extends React.Component {
             notificationStyle.borderTop = 0;
         }
 
-        if (!this.props.dismissable) {
+        if (this.props.dismissable) {
             autoDismiss = <span className={'notification-close-button'} onClick={this.dismissNotification}>×</span>;
         }
         if (this.props.allowHtml) {

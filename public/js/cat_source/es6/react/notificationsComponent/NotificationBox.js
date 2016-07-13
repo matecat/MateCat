@@ -12,6 +12,7 @@
  * allowHtml:       (Boolean, Default false) Set to true if the text contains HTML, like buttons
  * closeCallback    (Function) A callback function that will be called when the notification is about to be removed.
  * openCallback     (Function) A callback function that will be called when the notification is successfully added.
+ * dismissable      (Boolean, Default true) If show or not the button to close the notification
  * timer            (Number, Default 700) The timer to auto dismiss the notification
  */
 
@@ -138,6 +139,7 @@ class NotificationBox extends React.Component {
                             timer={notification.timer}
                             closeCallback={notification.closeCallback}
                             openCallback={notification.openCallback}
+                            dismissable = {notification.dismissable}
                             key={notification.uid}
                             uid={notification.uid}
                             hideMateCat={self.hideMateCat}
