@@ -4,6 +4,9 @@
    this class manages supported languages in the CAT tool
  */
 
+
+class Lang_InvalidLanguageException extends Exception {} ;
+
 class Langs_Languages {
 
     private static $instance; //singleton instance
@@ -192,7 +195,7 @@ class Langs_Languages {
      */
     public function getLocalizedName( $code, $lang = 'en' ) {
         if ( !array_key_exists( $code, self::$map_rfc2obj ) ) {
-            throw new Exception('Invalid language code: ' . $code ) ;
+            throw new Lang_InvalidLanguageException('Invalid language code: ' . $code ) ;
         }
 
         return self::$map_rfc2obj[ $code ][ 'localized' ][ $lang ];
