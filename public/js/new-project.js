@@ -451,6 +451,8 @@ APP.checkForLexiQALangs = function(){
 	var targetAccepted = targetLanguages.filter(function(n) {
 							return acceptedLanguages.indexOf(n) != -1;
 						}).length > 0;
+	LXQCheck.find('.onoffswitch').off("click");
+	$('.options-box #lexi_qa').removeAttr("disabled");
 	LXQCheck.removeClass('option-unavailable');
     //disable LexiQA
 	var disableLexiQA = !(sourceAccepted && targetAccepted && config.defaults.lexiqa);
@@ -472,7 +474,7 @@ APP.checkForLexiQALangs = function(){
  *
  */
 APP.checkForTagProjectionLangs = function(){
-
+	if ( $('.options-box #tagp_check').length == 0 ) return;
 	var acceptedLanguages = config.tag_projection_languages.slice();
 	var tpCheck = $('.options-box.tagp');
 	var targetLanguages = $( '#target-lang' ).val().split(',');
@@ -481,6 +483,8 @@ APP.checkForTagProjectionLangs = function(){
 							return acceptedLanguages.indexOf(n) != -1;
 						}).length > 0;
 	tpCheck.removeClass('option-unavailable');
+	tpCheck.find('.onoffswitch').off('click');
+	$('.options-box #tagp_check').removeAttr("disabled");
 
 	//disable Tag Projection
 	var disableTP = !(sourceAccepted && targetAccepted && config.defaults.tag_projection);
@@ -507,11 +511,12 @@ APP.checkForSpeechToText = function(){
 	var disableS2T = !config.defaults.speech2text;
 	var speech2textCheck = $('.s2t-box');
 	speech2textCheck.removeClass('option-unavailable');
+	speech2textCheck.find('.onoffswitch').off('click')
 	if (!('webkitSpeechRecognition' in window)) {
 		disableS2T = true;
 		$('.options-box #s2t_check').prop( "disabled", disableS2T );
 		speech2textCheck.find('.option-s2t-box-chrome-label').css('display', 'inline');
-		speech2textCheck.find('.onoffswitch').on('click', function () {
+		speech2textCheck.find('.onoffswitch').off('click').on('click', function () {
 			APP.alert({
 				title: 'Option not available',
 				okTxt: 'Continue',
