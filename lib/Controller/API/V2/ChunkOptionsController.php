@@ -36,6 +36,10 @@ class ChunkOptionsController extends ProtectedKleinController {
             'tag_projection' => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
         );
 
-        return filter_var_array( $this->request->params(), $args);
+        $args = array_intersect_key( $args, $this->request->params() );
+        $filtered = filter_var_array( $this->request->params(), $args);
+
+        return $filtered;
+        
     }
 }
