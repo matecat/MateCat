@@ -40,13 +40,18 @@ class ProjectOptionsSanitizer {
         
         if ( !isset( $this->options['speech2text'] ) ) {
             $this->sanitized['speech2text'] = TRUE  ; 
-        }
-        else {
+        } else {
             $this->sanitized['speech2text'] = !!$this->options['speech2text']; 
         }
-        
-        $this->sanitizeTagProjection(); 
-        $this->sanitizeLexiQA();
+
+        if( isset( $this->options['tag_projection'] ) ){
+            $this->sanitizeTagProjection();
+        }
+
+        if( isset( $this->options['lexiqa'] ) ){
+            $this->sanitizeLexiQA();
+        }
+
         $this->forceInt();
 
         $this->sanitizeSegmentationRule(); //do not force int because it is a string value
