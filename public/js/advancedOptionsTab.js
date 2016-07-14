@@ -12,39 +12,51 @@ if ( true )
             ".</br> Only available for " + acceptedLanguages.join(", ") +"."
         });
     }
+
+    var findInLanguagesArray = function(lang_rfc) {
+        return  _.find(config.languages_array, function (e) {
+            return e.code === lang_rfc ;
+        });
+    }
+
     function createSupportedLanguagesArrays(acceptedLanguages) {
         var notAcceptedLanguages = [];
         var notAcceptedLanguagesCodes = [], acceptedLanguagesCodes = [];
-        var source_lan = config.source_rfc;
-        var target_lan = config.target_rfc;
-        if (acceptedLanguages.indexOf(source_lan) === -1 ) {
-            notAcceptedLanguages.push((_.find(config.languages_array, function (e) {
-                if (e.code === source_lan) {
-                    notAcceptedLanguagesCodes.push(e.code.split("-")[0].toUpperCase());
-                    return true;
-                }
-                return false;
-            })).name);
+        var foundLang ;
+
+        if (acceptedLanguages.indexOf(config.source_rfc) === -1 ) {
+            foundLang = findInLanguagesArray( config.source_rfc );
+            if ( !foundLang ) {
+                notAcceptedLanguages.push( config.source_rfc );
+                notAcceptedLanguagesCodes.push( config.source_rfc );
+            } else {
+                notAcceptedLanguagesCodes.push(foundLang.code.split("-")[0].toUpperCase());
+                notAcceptedLanguages.push(foundLang.name);
+            }
         }
 
-        if (acceptedLanguages.indexOf(target_lan) === -1) {
-            notAcceptedLanguages.push((_.find(config.languages_array, function (e) {
-                if (e.code === target_lan) {
-                    notAcceptedLanguagesCodes.push(e.code.split("-")[0].toUpperCase());
-                    return true;
-                }
-                return false;
-            })).name);
+        if (acceptedLanguages.indexOf(config.target_rfc) === -1) {
+            foundLang = findInLanguagesArray( config.target_rfc );
+            if ( !foundLang ) {
+                notAcceptedLanguages.push( config.target_rfc );
+                notAcceptedLanguagesCodes.push( config.target_rfc );
+            } else {
+                notAcceptedLanguages.push(foundLang.name);
+                notAcceptedLanguagesCodes.push( foundLang.code.split("-")[0].toUpperCase() );
+            }
         }
+
         acceptedLanguages.forEach(function (value, index, array) {
             var result = _.find(config.languages_array, function (e) {
                 return e.code === value;
             });
             array[index] = result.name;
+
             if (acceptedLanguagesCodes.indexOf(result.code.split("-")[0].toUpperCase()) === -1) {
                 acceptedLanguagesCodes.push(result.code.split("-")[0].toUpperCase() );
             }
         });
+
         return {
             accepted: acceptedLanguages,
             acceptedCodes: acceptedLanguagesCodes,
