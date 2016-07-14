@@ -141,7 +141,7 @@ $.extend(UI, {
                     '    <input type="file" name="tmx_file" />' +
                     '</form>' +
                      '  <a class="pull-left btn-grey canceladdtmx">' +
-                     '      <span class="text">Cancel</span>' +
+                     '      <span class="text"></span>' +
                      '  </a>' +
                     '   <a class="existingKey pull-left btn-ok addtmxfile">' +
                     '       <span class="text">Confirm</span>' +
@@ -984,6 +984,7 @@ $.extend(UI, {
         });
     },
     saveTMkey: function (button) {
+        delete UI.newTmKey;
         APP.doRequest({
             data: {
                 action: 'userKeys',
@@ -1378,6 +1379,10 @@ $.extend(UI, {
     openAddNewTm: function () {
         $(".mgmt-table-tm tr.new").removeClass('hide').show();
         // $('#new-tm-key').attr('disabled','disabled');
+        if (UI.newTmKey) {
+            UI.copyNewTMKey(UI.newTmKey);
+            return false;
+        }
         //call API
         APP.doRequest( {
             data: {
@@ -1386,12 +1391,16 @@ $.extend(UI, {
             success: function ( d ) {
                 data = d.data;
                 //put value into input field
-                $('#new-tm-key').val(data.key);
-                $('#activetm tr.new').removeClass('badkey');
-                $('#activetm tr.new .error .tm-error-key').text('').hide();
-                UI.checkTMAddAvailability();
+                UI.newTmKey = data.key;
+                UI.copyNewTMKey(UI.newTmKey);
                 return false;
             }
-        } );
+        });
+    },
+    copyNewTMKey: function (key) {
+        $('#new-tm-key').val(key);
+        $('#activetm tr.new').removeClass('badkey');
+        $('#activetm tr.new .error .tm-error-key').text('').hide();
+        UI.checkTMAddAvailability();
     }
 });

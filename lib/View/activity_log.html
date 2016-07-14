@@ -9,29 +9,28 @@
     <link rel="stylesheet" href="${basepath}public/css/analyze.css?build=${build_number}"/>
 
     <script type="text/javascript" src="${basepath}public/js/lib/jquery.js"></script>
-    <script type='text/javascript' src="${basepath}public/js/login.js?build=${build_number}"></script>
 
     <div metal:use-macro="${php: INIT::$ROOT}/public/holidays/holidays.html/analyze_holidays"/>
 
 </head>
-<body>
+<body class="activity-log-page">
 <header>
     <div class="wrapper">
         <a href="${basepath}" class="logo"></a>
     </div>
 </header>
 
-<div class="">
-
+<div class="activity-log-container">
+<h1>Activity Log</h1>
     <h1>
         <a href="${projectUrl}">Project: ${projectID} - ${projectName}</a>
     </h1>
 
-    <div tal:define="activity php:array()" tal:repeat="jobActivity outputContent">
+    <div tal:define="activity php:array()" tal:repeat="jobActivity outputContent" class="activity-log-entry">
 
         <h3 tal:condition="php: repeat.jobActivity.key EQ '_project_related' ">Project Related Activities:</h3>
         <h3 tal:condition="php: repeat.jobActivity.key NE '_project_related' ">Job: ${repeat/jobActivity/key}</h3>
-        <table class="tablestats continue" width="100%" border="0" cellspacing="0" cellpadding="0">
+        <table class="activitylog continue" width="100%" border="0" cellspacing="0" cellpadding="0">
 
             <tr>
                 <th>User IP</th>

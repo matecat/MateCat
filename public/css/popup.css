@@ -99,6 +99,7 @@ box-shadow: inset 0 0 1px 1px #888;
     text-align: left;
     padding: 0 20px;
     margin: 0 auto;
+    width: auto!important;
     overflow: hidden;
 }
 .outsource.modal .out-link {

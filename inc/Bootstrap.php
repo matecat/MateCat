@@ -350,8 +350,9 @@ class Bootstrap {
      */
     public static function areMandatoryKeysPresent()  {
         $merged_config = array_merge(self::$CONFIG, self::$CONFIG[ INIT::$ENV ] );
+
         foreach ( INIT::$MANDATORY_KEYS as $key ) {
-            if (! array_key_exists($key, $merged_config ) || empty( $merged_config[$key] ) ) {
+            if ( !array_key_exists($key, $merged_config) || $merged_config[ $key ] === null ) {
                 return false;
             }
         }

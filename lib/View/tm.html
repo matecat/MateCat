@@ -53,6 +53,7 @@
                             <table class="mgmt-tm scroll" id="activetm">
                                 <thead>
                                 <tr>
+                                    <th class="dragrow"></th>
                                     <th class="privatekey">Private Key</th>
                                     <th class="owner">Owner</th>
                                     <th class="description">Description</th>
@@ -86,7 +87,7 @@
                                 </tal:block>
 
                                 <tr class="new hide">
-
+                                <td class="dragrow"></td>
                                     <td class="privatekey">
                                         <div class="error">
                                             <span class="tm-error-key"></span>
@@ -94,6 +95,8 @@
                                         <input class="mgmt-input pull-left" type="text" id="new-tm-key" placeholder="Have a Key? Add it here*" />
                                         <!--<a class="btn-ok pull-right">Create a New TM</a>-->
 <!--                                    <span class="text pull-left text-req">*required</span> -->
+                                    </td>
+                                    <td class="owner">You
                                     </td>
                                     <td class="description">
                                         <textarea rows="1" cols="50" class="mgmt-input" id="new-tm-description" placeholder="Enter a short description" ></textarea>
@@ -105,12 +108,13 @@
                                         <input id="new-tm-write" type="checkbox" name="w" class="w" value="1" checked="" />
                                     </td>
                                     <td class="action">
-                                        <a class="pull-left btn-ok uploadtm disabled">
-                                            <span class="text uploadkey">Confirm</span>
-                                        </a>
+                                       
 
                                         <a class="pull-left btn-grey canceladdtmx">
-                                            <span class="text">Cancel</span>
+                                            <span class="text"></span>
+                                        </a>
+                                         <a class="pull-left btn-ok uploadtm disabled">
+                                            <span class="text uploadkey">Confirm</span>
                                         </a>
                                         <div class="error">
                                             <span class="tm-error-grants"></span>
@@ -151,7 +155,7 @@
                                 <table class="mgmt-tm mgmt-tm-nested scroll" id="inactivetm">
                                     <thead>
                                     <tr>
-                                        <th class="fake" style="display: none"></th>
+                                        <th class="dragrow"></th>
                                         <th class="privatekey">Private Key</th>
                                         <th class="owner">Owner</th>
                                         <th class="description">Description</th>
