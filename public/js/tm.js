@@ -141,7 +141,7 @@ $.extend(UI, {
                     '    <input type="file" name="tmx_file" />' +
                     '</form>' +
                      '  <a class="pull-left btn-grey canceladdtmx">' +
-                     '      <span class="text">Cancel</span>' +
+                     '      <span class="text"></span>' +
                      '  </a>' +
                     '   <a class="existingKey pull-left btn-ok addtmxfile">' +
                     '       <span class="text">Confirm</span>' +
