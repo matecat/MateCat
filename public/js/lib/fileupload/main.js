@@ -315,7 +315,7 @@ $( function () {
 
         if ( $( '.upload-table tr' ).length >= (config.maxNumberFiles) ) {
             console.log( 'adding more than config.maxNumberFiles' );
-            jqXHR = data.submit();
+            var jqXHR = data.submit();
             jqXHR.abort();
         }
 
