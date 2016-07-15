@@ -1408,6 +1408,17 @@
     ,
         {
             "localized":[{
+                "en":"Spanish Colombia"
+            }],
+            "isocode":"es",
+            "enabled":true,
+            "rtl":false,
+            "top":"top20",
+            "rfc3066code":"es-CO"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Sranan Tongo"
             }],
             "isocode":"srn",
