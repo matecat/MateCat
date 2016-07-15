@@ -62,8 +62,11 @@ class TMAnalysisWorker extends AbstractWorker {
      * @throws ReQueueException
      */
     public function process( AbstractElement $queueElement ) {
-
+        
         $this->_checkDatabaseConnection();
+
+        $this->project = \Projects_ProjectDao::findById( $queueElement->params->pid );
+        $this->featureSet = \FeatureSet::fromIdCustomer( $this->project->id_customer );
 
         //reset matches vector
         $this->_matches = null;
@@ -93,8 +96,6 @@ class TMAnalysisWorker extends AbstractWorker {
          */
         $this->_matches = $this->_getMatches( $queueElement );
 
-        $this->project = \Projects_ProjectDao::findById( $queueElement->params->pid );
-        $this->featureSet = \FeatureSet::fromIdCustomer( $this->project->id_customer );
 
         $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Segment {$queueElement->params->id_segment} - Job {$queueElement->params->id_job} matches retrieved." );
         $this->_tryRealignTagID( $queueElement );
