@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="${basepath}public/css/analyze.css?build=${build_number}"/>
 
     <script type="text/javascript" src="${basepath}public/js/lib/jquery.js"></script>
+    <script type="text/javascript" src="${basepath}public/js/lib/jquery.tablesorter.js"></script>
+    <script type="text/javascript" src="${basepath}public/js/lib/jquery.tablesorter.widgets.js"></script>
 
     <div metal:use-macro="${php: INIT::$ROOT}/public/holidays/holidays.html/analyze_holidays"/>
 
@@ -28,25 +30,36 @@
 
     <div tal:define="activity php:array()" tal:repeat="jobActivity outputContent" class="activity-log-entry">
 
-        <h3 tal:condition="php: repeat.jobActivity.key EQ '_project_related' ">Project Related Activities:</h3>
-        <h3 tal:condition="php: repeat.jobActivity.key NE '_project_related' ">Job: ${repeat/jobActivity/key}</h3>
-        <table class="activitylog continue" width="100%" border="0" cellspacing="0" cellpadding="0">
-
+        <h3>Project Related Activities:</h3>
+        <div class="search-container">
+            <span class="search-label">Search:</span>
+            <input class="search" type="search" data-column="all" placeholder="Search" />
+        </div>
+        <table id="activity-log" class="activitylog tablesorter" width="100%" border="0" cellspacing="0" cellpadding="0">
+            <thead>
             <tr>
-                <th>User IP</th>
-                <th>Event Date</th>
-                <th>User Name</th>
-                <th>User Email</th>
-                <th>Action</th>
+                <th><div class="th-inner">User IP</div></th>
+                <th><div class="th-inner">Event Date</div></th>
+                <th><div class="th-inner">Project ID</div></th>
+                <th><div class="th-inner">Job ID</div></th>
+                <th><div class="th-inner">Language Pair</div></th>
+                <th><div class="th-inner">User Name</div></th>
+                <th><div class="th-inner">User Email</div></th>
+                <th><div class="th-inner">Action</div></th>
             </tr>
-
+            </thead>
+            <tbody>
             <tr tal:define="activity php:array()" tal:repeat="activity jobActivity">
                 <td tal:content="activity/ip | default">Unknown</td>
                 <td tal:content="activity/event_date | default">Unkwnown</td>
+                <td tal:content="activity/id_project | default">-</td>
+                <td tal:content="activity/id_job | default">-</td>
+                <td tal:content="activity/lang_pairs | default">-</td>
                 <td tal:content="activity/name | default">Unknown</td>
                 <td tal:content="activity/email | default">Unkwnown</td>
                 <td tal:content="activity/action | default">Unkwnown</td>
             </tr>
+            </tbody>
 
         </table>
     </div>
@@ -84,6 +97,26 @@
 
 <script src="${basepath}public/js/lib/snapengage.js"></script>
 <div metal:use-macro="cookiebanner.html/cookieBanner"/>
+
+<script type="text/javascript">
+    $(function() {
+
+                var table_sorter = $("#activity-log").tablesorter({
+                    widgets: ["filter"],
+                    widgetOptions : {
+                        // use the filter_external option OR use bindSearch function (below)
+                        // to bind external filters.
+                        // filter_external : '.search',
+                        filter_columnFilters: false,
+                        filter_saveFilters : true,
+                        filter_reset: '.reset',
+                        filter_external: '.search'
+                    }
+                });
+
+            }
+    );
+</script>
 
 </body>
 </html>
