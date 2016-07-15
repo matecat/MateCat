@@ -68,8 +68,8 @@ class ModelDao extends \DataAccess_AbstractDao {
                 'severities' => json_encode( $record['severities'] )
             ));
 
-            if ( array_key_exists('subcategories', $record)) {
-                foreach($record['subcategories'] as $sub) {
+            if ( array_key_exists('subcategories', $record) && !empty( $record['subcategories'] ) ) {
+                foreach( $record['subcategories'] as $sub ) {
                     insertRecord($sub, $model_id, $category->id, $default_severities);
                 }
             }
