@@ -957,7 +957,7 @@ class CatUtils {
         }
 
         //first two letter of code lang
-        $source_lang_two_letter = str_split( "-" , $source_lang )[0];
+        $source_lang_two_letter = explode( "-" , $source_lang )[0];
         if ( array_key_exists( $source_lang_two_letter, self::$cjk ) ) {
 
             $res = mb_strlen( $string, 'UTF-8' ) / self::$cjk[ $source_lang_two_letter ];
