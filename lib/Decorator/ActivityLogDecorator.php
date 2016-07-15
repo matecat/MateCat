@@ -97,13 +97,13 @@ class ActivityLogDecorator {
                 $value->email = "Unknown";
             }
 
-            $jobKeyName = trim( $value->id_job . " " . $jobLanguageDefinition[ $value->id_job ] );
-            if( empty( $jobKeyName ) ){
-                $jobKeyName = '_project_related';
-            }
+            $jobKeyName = '_project_' . $this->controller->project_data[ 0 ][ 'pid' ];
 
             $outputContent[ $jobKeyName ][ $k ][ 'ip' ]         = $value->ip;
             $outputContent[ $jobKeyName ][ $k ][ 'event_date' ] = $value->event_date;
+            $outputContent[ $jobKeyName ][ $k ][ 'id_project' ] = @$this->controller->project_data[ 0 ][ 'pid' ];
+            $outputContent[ $jobKeyName ][ $k ][ 'id_job' ]     = trim( $value->id_job );
+            $outputContent[ $jobKeyName ][ $k ][ 'lang_pairs' ] = trim( $jobLanguageDefinition[ $value->id_job ] );
             $outputContent[ $jobKeyName ][ $k ][ 'name' ]       = $value->first_name . " " . $value->last_name;
             $outputContent[ $jobKeyName ][ $k ][ 'email' ]      = $value->email;
             $outputContent[ $jobKeyName ][ $k ][ 'action' ]     = ActivityLogStruct::getAction( $value->action );
