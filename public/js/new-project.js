@@ -2,7 +2,7 @@ $(document).ready(function() {
 
 	$( "a.more-options" ).on("click", function ( e ) {
 		e.preventDefault();
-		APP.openOptionsPanel("opt")
+		APP.openOptionsPanel("tm")
 	} );
 
 	$("#source-lang").on('change', function(e){
