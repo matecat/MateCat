@@ -12,7 +12,9 @@ class SegmentsContainer extends React.Component {
 
     componentDidMount() {}
 
-    componentWillUnmount() {}
+    componentWillUnmount() {
+
+    }
 
     componentWillMount() {
 
@@ -22,11 +24,12 @@ class SegmentsContainer extends React.Component {
         var items = [];
         var self = this;
         this.props.segments.forEach(function (segment) {
+            var splitGroup = segment.split_group || self.props.splitGroup || '';
             var item = <Segment
                 key={segment.sid}
                 segment={segment}
-                splitAr={slef.props.splitAr}
-                splitGroup={self.props.splitGroup}
+                splitAr={self.props.splitAr}
+                splitGroup={splitGroup}
                 timeToEdit={self.props.timeToEdit}
             />;
             items.push(item);
