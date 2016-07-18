@@ -82,7 +82,7 @@ if (true)
                     else if ( next == 1 ) {
                         segmentToLookForGlossary = UI.Segment.find( this.nextSegmentId ) ;
                     }
-                    else if ( next == 2 && this.nextUntranslatedSegmentId != 0 ) {
+                    else if ( next == 2 && this.nextUntranslatedSegmentId != 0 && this.nextUntranslatedSegmentId != this.nextSegmentId ) {
                         segmentToLookForGlossary = UI.Segment.find( this.nextUntranslatedSegmentId ) ;
                     }
 
@@ -160,9 +160,9 @@ if (true)
             // TODO: refactor this to avoid timeout check
             if ( (next == 1) || (next == 2) ) { // is a prefetching
                 if ( !$( '.footer .submenu', segment.el ).length ) { // footer has not yet been created
-                    setTimeout( function () { // wait for creation
-                        UI.processLoadedGlossary( d, context );
-                    }, 200 );
+                    UI.currentSegment.on('afterFooterCreation', function () {
+                        UI.processLoadedGlossary(d,context);
+                    });
                 }
             }
             var numMatches = Object.size( d.data.matches );
