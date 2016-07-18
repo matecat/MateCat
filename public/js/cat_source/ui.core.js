@@ -1308,14 +1308,21 @@ UI = {
 						'		<li class="wordcounter">' +
                         '			Payable Words: <strong>' + config.fileCounter[fid].TOTAL_FORMATTED + '</strong>' +
 						'		</li>' +
-						'	</ul>';
+						'	</ul>' +
+                        '   <div class="article-segments-container"></div>' +
+                        '</article>';
 			}
+            var article$ = $(newFile);
 
-            newSegments = UI.renderSegments(this.segments, false);
-            newFile += newSegments;
-			if (articleToAdd) {
+            // var newSegments = UI.renderSegments(this.segments, false);
+
+
+
+            // Todo Why we dont close the tag Article??
+            // newFile += newSegments;
+            /*if (articleToAdd) {
 				newFile += '</article>';
-			}
+			}*/
 
 			if (articleToAdd) {
 				if (where == 'before') {
@@ -1338,7 +1345,10 @@ UI = {
 				}
 			}
 
-            UI.addEditAreaComponents(this.segments);
+			UI.renderSegments(this.segments, false);
+
+
+            // UI.addEditAreaComponents(this.segments);
 
             if (LXQ.enabled())
             $.each(this.segments,function(i,seg) {
@@ -1420,7 +1430,7 @@ UI = {
         splitAr = splitAr || [];
         splitGroup = splitGroup || [];
         var t = config.time_to_edit_enabled;
-        newSegments = '';
+        var newSegments = '';
         $.each(segments, function(index) {
 
             var readonly = UI.isReadonlySegment( this );
@@ -1454,6 +1464,15 @@ UI = {
 
 
         return newSegments;
+
+
+        var mountPoint = $(".article-segments-container")[0];
+        ReactDOM.render( React.createElement( SegmentsContainer, {
+            segments: segments,
+            splitAr : splitAr,
+            splitGroup: splitGroup,
+            timeToEdit: config.time_to_edit_enabled
+        } ), mountPoint );
     },
 
     getStatusForAutoSave : function( segment ) {

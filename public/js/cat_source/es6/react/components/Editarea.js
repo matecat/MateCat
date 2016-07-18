@@ -13,6 +13,7 @@ class Editarea extends React.Component {
 
         };
         this.hightlightEditarea = this.hightlightEditarea.bind(this);
+        this.replaceContent = this.replaceContent.bind(this);
     }
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
@@ -73,8 +74,10 @@ class Editarea extends React.Component {
             }, 2000);
         }
     }
-    replaceContent() {
-
+    replaceContent(sid, text) {
+        if (this.props.segment.sid == sid) {
+            console.log("Replace Content");
+        }
     }
     render() {
         if (this.props.segment){

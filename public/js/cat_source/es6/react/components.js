@@ -27,9 +27,10 @@ window.Review_QualityReportButton = require('./review/QualityReportButton').defa
 
 window.SegmentFilter_MainPanel = require('./segment_filter/MainPanel').default ;
 
-window.EditArea = require('./editAreaComponent/Editarea').default;
-window.NotificationBox = require('./notificationsComponent/NotificationBox').default;
+window.EditArea = require('./components/Editarea').default;
+window.NotificationBox = require('./components/notificationsComponent/NotificationBox').default;
 
 // window.AppDispatcher = require('./dispatcher/AppDispatcher');
 // window.SegmentStore = require('./stores/SegmentStore');
 window.SegmentActions = require('./actions/SegmentActions');
+window.SegmentsContainer = require('./components/SegmentsContainer').default;

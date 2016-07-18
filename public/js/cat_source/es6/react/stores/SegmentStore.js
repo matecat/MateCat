@@ -10,10 +10,12 @@ var assign = require('object-assign');
 EventEmitter.prototype.setMaxListeners(0);
 // Todo : Possiamo gestire la persistenza qui dentro con LokiJS
 
+var segments = {};
+
 var SegmentStore = assign({}, EventEmitter.prototype, {
 
-    emitChange: function(args) {
-        this.emit(SegmentConstants.HIGHLIGHT_EDITAREA, args);
+    emitChange: function(event, args) {
+        this.emit.apply(this, arguments);
     },
     /**
      * @param {string} event
@@ -38,10 +40,10 @@ AppDispatcher.register(function(action) {
 
     switch(action.actionType) {
         case SegmentConstants.HIGHLIGHT_EDITAREA:
-            SegmentStore.emitChange(action.id);
+            SegmentStore.emitChange(action.actionType, action.id);
             break;
         case SegmentConstants.REPLACE_CONTENT:
-            SegmentStore.emitChange(action.id, action.text);
+            SegmentStore.emitChange(action.actionType, action.id, action.text);
             break;
         default:
     }
