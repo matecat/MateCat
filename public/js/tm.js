@@ -359,7 +359,34 @@ $.extend(UI, {
     CheckCreateTmKeyFromQueryString: function () {
         var keyParam = APP.getParameterByName("private_tm_key");
         if (keyParam) {
-
+            //Check if present and enable it
+            var keyActive = UI.checkTMKeyIsActive(keyParam);
+            if (keyActive) {
+                return false;
+            }
+            var keyInactive = UI.checkTMKeyIsInactive(keyParam);
+            if (keyInactive){
+                var objectsArray = $('#inactivetm tbody tr:not(".new") .privatekey');
+                var trKey = $.grep(objectsArray, function( value ){
+                    if( $(value).text().slice(-5) == keyParam.slice(-5) ){
+                        return value;
+                    }
+                });
+                //Check the inputs
+                var row = $(trKey).closest("tr");
+                row.find('td.lookup input, td.update input').attr('checked', true);
+                UI.useTM(trKey);
+                return false;
+            }
+            //Create the TM Key
+            var keyParams = {
+                r: true,
+                w: true,
+                desc: "",
+                TMKey: keyParam
+            };
+            this.appendNewTmKeyToPanel( keyParams );
+            new UI.DropDown( $(trKey).find( '.wrapper-dropdown-5' ) );
         }
     },
     openLanguageResourcesPanel: function(tab, elToClick) {
@@ -378,7 +405,6 @@ $.extend(UI, {
     },
     setTMsortable: function () {
 
-
         var fixHelper = function(e, ui) {
             ui.children().each(function() {
                 $(this).width($(this).width());
@@ -396,23 +422,19 @@ $.extend(UI, {
 
     checkTMKey: function(operation) {
         //check if the key already exists, it can not be sent nor added twice
-        var keys_of_the_job = $('#activetm tbody tr:not(".new") .privatekey, #inactivetm tbody tr:not(".new") .privatekey');
-        var keyIsAlreadyPresent = false;
-        $( keys_of_the_job ).each( function( index, value ){
-            if( $(value).text().slice(-5) == $('#new-tm-key').val().slice(-5) ){
-                UI.showErrorOnKeyInput('The key is already present in this project.');
-                keyIsAlreadyPresent = true;
-                return false;
-            }
-        } );
-        if( keyIsAlreadyPresent ){ return false; }
-        //check if the key already exists, it can not be sent nor added twice
+        var keyValue = $('#new-tm-key').val();
+        var keyActive = this.checkTMKeyIsActive(keyValue);
+        var keyInactive = this.checkTMKeyIsInactive(keyValue);
+        if (keyActive || keyInactive) {
+            UI.showErrorOnKeyInput('The key is already present in this project.');
+            return false;
+        }
 
         APP.doRequest({
             data: {
                 action: 'ajaxUtils',
                 exec: 'checkTMKey',
-                tm_key: $('#new-tm-key').val()
+                tm_key: keyValue
             },
             context: operation,
             error: function() {
@@ -430,6 +452,28 @@ $.extend(UI, {
                 }
             }
         });
+    },
+    checkTMKeyIsActive: function (key) {
+        var keys_of_the_job = $('#activetm tbody tr:not(".new") .privatekey');
+        var keyIsAlreadyPresent = false;
+        $( keys_of_the_job ).each( function( index, value ){
+            if( $(value).text().slice(-5) == key.slice(-5) ){
+                keyIsAlreadyPresent = true;
+                return false;
+            }
+        } );
+        return keyIsAlreadyPresent;
+    },
+    checkTMKeyIsInactive: function (key) {
+        var keys_of_the_job = $('#inactivetm tbody tr:not(".new") .privatekey');
+        var keyIsAlreadyPresent = false;
+        $( keys_of_the_job ).each( function( index, value ){
+            if( $(value).text().slice(-5) == key.slice(-5) ){
+                keyIsAlreadyPresent = true;
+                return false;
+            }
+        } );
+        return keyIsAlreadyPresent;
     },
     showErrorOnKeyInput: function (message) {
         $('#activetm tr.new').addClass('badkey');
@@ -482,7 +526,7 @@ $.extend(UI, {
                     var data = {
                         grant: ($(el).parents('td').hasClass('lookup')? 'lookup' : 'update'),
                         key: $(tr).find('.privatekey').text()
-                    }
+                    };
 
                     APP.confirm({
                         name: 'confirmTMDisable',
@@ -589,7 +633,7 @@ $.extend(UI, {
         };
 
         this.appendNewTmKeyToPanel( keyParams );
-
+        new UI.DropDown( $( '#activetm tr.mine' ).last().find( '.wrapper-dropdown-5' ) );
         if ( uploading ) {
             $( '.mgmt-tm tr.new' ).addClass( 'hide' );
         } else {
@@ -1303,6 +1347,7 @@ $.extend(UI, {
         new UI.DropDown( $( '.wrapper-dropdown-5' ) );
 
         //set control events
+        $( '.action' ).off("mouseleave");
         $( '.action' ).mouseleave( function(){
             $( '.wrapper-dropdown-5' ).removeClass( 'activeMenu' );
         } );
