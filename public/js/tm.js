@@ -3,7 +3,7 @@
  Created by andreamartines on 02/10/14.
  Loaded by cattool and upload page.
  */
-
+(function($, undefined) {
 $.extend(UI, {
 
     initTM: function() {
@@ -316,6 +316,7 @@ $.extend(UI, {
                     }
                 }
             });
+            UI.CheckCreateTmKeyFromQueryString();
 
         });
 
@@ -355,6 +356,12 @@ $.extend(UI, {
         });
 
     },
+    CheckCreateTmKeyFromQueryString: function () {
+        var keyParam = APP.getParameterByName("private_tm_key");
+        if (keyParam) {
+
+        }
+    },
     openLanguageResourcesPanel: function(tab, elToClick) {
         if ($(".popup-tm").hasClass('open') ) {
             return false;
@@ -389,14 +396,11 @@ $.extend(UI, {
 
     checkTMKey: function(operation) {
         //check if the key already exists, it can not be sent nor added twice
-        var keys_of_the_job = $('#activetm tbody tr:not(".new") .privatekey' );
+        var keys_of_the_job = $('#activetm tbody tr:not(".new") .privatekey, #inactivetm tbody tr:not(".new") .privatekey');
         var keyIsAlreadyPresent = false;
         $( keys_of_the_job ).each( function( index, value ){
             if( $(value).text().slice(-5) == $('#new-tm-key').val().slice(-5) ){
-                $('#activetm tr.new').addClass('badkey');
-                $('#activetm tr.new .error .tm-error-key').text('The key is already present in this project.').show();
-                $('#activetm tr.new .error').show();
-                UI.checkTMAddAvailability(); //some enable/disable stuffs
+                UI.showErrorOnKeyInput('The key is already present in this project.');
                 keyIsAlreadyPresent = true;
                 return false;
             }
@@ -416,26 +420,28 @@ $.extend(UI, {
             },
             success: function(d) {
                 if(d.success === true) {
-                    $('#activetm tr.new').removeClass('badkey');
-                    $('#activetm tr.new .error .tm-error-key').text('').hide();
-                    $('#activetm tr.new .error').hide();
-                    UI.checkTMAddAvailability();
-
+                    UI.removeErrorOnKeyInput();
                     if(this == 'key') {
                         UI.addTMKeyToList(false);
                         UI.clearTMUploadPanel();
-                    } else {
-
                     }
-
                 } else {
-                    $('#activetm tr.new').addClass('badkey');
-                    $('#activetm tr.new .error .tm-error-key').text('The key is not valid').show();
-                    $('#activetm tr.new .error').show();
-                    UI.checkTMAddAvailability();
+                    UI.showErrorOnKeyInput('The key is not valid');
                 }
             }
         });
+    },
+    showErrorOnKeyInput: function (message) {
+        $('#activetm tr.new').addClass('badkey');
+        $('#activetm tr.new .error .tm-error-key').text(message).show();
+        $('#activetm tr.new .error').show();
+        UI.checkTMAddAvailability(); //some enable/disable stuffs
+    },
+    removeErrorOnKeyInput: function () {
+        $('#activetm tr.new').removeClass('badkey');
+        $('#activetm tr.new .error .tm-error-key').text('').hide();
+        $('#activetm tr.new .error').hide();
+        UI.checkTMAddAvailability();
     },
     checkTMAddAvailability: function () {
         if(($('#activetm tr.new').hasClass('badkey'))||($('#activetm tr.new').hasClass('badgrants'))) {
@@ -1404,3 +1410,4 @@ $.extend(UI, {
         UI.checkTMAddAvailability();
     }
 });
+})(jQuery);

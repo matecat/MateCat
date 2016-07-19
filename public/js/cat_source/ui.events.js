@@ -337,7 +337,6 @@ $.extend(UI, {
             if(!UI.checkTMgrants($('.addtm-tr'))) {
                 return false;
             } else {
-                console.log('vediamo qui');
                 $('.addtm-tr .error-message').text('').hide();
                 console.log('CONTROLLO: ', $('#uploadTMX').text());
                 operation = ($('#uploadTMX').text() === '')? 'key' : 'tm';

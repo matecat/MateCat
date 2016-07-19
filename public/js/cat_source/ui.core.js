@@ -2714,9 +2714,6 @@ UI = {
             ($('#addtm-tr-key').val().length > 19)&&
                 UI.checkTMgrants($('.addtm-tr'))
             ) {
-            $('#addtm-add').removeAttr('disabled').removeClass('disabled');
-        } else {
-            $('#addtm-add').attr('disabled', 'disabled').addClass('disabled');
         }
     },
     checkManageTMEnable: function() {
