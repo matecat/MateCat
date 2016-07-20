@@ -421,8 +421,14 @@ $.extend(UI, {
     checkTMKey: function(operation) {
         //check if the key already exists, it can not be sent nor added twice
         var keyValue = $('#new-tm-key').val();
+        if (keyValue === "") {
+            UI.showErrorOnKeyInput();
+            return false;
+        }
+
         var keyActive = this.checkTMKeyIsActive(keyValue);
         var keyInactive = this.checkTMKeyIsInactive(keyValue);
+
         if (keyActive) {
             UI.showErrorOnKeyInput('The key is already present in this project.');
             return false;
@@ -430,8 +436,8 @@ $.extend(UI, {
             UI.showErrorOnKeyInput('The key is already present in this project. <a class="active-tm-key-link">Click here to activate</a>');
             $('.active-tm-key-link').off('click');
             $('.active-tm-key-link').on('click', function() {
-                UI.activateInactiveKey(keyValue);
                 UI.clearTMPanel();
+                UI.activateInactiveKey(keyValue);
             });
             return false;
         }
@@ -482,22 +488,16 @@ $.extend(UI, {
         return keyIsAlreadyPresent;
     },
     showErrorOnKeyInput: function (message) {
-
-        $('.mgmt-container .tm-error-message').html(message).show();
+        if (message) {
+            $('.mgmt-container .tm-error-message').html(message).show();
+        }
         $('#activetm tr.new').addClass('badkey');
-        /*$('#activetm tr.new').addClass('badkey');
-        $('#activetm tr.new .error .tm-error-key').text(message).show();
-        $('#activetm tr.new .error').show();*/
         UI.checkTMAddAvailability(); //some enable/disable stuffs
     },
     removeErrorOnKeyInput: function () {
 
         $('.mgmt-container .tm-error-message').text('').hide();
         $('#activetm tr.new').removeClass('badkey');
-
-        /*$('#activetm tr.new').removeClass('badkey');
-        $('#activetm tr.new .error .tm-error-key').text('').hide();
-        $('#activetm tr.new .error').hide();*/
         UI.checkTMAddAvailability();
     },
     checkTMAddAvailability: function () {
@@ -729,8 +729,7 @@ $.extend(UI, {
         $('.mgmt-tm tr.new .addtmxfile').show();
     },
     clearTMPanel: function () {
-        $('.mgmt-container .tm-error-message').hide();
-        $('.mgmt-container .tm-warning-message').hide();
+
         $('#activetm .edit-desc').removeAttr('contenteditable');
         $('#activetm td.action .addtmx').removeClass('disabled');
         $("#activetm tr.new").hide();
@@ -739,6 +738,8 @@ $.extend(UI, {
         $(".mgmt-table-tm .add-tm").show();
         UI.clearTMUploadPanel();
         UI.clearAddTMRow();
+        $('.mgmt-container .tm-error-message').hide();
+        $('.mgmt-container .tm-warning-message').hide();
     },
     TMFileUpload: function(form, action_url, div_id, tmName) {
         // Create the iframe...
