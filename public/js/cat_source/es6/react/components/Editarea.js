@@ -41,6 +41,9 @@ class Editarea extends React.Component {
         } else {
             editareaClasses.push('editarea')
         }
+
+        Speech2Text.enabled() && editareaClasses.push( 'micActive' ) ;
+
         this.setState({
             editareaClasses: editareaClasses
         });

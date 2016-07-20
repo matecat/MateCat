@@ -118,7 +118,7 @@ UI = {
 		this.currentSegmentId    = segment.id ;
         this.lastOpenedSegmentId = segment.id ;
 		this.currentSegment      = segment.el ;
-		this.currentFile         = segment.el.parent();
+		this.currentFile         = segment.el.closest("article");
 		this.currentFileId       = this.currentFile.attr('id').split('-')[1];
 
         this.evalCurrentSegmentTranslationAndSourceTags( segment.el );
@@ -1431,10 +1431,8 @@ UI = {
         splitGroup = splitGroup || [];
         var t = config.time_to_edit_enabled;
         var newSegments = '';
-        $.each(segments, function(index) {
-
+        /*$.each(segments, function(index) {
             var readonly = UI.isReadonlySegment( this );
-
             var autoPropagated = this.autopropagated_from != 0;
             var autoPropagable = (this.repetitions_in_chunk == "1")? false : true;
 
@@ -1452,7 +1450,7 @@ UI = {
 
             var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
 
-            /* this is to show line feed in source too, because server side we replace \n with placeholders */
+            /!* this is to show line feed in source too, because server side we replace \n with placeholders *!/
             escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
             escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
             escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
@@ -1463,7 +1461,7 @@ UI = {
         });
 
 
-        return newSegments;
+        return newSegments;*/
 
 
         var mountPoint = $(".article-segments-container")[0];
