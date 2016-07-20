@@ -148,7 +148,7 @@ class Segment extends React.Component {
             </div>;
         }
         var tagModeButton = "";
-        if (this.tagModesEnabledes && this.notEnableTagProjection) {
+        if (this.tagModesEnabled && this.notEnableTagProjection) {
             tagModeButton = <a href="#" className="tagModeToggle" alt="Display full/short tags" title="Display full/short tags">
                 <span className="icon-chevron-left"/>
                 <span className="icon-tag-expand"/>
@@ -189,7 +189,8 @@ class Segment extends React.Component {
                                 <div className={"source item"}
                                      tabindex={0}
                                      id={"segment-" + this.props.segment.sid +"-source"}
-                                     data-original={this.escapedSegment}>{this.decoded_text}</div>
+                                     data-original={this.escapedSegment}
+                                     dangerouslySetInnerHTML={ this.allowHTML(this.decoded_text) }/>
                                 <div className={"copy"} title="Copy source to target">
                                     <a href="#"/>
                                     <p>ALT+CTRL+I</p>
