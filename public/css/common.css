@@ -2976,7 +2976,7 @@ p.surveynotice{
 .survey .popup-box{
 	height:inherit;	max-height:inherit;min-height:inherit;overflow-y:auto;
 }
-
+/*
 .tm-error-message, .tm-warning-message {
 background: #d65757 url(../img/error-symbol.png) 10px center no-repeat;
 color: #fff;
@@ -2990,15 +2990,46 @@ border-radius: 2px;
 border: 1px solid #c45f5f;
 text-indent: 40px;
 display: none;
+}*/
+
+.active-tm-key-link {
+    cursor: pointer;
+    text-decoration: underline;
+    color: #39699a;
+}
+
+.tm-error-message, .tm-warning-message {
+    display: none;
+    -moz-border-radius: 2px;
+    box-shadow: 0 2px 2px #e2e2e2;
+    border-radius: 2px;
+    border:1px solid #ccc;
+    line-height: 20px;
+    padding: 10px 15px;
+    margin: 10px 0;
+    background:#fff;
+    -webkit-transition: 0.3s ease-in-out;
+    -moz-transition: 0.3s ease-in-out;
+    -ms-transition: 0.3s ease-in-out;
+    -o-transition: 0.3s ease-in-out;
+    transition: 0.3s ease-in-out;
+}
+
+.tm-error-message {
+        border-top: 3px solid #ec3d3d;
+}
+
+.tm-warning-message {
+        border-top: 3px solid #ebad1a;
 }
 
 .mgmt-panel .tm-error-message, .mgmt-panel .tm-warning-message {
-	font-size:14px;
+	font-size:15px;
 	display: block;
 	}
 
 
-.warning-message, .tm-warning-message {
+.warning-message {
 background: #FFFA8B !important;
 border-color: #6D6E71;
 padding: 10px 0 10px 1%;

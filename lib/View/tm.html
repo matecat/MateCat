@@ -32,24 +32,24 @@
                     <div class="mgmt-table-tm hide">
 
                         <div class="mgmt-container" id="list-search">
-
-                            <p class="tm-error-message" style="display: none;"> Error: the errmsg will appear here... </p>
-                            <p class="tm-warning-message" style="display: none;"><span></span></p>
-
-                            <tal:block tal:condition="php: page != 'cattool'">
-                            <div class="boxed">
+                             <div class="boxed">
                                 <label>
                                     <input type="checkbox" id="pretranslate100" />
                                     Pre-translate 100% matches from TM
                                 </label>
                             </div>
+                            
+
+                            <tal:block tal:condition="php: page != 'cattool'">
+                           
                             </tal:block>
 
                             <div class="block pull-right ">
                                 <a class="btn-ok clear add-tm">Add a TM</a>
                             </div>
                             <h3 class="pull-left">Active TM</h3>
-
+                            <p class="tm-error-message" style="display: none;"> Error: the errmsg will appear here... </p>
+                            <p class="tm-warning-message" style="display: none;"><span></span></p>
                             <table class="mgmt-tm scroll" id="activetm">
                                 <thead>
                                 <tr>
