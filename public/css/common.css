@@ -2994,6 +2994,8 @@ display: none;
 
 .active-tm-key-link {
     cursor: pointer;
+    text-decoration: underline;
+    color: #39699a;
 }
 
 .tm-error-message, .tm-warning-message {
@@ -3027,7 +3029,7 @@ display: none;
 	}
 
 
-.warning-message, .tm-warning-message {
+.warning-message {
 background: #FFFA8B !important;
 border-color: #6D6E71;
 padding: 10px 0 10px 1%;
