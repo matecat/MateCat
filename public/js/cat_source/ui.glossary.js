@@ -137,7 +137,7 @@ if (true)
                             UI.noGlossary = true;
                         }
                     }
-                    n = this[0];Segments
+                    n = this[0];
                     UI.processLoadedGlossary( d, this );
 
                     UI.cachedGlossaryData = d;
