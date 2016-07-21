@@ -10,8 +10,6 @@ ENV = "production"    ; set to "production" for production environment
 ;If you don't need this check set the defined CHECK_FS to false
 CHECK_FS = no
 
-
-;----------------------------------------
 [development]
 DB_SERVER = "localhost"
 DB_DATABASE = "matecat"
