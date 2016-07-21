@@ -601,24 +601,7 @@ class setTranslationController extends ajaxController {
             }
         }
 
-        /**
-         * Set the new contribution in queue
-         */
-        $contributionStruct                       = new ContributionStruct();
-        $contributionStruct->fromRevision         = self::isRevision();
-        $contributionStruct->id_job               = $this->id_job;
-        $contributionStruct->job_password         = $this->password;
-        $contributionStruct->segment              = $this->segment[ 'segment' ];
-        $contributionStruct->translation          = $_Translation[ 'translation' ];
-        $contributionStruct->api_key              = \INIT::$MYMEMORY_API_KEY;
-        $contributionStruct->uid                  = $this->uid;
-        $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
-        $contributionStruct->oldSegment           = $this->segment[ 'segment' ]; //we do not change the segment source
-        $contributionStruct->oldTranslation       = $old_translation[ 'translation' ];
-
-        //assert there is not an exception by following the flow
-        WorkerClient::init( new AMQHandler() );
-        Set::contribution( $contributionStruct );
+        $this->evalSetContribution( $_Translation, $old_translation );
 
         $this->logForTagProjection(CatUtils::rawxliff2view($this->translation));
 
@@ -805,5 +788,37 @@ class setTranslationController extends ajaxController {
         \Log::$fileName = 'tagProjection.log';
         \Log::doLog( $msg );
         \Log::$fileName = $logfile;
+    }
+
+    /**
+     * @param $_Translation
+     * @param $old_translation
+     */
+    private function evalSetContribution( $_Translation, $old_translation ) {
+        if ( in_array( $this->status, array(
+                Constants_TranslationStatus::STATUS_DRAFT,
+                Constants_TranslationStatus::STATUS_NEW
+        ) ) ) {
+            return;
+        }
+        
+        /**
+         * Set the new contribution in queue
+         */
+        $contributionStruct                       = new ContributionStruct();
+        $contributionStruct->fromRevision         = self::isRevision();
+        $contributionStruct->id_job               = $this->id_job;
+        $contributionStruct->job_password         = $this->password;
+        $contributionStruct->segment              = $this->segment[ 'segment' ];
+        $contributionStruct->translation          = $_Translation[ 'translation' ];
+        $contributionStruct->api_key              = \INIT::$MYMEMORY_API_KEY;
+        $contributionStruct->uid                  = $this->uid;
+        $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
+        $contributionStruct->oldSegment           = $this->segment[ 'segment' ]; //we do not change the segment source
+        $contributionStruct->oldTranslation       = $old_translation[ 'translation' ];
+
+        //assert there is not an exception by following the flow
+        WorkerClient::init( new AMQHandler() );
+        Set::contribution( $contributionStruct );
     }
 }
