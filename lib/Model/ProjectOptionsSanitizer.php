@@ -6,7 +6,9 @@ class ProjectOptionsSanitizer {
     private $sanitized = array();  
     
     private $source_lang ; 
-    private $target_lang ; 
+    private $target_lang ;
+
+    private $boolean_keys = array('speech2text', 'lexiqa', 'tag_projection');
     
     public static $lexiQA_allowed_languages = array(
         'en-US',
@@ -38,10 +40,8 @@ class ProjectOptionsSanitizer {
     public function sanitize() {
         $this->sanitized = array(); 
         
-        if ( !isset( $this->options['speech2text'] ) ) {
-            $this->sanitized['speech2text'] = TRUE  ; 
-        } else {
-            $this->sanitized['speech2text'] = !!$this->options['speech2text']; 
+        if ( isset( $this->options['speech2text'] ) ) {
+            $this->sanitizeSpeech2Text() ;
         }
 
         if( isset( $this->options['tag_projection'] ) ){
@@ -52,16 +52,18 @@ class ProjectOptionsSanitizer {
             $this->sanitizeLexiQA();
         }
 
-        $this->forceInt();
+        $this->sanitizeSegmentationRule();
 
-        $this->sanitizeSegmentationRule(); //do not force int because it is a string value
+        $this->convertBooleansToInt();
 
         return $this->sanitized ; 
     }
-    
-    private function forceInt() {
-        foreach( $this->sanitized as $key => $value ) {
-            $this->sanitized[ $key ] = intval( $value ) ;
+
+    private function convertBooleansToInt() {
+        foreach($this->boolean_keys as $key) {
+            if ( isset( $this->sanitized [ $key ] ) ) {
+                $this->sanitized[ $key ] = (int) $this->sanitized[ $key ] ;
+            }
         }
     }
 
@@ -72,27 +74,31 @@ class ProjectOptionsSanitizer {
         }
     }
 
-    private function sanitizeLexiQA() { 
-        if ( isset($this->options['lexiqa']) && $this->options['lexiqa'] == FALSE ) {
-            $this->sanitized['lexiqa'] = FALSE;
-        }
-        else if ( $this->checkSourceAndTargetAreInCombination( self::$lexiQA_allowed_languages ) ) {
+    // No special sanitization for speech2text required
+    private function sanitizeSpeech2Text() {
+        $this->sanitized['speech2text'] = !!$this->options['speech2text'] ;
+    }
+
+    /**
+     * If Lexiqa is requested to be enabled, then check if language is in combination
+     */
+    private function sanitizeLexiQA() {
+        if ( $this->options['lexiqa'] == TRUE && $this->checkSourceAndTargetAreInCombination( self::$lexiQA_allowed_languages ) ) {
             $this->sanitized['lexiqa'] = TRUE;
-        }
-        else {
+        } else {
             $this->sanitized['lexiqa'] = FALSE;
         }
     }
-    
+
+    /**
+     * If tag project is requested to be enabled, check if language combination is allowed.
+     */
     private function sanitizeTagProjection() {
-        if ( isset($this->options['tag_projection']) && $this->options['tag_projection'] == FALSE ) {
-            $this->sanitized['tag_projection'] = FALSE; 
-        }
-        else if ( $this->checkSourceAndTargetAreInCombination( self::$tag_projection_allowed_languages ) ) {
-             $this->sanitized['tag_projection'] = TRUE; 
-        }
-        else {
-            $this->sanitized['tag_projection'] = FALSE; 
+        if ( $this->options['tag_projection'] == true && $this->checkSourceAndTargetAreInCombination( self::$tag_projection_allowed_languages ) ) {
+            $this->sanitized['tag_projection'] = TRUE;
+        } else {
+            $this->sanitized['tag_projection'] = FALSE;
+
         }
     }
     
