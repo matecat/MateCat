@@ -16,21 +16,46 @@ var SegmentConstants = require('../constants/SegmentConstants');
 var SegmentActions = {
 
     /**
-     * @param  {int} sid
+     * @param segments
+     * @param splitAr
+     * @param splitGroup
+     * @param timeToEdit
      */
+    renderSegments: function (segments, splitAr, splitGroup, timeToEdit) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.RENDER_SEGMENTS,
+            segments: segments,
+            splitAr: splitAr,
+            splitGroup: splitGroup,
+            timeToEdit: timeToEdit
+        });
+    },
+
+    splitSegments: function (oldSid, newSegments, splitAr, splitGroup) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SPLIT_SEGMENT,
+            oldSid: oldSid,
+            newSegments: newSegments,
+            splitAr: splitAr,
+            splitGroup: splitGroup,
+        });
+    },
     highlightEditarea: function(sid) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.HIGHLIGHT_EDITAREA,
             id: sid
         });
     },
-    replaceContent: function(sid, text) {
+
+    /*replaceContent: function(sid, text) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.REPLACE_CONTENT,
             id: sid,
             text: text
         });
-    }
+    }*/
+
+
 
 };
 

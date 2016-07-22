@@ -17,11 +17,11 @@ class Editarea extends React.Component {
     }
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
-        SegmentStore.addListener(SegmentConstants.REPLACE_CONTENT, this.replaceContent);
+        // SegmentStore.addListener(SegmentConstants.REPLACE_CONTENT, this.replaceContent);
     }
     componentWillUnmount() {
-        SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA);
-        SegmentStore.removeListener(SegmentConstants.REPLACE_CONTENT);
+        SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
+        // SegmentStore.removeListener(SegmentConstants.REPLACE_CONTENT);
     }
     componentWillMount() {
         var decoded_translation;
@@ -84,9 +84,14 @@ class Editarea extends React.Component {
     }
     render() {
         if (this.props.segment){
+            var lang = config.target_lang.toLowerCase();
+            var readonly = ((this.props.segment.readonly == 'true')||(UI.body.hasClass('archived'))) ? true : false;
             return (
                 <div className={this.state.editareaClasses.join(' ')}
                      id={'segment-' + this.props.segment.sid + '-editarea'}
+                     lang={lang}
+                     contentEditable={readonly}
+                     spellcheck="true"
                      data-sid={this.props.segment.sid}
                      dangerouslySetInnerHTML={ this.allowHTML(this.translation) }
                 ></div>
