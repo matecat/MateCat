@@ -13,7 +13,7 @@ class Segment extends React.Component {
         this.createSegmentClasses = this.createSegmentClasses.bind(this);
     }
 
-    createSegmentClasses() {
+    createSegmentClasses(splitGroup) {
         var classes = [];
         var readonly = ((this.props.segment.readonly == 'true')||(UI.body.hasClass('archived'))) ? true : false;
         if ( readonly ) {
@@ -31,14 +31,20 @@ class Segment extends React.Component {
             classes.push('has-reference');
         }
 
-        if ( this.props.segment.sid == this.splitGroup[0] ) {
+        if ( this.props.segment.sid == splitGroup[0] ) {
             classes.push( 'splitStart' );
         }
-        else if ( this.props.segment.sid == this.splitGroup[this.splitGroup.length - 1] ) {
+        else if ( this.props.segment.sid == splitGroup[splitGroup.length - 1] ) {
             classes.push( 'splitEnd' );
         }
-        else if ( this.splitGroup.length ) {
+        else if ( splitGroup.length ) {
             classes.push('splitInner');
+        }
+        if (UI.enableTagProjection && (UI.getSegmentStatus(this.props.segment) === 'draft' || UI.getSegmentStatus(this.props.segment) === 'new') ){
+            classes.push('enableTP');
+            this.dataAttrTagged = "nottagged";
+        } else {
+            this.dataAttrTagged = "tagged";
         }
         this.segment_classes = classes;
     }
@@ -51,34 +57,8 @@ class Segment extends React.Component {
         console.log("Unmount Segment" + this.props.segment.sid);
     }
 
-    componentWillMount() {
-        this.autoPropagated = this.props.segment.autopropagated_from != 0;
-        this.autoPropagable = (this.props.segment.repetitions_in_chunk != "1");
-        this.originalId = this.props.segment.sid.split('-')[0];
+    componentWillMount() {}
 
-        this.splitGroup = this.props.segment.split_group || this.props.splitGroup || '';
-
-        this.createSegmentClasses();
-
-        if ( this.props.timeToEdit ) {
-            this.segment_edit_min = this.props.segment.parsed_time_to_edit[1];
-            this.segment_edit_sec = this.props.segment.parsed_time_to_edit[2];
-        }
-
-        if (UI.enableTagProjection && (UI.getSegmentStatus(this.props.segment) === 'draft' || UI.getSegmentStatus(this.props.segment) === 'new') ){
-            this.segment_classes.push('enableTP');
-            this.dataAttrTagged = "nottagged";
-        } else {
-            this.dataAttrTagged = "tagged";
-        }
-
-        this.shortened_sid = UI.shortenId( this.props.segment.sid );
-        this.start_job_marker = this.props.segment.sid == config.first_job_segment;
-        this.end_job_marker = this.props.segment.sid == config.last_job_segment;
-
-
-
-    }
     allowHTML(string) {
         return { __html: string };
     }
@@ -86,9 +66,27 @@ class Segment extends React.Component {
     render() {
         var job_marker = "";
         var timeToEdit = "";
-        if (this.start_job_marker) {
+
+        var autoPropagated = this.props.segment.autopropagated_from != 0;
+        var autoPropagable = (this.props.segment.repetitions_in_chunk != "1");
+        var originalId = this.props.segment.sid.split('-')[0];
+
+        var splitGroup = this.props.segment.split_group || this.props.splitGroup || '';
+
+
+        if ( this.props.timeToEdit ) {
+            this.segment_edit_min = this.props.segment.parsed_time_to_edit[1];
+            this.segment_edit_sec = this.props.segment.parsed_time_to_edit[2];
+        }
+        this.createSegmentClasses(splitGroup);
+
+        var shortened_sid = UI.shortenId( this.props.segment.sid );
+        var start_job_marker = this.props.segment.sid == config.first_job_segment;
+        var end_job_marker = this.props.segment.sid == config.last_job_segment;
+
+        if (start_job_marker) {
             job_marker = <span className={"start-job-marker"}/>;
-        } else if (this.end_job_marker) {
+        } else if ( end_job_marker) {
             job_marker = <span className={"end-job-marker"}/>;
         }
 
@@ -100,17 +98,17 @@ class Segment extends React.Component {
             <section id={"segment-" + this.props.segment.sid}
                      className={this.segment_classes.join(' ')}
                      data-hash={this.props.segment.segment_hash}
-                     data-autopropagated={this.autoPropagated}
-                     data-propagable={this.autoPropagable}
+                     data-autopropagated={autoPropagated}
+                     data-propagable={autoPropagable}
                      data-version={this.props.segment.version}
-                     data-split-group={this.splitGroup}
-                     data-split-original-id={this.originalId}
+                     data-split-group={splitGroup}
+                     data-split-original-id={originalId}
                      data-tagmode="crunched"
                      data-tagprojection={this.dataAttrTagged}>
 
                 <a tabindex="0" href={"#" + this.props.segment.sid}/>
                 <div className={"sid"} title={this.props.segment.sid}>
-                    <div className="txt" dangerouslySetInnerHTML={ this.allowHTML(this.shortened_sid) }></div>
+                    <div className="txt" dangerouslySetInnerHTML={ this.allowHTML(shortened_sid) }></div>
                     <div className={"actions"}>
                         <a className={"split"} href={"#"} title={"Click to split segment"}>
                             <span className={"icon-split"}/>
