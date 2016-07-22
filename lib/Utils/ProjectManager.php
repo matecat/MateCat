@@ -269,110 +269,14 @@ class ProjectManager {
         $this->projectStructure[ 'array_files' ] = $sortedFiles;
         unset( $sortedFiles );
 
-        //check if all the keys are valid MyMemory keys
         if ( !empty( $this->projectStructure[ 'private_tm_key' ] ) ) {
-            // TODO: move this 100 lines IF condition elsewhere to reduce scope
+            $this->setPrivateTMKeys( $firstTMXFileName );
 
-            foreach ( $this->projectStructure[ 'private_tm_key' ] as $i => $_tmKey ) {
-                
-               $this->tmxServiceWrapper->setTmKey( $_tmKey[ 'key' ] );
-
-                try {
-
-                    $keyExists = $this->tmxServiceWrapper->checkCorrectKey();
-
-                    if ( !isset( $keyExists ) || $keyExists === false ) {
-                        Log::doLog( __METHOD__ . " -> TM key is not valid." );
-                        throw new Exception( "TM key is not valid: " . $_tmKey[ 'key' ], -4 );
-                    }
-
-                } catch ( Exception $e ) {
-
-                    $this->projectStructure[ 'result' ][ 'errors' ][] = array(
-                            "code" => $e->getCode(), "message" => $e->getMessage()
-                    );
-
-                    return false;
-                }
-
-                //set the first key as primary
-                $this->tmxServiceWrapper->setTmKey( $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ] );
-
+            if ( count( $this->projectStructure['result']['errors']) > 0 ) {
+                // This return value was introduced after a refactoring
+                return ;
             }
-
-
-            //check if the MyMemory keys provided by the user are already associated to him.
-            if ( $this->projectStructure[ 'userIsLogged' ] ) {
-
-                $mkDao = new TmKeyManagement_MemoryKeyDao( $this->dbHandler );
-
-                $searchMemoryKey      = new TmKeyManagement_MemoryKeyStruct();
-                $searchMemoryKey->uid = $this->projectStructure[ 'uid' ];
-
-                $userMemoryKeys = $mkDao->read( $searchMemoryKey );
-
-                $userTmKeys             = array();
-                $memoryKeysToBeInserted = array();
-
-                //extract user tm keys
-                foreach ( $userMemoryKeys as $_memoKey ) {
-                    /**
-                     * @var $_memoKey TmKeyManagement_MemoryKeyStruct
-                     */
-                    $userTmKeys[] = $_memoKey->tm_key->key;
-                }
-
-                foreach ( $this->projectStructure[ 'private_tm_key' ] as $_tmKey ) {
-
-                    if ( !in_array( $_tmKey[ 'key' ], $userTmKeys ) ) {
-                        $newMemoryKey   = new TmKeyManagement_MemoryKeyStruct();
-                        $newTmKey       = new TmKeyManagement_TmKeyStruct();
-                        $newTmKey->key  = $_tmKey[ 'key' ];
-                        $newTmKey->tm   = true;
-                        $newTmKey->glos = true;
-
-                        //THIS IS A NEW KEY and must be inserted into the user keyring
-                        //So, if a TMX file is present in the list of uploaded files, and the Key name provided is empty
-                        // assign TMX name to the key
-                        $newTmKey->name = ( !empty( $_tmKey[ 'name' ] ) ? $_tmKey[ 'name' ] : $firstTMXFileName );
-
-                        $newMemoryKey->tm_key = $newTmKey;
-                        $newMemoryKey->uid    = $this->projectStructure[ 'uid' ];
-
-                        $memoryKeysToBeInserted[] = $newMemoryKey;
-                    } else {
-                        Log::doLog( 'skip insertion' );
-                    }
-
-                }
-                try {
-                    $mkDao->createList( $memoryKeysToBeInserted );
-                } catch ( Exception $e ) {
-                    Log::doLog( $e->getMessage() );
-
-                    # Here we handle the error, displaying HTML, logging, ...
-                    $output = "<pre>\n";
-                    $output .= $e->getMessage() . "\n\t";
-                    $output .= "</pre>";
-                    Utils::sendErrMailReport( $output );
-
-                }
-
-            }
-
-
-            //the base case is when the user clicks on "generate private TM" button:
-            //a (user, pass, key) tuple is generated and can be inserted
-            //if it comes with it's own key without querying the creation API, create a (key,key,key) user
-            if ( empty( $this->projectStructure[ 'private_tm_user' ] ) ) {
-                $this->projectStructure[ 'private_tm_user' ] = $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ];
-                $this->projectStructure[ 'private_tm_pass' ] = $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ];
-            }
-
-            insertTranslator( $this->projectStructure );
-
         }
-
 
         $uploadDir = $this->uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ];
 
@@ -2291,6 +2195,133 @@ class ProjectManager {
         }
 
         return $isAConvertedFile;
+    }
+
+    /**
+     *
+     * What this function does:
+     *
+     * 1. validate the input private keys
+     * 2. set the primary key into the engine object
+     * 3. check if the user is logged and if so add the new keys to his keyring
+     * 4. ensure tm_user and tm_pass are populated even if missing
+     * 5. insert translator
+     * 6. run a callback to plugins to filter the private_tm_key value
+     *
+     * @param $firstTMXFileName
+     *
+     * @return array
+     */
+    private function setPrivateTMKeys( $firstTMXFileName ) {
+
+        foreach ( $this->projectStructure[ 'private_tm_key' ] as $i => $_tmKey ) {
+
+            $this->tmxServiceWrapper->setTmKey( $_tmKey[ 'key' ] );
+
+            try {
+
+                $keyExists = $this->tmxServiceWrapper->checkCorrectKey();
+
+                if ( !isset( $keyExists ) || $keyExists === false ) {
+                    Log::doLog( __METHOD__ . " -> TM key is not valid." );
+
+                    throw new Exception( "TM key is not valid: " . $_tmKey[ 'key' ], -4 );
+                }
+
+            } catch ( Exception $e ) {
+
+                $this->projectStructure[ 'result' ][ 'errors' ][] = array(
+                        "code" => $e->getCode(), "message" => $e->getMessage()
+                );
+
+                return false;
+            }
+
+            // TODO: evaluate if it's the case to remove this line from here. This is required for later calls
+            // for instance when it's time to push the TMX the TM Engine.
+
+        }
+
+
+        //check if the MyMemory keys provided by the user are already associated to him.
+        if ( $this->projectStructure[ 'userIsLogged' ] ) {
+
+            $mkDao = new TmKeyManagement_MemoryKeyDao( $this->dbHandler );
+
+            $searchMemoryKey      = new TmKeyManagement_MemoryKeyStruct();
+            $searchMemoryKey->uid = $this->projectStructure[ 'uid' ];
+
+            $userMemoryKeys = $mkDao->read( $searchMemoryKey );
+
+            $userTmKeys             = array();
+            $memoryKeysToBeInserted = array();
+
+            //extract user tm keys
+            foreach ( $userMemoryKeys as $_memoKey ) {
+                /**
+                 * @var $_memoKey TmKeyManagement_MemoryKeyStruct
+                 */
+                $userTmKeys[] = $_memoKey->tm_key->key;
+            }
+
+
+            foreach ( $this->projectStructure[ 'private_tm_key' ] as $_tmKey ) {
+
+                if ( !in_array( $_tmKey[ 'key' ], $userTmKeys ) ) {
+                    $newMemoryKey   = new TmKeyManagement_MemoryKeyStruct();
+                    $newTmKey       = new TmKeyManagement_TmKeyStruct();
+                    $newTmKey->key  = $_tmKey[ 'key' ];
+                    $newTmKey->tm   = true;
+                    $newTmKey->glos = true;
+
+                    //THIS IS A NEW KEY and must be inserted into the user keyring
+                    //So, if a TMX file is present in the list of uploaded files, and the Key name provided is empty
+                    // assign TMX name to the key
+                    $newTmKey->name = ( !empty( $_tmKey[ 'name' ] ) ? $_tmKey[ 'name' ] : $firstTMXFileName );
+
+                    $newMemoryKey->tm_key = $newTmKey;
+                    $newMemoryKey->uid    = $this->projectStructure[ 'uid' ];
+
+                    $memoryKeysToBeInserted[] = $newMemoryKey;
+                } else {
+                    Log::doLog( 'skip insertion' );
+                }
+
+            }
+            try {
+                $mkDao->createList( $memoryKeysToBeInserted );
+
+            } catch ( Exception $e ) {
+                Log::doLog( $e->getMessage() );
+
+                # Here we handle the error, displaying HTML, logging, ...
+                $output = "<pre>\n";
+                $output .= $e->getMessage() . "\n\t";
+                $output .= "</pre>";
+                Utils::sendErrMailReport( $output );
+
+            }
+
+        }
+
+        //the base case is when the user clicks on "generate private TM" button:
+        //a (user, pass, key) tuple is generated and can be inserted
+        //if it comes with it's own key without querying the creation API, create a (key,key,key) user
+        if ( empty( $this->projectStructure[ 'private_tm_user' ] ) ) {
+            $this->projectStructure[ 'private_tm_user' ] = $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ];
+            $this->projectStructure[ 'private_tm_pass' ] = $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ];
+        }
+
+        insertTranslator( $this->projectStructure );
+
+        $this->projectStructure['private_tm_key'] = $this->features->filter('filter_project_manager_private_tm_key',
+                $this->projectStructure['private_tm_key'],
+                array( 'project_structure' => $this->projectStructure )
+        );
+
+        if ( count( $this->projectStructure[ 'private_tm_key' ] ) > 0 ) {
+            $this->tmxServiceWrapper->setTmKey( $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ] );
+        }
     }
 
 }
