@@ -1279,6 +1279,7 @@ UI = {
 	renderFiles: function(files, where, starting) {
         // If we are going to re-render the articles first we remove them
         if (where === "center" && !starting) {
+            Segme
             $('article').remove();
         }
         $.each(files, function(k) {
@@ -1377,42 +1378,6 @@ UI = {
     },
 
     renderSegments: function (segments, justCreated, splitAr, splitGroup) {
-        // segments = this.normalizeSplittedSegments(segments);
-        // splitAr = splitAr || [];
-        // splitGroup = splitGroup || [];
-        /*var t = config.time_to_edit_enabled;
-        var newSegments = '';
-        $.each(segments, function(index) {
-            var readonly = UI.isReadonlySegment( this );
-            var autoPropagated = this.autopropagated_from != 0;
-            var autoPropagable = (this.repetitions_in_chunk == "1")? false : true;
-
-            try {
-                if (!$.parseHTML(this.segment).length) {
-                } else {
-                    this.segment = UI.stripSpans(this.segment);
-                }
-            } catch ( e ){
-                //if we split a segment in more than 3 parts and reload the cattool
-                //this exception is raised:
-                // Uncaught TypeError: Cannot read property 'length' of null
-                //so SKIP in a catched exception
-            }
-
-            var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
-
-            /!* this is to show line feed in source too, because server side we replace \n with placeholders *!/
-            escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
-            escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
-            escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
-            originalId = this.sid.split('-')[0];
-            if((typeof this.split_points_source == 'undefined') || (!this.split_points_source.length) || justCreated) {
-                newSegments += UI.getSegmentMarkup(this, t, readonly, autoPropagated, autoPropagable, escapedSegment, splitAr, splitGroup, originalId, 0);
-            }
-        });
-
-
-        return newSegments;*/
 
         if((typeof this.split_points_source == 'undefined') || (!this.split_points_source.length) || justCreated) {
             var mountPoint = $(".article-segments-container")[0];

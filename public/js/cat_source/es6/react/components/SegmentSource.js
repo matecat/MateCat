@@ -21,14 +21,7 @@ class SegmentSource extends React.Component {
          */
         if (UI.enableTagProjection && (UI.getSegmentStatus(this.props.segment) === 'draft' || UI.getSegmentStatus(this.props.segment) === 'new')
             && !UI.checkXliffTagsInText(this.props.segment.translation) ) {
-            // decoded_translation = UI.removeAllTags(segment.translation);
             decoded_source = UI.removeAllTags(this.props.segment.segment);
-            this.segment_classes.push('enableTP');
-            this.dataAttrTagged = "nottagged";
-        } else {
-            // decoded_translation = segment.translation;
-            decoded_source = this.props.segment.segment;
-            this.dataAttrTagged = "tagged";
         }
 
         decoded_source = UI.decodePlaceholdersToText(

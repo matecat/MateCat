@@ -13,11 +13,11 @@ class SegmentTarget extends React.Component {
     }
 
     componentDidMount() {
-        console.log("Mount SegmentTarget" + this.props.sid);
+        console.log("Mount SegmentTarget" + this.props.segment.sid);
     }
 
     componentWillUnmount() {
-        console.log("Unmount SegmentTarget" + this.props.sid);
+        console.log("Unmount SegmentTarget" + this.props.segment.sid);
     }
 
     componentWillMount() {
