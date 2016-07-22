@@ -110,6 +110,9 @@ class NewController extends ajaxController {
                 ),
                 'metadata' => array(
                     'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+                'pretranslate_100' => array(
+                        'filter' => array( 'filter' => FILTER_VALIDATE_INT )
                 )
 
         );
@@ -136,11 +139,14 @@ class NewController extends ajaxController {
         $this->source_lang  = $__postInput[ 'source_lang' ];
         $this->target_lang  = $__postInput[ 'target_lang' ];
 
-        $this->tms_engine   = $__postInput[ 'tms_engine' ]; // Default 1 MyMemory
-        $this->mt_engine    = $__postInput[ 'mt_engine' ]; // Default 1 MyMemory
-        $this->seg_rule     = ( !empty( $__postInput[ 'segmentation_rule' ] ) ) ? $__postInput[ 'segmentation_rule' ] : '';
-        $this->subject      = ( !empty( $__postInput[ 'subject' ] ) ) ? $__postInput[ 'subject' ] : 'general';
-        $this->owner        = $__postInput[ 'owner_email' ];
+        $this->tms_engine       = $__postInput[ 'tms_engine' ]; // Default 1 MyMemory
+        $this->mt_engine        = $__postInput[ 'mt_engine' ]; // Default 1 MyMemory
+        $this->seg_rule         = ( !empty( $__postInput[ 'segmentation_rule' ] ) ) ? $__postInput[ 'segmentation_rule' ] : '';
+        $this->subject          = ( !empty( $__postInput[ 'subject' ] ) ) ? $__postInput[ 'subject' ] : 'general';
+        $this->owner            = $__postInput[ 'owner_email' ];
+
+        // Force pretranslate_100 to be 0 or 1
+        $this->pretranslate_100 = (int) !!$__postInput[ 'pretranslate_100' ];
 
         try {
             $this->private_tm_key = array_map(
@@ -600,7 +606,8 @@ class NewController extends ajaxController {
         $projectStructure[ 'status' ]               = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
         $projectStructure[ 'skip_lang_validation' ] = true;
         $projectStructure[ 'owner' ]                = $this->owner;
-        $projectStructure[ 'metadata' ]         = $this->metadata ;
+        $projectStructure[ 'metadata' ]             = $this->metadata ;
+        $projectStructure[ 'pretranslate_100']      = $this->pretranslate_100 ;
 
         if ( $this->current_user != null ) {
             $projectStructure[ 'owner' ]       = $this->current_user->getEmail();
