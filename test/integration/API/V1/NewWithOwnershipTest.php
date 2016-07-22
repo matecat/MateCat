@@ -18,7 +18,7 @@ class NewWithOwnershipTest extends IntegrationTest {
         ));
     }
 
-    function tests_api_key_is_recognized() {
+    function test_api_key_is_recognized() {
         $this->prepareUserAndKey();
 
         $this->headers = array(
@@ -45,7 +45,7 @@ class NewWithOwnershipTest extends IntegrationTest {
         $this->assertEquals( $response['code'], 200 );
     }
 
-    function tests_wrong_key_returns_401() {
+    function test_wrong_key_returns_401() {
         $this->prepareUserAndKey();
 
         $this->headers = array(
@@ -68,7 +68,7 @@ class NewWithOwnershipTest extends IntegrationTest {
         $this->assertEquals( $body->message, 'Authentication failed' );
     }
 
-    function tests_missing_auth_sets_project_to_translated_user() {
+    function test_missing_auth_sets_project_to_translated_user() {
         $this->params = array(
             'project_name' => 'foo',
             'target_lang' => 'it',
