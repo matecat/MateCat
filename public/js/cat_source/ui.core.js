@@ -332,7 +332,7 @@ UI = {
 
         this.saveInUndoStack('copysource');
 
-        this.highlightEditarea();
+        SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
 
         this.currentSegmentQA();        
         $(this.currentSegment).trigger('copySourceToTarget');
@@ -1348,8 +1348,6 @@ UI = {
 			UI.renderSegments(this.segments, false);
 
 
-            // UI.addEditAreaComponents(this.segments);
-
             if (LXQ.enabled())
             $.each(this.segments,function(i,seg) {
                 if (!starting)
@@ -1369,69 +1367,22 @@ UI = {
 		}
 
 	},
-    addEditAreaComponents: function (segments) {
-        $.each(segments,function(i,seg) {
-            var mountPoint = $('#editarea-container-' + seg.sid)[0];
-            ReactDOM.render( React.createElement( EditArea, {
-                segment: seg,
-            } ), mountPoint );
-        });
-    },
     stripSpans: function (str) {
         return str.replace(/<span(.*?)>/gi, '').replace(/<\/span>/gi, '');
     },
-    normalizeSplittedSegments: function (segments) {
-        newSegments = [];
-        $.each(segments, function (index) {
-            splittedSourceAr = this.segment.split(UI.splittedTranslationPlaceholder);
-            if(splittedSourceAr.length > 1) {
-                segment = this;
-                splitGroup = [];
-                $.each(splittedSourceAr, function (i) {
-                    splitGroup.push(segment.sid + '-' + (i + 1));
-                });
 
-                $.each(splittedSourceAr, function (i) {
-                    translation = segment.translation.split(UI.splittedTranslationPlaceholder)[i];
-                    status = segment.target_chunk_lengths.statuses[i];
-                    segData = {
-                        autopropagated_from: "0",
-                        has_reference: "false",
-                        parsed_time_to_edit: ["00", "00", "00", "00"],
-                        readonly: "false",
-                        segment: splittedSourceAr[i],
-                        segment_hash: segment.segment_hash,
-                        sid: segment.sid + '-' + (i + 1),
-                        split_group: splitGroup,
-                        split_points_source: [],
-                        status: status,
-                        time_to_edit: "0",
-                        translation: translation,
-                        version: segment.version,
-                        warning: "0"
-                    }
-                    newSegments.push(segData);
-                    segData = null;
-                });
-            } else {
-                newSegments.push(this);
-            }
-
-        });
-        return newSegments;
-    },
 
     isReadonlySegment : function( segment ) {
        return ( (segment.readonly == 'true') ||(UI.body.hasClass('archived'))) ? true : false;
     },
 
     renderSegments: function (segments, justCreated, splitAr, splitGroup) {
-        segments = this.normalizeSplittedSegments(segments);
-        splitAr = splitAr || [];
-        splitGroup = splitGroup || [];
-        var t = config.time_to_edit_enabled;
+        // segments = this.normalizeSplittedSegments(segments);
+        // splitAr = splitAr || [];
+        // splitGroup = splitGroup || [];
+        /*var t = config.time_to_edit_enabled;
         var newSegments = '';
-        /*$.each(segments, function(index) {
+        $.each(segments, function(index) {
             var readonly = UI.isReadonlySegment( this );
             var autoPropagated = this.autopropagated_from != 0;
             var autoPropagable = (this.repetitions_in_chunk == "1")? false : true;
@@ -1463,14 +1414,15 @@ UI = {
 
         return newSegments;*/
 
+        if((typeof this.split_points_source == 'undefined') || (!this.split_points_source.length) || justCreated) {
+            var mountPoint = $(".article-segments-container")[0];
+            if (this.segmentContainer ) {
 
-        var mountPoint = $(".article-segments-container")[0];
-        ReactDOM.render( React.createElement( SegmentsContainer, {
-            segments: segments,
-            splitAr : splitAr,
-            splitGroup: splitGroup,
-            timeToEdit: config.time_to_edit_enabled
-        } ), mountPoint );
+            } else {
+                this.segmentContainer = ReactDOM.render(React.createElement(SegmentsContainer), mountPoint);
+                SegmentActions.renderSegments(segments, splitAr, splitGroup, config.time_to_edit_enabled);
+            }
+        }
     },
 
     getStatusForAutoSave : function( segment ) {
@@ -1937,7 +1889,7 @@ UI = {
 		isTranslatedButton = ($(button).hasClass('translated')) ? true : false;
 		this.editStop = new Date();
 		var segment = this.currentSegment;
-		tte = $('.timetoedit', segment);
+		// tte = $('.timetoedit', segment);
 		this.editTime = this.editStop - this.editStart;
 		this.totalTime = this.editTime + tte.data('raw-time-to-edit');
 		var editedTime = this.millisecondsToTime(this.totalTime);

@@ -167,24 +167,21 @@ if(config.splitSegmentEnabled) {
             });
         },
         setSegmentSplitSuccess: function (data) {
-            oldSid = data.sid;
-            console.log('oldSid: ', oldSid);
-            splittedSource = data.splittedSource;
-            console.log('splittedSource: ', splittedSource);
-            splitAr = data.splitAr;
-            newSegments = [];
-            splitGroup = [];
-            onlyOne = ( splittedSource.length == 1 ) ? true : false;
+            var oldSid = data.sid;
+            var splittedSource = data.splittedSource;
+            var splitAr = data.splitAr;
+            var newSegments = [];
+            var splitGroup = [];
+            var onlyOne = ( splittedSource.length == 1 );
 
             //get all chunk translations, if this is a merge we want all concatenated targets
             //but we could reload the page? ( TODO, check if we can avoid spaces and special chars problem )
-            translation = '';
+            var translation = '';
             if( onlyOne ) {
                 $( 'div[id*=segment-' + oldSid + ']' ).filter(function() {
                     return this.id.match(/-editarea/);
                 } ).each( function( index, value ){
                     translation += $( value ).html();
-                    //console.log( $( value ).html() );
                 } );
             }
 
@@ -195,7 +192,7 @@ if(config.splitSegmentEnabled) {
                     translation = ( index == 0 ) ? UI.editarea.html() : '';
                 }
 
-                segData = {
+                var segData = {
                     autopropagated_from: "0",
                     has_reference: "false",
                     parsed_time_to_edit: ["00", "00", "00", "00"],
@@ -213,22 +210,15 @@ if(config.splitSegmentEnabled) {
                 newSegments.push(segData);
                 splitGroup.push(oldSid + '-' + (index + 1));
             });
-            oldSegment = $('#segment-' + oldSid);
-            alreadySplitted = (oldSegment.length)? false : true;
+            var oldSegment = $('#segment-' + oldSid);
+            var alreadySplitted = (oldSegment.length)? false : true;
             if(onlyOne) splitGroup = [];
             $('.test-invisible').remove();
 
             if(alreadySplitted) {
-                prevSeg = $('#segment-' + oldSid + '-1').prev('section');
 
-                if(prevSeg.length) {
-                    $('section[data-split-original-id=' + oldSid + ']').remove();
-                    $(prevSeg).after(UI.renderSegments(newSegments, true, splitAr, splitGroup));
-                } else {
-                    file = $('#segment-' + oldSid + '-1').parents('article');
-                    $('section[data-split-original-id=' + oldSid + ']').remove();
-                    $(file).prepend(UI.renderSegments(newSegments, true, splitAr, splitGroup));
-                }
+                SegmentActions.splitSegments(oldSid, newSegments, splitAr, splitGroup);
+
                 if(splitGroup.length) {
                     $.each(splitGroup, function (index) {
                         UI.lockTags($('#segment-' + this + ' .source'));
@@ -240,11 +230,10 @@ if(config.splitSegmentEnabled) {
 
                 }
             } else {
-                $(oldSegment).after(UI.renderSegments(newSegments, true, splitAr, splitGroup));
+                SegmentActions.splitSegments(oldSid, newSegments, splitAr, splitGroup);
                 $.each(splitGroup, function (index) {
                     UI.lockTags($('#segment-' + this + ' .source'));
                 });
-                $(oldSegment).remove();
                 this.gotoSegment(oldSid + '-1');
             }
 
