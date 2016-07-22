@@ -2,6 +2,8 @@
  * React Component for the editarea.
 
  */
+var SegmentStore = require('../stores/SegmentStore');
+var SegmentConstants = require('../constants/SegmentConstants');
 var SegmentHeader = require('../components/SegmentHeader').default;
 var SegmentFooter = require('../components/SegmentFooter').default;
 var SegmentBody = require('../components/SegmentBody').default;
@@ -11,6 +13,13 @@ class Segment extends React.Component {
     constructor(props) {
         super(props);
         this.createSegmentClasses = this.createSegmentClasses.bind(this);
+        this.hightlightEditarea = this.hightlightEditarea.bind(this);
+        var splitGroup = this.props.segment.split_group || this.props.splitGroup || '';
+        var classes = this.createSegmentClasses(splitGroup);
+        this.state = {
+            segment_classes : classes,
+            splitGroup: splitGroup
+        };
     }
 
     createSegmentClasses(splitGroup) {
@@ -46,15 +55,32 @@ class Segment extends React.Component {
         } else {
             this.dataAttrTagged = "tagged";
         }
-        this.segment_classes = classes;
+        return classes;
+    }
+
+    hightlightEditarea(sid) {
+        if (this.props.segment.sid == sid) {
+            /*TODO REMOVE THIS CODE
+             *  The segment must know about his classes
+             */
+            var classes = $('#segment-' + this.props.segment.sid).attr("class").split(" ");
+            if (!!classes.indexOf("modified")) {
+                classes.push("modified");
+                this.setState({
+                    segment_classes: classes
+                });
+            }
+        }
     }
 
     componentDidMount() {
         console.log("Mount Segment" + this.props.segment.sid);
+        SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
     }
 
     componentWillUnmount() {
         console.log("Unmount Segment" + this.props.segment.sid);
+        SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
     }
 
     componentWillMount() {}
@@ -71,14 +97,10 @@ class Segment extends React.Component {
         var autoPropagable = (this.props.segment.repetitions_in_chunk != "1");
         var originalId = this.props.segment.sid.split('-')[0];
 
-        var splitGroup = this.props.segment.split_group || this.props.splitGroup || '';
-
-
         if ( this.props.timeToEdit ) {
             this.segment_edit_min = this.props.segment.parsed_time_to_edit[1];
             this.segment_edit_sec = this.props.segment.parsed_time_to_edit[2];
         }
-        this.createSegmentClasses(splitGroup);
 
         var shortened_sid = UI.shortenId( this.props.segment.sid );
         var start_job_marker = this.props.segment.sid == config.first_job_segment;
@@ -96,12 +118,12 @@ class Segment extends React.Component {
 
         return (
             <section id={"segment-" + this.props.segment.sid}
-                     className={this.segment_classes.join(' ')}
+                     className={this.state.segment_classes.join(' ')}
                      data-hash={this.props.segment.segment_hash}
                      data-autopropagated={autoPropagated}
                      data-propagable={autoPropagable}
                      data-version={this.props.segment.version}
-                     data-split-group={splitGroup}
+                     data-split-group={this.state.splitGroup}
                      data-split-original-id={originalId}
                      data-tagmode="crunched"
                      data-tagprojection={this.dataAttrTagged}>

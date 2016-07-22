@@ -23,26 +23,12 @@ if(config.splitSegmentEnabled) {
 
     .on('click', 'body:not([data-offline-mode]) .sid .actions .split', function(e) {
         e.preventDefault();
-        $('.sid .actions .split').addClass('cancel');
-        $('.split-shortcut').html('CTRL + W');
-        UI.currentSegment.addClass('split-action');
-        actions = $(this).parent().find('.actions');
-        actions.show();
-        segment = $(this).parents('section');
-        UI.createSplitArea(segment);
+        UI.openSegmentSplit(this);
     }).on('click', 'body[data-offline-mode] .sid .actions .split', function(e) {
         e.preventDefault();
     }).on('click', '.sid .actions .split.cancel', function(e) {
         e.preventDefault();
-        $('.sid .actions .split').removeClass('cancel');
-        source = $(segment).find('.source');
-        $(source).removeAttr('style');
-        UI.currentSegment.removeClass('split-action');
-        $('.split-shortcut').html('CTRL + S');
-        console.log('cancel');
-        segment = $(this).parents('section');
-        segment.find('.splitBar, .splitArea').remove();
-        segment.find('.sid .actions').hide();
+        UI.closeSegmentSplit(this);
     }).on('keydown', '.splitArea', function(e) {
         console.log('keydown');
         e.preventDefault();
@@ -227,8 +213,8 @@ if(config.splitSegmentEnabled) {
                 } else {
                     UI.lockTags($('#segment-' + oldSid + ' .source'));
                     this.gotoSegment(oldSid);
-
                 }
+                UI.closeSegmentSplit();
             } else {
                 SegmentActions.splitSegments(oldSid, newSegments, splitAr, splitGroup);
                 $.each(splitGroup, function (index) {
@@ -300,6 +286,23 @@ if(config.splitSegmentEnabled) {
         cleanSplitPoints: function (splitArea) {
             splitArea.html(splitArea.html().replace(/(<span class="splitpoint"><span class="splitpoint-delete"><\/span><\/span>)<span class="splitpoint"><span class="splitpoint-delete"><\/span><\/span>/gi, '$1'));
             splitArea.html(splitArea.html().replace(/(<span class="splitpoint"><span class="splitpoint-delete"><\/span><\/span>)$/gi, ''));
+        },
+        closeSegmentSplit: function () {
+            $('.sid .actions .split').removeClass('cancel');
+            source = $(segment).find('.source');
+            $(source).removeAttr('style');
+            UI.currentSegment.removeClass('split-action');
+            $('.split-shortcut').html('CTRL + S');
+            UI.currentSegment.find('.splitBar, .splitArea').remove();
+            UI.currentSegment.find('.sid .actions').hide();
+        },
+        openSegmentSplit: function () {
+            $('.sid .actions .split').addClass('cancel');
+            $('.split-shortcut').html('CTRL + W');
+            UI.currentSegment.addClass('split-action');
+            actions = UI.currentSegment.find('.actions');
+            actions.show();
+            UI.createSplitArea(UI.currentSegment);
         }
 
     })
