@@ -311,10 +311,6 @@
                 var regex = /file=([^&]*)/;
                 var match = regex.exec( data.url ); // take the file name from url to be deleted
 
-                if ( !match ) {
-                    console.log( error );
-                    return false;
-                }
 
                 var _deleteRow = function( rowToBeDeleted ){
 
@@ -326,6 +322,13 @@
                     );
 
                 };
+
+                if ( !match ) {
+                    //console.log( error );
+                    _deleteRow( data.context );
+                    _deleteRow($('.error-message'));
+                    return false;
+                }
 
                 match[1] = decodeURIComponent( match[1] ); //decode the requested filename ( taken from url )
 
