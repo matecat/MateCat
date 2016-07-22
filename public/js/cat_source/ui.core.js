@@ -3152,7 +3152,7 @@ UI = {
                 callback();
             }
             return;
-        }        
+        }
         var html = $(segment).find('.source').html();
         html = html.replace(/<.*?>/g,'');
         

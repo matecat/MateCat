@@ -6,6 +6,10 @@ class SegmentSource extends React.Component {
 
     constructor(props) {
         super(props);
+        this.state = {
+            source : this.props.segment.segment
+
+        };
         this.createEscapedSegment = this.createEscapedSegment.bind(this);
         this.decodeTextSource = this.decodeTextSource.bind(this);
     }
@@ -31,7 +35,7 @@ class SegmentSource extends React.Component {
             decoded_source || '',
             true, this.props.segment.sid, 'source');
 
-        this.decoded_text = decoded_source;
+        return decoded_source;
     }
 
     createEscapedSegment() {
@@ -40,11 +44,12 @@ class SegmentSource extends React.Component {
             text = UI.stripSpans(text);
         }
 
-        this.escapedSegment = htmlEncode(text.replace(/\"/g, "&quot;"));
+        var escapedSegment = htmlEncode(text.replace(/\"/g, "&quot;"));
         /* this is to show line feed in source too, because server side we replace \n with placeholders */
-        this.escapedSegment = this.escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
-        this.escapedSegment = this.escapedSegment.replace( config.crPlaceholderRegex, "\r" );
-        this.escapedSegment = this.escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
+        escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
+        escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
+        escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
+        return escapedSegment;
     }
 
     componentDidMount() {
@@ -64,12 +69,14 @@ class SegmentSource extends React.Component {
     }
 
     render() {
+        var decoded_text = this.decodeTextSource();
+        var escapedSegment = this.createEscapedSegment();
         return (
             <div className={"source item"}
                  tabindex={0}
                  id={"segment-" + this.props.segment.sid +"-source"}
-                 data-original={this.escapedSegment}
-                 dangerouslySetInnerHTML={ this.allowHTML(this.decoded_text) }/>
+                 data-original={escapedSegment}
+                 dangerouslySetInnerHTML={ this.allowHTML(decoded_text) }/>
         )
     }
 }
