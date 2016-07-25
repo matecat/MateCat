@@ -70,7 +70,7 @@
 <footer>
     <div class="wrapper">
 
-        <nav>
+        <nav tal:condition="php: Bootstrap::areOauthKeysPresent()">
             <ul>
                 <li><a tal:attributes="href string:${basepath}manage/">Manage</a></li>
                 <li><a href="https://www.matecat.com/support/" target="_blank">User Guide</a></li>

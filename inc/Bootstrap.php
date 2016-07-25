@@ -359,6 +359,27 @@ class Bootstrap {
         return true;
     }
 
+    /**
+     * Check if the main OAuth keys are present
+     *
+     * @return bool true if the main OAuth keys are present, false otherwise
+     */
+    public static function areOauthKeysPresent() {
+        if( empty( INIT::$OAUTH_CLIENT_ID ) ) {
+            return false;
+        }
+
+        if( empty( INIT::$OAUTH_CLIENT_SECRET ) ) {
+            return false;
+        }
+
+        if( empty( INIT::$OAUTH_CLIENT_APP_NAME ) ) {
+            return false;
+        }
+
+        return true;
+    }
+
 }
 
 return true;
