@@ -2992,7 +2992,7 @@ text-indent: 40px;
 display: none;
 }
 
-.addtm-tr .tm-error-message, .addtm-tr .tm-warning-message, .mgmt-panel .tm-error-message, .mgmt-panel .tm-warning-message {
+.mgmt-panel .tm-error-message, .mgmt-panel .tm-warning-message {
 	font-size:14px;
 	display: block;
 	}
