@@ -333,12 +333,7 @@ $.extend(UI, {
             UI.openAddNewTm();
         });
         $(".mgmt-tm tr.new .canceladdtmx").click(function() {
-            $("#activetm tr.new").hide();
-            $("#activetm tr.new .addtmxfile").removeClass('disabled');
-            $("#activetm tr.uploadpanel").addClass('hide');
-            $(".mgmt-table-tm .add-tm").show();
-            UI.clearTMUploadPanel();
-            UI.clearAddTMRow();
+            UI.clearTMPanel();
         });
 
         $(".add-gl").click(function() {
@@ -366,16 +361,7 @@ $.extend(UI, {
             }
             var keyInactive = UI.checkTMKeyIsInactive(keyParam);
             if (keyInactive){
-                var objectsArray = $('#inactivetm tbody tr:not(".new") .privatekey');
-                var trKey = $.grep(objectsArray, function( value ){
-                    if( $(value).text().slice(-5) == keyParam.slice(-5) ){
-                        return value;
-                    }
-                });
-                //Check the inputs
-                var row = $(trKey).closest("tr");
-                row.find('td.lookup input, td.update input').attr('checked', true);
-                UI.useTM(trKey);
+                this.activateInactiveKey(keyParam);
                 return false;
             }
             //Create the TM Key
@@ -388,6 +374,18 @@ $.extend(UI, {
             this.appendNewTmKeyToPanel( keyParams );
             new UI.DropDown( $(trKey).find( '.wrapper-dropdown-5' ) );
         }
+    },
+    activateInactiveKey: function (keyParam) {
+        var objectsArray = $('#inactivetm tr:not(".new") .privatekey');
+        var trKey = $.grep(objectsArray, function( value ){
+            if( $(value).text().slice(-5) == keyParam.slice(-5) ){
+                return value;
+            }
+        });
+        //Check the inputs
+        var row = $(trKey).closest("tr");
+        row.find('td.lookup input, td.update input').attr('checked', true);
+        UI.useTM(trKey);
     },
     openLanguageResourcesPanel: function(tab, elToClick) {
         if ($(".popup-tm").hasClass('open') ) {
@@ -423,10 +421,24 @@ $.extend(UI, {
     checkTMKey: function(operation) {
         //check if the key already exists, it can not be sent nor added twice
         var keyValue = $('#new-tm-key').val();
+        if (keyValue === "") {
+            UI.showErrorOnKeyInput();
+            return false;
+        }
+
         var keyActive = this.checkTMKeyIsActive(keyValue);
         var keyInactive = this.checkTMKeyIsInactive(keyValue);
-        if (keyActive || keyInactive) {
+
+        if (keyActive) {
             UI.showErrorOnKeyInput('The key is already present in this project.');
+            return false;
+        } else if (keyInactive) {
+            UI.showErrorOnKeyInput('The key is already present in this project. <a class="active-tm-key-link">Click here to activate</a>');
+            $('.active-tm-key-link').off('click');
+            $('.active-tm-key-link').on('click', function() {
+                UI.clearTMPanel();
+                UI.activateInactiveKey(keyValue);
+            });
             return false;
         }
 
@@ -476,15 +488,16 @@ $.extend(UI, {
         return keyIsAlreadyPresent;
     },
     showErrorOnKeyInput: function (message) {
+        if (message) {
+            $('.mgmt-container .tm-error-message').html(message).show();
+        }
         $('#activetm tr.new').addClass('badkey');
-        $('#activetm tr.new .error .tm-error-key').text(message).show();
-        $('#activetm tr.new .error').show();
         UI.checkTMAddAvailability(); //some enable/disable stuffs
     },
     removeErrorOnKeyInput: function () {
+
+        $('.mgmt-container .tm-error-message').text('').hide();
         $('#activetm tr.new').removeClass('badkey');
-        $('#activetm tr.new .error .tm-error-key').text('').hide();
-        $('#activetm tr.new .error').hide();
         UI.checkTMAddAvailability();
     },
     checkTMAddAvailability: function () {
@@ -716,13 +729,18 @@ $.extend(UI, {
         $('.mgmt-tm tr.new .addtmxfile').show();
     },
     clearTMPanel: function () {
-        $('.mgmt-container .tm-error-message').hide();
-        $('.mgmt-container .tm-warning-message').hide();
+
         $('#activetm .edit-desc').removeAttr('contenteditable');
         $('#activetm td.action .addtmx').removeClass('disabled');
-        $('#activetm tr.new .canceladdtmx').click();
+        $("#activetm tr.new").hide();
+        $("#activetm tr.new .addtmxfile").removeClass('disabled');
+        $("#activetm tr.uploadpanel").addClass('hide');
+        $(".mgmt-table-tm .add-tm").show();
+        UI.clearTMUploadPanel();
+        UI.clearAddTMRow();
+        $('.mgmt-container .tm-error-message').hide();
+        $('.mgmt-container .tm-warning-message').hide();
     },
-
     TMFileUpload: function(form, action_url, div_id, tmName) {
         // Create the iframe...
         ts = new Date().getTime();

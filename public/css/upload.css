@@ -904,7 +904,7 @@ tr.ready .size span{visibility: visible;}
 .translate-box .fileinput-button{margin-top:8px;text-align:center;padding:4px 0px}
 .more-options {float:right!important; margin-left: 20px;    font-size: 16px;
     margin-top: 8px !important;}
-.more-options,.more-options span:hover {text-decoration: none;}
+.more-options,.more-options span:hover {text-decoration: none;cursor: pointer;}
 .more-options span {text-decoration: underline;}
 @-moz-document url-prefix() {
 	
