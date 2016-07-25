@@ -26,14 +26,14 @@ class SegmentsContainer extends React.Component {
         });
     }
 
-    renderSegments(segments, splitAr, splitGroup, timeToEdit) {
-        splitAr = splitAr || [];
-        splitGroup = splitGroup || [];
+    renderSegments(segments) {
+        var splitAr = [];
+        var splitGroup =  [];
         this.setState({
             segments: segments,
             splitAr: splitAr,
             splitGroup: splitGroup,
-            timeToEdit: timeToEdit
+            timeToEdit: config.time_to_edit_enabled
         });
     }
 

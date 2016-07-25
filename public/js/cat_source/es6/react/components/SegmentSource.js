@@ -15,7 +15,7 @@ class SegmentSource extends React.Component {
     }
 
     decodeTextSource() {
-        var decoded_source;
+        var decoded_source = this.props.segment.segment;
         /**if Tag Projection enabled and there are not tags in the segment translation, remove it and add the class that identify
          * tha Tag Projection is enabled
          */

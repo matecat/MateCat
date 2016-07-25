@@ -1279,7 +1279,6 @@ UI = {
 	renderFiles: function(files, where, starting) {
         // If we are going to re-render the articles first we remove them
         if (where === "center" && !starting) {
-            Segme
             $('article').remove();
         }
         $.each(files, function(k) {
@@ -1310,14 +1309,9 @@ UI = {
                         '			Payable Words: <strong>' + config.fileCounter[fid].TOTAL_FORMATTED + '</strong>' +
 						'		</li>' +
 						'	</ul>' +
-                        '   <div class="article-segments-container"></div>' +
+                        '   <div class="article-segments-container-' + fid + '"></div>' +
                         '</article>';
 			}
-            var article$ = $(newFile);
-
-            // var newSegments = UI.renderSegments(this.segments, false);
-
-
 
             // Todo Why we dont close the tag Article??
             // newFile += newSegments;
@@ -1346,7 +1340,7 @@ UI = {
 				}
 			}
 
-			UI.renderSegments(this.segments, false);
+			UI.renderSegments(this.segments, false, fid);
 
 
             if (LXQ.enabled())
@@ -1377,16 +1371,12 @@ UI = {
        return ( (segment.readonly == 'true') ||(UI.body.hasClass('archived'))) ? true : false;
     },
 
-    renderSegments: function (segments, justCreated, splitAr, splitGroup) {
+    renderSegments: function (segments, justCreated, fid) {
 
         if((typeof this.split_points_source == 'undefined') || (!this.split_points_source.length) || justCreated) {
-            var mountPoint = $(".article-segments-container")[0];
-            if (this.segmentContainer ) {
-
-            } else {
-                this.segmentContainer = ReactDOM.render(React.createElement(SegmentsContainer), mountPoint);
-                SegmentActions.renderSegments(segments, splitAr, splitGroup, config.time_to_edit_enabled);
-            }
+            var mountPoint = $(".article-segments-container-" + fid)[0];
+            this.segmentContainer = ReactDOM.render(React.createElement(SegmentsContainer), mountPoint);
+            SegmentActions.renderSegments(segments);
         }
     },
 
