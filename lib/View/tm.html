@@ -48,7 +48,6 @@
                                 <a class="btn-ok clear add-tm">Add a TM</a>
                             </div>
                             <h3 class="pull-left">Active TM</h3>
-                            <p class="tm-error-message" style="display: none;"> Error: the errmsg will appear here... </p>
                             <p class="tm-warning-message" style="display: none;"><span></span></p>
                             <table class="mgmt-tm scroll" id="activetm">
                                 <thead>
@@ -138,7 +137,7 @@
 
                                 </tbody>
                             </table>
-
+                            <p class="tm-error-message" style="display: none;"> Error: the errmsg will appear here... </p>
                             <h3 class="pull-left">Inactive TM</h3>
 
                             <tal:block tal:condition="php: empty(logged_user)">
