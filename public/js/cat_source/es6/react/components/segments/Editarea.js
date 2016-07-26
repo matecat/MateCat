@@ -2,8 +2,8 @@
  * React Component for the editarea.
  
  */
-var SegmentConstants = require('../constants/SegmentConstants');
-var SegmentStore = require('../stores/SegmentStore');
+var SegmentConstants = require('../../constants/SegmentConstants');
+var SegmentStore = require('../../stores/SegmentStore');
 class Editarea extends React.Component {
 
     constructor(props) {

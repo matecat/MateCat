@@ -2,9 +2,9 @@
  * React Component .
 
  */
-var SegmentStore = require('../stores/SegmentStore');
-var SegmentSource = require('../components/SegmentSource').default;
-var SegmentTarget = require('../components/SegmentTarget').default;
+var SegmentStore = require('../../stores/SegmentStore');
+var SegmentSource = require('./SegmentSource').default;
+var SegmentTarget = require('./SegmentTarget').default;
 
 class SegmentBody extends React.Component {
 

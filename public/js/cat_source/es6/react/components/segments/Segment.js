@@ -2,11 +2,11 @@
  * React Component for the editarea.
 
  */
-var SegmentStore = require('../stores/SegmentStore');
-var SegmentConstants = require('../constants/SegmentConstants');
-var SegmentHeader = require('../components/SegmentHeader').default;
-var SegmentFooter = require('../components/SegmentFooter').default;
-var SegmentBody = require('../components/SegmentBody').default;
+var SegmentStore = require('../../stores/SegmentStore');
+var SegmentConstants = require('../../constants/SegmentConstants');
+var SegmentHeader = require('./SegmentHeader').default;
+var SegmentFooter = require('./SegmentFooter').default;
+var SegmentBody = require('./SegmentBody').default;
 
 class Segment extends React.Component {
 
