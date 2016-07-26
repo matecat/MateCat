@@ -43,6 +43,13 @@ var SegmentActions = {
             id: sid
         });
     },
+    addClassToSegment: function (sid, newClass) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.ADD_SEGMENT_CLASS,
+            id: sid,
+            newClass: newClass
+        });
+    }
 
     /*replaceContent: function(sid, text) {
         AppDispatcher.dispatch({

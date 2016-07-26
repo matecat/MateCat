@@ -14,6 +14,7 @@ class Segment extends React.Component {
         super(props);
         this.createSegmentClasses = this.createSegmentClasses.bind(this);
         this.hightlightEditarea = this.hightlightEditarea.bind(this);
+        this.addClass = this.addClass.bind(this);
         var splitGroup = this.props.segment.split_group || this.props.splitGroup || '';
         var classes = this.createSegmentClasses(splitGroup);
         this.state = {
@@ -63,7 +64,7 @@ class Segment extends React.Component {
 
     hightlightEditarea(sid) {
         if (this.props.segment.sid == sid) {
-            /*TODO REMOVE THIS CODE
+            /*  TODO REMOVE THIS CODE
              *  The segment must know about his classes
              */
             var classes = $('#segment-' + this.props.segment.sid).attr("class").split(" ");
@@ -76,14 +77,28 @@ class Segment extends React.Component {
         }
     }
 
+    addClass(sid, newClass) {
+        if (this.props.segment.sid == sid) {
+            var classes = $('#segment-' + this.props.segment.sid).attr("class").split(" ");
+            if (!!classes.indexOf(newClass)) {
+                classes.push(newClass);
+                this.setState({
+                    segment_classes: classes
+                });
+            }
+        }
+    }
+
     componentDidMount() {
         console.log("Mount Segment" + this.props.segment.sid);
         SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
+        SegmentStore.addListener(SegmentConstants.ADD_SEGMENT_CLASS, this.addClass);
     }
 
     componentWillUnmount() {
         console.log("Unmount Segment" + this.props.segment.sid);
         SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
+        SegmentStore.removeListener(SegmentConstants.ADD_SEGMENT_CLASS, this.addClass);
     }
 
     componentWillReceiveProps(nextProps) {

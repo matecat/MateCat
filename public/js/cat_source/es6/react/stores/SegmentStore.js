@@ -16,11 +16,11 @@ var _segments = {};
  * Update all
  */
 function updateAll(segments, fid) {
-    if ( _segments[fid] ) {
-
-    } else {
+    // if ( _segments[fid] ) {
+    //
+    // } else {
         _segments[fid] = normalizeSplittedSegments(segments);
-    }
+    // }
 }
 
 function normalizeSplittedSegments(segments) {
@@ -100,6 +100,13 @@ var SegmentStore = assign({}, EventEmitter.prototype, {
     emitChange: function(event, args) {
         this.emit.apply(this, arguments);
     },
+    getAllSegments: function () {
+        var result = [];
+        $.each(_segments, function(key, value) {
+            result = result.concat(value);
+        });
+        return result;
+    }
 });
 
 
@@ -117,6 +124,9 @@ AppDispatcher.register(function(action) {
             break;
         case SegmentConstants.HIGHLIGHT_EDITAREA:
             SegmentStore.emitChange(action.actionType, action.id);
+            break;
+        case SegmentConstants.ADD_SEGMENT_CLASS:
+            SegmentStore.emitChange(action.actionType, action.id, action.newClass);
             break;
         // case SegmentConstants.REPLACE_CONTENT:
         //     SegmentStore.emitChange(action.actionType, action.id, action.text);
