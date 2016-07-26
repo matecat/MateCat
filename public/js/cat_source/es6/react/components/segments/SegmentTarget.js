@@ -3,7 +3,7 @@
  * React Component .
 
  */
-var EditArea = require('../components/Editarea').default;
+var EditArea = require('./Editarea').default;
 
 class SegmentTarget extends React.Component {
 

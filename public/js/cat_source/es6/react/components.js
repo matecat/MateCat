@@ -33,4 +33,4 @@ window.NotificationBox = require('./components/notificationsComponent/Notificati
 // window.SegmentStore = require('./stores/SegmentStore');
 window.SegmentActions = require('./actions/SegmentActions');
 window.SegmentStore = require('./stores/SegmentStore');
-window.SegmentsContainer = require('./components/SegmentsContainer').default;
+window.SegmentsContainer = require('./components/segments/SegmentsContainer').default;
