@@ -41,7 +41,7 @@ class SegmentBody extends React.Component {
                             <a href="#"/>
                             <p>ALT+CTRL+I</p>
                         </div>
-                        <SegmentTarget segment={this.props.segment} />
+                        <SegmentTarget segment={this.props.segment} isReviewImproved={this.props.isReviewImproved}/>
 
                     </div>
                 </div>

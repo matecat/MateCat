@@ -55,6 +55,9 @@ class Segment extends React.Component {
         } else {
             this.dataAttrTagged = "tagged";
         }
+        if (this.props.isReviewImproved) {
+            classes.push("reviewImproved");
+        }
         return classes;
     }
 
@@ -83,7 +86,11 @@ class Segment extends React.Component {
         SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
     }
 
-    componentWillMount() {}
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.splitGroup !== this.props.splitGroup) {
+            this.setState({ splitGroup: nextProps.splitGroup });
+        }
+    }
 
     allowHTML(string) {
         return { __html: string };
@@ -103,9 +110,9 @@ class Segment extends React.Component {
         }
 
         var shortened_sid = UI.shortenId( this.props.segment.sid );
+
         var start_job_marker = this.props.segment.sid == config.first_job_segment;
         var end_job_marker = this.props.segment.sid == config.last_job_segment;
-
         if (start_job_marker) {
             job_marker = <span className={"start-job-marker"}/>;
         } else if ( end_job_marker) {
@@ -142,7 +149,7 @@ class Segment extends React.Component {
 
                 <div className={"body"}>
                     <SegmentHeader sid={this.props.segment.sid}/>
-                    <SegmentBody segment={this.props.segment}/>
+                    <SegmentBody segment={this.props.segment} isReviewImproved={this.props.isReviewImproved}/>
                     <div className="timetoedit"
                          data-raw-time-to-edit={this.props.segment.time_to_edit}>
                         {timeToEdit}
