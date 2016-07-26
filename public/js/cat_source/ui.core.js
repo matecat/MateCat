@@ -1279,7 +1279,9 @@ UI = {
 	renderFiles: function(files, where, starting) {
         // If we are going to re-render the articles first we remove them
         if (where === "center" && !starting) {
-            $('article').remove();
+            $('.article-segments-container').each(function (index, value) {
+                ReactDOM.unmountComponentAtNode(value);
+            })
         }
         $.each(files, function(k) {
 			var newFile = '';
@@ -1309,7 +1311,7 @@ UI = {
                         '			Payable Words: <strong>' + config.fileCounter[fid].TOTAL_FORMATTED + '</strong>' +
 						'		</li>' +
 						'	</ul>' +
-                        '   <div class="article-segments-container-' + fid + '"></div>' +
+                        '   <div class="article-segments-container-' + fid + ' article-segments-container"></div>' +
                         '</article>';
 			}
 
@@ -1375,8 +1377,8 @@ UI = {
 
         if((typeof this.split_points_source == 'undefined') || (!this.split_points_source.length) || justCreated) {
             var mountPoint = $(".article-segments-container-" + fid)[0];
-            this.segmentContainer = ReactDOM.render(React.createElement(SegmentsContainer), mountPoint);
-            SegmentActions.renderSegments(segments);
+            ReactDOM.render(React.createElement(SegmentsContainer,{fid : fid}), mountPoint);
+            SegmentActions.renderSegments(segments, fid);
         }
     },
 
@@ -1844,7 +1846,7 @@ UI = {
 		isTranslatedButton = ($(button).hasClass('translated')) ? true : false;
 		this.editStop = new Date();
 		var segment = this.currentSegment;
-		// tte = $('.timetoedit', segment);
+		var tte = $('.timetoedit', segment);
 		this.editTime = this.editStop - this.editStart;
 		this.totalTime = this.editTime + tte.data('raw-time-to-edit');
 		var editedTime = this.millisecondsToTime(this.totalTime);

@@ -17,27 +17,24 @@ var SegmentActions = {
 
     /**
      * @param segments
-     * @param splitAr
-     * @param splitGroup
-     * @param timeToEdit
+     * @param fid
      */
-    renderSegments: function (segments, splitAr, splitGroup, timeToEdit) {
+    renderSegments: function (segments, fid) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.RENDER_SEGMENTS,
             segments: segments,
-            splitAr: splitAr,
-            splitGroup: splitGroup,
-            timeToEdit: timeToEdit
+            fid: fid
         });
     },
 
-    splitSegments: function (oldSid, newSegments, splitAr, splitGroup) {
+    splitSegments: function (oldSid, newSegments, splitAr, splitGroup, fid) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SPLIT_SEGMENT,
             oldSid: oldSid,
             newSegments: newSegments,
             splitAr: splitAr,
             splitGroup: splitGroup,
+            fid: fid
         });
     },
     highlightEditarea: function(sid) {

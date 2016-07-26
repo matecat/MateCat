@@ -145,6 +145,17 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
             return translation ;
         },
+        renderSegments: function (segments, justCreated, fid) {
+
+            if((typeof this.split_points_source == 'undefined') || (!this.split_points_source.length) || justCreated) {
+                var mountPoint = $(".article-segments-container-" + fid)[0];
+                ReactDOM.render(React.createElement(SegmentsContainer,{
+                    fid : fid,
+                    isReviewImproved: true
+                }), mountPoint);
+                SegmentActions.renderSegments(segments, fid);
+            }
+        },
         getSegmentMarkup : function() {
             var segmentData = arguments[0];
             var data = UI.getSegmentTemplateData.apply( this, arguments ) ;

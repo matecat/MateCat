@@ -1,8 +1,16 @@
 (function($, undefined) {
     $.extend(UI, {
+        // TODO: DEPRECATED
+        /**
+         * @deprecated
+         */
         getSegmentTemplate : function() {
             return MateCat.Templates['translate/segment'];
         },
+        // TODO: DEPRECATED
+        /**
+         * @deprecated
+         */
         getSegmentTemplateData : function(
             segment, t, readonly, autoPropagated, autoPropagable,
             escapedSegment, splitAr, splitGroupParam, originalId
@@ -108,7 +116,10 @@
             };
 
         },
-
+        // TODO: DEPRECATED
+        /**
+         * @deprecated
+         */
         getSegmentMarkup: function (
             segment, t, readonly, autoPropagated, autoPropagable,
             escapedSegment, splitAr, splitGroup, originalId

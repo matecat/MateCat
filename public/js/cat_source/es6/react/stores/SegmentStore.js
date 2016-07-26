@@ -10,19 +10,22 @@ var assign = require('object-assign');
 EventEmitter.prototype.setMaxListeners(0);
 // Todo : Possiamo gestire la persistenza qui dentro con LokiJS
 
-var _segments = [];
+var _segments = {};
 
 /**
  * Update all
  */
-function updateAll(segments) {
-    _segments = segments.slice();
-    normalizeSplittedSegments();
+function updateAll(segments, fid) {
+    if ( _segments[fid] ) {
+
+    } else {
+        _segments[fid] = normalizeSplittedSegments(segments);
+    }
 }
 
-function normalizeSplittedSegments() {
+function normalizeSplittedSegments(segments) {
     var newSegments = [];
-    $.each(_segments, function (index) {
+    $.each(segments, function (index) {
         var splittedSourceAr = this.segment.split(UI.splittedTranslationPlaceholder);
         if(splittedSourceAr.length > 1) {
             var segment = this;
@@ -58,27 +61,25 @@ function normalizeSplittedSegments() {
         }
 
     });
-    _segments = newSegments;
+    return newSegments;
 }
 
-function splitSegment(oldSid, newSegments) {
-    var index = _segments.findIndex(function (segment, index) {
-        if (segment.sid == oldSid){
-            return true;
-        }
-        return false;
+function splitSegment(oldSid, newSegments, fid) {
+    var currentSegments = _segments[fid];
+    var index = currentSegments.findIndex(function (segment, index) {
+        return (segment.sid == oldSid);
     });
     if (index > -1) {
-        Array.prototype.splice.apply(_segments, [index, 1].concat(newSegments));
+        Array.prototype.splice.apply(currentSegments, [index, 1].concat(newSegments));
     } else {
-        removeSplit(oldSid, newSegments);
+        removeSplit(oldSid, newSegments, currentSegments);
     }
 }
 
-function removeSplit(oldSid, newSegments) {
+function removeSplit(oldSid, newSegments, currentSegments) {
     var elementsToRemove = [];
     var indexes = [];
-    _segments.map(function (segment, index) {
+    currentSegments.map(function (segment, index) {
         if (segment.sid.split('-').length && segment.sid.split('-')[0] == oldSid){
             elementsToRemove.push(segment);
             indexes.push(index);
@@ -87,9 +88,9 @@ function removeSplit(oldSid, newSegments) {
     });
     if (elementsToRemove.length) {
         elementsToRemove.forEach(function (seg) {
-            _segments.splice(_segments.indexOf(seg), 1)
+            currentSegments.splice(currentSegments.indexOf(seg), 1)
         });
-        Array.prototype.splice.apply(_segments, [indexes[0], 0].concat(newSegments));
+        Array.prototype.splice.apply(currentSegments, [indexes[0], 0].concat(newSegments));
     }
 }
 
@@ -107,12 +108,12 @@ AppDispatcher.register(function(action) {
 
     switch(action.actionType) {
         case SegmentConstants.RENDER_SEGMENTS:
-            updateAll(action.segments);
-            SegmentStore.emitChange(action.actionType, _segments, action.splitAr, action.splitGroup);
+            updateAll(action.segments, action.fid);
+            SegmentStore.emitChange(action.actionType, _segments[action.fid], action.fid);
             break;
         case SegmentConstants.SPLIT_SEGMENT:
-            splitSegment(action.oldSid, action.newSegments);
-            SegmentStore.emitChange(action.actionType, _segments, action.splitAr, action.splitGroup, action.timeToEdit);
+            splitSegment(action.oldSid, action.newSegments, action.fid);
+            SegmentStore.emitChange(action.actionType, _segments[action.fid], action.splitAr, action.splitGroup, action.fid);
             break;
         case SegmentConstants.HIGHLIGHT_EDITAREA:
             SegmentStore.emitChange(action.actionType, action.id);

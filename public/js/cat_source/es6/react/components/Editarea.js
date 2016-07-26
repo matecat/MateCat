@@ -9,7 +9,8 @@ class Editarea extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            editareaClasses : ['targetarea', 'invisible']
+            editareaClasses : ['targetarea', 'invisible'],
+            translation : this.props.translation
 
         };
         this.hightlightEditarea = this.hightlightEditarea.bind(this);
@@ -24,16 +25,7 @@ class Editarea extends React.Component {
         // SegmentStore.removeListener(SegmentConstants.REPLACE_CONTENT);
     }
     componentWillMount() {
-        var decoded_translation;
-        var segment = this.props.segment;
-        if (UI.enableTagProjection && (UI.getSegmentStatus(segment) === 'draft' || UI.getSegmentStatus(segment) === 'new')
-            && !UI.checkXliffTagsInText(segment.translation) ) {
-            decoded_translation = UI.removeAllTags(segment.translation);
-        } else {
-            decoded_translation = segment.translation;
-        }
-        decoded_translation = UI.decodePlaceholdersToText(decoded_translation || '');
-        this.translation = decoded_translation;
+
 
         var editareaClasses = this.state.editareaClasses;
         if ((this.props.segment.readonly == 'true')||(UI.body.hasClass('archived'))) {
@@ -93,7 +85,7 @@ class Editarea extends React.Component {
                      contentEditable={readonly}
                      spellcheck="true"
                      data-sid={this.props.segment.sid}
-                     dangerouslySetInnerHTML={ this.allowHTML(this.translation) }
+                     dangerouslySetInnerHTML={ this.allowHTML(this.state.translation) }
                 ></div>
 
             );

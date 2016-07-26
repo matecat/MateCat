@@ -12,13 +12,15 @@ class SegmentsContainer extends React.Component {
         this.state = {
             segments : [],
             splitAr: [],
-            splitGroup: []
+            splitGroup: [],
+            fid: ""
         };
         this.renderSegments = this.renderSegments.bind(this);
         this.updateSegments = this.updateSegments.bind(this);
     }
 
-    updateSegments(segments, splitAr, splitGroup) {
+    updateSegments(segments, splitAr, splitGroup, fid) {
+        if (fid !== this.props.fid) return;
         this.setState({
             segments: segments,
             splitAr: splitAr,
@@ -26,14 +28,15 @@ class SegmentsContainer extends React.Component {
         });
     }
 
-    renderSegments(segments) {
+    renderSegments(segments, fid) {
+        if (fid !== this.props.fid) return;
         var splitAr = [];
         var splitGroup =  [];
         this.setState({
             segments: segments,
             splitAr: splitAr,
             splitGroup: splitGroup,
-            timeToEdit: config.time_to_edit_enabled
+            timeToEdit: config.time_to_edit_enabled,
         });
     }
 
@@ -44,8 +47,8 @@ class SegmentsContainer extends React.Component {
     }
 
     componentWillUnmount() {
-        SegmentStore.removeListener(SegmentConstants.RENDER_SEGMENTS);
-        SegmentStore.removeListener(SegmentConstants.SPLIT_SEGMENT);
+        SegmentStore.removeListener(SegmentConstants.RENDER_SEGMENTS, this.renderSegments);
+        SegmentStore.removeListener(SegmentConstants.SPLIT_SEGMENT, this.updateSegments);
     }
 
     componentWillMount() {
@@ -55,6 +58,7 @@ class SegmentsContainer extends React.Component {
     render() {
         var items = [];
         var self = this;
+        var isReviewImproved = !!(this.props.isReviewImproved);
         this.state.segments.forEach(function (segment) {
             var splitGroup = segment.split_group || self.state.splitGroup || '';
             var item = <Segment
@@ -63,6 +67,8 @@ class SegmentsContainer extends React.Component {
                 splitAr={self.state.splitAr}
                 splitGroup={splitGroup}
                 timeToEdit={self.props.timeToEdit}
+                fid={self.props.fid}
+                isReviewImproved={isReviewImproved}
             />;
             items.push(item);
         });
