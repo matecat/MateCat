@@ -13,6 +13,7 @@ inc/config.ini
 inc/config.test.ini
 inc/config.development.ini
 inc/.globalmessage.ini
+inc/oauth-token-key.txt
 
 # Ignore artifacts
 public/css/app.css

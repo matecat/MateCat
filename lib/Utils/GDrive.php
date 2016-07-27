@@ -83,6 +83,7 @@ class GDrive {
      * @return  Google_Service_Drive
      */
     public static function getService ( $params = array() ) {
+        $oauthTokenEncryption = OauthTokenEncryption::getInstance();
         $token = null;
 
         if( array_key_exists( 'access_token' , $params ) ) {
@@ -90,7 +91,7 @@ class GDrive {
         } elseif( array_key_exists( 'uid' , $params ) ) {
             $dao = new \Users_UserDao( \Database::obtain() );
             $user = $dao->getByUid( $params[ 'uid' ] );
-            $token = $user->oauth_access_token ;
+            $token = $oauthTokenEncryption->decrypt( $user->oauth_access_token );
         }
 
         if( $token != null ) {
@@ -139,11 +140,14 @@ class GDrive {
     }
 
     public static function getUserToken( $session ) {
+        $oauthTokenEncryption = OauthTokenEncryption::getInstance();
         $dao = new \Users_UserDao( \Database::obtain() );
         $user = $dao->getByUid( $session[ 'uid' ] );
 
         if($user != null) {
-            $oauthToken = json_decode( $user->oauth_access_token, TRUE );
+            $oauthToken = json_decode(
+                $oauthTokenEncryption->decrypt( $user->oauth_access_token ), TRUE
+            );
             $accessToken = $oauthToken[ 'access_token' ];
 
             return $accessToken;
