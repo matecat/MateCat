@@ -300,7 +300,6 @@ class newProjectController extends viewController {
 
         $this->template->developerKey = INIT::$OAUTH_BROWSER_API_KEY;
         $this->template->clientId = INIT::$OAUTH_CLIENT_ID;
-        $this->template->accessToken = GDrive::getUserToken( $_SESSION );
 
         $this->template->currentTargetLang = $this->getCurrentTargetLang();
         
