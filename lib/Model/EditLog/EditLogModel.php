@@ -623,7 +623,7 @@ class EditLog_EditLogModel {
     }
 
     public function getProjectId(){
-        return $this->data[ 'id_project' ];
+        return $this->jobData[ 'id_project' ];
     }
 
 }
