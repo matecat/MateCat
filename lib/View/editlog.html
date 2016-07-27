@@ -177,7 +177,7 @@
         <footer>
             <div class="wrapper">
 
-                <nav>
+                <nav tal:condition="php: Bootstrap::areOauthKeysPresent()">
                     <ul>
                         <tal:block tal:condition="php: !empty(logged_user)">
                             <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>

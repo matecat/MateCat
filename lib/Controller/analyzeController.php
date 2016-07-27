@@ -159,7 +159,8 @@ class analyzeController extends viewController {
 
         $this->template->isLoggedIn = $this->isLoggedIn();
 
-        if ( isset( $_SESSION[ '_anonym_pid' ] ) && !empty( $_SESSION[ '_anonym_pid' ] ) ) {
+        if ( \Bootstrap::areOauthKeysPresent() && isset( $_SESSION[ '_anonym_pid' ] )
+                && !empty( $_SESSION[ '_anonym_pid' ] ) ) {
             $_SESSION[ 'incomingUrl' ]         = INIT::$HTTPHOST . $_SERVER[ 'REQUEST_URI' ];
             $_SESSION[ '_newProject' ]         = 1;
             $this->template->showModalBoxLogin = true;

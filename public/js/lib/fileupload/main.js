@@ -352,16 +352,13 @@ $( function () {
         UI.checkFailedConversionsNumber();
     } ).bind( 'fileuploaddestroyed', function ( e, data ) {
 
-        console.log( 'file deleted' );
-
         var deletedFileName = data.url.match( /file=[^&]*/g );
-        deletedFileName = decodeURIComponent( deletedFileName[0].replace( "file=", "" ) );
+        if (deletedFileName) {
+            deletedFileName = decodeURIComponent( deletedFileName[0].replace( "file=", "" ) );
 
-        console.log( UI.skipLangDetectArr, deletedFileName, typeof( UI.skipLangDetectArr[deletedFileName] ) );
-
-        if ( typeof( UI.skipLangDetectArr[deletedFileName] ) !== 'undefined' ) {
-            console.log( UI.skipLangDetectArr );
-            delete(UI.skipLangDetectArr[deletedFileName]);
+            if ( typeof( UI.skipLangDetectArr[deletedFileName] ) !== 'undefined' ) {
+                delete(UI.skipLangDetectArr[deletedFileName]);
+            }
         }
 
         if ( $( '.wrapper-upload .error-message.no-more' ).length ) {
