@@ -6,6 +6,10 @@ class SegmentHeader extends React.Component {
 
     constructor(props) {
         super(props);
+        this.state = {
+            autopropagated: this.props.autopropagated,
+            percentuage: ''
+        };
 
     }
 
@@ -25,8 +29,15 @@ class SegmentHeader extends React.Component {
     }
 
     render() {
+        var autopropagated = '';
+        if (this.state.autopropagated) {
+            autopropagated = <span className="repetition">Autopropagated</span>;
+        }
         return (
-            <div className={"header toggle"} id={"segment-" + this.props.sid + "-header"}/>
+            <div className="header toggle" id={"segment-" + this.props.sid + "-header"}>
+                {autopropagated}
+                <h2 title="" className="percentuage"></h2>
+            </div>
         )
     }
 }

@@ -64,12 +64,22 @@ function normalizeSplittedSegments(segments) {
     return newSegments;
 }
 
-function splitSegment(oldSid, newSegments, fid) {
+function getSegmentById(sid, fid) {
+    return _segments[fid].find(function (seg) {
+        return seg.sid == sid;
+    });
+
+}
+
+function splitSegment(oldSid, newSegments, fid, splitGroup) {
     var currentSegments = _segments[fid];
     var index = currentSegments.findIndex(function (segment, index) {
         return (segment.sid == oldSid);
     });
     if (index > -1) {
+        newSegments.forEach(function (element) {
+            element.split_group = splitGroup;
+        });
         Array.prototype.splice.apply(currentSegments, [index, 1].concat(newSegments));
     } else {
         removeSplit(oldSid, newSegments, currentSegments);
@@ -92,6 +102,11 @@ function removeSplit(oldSid, newSegments, currentSegments) {
         });
         Array.prototype.splice.apply(currentSegments, [indexes[0], 0].concat(newSegments));
     }
+}
+
+function setStatus(sid, fid, status) {
+    var segment = getSegmentById(sid, fid);
+    segment.status = status;
 }
 
 
@@ -119,14 +134,22 @@ AppDispatcher.register(function(action) {
             SegmentStore.emitChange(action.actionType, _segments[action.fid], action.fid);
             break;
         case SegmentConstants.SPLIT_SEGMENT:
-            splitSegment(action.oldSid, action.newSegments, action.fid);
-            SegmentStore.emitChange(action.actionType, _segments[action.fid], action.splitAr, action.splitGroup, action.fid);
+            splitSegment(action.oldSid, action.newSegments, action.fid, action.splitGroup);
+            SegmentStore.emitChange(action.actionType, _segments[action.fid], action.splitGroup, action.fid);
             break;
         case SegmentConstants.HIGHLIGHT_EDITAREA:
             SegmentStore.emitChange(action.actionType, action.id);
             break;
         case SegmentConstants.ADD_SEGMENT_CLASS:
             SegmentStore.emitChange(action.actionType, action.id, action.newClass);
+            break;
+        case SegmentConstants.SET_SEGMENT_STATUS:
+            setStatus(action.id, action.fid, action.status);
+            SegmentStore.emitChange(SegmentConstants.UPDATE_SEGMENTS, _segments[action.fid], action.fid);
+            break;
+        case SegmentConstants.PROPAGATE_TRANSLATION:
+
+            SegmentStore.emitChange(action.actionType, action.id);
             break;
         // case SegmentConstants.REPLACE_CONTENT:
         //     SegmentStore.emitChange(action.actionType, action.id, action.text);
