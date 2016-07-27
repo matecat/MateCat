@@ -11,30 +11,35 @@ class SegmentsContainer extends React.Component {
         super(props);
         this.state = {
             segments : [],
-            splitAr: [],
             splitGroup: [],
             fid: ""
         };
         this.renderSegments = this.renderSegments.bind(this);
         this.updateSegments = this.updateSegments.bind(this);
+        this.splitSegments = this.splitSegments.bind(this);
     }
 
-    updateSegments(segments, splitAr, splitGroup, fid) {
-        if (fid !== this.props.fid) return;
-        this.setState({
-            segments: segments,
-            splitAr: splitAr,
-            splitGroup: splitGroup,
-        });
+    splitSegments(segments, splitGroup, fid) {
+        if (fid == this.props.fid) {
+            this.setState({
+                segments: segments,
+                splitGroup: splitGroup
+            });
+        }
+    }
+    updateSegments(segments, fid) {
+        if (fid == this.props.fid) {
+            this.setState({
+                segments: segments,
+            });
+        }
     }
 
     renderSegments(segments, fid) {
         if (fid !== this.props.fid) return;
-        var splitAr = [];
         var splitGroup =  [];
         this.setState({
             segments: segments,
-            splitAr: splitAr,
             splitGroup: splitGroup,
             timeToEdit: config.time_to_edit_enabled,
         });
@@ -43,12 +48,14 @@ class SegmentsContainer extends React.Component {
 
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.RENDER_SEGMENTS, this.renderSegments);
-        SegmentStore.addListener(SegmentConstants.SPLIT_SEGMENT, this.updateSegments);
+        SegmentStore.addListener(SegmentConstants.SPLIT_SEGMENT, this.splitSegments);
+        SegmentStore.addListener(SegmentConstants.UPDATE_SEGMENTS, this.updateSegments);
     }
 
     componentWillUnmount() {
         SegmentStore.removeListener(SegmentConstants.RENDER_SEGMENTS, this.renderSegments);
-        SegmentStore.removeListener(SegmentConstants.SPLIT_SEGMENT, this.updateSegments);
+        SegmentStore.removeListener(SegmentConstants.SPLIT_SEGMENT, this.splitSegments);
+        SegmentStore.removeListener(SegmentConstants.UPDATE_SEGMENTS, this.updateSegments);
     }
 
     componentWillMount() {
@@ -60,12 +67,9 @@ class SegmentsContainer extends React.Component {
         var self = this;
         var isReviewImproved = !!(this.props.isReviewImproved);
         this.state.segments.forEach(function (segment) {
-            var splitGroup = segment.split_group || self.state.splitGroup || '';
             var item = <Segment
                 key={segment.sid}
                 segment={segment}
-                splitAr={self.state.splitAr}
-                splitGroup={splitGroup}
                 timeToEdit={self.props.timeToEdit}
                 fid={self.props.fid}
                 isReviewImproved={isReviewImproved}
@@ -78,14 +82,12 @@ class SegmentsContainer extends React.Component {
 
 SegmentsContainer.propTypes = {
     segments: React.PropTypes.array,
-    splitAr: React.PropTypes.array,
     splitGroup: React.PropTypes.array,
     timeToEdit: React.PropTypes.string
 };
 
 SegmentsContainer.defaultProps = {
     segments: [],
-    splitAr: [],
     splitGroup: [],
     timeToEdit: ""
 };

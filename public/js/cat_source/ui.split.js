@@ -203,7 +203,7 @@ if(config.splitSegmentEnabled) {
 
             if(alreadySplitted) {
 
-                SegmentActions.splitSegments(oldSid, newSegments, splitAr, splitGroup, this.currentFileId);
+                SegmentActions.splitSegments(oldSid, newSegments, splitGroup, this.currentFileId);
 
                 if(splitGroup.length) {
                     $.each(splitGroup, function (index) {
@@ -216,7 +216,7 @@ if(config.splitSegmentEnabled) {
                 }
                 UI.closeSegmentSplit();
             } else {
-                SegmentActions.splitSegments(oldSid, newSegments, splitAr, splitGroup, this.currentFileId);
+                SegmentActions.splitSegments(oldSid, newSegments, splitGroup, this.currentFileId);
                 $.each(splitGroup, function (index) {
                     UI.lockTags($('#segment-' + this + ' .source'));
                 });

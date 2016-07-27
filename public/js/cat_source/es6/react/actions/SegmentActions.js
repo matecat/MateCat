@@ -27,12 +27,11 @@ var SegmentActions = {
         });
     },
 
-    splitSegments: function (oldSid, newSegments, splitAr, splitGroup, fid) {
+    splitSegments: function (oldSid, newSegments, splitGroup, fid) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SPLIT_SEGMENT,
             oldSid: oldSid,
             newSegments: newSegments,
-            splitAr: splitAr,
             splitGroup: splitGroup,
             fid: fid
         });
@@ -48,6 +47,21 @@ var SegmentActions = {
             actionType: SegmentConstants.ADD_SEGMENT_CLASS,
             id: sid,
             newClass: newClass
+        });
+    },
+    propagateTranslation: function (sid, status) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.PROPAGATE_TRANSLATION,
+            id: sid,
+            status: status
+        });
+    },
+    setStatus: function (sid, fid, status) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_SEGMENT_STATUS,
+            id: sid,
+            fid: fid,
+            status: status
         });
     }
 

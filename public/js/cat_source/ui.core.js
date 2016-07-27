@@ -507,16 +507,17 @@ UI = {
 
 		forceEmptyContribution = (typeof forceEmptyContribution == 'undefined')? true : forceEmptyContribution;
 
-		if ( $('.matches .overflow', segment).text() !== '' ) { // <-- XXX unnamed intention
+        /* If the segment just translated is equal or similar (Levenshtein distance) to the
+         * current segment force to reload the matches
+        **/
+		if ( $('.matches .overflow', segment).text() !== '' ) {
 			if (!forceEmptyContribution) {
 				$('.matches .overflow', segment).empty();
-                $(document).trigger('createFooter:skipped', segment);
 				return false;
 			}
 		}
-
-		if ( $('.footer ul.submenu', segment).length ) {  // <--- XXX unnamed intention
-            $(document).trigger('createFooter:skipped:cached', segment);
+        // If the footer is already present skip (prefetched segment)
+		if ( $('.footer ul.submenu', segment).length ) {
             return false;
         }
 
@@ -539,7 +540,7 @@ UI = {
 
     createHeader: function(forceCreation) {
 
-        forceCreation = forceCreation || false;
+        /*forceCreation = forceCreation || false;
 
         if ( $('h2.percentuage', this.currentSegment).length && !forceCreation ) {
             return;
@@ -549,7 +550,7 @@ UI = {
 
         if ( this.currentSegment.data( 'autopropagated' ) && !$( '.header .repetition', this.currentSegment ).length ) {
             $( '.header', this.currentSegment ).prepend( '<span class="repetition">Autopropagated</span>' );
-        }
+        }*/
 
     },
 	createJobMenu: function() {
@@ -1281,7 +1282,8 @@ UI = {
         if (where === "center" && !starting) {
             $('.article-segments-container').each(function (index, value) {
                 ReactDOM.unmountComponentAtNode(value);
-            })
+            });
+            $('article').remove();
         }
         $.each(files, function(k) {
 			var newFile = '';
@@ -1833,14 +1835,8 @@ UI = {
      * @param status
      */
 	setStatus: function(segment, status) {
-		segment.removeClass(
-            "status-draft status-translated status-approved " +
-            "status-rejected status-new status-fixed status-rebutted")
-        .addClass("status-" + status);
-
-        segment
-            .find( '.status-container a' )
-            .attr( 'title', UI.statusHandleTitleAttr(status) );
+	    var fid = segment.data("fid");
+		SegmentActions.setStatus(UI.getSegmentId(segment), fid, status);
 	},
 	setStatusButtons: function(button) {
 		isTranslatedButton = ($(button).hasClass('translated')) ? true : false;
@@ -2851,10 +2847,10 @@ UI = {
 
     beforePropagateTranslation: function(segment, status) {
         if($(segment).attr('id').split('-').length > 2) return false;
-        UI.propagateTranslation(segment, status, false);
+        UI.propagateTranslation(segment, status);
     },
 
-    propagateTranslation: function(segment, status, evenTranslated) {
+    propagateTranslation: function(segment, status) {
         this.tempReqArguments = null;
         if( (status == 'translated') || (config.isReview && (status == 'approved'))){
             plusApproved = (config.isReview)? ', section[data-hash=' + $(segment).attr('data-hash') + '].status-approved' : '';
@@ -2869,7 +2865,7 @@ UI = {
                 // if status is not set to draft, the segment content is not displayed
                 UI.setStatus($(this), status); // now the status, too, is propagated
                 $( this ).data( 'autopropagated', true );
-                var trans = $('.editarea', this ).text().replace(/\uFEFF/g,'');
+
                 UI.doLexiQA(this,translation,UI.getSegmentId(this),true,null);
             });
 
