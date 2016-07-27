@@ -123,9 +123,17 @@ class ProjectManager {
         $this->dbHandler = Database::obtain();
 
         $this->features = new FeatureSet();
+
         if ( !empty( $this->projectStructure['id_customer']) ) {
            $this->features->loadFromIdCustomer(( $this->projectStructure['id_customer']));
         }
+
+        $this->projectStructure['array_files'] = $this->features->filter(
+                'filter_project_manager_array_files',
+                $this->projectStructure['array_files'],
+                $this->projectStructure
+        );
+
 
     }
 
