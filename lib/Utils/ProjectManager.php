@@ -109,6 +109,9 @@ class ProjectManager {
                             'word_count_type'      => '',
                             'metadata'             => array(),
                     ) );
+
+
+
         }
 
         $this->projectStructure = $projectStructure;
