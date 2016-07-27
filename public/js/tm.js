@@ -460,7 +460,12 @@ $.extend(UI, {
                         UI.clearTMUploadPanel();
                     }
                 } else {
-                    UI.showErrorOnKeyInput('The key is not valid');
+                    UI.showErrorOnKeyInput('The key is not valid. <a class="active-tm-key-link">Restore generated key</a>');
+                    $('.active-tm-key-link').off('click');
+                    $('.active-tm-key-link').on('click', function() {
+                        UI.openAddNewTm();
+                        UI.removeErrorOnKeyInput();
+                    });
                 }
             }
         });
