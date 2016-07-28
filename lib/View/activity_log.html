@@ -17,16 +17,17 @@
 
 </head>
 <body class="activity-log-page">
-<header>
+<header style="padding-bottom:5px">
     <div class="wrapper">
         <a href="${basepath}" class="logo"></a>
+        <a tal:attributes="href string:${basepath}manage/"  class="downloadtr-button backbtn" ><  Back to Manage</a>
     </div>
 </header>
 
 <div class="activity-log-container">
 <h1>Activity Log</h1>
     <h1 id="pid">
-        <a href="${projectUrl}">Project: ${projectID} - ${projectName}</a>
+        Project: ${projectID} - ${projectName}
     </h1>
 
     <div tal:define="activity php:array()" tal:repeat="jobActivity outputContent" class="activity-log-entry">
@@ -119,7 +120,7 @@
             }
     );
     $( window ).resize(function() {
-        APP.fitText($('#pid'), $('#pid a'), 70);
+        APP.fitText($('#pid'), $('#pid'), 70);
     });
 </script>
 
