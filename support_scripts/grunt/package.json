@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "",
   "main": "Gruntfile.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "author": "MateCat Team",
   "license": "ISC",
   "dependencies": {
@@ -30,11 +27,29 @@
     "lokijs": "^1.3.11",
     "moment": "^2.11.2",
     "node-sass": "^3.4.2",
-    "react": "^15.0.1",
+    "react": "^15.2.1",
     "flux": "^2.1.1",
     "keymirror": "~0.1.0",
     "react-addons-update": "^15.0.1",
     "react-dom": "^15.0.1",
     "sprintf": "^0.1.5"
+  },
+  "devDependencies": {
+    "babel-jest": "^14.0.0",
+    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-react": "^6.11.1",
+    "enzyme": "~2.4.1",
+    "jest": "^14.0.0",
+    "jest-cli": "^14.0.0",
+    "react": "^15.2.1"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "jest": {
+    "automock": false,
+    "testPathDirs": [
+      "/var/www/matecat/"
+    ]
   }
 }
