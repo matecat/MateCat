@@ -25,8 +25,6 @@ class Editarea extends React.Component {
         // SegmentStore.removeListener(SegmentConstants.REPLACE_CONTENT);
     }
     componentWillMount() {
-
-
         var editareaClasses = this.state.editareaClasses;
         if ((this.props.segment.readonly == 'true')||(UI.body.hasClass('archived'))) {
             editareaClasses.push('area')
