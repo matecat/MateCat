@@ -792,25 +792,6 @@ article .approved:active{
 
 }
 
-
-
-.backbtn{background: -webkit-gradient(linear, left top, left bottom, from(#f5f5f5), to(#d3d4d5));
-		 background: -moz-linear-gradient(top,  #f5f5f5,  #d3d4d5);
-		 background: linear-gradient(top,  #f5f5f5,  #d3d4d5);color:#333;text-decoration:none;}
-
-.downloadtr-button.backbtn {
-  float: right;
-  margin: 5px 0px 0px 15px !important;
-  font-weight: bold;
-  float: right;
-  font-size: 16px;
-  cursor: pointer;
-  border: 1px solid #ccc !important;
-  border-radius: 2px;
-  border-radius: 2px;
-  padding: 5px 17px !important;
-  min-width: 110px;
-}
 /*buttons editor*/
 
 td.action .btn {

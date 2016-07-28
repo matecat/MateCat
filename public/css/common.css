@@ -4018,10 +4018,6 @@ table.left-aligned tr th { text-align: left; }
     margin-top: 30px;
 }
 
-.activity-log-container h1 a {
-    color: #39699a;
-}
-
 .activity-log-container table td,
 .activity-log-container table th {
         border-bottom: 1px solid #ccc;
@@ -4121,3 +4117,21 @@ table.activitylog th .th-inner:after {
     font-family: calibri, Arial, Helvetica, sans-serif;
     font-weight: bold;
 }
+.backbtn{background: -webkit-gradient(linear, left top, left bottom, from(#f5f5f5), to(#d3d4d5));
+    background: -moz-linear-gradient(top,  #f5f5f5,  #d3d4d5);
+    background: linear-gradient(top,  #f5f5f5,  #d3d4d5);color:#333;text-decoration:none;}
+
+.downloadtr-button.backbtn {
+    float: right;
+    margin: 5px 0px 0px 15px !important;
+    font-weight: bold;
+    float: right;
+    font-size: 16px;
+    cursor: pointer;
+    border: 1px solid #ccc !important;
+    border-radius: 2px;
+    border-radius: 2px;
+    padding: 5px 17px !important;
+    min-width: 110px;
+}
+
