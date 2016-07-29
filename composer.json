@@ -9,6 +9,7 @@
         "psr/log": "~1.0",
         "monolog/monolog": "1.17.*",
         "google/apiclient": "1.*",
+        "defuse/php-encryption": "2.0.*",
         "phpmailer/phpmailer": "~5.2"
     }
 }

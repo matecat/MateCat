@@ -82,13 +82,24 @@ class AuthCookie {
     }
     
     public static function tryToRefreshToken($username){
+        $oauthTokenEncryption = OauthTokenEncryption::getInstance();
         $valid = false;
         
         $userData = getUserData( $username );
         
         if ( is_array( $userData ) && array_key_exists( 'oauth_access_token', $userData ) ) {
             $accessToken = $userData[ 'oauth_access_token' ];
-            
+
+            if( $oauthTokenEncryption->isTokenEncrypted( $accessToken ) ) {
+                $accessToken = $oauthTokenEncryption->decrypt( $accessToken );
+            } else {
+                $userDataEncryptToken = array(
+                    'email'                 => $username,
+                    'oauth_access_token'    => $oauthTokenEncryption->encrypt( $accessToken )
+                );
+                tryInsertUserFromOAuth( $userDataEncryptToken );
+            }
+
             if ( $accessToken !== '' ) {
                 $valid = self::validOrRefreshedToken( $username, $accessToken );
             }
@@ -99,13 +110,14 @@ class AuthCookie {
     
     private static function validOrRefreshedToken($username, $accessToken) {
         $client = OauthClient::getInstance()->getClient();
+        $oauthTokenEncryption = OauthTokenEncryption::getInstance();
 
         $client->setAccessToken( $accessToken );
         
         if ( $client->isAccessTokenExpired() && $client->getRefreshToken() != null ) {
             $client->refreshToken( $client->getRefreshToken() );
             
-            $newToken = $client->getAccessToken();
+            $newToken = $oauthTokenEncryption->encrypt( $client->getAccessToken() );
             
             $userData = array(
                 'email'                 => $username,
