@@ -2,6 +2,8 @@
  * React Component for the editarea.
  
  */
+var React = require('react');
+var $ = require('jquery');
 var SegmentConstants = require('../../constants/SegmentConstants');
 var SegmentStore = require('../../stores/SegmentStore');
 class Editarea extends React.Component {
@@ -26,7 +28,7 @@ class Editarea extends React.Component {
     }
     componentWillMount() {
         var editareaClasses = this.state.editareaClasses;
-        if ((this.props.segment.readonly == 'true')||(UI.body.hasClass('archived'))) {
+        if ((this.props.segment.readonly == 'true')||($("body").hasClass('archived'))) {
             editareaClasses.push('area')
         } else {
             editareaClasses.push('editarea')
@@ -43,6 +45,7 @@ class Editarea extends React.Component {
         return { __html: string };
     }
     hightlightEditarea(sid) {
+
         if (this.props.segment.sid == sid) {
             var self = this;
             var editareaClasses = this.state.editareaClasses;
@@ -75,16 +78,16 @@ class Editarea extends React.Component {
     render() {
         if (this.props.segment){
             var lang = config.target_lang.toLowerCase();
-            var readonly = ((this.props.segment.readonly == 'true')||(UI.body.hasClass('archived'))) ? true : false;
+            var readonly = ((this.props.segment.readonly == 'true')) ? true : false;
             return (
                 <div className={this.state.editareaClasses.join(' ')}
                      id={'segment-' + this.props.segment.sid + '-editarea'}
                      lang={lang}
-                     contentEditable={readonly}
-                     spellcheck="true"
+                     contentEditable={!readonly}
+                     spellCheck="true"
                      data-sid={this.props.segment.sid}
                      dangerouslySetInnerHTML={ this.allowHTML(this.state.translation) }
-                ></div>
+                />
 
             );
         }
