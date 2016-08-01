@@ -129,6 +129,23 @@ module.exports = function(grunt) {
                 ],
                 dest: buildPath + 'cat-react.js'
             },
+            test: {
+                options: {
+                    transform: [
+                        [ 'babelify', { presets: [ es2015Preset, reactPreset ] } ]
+                    ],
+                    browserifyOptions: {
+                        paths: [ __dirname + '/node_modules' ]
+                    }
+                },
+                src: [
+                    basePath + 'cat_source/es6/react-libs.js',
+                    basePath + 'cat_source/es6/react/*/*.js',
+                    basePath + 'cat_source/es6/react/*.js',
+                    basePath + 'cat_source/es6/__tests__/*.js',
+                ],
+                dest: buildPath + '/__tests__/test-react.js'
+            },
         },
 
 
@@ -415,6 +432,10 @@ module.exports = function(grunt) {
         'bundle:js',
         // 'strip',
         'sass'
+    ]);
+
+    grunt.registerTask('test', [
+        'browserify:test'
     ]);
 };
 
