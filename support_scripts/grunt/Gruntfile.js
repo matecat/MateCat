@@ -139,12 +139,9 @@ module.exports = function(grunt) {
                     }
                 },
                 src: [
-                    basePath + 'cat_source/es6/react-libs.js',
-                    basePath + 'cat_source/es6/react/*/*.js',
-                    basePath + 'cat_source/es6/react/*.js',
-                    basePath + 'cat_source/es6/__tests__/*.js',
+                    basePath + '__tests__/*.js',
                 ],
-                dest: buildPath + '/__tests__/test-react.js'
+                dest: buildPath + '/tests/test-react.js'
             },
         },
 
