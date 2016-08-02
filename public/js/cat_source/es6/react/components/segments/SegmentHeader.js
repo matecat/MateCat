@@ -2,6 +2,7 @@
  * React Component .
 
  */
+var React = require('react');
 class SegmentHeader extends React.Component {
 
     constructor(props) {
