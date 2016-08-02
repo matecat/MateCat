@@ -28,8 +28,8 @@ class NewWithOwnershipTest extends IntegrationTest {
 
         $this->params = array(
             'project_name' => 'foo',
-            'target_lang' => 'it',
-            'source_lang' => 'en',
+            'target_lang' => 'it-IT',
+            'source_lang' => 'en-US',
         );
 
         $this->files[] = test_file_path('xliff/amex-test.docx.xlf');
@@ -55,8 +55,8 @@ class NewWithOwnershipTest extends IntegrationTest {
 
         $this->params = array(
             'project_name' => 'foo',
-            'target_lang' => 'it',
-            'source_lang' => 'en',
+            'target_lang' => 'it-IT',
+            'source_lang' => 'en-US',
         );
 
         $this->files[] = test_file_path('xliff/amex-test.docx.xlf');
@@ -71,8 +71,8 @@ class NewWithOwnershipTest extends IntegrationTest {
     function test_missing_auth_sets_project_to_translated_user() {
         $this->params = array(
             'project_name' => 'foo',
-            'target_lang' => 'it',
-            'source_lang' => 'en',
+            'target_lang' => 'it-IT',
+            'source_lang' => 'en-US',
         );
 
         $this->files[] = test_file_path('xliff/amex-test.docx.xlf');

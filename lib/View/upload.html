@@ -214,6 +214,7 @@
         <option value="travel_tourism">Travel &amp; Tourism</option>
     </select>
     <a href="#" class="more-options"><span>Options</span></a>
+    <h2 class="resources" style="display:none;"><span class="numResources">4</span> Resources selected</h2>
 </div>
 
 
@@ -240,8 +241,8 @@
     <input name="" type="button" class="uploadbtn disabled" 
       tal:condition="not:volume_analysis_enabled" value="Translate" disabled="disabled"/>
 
-    <input name="" type="button" class="uploadbtn " 
-      tal:condition="volume_analysis_enabled" value="Analyze" />
+    <input name="" type="button" class="uploadbtn disabled"
+      tal:condition="volume_analysis_enabled" value="Analyze" disabled="disabled"/>
 
     <p class="enter">Press Enter</p>
 </div>
@@ -901,6 +902,7 @@
 </div>-->
 
 <div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
+<div metal:use-macro="popup_google_login.html/googleDriveLoginPopup"/>
 <div class="notifications-wrapper"></div>
 <footer>
 
@@ -913,7 +915,7 @@
             <li><a href="https://www.matecat.com/terms" target="_blank">Terms</a></li>
         </ul>
 
-        <nav>
+        <nav tal:condition="php: Bootstrap::areOauthKeysPresent()">
 
             <ul>
 
@@ -1030,7 +1032,6 @@
 <script type="text/javascript">
     var developerKey = '${developerKey}';
     var clientId = '${clientId}';
-    var oauthToken = '${accessToken}';
 
     if( !localStorage.getItem( 'currentTargetLang' ) ) {
         APP.changeTargetLang('${currentTargetLang}');

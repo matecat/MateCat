@@ -673,7 +673,7 @@ UI = {
 		        '	    	<a href="#" title="Archive project" class="archive-project"></a>'+
 		        '			<a href="#" title="Resume project" class="resume-project"></a>'+
 		        '	    	<a href="#" title="Unarchive project" class="unarchive-project"></a>'+
-		        '	    	<a href="/?action=downloadActivityLog&id_project='+this.id+'&password='+this.password+'" title="Download Activity Log" class="activity-log" target="_blank"></a>'+
+		        '	    	<a href="/activityLog/' + this.id + '/' + this.password + '" title="Download Activity Log" class="activity-log" target="_blank"></a>'+
 		        '		</div>'+
 	            '	</div>'+
 	            '	<div class="field">'+

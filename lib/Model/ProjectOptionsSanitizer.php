@@ -69,7 +69,7 @@ class ProjectOptionsSanitizer {
 
     private function sanitizeSegmentationRule() {
         $rules = array( 'patent' );
-        if ( array_search( $this->options[ 'segmentation_rule' ], $rules ) !== false ) {
+        if ( array_search( @$this->options[ 'segmentation_rule' ], $rules ) !== false ) {
             $this->sanitized[ 'segmentation_rule' ] = $this->options[ 'segmentation_rule' ];
         }
     }

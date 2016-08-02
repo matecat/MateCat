@@ -47,6 +47,9 @@ UI = {
     enableAnalyze: function () {
         enableAnalyze();
     },
+    disableAnalyze: function () {
+        disableAnalyze();
+    },
     checkRTL: function () {
         if(!this.RTLCheckDone) {
             sourceDirection = $('#source-lang option[value="' + $('#source-lang').val() + '"]').attr('data-direction');
@@ -312,7 +315,7 @@ $( function () {
 
         if ( $( '.upload-table tr' ).length >= (config.maxNumberFiles) ) {
             console.log( 'adding more than config.maxNumberFiles' );
-            jqXHR = data.submit();
+            var jqXHR = data.submit();
             jqXHR.abort();
         }
 
@@ -349,16 +352,13 @@ $( function () {
         UI.checkFailedConversionsNumber();
     } ).bind( 'fileuploaddestroyed', function ( e, data ) {
 
-        console.log( 'file deleted' );
-
         var deletedFileName = data.url.match( /file=[^&]*/g );
-        deletedFileName = decodeURIComponent( deletedFileName[0].replace( "file=", "" ) );
+        if (deletedFileName) {
+            deletedFileName = decodeURIComponent( deletedFileName[0].replace( "file=", "" ) );
 
-        console.log( UI.skipLangDetectArr, deletedFileName, typeof( UI.skipLangDetectArr[deletedFileName] ) );
-
-        if ( typeof( UI.skipLangDetectArr[deletedFileName] ) !== 'undefined' ) {
-            console.log( UI.skipLangDetectArr );
-            delete(UI.skipLangDetectArr[deletedFileName]);
+            if ( typeof( UI.skipLangDetectArr[deletedFileName] ) !== 'undefined' ) {
+                delete(UI.skipLangDetectArr[deletedFileName]);
+            }
         }
 
         if ( $( '.wrapper-upload .error-message.no-more' ).length ) {

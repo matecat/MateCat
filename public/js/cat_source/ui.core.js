@@ -2709,83 +2709,11 @@ UI = {
 			}
 		});
 	},
-    checkAddTMEnable: function() {
-        console.log('checkAddTMEnable');
-        if(
-            ($('#addtm-tr-key').val().length > 19)&&
-                UI.checkTMgrants($('.addtm-tr'))
-            ) {
-            $('#addtm-add').removeAttr('disabled').removeClass('disabled');
-        } else {
-            $('#addtm-add').attr('disabled', 'disabled').addClass('disabled');
-        }
-    },
-    checkManageTMEnable: function() {
-        console.log($('#addtm-tr-key').val().length);
-        if($('#addtm-tr-key').val().length > 19) {
-            $('.manageTM').removeClass('disabled');
-            $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').removeAttr('disabled');
-        } else {
-            $('.manageTM').addClass('disabled');
-            $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').attr('disabled', 'disabled');
-        }
-    },
-
-    clearAddTMpopup: function() {
-        $('#addtm-tr-key').val('');
-        $('.addtm-select-file').val('');
-        $('#addtm-tr-read, #addtm-tr-write').prop( "checked", true );
-        $('#uploadTMX').text('').hide();
-        $('.addtm-tr .error-message, .addtm-tr .warning-message').hide();
-        $('.manageTM').addClass('disabled');
-        $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').attr('disabled', 'disabled');
-    },
-
-    /**
-     * This function is used when a string has to be sent to the server
-     * It works over a clone of the editarea ( translation area ) and manage the text()
-     * @param segment
-     * @returns {XML|string}
-     */
-//    getTranslationWithBrPlaceHolders: function(segment) {
-//        return UI.getTextContentWithBrPlaceHolders( segment );
-//    },
-    /**
-     * This function is used when a string has to be sent to the server
-     * It works over a clone of the editarea ( source area ) and manage the text()
-     * @param segment
-     * @returns {XML|string}
-     */
-//    getSourceWithBrPlaceHolders: function(segment) {
-//        return UI.getTextContentWithBrPlaceHolders( segment, '.source' );
-//    },
-
-    /**
-     * Called when a translation is sent to the server
-     *
-     * This method get the translation edit area TEXT and place the right placeholders
-     * after br tags
-     *
-     * @param context
-     * @param selector
-     * @returns {XML|string}
-     */
-/*
-	fixBR: function(txt) {
-		var ph = '<br class="' + config.crPlaceholderClass + '">';
-		var re = new RegExp(ph + '$', "gi");
-		return txt.replace(/<div><br><\/div>/g, ph).replace(/<div>/g, '<br class="' + config.crPlaceholderClass + '">').replace(/<\/div>/g, '').replace(/<br>/g, ph).replace(re, '');
-//		return txt.replace(/<br>/g, '').replace(/<div>/g, '<br class="' + config.crPlaceholderClass + '">').replace(/<\/div>/g, '').replace(re, '');
-	},
-*/
 
     log: function(operation, d) {
         if(!UI.logEnabled) return false;
         data = d;
         var dd = new Date();
-//        console.log('stored log-' + operation + '-' + dd.getTime());
-//        console.log('data: ', JSON.stringify(d));
-//        console.log(stackTrace());
         logValue = {
             "data": data,
             "stack": stackTrace()

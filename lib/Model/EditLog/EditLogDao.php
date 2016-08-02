@@ -34,16 +34,19 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
             throw new Exception( "Job password required" );
         }
 
-        $querySegments = "SELECT segments.id AS __sid
-                    FROM segments
-                    JOIN segment_translations st ON id = id_segment
-                    JOIN jobs ON jobs.id = id_job
-                    WHERE id_job = %d
-                        AND password = '%s'
-                        AND show_in_cattool = 1
-                        AND segments.id >= %d
-                        AND st.status not in( '%s', '%s' )
-                    LIMIT %u
+        $querySegments = "
+                    SELECT * FROM (
+                        SELECT segments.id AS __sid
+                        FROM segments
+                        JOIN segment_translations st ON id = id_segment
+                        JOIN jobs ON jobs.id = id_job
+                        WHERE id_job = %d
+                            AND password = '%s'
+                            AND show_in_cattool = 1
+                            AND segments.id >= %d
+                            AND st.status not in( '%s', '%s' )
+                        LIMIT %u
+                    ) AS TT1
                     UNION
                     SELECT * from(
                             SELECT  segments.id AS __sid
@@ -57,7 +60,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                             AND st.status not in( '%s', '%s' )
                         ORDER BY __sid DESC
                         LIMIT %u
-                    ) as TT
+                    ) as TT2
                 ";
 
         $query = "SELECT

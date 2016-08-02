@@ -19,6 +19,10 @@ set_time_limit( 180 );
 class NewController extends ajaxController {
 
     /**
+     * @var Langs_Languages
+     */
+    private $lang_handler;
+    /**
      * @var string
      */
     private $project_name;
@@ -106,6 +110,9 @@ class NewController extends ajaxController {
                 ),
                 'metadata' => array(
                     'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+                'pretranslate_100' => array(
+                        'filter' => array( 'filter' => FILTER_VALIDATE_INT )
                 )
 
         );
@@ -130,17 +137,16 @@ class NewController extends ajaxController {
 
         $this->project_name = $__postInput[ 'project_name' ];
         $this->source_lang  = $__postInput[ 'source_lang' ];
+        $this->target_lang  = $__postInput[ 'target_lang' ];
 
-        $langTarget = explode( ',', $__postInput[ 'target_lang' ] );
-        $langTarget = array_map('trim',$langTarget);
-        $langTarget = array_unique($langTarget);
-        $this->target_lang = implode( ',', $langTarget );
+        $this->tms_engine       = $__postInput[ 'tms_engine' ]; // Default 1 MyMemory
+        $this->mt_engine        = $__postInput[ 'mt_engine' ]; // Default 1 MyMemory
+        $this->seg_rule         = ( !empty( $__postInput[ 'segmentation_rule' ] ) ) ? $__postInput[ 'segmentation_rule' ] : '';
+        $this->subject          = ( !empty( $__postInput[ 'subject' ] ) ) ? $__postInput[ 'subject' ] : 'general';
+        $this->owner            = $__postInput[ 'owner_email' ];
 
-        $this->tms_engine   = $__postInput[ 'tms_engine' ]; // Default 1 MyMemory
-        $this->mt_engine    = $__postInput[ 'mt_engine' ]; // Default 1 MyMemory
-        $this->seg_rule     = ( !empty( $__postInput[ 'segmentation_rule' ] ) ) ? $__postInput[ 'segmentation_rule' ] : '';
-        $this->subject      = ( !empty( $__postInput[ 'subject' ] ) ) ? $__postInput[ 'subject' ] : 'general';
-        $this->owner        = $__postInput[ 'owner_email' ];
+        // Force pretranslate_100 to be 0 or 1
+        $this->pretranslate_100 = (int) !!$__postInput[ 'pretranslate_100' ];
 
         try {
             $this->private_tm_key = array_map(
@@ -369,15 +375,9 @@ class NewController extends ajaxController {
             $this->project_name = $default_project_name; //'NO_NAME'.$this->create_project_name();
         }
 
-        if ( empty( $this->source_lang ) ) {
-            $this->api_output[ 'message' ] = "Missing source language.";
-            $this->result[ 'errors' ][]    = array( "code" => -3, "message" => "Missing source language." );
-        }
-
-        if ( empty( $this->target_lang ) ) {
-            $this->api_output[ 'message' ] = "Missing target language.";
-            $this->result[ 'errors' ][]    = array( "code" => -4, "message" => "Missing target language." );
-        }
+        $this->lang_handler = Langs_Languages::getInstance();
+        $this->validateSourceLang();
+        $this->validateTargetLangs();
 
         //ONE OR MORE ERRORS OCCURRED : EXITING
         //for now we sent to api output only the LAST error message, but we log all
@@ -606,7 +606,8 @@ class NewController extends ajaxController {
         $projectStructure[ 'status' ]               = Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS;
         $projectStructure[ 'skip_lang_validation' ] = true;
         $projectStructure[ 'owner' ]                = $this->owner;
-        $projectStructure[ 'metadata' ]         = $this->metadata ;
+        $projectStructure[ 'metadata' ]             = $this->metadata ;
+        $projectStructure[ 'pretranslate_100']      = $this->pretranslate_100 ;
 
         if ( $this->current_user != null ) {
             $projectStructure[ 'owner' ]       = $this->current_user->getEmail();
@@ -638,6 +639,43 @@ class NewController extends ajaxController {
             $this->api_output[ 'analyze_url' ] = $projectStructure[ 'result' ][ 'analyze_url' ];
         }
 
+    }
+
+    private function validateSourceLang() {
+        if ( empty( $this->source_lang ) ) {
+            $this->api_output[ 'message' ] = "Missing source language.";
+            $this->result[ 'errors' ][]    = array( "code" => -3, "message" => "Missing source language." );
+        }
+
+        try {
+            $this->lang_handler->getLocalizedNameRFC( $this->source_lang ) ;
+
+        } catch ( Exception $e ) {
+            $this->api_output['message'] = $e->getMessage();
+            $this->result[ 'errors' ][]    = array( "code" => -3, "message" => $e->getMessage() );
+        }
+    }
+
+    private function validateTargetLangs() {
+        $targets = explode( ',', $this->target_lang );
+        $targets = array_map('trim',$targets);
+        $targets = array_unique($targets);
+
+        if ( empty( $targets ) ) {
+            $this->api_output[ 'message' ] = "Missing target language.";
+            $this->result[ 'errors' ][]    = array( "code" => -4, "message" => "Missing target language." );
+        }
+
+        try {
+            foreach ( $targets as $target ) {
+               $this->lang_handler->getLocalizedNameRFC( $target );
+            }
+        } catch ( Exception $e ) {
+            $this->api_output['message'] = $e->getMessage();
+            $this->result[ 'errors' ][]    = array( "code" => -4, "message" => $e->getMessage() );
+        }
+
+        $this->target_lang = implode(',', $targets);
     }
 
     private function validateAuthHeader() {

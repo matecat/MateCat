@@ -79,7 +79,7 @@ class Bootstrap {
         INIT::$CONTROLLER_ROOT                 = INIT::$ROOT . '/lib/Controller';
         INIT::$UTILS_ROOT                      = INIT::$ROOT . '/lib/Utils';
 
-        INIT::$TASK_RUNNER_CONFIG = @parse_ini_file( INIT::$UTILS_ROOT . '/Analysis/task_manager_config.ini', true );
+        INIT::$TASK_RUNNER_CONFIG = @parse_ini_file( 'task_manager_config.ini', true );
 
         WorkerClient::init();
 
@@ -312,7 +312,7 @@ class Bootstrap {
 
         $env = self::$CONFIG[ self::$CONFIG['ENV'] ];
 
-        INIT::$BUILD_NUMBER = self::$CONFIG['BUILD_NUMBER'];
+        INIT::$BUILD_NUMBER = self::$_INI_VERSION;
 
         foreach( $env as $KEY => $value ){
 
@@ -341,6 +341,43 @@ class Bootstrap {
             );
         }
 
+    }
+
+    /**
+     * Check if all mandatory keys are present
+     *
+     * @return bool true if all mandatory keys are present, false otherwise
+     */
+    public static function areMandatoryKeysPresent()  {
+        $merged_config = array_merge(self::$CONFIG, self::$CONFIG[ INIT::$ENV ] );
+
+        foreach ( INIT::$MANDATORY_KEYS as $key ) {
+            if ( !array_key_exists($key, $merged_config) || $merged_config[ $key ] === null ) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Check if the main OAuth keys are present
+     *
+     * @return bool true if the main OAuth keys are present, false otherwise
+     */
+    public static function areOauthKeysPresent() {
+        if( empty( INIT::$OAUTH_CLIENT_ID ) ) {
+            return false;
+        }
+
+        if( empty( INIT::$OAUTH_CLIENT_SECRET ) ) {
+            return false;
+        }
+
+        if( empty( INIT::$OAUTH_CLIENT_APP_NAME ) ) {
+            return false;
+        }
+
+        return true;
     }
 
 }
