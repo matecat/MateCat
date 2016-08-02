@@ -1286,10 +1286,10 @@ $.extend(UI, {
 			UI.toggleFileMenu();
 		});
 
-		$("#jobNav .jobstart").on('click', function(e) {
+		/*$("#jobNav .jobstart").on('click', function(e) {
 			e.preventDefault();
 			UI.scrollSegment($('#segment-' + config.firstSegmentOfFiles[0].first_segment));
-		});
+		});*/
 		$("#jobMenu").on('click', 'li:not(.currSegment)', function(e) {
 			e.preventDefault();
             UI.saveSegment(UI.currentSegment);
@@ -1299,7 +1299,7 @@ $.extend(UI, {
 			e.preventDefault();
 			UI.pointToOpenSegment();
 		});
-		$("#jobNav .prevfile").on('click', function(e) {
+		/*$("#jobNav .prevfile").on('click', function(e) {
 			e.preventDefault();
 			currArtId = $(UI.currentFile).attr('id').split('-')[1];
 			$.each(config.firstSegmentOfFiles, function() {
@@ -1307,7 +1307,7 @@ $.extend(UI, {
 					firstSegmentOfCurrentFile = this.first_segment;
 			});
 			UI.scrollSegment($('#segment-' + firstSegmentOfCurrentFile));
-		});
+		});*/
 		$("#jobNav .currseg").on('click', function(e) {
 			e.preventDefault();
 
@@ -1320,7 +1320,7 @@ $.extend(UI, {
 				UI.scrollSegment(UI.currentSegment);
 			}
 		});
-		$("#jobNav .nextfile").on('click', function(e) {
+		/*$("#jobNav .nextfile").on('click', function(e) {
 			e.preventDefault();
 			if (UI.tempViewPoint === '') { // the user have not used yet the Job Nav
 				// go to current file first segment
@@ -1335,7 +1335,7 @@ $.extend(UI, {
 			$.each(config.firstSegmentOfFiles, function() {
 				console.log(this.id_file);
 			});
-		});
+		});*/
 
 		// Search and replace
 
