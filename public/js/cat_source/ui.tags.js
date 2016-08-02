@@ -106,7 +106,7 @@ $.extend(UI, {
         tx = tx.replace(/<span/gi, "<pl")
             .replace(/<\/span/gi, "</pl")
             .replace(/&lt;/gi, "<")
-            .replace(/(<(g|x|bx|ex|bpt|ept|ph[^a-z]*|it|mrk)\sid[^<]*?&gt;)/gi, brTx1)
+            .replace(/(<(g|x|bx|ex|bpt|ept|ph[^a-z]*|it|mrk)\sid[^<“]*?&gt;)/gi, brTx1)
             .replace(/</gi, "&lt;")
             .replace(/\&lt;pl/gi, "<span")
             .replace(/\&lt;\/pl/gi, "</span")
