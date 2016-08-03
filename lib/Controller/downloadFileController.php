@@ -479,6 +479,8 @@ class downloadFileController extends downloadController {
     }
 
     private function startGDriveService() {
+        $oauthTokenEncryption = OauthTokenEncryption::getInstance();
+
         // Get the user data from the project owner
         $project = \Projects_ProjectDao::findByJobId( $this->id_job );
         $userDao = new \Users_UserDao( \Database::obtain() );
@@ -488,7 +490,7 @@ class downloadFileController extends downloadController {
         \AuthCookie::tryToRefreshToken( $project->id_customer );
 
         $this->gdriveService = GDrive::getService(
-                array( 'access_token' => $user->oauth_access_token )
+                array( 'access_token' => $oauthTokenEncryption->decrypt( $user->oauth_access_token ) )
         );
     }
 
