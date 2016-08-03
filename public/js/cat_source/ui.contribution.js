@@ -158,7 +158,6 @@ $.extend(UI, {
         this.appendAddTMXButton( segment );
         this.processContributions(d, segment);
         this.currentSegmentQA();
-        console.log('getContribution:complete');
         $(document).trigger('getContribution:complete', segment);
     },
   	processContributions: function(d, segment) {

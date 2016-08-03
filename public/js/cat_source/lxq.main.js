@@ -499,7 +499,6 @@ LXQ.init  = function () {
                     ranges: results.blacklist
                 }];
 
-            console.log('-- text: ' + text);
             if (isSource)
                 $.powerTip.destroy($('.tooltipas',segment));
             else 
@@ -507,7 +506,6 @@ LXQ.init  = function () {
             text = cleanUpHighLighting(text);
             
             var ranges = cleanRanges(rangesIn,isSegmentCompleted);
-            console.dir(ranges);   
             if (ranges == null) {
                 //do nothing
                 return text;
@@ -567,7 +565,7 @@ LXQ.init  = function () {
             while ((match = findTags.exec(text)) !== null) {               
                 if (match[1] !== undefined) {
                     tags.push([match.index, match[1].length,0]);
-                    console.log('adding start: '+match.index+' length: '+match[1].length);
+                    // console.log('adding start: '+match.index+' length: '+match[1].length);
                     //lastElement = {start:match.index,length:match[1].length,tag:match[2]};
                 }
                 else {
@@ -576,16 +574,16 @@ LXQ.init  = function () {
                     //     sub = 0;
                     if (match[4] === 'span' && text[match.index-1] === '\uFEFF') {
                             tags.push([match.index-1, match[3].length+1,0]);
-                            console.log('adding start 2: '+(match.index-1)+' length: '+(match[3].length+1));       
+                            // console.log('adding start 2: '+(match.index-1)+' length: '+(match[3].length+1));
                     }
                     else {
                         if (match[3]!==undefined) {
                         tags.push([match.index, match[3].length,0]);
-                        console.log('adding start 3: '+match.index+' length: '+match[3].length);
+                        // console.log('adding start 3: '+match.index+' length: '+match[3].length);
                     }
                         else {
                             tags.push([match.index, match[5].length,0]);
-                            console.log('adding start 5: '+match.index+' length: '+match[5].length);
+                            // console.log('adding start 5: '+match.index+' length: '+match[5].length);
                         }
                     }
                 }
@@ -599,7 +597,7 @@ LXQ.init  = function () {
                 }            
             }            
             tags.forEach(function (tag) {
-                console.log('tag start: ' + tag[0] + ' tag length: ' + tag[1] + ' sub: '+tag[2]);
+                // console.log('tag start: ' + tag[0] + ' tag length: ' + tag[1] + ' sub: '+tag[2]);
                 ranges.newout.forEach(function (range) {
                     if (range.end > tag[0]) {
                         //range.start += tag[1];
@@ -731,7 +729,7 @@ LXQ.init  = function () {
             }
             spcsBeforeRegex.lastIndex = 0;
             text = text.replace(spcsBeforeRegex,spacesBefore+'<span id="selectionBoundary_');
-            console.log('-- text5: ' + text);
+            // console.log('-- text5: ' + text);
             //$(area).html(text);
             return text;
         }
@@ -862,8 +860,8 @@ LXQ.init  = function () {
                             },
                             type: 'GET',
                             success: function(response) {
-                                console.log('spellSuggest for word: '+word +' is: '+ response);
-                                console.log($('#powerTip').html());
+                                // console.log('spellSuggest for word: '+word +' is: '+ response);
+                                // console.log($('#powerTip').html());
                                 //$('#powerTip').html(response);
                                 //var txt = getWarningForModule('d1g', false);
                                 //var root = $(tpls.lxqTooltipWrap);
@@ -873,7 +871,6 @@ LXQ.init  = function () {
                                     row.find('.tooltip-error-category').text(suggest);
                                     row.find('.tooltip-error-category').on('click', function (e) {
                                         e.preventDefault();
-                                        console.log('AAAAAAASSSSSSSSSSSSSSSSS');
                                         LXQ.replaceWord(word, suggest,that);
                                     });
                                     $('#powerTip').append(row);
@@ -899,7 +896,6 @@ LXQ.init  = function () {
                     closeDelay: 500
                 });                
                 $('.tooltipa').on('powerTipRender', function() {
-                    console.log('powerTipRender');
                     //var rows = $('#powerTip').find('tooltip-error-category');
                     if ($(this).hasClass('d1g')) {
                     // make an ajax request
@@ -912,8 +908,7 @@ LXQ.init  = function () {
                             },
                             type: 'GET',
                             success: function(response) {
-                                console.log('spellSuggest for word: '+word +' is: '+ response);
-                                console.log($('#powerTip').html());
+
                                 //$('#powerTip').html(response);
                                 //var txt = getWarningForModule('d1g', false);
                                 //var root = $(tpls.lxqTooltipWrap);
@@ -923,7 +918,6 @@ LXQ.init  = function () {
                                     row.find('.tooltip-error-category').text(suggest);
                                     row.find('.tooltip-error-category').on('click', function (e) {
                                         e.preventDefault();
-                                        console.log('AAAAAAASSSSSSSSSSSSSSSSS');
                                         LXQ.replaceWord(word, suggest,that);
                                     });
                                     $('#powerTip').append(row);
@@ -936,7 +930,6 @@ LXQ.init  = function () {
         }
             
         var replaceWord  = function(word, suggest,target) {
-            console.log('word:',word,'suggest:',suggest);
             if ($(target).closest('.editarea').attr('contenteditable')) {
                 if ($(target).text() === word) {
                     //there is no overlaping errors (like caps after punct...)
@@ -948,7 +941,6 @@ LXQ.init  = function () {
                     var missingCharsStart=word.slice(0,startInWord);
                     var endInWord = startInWord+txt.length;
                     var missingCharsEnd = word.slice(endInWord);
-                    console.log('startP:',startInWord,'misStrt:',missingCharsStart,'endP:',endInWord,'misEnd:',missingCharsEnd);
                     while(missingCharsStart.length>0) {
                         $el = $(target).prev('lxqwarning');
                         txt = $el.text();
@@ -963,7 +955,6 @@ LXQ.init  = function () {
                         txt = $el.text();
                         startInWord = missingCharsEnd.indexOf(txt);
                         if (startInWord!==0) {
-                            console.log('oops')
                             break;
                         }
                         missingCharsEnd = missingCharsEnd.slice(txt.length);
@@ -978,9 +969,7 @@ LXQ.init  = function () {
                 UI.saveInUndoStack('lxq-replaceWord');
                 UI.currentSegmentQA();
             }
-            else
-                console.log('will not replace in inactive editarea');
-        }    
+        };
         var ignoreError = function(errorid) {
             var splits = errorid.split(/_/g);          
             var targetSeg = splits[1];
@@ -1059,7 +1048,7 @@ LXQ.init  = function () {
                             }
                 },
                 success:function(result){  
-                    console.log('postShowHighlight success: '+result);
+                    // console.log('postShowHighlight success: '+result);
                 }
             });          
         }
@@ -1074,7 +1063,7 @@ LXQ.init  = function () {
                             }
                 },
                 success:function(result){  
-                    console.log('postIgnoreError success: '+result);
+                    // console.log('postIgnoreError success: '+result);
                 }
             });          
         }
@@ -1144,7 +1133,7 @@ LXQ.init  = function () {
             $.each(segments,function (keys,segment) {
                 var segId = UI.getSegmentId(segment);
                 if (UI.lexiqaData.segments.indexOf(segId) < 0) {
-                    console.log('segment not in lexiqaDB: '+segId);
+                    // console.log('segment not in lexiqaDB: '+segId);
                     notChecked.push(segId);
                 }
             });
@@ -1162,7 +1151,7 @@ LXQ.init  = function () {
                 return;
             var seg =  UI.getSegmentById(segment);
             if (UI.getSegmentTarget(seg).length > 0) {                
-                console.log('Requesting QA for: '+segment);
+                // console.log('Requesting QA for: '+segment);
                 UI.doLexiQA(seg, UI.getSegmentTarget(seg),segment, true, checkNextUncheckedSegment);
             }
             else {
@@ -1241,7 +1230,7 @@ LXQ.init  = function () {
                         });
                     }
                     ,error:function(result){
-                        console.err(result);                   
+                        // console.err(result);
                     }
             });
            
