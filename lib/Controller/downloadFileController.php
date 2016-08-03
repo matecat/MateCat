@@ -193,6 +193,7 @@ class downloadFileController extends downloadController {
                             // using the following line of code, that changes the XLIFF's
                             // extension just a moment before it is downloaded by the user.
                             $output_content[ $fileID ][ 'output_filename' ] = preg_replace("|\\.sdlxliff$|i", ".xlf", $output_content[ $fileID ][ 'output_filename' ]);
+                            $output_content[ $fileID ][ 'output_filename' ] = preg_replace( "#(\\.xlf)+#i", ".xlf", $output_content[ $fileID ][ 'output_filename' ] );
                         }
                     }
 
