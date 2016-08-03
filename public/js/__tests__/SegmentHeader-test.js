@@ -1,12 +1,8 @@
-/**
- * Created by riccio on 01/08/16.
- */
-
 
 import React from 'react';
 import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
-import enzyme from 'enzyme';
+import { mount, shallow } from 'enzyme';
 
 
 import SegmentHeader from '../cat_source/es6/react/components/segments/SegmentHeader';

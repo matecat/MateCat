@@ -33,22 +33,19 @@
     "lokijs": "^1.3.11",
     "moment": "^2.11.2",
     "node-sass": "^3.4.2",
-    "react": "^15.2.1",
-    "react-dom": "^15.2.1",
+    "react": "^15.3.0",
+    "react-dom": "^15.3.0",
     "sprintf": "^0.1.5"
   },
   "devDependencies": {
     "babel-preset-es2015": "^6.9.0",
     "babel-preset-react": "^6.11.1",
     "chai": "^3.5.0",
-    "enzyme": "^2.3.0",
     "jsdom": "^8.0.1",
     "mocha": "^3.0.0",
     "mocha-sinon": "^1.1.5",
-    "react-addons-test-utils": "^15.2.1"
-  },
-  "scripts": {
-    "test": "jest"
+    "react-addons-test-utils": "^15.3.0",
+    "enzyme": "^2.4.1"
   },
   "babel": {
     "presets": [
