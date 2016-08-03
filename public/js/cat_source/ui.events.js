@@ -1198,14 +1198,45 @@ $.extend(UI, {
 			$(this).parents('section').find('.close').focus();
 		});
 
-		$("#point2seg").bind('mousedown', function() {
-			UI.setNextWarnedSegment();
+		$("#point2seg").bind('mousedown', function(e) {
+			e.preventDefault();
+            UI.saveSegment(UI.currentSegment);
+			UI.scrollSegment($('#segment-' + $(this).attr('data-segment')));
+            UI.setNextWarnedSegment();
+		});
+
+		$("#navSwitcher").on('click', function(e) {
+			e.preventDefault();
 		});
 
 		$("#pname").on('click', function(e) {
 			e.preventDefault();
 			UI.toggleFileMenu();
 		});
+
+		$("#jobMenu").on('click', 'li:not(.currSegment)', function(e) {
+			e.preventDefault();
+            UI.saveSegment(UI.currentSegment);
+			UI.renderAndScrollToSegment($(this).attr('data-segment'));
+		});
+		$("#jobMenu").on('click', 'li.currSegment', function(e) {
+			e.preventDefault();
+			UI.pointToOpenSegment();
+		});
+
+		$("#jobNav .currseg").on('click', function(e) {
+			e.preventDefault();
+
+			if (!($('#segment-' + UI.currentSegmentId).length)) {
+				$('#outer').empty();
+				UI.render({
+					firstLoad: false
+				});
+			} else {
+				UI.scrollSegment(UI.currentSegment);
+			}
+		});
+		
 
 		// Search and replace
 
