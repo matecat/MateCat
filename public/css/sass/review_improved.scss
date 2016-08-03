@@ -271,7 +271,8 @@ section {
 }
 
 .review-issues-overview-panel {
-    margin: 10px;
+    margin: 25px;
+    margin-top: 40px;
 }
 
 .review-current-version-container {
@@ -297,6 +298,24 @@ section {
     bottom: 0;
 }
 
+.review-side-panel-close {
+  font-size: 13px;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  line-height: 16px;
+  background-color: #333;
+  color: #ffffff;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+  &:hover {
+    background-color: #666;
+  }
+}
 /*
 .review-version-wrapper .collapsed .collapsable {
     display: none; 
