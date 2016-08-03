@@ -433,7 +433,7 @@ $.extend(UI, {
             UI.showErrorOnKeyInput('The key is already present in this project.');
             return false;
         } else if (keyInactive) {
-            UI.showErrorOnKeyInput('The key is already present in this project. <a class="active-tm-key-link">Click here to activate</a>');
+            UI.showErrorOnKeyInput('The key is already assigned to one of your Inactive TMs. <a class="active-tm-key-link">Click here to activate it</a>');
             $('.active-tm-key-link').off('click');
             $('.active-tm-key-link').on('click', function() {
                 UI.clearTMPanel();
