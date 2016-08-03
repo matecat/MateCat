@@ -89,7 +89,7 @@ if ( QaCheckGlossary.enabled() )
             console.log( entry );
 
             el.powerTip({ placement : 's' });
-            el.data({ 'powertipjq' : $('<div class="unusedGlossaryTip">Unused glossary term</div>') });
+            el.data({ 'powertipjq' : $('<div class="unusedGlossaryTip" style="padding: 4px;">Unused glossary term</div>') });
         });
     }
 
