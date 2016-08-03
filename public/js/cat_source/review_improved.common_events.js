@@ -98,4 +98,8 @@ if ( ReviewImproved.enabled() ) {
         $.getJSON( versions_path ).done( updateLocalTranslationVersions );
     });
 
+    $(document).on('sidepanel:close', function() {
+        ReviewImproved.closePanel();
+    });
+
 }
