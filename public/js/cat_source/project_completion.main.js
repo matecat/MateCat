@@ -166,12 +166,13 @@ if ( ProjectCompletion.enabled() ) {
         if ( !button.hasClass('isMarkableAsComplete') ) {
             return;
         }
-
+        $(document).trigger('sidepanel:close');
         if ( config.isReview ) {
             clickMarkAsCompleteForReview();
         } else {
             clickMarkAsCompleteForTranslate();
         }
+
     });
 
     $(document).on('setTranslation:success', function(ev, data) {
