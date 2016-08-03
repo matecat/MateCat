@@ -6,6 +6,7 @@ use ActivityLog\ActivityLogStruct;
 /**
  * Description of catController
  *
+ * @property CatDecorator decorator
  * @author antonio
  */
 class catController extends viewController {
@@ -44,6 +45,9 @@ class catController extends viewController {
     private $qa_overall = '';
 
     private $_keyList = array( 'totals' => array(), 'job_keys' => array() );
+
+    public $target_code;
+    public $source_code;
 
     /**
      * @var Chunks_ChunkStruct
@@ -659,22 +663,6 @@ class catController extends viewController {
         $this->template->maxNumSegments       = INIT::$MAX_NUM_SEGMENTS;
         $this->template->copySourceInterval   = INIT::$COPY_SOURCE_INTERVAL;
         $this->template->time_to_edit_enabled = INIT::$TIME_TO_EDIT_ENABLED;
-
-        //check if it is a composite language, for cjk check that accepts only ISO 639 code
-        if ( strpos( $this->target_code, '-' ) !== false ) {
-            //pick only first part
-            $tmp_lang               = explode( '-', $this->target_code );
-            $target_code_no_country = $tmp_lang[ 0 ];
-            unset( $tmp_lang );
-        } else {
-            //not a RFC code, it's fine
-            $target_code_no_country = $this->target_code;
-        }
-
-        //check if cjk
-        if ( array_key_exists( $target_code_no_country, CatUtils::$cjk ) ) {
-//            $this->template->taglockEnabled = 0;
-        }
 
         /*
          * Line Feed PlaceHolding System

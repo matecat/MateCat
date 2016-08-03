@@ -29,6 +29,11 @@ class analyzeController extends viewController {
     private $jpassword;
 
     /**
+     * @var Analysis_AnalysisModel
+     */
+    protected $model;
+
+    /**
      * @var Projects_ProjectStruct
      */
     private $project ;
@@ -42,6 +47,11 @@ class analyzeController extends viewController {
      * @var FeatureSet
      */
     private $features ;
+
+    /**
+     * @var bool
+     */
+    private $project_not_found = false;
 
     public function __construct() {
 
@@ -156,6 +166,13 @@ class analyzeController extends viewController {
         $langDomains = Langs_LanguageDomains::getInstance();
         $this->subject = $langDomains::getDisplayDomain($this->subject);  // subject is null !!??!?!?!
         $this->template->subject                    = $this->model->subject;
+
+        //first two letter of code lang
+        $project_data = $this->model->getProjectData()[ 0 ];
+
+        if ( array_key_exists( explode( "-" , $project_data[ 'source' ] )[0], CatUtils::$cjk ) ) {
+            $this->template->isCJK = true;
+        }
 
         $this->template->isLoggedIn = $this->isLoggedIn();
 

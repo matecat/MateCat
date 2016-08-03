@@ -85,6 +85,8 @@ class CatDecorator {
 
         $this->template->languages_array = json_encode(  $this->lang_handler->getEnabledLanguages( 'en' ) ) ;
 
+        $this->decorateForCJK();
+
         $this->assignOptions(); 
         
     }
@@ -176,6 +178,42 @@ class CatDecorator {
         
         $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages ); 
         $this->template->lexiqa_languages = json_encode( ProjectOptionsSanitizer::$lexiQA_allowed_languages ); 
+    }
+
+    private function decorateForCJK() {
+
+        //check if it is a composite language, for cjk check that accepts only ISO 639 code
+        if ( strpos( $this->controller->target_code, '-' ) !== false ) {
+            //pick only first part
+            $tmp_lang               = explode( '-', $this->controller->target_code );
+            $target_code_no_country = $tmp_lang[ 0 ];
+            unset( $tmp_lang );
+        } else {
+            //not a RFC code, it's fine
+            $target_code_no_country = $this->controller->target_code;
+        }
+
+        //check if cjk
+        if ( array_key_exists( $target_code_no_country, CatUtils::$cjk ) ) {
+//            $this->template->taglockEnabled = 0;
+        }
+
+        //check if it is a composite language, for cjk check that accepts only ISO 639 code
+        if ( strpos( $this->controller->source_code, '-' ) !== false ) {
+            //pick only first part
+            $tmp_lang               = explode( '-', $this->controller->source_code );
+            $source_code_no_country = $tmp_lang[ 0 ];
+            unset( $tmp_lang );
+        } else {
+            //not a RFC code, it's fine
+            $source_code_no_country = $this->controller->source_code;
+        }
+
+        //check if cjk
+        if ( array_key_exists( $source_code_no_country, CatUtils::$cjk ) ) {
+            $this->template->isCJK = true;
+        }
+
     }
 
 }
