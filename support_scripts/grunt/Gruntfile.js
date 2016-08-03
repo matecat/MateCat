@@ -131,6 +131,11 @@ module.exports = function(grunt) {
             },
             test: {
                 options: {
+                    external: [
+                        'react/addons',
+                        'react/lib/ReactContext',
+                        'react/lib/ExecutionEnvironment'
+                    ],
                     transform: [
                         [ 'babelify', { presets: [ es2015Preset, reactPreset ] } ]
                     ],
