@@ -135,7 +135,7 @@ if ( ReviewImproved.enabled() )
 
         mountPanelComponent : function() {
             ReactDOM.render(
-                React.createElement( ReviewSidePanel, {} ),
+                React.createElement( ReviewSidePanel, {closePanel: this.closePanel} ),
                 mountpoint );
         },
 

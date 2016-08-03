@@ -17,6 +17,10 @@ export default React.createClass({
         this.setState({visible: false}); 
     },
 
+    closePanelClick : function(e, data) {
+        this.props.closePanel();
+    },
+
     componentDidMount: function() {
         $(document).on('review-panel:opened', this.openPanel);
         $(document).on('review-panel:closed', this.closePanel);
@@ -60,6 +64,7 @@ export default React.createClass({
         } 
 
         return <div className={classes} id="review-side-panel">
+            <div className="review-side-panel-close" onClick={this.closePanelClick}>x</div>
             {innerPanel}
         </div>;
     }
