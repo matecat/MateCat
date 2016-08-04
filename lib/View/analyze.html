@@ -79,14 +79,19 @@
         <h2>Invoicing Tips</h2>
         <ul id="standard-equivalent-words" class="cost-table">
 
-            <li class="box"><span class="word-number loading" tal:content="standard_analysis_wc_print"> </span><br/>
-                Standard weighted* words<br/>
+            <li class="box"><span class="word-number loading" tal:content="standard_analysis_wc_print"> </span>
+                <br/>
+                Standard weighted*
+                <span tal:condition="not:isCJK">words</span>
+                <span tal:condition="true:isCJK">characters</span>
+                <br/>
                     <span class="days">
                         <strong>
                             <span class="workDays" tal:content="standard_wc_time">11,5</span> work
                             <span class="unit" tal:content="standard_wc_unit">days</span>
                         </strong> at 
-                        <span class="wordPerDay">3.000 w/day</span>
+                        <span class="wordPerDay" tal:condition="not:isCJK">3.000 w/day</span>
+                        <span class="wordPerDay" tal:condition="true:isCJK">4.000 characters/day</span>
                     </span>
             </li>
 
@@ -98,28 +103,38 @@
                 <p class="promo-text">
                     <span>16</span>%<br/>less
                 </p>
-                <span class="word-number loading" tal:content="tm_analysis_wc_print"></span><br/>
-                MateCat weighted words<br/>
+                <span class="word-number loading" tal:content="tm_analysis_wc_print"></span>
+                <br/>
+                MateCat weighted
+                <span tal:condition="not:isCJK">words</span>
+                <span tal:condition="true:isCJK">characters</span>
+                <br/>
                     <span class="days">
                         <strong>
                             <span class="workDays" tal:content="fast_wc_time">9,5</span> work
                             <span class="unit" tal:content="fast_wc_unit">days</span>
                         </strong> at 
-                        <span class="wordPerDay">3.000 w/day</span>
+                        <span class="wordPerDay" tal:condition="not:isCJK">3.000 w/day</span>
+                        <span class="wordPerDay" tal:condition="true:isCJK">4.000 characters/day</span>
                     </span>
             </li>
 
         </ul>
 
         <ul id="raw-words" class="cost-table">
-            <li class="box"><span class="word-number" tal:content="total_raw_word_count_print">40,500</span><br/>
-                Raw words<br/>
+            <li class="box"><span class="word-number" tal:content="total_raw_word_count_print">40,500</span>
+                <br/>
+                Raw
+                <span tal:condition="not:isCJK">words</span>
+                <span tal:condition="true:isCJK">characters</span>
+                <br/>
                     <span class="days">
                         <strong>
                             <span class="workDays" tal:content="raw_wc_time">11,5</span> work
                             <span class="unit" tal:content="raw_wc_unit">days</span>
                         </strong> at 
-                        <span class="wordPerDay">3.000 w/day</span>
+                        <span class="wordPerDay" tal:condition="not:isCJK">3.000 w/day</span>
+                        <span class="wordPerDay" tal:condition="true:isCJK">4.000 characters/day</span>
                     </span>
             </li>
 
@@ -241,7 +256,7 @@
                             <option value="12">12</option>
                             <option value="13">13</option>
                             <option value="14">14</option>
-                            <option value="15">15</option>
+                            <option value="15">15</option>tal:content="standard_analysis_wc_print"
                             <option value="16">16</option>
                             <option value="17">17</option>
                             <option value="18">18</option>

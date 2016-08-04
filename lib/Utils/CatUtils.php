@@ -885,7 +885,8 @@ class CatUtils {
 
 
         //check for a string made of spaces only, after the string was cleaned
-        if ( preg_replace( '#[\p{Z}]+#u', "", $string ) == "" ) {
+        $string_with_no_spaces = preg_replace( '#[\p{Z}]+#u', "", $string );
+        if ( $string_with_no_spaces == "" ) {
             return 0;
         }
 
@@ -893,7 +894,7 @@ class CatUtils {
         $source_lang_two_letter = explode( "-" , $source_lang )[0];
         if ( array_key_exists( $source_lang_two_letter, self::$cjk ) ) {
 
-            $res = mb_strlen( $string, 'UTF-8' ) / self::$cjk[ $source_lang_two_letter ];
+            $res = mb_strlen( $string_with_no_spaces, 'UTF-8' );
 
         } else {
 
@@ -1013,7 +1014,7 @@ class CatUtils {
      *
      * @param $mb_char string Unicode Multibyte Char String
      *
-*@return int
+     * @return int
      *
      */
     public static function fastUnicode2ord( $mb_char ){
