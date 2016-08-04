@@ -2,6 +2,7 @@
  * React Component .
 
  */
+var React = require('react');
 class SegmentFooter extends React.Component {
 
     constructor(props) {

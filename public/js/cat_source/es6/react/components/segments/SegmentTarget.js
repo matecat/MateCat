@@ -3,6 +3,7 @@
  * React Component .
 
  */
+var React = require('react');
 var EditArea = require('./Editarea').default;
 
 class SegmentTarget extends React.Component {
@@ -27,16 +28,7 @@ class SegmentTarget extends React.Component {
     }
 
     decodeTranslation() {
-        var decoded_translation;
-        var segment = this.props.segment;
-        if (UI.enableTagProjection && (UI.getSegmentStatus(segment) === 'draft' || UI.getSegmentStatus(segment) === 'new')
-            && !UI.checkXliffTagsInText(segment.translation) ) {
-            decoded_translation = UI.removeAllTags(segment.translation);
-        } else {
-            decoded_translation = segment.translation;
-        }
-        decoded_translation = UI.decodePlaceholdersToText(decoded_translation || '');
-        return decoded_translation;
+        return this.props.decodeTextFn(this.props.segment, this.props.segment.translation);
     }
     allowHTML(string) {
         return { __html: string };
@@ -74,7 +66,7 @@ class SegmentTarget extends React.Component {
                 </div>;
             }
 
-            if (UI.tagModesEnabled && !UI.enableTagProjection) {
+            if (this.props.tagModesEnabled && !this.props.enableTagProjection) {
                 tagModeButton =
                     <a href="#" className="tagModeToggle" alt="Display full/short tags" title="Display full/short tags">
                         <span className="icon-chevron-left"/>

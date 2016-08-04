@@ -33,10 +33,6 @@ UI = {
         return UI._editingSegment ;
     },
 
-    statusHandleTitleAttr : function( status ) {
-        status = status.toUpperCase();
-        return config.status_labels[ status ] + ', click to change it';
-    },
     showPostRevisionStatuses : false,
     pee_error_level_map: {
         0: "",
@@ -1397,7 +1393,12 @@ UI = {
 
         if((typeof this.split_points_source == 'undefined') || (!this.split_points_source.length) || justCreated) {
             var mountPoint = $(".article-segments-container-" + fid)[0];
-            ReactDOM.render(React.createElement(SegmentsContainer,{fid : fid}), mountPoint);
+            ReactDOM.render(React.createElement(SegmentsContainer,{
+                fid : fid,
+                enableTagProjection: UI.enableTagProjection,
+                decodeTextFn: UI.decodeText,
+                tagModesEnabled: UI.tagModesEnabled
+            }), mountPoint);
             SegmentActions.renderSegments(segments, fid);
         }
     },
@@ -3082,26 +3083,6 @@ UI = {
 		});
 		$('#jobMenu li.currSegment').attr('data-segment', UI.currentSegmentId);
 	},
-    findCommonPartInSegmentIds: function () {
-        var a = config.first_job_segment;
-        var b = config.last_job_segment;
-        for(x=0;x<a.length;x++){
-            if(a[x] != b[x]) {
-                n = x;
-                break;
-            }
-        }
-
-        //when the job has one segment only
-        if( typeof n === 'undefined' ) {
-            n = a.length -1;
-        }
-
-        this.commonPartInSegmentIds = a.substring(0,n);
-    },
-    shortenId: function(id) {
-        return id.replace(UI.commonPartInSegmentIds, '<span class="implicit">' + UI.commonPartInSegmentIds + '</span>');
-    },
     isCJK: function () {
         var l = config.target_rfc;
         return !!((l == 'zh-CN') || (l == 'zh-TW') || (l == 'ja-JP') || (l == 'ko-KR'));

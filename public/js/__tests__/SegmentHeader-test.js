@@ -82,7 +82,7 @@ describe('SegmentHeader Component', () => {
     });
 
 
-    it('SegmentHeader: Hide Header with event', () => {
+    it('SegmentHeader: Hide Header with Store event', () => {
         var Costants = require('../cat_source/es6/react/constants/SegmentConstants');
         var SegmentStore = require('../cat_source/es6/react/stores/SegmentStore');
 

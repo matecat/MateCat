@@ -2,6 +2,7 @@
  * React Component .
 
  */
+var React = require('react');
 class SegmentSource extends React.Component {
 
     constructor(props) {
@@ -15,20 +16,7 @@ class SegmentSource extends React.Component {
     }
 
     decodeTextSource() {
-        var decoded_source = this.props.segment.segment;
-        /**if Tag Projection enabled and there are not tags in the segment translation, remove it and add the class that identify
-         * tha Tag Projection is enabled
-         */
-        if (UI.enableTagProjection && (UI.getSegmentStatus(this.props.segment) === 'draft' || UI.getSegmentStatus(this.props.segment) === 'new')
-            && !UI.checkXliffTagsInText(this.props.segment.translation) ) {
-            decoded_source = UI.removeAllTags(this.props.segment.segment);
-        }
-
-        decoded_source = UI.decodePlaceholdersToText(
-            decoded_source || '',
-            true, this.props.segment.sid, 'source');
-
-        return decoded_source;
+        return this.props.decodeTextFn(this.props.segment, this.props.segment.segment);
     }
 
     createEscapedSegment() {
@@ -53,10 +41,8 @@ class SegmentSource extends React.Component {
         console.log("Unmount SegmentSource" + this.props.sid);
     }
 
-    componentWillMount() {
-        this.decodeTextSource();
-        this.createEscapedSegment();
-    }
+    componentWillMount() {}
+
     allowHTML(string) {
         return { __html: string };
     }
