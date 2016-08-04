@@ -16,10 +16,12 @@ class Segment extends React.Component {
         this.createSegmentClasses = this.createSegmentClasses.bind(this);
         this.hightlightEditarea = this.hightlightEditarea.bind(this);
         this.addClass = this.addClass.bind(this);
+        this.setAsAutopropagated = this.setAsAutopropagated.bind(this);
 
         this.state = {
             segment_classes : [],
             modified: false,
+            autopropagated: this.props.segment.autopropagated_from != 0
         };
     }
 
@@ -90,16 +92,26 @@ class Segment extends React.Component {
         }
     }
 
+    setAsAutopropagated(sid, propagation){
+        if (this.props.segment.sid == sid) {
+            this.setState({
+                autopropagated: propagation,
+            });
+        }
+    }
+
     componentDidMount() {
         console.log("Mount Segment" + this.props.segment.sid);
         SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.addListener(SegmentConstants.ADD_SEGMENT_CLASS, this.addClass);
+        SegmentStore.addListener(SegmentConstants.SET_SEGMENT_PROPAGATION, this.setAsAutopropagated);
     }
 
     componentWillUnmount() {
         console.log("Unmount Segment" + this.props.segment.sid);
         SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.removeListener(SegmentConstants.ADD_SEGMENT_CLASS, this.addClass);
+        SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_PROPAGATION, this.setAsAutopropagated);
     }
 
     /*componentWillReceiveProps(nextProps) {
@@ -119,7 +131,6 @@ class Segment extends React.Component {
 
         var segment_classes = this.state.segment_classes.concat(this.createSegmentClasses());
         var split_group = this.props.segment.split_group || [];
-        var autoPropagated = this.props.segment.autopropagated_from != 0;
         var autoPropagable = (this.props.segment.repetitions_in_chunk != "1");
         var originalId = this.props.segment.sid.split('-')[0];
 
@@ -146,7 +157,7 @@ class Segment extends React.Component {
             <section id={"segment-" + this.props.segment.sid}
                      className={segment_classes.join(' ')}
                      data-hash={this.props.segment.segment_hash}
-                     data-autopropagated={autoPropagated}
+                     data-autopropagated={this.state.autopropagated}
                      data-propagable={autoPropagable}
                      data-version={this.props.segment.version}
                      data-split-group={split_group}
@@ -155,7 +166,7 @@ class Segment extends React.Component {
                      data-tagprojection={this.dataAttrTagged}
                      data-fid={this.props.fid}>
 
-                <a tabindex="0" href={"#" + this.props.segment.sid}/>
+                <a tabIndex="0" href={"#" + this.props.segment.sid}/>
                 <div className={"sid"} title={this.props.segment.sid}>
                     <div className="txt" dangerouslySetInnerHTML={ this.allowHTML(shortened_sid) }></div>
                     <div className={"actions"}>
@@ -168,7 +179,7 @@ class Segment extends React.Component {
                 {job_marker}
 
                 <div className={"body"}>
-                    <SegmentHeader sid={this.props.segment.sid} autopropagated={autoPropagated}/>
+                    <SegmentHeader sid={this.props.segment.sid} autopropagated={this.state.autopropagated}/>
                     <SegmentBody segment={this.props.segment} isReviewImproved={this.props.isReviewImproved}/>
                     <div className="timetoedit"
                          data-raw-time-to-edit={this.props.segment.time_to_edit}>

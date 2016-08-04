@@ -14,7 +14,7 @@ var SegmentConstants = require('../constants/SegmentConstants');
 
 
 var SegmentActions = {
-
+    /********* SEGMENTS *********/
     /**
      * @param segments
      * @param fid
@@ -26,7 +26,6 @@ var SegmentActions = {
             fid: fid
         });
     },
-
     splitSegments: function (oldSid, newSegments, splitGroup, fid) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SPLIT_SEGMENT,
@@ -36,19 +35,8 @@ var SegmentActions = {
             fid: fid
         });
     },
-    highlightEditarea: function(sid) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.HIGHLIGHT_EDITAREA,
-            id: sid
-        });
-    },
-    addClassToSegment: function (sid, newClass) {
-        AppDispatcher.dispatch({
-            actionType: SegmentConstants.ADD_SEGMENT_CLASS,
-            id: sid,
-            newClass: newClass
-        });
-    },
+    /* TODO
+     */
     propagateTranslation: function (sid, status) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.PROPAGATE_TRANSLATION,
@@ -56,6 +44,17 @@ var SegmentActions = {
             status: status
         });
     },
+
+    /********** Segment **********/
+
+    addClassToSegment: function (sid, newClass) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.ADD_SEGMENT_CLASS,
+            id: sid,
+            newClass: newClass
+        });
+    },
+
     setStatus: function (sid, fid, status) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_SEGMENT_STATUS,
@@ -63,7 +62,48 @@ var SegmentActions = {
             fid: fid,
             status: status
         });
-    }
+    },
+    
+    setHeaderPercentuage: function (sid, fid, perc, className, createdBy) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_SEGMENT_HEADER,
+            id: sid,
+            fid: fid,
+            perc: perc,
+            className: className,
+            createdBy: createdBy
+        });
+    },
+
+    hideSegmentHeader: function (sid, fid) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.HIDE_SEGMENT_HEADER,
+            id: sid,
+            fid: fid
+        });
+    },
+
+    setSegmentPropagation: function (sid, fid, propagation, from) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.SET_SEGMENT_PROPAGATION,
+            id: sid,
+            fid: fid,
+            propagation: propagation,
+            from: from
+        });
+    },
+
+    /******************* EditArea ************/
+    highlightEditarea: function(sid) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.HIGHLIGHT_EDITAREA,
+            id: sid
+        });
+    },
+
+
+
+    
 
     /*replaceContent: function(sid, text) {
         AppDispatcher.dispatch({

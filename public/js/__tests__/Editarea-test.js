@@ -9,6 +9,7 @@ var segment;
 var expect = require('expect.js');
 var assert = chai.assert;
 var sinon = require('sinon');
+import { mount, shallow } from 'enzyme';
 var component;
 
 describe('Editarea Component', () => {
@@ -80,8 +81,8 @@ describe('Editarea Component', () => {
         assert.include(editareaNode.className, 'micActive', 'The class "micActive" has not been set');
         assert.equal(editareaNode.id, 'segment-' + segment.sid + '-editarea', 'The id parameter is correctly set');
         assert.equal(editareaNode.lang, 'en', 'The parameter lang is correctly set');
-        expect(editareaNode.getAttribute('contenteditable')).to.be.true;
-        expect(editareaNode.getAttribute('spellCheck')).to.be.true;
+        expect(editareaNode.getAttribute('contenteditable')).to.equal('true');
+        expect(editareaNode.getAttribute('spellCheck')).to.equal('true');
         assert.equal(editareaNode.getAttribute('data-sid'),"60310" , 'The data-sid parameter is correctly set');
     });
 
@@ -95,23 +96,24 @@ describe('Editarea Component', () => {
 
         assert.include(editareaNode.className, 'area', 'The class "area" has not been set');
 
-        expect(editareaNode.getAttribute('contenteditable')).to.be.false;
+        expect(editareaNode.getAttribute('contenteditable')).to.equal('false');
     });
 
-    xit('Editarea highlightEditArea is called TODO SPY', () => {
+    it('Editarea highlightEditArea is called', () => {
 
         var Costants = require('../cat_source/es6/react/constants/SegmentConstants');
         var SegmentStore = require('../cat_source/es6/react/stores/SegmentStore');
 
+        var spy = sinon.spy(EditArea.prototype, 'hightlightEditarea');
 
         component = TestUtils.renderIntoDocument(
             <EditArea segment={segment} translation={segment.translation}/>
         );
-        var spy = sinon.spy(component, 'hightlightEditarea');
 
         SegmentStore.emitChange(Costants.HIGHLIGHT_EDITAREA, "60310");
 
-        expect(spy.called).to.be.false;
+        expect(EditArea.prototype.hightlightEditarea).to.have.property('callCount', 1);
+        expect(spy.called).to.equal(true);
 
         console.log(spy.called);
 
