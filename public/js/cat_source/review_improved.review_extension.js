@@ -151,7 +151,10 @@ if ( ReviewImproved.enabled() && config.isReview ) {
                 var mountPoint = $(".article-segments-container-" + fid)[0];
                 ReactDOM.render(React.createElement(SegmentsContainer,{
                     fid : fid,
-                    isReviewImproved: true
+                    isReviewImproved: true,
+                    enableTagProjection: UI.enableTagProjection,
+                    decodeTextFn: UI.decodeText,
+                    tagModesEnabled: UI.tagModesEnabled
                 }), mountPoint);
                 SegmentActions.renderSegments(segments, fid);
             }

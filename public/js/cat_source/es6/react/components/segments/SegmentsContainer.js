@@ -2,6 +2,7 @@
  * React Component for the editarea.
 
  */
+var React = require('react');
 var SegmentStore = require('../../stores/SegmentStore');
 var Segment = require('./Segment').default;
 var SegmentConstants = require('../../constants/SegmentConstants');
@@ -70,9 +71,12 @@ class SegmentsContainer extends React.Component {
             var item = <Segment
                 key={segment.sid}
                 segment={segment}
-                timeToEdit={self.props.timeToEdit}
+                timeToEdit={self.state.timeToEdit}
                 fid={self.props.fid}
                 isReviewImproved={isReviewImproved}
+                enableTagProjection={self.props.enableTagProjection}
+                decodeTextFn={self.props.decodeTextFn}
+                tagModesEnabled={self.props.tagModesEnabled}
             />;
             items.push(item);
         });

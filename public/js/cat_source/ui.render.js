@@ -82,8 +82,7 @@ $.extend(UI, {
 
 		this.taglockEnabled = config.taglockEnabled;
 		this.debug = false;
-        this.findCommonPartInSegmentIds();
-		UI.detectStartSegment(); 
+		UI.detectStartSegment();
 		options.openCurrentSegmentAfter = ((!seg) && (!this.firstLoad)) ? true : false;
 		
 		var getSegmentsAjax = UI.getSegments(options);

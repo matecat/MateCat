@@ -1,16 +1,14 @@
 (function($, undefined) {
     $.extend(UI, {
-        // TODO: DEPRECATED
         /**
          * @deprecated
          */
-        getSegmentTemplate : function() {
+        /*getSegmentTemplate : function() {
             return MateCat.Templates['translate/segment'];
         },
-        // TODO: DEPRECATED
-        /**
+        /!**
          * @deprecated
-         */
+         *!/
         getSegmentTemplateData : function(
             segment, t, readonly, autoPropagated, autoPropagable,
             escapedSegment, splitAr, splitGroupParam, originalId
@@ -63,9 +61,9 @@
             // var decoded_translation;
             var decoded_source;
 
-            /**if Tag Projection enabled and there are not tags in the segment translation, remove it and add the class that identify
+            /!**if Tag Projection enabled and there are not tags in the segment translation, remove it and add the class that identify
              * tha Tag Projection is enabled
-             */
+             *!/
             if (UI.enableTagProjection && (UI.getSegmentStatus(segment) === 'draft' || UI.getSegmentStatus(segment) === 'new')
                 && !UI.checkXliffTagsInText(segment.translation) ) {
                 // decoded_translation = UI.removeAllTags(segment.translation);
@@ -116,17 +114,17 @@
             };
 
         },
-        // TODO: DEPRECATED
-        /**
+        //
+        /!**
          * @deprecated
-         */
+         *!/
         getSegmentMarkup: function (
             segment, t, readonly, autoPropagated, autoPropagable,
             escapedSegment, splitAr, splitGroup, originalId
         ) {
             var data = UI.getSegmentTemplateData.apply( this, arguments );
             return UI.getSegmentTemplate()( data );
-        },
+        },*/
         getSegmentStatus: function (segment) {
             return (segment.status)? segment.status.toLowerCase() : 'new';
         },
@@ -342,6 +340,17 @@
                 });
             }
             return returnArray;
+        },
+        decodeText(segment, text) {
+            var decoded_translation;
+            if (UI.enableTagProjection && (UI.getSegmentStatus(segment) === 'draft' || UI.getSegmentStatus(segment) === 'new')
+                && !UI.checkXliffTagsInText(text) ) {
+                decoded_translation = UI.removeAllTags(text);
+            } else {
+                decoded_translation = text;
+            }
+            decoded_translation = UI.decodePlaceholdersToText(decoded_translation || '');
+            return decoded_translation;
         }
     }); 
 })(jQuery); 

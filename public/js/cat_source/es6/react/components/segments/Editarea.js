@@ -20,11 +20,9 @@ class Editarea extends React.Component {
     }
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
-        SegmentStore.addListener(SegmentConstants.REPLACE_CONTENT, this.replaceContent);
     }
     componentWillUnmount() {
         SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
-        SegmentStore.removeListener(SegmentConstants.REPLACE_CONTENT, this.replaceContent);
     }
     componentWillMount() {
         var editareaClasses = this.state.editareaClasses;
