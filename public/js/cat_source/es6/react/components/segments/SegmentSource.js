@@ -66,7 +66,7 @@ class SegmentSource extends React.Component {
         var escapedSegment = this.createEscapedSegment();
         return (
             <div className={"source item"}
-                 tabindex={0}
+                 tabIndex={0}
                  id={"segment-" + this.props.segment.sid +"-source"}
                  data-original={escapedSegment}
                  dangerouslySetInnerHTML={ this.allowHTML(decoded_text) }/>

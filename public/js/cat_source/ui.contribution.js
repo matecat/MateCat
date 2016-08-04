@@ -13,14 +13,14 @@ $.extend(UI, {
 	chooseSuggestion: function(w) {
 		var ulDataItem = '.editor .tab.matches ul[data-item=';
 		this.copySuggestionInEditarea(this.currentSegment, $(ulDataItem + w + '] li.b .translation').html(),
-			$('.editor .editarea'), $(ulDataItem + w + '] ul.graysmall-details .percent').text(), false, false, w);
+			$('.editor .editarea'), $(ulDataItem + w + '] ul.graysmall-details .percent').text(), false, false, w, $(ulDataItem + w + '] li.graydesc .bold').text());
 		this.lockTags(this.editarea);
 		this.setChosenSuggestion(w);
 		this.editarea.focus();
 		SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
 		this.disableTPOnSegment();
 	},
-	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which) {
+	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which, createdBy) {
 		if (typeof (decode) == "undefined") {
 			decode = false;
 		}
@@ -54,9 +54,11 @@ $.extend(UI, {
             $(editarea).addClass('fromSuggestion');
 
 			this.saveInUndoStack('copysuggestion');
-			$('.percentuage', segment).text(match).removeClass('per-orange per-green per-blue per-yellow').addClass(percentageClass).addClass('visible');
-            $('.repetition', segment).hide();
-			if (which) {
+
+            SegmentActions.setHeaderPercentuage(UI.getSegmentId( segment ), UI.getSegmentFileId(segment), match ,percentageClass, createdBy);
+            // $('.percentuage', segment).text(match).removeClass('per-orange per-green per-blue per-yellow').addClass(percentageClass).addClass('visible');
+
+            if (which) {
 				this.currentSegment.addClass('modified');
                 this.currentSegment.data('modified', true);
                 this.currentSegment.trigger('modified');
@@ -190,9 +192,8 @@ $.extend(UI, {
           editarea.addClass("indent");
       }
       var translation = d.data.matches[0].translation;
-      var perc_t = $(".percentuage", segment).attr("title");
-
-      $(".percentuage", segment).attr("title", '' + perc_t + "Created by " + d.data.matches[0].created_by);
+      // var perc_t = $(".percentuage", segment).attr("title");
+      // $(".percentuage", segment).attr("title", '' + perc_t + "Created by " + d.data.matches[0].created_by);
       var match = d.data.matches[0].match;
 
       var segment_id = segment.attr('id');
@@ -293,8 +294,8 @@ $.extend(UI, {
                 }
 
                 var copySuggestion = function() {
-                    UI.copySuggestionInEditarea(segment, translation, editarea, match, false, true, 1);
-                }
+                    UI.copySuggestionInEditarea(segment, translation, editarea, match, false, true, 1, d.data.matches[0].created_by);
+                };
 
                 if ( Speech2Text.enabled() && Speech2Text.isContributionToBeAllowed( match ) ) {
 				    copySuggestion();

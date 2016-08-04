@@ -89,7 +89,6 @@ UI = {
 	activateSegment: function(segment, isNotSimilar) {
 		this.createFooter(this.currentSegment, isNotSimilar);
 		this.createButtons(segment);
-		this.createHeader();
 	},
     evalCurrentSegmentTranslationAndSourceTags : function( segment ) {
         if ( segment.length == 0 ) return ;
@@ -212,7 +211,8 @@ UI = {
 
         noPropagation = noPropagation || false;
 
-        $('.percentuage', segment.el).removeClass('visible');
+        // $('.percentuage', segment.el).removeClass('visible');
+        SegmentActions.hideSegmentHeader(options.segment_id, UI.getSegmentFileId(segment));
 
         this.setTranslation({
             id_segment: segment.id,
@@ -244,6 +244,29 @@ UI = {
 
         try {
             return $(segment).attr('id').replace('segment-', '');
+        } catch( e ){
+            return false;
+        }
+
+    },
+
+    getSegmentFileId: function (segment) {
+        if(typeof segment == 'undefined') return false;
+
+        /*
+         sometimes:
+         typeof $(segment).attr('id') == 'undefined'
+
+         The preeceding if doesn't works because segment is a list ==
+         '[<span class="undoCursorPlaceholder monad" contenteditable="false"></span>]'
+
+         so for now i put a try-catch block here
+
+         TODO FIX
+         */
+
+        try {
+            return $(segment).attr('data-fid');
         } catch( e ){
             return false;
         }
@@ -690,7 +713,6 @@ UI = {
 	},
 	deActivateSegment: function(byButton, segment) {
 		UI.removeButtons(byButton, segment);
-		UI.removeHeader(byButton, segment);
 		UI.removeFooter(byButton, segment);
 
         $(document).trigger('segment:deactivate', {
@@ -1269,10 +1291,6 @@ UI = {
 	removeFooter: function(byButton) {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
 		$('#' + segment.attr('id') + ' .footer').empty();
-	},
-	removeHeader: function(byButton) {
-		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
-		$('#' + segment.attr('id') + '-header').empty();
 	},
 	removeStatusMenu: function(statusMenu) {
 		statusMenu.empty().hide();
@@ -2864,21 +2882,14 @@ UI = {
 
                 // if status is not set to draft, the segment content is not displayed
                 UI.setStatus($(this), status); // now the status, too, is propagated
-                $( this ).data( 'autopropagated', true );
+
+                SegmentActions.setSegmentPropagation(UI.getSegmentId(this), UI.getSegmentFileId(this), true ,UI.getSegmentId(segment));
 
                 UI.doLexiQA(this,translation,UI.getSegmentId(this),true,null);
             });
 
             //unset actual segment as autoPropagated because now it is translated
             $( segment ).data( 'autopropagated', false );
-
-            //update current Header of Just Opened Segment
-            //NOTE: because this method is called after OpenSegment
-            // AS callback return for setTranslation ( whe are here now ),
-            // currentSegment pointer was already advanced by openSegment and header already created
-            //Needed because two consecutive segments can have the same hash
-            this.createHeader(true);
-
         }
     },
     switchFooter: function() {

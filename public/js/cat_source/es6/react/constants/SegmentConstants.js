@@ -11,5 +11,8 @@ module.exports = keyMirror({
     ADD_SEGMENT_CLASS: null,
     PROPAGATE_TRANSLATION: null,
     SET_SEGMENT_STATUS: null,
-    UPDATE_SEGMENTS: null
+    UPDATE_SEGMENTS: null,
+    SET_SEGMENT_HEADER: null,
+    HIDE_SEGMENT_HEADER: null,
+    SET_SEGMENT_PROPAGATION: null
 });
