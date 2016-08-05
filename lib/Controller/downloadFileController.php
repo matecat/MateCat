@@ -833,8 +833,10 @@ class downloadFileController extends downloadController {
      */
     public function reBuildZipContent( $zipFileName, $internalFiles ) {
 
+        $project = Projects_ProjectDao::findById( $this->jobInfo[ 'id_project' ] );
+
         $fs      = new FilesStorage();
-        $zipFile = $fs->getOriginalZipPath( $this->jobInfo[ 'create_date' ], $this->jobInfo[ 'id_project' ], $zipFileName );
+        $zipFile = $fs->getOriginalZipPath( $project->create_date, $this->jobInfo[ 'id_project' ], $zipFileName );
 
         $tmpFName = tempnam( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/', "ZIP" );
         copy( $zipFile, $tmpFName );

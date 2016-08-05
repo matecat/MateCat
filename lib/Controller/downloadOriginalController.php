@@ -55,7 +55,10 @@ class downloadOriginalController extends downloadController {
 
         //take the project ID and creation date, array index zero is good, all id are equals
         $this->id_project   = $files_job[0]['id_project'];
-        $this->project_date = $files_job[0]['create_date'];
+
+        $project = Projects_ProjectDao::findById( $this->id_project );
+
+        $this->project_date = $project->create_date;
 
         $output_content  = array();
 
