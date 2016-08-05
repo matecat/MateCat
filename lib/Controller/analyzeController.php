@@ -170,6 +170,8 @@ class analyzeController extends viewController {
         //first two letter of code lang
         $project_data = $this->model->getProjectData()[ 0 ];
 
+        $this->template->isCJK = false;
+
         if ( array_key_exists( explode( "-" , $project_data[ 'source' ] )[0], CatUtils::$cjk ) ) {
             $this->template->isCJK = true;
         }

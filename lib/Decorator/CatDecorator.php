@@ -49,6 +49,8 @@ class CatDecorator {
         $this->template->header_main_button_label   = $this->getHeaderMainButtonLabel();
         $this->template->header_main_button_id      = 'downloadProject';
 
+        $this->template->isCJK = false;
+
         if( $this->jobStatsStruct->isCompleted() && $this->jobStatsStruct->isAllApproved() ){
             $this->template->header_main_button_class = 'downloadtr-button approved';
         } elseif( $this->jobStatsStruct->isCompleted() ) {
