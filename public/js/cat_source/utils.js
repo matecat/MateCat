@@ -30,3 +30,10 @@ function b64_to_utf8(str) { // currently unused
 function escapeRegExp(str) {
     return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 }
+
+function millisecondsToTime(milli) {
+//		var milliseconds = milli % 1000;
+    var seconds = Math.round((milli / 1000) % 60);
+    var minutes = Math.floor((milli / (60 * 1000)) % 60);
+    return [minutes, seconds];
+}
