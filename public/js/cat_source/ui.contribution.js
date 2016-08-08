@@ -48,15 +48,11 @@ $.extend(UI, {
                 MateCat.db.segments.update( segmentObj );
             }
 
-
             SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(segment), UI.getSegmentFileId(segment), translation);
             SegmentActions.addClassToEditArea(UI.getSegmentId(segment), UI.getSegmentFileId(segment), 'fromSuggestion');
             SegmentActions.setHeaderPercentuage(UI.getSegmentId( segment ), UI.getSegmentFileId(segment), match ,percentageClass, createdBy);
 
             $(document).trigger('contribution:copied', { translation: translation, segment: segment });
-
-            this.saveInUndoStack('copysuggestion');
-
 
             if (which) {
 				this.currentSegment.addClass('modified');
