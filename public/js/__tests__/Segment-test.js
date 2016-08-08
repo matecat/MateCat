@@ -85,7 +85,5 @@ describe('Segment Component', () => {
 
         expect(component.find(SegmentFooter)).to.have.length(1);
         expect(component.find(SegmentFooter).prop('sid')).to.equal(segment.sid);
-
-
     });
 });

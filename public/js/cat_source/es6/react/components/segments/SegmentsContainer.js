@@ -77,6 +77,7 @@ class SegmentsContainer extends React.Component {
                 enableTagProjection={self.props.enableTagProjection}
                 decodeTextFn={self.props.decodeTextFn}
                 tagModesEnabled={self.props.tagModesEnabled}
+                speech2textEnabledFn={self.props.speech2textEnabledFn}
             />;
             items.push(item);
         });

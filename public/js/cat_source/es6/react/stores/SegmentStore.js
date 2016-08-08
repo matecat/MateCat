@@ -151,6 +151,14 @@ function setPropagation(sid, fid, propagation, from) {
         segment.autopropagated_from = "0";
     }
 }
+function replaceTranslation(sid, fid, translation) {
+    var segment = getSegmentById(sid, fid);
+    segment.translation = translation;
+}
+function replaceSource(sid, fid, source) {
+    var segment = getSegmentById(sid, fid);
+    segment.translation = source;
+}
 
 
 var SegmentStore = assign({}, EventEmitter.prototype, {
@@ -205,6 +213,17 @@ AppDispatcher.register(function(action) {
             break;
         case SegmentConstants.PROPAGATE_TRANSLATION:
             SegmentStore.emitChange(action.actionType, action.id);
+            break;
+        case SegmentConstants.REPLACE_TRANSLATION:
+            replaceTranslation(action.id, action.fid, action.translation);
+            SegmentStore.emitChange(action.actionType, action.id, action.translation);
+            break;
+        case SegmentConstants.REPLACE_SOURCE:
+            replaceSource(action.id, action.fid, action.source);
+            SegmentStore.emitChange(action.actionType, action.id, action.source);
+            break;
+        case SegmentConstants.ADD_EDITAREA_CLASS:
+            SegmentStore.emitChange(action.actionType, action.id, action.className);
             break;
         default:
     }

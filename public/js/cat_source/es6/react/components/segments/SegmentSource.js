@@ -3,26 +3,39 @@
 
  */
 var React = require('react');
+var SegmentStore = require('../../stores/SegmentStore');
+var SegmentConstants = require('../../constants/SegmentConstants');
+
+
 class SegmentSource extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            source : this.props.segment.segment
+            source : this.decodeTextSource(this.props.segment, this.props.segment.segment)
 
         };
         this.createEscapedSegment = this.createEscapedSegment.bind(this);
         this.decodeTextSource = this.decodeTextSource.bind(this);
+        this.replaceSource = this.replaceSource.bind(this);
     }
 
-    decodeTextSource() {
-        return this.props.decodeTextFn(this.props.segment, this.props.segment.segment);
+    replaceSource(sid, source) {
+        if (this.props.segment.sid == sid) {
+            this.setState({
+                source: this.decodeTextSource(this.props.segment, source)
+            });
+        }
+    }
+
+    decodeTextSource(segment, source) {
+        return this.props.decodeTextFn(segment, source);
     }
 
     createEscapedSegment() {
         var text = this.props.segment.segment;
         if (!$.parseHTML(text).length) {
-            text = UI.stripSpans(text);
+            text = text.replace(/<span(.*?)>/gi, '').replace(/<\/span>/gi, '');
         }
 
         var escapedSegment = htmlEncode(text.replace(/\"/g, "&quot;"));
@@ -34,28 +47,26 @@ class SegmentSource extends React.Component {
     }
 
     componentDidMount() {
-        console.log("Mount SegmentSource" + this.props.sid);
+        SegmentStore.addListener(SegmentConstants.REPLACE_SOURCE, this.replaceSource);
+
     }
 
     componentWillUnmount() {
-        console.log("Unmount SegmentSource" + this.props.sid);
+        SegmentStore.removeListener(SegmentConstants.REPLACE_SOURCE, this.replaceSource);
     }
-
-    componentWillMount() {}
 
     allowHTML(string) {
         return { __html: string };
     }
 
     render() {
-        var decoded_text = this.decodeTextSource();
         var escapedSegment = this.createEscapedSegment();
         return (
             <div className={"source item"}
                  tabIndex={0}
                  id={"segment-" + this.props.segment.sid +"-source"}
                  data-original={escapedSegment}
-                 dangerouslySetInnerHTML={ this.allowHTML(decoded_text) }/>
+                 dangerouslySetInnerHTML={ this.allowHTML(this.state.source) }/>
         )
     }
 }

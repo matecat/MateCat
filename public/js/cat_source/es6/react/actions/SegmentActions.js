@@ -93,6 +93,15 @@ var SegmentActions = {
         });
     },
 
+    replaceSourceText: function(sid, fid, text) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.REPLACE_SOURCE,
+            id: sid,
+            fid: fid,
+            source: text
+        });
+    },
+
     /******************* EditArea ************/
     highlightEditarea: function(sid) {
         AppDispatcher.dispatch({
@@ -101,17 +110,24 @@ var SegmentActions = {
         });
     },
 
-
-
-    
-
-    /*replaceContent: function(sid, text) {
+    replaceEditAreaTextContent: function(sid, fid, text) {
         AppDispatcher.dispatch({
-            actionType: SegmentConstants.REPLACE_CONTENT,
+            actionType: SegmentConstants.REPLACE_TRANSLATION,
             id: sid,
-            text: text
+            fid: fid,
+            translation: text
         });
-    }*/
+    },
+
+    addClassToEditArea: function(sid, fid, className) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.ADD_EDITAREA_CLASS,
+            id: sid,
+            fid: fid,
+            className: className
+        });
+    }
+
 
 
 

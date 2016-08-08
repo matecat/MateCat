@@ -724,12 +724,10 @@ LXQ.init  = function () {
             }
             spcsBeforeRegex.lastIndex = 0;
             text = text.replace(spcsBeforeRegex,spacesBefore+'<span id="selectionBoundary_');
-            //$(area).html(text);
             return text;
         }
         var toogleHighlighting = function () {
             var highlights = $('#outer').find('lxqwarning#lexiqahighlight');
-            //console.dir(highlights);
             $.each(highlights, function(i, element) {
                $(element).toggleClass('lxq-invisible');
             });
@@ -737,17 +735,11 @@ LXQ.init  = function () {
         }
         var toogleHighlightInSegment = function(segment) {
             var highlights = $(segment).find('lxqwarning#lexiqahighlight');
-            //console.dir(highlights);
             $.each(highlights, function(i, element) {
                $(element).toggleClass('lxq-invisible');
             });
             var show = shouldHighlighWarningsForSegment(segment,!shouldHighlighWarningsForSegment(segment));
-            // if (show) {
-            //     $('.lxq-error-seg',seg).attr('title','Click to hide warning highlighting').css("background-color","#efecca").removeClass('lxq-error-changed');
-            // }
-            // else {
-            //     $('.lxq-error-seg',seg).attr('title','Click to show warning highlighting').css("background-color","#046380").addClass('lxq-error-changed');
-            // }   
+
             postShowHighlight(UI.getSegmentId(segment),show);
         }
         var buildPowertipDataForSegment = function (segment) {
@@ -784,7 +776,6 @@ LXQ.init  = function () {
                var classlist = element.className.split(/\s+/);
                if ($(element).data('errors')!==undefined) { //lxq-invisible elements do not have a data part
                var errorlist = $(element).data('errors').trim().split(/\s+/);  
-               //console.dir(errorlist);             
                var root = $(tpls.lxqTooltipWrap);
                     var isSpelling = false, spellingRow = null, count = 0, word, ind;
                $.each(classlist,function(j,cl) {
@@ -922,10 +913,9 @@ LXQ.init  = function () {
             
         var replaceWord  = function(word, suggest,target) {
             if ($(target).closest('.editarea').attr('contenteditable')) {
-                if ($(target).text() === word) {
+
+                if ($(target).text() !== word) {
                     //there is no overlaping errors (like caps after punct...)
-                }
-                else {
                     //there is an overlap. lets try to find everything manually..
                     var txt = $(target).text(),$el;
                     var startInWord = word.indexOf(txt);
@@ -1003,7 +993,6 @@ LXQ.init  = function () {
                     }
             }; 
             $.each(UI.lexiqaData.lexiqaWarnings[segmentId],function(key,qadata) {
-                if (!qadata.ignored)
                 if (qadata.insource) {
                     highlights.source[qadata.category].push(qadata);
                 }

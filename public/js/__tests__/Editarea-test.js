@@ -32,9 +32,6 @@ describe('Editarea Component', () => {
         };
     });
 
-    afterEach( () => {
-        ReactDOM.unmountComponentAtNode(ReactDOM.findDOMNode(component).parentNode);
-    });
 
     it('Editarea is rendered right', () => {
 
@@ -44,6 +41,8 @@ describe('Editarea Component', () => {
         var editareaNode = ReactDOM.findDOMNode(component);
 
         expect(editareaNode.textContent).to.not.be.undefined;
+
+        ReactDOM.unmountComponentAtNode(ReactDOM.findDOMNode(component).parentNode);
     });
 
     it('Editarea is rendered right and without microphone', () => {
@@ -63,6 +62,7 @@ describe('Editarea Component', () => {
         expect(editareaNode.getAttribute('spellCheck')).to.be.true;
         assert.equal(editareaNode.getAttribute('data-sid'),"60310" , 'The data-sid parameter is correctly set');
 
+        ReactDOM.unmountComponentAtNode(ReactDOM.findDOMNode(component).parentNode);
     });
 
     it('Editarea is rendered with the microphone', () => {
@@ -84,6 +84,8 @@ describe('Editarea Component', () => {
         expect(editareaNode.getAttribute('contenteditable')).to.equal('true');
         expect(editareaNode.getAttribute('spellCheck')).to.equal('true');
         assert.equal(editareaNode.getAttribute('data-sid'),"60310" , 'The data-sid parameter is correctly set');
+
+        ReactDOM.unmountComponentAtNode(ReactDOM.findDOMNode(component).parentNode);
     });
 
     it('Editarea is not editable if the segment is readonly', () => {
@@ -97,6 +99,8 @@ describe('Editarea Component', () => {
         assert.include(editareaNode.className, 'area', 'The class "area" has not been set');
 
         expect(editareaNode.getAttribute('contenteditable')).to.equal('false');
+
+        ReactDOM.unmountComponentAtNode(ReactDOM.findDOMNode(component).parentNode);
     });
 
     it('Editarea highlightEditArea is called', () => {
@@ -115,15 +119,15 @@ describe('Editarea Component', () => {
         expect(EditArea.prototype.hightlightEditarea).to.have.property('callCount', 1);
         expect(spy.called).to.equal(true);
 
-        console.log(spy.called);
+        ReactDOM.unmountComponentAtNode(ReactDOM.findDOMNode(component).parentNode);
 
     });
 
     it('Editarea highlightEditArea is called and set the class', () => {
 
+
         var Costants = require('../cat_source/es6/react/constants/SegmentConstants');
         var SegmentStore = require('../cat_source/es6/react/stores/SegmentStore');
-
 
         component = TestUtils.renderIntoDocument(
             <EditArea segment={segment} translation={segment.translation}/>
@@ -140,5 +144,23 @@ describe('Editarea Component', () => {
         //     assert.notInclude(editareaNode.className, 'highlighted1');
         //     assert.notInclude(editareaNode.className, 'highlighted2');
         // }, 2000);
+
+        ReactDOM.unmountComponentAtNode(ReactDOM.findDOMNode(component).parentNode);
     });
+
+    it('Editarea: Translation change', () => {
+
+        component = mount(
+            <EditArea segment={segment} translation={segment.translation}/>
+        );
+
+        expect(component.text()).to.equal(segment.translation);
+
+        component.setProps({
+            translation: "New Translation"
+        });
+
+        expect(component.text()).to.equal("New Translation");
+    });
+
 });

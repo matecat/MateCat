@@ -3,10 +3,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import TestUtils from 'react-addons-test-utils';
 import { mount, shallow } from 'enzyme';
-
-
 import SegmentSource from '../cat_source/es6/react/components/segments/SegmentSource';
-
 var expect = require('expect.js');
 var assert = chai.assert;
 var sinon = require('sinon');
@@ -48,7 +45,9 @@ describe('SegmentSource Component', () => {
         var decodeTextMock = function (seg, text) {
             return text;
         };
-
+        var htmlEncode = function (text) {
+            return text;
+        };
         var component = shallow(
             <SegmentSource
                 segment={segment}
@@ -56,6 +55,29 @@ describe('SegmentSource Component', () => {
             />
         );
 
-        expect(component.find('.target')).to.have.length(1);
+        expect(component.find('.source')).to.have.length(1);
+    });
+
+    it('SegmentSource: replace source', () => {
+        var decodeTextMock = function (seg, text) {
+            return text;
+        };
+
+        var component = mount(
+            <SegmentSource
+                segment={segment}
+                decodeTextFn={decodeTextMock}
+            />
+        );
+
+        expect(component.find('.source')).to.have.length(1);
+        expect(component.find('.source').text()).to.equal(segment.segment);
+
+        component.setState({
+            source: "New source"
+        });
+
+        expect(component.find('.source').text()).to.equal("New source");
+
     });
 });

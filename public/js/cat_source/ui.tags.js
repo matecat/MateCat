@@ -140,6 +140,7 @@ $.extend(UI, {
 
     /**
      * This function replaces tags with monads
+     * in the source and target
      */
 	lockTags: function(el) {
         var self = this;
@@ -169,9 +170,14 @@ $.extend(UI, {
             saveSelection();
 
             var html = $(this).html() ;
-
             var tx = UI.transformTextForLockTags( html ) ;
-            $(this).html(tx);
+            if ($(this).hasClass("source")) {
+                SegmentActions.replaceSourceText(UI.getSegmentId(segment), UI.getSegmentFileId(segment), tx);
+            } else {
+                SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(segment), UI.getSegmentFileId(segment), tx);
+            }
+
+            // $(this).html(tx);
 
             var prevNumTags = $('span.locked', this).length;
 
@@ -219,8 +225,9 @@ $.extend(UI, {
     unlockTags: function() {
 		if (!this.taglockEnabled)
 			return false;
-        this.editarea.html(this.removeLockTagsFromString(this.editarea.html()));
-	},
+        var text = this.removeLockTagsFromString(this.editarea.html());
+        SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(this.editarea), UI.getSegmentFileId(this.editarea), text);
+    },
 
     toggleTagsMode: function (elem) {
         if (elem) {
@@ -230,96 +237,9 @@ $.extend(UI, {
     },
 
     removeLockTagsFromString: function (str) {
-        return str.replace(/<span contenteditable=\"false\" class=\"locked\"\>(.*?)<\/span\>/gi, "$1");
+        return str.replace(/<span contenteditable=\"false\" class=\"locked[^>]*\>(.*?)<\/span\>/gi, "$1");
     },
 
-    // TAG CLEANING
-    cleanDroppedTag: function ( area, beforeDropHTML ) {
-
-        this.droppingInEditarea = false;
-
-        //detect selected text
-        var html = "";
-        if ( typeof window.getSelection != "undefined" ) {
-            var sel = window.getSelection();
-            if ( sel.rangeCount ) {
-                var container = document.createElement( "div" );
-                for ( var i = 0, len = sel.rangeCount; i < len; ++i ) {
-                    container.appendChild( sel.getRangeAt( i ).cloneContents() );
-                }
-                html = container.innerHTML;
-            }
-        } else if ( typeof document.selection != "undefined" ) {
-            if ( document.selection.type == "Text" ) {
-                html = document.selection.createRange().htmlText;
-            }
-        }
-        draggedText = html;
-
-
-        draggedText = draggedText.replace( /^(\&nbsp;)(.*?)(\&nbsp;)$/gi, "$2" );
-        dr2 = draggedText.replace( /(<br>)$/, '' );
-
-        area.html( area.html().replace( draggedText, dr2 ) );
-        saveSelection();
-
-        if ( $( 'span .rangySelectionBoundary', area ).length > 1 ) {
-            $( '.rangySelectionBoundary', area ).last().remove();
-        }
-
-        if ( $( 'span .rangySelectionBoundary', area ).length ) {
-            spel = $( 'span', area ).has( '.rangySelectionBoundary' );
-            rsb = $( 'span .rangySelectionBoundary', area ).detach();
-            spel.after( rsb );
-        }
-
-        phcode = $( '.rangySelectionBoundary' )[0].outerHTML;
-        $( '.rangySelectionBoundary' ).text( this.cursorPlaceholder );
-
-
-        //map with special simbols
-        var mapSpecialSimbols = {
-            "<span class=\"tab-marker monad marker _09\">⇥</span>": "##PlaceHolderTABS##"
-        };
-
-        var clonedEl = area.clone();
-        //replace special simbol with placeholder
-        var replacementSpecialSimbol = clonedEl.html();
-        for ( key in mapSpecialSimbols ) {
-            if ( clonedEl.html().indexOf( key ) > -1 ) {
-                var reg = new RegExp( key, "g" );
-                replacementSpecialSimbol = replacementSpecialSimbol.replace( reg, mapSpecialSimbols[key] );
-            }
-        }
-
-        // encode br before textification
-        $( 'br', clonedEl ).each( function () {
-            $( this ).replaceWith( '[**[br class="' + this.className + '"]**]' );
-        } );
-
-        //new target text with placeholder
-        var drag = document.createElement( "drag" );
-        var newText = $( drag ).html( replacementSpecialSimbol ).text().replace( /(<span.*?>)\&nbsp;/, '$1' );
-
-        if ( typeof phcode == 'undefined' ) phcode = '';
-
-        clonedEl.text( newText );
-
-        //replace placeholder with special simbol
-        var areaHTML = clonedEl.html();
-        for ( key in mapSpecialSimbols ) {
-            if ( areaHTML.indexOf( mapSpecialSimbols[key] ) > -1 ) {
-                var reg = new RegExp( mapSpecialSimbols[key], "g" );
-                areaHTML = areaHTML.replace( reg, key );
-            }
-        }
-
-        clonedEl.html( areaHTML );
-        clonedEl.html( clonedEl.html().replace( this.cursorPlaceholder, phcode ) );
-        restoreSelection();
-        area.html( clonedEl.html().replace( this.cursorPlaceholder, '' ).replace( /\[\*\*\[(.*?)\]\*\*\]/gi, "<$1>" ) );
-
-    },
     setTagMode: function () {
         if(this.custom.extended_tagmode) {
             this.setExtendedTagMode();
@@ -415,13 +335,13 @@ $.extend(UI, {
         tempRange = range;
         UI.editarea.find('.test-invisible').remove();
         pasteHtmlAtCaret('<span class="test-invisible"></span>');
-        var coso = $.parseHTML(UI.editarea.html());
-        $.each(coso, function (index) {
+        var htmlEditarea = $.parseHTML(UI.editarea.html());
+        $.each(htmlEditarea, function (index) {
             if($(this).hasClass('test-invisible')) {
                 UI.numCharsUntilTagRight = 0;
                 UI.numCharsUntilTagLeft = 0;
-                nearTagOnRight = UI.nearTagOnRight(index+1, coso);
-                nearTagOnLeft = UI.nearTagOnLeft(index-1, coso);
+                nearTagOnRight = UI.nearTagOnRight(index+1, htmlEditarea);
+                nearTagOnLeft = UI.nearTagOnLeft(index-1, htmlEditarea);
 
                 if((typeof nearTagOnRight != 'undefined')&&(nearTagOnRight)) {//console.log('1');
                     UI.removeHighlightCorrespondingTags();

@@ -44,7 +44,6 @@ $.extend(UI, {
 		this.beforeDropEditareaHTML = '';
 		this.beforeDropSearchSourceHTML = '';
 		this.currentConcordanceField = null;
-		this.droppingInEditarea = false;
 		this.draggingInsideEditarea = false;
 		this.undoStack = [];
 		this.undoStackPosition = 0;
