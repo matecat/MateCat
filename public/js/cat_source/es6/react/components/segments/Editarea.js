@@ -11,18 +11,18 @@ class Editarea extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            editareaClasses : ['targetarea', 'invisible'],
-            translation : this.props.translation
-
+            editareaClasses : ['targetarea', 'invisible']
         };
         this.hightlightEditarea = this.hightlightEditarea.bind(this);
-        this.replaceContent = this.replaceContent.bind(this);
+        this.addClass = this.addClass.bind(this);
     }
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
+        SegmentStore.addListener(SegmentConstants.ADD_EDITAREA_CLASS, this.addClass);
     }
     componentWillUnmount() {
         SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
+        SegmentStore.removeListener(SegmentConstants.ADD_EDITAREA_CLASS, this.addClass);
     }
     componentWillMount() {
         var editareaClasses = this.state.editareaClasses;
@@ -68,9 +68,15 @@ class Editarea extends React.Component {
             }, 2000);
         }
     }
-    replaceContent(sid, text) {
+
+    addClass(sid, className) {
         if (this.props.segment.sid == sid) {
-            console.log("Replace Content");
+            var editareaClasses = this.state.editareaClasses;
+            editareaClasses.push(className);
+            this.setState({
+                editareaClasses: editareaClasses
+            });
+
         }
     }
     render() {
@@ -84,7 +90,7 @@ class Editarea extends React.Component {
                      contentEditable={!readonly}
                      spellCheck="true"
                      data-sid={this.props.segment.sid}
-                     dangerouslySetInnerHTML={ this.allowHTML(this.state.translation) }
+                     dangerouslySetInnerHTML={ this.allowHTML(this.props.translation) }
                 />
 
             );

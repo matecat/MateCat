@@ -60,18 +60,18 @@ $.extend(UI, {
 			UI.copySource();
 		}).on('keydown.shortcuts', null, UI.shortcuts.undoInSegment.keystrokes.standard, function(e) {
 			e.preventDefault();
-			UI.undoInSegment(segment);
+			UI.undoInSegment(UI.currentSegment);
 			UI.closeTagAutocompletePanel();
 		}).on('keydown.shortcuts', null, UI.shortcuts.undoInSegment.keystrokes.mac, function(e) {
 			e.preventDefault();
-			UI.undoInSegment(segment);
+			UI.undoInSegment(UI.currentSegment);
 			UI.closeTagAutocompletePanel();
 		}).on('keydown.shortcuts', null, UI.shortcuts.redoInSegment.keystrokes.standard, function(e) {
 			e.preventDefault();
-			UI.redoInSegment(segment);
+			UI.redoInSegment(UI.currentSegment);
 		}).on('keydown.shortcuts', null, UI.shortcuts.redoInSegment.keystrokes.mac, function(e) {
 			e.preventDefault();
-			UI.redoInSegment(segment);
+			UI.redoInSegment(UI.currentSegment);
 		}).on('keydown.shortcuts', null, UI.shortcuts.openSearch.keystrokes.standard, function(e) {
             if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
 		}).on('keydown.shortcuts', null, UI.shortcuts.openSearch.keystrokes.mac, function(e) {
@@ -929,10 +929,6 @@ $.extend(UI, {
 			UI.currentSegment.data('modified', true);
 			UI.currentSegment.trigger('modified');
 
-			if (UI.droppingInEditarea) {
-				UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
-			}
-
 			if ( UI.hasSourceOrTargetTags( e.target ) ) {
 				UI.currentSegment.addClass( 'hasTagsToggle' );
 			} else {
@@ -974,22 +970,6 @@ $.extend(UI, {
 		}).on('dragstart', '.editor .editarea .locked', function() {
             // To stop the drag in tags elements
             return false;
-		}).on('drop', '.editor .editarea', function(e) {
-			if (e.stopPropagation) {
-				e.stopPropagation(); // stops the browser from redirecting.
-			}
-			UI.beforeDropEditareaHTML = UI.editarea.html();
-			UI.droppingInEditarea = true;
-			setTimeout(function() {
-                UI.lockTags(UI.editarea);
-                UI.saveInUndoStack('drop');
-            }, 100);
-		}).on('drop paste', '.editor .cc-search .input, .editor .gl-search .input', function() {
-			UI.beforeDropSearchSourceHTML = UI.editarea.html();
-			UI.currentConcordanceField = $(this);
-			setTimeout(function() {
-				UI.cleanDroppedTag(UI.currentConcordanceField, UI.beforeDropSearchSourceHTML);
-			}, 100);
 		}).on('click', '.editor .editarea, .editor .source', function() {
 			$('.selected', $(this)).removeClass('selected');
 			UI.currentSelectedText = false;
@@ -1082,7 +1062,7 @@ $.extend(UI, {
 				e.preventDefault();
 				var txt = $(this).text();
 				if (txt.length > 2) {
-					segment = $(this).parents('section').first();
+					var segment = $(this).parents('section').first();
 					UI.getGlossary(segment, false);
 				}
 			}

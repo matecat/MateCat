@@ -239,6 +239,7 @@ UI = {
          */
 
         try {
+            segment = segment.closest("section");
             return $(segment).attr('id').replace('segment-', '');
         } catch( e ){
             return false;
@@ -262,6 +263,7 @@ UI = {
          */
 
         try {
+            segment = segment.closest("section");
             return $(segment).attr('data-fid');
         } catch( e ){
             return false;
@@ -347,10 +349,7 @@ UI = {
         // I hope it still works.
 
         this.saveInUndoStack('copysource');
-        $(".editarea", this.currentSegment).html(source_val).keyup().focus();
-
-        this.saveInUndoStack('copysource');
-
+        SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(this.currentSegment), UI.getSegmentFileId(this.currentSegment), source_val);
         SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
 
         this.currentSegmentQA();        
@@ -1397,7 +1396,8 @@ UI = {
                 fid : fid,
                 enableTagProjection: UI.enableTagProjection,
                 decodeTextFn: UI.decodeText,
-                tagModesEnabled: UI.tagModesEnabled
+                tagModesEnabled: UI.tagModesEnabled,
+                speech2textEnabledFn: Speech2Text.enabled
             }), mountPoint);
             SegmentActions.renderSegments(segments, fid);
         }
@@ -1673,8 +1673,10 @@ UI = {
 			if (this.body.hasClass('searchActive'))
 				this.addWarningToSearchDisplay();
 			this.saveInUndoStack('copyalternative');
-			$(UI.editarea).html(translation).addClass('fromAlternative');
-			this.saveInUndoStack('copyalternative');
+
+            SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(UI.currentSegment), UI.getSegmentFileId(UI.currentSegment), translation);
+
+            this.saveInUndoStack('copyalternative');
 		}
 	},
 	setDownloadStatus: function(stats) {
@@ -2251,7 +2253,7 @@ UI = {
             'currentSegmentQA is deprecated, use segmentQA and pass a segment as argument',
             getStackTrace().split("\n")[2]
         );
-        
+
         var that = this;
         UI.segmentQA.apply( this, UI.currentSegment );
     },
@@ -3024,7 +3026,7 @@ UI = {
 	},
 	saveInUndoStack: function(fromWhich) {
 //		noRestore = (typeof noRestore == 'undefined')? 0 : 1;        
-		currentItem = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition];
+		var currentItem = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition];
 
 		if (typeof currentItem != 'undefined') {
 			if (currentItem.trim() == this.editarea.html().trim())
@@ -3430,9 +3432,6 @@ UI = {
         if (typeof operation == 'undefined') {
             operation = 'clicking';
         }
-
-        UI.saveInUndoStack('click');
-        this.onclickEditarea = new Date();
 
         UI.notYetOpened = false;
         UI.closeTagAutocompletePanel();

@@ -5,49 +5,66 @@
  */
 var React = require('react');
 var EditArea = require('./Editarea').default;
+var SegmentConstants = require('../../constants/SegmentConstants');
+var SegmentStore = require('../../stores/SegmentStore');
+
 
 class SegmentTarget extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            translation : this.decodeTranslation()
+            translation : this.decodeTranslation(this.props.segment, this.props.segment.translation)
         };
+        this.replaceTranslation = this.replaceTranslation.bind(this);
+    }
+
+    replaceTranslation(sid, translation) {
+        if (this.props.segment.sid == sid) {
+            this.setState({
+                translation: this.decodeTranslation(this.props.segment, translation)
+            });
+        }
     }
 
     componentDidMount() {
-        console.log("Mount SegmentTarget" + this.props.segment.sid);
+        SegmentStore.addListener(SegmentConstants.REPLACE_TRANSLATION, this.replaceTranslation);
+
     }
 
     componentWillUnmount() {
-        console.log("Unmount SegmentTarget" + this.props.segment.sid);
+        SegmentStore.removeListener(SegmentConstants.REPLACE_TRANSLATION, this.replaceTranslation);
     }
 
-    componentWillMount() {
+    componentWillMount() {}
 
+    decodeTranslation(segment, translation) {
+        return this.props.decodeTextFn(segment, translation);
     }
 
-    decodeTranslation() {
-        return this.props.decodeTextFn(this.props.segment, this.props.segment.translation);
-    }
     allowHTML(string) {
         return { __html: string };
     }
 
     render() {
         var textAreaContainer = "";
-
         if (this.props.isReviewImproved) {
+
             textAreaContainer = <div data-mount="segment_text_area_container">
                                     <div className="textarea-container">
                                         <div className="targetarea issuesHighlightArea errorTaggingArea" dangerouslySetInnerHTML={ this.allowHTML(this.state.translation) }/>
                                     </div>
                                 </div>
+
         } else {
+
             var s2tMicro = "";
             var tagModeButton = "";
-            var s2t_enabled = Speech2Text.enabled();
+
             var tagLockCustomizable = ( this.props.segment.segment.match( /\&lt;.*?\&gt;/gi ) ? $('#tpl-taglock-customize').html() : null );
+
+            //Speeche2Text
+            var s2t_enabled = this.props.speech2textEnabledFn();
             if (s2t_enabled) {
                 s2tMicro = <div className="micSpeech" title="Activate voice input" data-segment-id="{{originalId}}">
                     <div className="micBg"></div>
@@ -66,6 +83,7 @@ class SegmentTarget extends React.Component {
                 </div>;
             }
 
+            //Tag Mode Buttons
             if (this.props.tagModesEnabled && !this.props.enableTagProjection) {
                 tagModeButton =
                     <a href="#" className="tagModeToggle" alt="Display full/short tags" title="Display full/short tags">
@@ -75,6 +93,7 @@ class SegmentTarget extends React.Component {
                     </a>;
             }
 
+            //Text Area
             textAreaContainer = <div className="textarea-container">
 
                                     <span className="loader"/>
@@ -99,9 +118,7 @@ class SegmentTarget extends React.Component {
         }
         return (
             <div className="target item" id={"segment-" + this.props.segment.sid + "-target"}>
-                {/*<span className="hide toggle"/>*/}
 
-                {/*{{> translate/_text_area_container }}*/}
                 {textAreaContainer}
                 <p className="warnings"/>
 

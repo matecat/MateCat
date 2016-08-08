@@ -48,21 +48,21 @@ $.extend(UI, {
                 MateCat.db.segments.update( segmentObj );
             }
 
-			$(editarea).html( translation );
+
+            SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(segment), UI.getSegmentFileId(segment), translation);
+            SegmentActions.addClassToEditArea(UI.getSegmentId(segment), UI.getSegmentFileId(segment), 'fromSuggestion');
+            SegmentActions.setHeaderPercentuage(UI.getSegmentId( segment ), UI.getSegmentFileId(segment), match ,percentageClass, createdBy);
+
             $(document).trigger('contribution:copied', { translation: translation, segment: segment });
 
-            $(editarea).addClass('fromSuggestion');
+            this.saveInUndoStack('copysuggestion');
 
-			this.saveInUndoStack('copysuggestion');
-
-            SegmentActions.setHeaderPercentuage(UI.getSegmentId( segment ), UI.getSegmentFileId(segment), match ,percentageClass, createdBy);
-            // $('.percentuage', segment).text(match).removeClass('per-orange per-green per-blue per-yellow').addClass(percentageClass).addClass('visible');
 
             if (which) {
 				this.currentSegment.addClass('modified');
                 this.currentSegment.data('modified', true);
                 this.currentSegment.trigger('modified');
-            }
+            };
 		}
 
 		// a value of 0 for 'which' means the choice has been made by the

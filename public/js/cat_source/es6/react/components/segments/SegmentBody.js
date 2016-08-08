@@ -3,7 +3,6 @@
 
  */
 var React = require('react');
-var SegmentStore = require('../../stores/SegmentStore');
 var SegmentSource = require('./SegmentSource').default;
 var SegmentTarget = require('./SegmentTarget').default;
 
@@ -54,6 +53,7 @@ class SegmentBody extends React.Component {
                             enableTagProjection={this.props.enableTagProjection}
                             decodeTextFn={this.props.decodeTextFn}
                             tagModesEnabled={this.props.tagModesEnabled}
+                            speech2textEnabledFn={this.props.speech2textEnabledFn}
                         />
 
                     </div>

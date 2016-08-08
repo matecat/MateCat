@@ -321,7 +321,7 @@
             );
             var data = {
                 'tag_projection': false
-            };
+            };o
             $.ajax({
                 url: path,
                 type: 'POST',

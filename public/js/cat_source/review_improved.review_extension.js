@@ -154,7 +154,8 @@ if ( ReviewImproved.enabled() && config.isReview ) {
                     isReviewImproved: true,
                     enableTagProjection: UI.enableTagProjection,
                     decodeTextFn: UI.decodeText,
-                    tagModesEnabled: UI.tagModesEnabled
+                    tagModesEnabled: UI.tagModesEnabled,
+                    speech2textEnabledFn: Speech2Text.enabled
                 }), mountPoint);
                 SegmentActions.renderSegments(segments, fid);
             }

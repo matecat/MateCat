@@ -3,7 +3,6 @@
 
  */
 var React = require('react');
-var $ = require('jquery');
 var SegmentStore = require('../../stores/SegmentStore');
 var SegmentConstants = require('../../constants/SegmentConstants');
 var SegmentHeader = require('./SegmentHeader').default;
@@ -180,6 +179,7 @@ class Segment extends React.Component {
                         isReviewImproved={this.props.isReviewImproved}
                         decodeTextFn={this.props.decodeTextFn}
                         tagModesEnabled={this.props.tagModesEnabled}
+                        speech2textEnabledFn={this.props.speech2textEnabledFn}
                     />
                     <div className="timetoedit"
                          data-raw-time-to-edit={this.props.segment.time_to_edit}>

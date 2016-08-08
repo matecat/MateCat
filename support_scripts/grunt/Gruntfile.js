@@ -199,6 +199,7 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/qa_check_blacklist.js',
 
                     basePath + 'cat_source/functions.js', // TODO: why this depends on this position?
+                    basePath + 'cat_source/utils.js', // TODO: why this depends on this position?
 
                     basePath + 'cat_source/ui.customization.js',
                     basePath + 'cat_source/ui.review.js',
