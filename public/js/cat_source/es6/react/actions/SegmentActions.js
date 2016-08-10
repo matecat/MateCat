@@ -45,6 +45,12 @@ var SegmentActions = {
         });
     },
 
+    updateAllSegments: function () {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.UPDATE_ALL_SEGMENTS
+        });
+    },
+
     /********** Segment **********/
 
     addClassToSegment: function (sid, newClass) {

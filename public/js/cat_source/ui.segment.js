@@ -104,8 +104,11 @@
         copyTagProjectionInCurrentSegment: function (translation) {
             this.copySourcefromDataAttribute();
             if (!_.isUndefined(translation) && translation.length > 0) {
+
                 var decoded_translation = UI.decodePlaceholdersToText(translation, true);
-                $(this.editarea).html(decoded_translation);
+                SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(this.editarea), UI.getSegmentFileId(this.editarea), translation);
+
+                // $(this.editarea).html(decoded_translation);
             }
 
         },
@@ -197,7 +200,7 @@
             );
             var data = {
                 'tag_projection': false
-            };o
+            };
             $.ajax({
                 url: path,
                 type: 'POST',
@@ -218,15 +221,18 @@
             return returnArray;
         },
         decodeText(segment, text) {
-            var decoded_translation;
+            var decoded_text;
             if (UI.enableTagProjection && (UI.getSegmentStatus(segment) === 'draft' || UI.getSegmentStatus(segment) === 'new')
-                && !UI.checkXliffTagsInText(text) ) {
-                decoded_translation = UI.removeAllTags(text);
+                && !UI.checkXliffTagsInText(segment.translation) ) {
+                decoded_text = UI.removeAllTags(text);
             } else {
-                decoded_translation = text;
+                decoded_text = text;
             }
-            decoded_translation = UI.decodePlaceholdersToText(decoded_translation || '');
-            return decoded_translation;
+            decoded_text = UI.decodePlaceholdersToText(decoded_text || '');
+            if ( !(config.tagLockCustomizable && $('body').hasClass('tagmarkDisabled')) ) {
+                decoded_text = UI.transformTextForLockTags(decoded_text);
+            }
+            return decoded_text;
         },
         getPercentuageClass: function(match) {
             var percentageClass = "";

@@ -188,8 +188,7 @@ $.extend(UI, {
           editarea.addClass("indent");
       }
       var translation = d.data.matches[0].translation;
-      // var perc_t = $(".percentuage", segment).attr("title");
-      // $(".percentuage", segment).attr("title", '' + perc_t + "Created by " + d.data.matches[0].created_by);
+
       var match = d.data.matches[0].match;
 
       var segment_id = segment.attr('id');
@@ -234,10 +233,10 @@ $.extend(UI, {
 					UI.createFooter(segment);
 				}
 				// Attention Bug: We are mixing the view mode and the raw data mode.
-				// before doing a enanched view you will need to add a data-original tag
+				// before doing a enanched  view you will need to add a data-original tag
                 //
-                suggestionDecodedHtml = UI.decodePlaceholdersToText(this.segment, true, segment_id, 'contribution source');
-				translationDecodedHtml = UI.decodePlaceholdersToText( this.translation, true, segment_id, 'contribution translation' );
+                suggestionDecodedHtml = UI.decodePlaceholdersToText(this.segment);
+				translationDecodedHtml = UI.decodePlaceholdersToText( this.translation);
 
 		  		//If Tag Projection is enable I take out the tags from the contributions
 				// if (UI.currentSegmentTPEnabled) {
@@ -266,7 +265,6 @@ $.extend(UI, {
 
 
 			UI.setDeleteSuggestion(segment);
-			UI.lockTags();
             UI.setContributionSourceDiff(segment);
             //If Tag Projection is enable I take out the tags from the contributions
             if (!UI.enableTagProjection) {

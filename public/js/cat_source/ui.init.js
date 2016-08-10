@@ -43,7 +43,7 @@ $.extend(UI, {
             $('#filterSwitch').show( 100, function(){ APP.fitText( $('.breadcrumbs'), $('#pname'), 30) } );
         this.fixHeaderHeightChange();
         this.setHideMatches();
-		this.setTagLockCustomizeCookie(true);
+
 		this.viewConcordanceInContextMenu = true;
 		if (!this.viewConcordanceInContextMenu)
 			$('#searchConcordance').hide();

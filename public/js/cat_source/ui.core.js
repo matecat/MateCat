@@ -816,8 +816,6 @@ UI = {
 					where: where,
 					seg: segLimit
 				});
-			} else {
-				this.markTags();
 			}
 
 		}
@@ -923,7 +921,6 @@ UI = {
         
 		this.loadingMore = false;
 		this.setWaypoints();
-		this.markTags();
 		this.checkPendingOperations();
         this.retrieveStatistics();
         $(document).trigger('getSegments_success');
@@ -1160,7 +1157,7 @@ UI = {
                 enableTagProjection: UI.enableTagProjection,
                 decodeTextFn: UI.decodeText,
                 tagModesEnabled: UI.tagModesEnabled,
-                speech2textEnabledFn: Speech2Text.enabled
+                speech2textEnabledFn: Speech2Text.enabled,
             }), mountPoint);
             SegmentActions.renderSegments(segments, fid);
         }
@@ -2544,20 +2541,20 @@ UI = {
         if(typeof $.cookie(cookieName + '-' + config.id_job) != 'undefined') {
             if(first) {
                 if($.cookie(cookieName + '-' + config.id_job) == 'true') {
-                    UI.body.addClass('tagmarkDisabled');
+                    $('body').addClass('tagmarkDisabled');
                     setTimeout(function() {
                         $('.editor .tagLockCustomize').addClass('unlock');
                     }, 100);
                 } else {
-                    UI.body.removeClass('tagmarkDisabled')
+                    $('body').removeClass('tagmarkDisabled')
                 }
             } else {
-                cookieVal = (UI.body.hasClass('tagmarkDisabled'))? 'true' : 'false';
+                cookieVal = ($('body').hasClass('tagmarkDisabled'))? 'true' : 'false';
                 $.cookie(cookieName + '-' + config.id_job, cookieVal,  { expires: 30 });
             }
 
         } else {
-            $.cookie(cookieName + '-' + config.id_job, this.body.hasClass('tagmarkDisabled'), { expires: 30 });
+            $.cookie(cookieName + '-' + config.id_job, $('body').hasClass('tagmarkDisabled'), { expires: 30 });
         }
 
     },
@@ -2993,8 +2990,8 @@ UI = {
         UI.lexiqaData.enableHighlighting = true;
         UI.lexiqaData.lexiqaFetching = false;
         UI.lexiqaData.segments = [];
-        UI.lexiqaData.segmentsInfo = {}; 
-        
+        UI.lexiqaData.segmentsInfo = {};
+        UI.setTagLockCustomizeCookie(true);
         APP.init();
         // If some icon is added on the top header menu, the file name is resized
         APP.addDomObserver($('.header-menu')[0], function() {

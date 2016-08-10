@@ -104,18 +104,13 @@ class Segment extends React.Component {
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_PROPAGATION, this.setAsAutopropagated);
     }
 
+
     componentWillUnmount() {
         console.log("Unmount Segment" + this.props.segment.sid);
         SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.removeListener(SegmentConstants.ADD_SEGMENT_CLASS, this.addClass);
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_PROPAGATION, this.setAsAutopropagated);
     }
-
-    /*componentWillReceiveProps(nextProps) {
-        if (nextProps.splitGroup !== this.props.splitGroup) {
-            this.setState({ splitGroup: nextProps.splitGroup });
-        }
-    }*/
 
     allowHTML(string) {
         return { __html: string };
@@ -149,18 +144,18 @@ class Segment extends React.Component {
         }
 
         return (
-            <section id={"segment-" + this.props.segment.sid}
-                     className={segment_classes.join(' ')}
-                     data-hash={this.props.segment.segment_hash}
-                     data-autopropagated={this.state.autopropagated}
-                     data-propagable={autoPropagable}
-                     data-version={this.props.segment.version}
-                     data-split-group={split_group}
-                     data-split-original-id={originalId}
-                     data-tagmode="crunched"
-                     data-tagprojection={this.dataAttrTagged}
-                     data-fid={this.props.fid}>
-
+            <section
+                id={"segment-" + this.props.segment.sid}
+                className={segment_classes.join(' ')}
+                data-hash={this.props.segment.segment_hash}
+                data-autopropagated={this.state.autopropagated}
+                data-propagable={autoPropagable}
+                data-version={this.props.segment.version}
+                data-split-group={split_group}
+                data-split-original-id={originalId}
+                data-tagmode="crunched"
+                data-tagprojection={this.dataAttrTagged}
+                data-fid={this.props.fid}>
                 <div className="sid" title={this.props.segment.sid}>
                     <div className="txt">{this.props.segment.sid}</div>
                     <div className="actions">
@@ -180,6 +175,7 @@ class Segment extends React.Component {
                         decodeTextFn={this.props.decodeTextFn}
                         tagModesEnabled={this.props.tagModesEnabled}
                         speech2textEnabledFn={this.props.speech2textEnabledFn}
+                        enableTagProjection={this.props.enableTagProjection}
                     />
                     <div className="timetoedit"
                          data-raw-time-to-edit={this.props.segment.time_to_edit}>
