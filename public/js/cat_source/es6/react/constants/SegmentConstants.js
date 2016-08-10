@@ -17,5 +17,6 @@ module.exports = keyMirror({
     SET_SEGMENT_PROPAGATION: null,
     REPLACE_TRANSLATION: null,
     REPLACE_SOURCE: null,
-    ADD_EDITAREA_CLASS: null
+    ADD_EDITAREA_CLASS: null,
+    UPDATE_ALL_SEGMENTS:null
 });

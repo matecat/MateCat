@@ -14,29 +14,53 @@ class SegmentTarget extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            translation : this.decodeTranslation(this.props.segment, this.props.segment.translation)
+            translation : this.props.segment.translation
         };
         this.replaceTranslation = this.replaceTranslation.bind(this);
+        this.beforeRenderActions = this.beforeRenderActions.bind(this);
+        this.afterRenderActions = this.afterRenderActions.bind(this);
     }
 
     replaceTranslation(sid, translation) {
         if (this.props.segment.sid == sid) {
             this.setState({
-                translation: this.decodeTranslation(this.props.segment, translation)
+                translation: translation
             });
+        }
+    }
+    beforeRenderActions() {
+        if (!this.props.isReviewImproved) {
+            var area = $("#segment-" + this.props.segment.sid + " .targetarea");
+            this.props.beforeRenderOrUpdate(area);
+        }
+    }
+
+    afterRenderActions() {
+        if (!this.props.isReviewImproved) {
+            var area = $("#segment-" + this.props.segment.sid + " .targetarea");
+            this.props.afterRenderOrUpdate(area);
         }
     }
 
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.REPLACE_TRANSLATION, this.replaceTranslation);
+        this.afterRenderActions();
 
     }
-
     componentWillUnmount() {
         SegmentStore.removeListener(SegmentConstants.REPLACE_TRANSLATION, this.replaceTranslation);
     }
 
-    componentWillMount() {}
+    componentWillMount() {
+        this.beforeRenderActions();
+    }
+    componentWillUpdate() {
+        this.beforeRenderActions();
+    }
+
+    componentDidUpdate() {
+        this.afterRenderActions();
+    }
 
     decodeTranslation(segment, translation) {
         return this.props.decodeTextFn(segment, translation);
@@ -48,6 +72,7 @@ class SegmentTarget extends React.Component {
 
     render() {
         var textAreaContainer = "";
+
         if (this.props.isReviewImproved) {
 
             textAreaContainer = <div data-mount="segment_text_area_container">
@@ -57,7 +82,7 @@ class SegmentTarget extends React.Component {
                                 </div>
 
         } else {
-
+            var translation = this.decodeTranslation(this.props.segment, this.props.segment.translation);
             var s2tMicro = "";
             var tagModeButton = "";
 
@@ -84,9 +109,11 @@ class SegmentTarget extends React.Component {
             }
 
             //Tag Mode Buttons
-            if (this.props.tagModesEnabled && !this.props.enableTagProjection) {
+
+            if (this.props.tagModesEnabled && !this.props.enableTagProjection && !config.tagLockCustomizable) {
+                var buttonClass = ($('body').hasClass("tagmode-default-extended")) ? "active" : "";
                 tagModeButton =
-                    <a href="#" className="tagModeToggle" alt="Display full/short tags" title="Display full/short tags">
+                    <a href="#" className={"tagModeToggle " + buttonClass} alt="Display full/short tags" title="Display full/short tags">
                         <span className="icon-chevron-left"/>
                         <span className="icon-tag-expand"/>
                         <span className="icon-chevron-right"/>
@@ -100,12 +127,12 @@ class SegmentTarget extends React.Component {
 
                                     <div className="editarea-container" id={"editarea-container-"+ this.props.segment.sid}></div>
 
-                                    <EditArea segment={this.props.segment} translation={this.state.translation}/>
+                                    <EditArea segment={this.props.segment} translation={translation}/>
 
                                     {s2tMicro}
 
                                     <div className="toolbar">
-                                        {tagLockCustomizable}
+                                        <div dangerouslySetInnerHTML={ this.allowHTML(tagLockCustomizable)}></div>
                                         {tagModeButton}
                                         <a href="#" className="autofillTag" alt="Copy missing tags from source to target" title="Copy missing tags from source to target"/>
                                         <ul className="editToolbar">

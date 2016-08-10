@@ -2,9 +2,6 @@
 	Component: ui.tags
  */
 
-$('html').on('copySourceToTarget', 'section', function( el ) {
-    UI.lockTags(UI.editarea);
-});
 
 $.extend(UI, {
     noTagsInSegment: function(options) {
@@ -46,23 +43,16 @@ $.extend(UI, {
     disableTagMark: function() {
 		this.taglockEnabled = false;
 		this.body.addClass('tagmarkDisabled');
-		$('.source span.locked').each(function() {
-			$(this).replaceWith($(this).html());
-		});
-		$('.editarea span.locked').each(function() {
-			$(this).replaceWith($(this).html());
-		});
+        SegmentActions.updateAllSegments();
+
 	},
 	enableTagMark: function() {
 		this.taglockEnabled = true;
 		this.body.removeClass('tagmarkDisabled');
-		saveSelection();
-		this.markTags();
-		restoreSelection();
+        SegmentActions.updateAllSegments();
 	},
+    //TODO This method do the same of UI.transformTextForLockTags that receive the text not the segment
 	markSuggestionTags: function(segment) {
-		if (!this.taglockEnabled)
-			return false;
 		$('.footer .suggestion_source', segment).each(function() {
             $(this).html($(this).html().replace(/(&lt;[\/]*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
 			if (UI.isFirefox) {
@@ -83,20 +73,6 @@ $.extend(UI, {
         });
 
     },
-	markTags: function() {
-		if (!this.taglockEnabled) return false;
-
-		if(this.noTagsInSegment({
-            area: false,
-            starting: true
-        })) {
-            return false;
-        }
-
-		$('.source, .editarea').each(function() {
-			UI.lockTags(this);
-		});
-	},
 
 
     transformTextForLockTags : function( tx ) {
@@ -131,84 +107,136 @@ $.extend(UI, {
         return tx;
     },
 
-
-	markTagsInSearch: function(el) {
-		if (!this.taglockEnabled)
-			return false;
-		var elements = (typeof el == 'undefined') ? $('.editor .cc-search .input') : el;
-	},
-
     /**
      * This function replaces tags with monads
      * in the source and target
      */
 	lockTags: function(el) {
-        var self = this;
-		if (this.body.hasClass('tagmarkDisabled')) {
-			return false;
+        // if (this.body.hasClass('tagmarkDisabled')) {
+			// return false;
+        // }
+        //
+        // if (!this.taglockEnabled) {
+        //     return false;
+        // }
+        //
+        // var area = (typeof el == 'undefined') ? UI.editarea : el;
+        //
+        // if (this.noTagsInSegment({area: area, starting: false })) {
+        //     return false;
+        // }
+        //
+        // $(area).first().each(function() {
+        //     var segment = $(this).closest('section');
+			// if (LXQ.enabled()) {
+        //     	$.powerTip.destroy($('.tooltipa',segment));
+        //     	$.powerTip.destroy($('.tooltipas',segment));
+        //     }
+        //     saveSelection();
+        //
+        //
+        //     var html = $(this).html() ;
+        //     var tx = UI.transformTextForLockTags( html ) ;
+        //     if ($(this).hasClass("source")) {
+        //         SegmentActions.replaceSourceText(UI.getSegmentId(segment), UI.getSegmentFileId(segment), tx);
+        //     } else {
+        //         SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(segment), UI.getSegmentFileId(segment), tx);
+        //     }
+        //
+        //
+        //     // $(this).html(tx);
+        //
+        //     var prevNumTags = $('span.locked', this).length;
+        //
+        //     restoreSelection();
+        //     if (LXQ.enabled())
+        //         LXQ.reloadPowertip(segment);
+        //     if ($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
+        //
+        //
+        //
+        //     UI.evalCurrentSegmentTranslationAndSourceTags( segment );
+        //
+        //     if ( UI.hasSourceOrTargetTags( segment ) ) {
+        //         segment.addClass( 'hasTagsToggle' );
+        //     } else {
+        //         segment.removeClass( 'hasTagsToggle' );
+        //     }
+        //
+        //     if ( UI.hasMissingTargetTags( segment ) ) {
+        //         segment.addClass( 'hasTagsAutofill' );
+        //     } else {
+        //         segment.removeClass( 'hasTagsAutofill' );
+        //     }
+        //
+        //     $('span.locked', this).addClass('monad');
+        //
+        //     UI.detectTagType(this);
+        // });
+    },
+
+    checkLockTags: function () {
+        if (this.body.hasClass('tagmarkDisabled')) {
+            return false;
         }
 
         if (!this.taglockEnabled) {
             return false;
         }
 
-		var area = (typeof el == 'undefined') ? UI.editarea : el;
-
-        if (this.noTagsInSegment({
-            area: area,
-            starting: false
-        })) {
+        if (this.noTagsInSegment({area: area, starting: false })) {
             return false;
         }
+        return true;
+    },
 
-        $(area).first().each(function() {
+    beforeLockTags: function () {
+        if (this.checkLockTags()) {
+            var area = (typeof el == 'undefined') ? UI.editarea : el;
+
             var segment = $(this).closest('section');
-			if (LXQ.enabled()) {
-            	$.powerTip.destroy($('.tooltipa',segment));
-            	$.powerTip.destroy($('.tooltipas',segment));
+            if (LXQ.enabled()) {
+                $.powerTip.destroy($('.tooltipa', segment));
+                $.powerTip.destroy($('.tooltipas', segment));
             }
-            saveSelection();
+        }
+    },
 
-            var html = $(this).html() ;
-            var tx = UI.transformTextForLockTags( html ) ;
-            if ($(this).hasClass("source")) {
-                SegmentActions.replaceSourceText(UI.getSegmentId(segment), UI.getSegmentFileId(segment), tx);
-            } else {
-                SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(segment), UI.getSegmentFileId(segment), tx);
-            }
-
-            // $(this).html(tx);
-
+    afterLockTags: function () {
+        if (this.checkLockTags()) {
             var prevNumTags = $('span.locked', this).length;
 
-            restoreSelection();
             if (LXQ.enabled())
                 LXQ.reloadPowertip(segment);
             if ($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
 
 
+            UI.evalCurrentSegmentTranslationAndSourceTags(segment);
 
-            UI.evalCurrentSegmentTranslationAndSourceTags( segment );
-
-            if ( UI.hasSourceOrTargetTags( segment ) ) {
-                segment.addClass( 'hasTagsToggle' );
+            if (UI.hasSourceOrTargetTags(segment)) {
+                segment.addClass('hasTagsToggle');
             } else {
-                segment.removeClass( 'hasTagsToggle' );
+                segment.removeClass('hasTagsToggle');
             }
 
-            if ( UI.hasMissingTargetTags( segment ) ) {
-                segment.addClass( 'hasTagsAutofill' );
+            if (UI.hasMissingTargetTags(segment)) {
+                segment.addClass('hasTagsAutofill');
             } else {
-                segment.removeClass( 'hasTagsAutofill' );
+                segment.removeClass('hasTagsAutofill');
             }
 
             $('span.locked', this).addClass('monad');
 
             UI.detectTagType(this);
-        });
+        }
     },
 
+
+
     detectTagType: function (area) {
+        if (!this.taglockEnabled || config.tagLockCustomizable ) {
+            return false;
+        }
         $('span.locked', area).each(function () {
             if($(this).text().startsWith('</')) {
                 $(this).addClass('endTag')
@@ -233,11 +261,11 @@ $.extend(UI, {
         if (elem) {
             $(elem).toggleClass('active');
         }
-        UI.body.toggleClass('tagmode-default-extended');
-    },
-
-    removeLockTagsFromString: function (str) {
-        return str.replace(/<span contenteditable=\"false\" class=\"locked[^>]*\>(.*?)<\/span\>/gi, "$1");
+        if (UI.body.hasClass('tagmode-default-extended')) {
+            this.setCrunchedTagMode();
+        } else {
+            this.setExtendedTagMode();
+        }
     },
 
     setTagMode: function () {
@@ -258,6 +286,10 @@ $.extend(UI, {
         if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
         this.custom.extended_tagmode = false;
         this.saveCustomization();
+    },
+
+    removeLockTagsFromString: function (str) {
+        return str.replace(/<span contenteditable=\"false\" class=\"locked[^>]*\>(.*?)<\/span\>/gi, "$1");
     },
 
     enableTagMode: function () {

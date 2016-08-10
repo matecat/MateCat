@@ -153,11 +153,14 @@ function setPropagation(sid, fid, propagation, from) {
 }
 function replaceTranslation(sid, fid, translation) {
     var segment = getSegmentById(sid, fid);
-    segment.translation = translation;
+    return segment.translation = removeLockTagsFromString(translation);
 }
 function replaceSource(sid, fid, source) {
     var segment = getSegmentById(sid, fid);
-    segment.translation = source;
+    return segment.translation = removeLockTagsFromString(source);
+}
+function removeLockTagsFromString(str) {
+    return str.replace(/<span contenteditable=\"false\" class=\"locked[^>]*\>(.*?)<\/span\>/gi, "$1");
 }
 
 
@@ -198,6 +201,9 @@ AppDispatcher.register(function(action) {
             setStatus(action.id, action.fid, action.status);
             SegmentStore.emitChange(SegmentConstants.UPDATE_SEGMENTS, _segments[action.fid], action.fid);
             break;
+        case SegmentConstants.UPDATE_ALL_SEGMENTS:
+            SegmentStore.emitChange(SegmentConstants.UPDATE_ALL_SEGMENTS);
+            break;
         case SegmentConstants.SET_SEGMENT_HEADER:
             setSuggestionMatch(action.id, action.fid, action.perc);
             SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_PROPAGATION, action.id, false);
@@ -215,12 +221,12 @@ AppDispatcher.register(function(action) {
             SegmentStore.emitChange(action.actionType, action.id);
             break;
         case SegmentConstants.REPLACE_TRANSLATION:
-            replaceTranslation(action.id, action.fid, action.translation);
-            SegmentStore.emitChange(action.actionType, action.id, action.translation);
+            var trans = replaceTranslation(action.id, action.fid, action.translation);
+            SegmentStore.emitChange(action.actionType, action.id, trans);
             break;
         case SegmentConstants.REPLACE_SOURCE:
-            replaceSource(action.id, action.fid, action.source);
-            SegmentStore.emitChange(action.actionType, action.id, action.source);
+            var source = replaceSource(action.id, action.fid, action.source);
+            SegmentStore.emitChange(action.actionType, action.id, source);
             break;
         case SegmentConstants.ADD_EDITAREA_CLASS:
             SegmentStore.emitChange(action.actionType, action.id, action.className);

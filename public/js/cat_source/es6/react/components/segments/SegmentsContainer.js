@@ -17,6 +17,7 @@ class SegmentsContainer extends React.Component {
         };
         this.renderSegments = this.renderSegments.bind(this);
         this.updateSegments = this.updateSegments.bind(this);
+        this.updateAllSegments = this.updateAllSegments.bind(this);
         this.splitSegments = this.splitSegments.bind(this);
     }
 
@@ -36,6 +37,10 @@ class SegmentsContainer extends React.Component {
         }
     }
 
+    updateAllSegments() {
+        this.forceUpdate()
+    }
+
     renderSegments(segments, fid) {
         if (fid !== this.props.fid) return;
         var splitGroup =  [];
@@ -51,16 +56,21 @@ class SegmentsContainer extends React.Component {
         SegmentStore.addListener(SegmentConstants.RENDER_SEGMENTS, this.renderSegments);
         SegmentStore.addListener(SegmentConstants.SPLIT_SEGMENT, this.splitSegments);
         SegmentStore.addListener(SegmentConstants.UPDATE_SEGMENTS, this.updateSegments);
+        SegmentStore.addListener(SegmentConstants.UPDATE_ALL_SEGMENTS, this.updateAllSegments);
     }
 
     componentWillUnmount() {
         SegmentStore.removeListener(SegmentConstants.RENDER_SEGMENTS, this.renderSegments);
         SegmentStore.removeListener(SegmentConstants.SPLIT_SEGMENT, this.splitSegments);
         SegmentStore.removeListener(SegmentConstants.UPDATE_SEGMENTS, this.updateSegments);
+        SegmentStore.removeListener(SegmentConstants.UPDATE_ALL_SEGMENTS, this.updateAllSegments);
     }
 
-    componentWillMount() {
-
+    componentWillUpdate() {
+        saveSelection();
+    }
+    componentDidUpdate() {
+        restoreSelection();
     }
 
     render() {

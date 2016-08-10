@@ -946,9 +946,7 @@ $.extend(UI, {
                 } else {
                     UI.lockTags(UI.editarea);
                 }
-        }).on('input', '.editor .cc-search .input', function() {
-			UI.markTagsInSearch($(this));
-		}).on('click', '.editor .source .locked,.editor .editarea .locked', function(e) {
+        }).on('click', '.editor .source .locked,.editor .editarea .locked', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
             if($(this).hasClass('selected')) {
@@ -1119,13 +1117,7 @@ $.extend(UI, {
 				UI.setExtendedConcordances(true);
 			}
 			$(this).parents('.matches').toggleClass('extended');
-		}).on('click', '.tagMode .crunched', function(e) {
-            e.preventDefault();
-            UI.setCrunchedTagMode();
-        }).on('click', '.tagMode .extended', function(e) {
-            e.preventDefault();
-            UI.setExtendedTagMode();
-        });
+		});
 
 		$("#outer").on('click', '.tab.alternatives .graysmall .goto a', function(e) {
 			e.preventDefault();
