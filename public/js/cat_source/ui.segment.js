@@ -58,8 +58,6 @@
                 UI.startOfflineMode();
             }).complete(function () {
                 UI.setSegmentAsTagged();
-                UI.lockTags(UI.editarea);
-                UI.lockTags(UI.currentSegment.find('.source'));
                 UI.editarea.focus();
                 SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
                 UI.createButtons();
@@ -105,7 +103,6 @@
             this.copySourcefromDataAttribute();
             if (!_.isUndefined(translation) && translation.length > 0) {
 
-                var decoded_translation = UI.decodePlaceholdersToText(translation, true);
                 SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(this.editarea), UI.getSegmentFileId(this.editarea), translation);
 
                 // $(this.editarea).html(decoded_translation);
@@ -163,9 +160,8 @@
                     .replace(/\r\n/g, config.crlfPlaceholder )
                     .replace(/\t/g, config.tabPlaceholder )
                     .replace(String.fromCharCode( parseInt( 0xA0, 10 ) ), config.nbspPlaceholder );
-            var decoded_source = UI.decodePlaceholdersToText(source, true);
-            currentSegment.find('.source').html(decoded_source);
-            UI.lockTags(currentSegment.find(".source"))
+
+            SegmentActions.replaceSourceText(UI.getSegmentId(currentSegment), UI.getSegmentFileId(currentSegment), source);
         },
         /**
          * Set the tag projection to true and reload file

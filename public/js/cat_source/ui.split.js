@@ -206,20 +206,13 @@ if(config.splitSegmentEnabled) {
                 SegmentActions.splitSegments(oldSid, newSegments, splitGroup, this.currentFileId);
 
                 if(splitGroup.length) {
-                    $.each(splitGroup, function (index) {
-                        UI.lockTags($('#segment-' + this + ' .source'));
-                    });
                     this.gotoSegment(oldSid + '-1');
                 } else {
-                    UI.lockTags($('#segment-' + oldSid + ' .source'));
                     this.gotoSegment(oldSid);
                 }
                 UI.closeSegmentSplit();
             } else {
                 SegmentActions.splitSegments(oldSid, newSegments, splitGroup, this.currentFileId);
-                $.each(splitGroup, function (index) {
-                    UI.lockTags($('#segment-' + this + ' .source'));
-                });
                 this.gotoSegment(oldSid + '-1');
             }
 
@@ -267,7 +260,6 @@ if(config.splitSegmentEnabled) {
                 splitAreaMarkup = htmlDecode(splitAreaMarkup).replace(/&quot;/g, '\"');
             }
             splitArea.html(splitAreaMarkup);
-            this.lockTags(splitArea);
             splitArea.find('.rangySelectionBoundary').remove();
         },
         updateSplitNumber: function (area) {

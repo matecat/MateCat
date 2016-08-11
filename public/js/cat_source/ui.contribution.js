@@ -14,7 +14,6 @@ $.extend(UI, {
 		var ulDataItem = '.editor .tab.matches ul[data-item=';
 		this.copySuggestionInEditarea(this.currentSegment, $(ulDataItem + w + '] li.b .translation').html(),
 			$('.editor .editarea'), $(ulDataItem + w + '] ul.graysmall-details .percent').text(), false, false, w, $(ulDataItem + w + '] li.graydesc .bold').text());
-		this.lockTags(this.editarea);
 		this.setChosenSuggestion(w);
 		this.editarea.focus();
 		SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
@@ -161,7 +160,6 @@ $.extend(UI, {
   	processContributions: function(d, segment) {
 		if(!d) return true;
 		this.renderContributions(d, segment);
-		this.lockTags(this.editarea);
 		this.spellCheck();
 		this.saveInUndoStack();
 		this.blockButtons = false;

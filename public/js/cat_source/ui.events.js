@@ -237,7 +237,6 @@ $.extend(UI, {
 					   .append(brEnd);
 
 			//lock tags and run again getWarnings
-			UI.lockTags(UI.editarea);
 			UI.currentSegmentQA();
 
 		}).on('click', '.tagLockCustomize', function(e) {
@@ -324,7 +323,6 @@ $.extend(UI, {
 			$('.tag-autocomplete-endcursor').before(htmlEncode($(this).text()));
 			restoreSelection();
 			UI.closeTagAutocompletePanel();
-			UI.lockTags(UI.editarea);
 			UI.currentSegmentQA();
 		}).on('click', '.modal.survey .x-popup', function() {
 			UI.surveyDisplayed = true;
@@ -420,8 +418,7 @@ $.extend(UI, {
 
             $('.editor .rangySelectionBoundary').addClass('focusOut');
 
-            $(
-                '.editor .search-source .rangySelectionBoundary.focusOut,' +
+            $('.editor .search-source .rangySelectionBoundary.focusOut,' +
                 '.editor .search-target .rangySelectionBoundary.focusOut'
             ).remove();
 
@@ -686,15 +683,6 @@ $.extend(UI, {
 					UI.checkAutocompleteTags();
 				}
 			}, 50);
-            if (!UI.body.hasClass('searchActive')) {
-
-                if(UI.isCJK && ( (e.which == '60') || (e.which == '62') ) ) {
-                } else {
-                    setTimeout(function() {
-                        UI.lockTags(UI.editarea);
-                    }, 10);
-                }
-            }
 		}).on('keydown', '.editor .editarea', function(e) {
 
             if ((e.which == 8) && (!UI.body.hasClass('tagmode-default-extended'))) {
@@ -942,10 +930,6 @@ $.extend(UI, {
 			}
 
 			UI.registerQACheck();
-                if(UI.isKorean && ( (e.which == '60') || (e.which == '62') || (e.which == '32')) ) {
-                } else {
-                    UI.lockTags(UI.editarea);
-                }
         }).on('click', '.editor .source .locked,.editor .editarea .locked', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
@@ -1101,8 +1085,6 @@ $.extend(UI, {
 			if(UI.isFirefox) pasteHtmlAtCaret('<div id="placeHolder"></div>');
 			var ev = (UI.isFirefox) ? e : event;
 			handlepaste(this, ev);
-            UI.lockTags(UI.editarea);
-
 		}).on('click', 'a.close', function(e, param) {
 			e.preventDefault();
 			var save = (typeof param == 'undefined') ? 'noSave' : param;
