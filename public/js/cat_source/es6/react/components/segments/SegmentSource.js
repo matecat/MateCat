@@ -89,8 +89,6 @@ class SegmentSource extends React.Component {
     render() {
         var escapedSegment = this.createEscapedSegment();
         var source = this.decodeTextSource(this.props.segment, this.state.source);
-        console.log("Source for" + this.props.segment.sid);
-        console.log("Source" + source);
         return (
             <div className={"source item"}
                  tabIndex={0}

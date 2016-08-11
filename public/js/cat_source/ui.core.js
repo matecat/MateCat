@@ -1337,7 +1337,6 @@ UI = {
 
     chooseAlternative: function(w) {
         this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).html(), true, UI.currentSegmentId, 'choose alternative' ) );
-        this.lockTags(this.editarea);
         this.editarea.focus();
         SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
         this.disableTPOnSegment();
@@ -1511,7 +1510,6 @@ UI = {
         else {
             replaceSelectedHtml(newStr);
         }
-        UI.lockTags();
         this.saveInUndoStack('formatSelection');
 		saveSelection();
 		$('.editor .editarea .formatSelection-placeholder').after($('.editor .editarea .rangySelectionBoundary'));
@@ -2627,9 +2625,6 @@ UI = {
 		setCursorPosition(document.getElementsByClassName("undoCursorPlaceholder")[0]);
 		$('.undoCursorPlaceholder').remove();
 
-		if (!ind)
-			this.lockTags();
-
 		if (this.undoStackPosition < (this.undoStack.length - 1))
 			this.undoStackPosition++;
 		this.currentSegment.removeClass('waiting_for_check_result');
@@ -3066,7 +3061,6 @@ UI = {
         }
 
         if (UI.editarea != '') {
-            UI.lockTags(UI.editarea);
             UI.checkTagProximity();
         }
 
@@ -3118,7 +3112,6 @@ UI = {
         }
         if(!UI.offline) UI.blockButtons = true;
 
-        UI.unlockTags();
         UI.setStatusButtons(button);
 
         if (!skipChange) {
@@ -3132,8 +3125,6 @@ UI = {
             $(".editarea", UI.nextUntranslatedSegment).trigger("click", "translated")
         }
 
-        UI.lockTags($('#' + $(button).attr('data-segmentid') + ' .editarea'));
-        UI.lockTags(UI.editarea);
         UI.changeStatusStop = new Date();
         UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
     },

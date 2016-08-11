@@ -107,132 +107,6 @@ $.extend(UI, {
         return tx;
     },
 
-    /**
-     * This function replaces tags with monads
-     * in the source and target
-     */
-	lockTags: function(el) {
-        // if (this.body.hasClass('tagmarkDisabled')) {
-			// return false;
-        // }
-        //
-        // if (!this.taglockEnabled) {
-        //     return false;
-        // }
-        //
-        // var area = (typeof el == 'undefined') ? UI.editarea : el;
-        //
-        // if (this.noTagsInSegment({area: area, starting: false })) {
-        //     return false;
-        // }
-        //
-        // $(area).first().each(function() {
-        //     var segment = $(this).closest('section');
-			// if (LXQ.enabled()) {
-        //     	$.powerTip.destroy($('.tooltipa',segment));
-        //     	$.powerTip.destroy($('.tooltipas',segment));
-        //     }
-        //     saveSelection();
-        //
-        //
-        //     var html = $(this).html() ;
-        //     var tx = UI.transformTextForLockTags( html ) ;
-        //     if ($(this).hasClass("source")) {
-        //         SegmentActions.replaceSourceText(UI.getSegmentId(segment), UI.getSegmentFileId(segment), tx);
-        //     } else {
-        //         SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(segment), UI.getSegmentFileId(segment), tx);
-        //     }
-        //
-        //
-        //     // $(this).html(tx);
-        //
-        //     var prevNumTags = $('span.locked', this).length;
-        //
-        //     restoreSelection();
-        //     if (LXQ.enabled())
-        //         LXQ.reloadPowertip(segment);
-        //     if ($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
-        //
-        //
-        //
-        //     UI.evalCurrentSegmentTranslationAndSourceTags( segment );
-        //
-        //     if ( UI.hasSourceOrTargetTags( segment ) ) {
-        //         segment.addClass( 'hasTagsToggle' );
-        //     } else {
-        //         segment.removeClass( 'hasTagsToggle' );
-        //     }
-        //
-        //     if ( UI.hasMissingTargetTags( segment ) ) {
-        //         segment.addClass( 'hasTagsAutofill' );
-        //     } else {
-        //         segment.removeClass( 'hasTagsAutofill' );
-        //     }
-        //
-        //     $('span.locked', this).addClass('monad');
-        //
-        //     UI.detectTagType(this);
-        // });
-    },
-
-    checkLockTags: function () {
-        if (this.body.hasClass('tagmarkDisabled')) {
-            return false;
-        }
-
-        if (!this.taglockEnabled) {
-            return false;
-        }
-
-        if (this.noTagsInSegment({area: area, starting: false })) {
-            return false;
-        }
-        return true;
-    },
-
-    beforeLockTags: function () {
-        if (this.checkLockTags()) {
-            var area = (typeof el == 'undefined') ? UI.editarea : el;
-
-            var segment = $(this).closest('section');
-            if (LXQ.enabled()) {
-                $.powerTip.destroy($('.tooltipa', segment));
-                $.powerTip.destroy($('.tooltipas', segment));
-            }
-        }
-    },
-
-    afterLockTags: function () {
-        if (this.checkLockTags()) {
-            var prevNumTags = $('span.locked', this).length;
-
-            if (LXQ.enabled())
-                LXQ.reloadPowertip(segment);
-            if ($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
-
-
-            UI.evalCurrentSegmentTranslationAndSourceTags(segment);
-
-            if (UI.hasSourceOrTargetTags(segment)) {
-                segment.addClass('hasTagsToggle');
-            } else {
-                segment.removeClass('hasTagsToggle');
-            }
-
-            if (UI.hasMissingTargetTags(segment)) {
-                segment.addClass('hasTagsAutofill');
-            } else {
-                segment.removeClass('hasTagsAutofill');
-            }
-
-            $('span.locked', this).addClass('monad');
-
-            UI.detectTagType(this);
-        }
-    },
-
-
-
     detectTagType: function (area) {
         if (!this.taglockEnabled || config.tagLockCustomizable ) {
             return false;
@@ -248,13 +122,6 @@ $.extend(UI, {
                 }
             }
         })
-    },
-
-    unlockTags: function() {
-		if (!this.taglockEnabled)
-			return false;
-        var text = this.removeLockTagsFromString(this.editarea.html());
-        SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(this.editarea), UI.getSegmentFileId(this.editarea), text);
     },
 
     toggleTagsMode: function (elem) {
@@ -286,10 +153,6 @@ $.extend(UI, {
         if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
         this.custom.extended_tagmode = false;
         this.saveCustomization();
-    },
-
-    removeLockTagsFromString: function (str) {
-        return str.replace(/<span contenteditable=\"false\" class=\"locked[^>]*\>(.*?)<\/span\>/gi, "$1");
     },
 
     enableTagMode: function () {

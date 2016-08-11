@@ -124,8 +124,6 @@
 
             $(editarea).removeClass("indent");
 
-            this.lockTags();
-
             if (!this.readonly) {
                 this.getContribution(segment.el, 1);
                 this.getContribution(segment.el, 2);

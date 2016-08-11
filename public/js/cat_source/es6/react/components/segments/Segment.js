@@ -50,7 +50,8 @@ class Segment extends React.Component {
         else if ( splitGroup.length ) {
             classes.push('splitInner');
         }
-        if (this.props.enableTagProjection && (this.props.segment.status.toLowerCase() === 'draft' || this.props.segment.status.toLowerCase() === 'new') ){
+        if (this.props.enableTagProjection && (this.props.segment.status.toLowerCase() === 'draft' || this.props.segment.status.toLowerCase() === 'new')
+            && !UI.checkXliffTagsInText(this.props.segment.translation)){
             classes.push('enableTP');
             this.dataAttrTagged = "nottagged";
         } else {

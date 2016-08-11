@@ -453,12 +453,11 @@ if (true)
             } );
         },
         copyGlossaryItemInEditarea: function ( item ) {
-            translation = item.find( '.translation' ).text();
+            var translation = item.find( '.translation' ).text();
             $( '.editor .editarea .focusOut' ).before( translation + '<span class="tempCopyGlossaryPlaceholder"></span>' ).remove();
-            this.lockTags( this.editarea );
-            range = window.getSelection().getRangeAt( 0 );
+            var range = window.getSelection().getRangeAt( 0 );
             var tempCopyGlossPlaceholder = $( '.editor .editarea .tempCopyGlossaryPlaceholder' );
-            node = tempCopyGlossPlaceholder[0];
+            var node = tempCopyGlossPlaceholder[0];
             setCursorAfterNode( range, node );
             tempCopyGlossPlaceholder.remove();
             SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
