@@ -45,13 +45,15 @@ describe('SegmentSource Component', () => {
         var decodeTextMock = function (seg, text) {
             return text;
         };
-        var htmlEncode = function (text) {
-            return text;
+        var fnMock = function () {
+          return true;
         };
         var component = shallow(
             <SegmentSource
                 segment={segment}
                 decodeTextFn={decodeTextMock}
+                afterRenderOrUpdate={fnMock}
+                beforeRenderOrUpdate={fnMock}
             />
         );
 
@@ -62,11 +64,16 @@ describe('SegmentSource Component', () => {
         var decodeTextMock = function (seg, text) {
             return text;
         };
+        var fnMock = function () {
+            return true;
+        };
 
         var component = mount(
             <SegmentSource
                 segment={segment}
                 decodeTextFn={decodeTextMock}
+                afterRenderOrUpdate={fnMock}
+                beforeRenderOrUpdate={fnMock}
             />
         );
 

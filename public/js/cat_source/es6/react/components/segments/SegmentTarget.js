@@ -82,7 +82,7 @@ class SegmentTarget extends React.Component {
                                 </div>
 
         } else {
-            var translation = this.decodeTranslation(this.props.segment, this.props.segment.translation);
+            var translation = this.decodeTranslation(this.props.segment, this.state.translation);
             var s2tMicro = "";
             var tagModeButton = "";
 

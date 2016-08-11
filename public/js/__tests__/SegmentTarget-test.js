@@ -51,6 +51,9 @@ describe('SegmentTarget component', () => {
         var speech2textEnable = function() {
             return false;
         };
+        var fnMock = function () {
+            return true;
+        };
         var component = shallow(
             <SegmentTarget
                 segment={segment}
@@ -59,6 +62,8 @@ describe('SegmentTarget component', () => {
                 decodeTextFn={decodeTextMock}
                 tagModesEnabled={true}
                 speech2textEnabledFn={speech2textEnable}
+                afterRenderOrUpdate={fnMock}
+                beforeRenderOrUpdate={fnMock}
             />
         );
 
@@ -83,6 +88,9 @@ describe('SegmentTarget component', () => {
         var speech2textEnable = function() {
             return true;
         };
+        var fnMock = function () {
+            return true;
+        };
         var component = shallow(
             <SegmentTarget
                 segment={segment}
@@ -91,6 +99,8 @@ describe('SegmentTarget component', () => {
                 decodeTextFn={decodeTextMock}
                 tagModesEnabled={true}
                 speech2textEnabledFn={speech2textEnable}
+                afterRenderOrUpdate={fnMock}
+                beforeRenderOrUpdate={fnMock}
             />
         );
 
@@ -115,6 +125,9 @@ describe('SegmentTarget component', () => {
         var speech2textEnable = function() {
             return false;
         };
+        var fnMock = function () {
+            return true;
+        };
         var component = shallow(
             <SegmentTarget
                 segment={segment}
@@ -123,6 +136,9 @@ describe('SegmentTarget component', () => {
                 decodeTextFn={decodeTextMock}
                 tagModesEnabled={true}
                 speech2textEnabledFn={speech2textEnable}
+                afterRenderOrUpdate={fnMock}
+                beforeRenderOrUpdate={fnMock}
+
             />
         );
 
@@ -145,6 +161,9 @@ describe('SegmentTarget component', () => {
             return text;
         };
         var speech2textEnable = function() {
+            return false;
+        };
+        var fnMock = function () {
             return true;
         };
         var component = mount(
@@ -155,6 +174,8 @@ describe('SegmentTarget component', () => {
                 decodeTextFn={decodeTextMock}
                 tagModesEnabled={true}
                 speech2textEnabledFn={speech2textEnable}
+                afterRenderOrUpdate={fnMock}
+                beforeRenderOrUpdate={fnMock}
             />
         );
 
