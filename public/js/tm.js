@@ -226,7 +226,7 @@ $.extend(UI, {
             $(this).addClass('disabled');
         }).on('click', 'a.disabletm', function() {
             UI.disableTM(this);
-        }).on('change', '.mgmt-table-tm tr.mine .lookup input, .mgmt-table-tm tr.mine .update input', function() {
+        }).on('change', '.mgmt-table-tm tr.mine .activate input', function() {
 
             if(APP.isCattool) UI.saveTMdata(false);
             UI.checkTMGrantsModifications(this);
@@ -537,7 +537,7 @@ $.extend(UI, {
     checkTMGrantsModifications: function (el) {
         tr = $(el).parents('tr.mine');
         isActive = ($(tr).parents('table').attr('id') == 'activetm')? true : false;
-        if((!tr.find('.lookup input').is(':checked')) && (!tr.find('.update input').is(':checked'))) {
+        if(!tr.find('.activate input').is(':checked')) {
             if(isActive) {
                 if(config.isAnonymousUser) {
 
@@ -552,7 +552,6 @@ $.extend(UI, {
                         onCancel: 'cancelTMDisable',
                         callback: 'continueTMDisable',
                         okTxt: 'Continue',
-//                        context: ($(el).parents('td').hasClass('lookup')? 'lookup' : 'update'),
                         context: JSON.stringify(data),
                         msg: "If you confirm this action, your Private TM key will be lost. <br />If you want to avoid this, please, log in with your account now."
                     });
@@ -605,7 +604,7 @@ $.extend(UI, {
         $("#activetm tr.new").before(row);
         if(!$('#inactivetm tbody tr:not(.noresults)').length) $('#inactivetm tr.noresults').show();
         row.addClass('mine');
-
+        row.find('td.lookup input, td.update input').attr('checked', true);
         row.css('display', 'block');
 
         //update datatable struct
@@ -687,6 +686,7 @@ $.extend(UI, {
 
         var newTr = '<tr class="mine" data-tm="1" data-glos="1" data-key="' + keyParams.TMKey + '" data-owner="' + config.ownerIsMe + '">' +
             '    <td class="dragrow"><div class="status"></div></td>' +
+            '    <td class="activate"><input type="checkbox" checked="checked"/></td>' +
             '    <td class="privatekey">' + keyParams.TMKey + '</td>' +
             '    <td class="owner">You</td>' +
             '    <td class="description"><div class="edit-desc">' + keyParams.desc + '</div></td>' +

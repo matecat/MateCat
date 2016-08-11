@@ -53,6 +53,7 @@
                                 <thead>
                                 <tr>
                                     <th class="dragrow"></th>
+                                    <th class="activate">Use it</th>
                                     <th class="privatekey">Private Key</th>
                                     <th class="owner">Owner</th>
                                     <th class="description">Description</th>
@@ -67,6 +68,7 @@
                                 <tal:block tal:condition="php: page == 'cattool'" tal:repeat="key user_keys/job_keys">
                                     <tr tal:condition="php: key.edit || key.owner" tal:attributes="class php: key.owner ? ( jobOwnerIsMe ? 'mine' : 'ownergroup' ) : 'mine'" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-key="${key/key}" data-owner="${key/owner}">
                                         <td class="dragrow"><div class="status"></div></td>
+                                        <td class="activate"><input type="checkbox" checked="checked"/></td>
                                         <td class="privatekey">${key/key}</td>
                                         <td class="owner">${php: key.owner ? ( jobOwnerIsMe ? 'You' : '*****' ) : 'You'}</td>
                                         <td class="description"><div class="edit-desc">${php: key.owner ? ( jobOwnerIsMe || key.edit ? key.name : '**********' ) : key.name}</div></td>
@@ -86,7 +88,8 @@
                                 </tal:block>
 
                                 <tr class="new hide">
-                                <td class="dragrow"></td>
+                                    <td class="dragrow"></td>
+                                    <td class="activate"></td>
                                     <td class="privatekey">
                                         <div class="error">
                                             <span class="tm-error-key"></span>
@@ -126,6 +129,7 @@
                                 <tal:block tal:condition="php: page == 'cattool'" tal:repeat="key user_keys/job_keys">
                                     <tr tal:condition="php: !key.edit && !key.owner" class="anonymous" data-tm="${key/tm}" data-glos="${key/glos}" data-key="${key/key}" data-editable="${key/edit}" data-owner="${key/owner}">
                                         <td class="dragrow"><div class="status"></div></td>
+                                        <td class="activate"><input type="checkbox" disabled="disabled" checked="checked" /></td>
                                         <td class="privatekey">${key/key}</td>
                                         <td class="owner">*****</td>
                                         <td class="description">**********</td>
@@ -155,6 +159,7 @@
                                     <thead>
                                     <tr>
                                         <th class="dragrow"></th>
+                                        <th class="activate">Use it</th>
                                         <th class="privatekey">Private Key</th>
                                         <th class="owner">Owner</th>
                                         <th class="description">Description</th>
@@ -168,6 +173,7 @@
                                     <tal:block tal:condition="php: page == 'cattool'" tal:repeat="key user_keys/totals">
                                         <tr class="mine" data-tm="1" data-glos="1" data-key="${key/key}">
                                             <td class="dragrow"><div class="status"></div></td>
+                                            <td class="activate"><input type="checkbox" /></td>
                                             <td class="privatekey">${key/key}</td>
                                             <td class="owner">You</td>
                                             <td class="description"><div class="edit-desc">${key/name}</div></td>
@@ -190,6 +196,7 @@
                                             <td class="dragrow">
                                                 <div class="status"></div>
                                             </td>
+                                            <td class="activate"><input type="checkbox" /></td>
                                             <td class="privatekey">${key/key}</td>
                                             <td class="owner">You</td>
                                             <td class="description">
