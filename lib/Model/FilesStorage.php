@@ -544,7 +544,7 @@ class FilesStorage {
             //try fetching from files dir
             $originalPath = $this->getOriginalFromFileDir( $result[ 'id_file' ], $result[ 'sha1_original_file' ] );
 
-            if ( !$originalPath ) {
+            if ( !$originalPath || !file_exists( $originalPath ) ) {
                 //file is on the database; let's copy it to disk to make it compliant to file-on-disk structure
                 //this moves both original and xliff
                 $this->migrateFileDB2FS( $result );
