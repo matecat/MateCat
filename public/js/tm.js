@@ -122,7 +122,7 @@ $.extend(UI, {
         // script per fare apparire e scomparire la riga con l'upload della tmx
         $('body').on('click', 'tr.mine a.canceladdtmx, tr.ownergroup a.canceladdtmx, #inactivetm tr.new .action .addtmxfile', function() {
 
-            $(this).parents('tr').find('.action .addtmx').removeClass('disabled');
+            $(this).parents('tr').find('.action .addtmx, .action .addGlossary').removeClass('disabled');
             $(this).parents('td.uploadfile').remove();
 
         }).on('click', '#activetm tr.uploadpanel a.canceladdtmx, #inactivetm tr.uploadpanel a.canceladdtmx', function() {
@@ -130,34 +130,12 @@ $.extend(UI, {
             $('#activetm tr.new .action .addtmxfile, #inactivetm tr.new .action .addtmxfile').removeClass('disabled');
         }).on('mousedown', '.addtmx:not(.disabled)', function(e) {
             e.preventDefault();
-            $(this).parents('.action').find('.addtmx').each( function(el) { $(this).addClass('disabled'); } );
-            var nr = '<td class="uploadfile">' +
-                    '<form class="existing add-TM-Form pull-left" action="/" method="post">' +
-                    '    <input type="hidden" name="action" value="loadTMX" />' +
-                    '    <input type="hidden" name="exec" value="newTM" />' +
-                    '    <input type="hidden" name="tm_key" value="" />' +
-                    '    <input type="hidden" name="name" value="" />' +
-                    '    <input type="submit" class="addtm-add-submit" style="display: none" />' +
-                    '    <input type="file" name="tmx_file" />' +
-                    '</form>' +
-                     '  <a class="pull-left btn-grey canceladdtmx">' +
-                     '      <span class="text"></span>' +
-                     '  </a>' +
-                    '   <a class="existingKey pull-left btn-ok addtmxfile">' +
-                    '       <span class="text">Confirm</span>' +
-                    '   </a>' +
-                    '   <span class="error"></span>' +
-                    '  <div class="uploadprogress">' +
-                    '       <span class="progress">' +
-                    '           <span class="inner"></span>' +
-                    '       </span>' +
-                    '       <span class="msgText">Uploading</span>' +
-                    '       <span class="error"></span>' +
-                    '  </div>' +
-                    '</td>';
+            UI.addFormUpload(this, 'tmx');
 
-            $(this).parents('tr').append(nr);
 
+        }).on('mousedown', '.addGlossary:not(.disabled)', function(e) {
+            e.preventDefault();
+            UI.addFormUpload(this, 'glossary');
         }).on('change paste', '#new-tm-key', function(event) {
             // set Timeout to get the text value after paste event, otherwise it is empty
             setTimeout( function(){ UI.checkTMKey('change'); }, 200 );
@@ -617,8 +595,8 @@ $.extend(UI, {
 
     execAddTM: function(el) {
 
-        table = $(el).parents('table');
-        existing = ($(el).hasClass('existingKey'))? true : false;
+        var table = $(el).parents('table');
+        var existing = ($(el).hasClass('existingKey'))? true : false;
         if(existing) {
             $(el).parents('.uploadfile').addClass('uploading');
         } else {
@@ -696,7 +674,9 @@ $.extend(UI, {
             '       <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>'+
             '          <div class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;'+
             '              <ul class="dropdown pull-left">' +
-            '                   <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>'+
+            '                   <li><a class="addGlossary" title="Import Glossary" alt="Import Glossary"><span class="icon-upload"></span>Import Glossary</a></li>'+
+            '                   <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>' +
+            '                   <li><a class="downloadGlossary" title="Export Glossary" alt="Export Glossary"><span class="icon-download"></span>Export Glossary</a></li> ' +
             '                  <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>'+
             '              </ul>'+
             '          </div>'+
@@ -901,7 +881,7 @@ $.extend(UI, {
                         if(d.completed) {
                             if(existing) {
                                 var tr = $(TRcaller).parents('tr.mine');
-                                $(tr).find('.addtmx').removeClass('disabled');
+                                $(tr).find('.addtmx, .addGlossary').removeClass('disabled');
                                 UI.pulseTMadded(tr);
                             }
 
@@ -1476,6 +1456,45 @@ $.extend(UI, {
         $('#activetm tr.new').removeClass('badkey');
         $('#activetm tr.new .error .tm-error-key').text('').hide();
         UI.checkTMAddAvailability();
+    },
+    addFormUpload: function (elem, type) {
+        var name;
+        if (type === "glossary") {
+            name = 'gl';
+        } else if (type === "tmx") {
+            name = 'tm';
+        } else {
+            return false;
+        }
+        $(elem).parents('.action').find('.addtmx, .addGlossary').each(function (el) {
+            $(this).addClass('disabled');
+        });
+        var nr = '<td class="uploadfile">' +
+            '<form class="existing add-TM-Form pull-left" action="/" method="post">' +
+            '    <input type="hidden" name="action" value="loadTMX" />' +
+            '    <input type="hidden" name="exec" value="newTM" />' +
+            '    <input type="hidden" name="tm_key" value="" />' +
+            '    <input type="hidden" name="name" value="" />' +
+            '    <input type="submit" class="addtm-add-submit" style="display: none" />' +
+            '    <input type="file" name="tmx_file"/>' +
+            '</form>' +
+            '  <a class="pull-left btn-grey canceladdtmx">' +
+            '      <span class="text"></span>' +
+            '  </a>' +
+            '   <a class="existingKey pull-left btn-ok addtmxfile">' +
+            '       <span class="text">Confirm</span>' +
+            '   </a>' +
+            '   <span class="error"></span>' +
+            '  <div class="uploadprogress">' +
+            '       <span class="progress">' +
+            '           <span class="inner"></span>' +
+            '       </span>' +
+            '       <span class="msgText">Uploading</span>' +
+            '       <span class="error"></span>' +
+            '  </div>' +
+            '</td>';
+
+        $(elem).parents('tr').append(nr);
     }
 });
 })(jQuery);
