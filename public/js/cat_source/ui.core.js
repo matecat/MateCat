@@ -3026,7 +3026,7 @@ UI = {
      * and should be decoupled in future refactorings.
      *
      */
-    editAreaClick : function(e, operation, action) {
+    editAreaClick : function() {
         if (typeof operation == 'undefined') {
             operation = 'clicking';
         }

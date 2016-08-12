@@ -89,7 +89,7 @@ if ( SegmentFilter.enabled() )
             return  $(el).closest('section').hasClass('muted');
         },
 
-        editAreaClick : function(e, operation, action) {
+        editAreaClick : function() {
             var e = arguments[0];
             if ( ! UI.isMuted(e.target) ) {
                 original_editAreaClick.apply( $(e.target).closest('.editarea'), arguments );
