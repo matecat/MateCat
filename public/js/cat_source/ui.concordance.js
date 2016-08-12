@@ -27,7 +27,6 @@ $.extend(UI, {
 		});
 	},
 	openConcordance: function() {
-		this.closeContextMenu();
 		$('.editor .submenu .tab-switcher-cc a').click();
 		$('.editor .cc-search .input').text('');
 		$('.editor .concordances .results').empty();

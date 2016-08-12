@@ -976,11 +976,6 @@ UI = {
 		}
 	},
 
-	closeContextMenu: function() {
-		$('#contextMenu').hide();
-		$('#spellCheck .words').remove();
-	},
-
     placeCaretAtEnd: function(el) {
 
 		 $(el).focus();
@@ -1173,13 +1168,11 @@ UI = {
 		});
 //        this.render(false, segment.selector.split('-')[1]);
 	},
-
+    // TODO: Deprecated
 	spellCheck: function(ed) {
 		if (!UI.customSpellcheck)
 			return false;
 		var editarea = (typeof ed == 'undefined') ? UI.editarea : $(ed);
-		if ($('#contextMenu').css('display') == 'block')
-			return true;
 
 		APP.doRequest({
 			data: {
@@ -2425,12 +2418,6 @@ UI = {
 		res = ($('section.modified').length) ? true : false;
 		return res;
 	},
-	setContextMenu: function() {
-		var alt = (this.isMac) ? '&#x2325;' : 'Alt ';
-		var cmd = (this.isMac) ? '&#8984;' : 'Ctrl ';
-		$('#contextMenu .shortcut .alt').html(alt);
-		$('#contextMenu .shortcut .cmd').html(cmd);
-	},
 	setTranslation_success: function(d, options) {
         var id_segment = options.id_segment;
         var status = options.status;
@@ -2584,14 +2571,6 @@ UI = {
 				UI.getMoreSegments('before');
 			}
 		}, UI.upOpts);
-	},
-	showContextMenu: function(str, ypos, xpos) {
-		if (($('#contextMenu').width() + xpos) > $(window).width())
-			xpos = $(window).width() - $('#contextMenu').width() - 30;
-		$('#contextMenu').css({
-			"top": (ypos + 13) + "px",
-			"left": xpos + "px"
-		}).show();
 	},
 
     storeClientInfo: function () {
@@ -3026,7 +3005,7 @@ UI = {
      * and should be decoupled in future refactorings.
      *
      */
-    editAreaClick : function() {
+    editAreaClick : function(e, operation, action) {
         if (typeof operation == 'undefined') {
             operation = 'clicking';
         }

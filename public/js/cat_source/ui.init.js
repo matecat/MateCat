@@ -44,12 +44,13 @@ $.extend(UI, {
         this.fixHeaderHeightChange();
         this.setHideMatches();
 
-		this.viewConcordanceInContextMenu = true;
+		/*this.viewConcordanceInContextMenu = true;
 		if (!this.viewConcordanceInContextMenu)
 			$('#searchConcordance').hide();
 		this.viewSpellCheckInContextMenu = true;
 		if (!this.viewSpellCheckInContextMenu)
-			$('#spellCheck').hide();
+			$('#spellCheck').hide();*/
+
 		setTimeout(function() {
 			UI.autoscrollCorrectionEnabled = false;
 		}, 2000);
@@ -164,7 +165,6 @@ $.extend(UI, {
 		});
 
 		this.setShortcuts();
-		this.setContextMenu();
 		this.createJobMenu();
 		$('#alertConfirmTranslation p').text('To confirm your translation, please press on Translated or use the shortcut ' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+Enter.');
 		APP.initMessageBar();

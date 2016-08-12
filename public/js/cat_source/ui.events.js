@@ -290,10 +290,8 @@ $.extend(UI, {
 		}).on('click', '#spellCheck .words', function(e) {
 			e.preventDefault();
 			UI.selectedMisspelledElement.replaceWith($(this).text());
-			UI.closeContextMenu();
 		}).on('click', '#spellCheck .add', function(e) {
 			e.preventDefault();
-			UI.closeContextMenu();
 			UI.addWord(UI.selectedMisspelledElement.text());
 		}).on('click', '.reloadPage', function() {
 			location.reload(true);
@@ -603,12 +601,6 @@ $.extend(UI, {
         }).on('click', '.alert .close', function(e) {
 			e.preventDefault();
 			$('.alert').remove();
-		}).on('click', '#contextMenu #searchConcordance', function() {
-			if ($('#contextMenu').attr('data-sid') == UI.currentSegmentId) {
-				UI.openConcordance();
-			} else {
-				$('#segment-' + $('#contextMenu').attr('data-sid') + ' .editarea').trigger('click', ['clicking', 'openConcordance']);
-			}
 		}).on('click', '#checkConnection', function(e) {
 			e.preventDefault();
 			UI.checkConnection( 'Click from Human Authorized' );
@@ -942,7 +934,6 @@ $.extend(UI, {
 			$('.selected', $(this)).removeClass('selected');
 			UI.currentSelectedText = false;
 			UI.currentSearchInTarget = false;
-			$('#contextMenu').hide();
         }).on('blur', '.editor .editarea', function() {
             UI.hideEditToolbar();
 		}).on('click', 'a.translated, a.next-untranslated', function(e) {
