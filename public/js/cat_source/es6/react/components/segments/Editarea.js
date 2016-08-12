@@ -15,30 +15,9 @@ class Editarea extends React.Component {
         };
         this.hightlightEditarea = this.hightlightEditarea.bind(this);
         this.addClass = this.addClass.bind(this);
+        this.onMouseUpEvent = this.onMouseUpEvent.bind(this);
     }
-    componentDidMount() {
-        SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
-        SegmentStore.addListener(SegmentConstants.ADD_EDITAREA_CLASS, this.addClass);
-    }
-    componentWillUnmount() {
-        SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
-        SegmentStore.removeListener(SegmentConstants.ADD_EDITAREA_CLASS, this.addClass);
-    }
-    componentWillMount() {
-        var editareaClasses = this.state.editareaClasses;
-        if ((this.props.segment.readonly == 'true')||($("body").hasClass('archived'))) {
-            editareaClasses.push('area')
-        } else {
-            editareaClasses.push('editarea')
-        }
 
-        Speech2Text.enabled() && editareaClasses.push( 'micActive' ) ;
-
-        this.setState({
-            editareaClasses: editareaClasses
-        });
-
-    }
     allowHTML(string) {
         return { __html: string };
     }
@@ -79,6 +58,43 @@ class Editarea extends React.Component {
 
         }
     }
+    onMouseUpEvent(e) {
+        var self = this;
+        setTimeout(function () {
+            if(!$(self.editAreaRef).find('.locked.selected').length) {
+                if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
+                    UI.showEditToolbar();
+                }
+            }
+        }, 100);
+
+    }
+    onMouseDownEvent() {
+        UI.hideEditToolbar();
+    }
+    componentDidMount() {
+        SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
+        SegmentStore.addListener(SegmentConstants.ADD_EDITAREA_CLASS, this.addClass);
+    }
+    componentWillUnmount() {
+        SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
+        SegmentStore.removeListener(SegmentConstants.ADD_EDITAREA_CLASS, this.addClass);
+    }
+    componentWillMount() {
+        var editareaClasses = this.state.editareaClasses;
+        if ((this.props.segment.readonly == 'true')||($("body").hasClass('archived'))) {
+            editareaClasses.push('area')
+        } else {
+            editareaClasses.push('editarea')
+        }
+
+        Speech2Text.enabled() && editareaClasses.push( 'micActive' ) ;
+
+        this.setState({
+            editareaClasses: editareaClasses
+        });
+
+    }
     render() {
         if (this.props.segment){
             var lang = config.target_lang.toLowerCase();
@@ -91,6 +107,10 @@ class Editarea extends React.Component {
                      spellCheck="true"
                      data-sid={this.props.segment.sid}
                      dangerouslySetInnerHTML={ this.allowHTML(this.props.translation) }
+                     onMouseUp={this.onMouseUpEvent}
+                     onMouseDown={this.onMouseDownEvent}
+                     onContextMenu={this.onMouseUpEvent}
+                     ref={(ref) => this.editAreaRef = ref}
                 />
 
             );

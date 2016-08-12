@@ -454,8 +454,6 @@ $.extend(UI, {
 			UI.body.toggleClass('replace-box');
 		});
 
-		jQuery('.editarea').trigger('update');
-
 		$("div.notification-box").mouseup(function() {
 			return false;
 		});
@@ -622,18 +620,6 @@ $.extend(UI, {
 		$("#outer").on('click', 'a.percentuage', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-		}).on('mouseup', '.editarea', function() { //mouseupeditarea
-            if(UI.editarea != '' && !UI.editarea.find('.locked.selected').length) {
-                if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
-                    UI.showEditToolbar();
-                }
-            }
-		}).on('mousedown', '.editarea', function(e) {
-            if(e.which == 3) {
-                e.preventDefault();
-                return false;
-            }
-			UI.hideEditToolbar();
 		}).on('mousedown', '.editToolbar .uppercase', function() {
 			UI.formatSelection('uppercase');
 		}).on('mousedown', '.editToolbar .lowercase', function() {
