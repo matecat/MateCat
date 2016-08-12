@@ -265,7 +265,7 @@ UI = {
         }
     },
     uploadingTMX: function () {
-        return $( '.mgmt-tm td.uploadfile' ).length;
+        return $( '.mgmt-tm td.uploadfile.uploading' ).length;
     }
 
 };
