@@ -1528,15 +1528,13 @@ class ProjectManager {
                             //mrk in the list will not be too!!!
                             $show_in_cattool = 1;
 
-                            $tempSeg = strip_tags( $seg_source[ 'raw-content' ] );
-                            $tempSeg = preg_replace( '#[\p{P}\p{Z}\p{C}]+#u', "", $tempSeg );
-                            $tempSeg = trim( $tempSeg );
+                            $wordCount = CatUtils::segment_raw_wordcount( $seg_source[ 'raw-content' ], $xliff_file[ 'attr' ][ 'source-language' ] );
 
                             //init tags
                             $seg_source[ 'mrk-ext-prec-tags' ] = '';
                             $seg_source[ 'mrk-ext-succ-tags' ] = '';
 
-                            if ( is_null( $tempSeg ) || $tempSeg === '' ) {
+                            if ( empty( $wordCount ) ) {
                                 $show_in_cattool = 0;
                             } else {
                                 $extract_external                  = $this->_strip_external( $seg_source[ 'raw-content' ] );
@@ -1588,7 +1586,7 @@ class ProjectManager {
                             $source            = $this->dbHandler->escape( CatUtils::raw2DatabaseXliff( $seg_source[ 'raw-content' ] ) );
                             $source_hash       = $this->dbHandler->escape( md5( $seg_source[ 'raw-content' ] ) );
                             $ext_succ_tags     = $this->dbHandler->escape( $seg_source[ 'ext-succ-tags' ] );
-                            $num_words         = CatUtils::segment_raw_wordcount( $seg_source[ 'raw-content' ], $xliff_file[ 'attr' ][ 'source-language' ] );
+                            $num_words         = $wordCount;
                             $trans_unit_id     = $this->dbHandler->escape( $xliff_trans_unit[ 'attr' ][ 'id' ] );
                             $mrk_ext_prec_tags = $this->dbHandler->escape( $seg_source[ 'mrk-ext-prec-tags' ] );
                             $mrk_ext_succ_tags = $this->dbHandler->escape( $seg_source[ 'mrk-ext-succ-tags' ] );
@@ -1605,14 +1603,14 @@ class ProjectManager {
 
                         $this->addNotesToProjectStructure( $xliff_trans_unit );
 
-                    } else {
+                    }
+                    else {
 
-                        $tempSeg   = strip_tags( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
-                        $tempSeg   = preg_replace( '#[\p{P}\p{Z}\p{C}]+#u', "", $tempSeg );
-                        $tempSeg   = trim( $tempSeg );
+                        $wordCount = CatUtils::segment_raw_wordcount( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $xliff_file[ 'attr' ][ 'source-language' ] );
+
                         $prec_tags = null;
                         $succ_tags = null;
-                        if ( is_null( $tempSeg ) || $tempSeg === '' ) { //|| $tempSeg == NBSPPLACEHOLDER ) { //@see CatUtils.php, ( DEFINE NBSPPLACEHOLDER ) don't show <x id=\"nbsp\"/>
+                        if ( empty( $wordCount ) ) {
                             $show_in_cattool = 0;
                         } else {
                             $extract_external                              = $this->_strip_external( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
@@ -1648,7 +1646,7 @@ class ProjectManager {
 
                         //we do the word count after the place-holding with <x id="nbsp"/>
                         //so &nbsp; are now not recognized as word and not counted as payable
-                        $num_words = CatUtils::segment_raw_wordcount( $source, $xliff_file[ 'attr' ][ 'source-language' ] );
+                        $num_words = $wordCount;
 
                         //applying escaping after raw count
                         $source      = $this->dbHandler->escape( CatUtils::raw2DatabaseXliff( $source ) );
