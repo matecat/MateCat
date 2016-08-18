@@ -884,8 +884,8 @@ class CatUtils {
         $string = str_replace( array( "¯", '¸' ), array( '-', '_' ), $string );
 
 
-        //check for a string made of spaces only, after the string was cleaned
-        if ( preg_replace( '#[\p{Z}]+#u', "", $string ) == "" ) {
+        //check for a string made of spaces and symbols only, after the string was cleaned
+        if ( preg_replace( '#[\p{P}\p{Z}\p{C}]+#u', "", $string ) == "" ) {
             return 0;
         }
 
