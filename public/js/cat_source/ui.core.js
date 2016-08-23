@@ -3005,7 +3005,7 @@ UI = {
      * and should be decoupled in future refactorings.
      *
      */
-    editAreaClick : function(e, operation, action) {
+    editAreaClick : function(e, operation) {
         if (typeof operation == 'undefined') {
             operation = 'clicking';
         }
@@ -3028,8 +3028,6 @@ UI = {
             UI.lastOperation = operation;
 
             UI.openSegment(this, operation);
-            if (action == 'openConcordance')
-                UI.openConcordance();
 
             if (operation != 'moving') {
                 var segment = $('#segment-' + $(this).data('sid'));
@@ -3101,6 +3099,7 @@ UI = {
             UI.gotoNextSegment();
         } else {
             // TODO: investigate why this trigger click is necessary.
+            // See function closeSegment (line 271) ??
             $(".editarea", UI.nextUntranslatedSegment).trigger("click", "translated")
         }
 
