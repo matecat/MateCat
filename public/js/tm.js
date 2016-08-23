@@ -618,7 +618,7 @@ $.extend(UI, {
 
     execAddTM: function(el) {
 
-        table = $(el).parents('table');
+        var table = $(el).parents('table');
         existing = ($(el).hasClass('existingKey'))? true : false;
         if(existing) {
             $(el).parents('.uploadfile').addClass('uploading');
