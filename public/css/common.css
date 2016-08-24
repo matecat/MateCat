@@ -1122,6 +1122,11 @@ width: 804px;
     display: block;
 }
 
+input.email-export-tmx {
+    width: 180px;
+    margin-left: 10px!important;
+}
+
 .downloading .uploadloader {
 	display: block;
 	z-index: 10;
@@ -1184,6 +1189,7 @@ background: #f8f8f8;
 form.add-TM-Form {
     display: inline;
     padding: 5px 0 10px;
+    margin: 0 0 0 10px;
 }
 #uploadCallback {
     display: none;
@@ -1657,7 +1663,7 @@ width: 100%;
 	position: relative;
 	border-radius: 4px;
 	float: left;
-	width: 235px;
+	width: 120px;
 }
 
 .new td.fileupload {
@@ -1828,6 +1834,8 @@ text-align: center;}
 
 .addtmxfile.btn-ok {
     display: none;
+    margin-left: -10px;
+    margin-right: 20px;
 }
 
  .canceladdtmx.btn-grey {
@@ -1971,15 +1979,28 @@ margin-top: 10px;
 	box-shadow: inset 0px 2px 5px 0px #E4E4E4;
     position: relative;
 }
+
+span.email-export-tmx-email-sent,
 #activetm td.uploadfile .msg,
 #inactivetm td.uploadfile .msg {
     float: right;
-    margin-right: 100px;
+    margin-right: 20px;
+    margin-top:5px;
     color: green;
+    text-align: right;
 }
 #activetm td.dragrow {
    position: relative;
 	padding: 5px 5px 5px 5px!important;
+}
+
+td.uploadfile p {
+    width: 250px;
+    margin: 0 10px;
+}
+
+td.uploadfile .canceladdtmx {
+    margin-right: 18px;
 }
 
 #activetm td.dragrow .status {
@@ -2025,13 +2046,13 @@ td.download-tmx-container {
 
 .message-export-tmx {
     float: left;
-    margin-left: 5px;
+    margin-left: 11px;
 }
 
 input.email-export-tmx {
     float: left;
     margin-left: 14px;
-    margin-top: 3px;
+    margin-top: 3px!important;
 }
 
 .export-tmx-button-label:before {
@@ -2059,11 +2080,8 @@ input.email-export-tmx {
 }
 span.email-export-tmx-email-sent {
     float: right;
-    font-size: 16px;
-    margin-right: 35px;
     margin-top: 1px;
     display: none;
-    font-style: italic;
 }
 .btn-grey.canceladd-export-tmx {
     background: #f26522;
@@ -2739,7 +2757,9 @@ input#new-tm-key {
     height: 0px;
 }
 
-#activetm input#new-tm-key {
+#activetm input#new-tm-key,
+input.email-export-tmx
+ {
 	width: 155px;
 	padding: 12px 5px;
 	margin: 0;
