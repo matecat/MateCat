@@ -512,6 +512,11 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
      * @param $userEmail
      * @param $userName
      * @param $userSurname
+     *
+     *
+     * @return Engines_Results_MyMemory_ExportResponse
+     * @throws Exception
+     *
      */
     public function emailExport( $key, $name, $userEmail, $userName, $userSurname ) {
         $parameters = array();
@@ -522,6 +527,13 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         ( !empty( $name ) ? $parameters[ 'tm_name' ] = $name : $parameters[ 'tm_name' ] = $key );
 
         $this->call( 'tmx_export_email_url', $parameters );
+
+        /**
+         * $result Engines_Results_MyMemory_ExportResponse
+         */
+        if ( $this->result->responseStatus >= 400 ) {
+            throw new Exception( $this->result->error->message, $this->result->responseStatus );
+        }
 
         Log::doLog('TMX exported to E-mail.');
         return $this->result;
