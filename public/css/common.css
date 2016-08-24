@@ -1969,6 +1969,7 @@ margin-top: 10px;
     height: 20px;
     border-top: 1px solid #E1E1E1;
 	box-shadow: inset 0px 2px 5px 0px #E4E4E4;
+    position: relative;
 }
 #activetm td.uploadfile .msg,
 #inactivetm td.uploadfile .msg {
@@ -1985,17 +1986,16 @@ margin-top: 10px;
 	cursor: move;
 	margin: 0 auto;
 	width: 2px;
-	height: inherit;
 	border: 2px dotted #ccc;
 	border-top: 0;
-border-bottom: 0;
+    border-bottom: 0;
 	display: block;
 	position: absolute;
 	right: 0;
 	left: 0;
 	height: 67%;
-bottom: 15%;
-top: 17%;
+    bottom: 15%;
+    top: 17%;
 }
 
 #activetm tr.owner td {
@@ -2006,6 +2006,78 @@ top: 17%;
     background: #f6f6f6 !important;
 }
 
+
+/* Export TMX container */
+#activetm td.download-tmx-container,
+#inactivetm td.download-tmx-container
+{
+    display: block;
+    background: #fff;
+    padding: 10px 5px 20px;
+    height: 20px;
+    border-top: 1px solid #E1E1E1;
+    box-shadow: inset 0px 2px 5px 0px #E4E4E4;
+    position: relative;
+}
+td.download-tmx-container {
+    line-height: 30px;
+}
+
+.message-export-tmx {
+    float: left;
+    margin-left: 5px;
+}
+
+input.email-export-tmx {
+    float: left;
+    margin-left: 14px;
+    margin-top: 3px;
+}
+
+.export-tmx-button-label:before {
+    content: "\f00c";
+    padding-right: 7px;
+    vertical-align: text-top;
+}
+
+.export-tmx-button-label {
+    width: 90px;
+    display: block;
+    text-align: center;
+}
+.mgmt-tm .btn-ok.export-tmx-button {
+    padding: 0px 5px !important;
+    margin-right: 20px;
+}
+.download-tmx-container .uploadloader {
+    right: 200px;
+    top: -18px;
+}
+.export-tmx-button.disabled {
+    cursor: default;
+    pointer-events: none;
+}
+span.email-export-tmx-email-sent {
+    float: right;
+    font-size: 16px;
+    margin-right: 35px;
+    margin-top: 1px;
+    display: none;
+    font-style: italic;
+}
+.btn-grey.canceladd-export-tmx {
+    background: #f26522;
+    width: 35px;
+    padding: 0px !important;
+    text-align: center;
+    color: #fff;
+}
+
+.canceladd-export-tmx:before {
+    content: "\f00d";
+    vertical-align: text-top;
+}
+/************************/
 .anonymous td.dragrow {
 
     background-image: none !important;
@@ -3190,6 +3262,8 @@ header .filter:before,
 .editToolbar .lowercase:after,
 .editToolbar .capitalize:after,
 .more-options:before,
+.export-tmx-button-label:before,
+.canceladd-export-tmx:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .splitArea .locked.startTag:before,
