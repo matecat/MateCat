@@ -1,0 +1,34 @@
+ENV = "development"
+CHECK_FS = yes
+BUILD_NUMBER = "1.0.4"
+
+[development]
+DB_SERVER = "mysql"
+DB_DATABASE = "matecat"
+DB_USER = "admin"
+DB_PASS = "admin"
+MEMCACHE_SERVERS = ""
+REDIS_SERVERS = "tcp://redis:6379"
+QUEUE_BROKER_ADDRESS = "tcp://amq:61613"
+QUEUE_DQF_ADDRESS = "tcp://amq:61613"
+QUEUE_JMX_ADDRESS = "http://amq:8161"
+STORAGE_DIR = "/var/www/matecat/local_storage"
+CONVERSION_ENABLED = yes
+FORCE_XLIFF_CONVERSION = yes
+DQF_ENABLED = yes
+MAX_UPLOAD_FILE_SIZE = 104857600
+MAX_UPLOAD_TMX_FILE_SIZE = 104857600;
+MYMEMORY_API_KEY = "pro@matecat.com"
+MYMEMORY_TM_API_KEY = "tmanalysis@matecat.com"
+
+FILTERS_ADDRESS = "http://filters:8732/"
+;FILTERS_USER_AGENT = "MateCat Community Instance --allow-legacy-filters"
+;FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION = "legacy"
+
+SSE_BASE_URL = "http://localhost/sse"
+SMTP_HOST = "matecat"
+SMTP_PORT = 2637
+SMTP_SENDER = "cattool@matecat.com"
+SMTP_HOSTNAME = "matecat.com"
+MAX_NUM_FILES = 150
+SUPPORT_MAIL = "support@matecat.com"
