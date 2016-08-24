@@ -134,6 +134,7 @@
                 e.preventDefault();
                 $(this).parents('.action').find('.addtmx').each( function(el) { $(this).addClass('disabled'); } );
                 var nr = '<td class="uploadfile" style="display: none">' +
+                    '<p class="pull-left">Select TMX file to import</p>' +
                     '<form class="existing add-TM-Form pull-left" action="/" method="post">' +
                     '    <input type="hidden" name="action" value="loadTMX" />' +
                     '    <input type="hidden" name="exec" value="newTM" />' +
@@ -142,12 +143,12 @@
                     '    <input type="submit" class="addtm-add-submit" style="display: none" />' +
                     '    <input type="file" name="tmx_file" />' +
                     '</form>' +
-                    '  <a class="pull-left btn-grey canceladdtmx">' +
-                    '      <span class="text"></span>' +
-                    '  </a>' +
-                    '   <a class="existingKey pull-left btn-ok addtmxfile">' +
+                    '   <a class="existingKey pull-right btn-ok addtmxfile">' +
                     '       <span class="text">Confirm</span>' +
                     '   </a>' +
+                    '  <a class="pull-right btn-grey canceladdtmx">' +
+                    '      <span class="text"></span>' +
+                    '  </a>' +
                     '   <span class="error"></span>' +
                     '  <div class="uploadprogress">' +
                     '       <span class="progress">' +
@@ -906,7 +907,7 @@
 
                     } else {
 
-                        $(TRcaller).find('.uploadprogress .msgText').text('Uploading ' + this[1]);
+                        $(TRcaller).find('.uploadprogress .msgText').text('Uploading');
 
                         $(TRcaller).find('.uploadprogress').show();
 
@@ -922,7 +923,8 @@
                                     UI.pulseTMadded(tr);
                                 }
 
-                                $(TRcaller).find('.uploadprogress').hide();
+                                $(TRcaller).find('.uploadprogress,.canceladdtmx,.addtmxfile').hide();
+
                                 $(TRcaller).find('.uploadprogress .msgText').text('Uploading');
 
                                 if(existing) {
@@ -1425,7 +1427,7 @@
 
             var exportDiv = '<td class="download-tmx-container" style="display: none">' +
                 '<div class="message-export-tmx">We will send a link to download the exported TM to this email:</div>' +
-                '<input class="email-export-tmx" value="' + config.userMail + '"/>' +
+                '<input type="text" class="email-export-tmx mgmt-input" value="' + config.userMail + '"/>' +
                 '<span class="uploadloader"></span>'+
                 '<span class="email-export-tmx-email-sent">Request submitted</span>' +
                 '<a class="pull-right btn-ok export-tmx-button">' +
