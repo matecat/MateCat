@@ -312,12 +312,14 @@ class TMSService {
     }
 
     /**
-     * Send a request for download
+     * Send a mail with link for direct prepared download
      *
-     * First basic implementation
-     * TODO  in the future we would send a mail with link for direct prepared download
+     * @param $userMail
+     * @param $userName
+     * @param $userSurname
+     * @throws Exception
      */
-    public function downloadTMX() {
+    public function downloadTMX( $userMail, $userName, $userSurname ) {
 
         /**
          * @var $result Engines_Results_MyMemory_ExportResponse
@@ -346,11 +348,6 @@ class TMSService {
             if ( $result->responseDetails == 'NO SEGMENTS' ) {
                 throw new DomainException( "No translation memories found to download.", -17 );
             }
-
-            $_download_url = parse_url( $result->resourceLink );
-            parse_str( $_download_url[ 'query' ], $secrets );
-            list( $_key, $pass ) = array_values( $secrets );
-
         }
         else {
 
@@ -358,9 +355,15 @@ class TMSService {
 
         }
 
-        $resource_pointer = $this->mymemory_engine->downloadExport( $this->tm_key, $pass );
+        $response = $this->mymemory_engine->emailExport(
+            $this->tm_key,
+            $this->name,
+            $userMail,
+            $userName,
+            $userSurname
+        );
 
-        return $resource_pointer;
+        return $response;
 
     }
 

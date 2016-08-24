@@ -2998,7 +2998,7 @@ display: none;
     color: #39699a;
 }
 
-.tm-error-message, .tm-warning-message {
+.tm-error-message, .tm-warning-message, .tm-success-message {
     display: none;
     -moz-border-radius: 2px;
     box-shadow: 0 2px 2px #e2e2e2;
@@ -3023,7 +3023,11 @@ display: none;
         border-top: 3px solid #ebad1a;
 }
 
-.mgmt-panel .tm-error-message, .mgmt-panel .tm-warning-message {
+.tm-success-message {
+    border-top: 3px solid #4F8A10;
+}
+
+.mgmt-panel .tm-error-message, .mgmt-panel .tm-warning-message, .mgmt-panel .tm-success-message {
 	font-size:15px;
 	display: block;
 	}
@@ -3038,7 +3042,7 @@ width: 98.8%;
 color: #000;
 }
 
-.tm-warning-message, .tm-error-message {
+.tm-warning-message, .tm-error-message, .tm-success-message {
     margin: 0 0 15px !important;
 }
 

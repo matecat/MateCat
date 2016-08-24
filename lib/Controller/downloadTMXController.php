@@ -30,6 +30,13 @@ class downloadTMXController extends downloadController {
     protected $tm_key;
 
     /**
+     * MyMemory name/description
+     *
+     * @var string
+     */
+    protected $tm_name;
+
+    /**
      * For future implementations
      *
      * @var string
@@ -58,13 +65,20 @@ class downloadTMXController extends downloadController {
     /**
      * @var
      */
-    protected $streamFilePointer;
+    protected $tmxExportResponse;
 
     /**
      * User id
      * @var int
      */
     protected $uid;
+
+    /**
+     * User
+     *
+     * @var Users_UserStruct
+     */
+    protected $user;
 
     /**
      * User email
@@ -88,6 +102,9 @@ class downloadTMXController extends downloadController {
             'tm_key' =>  array(
                     'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
             ),
+            'tm_name' =>  array(
+                'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+            ),
             'downloadToken' =>  array(
                     'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
             ),
@@ -107,6 +124,7 @@ class downloadTMXController extends downloadController {
         //$__postInput = filter_var_array( $_POST, $filterArgs );
 
         $this->tm_key        = $__postInput[ 'tm_key' ];
+        $this->tm_name       = $__postInput[ 'tm_name' ];
         $this->source        = $__postInput[ 'source' ];
         $this->target        = $__postInput[ 'target' ];
         $this->downloadToken = $__postInput[ 'downloadToken' ];
@@ -131,8 +149,12 @@ class downloadTMXController extends downloadController {
             exit;
         }
 
+        $userDao = new Users_UserDao();
+        $this->user = $userDao->getByUid( $this->uid );
+
         $this->tmxHandler = new TMSService();
         $this->tmxHandler->setTmKey( $this->tm_key );
+        $this->tmxHandler->setName( $this->tm_name );
 
     }
 
@@ -145,7 +167,11 @@ class downloadTMXController extends downloadController {
 
         try {
 
-            $this->streamFilePointer = $this->tmxHandler->downloadTMX();
+            $this->tmxExportResponse = $this->tmxHandler->downloadTMX(
+                $this->user->email,
+                $this->user->first_name,
+                $this->user->last_name
+            );
 
             // TODO: Not used at moment, will be enabled when will be built the Log Activity Keys
             /*
@@ -189,27 +215,8 @@ class downloadTMXController extends downloadController {
     }
 
     public function finalize() {
+        echo $this->tmxExportResponse;
 
-        $this->unlockToken();
-
-        list( $file_name, $mx_domain) = explode( "@", $this->userMail );
-
-        $file_name .= "_" . uniqid() . ".zip";
-
-        $buffer = ob_get_contents();
-        ob_get_clean();
-        ob_start("ob_gzhandler");  // compress page before sending
-        $this->nocache();
-        header("Content-Type: application/force-download");
-        header("Content-Type: application/octet-stream");
-        header("Content-Type: application/download");
-        header("Content-Disposition: attachment; filename=\"$file_name\""); // enclose file name in double quotes in order to avoid duplicate header error. Reference https://github.com/prior/prawnto/pull/16
-        header("Expires: 0");
-        header("Connection: close");
-        while ( !feof( $this->streamFilePointer ) ) {
-            echo fgets( $this->streamFilePointer, 2048 );
-        }
-        fclose( $this->streamFilePointer );
         exit;
 
     }

@@ -138,6 +138,7 @@
                                 </tbody>
                             </table>
                             <p class="tm-error-message" style="display: none;"> Error: the errmsg will appear here... </p>
+                            <p class="tm-success-message activetm" style="display: none;"> Success: the success msg will appear here... </p>
                             <h3 class="pull-left">Inactive TM</h3>
 
                             <tal:block tal:condition="php: empty(logged_user)">
@@ -219,6 +220,9 @@
 
                                     </tbody>
                                 </table>
+
+                                <p class="tm-success-message inactivetm" style="display: none;"> Success: the success msg will appear here... </p>
+
                             </tal:block>
 
 

@@ -277,12 +277,13 @@ $.extend(UI, {
                 UI.filterInactiveTM($('#filterInactive').val());
             }
         }).on('mousedown', '.mgmt-tm .downloadtmx', function(){
-            if($(this).hasClass('downloading')) return false;
            UI.downloadTM( $(this).parentsUntil('tbody', 'tr'), 'downloadtmx' );
-            $(this).addClass('disabled' );
-            $(this).prepend('<span class="uploadloader"></span>');
-            var msg = '<span class="notify"><span class="uploadloader"></span> Downloading TMX... ' + ((APP.isCattool)? 'You can close the panel and continue translating.' : 'This can take a few minutes.')+ '</span>';
-            $(this).parents('td').first().append(msg);
+
+            var referenceTableId = $(this).parentsUntil('div.mgmt-container', 'table').attr('id');
+            UI.showSuccessMessage( 'You will receive an email with the download link.', referenceTableId );
+            setTimeout( function() {
+                UI.hideSuccessMessage( referenceTableId );
+            }, 6000 );
         }).on('mousedown', '.mgmt-tm .deleteTM', function(){
             UI.deleteTM($(this));
         });
@@ -491,6 +492,14 @@ $.extend(UI, {
             }
         } );
         return keyIsAlreadyPresent;
+    },
+    showSuccessMessage: function ( message, referenceTableId ) {
+        if ( message ) {
+            $( '.mgmt-container .tm-success-message.' + referenceTableId ).html( message ).show();
+        }
+    },
+    hideSuccessMessage: function ( referenceTableId ) {
+        $( '.mgmt-container .tm-success-message.' + referenceTableId ).html( '' ).hide();
     },
     showErrorOnKeyInput: function (message) {
         if (message) {
@@ -1104,101 +1113,26 @@ $.extend(UI, {
         $('#inactivetm tbody td.privatekey:containsNC("' + txt + '"), #inactivetm tbody td.description:containsNC("' + txt + '")').parents('tr').addClass('found');
     },
     downloadTM: function( tm, button_class ) {
+        var tm_key = $( '.privatekey', tm ).text().trim();
+        var tm_name = $( '.description', tm ).text().trim();
 
-        if ( !$( tm ).find( '.' + button_class ).hasClass( 'disabled' ) ) {
+        var id_job;
+        var password;
 
-            //add a random string to avoid collision for concurrent javascript requests
-            //in the same milli second, and also, because a string is needed for token and not number....
-            var downloadToken = new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 );
-
-            //create a random Frame ID and form ID to get it uniquely
-            var iFrameID = 'iframeDownload_' + downloadToken;
-            var formID = 'form_' + downloadToken;
-
-            //create an iFrame element
-            var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop( {
-                id: iFrameID,
-                src: ''
-            } );
-
-            $( "body" ).append( iFrameDownload );
-
-            iFrameDownload.ready( function () {
-
-                //create a GLOBAL setInterval so in anonymous function it can be disabled
-                var downloadTimer = window.setInterval( function () {
-
-                    //check for cookie equals to it's value.
-                    //This is unique by definition and we can do multiple downloads
-                    var token = $.cookie( downloadToken );
-
-                    //if the cookie is found, download is completed
-                    //remove iframe an re-enable download button
-                    if ( token ) {
-                        $( tm ).find( '.' + button_class ).removeClass( 'disabled' ).removeClass( 'downloading' );
-                        $( tm ).find( 'span.notify' ).remove();
-                        window.clearInterval( downloadTimer );
-                        $.cookie( downloadToken, null, {path: '/', expires: -1} );
-                        errorMsg = $( '#' + iFrameID ).contents().find( 'body' ).text();
-                        errorKey = $( tm ).attr( 'data-key' );
-                        if ( errorMsg != '' ) {
-                            APP.alert( 'Error on downloading a TM with key ' + errorKey + ':<br />' + errorMsg );
-                        }
-
-                        $( '#' + iFrameID ).remove();
-                    }
-
-                }, 2000 );
-            } );
-
-            //create the html form and append a token for download
-            var iFrameForm = $( document.createElement( 'form' ) ).attr( {
-                'id': formID,
-                'action': '/',
-                'method': 'POST'
-            } ).append(
-                    //action to call
-                    $( document.createElement( 'input' ) ).prop( {
-                        type: 'hidden',
-                        name: 'action',
-                        value: 'downloadTMX'
-                    } ),
-                    //we tell to the controller to check a field in the post named downloadToken
-                    // and to set a cookie named as it's value with it's value ( equals )
-                    $( document.createElement( 'input' ) ).prop( {
-                        type: 'hidden',
-                        name: 'downloadToken',
-                        value: downloadToken
-                    } ),
-                    //set other values
-                    $( document.createElement( 'input' ) ).prop( {
-                        type: 'hidden',
-                        name: 'tm_key',
-                        value: $( '.privatekey', tm ).text()
-                    } )
-            );
-
-            if ( typeof config.id_job !== 'undefined' ){
-                iFrameForm.append(
-                    $( document.createElement( 'input' ) ).prop( {
-                        type: 'hidden',
-                        name: 'id_job',
-                        value: config.id_job
-                    } ),
-                    $( document.createElement( 'input' ) ).prop( {
-                        type: 'hidden',
-                        name: 'password',
-                        value: config.password
-                    } )
-                );
-            }
-
-            //append from to newly created iFrame and submit form post
-            iFrameDownload.contents().find( 'body' ).append( iFrameForm );
-            console.log( iFrameDownload.contents().find( "#" + formID ) );
-            iFrameDownload.contents().find( "#" + formID ).submit();
-
+        if ( typeof config.id_job !== 'undefined' ){
+            id_job = config.id_job;
+            password = config.password;
         }
+
+        APP.doRequest({
+            data: {
+                action: 'downloadTMX',
+                tm_key: tm_key,
+                tm_name: tm_name,
+                id_job: id_job,
+                password: password
+            }
+        });
 
     },
     deleteTM: function (button) {
