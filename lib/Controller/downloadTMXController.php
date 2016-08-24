@@ -10,7 +10,7 @@ use ActivityLog\ActivityLogStruct;
  * 
  */
 
-class downloadTMXController extends downloadController {
+class downloadTMXController extends ajaxController {
 
     /**
      * @var int
@@ -21,6 +21,13 @@ class downloadTMXController extends downloadController {
      * @var string
      */
     protected $password;
+
+    /**
+     * Tell to MyMemory to send the download link to this email.
+     *
+     * @var string
+     */
+    protected $download_to_email;
 
     /**
      * MyMemory key
@@ -51,21 +58,9 @@ class downloadTMXController extends downloadController {
     protected $target;
 
     /**
-     * Download Token
-     *
-     * @var string
-     */
-    protected $downloadToken;
-
-    /**
      * @var TMSService
      */
     protected $tmxHandler;
-
-    /**
-     * @var
-     */
-    protected $tmxExportResponse;
 
     /**
      * User id
@@ -89,6 +84,8 @@ class downloadTMXController extends downloadController {
 
     public function __construct() {
 
+        parent::__construct();
+
         /**
          * Retrieve user information
          */
@@ -108,6 +105,9 @@ class downloadTMXController extends downloadController {
             'downloadToken' =>  array(
                     'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
             ),
+            'email' =>  array(
+                    'filter' => FILTER_VALIDATE_EMAIL
+            ),
             'source' =>  array(
                     'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
             ),
@@ -123,14 +123,13 @@ class downloadTMXController extends downloadController {
         //NOTE: Global $_POST Overriding from CLI Test scripts
         //$__postInput = filter_var_array( $_POST, $filterArgs );
 
-        $this->tm_key        = $__postInput[ 'tm_key' ];
-        $this->tm_name       = $__postInput[ 'tm_name' ];
-        $this->source        = $__postInput[ 'source' ];
-        $this->target        = $__postInput[ 'target' ];
-        $this->downloadToken = $__postInput[ 'downloadToken' ];
-
-        $this->id_job        = $__postInput[ 'id_job' ];
-        $this->password      = $__postInput[ 'password' ];
+        $this->tm_key            = $__postInput[ 'tm_key' ];
+        $this->tm_name           = $__postInput[ 'tm_name' ];
+        $this->source            = $__postInput[ 'source' ];
+        $this->target            = $__postInput[ 'target' ];
+        $this->download_to_email = $__postInput[ 'email' ];
+        $this->id_job            = $__postInput[ 'id_job' ];
+        $this->password          = $__postInput[ 'password' ];
 
         if( !$this->userIsLogged ){
 
@@ -145,12 +144,10 @@ class downloadTMXController extends downloadController {
             Log::doLog( $output );
 
             Utils::sendErrMailReport( $output, "Download TMX Error: user Not Logged" );
-            $this->unlockToken();
             exit;
         }
 
-        $userDao = new Users_UserDao();
-        $this->user = $userDao->getByUid( $this->uid );
+        $this->user = $this->logged_user;
 
         $this->tmxHandler = new TMSService();
         $this->tmxHandler->setTmKey( $this->tm_key );
@@ -161,13 +158,17 @@ class downloadTMXController extends downloadController {
     /**
      * When Called it perform the controller action to retrieve/manipulate data
      *
-     * @return mixed
      */
     function doAction() {
 
         try {
 
-            $this->tmxExportResponse = $this->tmxHandler->downloadTMX(
+            if( $this->download_to_email === false ){
+                $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "Invalid email provided for download." );
+                return;
+            }
+
+            $this->result[ 'data' ] = $this->tmxHandler->requestTMXEmailDownload(
                 $this->user->email,
                 $this->user->first_name,
                 $this->user->last_name
@@ -204,20 +205,10 @@ class downloadTMXController extends downloadController {
 
             Utils::sendErrMailReport( $r, "Download TMX Error: " . $e->getMessage() );
 
-
-            $this->unlockToken();
-            echo $e->getMessage();
-
-            exit;
+            $this->result[ 'errors' ][ ] = array( "code" => -2, "message" => "Download TMX Error: " . $e->getMessage() );
+            return;
 
         }
-
-    }
-
-    public function finalize() {
-        echo $this->tmxExportResponse;
-
-        exit;
 
     }
 

@@ -409,7 +409,11 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
      * <br />invoke with the same parameters of createExport
      *
      * @see Engines_MyMemory::createExport
-     *
+     *,
+                $this->name,
+                $userMail,
+                $userName,
+                $userSurname
      * @param      $key
      * @param null $source
      * @param null $target
@@ -514,13 +518,13 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
 
         $parameters[ 'key' ] = trim( $key );
         $parameters[ 'user_email' ] = trim( $userEmail );
-        $parameters[ 'user_name' ] = trim( $userName );
-        $parameters[ 'user_surname' ] = trim( $userSurname );
-        ( !empty( $name ) ? $parameters[ 'name' ] = $name : $parameters[ 'name' ] = $key );
+        $parameters[ 'user_name' ] = trim( $userName ) . " " . trim( $userSurname );
+        ( !empty( $name ) ? $parameters[ 'tm_name' ] = $name : $parameters[ 'tm_name' ] = $key );
 
         $this->call( 'tmx_export_email_url', $parameters );
 
         Log::doLog('TMX exported to E-mail.');
+        return $this->result;
     }
 
     /*****************************************/

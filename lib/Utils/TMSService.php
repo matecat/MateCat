@@ -317,6 +317,8 @@ class TMSService {
      * @param $userMail
      * @param $userName
      * @param $userSurname
+     *
+     * @return resource
      * @throws Exception
      */
     public function downloadTMX( $userMail, $userName, $userSurname ) {
@@ -324,7 +326,9 @@ class TMSService {
         /**
          * @var $result Engines_Results_MyMemory_ExportResponse
          */
-        $result = $this->mymemory_engine->createExport( $this->tm_key );
+        $result = $this->mymemory_engine->createExport(
+                $this->tm_key
+        );
 
         if ( $result->responseDetails == 'QUEUED' &&
                 $result->responseStatus == 202
@@ -348,6 +352,11 @@ class TMSService {
             if ( $result->responseDetails == 'NO SEGMENTS' ) {
                 throw new DomainException( "No translation memories found to download.", -17 );
             }
+
+            $_download_url = parse_url( $result->resourceLink );
+            parse_str( $_download_url[ 'query' ], $secrets );
+            list( $_key, $pass ) = array_values( $secrets );
+
         }
         else {
 
@@ -355,12 +364,27 @@ class TMSService {
 
         }
 
+        $resource_pointer = $this->mymemory_engine->downloadExport( $this->tm_key, $pass );
+
+        return $resource_pointer;
+
+    }
+
+    /**
+     * @param $userMail
+     * @param $userName
+     * @param $userSurname
+     *
+     * @return Engines_Results_MyMemory_ExportResponse
+     */
+    public function requestTMXEmailDownload( $userMail, $userName, $userSurname ){
+
         $response = $this->mymemory_engine->emailExport(
-            $this->tm_key,
-            $this->name,
-            $userMail,
-            $userName,
-            $userSurname
+                $this->tm_key,
+                $this->name,
+                $userMail,
+                $userName,
+                $userSurname
         );
 
         return $response;
