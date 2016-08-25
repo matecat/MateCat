@@ -441,6 +441,7 @@ UI = {
 
     clearMarks: function (str) {
         str = str.replace(/(<mark class="inGlossary">)/gi, '').replace(/<\/mark>/gi, '');
+        str = str.replace(/<span data-id="[^"]+" class="unusedGlossaryTerm">(.*?)<\/span>/gi, "$1");
         return str;
     },
 	highlightEditarea: function(seg) {
