@@ -63,14 +63,19 @@ class Editarea extends React.Component {
         setTimeout(function () {
             if(!$(self.editAreaRef).find('.locked.selected').length) {
                 if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
-                    UI.showEditToolbar();
+                    //ShowEditToolbar
+                    $('.editor .editToolbar').addClass('visible');
                 }
             }
         }, 100);
-
     }
     onMouseDownEvent() {
-        UI.hideEditToolbar();
+        // Hide Edit Toolbar
+        $('.editor .editToolbar').removeClass('visible');
+    }
+    onBlurEvent() {
+        // Hide Edit Toolbar
+        $('.editor .editToolbar').removeClass('visible');
     }
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
@@ -110,6 +115,7 @@ class Editarea extends React.Component {
                      onMouseUp={this.onMouseUpEvent}
                      onMouseDown={this.onMouseDownEvent}
                      onContextMenu={this.onMouseUpEvent}
+                     onBlur={this.onBlurEvent}
                      ref={(ref) => this.editAreaRef = ref}
                 />
 

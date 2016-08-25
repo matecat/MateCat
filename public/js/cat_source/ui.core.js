@@ -1453,14 +1453,7 @@ UI = {
 	chunkedSegmentsLoaded: function() {
 		return $('section.readonly').length;
 	},
-	showEditToolbar: function() {
-		$('.editor .editToolbar').addClass('visible');
-	},
-	hideEditToolbar: function() {
-		$('.editor .editToolbar').removeClass('visible');
-	},
-
-	formatSelection: function(op) {
+    formatSelection: function(op) {
         var str = getSelectionHtml();
         insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
         var newStr = '';
@@ -3052,7 +3045,6 @@ UI = {
     clickOnTranslatedButton: function (e, button) {
         var buttonValue = ($(button).hasClass('translated')) ? 'translated' : 'next-untranslated';
         e.preventDefault();
-        UI.hideEditToolbar();
         //??
         $('.test-invisible').remove();
 

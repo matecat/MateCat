@@ -305,7 +305,6 @@ if ( Review.enabled() && Review.type == 'simple' ) {
             e.preventDefault();
             var goToNextNotApproved = ($(button).hasClass('approved')) ? false : true;
             UI.tempDisablingReadonlyAlert = true;
-            UI.hideEditToolbar();
             UI.currentSegment.removeClass('modified');
             UI.currentSegment.data('modified', false);
 

@@ -165,7 +165,8 @@ $.extend(UI, {
 		}).on('keydown', '.editor .editarea', 'shift+return', function(e) {
             UI.handleReturn(e);
         }).on('keydown', '.editor .editarea', 'return', function(e) {
-            UI.handleReturn(e);
+            e.preventDefault();
+        	UI.handleReturn(e);
 		}).on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
             if(!UI.hiddenTextEnabled) return;
 			e.preventDefault();
@@ -629,12 +630,6 @@ $.extend(UI, {
 		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.standard, function(e) {
 			e.preventDefault();
 			UI.preOpenConcordance();
-
-        }).on('keyup', '.editor .editarea', 'return', function(e) {
-            e.preventDefault();
-            return false;
-        }).on('keydown', '.editor .editarea', 'return', function(e) {
-            e.preventDefault();
         }).on('keypress', '.editor .editarea', function(e) {
 
 			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
@@ -663,232 +658,7 @@ $.extend(UI, {
 			}, 50);
 		}).on('keydown', '.editor .editarea', function(e) {
 
-            if ((e.which == 8) && (!UI.body.hasClass('tagmode-default-extended'))) {
-				return true;
-				// ONly for console.log
-                // var rangeObject = getRangeObject(window.getSelection());
-                // for(var key in rangeObject.endContainer) {
-                //     console.log('key: ' + key + '\n' + 'value: "' + rangeObject[key] + '"');
-                // }
-            }
-
-			if ((e.which == 8) || (e.which == 46)) { // backspace e canc(mac)
-				if ($('.selected', $(this)).length) {
-					e.preventDefault();
-					$('.selected', $(this)).remove();
-					UI.saveInUndoStack('cancel');
-					UI.currentSegmentQA();
-				} else {
-					var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
-                    var numSpacesBefore = $('.space-marker', UI.editarea).length;
-					saveSelection();
-
-					parentTag = $('span.locked', UI.editarea).has('.rangySelectionBoundary');
-					isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
-					parentMark = $('.searchMarker', UI.editarea).has('.rangySelectionBoundary');
-					isInsideMark = $('.searchMarker .rangySelectionBoundary', UI.editarea).length;
-
-                    sbIndex = 0;
-                    var translation = $.parseHTML(UI.editarea.html());
-                    $.each(translation, function(index) {
-                        if($(this).hasClass('rangySelectionBoundary')) sbIndex = index;
-                    });
-
-                    var undeletableMonad = (($(translation[sbIndex-1]).hasClass('monad'))&&($(translation[sbIndex-2]).prop("tagName") == 'BR'))? true : false;
-                    var selBound = $('.rangySelectionBoundary', UI.editarea);
-                    if(undeletableMonad) selBound.prev().remove();
-                    if(e.which == 8) { // backspace
-                        var undeletableTag = (($(translation[sbIndex-1]).hasClass('locked'))&&($(translation[sbIndex-2]).prop("tagName") == 'BR'))? true : false;
-                        if(undeletableTag) selBound.prev().remove();
-                    }
-
-                    restoreSelection();
-
-					// insideTag management
-					if ((e.which == 8)&&(isInsideTag)) {
-						parentTag.remove();
-						e.preventDefault();
-					}
-
-					setTimeout(function() {
-                        saveSelection();
-                        // detect if selection ph is inside a monad tag
-                        if($('.monad .rangySelectionBoundary', UI.editarea).length) {
-                            $('.monad:has(.rangySelectionBoundary)', UI.editarea).after($('.monad .rangySelectionBoundary', UI.editarea));
-                            // move selboundary after the
-                        }
-                        restoreSelection();
-						var numTagsAfter = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
-						var numSpacesAfter = $('.space-marker', UI.editarea).length;
-//                        var numSpacesAfter = (UI.editarea.text())? UI.editarea.text().match(/\s/gi).length : 0;
-						if (numTagsAfter < numTagsBefore) UI.saveInUndoStack('cancel');
-						if (numSpacesAfter < numSpacesBefore) UI.saveInUndoStack('cancel');
-//                        console.log('EE: ', UI.editarea.html());
-//                        console.log($(':focus'));
-
-
-					}, 50);
-
-					// insideMark management
-					if ((e.which == 8)&&(isInsideMark)) {
-						console.log('inside mark');
-					}
-
-
-
-				}
-			}
-
-			if (e.which == 8) { // backspace
-				if($('.tag-autocomplete').length) {
-					UI.closeTagAutocompletePanel();
-					setTimeout(function() {
-						UI.openTagAutocompletePanel();
-						added = UI.getPartialTagAutocomplete();
-						if(added === '') UI.closeTagAutocompletePanel();
-					}, 10);
-				}
-			}
-			if (e.which == 9) { // tab
-                if(!UI.hiddenTextEnabled) return;
-
-				e.preventDefault();
-				var node = document.createElement("span");
-				node.setAttribute('class', 'marker monad tab-marker ' + config.tabPlaceholderClass);
-				node.setAttribute('contenteditable', 'false');
-				node.textContent = htmlDecode("&#8677;");
-				insertNodeAtCursor(node);
-				UI.unnestMarkers();
-			}
-			if (e.which == 37) { // left arrow
-				selection = window.getSelection();
-				range = selection.getRangeAt(0);
-                setTimeout(function() {
-                    UI.checkTagProximity();
-                }, 10);
-
-				if (range.startOffset != range.endOffset) { // if something is selected when the left button is pressed...
-					r = range.startContainer.innerText;
-					if ((r[0] == '<') && (r[r.length - 1] == '>')) { // if a tag is selected
-                        e.preventDefault();
-
-
-                        saveSelection();
-                        rr = document.createRange();
-                        referenceNode = $('.rangySelectionBoundary', UI.editarea).first().get(0);
-                        rr.setStartBefore(referenceNode);
-                        rr.setEndBefore(referenceNode);
-                        $('.rangySelectionBoundary', UI.editarea).remove();
-
-					}
-				} else { // there's nothing selected
-                }
-				UI.closeTagAutocompletePanel();
-			}
-
-			if (e.which == 38) { // top arrow
-				if($('.tag-autocomplete').length) {
-					if(!$('.tag-autocomplete li.current').is($('.tag-autocomplete li:first'))) {
-						$('.tag-autocomplete li.current:not(:first-child)').removeClass('current').prevAll(':not(.hidden)').first().addClass('current');
-						return false;
-					}
-				}
-				selection = window.getSelection();
-				range = selection.getRangeAt(0);
-				if (range.startOffset != range.endOffset) {
-					r = range.startContainer.data;
-					if ((r[0] == '<') && (r[r.length - 1] == '>')) {
-						saveSelection();
-						rr = document.createRange();
-						referenceNode = $('.rangySelectionBoundary', UI.editarea).last().get(0);
-						rr.setStartAfter(referenceNode);
-						rr.setEndAfter(referenceNode);
-						$('.rangySelectionBoundary', UI.editarea).remove();
-					}
-				}
-                setTimeout(function() {
-                    UI.checkTagProximity();
-                }, 10);
-			}
-			if (e.which == 39) { // right arrow
-				selection = window.getSelection();
-				range = selection.getRangeAt(0);
-                setTimeout(function() {
-                    UI.checkTagProximity();
-                }, 10);
-
-				if (range.startOffset != range.endOffset) {
-					r = range.startContainer.innerText;
-					if ((r[0] == '<') && (r[r.length - 1] == '>')) {
-						saveSelection();
-						rr = document.createRange();
-						referenceNode = $('.rangySelectionBoundary', UI.editarea).last().get(0);
-						rr.setStartAfter(referenceNode);
-						rr.setEndAfter(referenceNode);
-						$('.rangySelectionBoundary', UI.editarea).remove();
-					}
-				}
-				UI.closeTagAutocompletePanel();
-				UI.jumpTag(range, 'end');
-			}
-
-			if (e.which == 40) { // down arrow
-				if($('.tag-autocomplete').length) {
-					$('.tag-autocomplete li.current:not(:last-child)').removeClass('current').nextAll(':not(.hidden)').first().addClass('current');
-					return false;
-				}
-				selection = window.getSelection();
-				range = selection.getRangeAt(0);
-				if (range.startOffset != range.endOffset) {
-					r = range.startContainer.data;
-					if ((r[0] == '<') && (r[r.length - 1] == '>')) {
-						saveSelection();
-						rr = document.createRange();
-						referenceNode = $('.rangySelectionBoundary', UI.editarea).last().get(0);
-						rr.setStartAfter(referenceNode);
-						rr.setEndAfter(referenceNode);
-						$('.rangySelectionBoundary', UI.editarea).remove();
-					}
-				}
-                setTimeout(function() {
-                    UI.checkTagProximity();
-                }, 10);
-			}
-
-            if (((e.which == 37) || (e.which == 38) || (e.which == 39) || (e.which == 40) || (e.which == 8))) { // not arrows, backspace, canc
-                UI.saveInUndoStack('arrow');
-            }
-
-			if (!((e.which == 37) || (e.which == 38) || (e.which == 39) || (e.which == 40) || (e.which == 8) || (e.which == 46) || (e.which == 91))) { // not arrows, backspace, canc or cmd
-				if (UI.body.hasClass('searchActive')) {
-					UI.resetSearch();
-				}
-			}
-			if (e.which == 32) { // space
-				setTimeout(function() {
-					UI.saveInUndoStack('space');
-				}, 100);
-			}
-
-			if (e.which == 13) { // return
-				if($('.tag-autocomplete').length) {
-                    e.preventDefault();
-                    $('.tag-autocomplete li.current').click();
-					return false;
-				}
-			}
-
-			if (
-					(e.which == 13) || // return
-					(e.which == 32) || // space
-					(e.which == 49) || // semicomma
-					(e.which == 188) || // comma
-					(e.which == 186) || // semicomma
-					(e.which == 190) || // mark
-					(e.which == 191) || // question mark
-					(e.which == 222)) { // apostrophe
-				UI.spellCheck();
-			}
+            UI.keydownEditAreaEventHandler(e)
 
 		}).on('input', '.editarea', function( e ) { //inputineditarea
 			UI.currentSegment.addClass('modified').removeClass('waiting_for_check_result');
@@ -934,15 +704,12 @@ $.extend(UI, {
 			$('.selected', $(this)).removeClass('selected');
 			UI.currentSelectedText = false;
 			UI.currentSearchInTarget = false;
-        }).on('blur', '.editor .editarea', function() {
-            UI.hideEditToolbar();
-		}).on('click', 'a.translated, a.next-untranslated', function(e) {
+        }).on('click', 'a.translated, a.next-untranslated', function(e) {
 			UI.clickOnTranslatedButton(e, this);
 		}).on('click', 'a.guesstags', function(e) {
 			// Tag Projection: handle click on "GuesssTags" button, retrieve the translation and place it
 			// in the current segment
 			e.preventDefault();
-			UI.hideEditToolbar();
 			UI.startSegmentTagProjection();
 			return false;
 		}).on('click', 'a.d, a.a, a.r, a.f, a.fx, a.rb', function() {
@@ -1274,7 +1041,235 @@ $.extend(UI, {
 		this.initTime = this.initEnd - this.initStart;
 		if (this.debug) { console.log('Init time: ' + this.initTime); }
 
-    }
+    },
+    keydownEditAreaEventHandler: function (e) {
+		var code = e.which || e.keyCode;
+		var selection, range, r, rr, referenceNode;
+    	if ((code == 8) && (!UI.body.hasClass('tagmode-default-extended'))) {
+			return true;
+			// ONly for console.log
+			// var rangeObject = getRangeObject(window.getSelection());
+			// for(var key in rangeObject.endContainer) {
+			//     console.log('key: ' + key + '\n' + 'value: "' + rangeObject[key] + '"');
+			// }
+		}
+
+		if ((code == 8) || (code == 46)) { // backspace e canc(mac)
+			if ($('.selected', $(this)).length) {
+				e.preventDefault();
+				$('.selected', $(this)).remove();
+				UI.saveInUndoStack('cancel');
+				UI.currentSegmentQA();
+			} else {
+				var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
+				var numSpacesBefore = $('.space-marker', UI.editarea).length;
+				saveSelection();
+
+				var parentTag = $('span.locked', UI.editarea).has('.rangySelectionBoundary');
+				var isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
+				var isInsideMark = $('.searchMarker .rangySelectionBoundary', UI.editarea).length;
+
+				var sbIndex = 0;
+				var translation = $.parseHTML(UI.editarea.html());
+				$.each(translation, function(index) {
+					if($(this).hasClass('rangySelectionBoundary')) sbIndex = index;
+				});
+
+				var undeletableMonad = (($(translation[sbIndex-1]).hasClass('monad'))&&($(translation[sbIndex-2]).prop("tagName") == 'BR'))? true : false;
+				var selBound = $('.rangySelectionBoundary', UI.editarea);
+				if(undeletableMonad) selBound.prev().remove();
+				if(code == 8) { // backspace
+					var undeletableTag = (($(translation[sbIndex-1]).hasClass('locked'))&&($(translation[sbIndex-2]).prop("tagName") == 'BR'))? true : false;
+					if(undeletableTag) selBound.prev().remove();
+				}
+
+				restoreSelection();
+
+				// insideTag management
+				if ((code == 8)&&(isInsideTag)) {
+					parentTag.remove();
+					e.preventDefault();
+				}
+
+				setTimeout(function() {
+					saveSelection();
+					// detect if selection ph is inside a monad tag
+					if($('.monad .rangySelectionBoundary', UI.editarea).length) {
+						$('.monad:has(.rangySelectionBoundary)', UI.editarea).after($('.monad .rangySelectionBoundary', UI.editarea));
+						// move selboundary after the
+					}
+					restoreSelection();
+					var numTagsAfter = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
+					var numSpacesAfter = $('.space-marker', UI.editarea).length;
+//                        var numSpacesAfter = (UI.editarea.text())? UI.editarea.text().match(/\s/gi).length : 0;
+					if (numTagsAfter < numTagsBefore) UI.saveInUndoStack('cancel');
+					if (numSpacesAfter < numSpacesBefore) UI.saveInUndoStack('cancel');
+//                        console.log('EE: ', UI.editarea.html());
+//                        console.log($(':focus'));
+
+
+				}, 50);
+
+				// insideMark management
+				if ((code == 8)&&(isInsideMark)) {
+					console.log('inside mark');
+				}
+
+
+
+			}
+		}
+
+		if (code == 8) { // backspace
+			if($('.tag-autocomplete').length) {
+				UI.closeTagAutocompletePanel();
+				setTimeout(function() {
+					UI.openTagAutocompletePanel();
+					var added = UI.getPartialTagAutocomplete();
+					if(added === '') UI.closeTagAutocompletePanel();
+				}, 10);
+			}
+		}
+		if (code == 9) { // tab
+			if(!UI.hiddenTextEnabled) return;
+
+			e.preventDefault();
+			var node = document.createElement("span");
+			node.setAttribute('class', 'marker monad tab-marker ' + config.tabPlaceholderClass);
+			node.setAttribute('contenteditable', 'false');
+			node.textContent = htmlDecode("&#8677;");
+			insertNodeAtCursor(node);
+			UI.unnestMarkers();
+		}
+		if (code == 37) { // left arrow
+			selection = window.getSelection();
+			range = selection.getRangeAt(0);
+			setTimeout(function() {
+				UI.checkTagProximity();
+			}, 10);
+
+			if (range.startOffset != range.endOffset) { // if something is selected when the left button is pressed...
+				r = range.startContainer.innerText;
+				if ((r[0] == '<') && (r[r.length - 1] == '>')) { // if a tag is selected
+					e.preventDefault();
+
+
+					saveSelection();
+					rr = document.createRange();
+					referenceNode = $('.rangySelectionBoundary', UI.editarea).first().get(0);
+					rr.setStartBefore(referenceNode);
+					rr.setEndBefore(referenceNode);
+					$('.rangySelectionBoundary', UI.editarea).remove();
+
+				}
+			}
+			UI.closeTagAutocompletePanel();
+		}
+
+		if (code == 38) { // top arrow
+			if($('.tag-autocomplete').length) {
+				if(!$('.tag-autocomplete li.current').is($('.tag-autocomplete li:first'))) {
+					$('.tag-autocomplete li.current:not(:first-child)').removeClass('current').prevAll(':not(.hidden)').first().addClass('current');
+					return false;
+				}
+			}
+			selection = window.getSelection();
+			range = selection.getRangeAt(0);
+			if (range.startOffset != range.endOffset) {
+				r = range.startContainer.data;
+				if ((r[0] == '<') && (r[r.length - 1] == '>')) {
+					saveSelection();
+					rr = document.createRange();
+					referenceNode = $('.rangySelectionBoundary', UI.editarea).last().get(0);
+					rr.setStartAfter(referenceNode);
+					rr.setEndAfter(referenceNode);
+					$('.rangySelectionBoundary', UI.editarea).remove();
+				}
+			}
+			setTimeout(function() {
+				UI.checkTagProximity();
+			}, 10);
+		}
+		if (code == 39) { // right arrow
+			selection = window.getSelection();
+			range = selection.getRangeAt(0);
+			setTimeout(function() {
+				UI.checkTagProximity();
+			}, 10);
+
+			if (range.startOffset != range.endOffset) {
+				r = range.startContainer.innerText;
+				if ((r[0] == '<') && (r[r.length - 1] == '>')) {
+					saveSelection();
+					rr = document.createRange();
+					referenceNode = $('.rangySelectionBoundary', UI.editarea).last().get(0);
+					rr.setStartAfter(referenceNode);
+					rr.setEndAfter(referenceNode);
+					$('.rangySelectionBoundary', UI.editarea).remove();
+				}
+			}
+			UI.closeTagAutocompletePanel();
+			UI.jumpTag(range, 'end');
+		}
+
+		if (code == 40) { // down arrow
+			if($('.tag-autocomplete').length) {
+				$('.tag-autocomplete li.current:not(:last-child)').removeClass('current').nextAll(':not(.hidden)').first().addClass('current');
+				return false;
+			}
+			selection = window.getSelection();
+			range = selection.getRangeAt(0);
+			if (range.startOffset != range.endOffset) {
+				r = range.startContainer.data;
+				if ((r[0] == '<') && (r[r.length - 1] == '>')) {
+					saveSelection();
+					rr = document.createRange();
+					referenceNode = $('.rangySelectionBoundary', UI.editarea).last().get(0);
+					rr.setStartAfter(referenceNode);
+					rr.setEndAfter(referenceNode);
+					$('.rangySelectionBoundary', UI.editarea).remove();
+				}
+			}
+			setTimeout(function() {
+				UI.checkTagProximity();
+			}, 10);
+		}
+
+		if (((code == 37) || (code == 38) || (code == 39) || (code == 40) || (code == 8))) { // not arrows, backspace, canc
+			UI.saveInUndoStack('arrow');
+		}
+
+		if (!((code == 37) || (code == 38) || (code == 39) || (code == 40) || (code == 8) || (code == 46) || (code == 91))) { // not arrows, backspace, canc or cmd
+			if (UI.body.hasClass('searchActive')) {
+				UI.resetSearch();
+			}
+		}
+		if (code == 32) { // space
+			setTimeout(function() {
+				UI.saveInUndoStack('space');
+			}, 100);
+		}
+
+		if (code == 13) { // return
+			if($('.tag-autocomplete').length) {
+				e.preventDefault();
+				$('.tag-autocomplete li.current').click();
+				return false;
+			}
+		}
+
+		if (
+			(code == 13) || // return
+			(code == 32) || // space
+			(code == 49) || // semicomma
+			(code == 188) || // comma
+			(code == 186) || // semicomma
+			(code == 190) || // mark
+			(code == 191) || // question mark
+			(code == 222)) { // apostrophe
+			UI.spellCheck();
+		}
+	}
 });
 
 if ( config.isReview ) {

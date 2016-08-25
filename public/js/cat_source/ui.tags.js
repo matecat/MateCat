@@ -221,13 +221,10 @@ $.extend(UI, {
     checkTagProximity: function () {
         if(UI.editarea.html() == '') return false;
 
-        selection = window.getSelection();
+        var selection = window.getSelection();
         if(selection.rangeCount < 1) return false;
-        range = selection.getRangeAt(0);
+        var range = selection.getRangeAt(0);
         if(!range.collapsed) return true;
-        nextEl = $(range.endContainer.nextElementSibling);
-        prevEl = $(range.endContainer.previousElementSibling);
-        tempRange = range;
         UI.editarea.find('.test-invisible').remove();
         pasteHtmlAtCaret('<span class="test-invisible"></span>');
         var htmlEditarea = $.parseHTML(UI.editarea.html());
@@ -235,24 +232,20 @@ $.extend(UI, {
             if($(this).hasClass('test-invisible')) {
                 UI.numCharsUntilTagRight = 0;
                 UI.numCharsUntilTagLeft = 0;
-                nearTagOnRight = UI.nearTagOnRight(index+1, htmlEditarea);
-                nearTagOnLeft = UI.nearTagOnLeft(index-1, htmlEditarea);
+                var nearTagOnRight = UI.nearTagOnRight(index+1, htmlEditarea);
+                var nearTagOnLeft = UI.nearTagOnLeft(index-1, htmlEditarea);
 
-                if((typeof nearTagOnRight != 'undefined')&&(nearTagOnRight)) {//console.log('1');
-                    UI.removeHighlightCorrespondingTags();
+                if( (typeof nearTagOnRight != 'undefined') && (nearTagOnRight) ||
+                    (typeof nearTagOnLeft != 'undefined')&&(nearTagOnLeft)) {
                     UI.highlightCorrespondingTags($(UI.editarea.find('.locked')[indexTags]));
-                } else if((typeof nearTagOnLeft != 'undefined')&&(nearTagOnLeft)) {//console.log('2');
-                    UI.removeHighlightCorrespondingTags();
-                    UI.highlightCorrespondingTags($(UI.editarea.find('.locked')[indexTags]));
-                } else {
-                    UI.removeHighlightCorrespondingTags();
                 }
+                UI.removeHighlightCorrespondingTags();
 
                 UI.numCharsUntilTagRight = null;
                 UI.numCharsUntilTagLeft = null;
                 UI.editarea.find('.test-invisible').remove();
                 return false;
-            };
+            }
         });
 
     },
@@ -349,7 +342,7 @@ $.extend(UI, {
 
 	// TAG AUTOCOMPLETE
 	checkAutocompleteTags: function() {
-		added = this.getPartialTagAutocomplete();
+		var added = this.getPartialTagAutocomplete();
 		$('.tag-autocomplete li.hidden').removeClass('hidden');
 		$('.tag-autocomplete li').each(function() {
 			var str = $(this).text();
