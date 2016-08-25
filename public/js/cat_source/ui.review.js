@@ -309,50 +309,40 @@ if ( Review.enabled() && Review.type == 'simple' ) {
             UI.currentSegment.removeClass('modified');
             UI.currentSegment.data('modified', false);
 
-            var noneSelected = !((UI.currentSegment.find('.sub-editor.review .error-type input[value=1]').is(':checked')) || (UI.currentSegment.find('.sub-editor.review .error-type input[value=2]').is(':checked')));
 
-            //
-            if (( noneSelected ) && ( $('.editor .track-changes p span').length)) {
+            $('.sub-editor.review .error-type').removeClass('error');
 
-                $('.editor .tab-switcher-review').click();
-                $('.sub-editor.review .error-type').addClass('error');
+            UI.changeStatus(button, 'approved', 0);  // this does < setTranslation
 
+            var original = UI.currentSegment.find('.original-translation').text();
+            var sid = UI.currentSegmentId;
+            var err = $('.sub-editor.review .error-type');
+            var err_typing = $(err).find('input[name=t1]:checked').val();
+            var err_translation = $(err).find('input[name=t2]:checked').val();
+            var err_terminology = $(err).find('input[name=t3]:checked').val();
+            var err_language = $(err).find('input[name=t4]:checked').val();
+            var err_style = $(err).find('input[name=t5]:checked').val();
+
+            if (goToNextNotApproved) {
+                UI.openNextTranslated();
             } else {
-
-                $('.sub-editor.review .error-type').removeClass('error');
-
-                UI.changeStatus(button, 'approved', 0);  // this does < setTranslation
-
-                var original = UI.currentSegment.find('.original-translation').text();
-                var sid = UI.currentSegmentId;
-                var err = $('.sub-editor.review .error-type');
-                var err_typing = $(err).find('input[name=t1]:checked').val();
-                var err_translation = $(err).find('input[name=t2]:checked').val();
-                var err_terminology = $(err).find('input[name=t3]:checked').val();
-                var err_language = $(err).find('input[name=t4]:checked').val();
-                var err_style = $(err).find('input[name=t5]:checked').val();
-
-                if (goToNextNotApproved) {
-                    UI.openNextTranslated();
-                } else {
-                    UI.gotoNextSegment();
-                }
-
-                var data = {
-                    action: 'setRevision',
-                    job: config.job_id,
-                    jpassword: config.password,
-                    segment: sid,
-                    original: original,
-                    err_typing: err_typing,
-                    err_translation: err_translation,
-                    err_terminology: err_terminology,
-                    err_language: err_language,
-                    err_style: err_style
-                };
-
-                UI.setRevision(data);
+                UI.gotoNextSegment();
             }
+
+            var data = {
+                action: 'setRevision',
+                job: config.job_id,
+                jpassword: config.password,
+                segment: sid,
+                original: original,
+                err_typing: err_typing,
+                err_translation: err_translation,
+                err_terminology: err_terminology,
+                err_language: err_language,
+                err_style: err_style
+            };
+
+            UI.setRevision(data);
         },
         overrideButtonsForRevision: function () {
             var div = $('<ul>' + UI.segmentButtons + '</ul>');

@@ -1330,7 +1330,7 @@ background: #09beec;
 }
 
 .sub-editor .cc-search .search-target{
-	width: 45.2%;
+	width: 44.2%;
 }
 
 .sub-editor .gl-search .gl-comment
@@ -2699,10 +2699,10 @@ section.modified.editor .status
 
 /*media query */
 
-@media screen and (max-width: 1580px){
-	/*.buttons{margin:-15px 45px 0 0 !important;}*/
-	.graysmall li{width:43%;}
-}
+/*@media screen and (max-width: 1580px){*/
+	/*!*.buttons{margin:-15px 45px 0 0 !important;}*!*/
+	/*.graysmall li{width:43%;}*/
+/*}*/
 @media screen and (min-width: 1600px){
 
 	.header-menu{margin-right:22px}
@@ -2719,7 +2719,7 @@ section.modified.editor .status
 
 @media screen and (max-width: 1380px){
 	/*.buttons{margin:-15px 43px 0 0 !important;}*/
-	.graysmall li{width:42.5%;}
+	.graysmall li{width:45.5%;}
 	.header-menu{margin-right:18px}
     #stat-completion, #stat-wph {display: block;}
     p.split-shortcut,.editing .sid .txt {font-size:10px;}
