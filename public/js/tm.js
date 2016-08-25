@@ -502,14 +502,6 @@
             } );
             return keyIsAlreadyPresent;
         },
-        showSuccessMessage: function ( message, referenceTableId ) {
-            if ( message ) {
-                $( '.mgmt-container .tm-success-message.' + referenceTableId ).html( message ).show();
-            }
-        },
-        hideSuccessMessage: function ( referenceTableId ) {
-            $( '.mgmt-container .tm-success-message.' + referenceTableId ).html( '' ).hide();
-        },
         showErrorOnKeyInput: function (message) {
             if (message) {
                 $('.mgmt-container .tm-error-message').html(message).show();
@@ -636,22 +628,22 @@
 
         execAddTM: function(el) {
 
-            table = $(el).parents('table');
-            existing = ($(el).hasClass('existingKey'))? true : false;
-            if(existing) {
-                $(el).parents('.uploadfile').addClass('uploading');
+        var table = $(el).parents('table');
+        existing = ($(el).hasClass('existingKey'))? true : false;
+        if(existing) {
+            $(el).parents('.uploadfile').addClass('uploading');
+        } else {
+            $(table).find('tr.uploadpanel .uploadfile').addClass('uploading');
+        }
+        if(existing) {
+            if($(el).parents('tr').hasClass('mine')) {
+                trClass = 'mine';
             } else {
-                $(table).find('tr.uploadpanel .uploadfile').addClass('uploading');
+                trClass = 'ownergroup';
             }
-            if(existing) {
-                if($(el).parents('tr').hasClass('mine')) {
-                    trClass = 'mine';
-                } else {
-                    trClass = 'ownergroup';
-                }
-            } else {
-                trClass = 'uploadpanel';
-            }
+        } else {
+            trClass = 'uploadpanel';
+        }
 
             form = $(table).find('tr.' + trClass + ' .add-TM-Form')[0];
             path = $(el).parents('.uploadfile').find('input[type="file"]').val();

@@ -320,7 +320,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
 
         $postFields[ 'key' ] = trim( $key );
 
-        if ( PHP_MINOR_VERSION >= 5 ) {
+        if ( version_compare(PHP_VERSION, '5.5.0') >= 0 ) {
             /**
              * Added in PHP 5.5.0 with FALSE as the default value.
              * PHP 5.6.0 changes the default value to TRUE.
@@ -344,7 +344,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         $postFields[ 'key' ] = trim( $key );
 
 
-        if (PHP_MINOR_VERSION >= 5) {
+        if ( version_compare(PHP_VERSION, '5.5.0') >= 0 ) {
             /**
              * Added in PHP 5.5.0 with FALSE as the default value.
              * PHP 5.6.0 changes the default value to TRUE.
