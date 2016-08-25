@@ -1981,6 +1981,7 @@ margin-top: 10px;
 }
 
 span.email-export-tmx-email-sent,
+span.email-export-tmx-email-error,
 #activetm td.uploadfile .msg,
 #inactivetm td.uploadfile .msg {
     float: right;
@@ -1989,6 +1990,7 @@ span.email-export-tmx-email-sent,
     color: green;
     text-align: right;
 }
+
 #activetm td.dragrow {
    position: relative;
 	padding: 5px 5px 5px 5px!important;
@@ -2078,10 +2080,18 @@ input.email-export-tmx {
     cursor: default;
     pointer-events: none;
 }
-span.email-export-tmx-email-sent {
+span.email-export-tmx-email-sent,
+span.email-export-tmx-email-error {
     float: right;
     margin-top: 1px;
     display: none;
+}
+span.email-export-tmx-email-error {
+    color: red;
+    margin-left: 21px;
+    line-height: 14px;
+    text-align: center;
+    margin-right: 28px;
 }
 .btn-grey.canceladd-export-tmx {
     background: #f26522;

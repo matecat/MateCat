@@ -1134,7 +1134,7 @@
                 password = config.password;
             }
 
-            APP.doRequest({
+            return APP.doRequest({
                 data: {
                     action: 'downloadTMX',
                     tm_key: tm_key,
@@ -1430,6 +1430,7 @@
                 '<input type="text" class="email-export-tmx mgmt-input" value="' + config.userMail + '"/>' +
                 '<span class="uploadloader"></span>'+
                 '<span class="email-export-tmx-email-sent">Request submitted</span>' +
+                '<span class="email-export-tmx-email-error">We got an error,</br> please contact support</span>' +
                 '<a class="pull-right btn-ok export-tmx-button">' +
                     '<span class="text export-tmx-button-label">Confirm</span>' +
                 '</a>' +
@@ -1447,15 +1448,26 @@
             line.find('.uploadloader').show();
             line.find('.export-tmx-button, .canceladd-export-tmx').addClass('disabled');
             var email = line.find('.email-export-tmx').val();
-            UI.downloadTM( line, email );
-            setTimeout( function() {
-                line.find('.uploadloader').hide();
-                line.find('.export-tmx-button, .canceladd-export-tmx').hide();
-                line.find('.email-export-tmx-email-sent').show();
-                setTimeout( function() {
-                    UI.closeExportTmx(line);
-                }, 2000);
-            }, 3000 );
+            UI.downloadTM( line, email ).done(function (response) {
+                if (response.errors.length == 0) {
+                    setTimeout(function () {
+                        line.find('.uploadloader').hide();
+                        line.find('.export-tmx-button, .canceladd-export-tmx').hide();
+                        line.find('.email-export-tmx-email-sent').show();
+                        setTimeout(function () {
+                            UI.closeExportTmx(line);
+                        }, 2000);
+                    }, 3000);
+                } else {
+                    setTimeout(function () {
+                        line.find('.uploadloader').hide();
+                        line.find('.export-tmx-button').hide();
+                        line.find('.canceladd-export-tmx').removeClass('disabled');
+                        line.find('.email-export-tmx-email-error').show();
+                    }, 2000);
+                }
+            });
+
         },
         closeExportTmx: function (elem) {
             $(elem).find('td.download-tmx-container').slideToggle(function () {
