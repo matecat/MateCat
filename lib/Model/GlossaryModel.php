@@ -38,6 +38,11 @@ class GlossaryModel {
         $this->role = TmKeyManagement_Filter::ROLE_REVISOR ;
     }
 
+    private function __matchWithWordBoundary( $what, $where ) {
+        $quoted = preg_quote( $what );
+        return preg_match_all("/\\b$quoted\\b/u", $where ) ;
+    }
+
     /**
      * Only returns matches that are not present in translation.
      *
@@ -50,12 +55,10 @@ class GlossaryModel {
         $unmatched = array() ;
 
         foreach($allMatches as $match) {
-            $quoted = preg_quote( $match['raw_translation'] );
-            $found = preg_match_all("/\\b$quoted\\b/", $translation ) ;
-
-            // TODO: consider to change this in favour of a comparison with
-            // $match['usage_count']. 
-            if ( $found == 0 ) {
+            if (
+                    $this->__matchWithWordBoundary( $match['raw_segment'], $segment ) > 0 &&
+                    $this->__matchWithWordBoundary( $match['raw_translation'], $translation ) === 0
+            ) {
                 $unmatched[] = $match ;
             }
         }
