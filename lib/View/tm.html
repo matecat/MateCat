@@ -32,16 +32,13 @@
                     <div class="mgmt-table-tm hide">
 
                         <div class="mgmt-container" id="list-search">
-                             <div class="boxed">
+                            <tal:block tal:condition="php: page != 'cattool'">
+                            <div class="boxed">
                                 <label>
                                     <input type="checkbox" id="pretranslate100" />
                                     Pre-translate 100% matches from TM
                                 </label>
                             </div>
-                            
-
-                            <tal:block tal:condition="php: page != 'cattool'">
-                           
                             </tal:block>
 
                             <div class="block pull-right ">
