@@ -122,7 +122,7 @@ class Filters {
         $filename = "$basename.$extension";
 
         $data = array(
-            'documentContent' => "@$filePath",
+            'documentContent' => Utils::curlFile($filePath),
             'sourceLocale' => Langs_Languages::getInstance()->getLangRegionCode( $sourceLang ),
             'targetLocale' => Langs_Languages::getInstance()->getLangRegionCode( $targetLang ),
             'segmentation' => $segmentation,
@@ -153,7 +153,7 @@ class Filters {
             $tmpFiles[$id] = $tmpXliffFile;
             file_put_contents($tmpXliffFile, $xliffData[ 'document_content' ]);
 
-            $dataGroups[$id] = array('xliffContent' => "@$tmpXliffFile");
+            $dataGroups[$id] = array('xliffContent' => Utils::curlFile($tmpXliffFile));
         }
 
         $responses = self::sendToFilters($dataGroups, self::XLIFF_TO_TARGET_ENDPOINT);
