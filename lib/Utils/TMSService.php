@@ -314,14 +314,10 @@ class TMSService {
     /**
      * Send a mail with link for direct prepared download
      *
-     * @param $userMail
-     * @param $userName
-     * @param $userSurname
-     *
      * @return resource
      * @throws Exception
      */
-    public function downloadTMX( $userMail, $userName, $userSurname ) {
+    public function downloadTMX() {
 
         /**
          * @var $result Engines_Results_MyMemory_ExportResponse

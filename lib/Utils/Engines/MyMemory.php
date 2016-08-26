@@ -524,7 +524,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         $parameters[ 'key' ] = trim( $key );
         $parameters[ 'user_email' ] = trim( $userEmail );
         $parameters[ 'user_name' ] = trim( $userName ) . " " . trim( $userSurname );
-        ( !empty( $name ) ? $parameters[ 'tm_name' ] = $name : $parameters[ 'tm_name' ] = $key );
+        ( !empty( $name ) ? $parameters[ 'zip_name' ] = $name : $parameters[ 'zip_name' ] = $key );
 
         $this->call( 'tmx_export_email_url', $parameters );
 

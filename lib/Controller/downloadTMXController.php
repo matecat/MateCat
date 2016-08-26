@@ -151,7 +151,7 @@ class downloadTMXController extends ajaxController {
 
         $this->tmxHandler = new TMSService();
         $this->tmxHandler->setTmKey( $this->tm_key );
-        $this->tmxHandler->setName( $this->tm_name );
+        $this->tmxHandler->setName( $this->tm_name . ".zip" );
 
     }
 
@@ -189,10 +189,10 @@ class downloadTMXController extends ajaxController {
 
             $r = "<pre>";
 
-            $r .= print_r( "User Email: " . $this->userMail , true );
-            $r .= print_r( "User ID: " . $this->uid , true );
-            $r .= print_r( $e->getMessage(), true );
-            $r .= print_r( $e->getTraceAsString(), true );
+            $r .= print_r( "User Email: " . $this->userMail , true ) . "\n";
+            $r .= print_r( "User ID: " . $this->uid , true ) . "\n";
+            $r .= print_r( $e->getMessage(), true ) . "\n";
+            $r .= print_r( $e->getTraceAsString(), true ) . "\n";
 
             $r .= "\n\n";
             $r .=  " - REQUEST URI: " . print_r( @$_SERVER['REQUEST_URI'], true ) . "\n";
