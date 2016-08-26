@@ -271,8 +271,7 @@ section {
 }
 
 .review-issues-overview-panel {
-    margin: 25px;
-    margin-top: 40px;
+    padding: 10px 10px 40px 10px;
 }
 
 .review-current-version-container {
@@ -302,7 +301,7 @@ section {
   font-size: 13px;
   position: absolute;
   top: 10px;
-  left: 10px;
+  right: 10px;
   line-height: 16px;
   background-color: #333;
   color: #ffffff;
