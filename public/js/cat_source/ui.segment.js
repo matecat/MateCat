@@ -333,12 +333,14 @@
 
             if (next.is('section')) {
                 UI.scrollSegment(next);
-                $(UI.targetContainerSelector(), next).trigger("click", "moving");
+                UI.editAreaClick($(UI.targetContainerSelector(), next), 'moving');
+                // $(UI.targetContainerSelector(), next).trigger("click", "moving");
             } else {
                 next = UI.currentFile.next().find( selector ).first();
                 if (next.length) {
                     UI.scrollSegment(next);
-                    $(UI.targetContainerSelector(), next).trigger("click", "moving");
+                    UI.editAreaClick($(UI.targetContainerSelector(), next), 'moving');
+                    // $(UI.targetContainerSelector(), next).trigger("click", "moving");
                 } else {
                     UI.closeSegment(UI.currentSegment, 1, 'save');
                 }

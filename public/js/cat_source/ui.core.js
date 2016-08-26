@@ -2998,7 +2998,7 @@ UI = {
      * and should be decoupled in future refactorings.
      *
      */
-    editAreaClick : function(e, operation) {
+    editAreaClick : function(target, operation) {
         if (typeof operation == 'undefined') {
             operation = 'clicking';
         }
@@ -3007,9 +3007,9 @@ UI = {
         UI.closeTagAutocompletePanel();
         UI.removeHighlightCorrespondingTags();
 
-        var segmentNotYetOpened = ($(this).is(UI.editarea) && !$(this).closest('section').hasClass("opened"));
+        var segmentNotYetOpened = ($(target).is(UI.editarea) && !$(target).closest('section').hasClass("opened"));
 
-        if ( !$(this).is(UI.editarea) || (UI.editarea === '') || (!UI.body.hasClass('editing')) || segmentNotYetOpened) {
+        if ( !$(target).is(UI.editarea) || !UI.body.hasClass('editing') || segmentNotYetOpened) {
             if (operation == 'moving') {
                 UI.recentMoving = true;
                 clearTimeout(UI.recentMovingTimeout);
@@ -3020,19 +3020,18 @@ UI = {
             
             UI.lastOperation = operation;
 
-            UI.openSegment(this, operation);
+            UI.openSegment(target, operation);
 
             if (operation != 'moving') {
-                var segment = $('#segment-' + $(this).data('sid'));
+                var segment = $('#segment-' + $(target).data('sid'));
                 if(!(config.isReview && (segment.hasClass('status-new') || segment.hasClass('status-draft')))) {
-                    UI.scrollSegment($('#segment-' + $(this).data('sid')));
+                    UI.scrollSegment($('#segment-' + $(target).data('sid')));
                 }
             }
         }
 
-        if (UI.editarea != '') {
-            UI.checkTagProximity();
-        }
+        UI.checkTagProximity();
+
 
         // if (UI.debug) { console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea)); }
 

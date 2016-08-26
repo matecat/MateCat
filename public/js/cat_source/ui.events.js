@@ -623,8 +623,7 @@ $.extend(UI, {
 			restoreSelection();
         }).on('click', '.footerSwitcher', function(e) {
             UI.switchFooter();
-		}).on('click', '.editarea', UI.editAreaClick
-        ).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.mac, function(e) {
+		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.mac, function(e) {
 			e.preventDefault();
 			UI.preOpenConcordance();
 		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.standard, function(e) {

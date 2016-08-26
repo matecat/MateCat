@@ -77,6 +77,9 @@ class Editarea extends React.Component {
         // Hide Edit Toolbar
         $('.editor .editToolbar').removeClass('visible');
     }
+    onClickEvent(event) {
+        UI.editAreaClick(event.currentTarget);
+    }
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.addListener(SegmentConstants.ADD_EDITAREA_CLASS, this.addClass);
@@ -116,6 +119,7 @@ class Editarea extends React.Component {
                      onMouseDown={this.onMouseDownEvent}
                      onContextMenu={this.onMouseUpEvent}
                      onBlur={this.onBlurEvent}
+                     onClick={this.onClickEvent}
                      ref={(ref) => this.editAreaRef = ref}
                 />
 
