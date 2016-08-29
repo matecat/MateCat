@@ -100,10 +100,10 @@
         <script tal:condition="true:isReview" type="text/javascript">
             config.review_password = '${review_password}';
             config.overall_quality_class = '${overall_quality_class}';
-            config.quality_report_href = '${quality_report_href}';
         </script>
 
         <script tal:condition="true:review_improved" type="text/javascript">
+            config.quality_report_href = '${quality_report_href}';
           /*<![CDATA[*/
           // TODO: remove the nested one, should be nested on the client.
           config.lqa_nested_categories = '${lqa_categories}';
