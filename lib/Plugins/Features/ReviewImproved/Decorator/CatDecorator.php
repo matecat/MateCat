@@ -38,13 +38,13 @@ class CatDecorator extends \AbstractDecorator {
         $this->template->footer_show_revise_link = false;
 
 
-        if ( $this->controller->isRevision() ) {
-            // TODO: complete this with the actual URL
-            $this->template->quality_report_href = \Routes::pluginsBase() .
-                     "/review_improved/quality_report/" .
-                    "{$this->controller->getJob()->id}/" .
-                    "{$this->controller->getJob()->password}";
+        // TODO: complete this with the actual URL
+        $this->template->quality_report_href = \Routes::pluginsBase() .
+            "/review_improved/quality_report/" .
+            "{$this->controller->getJob()->id}/" .
+            "{$this->controller->getJob()->password}";
 
+        if ( $this->controller->isRevision() ) {
             $this->template->showReplaceOptionsInSearch = false ;
         }
 

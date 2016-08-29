@@ -69,6 +69,8 @@ class CatDecorator {
             $this->decorateForTranslate();
         }
 
+        $this->setQualityReportHref();
+
         $this->template->searchable_statuses = $this->searchableStatuses();
         $this->template->project_type        = null;
 
@@ -152,8 +154,6 @@ class CatDecorator {
         ) {
             $this->template->header_quality_report_item_class = 'hide';
         }
-
-        $this->setQualityReportHref();
 
     }
 
