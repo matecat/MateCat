@@ -32,16 +32,13 @@
                     <div class="mgmt-table-tm hide">
 
                         <div class="mgmt-container" id="list-search">
-                             <div class="boxed">
+                            <tal:block tal:condition="php: page != 'cattool'">
+                            <div class="boxed">
                                 <label>
                                     <input type="checkbox" id="pretranslate100" />
                                     Pre-translate 100% matches from TM
                                 </label>
                             </div>
-                            
-
-                            <tal:block tal:condition="php: page != 'cattool'">
-                           
                             </tal:block>
 
                             <div class="block pull-right ">
@@ -232,9 +229,6 @@
                     </div>
                     <div class="mgmt-table-mt hide">
                         <div class="mgmt-container">
-                            <p class="tm-error-message" style="display: none;"> Error: the errmsg will appear here... </p>
-                            <p class="tm-warning-message" style="display: none;"><span></span></p>
-
                                 <div class="insert-tm hide">
                                  <h3 class="pull-left">Add MT engine</h3> 
                                   <div class="step1 pull-left">
@@ -367,6 +361,8 @@
                                 </tbody>
 
                             </table>
+                            <p class="tm-error-message" style="display: none;"> Error: the errmsg will appear here... </p>
+                            <p class="tm-warning-message" style="display: none;"><span></span></p>
                         </div>
 
                     </div>

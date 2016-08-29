@@ -472,14 +472,14 @@ $.extend(UI, {
     },
     showErrorOnKeyInput: function (message) {
         if (message) {
-            $('.mgmt-container .tm-error-message').html(message).show();
+            $('.mgmt-table-tm .mgmt-container .tm-error-message').html(message).show();
         }
         $('#activetm tr.new').addClass('badkey');
         UI.checkTMAddAvailability(); //some enable/disable stuffs
     },
     removeErrorOnKeyInput: function () {
 
-        $('.mgmt-container .tm-error-message').text('').hide();
+        $('.mgmt-table-tm .mgmt-container .tm-error-message').text('').hide();
         $('#activetm tr.new').removeClass('badkey');
         UI.checkTMAddAvailability();
     },

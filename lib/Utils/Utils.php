@@ -41,6 +41,16 @@ class Utils {
 		return is_array($array) AND (bool) count(array_filter(array_keys($array), 'is_string'));
 	}
 
+	public static function curlFile($filePath)
+	{
+		$curlFile =  "@$filePath";		
+		// CURLfile is available with PHP 5.5 and higher versions
+		if( version_compare(PHP_VERSION, '5.5.0') >= 0 ){ 
+		    $curlFile = new CURLFile($filePath);
+		}
+		return $curlFile;
+	}
+
 	public static function curl_post($url, &$d, $opt = array()) {
 		if (!self::is_assoc($d)) {
 			throw new Exception("The input data to " . __FUNCTION__ . "must be an associative array", -1);

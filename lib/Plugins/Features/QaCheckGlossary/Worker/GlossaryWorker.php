@@ -74,12 +74,26 @@ class GlossaryWorker extends AbstractWorker {
                     'id_segment' => $id_segment,
                     'scope'      => QaCheckGlossary::GLOSSARY_SCOPE,
                     'severity'   => WarningModel::WARNING,
-                    'data'       => json_encode( $entry )
+                    'data'       => json_encode( $this->_formatWarningData( $entry ) )
             ) );
 
             $warningModel->addWarning( $warning );
         }
         $warningModel->save();
+    }
+
+    /**
+     * This function controls what we write in  data field, to avoid to pass the raw TM response to clients.
+     *
+     * @param $warning
+     *
+     * @return array
+     */
+    protected function _formatWarningData( $warning ) {
+        return array(
+                'raw_segment'        => $warning['raw_segment'],
+                'raw_translation'    => $warning['raw_translation']
+        );
     }
 
     protected function _checkForReQueueEnd( QueueElement $queueElement ){

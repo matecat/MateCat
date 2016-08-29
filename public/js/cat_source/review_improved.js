@@ -180,6 +180,26 @@ if ( ReviewImproved.enabled() )
     });
 })(jQuery, ReviewImproved);
 
+if ( ReviewImproved.enabled() ) {
+    $.extend(ReviewImproved, {
+        reloadQualityReport : function() {
+            var path  = sprintf('/api/v2/jobs/%s/%s/quality-report',
+                config.id_job, config.password);
+
+            $.getJSON( path )
+                .success( function( data ) {
+                    var review = data['quality-report'].chunk.review ;
+
+                    window.quality_report_btn_component.setState({
+                        is_pass : review.is_pass,
+                        score : review.score,
+                        percentage_reviewed : review.percentage
+                    });
+                });
+        }
+    });
+}
+
 /**
  * Review page
  */
@@ -208,21 +228,6 @@ if ( ReviewImproved.enabled() && config.isReview ) {
             return $.when.apply($, deferreds).done(function() {
                 ReviewImproved.reloadQualityReport();
             });
-        },
-        reloadQualityReport : function() {
-            var path  = sprintf('/api/v2/jobs/%s/%s/quality-report',
-                config.id_job, config.password);
-
-            $.getJSON( path )
-                .success( function( data ) {
-                    var review = data['quality-report'].chunk.review ;
-
-                    window.quality_report_btn_component.setState({
-                        is_pass : review.is_pass,
-                        score : review.score,
-                        percentage_reviewed : review.percentage
-                    });
-                });
         },
 
     });
