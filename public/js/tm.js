@@ -1419,6 +1419,7 @@
 
             var exportDiv = '<td class="download-tmx-container" style="display: none">' +
                 '<div class="message-export-tmx">We will send a link to download the exported TM to this email:</div>' +
+                '<div class="message-export-tmx-success"></div>' +
                 '<input type="text" class="email-export-tmx mgmt-input" value="' + config.userMail + '"/>' +
                 '<span class="uploadloader"></span>'+
                 '<span class="email-export-tmx-email-sent">Request submitted</span>' +
@@ -1435,20 +1436,25 @@
             $(elem).parents('tr').find('.download-tmx-container').slideToggle();
         },
         startExportTmx: function (elem) {
-
             var line = $(elem).closest('tr');
+            var email = line.find('.email-export-tmx').val();
+            var successText = 'You should receive the link at ' + email + ' in %XX% minutes.';
+
             line.find('.uploadloader').show();
             line.find('.export-tmx-button, .canceladd-export-tmx').addClass('disabled');
-            var email = line.find('.email-export-tmx').val();
             UI.downloadTM( line, email ).done(function (response) {
-                if (response.errors.length == 0) {
+                if (response.errors.length == 0 && !response.data.error) {
+                    var time = Math.round(response.data.estimatedTime / 60);
+                    successText = successText.replace('%XX%', time);
                     setTimeout(function () {
+                        line.find('.message-export-tmx-success').text(successText);
                         line.find('.uploadloader').hide();
-                        line.find('.export-tmx-button, .canceladd-export-tmx').hide();
-                        line.find('.email-export-tmx-email-sent').show();
+                        line.find('.export-tmx-button, .canceladd-export-tmx, .email-export-tmx').hide();
+                        line.find('.message-export-tmx').hide();
+                        line.find('.message-export-tmx-success, .email-export-tmx-email-sent').show();
                         setTimeout(function () {
                             UI.closeExportTmx(line);
-                        }, 2000);
+                        }, 5000);
                     }, 3000);
                 } else {
                     setTimeout(function () {

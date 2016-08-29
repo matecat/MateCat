@@ -2046,7 +2046,8 @@ td.download-tmx-container {
     line-height: 30px;
 }
 
-.message-export-tmx {
+.message-export-tmx,
+.message-export-tmx-success{
     float: left;
     margin-left: 11px;
 }
