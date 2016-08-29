@@ -122,7 +122,7 @@
             // script per fare apparire e scomparire la riga con l'upload della tmx
             $('body').on('click', 'tr.mine a.canceladdtmx, tr.ownergroup a.canceladdtmx, #inactivetm tr.new .action .addtmxfile', function() {
 
-                $(this).parents('tr').find('.action .addtmx').removeClass('disabled');
+                $(this).parents('tr').find('.action .addtmx, .action .addGlossary').removeClass('disabled');
                 $(this).parents('td.uploadfile').slideToggle(function () {
                     $(this).remove();
                 });
@@ -162,6 +162,9 @@
                 $(this).parents('tr').append(nr);
                 $(this).parents('tr').find('.uploadfile').slideToggle();
 
+            }).on('mousedown', '.addGlossary:not(.disabled)', function(e) {
+                e.preventDefault();
+                UI.addFormUpload(this, 'glossary');
             }).on('change paste', '#new-tm-key', function(event) {
                 // set Timeout to get the text value after paste event, otherwise it is empty
                 setTimeout( function(){ UI.checkTMKey('change'); }, 200 );
@@ -226,11 +229,11 @@
                 console.log('upload file');
                 UI.checkTMKey('tm');
 
-                $('#activetm tr.uploadpanel').removeClass('hide');
-                $(this).addClass('disabled');
-            }).on('click', 'a.disabletm', function() {
-                UI.disableTM(this);
-            }).on('change', '.mgmt-table-tm tr.mine .lookup input, .mgmt-table-tm tr.mine .update input', function() {
+            $('#activetm tr.uploadpanel').removeClass('hide');
+            $(this).addClass('disabled');
+        }).on('click', 'a.disabletm', function() {
+            UI.disableTM(this);
+        }).on('change', '.mgmt-table-tm tr.mine .activate input', function() {
 
                 if(APP.isCattool) UI.saveTMdata(false);
                 UI.checkTMGrantsModifications(this);
@@ -541,42 +544,41 @@
                 $(panel).find('.action .error .tm-error-grants').text('').hide();
                 UI.checkTMAddAvailability();
 
-                return true;
-            }
-        },
-        checkTMGrantsModifications: function (el) {
-            tr = $(el).parents('tr.mine');
-            isActive = ($(tr).parents('table').attr('id') == 'activetm')? true : false;
-            if((!tr.find('.lookup input').is(':checked')) && (!tr.find('.update input').is(':checked'))) {
-                if(isActive) {
-                    if(config.isAnonymousUser) {
+            return true;
+        }
+    },
+    checkTMGrantsModifications: function (el) {
+        tr = $(el).parents('tr.mine');
+        isActive = ($(tr).parents('table').attr('id') == 'activetm')? true : false;
+        if(!tr.find('.activate input').is(':checked')) {
+            if(isActive) {
+                if(config.isAnonymousUser) {
 
                         var data = {
                             grant: ($(el).parents('td').hasClass('lookup')? 'lookup' : 'update'),
                             key: $(tr).find('.privatekey').text()
                         };
 
-                        APP.confirm({
-                            name: 'confirmTMDisable',
-                            cancelTxt: 'Cancel',
-                            onCancel: 'cancelTMDisable',
-                            callback: 'continueTMDisable',
-                            okTxt: 'Continue',
-//                        context: ($(el).parents('td').hasClass('lookup')? 'lookup' : 'update'),
-                            context: JSON.stringify(data),
-                            msg: "If you confirm this action, your Private TM key will be lost. <br />If you want to avoid this, please, log in with your account now."
-                        });
-                        return false;
-                    }
-                    UI.disableTM(el);
-                    $("#inactivetm").trigger("update");
+                    APP.confirm({
+                        name: 'confirmTMDisable',
+                        cancelTxt: 'Cancel',
+                        onCancel: 'cancelTMDisable',
+                        callback: 'continueTMDisable',
+                        okTxt: 'Continue',
+                        context: JSON.stringify(data),
+                        msg: "If you confirm this action, your Private TM key will be lost. <br />If you want to avoid this, please, log in with your account now."
+                    });
+                    return false;
                 }
-            } else {
-                if(!isActive) {
-                    UI.useTM(el);
-                    $("#inactivetm").trigger("update");
-                }
+                UI.disableTM(el);
+                $("#inactivetm").trigger("update");
             }
+        } else {
+            if(!isActive) {
+                UI.useTM(el);
+                $("#inactivetm").trigger("update");
+            }
+        }
 
         },
         cancelTMDisable: function (context) {
@@ -609,14 +611,14 @@
 
         },
 
-        useTM: function (el) {
-            var row = $(el).closest("tr");
-            row.detach();
-            $("#activetm tr.new").before(row);
-            if(!$('#inactivetm tbody tr:not(.noresults)').length) $('#inactivetm tr.noresults').show();
-            row.addClass('mine');
-
-            row.css('display', 'block');
+    useTM: function (el) {
+        var row = $(el).closest("tr");
+        row.detach();
+        $("#activetm tr.new").before(row);
+        if(!$('#inactivetm tbody tr:not(.noresults)').length) $('#inactivetm tr.noresults').show();
+        row.addClass('mine');
+        row.find('td.lookup input, td.update input').attr('checked', true);
+        row.css('display', 'block');
 
             //update datatable struct
             // draw the user's attention to it
@@ -629,7 +631,7 @@
         execAddTM: function(el) {
 
         var table = $(el).parents('table');
-        existing = ($(el).hasClass('existingKey'))? true : false;
+        var existing = ($(el).hasClass('existingKey'))? true : false;
         if(existing) {
             $(el).parents('.uploadfile').addClass('uploading');
         } else {
@@ -695,23 +697,26 @@
                 TMKey: typeof keyParams.TMKey !== 'undefined' ? keyParams.TMKey : ''
             };
 
-            var newTr = '<tr class="mine" data-tm="1" data-glos="1" data-key="' + keyParams.TMKey + '" data-owner="' + config.ownerIsMe + '">' +
-                '    <td class="dragrow"><div class="status"></div></td>' +
-                '    <td class="privatekey">' + keyParams.TMKey + '</td>' +
-                '    <td class="owner">You</td>' +
-                '    <td class="description"><div class="edit-desc">' + keyParams.desc + '</div></td>' +
-                '    <td class="lookup check text-center"><input type="checkbox"' + ( keyParams.r ? ' checked="checked"' : '' ) + ' /></td>' +
-                '    <td class="update check text-center"><input type="checkbox"' + ( keyParams.w ? ' checked="checked"' : '' ) + ' /></td>' +
-                '    <td class="action">' +
-                '       <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>'+
-                '          <div class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;'+
-                '              <ul class="dropdown pull-left">' +
-                '                   <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>'+
-                '                  <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>'+
-                '              </ul>'+
-                '          </div>'+
-                '</td>' +
-                '</tr>';
+        var newTr = '<tr class="mine" data-tm="1" data-glos="1" data-key="' + keyParams.TMKey + '" data-owner="' + config.ownerIsMe + '">' +
+            '    <td class="dragrow"><div class="status"></div></td>' +
+            '    <td class="activate"><input type="checkbox" checked="checked"/></td>' +
+            '    <td class="privatekey">' + keyParams.TMKey + '</td>' +
+            '    <td class="owner">You</td>' +
+            '    <td class="description"><div class="edit-desc">' + keyParams.desc + '</div></td>' +
+            '    <td class="lookup check text-center"><input type="checkbox"' + ( keyParams.r ? ' checked="checked"' : '' ) + ' /></td>' +
+            '    <td class="update check text-center"><input type="checkbox"' + ( keyParams.w ? ' checked="checked"' : '' ) + ' /></td>' +
+            '    <td class="action">' +
+            '       <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>'+
+            '          <div class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;'+
+            '              <ul class="dropdown pull-left">' +
+            '                   <li><a class="addGlossary" title="Import Glossary" alt="Import Glossary"><span class="icon-upload"></span>Import Glossary</a></li>'+
+            '                   <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>' +
+            '                   <li><a class="downloadGlossary" title="Export Glossary" alt="Export Glossary"><span class="icon-download"></span>Export Glossary</a></li> ' +
+            '                  <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>'+
+            '              </ul>'+
+            '          </div>'+
+            '</td>' +
+            '</tr>';
 
             $('#activetm').find('tr.new').before( newTr );
 
@@ -903,17 +908,17 @@
 
                         $(TRcaller).find('.uploadprogress').show();
 
-                        if(d.data.total == null) {
-                            setTimeout(function() {
-                                UI.pollForUploadProgress(TMKey, TMName, existing, TRcaller);
-                            }, 1000);
-                        } else {
-                            if(d.completed) {
-                                if(existing) {
-                                    var tr = $(TRcaller).parents('tr.mine');
-                                    $(tr).find('.addtmx').removeClass('disabled');
-                                    UI.pulseTMadded(tr);
-                                }
+                    if(d.data.total == null) {
+                        setTimeout(function() {
+                            UI.pollForUploadProgress(TMKey, TMName, existing, TRcaller);
+                        }, 1000);
+                    } else {
+                        if(d.completed) {
+                            if(existing) {
+                                var tr = $(TRcaller).parents('tr.mine');
+                                $(tr).find('.addtmx, .addGlossary').removeClass('disabled');
+                                UI.pulseTMadded(tr);
+                            }
 
                                 $(TRcaller).find('.uploadprogress,.canceladdtmx,.addtmxfile').hide();
 
@@ -1472,6 +1477,45 @@
                 $(this).remove();
             });
             $(elem).find('.action .downloadtmx, .action .addtmx').removeClass('disabled');
+        },
+        addFormUpload: function (elem, type) {
+            var name;
+            if (type === "glossary") {
+                name = 'gl';
+            } else if (type === "tmx") {
+                name = 'tm';
+            } else {
+                return false;
+            }
+            $(elem).parents('.action').find('.addtmx, .addGlossary').each(function (el) {
+                $(this).addClass('disabled');
+            });
+            var nr = '<td class="uploadfile">' +
+                '<form class="existing add-TM-Form pull-left" action="/" method="post">' +
+                '    <input type="hidden" name="action" value="loadTMX" />' +
+                '    <input type="hidden" name="exec" value="newTM" />' +
+                '    <input type="hidden" name="tm_key" value="" />' +
+                '    <input type="hidden" name="name" value="" />' +
+                '    <input type="submit" class="addtm-add-submit" style="display: none" />' +
+                '    <input type="file" name="tmx_file"/>' +
+                '</form>' +
+                '  <a class="pull-left btn-grey canceladdtmx">' +
+                '      <span class="text"></span>' +
+                '  </a>' +
+                '   <a class="existingKey pull-left btn-ok addtmxfile">' +
+                '       <span class="text">Confirm</span>' +
+                '   </a>' +
+                '   <span class="error"></span>' +
+                '  <div class="uploadprogress">' +
+                '       <span class="progress">' +
+                '           <span class="inner"></span>' +
+                '       </span>' +
+                '       <span class="msgText">Uploading</span>' +
+                '       <span class="error"></span>' +
+                '  </div>' +
+                '</td>';
+
+            $(elem).parents('tr').append(nr);
         }
     });
 })(jQuery);

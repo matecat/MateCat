@@ -25,7 +25,7 @@
             <div class="mgmt-panel mgmt-panel-tm">
                 <div class="mgmt-wrapper">
                     <ul class="nav nav-tabs hide" role="tablist">
-                        <li class="mgmt-tm"><a href="#tm">Translation Memory</a></li>
+                        <li class="mgmt-tm"><a href="#tm">Translation Memory and Glossary</a></li>
                         <li class="mgmt-mt"><a href="#mt">Machine Translation</a></li>
                         <li class="mgmt-opt active"><a href="#options">Advanced Options</a></li>
                     </ul>
@@ -42,14 +42,15 @@
                             </tal:block>
 
                             <div class="block pull-right ">
-                                <a class="btn-ok clear add-tm">Add a TM</a>
+                                <a class="btn-ok clear add-tm">Add a Key</a>
                             </div>
-                            <h3 class="pull-left">Active TM</h3>
+                            <h3 class="pull-left">Active Resources</h3>
                             <p class="tm-warning-message" style="display: none;"><span></span></p>
                             <table class="mgmt-tm scroll" id="activetm">
                                 <thead>
                                 <tr>
                                     <th class="dragrow"></th>
+                                    <th class="activate">Use it</th>
                                     <th class="privatekey">Private Key</th>
                                     <th class="owner">Owner</th>
                                     <th class="description">Description</th>
@@ -64,6 +65,7 @@
                                 <tal:block tal:condition="php: page == 'cattool'" tal:repeat="key user_keys/job_keys">
                                     <tr tal:condition="php: key.edit || key.owner" tal:attributes="class php: key.owner ? ( jobOwnerIsMe ? 'mine' : 'ownergroup' ) : 'mine'" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-key="${key/key}" data-owner="${key/owner}">
                                         <td class="dragrow"><div class="status"></div></td>
+                                        <td class="activate"><input type="checkbox" checked="checked"/></td>
                                         <td class="privatekey">${key/key}</td>
                                         <td class="owner">${php: key.owner ? ( jobOwnerIsMe ? 'You' : '*****' ) : 'You'}</td>
                                         <td class="description"><div class="edit-desc">${php: key.owner ? ( jobOwnerIsMe || key.edit ? key.name : '**********' ) : key.name}</div></td>
@@ -73,8 +75,10 @@
                                                 <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
                                                 <div  class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
                                                     <ul class="dropdown pull-left">
+                                                        <li><a class="addGlossary" title="Import Glossary" alt="Import Glossary"><span class="icon-upload"></span>Import Glossary</a></li>
                                                         <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>
-                                                        <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>
+                                                        <li><a class="downloadGlossary" title="Export Glossary" alt="Export Glossary"><span class="icon-download"></span>Export Glossary</a></li>
+                                                        <li><a class="deleteTM" title="Delete Key" alt="Delete Key"><span class="icon-trash-o"></span>Delete Key</a></li>
                                                     </ul>
                                                 </div>
                                         </td>
@@ -83,7 +87,8 @@
                                 </tal:block>
 
                                 <tr class="new hide">
-                                <td class="dragrow"></td>
+                                    <td class="dragrow"></td>
+                                    <td class="activate"></td>
                                     <td class="privatekey">
                                         <div class="error">
                                             <span class="tm-error-key"></span>
@@ -123,6 +128,7 @@
                                 <tal:block tal:condition="php: page == 'cattool'" tal:repeat="key user_keys/job_keys">
                                     <tr tal:condition="php: !key.edit && !key.owner" class="anonymous" data-tm="${key/tm}" data-glos="${key/glos}" data-key="${key/key}" data-editable="${key/edit}" data-owner="${key/owner}">
                                         <td class="dragrow"><div class="status"></div></td>
+                                        <td class="activate"><input type="checkbox" disabled="disabled" checked="checked" /></td>
                                         <td class="privatekey">${key/key}</td>
                                         <td class="owner">*****</td>
                                         <td class="description">**********</td>
@@ -135,8 +141,7 @@
                                 </tbody>
                             </table>
                             <p class="tm-error-message" style="display: none;"> Error: the errmsg will appear here... </p>
-                            <p class="tm-success-message activetm" style="display: none;"> Success: the success msg will appear here... </p>
-                            <h3 class="pull-left">Inactive TM</h3>
+                            <h3 class="pull-left">Inactive Resources</h3>
 
                             <tal:block tal:condition="php: empty(logged_user)">
                                 <p><a id='sign-in-o' tal:attributes="data-oauth authURL" href="#" class="btn btn-grey pull-left" >Login to see your TM</a></p>
@@ -153,6 +158,7 @@
                                     <thead>
                                     <tr>
                                         <th class="dragrow"></th>
+                                        <th class="activate">Use it</th>
                                         <th class="privatekey">Private Key</th>
                                         <th class="owner">Owner</th>
                                         <th class="description">Description</th>
@@ -166,6 +172,7 @@
                                     <tal:block tal:condition="php: page == 'cattool'" tal:repeat="key user_keys/totals">
                                         <tr class="mine" data-tm="1" data-glos="1" data-key="${key/key}">
                                             <td class="dragrow"><div class="status"></div></td>
+                                            <td class="activate"><input type="checkbox" /></td>
                                             <td class="privatekey">${key/key}</td>
                                             <td class="owner">You</td>
                                             <td class="description"><div class="edit-desc">${key/name}</div></td>
@@ -175,8 +182,10 @@
                                                 <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
                                                 <div  class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
                                                     <ul class="dropdown pull-left">
+                                                        <li><a class="addGlossary" title="Import Glossary" alt="Import Glossary"><span class="icon-upload"></span>Import Glossary</a></li>
                                                         <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>
-                                                        <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>
+                                                        <li><a class="downloadGlossary" title="Export Glossary" alt="Export Glossary"><span class="icon-download"></span>Export Glossary</a></li>
+                                                        <li><a class="deleteTM" title="Delete Key" alt="Delete Key"><span class="icon-trash-o"></span>Delete Key</a></li>
                                                     </ul>
                                                 </div>
                                             </td>
@@ -188,6 +197,7 @@
                                             <td class="dragrow">
                                                 <div class="status"></div>
                                             </td>
+                                            <td class="activate"><input type="checkbox" /></td>
                                             <td class="privatekey">${key/key}</td>
                                             <td class="owner">You</td>
                                             <td class="description">
@@ -197,17 +207,12 @@
                                             <td class="update text-center check"><input type="checkbox"/></td>
                                             <td class="action">
                                                 <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
-
-                                                <div  class="wrapper-dropdown-5 pull-left" tabindex="1">
-                                                    &nbsp;
+                                                <div  class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
                                                     <ul class="dropdown pull-left">
-                                                        <li><a class="downloadtmx" title="Export TMX" alt="Export TMX">
-                                                            <span class="icon-download"></span>Export TMX
-                                                        </a></li>
-                                                        <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX">
-                                                            <span class="icon-trash-o"></span>Delete TM
-                                                        </a></li>
-
+                                                        <li><a class="addGlossary" title="Import Glossary" alt="Import Glossary"><span class="icon-upload"></span>Import Glossary</a></li>
+                                                        <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>
+                                                        <li><a class="downloadGlossary" title="Export Glossary" alt="Export Glossary"><span class="icon-download"></span>Export Glossary</a></li>
+                                                        <li><a class="deleteTM" title="Delete Key" alt="Delete Key"><span class="icon-trash-o"></span>Delete Key</a></li>
                                                     </ul>
                                                 </div>
 

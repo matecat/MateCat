@@ -1609,7 +1609,7 @@ margin:0 auto; overflow:hidden; width:100%;
 
 .mgmt-tm .description {
 	/*width:32%!important;*/
-	width:307px!important;
+	width:300px!important;
 }
 
 .owner {width: 59px!important;}
@@ -1636,6 +1636,26 @@ margin:0 auto; overflow:hidden; width:100%;
 
 .mgmt-tm  th.action, .mgmt-tm td.action {
     width: 172px;
+}
+.mgmt-tm th.activate {
+    width: 40px;
+}
+
+th.dragrow {
+    padding: 2px !important;
+}
+
+td.activate {
+    width: 35px;
+}
+
+#inactivetm th.check {
+    visibility: hidden;
+}
+
+#inactivetm .check.lookup input,
+#inactivetm .check.update input {
+    visibility:hidden;
 }
 
 #inactivetm tbody {
@@ -1845,8 +1865,8 @@ text-align: center;}
 .popup-tm td.engine-name .edit-desc
 {
     height: 18px;
-/*    width: 350px;*/
-    width: 285px!important;
+    /*width: 285px!important;*/
+    width: 98%;
     height: 18px;
     padding: 2px 4px;
     border-radius: 2px;
