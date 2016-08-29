@@ -1436,11 +1436,12 @@
             $(elem).parents('tr').find('.download-tmx-container').slideToggle();
         },
         startExportTmx: function (elem) {
-            var successText = 'Request submitted. You should receive the link at ' + config.userMail + ' in %XX% minutes.';
             var line = $(elem).closest('tr');
+            var email = line.find('.email-export-tmx').val();
+            var successText = 'You should receive the link at ' + email + ' in %XX% minutes.';
+
             line.find('.uploadloader').show();
             line.find('.export-tmx-button, .canceladd-export-tmx').addClass('disabled');
-            var email = line.find('.email-export-tmx').val();
             UI.downloadTM( line, email ).done(function (response) {
                 if (response.errors.length == 0 && !response.data.error) {
                     var time = Math.round(response.data.estimatedTime / 60);
@@ -1450,7 +1451,7 @@
                         line.find('.uploadloader').hide();
                         line.find('.export-tmx-button, .canceladd-export-tmx, .email-export-tmx').hide();
                         line.find('.message-export-tmx').hide();
-                        line.find('.message-export-tmx-success').show();
+                        line.find('.message-export-tmx-success, .email-export-tmx-email-sent').show();
                         setTimeout(function () {
                             UI.closeExportTmx(line);
                         }, 5000);

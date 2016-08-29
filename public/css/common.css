@@ -2052,10 +2052,6 @@ td.download-tmx-container {
     margin-left: 11px;
 }
 
-.message-export-tmx-success {
-    color: green;
-}
-
 input.email-export-tmx {
     float: left;
     margin-left: 14px;
