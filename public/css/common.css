@@ -1767,11 +1767,14 @@ font-size:14px;
     margin-left: 12px;
 }
 
-.mgmt-tm .canceladdtmx {
+.mgmt-tm .canceladdtmx,
+.mgmt-tm .canceladdglossary
+{
     width: 35px;
 }
 
-.canceladdtmx {
+.canceladdtmx ,
+.canceladdglossary {
     margin: 0;
     cursor: pointer;
 }
@@ -1829,15 +1832,20 @@ body.cattool .mgmt-tm.mine thead,
 
 .btn-grey .text,
 .canceladdtmx.btn-grey .text, 
-.addtmxfile.btn-ok .text, 
+.canceladdglossary.btn-grey .text,
+.addtmxfile.btn-ok .text,
+.addglossaryfile.btn-ok .text,
 .uploadtm.btn-ok .text
 
  {
-display: block;
-text-align: center;}
+    display: block;
+    text-align: center;
+}
 
 .canceladdtmx.btn-grey .text, 
-.addtmxfile.btn-ok .text, 
+.canceladdglossary.btn-grey .text,
+.addtmxfile.btn-ok .text,
+.addglossaryfile.btn-ok .text,
 .uploadtm.btn-ok .text {
     width: 90px;
 }
@@ -1847,18 +1855,24 @@ text-align: center;}
 }
 
 .canceladdtmx.btn-grey .text,
-.addtmxfile.btn-ok .text, 
+.canceladdglossary.btn-grey .text,
+.addtmxfile.btn-ok .text,
+.addglossaryfile.btn-ok .text,
 .uploadtm.btn-ok .text {
 	color:#fff;
 }
 
-.addtmxfile.btn-ok {
+.addtmxfile.btn-ok,
+.addglossaryfile.btn-ok
+{
     display: none;
     margin-left: -10px;
     margin-right: 20px;
 }
 
- .canceladdtmx.btn-grey {
+ .canceladdtmx.btn-grey,
+ .canceladdglossary.btn-grey
+ {
     background:#f26522;
 }
 .popup-tm td.description .edit-desc,
@@ -1902,10 +1916,21 @@ text-align: center;}
     cursor: text;
 }
  
- .canceladdtmx.btn-grey:hover{background:#d1581c;}
-.addtmxfile.btn-ok:hover {background:#00A8D2;}
+ .canceladdtmx.btn-grey:hover,
+ .canceladdglossary.btn-grey:hover
+ {
+     background:#d1581c;
+ }
 
-td.uploadfile .canceladdtmx {
+.addtmxfile.btn-ok:hover,
+.addglossaryfile.btn-ok:hover
+{
+    background:#00A8D2;
+}
+
+td.uploadfile .canceladdtmx,
+td.uploadfile .canceladdglossary
+{
     margin-bottom: 0px;
 }
 
@@ -1924,7 +1949,8 @@ td.uploadfile .uploadprogress .error {
     margin-right: 0px;
 }
 
-.canceladdtmx:hover {
+.canceladdtmx:hover,
+.canceladdglossary:hover{
 	color:red;
 }
 
@@ -2021,7 +2047,9 @@ td.uploadfile p {
     margin: 0 10px;
 }
 
-td.uploadfile .canceladdtmx {
+td.uploadfile .canceladdtmx,
+td.uploadfile .canceladdglossary
+{
     margin-right: 18px;
 }
 
@@ -2311,7 +2339,8 @@ margin-left: -37px;
 margin-top: 3px;
 }
 
-.insert-tm .canceladdtmx {
+.insert-tm .canceladdtmx ,
+.insert-tm .canceladdglossary {
     margin: 15px 0;
 }
 
@@ -3249,6 +3278,7 @@ color: #000;
 .addtmx .text:before,
 .disabletm .text:before,
 .addtmxfile .text:before,
+.addglossaryfile .text:before,
 .usetm .text:before,
 .downloadtmx .text:before,
 .uploadkey:before,
@@ -3259,6 +3289,7 @@ color: #000;
 .owner.tablesorter-header .tablesorter-header-inner:after,
 .description.tablesorter-header .tablesorter-header-inner:after,
 .canceladdtmx.btn-grey .text:before,
+.canceladdglossary.btn-grey .text:before,
 .deleteTM .text:before,
 .sorting:after,
 .splitbtn:before,
@@ -3594,12 +3625,15 @@ float: left;
 .more.minus:before {
     content: "\f147";
 }
-.canceladdtmx.btn-grey .text:before {
+.canceladdtmx.btn-grey .text:before ,
+.canceladdglossary.btn-grey .text:before {
 	content: "\f00d";
 	vertical-align: text-top;
 }
 
-.insert-tm .canceladdtmx.btn-grey .text:before {
+.insert-tm .canceladdtmx.btn-grey .text:before,
+.insert-tm .canceladdglossary.btn-grey .text:before
+{
     padding-right: 8px;
 }
 .deleteTM .text:before {
@@ -3707,6 +3741,7 @@ cursor: pointer;
 }
 
 .addtmxfile .text:before,
+.addglossaryfile .text:before,
 /*.addtmx .text:before, */
 .open-popup-addtm-tr:before
  {
@@ -3715,7 +3750,9 @@ cursor: pointer;
 	vertical-align: text-top;
 }
 
-.addtmxfile .text:before {
+.addtmxfile .text:before,
+.addglossaryfile .text:before
+{
 	padding-right: 7px;
 }
 
