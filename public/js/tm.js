@@ -970,7 +970,7 @@
                     $('.popup-tm').removeClass('saving');
 
                     if(d.errors.length) {
-                        APP.showMessage({msg: d.errors[0].message});
+                        $('.tm-error-message').text('There was an error saving your data. Please retry!').show();
                     } else {
                         console.log('TM data saved!!');
 
