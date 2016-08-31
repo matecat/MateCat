@@ -914,11 +914,11 @@ $.extend(UI, {
 					UI.resetSearch();
 				}
 			}
-			if (e.which == 32) { // space
-				setTimeout(function() {
-					UI.saveInUndoStack('space');
-				}, 100);
-			}
+			// if (e.which == 32) { // space
+			// 	setTimeout(function() {
+			// 		UI.saveInUndoStack('space');
+			// 	}, 100);
+			// }
 
 			if (e.which == 13) { // return
 				if($('.tag-autocomplete').length) {
