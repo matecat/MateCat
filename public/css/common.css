@@ -1578,7 +1578,7 @@ margin: 0 auto;
 overflow: hidden;
 width: 96%;
 padding-top: 20px;
-  padding-bottom: 60px;
+  padding-bottom: 50px;
 text-align: left;
 min-height: 400px;
 }
@@ -1834,8 +1834,6 @@ text-align: center;}
 
 .addtmxfile.btn-ok {
     display: none;
-    margin-left: -10px;
-    margin-right: 20px;
 }
 
  .canceladdtmx.btn-grey {
@@ -1941,11 +1939,6 @@ margin-top: 10px;
 
 
 
-#activetm td.uploadfile .btn-grey {
-    margin-right: 8px;
-}
-
-
 /*
 #activetm {margin-bottom: 15px;}
 */
@@ -1973,7 +1966,7 @@ margin-top: 10px;
  {
     display: block;
     background: #fff;
-    padding: 10px 5px 20px;
+    padding: 10px 22px 20px 5px;
     height: 20px;
     border-top: 1px solid #E1E1E1;
 	box-shadow: inset 0px 2px 5px 0px #E4E4E4;
@@ -2001,9 +1994,6 @@ td.uploadfile p {
     margin: 0 10px;
 }
 
-td.uploadfile .canceladdtmx {
-    margin-right: 18px;
-}
 
 #activetm td.dragrow .status {
 	cursor: move;
@@ -3131,6 +3121,13 @@ display: none;
 
 .tm-success-message {
     border-top: 3px solid #4F8A10;
+}
+
+.fixed-msg {
+    position: fixed;
+    top: 0px;
+    width: 865px;
+    z-index: 10000;
 }
 
 .mgmt-panel .tm-error-message, .mgmt-panel .tm-warning-message, .mgmt-panel .tm-success-message {

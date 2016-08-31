@@ -7,8 +7,38 @@
 <body>
 
 
-<div metal:define-macro="tm_panel">
 
+<div metal:define-macro="tm_panel">
+<script type="text/javascript">
+/*<![CDATA[*/
+function isVisible($el) {
+  var winTop = $(window).scrollTop();
+  var winBottom = winTop + $(window).height();
+  var elTop = $el.offset().top;
+  var elBottom = elTop + $el.height();
+  return ((elBottom<= winBottom) && (elTop >= winTop));
+}
+
+$(function() {
+    $(".popup-tm.slide-panel").on("scroll", function(){
+        if (!isVisible($(".active-tm-container h3"))) {
+            $('.active-tm-container .notification-message').addClass('fixed-msg');
+        }
+        else {
+            $('.active-tm-container .notification-message').removeClass('fixed-msg');
+        }
+        if (!isVisible($(".inactive-tm-container h3"))) {
+            $('.inactive-tm-container .notification-message').addClass('fixed-msg');
+        }
+        else {
+            $('.inactive-tm-container .notification-message').removeClass('fixed-msg');
+        }
+    })
+
+});
+
+/*]]>*/
+</script>
 
     <div class="popup-outer outer-tm hide"></div>
     <!-- inizio popup tm mgmt -->
@@ -44,112 +74,12 @@
                             <div class="block pull-right ">
                                 <a class="btn-ok clear add-tm">Add a TM</a>
                             </div>
-                            <h3 class="pull-left">Active TM</h3>
-                            <p class="tm-warning-message" style="display: none;"><span></span></p>
-                            <table class="mgmt-tm scroll" id="activetm">
-                                <thead>
-                                <tr>
-                                    <th class="dragrow"></th>
-                                    <th class="privatekey">Private Key</th>
-                                    <th class="owner">Owner</th>
-                                    <th class="description">Description</th>
-                                    <th class="check">Lookup</th>
-                                    <th class="check">Update</th>
-                                    <th class="action">Actions</th>
-                                </tr>
-                                </thead>
-
-                                <tbody class="list sortable">
-
-                                <tal:block tal:condition="php: page == 'cattool'" tal:repeat="key user_keys/job_keys">
-                                    <tr tal:condition="php: key.edit || key.owner" tal:attributes="class php: key.owner ? ( jobOwnerIsMe ? 'mine' : 'ownergroup' ) : 'mine'" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-key="${key/key}" data-owner="${key/owner}">
-                                        <td class="dragrow"><div class="status"></div></td>
-                                        <td class="privatekey">${key/key}</td>
-                                        <td class="owner">${php: key.owner ? ( jobOwnerIsMe ? 'You' : '*****' ) : 'You'}</td>
-                                        <td class="description"><div class="edit-desc">${php: key.owner ? ( jobOwnerIsMe || key.edit ? key.name : '**********' ) : key.name}</div></td>
-                                        <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !jobOwnerIsMe ); checked key/r" /></td>
-                                        <td class="update text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !jobOwnerIsMe ); checked key/w" /></td>
-                                        <td tal:condition="php: key.edit" class="action">
-                                                <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
-                                                <div  class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
-                                                    <ul class="dropdown pull-left">
-                                                        <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>
-                                                        <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>
-                                                    </ul>
-                                                </div>
-                                        </td>
-                                        <td tal:condition="php: !key.edit" class="action"></td>
-                                    </tr>
-                                </tal:block>
-
-                                <tr class="new hide">
-                                <td class="dragrow"></td>
-                                    <td class="privatekey">
-                                        <div class="error">
-                                            <span class="tm-error-key"></span>
-                                        </div>
-                                        <input class="mgmt-input pull-left" type="text" id="new-tm-key" placeholder="Have a Key? Add it here*" />
-                                        <!--<a class="btn-ok pull-right">Create a New TM</a>-->
-<!--                                    <span class="text pull-left text-req">*required</span> -->
-                                    </td>
-                                    <td class="owner">You
-                                    </td>
-                                    <td class="description">
-                                        <textarea rows="1" cols="50" class="mgmt-input" id="new-tm-description" placeholder="Enter a short description" ></textarea>
-                                    </td>
-                                    <td class="lookup text-center check">
-                                        <input id="new-tm-read" type="checkbox" name="r" class="r" value="1" checked="" />
-                                    </td>
-                                    <td class="update text-center check">
-                                        <input id="new-tm-write" type="checkbox" name="w" class="w" value="1" checked="" />
-                                    </td>
-                                    <td class="action">
-                                       
-
-                                        <a class="pull-left btn-grey canceladdtmx">
-                                            <span class="text"></span>
-                                        </a>
-                                         <a class="pull-left btn-ok uploadtm disabled">
-                                            <span class="text uploadkey">Confirm</span>
-                                        </a>
-                                        <div class="error">
-                                            <span class="tm-error-grants"></span>
-                                        </div>
-
-                                        <div id="uploadCallback"></div>
-                                    </td>
-                                </tr>
-
-                                <tal:block tal:condition="php: page == 'cattool'" tal:repeat="key user_keys/job_keys">
-                                    <tr tal:condition="php: !key.edit && !key.owner" class="anonymous" data-tm="${key/tm}" data-glos="${key/glos}" data-key="${key/key}" data-editable="${key/edit}" data-owner="${key/owner}">
-                                        <td class="dragrow"><div class="status"></div></td>
-                                        <td class="privatekey">${key/key}</td>
-                                        <td class="owner">*****</td>
-                                        <td class="description">**********</td>
-                                        <td class="lookup text-center check"><input type="checkbox" disabled="disabled" tal:attributes="checked key/r" /></td>
-                                        <td class="update text-center check"><input type="checkbox" disabled="disabled" tal:attributes="checked key/w" /></td>
-                                        <td class="action"></td>
-                                    </tr>
-                                </tal:block>
-
-                                </tbody>
-                            </table>
-                            <p class="tm-error-message" style="display: none;"> Error: the errmsg will appear here... </p>
-                            <p class="tm-success-message activetm" style="display: none;"> Success: the success msg will appear here... </p>
-                            <h3 class="pull-left">Inactive TM</h3>
-
-                            <tal:block tal:condition="php: empty(logged_user)">
-                                <p><a id='sign-in-o' tal:attributes="data-oauth authURL" href="#" class="btn btn-grey pull-left" >Login to see your TM</a></p>
-                            </tal:block>
-
-                            <tal:block tal:condition="php: !empty(logged_user)">
-
-                                <div style="float: right">
-                                    <label for="filterInactive">Search: </label>
-                                    <input id="filterInactive" type="text"/>
-                                </div>
-
-                                <table class="mgmt-tm mgmt-tm-nested scroll" id="inactivetm">
+                            <div class="active-tm-container">
+                                <h3 class="pull-left">Active TM</h3>
+                                <p class="tm-warning-message notification-message" style="display: none;">Warning: the errmsg will appear here... </p>
+                                <p class="tm-error-message notification-message" style="display: none;"> Error: the errmsg will appear here... </p>
+                                <p class="tm-success-message activetm notification-message" style="display: none;"> Success: the success msg will appear here... </p>
+                                <table class="mgmt-tm scroll" id="activetm">
                                     <thead>
                                     <tr>
                                         <th class="dragrow"></th>
@@ -161,68 +91,169 @@
                                         <th class="action">Actions</th>
                                     </tr>
                                     </thead>
-                                    <tbody class="list">
 
-                                    <tal:block tal:condition="php: page == 'cattool'" tal:repeat="key user_keys/totals">
-                                        <tr class="mine" data-tm="1" data-glos="1" data-key="${key/key}">
+                                    <tbody class="list sortable">
+
+                                    <tal:block tal:condition="php: page == 'cattool'" tal:repeat="key user_keys/job_keys">
+                                        <tr tal:condition="php: key.edit || key.owner" tal:attributes="class php: key.owner ? ( jobOwnerIsMe ? 'mine' : 'ownergroup' ) : 'mine'" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-key="${key/key}" data-owner="${key/owner}">
                                             <td class="dragrow"><div class="status"></div></td>
                                             <td class="privatekey">${key/key}</td>
-                                            <td class="owner">You</td>
-                                            <td class="description"><div class="edit-desc">${key/name}</div></td>
-                                            <td class="lookup text-center check"><input type="checkbox" /></td>
-                                            <td class="update text-center check"><input type="checkbox" /></td>
-                                            <td class="action">
-                                                <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
-                                                <div  class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
-                                                    <ul class="dropdown pull-left">
-                                                        <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>
-                                                        <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>
-                                                    </ul>
-                                                </div>
+                                            <td class="owner">${php: key.owner ? ( jobOwnerIsMe ? 'You' : '*****' ) : 'You'}</td>
+                                            <td class="description"><div class="edit-desc">${php: key.owner ? ( jobOwnerIsMe || key.edit ? key.name : '**********' ) : key.name}</div></td>
+                                            <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !jobOwnerIsMe ); checked key/r" /></td>
+                                            <td class="update text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !jobOwnerIsMe ); checked key/w" /></td>
+                                            <td tal:condition="php: key.edit" class="action">
+                                                    <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
+                                                    <div  class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
+                                                        <ul class="dropdown pull-left">
+                                                            <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>
+                                                            <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>
+                                                        </ul>
+                                                    </div>
                                             </td>
+                                            <td tal:condition="php: !key.edit" class="action"></td>
                                         </tr>
                                     </tal:block>
 
-                                    <tal:block tal:condition="php: page == 'home'" tal:repeat="key user_keys">
-                                        <tr class="mine" data-tm="1" data-glos="1" data-key="${key/key}">
-                                            <td class="dragrow">
-                                                <div class="status"></div>
-                                            </td>
+                                    <tr class="new hide">
+                                    <td class="dragrow"></td>
+                                        <td class="privatekey">
+                                            <div class="error">
+                                                <span class="tm-error-key"></span>
+                                            </div>
+                                            <input class="mgmt-input pull-left" type="text" id="new-tm-key" placeholder="Have a Key? Add it here*" />
+                                            <!--<a class="btn-ok pull-right">Create a New TM</a>-->
+    <!--                                    <span class="text pull-left text-req">*required</span> -->
+                                        </td>
+                                        <td class="owner">You
+                                        </td>
+                                        <td class="description">
+                                            <textarea rows="1" cols="50" class="mgmt-input" id="new-tm-description" placeholder="Enter a short description" ></textarea>
+                                        </td>
+                                        <td class="lookup text-center check">
+                                            <input id="new-tm-read" type="checkbox" name="r" class="r" value="1" checked="" />
+                                        </td>
+                                        <td class="update text-center check">
+                                            <input id="new-tm-write" type="checkbox" name="w" class="w" value="1" checked="" />
+                                        </td>
+                                        <td class="action">
+                                           
+
+                                            <a class="pull-left btn-grey canceladdtmx">
+                                                <span class="text"></span>
+                                            </a>
+                                             <a class="pull-left btn-ok uploadtm disabled">
+                                                <span class="text uploadkey">Confirm</span>
+                                            </a>
+                                            <div class="error">
+                                                <span class="tm-error-grants"></span>
+                                            </div>
+
+                                            <div id="uploadCallback"></div>
+                                        </td>
+                                    </tr>
+
+                                    <tal:block tal:condition="php: page == 'cattool'" tal:repeat="key user_keys/job_keys">
+                                        <tr tal:condition="php: !key.edit && !key.owner" class="anonymous" data-tm="${key/tm}" data-glos="${key/glos}" data-key="${key/key}" data-editable="${key/edit}" data-owner="${key/owner}">
+                                            <td class="dragrow"><div class="status"></div></td>
                                             <td class="privatekey">${key/key}</td>
-                                            <td class="owner">You</td>
-                                            <td class="description">
-                                                <div class="edit-desc">${key/name}</div>
-                                            </td>
-                                            <td class="lookup text-center check"><input type="checkbox"/></td>
-                                            <td class="update text-center check"><input type="checkbox"/></td>
-                                            <td class="action">
-                                                <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
-
-                                                <div  class="wrapper-dropdown-5 pull-left" tabindex="1">
-                                                    &nbsp;
-                                                    <ul class="dropdown pull-left">
-                                                        <li><a class="downloadtmx" title="Export TMX" alt="Export TMX">
-                                                            <span class="icon-download"></span>Export TMX
-                                                        </a></li>
-                                                        <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX">
-                                                            <span class="icon-trash-o"></span>Delete TM
-                                                        </a></li>
-
-                                                    </ul>
-                                                </div>
-
-                                            </td>
+                                            <td class="owner">*****</td>
+                                            <td class="description">**********</td>
+                                            <td class="lookup text-center check"><input type="checkbox" disabled="disabled" tal:attributes="checked key/r" /></td>
+                                            <td class="update text-center check"><input type="checkbox" disabled="disabled" tal:attributes="checked key/w" /></td>
+                                            <td class="action"></td>
                                         </tr>
                                     </tal:block>
 
                                     </tbody>
                                 </table>
+                            </div>
+                            <div class="inactive-tm-container">
+                                <h3 class="pull-left">Inactive TM</h3>
+                                 <p class="tm-warning-message notification-message" style="display: none;">Warning: the errmsg will appear here... </p>
+                                <p class="tm-error-message notification-message" style="display: none;"> Error: the errmsg will appear here... </p>
+                                <p class="tm-success-message activetm notification-message" style="display: none;"> Success: the success msg will appear here... </p>
+                                <tal:block tal:condition="php: empty(logged_user)">
+                                    <p><a id='sign-in-o' tal:attributes="data-oauth authURL" href="#" class="btn btn-grey pull-left" >Login to see your TM</a></p>
+                                </tal:block>
 
-                                <p class="tm-success-message inactivetm" style="display: none;"> Success: the success msg will appear here... </p>
+                                <tal:block tal:condition="php: !empty(logged_user)">
 
-                            </tal:block>
+                                    <div style="float: right">
+                                        <label for="filterInactive">Search: </label>
+                                        <input id="filterInactive" type="text"/>
+                                    </div>
 
+                                    <table class="mgmt-tm mgmt-tm-nested scroll" id="inactivetm">
+                                        <thead>
+                                        <tr>
+                                            <th class="dragrow"></th>
+                                            <th class="privatekey">Private Key</th>
+                                            <th class="owner">Owner</th>
+                                            <th class="description">Description</th>
+                                            <th class="check">Lookup</th>
+                                            <th class="check">Update</th>
+                                            <th class="action">Actions</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody class="list">
 
+                                        <tal:block tal:condition="php: page == 'cattool'" tal:repeat="key user_keys/totals">
+                                            <tr class="mine" data-tm="1" data-glos="1" data-key="${key/key}">
+                                                <td class="dragrow"><div class="status"></div></td>
+                                                <td class="privatekey">${key/key}</td>
+                                                <td class="owner">You</td>
+                                                <td class="description"><div class="edit-desc">${key/name}</div></td>
+                                                <td class="lookup text-center check"><input type="checkbox" /></td>
+                                                <td class="update text-center check"><input type="checkbox" /></td>
+                                                <td class="action">
+                                                    <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
+                                                    <div  class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
+                                                        <ul class="dropdown pull-left">
+                                                            <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>
+                                                            <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tal:block>
+
+                                        <tal:block tal:condition="php: page == 'home'" tal:repeat="key user_keys">
+                                            <tr class="mine" data-tm="1" data-glos="1" data-key="${key/key}">
+                                                <td class="dragrow">
+                                                    <div class="status"></div>
+                                                </td>
+                                                <td class="privatekey">${key/key}</td>
+                                                <td class="owner">You</td>
+                                                <td class="description">
+                                                    <div class="edit-desc">${key/name}</div>
+                                                </td>
+                                                <td class="lookup text-center check"><input type="checkbox"/></td>
+                                                <td class="update text-center check"><input type="checkbox"/></td>
+                                                <td class="action">
+                                                    <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
+
+                                                    <div  class="wrapper-dropdown-5 pull-left" tabindex="1">
+                                                        &nbsp;
+                                                        <ul class="dropdown pull-left">
+                                                            <li><a class="downloadtmx" title="Export TMX" alt="Export TMX">
+                                                                <span class="icon-download"></span>Export TMX
+                                                            </a></li>
+                                                            <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX">
+                                                                <span class="icon-trash-o"></span>Delete TM
+                                                            </a></li>
+
+                                                        </ul>
+                                                    </div>
+
+                                                </td>
+                                            </tr>
+                                        </tal:block>
+                                        </tbody>
+                                    </table>
+                                    <p class="tm-success-message inactivetm" style="display: none;"> Success: the success msg will appear here... </p>
+                                </tal:block>
+                            </div>
                         </div>
                     </div>
                     <div class="mgmt-table-mt hide">
