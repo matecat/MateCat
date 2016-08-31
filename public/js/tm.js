@@ -141,9 +141,11 @@
                 // set Timeout to get the text value after paste event, otherwise it is empty
                 setTimeout( function(){ UI.checkTMKey('change'); }, 200 );
             }).on('click', '.mgmt-tm tr.new a.uploadtm:not(.disabled)', function() {
+                var self = this;
+                UI.checkTMKey('key').done(function () {
+                    UI.saveTMkey($(this));
+                });
 
-                UI.checkTMKey('key');
-                UI.saveTMkey($(this));
 
             }).on('click', 'tr .uploadfile .addtmxfile:not(.disabled)', function() {
 
@@ -429,7 +431,7 @@
                 return false;
             }
 
-            APP.doRequest({
+            return APP.doRequest({
                 data: {
                     action: 'ajaxUtils',
                     exec: 'checkTMKey',
@@ -1355,7 +1357,7 @@
             var exportDiv = '<td class="download-tmx-container" style="display: none">' +
                 '<div class="message-export-tmx">We will send a link to download the exported TM to this email:</div>' +
                 '<div class="message-export-tmx-success"></div>' +
-                '<input type="text" class="email-export-tmx mgmt-input" value="' + config.userMail + '"/>' +
+                '<input type="email" required class="email-export-tmx mgmt-input" value="' + config.userMail + '"/>' +
                 '<span class="uploadloader"></span>'+
                 '<span class="email-export-tmx-email-sent">Request submitted</span>' +
                 '<span class="email-export-tmx-email-error">We got an error,</br> please contact support</span>' +
@@ -1380,6 +1382,7 @@
             UI.downloadTM( line, email ).done(function (response) {
                 if (response.errors.length == 0 && !response.data.error) {
                     var time = Math.round(response.data.estimatedTime / 60);
+                    time = (time > 0 ) ? time : 1;
                     successText = successText.replace('%XX%', time);
                     setTimeout(function () {
                         line.find('.message-export-tmx-success').text(successText);
