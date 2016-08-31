@@ -13,14 +13,13 @@ $.extend(UI, {
 	chooseSuggestion: function(w) {
 		var ulDataItem = '.editor .tab.matches ul[data-item=';
 		this.copySuggestionInEditarea(this.currentSegment, $(ulDataItem + w + '] li.b .translation').html(),
-			$('.editor .editarea'), $(ulDataItem + w + '] ul.graysmall-details .percent').text(), false, false, w);
-		this.lockTags(this.editarea);
+			$('.editor .editarea'), $(ulDataItem + w + '] ul.graysmall-details .percent').text(), false, false, w, $(ulDataItem + w + '] li.graydesc .bold').text());
 		this.setChosenSuggestion(w);
 		this.editarea.focus();
-		this.highlightEditarea();
+		SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
 		this.disableTPOnSegment();
 	},
-	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which) {
+	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which, createdBy) {
 		if (typeof (decode) == "undefined") {
 			decode = false;
 		}
@@ -48,19 +47,17 @@ $.extend(UI, {
                 MateCat.db.segments.update( segmentObj );
             }
 
-			$(editarea).html( translation );
+            SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(segment), UI.getSegmentFileId(segment), translation);
+            SegmentActions.addClassToEditArea(UI.getSegmentId(segment), UI.getSegmentFileId(segment), 'fromSuggestion');
+            SegmentActions.setHeaderPercentuage(UI.getSegmentId( segment ), UI.getSegmentFileId(segment), match ,percentageClass, createdBy);
+
             $(document).trigger('contribution:copied', { translation: translation, segment: segment });
 
-            $(editarea).addClass('fromSuggestion');
-
-			this.saveInUndoStack('copysuggestion');
-			$('.percentuage', segment).text(match).removeClass('per-orange per-green per-blue per-yellow').addClass(percentageClass).addClass('visible');
-            $('.repetition', segment).hide();
-			if (which) {
+            if (which) {
 				this.currentSegment.addClass('modified');
                 this.currentSegment.data('modified', true);
                 this.currentSegment.trigger('modified');
-            }
+            };
 		}
 
 		// a value of 0 for 'which' means the choice has been made by the
@@ -163,7 +160,6 @@ $.extend(UI, {
   	processContributions: function(d, segment) {
 		if(!d) return true;
 		this.renderContributions(d, segment);
-		this.lockTags(this.editarea);
 		this.spellCheck();
 		this.saveInUndoStack();
 		this.blockButtons = false;
@@ -190,9 +186,7 @@ $.extend(UI, {
           editarea.addClass("indent");
       }
       var translation = d.data.matches[0].translation;
-      var perc_t = $(".percentuage", segment).attr("title");
 
-      $(".percentuage", segment).attr("title", '' + perc_t + "Created by " + d.data.matches[0].created_by);
       var match = d.data.matches[0].match;
 
       var segment_id = segment.attr('id');
@@ -237,10 +231,10 @@ $.extend(UI, {
 					UI.createFooter(segment);
 				}
 				// Attention Bug: We are mixing the view mode and the raw data mode.
-				// before doing a enanched view you will need to add a data-original tag
+				// before doing a enanched  view you will need to add a data-original tag
                 //
-                suggestionDecodedHtml = UI.decodePlaceholdersToText(this.segment, true, segment_id, 'contribution source');
-				translationDecodedHtml = UI.decodePlaceholdersToText( this.translation, true, segment_id, 'contribution translation' );
+                suggestionDecodedHtml = UI.decodePlaceholdersToText(this.segment);
+				translationDecodedHtml = UI.decodePlaceholdersToText( this.translation);
 
 		  		//If Tag Projection is enable I take out the tags from the contributions
 				// if (UI.currentSegmentTPEnabled) {
@@ -269,7 +263,6 @@ $.extend(UI, {
 
 
 			UI.setDeleteSuggestion(segment);
-			UI.lockTags();
             UI.setContributionSourceDiff(segment);
             //If Tag Projection is enable I take out the tags from the contributions
             if (!UI.enableTagProjection) {
@@ -293,8 +286,8 @@ $.extend(UI, {
                 }
 
                 var copySuggestion = function() {
-                    UI.copySuggestionInEditarea(segment, translation, editarea, match, false, true, 1);
-                }
+                    UI.copySuggestionInEditarea(segment, translation, editarea, match, false, true, 1, d.data.matches[0].created_by);
+                };
 
                 if ( Speech2Text.enabled() && Speech2Text.isContributionToBeAllowed( match ) ) {
 				    copySuggestion();

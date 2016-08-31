@@ -145,32 +145,21 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
             return translation ;
         },
-        getSegmentMarkup : function() {
-            var segmentData = arguments[0];
-            var data = UI.getSegmentTemplateData.apply( this, arguments ) ;
+        renderSegments: function (segments, justCreated, fid) {
 
-            var section            = $( UI.getSegmentTemplate()( data ) );
-            var segment_body       = $( MateCat.Templates[ 'review_improved/segment_body' ](data) );
-            var textarea_container = MateCat.Templates[ 'review_improved/text_area_container' ](
-                {
-                    decoded_translation : data.decoded_translation
-                });
-
-            segment_body
-                .find('[data-mount="segment_text_area_container"]')
-                .html( textarea_container );
-
-            section
-                .find('[data-mount="segment_body"]')
-                .html( segment_body );
-
-            return section[0].outerHTML ;
+            if((typeof this.split_points_source == 'undefined') || (!this.split_points_source.length) || justCreated) {
+                var mountPoint = $(".article-segments-container-" + fid)[0];
+                ReactDOM.render(React.createElement(SegmentsContainer,{
+                    fid : fid,
+                    isReviewImproved: true,
+                    enableTagProjection: UI.enableTagProjection,
+                    decodeTextFn: UI.decodeText,
+                    tagModesEnabled: UI.tagModesEnabled,
+                    speech2textEnabledFn: Speech2Text.enabled
+                }), mountPoint);
+                SegmentActions.renderSegments(segments, fid);
+            }
         },
-
-        getSegmentTemplate : function() {
-            return MateCat.Templates['review_improved/segment'];
-        },
-
         rejectAndGoToNext : function() {
             UI.setTranslation({
                 id_segment: UI.currentSegmentId,

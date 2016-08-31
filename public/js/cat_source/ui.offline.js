@@ -215,7 +215,15 @@ $.extend(UI, {
         if (typeof UI.offlineNotification != 'undefined') {
             APP.removeNotification(this.offlineNotification);
         }
-    }
+    },
+    changeStatusOffline: function (sid) {
+        if($('#segment-' + sid + ' .editarea').text() != '') {
+            $('#segment-' + sid).removeClass('status-draft status-approved ' +
+                'status-new status-rejected ' +
+                'status-fixed status-rebutted'
+            ).addClass('status-translated');
+        }
+    },
 });
 
 $('html').on('mousedown', 'body[data-offline-mode="light-off"] .editor .actions .split', function(e) {

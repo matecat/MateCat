@@ -23,26 +23,12 @@ if(config.splitSegmentEnabled) {
 
     .on('click', 'body:not([data-offline-mode]) .sid .actions .split', function(e) {
         e.preventDefault();
-        $('.sid .actions .split').addClass('cancel');
-        $('.split-shortcut').html('CTRL + W');
-        UI.currentSegment.addClass('split-action');
-        actions = $(this).parent().find('.actions');
-        actions.show();
-        segment = $(this).parents('section');
-        UI.createSplitArea(segment);
+        UI.openSegmentSplit(this);
     }).on('click', 'body[data-offline-mode] .sid .actions .split', function(e) {
         e.preventDefault();
     }).on('click', '.sid .actions .split.cancel', function(e) {
         e.preventDefault();
-        $('.sid .actions .split').removeClass('cancel');
-        source = $(segment).find('.source');
-        $(source).removeAttr('style');
-        UI.currentSegment.removeClass('split-action');
-        $('.split-shortcut').html('CTRL + S');
-        console.log('cancel');
-        segment = $(this).parents('section');
-        segment.find('.splitBar, .splitArea').remove();
-        segment.find('.sid .actions').hide();
+        UI.closeSegmentSplit(this);
     }).on('keydown', '.splitArea', function(e) {
         console.log('keydown');
         e.preventDefault();
@@ -167,24 +153,21 @@ if(config.splitSegmentEnabled) {
             });
         },
         setSegmentSplitSuccess: function (data) {
-            oldSid = data.sid;
-            console.log('oldSid: ', oldSid);
-            splittedSource = data.splittedSource;
-            console.log('splittedSource: ', splittedSource);
-            splitAr = data.splitAr;
-            newSegments = [];
-            splitGroup = [];
-            onlyOne = ( splittedSource.length == 1 ) ? true : false;
+            var oldSid = data.sid;
+            var splittedSource = data.splittedSource;
+            var splitAr = data.splitAr;
+            var newSegments = [];
+            var splitGroup = [];
+            var onlyOne = ( splittedSource.length == 1 );
 
             //get all chunk translations, if this is a merge we want all concatenated targets
             //but we could reload the page? ( TODO, check if we can avoid spaces and special chars problem )
-            translation = '';
+            var translation = '';
             if( onlyOne ) {
                 $( 'div[id*=segment-' + oldSid + ']' ).filter(function() {
                     return this.id.match(/-editarea/);
                 } ).each( function( index, value ){
                     translation += $( value ).html();
-                    //console.log( $( value ).html() );
                 } );
             }
 
@@ -195,7 +178,7 @@ if(config.splitSegmentEnabled) {
                     translation = ( index == 0 ) ? UI.editarea.html() : '';
                 }
 
-                segData = {
+                var segData = {
                     autopropagated_from: "0",
                     has_reference: "false",
                     parsed_time_to_edit: ["00", "00", "00", "00"],
@@ -209,42 +192,27 @@ if(config.splitSegmentEnabled) {
                     translation: translation,
                     version: segment.attr('data-version'),
                     warning: "0"
-                }
+                };
                 newSegments.push(segData);
                 splitGroup.push(oldSid + '-' + (index + 1));
             });
-            oldSegment = $('#segment-' + oldSid);
-            alreadySplitted = (oldSegment.length)? false : true;
+            var oldSegment = $('#segment-' + oldSid);
+            var alreadySplitted = (oldSegment.length)? false : true;
             if(onlyOne) splitGroup = [];
             $('.test-invisible').remove();
 
             if(alreadySplitted) {
-                prevSeg = $('#segment-' + oldSid + '-1').prev('section');
 
-                if(prevSeg.length) {
-                    $('section[data-split-original-id=' + oldSid + ']').remove();
-                    $(prevSeg).after(UI.renderSegments(newSegments, true, splitAr, splitGroup));
-                } else {
-                    file = $('#segment-' + oldSid + '-1').parents('article');
-                    $('section[data-split-original-id=' + oldSid + ']').remove();
-                    $(file).prepend(UI.renderSegments(newSegments, true, splitAr, splitGroup));
-                }
+                SegmentActions.splitSegments(oldSid, newSegments, splitGroup, this.currentFileId);
+
                 if(splitGroup.length) {
-                    $.each(splitGroup, function (index) {
-                        UI.lockTags($('#segment-' + this + ' .source'));
-                    });
                     this.gotoSegment(oldSid + '-1');
                 } else {
-                    UI.lockTags($('#segment-' + oldSid + ' .source'));
                     this.gotoSegment(oldSid);
-
                 }
+                UI.closeSegmentSplit();
             } else {
-                $(oldSegment).after(UI.renderSegments(newSegments, true, splitAr, splitGroup));
-                $.each(splitGroup, function (index) {
-                    UI.lockTags($('#segment-' + this + ' .source'));
-                });
-                $(oldSegment).remove();
+                SegmentActions.splitSegments(oldSid, newSegments, splitGroup, this.currentFileId);
                 this.gotoSegment(oldSid + '-1');
             }
 
@@ -292,7 +260,6 @@ if(config.splitSegmentEnabled) {
                 splitAreaMarkup = htmlDecode(splitAreaMarkup).replace(/&quot;/g, '\"');
             }
             splitArea.html(splitAreaMarkup);
-            this.lockTags(splitArea);
             splitArea.find('.rangySelectionBoundary').remove();
         },
         updateSplitNumber: function (area) {
@@ -311,6 +278,23 @@ if(config.splitSegmentEnabled) {
         cleanSplitPoints: function (splitArea) {
             splitArea.html(splitArea.html().replace(/(<span class="splitpoint"><span class="splitpoint-delete"><\/span><\/span>)<span class="splitpoint"><span class="splitpoint-delete"><\/span><\/span>/gi, '$1'));
             splitArea.html(splitArea.html().replace(/(<span class="splitpoint"><span class="splitpoint-delete"><\/span><\/span>)$/gi, ''));
+        },
+        closeSegmentSplit: function () {
+            $('.sid .actions .split').removeClass('cancel');
+            source = $(segment).find('.source');
+            $(source).removeAttr('style');
+            UI.currentSegment.removeClass('split-action');
+            $('.split-shortcut').html('CTRL + S');
+            UI.currentSegment.find('.splitBar, .splitArea').remove();
+            UI.currentSegment.find('.sid .actions').hide();
+        },
+        openSegmentSplit: function () {
+            $('.sid .actions .split').addClass('cancel');
+            $('.split-shortcut').html('CTRL + W');
+            UI.currentSegment.addClass('split-action');
+            actions = UI.currentSegment.find('.actions');
+            actions.show();
+            UI.createSplitArea(UI.currentSegment);
         }
 
     })

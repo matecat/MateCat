@@ -129,6 +129,25 @@ module.exports = function(grunt) {
                 ],
                 dest: buildPath + 'cat-react.js'
             },
+            test: {
+                options: {
+                    external: [
+                        'react/addons',
+                        'react/lib/ReactContext',
+                        'react/lib/ExecutionEnvironment'
+                    ],
+                    transform: [
+                        [ 'babelify', { presets: [ es2015Preset, reactPreset ] } ]
+                    ],
+                    browserifyOptions: {
+                        paths: [ __dirname + '/node_modules' ]
+                    }
+                },
+                src: [
+                    basePath + '__tests__/*.js',
+                ],
+                dest: buildPath + '/tests/test-react.js'
+            },
         },
 
 
@@ -180,6 +199,7 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/qa_check_blacklist.js',
 
                     basePath + 'cat_source/functions.js', // TODO: why this depends on this position?
+                    basePath + 'cat_source/utils.js', // TODO: why this depends on this position?
 
                     basePath + 'cat_source/ui.customization.js',
                     basePath + 'cat_source/ui.review.js',
@@ -415,6 +435,10 @@ module.exports = function(grunt) {
         'bundle:js',
         // 'strip',
         'sass'
+    ]);
+
+    grunt.registerTask('test', [
+        'browserify:test'
     ]);
 };
 

@@ -1,12 +1,13 @@
 <section id="segment-{{segment.sid}}"
-         class="reviewImproved {{segment_classes}}"
+         class="isReviewImproved {{segment_classes}}"
          data-hash="{{segment.segment_hash}}"
          data-autopropagated="{{autoPropagated}}"
          data-propagable="{{autoPropagable}}"
          data-version="{{segment.version}}"
          data-split-group="{{splitGroup}}"
          data-split-original-id="{{originalId}}"
-         data-tagmode="crunched">
+         data-tagmode="crunched"
+         data-tagprojection="{{dataAttrTagged}}">>
 
     <a tabindex="-1" href="#{{segment.sid}}"></a>
     <div class="sid" title="{{segment.sid}}">

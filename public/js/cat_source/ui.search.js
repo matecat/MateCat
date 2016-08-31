@@ -182,14 +182,7 @@ $.extend(UI, {
 			}
 		});
 	},
-	checkSearchStrings: function() {
-		s = this.searchParams.source;
-		if (s.match(/[<\>]/gi)) { // there is a tag in source
-			this.disableTagMark();
-		} else {
-			this.enableTagMark();
-		}
-	},
+
 	updateSearchDisplay: function() {
 		if ((this.searchMode == 'onlyStatus')) {
 			res = (this.numSearchResultsSegments) ? this.numSearchResultsSegments : 0;

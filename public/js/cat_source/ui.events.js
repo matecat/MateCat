@@ -60,18 +60,18 @@ $.extend(UI, {
 			UI.copySource();
 		}).on('keydown.shortcuts', null, UI.shortcuts.undoInSegment.keystrokes.standard, function(e) {
 			e.preventDefault();
-			UI.undoInSegment(segment);
+			UI.undoInSegment(UI.currentSegment);
 			UI.closeTagAutocompletePanel();
 		}).on('keydown.shortcuts', null, UI.shortcuts.undoInSegment.keystrokes.mac, function(e) {
 			e.preventDefault();
-			UI.undoInSegment(segment);
+			UI.undoInSegment(UI.currentSegment);
 			UI.closeTagAutocompletePanel();
 		}).on('keydown.shortcuts', null, UI.shortcuts.redoInSegment.keystrokes.standard, function(e) {
 			e.preventDefault();
-			UI.redoInSegment(segment);
+			UI.redoInSegment(UI.currentSegment);
 		}).on('keydown.shortcuts', null, UI.shortcuts.redoInSegment.keystrokes.mac, function(e) {
 			e.preventDefault();
-			UI.redoInSegment(segment);
+			UI.redoInSegment(UI.currentSegment);
 		}).on('keydown.shortcuts', null, UI.shortcuts.openSearch.keystrokes.standard, function(e) {
             if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
 		}).on('keydown.shortcuts', null, UI.shortcuts.openSearch.keystrokes.mac, function(e) {
@@ -166,23 +166,7 @@ $.extend(UI, {
             UI.handleReturn(e);
         }).on('keydown', '.editor .editarea', 'return', function(e) {
             UI.handleReturn(e);
-		}).on('keydown', '.editor .editarea', 'space', function(e) {
-            if(UI.markSpacesEnabled) {
-                if(!UI.hiddenTextEnabled) return;
-                e.preventDefault();
-                UI.editarea.find('.lastInserted').removeClass('lastInserted');
-
-                var node = document.createElement("span");
-                node.setAttribute('class', 'marker monad space-marker lastInserted');
-                node.setAttribute('contenteditable', 'false');
-                node.textContent = htmlDecode(" ");
-
-                insertNodeAtCursor(node);
-                UI.unnestMarkers();
-            }
-
-		})
-                .on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
+		}).on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
             if(!UI.hiddenTextEnabled) return;
 			e.preventDefault();
             UI.editarea.find('.lastInserted').removeClass('lastInserted');
@@ -253,7 +237,6 @@ $.extend(UI, {
 					   .append(brEnd);
 
 			//lock tags and run again getWarnings
-			UI.lockTags(UI.editarea);
 			UI.currentSegmentQA();
 
 		}).on('click', '.tagLockCustomize', function(e) {
@@ -340,7 +323,6 @@ $.extend(UI, {
 			$('.tag-autocomplete-endcursor').before(htmlEncode($(this).text()));
 			restoreSelection();
 			UI.closeTagAutocompletePanel();
-			UI.lockTags(UI.editarea);
 			UI.currentSegmentQA();
 		}).on('click', '.modal.survey .x-popup', function() {
 			UI.surveyDisplayed = true;
@@ -436,8 +418,7 @@ $.extend(UI, {
 
             $('.editor .rangySelectionBoundary').addClass('focusOut');
 
-            $(
-                '.editor .search-source .rangySelectionBoundary.focusOut,' +
+            $('.editor .search-source .rangySelectionBoundary.focusOut,' +
                 '.editor .search-target .rangySelectionBoundary.focusOut'
             ).remove();
 
@@ -702,15 +683,6 @@ $.extend(UI, {
 					UI.checkAutocompleteTags();
 				}
 			}, 50);
-            if (!UI.body.hasClass('searchActive')) {
-
-                if(UI.isCJK && ( (e.which == '60') || (e.which == '62') ) ) {
-                } else {
-                    setTimeout(function() {
-                        UI.lockTags(UI.editarea);
-                    }, 10);
-                }
-            }
 		}).on('keydown', '.editor .editarea', function(e) {
 
             if ((e.which == 8) && (!UI.body.hasClass('tagmode-default-extended'))) {
@@ -945,10 +917,6 @@ $.extend(UI, {
 			UI.currentSegment.data('modified', true);
 			UI.currentSegment.trigger('modified');
 
-			if (UI.droppingInEditarea) {
-				UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
-			}
-
 			if ( UI.hasSourceOrTargetTags( e.target ) ) {
 				UI.currentSegment.addClass( 'hasTagsToggle' );
 			} else {
@@ -962,13 +930,7 @@ $.extend(UI, {
 			}
 
 			UI.registerQACheck();
-                if(UI.isKorean && ( (e.which == '60') || (e.which == '62') || (e.which == '32')) ) {
-                } else {
-                    UI.lockTags(UI.editarea);
-                }
-        }).on('input', '.editor .cc-search .input', function() {
-			UI.markTagsInSearch($(this));
-		}).on('click', '.editor .source .locked,.editor .editarea .locked', function(e) {
+        }).on('click', '.editor .source .locked,.editor .editarea .locked', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
             if($(this).hasClass('selected')) {
@@ -990,22 +952,6 @@ $.extend(UI, {
 		}).on('dragstart', '.editor .editarea .locked', function() {
             // To stop the drag in tags elements
             return false;
-		}).on('drop', '.editor .editarea', function(e) {
-			if (e.stopPropagation) {
-				e.stopPropagation(); // stops the browser from redirecting.
-			}
-			UI.beforeDropEditareaHTML = UI.editarea.html();
-			UI.droppingInEditarea = true;
-			setTimeout(function() {
-                UI.lockTags(UI.editarea);
-                UI.saveInUndoStack('drop');
-            }, 100);
-		}).on('drop paste', '.editor .cc-search .input, .editor .gl-search .input', function() {
-			UI.beforeDropSearchSourceHTML = UI.editarea.html();
-			UI.currentConcordanceField = $(this);
-			setTimeout(function() {
-				UI.cleanDroppedTag(UI.currentConcordanceField, UI.beforeDropSearchSourceHTML);
-			}, 100);
 		}).on('click', '.editor .editarea, .editor .source', function() {
 			$('.selected', $(this)).removeClass('selected');
 			UI.currentSelectedText = false;
@@ -1098,7 +1044,7 @@ $.extend(UI, {
 				e.preventDefault();
 				var txt = $(this).text();
 				if (txt.length > 2) {
-					segment = $(this).parents('section').first();
+					var segment = $(this).parents('section').first();
 					UI.getGlossary(segment, false);
 				}
 			}
@@ -1139,8 +1085,6 @@ $.extend(UI, {
 			if(UI.isFirefox) pasteHtmlAtCaret('<div id="placeHolder"></div>');
 			var ev = (UI.isFirefox) ? e : event;
 			handlepaste(this, ev);
-            UI.lockTags(UI.editarea);
-
 		}).on('click', 'a.close', function(e, param) {
 			e.preventDefault();
 			var save = (typeof param == 'undefined') ? 'noSave' : param;
@@ -1155,18 +1099,13 @@ $.extend(UI, {
 				UI.setExtendedConcordances(true);
 			}
 			$(this).parents('.matches').toggleClass('extended');
-		}).on('click', '.tagMode .crunched', function(e) {
-            e.preventDefault();
-            UI.setCrunchedTagMode();
-        }).on('click', '.tagMode .extended', function(e) {
-            e.preventDefault();
-            UI.setExtendedTagMode();
-        });
+		});
 
 		$("#outer").on('click', '.tab.alternatives .graysmall .goto a', function(e) {
 			e.preventDefault();
 			UI.scrollSegment($('#segment-' + $(this).attr('data-goto')), true);
-			UI.highlightEditarea($('#segment-' + $(this).attr('data-goto')));
+			// UI.highlightEditarea($('#segment-' + $(this).attr('data-goto')));
+			SegmentActions.highlightEditarea($(this).attr('data-goto'));
 		});
 		UI.toSegment = true;
 
