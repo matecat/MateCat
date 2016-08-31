@@ -620,7 +620,7 @@
             var form = line.find('.add-TM-Form')[0];
             var path = line.find('.uploadfile').find('input[type="file"]').val();
             var file = path.split('\\')[path.split('\\').length-1];
-            this.TMFileUpload(form, action, 'uploadCallback', file);
+            this.fileUpload(form, action, 'uploadCallback', file, type);
 
         },
         addTMKeyToList: function ( uploading ) {
@@ -731,7 +731,7 @@
             $('.mgmt-container .tm-error-message').hide();
             $('.mgmt-container .tm-warning-message').hide();
         },
-        TMFileUpload: function(form, action_url, div_id, tmName) {
+        fileUpload: function(form, action_url, div_id, tmName, type) {
             // Create the iframe...
             var ts = new Date().getTime();
             var ifId = "upload_iframe-" + ts;
@@ -748,7 +748,7 @@
 
             window.frames['upload_iframe'].name = "upload_iframe";
             iframeId = document.getElementById(ifId);
-            UI.TMuploadIframeId = iframeId;
+            UI.UploadIframeId = iframeId;
 
             // Add event...
             var eventHandler = function () {
@@ -767,12 +767,12 @@
 
                 document.getElementById(div_id).innerHTML = content;
 
-            }
+            };
 
             if (iframeId.addEventListener) iframeId.addEventListener("load", eventHandler, true);
             if (iframeId.attachEvent) iframeId.attachEvent("onload", eventHandler);
             var TR = $(form).parents('tr');
-            var TMKey = TR.find('.privatekey').first().text();
+            var Key = TR.find('.privatekey').first().text();
 
             // Set properties of form...
             form.setAttribute("target", "upload_iframe");
@@ -781,7 +781,7 @@
             form.setAttribute("enctype", "multipart/form-data");
             form.setAttribute("encoding", "multipart/form-data");
             $(form).append('<input type="hidden" name="exec" value="newTM" />')
-                .append('<input type="hidden" name="tm_key" value="' + TMKey + '" />')
+                .append('<input type="hidden" name="tm_key" value="' + Key + '" />')
                 .append('<input type="hidden" name="name" value="' + tmName + '" />')
                 .append('<input type="hidden" name="r" value="1" />')
                 .append('<input type="hidden" name="w" value="1" />');
@@ -794,20 +794,20 @@
             form.submit();
 
             document.getElementById(div_id).innerHTML = "";
-            var TMPath =  $(form).find('input[type="file"]').val();
-            var TMName = TMPath.split('\\')[TMPath.split('\\').length-1];
+            var filePath =  $(form).find('input[type="file"]').val();
+            var fileName = filePath.split('\\')[filePath.split('\\').length-1];
 
             var TRcaller = $(form).parents('.uploadfile');
             TRcaller.addClass('startUploading');
 
             setTimeout(function() {
-                UI.pollForUploadCallback(TMKey, TMName, TRcaller);
+                UI.pollForUploadCallback(Key, fileName, TRcaller);
             }, 3000);
 
             return false;
 
         },
-        pollForUploadCallback: function(TMKey, TMName, TRcaller) {
+        pollForUploadCallback: function(Key, fileName, TRcaller) {
 
             if($('#uploadCallback').text() != '') {
                 msg = $.parseJSON($('#uploadCallback pre').text());
@@ -815,7 +815,7 @@
                     setTimeout(function() {
                         //delay because server can take some time to process large file
                         TRcaller.removeClass('startUploading');
-                        UI.pollForUploadProgress(TMKey, TMName, TRcaller);
+                        UI.pollForUploadProgress(Key, fileName, TRcaller);
                     }, 3000);
                 } else {
                     console.log('error');
@@ -824,21 +824,21 @@
                 }
             } else {
                 setTimeout(function() {
-                    UI.pollForUploadCallback(TMKey, TMName, TRcaller);
+                    UI.pollForUploadCallback(Key, fileName, TRcaller);
                 }, 1000);
             }
 
         },
-        pollForUploadProgress: function(TMKey, TMName, TRcaller) {
+        pollForUploadProgress: function(Key, fileName, TRcaller) {
 
             APP.doRequest({
                 data: {
                     action: 'loadTMX',
                     exec: 'uploadStatus',
-                    tm_key: TMKey,
-                    name: TMName
+                    tm_key: Key,
+                    name: fileName
                 },
-                context: [TMKey, TMName, true, TRcaller],
+                context: [Key, fileName, true, TRcaller],
                 error: function() {
                     console.log('error');
 
@@ -859,7 +859,7 @@
 
                         if(d.data.total == null) {
                             setTimeout(function() {
-                                UI.pollForUploadProgress(TMKey, TMName, existing, TRcaller);
+                                UI.pollForUploadProgress(Key, fileName, existing, TRcaller);
                             }, 1000);
                         } else {
                             if(d.completed) {
@@ -870,7 +870,7 @@
                                 $(TRcaller).find('.uploadprogress,.canceladdtmx,.addtmxfile, .addglossaryfile, .cancelladdglossary').hide();
 
                                 if( !tr.find('td.description .edit-desc').text() ){
-                                    tr.find('td.description .edit-desc').text(TMName);
+                                    tr.find('td.description .edit-desc').text(fileName);
                                 }
 
                                 $(TRcaller).addClass('tempTRcaller').append('<span class="msg">Import Complete</span>');
@@ -882,14 +882,14 @@
 
 
 
-                                UI.TMuploadIframeId.parentNode.removeChild(UI.TMuploadIframeId);
+                                UI.UploadIframeId.parentNode.removeChild(UI.UploadIframeId);
 
                                 return false;
                             }
                             progress = (parseInt(d.data.done)/parseInt(d.data.total))*100;
                             $(TRcaller).find('.progress .inner').css('width', progress + '%');
                             setTimeout(function() {
-                                UI.pollForUploadProgress(TMKey, TMName, existing, TRcaller);
+                                UI.pollForUploadProgress(Key, fileName, existing, TRcaller);
                             }, 1000);
                         }
                     }
