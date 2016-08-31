@@ -1271,13 +1271,12 @@ $.extend(UI, {
 	}
 });
 
-if ( config.isReview ) {
-    $(document).on('ready', function() {
-        window.quality_report_btn_component = ReactDOM.render(
-            React.createElement( Review_QualityReportButton, {
-                vote                : config.overall_quality_class,
-                quality_report_href : config.quality_report_href
-            }), $('#quality-report-button')[0] );
+$(document).on('ready', function() {
+	window.quality_report_btn_component = ReactDOM.render(
+		React.createElement( Review_QualityReportButton, {
+			vote                : config.overall_quality_class,
+			quality_report_href : config.quality_report_href
+		}), $('#quality-report-button')[0] );
 
-    });
-}
+});
+

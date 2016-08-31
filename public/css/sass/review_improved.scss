@@ -214,6 +214,7 @@ section {
             color: #fff;
             text-transform: uppercase;
             margin: 0 0 0 10px;
+            text-decoration: none;
         }
 
         .button-default {
@@ -271,8 +272,7 @@ section {
 }
 
 .review-issues-overview-panel {
-    margin: 25px;
-    margin-top: 40px;
+    padding: 10px 10px 40px 10px;
 }
 
 .review-current-version-container {
@@ -287,7 +287,7 @@ section {
 
 .review-issue-comment-reply textarea {
     width: 95%;
-    margin: 10px 0;
+    margin-top: 10px;
 }
 
 .review-previous-versions-wrapper {
@@ -302,7 +302,7 @@ section {
   font-size: 13px;
   position: absolute;
   top: 10px;
-  left: 10px;
+  right: 10px;
   line-height: 16px;
   background-color: #333;
   color: #ffffff;
@@ -507,7 +507,7 @@ a.cancel-project:hover {
 }
 
 .review-issue-comment-buttons {
-    margin: 5px 0;
+    margin: 15px 0;
 }
 
 .review-issue-selection-panel {

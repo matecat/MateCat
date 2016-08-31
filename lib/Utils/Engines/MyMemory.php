@@ -68,6 +68,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
                 break;
             case 'tmx_export_create_url' :
             case 'tmx_export_check_url' :
+            case 'tmx_export_email_url' :
                 $result_object = Engines_Results_MyMemory_ExportResponse::getInstance( $decoded );
                 break;
             case 'analyze_url':
@@ -408,7 +409,11 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
      * <br />invoke with the same parameters of createExport
      *
      * @see Engines_MyMemory::createExport
-     *
+     *,
+                $this->name,
+                $userMail,
+                $userName,
+                $userSurname
      * @param      $key
      * @param null $source
      * @param null $target
@@ -497,6 +502,41 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
 
         return $handle;
 
+    }
+
+    /**
+     * Calls the MyMemory endpoint to send the TMX download URL to the user e-mail
+     *
+     * @param $key
+     * @param $name
+     * @param $userEmail
+     * @param $userName
+     * @param $userSurname
+     *
+     *
+     * @return Engines_Results_MyMemory_ExportResponse
+     * @throws Exception
+     *
+     */
+    public function emailExport( $key, $name, $userEmail, $userName, $userSurname ) {
+        $parameters = array();
+
+        $parameters[ 'key' ] = trim( $key );
+        $parameters[ 'user_email' ] = trim( $userEmail );
+        $parameters[ 'user_name' ] = trim( $userName ) . " " . trim( $userSurname );
+        ( !empty( $name ) ? $parameters[ 'zip_name' ] = $name : $parameters[ 'zip_name' ] = $key );
+
+        $this->call( 'tmx_export_email_url', $parameters );
+
+        /**
+         * $result Engines_Results_MyMemory_ExportResponse
+         */
+        if ( $this->result->responseStatus >= 400 ) {
+            throw new Exception( $this->result->error->message, $this->result->responseStatus );
+        }
+
+        Log::doLog('TMX exported to E-mail.');
+        return $this->result;
     }
 
     /*****************************************/

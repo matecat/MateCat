@@ -27,6 +27,8 @@ abstract class ajaxController extends controller {
     protected $id_segment;
     protected $split_num = null;
 
+    protected $logged_user;
+
     /**
      * Class constructor, initialize the header content type.
      */
@@ -85,11 +87,28 @@ abstract class ajaxController extends controller {
     }
 
     public function checkLogin( $close = true ) {
+
         //Warning, sessions enabled, disable them after check, $_SESSION is in read only mode after disable
         parent::sessionStart();
+
+        //even if no login in required, if user data is present, pull it out
+        $this->logged_user = new Users_UserStruct();
+        if ( !empty( $_SESSION[ 'cid' ] ) ){
+            $this->logged_user->uid = $_SESSION[ 'uid' ];
+            $this->logged_user->email = $_SESSION[ 'cid' ];
+
+            $userDao = new Users_UserDao(Database::obtain());
+            $userObject = $userDao->setCacheTTL( 3600 )->read( $this->logged_user ); // one hour cache
+
+            /**
+             * @var $userObject Users_UserStruct
+             */
+            $this->logged_user = $userObject[0];
+        }
+
         $this->userIsLogged = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) );
-        $this->userMail     = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ? $_SESSION[ 'cid' ] : null );
-        $this->uid          = ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) ? $_SESSION[ 'uid' ] : null );
+        $this->uid          = $this->logged_user->getUid();
+        $this->userMail     = $this->logged_user->getEmail();
 
         if ( $close ) {
             parent::disableSessions();

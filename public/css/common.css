@@ -1096,6 +1096,11 @@ width: 804px;
     display: block;
 }
 
+input.email-export-tmx {
+    width: 180px;
+    margin-left: 10px!important;
+}
+
 .downloading .uploadloader {
 	display: block;
 	z-index: 10;
@@ -1158,6 +1163,7 @@ background: #f8f8f8;
 form.add-TM-Form {
     display: inline;
     padding: 5px 0 10px;
+    margin: 0 0 0 10px;
 }
 #uploadCallback {
     display: none;
@@ -1631,7 +1637,7 @@ width: 100%;
 	position: relative;
 	border-radius: 4px;
 	float: left;
-	width: 235px;
+	width: 120px;
 }
 
 .new td.fileupload {
@@ -1802,6 +1808,8 @@ text-align: center;}
 
 .addtmxfile.btn-ok {
     display: none;
+    margin-left: -10px;
+    margin-right: 20px;
 }
 
  .canceladdtmx.btn-grey {
@@ -1943,33 +1951,48 @@ margin-top: 10px;
     height: 20px;
     border-top: 1px solid #E1E1E1;
 	box-shadow: inset 0px 2px 5px 0px #E4E4E4;
+    position: relative;
 }
+
+span.email-export-tmx-email-sent,
+span.email-export-tmx-email-error,
 #activetm td.uploadfile .msg,
 #inactivetm td.uploadfile .msg {
     float: right;
-    margin-right: 100px;
+    margin-right: 20px;
+    margin-top:5px;
     color: green;
+    text-align: right;
 }
+
 #activetm td.dragrow {
    position: relative;
 	padding: 5px 5px 5px 5px!important;
+}
+
+td.uploadfile p {
+    width: 250px;
+    margin: 0 10px;
+}
+
+td.uploadfile .canceladdtmx {
+    margin-right: 18px;
 }
 
 #activetm td.dragrow .status {
 	cursor: move;
 	margin: 0 auto;
 	width: 2px;
-	height: inherit;
 	border: 2px dotted #ccc;
 	border-top: 0;
-border-bottom: 0;
+    border-bottom: 0;
 	display: block;
 	position: absolute;
 	right: 0;
 	left: 0;
 	height: 67%;
-bottom: 15%;
-top: 17%;
+    bottom: 15%;
+    top: 17%;
 }
 
 #activetm tr.owner td {
@@ -1980,6 +2003,84 @@ top: 17%;
     background: #f6f6f6 !important;
 }
 
+
+/* Export TMX container */
+#activetm td.download-tmx-container,
+#inactivetm td.download-tmx-container
+{
+    display: block;
+    background: #fff;
+    padding: 10px 5px 20px;
+    height: 20px;
+    border-top: 1px solid #E1E1E1;
+    box-shadow: inset 0px 2px 5px 0px #E4E4E4;
+    position: relative;
+}
+td.download-tmx-container {
+    line-height: 30px;
+}
+
+.message-export-tmx,
+.message-export-tmx-success{
+    float: left;
+    margin-left: 11px;
+}
+
+input.email-export-tmx {
+    float: left;
+    margin-left: 14px;
+    margin-top: 3px!important;
+}
+
+.export-tmx-button-label:before {
+    content: "\f00c";
+    padding-right: 7px;
+    vertical-align: text-top;
+}
+
+.export-tmx-button-label {
+    width: 90px;
+    display: block;
+    text-align: center;
+}
+.mgmt-tm .btn-ok.export-tmx-button {
+    padding: 0px 5px !important;
+    margin-right: 20px;
+}
+.download-tmx-container .uploadloader {
+    right: 200px;
+    top: -18px;
+}
+.export-tmx-button.disabled {
+    cursor: default;
+    pointer-events: none;
+}
+span.email-export-tmx-email-sent,
+span.email-export-tmx-email-error {
+    float: right;
+    margin-top: 1px;
+    display: none;
+}
+span.email-export-tmx-email-error {
+    color: red;
+    margin-left: 21px;
+    line-height: 14px;
+    text-align: center;
+    margin-right: 28px;
+}
+.btn-grey.canceladd-export-tmx {
+    background: #f26522;
+    width: 35px;
+    padding: 0px !important;
+    text-align: center;
+    color: #fff;
+}
+
+.canceladd-export-tmx:before {
+    content: "\f00d";
+    vertical-align: text-top;
+}
+/************************/
 .anonymous td.dragrow {
 
     background-image: none !important;
@@ -2641,13 +2742,18 @@ input#new-tm-key {
     height: 0px;
 }
 
-#activetm input#new-tm-key {
+#activetm input#new-tm-key,
+input.email-export-tmx
+ {
 	width: 155px;
 	padding: 12px 5px;
 	margin: 0;
 	height: 0px;
 	box-shadow: inset 0 1px 2px #ddd;
 -webkit-box-shadow: inset 0 1px 2px #ddd;
+}
+input.email-export-tmx {
+    width: 200px;
 }
 
 .badkey input#new-tm-key {
@@ -2972,7 +3078,7 @@ display: none;
     color: #39699a;
 }
 
-.tm-error-message, .tm-warning-message {
+.tm-error-message, .tm-warning-message, .tm-success-message {
     display: none;
     -moz-border-radius: 2px;
     box-shadow: 0 2px 2px #e2e2e2;
@@ -2997,7 +3103,11 @@ display: none;
         border-top: 3px solid #ebad1a;
 }
 
-.mgmt-panel .tm-error-message, .mgmt-panel .tm-warning-message {
+.tm-success-message {
+    border-top: 3px solid #4F8A10;
+}
+
+.mgmt-panel .tm-error-message, .mgmt-panel .tm-warning-message, .mgmt-panel .tm-success-message {
 	font-size:15px;
 	display: block;
 	}
@@ -3012,7 +3122,7 @@ width: 98.8%;
 color: #000;
 }
 
-.tm-warning-message, .tm-error-message {
+.tm-warning-message, .tm-error-message, .tm-success-message {
     margin: 0 0 15px !important;
 }
 
@@ -3160,6 +3270,8 @@ header .filter:before,
 .editToolbar .lowercase:after,
 .editToolbar .capitalize:after,
 .more-options:before,
+.export-tmx-button-label:before,
+.canceladd-export-tmx:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .splitArea .locked.startTag:before,

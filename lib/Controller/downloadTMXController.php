@@ -10,7 +10,7 @@ use ActivityLog\ActivityLogStruct;
  * 
  */
 
-class downloadTMXController extends downloadController {
+class downloadTMXController extends ajaxController {
 
     /**
      * @var int
@@ -23,11 +23,25 @@ class downloadTMXController extends downloadController {
     protected $password;
 
     /**
+     * Tell to MyMemory to send the download link to this email.
+     *
+     * @var string
+     */
+    protected $download_to_email;
+
+    /**
      * MyMemory key
      *
      * @var string
      */
     protected $tm_key;
+
+    /**
+     * MyMemory name/description
+     *
+     * @var string
+     */
+    protected $tm_name;
 
     /**
      * For future implementations
@@ -44,27 +58,22 @@ class downloadTMXController extends downloadController {
     protected $target;
 
     /**
-     * Download Token
-     *
-     * @var string
-     */
-    protected $downloadToken;
-
-    /**
      * @var TMSService
      */
     protected $tmxHandler;
-
-    /**
-     * @var
-     */
-    protected $streamFilePointer;
 
     /**
      * User id
      * @var int
      */
     protected $uid;
+
+    /**
+     * User
+     *
+     * @var Users_UserStruct
+     */
+    protected $user;
 
     /**
      * User email
@@ -74,6 +83,8 @@ class downloadTMXController extends downloadController {
     protected $userMail;
 
     public function __construct() {
+
+        parent::__construct();
 
         /**
          * Retrieve user information
@@ -88,8 +99,14 @@ class downloadTMXController extends downloadController {
             'tm_key' =>  array(
                     'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
             ),
+            'tm_name' =>  array(
+                'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+            ),
             'downloadToken' =>  array(
                     'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+            ),
+            'email' =>  array(
+                    'filter' => FILTER_VALIDATE_EMAIL
             ),
             'source' =>  array(
                     'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
@@ -106,13 +123,13 @@ class downloadTMXController extends downloadController {
         //NOTE: Global $_POST Overriding from CLI Test scripts
         //$__postInput = filter_var_array( $_POST, $filterArgs );
 
-        $this->tm_key        = $__postInput[ 'tm_key' ];
-        $this->source        = $__postInput[ 'source' ];
-        $this->target        = $__postInput[ 'target' ];
-        $this->downloadToken = $__postInput[ 'downloadToken' ];
-
-        $this->id_job        = $__postInput[ 'id_job' ];
-        $this->password      = $__postInput[ 'password' ];
+        $this->tm_key            = $__postInput[ 'tm_key' ];
+        $this->tm_name           = $__postInput[ 'tm_name' ];
+        $this->source            = $__postInput[ 'source' ];
+        $this->target            = $__postInput[ 'target' ];
+        $this->download_to_email = $__postInput[ 'email' ];
+        $this->id_job            = $__postInput[ 'id_job' ];
+        $this->password          = $__postInput[ 'password' ];
 
         if( !$this->userIsLogged ){
 
@@ -127,25 +144,35 @@ class downloadTMXController extends downloadController {
             Log::doLog( $output );
 
             Utils::sendErrMailReport( $output, "Download TMX Error: user Not Logged" );
-            $this->unlockToken();
             exit;
         }
 
+        $this->user = $this->logged_user;
+
         $this->tmxHandler = new TMSService();
         $this->tmxHandler->setTmKey( $this->tm_key );
+        $this->tmxHandler->setName( $this->tm_name . ".zip" );
 
     }
 
     /**
      * When Called it perform the controller action to retrieve/manipulate data
      *
-     * @return mixed
      */
     function doAction() {
 
         try {
 
-            $this->streamFilePointer = $this->tmxHandler->downloadTMX();
+            if( $this->download_to_email === false ){
+                $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "Invalid email provided for download." );
+                return;
+            }
+
+            $this->result[ 'data' ] = $this->tmxHandler->requestTMXEmailDownload(
+                $this->user->email,
+                $this->user->first_name,
+                $this->user->last_name
+            );
 
             // TODO: Not used at moment, will be enabled when will be built the Log Activity Keys
             /*
@@ -162,10 +189,10 @@ class downloadTMXController extends downloadController {
 
             $r = "<pre>";
 
-            $r .= print_r( "User Email: " . $this->userMail , true );
-            $r .= print_r( "User ID: " . $this->uid , true );
-            $r .= print_r( $e->getMessage(), true );
-            $r .= print_r( $e->getTraceAsString(), true );
+            $r .= print_r( "User Email: " . $this->userMail , true ) . "\n";
+            $r .= print_r( "User ID: " . $this->uid , true ) . "\n";
+            $r .= print_r( $e->getMessage(), true ) . "\n";
+            $r .= print_r( $e->getTraceAsString(), true ) . "\n";
 
             $r .= "\n\n";
             $r .=  " - REQUEST URI: " . print_r( @$_SERVER['REQUEST_URI'], true ) . "\n";
@@ -178,39 +205,10 @@ class downloadTMXController extends downloadController {
 
             Utils::sendErrMailReport( $r, "Download TMX Error: " . $e->getMessage() );
 
-
-            $this->unlockToken();
-            echo $e->getMessage();
-
-            exit;
+            $this->result[ 'errors' ][ ] = array( "code" => -2, "message" => "Download TMX Error: " . $e->getMessage() );
+            return;
 
         }
-
-    }
-
-    public function finalize() {
-
-        $this->unlockToken();
-
-        list( $file_name, $mx_domain) = explode( "@", $this->userMail );
-
-        $file_name .= "_" . uniqid() . ".zip";
-
-        $buffer = ob_get_contents();
-        ob_get_clean();
-        ob_start("ob_gzhandler");  // compress page before sending
-        $this->nocache();
-        header("Content-Type: application/force-download");
-        header("Content-Type: application/octet-stream");
-        header("Content-Type: application/download");
-        header("Content-Disposition: attachment; filename=\"$file_name\""); // enclose file name in double quotes in order to avoid duplicate header error. Reference https://github.com/prior/prawnto/pull/16
-        header("Expires: 0");
-        header("Connection: close");
-        while ( !feof( $this->streamFilePointer ) ) {
-            echo fgets( $this->streamFilePointer, 2048 );
-        }
-        fclose( $this->streamFilePointer );
-        exit;
 
     }
 

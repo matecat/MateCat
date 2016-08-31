@@ -32,16 +32,13 @@
                     <div class="mgmt-table-tm hide">
 
                         <div class="mgmt-container" id="list-search">
-                             <div class="boxed">
+                            <tal:block tal:condition="php: page != 'cattool'">
+                            <div class="boxed">
                                 <label>
                                     <input type="checkbox" id="pretranslate100" />
                                     Pre-translate 100% matches from TM
                                 </label>
                             </div>
-                            
-
-                            <tal:block tal:condition="php: page != 'cattool'">
-                           
                             </tal:block>
 
                             <div class="block pull-right ">
@@ -138,6 +135,7 @@
                                 </tbody>
                             </table>
                             <p class="tm-error-message" style="display: none;"> Error: the errmsg will appear here... </p>
+                            <p class="tm-success-message activetm" style="display: none;"> Success: the success msg will appear here... </p>
                             <h3 class="pull-left">Inactive TM</h3>
 
                             <tal:block tal:condition="php: empty(logged_user)">
@@ -219,6 +217,9 @@
 
                                     </tbody>
                                 </table>
+
+                                <p class="tm-success-message inactivetm" style="display: none;"> Success: the success msg will appear here... </p>
+
                             </tal:block>
 
 

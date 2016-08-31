@@ -312,17 +312,19 @@ class TMSService {
     }
 
     /**
-     * Send a request for download
+     * Send a mail with link for direct prepared download
      *
-     * First basic implementation
-     * TODO  in the future we would send a mail with link for direct prepared download
+     * @return resource
+     * @throws Exception
      */
     public function downloadTMX() {
 
         /**
          * @var $result Engines_Results_MyMemory_ExportResponse
          */
-        $result = $this->mymemory_engine->createExport( $this->tm_key );
+        $result = $this->mymemory_engine->createExport(
+                $this->tm_key
+        );
 
         if ( $result->responseDetails == 'QUEUED' &&
                 $result->responseStatus == 202
@@ -361,6 +363,27 @@ class TMSService {
         $resource_pointer = $this->mymemory_engine->downloadExport( $this->tm_key, $pass );
 
         return $resource_pointer;
+
+    }
+
+    /**
+     * @param $userMail
+     * @param $userName
+     * @param $userSurname
+     *
+     * @return Engines_Results_MyMemory_ExportResponse
+     */
+    public function requestTMXEmailDownload( $userMail, $userName, $userSurname ){
+
+        $response = $this->mymemory_engine->emailExport(
+                $this->tm_key,
+                $this->name,
+                $userMail,
+                $userName,
+                $userSurname
+        );
+
+        return $response;
 
     }
 
