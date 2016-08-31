@@ -39,7 +39,7 @@ UI.SegmentFooter = function( element ) {
                 item.on_activation( self ) ;
             }
         });
-    }
+    };
 
     this.activeItem = function() {
         // find a list of all enabled ones
@@ -63,7 +63,7 @@ UI.SegmentFooter = function( element ) {
         return _.first( sorted );
     }
 
-}
+};
 
 UI.SegmentFooter.registry = [];
 UI.SegmentFooter.registerTab = function( params ) {

@@ -2,7 +2,7 @@
 if ( SegmentFilter.enabled() )
 (function($, UI, SF, undefined) {
 
-    var original_getSegmentsMarkup = UI.getSegmentMarkup ;
+    var original_renderSegments = UI.renderSegments ;
     var original_editAreaClick     = UI.editAreaClick ;
 
     var original_selectorForNextUntranslatedSegment = UI.selectorForNextUntranslatedSegment ; 
@@ -96,18 +96,18 @@ if ( SegmentFilter.enabled() )
             }
         },
 
-        getSegmentMarkup : function() {
-            var markup = original_getSegmentsMarkup.apply( undefined, arguments );
-            var segment = arguments[0];
+        renderSegments : function() {
+            original_renderSegments.apply( undefined, arguments );
 
             if (SF.filtering()) {
-                if ( SF.getLastFilterData()['segment_ids'].indexOf( segment.sid ) === -1 ) {
-                    markup = $(markup).addClass('muted');
-                    markup = $('<div/>').append(markup).html();
-                }
+                var segments = SegmentStore.getAllSegments();
+                var filterArray = SF.getLastFilterData()['segment_ids']
+                segments.forEach(function (segment,index) {
+                    if (filterArray.indexOf(segment.sid) === -1) {
+                        SegmentActions.addClassToSegment(segment.sid, 'muted');
+                    }
+                })
             }
-
-            return markup ;
         }
     });
 })(jQuery, UI, SegmentFilter);

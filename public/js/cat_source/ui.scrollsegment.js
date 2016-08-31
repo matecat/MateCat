@@ -77,7 +77,7 @@
         
         if ( highlight ) { 
             scrollPromise.done( function() {
-                UI.highlightEditarea( segment ) ;
+                SegmentActions.highlightEditarea(segment.find(".editarea").data("sid"));
             }); 
         }
         

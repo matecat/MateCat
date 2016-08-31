@@ -55,8 +55,6 @@ if (QaCheckBlacklist.enabled() )
             setCursorPosition( editarea.find('.undoCursorPlaceholder')[0] );
         }
 
-        UI.lockTags( editarea );
-
         $('.blacklistItem', editarea).on('click', blacklistItemClick);
         addTip( editarea ) ;
     }

@@ -1940,12 +1940,12 @@ body.archived section .status-container
 
 	/*background-color: transparent;*/
 }
-.editor.highlighted1 .editarea
+.editor .editarea.highlighted1
 {
 	background-color: #ffff94;
 }
 
-.editor.highlighted2 .editarea
+.editor .editarea.highlighted2
 {
 	-moz-transition:background-color 1.5s;
 	-webkit-transition:background-color 1.5s !important;
@@ -1968,10 +1968,10 @@ section.highlighted2 .editarea
 }
 */
 
-section:not(.editor).highlighted1 .editarea {
+section:not(.editor) .editarea.highlighted1 {
 border-color: #00C1E6;
 }
-section:not(.editor).highlighted2 .editarea
+section:not(.editor) .editarea.highlighted2
 {
 -moz-transition: border-color 3s;
 -webkit-transition: border-color 3s !important;
