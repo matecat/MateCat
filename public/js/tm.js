@@ -141,9 +141,10 @@
                 // set Timeout to get the text value after paste event, otherwise it is empty
                 setTimeout( function(){ UI.checkTMKey('change'); }, 200 );
             }).on('click', '.mgmt-tm tr.new a.uploadtm:not(.disabled)', function() {
-                var self = this;
+                var keyValue = $('#new-tm-key').val();
+                var descKey = $('#new-tm-description').val();
                 UI.checkTMKey('key').done(function () {
-                    UI.saveTMkey($(this));
+                    UI.saveTMkey(keyValue, descKey);
                 });
 
 
@@ -1013,14 +1014,14 @@
                 }
             });
         },
-        saveTMkey: function (button) {
+        saveTMkey: function (key, desc) {
             delete UI.newTmKey;
             APP.doRequest({
                 data: {
                     action: 'userKeys',
                     exec: 'newKey',
-                    key: $('#new-tm-key').val(),
-                    description: $('#new-tm-description').val()
+                    key: key,
+                    description: desc
                 },
                 error: function() {
                     console.log('Error saving TM key!');
