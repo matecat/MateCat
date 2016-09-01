@@ -873,6 +873,8 @@ color:#333;}
 	    background-color: #fff;
 }
 
+
+
     .modal .popup p.waiting {
         background: url(../img/loading.gif) 38% 3px no-repeat !important;
         background-size: 24px !important;
@@ -1607,12 +1609,12 @@ margin:0 auto; overflow:hidden; width:100%;
 	width:190px!important;
 }
 
-.mgmt-tm .description {
+td.description, th.description {
 	/*width:32%!important;*/
-	width:307px!important;
+	width:290px!important;
 }
 
-.owner {width: 59px!important;}
+th.owner,td.owner {width: 80px!important;}
 
 .mgmt-tm .langpair {
 	/*width:14%!important;*/
@@ -1621,12 +1623,14 @@ margin:0 auto; overflow:hidden; width:100%;
 
 .mgmt-tm .check {
 		/*width:6%!important;*/
-		width:56px!important;
+		width:60px!important;
 		text-align: center;
 }
 
 
-
+.mgmt-table-mt td {
+    padding: 10px 15px 10px 10px!important;
+}
 
 .mgmt-mt .action {
 		/*width:22%!important;*/
@@ -1635,7 +1639,24 @@ margin:0 auto; overflow:hidden; width:100%;
 
 
 .mgmt-tm  th.action, .mgmt-tm td.action {
-    width: 172px;
+    width: 172px!important;
+}
+
+th.activate, td.activate {
+    width: 50px!important;
+    text-align: center;
+}
+
+
+
+
+#inactivetm th.check {
+    visibility: hidden;
+}
+
+#inactivetm .check.lookup input,
+#inactivetm .check.update input {
+    visibility:hidden;
 }
 
 #inactivetm tbody {
@@ -1663,6 +1684,7 @@ width: 100%;
 	position: relative;
 	border-radius: 4px;
 	float: left;
+    margin-right: 10px;
 	width: 120px;
 }
 
@@ -1729,7 +1751,7 @@ box-shadow: inset 0 0 1px 1px #888;}
 
 
 
-.file_upload_error, .error {color:#FF3300; font-size:14px;}
+.file_upload_error, .error {color:#FF3300;}
 .error{float: left;}
 
 input.error {border: 1px solid red !important; font-size: inherit;}
@@ -1747,11 +1769,14 @@ font-size:14px;
     margin-left: 12px;
 }
 
-.mgmt-tm .canceladdtmx {
+.mgmt-tm .canceladdtmx,
+.mgmt-tm .canceladdglossary
+{
     width: 35px;
 }
 
-.canceladdtmx {
+.canceladdtmx ,
+.canceladdglossary {
     margin: 0;
     cursor: pointer;
 }
@@ -1809,15 +1834,20 @@ body.cattool .mgmt-tm.mine thead,
 
 .btn-grey .text,
 .canceladdtmx.btn-grey .text, 
-.addtmxfile.btn-ok .text, 
+.canceladdglossary.btn-grey .text,
+.addtmxfile.btn-ok .text,
+.addglossaryfile.btn-ok .text,
 .uploadtm.btn-ok .text
 
  {
-display: block;
-text-align: center;}
+    display: block;
+    text-align: center;
+}
 
 .canceladdtmx.btn-grey .text, 
-.addtmxfile.btn-ok .text, 
+.canceladdglossary.btn-grey .text,
+.addtmxfile.btn-ok .text,
+.addglossaryfile.btn-ok .text,
 .uploadtm.btn-ok .text {
     width: 90px;
 }
@@ -1827,26 +1857,29 @@ text-align: center;}
 }
 
 .canceladdtmx.btn-grey .text,
-.addtmxfile.btn-ok .text, 
+.canceladdglossary.btn-grey .text,
+.addtmxfile.btn-ok .text,
+.addglossaryfile.btn-ok .text,
 .uploadtm.btn-ok .text {
 	color:#fff;
 }
 
-.addtmxfile.btn-ok {
+.addtmxfile.btn-ok,
+.addglossaryfile.btn-ok
+{
     display: none;
-    margin-left: -10px;
-    margin-right: 20px;
 }
 
- .canceladdtmx.btn-grey {
+ .canceladdtmx.btn-grey,
+ .canceladdglossary.btn-grey
+ {
     background:#f26522;
 }
 .popup-tm td.description .edit-desc,
 .popup-tm td.engine-name .edit-desc
 {
     height: 18px;
-/*    width: 350px;*/
-    width: 285px!important;
+    width: 235px!important;
     height: 18px;
     padding: 2px 4px;
     border-radius: 2px;
@@ -1882,10 +1915,21 @@ text-align: center;}
     cursor: text;
 }
  
- .canceladdtmx.btn-grey:hover{background:#d1581c;}
-.addtmxfile.btn-ok:hover {background:#00A8D2;}
+ .canceladdtmx.btn-grey:hover,
+ .canceladdglossary.btn-grey:hover
+ {
+     background:#d1581c;
+ }
 
-td.uploadfile .canceladdtmx {
+.addtmxfile.btn-ok:hover,
+.addglossaryfile.btn-ok:hover
+{
+    background:#00A8D2;
+}
+
+td.uploadfile .canceladdtmx,
+td.uploadfile .canceladdglossary
+{
     margin-bottom: 0px;
 }
 
@@ -1894,8 +1938,7 @@ margin-right: 20px;
 }
 
 td.uploadfile .error {
-    display: none;
-    float: right;
+    float: left;
     margin-right: 14px;
     color: red;
 }
@@ -1904,7 +1947,8 @@ td.uploadfile .uploadprogress .error {
     margin-right: 0px;
 }
 
-.canceladdtmx:hover {
+.canceladdtmx:hover,
+.canceladdglossary:hover{
 	color:red;
 }
 
@@ -1940,12 +1984,6 @@ margin-top: 10px;
 
 
 
-
-#activetm td.uploadfile .btn-grey {
-    margin-right: 8px;
-}
-
-
 /*
 #activetm {margin-bottom: 15px;}
 */
@@ -1973,11 +2011,13 @@ margin-top: 10px;
  {
     display: block;
     background: #fff;
-    padding: 10px 5px 20px;
+    padding: 10px 16px 20px 5px;
     height: 20px;
+    width: initial!important;
     border-top: 1px solid #E1E1E1;
 	box-shadow: inset 0px 2px 5px 0px #E4E4E4;
     position: relative;
+    box-sizing: content-box;
 }
 
 span.email-export-tmx-email-sent,
@@ -1985,8 +2025,8 @@ span.email-export-tmx-email-error,
 #activetm td.uploadfile .msg,
 #inactivetm td.uploadfile .msg {
     float: right;
+    margin-top: 5px;
     margin-right: 20px;
-    margin-top:5px;
     color: green;
     text-align: right;
 }
@@ -1997,13 +2037,10 @@ span.email-export-tmx-email-error,
 }
 
 td.uploadfile p {
-    width: 250px;
     margin: 0 10px;
 }
 
-td.uploadfile .canceladdtmx {
-    margin-right: 18px;
-}
+
 
 #activetm td.dragrow .status {
 	cursor: move;
@@ -2189,9 +2226,14 @@ color: #999;}
     box-shadow: inset 0px 1px 0px 0px #fff;
 }
 
-.mgmt-panel-tm td {
+.mgmt-tm td {
   padding: 10px 5px;
   vertical-align: middle;
+  box-sizing: border-box;
+}
+
+.mgmt-tm th {
+    box-sizing: border-box;
 }
 
 .addtmxrow td, .new td {
@@ -2291,7 +2333,8 @@ margin-left: -37px;
 margin-top: 3px;
 }
 
-.insert-tm .canceladdtmx {
+.insert-tm .canceladdtmx ,
+.insert-tm .canceladdglossary {
     margin: 15px 0;
 }
 
@@ -2734,12 +2777,8 @@ border-radius: 2px;
 border: 1px solid #999;
 }
 
-th.action, td.action {
-    width: 172px;
-}
-
 .description .mgmt-input {
-width: 284px;
+width: 235px;
 }
 
 
@@ -2805,8 +2844,7 @@ background-size: 2% !important;
 #inactivetm .uploadprogress {
     display: none;
     margin-right: 8px;
-	margin-top: -5px;
-	float: right;
+	margin-top: 6px;
 }
 
 #activetm .uploadprogress .msgText,
@@ -3229,6 +3267,7 @@ color: #000;
 .addtmx .text:before,
 .disabletm .text:before,
 .addtmxfile .text:before,
+.addglossaryfile .text:before,
 .usetm .text:before,
 .downloadtmx .text:before,
 .uploadkey:before,
@@ -3239,6 +3278,7 @@ color: #000;
 .owner.tablesorter-header .tablesorter-header-inner:after,
 .description.tablesorter-header .tablesorter-header-inner:after,
 .canceladdtmx.btn-grey .text:before,
+.canceladdglossary.btn-grey .text:before,
 .deleteTM .text:before,
 .sorting:after,
 .splitbtn:before,
@@ -3574,12 +3614,15 @@ float: left;
 .more.minus:before {
     content: "\f147";
 }
-.canceladdtmx.btn-grey .text:before {
+.canceladdtmx.btn-grey .text:before ,
+.canceladdglossary.btn-grey .text:before {
 	content: "\f00d";
 	vertical-align: text-top;
 }
 
-.insert-tm .canceladdtmx.btn-grey .text:before {
+.insert-tm .canceladdtmx.btn-grey .text:before,
+.insert-tm .canceladdglossary.btn-grey .text:before
+{
     padding-right: 8px;
 }
 .deleteTM .text:before {
@@ -3687,6 +3730,7 @@ cursor: pointer;
 }
 
 .addtmxfile .text:before,
+.addglossaryfile .text:before,
 /*.addtmx .text:before, */
 .open-popup-addtm-tr:before
  {
@@ -3695,7 +3739,9 @@ cursor: pointer;
 	vertical-align: text-top;
 }
 
-.addtmxfile .text:before {
+.addtmxfile .text:before,
+.addglossaryfile .text:before
+{
 	padding-right: 7px;
 }
 
