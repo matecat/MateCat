@@ -137,8 +137,6 @@ route(
 );
 
 
-
-
 route( '/api/v1/jobs/[:id_job]/[:password]/stats', 'GET',  'API\V1\StatsController', 'stats' );
 
 route( '/api/v2/jobs/[:id_job]/[:password]/segments-filter', 'GET',
@@ -177,6 +175,24 @@ route(
 route(
     '/gdrive/verify', 'GET',
     'GDriveController', 'isGDriveAccessible'
+);
+
+/**
+ *
+ */
+route(
+        '/api/v2/glossaries/import/', 'POST',
+        '\API\V2\GlossariesController', 'import'
+);
+
+route(
+        '/api/v2/glossaries/status/[:tm_key]/[:name]', 'GET',
+        '\API\V2\GlossariesController', 'status'
+);
+
+route(
+        '/api/v2/glossaries/download/[:tm_key]/[:downloadToken]', 'GET',
+        '\API\V2\GlossariesController', 'download'
 );
 
 $klein->dispatch();
