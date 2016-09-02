@@ -788,13 +788,13 @@
             TRcaller.addClass('startUploading');
 
             setTimeout(function() {
-                UI.pollForUploadCallback(Key, fileName, TRcaller);
+                UI.pollForUploadCallback(Key, fileName, TRcaller, type);
             }, 3000);
 
             return false;
 
         },
-        pollForUploadCallback: function(Key, fileName, TRcaller) {
+        pollForUploadCallback: function(Key, fileName, TRcaller, type) {
 
             if($('#uploadCallback').text() != '') {
                 var msg = $.parseJSON($('#uploadCallback pre').text());
@@ -802,7 +802,7 @@
                     setTimeout(function() {
                         //delay because server can take some time to process large file
                         TRcaller.removeClass('startUploading');
-                        UI.pollForUploadProgress(Key, fileName, TRcaller);
+                        UI.pollForUploadProgress(Key, fileName, TRcaller, type);
                     }, 3000);
                 } else {
                     console.log('error');
@@ -813,23 +813,36 @@
                 }
             } else {
                 setTimeout(function() {
-                    UI.pollForUploadCallback(Key, fileName, TRcaller);
+                    UI.pollForUploadCallback(Key, fileName, TRcaller, type);
                 }, 1000);
             }
 
         },
-        pollForUploadProgress: function(Key, fileName, TRcaller) {
-
-            APP.doRequest({
-                data: {
+        pollForUploadProgress: function(Key, fileName, TRcaller, type) {
+            var glossaryUrl = '/api/v2/glossaries/import/statusgg/' + Key +'/' + fileName;
+            var urlReq, data, typeReq;
+            if (type === "glossary") {
+                urlReq = glossaryUrl;
+                data = {};
+                typeReq = 'GET';
+            } else {
+                data = {
                     action: 'loadTMX',
                     exec: 'uploadStatus',
                     tm_key: Key,
                     name: fileName
-                },
+                };
+                typeReq = 'POST';
+
+            }
+            APP.doRequest({
+                url: urlReq,
+                data: data,
+                type: typeReq,
                 context: [Key, fileName, true, TRcaller],
                 error: function() {
                     var TRcaller = this[3];
+                    $(TRcaller).find('.addtmxfile, .addglossaryfile').hide();
                     $(TRcaller).find('.upload-file-msg-error').text('There was an error uploading your file. Please retry!').show();
                     UI.UploadIframeId.remove();
                 },
@@ -847,7 +860,7 @@
 
                         if(d.data.total == null) {
                             setTimeout(function() {
-                                UI.pollForUploadProgress(Key, fileName, TRcaller);
+                                UI.pollForUploadProgress(Key, fileName, TRcaller, type);
                             }, 1000);
                         } else {
                             if(d.completed) {
@@ -877,7 +890,7 @@
                             var progress = (parseInt(d.data.done)/parseInt(d.data.total))*100;
                             $(TRcaller).find('.progress .inner').css('width', progress + '%');
                             setTimeout(function() {
-                                UI.pollForUploadProgress(Key, fileName, TRcaller);
+                                UI.pollForUploadProgress(Key, fileName, TRcaller, type);
                             }, 1000);
                         }
                     }
