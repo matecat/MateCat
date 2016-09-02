@@ -43,7 +43,7 @@ class KleinFileStreamResponse extends Response {
         $this->body('');
         $this->noCache();
 
-        if ( null === $filename ) {
+        if ( null !== $filename ) {
             $filename = FilesStorage::basename_fix( $filename );
         }
 

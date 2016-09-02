@@ -389,6 +389,10 @@ class TMSService {
 
     }
 
+    public function downloadGlossary(){
+        return $this->mymemory_engine->downloadExport( $this->tm_key, null, true );
+    }
+
     /**
      * Export Job as Tmx File
      *

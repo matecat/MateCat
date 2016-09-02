@@ -187,12 +187,12 @@ route(
 );
 
 route(
-        '/api/v2/glossaries/status/[:tm_key]/[:name]', 'GET',
-        '\API\V2\GlossariesController', 'status'
+        '/api/v2/glossaries/status/upload/[:tm_key]/[:name]', 'GET',
+        '\API\V2\GlossariesController', 'uploadStatus'
 );
 
 route(
-        '/api/v2/glossaries/download/[:tm_key]/[:downloadToken]', 'GET',
+        '/api/v2/glossaries/export/[:tm_key].[:downloadToken]?', 'GET',
         '\API\V2\GlossariesController', 'download'
 );
 

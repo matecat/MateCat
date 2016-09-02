@@ -30,6 +30,11 @@ class GlossariesController extends KleinController {
      */
     protected $TMService;
 
+    /**
+     * @var string
+     */
+    protected $downloadToken;
+
     protected function afterConstruct() {
         $this->TMService = new TMSService();
         $this->validateRequest();
@@ -59,6 +64,7 @@ class GlossariesController extends KleinController {
 
         $this->name   = $postInput->name;
         $this->tm_key = $postInput->tm_key;
+        $this->downloadToken = $postInput->downloadToken;
 
         $this->TMService->setName( $postInput->name );
         $this->TMService->setTmKey( $postInput->tm_key );
@@ -98,7 +104,7 @@ class GlossariesController extends KleinController {
     }
 
     //TODO serve l'endpoint corretto di MyMemory
-    public function status() {
+    public function uploadStatus() {
 
         throw new Exception( "TODO: incomplete, MyMemory lacks the endpoint." );
 
@@ -118,8 +124,6 @@ class GlossariesController extends KleinController {
 
     //TODO serve l'endpoint corretto di MyMemory
     public function download() {
-
-        throw new Exception( "TODO: incomplete, MyMemory lacks the endpoint." );
 
         //cast response to KleinFileStreamResponse to override file method
         $responseOverride = new KleinFileStreamResponse(
@@ -143,7 +147,7 @@ class GlossariesController extends KleinController {
         try {
 
             //TODO change with something
-            $filePointer = $this->TMService->downloadTMX();
+            $filePointer = $this->TMService->downloadGlossary();
 
             // TODO: Not used at moment, will be enabled when will be built the Log Activity Keys
             /*
