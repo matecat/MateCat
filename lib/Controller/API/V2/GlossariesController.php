@@ -13,7 +13,7 @@ use ReflectionClass;
 use TMSService, Upload, Exception, Log;
 use PHPExcel_IOFactory;
 use PHPExcel_Writer_CSV;
-use Utils;
+use Utils, INIT;
 
 class GlossariesController extends KleinController {
 
@@ -33,7 +33,7 @@ class GlossariesController extends KleinController {
     /**
      * @var string
      */
-    protected $downloadToken;
+    public $downloadToken;
 
     protected function afterConstruct() {
         $this->TMService = new TMSService();
@@ -238,8 +238,10 @@ class GlossariesController extends KleinController {
                             "code"    => 0,
                             "message" => "Download complete."
                     ) ) : json_encode( $tokenContent ) ),
-                    2147483647            // expires January 1, 2038
-            );
+                    2147483647,            // expires January 1, 2038
+                    "/",
+                    $_SERVER[ 'HTTP_HOST' ]
+                );
             $this->downloadToken = null;
         }
 
