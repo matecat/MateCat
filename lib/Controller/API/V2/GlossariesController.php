@@ -187,7 +187,7 @@ class GlossariesController extends KleinController {
 
         $this->response->code( 404 );
         $this->response->json( [
-                'errors'  => [ "code" => $errCode, "message" => $message ],
+                'errors'  => [ [ "code" => $errCode, "message" => $message ] ],
                 "data"    => [ ],
                 "success" => false
         ] );
