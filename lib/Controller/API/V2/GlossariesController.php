@@ -103,10 +103,7 @@ class GlossariesController extends KleinController {
 
     }
 
-    //TODO serve l'endpoint corretto di MyMemory
     public function uploadStatus() {
-
-        throw new Exception( "TODO: incomplete, MyMemory lacks the endpoint." );
 
         try {
             $result = $this->TMService->tmxUploadStatus();
@@ -117,7 +114,7 @@ class GlossariesController extends KleinController {
         }
 
         if ( !$this->response->isLocked() ) {
-            $this->response->json( $result );
+            $this->setSuccesResponse( null, $result[ 'data' ] );
         }
 
     }

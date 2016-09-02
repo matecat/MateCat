@@ -456,7 +456,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         $parameters[ 'pass' ] = trim( $hashPass );
 
         if( $isGlossary ){
-            $url = $this->base_url . "/glossary/export?";
+            $url = $this->base_url . "/" . $this->glossary_export_relative_url . "?";
         } else {
             $url = $this->base_url . "/" . $this->tmx_export_download_url . "?";
         }
