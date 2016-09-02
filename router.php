@@ -178,7 +178,8 @@ route(
 );
 
 /**
- *
+ * @params string tm_key
+ * @params file
  */
 route(
         '/api/v2/glossaries/import/', 'POST',

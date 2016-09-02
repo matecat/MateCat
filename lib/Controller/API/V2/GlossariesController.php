@@ -67,35 +67,33 @@ class GlossariesController extends KleinController {
 
     public function import() {
 
-        $uploadFile = new Upload();
         try {
-            $stdResult = $uploadFile->uploadFiles( $_FILES );
+            $stdResult = $this->TMService->uploadFile();
         } catch ( Exception $e ) {
             $this->setErrorResponse( -2, $e->getMessage() );
-
             return;
         }
 
-        $this->extractCSV( $stdResult );
+        $fileInfo = $this->extractCSV( $stdResult );
 
         //load it into MyMemory
-        $this->TMService->setName( $stdResult->glossary_file->name );
-        $this->TMService->setFile( array( $stdResult->glossary_file ) );
+        $this->TMService->setName( $fileInfo->name );
+        $this->TMService->setFile( array( $fileInfo ) );
 
         try {
             $this->TMService->addGlossaryInMyMemory();
         } catch ( Exception $e ) {
             $this->setErrorResponse( $e->getCode(), $e->getMessage() );
-            unlink( $stdResult->glossary_file->file_path );
+            unlink( $fileInfo->file_path );
 
             return;
         }
 
         if ( !$this->response->isLocked() ) {
-            $this->response->json( $this->request->paramsPost()->all() );
+            $this->setSuccesResponse( 202 );
         }
 
-        unlink( $stdResult->glossary_file->file_path );
+        unlink( $fileInfo->file_path );
 
     }
 
@@ -185,8 +183,20 @@ class GlossariesController extends KleinController {
 
         $this->response->code( 404 );
         $this->response->json( [
-                'errors' => [ "code" => $errCode, "message" => $message ],
-                "data"   => [ ]
+                'errors'  => [ "code" => $errCode, "message" => $message ],
+                "data"    => [ ],
+                "success" => false
+        ] );
+
+    }
+
+    protected function setSuccesResponse( $code = 200, Array $data = [ ] ){
+
+        $this->response->code( $code );
+        $this->response->json( [
+                'errors'  => [ ],
+                "data"    => $data,
+                "success" => true
         ] );
 
     }
@@ -195,20 +205,26 @@ class GlossariesController extends KleinController {
 
         $tmpFileName = tempnam( "/tmp", "MAT_EXCEL_GLOSS_" );
 
-        $inputFileType = PHPExcel_IOFactory::identify( $stdResult->glossary_file->file_path );
-        $objReader     = PHPExcel_IOFactory::createReader( $inputFileType );
+        //$stdResult in this case handle everytime only a file, this cycle needs to make this method
+        // not dipendent on the form key name
+        foreach( $stdResult as $fileInfo ){
 
-        $objPHPExcel = $objReader->load( $stdResult->glossary_file->file_path );
-        $objWriter   = new PHPExcel_Writer_CSV( $objPHPExcel );
-        $objWriter->save( $tmpFileName );
+            $inputFileType = PHPExcel_IOFactory::identify( $fileInfo->file_path );
+            $objReader     = PHPExcel_IOFactory::createReader( $inputFileType );
 
-        $oldPath                             = $stdResult->glossary_file->file_path;
-        $stdResult->glossary_file->file_path = $tmpFileName;
-        Log::doLog( "Originally uploaded File path: " . $oldPath . " - Override: " . $stdResult->glossary_file->file_path );
+            $objPHPExcel = $objReader->load( $fileInfo->file_path );
+            $objWriter   = new PHPExcel_Writer_CSV( $objPHPExcel );
+            $objWriter->save( $tmpFileName );
 
-        unlink( $oldPath );
+            $oldPath                             = $fileInfo->file_path;
+            $fileInfo->file_path = $tmpFileName;
+            Log::doLog( "Originally uploaded File path: " . $oldPath . " - Override: " . $fileInfo->file_path );
 
-        return $stdResult;
+            unlink( $oldPath );
+
+        }
+
+        return $fileInfo;
 
     }
 

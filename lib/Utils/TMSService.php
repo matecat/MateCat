@@ -312,7 +312,7 @@ class TMSService {
     }
 
     /**
-     * Send a mail with link for direct prepared download
+     * Set a cyclic barrier to get response about status succes to call the download
      *
      * @return resource
      * @throws Exception
@@ -367,6 +367,8 @@ class TMSService {
     }
 
     /**
+     * Send a mail with link for direct prepared download
+     *
      * @param $userMail
      * @param $userName
      * @param $userSurname
