@@ -819,7 +819,7 @@
 
         },
         pollForUploadProgress: function(Key, fileName, TRcaller, type) {
-            var glossaryUrl = '/api/v2/glossaries/import/statusgg/' + Key +'/' + fileName;
+            var glossaryUrl = '/api/v2/glossaries/import/status/' + Key +'/' + fileName;
             var urlReq, data, typeReq;
             if (type === "glossary") {
                 urlReq = glossaryUrl;
@@ -863,7 +863,7 @@
                                 UI.pollForUploadProgress(Key, fileName, TRcaller, type);
                             }, 1000);
                         } else {
-                            if(d.completed) {
+                            if(d.data.completed) {
                                 var tr = $(TRcaller).parents('tr');
                                 $(tr).find('.addtmx, .addGlossary').removeClass('disabled');
                                 UI.pulseTMadded(tr);
