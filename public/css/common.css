@@ -1685,6 +1685,7 @@ width: 100%;
 	border-radius: 4px;
 	float: left;
     margin-right: 10px;
+    margin-left: 10px;
 	width: 120px;
 }
 
@@ -2022,13 +2023,30 @@ margin-top: 10px;
 
 span.email-export-tmx-email-sent,
 span.email-export-tmx-email-error,
+.message-glossary-export-completed,
 #activetm td.uploadfile .msg,
-#inactivetm td.uploadfile .msg {
+#inactivetm td.uploadfile .msg
+{
     float: right;
     margin-top: 5px;
     margin-right: 20px;
     color: green;
     text-align: right;
+}
+
+.mgmt-tm .upload-file-msg-success,
+.mgmt-tm .upload-file-msg-error {
+    color: green;
+    float: right;
+    margin-top: 7px;
+    margin-right: 4px;
+    display: none;
+}
+
+.mgmt-tm .upload-file-msg-error {
+    color: red;
+    margin-right: 20px;
+    max-width: 250px;
 }
 
 #activetm td.dragrow {
@@ -2069,22 +2087,27 @@ td.uploadfile p {
 
 /* Export TMX container */
 #activetm td.download-tmx-container,
-#inactivetm td.download-tmx-container
+#inactivetm td.download-tmx-container,
+#activetm td.download-glossary-container,
+#inactivetm td.download-glossary-container
 {
     display: block;
     background: #fff;
     padding: 10px 5px 20px;
-    height: 20px;
+    height: 53px;
     border-top: 1px solid #E1E1E1;
     box-shadow: inset 0px 2px 5px 0px #E4E4E4;
     position: relative;
 }
-td.download-tmx-container {
+td.download-tmx-container,
+.mgmt-tm .download-glossary-container{
     line-height: 30px;
 }
 
 .message-export-tmx,
-.message-export-tmx-success{
+.message-export-tmx-success,
+.message-export-glossary
+{
     float: left;
     margin-left: 11px;
 }
@@ -2110,6 +2133,10 @@ input.email-export-tmx {
     padding: 0px 5px !important;
     margin-right: 20px;
 }
+td.download-glossary-container .uploadloader {
+    top: -18px;
+    right: 85px;
+}
 .download-tmx-container .uploadloader {
     right: 200px;
     top: -18px;
@@ -2119,7 +2146,8 @@ input.email-export-tmx {
     pointer-events: none;
 }
 span.email-export-tmx-email-sent,
-span.email-export-tmx-email-error {
+span.email-export-tmx-email-error,
+.message-glossary-export-completed{
     float: right;
     margin-top: 1px;
     display: none;
@@ -2843,14 +2871,16 @@ background-size: 2% !important;
 #activetm .uploadprogress, 
 #inactivetm .uploadprogress {
     display: none;
-    margin-right: 8px;
-	margin-top: 6px;
+    right: 8px;
+	top: 17px;
+    position: absolute;
 }
 
 #activetm .uploadprogress .msgText,
 #inactivetm .uploadprogress .msgText
  {
 	display: block;
+    float: left;
 }
 
 #activetm .uploadprogress .progress .inner,

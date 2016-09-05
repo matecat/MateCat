@@ -47,12 +47,11 @@ class KleinFileStreamResponse extends Response {
             $filename = FilesStorage::basename_fix( $filename );
         }
 
-        $this->header('Content-type', "application/force-download" );
-        $this->header('Content-type', "application/octet-stream" );
         $this->header('Content-type', "application/download" );
         $this->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
         $this->header('Expires', "0" );
         $this->header('Connection', "close" );
+
         $this->send();
 
         while ( !feof( $filePointer ) ) {
@@ -69,7 +68,7 @@ class KleinFileStreamResponse extends Response {
      *
      * @return ResponseCookieDataCollection
      */
-    public function cookie( $cookies = null ){
+    public function cookie( ResponseCookieDataCollection $cookies = null ){
 
         if( !empty( $cookies ) ){
             $this->cookies = $cookies;

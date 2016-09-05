@@ -127,9 +127,6 @@
                     $(this).remove();
                 });
 
-            }).on('click', '#activetm tr.uploadpanel a.canceladdtmx, #inactivetm tr.uploadpanel a.canceladdtmx', function() {
-                $('#activetm tr.uploadpanel, #inactivetm tr.uploadpanel').addClass('hide');
-                $('#activetm tr.new .action .addtmxfile, #inactivetm tr.new .action .addtmxfile').removeClass('disabled');
             }).on('mousedown', '.addtmx:not(.disabled)', function(e) {
                 e.preventDefault();
                 UI.addFormUpload(this, 'tmx');
@@ -153,7 +150,7 @@
                 $(this).addClass('disabled');
                 $(this).parents('.uploadfile').find('.error').text('').hide();
 
-                UI.execAddTMOrGlossary(this, 'tm');
+                UI.execAddTMOrGlossary(this, 'tmx');
 
             }).on('click', 'tr .uploadfile .addglossaryfile:not(.disabled)', function() {
 
@@ -206,7 +203,6 @@
                 console.log('upload file');
                 UI.checkTMKey('tm');
 
-            $('#activetm tr.uploadpanel').removeClass('hide');
             $(this).addClass('disabled');
         }).on('click', 'a.disabletm', function() {
             UI.disableTM(this);
@@ -244,13 +240,8 @@
                 if($(this).val() == '') {
                     $(this).parents('.uploadfile').find('.addtmxfile, .addglossaryfile').hide();
                 } else {
-                    $(this).parents('.uploadfile').find('.addtmxfile, .addglossaryfile').show();
-                }
-            }).on('change', '.mgmt-tm tr.uploadpanel td.uploadfile input[type="file"]', function() {
-                if($(this).val() == '') {
-                    $(this).parents('.uploadfile').find('.addtmxfile, .addglossaryfile').hide();
-                } else {
-                    $(this).parents('.uploadfile').find('.addtmxfile, .addglossaryfile').show();
+                    $(this).parents('.uploadfile').find('.addtmxfile, .addglossaryfile').removeClass("disabled").show();
+                    $(this).parents('.uploadfile').find('.upload-file-msg-error').hide();
                 }
             }).on('keyup', '#filterInactive', function() {
                 if($(this).val() == '') {
@@ -265,14 +256,11 @@
 
                 UI.openExportTmx(this);
 
-            }).on('mousedown', '.mgmt-tm .downloadglossary', function(e){
+            }).on('mousedown', '.mgmt-tm .downloadGlossary', function(e){
                 //Todo
-                if($(this).hasClass('downloading')) return false;
-                UI.downloadTM( $(this).parentsUntil('tbody', 'tr'), 'downloadglossary' );
-                $(this).addClass('disabled' );
-                $(this).prepend('<span class="uploadloader"></span>');
-                var msg = '<span class="notify"><span class="uploadloader"></span> Downloading TMX... ' + ((APP.isCattool)? 'You can close the panel and continue translating.' : 'This can take a few minutes.')+ '</span>';
-                $(this).parents('td').first().append(msg);
+                if($(this).hasClass('disabled')) return false;
+                UI.downloadGlossary( $(this) );
+
 
             }).on('mousedown', '.mgmt-tm .export-tmx-button', function(e){
                 e.preventDefault();
@@ -507,11 +495,8 @@
         checkTMAddAvailability: function () {
             if(($('#activetm tr.new').hasClass('badkey'))||($('#activetm tr.new').hasClass('badgrants'))) {
                 $('#activetm tr.new .uploadtm').addClass('disabled');
-                $('#activetm tr.uploadpanel .addtmxfile, #activetm tr.uploadpanel .addglossaryfile').addClass('disabled');
             } else {
                 $('#activetm tr.new .uploadtm').removeClass('disabled');
-                $('#activetm tr.uploadpanel .addtmxfile, #activetm tr.uploadpanel .addglossaryfile').removeClass('disabled');
-
             }
         },
 
@@ -614,10 +599,9 @@
             $('.addtmxrow').hide();
         },
         execAddTMOrGlossary: function(el, type) {
-            var action = (type == 'glossary') ? '/?action=loadTMX' : '/?action=loadTMX';
+            var action = (type == 'glossary') ? '/api/v2/glossaries/import/' : '/?action=loadTMX';
             var line = $(el).parents('tr');
             line.find('.uploadfile').addClass('uploading');
-            line.find('tr.uploadpanel .uploadfile').addClass('uploading');
             var form = line.find('.add-TM-Form')[0];
             var path = line.find('.uploadfile').find('input[type="file"]').val();
             var file = path.split('\\')[path.split('\\').length-1];
@@ -725,13 +709,13 @@
             $('#activetm td.action .addtmx').removeClass('disabled');
             $("#activetm tr.new").hide();
             $("#activetm tr.new .addtmxfile, #activetm tr.new .addtmxfile .addglossaryfile").removeClass('disabled');
-            $("#activetm tr.uploadpanel").addClass('hide');
             $(".mgmt-table-tm .add-tm").show();
             UI.clearTMUploadPanel();
             UI.clearAddTMRow();
             $('.mgmt-container .tm-error-message').hide();
             $('.mgmt-container .tm-warning-message').hide();
         },
+
         fileUpload: function(form, action_url, div_id, tmName, type) {
             // Create the iframe...
             var ts = new Date().getTime();
@@ -781,11 +765,13 @@
             form.setAttribute("method", "post");
             form.setAttribute("enctype", "multipart/form-data");
             form.setAttribute("encoding", "multipart/form-data");
-            $(form).append('<input type="hidden" name="exec" value="newTM" />')
-                .append('<input type="hidden" name="tm_key" value="' + Key + '" />')
-                .append('<input type="hidden" name="name" value="' + tmName + '" />')
-                .append('<input type="hidden" name="r" value="1" />')
-                .append('<input type="hidden" name="w" value="1" />');
+            if (type === "tmx") {
+                $(form).append('<input type="hidden" name="exec" value="newTM" />');
+            }
+            $(form).append('<input type="hidden" name="tm_key" value="' + Key + '" />')
+                    .append('<input type="hidden" name="name" value="' + tmName + '" />')
+                    .append('<input type="hidden" name="r" value="1" />')
+                    .append('<input type="hidden" name="w" value="1" />');
             if(APP.isCattool) {
                 $(form).append('<input type="hidden" name="job_id" value="' + config.job_id + '" />')
                     .append('<input type="hidden" name="job_pass" value="' + config.password + '" />')
@@ -802,65 +788,79 @@
             TRcaller.addClass('startUploading');
 
             setTimeout(function() {
-                UI.pollForUploadCallback(Key, fileName, TRcaller);
+                UI.pollForUploadCallback(Key, fileName, TRcaller, type);
             }, 3000);
 
             return false;
 
         },
-        pollForUploadCallback: function(Key, fileName, TRcaller) {
+        pollForUploadCallback: function(Key, fileName, TRcaller, type) {
 
             if($('#uploadCallback').text() != '') {
-                msg = $.parseJSON($('#uploadCallback pre').text());
+                var msg = $.parseJSON($('#uploadCallback pre').text());
                 if(msg.success === true) {
                     setTimeout(function() {
                         //delay because server can take some time to process large file
                         TRcaller.removeClass('startUploading');
-                        UI.pollForUploadProgress(Key, fileName, TRcaller);
+                        UI.pollForUploadProgress(Key, fileName, TRcaller, type);
                     }, 3000);
                 } else {
                     console.log('error');
                     TRcaller.removeClass('startUploading');
-                    $(TRcaller).find('.error').text(msg.errors[0].message).show();
+                    $(TRcaller).find('.addtmxfile, .addglossaryfile').hide();
+                    UI.UploadIframeId.remove();
+                    $(TRcaller).find('.upload-file-msg-error').text(msg.errors[0].message).show();
                 }
             } else {
                 setTimeout(function() {
-                    UI.pollForUploadCallback(Key, fileName, TRcaller);
+                    UI.pollForUploadCallback(Key, fileName, TRcaller, type);
                 }, 1000);
             }
 
         },
-        pollForUploadProgress: function(Key, fileName, TRcaller) {
-
-            APP.doRequest({
-                data: {
+        pollForUploadProgress: function(Key, fileName, TRcaller, type) {
+            var glossaryUrl = '/api/v2/glossaries/import/statusgg/' + Key +'/' + fileName;
+            var urlReq, data, typeReq;
+            if (type === "glossary") {
+                urlReq = glossaryUrl;
+                data = {};
+                typeReq = 'GET';
+            } else {
+                data = {
                     action: 'loadTMX',
                     exec: 'uploadStatus',
                     tm_key: Key,
                     name: fileName
-                },
+                };
+                typeReq = 'POST';
+
+            }
+            APP.doRequest({
+                url: urlReq,
+                data: data,
+                type: typeReq,
                 context: [Key, fileName, true, TRcaller],
                 error: function() {
-                    console.log('error');
-
+                    var TRcaller = this[3];
+                    $(TRcaller).find('.addtmxfile, .addglossaryfile').hide();
+                    $(TRcaller).find('.upload-file-msg-error').text('There was an error uploading your file. Please retry!').show();
+                    UI.UploadIframeId.remove();
                 },
                 success: function(d) {
-
-                    console.log('progress success data: ', d);
-                    TRcaller = this[3];
+                    var TRcaller = this[3];
 
                     if(d.errors.length) {
-                        console.log('error');
-                        console.log($(TRcaller));
-                        $(TRcaller).find('.error').text(d.errors[0].message).show();
-
+                        $(TRcaller).find('.addtmxfile, .addglossaryfile').hide();
+                        $(TRcaller).find('.upload-file-msg-error').text(d.errors[0].message).show();
+                        UI.UploadIframeId.remove();
                     } else {
-                        $(TRcaller).find('.uploadprogress .msgText').text('Uploading');
+                        $(TRcaller).find('.addglossaryfile, .canceladdglossary, .addtmxfile, .canceladdtmx').hide();
+                        $(TRcaller).find('input[type="file"]').attr("disabled", true);
                         $(TRcaller).find('.uploadprogress').show();
 
                         if(d.data.total == null) {
                             setTimeout(function() {
-                                UI.pollForUploadProgress(Key, fileName, existing, TRcaller);
+                                UI.pollForUploadProgress(Key, fileName, TRcaller, type);
                             }, 1000);
                         } else {
                             if(d.completed) {
@@ -874,23 +874,23 @@
                                     tr.find('td.description .edit-desc').text(fileName);
                                 }
 
-                                $(TRcaller).addClass('tempTRcaller').append('<span class="msg">Import Complete</span>');
+                                $(TRcaller).find(".upload-file-msg-success").show();
                                 setTimeout(function() {
-                                    $('.tempTRcaller').slideToggle(function () {
+                                    $(TRcaller).slideToggle(function () {
                                         this.remove();
                                     });
                                 }, 3000);
 
 
 
-                                UI.UploadIframeId.parentNode.removeChild(UI.UploadIframeId);
+                                UI.UploadIframeId.remove();
 
                                 return false;
                             }
-                            progress = (parseInt(d.data.done)/parseInt(d.data.total))*100;
+                            var progress = (parseInt(d.data.done)/parseInt(d.data.total))*100;
                             $(TRcaller).find('.progress .inner').css('width', progress + '%');
                             setTimeout(function() {
-                                UI.pollForUploadProgress(Key, fileName, existing, TRcaller);
+                                UI.pollForUploadProgress(Key, fileName, TRcaller, type);
                             }, 1000);
                         }
                     }
@@ -954,12 +954,13 @@
         },
 
         saveTMdata: function(closeAfter) {
+
             $('.popup-tm').addClass('saving');
             if(closeAfter) {
                 UI.closeTMPanel();
                 UI.clearTMPanel();
             }
-
+            if(!APP.isCattool) return;
             data = this.extractTMdataFromTable();
             APP.doRequest({
                 data: {
@@ -1041,7 +1042,6 @@
 
 
         closeTMPanel: function () {
-            $('.mgmt-tm tr.uploadpanel').hide();
             $( ".popup-tm").removeClass('open').hide("slide", { direction: "right" }, 400);
             $("#SnapABug_Button").show();
             $(".outer-tm").hide();
@@ -1085,102 +1085,73 @@
             });
 
         },
-        downloadGlossary: function( tm, button_class ) {
+        downloadGlossary: function( elem ) {
+            var tr = elem.closest('tr');
+            this.openExportGlossary(elem, tr);
 
-            if ( !$( tm ).find( '.' + button_class ).hasClass( 'disabled' ) ) {
+            //add a random string to avoid collision for concurrent javascript requests
+            //in the same milli second, and also, because a string is needed for token and not number....
+            var downloadToken = new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 );
 
-                //add a random string to avoid collision for concurrent javascript requests
-                //in the same milli second, and also, because a string is needed for token and not number....
-                var downloadToken = new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 );
+            //create a random Frame ID and form ID to get it uniquely
+            var iFrameID = 'iframeDownload_' + downloadToken;
+            var formID = 'form_' + downloadToken;
 
-                //create a random Frame ID and form ID to get it uniquely
-                var iFrameID = 'iframeDownload_' + downloadToken;
-                var formID = 'form_' + downloadToken;
+            //create an iFrame element
+            var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop( {
+                id: iFrameID,
+                src: ''
+            } );
 
-                //create an iFrame element
-                var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop( {
-                    id: iFrameID,
-                    src: ''
-                } );
+            $( "body" ).append( iFrameDownload );
 
-                $( "body" ).append( iFrameDownload );
+            iFrameDownload.ready( function () {
 
-                iFrameDownload.ready( function () {
+                //create a GLOBAL setInterval so in anonymous function it can be disabled
+                var downloadTimer = window.setInterval( function () {
 
-                    //create a GLOBAL setInterval so in anonymous function it can be disabled
-                    var downloadTimer = window.setInterval( function () {
+                    //check for cookie equals to it's value.
+                    //This is unique by definition and we can do multiple downloads
+                    var token = $.cookie( downloadToken );
 
-                        //check for cookie equals to it's value.
-                        //This is unique by definition and we can do multiple downloads
-                        var token = $.cookie( downloadToken );
-
-                        //if the cookie is found, download is completed
-                        //remove iframe an re-enable download button
-                        if ( token ) {
-                            $( tm ).find( '.' + button_class ).removeClass( 'disabled' ).removeClass( 'downloading' );
-                            $( tm ).find( 'span.notify' ).remove();
-                            window.clearInterval( downloadTimer );
-                            $.cookie( downloadToken, null, {path: '/', expires: -1} );
-                            errorMsg = $( '#' + iFrameID ).contents().find( 'body' ).text();
-                            errorKey = $( tm ).attr( 'data-key' );
-                            if ( errorMsg != '' ) {
-                                APP.alert( 'Error on downloading a TM with key ' + errorKey + ':<br />' + errorMsg );
-                            }
-
-                            $( '#' + iFrameID ).remove();
+                    //if the cookie is found, download is completed
+                    //remove iframe an re-enable download button
+                    if ( token ) {
+                        window.clearInterval( downloadTimer );
+                        elem.removeClass( 'disabled' );
+                        tr.find('.uploadloader').hide();
+                        tr.find('.message-glossary-export-completed').show()
+                        $.cookie( downloadToken, null, {path: '/', expires: -1} );
+                        errorMsg = $( '#' + iFrameID ).contents().find( 'body' ).text();
+                        errorKey = $( tr ).attr( 'data-key' );
+                        if ( errorMsg != '' ) {
+                            APP.alert( 'Error on downloading a TM with key ' + errorKey + ':<br />' + errorMsg );
                         }
 
-                    }, 2000 );
-                } );
+                        $( '#' + iFrameID ).remove();
 
-                //create the html form and append a token for download
-                var iFrameForm = $( document.createElement( 'form' ) ).attr( {
-                    'id': formID,
-                    'action': '/',
-                    'method': 'POST'
-                } ).append(
-                    //action to call
-                    $( document.createElement( 'input' ) ).prop( {
-                        type: 'hidden',
-                        name: 'action',
-                        value: 'downloadTMX'
-                    } ),
-                    //we tell to the controller to check a field in the post named downloadToken
-                    // and to set a cookie named as it's value with it's value ( equals )
-                    $( document.createElement( 'input' ) ).prop( {
-                        type: 'hidden',
-                        name: 'downloadToken',
-                        value: downloadToken
-                    } ),
-                    //set other values
-                    $( document.createElement( 'input' ) ).prop( {
-                        type: 'hidden',
-                        name: 'tm_key',
-                        value: $( '.privatekey', tm ).text()
-                    } )
-                );
+                        setTimeout(function () {
+                            tr.find('td.download-glossary-container').slideToggle(function () {
+                                $(this).remove();
+                            });
+                        }, 3000);
 
-                if ( typeof config.id_job !== 'undefined' ){
-                    iFrameForm.append(
-                        $( document.createElement( 'input' ) ).prop( {
-                            type: 'hidden',
-                            name: 'id_job',
-                            value: config.id_job
-                        } ),
-                        $( document.createElement( 'input' ) ).prop( {
-                            type: 'hidden',
-                            name: 'password',
-                            value: config.password
-                        } )
-                    );
-                }
+                    }
 
-                //append from to newly created iFrame and submit form post
-                iFrameDownload.contents().find( 'body' ).append( iFrameForm );
-                console.log( iFrameDownload.contents().find( "#" + formID ) );
-                iFrameDownload.contents().find( "#" + formID ).submit();
+                }, 2000 );
+            } );
+            var tm_key = $( '.privatekey', tr ).text();
+            //create the html form and append a token for download
+            var iFrameForm = $( document.createElement( 'form' ) ).attr( {
+                'id': formID,
+                'action': '/api/v2/glossaries/export/'+ tm_key + '/' + downloadToken,
+                'method': 'GET'
+            } );
 
-            }
+            //append from to newly created iFrame and submit form post
+            iFrameDownload.contents().find( 'body' ).append( iFrameForm );
+            console.log( iFrameDownload.contents().find( "#" + formID ) );
+            iFrameDownload.contents().find( "#" + formID ).submit();
 
         },
         deleteTM: function (button) {
@@ -1480,6 +1451,18 @@
             $(elem).parents('tr').append(exportDiv);
             $(elem).parents('tr').find('.download-tmx-container').slideToggle();
         },
+        openExportGlossary: function (elem, tr) {
+            tr.find('.downloadGlossary').addClass('disabled');
+            var exportDiv = '<td class="download-glossary-container" style="display: none">' +
+                '<div class="message-export-glossary">We are exporting the glossary. Please wait...</div>' +
+                '<span class="message-glossary-export-completed">Export Completed</span>' +
+                '<span class="uploadloader"></span>'+
+                '</td>';
+
+            tr.append(exportDiv);
+            tr.find('.uploadloader').show();
+            tr.find('.download-glossary-container').slideToggle();
+        },
         startExportTmx: function (elem) {
             var line = $(elem).closest('tr');
             var email = line.find('.email-export-tmx').val();
@@ -1536,12 +1519,8 @@
             var nr = '<td class="uploadfile" style="display: none">' +
                 label +
                 '<form class="existing add-TM-Form pull-left" action="/" method="post">' +
-                '    <input type="hidden" name="action" value="loadTMX" />' +
-                '    <input type="hidden" name="exec" value="newTM" />' +
-                '    <input type="hidden" name="tm_key" value="" />' +
-                '    <input type="hidden" name="name" value="" />' +
                 '    <input type="submit" class="addtm-add-submit" style="display: none" />' +
-                '    <input type="file" name="tmx_file" accept="'+ format +'"/>' +
+                '    <input type="file" name="uploaded_file" accept="'+ format +'"/>' +
                 '</form>' +
                 '   <a class="existingKey pull-right btn-ok add'+ type +'file">' +
                 '       <span class="text">Confirm</span>' +
@@ -1549,13 +1528,13 @@
                 '   <a class="pull-right btn-grey canceladd'+ type +'">' +
                 '      <span class="text"></span>' +
                 '   </a>' +
-                '   <span class="error"></span>' +
+                '   <span class="upload-file-msg-error"></span>' +
+                '   <span class="upload-file-msg-success">Import Complete</span>' +
                 '  <div class="uploadprogress">' +
+                '       <span class="msgText">Uploading</span>' +
                 '       <span class="progress">' +
                 '           <span class="inner"></span>' +
                 '       </span>' +
-                '       <span class="msgText">Uploading</span>' +
-                '       <span class="error"></span>' +
                 '  </div>' +
                 '</td>';
 

@@ -143,14 +143,15 @@ APP = {
     },
     doRequest: function ( req, log ) {
 
-        logTxt = (typeof log == 'undefined') ? '' : '&type=' + log;
-        version = (typeof config.build_number == 'undefined') ? '' : '-v' + config.build_number;
-        builtURL = (req.url) ? req.url : config.basepath + '?action=' + req.data.action + logTxt + this.appendTime() + version + ',jid=' + config.id_job + ((typeof req.data.id_segment != 'undefined') ? ',sid=' + req.data.id_segment : '');
+        var logTxt = (typeof log == 'undefined') ? '' : '&type=' + log;
+        var version = (typeof config.build_number == 'undefined') ? '' : '-v' + config.build_number;
+        var builtURL = (req.url) ? req.url : config.basepath + '?action=' + req.data.action + logTxt + this.appendTime() + version + ',jid=' + config.id_job + ((typeof req.data.id_segment != 'undefined') ? ',sid=' + req.data.id_segment : '');
+        var reqType = (req.type) ? req.type : 'POST';
         var setup = {
             url: builtURL,
 
 			data: req.data,
-			type: 'POST',
+			type: reqType,
 			dataType: 'json'
 			//TODO set timeout longer than server curl for TM/MT
 		};
