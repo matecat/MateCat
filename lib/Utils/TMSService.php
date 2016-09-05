@@ -249,7 +249,8 @@ class TMSService {
                         "done"        => $current_tm[ "temp_seg_ins" ],
                         "total"       => $current_tm[ "num_seg_tot" ],
                         "source_lang" => $current_tm[ "source_lang" ],
-                        "target_lang" => $current_tm[ "target_lang" ]
+                        "target_lang" => $current_tm[ "target_lang" ],
+                        'completed'   => false
                 );
                 $result[ 'completed' ] = false;
                 break;
@@ -260,7 +261,8 @@ class TMSService {
                         "done"        => $current_tm[ "temp_seg_ins" ],
                         "total"       => $current_tm[ "num_seg_tot" ],
                         "source_lang" => $current_tm[ "source_lang" ],
-                        "target_lang" => $current_tm[ "target_lang" ]
+                        "target_lang" => $current_tm[ "target_lang" ],
+                        'completed'   => true
                 );
                 $result[ 'completed' ] = true;
                 break;
