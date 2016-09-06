@@ -892,7 +892,7 @@ color: white;
 .progress-extended{display:none}
 
 
-.dragging .file-drag,, .uploaded .file-drop, .uploaded .fileupload-buttonbar{height:0;}
+.dragging .file-drag,.uploaded .file-drop, .uploaded .fileupload-buttonbar{height:0;}
 .dragging .min {
   display: none;
 }

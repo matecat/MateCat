@@ -348,6 +348,7 @@ $( function () {
         if ( !($( '.upload-table tr' ).length > 1) ) $( '.upload-files' ).removeClass( 'uploaded' );
         UI.checkFailedConversionsNumber();
     } ).bind( 'fileuploadchange', function ( e ) {
+        $( '.upload-files' ).addClass( 'uploaded' );
         console.log( 'FIRE fileuploadchange' );
         UI.checkFailedConversionsNumber();
     } ).bind( 'fileuploaddestroyed', function ( e, data ) {
