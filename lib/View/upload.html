@@ -105,11 +105,11 @@
 
 
 <div class="wrapper-claim">
-    <h1 tal:condition="true:conversion_enabled">Translate your files</h1>
+    <h1 tal:condition="true:conversion_enabled">Join the Evolution</h1>
 
-    <h1 tal:condition="not:conversion_enabled">Translate an XLIFF file</h1>
+    <h1 tal:condition="not:conversion_enabled">Join the Evolution</h1>
 
-    <h2 class="payoff">MateCat gives you more matches than any other CAT tool.</h2>
+    <h2 class="payoff"><strong>The CAT tool that works for you</strong></h2>
 </div>
 <div class="wrapper-upload">
 
@@ -214,7 +214,7 @@
         <option value="telecommunications">Telecommunications</option>
         <option value="travel_tourism">Travel &amp; Tourism</option>
     </select>
-    <a href="#" class="more-options"><span>Options</span></a>
+    <a href="#" class="more-options"><span>Settings</span></a>
     <h2 class="resources" style="display:none;"><span class="numResources">4</span> Resources selected</h2>
 </div>
 
@@ -234,7 +234,15 @@
 <div metal:use-macro="upload_partials.html/gdrive_files"/>
 
 <p tal:condition="true:conversion_enabled" class="supported-files">MateCat supports
-    <a class="supported-file-formats" href="#">${formats_number} file formats</a>.</p>
+    <a class="supported-file-formats" href="#">${formats_number} file formats</a>
+    <tal:block tal:condition="php: Bootstrap::areOauthKeysPresent()">
+        and
+        <a class="load-gdrive load-gdrive-disabled" href="#">Google Drive files</a>
+        <span class="gdrive-icon"></span>
+        <!--<span class="btn-success min">or</span>
+        <span class="btn-success btn ">Add from Google Drive</span>-->
+    </tal:block>
+</p>
 
 <div class="uploadbtn-box">
     <span class="uploadloader"></span>
