@@ -22,12 +22,12 @@
         <div id="droptest">
 
             <p tal:condition="true:conversion_enabled" class="file-drag">
-                <strong>Drag and drop</strong> your file here<br/>
-                <span tal:condition="true:isUploadTMXAllowed" class="min">(including TMX)</span><br/>
+                <strong>Upload your files to translate them with MateCat</strong><br/>
+
             </p>
 
             <p tal:condition="not:conversion_enabled" class="file-drag">
-                <strong>Drag and drop</strong> your XLIFF here<br/>
+                <strong>Upload your XLIFF files to translate them with MateCat</strong><br/>
                 or</p>
 
             <p class="file-drop">
@@ -46,10 +46,7 @@
                                         <span>Add files...</span>
                                         <input type="file" name="files[]" multiple="multiple" class="multiple-button"/>
                                     </span>
-                                <tal:block tal:condition="php: Bootstrap::areOauthKeysPresent()">
-                                    <span class="btn-success min">or</span>
-                                    <span class="btn-success btn load-gdrive load-gdrive-disabled">Add from Google Drive</span>
-                                </tal:block>
+
 
                         <!--
                                         <button type="submit" class="btn btn-primary start">
@@ -104,7 +101,7 @@
 
             </div>
             <!-- #container -->
-
+            <span class="min">(or drop them here)</span>
 
         </div>
 
