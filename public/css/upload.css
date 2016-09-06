@@ -885,7 +885,7 @@ color: white;
 	-ms-transition: all 0.1s linear;
 }
 /*.dragging .file-drag,*/
- .uploaded .file-drag{ display:none;}
+ .uploaded .file-drag, .uploaded .min{ display:none;}
 
 .file-drop, .upload-footer, .uploaded .btn-success, .dragging .btn-success {display:none !important; }
 
