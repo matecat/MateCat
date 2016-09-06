@@ -296,7 +296,6 @@ $(document).ready(function() {
 
     function closeMLPanel() {
         $( ".popup-languages.slide").removeClass('open').hide("slide", { direction: "right" }, 400);
-        $("#SnapABug_Button").show();
         $(".popup-outer.lang-slide").hide();
         $('body').removeClass('side-popup');
 
@@ -314,7 +313,6 @@ $(document).ready(function() {
             ll.parent().addClass('on');
             ll.attr('checked','checked');
         });
-        $("#SnapABug_Button").hide();
         $(".popup-outer.lang-slide").show();
         $('body').addClass('side-popup');
 	});

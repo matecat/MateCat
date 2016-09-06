@@ -3666,7 +3666,6 @@ UI = {
         var tab = 'opt';
         $('body').addClass('side-popup');
         $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
-        $("#SnapABug_Button").hide();
         $(".outer-tm").show();
         $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
         $.cookie('tmpanel-open', 1, { path: '/' });
