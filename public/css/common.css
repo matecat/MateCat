@@ -2128,6 +2128,7 @@ input.email-export-tmx {
     width: 90px;
     display: block;
     text-align: center;
+    color: white !important;
 }
 .mgmt-tm .btn-ok.export-tmx-button {
     padding: 0px 5px !important;
