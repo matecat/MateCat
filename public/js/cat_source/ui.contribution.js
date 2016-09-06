@@ -54,6 +54,9 @@ $.extend(UI, {
             $(editarea).addClass('fromSuggestion');
 
 			this.saveInUndoStack('copysuggestion');
+            if (!$('.percentuage', segment).length) {
+                UI.createHeader(segment);
+            }
 			$('.percentuage', segment).text(match).removeClass('per-orange per-green per-blue per-yellow').addClass(percentageClass).addClass('visible');
             $('.repetition', segment).hide();
 			if (which) {
