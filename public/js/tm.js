@@ -297,7 +297,7 @@
                     },
                     headers: {
                         4: {
-                            sorter: false
+                            sorter: true
                         },
                         5: {
                             sorter: false
