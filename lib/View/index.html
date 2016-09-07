@@ -356,7 +356,6 @@
             <p>Howto layer to show a basic tutorial of the cattool when the first-time user open it.</p>
             <form action=""><input id="hideTutorial" type="checkbox" value="" />Do not display again </form>
         </div>
-        <script src="${basepath}public/js/lib/snapengage.js"></script>
 		<script type="text/javascript">
 		$( ".open-popup-tmx" ).click(function() {
   $( this ).hide();
@@ -458,9 +457,7 @@ $(window).resize(function() {
     <template id="tpl-taglock-customize" tal:condition="not:tagLockCustomizable">
     </template>
 <div class="offline_stuffs" ></div>
-<!-- Snapengage -->
-<script src="${basepath}public/js/lib/snapengage.js"></script>
-<!-- // Snapengage -->
+
 
 <tal:block  tal:repeat="js_source footer_js">
   <script type="text/javascript" tal:attributes="src js_source"></script>
