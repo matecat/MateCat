@@ -1466,7 +1466,7 @@
         startExportTmx: function (elem) {
             var line = $(elem).closest('tr');
             var email = line.find('.email-export-tmx').val();
-            var successText = 'You should receive the link at ' + email + ' in %XX% minutes.';
+            var successText = 'You should receive the link at ' + email + ' in <strong>%XX% minutes.</strong>';
 
             line.find('.uploadloader').show();
             line.find('.export-tmx-button, .canceladd-export-tmx').addClass('disabled');
@@ -1476,7 +1476,7 @@
                     time = (time > 0 ) ? time : 1;
                     successText = successText.replace('%XX%', time);
                     setTimeout(function () {
-                        line.find('.message-export-tmx-success').text(successText);
+                        line.find('.message-export-tmx-success').html(successText);
                         line.find('.uploadloader').hide();
                         line.find('.export-tmx-button, .canceladd-export-tmx, .email-export-tmx').hide();
                         line.find('.message-export-tmx').hide();
