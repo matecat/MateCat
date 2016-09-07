@@ -203,10 +203,10 @@
                 console.log('upload file');
                 UI.checkTMKey('tm');
 
-            $(this).addClass('disabled');
-        }).on('click', 'a.disabletm', function() {
-            UI.disableTM(this);
-        }).on('change', '.mgmt-table-tm tr.mine .activate input', function() {
+                $(this).addClass('disabled');
+            }).on('click', 'a.disabletm', function() {
+                UI.disableTM(this);
+            }).on('change', '.mgmt-table-tm tr.mine .activate input', function() {
 
                 if(APP.isCattool) UI.saveTMdata(false);
                 UI.checkTMGrantsModifications(this);
@@ -217,6 +217,13 @@
                     UI.activateMT(this);
                 } else {
                     UI.deactivateMT(this);
+                }
+
+            }).on('click', '#activetm .lookup input, #activetm .update input', function() {
+                var tr = $(this).parents('tr.mine');
+                if(!tr.find('td.lookup input').is(':checked') && !tr.find('td.update input').is(':checked')) {
+                    UI.checkTMGrantsModifications(this);
+                    tr.find('.activate input').prop('checked', false);
                 }
 
             }).on('click', '.mgmt-table-mt tr .action .deleteMT', function() {
@@ -519,9 +526,10 @@
             }
         },
         checkTMGrantsModifications: function (el) {
-            tr = $(el).parents('tr.mine');
-            isActive = ($(tr).parents('table').attr('id') == 'activetm')? true : false;
-            if(!tr.find('.activate input').is(':checked')) {
+            var tr = $(el).parents('tr.mine');
+            var isActive = ($(tr).parents('table').attr('id') == 'activetm')? true : false;
+            var deactivate = isActive && (!tr.find('.lookup input').is(':checked') && !tr.find(' td.update input').is(':checked'));
+            if(!tr.find('.activate input').is(':checked') || deactivate ) {
                 if(isActive) {
                     if(config.isAnonymousUser) {
 
