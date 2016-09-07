@@ -109,7 +109,7 @@
 
     <h1 tal:condition="not:conversion_enabled">Join the Evolution</h1>
 
-    <h2 class="payoff"><strong>The CAT tool that works for you</strong></h2>
+    <h2 class="payoff">The CAT tool that works for you</h2>
 </div>
 <div class="wrapper-upload">
 
@@ -235,13 +235,17 @@
 
 <p tal:condition="true:conversion_enabled" class="supported-files">MateCat supports
     <a class="supported-file-formats" href="#">${formats_number} file formats</a>
+    <span style="float: right;">.</span>
     <tal:block tal:condition="php: Bootstrap::areOauthKeysPresent()">
-        and
-        <a class="load-gdrive load-gdrive-disabled" href="#">Google Drive files</a>
-        <span class="gdrive-icon"></span>
-        <!--<span class="btn-success min">or</span>
-        <span class="btn-success btn ">Add from Google Drive</span>-->
+        <span class="gdrive-addlink-container">
+            and
+            <a class="load-gdrive load-gdrive-disabled" href="#">Google Drive files</a>
+            <span class="gdrive-icon"></span>
+            <!--<span class="btn-success min">or</span>
+            <span class="btn-success btn ">Add from Google Drive</span>-->
+        </span>
     </tal:block>
+
 </p>
 
 <div class="uploadbtn-box">
