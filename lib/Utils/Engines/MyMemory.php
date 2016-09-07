@@ -500,6 +500,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         $parameters[ 'user_email' ] = trim( $userEmail );
         $parameters[ 'user_name' ] = trim( $userName ) . " " . trim( $userSurname );
         ( !empty( $name ) ? $parameters[ 'zip_name' ] = $name : $parameters[ 'zip_name' ] = $key );
+        $parameters[ 'zip_name' ] = $parameters[ 'zip_name' ] . ".zip";
 
         $this->call( 'tmx_export_email_url', $parameters );
 

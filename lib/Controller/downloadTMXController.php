@@ -143,7 +143,7 @@ class downloadTMXController extends ajaxController {
 
         $this->tmxHandler = new TMSService();
         $this->tmxHandler->setTmKey( $this->tm_key );
-        $this->tmxHandler->setName( $this->tm_name . ".zip" );
+        $this->tmxHandler->setName( $this->tm_name );
 
     }
 
