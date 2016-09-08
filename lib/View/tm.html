@@ -52,12 +52,13 @@
                                 <tr>
                                     <th class="dragrow"></th>
                                     <th class="activate">Use it</th>
+                                    <th class="check">Lookup</th>
                                     <th class="check">Update</th>
-                                    <th class="action">Actions</th>
                                     <th class="privatekey">Private Key</th>
                                     <th class="owner">Owner</th>
                                     <th class="description">Description</th>
-                                    <th class="check">Lookup</th>
+                                    <th class="action">Actions</th>
+
 
                                 </tr>
                                 </thead>
@@ -67,7 +68,8 @@
                                 <tal:block tal:condition="php: page == 'cattool'" tal:repeat="key user_keys/job_keys">
                                     <tr tal:condition="php: key.edit || key.owner" tal:attributes="class php: key.owner ? ( jobOwnerIsMe ? 'mine' : 'ownergroup' ) : 'mine'" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-key="${key/key}" data-owner="${key/owner}">
                                         <td class="dragrow"><div class="status"></div></td>
-                                        <td class="activate"><input type="checkbox" checked="checked"/></td><td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !jobOwnerIsMe ); checked key/r" /></td>
+                                        <td class="activate"><input type="checkbox" checked="checked" tal:attributes="disabled php: !key.edit || ( key.owner && !jobOwnerIsMe ); checked key/r"/></td>
+                                        <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !jobOwnerIsMe ); checked key/r" /></td>
                                         <td class="update text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !jobOwnerIsMe ); checked key/w" /></td>
                                         <td class="privatekey">${key/key}</td>
                                         <td class="owner">${php: key.owner ? ( jobOwnerIsMe ? 'You' : '*****' ) : 'You'}</td>
