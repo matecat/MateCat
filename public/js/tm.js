@@ -487,14 +487,14 @@
         },
         showErrorOnKeyInput: function (message) {
             if (message) {
-                $('.mgmt-container .tm-error-message').html(message).show();
+                $('.mgmt-container .active-tm-container .tm-error-message').html(message).show();
             }
             $('#activetm tr.new').addClass('badkey');
             UI.checkTMAddAvailability(); //some enable/disable stuffs
         },
         removeErrorOnKeyInput: function () {
 
-            $('.mgmt-container .tm-error-message').text('').hide();
+            $('.mgmt-container .active-tm-container .tm-error-message').text('').hide();
             $('#activetm tr.new').removeClass('badkey');
             UI.checkTMAddAvailability();
         },
@@ -1445,13 +1445,13 @@
                 '<input type="email" required class="email-export-tmx mgmt-input" value="' + config.userMail + '"/>' +
                 '<span class="uploadloader"></span>'+
                 '<span class="email-export-tmx-email-sent">Request submitted</span>' +
-                '<span class="email-export-tmx-email-error">We got an error,</br> please contact support</span>' +
                 '<a class="pull-right btn-ok export-tmx-button">' +
                     '<span class="text export-tmx-button-label">Confirm</span>' +
                 '</a>' +
                 '<a class="pull-right btn-grey canceladd-export-tmx">' +
                     '<span class="text"></span>'+
                 '</a>' +
+                '<span class="email-export-tmx-email-error">We got an error,</br> please contact support</span>' +
                 '</td>';
 
             $(elem).parents('tr').append(exportDiv);

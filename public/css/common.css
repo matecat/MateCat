@@ -1580,7 +1580,7 @@ margin: 0 auto;
 overflow: hidden;
 width: 96%;
 padding-top: 20px;
-  padding-bottom: 60px;
+  padding-bottom: 50px;
 text-align: left;
 min-height: 400px;
 }
@@ -3199,6 +3199,13 @@ display: none;
 
 .tm-success-message {
     border-top: 3px solid #4F8A10;
+}
+
+.fixed-msg {
+    position: fixed;
+    top: 0px;
+    width: 865px;
+    z-index: 10000;
 }
 
 .mgmt-panel .tm-error-message, .mgmt-panel .tm-warning-message, .mgmt-panel .tm-success-message {
