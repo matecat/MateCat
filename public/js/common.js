@@ -564,18 +564,18 @@ APP = {
      */
 
     addNotification: function (notification) {
-        if (!UI. notificationBox) {
-            UI.notificationBox = ReactDOM.render(
+        if (!APP. notificationBox) {
+            APP.notificationBox = ReactDOM.render(
                 React.createElement(NotificationBox),
                 $(".notifications-wrapper")[0]
             );
         }
         
-        return UI.notificationBox.addNotification(notification);
+        return APP.notificationBox.addNotification(notification);
     },
     removeNotification: function (notification) {
-        if (UI. notificationBox) {
-            UI.notificationBox.removeNotification(notification);
+        if (APP.notificationBox) {
+            APP.notificationBox.removeNotification(notification);
         }
     },
 
