@@ -662,11 +662,11 @@
             var newTr = '<tr class="mine" data-tm="1" data-glos="1" data-key="' + keyParams.TMKey + '" data-owner="' + config.ownerIsMe + '">' +
                 '    <td class="dragrow"><div class="status"></div></td>' +
                 '    <td class="activate"><input type="checkbox" checked="checked"/></td>' +
+                '    <td class="lookup check text-center"><input type="checkbox"' + ( keyParams.r ? ' checked="checked"' : '' ) + ' /></td>' +
+                '    <td class="update check text-center"><input type="checkbox"' + ( keyParams.w ? ' checked="checked"' : '' ) + ' /></td>' +
                 '    <td class="privatekey">' + keyParams.TMKey + '</td>' +
                 '    <td class="owner">You</td>' +
                 '    <td class="description"><div class="edit-desc">' + keyParams.desc + '</div></td>' +
-                '    <td class="lookup check text-center"><input type="checkbox"' + ( keyParams.r ? ' checked="checked"' : '' ) + ' /></td>' +
-                '    <td class="update check text-center"><input type="checkbox"' + ( keyParams.w ? ' checked="checked"' : '' ) + ' /></td>' +
                 '    <td class="action">' +
                 '       <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>'+
                 '          <div class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;'+
