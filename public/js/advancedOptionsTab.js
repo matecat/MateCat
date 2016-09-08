@@ -107,14 +107,27 @@ if ( true )
                 tagProjectionCheck.on('change', this.toggleTagProjectionOption.bind(this));
             } else {
                 var tpContainer= $('.options-box.tagp');
+                var sourceCode = config.source_rfc.split('-')[0];
+                var targetCode = config.target_rfc.split('-')[0];
                 $('.options-box #tagp_check').prop( "disabled", true ).attr('checked', false);
 
                 var acceptedLanguagesTP = config.tag_projection_languages.slice();
-                var languagesArraysTP = createSupportedLanguagesArrays(acceptedLanguagesTP);
-                tpContainer.find('.option-supported-languages').html(languagesArraysTP.acceptedCodes.join(', '));
-                tpContainer.find('.option-notsupported-languages').html(languagesArraysTP.notAcceptedCodes.join(', '));
+
+                var labelArraySupportedLanguages = [];
+                acceptedLanguagesTP.forEach(function (value) {
+                    labelArraySupportedLanguages.push(value.replace('-', '<>').toUpperCase())
+                });
+                var notSupportedCouples = [];
+                var languageCombinations = [sourceCode+'-'+targetCode, targetCode+'-'+sourceCode];
+                languageCombinations.forEach(function(n) {
+                    if (acceptedLanguagesTP.indexOf(n) === -1 && n.indexOf(sourceCode + '-') > -1) {
+                        notSupportedCouples.push(n.replace('-', '<>').toUpperCase());
+                    }
+                });
+                tpContainer.find('.option-supported-languages').html(labelArraySupportedLanguages.join(', '));
+                tpContainer.find('.option-notsupported-languages').html(notSupportedCouples.join(', '));
                 tpContainer.find('.onoffswitch').off('click').on('click', function () {
-                    showModalNotSupportedLanguages(languagesArraysTP.notAccepted, languagesArraysTP.accepted);
+                    showModalNotSupportedLanguages(notSupportedCouples, labelArraySupportedLanguages);
                 });
                 tpContainer.addClass('option-unavailable');
 

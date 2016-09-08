@@ -16,13 +16,24 @@ class ProjectOptionsSanitizer {
         'fr-FR',
         'de-DE',
         'it-IT'
-    ); 
-    
+    );
+    /**
+     * All combinations of languages for Tag Ptojection
+     */
     public static $tag_projection_allowed_languages = array(
-        'en-US',
-        'en-GB',
-        'it-IT'
-    ); 
+        'en-de',
+        'de-it',
+        'de-fr',
+        'en-es',
+        'en-fr',
+        'en-pt',
+        'en-ru',
+        'fr-it',
+        'it-es',
+        'en-it'
+    );
+
+
     
     public function __construct( $input_options ) { 
         $this->options = $input_options ; 
@@ -103,12 +114,14 @@ class ProjectOptionsSanitizer {
     }
     
     private function checkSourceAndTargetAreInCombination( $langs ) {
-        $all_langs = array_merge( $this->target_lang, array($this->source_lang) ); 
-        
-        $all_langs = array_unique( $all_langs ) ; 
-        
-        $found = count( array_intersect( $langs, $all_langs ) ) ;
-        return $found == 2 ; 
+        $lang_combination = array();
+        foreach ($this->target_lang as &$value) {
+            array_push($lang_combination, explode('-',$value)[0] . '-' . explode('-',$this->source_lang)[0]);
+            array_push($lang_combination, explode('-',$this->source_lang)[0] . '-' . explode('-',$value)[0]);
+        }
+
+        $found = count( array_intersect( $langs, $lang_combination ) ) ;
+        return $found > 0 ;
     }
 
 }
