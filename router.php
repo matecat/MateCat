@@ -50,19 +50,6 @@ $klein->onError(function ($klein, $err_msg, $err_type, $exception) {
 
 });
 
-// This is unreleased APIs. I'm no longer fond of the [i:id_job] in the path,
-// so before releasing change it use a querystring.
-//
-route(
-    '/api/v2/jobs/[i:id_job]/revision-data', 'GET',
-    'API_V2_JobRevisionData', 'revisionData'
-);
-
-route(
-    '/api/v2/jobs/[i:id_job]/revision-data/segments', 'GET',
-    'API_V2_JobRevisionData', 'segments'
-);
-
 route(
     '/api/v2/project-completion-status/[i:id_project]', 'GET',
     '\API\V2\ProjectCompletionStatus', 'status'
