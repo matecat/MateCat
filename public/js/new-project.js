@@ -281,7 +281,7 @@ $(document).ready(function() {
 							desc: _fileName,
 							TMKey: d.data.key
 						} );
-
+                        UI.setDropDown();
 						return true;
 					}
 
