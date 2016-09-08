@@ -87,8 +87,8 @@ class Engines_MMT extends Engines_AbstractEngine implements Engines_EngineInterf
     public function getTagProjection( $config ){
 
         $parameters           = array();
-        $parameters[ 's' ]    = $config[ 'source' ];
-        $parameters[ 't' ]    = $config[ 'target' ];
+//        $parameters[ 's' ]    = $config[ 'source' ];
+//        $parameters[ 't' ]    = $config[ 'target' ];
         $parameters[ 'sl' ]   = $config[ 'source_lang' ];
         $parameters[ 'tl' ]   = $config[ 'target_lang' ];
         $parameters[ 'hint' ] = $config[ 'suggestion' ];
@@ -96,8 +96,8 @@ class Engines_MMT extends Engines_AbstractEngine implements Engines_EngineInterf
         /*
          * For now override the base url and the function params
          */
-        $this->engineRecord[ 'base_url' ] = 'http://52.72.102.16:8045';
-        $this->engineRecord->others[ 'tags_projection' ] = 'tags-projection';
+        $this->engineRecord[ 'base_url' ] = 'http://149.7.212.129:10000';
+        $this->engineRecord->others[ 'tags_projection' ] = 'tags-projection/' . $config[ 'source' ] . "/" . $config[ 'target' ] . "/";
 
         $this->call( 'tags_projection', $parameters );
 
