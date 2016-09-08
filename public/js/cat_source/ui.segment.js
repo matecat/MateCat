@@ -211,8 +211,8 @@
                     id_job: config.id_job,
                     source: source,
                     target: target,
-                    source_lang: config.source_lang,
-                    target_lang: config.target_lang,
+                    source_lang: config.source_rfc,
+                    target_lang: config.target_rfc,
                     sl: suggestion
                 }
             });
