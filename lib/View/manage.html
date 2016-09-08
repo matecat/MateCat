@@ -5,9 +5,11 @@
         <title>Manage Projects - Matecat</title>
         <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
         <meta name="viewport" content="width=device-width"/>
+
         <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link rel="stylesheet" href="${basepath}public/css/manage.css?build=${build_number}"/>
+        <link href="${basepath}public/css/components-build.css?build=${build_number}" rel="stylesheet" type="text/css"/>
 
         <script type="text/javascript" src="${basepath}public/js/lib/jquery.js?build=${build_number}"></script>
         <script type="text/javascript" src="${basepath}public/js/lib/jquery.tablesorter-fork-mottie.js?build=${build_number}"></script>
@@ -16,6 +18,9 @@
         <script type="text/javascript" src="${basepath}public/js/common.js?build=${build_number}"></script>
         <script type="text/javascript" src="${basepath}public/js/manage.js?build=${build_number}"></script>
         <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
+
+        <script src="${basepath}public/js/build/react.js?build=${build_number}"></script>
+        <script src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
 
         <script type="text/javascript">
             var config = {
@@ -87,22 +92,7 @@
 					<option value="cancelled">Cancelled</option>
 				</select>  	
 			</div>
-<!--
-			<div class="block">
-				<input id="only-completed" type="checkbox" />
-				<label for="only-completed">Only Completed</label>
-			</div>
 
-			<div class="block">
-				<input id="show-archived" type="checkbox" />
-				<label for="show-archived">Show Archived</label>
-			</div>
-			
-			<div class="block">
-				<input id="show-cancelled" type="checkbox" />
-				<label for="show-cancelled">Show Cancelled</label>
-			</div>
--->
 			</form>
 		</div>
 
@@ -114,20 +104,9 @@
             
             <div id="projects"></div>
 
-<!--
-			<div class="pagination" style="float: right">
-				<a class="previous" tal:condition="prev_page" href="${basepath}manage/${prev_page}/">Previous</a>
-				<a class="next" tal:condition="next_page" href="${basepath}manage/${next_page}/">Next</a>		
-			</div>
--->
-
-<!--
-			<div class="pagination" style="float: right">
-				<a class="previous" tal:condition="prev_page" href="${basepath}manage/${prev_page}/">Previous</a>
-				<a class="next" tal:condition="next_page" href="${basepath}manage/${next_page}/">Next</a>		
-			</div>
--->
         </div>
+
+        <div class="notifications-wrapper"></div>
 
 		<footer>
             <div class="wrapper">
