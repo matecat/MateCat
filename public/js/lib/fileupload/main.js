@@ -341,10 +341,12 @@ $( function () {
     } ).bind( 'fileuploadadded fileuploaddestroyed', function ( e, data ) {
         if ( $( '.upload-table tr' ).length ) {
             $( '.upload-files' ).addClass( 'uploaded' );
-            APP.hideGDLink();
+            if (APP.hideGDLink)
+                APP.hideGDLink();
         } else {
             $( '.upload-files' ).removeClass( 'uploaded' );
-            APP.showGDLink();
+            if (APP.showGDLink)
+                APP.showGDLink();
         }
     } ).bind( 'fileuploadfail', function ( e ) {
         if ( !($( '.upload-table tr' ).length > 1) ) $( '.upload-files' ).removeClass( 'uploaded' );
