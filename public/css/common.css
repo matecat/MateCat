@@ -2012,7 +2012,7 @@ margin-top: 10px;
  {
     display: block;
     background: #fff;
-    padding: 10px 16px 20px 5px;
+    padding: 10px 14px 20px 5px;
     height: 20px;
     width: initial!important;
     border-top: 1px solid #E1E1E1;
@@ -2132,7 +2132,7 @@ input.email-export-tmx {
 }
 .mgmt-tm .btn-ok.export-tmx-button {
     padding: 0px 5px !important;
-    margin-right: 20px;
+    margin-right: 9px;
 }
 td.download-glossary-container .uploadloader {
     top: -18px;
@@ -2164,6 +2164,7 @@ span.email-export-tmx-email-error {
     background: #f26522;
     width: 35px;
     padding: 0px !important;
+    margin: 0px;
     text-align: center;
     color: #fff;
 }
