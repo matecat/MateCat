@@ -6,6 +6,14 @@
  * Time: 10:08
  */
 
+
+$klein->with('/api/v2/projects/[:id_project]/[:password]', function() {
+
+    route( '/urls',                 'GET',  'API\V2\UrlsController',        'urls'      );
+    route( '/jobs/[:id_job]/merge', 'POST', 'API\V2\JobMergeController',    'merge'     );
+
+});
+
 $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
     // TODO: group all similarly prefixed APIs into this block
     route( '/comments',     'GET', 'API\V2\CommentsController', 'index' );
@@ -76,11 +84,6 @@ route(
 route(
     '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation', 'GET',
     'API\V2\TranslationController', 'index'
-);
-
-route(
-    '/api/v2/projects/[:id_project]/[:password]/jobs/[:id_job]/merge', 'POST',
-    'API\V2\JobMergeController', 'merge'
 );
 
 route(
