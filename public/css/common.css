@@ -2125,7 +2125,7 @@ input.email-export-tmx {
 }
 
 .export-tmx-button-label {
-    width: 90px;
+    width: 90px !important;
     display: block;
     text-align: center;
     color: white !important;

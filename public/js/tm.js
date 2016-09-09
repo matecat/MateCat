@@ -238,11 +238,15 @@
 
             }).on('click', '.mgmt-table-mt tr .action .deleteMT', function() {
 
-                $('.mgmt-table-mt .tm-warning-message').html('Do you really want to delete this MT? <a href="#" class="continueDeletingMT" data-id="' + $(this).parents('tr').attr('data-id') + '">Continue</a>').show();
+                $('.mgmt-table-mt .tm-warning-message').html('Do you really want to delete this MT? <a href="#" class="continueDeletingMT" data-id="' + $(this).parents('tr').attr('data-id') + '">Continue</a> ' +
+                    '  <a class="cancelDeletingMT" style="cursor: pointer;">Cancel</a>').show();
 
             }).on('click', '.continueDeletingMT', function(e){
                 e.preventDefault();
                 UI.deleteMT($('.mgmt-table-mt table.mgmt-mt tr[data-id="' + $(this).attr('data-id') + '"] .deleteMT'));
+                $('.mgmt-table-mt .tm-warning-message').empty().hide();
+            }).on('click', '.cancelDeletingMT', function(e){
+                e.preventDefault();
                 $('.mgmt-table-mt .tm-warning-message').empty().hide();
             }).on('click', 'a.usetm', function() {
                 UI.useTM(this);
@@ -1185,8 +1189,8 @@
         showDeleteTmMessage: function (button) {
             clearTimeout(this.timeoutDeleteKey);
             $("tr.tm-key-deleting").removeClass('tm-key-deleting');
-            var message = 'Are you sure you want to delete the key XXX? <a class="confirm-tm-key-delete" style="cursor: pointer">YES</a>   ' +
-                '<a class="cancel-tm-key-delete" style="cursor: pointer">NO</a>';
+            var message = 'Do you really want to delete the key XXX? <a class="confirm-tm-key-delete" style="cursor: pointer">Continue</a>   ' +
+                '<a class="cancel-tm-key-delete" style="cursor: pointer">Cancel</a>';
             var elem = $(button).closest("table");
             var tr = $(button).closest("tr");
             tr.addClass("tm-key-deleting");
@@ -1250,8 +1254,7 @@
                 },
                 context: id,
                 error: function() {
-                    // console.log('error');
-                    UI.showErrorOnActiveTMTable('There was an error saving your data. Please retry!');
+                    $(".mgmt-table-mt .tm-error-message").text("There was an error saving your data. Please retry!").show()
                 },
                 success: function(d) {
                     // console.log('success');
@@ -1629,7 +1632,8 @@
         },
         hideAllBoxOnTables: function () {
             $('.mgmt-container .active-tm-container .tm-error-message, .mgmt-container .active-tm-container .tm-warning-message, .mgmt-container .active-tm-container .tm-success-message,' +
-                '.mgmt-container .inactive-tm-container .tm-error-message, .mgmt-container .inactive-tm-container .tm-warning-message, .mgmt-container .inactive-tm-container .tm-success-message').fadeOut(150, function () {
+                '.mgmt-container .inactive-tm-container .tm-error-message, .mgmt-container .inactive-tm-container .tm-warning-message, .mgmt-container .inactive-tm-container .tm-success-message,' +
+                '.mgmt-table-mt .tm-error-message').fadeOut(150, function () {
                 $(this).html("");
             });
         },
