@@ -129,9 +129,6 @@ $(function() {
                                             <input id="new-tm-write" type="checkbox" name="w" class="w" value="1" checked="" />
                                         </td>
                                         <td class="privatekey">
-                                            <div class="error">
-                                                <span class="tm-error-key"></span>
-                                            </div>
                                             <input class="mgmt-input pull-left" type="text" id="new-tm-key" placeholder="Have a Key? Add it here*" />
                                             <!--<a class="btn-ok pull-right">Create a New TM</a>-->
     <!--                                    <span class="text pull-left text-req">*required</span> -->
@@ -150,11 +147,9 @@ $(function() {
                                              <a class="pull-left btn-ok uploadtm disabled">
                                                 <span class="text uploadkey">Confirm</span>
                                             </a>
-                                            <div class="error">
-                                                <span class="tm-error-grants"></span>
-                                            </div>
 
-                                                <div id="uploadCallback"></div>
+
+                                            <div id="uploadCallback"></div>
                                         </td>
                                     </tr>
 
@@ -171,8 +166,8 @@ $(function() {
                                         </tr>
                                     </tal:block>
 
-                                </tbody>
-                            </table>
+                                    </tbody>
+                                </table>
                             </div>
                             <div class="inactive-tm-container">
                                 <h3 class="pull-left">Inactive Resources</h3>
@@ -296,9 +291,6 @@ $(function() {
                                                class="pull-right btn-grey canceladdtmx">
                                                 <span class="text">Cancel</span>
                                             </a>
-                                            <div class="error">
-                                                <span class="tm-error-grants"></span>
-                                            </div>
                                         </form>
                                     </div>
                                     <div class="step3 pull-left hide">

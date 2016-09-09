@@ -4,6 +4,15 @@
  Loaded by cattool and upload page.
  */
 (function($, undefined) {
+
+    function isVisible($el) {
+        var winTop = $(window).scrollTop();
+        var winBottom = winTop + $(window).height();
+        var elTop = $el.offset().top;
+        var elBottom = elTop + $el.height();
+        return ((elBottom<= winBottom) && (elTop >= winTop));
+    }
+
     $.extend(UI, {
 
         initTM: function() {
@@ -280,6 +289,20 @@
             }).on('mousedown', '.mgmt-tm .deleteTM', function(){
                 UI.deleteTM($(this));
             });
+            $(".popup-tm.slide-panel").on("scroll", function(){
+                if (!isVisible($(".active-tm-container h3"))) {
+                    $('.active-tm-container .notification-message').addClass('fixed-msg');
+                }
+                else {
+                    $('.active-tm-container .notification-message').removeClass('fixed-msg');
+                }
+                if (!isVisible($(".inactive-tm-container h3"))) {
+                    $('.inactive-tm-container .notification-message').addClass('fixed-msg');
+                }
+                else {
+                    $('.inactive-tm-container .notification-message').removeClass('fixed-msg');
+                }
+            });
 
             // script per filtrare il contenuto dinamicamente, da qui: http://www.datatables.net
 
@@ -487,14 +510,14 @@
         },
         showErrorOnKeyInput: function (message) {
             if (message) {
-                $('.mgmt-container .active-tm-container .tm-error-message').html(message).show();
+                this.showErrorOnActiveTMTable(message);
             }
             $('#activetm tr.new').addClass('badkey');
             UI.checkTMAddAvailability(); //some enable/disable stuffs
         },
         removeErrorOnKeyInput: function () {
 
-            $('.mgmt-container .active-tm-container .tm-error-message').text('').hide();
+            this.hideAllBoxOnTables();
             $('#activetm tr.new').removeClass('badkey');
             UI.checkTMAddAvailability();
         },
@@ -512,13 +535,13 @@
             var w = ($(panel).find('.w').is(':checked'))? 1 : 0;
             if(!r && !w) {
                 $('#activetm tr.new').addClass('badgrants');
-                $(panel).find('.action .error .tm-error-grants').text('Either "Lookup" or "Update" must be checked').show();
+                UI.showErrorOnActiveTMTable('Either "Lookup" or "Update" must be checked');
                 UI.checkTMAddAvailability();
 
                 return false;
             } else {
+                UI.hideAllBoxOnTables();
                 $('#activetm tr.new').removeClass('badgrants');
-                $(panel).find('.action .error .tm-error-grants').text('').hide();
                 UI.checkTMAddAvailability();
 
                 return true;
@@ -719,8 +742,7 @@
             $(".mgmt-table-tm .add-tm").show();
             UI.clearTMUploadPanel();
             UI.clearAddTMRow();
-            $('.mgmt-container .tm-error-message').hide();
-            $('.mgmt-container .tm-warning-message').hide();
+            UI.hideAllBoxOnTables();
         },
 
         fileUpload: function(form, action_url, div_id, tmName, type) {
@@ -977,27 +999,20 @@
                     data: data
                 },
                 error: function() {
-
-                    console.log('Error saving TM data!!');
-
-                    $('.tm-error-message').text('There was an error saving your data. Please retry!').show();
+                    UI.showErrorOnActiveTMTable('There was an error saving your data. Please retry!');
                     $('.popup-tm').removeClass('saving');
 
                 },
                 success: function(d) {
                     $('.popup-tm').removeClass('saving');
-
+                    UI.hideAllBoxOnTables();
                     if(d.errors.length) {
-                        $('.tm-error-message').text('There was an error saving your data. Please retry!').show();
-                    } else {
-                        console.log('TM data saved!!');
-
+                        UI.showErrorOnActiveTMTable('There was an error saving your data. Please retry!');
                     }
                 }
             });
         },
         saveTMdescription: function (field) {
-            console.log(field);
             var tr = field.parents('tr').first();
 
             APP.doRequest({
@@ -1008,16 +1023,16 @@
                     description: field.text()
                 },
                 error: function() {
-                    console.log('Error saving TM description!!');
-                    APP.showMessage({msg: 'There was an error saving your description. Please retry!'});
+                    UI.showErrorOnActiveTMTable('There was an error saving your description. Please retry!');
+                    // APP.showMessage({msg: 'There was an error saving your description. Please retry!'});
                     $('.popup-tm').removeClass('saving');
                 },
                 success: function(d) {
+                    UI.hideAllBoxOnTables();
                     $('.popup-tm').removeClass('saving');
                     if(d.errors.length) {
-                        APP.showMessage({msg: d.errors[0].message});
-                    } else {
-                        console.log('TM description saved!!');
+                        UI.showErrorOnActiveTMTable(d.errors[0].message);
+                        // APP.showMessage({msg: d.errors[0].message});
                     }
                 }
             });
@@ -1032,15 +1047,16 @@
                     description: desc
                 },
                 error: function() {
-                    console.log('Error saving TM key!');
+                    UI.showErrorOnActiveTMTable('There was an error saving your data. Please retry!');
                     $('.popup-tm').removeClass('saving');
                 },
                 success: function(d) {
                     $('.popup-tm').removeClass('saving');
+                    UI.hideAllBoxOnTables();
                     if(d.errors.length) {
+                        UI.showErrorOnActiveTMTable(d.errors[0].message);
 //                    APP.showMessage({msg: d.errors[0].message});
                     } else {
-                        console.log('TM key saved!!');
                         UI.clearTMUploadPanel();
                     }
                 }
@@ -1172,10 +1188,11 @@
                     key: tr.find('.privatekey').text()
                 },
                 error: function() {
-                    console.log('Error deleting TM!!');
+                    UI.showErrorOnActiveTMTable('There was an error saving your data. Please retry!');
+                    // console.log('Error deleting TM!!');
                 },
                 success: function(d) {
-
+                    UI.hideAllBoxOnTables();
                 }
             });
         },
@@ -1189,10 +1206,12 @@
                 },
                 context: id,
                 error: function() {
-                    console.log('error');
+                    // console.log('error');
+                    UI.showErrorOnActiveTMTable('There was an error saving your data. Please retry!');
                 },
                 success: function(d) {
-                    console.log('success');
+                    // console.log('success');
+                    UI.hideAllBoxOnTables();
                     $('.mgmt-table-mt tr[data-id=' + this + ']').remove();
                     $('#mt_engine option[value=' + this + ']').remove();
                     if(!$('#mt_engine option[selected=selected]').length) $('#mt_engine option[value=0]').attr('selected', 'selected');
@@ -1433,7 +1452,6 @@
         copyNewTMKey: function (key) {
             $('#new-tm-key').val(key);
             $('#activetm tr.new').removeClass('badkey');
-            $('#activetm tr.new .error .tm-error-key').text('').hide();
             UI.checkTMAddAvailability();
         },
         openExportTmx: function (elem) {
@@ -1546,6 +1564,28 @@
 
             $(elem).parents('tr').append(nr);
             $(elem).parents('tr').find('.uploadfile').slideToggle();
-        }
+        },
+        showErrorOnActiveTMTable: function (message) {
+            $('.mgmt-container .active-tm-container .tm-error-message').html(message).show();
+        },
+        showErrorOnInactiveTmTable: function (message) {
+            $('.mgmt-container .active-tm-container .tm-error-message').html(message).show();
+        },
+        showWarningOnActiveTMTable: function (message) {
+            $('.mgmt-container .active-tm-container .tm-warning-message').html(message).show();
+        },
+        showWarningOnInactiveTmTable: function (message) {
+            $('.mgmt-container .active-tm-container .tm-warning-message').html(message).show();
+        },
+        showSuccessOnActiveTMTable: function (message) {
+            $('.mgmt-container .active-tm-container .tm-success-message').html(message).show();
+        },
+        showSuccessOnInactiveTmTable: function (message) {
+            $('.mgmt-container .active-tm-container .tm-success-message').html(message).show();
+        },
+        hideAllBoxOnTables: function () {
+            $('.mgmt-container .active-tm-container .tm-error-message, .mgmt-container .active-tm-container .tm-warning-message, .mgmt-container .active-tm-container .tm-success-message').html("").hide();
+        },
+
     });
 })(jQuery);
