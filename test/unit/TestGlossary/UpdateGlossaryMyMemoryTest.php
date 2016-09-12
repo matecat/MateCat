@@ -293,7 +293,6 @@ class UpdateGlossaryMyMemoryTest extends AbstractTest
         $this->config_param_of_update['id_user'] = array('0' => "{$this->test_key}");
 
         $result = $this->engine_MyMemory->updateGlossary($this->config_param_of_update);
-        sleep(2);
 
         $this->assertTrue($result);
 

@@ -43,6 +43,7 @@ class BuildResultEngineTest extends AbstractTest
            'base_url' => "base/sample",
            'translate_relative_url' => "translate",
            'contribute_relative_url' => "contribute",
+           'update_relative_url' => "update",
            'delete_relative_url' => "delete",
            'others' => "{}",
            'class_load' => "NONE",
@@ -65,6 +66,7 @@ class BuildResultEngineTest extends AbstractTest
         $this->assertEquals("base/sample", $actual_engine_struct->base_url);
         $this->assertEquals("translate", $actual_engine_struct->translate_relative_url);
         $this->assertEquals("contribute", $actual_engine_struct->contribute_relative_url);
+        $this->assertEquals("update", $actual_engine_struct->update_relative_url);
         $this->assertEquals("delete", $actual_engine_struct->delete_relative_url);
         $this->assertEquals(array(), $actual_engine_struct->others);
         $this->assertEquals("NONE", $actual_engine_struct->class_load);
