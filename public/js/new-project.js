@@ -281,7 +281,7 @@ $(document).ready(function() {
 							desc: _fileName,
 							TMKey: d.data.key
 						} );
-
+                        UI.setDropDown();
 						return true;
 					}
 
@@ -296,7 +296,6 @@ $(document).ready(function() {
 
     function closeMLPanel() {
         $( ".popup-languages.slide").removeClass('open').hide("slide", { direction: "right" }, 400);
-        $("#SnapABug_Button").show();
         $(".popup-outer.lang-slide").hide();
         $('body').removeClass('side-popup');
 
@@ -314,7 +313,6 @@ $(document).ready(function() {
             ll.parent().addClass('on');
             ll.attr('checked','checked');
         });
-        $("#SnapABug_Button").hide();
         $(".popup-outer.lang-slide").show();
         $('body').addClass('side-popup');
 	});
@@ -475,25 +473,41 @@ APP.checkForLexiQALangs = function(){
  */
 APP.checkForTagProjectionLangs = function(){
 	if ( $('.options-box #tagp_check').length == 0 ) return;
+
 	var acceptedLanguages = config.tag_projection_languages.slice();
 	var tpCheck = $('.options-box.tagp');
-	var targetLanguages = $( '#target-lang' ).val().split(',');
-	var sourceAccepted = (acceptedLanguages.indexOf($( '#source-lang' ).val() ) > -1);
-	var targetAccepted = targetLanguages.filter(function(n) {
-							return acceptedLanguages.indexOf(n) != -1;
-						}).length > 0;
+    var sourceLanguage = $( '#source-lang' ).val().split('-')[0];
+    var languageCombinations = [];
+    var notSupportedCouples = [];
+
+    $( '#target-lang' ).val().split(',').forEach(function (value) {
+        var elem = value.split('-')[0];
+        languageCombinations.push(elem + '-' + sourceLanguage);
+        languageCombinations.push(sourceLanguage + '-' + elem);
+    });
+
+    var arrayIntersection = languageCombinations.filter(function(n) {
+        if (acceptedLanguages.indexOf(n) === -1 && n.indexOf(sourceLanguage + '-') > -1) {
+            notSupportedCouples.push(n.replace('-', '<>').toUpperCase());
+        }
+        return acceptedLanguages.indexOf(n) != -1;
+    });
+
 	tpCheck.removeClass('option-unavailable');
 	tpCheck.find('.onoffswitch').off('click');
 	$('.options-box #tagp_check').removeAttr("disabled");
 
 	//disable Tag Projection
-	var disableTP = !(sourceAccepted && targetAccepted && config.defaults.tag_projection);
-	if (!(sourceAccepted && targetAccepted)) {
-		var arrays = createSupportedLanguagesArrays(acceptedLanguages, targetLanguages, sourceAccepted);
-		tpCheck.find('.option-supported-languages').html(arrays.acceptedCodes.join(', '));
-		tpCheck.find('.option-notsupported-languages').html(arrays.notAcceptedCodes.join(', '));
+	var disableTP = !(arrayIntersection.length > 0 && config.defaults.tag_projection);
+	if (!(arrayIntersection.length > 0)) {
+		var labelArraySupportedLanguages = [];
+        acceptedLanguages.forEach(function (value) {
+           labelArraySupportedLanguages.push(value.replace('-', '<>').toUpperCase())
+        });
+	    tpCheck.find('.option-supported-languages').html(labelArraySupportedLanguages.join(', '));
+		tpCheck.find('.option-notsupported-languages').html(notSupportedCouples.join(', '));
 		tpCheck.find('.onoffswitch').off('click').on('click', function () {
-			showModalNotSupportedLanguages(arrays.notAccepted, arrays.accepted);
+			showModalNotSupportedLanguages(notSupportedCouples, labelArraySupportedLanguages);
 		});
 		tpCheck.addClass('option-unavailable');
 		$('.options-box #tagp_check').prop( "disabled", disableTP );

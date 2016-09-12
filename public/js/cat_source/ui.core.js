@@ -89,7 +89,7 @@ UI = {
 	activateSegment: function(segment, isNotSimilar) {
 		this.createFooter(this.currentSegment, isNotSimilar);
 		this.createButtons(segment);
-		this.createHeader();
+		this.createHeader(segment);
 	},
     evalCurrentSegmentTranslationAndSourceTags : function( segment ) {
         if ( segment.length == 0 ) return ;
@@ -441,6 +441,7 @@ UI = {
 
     clearMarks: function (str) {
         str = str.replace(/(<mark class="inGlossary">)/gi, '').replace(/<\/mark>/gi, '');
+        str = str.replace(/<span data-id="[^"]+" class="unusedGlossaryTerm">(.*?)<\/span>/gi, "$1");
         return str;
     },
 	highlightEditarea: function(seg) {
@@ -549,18 +550,19 @@ UI = {
 		}
 	},
 
-    createHeader: function(forceCreation) {
-
+    createHeader: function(segment, forceCreation) {
+        var segment$ = $(segment);
+        var segmentId = UI.getSegmentId(segment);
         forceCreation = forceCreation || false;
 
-        if ( $('h2.percentuage', this.currentSegment).length && !forceCreation ) {
+        if ( $('h2.percentuage', segment$).length && !forceCreation ) {
             return;
         }
-		var header = '<h2 title="" class="percentuage"><span></span></h2><a href="/referenceFile/' + config.id_job + '/' + config.password + '/' + this.currentSegmentId + '" id="segment-' + this.currentSegmentId + '-context" class="context" title="Open context" target="_blank">Context</a>';
-		$('#' + this.currentSegment.attr('id') + '-header').html(header);
+		var header = '<h2 title="" class="percentuage"><span></span></h2><a href="/referenceFile/' + config.id_job + '/' + config.password + '/' + segmentId + '" id="segment-' + segmentId + '-context" class="context" title="Open context" target="_blank">Context</a>';
+        $('#' + segment$.attr('id') + '-header').html(header);
 
-        if ( this.currentSegment.data( 'autopropagated' ) && !$( '.header .repetition', this.currentSegment ).length ) {
-            $( '.header', this.currentSegment ).prepend( '<span class="repetition">Autopropagated</span>' );
+        if ( segment$.data( 'autopropagated' ) && !$( '.header .repetition', segment$ ).length ) {
+            $( '.header', segment$ ).prepend( '<span class="repetition">Autopropagated</span>' );
         }
 
     },
@@ -2968,7 +2970,7 @@ UI = {
             // AS callback return for setTranslation ( whe are here now ),
             // currentSegment pointer was already advanced by openSegment and header already created
             //Needed because two consecutive segments can have the same hash
-            this.createHeader(true);
+            this.createHeader(segment, true);
 
         }
     },
@@ -3671,7 +3673,6 @@ UI = {
         var tab = 'opt';
         $('body').addClass('side-popup');
         $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
-        $("#SnapABug_Button").hide();
         $(".outer-tm").show();
         $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
         $.cookie('tmpanel-open', 1, { path: '/' });

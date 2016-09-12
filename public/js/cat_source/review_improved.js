@@ -142,7 +142,7 @@ if ( ReviewImproved.enabled() )
         openPanel : function(data) {
             $('article').addClass('review-panel-opened');
             $('body').addClass('side-tools-opened review-side-panel-opened');
-            hackSnapEngage( true );
+            hackIntercomButton( true );
 
             $(document).trigger('review-panel:opened', data);
 
@@ -167,7 +167,7 @@ if ( ReviewImproved.enabled() )
         closePanel : function() {
             $(document).trigger('review-panel:closed');
 
-            hackSnapEngage( false );
+            hackIntercomButton( false );
 
             $('article').removeClass('review-panel-opened');
             $('body').removeClass('side-tools-opened review-side-panel-opened');
@@ -179,6 +179,26 @@ if ( ReviewImproved.enabled() )
         }
     });
 })(jQuery, ReviewImproved);
+
+if ( ReviewImproved.enabled() ) {
+    $.extend(ReviewImproved, {
+        reloadQualityReport : function() {
+            var path  = sprintf('/api/v2/jobs/%s/%s/quality-report',
+                config.id_job, config.password);
+
+            $.getJSON( path )
+                .success( function( data ) {
+                    var review = data['quality-report'].chunk.review ;
+
+                    window.quality_report_btn_component.setState({
+                        is_pass : review.is_pass,
+                        score : review.score,
+                        percentage_reviewed : review.percentage
+                    });
+                });
+        }
+    });
+}
 
 /**
  * Review page
@@ -208,21 +228,6 @@ if ( ReviewImproved.enabled() && config.isReview ) {
             return $.when.apply($, deferreds).done(function() {
                 ReviewImproved.reloadQualityReport();
             });
-        },
-        reloadQualityReport : function() {
-            var path  = sprintf('/api/v2/jobs/%s/%s/quality-report',
-                config.id_job, config.password);
-
-            $.getJSON( path )
-                .success( function( data ) {
-                    var review = data['quality-report'].chunk.review ;
-
-                    window.quality_report_btn_component.setState({
-                        is_pass : review.is_pass,
-                        score : review.score,
-                        percentage_reviewed : review.percentage
-                    });
-                });
         },
 
     });

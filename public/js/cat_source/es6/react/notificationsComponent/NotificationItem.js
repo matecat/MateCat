@@ -128,10 +128,10 @@ class NotificationItem extends React.Component {
             autoDismiss = <span className={'notification-close-button'} onClick={this.dismissNotification}>×</span>;
         }
         if (this.props.allowHtml) {
-            title = <h2 className={this.styleNameTitle} dangerouslySetInnerHTML={ this.allowHTML(this.props.title) }></h2>;
+            title = <div className={this.styleNameTitle} dangerouslySetInnerHTML={ this.allowHTML(this.props.title) }></div>;
             message = <div className= {'notification-message'} dangerouslySetInnerHTML={ this.allowHTML(this.props.text) }></div>;
         } else {
-            title = <h2 className={this.styleNameTitle} > {this.props.title}</h2>
+            title = <div className={this.styleNameTitle} > {this.props.title}</div>
             message = <div className= {'notification-message'} >{this.props.text}</div>;
         }
         return <div className={this.styleNameContainer} style={notificationStyle}>

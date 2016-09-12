@@ -54,6 +54,7 @@
                 target_lang: '${target}',
                 ownerIsMe: ${jobOwnerIsMe},
                 isAnonymousUser: ${isAnonymousUser},
+                userMail: '${userMail}',
                 time_to_edit_enabled: ${time_to_edit_enabled},
                 build_number: '${build_number}',
                 warningPollingInterval: '${warningPollingInterval}',
@@ -98,18 +99,28 @@
 
         <script tal:condition="true:isReview" type="text/javascript">
             config.review_password = '${review_password}';
-            config.overall_quality_class = '${overall_quality_class}';
-            config.quality_report_href = '${quality_report_href}';
+
         </script>
 
         <script tal:condition="true:review_improved" type="text/javascript">
+
           /*<![CDATA[*/
           // TODO: remove the nested one, should be nested on the client.
           config.lqa_nested_categories = '${lqa_categories}';
           config.lqa_flat_categories = '${lqa_flat_categories}';
 
-          config.project_type = '${project_type}'; // TODO: move this into project metadata namespace
+
           /*]]>*/
+
+        </script>
+
+        <script type="text/javascript">
+            /*<![CDATA[*/
+            config.overall_quality_class = '${overall_quality_class}';
+            config.quality_report_href = '${quality_report_href}';
+
+            config.project_type = '${project_type}'; // TODO: move this into project metadata namespace
+            /*]]>*/
 
         </script>
 
@@ -355,7 +366,6 @@
             <p>Howto layer to show a basic tutorial of the cattool when the first-time user open it.</p>
             <form action=""><input id="hideTutorial" type="checkbox" value="" />Do not display again </form>
         </div>
-        <script src="${basepath}public/js/lib/snapengage.js"></script>
 		<script type="text/javascript">
 		$( ".open-popup-tmx" ).click(function() {
   $( this ).hide();
@@ -457,9 +467,7 @@ $(window).resize(function() {
     <template id="tpl-taglock-customize" tal:condition="not:tagLockCustomizable">
     </template>
 <div class="offline_stuffs" ></div>
-<!-- Snapengage -->
-<script src="${basepath}public/js/lib/snapengage.js"></script>
-<!-- // Snapengage -->
+
 
 <tal:block  tal:repeat="js_source footer_js">
   <script type="text/javascript" tal:attributes="src js_source"></script>

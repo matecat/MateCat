@@ -18,7 +18,7 @@ inc/oauth-token-key.txt
 # Ignore artifacts
 public/css/app.css
 public/css/app.css.map
-public/css/upload-build.css
+public/css/*-build.css
 public/js/build
 
 # NodeJs stuff

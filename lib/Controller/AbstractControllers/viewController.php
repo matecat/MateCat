@@ -54,12 +54,7 @@ abstract class viewController extends controller {
      */
     protected $logged_user = false;
 
-    /**
-     * tell the children to set the template vars
-     *
-     * @return mixed
-     */
-    abstract function setTemplateVars();
+
 
     /**
      * Try to identify the browser of users
@@ -178,18 +173,18 @@ abstract class viewController extends controller {
         }
 
         //even if no login in required, if user data is present, pull it out
+        $this->logged_user = new Users_UserStruct();
         if ( !empty( $_SESSION[ 'cid' ] ) ){
-            $userSearch = new Users_UserStruct();
-            $userSearch->email = $_SESSION[ 'cid' ];
+            $this->logged_user->uid = $_SESSION[ 'uid' ];
+            $this->logged_user->email = $_SESSION[ 'cid' ];
 
             $userDao = new Users_UserDao(Database::obtain());
-            $userObject = $userDao->read($userSearch);
+            $userObject = $userDao->setCacheTTL( 3600 )->read( $this->logged_user ); // one hour cache
 
             /**
              * @var $userObject Users_UserStruct
              */
-            $userObject = $userObject[0];
-            $this->logged_user = $userObject;
+            $this->logged_user = $userObject[0];
         }
 
         if( $isAuthRequired  ) {
@@ -230,16 +225,7 @@ abstract class viewController extends controller {
         return true;
     }
 
-    /**
-     * Get Client Instance and retrieve authentication url
-     *
-     */
-    protected function generateAuthURL() {
 
-        $this->client  = OauthClient::getInstance()->getClient();
-        $this->authURL = $this->client->createAuthUrl();
-
-    }
 
     /**
      * Check user logged
@@ -264,7 +250,7 @@ abstract class viewController extends controller {
      */
     public function getLoginUserParams() {
         if ( $this->isLoggedIn() ){
-            return array( $_SESSION['uid'], $_SESSION['cid'] );
+            return array( $this->logged_user->getUid(), $this->logged_user->getEmail() );
         }
         return array( null, null );
     }
@@ -305,47 +291,6 @@ abstract class viewController extends controller {
 
         return 0;
     }
-    /**
-     *
-     * Set the variables for the browser support
-     *
-     */
-    private function setBrowserSupport() {
-        $browser_info = $this->getBrowser();
-        $this->supportedBrowser = $this->isSupportedWebBrowser($browser_info);
-        $this->userPlatform = strtolower( $browser_info[ 'platform' ] );
-    }
-    /**
-     * Create an instance of skeleton PHPTAL template
-     *
-     * @param $skeleton_file
-     *
-     */
-    protected function makeTemplate( $skeleton_file ) {
-        try {
-            $this->template                       = new PHPTALWithAppend( INIT::$TEMPLATE_ROOT . "/$skeleton_file" ); // create a new template object
-            $this->template->basepath             = INIT::$BASEURL;
-            $this->template->hostpath             = INIT::$HTTPHOST;
-            $this->template->supportedBrowser     = $this->supportedBrowser;
-            $this->template->platform             = $this->userPlatform;
-            $this->template->enabledBrowsers      = INIT::$ENABLED_BROWSERS;
-            $this->template->build_number         = INIT::$BUILD_NUMBER;
-            $this->template->use_compiled_assets  = INIT::$USE_COMPILED_ASSETS;
-
-            $this->template->maxFileSize          = INIT::$MAX_UPLOAD_FILE_SIZE;
-            $this->template->maxTMXFileSize       = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
-
-            ( INIT::$VOLUME_ANALYSIS_ENABLED ? $this->template->analysis_enabled = true : null );
-            $this->template->setOutputMode( PHPTAL::HTML5 );
-        } catch ( Exception $e ) {
-            echo "<pre>";
-            print_r( $e );
-            echo "\n\n\n";
-            print_r( $this->template );
-            echo "</pre>";
-            exit;
-        }
-    }
 
     /**
      * Return the content in the right format, it tell to the child class to execute template vars inflating
@@ -384,14 +329,23 @@ abstract class viewController extends controller {
             exit;
         }
 
+    }    /**
+     *
+     * Set the variables for the browser support
+     *
+     */
+    private function setBrowserSupport() {
+        $browser_info = $this->getBrowser();
+        $this->supportedBrowser = $this->isSupportedWebBrowser($browser_info);
+        $this->userPlatform = strtolower( $browser_info[ 'platform' ] );
     }
 
-    public static function isRevision(){
-        //TODO: IMPROVE
-        $_from_url   = parse_url( $_SERVER[ 'REQUEST_URI' ] );
-        $is_revision_url = strpos( $_from_url[ 'path' ], "/revise" ) === 0;
-        return $is_revision_url;
-    }
+    /**
+     * tell the children to set the template vars
+     *
+     * @return mixed
+     */
+    abstract function setTemplateVars();
 
     /**
      * @return Users_UserStruct
@@ -405,5 +359,53 @@ abstract class viewController extends controller {
      */
     public function getAuthUrl(){
         return $this->authURL;
+    }    public static function isRevision(){
+        //TODO: IMPROVE
+        $_from_url   = parse_url( $_SERVER[ 'REQUEST_URI' ] );
+        $is_revision_url = strpos( $_from_url[ 'path' ], "/revise" ) === 0;
+        return $is_revision_url;
+    }
+
+    /**
+     * Get Client Instance and retrieve authentication url
+     *
+     */
+    protected function generateAuthURL() {
+
+        $this->client  = OauthClient::getInstance()->getClient();
+        $this->authURL = $this->client->createAuthUrl();
+
+    }
+
+    /**
+     * Create an instance of skeleton PHPTAL template
+     *
+     * @param $skeleton_file
+     *
+     */
+    protected function makeTemplate( $skeleton_file ) {
+        try {
+            $this->template                       = new PHPTALWithAppend( INIT::$TEMPLATE_ROOT . "/$skeleton_file" ); // create a new template object
+            $this->template->basepath             = INIT::$BASEURL;
+            $this->template->hostpath             = INIT::$HTTPHOST;
+            $this->template->supportedBrowser     = $this->supportedBrowser;
+            $this->template->platform             = $this->userPlatform;
+            $this->template->enabledBrowsers      = INIT::$ENABLED_BROWSERS;
+            $this->template->build_number         = INIT::$BUILD_NUMBER;
+            $this->template->use_compiled_assets  = INIT::$USE_COMPILED_ASSETS;
+
+            $this->template->maxFileSize          = INIT::$MAX_UPLOAD_FILE_SIZE;
+            $this->template->maxTMXFileSize       = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
+
+            ( INIT::$VOLUME_ANALYSIS_ENABLED ? $this->template->analysis_enabled = true : null );
+            $this->template->setOutputMode( PHPTAL::HTML5 );
+        } catch ( Exception $e ) {
+            echo "<pre>";
+            print_r( $e );
+            echo "\n\n\n";
+            print_r( $this->template );
+            echo "</pre>";
+            exit;
+        }
     }
 }

@@ -914,11 +914,11 @@ $.extend(UI, {
 					UI.resetSearch();
 				}
 			}
-			if (e.which == 32) { // space
-				setTimeout(function() {
-					UI.saveInUndoStack('space');
-				}, 100);
-			}
+			// if (e.which == 32) { // space
+			// 	setTimeout(function() {
+			// 		UI.saveInUndoStack('space');
+			// 	}, 100);
+			// }
 
 			if (e.which == 13) { // return
 				if($('.tag-autocomplete').length) {
@@ -1361,13 +1361,12 @@ $.extend(UI, {
     }
 });
 
-if ( config.isReview ) {
-    $(document).on('ready', function() {
-        window.quality_report_btn_component = ReactDOM.render(
-            React.createElement( Review_QualityReportButton, {
-                vote                : config.overall_quality_class,
-                quality_report_href : config.quality_report_href
-            }), $('#quality-report-button')[0] );
+$(document).on('ready', function() {
+	window.quality_report_btn_component = ReactDOM.render(
+		React.createElement( Review_QualityReportButton, {
+			vote                : config.overall_quality_class,
+			quality_report_href : config.quality_report_href
+		}), $('#quality-report-button')[0] );
 
-    });
-}
+});
+

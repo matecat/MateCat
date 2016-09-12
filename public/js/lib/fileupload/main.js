@@ -341,13 +341,18 @@ $( function () {
     } ).bind( 'fileuploadadded fileuploaddestroyed', function ( e, data ) {
         if ( $( '.upload-table tr' ).length ) {
             $( '.upload-files' ).addClass( 'uploaded' );
+            if (APP.hideGDLink)
+                APP.hideGDLink();
         } else {
             $( '.upload-files' ).removeClass( 'uploaded' );
+            if (APP.showGDLink)
+                APP.showGDLink();
         }
     } ).bind( 'fileuploadfail', function ( e ) {
         if ( !($( '.upload-table tr' ).length > 1) ) $( '.upload-files' ).removeClass( 'uploaded' );
         UI.checkFailedConversionsNumber();
     } ).bind( 'fileuploadchange', function ( e ) {
+        $( '.upload-files' ).addClass( 'uploaded' );
         console.log( 'FIRE fileuploadchange' );
         UI.checkFailedConversionsNumber();
     } ).bind( 'fileuploaddestroyed', function ( e, data ) {

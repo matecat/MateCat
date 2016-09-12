@@ -142,8 +142,9 @@ APP.addGDriveFile = function(exportIds) {
 
 APP.displayGDriveFiles = function() {
     if( !$('#gdrive-files-list').is(":visible") ) {
-        $('#upload-files-list').hide();
+        $('#upload-files-list, .gdrive-addlink-container').hide();
         $('#gdrive-files-list').show();
+
         UI.enableAnalyze();
     }
 };
@@ -151,9 +152,17 @@ APP.displayGDriveFiles = function() {
 APP.hideGDriveFiles = function() {
     if( $('#gdrive-files-list').is(":visible") ) {
         $('#gdrive-files-list').hide();
-        $('#upload-files-list').show();
+        $('#upload-files-list, .gdrive-addlink-container').show();
         UI.disableAnalyze();
     }
+};
+
+APP.hideGDLink = function () {
+    $('.gdrive-addlink-container').hide();
+};
+
+APP.showGDLink = function () {
+    $('.gdrive-addlink-container').show();
 };
 
 $(document).ready( function() {

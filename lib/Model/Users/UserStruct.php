@@ -34,4 +34,27 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
         return $this->email ;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getUid() {
+        return $this->uid;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFirstName() {
+        return $this->first_name;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLastName() {
+        return $this->last_name;
+    }
+
+
+
 }

@@ -68,6 +68,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
                 break;
             case 'tmx_export_create_url' :
             case 'tmx_export_check_url' :
+            case 'tmx_export_email_url' :
                 $result_object = Engines_Results_MyMemory_ExportResponse::getInstance( $decoded );
                 break;
             case 'analyze_url':
@@ -408,7 +409,11 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
      * <br />invoke with the same parameters of createExport
      *
      * @see Engines_MyMemory::createExport
-     *
+     *,
+                $this->name,
+                $userMail,
+                $userName,
+                $userSurname
      * @param      $key
      * @param null $source
      * @param null $target
@@ -437,66 +442,77 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
      *
      * @param $key
      * @param $hashPass
+     * @param $isGlossary
      *
      * @return resource
      *
      * @throws Exception
      */
-    public function downloadExport( $key, $hashPass ) {
+    public function downloadExport( $key, $hashPass = null, $isGlossary = false ) {
 
         $parameters = array();
 
         $parameters[ 'key' ]  = trim( $key );
         $parameters[ 'pass' ] = trim( $hashPass );
 
-//        $this->call( 'tmx_export_download_url', $parameters );
+        if( $isGlossary ){
+            $url = $this->base_url . "/" . $this->glossary_export_relative_url . "?";
+        } else {
+            $url = $this->base_url . "/" . $this->tmx_export_download_url . "?";
+        }
 
-        $url = $this->base_url . "/" . $this->tmx_export_download_url . "?";
         $url .= http_build_query( $parameters );;
-
-//        $parsed_url = parse_url ( $this->url );
-        $parsed_url = parse_url( $url );
-
-        $isSSL = stripos( $parsed_url[ 'scheme' ], "https" ) !== false;
-
-//        if( $isSSL ){
-//            $fp = fsockopen( "ssl://" . $parsed_url['host'], 443, $errno, $err_str, 120 );
-//        } else {
-//            $fp = fsockopen( $parsed_url['host'], 80, $errno, $err_str, 120 );
-//        }
-//
-//        if (!$fp) {
-//            throw new Exception( "$err_str ($errno)" );
-//        }
-//
-//        $out = "GET " . $parsed_url['path'] . "?" . $parsed_url['query'] .  " HTTP/1.1\r\n";
-//        $out .= "Host: {$parsed_url['host']}\r\n";
-//        $out .= "Connection: Close\r\n\r\n";
-//
-//        Log::doLog( "Download TMX: " . $this->url );
-
-//        fwrite($fp, $out);
-
         $streamFileName = tempnam( "/tmp", "TMX" );
-
         $handle = fopen( $streamFileName, "w+" );
 
-        $ch = curl_init();
+        $mh       = new MultiCurlHandler();
+        $uniq_uid = uniqid( '', true );
+        $mh->createResource( $url,
+                $this->curl_additional_params + [ CURLOPT_FILE => $handle ], $uniq_uid
+        );
 
-        // set URL and other appropriate options
-//        curl_setopt( $ch, CURLOPT_URL, $this->url );
-        curl_setopt( $ch, CURLOPT_URL, $url );
-        curl_setopt( $ch, CURLOPT_HEADER, 0 );
-        curl_setopt( $ch, CURLOPT_FILE, $handle ); // write curl response to file
-        curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
-
-        // grab URL and pass it to the browser
-        curl_exec( $ch );
+        $mh->multiExec();
 
         rewind( $handle );
 
         return $handle;
 
+    }
+
+    /**
+     * Calls the MyMemory endpoint to send the TMX download URL to the user e-mail
+     *
+     * @param $key
+     * @param $name
+     * @param $userEmail
+     * @param $userName
+     * @param $userSurname
+     *
+     *
+     * @return Engines_Results_MyMemory_ExportResponse
+     * @throws Exception
+     *
+     */
+    public function emailExport( $key, $name, $userEmail, $userName, $userSurname ) {
+        $parameters = array();
+
+        $parameters[ 'key' ] = trim( $key );
+        $parameters[ 'user_email' ] = trim( $userEmail );
+        $parameters[ 'user_name' ] = trim( $userName ) . " " . trim( $userSurname );
+        ( !empty( $name ) ? $parameters[ 'zip_name' ] = $name : $parameters[ 'zip_name' ] = $key );
+        $parameters[ 'zip_name' ] = $parameters[ 'zip_name' ] . ".zip";
+
+        $this->call( 'tmx_export_email_url', $parameters );
+
+        /**
+         * $result Engines_Results_MyMemory_ExportResponse
+         */
+        if ( $this->result->responseStatus >= 400 ) {
+            throw new Exception( $this->result->error->message, $this->result->responseStatus );
+        }
+
+        Log::doLog('TMX exported to E-mail.');
+        return $this->result;
     }
 
     /*****************************************/
