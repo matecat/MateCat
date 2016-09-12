@@ -857,8 +857,8 @@ function eventFromReact(e) {
     return e.target.hasAttribute('data-reactid');
 }
 
-function hackSnapEngage( on ) {
-    var button = $( document ).find( '#SnapABug_Button' );
+function hackIntercomButton(on ) {
+    var button = $( document ).find( '.intercom-button' );
     if ( on ) {
         button.data( 'mbc-zindex', button.css( 'z-index' ) );
         button.css( 'z-index', -1 );

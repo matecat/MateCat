@@ -212,9 +212,10 @@ left: -5px;
   border: 1px solid #848689;
   font-size: 17px;
   color: #333;
-    display: block;
+    display: none;
 }
 .cattool #quality-report[data-vote=acceptable],
+.cattool #quality-report[data-vote=poor],
 .cattool #quality-report[data-vote=fail],
 .cattool.review #quality-report
 {

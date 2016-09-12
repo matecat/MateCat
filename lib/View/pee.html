@@ -1,17 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <!-- jQuery UI styles -->
-    <!--
-    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/themes/base/jquery-ui.css" id="theme"/>
-    -->
-
     <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>
     <link href="${basepath}public/css/libs/theme.bootstrap.css" rel="stylesheet" type="text/css"/>
     <link rel="stylesheet" href="${basepath}public/css/manage.css?build=${build_number}"/>
     <link rel="stylesheet" href="${basepath}public/js/lib/colorbox/colorbox.css?build=${build_number}"/>
-    <!--<link href="${basepath}public/css/libs/theme.blue.css" rel="stylesheet" type="text/css"/>-->
-    <!--<link rel="stylesheet" href="http://mottie.github.io/tablesorter/css/theme.blue.css"/>-->
+    <link href="${basepath}public/css/components-build.css?build=${build_number}" rel="stylesheet" type="text/css"/>
+
     <style>
         header {
             border-bottom: 1px solid #5C5C5C;
@@ -97,6 +92,9 @@
 
     <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
 
+    <script src="${basepath}public/js/build/react.js?build=${build_number}"></script>
+    <script src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
+
     <div metal:use-macro="${php: INIT::$ROOT}/public/holidays/holidays.html/upload_holidays"/>
 
 </head>
@@ -142,7 +140,7 @@
     <script type="text/javascript">
 
         /*<![CDATA[*/
-        var langStats = ${dataLangStats}
+        var langStats = ${dataLangStats};
         /*]]>*/
 
     </script>
@@ -167,6 +165,7 @@
 
 </body>
 
+<div class="notifications-wrapper"></div>
 <footer>
     <div class="wrapper">
         <ul class="external-links">
@@ -443,9 +442,7 @@
 </script>
 
 <div metal:use-macro="cookiebanner.html/cookieBanner"/>
-<!-- SnapEngage -->
-<script src="${basepath}public/js/lib/snapengage.js"></script>
-<!-- // SnapEngage -->
+
 <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_upload"/>
 
 </body>

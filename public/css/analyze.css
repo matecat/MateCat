@@ -867,8 +867,10 @@ top: 25%;
 		padding: 4px;
 	}
 	.wrapper {
-  width: 98%;
+  		width: 98%;
+	}
 }
+
 @media only screen and (max-width : 1200px) {
 
 	.tablestats th {

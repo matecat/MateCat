@@ -48,6 +48,10 @@ module.exports = function(grunt) {
         cssBase + 'popup.css',
         cssBase + 'sass/notifications.scss'
     ];
+    var cssWatchComponents = [
+        cssBase + 'sass/variables.scss',
+        cssBase + 'sass/notifications.scss'
+    ];
 
     var es2015Preset = require('babel-preset-es2015');
     var reactPreset = require('babel-preset-react');
@@ -307,7 +311,15 @@ module.exports = function(grunt) {
                     interrupt: true,
                     livereload : true
                 }
-            }
+            },
+            cssComponents: {
+                files:  cssWatchComponents,
+                tasks: ['sass:distComponents'],
+                options: {
+                    interrupt: true,
+                    livereload : true
+                }
+            },
         },
         sass: {
             distCattol: {
@@ -329,6 +341,16 @@ module.exports = function(grunt) {
                     cssBase + 'sass/upload-main.scss'
                 ],
                 dest: cssBase + 'upload-build.css'
+            },
+            distComponents: {
+                options : {
+                    sourceMap : false,
+                    includePaths: [ cssBase, cssBase + 'libs/' ]
+                },
+                src: [
+                    cssBase + 'sass/components-main.scss'
+                ],
+                dest: cssBase + 'components-build.css'
             }
         },
         jshint: {

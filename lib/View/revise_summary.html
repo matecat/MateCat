@@ -9,6 +9,7 @@
     <link href="../../public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css"/>
     <link rel="stylesheet" href="../../public/css/manage.css?build=${build_number}"/>
     <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
+    <link href="${basepath}public/css/components-build.css?build=${build_number}" rel="stylesheet" type="text/css"/>
 
     <script type="text/javascript">
         var config = {
@@ -21,6 +22,9 @@
     <script type="text/javascript" src="${basepath}public/js/common.js?build=${build_number}"></script>
     <script type="text/javascript" src="${basepath}public/js/editlog.js?build=${build_number}"></script>
     <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
+
+    <script src="${basepath}public/js/build/react.js?build=${build_number}"></script>
+    <script src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
 </head>
 
 <body class="reviselog" tal:condition="not:supportedBrowser">
@@ -234,7 +238,7 @@
     </div>
 </div>
 
-
+<div class="notifications-wrapper"></div>
 <footer>
     <div class="wrapper">
 
@@ -341,7 +345,7 @@
 
     } );
 </script>
-<script src="${basepath}public/js/lib/snapengage.js"></script>
+<div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_analyze"/>
 
 <div metal:use-macro="cookiebanner.html/cookieBanner"/>
 <div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
