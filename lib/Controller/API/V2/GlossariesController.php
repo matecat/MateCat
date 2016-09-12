@@ -14,6 +14,7 @@ use TMSService, Upload, Exception, Log;
 use PHPExcel_IOFactory;
 use PHPExcel_Writer_CSV;
 use Utils, INIT;
+use ActivityLog\ActivityLogStruct ;
 
 class GlossariesController extends KleinController {
 
@@ -119,65 +120,51 @@ class GlossariesController extends KleinController {
 
     }
 
-    //TODO serve l'endpoint corretto di MyMemory
     public function download() {
 
-        //cast response to KleinFileStreamResponse to override file method
-        $responseOverride = new KleinFileStreamResponse(
-                $this->response->body(),
-                $this->response->code()
-        );
-
-        $reflectionCass   = new ReflectionClass( $this->response );
-        $cookiesProperty   = $reflectionCass->getProperty( 'cookies' );
-        $cookiesProperty->setAccessible( true );
-        $cookiesVal = $cookiesProperty->getValue( 'cookies' );
-        $responseOverride->cookie( $cookiesVal );
-
-        $headersProperty   = $reflectionCass->getProperty( 'headers' );
-        $headersProperty->setAccessible( true );
-        $headersVal = $headersProperty->getValue( 'headers' );
-        $responseOverride->headers( $headersVal );
-
-        $this->response = $responseOverride;
-
         try {
-
-            //TODO change with something
             $filePointer = $this->TMService->downloadGlossary();
 
             // TODO: Not used at moment, will be enabled when will be built the Log Activity Keys
-            /*
-                $activity             = new ActivityLogStruct();
-                $activity->id_job     = $this->id_job;
-                $activity->action     = ActivityLogStruct::DOWNLOAD_KEY_TMX;
-                $activity->ip         = Utils::getRealIpAddr();
-                $activity->uid        = $this->uid;
-                $activity->event_date = date( 'Y-m-d H:i:s' );
-                Activity::save( $activity );
-            */
+            // $this->recordActivity();
 
         } catch( Exception $e ){
-
-            $r = "<pre>";
-            $r .= print_r( $e->getMessage(), true );
-            $r .= print_r( $e->getTraceAsString(), true );
-            $r .= "\n\n";
-            $r .=  " - API REQUEST URI: " . print_r( @$_SERVER['REQUEST_URI'], true ) . "\n";
-            $r .=  " - API REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
-            $r .= "\n\n\n";
-            $r .= "</pre>";
-            Log::$fileName = 'php_errors.txt';
-            Log::doLog( $r );
-            Utils::sendErrMailReport( $r, "API: Download Glossary Error: " . $e->getMessage() );
-            $this->unlockToken();
+            $this->logDownloadError($e);
+            $this->unlockDownloadToken();
             $this->setErrorResponse( $e->getCode(), $e->getMessage() );
             return;
-
         }
 
-        $this->response->file( $filePointer, $this->tm_key . "_" . ( new DateTime() )->format( 'YmdHi' ) . ".zip", $this );
+        $this->unlockDownloadToken();
 
+        $fileStream = new KleinResponseFileStream( $this->response );
+        $fileName = $this->tm_key . "_" . ( new DateTime() )->format( 'YmdHi' ) . ".zip"  ;
+        $fileStream->streamFileFromPointer( $filePointer, $fileName );
+    }
+
+    protected function logDownloadError(Exception $e) {
+        $r = "<pre>";
+        $r .= print_r( $e->getMessage(), true );
+        $r .= print_r( $e->getTraceAsString(), true );
+        $r .= "\n\n";
+        $r .=  " - API REQUEST URI: " . print_r( @$_SERVER['REQUEST_URI'], true ) . "\n";
+        $r .=  " - API REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
+        $r .= "\n\n\n";
+        $r .= "</pre>";
+        Log::$fileName = 'php_errors.txt';
+        Log::doLog( $r );
+        Utils::sendErrMailReport( $r, "API: Download Glossary Error: " . $e->getMessage() );
+
+    }
+
+    protected function recordDownloadActivity() {
+        $activity             = new ActivityLogStruct();
+        $activity->id_job     = $this->id_job;
+        $activity->action     = ActivityLogStruct::DOWNLOAD_KEY_TMX;
+        $activity->ip         = Utils::getRealIpAddr();
+        $activity->uid        = $this->uid;
+        $activity->event_date = date( 'Y-m-d H:i:s' );
+        Activity::save( $activity );
     }
 
     protected function setErrorResponse( $errCode, $message ) {
@@ -229,22 +216,7 @@ class GlossariesController extends KleinController {
 
     }
 
-    public function unlockToken( $tokenContent = null ) {
 
-        if ( isset( $this->downloadToken ) && !empty( $this->downloadToken ) ) {
-            setcookie(
-                    $this->downloadToken,
-                    ( empty( $tokenContent ) ? json_encode( array(
-                            "code"    => 0,
-                            "message" => "Download complete."
-                    ) ) : json_encode( $tokenContent ) ),
-                    2147483647,            // expires January 1, 2038
-                    "/",
-                    $_SERVER[ 'HTTP_HOST' ]
-                );
-            $this->downloadToken = null;
-        }
 
-    }
 
 }
