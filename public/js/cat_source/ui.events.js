@@ -162,24 +162,7 @@ $.extend(UI, {
 				tab = 'alternatives';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');
 			}
-		}).on('keydown', '.editor .editarea', 'shift+return', function(e) {
-            UI.handleReturn(e);
-        }).on('keydown', '.editor .editarea', 'return', function(e) {
-            e.preventDefault();
-        	UI.handleReturn(e);
-		}).on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
-            if(!UI.hiddenTextEnabled) return;
-			e.preventDefault();
-            UI.editarea.find('.lastInserted').removeClass('lastInserted');
-
-			var node = document.createElement("span");
-			node.setAttribute('class', 'marker monad nbsp-marker lastInserted ' + config.nbspPlaceholderClass);
-			node.setAttribute('contenteditable', 'false');
-			node.textContent = htmlDecode("&nbsp;");
-			insertNodeAtCursor(node);
-			UI.unnestMarkers();
-
-        });
+		});
 
 		$("body").bind('keydown', 'Ctrl+c', function() {
 			UI.tagSelection = false;
@@ -298,31 +281,7 @@ $.extend(UI, {
 			location.reload(true);
 		}).on('click', '.tag-autocomplete li', function(e) {
 			e.preventDefault();
-
-            UI.editarea.html(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
-
-            UI.editarea.find('.rangySelectionBoundary').before(UI.editarea.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
-
-            UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1'));
-
-            UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
-
-            UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
-
-            UI.editarea.html(UI.editarea.html().replace(/(<span class="tag-autocomplete-endcursor"\><\/span><span class="undoCursorPlaceholder monad" contenteditable="false"><\/span>)&lt;/gi, '$1'));
-
-			saveSelection();
-			if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
-				setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
-				saveSelection();
-			}
-			var ph = $('.rangySelectionBoundary', UI.editarea)[0].outerHTML;
-			$('.rangySelectionBoundary', UI.editarea).remove();
-			$('.tag-autocomplete-endcursor', UI.editarea).after(ph);
-			$('.tag-autocomplete-endcursor').before(htmlEncode($(this).text()));
-			restoreSelection();
-			UI.closeTagAutocompletePanel();
-			UI.currentSegmentQA();
+			UI.autoCompleteTagClick(this);
 		}).on('click', '.modal.survey .x-popup', function() {
 			UI.surveyDisplayed = true;
 			if(typeof $.cookie('surveyedJobs') != 'undefined') {
@@ -623,6 +582,9 @@ $.extend(UI, {
 			restoreSelection();
         }).on('click', '.footerSwitcher', function(e) {
             UI.switchFooter();
+			/**
+			 * Start EditArea Events
+			 */
 		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.mac, function(e) {
 			e.preventDefault();
 			UI.preOpenConcordance();
@@ -630,53 +592,34 @@ $.extend(UI, {
 			e.preventDefault();
 			UI.preOpenConcordance();
         }).on('keypress', '.editor .editarea', function(e) {
-
-			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
-				if($('.tag-autocomplete').length) {
-					e.preventDefault();
-					return false;
-				}
-				UI.openTagAutocompletePanel();
-            }
-			if((e.which == 62)&&(UI.taglockEnabled)) { // closing tag sign
-				if($('.tag-autocomplete').length) {
-					e.preventDefault();
-					return false;
-				}
-			}
-			setTimeout(function() {
-				if($('.tag-autocomplete').length) {
-                    tempStr = UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi);
-                    UI.stripAngular = (!tempStr)? false : (!tempStr.length)? false : true;
-
-					if(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) !== null) {
-						UI.editarea.html(UI.editarea.html().replace(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi, '&lt;<span class="tag-autocomplete-endcursor"><\/span>'));
-					}
-					UI.checkAutocompleteTags();
-				}
-			}, 50);
+			UI.keyPressEditAreaEventHandler(e);
 		}).on('keydown', '.editor .editarea', function(e) {
-
             UI.keydownEditAreaEventHandler(e)
-
 		}).on('input', '.editarea', function( e ) { //inputineditarea
-			UI.currentSegment.addClass('modified').removeClass('waiting_for_check_result');
-			UI.currentSegment.data('modified', true);
-			UI.currentSegment.trigger('modified');
+			UI.inputEditAreaEventHandler(e);
+		}).on('click', '.editor .editarea, .editor .source', function() {
+			$('.selected', $(this)).removeClass('selected');
+			UI.currentSelectedText = false;
+			UI.currentSearchInTarget = false;
+		}).on('keydown', '.editor .editarea', 'shift+return', function(e) {
+				UI.handleReturn(e);
+		}).on('keydown', '.editor .editarea', 'return', function(e) {
+			e.preventDefault();
+			UI.handleReturn(e);
+		}).on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
+			if(!UI.hiddenTextEnabled) return;
+			e.preventDefault();
+			UI.editarea.find('.lastInserted').removeClass('lastInserted');
 
-			if ( UI.hasSourceOrTargetTags( e.target ) ) {
-				UI.currentSegment.addClass( 'hasTagsToggle' );
-			} else {
-				UI.currentSegment.removeClass( 'hasTagsToggle' );
-			}
-
-			if ( UI.hasMissingTargetTags( $(e.target).closest('section') ) ) {
-				UI.currentSegment.addClass( 'hasTagsAutofill' );
-			} else {
-				UI.currentSegment.removeClass( 'hasTagsAutofill' );
-			}
-
-			UI.registerQACheck();
+			var node = document.createElement("span");
+			node.setAttribute('class', 'marker monad nbsp-marker lastInserted ' + config.nbspPlaceholderClass);
+			node.setAttribute('contenteditable', 'false');
+			node.textContent = htmlDecode("&nbsp;");
+			insertNodeAtCursor(node);
+			UI.unnestMarkers();
+			/**
+			 * Finish editArea Events
+			 */
         }).on('click', '.editor .source .locked,.editor .editarea .locked', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
@@ -699,11 +642,7 @@ $.extend(UI, {
 		}).on('dragstart', '.editor .editarea .locked', function() {
             // To stop the drag in tags elements
             return false;
-		}).on('click', '.editor .editarea, .editor .source', function() {
-			$('.selected', $(this)).removeClass('selected');
-			UI.currentSelectedText = false;
-			UI.currentSearchInTarget = false;
-        }).on('click', 'a.translated, a.next-untranslated', function(e) {
+		}).on('click', 'a.translated, a.next-untranslated', function(e) {
 			UI.clickOnTranslatedButton(e, this);
 		}).on('click', 'a.guesstags', function(e) {
 			// Tag Projection: handle click on "GuesssTags" button, retrieve the translation and place it
@@ -1268,7 +1207,79 @@ $.extend(UI, {
 			(code == 222)) { // apostrophe
 			UI.spellCheck();
 		}
+	},
+	keyPressEditAreaEventHandler: function (e) {
+		if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
+			if($('.tag-autocomplete').length) {
+				e.preventDefault();
+				return false;
+			}
+			UI.openTagAutocompletePanel();
+		}
+		if((e.which == 62)&&(UI.taglockEnabled)) { // closing tag sign
+			if($('.tag-autocomplete').length) {
+				e.preventDefault();
+				return false;
+			}
+		}
+		setTimeout(function() {
+			if($('.tag-autocomplete').length) {
+				tempStr = UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi);
+				UI.stripAngular = (!tempStr)? false : (!tempStr.length)? false : true;
+
+				if(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) !== null) {
+					UI.editarea.html(UI.editarea.html().replace(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi, '&lt;<span class="tag-autocomplete-endcursor"><\/span>'));
+				}
+				UI.checkAutocompleteTags();
+			}
+		}, 50);
+	},
+	inputEditAreaEventHandler: function (e) {
+		UI.currentSegment.addClass('modified').removeClass('waiting_for_check_result');
+		UI.currentSegment.data('modified', true);
+		UI.currentSegment.trigger('modified');
+
+		if ( UI.hasSourceOrTargetTags( e.target ) ) {
+			UI.currentSegment.addClass( 'hasTagsToggle' );
+		} else {
+			UI.currentSegment.removeClass( 'hasTagsToggle' );
+		}
+
+		if ( UI.hasMissingTargetTags( $(e.target).closest('section') ) ) {
+			UI.currentSegment.addClass( 'hasTagsAutofill' );
+		} else {
+			UI.currentSegment.removeClass( 'hasTagsAutofill' );
+		}
+
+		UI.registerQACheck();
+	},
+	autoCompleteTagClick: function (elem) {
+		var text = UI.editarea.html();
+		text = text.replace(/<span class="tag-autocomplete-endcursor"><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>');
+		UI.editarea.html(text);
+
+		UI.editarea.find('.rangySelectionBoundary').before(UI.editarea.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
+		text = UI.editarea.html();
+		text = text.replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1')
+			.replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1')
+			.replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1')
+			.replace(/(<span class="tag-autocomplete-endcursor"\><\/span><span class="undoCursorPlaceholder monad" contenteditable="false"><\/span>)&lt;/gi, '$1');
+
+		UI.editarea.html(text);
+		saveSelection();
+		if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
+			setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
+			saveSelection();
+		}
+		var ph = $('.rangySelectionBoundary', UI.editarea)[0].outerHTML;
+		$('.rangySelectionBoundary', UI.editarea).remove();
+		$('.tag-autocomplete-endcursor', UI.editarea).after(ph);
+		$('.tag-autocomplete-endcursor').before(htmlEncode($(elem).text()));
+		restoreSelection();
+		UI.closeTagAutocompletePanel();
+		UI.currentSegmentQA();
 	}
+
 });
 
 $(document).on('ready', function() {
