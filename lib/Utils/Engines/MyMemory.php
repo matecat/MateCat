@@ -482,11 +482,10 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         $parameters[ 'key' ]  = trim( $key );
         $parameters[ 'pass' ] = trim( $hashPass );
 
-        if( $isGlossary ){
-            $url = $this->base_url . "/" . $this->glossary_export_relative_url . "?";
-        } else {
-            $url = $this->base_url . "/" . $this->tmx_export_download_url . "?";
-        }
+        $method = $isGlossary ? $this->glossary_export_relative_url : $this->tmx_export_download_url ;
+        if ( empty( $method ) ) throw new Exception('Download method not found');
+
+        $url = $this->base_url . "/" . $method . "?";
 
         $url .= http_build_query( $parameters );;
         $streamFileName = tempnam( "/tmp", "TMX" );

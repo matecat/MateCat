@@ -2087,7 +2087,7 @@ body.rtl-target .editor .editarea span
 	background: linear-gradient(top,  #f6f6f6,  #e2e3e5);
 }
 .wrap {
-    display: table;
+    /*display: table;*/
 	float:left;
     width: 99%;
 	height:100%;
