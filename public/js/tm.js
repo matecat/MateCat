@@ -1346,13 +1346,15 @@
         DropDown: function(el){
             this.initEvents = function () {
                 var obj = this;
-                obj.dd.on( 'click', function ( event ) {
+                var fun = function ( event ) {
                     $( this ).toggleClass( 'activeMenu' );
                     event.preventDefault();
                     if($( this ).hasClass( 'activeMenu' )) {
                         event.stopPropagation();
                     }
-                } );
+                };
+                obj.dd.off('click');
+                obj.dd.on( 'click', fun);
             };
             this.dd = el;
             this.initEvents();
