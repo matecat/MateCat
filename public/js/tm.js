@@ -4,6 +4,15 @@
  Loaded by cattool and upload page.
  */
 (function($, undefined) {
+
+    function isVisible($el) {
+        var winTop = $(window).scrollTop();
+        var winBottom = winTop + $(window).height();
+        var elTop = $el.offset().top;
+        var elBottom = elTop + $el.height();
+        return ((elBottom<= winBottom) && (elTop >= winTop));
+    }
+
     $.extend(UI, {
 
         initTM: function() {
@@ -126,6 +135,7 @@
                 $(this).parents('td.uploadfile').slideToggle(function () {
                     $(this).remove();
                 });
+                UI.hideAllBoxOnTables();
 
             }).on('mousedown', '.addtmx:not(.disabled)', function(e) {
                 e.preventDefault();
@@ -228,11 +238,15 @@
 
             }).on('click', '.mgmt-table-mt tr .action .deleteMT', function() {
 
-                $('.mgmt-table-mt .tm-warning-message').html('Do you really want to delete this MT? <a href="#" class="continueDeletingMT" data-id="' + $(this).parents('tr').attr('data-id') + '">Continue</a>').show();
+                $('.mgmt-table-mt .tm-warning-message').html('Do you really want to delete this MT? <a href="#" class="continueDeletingMT" data-id="' + $(this).parents('tr').attr('data-id') + '">Continue</a> ' +
+                    '  <a class="cancelDeletingMT" style="cursor: pointer;">Cancel</a>').show();
 
             }).on('click', '.continueDeletingMT', function(e){
                 e.preventDefault();
                 UI.deleteMT($('.mgmt-table-mt table.mgmt-mt tr[data-id="' + $(this).attr('data-id') + '"] .deleteMT'));
+                $('.mgmt-table-mt .tm-warning-message').empty().hide();
+            }).on('click', '.cancelDeletingMT', function(e){
+                e.preventDefault();
                 $('.mgmt-table-mt .tm-warning-message').empty().hide();
             }).on('click', 'a.usetm', function() {
                 UI.useTM(this);
@@ -277,8 +291,24 @@
             }).on('mousedown', '.mgmt-tm .canceladd-export-tmx', function(e){
                 e.preventDefault();
                 UI.closeExportTmx($(this).closest('tr'));
-            }).on('mousedown', '.mgmt-tm .deleteTM', function(){
-                UI.deleteTM($(this));
+            }).on('mousedown', '.mgmt-tm .deleteTM', function(e){
+                e.preventDefault();
+                UI.showDeleteTmMessage(this);
+                // UI.deleteTM($(this));
+            });
+            $(".popup-tm.slide-panel").on("scroll", function(){
+                if (!isVisible($(".active-tm-container h3"))) {
+                    $('.active-tm-container .notification-message').addClass('fixed-msg');
+                }
+                else {
+                    $('.active-tm-container .notification-message').removeClass('fixed-msg');
+                }
+                if (!isVisible($(".inactive-tm-container h3"))) {
+                    $('.inactive-tm-container .notification-message').addClass('fixed-msg');
+                }
+                else {
+                    $('.inactive-tm-container .notification-message').removeClass('fixed-msg');
+                }
             });
 
             // script per filtrare il contenuto dinamicamente, da qui: http://www.datatables.net
@@ -487,14 +517,14 @@
         },
         showErrorOnKeyInput: function (message) {
             if (message) {
-                $('.mgmt-container .tm-error-message').html(message).show();
+                this.showErrorOnActiveTMTable(message);
             }
             $('#activetm tr.new').addClass('badkey');
             UI.checkTMAddAvailability(); //some enable/disable stuffs
         },
         removeErrorOnKeyInput: function () {
 
-            $('.mgmt-container .tm-error-message').text('').hide();
+            this.hideAllBoxOnTables();
             $('#activetm tr.new').removeClass('badkey');
             UI.checkTMAddAvailability();
         },
@@ -512,13 +542,13 @@
             var w = ($(panel).find('.w').is(':checked'))? 1 : 0;
             if(!r && !w) {
                 $('#activetm tr.new').addClass('badgrants');
-                $(panel).find('.action .error .tm-error-grants').text('Either "Lookup" or "Update" must be checked').show();
+                UI.showErrorOnActiveTMTable('Either "Lookup" or "Update" must be checked');
                 UI.checkTMAddAvailability();
 
                 return false;
             } else {
+                UI.hideAllBoxOnTables();
                 $('#activetm tr.new').removeClass('badgrants');
-                $(panel).find('.action .error .tm-error-grants').text('').hide();
                 UI.checkTMAddAvailability();
 
                 return true;
@@ -715,12 +745,12 @@
             $('#activetm .edit-desc').removeAttr('contenteditable');
             $('#activetm td.action .addtmx').removeClass('disabled');
             $("#activetm tr.new").hide();
+            $("tr.tm-key-deleting").removeClass('tm-key-deleting');
             $("#activetm tr.new .addtmxfile, #activetm tr.new .addtmxfile .addglossaryfile").removeClass('disabled');
             $(".mgmt-table-tm .add-tm").show();
             UI.clearTMUploadPanel();
             UI.clearAddTMRow();
-            $('.mgmt-container .tm-error-message').hide();
-            $('.mgmt-container .tm-warning-message').hide();
+            UI.hideAllBoxOnTables();
         },
 
         fileUpload: function(form, action_url, div_id, tmName, type) {
@@ -812,11 +842,12 @@
                         UI.pollForUploadProgress(Key, fileName, TRcaller, type);
                     }, 3000);
                 } else {
-                    console.log('error');
+                    // console.log('error');
                     TRcaller.removeClass('startUploading');
                     $(TRcaller).find('.addtmxfile, .addglossaryfile').hide();
                     UI.UploadIframeId.remove();
-                    $(TRcaller).find('.upload-file-msg-error').text(msg.errors[0].message).show();
+                    $(TRcaller).find('.upload-file-msg-error').text('Error').show();
+                    UI.showErrorOnActiveTMTable(msg.errors[0].message);
                 }
             } else {
                 setTimeout(function() {
@@ -858,7 +889,8 @@
 
                     if(d.errors.length) {
                         $(TRcaller).find('.addtmxfile, .addglossaryfile').hide();
-                        $(TRcaller).find('.upload-file-msg-error').text(d.errors[0].message).show();
+                        $(TRcaller).find('.upload-file-msg-error').text("Error").show();
+                        UI.showErrorOnActiveTMTable(d.errors[0].message);
                         UI.UploadIframeId.remove();
                     } else {
                         $(TRcaller).find('.addglossaryfile, .canceladdglossary, .addtmxfile, .canceladdtmx').hide();
@@ -977,27 +1009,20 @@
                     data: data
                 },
                 error: function() {
-
-                    console.log('Error saving TM data!!');
-
-                    $('.tm-error-message').text('There was an error saving your data. Please retry!').show();
+                    UI.showErrorOnActiveTMTable('There was an error saving your data. Please retry!');
                     $('.popup-tm').removeClass('saving');
 
                 },
                 success: function(d) {
                     $('.popup-tm').removeClass('saving');
-
+                    UI.hideAllBoxOnTables();
                     if(d.errors.length) {
-                        $('.tm-error-message').text('There was an error saving your data. Please retry!').show();
-                    } else {
-                        console.log('TM data saved!!');
-
+                        UI.showErrorOnActiveTMTable('There was an error saving your data. Please retry!');
                     }
                 }
             });
         },
         saveTMdescription: function (field) {
-            console.log(field);
             var tr = field.parents('tr').first();
 
             APP.doRequest({
@@ -1008,16 +1033,16 @@
                     description: field.text()
                 },
                 error: function() {
-                    console.log('Error saving TM description!!');
-                    APP.showMessage({msg: 'There was an error saving your description. Please retry!'});
+                    UI.showErrorOnActiveTMTable('There was an error saving your description. Please retry!');
+                    // APP.showMessage({msg: 'There was an error saving your description. Please retry!'});
                     $('.popup-tm').removeClass('saving');
                 },
                 success: function(d) {
+                    UI.hideAllBoxOnTables();
                     $('.popup-tm').removeClass('saving');
                     if(d.errors.length) {
-                        APP.showMessage({msg: d.errors[0].message});
-                    } else {
-                        console.log('TM description saved!!');
+                        UI.showErrorOnActiveTMTable(d.errors[0].message);
+                        // APP.showMessage({msg: d.errors[0].message});
                     }
                 }
             });
@@ -1032,15 +1057,16 @@
                     description: desc
                 },
                 error: function() {
-                    console.log('Error saving TM key!');
+                    UI.showErrorOnActiveTMTable('There was an error saving your data. Please retry!');
                     $('.popup-tm').removeClass('saving');
                 },
                 success: function(d) {
                     $('.popup-tm').removeClass('saving');
+                    UI.hideAllBoxOnTables();
                     if(d.errors.length) {
+                        UI.showErrorOnActiveTMTable(d.errors[0].message);
 //                    APP.showMessage({msg: d.errors[0].message});
                     } else {
-                        console.log('TM key saved!!');
                         UI.clearTMUploadPanel();
                     }
                 }
@@ -1160,6 +1186,44 @@
             iFrameDownload.contents().find( "#" + formID ).submit();
 
         },
+        showDeleteTmMessage: function (button) {
+            clearTimeout(this.timeoutDeleteKey);
+            $("tr.tm-key-deleting").removeClass('tm-key-deleting');
+            var message = 'Do you really want to delete the key XXX? <a class="confirm-tm-key-delete" style="cursor: pointer">Continue</a>   ' +
+                '<a class="cancel-tm-key-delete" style="cursor: pointer">Cancel</a>';
+            var elem = $(button).closest("table");
+            var tr = $(button).closest("tr");
+            tr.addClass("tm-key-deleting");
+            var key = tr.find('.privatekey').text();
+            message = message.replace('XXX', key);
+            if (elem.attr("id") === "activetm") {
+                UI.showWarningOnActiveTMTable(message);
+            } else {
+                UI.showWarningOnInactiveTmTable(message);
+            }
+            var removeListeners = function () {
+                $('.confirm-tm-key-delete, .cancel-tm-key-delete').off('click');
+                clearTimeout(this.timeoutDeleteKey);
+            };
+            $('.confirm-tm-key-delete').off('click');
+            $('.confirm-tm-key-delete').on('click', function (e) {
+                e.preventDefault();
+                UI.deleteTM(button);
+                UI.hideAllBoxOnTables();
+                removeListeners();
+            });
+            $('.cancel-tm-key-delete').off('click');
+            $('.cancel-tm-key-delete').on('click', function (e) {
+                e.preventDefault();
+                UI.hideAllBoxOnTables();
+                $("tr.tm-key-deleting").removeClass('tm-key-deleting');
+                removeListeners();
+            });
+            this.timeoutDeleteKey = setTimeout(function () {
+                $('.cancel-tm-key-delete').click();
+                tr.removeClass('tm-key-deleting');
+            }, 5000)
+        },
         deleteTM: function (button) {
             tr = $(button).parents('tr').first();
             $(tr).fadeOut("normal", function() {
@@ -1172,10 +1236,11 @@
                     key: tr.find('.privatekey').text()
                 },
                 error: function() {
-                    console.log('Error deleting TM!!');
+                    UI.showErrorOnActiveTMTable('There was an error saving your data. Please retry!');
+                    // console.log('Error deleting TM!!');
                 },
                 success: function(d) {
-
+                    UI.hideAllBoxOnTables();
                 }
             });
         },
@@ -1189,10 +1254,11 @@
                 },
                 context: id,
                 error: function() {
-                    console.log('error');
+                    $(".mgmt-table-mt .tm-error-message").text("There was an error saving your data. Please retry!").show()
                 },
                 success: function(d) {
-                    console.log('success');
+                    // console.log('success');
+                    UI.hideAllBoxOnTables();
                     $('.mgmt-table-mt tr[data-id=' + this + ']').remove();
                     $('#mt_engine option[value=' + this + ']').remove();
                     if(!$('#mt_engine option[selected=selected]').length) $('#mt_engine option[value=0]').attr('selected', 'selected');
@@ -1433,7 +1499,6 @@
         copyNewTMKey: function (key) {
             $('#new-tm-key').val(key);
             $('#activetm tr.new').removeClass('badkey');
-            $('#activetm tr.new .error .tm-error-key').text('').hide();
             UI.checkTMAddAvailability();
         },
         openExportTmx: function (elem) {
@@ -1445,13 +1510,13 @@
                 '<input type="email" required class="email-export-tmx mgmt-input" value="' + config.userMail + '"/>' +
                 '<span class="uploadloader"></span>'+
                 '<span class="email-export-tmx-email-sent">Request submitted</span>' +
-                '<span class="email-export-tmx-email-error">We got an error,</br> please contact support</span>' +
                 '<a class="pull-right btn-ok export-tmx-button">' +
                     '<span class="text export-tmx-button-label">Confirm</span>' +
                 '</a>' +
                 '<a class="pull-right btn-grey canceladd-export-tmx">' +
                     '<span class="text"></span>'+
                 '</a>' +
+                '<span class="email-export-tmx-email-error">We got an error,</br> please contact support</span>' +
                 '</td>';
 
             $(elem).parents('tr').append(exportDiv);
@@ -1546,6 +1611,32 @@
 
             $(elem).parents('tr').append(nr);
             $(elem).parents('tr').find('.uploadfile').slideToggle();
-        }
+        },
+        showErrorOnActiveTMTable: function (message) {
+            $('.mgmt-container .active-tm-container .tm-error-message').html(message).fadeIn(100);
+        },
+        showErrorOnInactiveTmTable: function (message) {
+            $('.mgmt-container .inactive-tm-container .tm-error-message').html(message).fadeIn(100);
+        },
+        showWarningOnActiveTMTable: function (message) {
+            $('.mgmt-container .active-tm-container .tm-warning-message').html(message).fadeIn(100);
+        },
+        showWarningOnInactiveTmTable: function (message) {
+            $('.mgmt-container .inactive-tm-container .tm-warning-message').html(message).fadeIn(100);
+        },
+        showSuccessOnActiveTMTable: function (message) {
+            $('.mgmt-container .active-tm-container .tm-success-message').html(message).fadeIn(100);
+        },
+        showSuccessOnInactiveTmTable: function (message) {
+            $('.mgmt-container .inactive-tm-container .tm-success-message').html(message).fadeIn(100);
+        },
+        hideAllBoxOnTables: function () {
+            $('.mgmt-container .active-tm-container .tm-error-message, .mgmt-container .active-tm-container .tm-warning-message, .mgmt-container .active-tm-container .tm-success-message,' +
+                '.mgmt-container .inactive-tm-container .tm-error-message, .mgmt-container .inactive-tm-container .tm-warning-message, .mgmt-container .inactive-tm-container .tm-success-message,' +
+                '.mgmt-table-mt .tm-error-message').fadeOut(150, function () {
+                $(this).html("");
+            });
+        },
+
     });
 })(jQuery);
