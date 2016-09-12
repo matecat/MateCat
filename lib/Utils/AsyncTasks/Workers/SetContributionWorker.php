@@ -20,6 +20,7 @@ use CatUtils,
         TmKeyManagement_Filter,
         TmKeyManagement_TmKeyManagement,
         TaskRunner\Commons\AbstractElement;
+use Constants_TranslationStatus;
 
 class SetContributionWorker extends AbstractWorker {
 
@@ -88,9 +89,6 @@ class SetContributionWorker extends AbstractWorker {
     }
 
     /**
-     * TODO implement the logic for update on mymemory
-     * TODO MyMemory::update works only for the glossary now. Implement
-     *
      * @param ContributionStruct $contributionStruct
      *
      * @throws EndQueueException
@@ -106,7 +104,6 @@ class SetContributionWorker extends AbstractWorker {
 //        $userInfo = array_pop( $userInfoList );
 
         $id_tms  = $jobStruct->id_tms;
-        $tm_keys = $jobStruct->tm_keys;
 
         if ( $id_tms != 0 ) {
 
@@ -115,39 +112,19 @@ class SetContributionWorker extends AbstractWorker {
             }
 
             $config = $this->_tms->getConfigStruct();
-
-            $config[ 'segment' ]     = CatUtils::view2rawxliff( $contributionStruct->segment );
-            $config[ 'translation' ] = CatUtils::view2rawxliff( $contributionStruct->translation );
             $config[ 'source' ]      = $jobStruct->source;
             $config[ 'target' ]      = $jobStruct->target;
             $config[ 'email' ]       = $contributionStruct->api_key;
 
-            //get the Props
-            $config[ 'prop' ]        = json_encode( $contributionStruct->getProp() );
+            $config = array_merge( $config, $this->_extractAvailableKeysForUser( $contributionStruct, $jobStruct ) );
 
-            if ( $contributionStruct->fromRevision ) {
-                $userRole = TmKeyManagement_Filter::ROLE_REVISOR;
-            } else {
-                $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
-            }
-
-            //find all the job's TMs with write grants and make a contribution to them
-            $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'tm', $contributionStruct->uid, $userRole  );
-
-            if ( !empty( $tm_keys ) ) {
-
-                $config[ 'id_user' ] = array();
-                foreach ( $tm_keys as $i => $tm_info ) {
-                    $config[ 'id_user' ][] = $tm_info->key;
-                }
-
-            }
-
-            // set the contribution for every key in the job belonging to the user
-            $res = $this->_tms->set( $config );
-
-            if ( !$res ) {
-                throw new ReQueueException( "Set failed on " . get_class( $this->_tms ) . ": Values " . var_export( $config, true ), self::ERR_SET_FAILED );
+            switch( $contributionStruct->oldTranslationStatus ){
+                case Constants_TranslationStatus::STATUS_NEW:
+                    $this->_set( $config, $contributionStruct );
+                    break;
+                default:
+                    $this->_update( $config, $contributionStruct );
+                    break;
             }
 
         } else {
@@ -155,6 +132,63 @@ class SetContributionWorker extends AbstractWorker {
             throw new EndQueueException( "No TM engine configured for the job. Skip, OK", self::ERR_NO_TM_ENGINE );
             
         }
+
+    }
+
+    protected function _set( Array $config, ContributionStruct $contributionStruct ){
+
+        $config[ 'segment' ]     = CatUtils::view2rawxliff( $contributionStruct->segment );
+        $config[ 'translation' ] = CatUtils::view2rawxliff( $contributionStruct->translation );
+
+        //get the Props
+        $config[ 'prop' ]        = json_encode( $contributionStruct->getProp() );
+
+        // set the contribution for every key in the job belonging to the user
+        $res = $this->_tms->set( $config );
+        if ( !$res ) {
+            throw new ReQueueException( "Set failed on " . get_class( $this->_tms ) . ": Values " . var_export( $config, true ), self::ERR_SET_FAILED );
+        }
+
+    }
+
+    protected function _update( Array $config, ContributionStruct $contributionStruct ){
+
+        // update the contribution for every key in the job belonging to the user
+        $config[ 'segment' ]     = CatUtils::view2rawxliff( $contributionStruct->oldSegment );
+        $config[ 'translation' ] = CatUtils::view2rawxliff( $contributionStruct->oldTranslation );
+
+        $config[ 'newsegment' ] = CatUtils::view2rawxliff( $contributionStruct->segment );
+        $config[ 'newtranslation' ] = CatUtils::view2rawxliff( $contributionStruct->translation );
+
+        $res = $this->_tms->update( $config );
+        if ( !$res ) {
+            throw new ReQueueException( "Update failed on " . get_class( $this->_tms ) . ": Values " . var_export( $config, true ), self::ERR_SET_FAILED );
+        }
+
+    }
+
+    protected function _extractAvailableKeysForUser( $contributionStruct, $jobStruct ){
+
+        if ( $contributionStruct->fromRevision ) {
+            $userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+        } else {
+            $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+        }
+
+        //find all the job's TMs with write grants and make a contribution to them
+        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $jobStruct->tm_keys, 'w', 'tm', $contributionStruct->uid, $userRole  );
+
+        $config = [];
+        if ( !empty( $tm_keys ) ) {
+
+            $config[ 'id_user' ] = array();
+            foreach ( $tm_keys as $i => $tm_info ) {
+                $config[ 'id_user' ][] = $tm_info->key;
+            }
+
+        }
+
+        return $config;
 
     }
 

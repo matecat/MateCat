@@ -75,6 +75,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
                 $result_object = Engines_Results_MyMemory_AnalyzeResponse::getInstance( $decoded );
                 break;
             case 'contribute_relative_url':
+            case 'update_relative_url':
                 $result_object = Engines_Results_MyMemory_SetContributionResponse::getInstance( $decoded );
                 break;
             default:
@@ -163,6 +164,32 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
 
     }
 
+    public function update( $_config ){
+
+        $parameters               = array();
+        $parameters[ 'seg' ]      = $_config[ 'segment' ];
+        $parameters[ 'tra' ]      = $_config[ 'translation' ];
+        $parameters[ 'newseg' ]   = $_config[ 'newsegment' ];
+        $parameters[ 'newtra' ]   = $_config[ 'newtranslation' ];
+        $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
+
+        if ( !empty( $_config[ 'id_user' ] ) ) {
+            if ( !is_array( $_config[ 'id_user' ] ) ) {
+                $_config[ 'id_user' ] = array( $_config[ 'id_user' ] );
+            }
+            $parameters[ 'key' ] = implode( ",", $_config[ 'id_user' ] );
+        }
+
+        $this->call( "update_relative_url", $parameters );
+
+        if ( $this->result->responseStatus != "200" ) {
+            return false;
+        }
+
+        return true;
+
+    }
+
     /**
      * @param $_config
      *
@@ -213,13 +240,13 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
      *
      * @return bool
      */
-    public function update( $_config ) {
+    public function updateGlossary( $_config ) {
 
         $parameters               = array();
         $parameters[ 'seg' ]      = $_config[ 'segment' ];
         $parameters[ 'tra' ]      = $_config[ 'translation' ];
-        $parameters[ 'newseg' ]      = $_config[ 'newsegment' ];
-        $parameters[ 'newtra' ]      = $_config[ 'newtranslation' ];
+        $parameters[ 'newseg' ]   = $_config[ 'newsegment' ];
+        $parameters[ 'newtra' ]   = $_config[ 'newtranslation' ];
         $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
         $parameters[ 'tnote' ]    = $_config[ 'tnote' ];
         $parameters[ 'prop' ]     = $_config[ 'prop' ];

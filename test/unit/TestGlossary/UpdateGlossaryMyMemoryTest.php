@@ -2,7 +2,7 @@
 
 /**
  * @group regression
- * @covers Engines_MyMemory::update
+ * @covers Engines_MyMemory::updateGlossary
  * User: dinies
  * Date: 17/05/16
  * Time: 16.27
@@ -193,7 +193,7 @@ class UpdateGlossaryMyMemoryTest extends AbstractTest
 
     /**
      * @group regression
-     * @covers Engines_MyMemory::update
+     * @covers Engines_MyMemory::updateGlossary
      */
     public function test_update_glossary_segment_without_key_id()
     {
@@ -203,7 +203,7 @@ class UpdateGlossaryMyMemoryTest extends AbstractTest
         $this->config_param_of_update['newtranslation'] = $this->new_translation;
 
 
-        $result = $this->engine_MyMemory->update($this->config_param_of_update);
+        $result = $this->engine_MyMemory->updateGlossary($this->config_param_of_update);
 
         $this->assertFalse($result);
 
@@ -226,7 +226,7 @@ class UpdateGlossaryMyMemoryTest extends AbstractTest
 
     /**
      * @group regression
-     * @covers Engines_MyMemory::update
+     * @covers Engines_MyMemory::updateGlossary
      */
 
     public function test_OLD_NEW_update_with_success_glossary_word_checking_through_get_verification()
@@ -245,7 +245,7 @@ class UpdateGlossaryMyMemoryTest extends AbstractTest
         $this->config_param_of_update['newtranslation'] = $this->new_translation;
         $this->config_param_of_update['id_user'] = array('0' => "{$this->test_key}");
 
-        $this->engine_MyMemory->update($this->config_param_of_update);
+        $this->engine_MyMemory->updateGlossary($this->config_param_of_update);
         sleep(2);
 
 
@@ -272,7 +272,7 @@ class UpdateGlossaryMyMemoryTest extends AbstractTest
     /**
      * SOMETIMES IT FAILS IF LAUNCHED WITH ALL THE OTHER UNIT TESTS
      * @group regression
-     * @covers Engines_MyMemory::update
+     * @covers Engines_MyMemory::updateGlossary
      * @see    UpdateGlossaryMyMemoryTest::test_OLD_NEW_update_with_success_glossary_word_checking_through_get_verification
      */
 
@@ -292,7 +292,7 @@ class UpdateGlossaryMyMemoryTest extends AbstractTest
         $this->config_param_of_update['newtranslation'] = $this->new_translation;
         $this->config_param_of_update['id_user'] = array('0' => "{$this->test_key}");
 
-        $result = $this->engine_MyMemory->update($this->config_param_of_update);
+        $result = $this->engine_MyMemory->updateGlossary($this->config_param_of_update);
         sleep(2);
 
         $this->assertTrue($result);
@@ -331,7 +331,7 @@ class UpdateGlossaryMyMemoryTest extends AbstractTest
 
     /**
      * @group regression
-     * @covers Engines_MyMemory::update
+     * @covers Engines_MyMemory::updateGlossary
      */
 
     public function test_NEW_OLD_update_with_success_of_glossary_word_with_id_not_in_array_coverage_purpose_checking_through_get_verification()
@@ -348,7 +348,7 @@ class UpdateGlossaryMyMemoryTest extends AbstractTest
         $this->config_param_of_update['newtranslation'] = $this->old_translation;
         $this->config_param_of_update['id_user'] = "{$this->test_key}";
 
-        $this->engine_MyMemory->update($this->config_param_of_update);
+        $this->engine_MyMemory->updateGlossary($this->config_param_of_update);
         sleep(2);
 
 
@@ -375,7 +375,7 @@ class UpdateGlossaryMyMemoryTest extends AbstractTest
 
     /**
      * @group regression
-     * @covers Engines_MyMemory::update
+     * @covers Engines_MyMemory::updateGlossary
      * @see    UpdateGlossaryMyMemoryTest::test_NEW_OLD_update_with_success_of_glossary_word_with_id_not_in_array_coverage_purpose_checking_through_get_verification
      */
 
@@ -394,7 +394,7 @@ class UpdateGlossaryMyMemoryTest extends AbstractTest
         $this->config_param_of_update['newtranslation'] = $this->old_translation;
         $this->config_param_of_update['id_user'] = "{$this->test_key}";
 
-        $result = $this->engine_MyMemory->update($this->config_param_of_update);
+        $result = $this->engine_MyMemory->updateGlossary($this->config_param_of_update);
         sleep(2);
 
         $this->assertTrue($result);
