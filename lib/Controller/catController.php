@@ -22,7 +22,7 @@ class catController extends viewController {
     private $start_from = 0;
     private $page = 0;
     private $start_time = 0.00;
-    private $downloadFileName;
+
     private $job_stats = array();
     private $source_rtl = false;
     private $target_rtl = false;
@@ -122,8 +122,6 @@ class catController extends viewController {
         } else {
             $this->filter_enabled = false;
         };
-
-        $this->downloadFileName = "";
 
         $this->doAuth();
 
@@ -270,10 +268,6 @@ class catController extends viewController {
 
             $id_file = $job[ 'id_file' ];
 
-            if ( !isset( $this->data[ "$id_file" ] ) ) {
-                $files_found[ ] = $job[ 'filename' ];
-            }
-
             $wStruct = new WordCount_Struct();
 
             $wStruct->setIdJob( $this->jid );
@@ -319,11 +313,7 @@ class catController extends viewController {
             ? $this->job->last_opened_segment
             : getFirstSegmentId( $this->job->id, $this->job->password );
 
-        if ( count( $files_found ) == 1 ) {
-            $this->downloadFileName = $files_found[ 0 ];
-        } else {
-            $this->downloadFileName = $this->project->name . ".zip"; // will be overwritten below in case of one file job
-        }
+
 
         /**
          * get first segment of every file
@@ -630,8 +620,6 @@ class catController extends viewController {
         $this->template->tms_enabled = var_export( (bool) $this->job->id_tms , true );
         $this->template->mt_enabled  = var_export( (bool) $this->job->id_mt_engine , true );
 
-        $this->template->downloadFileName       = urlencode( $this->downloadFileName );
-
         $this->template->warningPollingInterval = 1000 * ( INIT::$WARNING_POLLING_INTERVAL );
         $this->template->segmentQACheckInterval = 1000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL );
         $this->template->filtered               = $this->filter_enabled;
@@ -737,10 +725,6 @@ class catController extends viewController {
         }
 
         return $return;
-    }
-
-    public function getDownloadFileName() {
-        return $this->downloadFileName;
     }
 
     public function isCurrentProjectGDrive() {

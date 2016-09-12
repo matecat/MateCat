@@ -9,15 +9,20 @@ class downloadFileController extends downloadController {
 
     protected $id_job;
     protected $password;
-    protected $fname;
     protected $download_type;
     protected $jobInfo;
     protected $forceXliff;
     protected $downloadToken;
     protected $gdriveService;
     protected $openOriginalFiles;
+    protected $id_file ;
 
     protected $trereIsARemoteFile = null;
+
+    /**
+     * @var Jobs_JobStruct
+     */
+    protected $job;
 
     /**
      * @var Google_Service_Drive_DriveFile
@@ -50,16 +55,13 @@ class downloadFileController extends downloadController {
 
         $__postInput = filter_var_array( $_REQUEST, $filterArgs );
 
-        //NOTE: This is for debug purpose only,
-        //NOTE: Global $_POST Overriding from CLI Test scripts
-        //$__postInput = filter_var_array( $_POST, $filterArgs );
+        $this->_user_provided_filename = $__postInput[ 'filename' ];
 
-        $this->fname         = $__postInput[ 'filename' ];
-        $this->id_file       = $__postInput[ 'id_file' ];
-        $this->id_job        = $__postInput[ 'id_job' ];
-        $this->download_type = $__postInput[ 'download_type' ];
-        $this->password      = $__postInput[ 'password' ];
-        $this->downloadToken = $__postInput[ 'downloadToken' ];
+        $this->id_file              = $__postInput[ 'id_file' ];
+        $this->id_job               = $__postInput[ 'id_job' ];
+        $this->download_type        = $__postInput[ 'download_type' ];
+        $this->password             = $__postInput[ 'password' ];
+        $this->downloadToken        = $__postInput[ 'downloadToken' ];
 
         $this->forceXliff = ( isset( $__postInput[ 'forceXliff' ] ) && !empty( $__postInput[ 'forceXliff' ] ) && $__postInput[ 'forceXliff' ] == 1 );
         $this->openOriginalFiles = ( isset( $__postInput[ 'original' ] ) && !empty( $__postInput[ 'original' ] ) && $__postInput[ 'original' ] == 1 );
@@ -86,6 +88,9 @@ class downloadFileController extends downloadController {
 
             return null;
         }
+
+        $this->job      = Jobs_JobDao::getById($this->id_job);
+        $this->project  = $this->job->getProject();
 
         //get storage object
         $fs        = new FilesStorage();
@@ -274,13 +279,15 @@ class downloadFileController extends downloadController {
         }
 
         //set the file Name
-        $pathinfo        = FilesStorage::pathinfo_fix( $this->fname );
+        $pathinfo        = FilesStorage::pathinfo_fix( $this->_getDefaultFileName( $this->project ) );
         $this->_filename = $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "." . $pathinfo[ 'extension' ];
 
         //qui prodest to check download type?
         if ( $this->download_type == 'omegat' ) {
 
-            $this->_filename .= ".zip";
+            if ( $pathinfo['extension'] != 'zip') {
+                $this->_filename .= ".zip";
+            }
 
             $tmsService = new TMSService();
             $tmsService->setOutputType( 'tm' );

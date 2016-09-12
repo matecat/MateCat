@@ -3,6 +3,12 @@
 
 class Routes {
 
+    /**
+     * @param $id_job
+     * @param $password
+     * @param array $options
+     * @return string
+     */
     public static function downloadXliff($id_job, $password, $options = array() ) {
         $host = self::httpHost( $options );
         // TODO: pass in a filename here as last param?
