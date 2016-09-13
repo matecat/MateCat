@@ -16,6 +16,10 @@ class Editarea extends React.Component {
         this.hightlightEditarea = this.hightlightEditarea.bind(this);
         this.addClass = this.addClass.bind(this);
         this.onMouseUpEvent = this.onMouseUpEvent.bind(this);
+        this.onInputEvent = this.onInputEvent.bind(this);
+        this.onKeyDownEvent = this.onKeyDownEvent.bind(this);
+        this.onKeyPressEvent = this.onKeyPressEvent.bind(this);
+        this.onPasteEvent = this.onPasteEvent.bind(this);
     }
 
     allowHTML(string) {
@@ -80,6 +84,18 @@ class Editarea extends React.Component {
     onClickEvent(event) {
         UI.editAreaClick(event.currentTarget);
     }
+    onInputEvent(e) {
+        UI.inputEditAreaEventHandler.call(this.editAreaRef, e);
+    }
+    onKeyDownEvent(e) {
+        UI.keydownEditAreaEventHandler.call(this.editAreaRef, e);
+    }
+    onKeyPressEvent(e) {
+        UI.keyPressEditAreaEventHandler.call(this.editAreaRef, e);
+    }
+    onPasteEvent(e) {
+        UI.pasteEditAreaEventHandler.call(this.editAreaRef, e.nativeEvent);
+    }
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.addListener(SegmentConstants.ADD_EDITAREA_CLASS, this.addClass);
@@ -107,24 +123,28 @@ class Editarea extends React.Component {
         if (this.props.segment){
             var lang = config.target_lang.toLowerCase();
             var readonly = ((this.props.segment.readonly == 'true')) ? true : false;
-            return (
-                <div className={this.state.editareaClasses.join(' ')}
-                     id={'segment-' + this.props.segment.sid + '-editarea'}
-                     lang={lang}
-                     contentEditable={!readonly}
-                     spellCheck="true"
-                     data-sid={this.props.segment.sid}
-                     dangerouslySetInnerHTML={ this.allowHTML(this.props.translation) }
-                     onMouseUp={this.onMouseUpEvent}
-                     onMouseDown={this.onMouseDownEvent}
-                     onContextMenu={this.onMouseUpEvent}
-                     onBlur={this.onBlurEvent}
-                     onClick={this.onClickEvent}
-                     ref={(ref) => this.editAreaRef = ref}
-                />
-
-            );
         }
+        return (
+            <div className={this.state.editareaClasses.join(' ')}
+                 id={'segment-' + this.props.segment.sid + '-editarea'}
+                 lang={lang}
+                 contentEditable={!readonly}
+                 spellCheck="true"
+                 data-sid={this.props.segment.sid}
+                 dangerouslySetInnerHTML={ this.allowHTML(this.props.translation) }
+                 onMouseUp={this.onMouseUpEvent}
+                 onMouseDown={this.onMouseDownEvent}
+                 onContextMenu={this.onMouseUpEvent}
+                 onBlur={this.onBlurEvent}
+                 onClick={this.onClickEvent}
+                 onKeyDown={this.onKeyDownEvent}
+                 onKeyPress={this.onKeyPressEvent}
+                 onInput={this.onInputEvent}
+                 onPaste={this.onPasteEvent}
+                 ref={(ref) => this.editAreaRef = ref}
+            />
+
+        );
     }
 }
 

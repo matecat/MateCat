@@ -187,6 +187,7 @@ module.exports = function(grunt) {
                     basePath + 'build/templates.js',
                     basePath + 'cat_source/ui.core.js',
                     basePath + 'cat_source/ui.segment.js',
+                    basePath + 'cat_source/ui.editarea.js',
                     basePath + 'cat_source/ui.scrollsegment.js',
                     basePath + 'cat_source/ui.classes.js',
                     basePath + 'cat_source/ui.classes.segment_footer.js',

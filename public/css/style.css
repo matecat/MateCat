@@ -2439,10 +2439,10 @@ section.modified.editor .status
 
 .arrow-mcolor{display:block;width:20px;height:20px;background:url(../img/arrow-menucolor.png) 0 0 no-repeat;position:absolute;margin:-8px 0 0 123px;background-size:10px 8px}
 .arrow{border:0 !important; }
-.a{border-right:9px solid #7cc576}
-.d{border-right:9px solid #09beec}
-.r{border-right:9px solid #dc2e34}
-.f{border-right:9px solid #dddedf}
+.approvedStatusMenu{border-right:9px solid #7cc576}
+.translatedStatusMenu{border-right:9px solid #09beec}
+.rejectedStatusMenu{border-right:9px solid #dc2e34}
+.draftStatusMenu{border-right:9px solid #dddedf}
 
 
 /*joblist*/
