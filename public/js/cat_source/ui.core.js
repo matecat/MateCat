@@ -483,8 +483,7 @@ UI = {
      * to the next segment.
      *
      * @param segment DOMElement the <section> tag of the segment
-     * @param forceEmptyContribution boolean default true. not sure what it
-     * does.
+     * @param forceEmptyContribution boolean default true. To force to reload the footer.
      */
 	createFooter: function(segment, forceEmptyContribution) {
         var sid = UI.getSegmentId( segment );

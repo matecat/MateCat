@@ -46,7 +46,7 @@
             var isNotSimilar = lev(s1,s2)/Math.max(s1.length,s2.length)*100 >50;
             var isEqual = (s1 == s2);
 
-            getNormally = isNotSimilar || isEqual;
+            var getNormally = isNotSimilar || isEqual;
 
             this.activateSegment(segment, getNormally);
 

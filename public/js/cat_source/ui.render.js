@@ -41,12 +41,13 @@ $.extend(UI, {
 		this.goingToNext = false;
 		this.preCloseTagAutocomplete = false;
         this.hiddenTextEnabled = true;
-        this.tagModesEnabled = (typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
-        if(this.tagModesEnabled) {
-            UI.body.addClass('tagModes');
-        } else {
-            UI.body.removeClass('tagModes');
-        }
+		this.setGlobalTagProjection();
+		this.tagModesEnabled = (typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
+		if(this.tagModesEnabled && !this.enableTagProjection) {
+			UI.body.addClass('tagModes');
+		} else {
+			UI.body.removeClass('tagModes');
+		}
 
         /**
          * Global Translation mismatches array definition.

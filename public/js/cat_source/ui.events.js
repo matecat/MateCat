@@ -595,12 +595,6 @@ $.extend(UI, {
 				if(!UI.body.hasClass('tagmode-default-extended')) $('.editor .tagModeToggle').click();
             }
 
-		}).on('mousedown', '.source', function(e) {
-			if (e.button == 2) { // right click
-				// temporarily disabled
-				return true;
-			}
-			return true;
 		}).on('dragstart', '.editor .editarea .locked', function() {
             // To stop the drag in tags elements
             return false;
