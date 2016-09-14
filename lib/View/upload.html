@@ -57,8 +57,6 @@
             maxTMXFileSize: ${maxTMXFileSize},
             maxNumberFiles: ${maxNumberFiles},
             ownerIsMe: true,
-            isAnonymousUser: ${isAnonymousUser},
-            userMail: '${userMail}',
             blueimp_dataType: 'json',
             gdriveAuthURL: ${structure php:json_encode(gdriveAuthURL)},
             defaults : {
@@ -1051,6 +1049,8 @@
     APP.displayCurrentTargetLang();
 </script>
 <script type="text/javascript" src="//apis.google.com/js/api.js?onload=onApiLoad"></script>
+
+<div metal:use-macro="common.html/footer_variables" />
 
 </body>
 
