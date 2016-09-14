@@ -17,7 +17,6 @@
             status: '${project_status}',
             totalSegments: '${num_segments}',
             totalAnalyzed: '${num_segments_analyzed}',
-            isLoggedIn: '${isLoggedIn}',
             showModalBoxLogin: '${showModalBoxLogin}',
             enable_outsource: ${enable_outsource | string:false},
             daemon_warning: ${daemon_misconfiguration},
@@ -457,6 +456,8 @@ $(".currencychange").click(function() {
 <div metal:use-macro="cookiebanner.html/cookieBanner"/>
 
 <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_analyze"/>
+
+<div metal:use-macro="common.html/footer_includes" />
 
 </body>
 </html>
