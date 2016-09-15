@@ -105,23 +105,38 @@ class ProjectOptionsSanitizer {
      * If tag project is requested to be enabled, check if language combination is allowed.
      */
     private function sanitizeTagProjection() {
-        if ( $this->options['tag_projection'] == true && $this->checkSourceAndTargetAreInCombination( self::$tag_projection_allowed_languages ) ) {
+        if ( $this->options['tag_projection'] == true && $this->checkSourceAndTargetAreInCombinationForTagProjection( self::$tag_projection_allowed_languages ) ) {
             $this->sanitized['tag_projection'] = TRUE;
         } else {
             $this->sanitized['tag_projection'] = FALSE;
 
         }
     }
-    
+
     private function checkSourceAndTargetAreInCombination( $langs ) {
+        $all_langs = array_merge( $this->target_lang, array($this->source_lang) );
+
+        $all_langs = array_unique( $all_langs ) ;
+
+        $found = count( array_intersect( $langs, $all_langs ) ) ;
+        return $found == 2 ;
+    }
+
+    private function checkSourceAndTargetAreInCombinationForTagProjection( $langs ) {
         $lang_combination = array();
-        foreach ($this->target_lang as &$value) {
+        $found = false;
+        foreach ($this->target_lang as $value) {
             array_push($lang_combination, explode('-',$value)[0] . '-' . explode('-',$this->source_lang)[0]);
             array_push($lang_combination, explode('-',$this->source_lang)[0] . '-' . explode('-',$value)[0]);
         }
 
-        $found = count( array_intersect( $langs, $lang_combination ) ) ;
-        return $found > 0 ;
+        foreach ($lang_combination as $langPair) {
+            if (array_key_exists($langPair, $langs)) {
+                $found = true;
+                break;
+            }
+        }
+        return $found ;
     }
 
 }
