@@ -79,7 +79,7 @@ protected $actual;
 
         $wrapped_result=$this->database_instance->query($this->sql_select_engine)->fetchAll(PDO::FETCH_ASSOC);
         $result= $wrapped_result['0'];
-        $this->assertCount(15,$result);
+        $this->assertCount(16,$result);
         $this->assertEquals($this->id,$result['id']);
         $this->assertEquals("Moses_bar_and_foo", $result['name']);
         $this->assertEquals("TM", $result['type']);
@@ -87,6 +87,7 @@ protected $actual;
         $this->assertEquals("http://mtserver01.deepfoobar.com:8019", $result['base_url']);
         $this->assertEquals("translate", $result['translate_relative_url']);
         $this->assertNull($result['contribute_relative_url']);
+        $this->assertNull($result['update_relative_url']);
         $this->assertNull($result['delete_relative_url']);
         $this->assertEquals("\"{}\"", $result['others']);
         $this->assertEquals("foo_bar", $result['class_load']);

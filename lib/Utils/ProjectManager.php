@@ -592,7 +592,12 @@ class ProjectManager {
         $this->projectStructure[ 'result' ][ 'target_language' ] = $this->projectStructure[ 'target_language' ];
         $this->projectStructure[ 'result' ][ 'status' ]          = $this->projectStructure[ 'status' ];
         $this->projectStructure[ 'result' ][ 'lang_detect' ]     = $this->projectStructure[ 'lang_detect_files' ];
-        $this->projectStructure[ 'result' ][ 'analyze_url' ]     = $this->analyzeURL();
+
+        if ( INIT::$VOLUME_ANALYSIS_ENABLED )
+            $this->projectStructure[ 'result' ][ 'analyze_url' ]     = $this->analyzeURL();
+
+
+
 
         /*
          * This is the old code.

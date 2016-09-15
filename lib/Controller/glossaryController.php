@@ -358,7 +358,7 @@ class glossaryController extends ajaxController {
              */
             foreach ( $tm_keys as $tm_key ) {
                 $config[ 'id_user' ] = $tm_key->key;
-                $TMS_RESULT = $this->_TMS->update( $config );
+                $TMS_RESULT = $this->_TMS->updateGlossary( $config );
                 $set_code[ ] = $TMS_RESULT;
             }
 

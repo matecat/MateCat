@@ -3234,7 +3234,8 @@ UI = {
                     //$('#go2lexiqa').attr('href', result.qaurl);
                     }
                     //highlight the segments
-                    var source_val = UI.clearMarks($.trim($(".source", segment).html()));
+                    //var source_val = UI.clearMarks($.trim($(".source", segment).html()));
+                    source_val =$(".source", segment).html();
                     var highlights = {
                             source: {
                                 numbers: [],
@@ -3283,7 +3284,8 @@ UI = {
                     source_val = LXQ.highLightText(source_val, highlights.source,isSegmentCompleted,true,true,segment);
                     if (callback!=null)
                         saveSelection();
-                    target_val = UI.clearMarks($(".editarea", segment).html());
+                    //target_val = UI.clearMarks($(".editarea", segment).html());
+                    target_val = $(".editarea", segment).html();
                     target_val = LXQ.highLightText(target_val,highlights.target,isSegmentCompleted,true,false,segment);
                     
                     $(".editarea", segment).html(target_val);
@@ -3304,14 +3306,16 @@ UI = {
                 else {
                     //do something else
                     noVisibleErrorsFound = true;                  
-                    source_val = UI.clearMarks($.trim($(".source", segment).html()));
+                    //source_val = UI.clearMarks($.trim($(".source", segment).html()));
+                    source_val = $(".source", segment).html();
                     source_val = LXQ.cleanUpHighLighting(source_val);
                     
                     
                                         
                     if (callback!=null)
                         saveSelection();
-                    target_val = UI.clearMarks($.trim($(".editarea", segment).html()));
+                    //target_val = UI.clearMarks($.trim($(".editarea", segment).html()));
+                    target_val = $(".editarea", segment).html();
                     target_val = LXQ.cleanUpHighLighting(target_val);
                     $(".editarea", segment).html(target_val);
                     if (callback!=null)
@@ -3441,12 +3445,14 @@ UI = {
                         //console.dir (seg);
                         //var segEdit = UI.getEditAreaBySegmentId(element);
                         //console.dir(segEdit);
-                        var source_val = UI.clearMarks($.trim($(".source", seg).html()));
+                        //var source_val = UI.clearMarks($.trim($(".source", seg).html()));
+                        var source_val = $(".source", seg).html();
                         //console.log('source: '+source_val);
                                                 
                         source_val = LXQ.highLightText(source_val,highlights.source,true,LXQ.shouldHighlighWarningsForSegment(seg),true,seg);
                         
-                        var target_val = UI.clearMarks($.trim($(".editarea", seg).html()));
+                        //var target_val = UI.clearMarks($.trim($(".editarea", seg).html()));
+                        target_val = $(".editarea", segment).html();
                         target_val = LXQ.highLightText(target_val,highlights.target,true,LXQ.shouldHighlighWarningsForSegment(seg),false,seg);
                         $(".editarea", seg).html(target_val);
                         $(".source", seg).html(source_val);

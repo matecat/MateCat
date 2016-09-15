@@ -44,6 +44,7 @@ $createSchemaTable = <<<EOF
 
 CREATE TABLE IF NOT EXISTS `phinxlog` (
   `version` bigint(20) NOT NULL,
+  `migration_name` varchar(100) DEFAULT NULL,
   `start_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `end_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`version`)
@@ -71,7 +72,7 @@ foreach($filenames as $migration => $filename) {
 
   echo <<<EOF
 
-INSERT INTO phinxlog VALUES ( $migration, '$start_date', '$stop_date'); 
+INSERT INTO phinxlog VALUES ( $migration, null, '$start_date', '$stop_date'); 
 
 EOF;
 
