@@ -19,6 +19,7 @@
 
 // script per lo slide del pannello di manage tmx
             UI.setDropDown();
+            UI.initOptionsTip();
 
             $(".popup-tm .x-popup, .popup-tm h1 .continue").click(function(e) {
                 e.preventDefault();
@@ -1637,6 +1638,44 @@
                 $(this).html("");
             });
         },
+
+        initOptionsTip: function () {
+            var guesstagText = "<div class='powerTip-options-tm'><div class='powerTip-options-tm-title'>​​Currently supported languages pairs:</div>" +
+                "<ul>" +
+                "<li class='powerTip-options-tm-list'>English - German</li>" +
+                "<li class='powerTip-options-tm-list'>English - Spanish</li>" +
+                "<li class='powerTip-options-tm-list'>English - French</li>" +
+                "<li class='powerTip-options-tm-list'>English - Italian</li>" +
+                "<li class='powerTip-options-tm-list'>English - Portuguese</li>" +
+                "<li class='powerTip-options-tm-list'>English - Russian</li>" +
+                "<li class='powerTip-options-tm-list'>German - Italian</li>" +
+                "<li class='powerTip-options-tm-list'>German - French</li>" +
+                "<li class='powerTip-options-tm-list'>French - Italian</li>" +
+                "<li class='powerTip-options-tm-list'>Italian - Spanish</li>" +
+                "</ul></div>";
+            $(".tooltip-guess-tags").data("powertip", guesstagText);
+            $(".tooltip-guess-tags").powerTip({
+                placement : 's',
+                popupId : "matecatTip",
+                mouseOnToPopup: true
+
+            });
+
+            var lexiqaText = "<div class='powerTip-options-tm'><div class='powerTip-options-tm-title'>Supported languages:</div>" +
+                "<ul>" +
+                "<li class='powerTip-options-tm-list'>English</li>" +
+                "<li class='powerTip-options-tm-list'>French</li>" +
+                "<li class='powerTip-options-tm-list'>German</li>" +
+                "<li class='powerTip-options-tm-list'>Italian</li>" +
+                "</ul></div>";
+            $(".tooltip-lexiqa").data("powertip", lexiqaText);
+            $(".tooltip-lexiqa").powerTip({
+                placement : 's',
+                popupId : "matecatTip",
+                mouseOnToPopup: true
+
+            });
+        }
 
     });
 })(jQuery);

@@ -414,8 +414,8 @@ $(function() {
                             </div>
 
                             <div class="options-box tagp">
-                                <h3>Guess tag position</h3>
-                                <p><span class="option-tagp-languages">Not available for: <span class="option-notsupported-languages"></span>. Currently supported languages: <span class="option-supported-languages"></span>. <br/></span>Enable this functionality to let MateCat automatically place the tags where they belong.</p>
+                                <h3>Guess tag position <a class="tooltip-guess-tags" powertip="">?</a></h3>
+                                <p><span class="option-tagp-languages">Not available for: <span class="option-notsupported-languages"></span>. <br/></span>Enable this functionality to let MateCat automatically place the tags where they belong.</p>
                                 <div class="onoffswitch">
                                     <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="tagp_check" checked="checked" />
                                     <label class="onoffswitch-label" for="tagp_check">
@@ -448,8 +448,8 @@ $(function() {
                             </div>
 
                             <div tal:condition="not: deny_lexiqa" class="options-box qa-box">
-                                <h3>QA by <img src="/public/img/lexiqa2_2x.png" /></h3>
-                                <p><span class="option-qa-box-languages">Not available for: <span class="option-notsupported-languages"></span>. Supported languages: <span class="option-supported-languages"></span>. <br/></span>Linguistic QA with automated checks for punctuation, numerals, links, symbols, etc.</p>
+                                <h3>QA by <img src="/public/img/lexiqa2_2x.png" /> <a class="tooltip-lexiqa" powertip="">?</a></h3>
+                                <p><span class="option-qa-box-languages">Not available for: <span class="option-notsupported-languages"></span>. <br/></span>Linguistic QA with automated checks for punctuation, numerals, links, symbols, etc.</p>
 
                                 <div class="onoffswitch">
                                     <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="lexi_qa" />
