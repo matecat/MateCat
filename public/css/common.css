@@ -1101,10 +1101,18 @@ color:#333;}
 .option-unavailable.options-box p span {
     display: inline;
 }
+.option-unavailable.options-box p span.option-tagp-revise {
+    display: none;
+}
 .option-unavailable .onoffswitch-label {
     cursor: not-allowed;
 }
-
+.option-unavailable-revise .option-tagp-languages {
+    display: none !important;
+}
+.option-unavailable-revise .option-tagp-revise {
+    display: inline !important;
+}
 .tooltip-guess-tags,
 .tooltip-lexiqa {
     cursor: help;

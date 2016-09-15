@@ -50,17 +50,19 @@ if ( true )
                 var tpContainer= $('.options-box.tagp');
 
                 $('.options-box #tagp_check').prop( "disabled", true ).attr('checked', false);
-                var sourceLang = _.find(config.languages_array, function (e) {
-                    return e.code === config.source_rfc;
-                }).name;
-                var targetLang = _.find(config.languages_array, function (e) {
-                    return e.code === config.target_rfc;
-                }).name;
-                var label = sourceLang + " - " + targetLang;
-                tpContainer.find('.option-notsupported-languages').html(label);
-
+                if (config.isReview) {
+                    tpContainer.addClass('option-unavailable-revise');
+                } else {
+                    var sourceLang = _.find(config.languages_array, function (e) {
+                        return e.code === config.source_rfc;
+                    }).name;
+                    var targetLang = _.find(config.languages_array, function (e) {
+                        return e.code === config.target_rfc;
+                    }).name;
+                    var label = sourceLang + " - " + targetLang;
+                    tpContainer.find('.option-notsupported-languages').html(label);
+                }
                 tpContainer.addClass('option-unavailable');
-
             }
             //Check Speech To Text
             if (!('webkitSpeechRecognition' in window)) {
