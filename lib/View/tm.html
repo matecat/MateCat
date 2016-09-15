@@ -423,17 +423,19 @@ $(function() {
                                     <span class="option-tagp-revise">Not available in revise mode.<br/></span>
                                     Enable this functionality to let MateCat automatically place the tags where they belong.
                                 </p>
-                                <div class="onoffswitch">
-                                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="tagp_check" checked="checked" />
-                                    <label class="onoffswitch-label" for="tagp_check">
-                                        <span class="onoffswitch-inner"></span>
-                                        <span class="onoffswitch-switch"></span>
-                                        <span class="onoffswitch-label-status-active">Active</span>
-                                        <span class="onoffswitch-label-status-inactive">Inactive</span>
-                                        <span class="onoffswitch-label-status-unavailable">Unavailable</span>
+                                <div class="onoffswitch-container">
+                                    <div class="onoffswitch">
+                                        <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="tagp_check" checked="checked" />
+                                        <label class="onoffswitch-label" for="tagp_check">
+                                            <span class="onoffswitch-inner"></span>
+                                            <span class="onoffswitch-switch"></span>
+                                            <span class="onoffswitch-label-status-active">Active</span>
+                                            <span class="onoffswitch-label-status-inactive">Inactive</span>
+                                            <span class="onoffswitch-label-status-unavailable">Unavailable</span>
 
-                                    </label>
+                                        </label>
 
+                                    </div>
                                 </div>
                             </div>
 
@@ -457,18 +459,19 @@ $(function() {
                             <div tal:condition="not: deny_lexiqa" class="options-box qa-box">
                                 <h3>QA by <img src="/public/img/lexiqa2_2x.png" /> <a class="tooltip-lexiqa" powertip="">?</a></h3>
                                 <p><span class="option-qa-box-languages">Not available for: <span class="option-notsupported-languages"></span>. <br/></span>Linguistic QA with automated checks for punctuation, numerals, links, symbols, etc.</p>
+                                <div class="onoffswitch-container">
+                                    <div class="onoffswitch">
+                                        <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="lexi_qa" />
+                                        <label class="onoffswitch-label" for="lexi_qa">
+                                            <span class="onoffswitch-inner"></span>
+                                            <span class="onoffswitch-switch"></span>
+                                            <span class="onoffswitch-label-status-active">Active</span>
+                                            <span class="onoffswitch-label-status-inactive">Inactive</span>
+                                            <span class="onoffswitch-label-status-unavailable">Unavailable</span>
 
-                                <div class="onoffswitch">
-                                    <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="lexi_qa" />
-                                    <label class="onoffswitch-label" for="lexi_qa">
-                                        <span class="onoffswitch-inner"></span>
-                                        <span class="onoffswitch-switch"></span>
-                                        <span class="onoffswitch-label-status-active">Active</span>
-                                        <span class="onoffswitch-label-status-inactive">Inactive</span>
-                                        <span class="onoffswitch-label-status-unavailable">Unavailable</span>
+                                        </label>
 
-                                    </label>
-
+                                    </div>
                                 </div>
 
                             </div>

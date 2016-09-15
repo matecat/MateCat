@@ -41,6 +41,7 @@ if ( true )
                 LXQContainer.find('.option-notsupported-languages').html(notAcceptedLanguages.join(', '));
                 $('.options-box #lexi_qa').prop( "disabled", true ).attr('checked', false);
                 LXQContainer.addClass('option-unavailable');
+                UI.setLanguageTooltipLXQ();
             }
             //Check Tag Projection
             if (UI.checkTpCanActivate()) {
@@ -63,6 +64,7 @@ if ( true )
                     tpContainer.find('.option-notsupported-languages').html(label);
                 }
                 tpContainer.addClass('option-unavailable');
+                UI.setLanguageTooltipTP();
             }
             //Check Speech To Text
             if (!('webkitSpeechRecognition' in window)) {

@@ -423,6 +423,7 @@ APP.checkForLexiQALangs = function(){
 	$('.options-box #lexi_qa').removeAttr("disabled");
 	LXQCheck.removeClass('option-unavailable');
     LXQCheck.find('.option-qa-box-languages').hide();
+	UI.removeTooltipLXQ();
     //disable LexiQA
 	var disableLexiQA = !(sourceAccepted && targetAccepted && config.defaults.lexiqa);
     if (notAcceptedLanguages.length > 0) {
@@ -432,6 +433,7 @@ APP.checkForLexiQALangs = function(){
     if (!(sourceAccepted && targetAccepted)) {
 		LXQCheck.addClass('option-unavailable');
 		$('.options-box #lexi_qa').prop( "disabled", disableLexiQA );
+		UI.setLanguageTooltipLXQ();
 	}
     $('.options-box #lexi_qa').attr('checked', !disableLexiQA);
 };
@@ -481,6 +483,7 @@ APP.checkForTagProjectionLangs = function(){
     if ( arrayIntersection.length == 0) {
 		tpCheck.addClass('option-unavailable');
 		$('.options-box #tagp_check').prop( "disabled", disableTP );
+		UI.setLanguageTooltipTP();
 	}
 	$('.options-box #tagp_check').attr('checked', !disableTP);
 };

@@ -1136,6 +1136,13 @@ color:#333;}
     opacity: 1 !important;
 }
 
+.onoffswitch-container {
+    position: relative;
+    width: 140px;
+    float: left;
+    height: 35px;
+}
+
 /********** TM panel End **********/
 
 span.notify {

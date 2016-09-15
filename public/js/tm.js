@@ -1640,19 +1640,15 @@
         },
 
         initOptionsTip: function () {
+
             var guesstagText = "<div class='powerTip-options-tm'><div class='powerTip-options-tm-title'>​​Currently supported languages pairs:</div>" +
-                "<ul>" +
-                "<li class='powerTip-options-tm-list'>English - German</li>" +
-                "<li class='powerTip-options-tm-list'>English - Spanish</li>" +
-                "<li class='powerTip-options-tm-list'>English - French</li>" +
-                "<li class='powerTip-options-tm-list'>English - Italian</li>" +
-                "<li class='powerTip-options-tm-list'>English - Portuguese</li>" +
-                "<li class='powerTip-options-tm-list'>English - Russian</li>" +
-                "<li class='powerTip-options-tm-list'>German - Italian</li>" +
-                "<li class='powerTip-options-tm-list'>German - French</li>" +
-                "<li class='powerTip-options-tm-list'>French - Italian</li>" +
-                "<li class='powerTip-options-tm-list'>Italian - Spanish</li>" +
-                "</ul></div>";
+                "<ul>";
+
+            for (var key in config.tag_projection_languages) {
+                guesstagText = guesstagText + "<li class='powerTip-options-tm-list'>"+ config.tag_projection_languages[key] +"</li>"
+            }
+            guesstagText = guesstagText + "</ul></div>";
+
             $(".tooltip-guess-tags").data("powertip", guesstagText);
             $(".tooltip-guess-tags").powerTip({
                 placement : 's',
@@ -1661,13 +1657,17 @@
 
             });
 
+            var acceptedLanguagesLXQ = config.lexiqa_languages.slice();
             var lexiqaText = "<div class='powerTip-options-tm'><div class='powerTip-options-tm-title'>Supported languages:</div>" +
-                "<ul>" +
-                "<li class='powerTip-options-tm-list'>English</li>" +
-                "<li class='powerTip-options-tm-list'>French</li>" +
-                "<li class='powerTip-options-tm-list'>German</li>" +
-                "<li class='powerTip-options-tm-list'>Italian</li>" +
-                "</ul></div>";
+                "<ul>";
+            acceptedLanguagesLXQ.forEach(function (elem) {
+                var name = config.languages_array.find(function (e) {
+                    return e.code === elem;
+                }).name;
+                lexiqaText = lexiqaText + "<li class='powerTip-options-tm-list'>" + name + "</li>";
+            });
+            lexiqaText = lexiqaText + "</ul></div>";
+
             $(".tooltip-lexiqa").data("powertip", lexiqaText);
             $(".tooltip-lexiqa").powerTip({
                 placement : 's',
@@ -1675,6 +1675,37 @@
                 mouseOnToPopup: true
 
             });
+        },
+
+        setLanguageTooltipTP: function () {
+            var gtTooltip = $(".tooltip-guess-tags").data("powertip");
+            $(".tagp .onoffswitch-container").data("powertip", gtTooltip);
+            $(".tagp .onoffswitch-container").powerTip({
+                placement : 's',
+                popupId : "matecatTip",
+                mouseOnToPopup: true
+            });
+        },
+
+        setLanguageTooltipLXQ: function () {
+            var lxTooltip = $(".tooltip-lexiqa").data("powertip");
+
+            $(".qa-box .onoffswitch-container").data("powertip", lxTooltip);
+            $(".qa-box .onoffswitch-container").powerTip({
+                placement : 's',
+                popupId : "matecatTip",
+                mouseOnToPopup: true
+            });
+        },
+
+        removeTooltipTP: function () {
+            $('.qa-box .onoffswitch-container').powerTip('destroy');
+            $('.tagp .onoffswitch-container').powerTip('destroy');
+        },
+
+        removeTooltipLXQ: function () {
+            $('.qa-box .onoffswitch-container').powerTip('destroy');
+            $('.tagp .onoffswitch-container').powerTip('destroy');
         }
 
     });
