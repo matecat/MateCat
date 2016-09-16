@@ -118,13 +118,18 @@ class SetContributionWorker extends AbstractWorker {
 
             $config = array_merge( $config, $this->_extractAvailableKeysForUser( $contributionStruct, $jobStruct ) );
 
-            switch( $contributionStruct->oldTranslationStatus ){
-                case Constants_TranslationStatus::STATUS_NEW:
-                    $this->_set( $config, $contributionStruct );
-                    break;
-                default:
+            if( $contributionStruct->oldTranslationStatus == Constants_TranslationStatus::STATUS_NEW ){
+
+                $this->_set( $config, $contributionStruct );
+
+            } else {
+
+                if( $contributionStruct->propagationRequest ){
                     $this->_update( $config, $contributionStruct );
-                    break;
+                } else {
+                    $this->_set( $config, $contributionStruct );
+                }
+
             }
 
         } else {
@@ -167,7 +172,7 @@ class SetContributionWorker extends AbstractWorker {
 
     }
 
-    protected function _extractAvailableKeysForUser( $contributionStruct, $jobStruct ){
+    protected function _extractAvailableKeysForUser( ContributionStruct $contributionStruct, $jobStruct ){
 
         if ( $contributionStruct->fromRevision ) {
             $userRole = TmKeyManagement_Filter::ROLE_REVISOR;
