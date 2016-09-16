@@ -80,6 +80,11 @@ class ContributionStruct extends DataAccess_AbstractDaoObjectStruct implements D
     public $oldTranslationStatus = Constants_TranslationStatus::STATUS_NEW;
 
     /**
+     * @var bool
+     */
+    public $propagationRequest =true;
+
+    /**
      * @param $name
      *
      * @return mixed
