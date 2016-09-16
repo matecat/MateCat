@@ -128,7 +128,7 @@ class Utils {
 
 	public static function sendErrMailReport( $htmlContent, $subject = null ){
 
-        if ( EnvWrap::isTest() ) {
+        if ( !INIT::$SEND_ERR_MAIL_REPORT ) {
           return true ;
         }
 

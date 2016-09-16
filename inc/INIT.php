@@ -363,6 +363,8 @@ class INIT {
      */
     public static $TASK_RUNNER_CONFIG = null;
 
+    public static $SEND_ERR_MAIL_REPORT = true ;
+
     /**
      * Initialize the Class Instance
      */
