@@ -69,6 +69,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
             case 'tmx_export_create_url' :
             case 'tmx_export_check_url' :
             case 'tmx_export_email_url' :
+            case 'glossary_export_relative_url' :
                 $result_object = Engines_Results_MyMemory_ExportResponse::getInstance( $decoded );
                 break;
             case 'analyze_url':
@@ -470,35 +471,45 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
      * @param $key
      * @param $hashPass
      * @param $isGlossary
+     * @param $fileName
      *
      * @return resource
      *
      * @throws Exception
      */
-    public function downloadExport( $key, $hashPass = null, $isGlossary = false ) {
+    public function downloadExport( $key, $hashPass = null, $isGlossary = false, $fileName = null ) {
 
         $parameters = array();
 
         $parameters[ 'key' ]  = trim( $key );
         $parameters[ 'pass' ] = trim( $hashPass );
 
-        $method = $isGlossary ? $this->glossary_export_relative_url : $this->tmx_export_download_url ;
-        if ( empty( $method ) ) throw new Exception('Download method not found');
+        ( $isGlossary ? $method = "glossary_export_relative_url" : $method = "tmx_export_download_url" );
 
-        $url = $this->base_url . "/" . $method . "?";
+        if( is_null( $fileName ) ) { $fileName =  "/tmp/TMX" . $key; }
+        $handle = fopen( $fileName, "w+" );
 
-        $url .= http_build_query( $parameters );;
-        $streamFileName = tempnam( "/tmp", "TMX" );
-        $handle = fopen( $streamFileName, "w+" );
+        $this->_setAdditionalCurlParams( [
+                CURLOPT_TIMEOUT    => 120,
+                CURLOPT_FILE       => $handle
+        ] );
 
-        $mh       = new MultiCurlHandler();
-        $uniq_uid = uniqid( '', true );
-        $mh->createResource( $url,
-                $this->curl_additional_params + [ CURLOPT_FILE => $handle ], $uniq_uid
-        );
+        $this->call( $method, $parameters );
 
-        $mh->multiExec();
+        /**
+         * Code block not useful at moment until MyMemory does not respond with HTTP 404
+         *
+         * $result Engines_Results_MyMemory_ExportResponse
+         */
+/*
+ *
+ *        if ( $this->result->responseStatus >= 400 ) {
+ *            throw new Exception( $this->result->error->message, $this->result->responseStatus );
+ *        }
+ *        fwrite( $handle, $this->result );
+ */
 
+        fflush( $handle );
         rewind( $handle );
 
         return $handle;

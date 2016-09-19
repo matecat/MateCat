@@ -2024,6 +2024,7 @@ margin-top: 10px;
 span.email-export-tmx-email-sent,
 span.email-export-tmx-email-error,
 .message-glossary-export-completed,
+.mgmt-tm .message-glossary-export-error,
 #activetm td.uploadfile .msg,
 #inactivetm td.uploadfile .msg
 {
@@ -2043,6 +2044,7 @@ span.email-export-tmx-email-error,
     display: none;
 }
 
+.mgmt-tm .message-glossary-export-error,
 .mgmt-tm .upload-file-msg-error {
     color: red;
     margin-right: 20px;
@@ -2148,6 +2150,7 @@ td.download-glossary-container .uploadloader {
 }
 span.email-export-tmx-email-sent,
 span.email-export-tmx-email-error,
+.mgmt-tm .message-glossary-export-error,
 .message-glossary-export-completed{
     float: right;
     margin-top: 1px;

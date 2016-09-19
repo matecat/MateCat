@@ -703,7 +703,7 @@
                 '              <ul class="dropdown pull-left">' +
                 '                   <li><a class="addGlossary" title="Import Glossary" alt="Import Glossary"><span class="icon-upload"></span>Import Glossary</a></li>'+
                 '                   <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>' +
-                '                   <!--<li><a class="downloadGlossary" title="Export Glossary" alt="Export Glossary"><span class="icon-download"></span>Export Glossary</a></li> -->' +
+                '                   <li><a class="downloadGlossary" title="Export Glossary" alt="Export Glossary"><span class="icon-download"></span>Export Glossary</a></li>' +
                 '                  <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>'+
                 '              </ul>'+
                 '          </div>'+
@@ -1152,12 +1152,14 @@
                         window.clearInterval( downloadTimer );
                         elem.removeClass( 'disabled' );
                         tr.find('.uploadloader').hide();
-                        tr.find('.message-glossary-export-completed').show()
                         $.cookie( downloadToken, null, {path: '/', expires: -1} );
                         errorMsg = $( '#' + iFrameID ).contents().find( 'body' ).text();
                         errorKey = $( tr ).attr( 'data-key' );
                         if ( errorMsg != '' ) {
-                            APP.alert( 'Error on downloading a TM with key ' + errorKey + ':<br />' + errorMsg );
+                            tr.find('.message-glossary-export-error').show();
+                            UI.showErrorOnActiveTMTable( 'Error on downloading resource from TM server.' );
+                        } else {
+                            tr.find('.message-glossary-export-completed').show();
                         }
 
                         $( '#' + iFrameID ).remove();
@@ -1527,6 +1529,7 @@
             var exportDiv = '<td class="download-glossary-container" style="display: none">' +
                 '<div class="message-export-glossary">We are exporting the glossary. Please wait...</div>' +
                 '<span class="message-glossary-export-completed">Export Completed</span>' +
+                '<span class="message-glossary-export-error">Export Failed</span>' +
                 '<span class="uploadloader"></span>'+
                 '</td>';
 

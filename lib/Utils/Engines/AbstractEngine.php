@@ -212,9 +212,13 @@ abstract class Engines_AbstractEngine {
          * to the first array while not overwriting the elements from
          * the first array and not re-indexing
          *
-         * Use the + array union operator
+         * In this case we CAN NOT use the + array union operator because if there is a file handler in the $curlOptParams
+         * the resource is duplicated and the reference to the first one is lost with + operator, in this way the CURLOPT_FILE does not works
          */
-        $this->curl_additional_params = $curlOptParams + $this->curl_additional_params;
+        foreach( $curlOptParams as $key => $value ){
+            $this->curl_additional_params[ $key ] = $value;
+        }
+
     }
 
     public function getConfigStruct() {
