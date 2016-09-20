@@ -1,7 +1,5 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
-
 class JobsStats extends AbstractMatecatMigration
 {
 
@@ -16,7 +14,6 @@ target VARCHAR(45) NOT NULL,
 total_time_to_edit BIGINT(20) DEFAULT '0' NOT NULL,
 avg_post_editing_effort FLOAT,
 total_raw_wc BIGINT(20) DEFAULT '1',
-completed TINYINT(4) DEFAULT '0' NOT NULL,
 CONSTRAINT `PRIMARY` PRIMARY KEY (id_job, password, fuzzy_band)
 );
 CREATE INDEX fuzzybands__index ON jobs_stats (fuzzy_band);
