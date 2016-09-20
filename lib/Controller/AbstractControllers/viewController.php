@@ -52,9 +52,7 @@ abstract class viewController extends controller {
      *
      * @var Users_UserStruct
      */
-    protected $logged_user = false;
-
-
+    protected $logged_user;
 
     /**
      * Try to identify the browser of users
@@ -307,6 +305,8 @@ abstract class viewController extends controller {
          */
         $this->setTemplateVars();
 
+        $this->setTemplateFinalVars();
+
         try {
 
             $buffer = ob_get_contents();
@@ -329,7 +329,24 @@ abstract class viewController extends controller {
             exit;
         }
 
-    }    /**
+    }
+
+
+    /**
+     * setTemplateFinalVars
+     *
+     * Here you have the possiblity to set additional template variables that you always want available in the
+     * template. This is the pleace where to set variables like user_id, email address and so on.
+     */
+    private function setTemplateFinalVars() {
+        $this->template->logged_user   = $this->logged_user->shortName() ;
+        $this->template->extended_user = $this->logged_user->fullName() ;
+
+        $this->template->isLoggedIn    = $this->isLoggedIn();                       // used in template
+        $this->template->userMail      = $this->logged_user->getEmail() ;
+    }
+
+    /**
      *
      * Set the variables for the browser support
      *
