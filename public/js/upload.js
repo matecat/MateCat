@@ -11,7 +11,8 @@ $(document).ready(function(){
     //					$('#target-lang').val('fr-FR').attr('selected',true);
     $('#target-lang option.separator').remove();
     }
-    if(config.isAnonymousUser) $('body').addClass('isAnonymous');
+
+    if(!config.isLoggedIn) $('body').addClass('isAnonymous');
 
     $(".supported-file-formats").click(function(e){
         e.preventDefault();

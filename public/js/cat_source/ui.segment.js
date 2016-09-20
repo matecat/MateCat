@@ -154,13 +154,11 @@
          */
         checkTpCanActivate: function () {
             if (_.isUndefined(this.tpCanActivate)) {
-                var sourceCode = config.source_rfc.split('-')[0];
-                var targetCode = config.target_rfc.split('-')[0];
-                var languageCombinations = [sourceCode+'-'+targetCode, targetCode+'-'+sourceCode];
-                var arrayIntersection = languageCombinations.filter(function(n) {
-                    return config.tag_projection_languages.indexOf(n) != -1;
-                });
-                this.tpCanActivate = arrayIntersection.length > 0 &&
+                var acceptedLanguages = config.tag_projection_languages
+                var elemST = config.source_rfc.split("-")[0] + "-" + config.target_rfc.split("-")[0];
+                var elemTS = config.target_rfc.split("-")[0] + "-" + config.source_rfc.split("-")[0];
+                var supportedPair = (typeof acceptedLanguages[elemST] !== 'undefined' || typeof acceptedLanguages[elemTS] !== 'undefined');
+                this.tpCanActivate = supportedPair > 0 &&
                     !config.isReview;
             }
             return this.tpCanActivate;
