@@ -123,7 +123,7 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                                 $querySegments,
                                 $_job_first_segment,
                                 $_job_last_segment,
-                                implode(",", $segment_statuses),
+                                "'" . implode("','", $segment_statuses) . "'",
                                 $_jid,
                                 $firstSeg,
                                 self::NR_OF_SEGS
