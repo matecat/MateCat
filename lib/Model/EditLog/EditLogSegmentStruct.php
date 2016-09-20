@@ -101,6 +101,11 @@ class EditLog_EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct im
     public $warnings;
 
     /**
+     * @var string
+     */
+    public $match_type;
+
+    /**
      * @return float
      */
     public function getSecsPerWord() {
