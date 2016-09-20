@@ -23,6 +23,9 @@ class BlacklistWorker extends AbstractWorker {
     protected $matches ;
 
     public function process( AbstractElement $queueElement ) {
+
+        $this->_checkDatabaseConnection();
+
         $this->queueElement  = $queueElement ;
 
         $this->_checkForReQueueEnd( $this->queueElement );
