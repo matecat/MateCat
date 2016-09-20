@@ -2,8 +2,6 @@ APP = null;
 
 APP = {
     init: function () {
-//        this.waitingConfirm = false;
-//        this.confirmValue = null;
         this.isCattool = $( 'body' ).hasClass( 'cattool' );
         $( "body" ).on( 'click', '.modal .x-popup', function ( e ) {
             e.preventDefault();
@@ -22,7 +20,6 @@ APP = {
             var dataType = $('.modal' ).attr('data-type');
 
             if ( !$( '.modal[data-type='+dataType+']' ).hasClass( 'closeOnSuccess' ) ) APP.closePopup();
-//            APP.closePopup();
             if ( $( this ).attr( 'data-callback' ) ) {
                 if ( typeof UI[$( this ).attr( 'data-callback' )] === 'function' ) {
                     var context = $( this ).attr( 'data-context' ) || '';
@@ -72,14 +69,13 @@ APP = {
             options.callback = false;
             options.msg = options;
         }
-        ;
         var callback = (typeof options == 'string') ? false : options.callback;
         var content = (typeof options == 'string') ? options : options.msg;
         this.popup( {
             type: 'alert',
             onConfirm: callback,
             closeClickingOutside: true,
-            title: 'Warning',
+            title: (options.title || 'Warning'),
             content: content
         } );
     },
@@ -106,7 +102,7 @@ APP = {
             context: options.context,
             closeOnSuccess: (options.closeOnSuccess || false)
         } );
-        return APP.confirmValue;
+        return APP.confirmValue; // TODO: this return value is clearly meaningless
     },
     confirmAndCheckbox: function(options){
         this.waitingConfirm = true;
@@ -147,14 +143,15 @@ APP = {
     },
     doRequest: function ( req, log ) {
 
-        logTxt = (typeof log == 'undefined') ? '' : '&type=' + log;
-        version = (typeof config.build_number == 'undefined') ? '' : '-v' + config.build_number;
-        builtURL = (req.url) ? req.url : config.basepath + '?action=' + req.data.action + logTxt + this.appendTime() + version + ',jid=' + config.id_job + ((typeof req.data.id_segment != 'undefined') ? ',sid=' + req.data.id_segment : '');
+        var logTxt = (typeof log == 'undefined') ? '' : '&type=' + log;
+        var version = (typeof config.build_number == 'undefined') ? '' : '-v' + config.build_number;
+        var builtURL = (req.url) ? req.url : config.basepath + '?action=' + req.data.action + logTxt + this.appendTime() + version + ',jid=' + config.id_job + ((typeof req.data.id_segment != 'undefined') ? ',sid=' + req.data.id_segment : '');
+        var reqType = (req.type) ? req.type : 'POST';
         var setup = {
             url: builtURL,
 
 			data: req.data,
-			type: 'POST',
+			type: reqType,
 			dataType: 'json'
 			//TODO set timeout longer than server curl for TM/MT
 		};
@@ -567,19 +564,29 @@ APP = {
      */
 
     addNotification: function (notification) {
-        if (!UI. notificationBox) {
-            UI.notificationBox = ReactDOM.render(
+        if (!APP. notificationBox) {
+            APP.notificationBox = ReactDOM.render(
                 React.createElement(NotificationBox),
                 $(".notifications-wrapper")[0]
             );
         }
         
-        return UI.notificationBox.addNotification(notification);
+        return APP.notificationBox.addNotification(notification);
     },
     removeNotification: function (notification) {
-        if (UI. notificationBox) {
-            UI.notificationBox.removeNotification(notification);
+        if (APP.notificationBox) {
+            APP.notificationBox.removeNotification(notification);
         }
+    },
+
+    getParameterByName : function(name, url) {
+        if (!url) url = window.location.href;
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
     }
 };
 

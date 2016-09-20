@@ -37,6 +37,7 @@
 
     <script src="${basepath}public/js/lib/jquery.js"></script>
     <script src="${basepath}public/js/common.js"></script>
+    <script src="${basepath}public/js/lib/jquery.powertip.min.js"></script>
     <script src="${basepath}public/js/gdrive.upload.js"></script>
     <script src="${basepath}public/js/gdrive.picker.js"></script>
     <script src="${basepath}public/js/upload.js"></script>
@@ -57,17 +58,17 @@
             maxTMXFileSize: ${maxTMXFileSize},
             maxNumberFiles: ${maxNumberFiles},
             ownerIsMe: true,
-            isAnonymousUser: ${isAnonymousUser},
             blueimp_dataType: 'json',
             gdriveAuthURL: ${structure php:json_encode(gdriveAuthURL)},
             defaults : {
                 tag_projection : true,
-                speech2text : true,
+                speech2text : false,
                 lexiqa : true,
             },
             lexiqa_languages: ${lexiqa_languages},
             deny_lexiqa: ${deny_lexiqa | string:false},
-            tag_projection_languages: ${tag_projection_languages}
+            tag_projection_languages: ${tag_projection_languages},
+            languages_array : ${languages_array}
         };
         /*]]>*/
     </script>
@@ -103,11 +104,11 @@
 
 
 <div class="wrapper-claim">
-    <h1 tal:condition="true:conversion_enabled">Translate your files</h1>
+    <h1 tal:condition="true:conversion_enabled">Join the Evolution</h1>
 
-    <h1 tal:condition="not:conversion_enabled">Translate an XLIFF file</h1>
+    <h1 tal:condition="not:conversion_enabled">Join the Evolution</h1>
 
-    <h2 class="payoff">MateCat gives you more matches than any other CAT tool.</h2>
+    <h2 class="payoff">The CAT tool that works for you</h2>
 </div>
 <div class="wrapper-upload">
 
@@ -212,7 +213,8 @@
         <option value="telecommunications">Telecommunications</option>
         <option value="travel_tourism">Travel &amp; Tourism</option>
     </select>
-    <a href="#" class="more-options"><span>Options</span></a>
+    <a href="#" class="more-options"><span>Settings</span></a>
+    <h2 class="resources" style="display:none;"><span class="numResources">4</span> Resources selected</h2>
 </div>
 
 
@@ -231,7 +233,19 @@
 <div metal:use-macro="upload_partials.html/gdrive_files"/>
 
 <p tal:condition="true:conversion_enabled" class="supported-files">MateCat supports
-    <a class="supported-file-formats" href="#">${formats_number} file formats</a>.</p>
+    <a class="supported-file-formats" href="#">${formats_number} file formats</a>
+    <span style="float: right;">.</span>
+    <tal:block tal:condition="php: Bootstrap::areOauthKeysPresent()">
+        <span class="gdrive-addlink-container">
+            and
+            <a class="load-gdrive load-gdrive-disabled" href="#">Google Drive files</a>
+            <span class="gdrive-icon"></span>
+            <!--<span class="btn-success min">or</span>
+            <span class="btn-success btn ">Add from Google Drive</span>-->
+        </span>
+    </tal:block>
+
+</p>
 
 <div class="uploadbtn-box">
     <span class="uploadloader"></span>
@@ -239,8 +253,8 @@
     <input name="" type="button" class="uploadbtn disabled" 
       tal:condition="not:volume_analysis_enabled" value="Translate" disabled="disabled"/>
 
-    <input name="" type="button" class="uploadbtn " 
-      tal:condition="volume_analysis_enabled" value="Analyze" />
+    <input name="" type="button" class="uploadbtn disabled"
+      tal:condition="volume_analysis_enabled" value="Analyze" disabled="disabled"/>
 
     <p class="enter">Press Enter</p>
 </div>
@@ -900,6 +914,7 @@
 </div>-->
 
 <div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
+<div metal:use-macro="popup_google_login.html/googleDriveLoginPopup"/>
 <div class="notifications-wrapper"></div>
 <footer>
 
@@ -912,7 +927,7 @@
             <li><a href="https://www.matecat.com/terms" target="_blank">Terms</a></li>
         </ul>
 
-        <nav>
+        <nav tal:condition="php: Bootstrap::areOauthKeysPresent()">
 
             <ul>
 
@@ -1005,13 +1020,6 @@
        
     } );
 
-    $( "a.more-options" ).on("click", function ( e ) {
-        e.preventDefault();
-        tab = $(this).attr('data-tab') || 'options';
-        elToClick = $(this).attr('data-el-to-click') || null;
-        UI.openLanguageResourcesPanel(tab, elToClick);
-    } );
-
     $( function () {
 
         var dd = new DropDown( $( '#dd' ) );
@@ -1027,16 +1035,13 @@
 
 
 <div metal:use-macro="cookiebanner.html/cookieBanner"/>
-<!-- SnapEngage -->
-<script src="${basepath}public/js/lib/snapengage.js"></script>
-<!-- // SnapEngage -->
+
 
 <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_upload"/>
 
 <script type="text/javascript">
     var developerKey = '${developerKey}';
     var clientId = '${clientId}';
-    var oauthToken = '${accessToken}';
 
     if( !localStorage.getItem( 'currentTargetLang' ) ) {
         APP.changeTargetLang('${currentTargetLang}');
@@ -1045,6 +1050,8 @@
     APP.displayCurrentTargetLang();
 </script>
 <script type="text/javascript" src="//apis.google.com/js/api.js?onload=onApiLoad"></script>
+
+<div metal:use-macro="common.html/footer_variables" />
 
 </body>
 

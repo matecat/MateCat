@@ -13,4 +13,6 @@ class Constants {
 
     const DEFAULT_SOURCE_LANG = 'en-US';
     const DEFAULT_TARGET_LANG = 'fr-FR';
+
+    const OAUTH_TOKEN_KEY_FILE = '/inc/oauth-token-key.txt';
 }

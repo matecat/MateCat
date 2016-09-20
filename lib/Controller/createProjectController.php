@@ -23,6 +23,8 @@ class createProjectController extends ajaxController {
     private $dqf_key;
     private $metadata;
 
+    private $lang_handler ;
+
     public function __construct() {
 
         //SESSION ENABLED
@@ -51,7 +53,10 @@ class createProjectController extends ajaxController {
                 ),
                 'lexiqa'             => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
                 'speech2text'        => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
-                'tag_projection'     => array( 'filter' => FILTER_VALIDATE_BOOLEAN )
+                'tag_projection'     => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
+                'segmentation_rule'  => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                )
 
                 //            This will be sanitized inside the TmKeyManagement class
                 //            SKIP
@@ -146,6 +151,10 @@ class createProjectController extends ajaxController {
         if ( $this->pretranslate_100 !== 1 && $this->pretranslate_100 !== 0 ) {
             $this->result[ 'errors' ][ ] = array( "code" => -6, "message" => "invalid pretranslate_100 value" );
         }
+
+        $this->lang_handler = Langs_Languages::getInstance();
+        $this->validateSourceLang();
+        $this->validateTargetLangs();
     }
 
     public function doAction() {
@@ -316,6 +325,39 @@ class createProjectController extends ajaxController {
 
     }
 
+    private function validateTargetLangs() {
+        $targets = explode( ',', $this->target_language );
+        $targets = array_map('trim',$targets);
+        $targets = array_unique($targets);
+
+        if ( empty( $targets ) ) {
+            $this->result[ 'errors' ][]    = array( "code" => -4, "message" => "Missing target language." );
+        }
+
+        try {
+            foreach ( $targets as $target ) {
+                $this->lang_handler->getLocalizedNameRFC( $target );
+            }
+        } catch ( Exception $e ) {
+            $this->result[ 'errors' ][]    = array( "code" => -4, "message" => $e->getMessage() );
+        }
+
+        $this->target_language = implode(',', $targets);
+    }
+
+    private function validateSourceLang() {
+        if ( empty( $this->source_language ) ) {
+            $this->result[ 'errors' ][]    = array( "code" => -3, "message" => "Missing source language." );
+        }
+
+        try {
+            $this->lang_handler->getLocalizedNameRFC( $this->source_language ) ;
+
+        } catch ( Exception $e ) {
+            $this->result[ 'errors' ][]    = array( "code" => -3, "message" => $e->getMessage() );
+        }
+    }
+
     private function clearSessionFiles() {
         unset( $_SESSION[ GDrive::SESSION_FILE_LIST ] );
     }
@@ -334,7 +376,8 @@ class createProjectController extends ajaxController {
         if ( isset( $__postInput['lexiqa']) )           $options['lexiqa'] = $__postInput[ 'lexiqa' ];
         if ( isset( $__postInput['speech2text']) )      $options['speech2text'] = $__postInput[ 'speech2text' ];
         if ( isset( $__postInput['tag_projection']) )   $options['tag_projection'] = $__postInput[ 'tag_projection' ];
-        
+        if ( isset( $__postInput['segmentation_rule']) ) $options['segmentation_rule'] = $__postInput[ 'segmentation_rule' ];
+
         $this->metadata = $options ; 
     }
 

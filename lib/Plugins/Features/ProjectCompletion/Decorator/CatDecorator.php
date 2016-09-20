@@ -6,8 +6,11 @@ use Features ;
 
 class CatDecorator extends AbstractDecorator {
 
-    private $stats;
+    /** @var  \catController  */
+    protected $controller;
 
+    private $stats;
+    
     public function decorate() {
         $job = $this->controller->getJob();
         $this->stats = $this->controller->getJobStats();
@@ -18,6 +21,9 @@ class CatDecorator extends AbstractDecorator {
 
         $completed = $job->isMarkedComplete( array('is_review' => $this->controller->isRevision() ) ) ;
 
+        $dao = new \Chunks_ChunkCompletionEventDao();
+        $this->template->job_completion_current_phase = $dao->currentPhase( $this->controller->getJob() );
+
         if ( $completed ) {
             $this->varsForComplete();
         }
@@ -27,6 +33,7 @@ class CatDecorator extends AbstractDecorator {
     }
 
     private function varsForUncomplete() {
+        $this->template->job_marked_complete = false;
         $this->template->header_main_button_label = 'Mark as complete';
         $this->template->header_main_button_class = 'notMarkedComplete' ;
 
@@ -39,6 +46,7 @@ class CatDecorator extends AbstractDecorator {
     }
 
     private function varsForComplete() {
+        $this->template->job_marked_complete = true ;
         $this->template->header_main_button_label = 'Marked as complete';
         $this->template->header_main_button_class = 'isMarkedComplete' ;
         $this->template->header_main_button_enabled =  false ;

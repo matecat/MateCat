@@ -25,6 +25,10 @@ if ( ReviewImproved.enabled() && config.isReview ) {
     }
 
     $.extend(UI, {
+
+        alertNotTranslatedMessage : "This segment is not translated yet.<br /> Only translated or post-edited segments can be revised. " +
+         " <br />If needed, you can force the status by clicking on the coloured bar on the right of the segment ",
+
         /**
          * Search for the next translated segment to propose for revision.
          * This function searches in the current UI first, then falls back

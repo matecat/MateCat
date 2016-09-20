@@ -11,30 +11,12 @@ if ( ReviewImproved.enabled() ) {
         loadDataPromise.done(function() {
             $('section [data-mount=translation-issues-button]').each(function() {
                 var segment = new UI.Segment( this )  ;
-                if ( !segment.isSplit() || segment.isFirstOfSplit() ) {
+                if ( issuesPanelSideButtonEnabled( segment ) ) {
                     ReactDOM.render( React.createElement( TranslationIssuesSideButton, {
                         sid : segment.absoluteId
                     } ), this );
                 }
             });
-        }).done(function() {
-            var issuesRebutted = MateCat.db.segment_translation_issues.find({
-                rebutted_at: {
-                    '$ne': null
-                }
-            });
-
-            for( var i in issuesRebutted ) {
-                var issue = issuesRebutted[ i ];
-
-                var segmentRecord = MateCat.db.segments.by( 'sid', issue.id_segment );
-
-                if( segmentRecord && segmentRecord.status != 'REBUTTED' ) {
-                    MateCat.db.segments.update(
-                        _.extend( segmentRecord, { 'status': 'REBUTTED' } )
-                    );
-                }
-            }
         });
     });
 
@@ -42,6 +24,9 @@ if ( ReviewImproved.enabled() ) {
         ReviewImproved.mountPanelComponent();
     });
 
+    var issuesPanelSideButtonEnabled = function( segment ) {
+        return !segment.isReadonly() && ( !segment.isSplit() || segment.isFirstOfSplit() );
+    }
 
     $(document).on('segment-filter:filter-data:load', function() {
         ReviewImproved.closePanel();
@@ -95,11 +80,11 @@ if ( ReviewImproved.enabled() ) {
     });
 
     $(document).on('click', function( e ) {
-        if (e.target.closest('body') == null ) {
+        if ($(e.target).closest('body') == null ) {
             // it's a detatched element, likely the APPROVE button.
             return ;
         }
-        if (e.target.closest('header, .modal, section, #review-side-panel') == null) {
+        if ($(e.target).closest('header, .modal, section, #review-side-panel') == null) {
             ReviewImproved.closePanel( );
         }
     });
@@ -113,42 +98,8 @@ if ( ReviewImproved.enabled() ) {
         $.getJSON( versions_path ).done( updateLocalTranslationVersions );
     });
 
-    $(document).on('translation:change', function(e, data) {
-        var record = MateCat.db.segments.by('sid', data.sid);
-        MateCat.db.segments.update( _.extend(record, data) );
+    $(document).on('sidepanel:close', function() {
+        ReviewImproved.closePanel();
     });
 
-    MateCat.db.segment_translation_issues.on( 'update', function( data ) {
-        var issuesRebutted = MateCat.db.segment_translation_issues.find( {
-            '$and': [ {
-                id_segment: data.id_segment,
-            }, {
-                rebutted_at: {
-                    '$ne': null
-                }
-            } ]
-        });
-
-        var segmentRecord = MateCat.db.segments.by( 'sid', data.id_segment );
-
-        var newStatus;
-
-        if( segmentRecord ) {
-            if( issuesRebutted.length > 0 ) {
-                if( segmentRecord.status != 'REBUTTED' ) {
-                    newStatus = 'REBUTTED';
-                }
-            } else {
-                if( segmentRecord.status === 'REBUTTED' ) {
-                    newStatus = 'FIXED';
-                }
-            }
-        }
-
-        if( newStatus ) {
-            MateCat.db.segments.update(
-                _.extend( segmentRecord, { 'status': newStatus } )
-            );
-        }
-    });
 }

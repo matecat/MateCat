@@ -504,14 +504,6 @@ float: left;
 	.translate-box select, .mgmt-table-mt select {
 		width: 210px!important;
 	}
-
-
-
-	.translate-box a {
-	  display: block;
-	  width: 195px;
-	  margin-top: 0;
-	}
 }
 
 @media only screen and (max-width : 1280px) {
@@ -761,7 +753,7 @@ a{color:#39699a}
 .upload-analysis th{padding:10px;border-bottom:1px solid #ccc;text-align:left;background:#e2e4e5}
 .upload-analysis td{padding:10px;border-bottom:1px solid #ccc;text-align:left;background:#efefef}
 
-.supported-files{float:left;font-weight:bold;font-size:14px;color:#666}
+.supported-files{float:left;font-weight:bold;font-size:16px;color:#666}
 
 /*upload table*/
 
@@ -791,7 +783,15 @@ margin-top: 30px;
 padding-bottom: 50px !important;
 min-height: 220px;
 }
-
+span.gdrive-icon {
+    background: url(../img/logo-drive-16.png);
+    width: 16px;
+    height: 14px;
+    display: block;
+    float: right;
+    margin-top: 2px;
+    margin-left: 3px;
+}
 .dragging {background:#e2e2e3 !important;border:1px dashed #000 !important;-moz-box-shadow: 0 1px 2px #ccc;-webkit-box-shadow: 0 1px 2px #ccc;
 }
 
@@ -800,8 +800,8 @@ min-height: 220px;
 .uploaded  .upload-files, .uploaded .gdrive-upload-files	{	height:auto !important;}
 
 .drag{text-align:center;overflow:hidden;}
-.drag p{ text-align:center;margin:30px 0 10px 0;font-size:36px;line-height:50px;}
-.drag p span.min
+.drag p{ text-align:center;margin:30px 0 30px 0;font-size:36px;line-height:50px;}
+.drag span.min
 {
 	font-size:24px;
 }
@@ -885,15 +885,17 @@ color: white;
 	-ms-transition: all 0.1s linear;
 }
 /*.dragging .file-drag,*/
- .uploaded .file-drag{ display:none;}
+ .uploaded .file-drag, .uploaded .min{ display:none;}
 
 .file-drop, .upload-footer, .uploaded .btn-success, .dragging .btn-success {display:none !important; }
 
 .progress-extended{display:none}
 
 
-.dragging .file-drag, .uploaded .file-drop, .uploaded .fileupload-buttonbar{height:0;}
-
+.dragging .file-drag,.uploaded .file-drop, .uploaded .fileupload-buttonbar{height:0;}
+.dragging .min {
+  display: none;
+}
 .name{width:230px;}
 .size {
 width: 100px;
@@ -912,7 +914,7 @@ tr.ready .size span{visibility: visible;}
 .translate-box .fileinput-button{margin-top:8px;text-align:center;padding:4px 0px}
 .more-options {float:right!important; margin-left: 20px;    font-size: 16px;
     margin-top: 8px !important;}
-.more-options,.more-options span:hover {text-decoration: none;}
+.more-options,.more-options span:hover {text-decoration: none;cursor: pointer;}
 .more-options span {text-decoration: underline;}
 @-moz-document url-prefix() {
 	
@@ -1304,7 +1306,7 @@ span.load-gdrive {
     font-family: calibri, Arial, Helvetica, sans-serif;
     font-size: 1.1em;
     margin: 0;
-    padding: 0.70rem 0.25rem 0.30rem 2.2rem;
+    padding: 0.60rem 0.25rem 0.40rem 2.2rem;
     border: 0.1rem solid #B7B9BC;
     background: url(../img/logo-drive-16.png) 1.3rem 0.85rem no-repeat;
     background-color: #F5F5F5;

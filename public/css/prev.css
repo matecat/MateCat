@@ -418,51 +418,11 @@ footer nav li:first-child
   }
 
 
-
-
-
-
-
-
   .topMenu ul li a:hover
   {
 	  text-decoration: underline;
 }  
 
-
-
-
-
-
-
-.slideMenu
-{
-	position: fixed;
-	right: 0;
-	bottom: -273px;
-	width: 30px;
-	background: #6d6e71;
-	border-top: 1px solid #333;
-	border-right: 1px solid #333;
-	border-left: 1px solid #333;
-	z-index: 999999999;
-    }
-    .slideMenu ul.bar li
-    {
-	    background: transparent url(../img/nav-icons.png) -10px -10px no-repeat;
-    }
-    .slideMenu ul.bar li a
-    {
-	    display: block;
-	    width: 30px;
-	    height: 30px;
-	    text-indent: -9999px;
-	    margin-bottom: 5px;
-    }
-    .slideMenu ul.bar li.disabled a
-    {
-	    visibility: hidden;
-}
 
 #contextMenu
 {

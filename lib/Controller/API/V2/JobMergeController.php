@@ -18,6 +18,8 @@ class JobMergeController extends ProtectedKleinController {
      */
     private $validator;
 
+    private $job ;
+
     public function merge() {
         $pManager = new ProjectManager();
         $pManager->setProjectIdAndLoadProject( $this->validator->getProject()->id );
@@ -25,7 +27,7 @@ class JobMergeController extends ProtectedKleinController {
         $pStruct = $pManager->getProjectStructure();
         $pStruct['id_customer'] = $this->validator->getProject()->id_customer ;
 
-        $pStruct[ 'job_to_merge' ] = $this->validator->getJob()->id;
+        $pStruct[ 'job_to_merge' ] = $this->job->id;
         $pManager->mergeALL( $pStruct );
 
         $this->response->code(200);
@@ -34,6 +36,13 @@ class JobMergeController extends ProtectedKleinController {
 
     protected function validateRequest() {
         $this->validator->validate();
+        // TODO: additional validation to be included in a ProjectAndJob Validation object
+
+        $this->job = \Jobs_JobDao::getById( $this->request->id_job );
+
+        if ( !$this->job || $this->job->id_project != $this->validator->getProject()->id ) {
+            throw new \Exceptions_RecordNotFound();
+        }
     }
 
     protected function afterConstruct() {

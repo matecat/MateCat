@@ -109,6 +109,9 @@ class ProjectManager {
                             'word_count_type'      => '',
                             'metadata'             => array(),
                     ) );
+
+
+
         }
 
         $this->projectStructure = $projectStructure;
@@ -123,9 +126,17 @@ class ProjectManager {
         $this->dbHandler = Database::obtain();
 
         $this->features = new FeatureSet();
+
         if ( !empty( $this->projectStructure['id_customer']) ) {
            $this->features->loadFromIdCustomer(( $this->projectStructure['id_customer']));
         }
+
+        $this->projectStructure['array_files'] = $this->features->filter(
+                'filter_project_manager_array_files',
+                $this->projectStructure['array_files'],
+                $this->projectStructure
+        );
+
 
     }
 
@@ -269,110 +280,14 @@ class ProjectManager {
         $this->projectStructure[ 'array_files' ] = $sortedFiles;
         unset( $sortedFiles );
 
-        //check if all the keys are valid MyMemory keys
         if ( !empty( $this->projectStructure[ 'private_tm_key' ] ) ) {
-            // TODO: move this 100 lines IF condition elsewhere to reduce scope
+            $this->setPrivateTMKeys( $firstTMXFileName );
 
-            foreach ( $this->projectStructure[ 'private_tm_key' ] as $i => $_tmKey ) {
-                
-               $this->tmxServiceWrapper->setTmKey( $_tmKey[ 'key' ] );
-
-                try {
-
-                    $keyExists = $this->tmxServiceWrapper->checkCorrectKey();
-
-                    if ( !isset( $keyExists ) || $keyExists === false ) {
-                        Log::doLog( __METHOD__ . " -> TM key is not valid." );
-                        throw new Exception( "TM key is not valid: " . $_tmKey[ 'key' ], -4 );
-                    }
-
-                } catch ( Exception $e ) {
-
-                    $this->projectStructure[ 'result' ][ 'errors' ][] = array(
-                            "code" => $e->getCode(), "message" => $e->getMessage()
-                    );
-
-                    return false;
-                }
-
-                //set the first key as primary
-                $this->tmxServiceWrapper->setTmKey( $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ] );
-
+            if ( count( $this->projectStructure['result']['errors']) > 0 ) {
+                // This return value was introduced after a refactoring
+                return ;
             }
-
-
-            //check if the MyMemory keys provided by the user are already associated to him.
-            if ( $this->projectStructure[ 'userIsLogged' ] ) {
-
-                $mkDao = new TmKeyManagement_MemoryKeyDao( $this->dbHandler );
-
-                $searchMemoryKey      = new TmKeyManagement_MemoryKeyStruct();
-                $searchMemoryKey->uid = $this->projectStructure[ 'uid' ];
-
-                $userMemoryKeys = $mkDao->read( $searchMemoryKey );
-
-                $userTmKeys             = array();
-                $memoryKeysToBeInserted = array();
-
-                //extract user tm keys
-                foreach ( $userMemoryKeys as $_memoKey ) {
-                    /**
-                     * @var $_memoKey TmKeyManagement_MemoryKeyStruct
-                     */
-                    $userTmKeys[] = $_memoKey->tm_key->key;
-                }
-
-                foreach ( $this->projectStructure[ 'private_tm_key' ] as $_tmKey ) {
-
-                    if ( !in_array( $_tmKey[ 'key' ], $userTmKeys ) ) {
-                        $newMemoryKey   = new TmKeyManagement_MemoryKeyStruct();
-                        $newTmKey       = new TmKeyManagement_TmKeyStruct();
-                        $newTmKey->key  = $_tmKey[ 'key' ];
-                        $newTmKey->tm   = true;
-                        $newTmKey->glos = true;
-
-                        //THIS IS A NEW KEY and must be inserted into the user keyring
-                        //So, if a TMX file is present in the list of uploaded files, and the Key name provided is empty
-                        // assign TMX name to the key
-                        $newTmKey->name = ( !empty( $_tmKey[ 'name' ] ) ? $_tmKey[ 'name' ] : $firstTMXFileName );
-
-                        $newMemoryKey->tm_key = $newTmKey;
-                        $newMemoryKey->uid    = $this->projectStructure[ 'uid' ];
-
-                        $memoryKeysToBeInserted[] = $newMemoryKey;
-                    } else {
-                        Log::doLog( 'skip insertion' );
-                    }
-
-                }
-                try {
-                    $mkDao->createList( $memoryKeysToBeInserted );
-                } catch ( Exception $e ) {
-                    Log::doLog( $e->getMessage() );
-
-                    # Here we handle the error, displaying HTML, logging, ...
-                    $output = "<pre>\n";
-                    $output .= $e->getMessage() . "\n\t";
-                    $output .= "</pre>";
-                    Utils::sendErrMailReport( $output );
-
-                }
-
-            }
-
-
-            //the base case is when the user clicks on "generate private TM" button:
-            //a (user, pass, key) tuple is generated and can be inserted
-            //if it comes with it's own key without querying the creation API, create a (key,key,key) user
-            if ( empty( $this->projectStructure[ 'private_tm_user' ] ) ) {
-                $this->projectStructure[ 'private_tm_user' ] = $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ];
-                $this->projectStructure[ 'private_tm_pass' ] = $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ];
-            }
-
-            insertTranslator( $this->projectStructure );
-
         }
-
 
         $uploadDir = $this->uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure[ 'uploadToken' ];
 
@@ -610,7 +525,7 @@ class ProjectManager {
             //we need compare the number of segments with translations, but take an eye to the opensource
 
             $query_visible_segments = "SELECT count(*) as cattool_segments
-				FROM segments WHERE id_file IN ( %s ) and show_in_cattool = 1";
+				FROM segments USE INDEX(id_file) WHERE id_file IN ( %s ) and show_in_cattool = 1";
 
             $string_file_list       = implode( ",", $this->projectStructure[ 'file_id_list' ]->getArrayCopy() );
             $query_visible_segments = sprintf( $query_visible_segments, $string_file_list );
@@ -677,7 +592,12 @@ class ProjectManager {
         $this->projectStructure[ 'result' ][ 'target_language' ] = $this->projectStructure[ 'target_language' ];
         $this->projectStructure[ 'result' ][ 'status' ]          = $this->projectStructure[ 'status' ];
         $this->projectStructure[ 'result' ][ 'lang_detect' ]     = $this->projectStructure[ 'lang_detect_files' ];
-        $this->projectStructure[ 'result' ][ 'analyze_url' ]     = $this->analyzeURL();
+
+        if ( INIT::$VOLUME_ANALYSIS_ENABLED )
+            $this->projectStructure[ 'result' ][ 'analyze_url' ]     = $this->analyzeURL();
+
+
+
 
         /*
          * This is the old code.
@@ -1474,6 +1394,9 @@ class ProjectManager {
 
         $rows = $this->dbHandler->fetch_array( $query_job );
 
+        $metadata_dao = new Projects_MetadataDao();
+        $metadata_dao->cleanupChunksOptions( $rows );
+
         //get the min and
         $first_job         = reset( $rows );
         $job_first_segment = $first_job[ 'job_first_segment' ];
@@ -1610,15 +1533,13 @@ class ProjectManager {
                             //mrk in the list will not be too!!!
                             $show_in_cattool = 1;
 
-                            $tempSeg = strip_tags( $seg_source[ 'raw-content' ] );
-                            $tempSeg = preg_replace( '#[\p{P}\p{Z}\p{C}]+#u', "", $tempSeg );
-                            $tempSeg = trim( $tempSeg );
+                            $wordCount = CatUtils::segment_raw_wordcount( $seg_source[ 'raw-content' ], $xliff_file[ 'attr' ][ 'source-language' ] );
 
                             //init tags
                             $seg_source[ 'mrk-ext-prec-tags' ] = '';
                             $seg_source[ 'mrk-ext-succ-tags' ] = '';
 
-                            if ( is_null( $tempSeg ) || $tempSeg === '' ) {
+                            if ( empty( $wordCount ) ) {
                                 $show_in_cattool = 0;
                             } else {
                                 $extract_external                  = $this->_strip_external( $seg_source[ 'raw-content' ] );
@@ -1670,7 +1591,7 @@ class ProjectManager {
                             $source            = $this->dbHandler->escape( CatUtils::raw2DatabaseXliff( $seg_source[ 'raw-content' ] ) );
                             $source_hash       = $this->dbHandler->escape( md5( $seg_source[ 'raw-content' ] ) );
                             $ext_succ_tags     = $this->dbHandler->escape( $seg_source[ 'ext-succ-tags' ] );
-                            $num_words         = CatUtils::segment_raw_wordcount( $seg_source[ 'raw-content' ], $xliff_file[ 'attr' ][ 'source-language' ] );
+                            $num_words         = $wordCount;
                             $trans_unit_id     = $this->dbHandler->escape( $xliff_trans_unit[ 'attr' ][ 'id' ] );
                             $mrk_ext_prec_tags = $this->dbHandler->escape( $seg_source[ 'mrk-ext-prec-tags' ] );
                             $mrk_ext_succ_tags = $this->dbHandler->escape( $seg_source[ 'mrk-ext-succ-tags' ] );
@@ -1687,14 +1608,14 @@ class ProjectManager {
 
                         $this->addNotesToProjectStructure( $xliff_trans_unit );
 
-                    } else {
+                    }
+                    else {
 
-                        $tempSeg   = strip_tags( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
-                        $tempSeg   = preg_replace( '#[\p{P}\p{Z}\p{C}]+#u', "", $tempSeg );
-                        $tempSeg   = trim( $tempSeg );
+                        $wordCount = CatUtils::segment_raw_wordcount( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $xliff_file[ 'attr' ][ 'source-language' ] );
+
                         $prec_tags = null;
                         $succ_tags = null;
-                        if ( is_null( $tempSeg ) || $tempSeg === '' ) { //|| $tempSeg == NBSPPLACEHOLDER ) { //@see CatUtils.php, ( DEFINE NBSPPLACEHOLDER ) don't show <x id=\"nbsp\"/>
+                        if ( empty( $wordCount ) ) {
                             $show_in_cattool = 0;
                         } else {
                             $extract_external                              = $this->_strip_external( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
@@ -1730,7 +1651,7 @@ class ProjectManager {
 
                         //we do the word count after the place-holding with <x id="nbsp"/>
                         //so &nbsp; are now not recognized as word and not counted as payable
-                        $num_words = CatUtils::segment_raw_wordcount( $source, $xliff_file[ 'attr' ][ 'source-language' ] );
+                        $num_words = $wordCount;
 
                         //applying escaping after raw count
                         $source      = $this->dbHandler->escape( CatUtils::raw2DatabaseXliff( $source ) );
@@ -2288,6 +2209,133 @@ class ProjectManager {
         }
 
         return $isAConvertedFile;
+    }
+
+    /**
+     *
+     * What this function does:
+     *
+     * 1. validate the input private keys
+     * 2. set the primary key into the engine object
+     * 3. check if the user is logged and if so add the new keys to his keyring
+     * 4. ensure tm_user and tm_pass are populated even if missing
+     * 5. insert translator
+     * 6. run a callback to plugins to filter the private_tm_key value
+     *
+     * @param $firstTMXFileName
+     *
+     * @return array
+     */
+    private function setPrivateTMKeys( $firstTMXFileName ) {
+
+        foreach ( $this->projectStructure[ 'private_tm_key' ] as $i => $_tmKey ) {
+
+            $this->tmxServiceWrapper->setTmKey( $_tmKey[ 'key' ] );
+
+            try {
+
+                $keyExists = $this->tmxServiceWrapper->checkCorrectKey();
+
+                if ( !isset( $keyExists ) || $keyExists === false ) {
+                    Log::doLog( __METHOD__ . " -> TM key is not valid." );
+
+                    throw new Exception( "TM key is not valid: " . $_tmKey[ 'key' ], -4 );
+                }
+
+            } catch ( Exception $e ) {
+
+                $this->projectStructure[ 'result' ][ 'errors' ][] = array(
+                        "code" => $e->getCode(), "message" => $e->getMessage()
+                );
+
+                return false;
+            }
+
+            // TODO: evaluate if it's the case to remove this line from here. This is required for later calls
+            // for instance when it's time to push the TMX the TM Engine.
+
+        }
+
+
+        //check if the MyMemory keys provided by the user are already associated to him.
+        if ( $this->projectStructure[ 'userIsLogged' ] ) {
+
+            $mkDao = new TmKeyManagement_MemoryKeyDao( $this->dbHandler );
+
+            $searchMemoryKey      = new TmKeyManagement_MemoryKeyStruct();
+            $searchMemoryKey->uid = $this->projectStructure[ 'uid' ];
+
+            $userMemoryKeys = $mkDao->read( $searchMemoryKey );
+
+            $userTmKeys             = array();
+            $memoryKeysToBeInserted = array();
+
+            //extract user tm keys
+            foreach ( $userMemoryKeys as $_memoKey ) {
+                /**
+                 * @var $_memoKey TmKeyManagement_MemoryKeyStruct
+                 */
+                $userTmKeys[] = $_memoKey->tm_key->key;
+            }
+
+
+            foreach ( $this->projectStructure[ 'private_tm_key' ] as $_tmKey ) {
+
+                if ( !in_array( $_tmKey[ 'key' ], $userTmKeys ) ) {
+                    $newMemoryKey   = new TmKeyManagement_MemoryKeyStruct();
+                    $newTmKey       = new TmKeyManagement_TmKeyStruct();
+                    $newTmKey->key  = $_tmKey[ 'key' ];
+                    $newTmKey->tm   = true;
+                    $newTmKey->glos = true;
+
+                    //THIS IS A NEW KEY and must be inserted into the user keyring
+                    //So, if a TMX file is present in the list of uploaded files, and the Key name provided is empty
+                    // assign TMX name to the key
+                    $newTmKey->name = ( !empty( $_tmKey[ 'name' ] ) ? $_tmKey[ 'name' ] : $firstTMXFileName );
+
+                    $newMemoryKey->tm_key = $newTmKey;
+                    $newMemoryKey->uid    = $this->projectStructure[ 'uid' ];
+
+                    $memoryKeysToBeInserted[] = $newMemoryKey;
+                } else {
+                    Log::doLog( 'skip insertion' );
+                }
+
+            }
+            try {
+                $mkDao->createList( $memoryKeysToBeInserted );
+
+            } catch ( Exception $e ) {
+                Log::doLog( $e->getMessage() );
+
+                # Here we handle the error, displaying HTML, logging, ...
+                $output = "<pre>\n";
+                $output .= $e->getMessage() . "\n\t";
+                $output .= "</pre>";
+                Utils::sendErrMailReport( $output );
+
+            }
+
+        }
+
+        //the base case is when the user clicks on "generate private TM" button:
+        //a (user, pass, key) tuple is generated and can be inserted
+        //if it comes with it's own key without querying the creation API, create a (key,key,key) user
+        if ( empty( $this->projectStructure[ 'private_tm_user' ] ) ) {
+            $this->projectStructure[ 'private_tm_user' ] = $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ];
+            $this->projectStructure[ 'private_tm_pass' ] = $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ];
+        }
+
+        insertTranslator( $this->projectStructure );
+
+        $this->projectStructure['private_tm_key'] = $this->features->filter('filter_project_manager_private_tm_key',
+                $this->projectStructure['private_tm_key'],
+                array( 'project_structure' => $this->projectStructure )
+        );
+
+        if ( count( $this->projectStructure[ 'private_tm_key' ] ) > 0 ) {
+            $this->tmxServiceWrapper->setTmKey( $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ] );
+        }
     }
 
 }

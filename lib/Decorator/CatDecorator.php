@@ -23,6 +23,8 @@ class CatDecorator {
 
     private $isGDriveProject ;
 
+    private $lang_handler ;
+
     public function __construct( catController $controller, PHPTAL $template ) {
 
         $this->controller     = $controller;
@@ -31,6 +33,8 @@ class CatDecorator {
         $this->jobStatsStruct = new JobStatsStruct( $this->controller->getJobStats() );
 
         $this->isGDriveProject = $controller->isCurrentProjectGDrive();
+
+        $this->lang_handler = Langs_Languages::getInstance();
     }
 
     public function decorate() {
@@ -44,6 +48,8 @@ class CatDecorator {
         $this->template->header_main_button_enabled = true;
         $this->template->header_main_button_label   = $this->getHeaderMainButtonLabel();
         $this->template->header_main_button_id      = 'downloadProject';
+
+        $this->template->isCJK = false;
 
         if( $this->jobStatsStruct->isCompleted() && $this->jobStatsStruct->isAllApproved() ){
             $this->template->header_main_button_class = 'downloadtr-button approved';
@@ -63,6 +69,8 @@ class CatDecorator {
             $this->decorateForTranslate();
         }
 
+        $this->setQualityReportHref();
+
         $this->template->searchable_statuses = $this->searchableStatuses();
         $this->template->project_type        = null;
 
@@ -76,13 +84,15 @@ class CatDecorator {
             $this->template->remoteFilesInJob = $files ;
         }
 
+        $this->template->support_mail = INIT::$SUPPORT_MAIL ;
         $this->template->showReplaceOptionsInSearch = true ;
-        
-        
+
+        $this->template->languages_array = json_encode(  $this->lang_handler->getEnabledLanguages( 'en' ) ) ;
+
+        $this->decorateForCJK();
+
         $this->assignOptions(); 
         
-
-
     }
 
     /**
@@ -145,8 +155,6 @@ class CatDecorator {
             $this->template->header_quality_report_item_class = 'hide';
         }
 
-        $this->setQualityReportHref();
-
     }
 
     private function decorateForTranslate() {
@@ -168,9 +176,46 @@ class CatDecorator {
         $this->template->speech2text_enabled = $chunk_options_model->isEnabled( 'speech2text' ) ; 
         $this->template->lxq_enabled = $chunk_options_model->isEnabled( 'lexiqa' ) ; 
         $this->template->deny_lexiqa = false ;
+        $this->template->segmentation_rule = $chunk_options_model->project_metadata[ 'segmentation_rule' ];
         
         $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages ); 
         $this->template->lexiqa_languages = json_encode( ProjectOptionsSanitizer::$lexiQA_allowed_languages ); 
+    }
+
+    private function decorateForCJK() {
+
+        //check if it is a composite language, for cjk check that accepts only ISO 639 code
+        if ( strpos( $this->controller->target_code, '-' ) !== false ) {
+            //pick only first part
+            $tmp_lang               = explode( '-', $this->controller->target_code );
+            $target_code_no_country = $tmp_lang[ 0 ];
+            unset( $tmp_lang );
+        } else {
+            //not a RFC code, it's fine
+            $target_code_no_country = $this->controller->target_code;
+        }
+
+        //check if cjk
+        if ( array_key_exists( $target_code_no_country, CatUtils::$cjk ) ) {
+//            $this->template->taglockEnabled = 0;
+        }
+
+        //check if it is a composite language, for cjk check that accepts only ISO 639 code
+        if ( strpos( $this->controller->source_code, '-' ) !== false ) {
+            //pick only first part
+            $tmp_lang               = explode( '-', $this->controller->source_code );
+            $source_code_no_country = $tmp_lang[ 0 ];
+            unset( $tmp_lang );
+        } else {
+            //not a RFC code, it's fine
+            $source_code_no_country = $this->controller->source_code;
+        }
+
+        //check if cjk
+        if ( array_key_exists( $source_code_no_country, CatUtils::$cjk ) ) {
+            $this->template->isCJK = true;
+        }
+
     }
 
 }

@@ -27,12 +27,8 @@ RewriteRule ^(translate)/([^/]*)/([^/]*)/([^/\-]*)-(?:[0-9]*-)?([^/]*)[/]*([^/]*
 RewriteRule ^(revise)[/]?$ index.php?action=cat [L]
 RewriteRule ^(revise)/([^/]*)/([^/]*)/([^/\-]*)-(?:[0-9]*-)?([^/]*)[/]*([^/]*)[/]*$ index.php?action=cat&jid=$4&password=$5&page=$6 [L]
 
-RewriteRule ^(translatenew)[/]?$ index.php?action=catnew [L]
-RewriteRule ^(translatenew)/([^/]*)/([^/]*)/([^/]*)-([^/]*)[/]*([^/]*)[/]*$ index.php?action=catnew&jid=$4&password=$5&step=$6 [L]
-
 RewriteRule ^(analyze)/([^/]*)/([^/]*)-([^/]*)$ index.php?action=analyze&pid=$3&password=$4 [L]
 RewriteRule ^(jobanalysis)/([^/]*)-([^/]*)-([^/]*)/?$ index.php?action=analyze&pid=$2&jid=$3&password=$4 [L]
-RewriteRule ^(statistics)[/]?$ index.php?action=projectStatistics [L]
 
 RewriteRule ^(login)[/]?$ index.php?action=loginPage [L,QSA]
 RewriteRule ^(ajaxLogout)[/]?$ index.php?action=formLogout [L,QSA]
@@ -48,6 +44,8 @@ RewriteRule ^(manage)/([^/]*)/?$ index.php?action=manage&page=$2 [QSA,L]
 RewriteRule ^(editlog)/([^/]*)-([^/]*)/?$ index.php?action=editlog&jid=$2&password=$3 [QSA,L]
 RewriteRule ^(revise-summary)/([^/]*)-([^/]*)/?$ index.php?action=reviseSummary&jid=$2&password=$3 [L]
 RewriteRule ^(referenceFile)/([^/]*)/([^/]*)/([^/]*)?$ index.php?action=referenceFile&job_id=$2&job_password=$3&segment_id=$4 [L]
+
+RewriteRule ^activityLog/([^/]*)/([^/]*)[/]?(download)?$ index.php?action=activityLog&id_project=$1&password=$2&download=$3 [QSA,L]
 
 RewriteRule ^utils/xliff-to-target$ index.php?action=xliffToTargetView [L]
 RewriteRule ^api/docs$ lib/View/APIDoc.php [L]

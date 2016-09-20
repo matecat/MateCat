@@ -17,9 +17,7 @@ $.extend(UI, {
             UI.offline = true;
             UI.body.attr('data-offline-mode', 'light-off');
 
-            if (typeof this.offlineNotification != 'undefined') {
-                APP.removeNotification(this.offlineNotification);
-            }
+            this.removeOldConnectionNotification();
             var notification = {
                 title: '<div class="message-offline-icons"><span class="icon-power-cord"></span><span class="icon-power-cord2"></span></div>No connection available',
                 text: 'You can still translate <span class="remainingSegments">' + UI.offlineCacheSize + '</span> segments in offline mode. Do not refresh or you lose the segments!',
@@ -27,14 +25,8 @@ $.extend(UI, {
                 position: "bl",
                 autoDismiss: false,
                 allowHtml: true,
-                closeCallback: function() {
-                    console.log("Notification close");
-                },
-                openCallback: function() {
-                    console.log("Notification open");
-                },
                 timer: 7000
-            }
+            };
             this.offlineNotification = APP.addNotification(notification);
 
             UI.checkingConnection = setInterval( function() {
@@ -45,20 +37,20 @@ $.extend(UI, {
     },
     endOfflineMode: function () {
         if ( UI.offline ) {
-
             UI.offline = false;
-            if (typeof this.offlineNotification != 'undefined') {
-                APP.removeNotification(this.offlineNotification);
-            }
+            UI.removeOldConnectionNotification();
             var notification = {
                 title: 'Connection is back',
                 text: 'We are saving translated segments in the database.',
                 type: 'success',
                 position: "bl",
                 autoDismiss: true,
-                timer: 10000
+                timer: 10000,
+                openCallback: function () {
+                    UI.removeOldConnectionNotification();
+                }
             };
-            this.offlineNotification = APP.addNotification(notification);
+            UI.offlineNotification = APP.addNotification(notification);
 
             setTimeout( function () {
                 $( '#messageBar .close' ).click();
@@ -114,9 +106,7 @@ $.extend(UI, {
             $._data( $("body")[0] ).events = {}
         }, 300 );
 
-        if (typeof this.offlineNotification != 'undefined') {
-            APP.removeNotification(this.offlineNotification);
-        }
+        UI.removeOldConnectionNotification();
 
         //clear previous Interval and set a new one
         UI.currentConnectionCountdown = $( ".noConnectionMsg .countdown" ).countdown( function () {
@@ -220,6 +210,11 @@ $.extend(UI, {
         // reset counter by 1
         UI.offlineCacheRemaining += 1;
         //$('#messageBar .remainingSegments').text( this.offlineCacheRemaining );
+    },
+    removeOldConnectionNotification: function () {
+        if (typeof UI.offlineNotification != 'undefined') {
+            APP.removeNotification(this.offlineNotification);
+        }
     }
 });
 

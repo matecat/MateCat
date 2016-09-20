@@ -1,4 +1,6 @@
 <?php
+use ActivityLog\Activity;
+use ActivityLog\ActivityLogStruct;
 
 /**
  * Description of manageController
@@ -39,6 +41,15 @@ class manageController extends viewController {
 	}
 
 	public function doAction() {
+
+		list( $uid, $email ) = $this->getLoginUserParams();
+		$activity             = new ActivityLogStruct();
+		$activity->action     = ActivityLogStruct::ACCESS_MANAGE_PAGE;
+		$activity->ip         = Utils::getRealIpAddr();
+		$activity->uid        = $uid;
+		$activity->event_date = date( 'Y-m-d H:i:s' );
+		Activity::save( $activity );
+		
 	}
 
 	public function setTemplateVars() {

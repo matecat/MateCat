@@ -1,5 +1,7 @@
 <?php
 
+use ActivityLog\Activity;
+use ActivityLog\ActivityLogStruct;
 use \Analysis\Status;
 
 class analyzeController extends viewController {
@@ -22,8 +24,14 @@ class analyzeController extends viewController {
     protected $_outsource_login_API = '//signin.translated.net/';
 
     private $pid;
+    private $jid;
     private $ppassword;
     private $jpassword;
+
+    /**
+     * @var Analysis_AnalysisModel
+     */
+    protected $model;
 
     /**
      * @var Projects_ProjectStruct
@@ -39,6 +47,11 @@ class analyzeController extends viewController {
      * @var FeatureSet
      */
     private $features ;
+
+    /**
+     * @var bool
+     */
+    private $project_not_found = false;
 
     public function __construct() {
 
@@ -90,6 +103,18 @@ class analyzeController extends viewController {
 
         $this->model = new Analysis_AnalysisModel( $this->project, $this->chunk );
         $this->model->loadData();
+
+        list( $uid, $email ) = $this->getLoginUserParams();
+
+        $activity             = new ActivityLogStruct();
+        $activity->id_job     = $this->jid;
+        $activity->id_project = $this->pid;
+        $activity->action     = ActivityLogStruct::ACCESS_ANALYZE_PAGE;
+        $activity->ip         = Utils::getRealIpAddr();
+        $activity->uid        = $uid;
+        $activity->event_date = date( 'Y-m-d H:i:s' );
+        Activity::save( $activity );
+        
     }
 
     public function setTemplateVars() {
@@ -142,9 +167,19 @@ class analyzeController extends viewController {
         $this->subject = $langDomains::getDisplayDomain($this->subject);  // subject is null !!??!?!?!
         $this->template->subject                    = $this->model->subject;
 
+        //first two letter of code lang
+        $project_data = $this->model->getProjectData()[ 0 ];
+
+        $this->template->isCJK = false;
+
+        if ( array_key_exists( explode( "-" , $project_data[ 'source' ] )[0], CatUtils::$cjk ) ) {
+            $this->template->isCJK = true;
+        }
+
         $this->template->isLoggedIn = $this->isLoggedIn();
 
-        if ( isset( $_SESSION[ '_anonym_pid' ] ) && !empty( $_SESSION[ '_anonym_pid' ] ) ) {
+        if ( \Bootstrap::areOauthKeysPresent() && isset( $_SESSION[ '_anonym_pid' ] )
+                && !empty( $_SESSION[ '_anonym_pid' ] ) ) {
             $_SESSION[ 'incomingUrl' ]         = INIT::$HTTPHOST . $_SERVER[ 'REQUEST_URI' ];
             $_SESSION[ '_newProject' ]         = 1;
             $this->template->showModalBoxLogin = true;

@@ -20,6 +20,7 @@ class Engines_Results_MyMemory_ExportResponse extends Engines_Results_AbstractRe
         $this->id              = isset( $response[ 'responseData' ][ 'id' ] ) ? $response[ 'responseData' ][ 'id' ] : '';
         $this->resourceLink    = isset( $response[ 'resourceLink' ] ) ? $response[ 'resourceLink' ] : '';
         $this->responseDetails = isset( $response[ 'status' ] ) ? $response[ 'status' ] : '';
+        $this->estimatedTime   = isset( $response[ 'estimated_time' ] ) ? $response[ 'estimated_time' ] : '';
 
     }
 

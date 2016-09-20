@@ -10,6 +10,8 @@ class oauthResponseHandlerController extends viewController{
 
 	private $user_logged;
 
+	private $oauthTokenEncryption;
+
 	public function __construct(){
 
         //SESSION ENABLED
@@ -21,6 +23,8 @@ class oauthResponseHandlerController extends viewController{
 
 		$this->client = OauthClient::getInstance()->getClient();
                 $this->client->setAccessType( "offline" );
+
+		$oauthTokenEncryption = OauthTokenEncryption::getInstance();
 
 		$plus = new Google_Service_Oauth2($this->client);
 
@@ -43,7 +47,9 @@ class oauthResponseHandlerController extends viewController{
 			$this->userData['email']              = $user['email'];
 			$this->userData['first_name']         = $user['givenName'];
 			$this->userData['last_name']          = $user['familyName'];
-            $this->userData['oauth_access_token'] = $this->client->getAccessToken();
+			$this->userData['oauth_access_token'] = $oauthTokenEncryption->encrypt(
+				$this->client->getAccessToken()
+			);
 		}
 		else if (isset($error)){
 			$this->user_logged = false;

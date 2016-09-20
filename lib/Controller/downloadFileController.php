@@ -1,18 +1,28 @@
 <?php
 
+use ActivityLog\Activity;
+use ActivityLog\ActivityLogStruct;
+
 set_time_limit( 180 );
 
 class downloadFileController extends downloadController {
 
     protected $id_job;
     protected $password;
-    protected $fname;
     protected $download_type;
     protected $jobInfo;
     protected $forceXliff;
     protected $downloadToken;
     protected $gdriveService;
     protected $openOriginalFiles;
+    protected $id_file ;
+
+    protected $trereIsARemoteFile = null;
+
+    /**
+     * @var Jobs_JobStruct
+     */
+    protected $job;
 
     /**
      * @var Google_Service_Drive_DriveFile
@@ -45,16 +55,13 @@ class downloadFileController extends downloadController {
 
         $__postInput = filter_var_array( $_REQUEST, $filterArgs );
 
-        //NOTE: This is for debug purpose only,
-        //NOTE: Global $_POST Overriding from CLI Test scripts
-        //$__postInput = filter_var_array( $_POST, $filterArgs );
+        $this->_user_provided_filename = $__postInput[ 'filename' ];
 
-        $this->fname         = $__postInput[ 'filename' ];
-        $this->id_file       = $__postInput[ 'id_file' ];
-        $this->id_job        = $__postInput[ 'id_job' ];
-        $this->download_type = $__postInput[ 'download_type' ];
-        $this->password      = $__postInput[ 'password' ];
-        $this->downloadToken = $__postInput[ 'downloadToken' ];
+        $this->id_file              = $__postInput[ 'id_file' ];
+        $this->id_job               = $__postInput[ 'id_job' ];
+        $this->download_type        = $__postInput[ 'download_type' ];
+        $this->password             = $__postInput[ 'password' ];
+        $this->downloadToken        = $__postInput[ 'downloadToken' ];
 
         $this->forceXliff = ( isset( $__postInput[ 'forceXliff' ] ) && !empty( $__postInput[ 'forceXliff' ] ) && $__postInput[ 'forceXliff' ] == 1 );
         $this->openOriginalFiles = ( isset( $__postInput[ 'original' ] ) && !empty( $__postInput[ 'original' ] ) && $__postInput[ 'original' ] == 1 );
@@ -81,6 +88,9 @@ class downloadFileController extends downloadController {
 
             return null;
         }
+
+        $this->job      = Jobs_JobDao::getById($this->id_job);
+        $this->project  = $this->job->getProject();
 
         //get storage object
         $fs        = new FilesStorage();
@@ -188,6 +198,7 @@ class downloadFileController extends downloadController {
                             // using the following line of code, that changes the XLIFF's
                             // extension just a moment before it is downloaded by the user.
                             $output_content[ $fileID ][ 'output_filename' ] = preg_replace("|\\.sdlxliff$|i", ".xlf", $output_content[ $fileID ][ 'output_filename' ]);
+                            $output_content[ $fileID ][ 'output_filename' ] = preg_replace( "#(\\.xlf)+#i", ".xlf", $output_content[ $fileID ][ 'output_filename' ] );
                         }
                     }
 
@@ -268,13 +279,15 @@ class downloadFileController extends downloadController {
         }
 
         //set the file Name
-        $pathinfo        = FilesStorage::pathinfo_fix( $this->fname );
+        $pathinfo        = FilesStorage::pathinfo_fix( $this->_getDefaultFileName( $this->project ) );
         $this->_filename = $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "." . $pathinfo[ 'extension' ];
 
         //qui prodest to check download type?
         if ( $this->download_type == 'omegat' ) {
 
-            $this->_filename .= ".zip";
+            if ( $pathinfo['extension'] != 'zip') {
+                $this->_filename .= ".zip";
+            }
 
             $tmsService = new TMSService();
             $tmsService->setOutputType( 'tm' );
@@ -382,15 +395,54 @@ class downloadFileController extends downloadController {
         catch(Exception $e){
             Log::doLog( 'Failed to delete dir:'.$e->getMessage() );
         }
+
+        $this->_saveActivity();
+
+    }
+
+    protected function _saveActivity(){
+
+        $redisHandler = new RedisHandler();
+        $job_complete   = $redisHandler->getConnection()->get( 'job_completeness:' . $this->id_job );
+
+        if( $this->download_type == 'omegat' ){
+            $action = ActivityLogStruct::DOWNLOAD_OMEGAT;
+        } elseif( $this->forceXliff ){
+            $action = ActivityLogStruct::DOWNLOAD_XLIFF;
+        } elseif( $this->anyRemoteFile() ){
+            $action = ( $job_complete ? ActivityLogStruct::DOWNLOAD_GDRIVE_TRANSLATION : ActivityLogStruct::DOWNLOAD_GDRIVE_PREVIEW );
+        } else {
+            $action = ( $job_complete ? ActivityLogStruct::DOWNLOAD_TRANSLATION : ActivityLogStruct::DOWNLOAD_PREVIEW );
+        }
+        
+        /**
+         * Retrieve user information
+         */
+        $this->checkLogin();
+
+        $activity             = new ActivityLogStruct();
+        $activity->id_job     = $this->id_job;
+        $activity->id_project = $this->jobInfo['id_project'];
+        $activity->action     = $action;
+        $activity->ip         = Utils::getRealIpAddr();
+        $activity->uid        = $this->uid;
+        $activity->event_date = date( 'Y-m-d H:i:s' );
+        Activity::save( $activity );
+
     }
 
     /**
      * Initializes remoteFiles property reading entries from database
      *
-     * @return int
+     * Cached result to avoid query executed more than once
+     *
+     * @return bool
      */
-    private function anyRemoteFile()  {
-        return \RemoteFiles_RemoteFileDao::jobHasRemoteFiles( $this->id_job );
+    private function anyRemoteFile() {
+        if( is_null( $this->trereIsARemoteFile ) ){
+            $this->trereIsARemoteFile = \RemoteFiles_RemoteFileDao::jobHasRemoteFiles( $this->id_job );
+        }
+        return $this->trereIsARemoteFile;
     }
 
     private function outputResultForOriginalFiles() {
@@ -435,6 +487,8 @@ class downloadFileController extends downloadController {
     }
 
     private function startGDriveService() {
+        $oauthTokenEncryption = OauthTokenEncryption::getInstance();
+
         // Get the user data from the project owner
         $project = \Projects_ProjectDao::findByJobId( $this->id_job );
         $userDao = new \Users_UserDao( \Database::obtain() );
@@ -444,7 +498,7 @@ class downloadFileController extends downloadController {
         \AuthCookie::tryToRefreshToken( $project->id_customer );
 
         $this->gdriveService = GDrive::getService(
-                array( 'access_token' => $user->oauth_access_token )
+                array( 'access_token' => $oauthTokenEncryption->decrypt( $user->oauth_access_token ) )
         );
     }
 
@@ -786,8 +840,10 @@ class downloadFileController extends downloadController {
      */
     public function reBuildZipContent( $zipFileName, $internalFiles ) {
 
+        $project = Projects_ProjectDao::findById( $this->jobInfo[ 'id_project' ] );
+
         $fs      = new FilesStorage();
-        $zipFile = $fs->getOriginalZipPath( $this->jobInfo[ 'create_date' ], $this->jobInfo[ 'id_project' ], $zipFileName );
+        $zipFile = $fs->getOriginalZipPath( $project->create_date, $this->jobInfo[ 'id_project' ], $zipFileName );
 
         $tmpFName = tempnam( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/', "ZIP" );
         copy( $zipFile, $tmpFName );

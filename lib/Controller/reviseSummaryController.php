@@ -1,4 +1,6 @@
 <?php
+use ActivityLog\Activity;
+use ActivityLog\ActivityLogStruct;
 
 /**
  * Description of catController
@@ -85,8 +87,28 @@ class reviseSummaryController extends viewController {
         $this->qa_overall_avg      = $jobVote[ 'avg' ];
         $this->qa_equivalent_class = $jobVote[ 'equivalent_class' ];
 
+        $this->_saveActivity();
+
 	}
 
+    protected function _saveActivity(){
+
+        /**
+         * Retrieve user information
+         */
+        list( $uid, $email ) = $this->getLoginUserParams();
+
+        $activity             = new ActivityLogStruct();
+        $activity->id_job     = $this->jid;
+        $activity->id_project = $this->data[ 'id_project' ];
+        $activity->action     = ActivityLogStruct::ACCESS_REVISE_SUMMARY_PAGE;
+        $activity->ip         = Utils::getRealIpAddr();
+        $activity->uid        = $uid;
+        $activity->event_date = date( 'Y-m-d H:i:s' );
+        Activity::save( $activity );
+
+    }
+    
 	public function setTemplateVars() {
 
         $this->template->job_archived = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';

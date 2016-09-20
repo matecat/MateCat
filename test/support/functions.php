@@ -172,8 +172,8 @@ function integrationCreateTestProject( $options=array() ) {
 
     $test->params = array(
             'project_name' => 'foo',
-            'target_lang' => 'it',
-            'source_lang' => 'en'
+            'target_lang' => 'it-IT',
+            'source_lang' => 'en-US'
     );
 
     if ( array_key_exists( 'params', $options )) {
@@ -318,4 +318,29 @@ function setupSignalHandler() {
     pcntl_signal(SIGHUP,  "sig_handler");
     pcntl_signal(SIGINT, "sig_handler");
     echo "\033[0;30;42m" . str_pad( "Signal handler installed.", 35, " ", STR_PAD_BOTH ). "\033[0m\n";
+}
+
+function toggleChunkOptions( $options ) {
+    $test = new CurlTest();
+    $test->params = $options[ 'features' ];
+    $test->method = 'POST';
+    $test->path = sprintf(
+            '/api/v2/jobs/%s/%s/options',
+            $options[ 'id_job' ],
+            $options[ 'job_pass' ]
+    );
+
+    $response = $test->getResponse();
+
+    if ( !in_array( (int) $response[ 'code' ], array( 200, 201 ) ) ) {
+        throw new Exception( "invalid response code " . $response[ 'code' ] );
+    }
+
+    $body = json_decode( $response[ 'body'], true );
+
+    if ( !empty( $body[ 'errors' ] ) ) {
+        throw new Exception( "Ajax error detected " . var_export( $body[ 'errors' ], true ) );
+    }
+
+    return $body ;
 }

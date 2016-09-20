@@ -41,6 +41,16 @@ class Utils {
 		return is_array($array) AND (bool) count(array_filter(array_keys($array), 'is_string'));
 	}
 
+	public static function curlFile($filePath)
+	{
+		$curlFile =  "@$filePath";		
+		// CURLfile is available with PHP 5.5 and higher versions
+		if( version_compare(PHP_VERSION, '5.5.0') >= 0 ){ 
+		    $curlFile = new CURLFile($filePath);
+		}
+		return $curlFile;
+	}
+
 	public static function curl_post($url, &$d, $opt = array()) {
 		if (!self::is_assoc($d)) {
 			throw new Exception("The input data to " . __FUNCTION__ . "must be an associative array", -1);
@@ -118,7 +128,7 @@ class Utils {
 
 	public static function sendErrMailReport( $htmlContent, $subject = null ){
 
-        if ( EnvWrap::isTest() ) {
+        if ( !INIT::$SEND_ERR_MAIL_REPORT ) {
           return true ;
         }
 
@@ -472,5 +482,18 @@ class Utils {
 
 		return $job_owner;
 	}
+
+    /**
+     * @param $params
+     * @return string
+     */
+	public static function buildQueryString( $params ) {
+        $querystring = implode('&', array_map(function($key, $value) {
+            return "$key=" . urlencode( $value ) ;
+        }, array_keys( $params ), $params ));
+
+        return $querystring ;
+    }
+
 }
 

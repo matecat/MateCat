@@ -34,7 +34,7 @@ class Analysis_AnalysisModel {
     public $proj_payable_rates;
     public $subject;
 
-
+    public $project_data ;
     public $reference_files ;
     
     /**
@@ -85,15 +85,15 @@ class Analysis_AnalysisModel {
     public function loadData() {
 
         $this->loadReferenceFiles();
+        $this->loadProjectData();
 
-        $project_data = $this->getProjectData();
         $lang_handler = Langs_Languages::getInstance();
 
-        $this->subject = $project_data[ 0 ][ 'subject' ];
+        $this->subject = $this->project_data[ 0 ][ 'subject' ];
 
         $this->pid = $this->project->id ;
 
-        foreach ( $project_data as &$p_jdata ) {
+        foreach ( $this->project_data as $p_jdata ) {
 
             $p_jdata[ 'filename' ] = ZipArchiveExtended::getFileName( $p_jdata[ 'filename' ] );
 
@@ -212,6 +212,13 @@ class Analysis_AnalysisModel {
         $tm_wc_time   = $this->tm_analysis_wc / INIT::$ANALYSIS_WORDS_PER_DAYS;
         $fast_wc_time = $this->fast_analysis_wc / INIT::$ANALYSIS_WORDS_PER_DAYS;
 
+        //CJK count we assume 4000 chars/day
+        if ( array_key_exists( explode( "-" , $p_jdata[ 'source' ] )[0], CatUtils::$cjk ) ) {
+            $raw_wc_time  = $this->total_raw_word_count / ( INIT::$ANALYSIS_WORDS_PER_DAYS + 1000 );
+            $tm_wc_time   = $this->tm_analysis_wc / ( INIT::$ANALYSIS_WORDS_PER_DAYS + 1000 );
+            $fast_wc_time = $this->fast_analysis_wc / ( INIT::$ANALYSIS_WORDS_PER_DAYS + 1000 );
+        }
+
         $raw_wc_unit  = 'day';
         $tm_wc_unit   = 'day';
         $fast_wc_unit = 'day';
@@ -293,16 +300,24 @@ class Analysis_AnalysisModel {
 
     }
 
-    private function getProjectData() {
+    private function loadProjectData() {
+
+        if( !empty( $this->project_data ) ){
+            return $this->project_data;
+        }
+
         if ( $this->chunk == null ) {
-            $project_by_jobs_data = getProjectData( $this->project->id, $this->project->password );
+            $this->project_data = getProjectData( $this->project->id, $this->project->password );
         } else {
-            $project_by_jobs_data = getProjectData( $this->project->id, $this->project->password,
+            $this->project_data = getProjectData( $this->project->id, $this->project->password,
                     $this->chunk->id, $this->chunk->password );
         }
 
-        return $project_by_jobs_data;
+        return $this->project_data;
     }
 
+    public function getProjectData(){
+        return $this->loadProjectData();
+    }
 
 }

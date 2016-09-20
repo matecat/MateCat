@@ -7,7 +7,12 @@ class setTranslationController extends ajaxController {
 
     protected $__postInput = array();
 
-    protected $propagate = false;
+    /**
+     * Set as true the propagation default
+     * @var bool
+     */
+    protected $propagate = true;
+
     protected $id_job = false;
     protected $password = false;
 
@@ -89,7 +94,14 @@ class setTranslationController extends ajaxController {
 
         $this->id_job                = $this->__postInput[ 'id_job' ];
         $this->password              = $this->__postInput[ 'password' ];
-        $this->propagate             = $this->__postInput[ 'propagate' ]; //not used here but used in child class setAutoPropagationController
+
+        /*
+         * set by the client, mandatory
+         * check propagation flag, if it is null the client not sent it, leave default true, otherwise set the value
+         */
+        !is_null( $this->__postInput[ 'propagate' ] ) ? $this->propagate = $this->__postInput[ 'propagate' ] : null /* do nothing */ ;
+
+        $this->propagate             = $this->__postInput[ 'propagate' ]; //set by the client, mandatory
         $this->id_segment            = $this->__postInput[ 'id_segment' ];
         $this->time_to_edit          = (int)$this->__postInput[ 'time_to_edit' ]; //cast to int, so the default is 0
         $this->id_translator         = $this->__postInput[ 'id_translator' ];
@@ -106,9 +118,6 @@ class setTranslationController extends ajaxController {
         //PATCH TO FIX BOM INSERTIONS
         $this->translation = str_replace( "\xEF\xBB\xBF", '', $this->translation );
 
-        if ( is_null( $this->propagate ) || !isset( $this->propagate ) ) {
-            $this->propagate = true;
-        }
         Log::doLog( $this->__postInput );
 
     }
@@ -418,19 +427,11 @@ class setTranslationController extends ajaxController {
             }
         }
 
-        $doPropagation = true;
-
-        //for the moment, this is set explicitely
-        if ( $this->propagate == false ) {
-            $doPropagation = false;
-        }
-
         //propagate translations
-
         $TPropagation = array();
         $propagationTotal = array();
 
-        if ( $doPropagation && in_array( $this->status, array(
+        if ( $this->propagate && in_array( $this->status, array(
             Constants_TranslationStatus::STATUS_TRANSLATED,
             Constants_TranslationStatus::STATUS_APPROVED,
             Constants_TranslationStatus::STATUS_REJECTED
@@ -582,10 +583,8 @@ class setTranslationController extends ajaxController {
                 'old_translation' => $old_translation,
                 'propagated_ids'  => $propagationTotal['propagated_ids'],
                 'chunk'           => $this->chunk,
-                'segment'         => $this->segment,
-                'uid'             => $uid
+                'segment'         => $this->segment
                 ));
-
 
         //EVERY time an user changes a row in his job when the job is completed,
         // a query to do the update is executed...
@@ -603,24 +602,7 @@ class setTranslationController extends ajaxController {
             }
         }
 
-        /**
-         * Set the new contribution in queue
-         */
-        $contributionStruct                       = new ContributionStruct();
-        $contributionStruct->fromRevision         = self::isRevision();
-        $contributionStruct->id_job               = $this->id_job;
-        $contributionStruct->job_password         = $this->password;
-        $contributionStruct->segment              = $this->segment[ 'segment' ];
-        $contributionStruct->translation          = $_Translation[ 'translation' ];
-        $contributionStruct->api_key              = \INIT::$MYMEMORY_API_KEY;
-        $contributionStruct->uid                  = $this->uid;
-        $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
-        $contributionStruct->oldSegment           = $this->segment[ 'segment' ]; //we do not change the segment source
-        $contributionStruct->oldTranslation       = $old_translation[ 'translation' ];
-
-        //assert there is not an exception by following the flow
-        WorkerClient::init( new AMQHandler() );
-        Set::contribution( $contributionStruct );
+        $this->evalSetContribution( $_Translation, $old_translation );
 
         $this->logForTagProjection(CatUtils::rawxliff2view($this->translation));
 
@@ -807,5 +789,38 @@ class setTranslationController extends ajaxController {
         \Log::$fileName = 'tagProjection.log';
         \Log::doLog( $msg );
         \Log::$fileName = $logfile;
+    }
+
+    /**
+     * @param $_Translation
+     * @param $old_translation
+     */
+    private function evalSetContribution( $_Translation, $old_translation ) {
+        if ( in_array( $this->status, array(
+                Constants_TranslationStatus::STATUS_DRAFT,
+                Constants_TranslationStatus::STATUS_NEW
+        ) ) ) {
+            return;
+        }
+        
+        /**
+         * Set the new contribution in queue
+         */
+        $contributionStruct                       = new ContributionStruct();
+        $contributionStruct->fromRevision         = self::isRevision();
+        $contributionStruct->id_job               = $this->id_job;
+        $contributionStruct->job_password         = $this->password;
+        $contributionStruct->segment              = $this->segment[ 'segment' ];
+        $contributionStruct->translation          = $_Translation[ 'translation' ];
+        $contributionStruct->api_key              = \INIT::$MYMEMORY_API_KEY;
+        $contributionStruct->uid                  = $this->uid;
+        $contributionStruct->oldTranslationStatus = $old_translation[ 'status' ];
+        $contributionStruct->oldSegment           = $this->segment[ 'segment' ]; //we do not change the segment source
+        $contributionStruct->oldTranslation       = $old_translation[ 'translation' ];
+        $contributionStruct->propagationRequest   = $this->propagate;
+
+        //assert there is not an exception by following the flow
+        WorkerClient::init( new AMQHandler() );
+        Set::contribution( $contributionStruct );
     }
 }

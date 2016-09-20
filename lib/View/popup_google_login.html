@@ -6,7 +6,7 @@
 
         <h1>Login with Google</h1>
 
-        <p>Log in to access advanced functionalities<br />(e.g. TM and glossary management)</p><br/>
+        <p>Log in to access advanced functionalities<br />(e.g. TM, MT, glossary management <br /> and Google Drive integration)</p>
         <div class="popup-box">
             <div class="outer">
                 <div class="inner">
@@ -16,6 +16,30 @@
                             type="button"
                             class="login-button"
                             >Sign in using Google
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal login-google-drive" data-type="view" metal:define-macro="googleDriveLoginPopup">
+    <div class="popup-outer closeClickingOutside"></div>
+    <div class="popup">
+        <a href="#" class="x-popup"></a>
+
+        <h1>Login with Google</h1>
+
+        <p>Log in to select files to add from your Google Drive to MateCat</p><br/>
+        <div class="popup-box">
+            <div class="outer">
+                <div class="inner">
+                    <button id="sign-in"
+                            tal:attributes='data-oauth authURL'
+                            name=""
+                            type="button"
+                            class="login-button"
+                    >Sign in using Google
                     </button>
                 </div>
             </div>

@@ -23,7 +23,7 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
     }
 
     public function fullName() {
-        return $this->first_name . ' ' . $this->last_name;
+        return trim($this->first_name . ' ' . $this->last_name);
     }
 
     public function shortName() {
@@ -33,5 +33,28 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
     public function getEmail() {
         return $this->email ;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getUid() {
+        return $this->uid;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFirstName() {
+        return $this->first_name;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLastName() {
+        return $this->last_name;
+    }
+
+
 
 }

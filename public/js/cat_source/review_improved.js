@@ -96,29 +96,37 @@ if ( ReviewImproved.enabled() )
                 id_issue
             );
 
-            $.ajax({
+            return $.ajax({
                 url: replies_path,
                 type: 'POST',
                 data : data
             }).done( function( data ) {
                 MateCat.db.segment_translation_issue_comments.insert ( data.comment );
+
+                if( data.issue ) {
+                    ReviewImproved.updateIssueRebutted( data.issue );
+                }
            });
         },
-        setIssueRebutted : function( id_segment, id_issue, rebutted ) {
-            var issues_path = sprintf(
-                '/api/v2/jobs/%s/%s/segments/%s/translation-issues/%s/rebutted-at',
+        updateIssueRebutted : function ( issue ) {
+            MateCat.db.upsert('segment_translation_issues', 'id', issue );
+        },
+        undoRebutIssue : function ( id_segment, id_issue ) {
+            var issue_update_path = sprintf(
+                '/api/v2/jobs/%s/%s/segments/%s/translation-issues/%s',
                 config.id_job, config.password,
                 id_segment,
                 id_issue
             );
 
-            $.ajax({
-                url: issues_path,
+            return $.ajax({
+                url: issue_update_path,
                 type: 'POST',
-                data : { 'rebutted' : rebutted }
+                data : { rebutted_at : null }
             }).done( function( data ) {
-                var issue = MateCat.db.segment_translation_issues.by( 'id', data.id );
-                MateCat.db.segment_translation_issues.update( _.extend( issue, { 'rebutted_at': data.rebutted_at } ) );
+                if( data.issue ) {
+                    ReviewImproved.updateIssueRebutted( data.issue );
+                }
             });
         },
         unmountPanelComponent : function() {
@@ -127,22 +135,18 @@ if ( ReviewImproved.enabled() )
 
         mountPanelComponent : function() {
             ReactDOM.render(
-                React.createElement( ReviewSidePanel, {} ),
+                React.createElement( ReviewSidePanel, {closePanel: this.closePanel} ),
                 mountpoint );
         },
 
         openPanel : function(data) {
             $('article').addClass('review-panel-opened');
             $('body').addClass('side-tools-opened review-side-panel-opened');
-            hackSnapEngage( true );
-            
-            var segment = UI.Segment.findEl( data.sid );
+            hackIntercomButton( true );
 
             $(document).trigger('review-panel:opened', data);
 
-            // simulate the click to activate the segment, we don't want
-            // side panel open on deactivted segments.
-
+            var segment = UI.Segment.findEl( data.sid );
             segment.find( UI.targetContainerSelector() ).click();
 
             window.setTimeout( function(data) {
@@ -163,7 +167,7 @@ if ( ReviewImproved.enabled() )
         closePanel : function() {
             $(document).trigger('review-panel:closed');
 
-            hackSnapEngage( false );
+            hackIntercomButton( false );
 
             $('article').removeClass('review-panel-opened');
             $('body').removeClass('side-tools-opened review-side-panel-opened');
@@ -176,41 +180,8 @@ if ( ReviewImproved.enabled() )
     });
 })(jQuery, ReviewImproved);
 
-/**
- * Review page
- */
-
-if ( ReviewImproved.enabled() && config.isReview ) {
-    SegmentActivator.registry.push(function( sid ) {
-        var segment = UI.Segment.find( sid );
-        // TODO: refactor this, the click to activate a
-        // segment is not a good way to handle.
-        segment.el.find('.errorTaggingArea').click();
-    });
-
+if ( ReviewImproved.enabled() ) {
     $.extend(ReviewImproved, {
-        submitIssue : function(sid, data_array, options) {
-            var path  = sprintf('/api/v2/jobs/%s/%s/segments/%s/translation-issues',
-                  config.id_job, config.password, sid);
-            var segment = UI.Segment.find( sid );
-
-            
-            var deferreds = _.map( data_array, function( data ) {
-                return $.post( path, data )
-                .done(function( data ) {
-                    MateCat.db.segment_translation_issues.insert( data.issue ) ;
-                })
-            });
-
-            var submitIssues = function() {
-                $.when.apply($, deferreds).done(function() {
-                    ReviewImproved.reloadQualityReport();
-                    options.done();
-                });
-            };
-
-            submitIssues();
-        },
         reloadQualityReport : function() {
             var path  = sprintf('/api/v2/jobs/%s/%s/quality-report',
                 config.id_job, config.password);
@@ -225,6 +196,38 @@ if ( ReviewImproved.enabled() && config.isReview ) {
                         percentage_reviewed : review.percentage
                     });
                 });
+        }
+    });
+}
+
+/**
+ * Review page
+ */
+
+if ( ReviewImproved.enabled() && config.isReview ) {
+    SegmentActivator.registry.push(function( sid ) {
+        var segment = UI.Segment.find( sid );
+        // TODO: refactor this, the click to activate a
+        // segment is not a good way to handle.
+        segment.el.find('.errorTaggingArea').click();
+    });
+
+    $.extend(ReviewImproved, {
+        submitIssue : function(sid, data_array) {
+            var path  = sprintf('/api/v2/jobs/%s/%s/segments/%s/translation-issues',
+                  config.id_job, config.password, sid);
+            var segment = UI.Segment.find( sid );
+            
+            var deferreds = _.map( data_array, function( data ) {
+                return $.post( path, data )
+                .done(function( data ) {
+                    MateCat.db.segment_translation_issues.insert( data.issue ) ;
+                })
+            });
+
+            return $.when.apply($, deferreds).done(function() {
+                ReviewImproved.reloadQualityReport();
+            });
         },
 
     });

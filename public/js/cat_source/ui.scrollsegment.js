@@ -98,16 +98,40 @@
         }
 
     }
-    
+
+    /**
+     * This function takes a segment as argument and the speed to apply to scroll.
+     *
+     * If a previous segment is found, then we scroll to the previous segment, so to keep
+     * a sufficient amount of space to read the previous segment.
+     *
+     * If a previous segment is not found, then we assume the segment is the first of a file.
+     *
+     * This function returns a Deferred, so to make the it chainable with other functions to be triggered
+     * when scroll animation is completed.
+     *
+     * @param segment
+     * @param speed
+     * @returns Deferred
+     */
     var animateScroll = function( segment, speed ) {
         var scrollAnimation = $( scrollSelector ).stop().delay( 300 ); 
-        
-        if ( segment.prev().length ) {
-            scrollAnimation.animate({
-                scrollTop: segment.prev().offset().top - $('.header-menu').height()
-            }, speed);
+        var pos ;
+        var prev = segment.prev('section') ;
+
+        // XXX: this condition is necessary **only** because in case of first segment of a file,
+        // the previous element (<ul>) has display:none style. Such elements are ignored by the
+        // the .offset() function.
+        if ( prev.length ) {
+            pos = prev.offset().top - $('.header-menu').height() ;
+        } else {
+            pos = segment.offset().top - $('.header-menu').height() ;
         }
-        
+
+        scrollAnimation.animate({
+            scrollTop: pos
+        }, speed);
+
         return scrollAnimation.promise() ; 
     }
 

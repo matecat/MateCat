@@ -68,12 +68,15 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
                 break;
             case 'tmx_export_create_url' :
             case 'tmx_export_check_url' :
+            case 'tmx_export_email_url' :
+            case 'glossary_export_relative_url' :
                 $result_object = Engines_Results_MyMemory_ExportResponse::getInstance( $decoded );
                 break;
             case 'analyze_url':
                 $result_object = Engines_Results_MyMemory_AnalyzeResponse::getInstance( $decoded );
                 break;
             case 'contribute_relative_url':
+            case 'update_relative_url':
                 $result_object = Engines_Results_MyMemory_SetContributionResponse::getInstance( $decoded );
                 break;
             default:
@@ -162,6 +165,32 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
 
     }
 
+    public function update( $_config ){
+
+        $parameters               = array();
+        $parameters[ 'seg' ]      = $_config[ 'segment' ];
+        $parameters[ 'tra' ]      = $_config[ 'translation' ];
+        $parameters[ 'newseg' ]   = $_config[ 'newsegment' ];
+        $parameters[ 'newtra' ]   = $_config[ 'newtranslation' ];
+        $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
+
+        if ( !empty( $_config[ 'id_user' ] ) ) {
+            if ( !is_array( $_config[ 'id_user' ] ) ) {
+                $_config[ 'id_user' ] = array( $_config[ 'id_user' ] );
+            }
+            $parameters[ 'key' ] = implode( ",", $_config[ 'id_user' ] );
+        }
+
+        $this->call( "update_relative_url", $parameters );
+
+        if ( $this->result->responseStatus != "200" ) {
+            return false;
+        }
+
+        return true;
+
+    }
+
     /**
      * @param $_config
      *
@@ -212,13 +241,13 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
      *
      * @return bool
      */
-    public function update( $_config ) {
+    public function updateGlossary( $_config ) {
 
         $parameters               = array();
         $parameters[ 'seg' ]      = $_config[ 'segment' ];
         $parameters[ 'tra' ]      = $_config[ 'translation' ];
-        $parameters[ 'newseg' ]      = $_config[ 'newsegment' ];
-        $parameters[ 'newtra' ]      = $_config[ 'newtranslation' ];
+        $parameters[ 'newseg' ]   = $_config[ 'newsegment' ];
+        $parameters[ 'newtra' ]   = $_config[ 'newtranslation' ];
         $parameters[ 'langpair' ] = $_config[ 'source' ] . "|" . $_config[ 'target' ];
         $parameters[ 'tnote' ]    = $_config[ 'tnote' ];
         $parameters[ 'prop' ]     = $_config[ 'prop' ];
@@ -319,7 +348,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
 
         $postFields[ 'key' ] = trim( $key );
 
-        if ( PHP_MINOR_VERSION >= 5 ) {
+        if ( version_compare(PHP_VERSION, '5.5.0') >= 0 ) {
             /**
              * Added in PHP 5.5.0 with FALSE as the default value.
              * PHP 5.6.0 changes the default value to TRUE.
@@ -343,7 +372,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         $postFields[ 'key' ] = trim( $key );
 
 
-        if (PHP_MINOR_VERSION >= 5) {
+        if ( version_compare(PHP_VERSION, '5.5.0') >= 0 ) {
             /**
              * Added in PHP 5.5.0 with FALSE as the default value.
              * PHP 5.6.0 changes the default value to TRUE.
@@ -408,7 +437,11 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
      * <br />invoke with the same parameters of createExport
      *
      * @see Engines_MyMemory::createExport
-     *
+     *,
+                $this->name,
+                $userMail,
+                $userName,
+                $userSurname
      * @param      $key
      * @param null $source
      * @param null $target
@@ -437,66 +470,86 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
      *
      * @param $key
      * @param $hashPass
+     * @param $isGlossary
+     * @param $fileName
      *
      * @return resource
      *
      * @throws Exception
      */
-    public function downloadExport( $key, $hashPass ) {
+    public function downloadExport( $key, $hashPass = null, $isGlossary = false, $fileName = null ) {
 
         $parameters = array();
 
         $parameters[ 'key' ]  = trim( $key );
         $parameters[ 'pass' ] = trim( $hashPass );
 
-//        $this->call( 'tmx_export_download_url', $parameters );
+        ( $isGlossary ? $method = "glossary_export_relative_url" : $method = "tmx_export_download_url" );
 
-        $url = $this->base_url . "/" . $this->tmx_export_download_url . "?";
-        $url .= http_build_query( $parameters );;
+        if( is_null( $fileName ) ) { $fileName =  "/tmp/TMX" . $key; }
+        $handle = fopen( $fileName, "w+" );
 
-//        $parsed_url = parse_url ( $this->url );
-        $parsed_url = parse_url( $url );
+        $this->_setAdditionalCurlParams( [
+                CURLOPT_TIMEOUT    => 120,
+                CURLOPT_FILE       => $handle
+        ] );
 
-        $isSSL = stripos( $parsed_url[ 'scheme' ], "https" ) !== false;
+        $this->call( $method, $parameters );
 
-//        if( $isSSL ){
-//            $fp = fsockopen( "ssl://" . $parsed_url['host'], 443, $errno, $err_str, 120 );
-//        } else {
-//            $fp = fsockopen( $parsed_url['host'], 80, $errno, $err_str, 120 );
-//        }
-//
-//        if (!$fp) {
-//            throw new Exception( "$err_str ($errno)" );
-//        }
-//
-//        $out = "GET " . $parsed_url['path'] . "?" . $parsed_url['query'] .  " HTTP/1.1\r\n";
-//        $out .= "Host: {$parsed_url['host']}\r\n";
-//        $out .= "Connection: Close\r\n\r\n";
-//
-//        Log::doLog( "Download TMX: " . $this->url );
+        /**
+         * Code block not useful at moment until MyMemory does not respond with HTTP 404
+         *
+         * $result Engines_Results_MyMemory_ExportResponse
+         */
+/*
+ *
+ *        if ( $this->result->responseStatus >= 400 ) {
+ *            throw new Exception( $this->result->error->message, $this->result->responseStatus );
+ *        }
+ *        fwrite( $handle, $this->result );
+ */
 
-//        fwrite($fp, $out);
-
-        $streamFileName = tempnam( "/tmp", "TMX" );
-
-        $handle = fopen( $streamFileName, "w+" );
-
-        $ch = curl_init();
-
-        // set URL and other appropriate options
-//        curl_setopt( $ch, CURLOPT_URL, $this->url );
-        curl_setopt( $ch, CURLOPT_URL, $url );
-        curl_setopt( $ch, CURLOPT_HEADER, 0 );
-        curl_setopt( $ch, CURLOPT_FILE, $handle ); // write curl response to file
-        curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
-
-        // grab URL and pass it to the browser
-        curl_exec( $ch );
-
+        fflush( $handle );
         rewind( $handle );
 
         return $handle;
 
+    }
+
+    /**
+     * Calls the MyMemory endpoint to send the TMX download URL to the user e-mail
+     *
+     * @param $key
+     * @param $name
+     * @param $userEmail
+     * @param $userName
+     * @param $userSurname
+     *
+     *
+     * @return Engines_Results_MyMemory_ExportResponse
+     * @throws Exception
+     *
+     */
+    public function emailExport( $key, $name, $userEmail, $userName, $userSurname ) {
+        $parameters = array();
+
+        $parameters[ 'key' ] = trim( $key );
+        $parameters[ 'user_email' ] = trim( $userEmail );
+        $parameters[ 'user_name' ] = trim( $userName ) . " " . trim( $userSurname );
+        ( !empty( $name ) ? $parameters[ 'zip_name' ] = $name : $parameters[ 'zip_name' ] = $key );
+        $parameters[ 'zip_name' ] = $parameters[ 'zip_name' ] . ".zip";
+
+        $this->call( 'tmx_export_email_url', $parameters );
+
+        /**
+         * $result Engines_Results_MyMemory_ExportResponse
+         */
+        if ( $this->result->responseStatus >= 400 ) {
+            throw new Exception( $this->result->error->message, $this->result->responseStatus );
+        }
+
+        Log::doLog('TMX exported to E-mail.');
+        return $this->result;
     }
 
     /*****************************************/

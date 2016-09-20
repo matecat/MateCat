@@ -11,6 +11,18 @@ abstract class downloadController extends controller {
 
     protected $content = "";
     protected $_filename = "unknown";
+    protected $_user_provided_filename ;
+
+    protected $uid;
+    protected $userIsLogged = false;
+    protected $userMail;
+
+    protected $id_job ;
+
+    /**
+     * @var Projects_ProjectStruct
+     */
+    protected $project ;
 
     protected function unlockToken( $tokenContent = null ) {
 
@@ -32,9 +44,15 @@ abstract class downloadController extends controller {
         try {
             $this->unlockToken();
 
-            $project = \Projects_ProjectDao::findByJobId($this->id_job);
+            if ( empty( $this->project) ) {
+                $this->project = \Projects_ProjectDao::findByJobId($this->id_job);
+            }
 
-            $isGDriveProject = \Projects_ProjectDao::isGDriveProject($project->id);
+            if ( empty($this->_filename ) ) {
+                $this->_filename = $this->_getDefaultFileName( $this->project );
+            }
+
+            $isGDriveProject = \Projects_ProjectDao::isGDriveProject($this->project->id);
 
             $forceXliff = intval( filter_input( INPUT_GET, 'forceXliff' ) );
 
@@ -60,6 +78,21 @@ abstract class downloadController extends controller {
             exit;
         }
     }
+
+    /**
+     * If more than one file constitutes the project, then the filename is the project name.
+     * If the project is made of just one file, then the filename for download is the file name itself.
+     * @param $project Projects_ProjectStruct
+     */
+    protected function _getDefaultFileName( Projects_ProjectStruct $project ) {
+            $files = Files_FileDao::getByProjectId( $project->id );
+
+            if ( count(  $files ) > 1 ) {
+                return $this->project->name . ".zip" ;
+            } else {
+                return $files[0]->filename ;
+            }
+        }
 
     /**
      * @param ZipContentObject[] $output_content
@@ -132,6 +165,19 @@ abstract class downloadController extends controller {
         }
 
         return $filename;
+
+    }
+
+    public function checkLogin( $close = true ) {
+        //Warning, sessions enabled, disable them after check, $_SESSION is in read only mode after disable
+        parent::sessionStart();
+        $this->userIsLogged = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) );
+        $this->userMail     = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ? $_SESSION[ 'cid' ] : null );
+        $this->uid          = ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) ? $_SESSION[ 'uid' ] : null );
+
+        if ( $close ) {
+            parent::disableSessions();
+        }
 
     }
 

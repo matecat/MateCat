@@ -154,7 +154,7 @@ class QualityReportModel {
                 $this->structureNestSegment( $record );
             }
 
-            if ( $current_issue_id != $record[ 'issue_id' ] ) {
+            if ( $current_issue_id != $record[ 'issue_id' ] && $record['issue_id'] !== null ) {
                 $this->structureNestIssue( $record );
             }
 

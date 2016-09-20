@@ -18,6 +18,7 @@ export default React.createClass({
     },
 
     componentDidMount: function() {
+        MateCat.db.addListener('segments', ['update'], this.setStateReadingFromDatabase );
         MateCat.db.addListener('segment_translation_issues', 
                                   ['insert', 'update', 'delete'], 
                                   this.setStateReadingFromDatabase );
@@ -25,6 +26,7 @@ export default React.createClass({
     },
 
     componentWillUnmount: function() {
+        MateCat.db.removeListener('segments', ['update'], this.setStateReadingFromDatabase );
         MateCat.db.removeListener('segment_translation_issues', 
                                   ['insert', 'update', 'delete'], 
                                   this.setStateReadingFromDatabase ); 

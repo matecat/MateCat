@@ -2,8 +2,6 @@
 
 class createProjectControllerTest extends IntegrationTest {
 
-    private $test_data=array();
-
     function setUp() {
         $this->test_data=new stdClass();
     }
@@ -39,7 +37,7 @@ class createProjectControllerTest extends IntegrationTest {
         $this->assertNotNull( $project->id );
         $metadata = $project->getMetadataAsKeyValue();
 
-        $this->assertEquals( '1', $metadata['speech2text'] );
+        $this->assertEquals( false, array_key_exists('speech2text', $metadata ) );
     }
 
     function test_speech2text_can_be_disabled() {
@@ -97,7 +95,8 @@ class createProjectControllerTest extends IntegrationTest {
                 'job_subject' => 'general',
                 'file_name' => 'amex-test.docx.xlf',
                 'upload_session' => $upload_session,
-                'files' => array( $file )
+                'files' => array( $file ),
+                'lexiqa' => 'true'
         ));
 
         $json_response = json_decode( $response['body'], TRUE );
@@ -118,20 +117,21 @@ class createProjectControllerTest extends IntegrationTest {
         prepare_file_in_upload_folder( $file, $upload_session );
 
         do_file_conversion(array(
-                'source_lang' => 'mm-MY',
+                'source_lang' => 'my-MM',
                 'target_lang' => 'ja-JP,be-BY',
                 'file_name' => 'amex-test.docx.xlf',
                 'upload_session' => $upload_session
         ));
 
         $response = createProjectWithUIParams( array(
-                'source_language' => 'mm-MY',
+                'source_language' => 'my-MM',
                 'target_language' => 'ja-JP,be-BY', 
                 'pretranslate_100' => 1,
                 'job_subject' => 'general',
                 'file_name' => 'amex-test.docx.xlf',
                 'upload_session' => $upload_session,
-                'files' => array( $file )
+                'files' => array( $file ),
+                'lexiqa' => 'true'
         ));
 
         $json_response = json_decode( $response['body'], TRUE );
@@ -152,20 +152,21 @@ class createProjectControllerTest extends IntegrationTest {
         prepare_file_in_upload_folder( $file, $upload_session );
 
         do_file_conversion(array(
-                'source_lang' => 'my-MM',
+                'source_lang' => 'en-US',
                 'target_lang' => 'it-IT,be-BY',
                 'file_name' => 'amex-test.docx.xlf',
                 'upload_session' => $upload_session
         ));
 
         $response = createProjectWithUIParams( array(
-                'source_language' => 'my-MM',
+                'source_language' => 'en-US',
                 'target_language' => 'it-IT,be-BY',
                 'pretranslate_100' => 1,
                 'job_subject' => 'general',
                 'file_name' => 'amex-test.docx.xlf',
                 'upload_session' => $upload_session,
-                'files' => array( $file )
+                'files' => array( $file ),
+                'lexiqa' => 'true'
         ));
 
         $json_response = json_decode( $response['body'], TRUE );
@@ -235,7 +236,8 @@ class createProjectControllerTest extends IntegrationTest {
                 'job_subject' => 'general',
                 'file_name' => 'amex-test.docx.xlf',
                 'upload_session' => $upload_session,
-                'files' => array( $file )
+                'files' => array( $file ),
+                'tag_projection' => 'true'
         ));
 
         $json_response = json_decode( $response['body'], TRUE );
@@ -256,20 +258,21 @@ class createProjectControllerTest extends IntegrationTest {
         prepare_file_in_upload_folder( $file, $upload_session );
 
         do_file_conversion(array(
-                'source_lang' => 'mm-MY',
+                'source_lang' => 'my-MM',
                 'target_lang' => 'ja-JP,be-BY',
                 'file_name' => 'amex-test.docx.xlf',
                 'upload_session' => $upload_session
         ));
 
         $response = createProjectWithUIParams( array(
-                'source_language' => 'mm-MY',
+                'source_language' => 'my-MM',
                 'target_language' => 'ja-JP,be-BY',
                 'pretranslate_100' => 1,
                 'job_subject' => 'general',
                 'file_name' => 'amex-test.docx.xlf',
                 'upload_session' => $upload_session,
-                'files' => array( $file )
+                'files' => array( $file ),
+                'tag_projection' => 'true'
         ));
 
         $json_response = json_decode( $response['body'], TRUE );
@@ -290,20 +293,21 @@ class createProjectControllerTest extends IntegrationTest {
         prepare_file_in_upload_folder( $file, $upload_session );
 
         do_file_conversion(array(
-                'source_lang' => 'my-MM',
+                'source_lang' => 'en-US',
                 'target_lang' => 'it-IT,be-BY',
                 'file_name' => 'amex-test.docx.xlf',
                 'upload_session' => $upload_session
         ));
 
         $response = createProjectWithUIParams( array(
-                'source_language' => 'my-MM',
+                'source_language' => 'en-US',
                 'target_language' => 'it-IT,be-BY',
                 'pretranslate_100' => 1,
                 'job_subject' => 'general',
                 'file_name' => 'amex-test.docx.xlf',
                 'upload_session' => $upload_session,
-                'files' => array( $file )
+                'files' => array( $file ),
+                'tag_projection' => 'true'
         ));
 
         $json_response = json_decode( $response['body'], TRUE );
@@ -339,7 +343,8 @@ class createProjectControllerTest extends IntegrationTest {
                 'job_subject' => 'general',
                 'file_name' => 'amex-test.docx.xlf',
                 'upload_session' => $upload_session,
-                'files' => array( $file )
+                'files' => array( $file ),
+                'tag_projection' => 'false'
         ));
 
         $json_response = json_decode( $response['body'], TRUE );

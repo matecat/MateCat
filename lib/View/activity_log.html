@@ -1,0 +1,129 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Activity Log - MateCat</title>
+    <meta name="description" content="MateCat allows you to get more matches than any other CAT tool."/>
+    <meta name="viewport" content="width=device-width"/>
+    <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="${basepath}public/css/analyze.css?build=${build_number}"/>
+
+    <script type="text/javascript" src="${basepath}public/js/lib/jquery.js"></script>
+    <script type="text/javascript" src="${basepath}public/js/lib/jquery.tablesorter.js"></script>
+    <script type="text/javascript" src="${basepath}public/js/lib/jquery.tablesorter.widgets.js"></script>
+    <script type="text/javascript" src="${basepath}public/js/common.js?build=${build_number}"></script>
+
+    <div metal:use-macro="${php: INIT::$ROOT}/public/holidays/holidays.html/analyze_holidays"/>
+
+</head>
+<body class="activity-log-page">
+<header style="padding-bottom:5px">
+    <div class="wrapper">
+        <a href="${basepath}" class="logo"></a>
+        <a tal:attributes="href string:${basepath}manage/"  class="downloadtr-button backbtn" ><  Back to Manage</a>
+    </div>
+</header>
+
+<div class="activity-log-container">
+<h1>Activity Log</h1>
+    <h1 id="pid">
+        Project: ${projectID} - ${projectName}
+    </h1>
+
+    <div tal:define="activity php:array()" tal:repeat="jobActivity outputContent" class="activity-log-entry">
+
+        <h3>Project Related Activities:</h3>
+        <div class="search-container">
+            <span class="search-label">Search:</span>
+            <input class="search" type="search" data-column="all" placeholder="Search" />
+        </div>
+        <table id="activity-log" class="activitylog tablesorter" width="100%" border="0" cellspacing="0" cellpadding="0">
+            <thead>
+            <tr>
+                <th><div class="th-inner"><span>User IP</span></div></th>
+                <th><div class="th-inner"><span>Event Date</span></div></th>
+                <th><div class="th-inner"><span>Project ID</span></div></th>
+                <th><div class="th-inner"><span>Job ID</span></div></th>
+                <th><div class="th-inner"><span>Language Pair</span></div></th>
+                <th><div class="th-inner"><span>User Name</span></div></th>
+                <th><div class="th-inner"><span>User Email</span></div></th>
+                <th><div class="th-inner"><span>Action</span></div></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr tal:define="activity php:array()" tal:repeat="activity jobActivity">
+                <td tal:content="activity/ip | default">Unknown</td>
+                <td tal:content="activity/event_date | default">Unkwnown</td>
+                <td tal:content="activity/id_project | default">-</td>
+                <td tal:content="activity/id_job | default">-</td>
+                <td tal:content="activity/lang_pairs | default">-</td>
+                <td tal:content="activity/name | default">Unknown</td>
+                <td tal:content="activity/email | default">Unkwnown</td>
+                <td tal:content="activity/action | default">Unkwnown</td>
+            </tr>
+            </tbody>
+
+        </table>
+    </div>
+
+
+</div>
+
+<footer>
+    <div class="wrapper">
+
+        <nav tal:condition="php: Bootstrap::areOauthKeysPresent()">
+            <ul>
+                <li><a tal:attributes="href string:${basepath}manage/">Manage</a></li>
+                <li><a href="https://www.matecat.com/support/" target="_blank">User Guide</a></li>
+            </ul>
+
+            <tal:block tal:condition="php: empty(logged_user)">
+                <div id='welcomebox'>
+                    <span>Anonymous</span> (<a id='loginlink' tal:attributes="href incomingUrl">login</a>)
+                </div>
+            </tal:block>
+
+            <tal:block tal:condition="php: !empty(logged_user)">
+                <div id='welcomebox' tal:attributes="title extended_user">
+                    <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)
+                </div>
+            </tal:block>
+
+        </nav>
+
+    </div>
+</footer>
+
+<script type="text/javascript"></script>
+
+<div metal:use-macro="cookiebanner.html/cookieBanner"/>
+
+<script type="text/javascript">
+    $(function() {
+
+                var table_sorter = $("#activity-log").tablesorter({
+                    widgets: ["filter"],
+                    widgetOptions : {
+                        // use the filter_external option OR use bindSearch function (below)
+                        // to bind external filters.
+                        // filter_external : '.search',
+                        filter_columnFilters: false,
+                        filter_saveFilters : true,
+                        filter_reset: '.reset',
+                        filter_external: '.search'
+                    }
+                });
+
+
+            }
+    );
+    $( window ).resize(function() {
+        APP.fitText($('#pid'), $('#pid'), 70);
+    });
+</script>
+
+<div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_analyze"/>
+
+</body>
+</html>

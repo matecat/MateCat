@@ -2,14 +2,14 @@
 
     $.extend(UI, {
         openSegment: function(editarea_or_segment, operation) {
-
+            var editarea, segment;
             if ( editarea_or_segment instanceof UI.Segment ) {
-                var editarea = $('.editarea', editarea_or_segment.el);
-                var segment = editarea_or_segment ;
+                editarea = $('.editarea', editarea_or_segment.el);
+                segment = editarea_or_segment ;
             }
             else {
-                var editarea = editarea_or_segment ;
-                var segment = new UI.Segment( editarea_or_segment.closest('section') );
+                editarea = $(editarea_or_segment) ;
+                segment = new UI.Segment( editarea.closest('section') );
             }
 
             if ( Review.enabled() && !Review.evalOpenableSegment( segment.el ) ) {
@@ -142,10 +142,6 @@
                 segment: segment
             });
 
-            if( this.currentSegment.data( 'modified' ) === true ) {
-                segment.el.trigger('fixedButton:enable');
-            }
-            
             Speech2Text.enabled() && Speech2Text.enableMicrophone(segment.el);
         }
     });

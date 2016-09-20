@@ -6,12 +6,15 @@ $.extend(UI, {
 		$("body").removeClass('shortcutsDisabled');
 		$("body").on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.standard, function(e) {
 			e.preventDefault();
-			if ($('.editor .translated').length > 0) {
-				$('.editor .translated').click();
+			if ( config.isReview ) {
+				$('body.review .editor .approved').click();
 			} else {
-				$('.editor .guesstags').click();
+				if ( $('.editor .translated').length > 0 ) {
+					$('.editor .translated').click();
+				} else if ( $('.editor .guesstags').length > 0 ) {
+					$('.editor .guesstags').click();
+				}
 			}
-            $('body.review .editor .approved').click();
 		}).on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.mac, function(e) {
 			e.preventDefault();
 			if ($('.editor .translated').length > 0) {
@@ -271,79 +274,7 @@ $.extend(UI, {
         }).on('click', '.open-popup-addtm-tr', function(e) {
             e.preventDefault();
             UI.openLanguageResourcesPanel();
-//            $('.popup-addtm-tr').show();
-        }).on('click', '#addtm-create-key', function(e) {
-            e.preventDefault();
-            //prevent double click
-            if($(this).hasClass('disabled')) return false;
-            $(this).addClass('disabled');
-            $(this).attr('disabled','');
-
-            //call API
-            APP.doRequest({
-                data: {
-                    action: 'createRandUser'
-                },
-                success: function(d) {
-                    //put value into input field
-                    $('#addtm-tr-key').val( d.data.key);
-                    $('#addtm-create-key').removeClass('disabled');
-                    setTimeout(function() {
-                        UI.checkAddTMEnable();
-                        UI.checkManageTMEnable();
-                    }, 100);
-                    //$('#private-tm-user').val(data.id);
-                    //$('#private-tm-pass').val(data.pass);
-                    //$('#create_private_tm_btn').attr('data-key', data.key);
-                    return false;
-                }
-            });
-
-        }).on('change', '#addtm-tr-read, #addtm-tr-write', function() {
-            if(UI.checkTMgrants($('.addtm-tr'))) {
-                $('.addtm-tr .error-message').hide();
-            }
-        }).on('change', '#addtm-tr-key-read, #addtm-tr-key-write', function() {
-            if(UI.checkTMgrants($('.addtm-tr-key'))) {
-                $('.addtm-tr-key .error-message').hide();
-            }
-        }).on('change', '.addtm-select-file', function() {
-
-        }).on('click', '#addtm-select-file', function() {
-            $('.addtm-select-file').click();
-        }).on('change', '.addtm-select-file', function() {
-            console.log($(this).val());
-            if($(this).val() !== '') {
-                $('#uploadTMX').html($(this).val().split('\\')[$(this).val().split('\\').length - 1] + '<a class="delete"></a>').show();
-            } else {
-                $('#uploadTMX').hide();
-            }
-        }).on('change', '#addtm-tr-key', function() {
-            $('.addtm-tr .warning-message').hide();
-        }).on('input', '#addtm-tr-key', function() {
-            UI.checkAddTMEnable();
-            UI.checkManageTMEnable();
-        }).on('change', '#addtm-tr-key, .addtm-select-file, #addtm-tr-read, #addtm-tr-write', function() {
-            UI.checkAddTMEnable();
-        }).on('click', '#uploadTMX .delete', function(e) {
-            e.preventDefault();
-            $('#uploadTMX').html('');
-            $('.addtm-select-file').val('');
-        }).on('click', '#addtm-add', function(e) {
-            e.preventDefault();
-            if(!UI.checkTMgrants($('.addtm-tr'))) {
-                return false;
-            } else {
-                console.log('vediamo qui');
-                $('.addtm-tr .error-message').text('').hide();
-                console.log('CONTROLLO: ', $('#uploadTMX').text());
-                operation = ($('#uploadTMX').text() === '')? 'key' : 'tm';
-                UI.checkTMKey($('#addtm-tr-key').val(), operation);
-            }
-
-        // end addtmx
-
-		}).on('click', '.popup-settings #settings-restore', function(e) {
+        }).on('click', '.popup-settings #settings-restore', function(e) {
 			e.preventDefault();
 			APP.closePopup();
 		}).on('click', '.popup-settings #settings-save', function(e) {
@@ -580,29 +511,9 @@ $.extend(UI, {
 				UI.removeStatusMenu(statusMenu);
 			});
 		}).on('click', 'section.readonly, section.readonly a.status', function(e) {
-
             e.preventDefault();
-
-            var section = $(e.target).closest('section');
-
-			if ( UI.justSelecting('readonly') )   return;
-			if ( UI.someUserSelection )           return;
-
-            var doShowAlert = function () {
-                return true ;
-                // return ! ( MBC.enabled() && MBC.popLastSelectedOnHistory() == sid ) ;
-            }
-
-            if ( doShowAlert() ) {
-                var msgArchived = 'Job has been archived and cannot be edited.' ;
-                var msgOther = 'This part has not been assigned to you.' ;
-                var msg = (UI.body.hasClass('archived'))? msgArchived : msgOther ;
-
-                UI.selectingReadonly = setTimeout(function() {
-                    APP.alert({msg: msg});
-                }, 200);
-            }
-
+			var section = $(e.target).closest('section');
+			UI.handleClickOnReadOnly( section );
 		}).on('mousedown', 'section.readonly, section.readonly a.status', function() {
 			sel = window.getSelection();
 			UI.someUserSelection = (sel.type == 'Range') ? true : false;
@@ -1003,11 +914,11 @@ $.extend(UI, {
 					UI.resetSearch();
 				}
 			}
-			if (e.which == 32) { // space
-				setTimeout(function() {
-					UI.saveInUndoStack('space');
-				}, 100);
-			}
+			// if (e.which == 32) { // space
+			// 	setTimeout(function() {
+			// 		UI.saveInUndoStack('space');
+			// 	}, 100);
+			// }
 
 			if (e.which == 13) { // return
 				if($('.tag-autocomplete').length) {
@@ -1031,8 +942,8 @@ $.extend(UI, {
 
 		}).on('input', '.editarea', function( e ) { //inputineditarea
 			UI.currentSegment.addClass('modified').removeClass('waiting_for_check_result');
-                        UI.currentSegment.data('modified', true);
-                        UI.currentSegment.trigger('modified:true');
+			UI.currentSegment.data('modified', true);
+			UI.currentSegment.trigger('modified');
 
 			if (UI.droppingInEditarea) {
 				UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
@@ -1044,7 +955,7 @@ $.extend(UI, {
 				UI.currentSegment.removeClass( 'hasTagsToggle' );
 			}
 
-			if ( UI.hasMissingTargetTags( e.target.closest('section') ) ) {
+			if ( UI.hasMissingTargetTags( $(e.target).closest('section') ) ) {
 				UI.currentSegment.addClass( 'hasTagsAutofill' );
 			} else {
 				UI.currentSegment.removeClass( 'hasTagsAutofill' );
@@ -1251,6 +1162,12 @@ $.extend(UI, {
             e.preventDefault();
             UI.setExtendedTagMode();
         });
+
+		$("#outer").on('click', '.tab.alternatives .graysmall .goto a', function(e) {
+			e.preventDefault();
+			UI.scrollSegment($('#segment-' + $(this).attr('data-goto')), true);
+			UI.highlightEditarea($('#segment-' + $(this).attr('data-goto')));
+		});
 		UI.toSegment = true;
 
         if(!$('#segment-' + this.startSegmentId).length) {
@@ -1258,7 +1175,7 @@ $.extend(UI, {
                 if ( typeof this.startSegmentId != 'undefined' ) {
                     this.startSegmentId = this.startSegmentId + '-1';
                 }
-            };
+            }
         }
 
 		if (!this.segmentToScrollAtRender)
@@ -1281,38 +1198,32 @@ $.extend(UI, {
 			$(this).parents('section').find('.close').focus();
 		});
 
-		$("#point2seg").bind('mousedown', function() {
-			UI.setNextWarnedSegment();
+		$("#point2seg").bind('mousedown', function(e) {
+			e.preventDefault();
+            UI.saveSegment(UI.currentSegment);
+			UI.scrollSegment($('#segment-' + $(this).attr('data-segment')));
+            UI.setNextWarnedSegment();
 		});
 
 		$("#navSwitcher").on('click', function(e) {
 			e.preventDefault();
 		});
+
 		$("#pname").on('click', function(e) {
 			e.preventDefault();
 			UI.toggleFileMenu();
 		});
-		$("#jobNav .jobstart").on('click', function(e) {
-			e.preventDefault();
-			UI.scrollSegment($('#segment-' + config.firstSegmentOfFiles[0].first_segment));
-		});
+
 		$("#jobMenu").on('click', 'li:not(.currSegment)', function(e) {
 			e.preventDefault();
+            UI.saveSegment(UI.currentSegment);
 			UI.renderAndScrollToSegment($(this).attr('data-segment'));
 		});
 		$("#jobMenu").on('click', 'li.currSegment', function(e) {
 			e.preventDefault();
 			UI.pointToOpenSegment();
 		});
-		$("#jobNav .prevfile").on('click', function(e) {
-			e.preventDefault();
-			currArtId = $(UI.currentFile).attr('id').split('-')[1];
-			$.each(config.firstSegmentOfFiles, function() {
-				if (currArtId == this.id_file)
-					firstSegmentOfCurrentFile = this.first_segment;
-			});
-			UI.scrollSegment($('#segment-' + firstSegmentOfCurrentFile));
-		});
+
 		$("#jobNav .currseg").on('click', function(e) {
 			e.preventDefault();
 
@@ -1325,22 +1236,7 @@ $.extend(UI, {
 				UI.scrollSegment(UI.currentSegment);
 			}
 		});
-		$("#jobNav .nextfile").on('click', function(e) {
-			e.preventDefault();
-			if (UI.tempViewPoint === '') { // the user have not used yet the Job Nav
-				// go to current file first segment
-				currFileFirstSegmentId = $(UI.currentFile).attr('id').split('-')[1];
-				$.each(config.firstSegmentOfFiles, function() {
-					if (this.id_file == currFileFirstSegmentId)
-						firstSegId = this.first_segment;
-				});
-				UI.scrollSegment($('#segment-' + firstSegId));
-				UI.tempViewPoint = $(UI.currentFile).attr('id').split('-')[1];
-			}
-			$.each(config.firstSegmentOfFiles, function() {
-				console.log(this.id_file);
-			});
-		});
+		
 
 		// Search and replace
 
@@ -1423,7 +1319,7 @@ $.extend(UI, {
 
         });
 		$("#enable-replace").on('change', function() {
-			if ($('#enable-replace').is(':checked')) {
+			if ($('#enable-replace').is(':checked') && $('#search-target').val() != "") {
 				$('#exec-replace, #exec-replaceall').removeAttr('disabled');
 			} else {
 				$('#exec-replace, #exec-replaceall').attr('disabled', 'disabled');
@@ -1432,6 +1328,7 @@ $.extend(UI, {
 		$("#search-source, #search-target").on('input', function() {
 			if (UI.checkSearchChanges()) {
 				UI.setFindFunction('find');
+				$("#enable-replace").change();
 			}
 		});
         $('#replace-target').on('focus', function() {
@@ -1464,13 +1361,12 @@ $.extend(UI, {
     }
 });
 
-if ( config.isReview ) {
-    $(document).on('ready', function() {
-        window.quality_report_btn_component = ReactDOM.render(
-            React.createElement( Review_QualityReportButton, {
-                vote                : config.overall_quality_class,
-                quality_report_href : config.quality_report_href
-            }), $('#quality-report-button')[0] );
+$(document).on('ready', function() {
+	window.quality_report_btn_component = ReactDOM.render(
+		React.createElement( Review_QualityReportButton, {
+			vote                : config.overall_quality_class,
+			quality_report_href : config.quality_report_href
+		}), $('#quality-report-button')[0] );
 
-    });
-}
+});
+

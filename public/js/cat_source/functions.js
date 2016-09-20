@@ -250,93 +250,6 @@ function removeSelectedText() {
 		document.selection.clear();
 	}
 }
-
-// addTM with iFrame
-
-function fileUpload(form, action_url, div_id) {
-    console.log('div_id: ', div_id);
-    // Create the iframe...
-    var iframe = document.createElement("iframe");
-    iframe.setAttribute("id", "upload_iframe");
-    iframe.setAttribute("name", "upload_iframe");
-    iframe.setAttribute("width", "0");
-    iframe.setAttribute("height", "0");
-    iframe.setAttribute("border", "0");
-    iframe.setAttribute("style", "width: 0; height: 0; border: none;");
-
-    // Add to document...
-    form.parentNode.appendChild(iframe);
-    window.frames['upload_iframe'].name = "upload_iframe";
-
-    iframeId = document.getElementById("upload_iframe");
-
-    // Add event...
-    var eventHandler = function () {
-
-        if (iframeId.detachEvent) iframeId.detachEvent("onload", eventHandler);
-        else iframeId.removeEventListener("load", eventHandler, false);
-
-        // Message from server...
-        if (iframeId.contentDocument) {
-            content = iframeId.contentDocument.body.innerHTML;
-        } else if (iframeId.contentWindow) {
-            content = iframeId.contentWindow.document.body.innerHTML;
-        } else if (iframeId.document) {
-            content = iframeId.document.body.innerHTML;
-        }
-
-        document.getElementById(div_id).innerHTML = content;
-
-        // Del the iframe...
-        setTimeout('iframeId.parentNode.removeChild(iframeId)', 250);
-    };
-
-    if (iframeId.addEventListener) iframeId.addEventListener("load", eventHandler, true);
-    if (iframeId.attachEvent) iframeId.attachEvent("onload", eventHandler);
-
-    // Set properties of form...
-    form.setAttribute("target", "upload_iframe");
-    form.setAttribute("action", action_url);
-    form.setAttribute("method", "post");
-    form.setAttribute("enctype", "multipart/form-data");
-    form.setAttribute("encoding", "multipart/form-data");
-    $(form).append('<input type="hidden" name="job_id" value="' + config.job_id + '" />')
-        .append('<input type="hidden" name="exec" value="newTM" />')
-        .append('<input type="hidden" name="job_pass" value="' + config.password + '" />')
-        .append('<input type="hidden" name="tm_key" value="' + $('#addtm-tr-key').val() + '" />')
-        .append('<input type="hidden" name="name" value="' + $('#uploadTMX').text() + '" />')
-        .append('<input type="hidden" name="r" value="1" />')
-        .append('<input type="hidden" name="w" value="1" />');
-
-    // Submit the form...
-    form.submit();
-
-//    document.getElementById(div_id).innerHTML = "Uploading...";
-    $('.popup-addtm-tr .x-popup').click();
-	var notification = {
-		title: 'Upload',
-		text: 'Uploading your TM...',
-		type: 'warning',
-		position: "bl"
-	};
-	APP.addNotification(notification);
-    /*UI.showMessage({
-        msg: 'Uploading your TM...'
-    });*/
-    $('#messageBar .msg').after('<span class="progress"></span>');
-    TMKey = $('#addtm-tr-key').val();
-    TMName = $('#uploadTMX').text();
-	console.log('TMKey 1: ', TMKey);
-    console.log('TMName 1: ', TMName);
-//    UI.pollForUploadProgress(TMKey, TMName);
-
-    //delay because server can take some time to process large file
-    setTimeout(function() {
-        UI.pollForUploadCallback(TMKey, TMName);
-    }, 3000);
-
-}
-
 function stripHTML(dirtyString) {
     var container = document.createElement('div');
     container.innerHTML = dirtyString;
@@ -347,39 +260,6 @@ function stackTrace() {
     var err = new Error();
     return err.stack;
 }
-// addTM webworker
-/*
-function werror(e) {
-    console.log('ERROR: Line ', e.lineno, ' in ', e.filename, ': ', e.message);
-}
-
-function handleFileSelect(evt) {
-    evt.stopPropagation();
-    evt.preventDefault();
-
-    var files = evt.dataTransfer.files||evt.target.files;
-    // FileList object.
-
-    worker.postMessage({
-        'files' : files
-    });
-    //Sending File list to worker
-    // files is a FileList of File objects. List some properties.
-    var output = [];
-    for (var i = 0, f; f = files[i]; i++) {
-        output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ', f.size, ' bytes, last modified: ', f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a', '</li>');
-    }
-    document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
-}
-
-function handleDragOver(evt) {
-    evt.stopPropagation();
-    evt.preventDefault();
-    evt.dataTransfer.dropEffect = 'copy';
-    // Explicitly show this is a copy.
-}
-*/
-
 
 /* FORMATTING FUNCTION  TO TEST */
 
@@ -758,9 +638,17 @@ function goodbye(e) {
 
 }
 
+function cleanupHTMLCharsForDiff( string ) {
+	return string.replace(/&nbsp;/g, '');
+}
+
 function trackChangesHTML(source, target) {
-    var diff   = UI.dmp.diff_main( source, target );
-    UI.dmp.diff_cleanupSemantic( diff )
+    var diff   = UI.dmp.diff_main(
+		cleanupHTMLCharsForDiff( source ),
+		cleanupHTMLCharsForDiff( target )
+	);
+
+    UI.dmp.diff_cleanupSemantic( diff ) ;
 
     var diffTxt = '';
 
@@ -1001,8 +889,8 @@ function eventFromReact(e) {
     return e.target.hasAttribute('data-reactid');
 }
 
-function hackSnapEngage( on ) {
-    var button = $( document ).find( '#SnapABug_Button' );
+function hackIntercomButton(on ) {
+    var button = $( document ).find( '.intercom-button' );
     if ( on ) {
         button.data( 'mbc-zindex', button.css( 'z-index' ) );
         button.css( 'z-index', -1 );
@@ -1017,4 +905,24 @@ function cleanupSplitMarker( string ) {
 
 function absoluteId( id ) {
 	return id.split('-')[0]; 
+}
+
+/**
+ * Returns a clickable link with mailto support.
+ */
+function linkedSupportEmail() {
+	return sprintf('<a href="mailto:%s">%s</a>', config.support_mail, config.support_mail );
+}
+
+/**
+ * A generic error message to show in modal window.
+ *
+ * @returns {*}
+ */
+function genericErrorAlertMessage() {
+	return APP.alert({
+		msg: sprintf('There was an error while saving data to server, please try again. ' +
+			'If the problem persists please contact %s reporting the web address of the current browser tab.',
+			linkedSupportEmail() )
+	});
 }

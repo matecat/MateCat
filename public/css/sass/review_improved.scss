@@ -35,6 +35,10 @@ section.reviewImproved.opened .textarea-container {
     font-size:18px;
 }
 
+body.sampling-enabled section.reviewImproved.opened .edit-distance {
+    display: block;
+}
+
 section.reviewImproved .errorTaggingArea {
     padding: 3px;
     line-height: 27px;
@@ -210,6 +214,7 @@ section {
             color: #fff;
             text-transform: uppercase;
             margin: 0 0 0 10px;
+            text-decoration: none;
         }
 
         .button-default {
@@ -267,7 +272,7 @@ section {
 }
 
 .review-issues-overview-panel {
-    margin: 10px;
+    padding: 10px 10px 40px 10px;
 }
 
 .review-current-version-container {
@@ -282,7 +287,7 @@ section {
 
 .review-issue-comment-reply textarea {
     width: 95%;
-    margin: 10px 0;
+    margin-top: 10px;
 }
 
 .review-previous-versions-wrapper {
@@ -293,6 +298,24 @@ section {
     bottom: 0;
 }
 
+.review-side-panel-close {
+  font-size: 13px;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  line-height: 16px;
+  background-color: #333;
+  color: #ffffff;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+  &:hover {
+    background-color: #666;
+  }
+}
 /*
 .review-version-wrapper .collapsed .collapsable {
     display: none; 
@@ -484,7 +507,7 @@ a.cancel-project:hover {
 }
 
 .review-issue-comment-buttons {
-    margin: 5px 0;
+    margin: 15px 0;
 }
 
 .review-issue-selection-panel {
@@ -513,8 +536,13 @@ table.review-issue-category-list {
 }
 
 .review-issue-buttons-right {
-    float: right;
     margin-top: 15px;
+    margin-right: 10px;
+    height: 50px;
+
+    .mc-button {
+        float: right;
+    }
 }
 
 .review-side-inner1 {

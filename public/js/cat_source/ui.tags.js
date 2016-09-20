@@ -106,7 +106,7 @@ $.extend(UI, {
         tx = tx.replace(/<span/gi, "<pl")
             .replace(/<\/span/gi, "</pl")
             .replace(/&lt;/gi, "<")
-            .replace(/(<(g|x|bx|ex|bpt|ept|ph[^a-z]*|it|mrk)\sid[^<]*?&gt;)/gi, brTx1)
+            .replace(/(<(g|x|bx|ex|bpt|ept|ph[^a-z]*|it|mrk)\sid[^<“]*?&gt;)/gi, brTx1)
             .replace(/</gi, "&lt;")
             .replace(/\&lt;pl/gi, "<span")
             .replace(/\&lt;\/pl/gi, "</span")
@@ -115,6 +115,8 @@ $.extend(UI, {
             .replace(/\&lt;div\>/gi, "<div>")
             .replace(/\&lt;\/div\>/gi, "</div>")
             .replace(/\&lt;br\>/gi, "<br>")
+            .replace(/\&lt;mark/gi, "<mark")
+            .replace(/\&lt;\/mark/gi, "</mark")
             .replace(/\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />')
             .replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2);
 
@@ -638,8 +640,12 @@ $.extend(UI, {
      * @returns the decoded String
      */
     removeAllTags: function (currentString) {
-        var regExp = this.getXliffRegExpression();
-        return currentString.replace(regExp, '');
+        if (currentString) {
+            var regExp = this.getXliffRegExpression();
+            return currentString.replace(regExp, '');
+        } else {
+            return '';
+        }
     },
     /**
      *  Return the Regular expression to match all xliff source tags

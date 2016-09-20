@@ -2,7 +2,7 @@
 
 /**
  * @group regression
- * @covers Engines_MyMemory::update
+ * @covers Engines_MyMemory::updateGlossary
  * @covers Engines_MyMemory::set
  * @covers Engines_MyMemory::get
  * User: dinies
@@ -153,11 +153,9 @@ LABEL;
     /**
      * This test is focused on the behaviour of the words with a correlated note
      * @group regression
-     * @covers Engines_MyMemory::update
+     * @covers Engines_MyMemory::updateGlossary
      * @covers Engines_MyMemory::set
      * @covers Engines_MyMemory::get
-     * TODO: this tests will FAIL because MyMemory returns a result with the OLD source_note
-
      */
     public function test_set_update_get_word_with_note_glossary(){
 
@@ -181,7 +179,7 @@ LABEL;
         $this->config_param_of_update['newtranslation'] = $this->new_translation;
         $this->config_param_of_update['tnote'] = $substitute_string;
 
-        $this->engine_MyMemory->update($this->config_param_of_update);
+        $this->engine_MyMemory->updateGlossary($this->config_param_of_update);
         sleep(2);
         /**
          * Getting

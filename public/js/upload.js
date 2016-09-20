@@ -11,7 +11,8 @@ $(document).ready(function(){
     //					$('#target-lang').val('fr-FR').attr('selected',true);
     $('#target-lang option.separator').remove();
     }
-    if(config.isAnonymousUser) $('body').addClass('isAnonymous');
+
+    if(!config.isLoggedIn) $('body').addClass('isAnonymous');
 
     $(".supported-file-formats").click(function(e){
         e.preventDefault();
@@ -36,10 +37,22 @@ $(document).ready(function(){
         }
         $('#source-lang').val(trg);
         $('#target-lang').val(src);
-        if(!$('.template-download').length) return;
-        if (UI.conversionsAreToRestart()) {
-            APP.confirm({msg: 'Source language changed. The files must be reimported.', callback: 'confirmRestartConversions'});
-        }        
+
+        APP.changeTargetLang( src );
+
+        if ( $('.template-download').length ) {
+            if ( UI.conversionsAreToRestart() ) {
+                APP.confirm({
+                    msg: 'Source language changed. The files must be reimported.',
+                    callback: 'confirmRestartConversions'
+                });
+            }
+        } else if ( $('.template-gdrive').length ) {
+            APP.confirm({
+                msg: 'Source language has been changed.<br/>The files will be reimported.',
+                callback: 'confirmGDriveRestartConversions'
+            });
+        }
     });
     $("#chooseMultilang").click(function(e){
         e.preventDefault();

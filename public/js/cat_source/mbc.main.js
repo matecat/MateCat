@@ -381,7 +381,7 @@ if ( MBC.enabled() )
 
         var openSegmentComment = function ( el ) {
             popLastCommentHash(); 
-            hackSnapEngage( true );
+            hackIntercomButton( true );
 
             scrollSegment( el ).promise().done( function() {
                 $( 'article' ).addClass( 'mbc-commenting-opened' );
@@ -393,13 +393,12 @@ if ( MBC.enabled() )
         var openSegmentCommentNoScroll = function ( el ) {
             $( 'article' ).addClass( 'mbc-commenting-opened' );
             $( 'body' ).addClass( 'side-tools-opened' );
-            hackSnapEngage( true );
+            hackIntercomButton( true );
             renderSegmentBalloon( el );
         }
 
         var closeBalloon = function () {
             $( '.mbc-comment-balloon-outer' ).remove();
-            // hackSnapEngage( false );
             $( 'article' ).removeClass( 'mbc-commenting-opened' );
             $( 'body' ).removeClass( 'side-tools-opened' );
         }
@@ -649,7 +648,7 @@ if ( MBC.enabled() )
          * of the page.
          */
         $(document).on('click', function(e) {
-            if (e.target.closest('section') == null) {
+            if ($(e.target).closest('section') == null) {
                 closeBalloon();
             }
         });

@@ -1,5 +1,8 @@
 <?php
 
+use ActivityLog\Activity;
+use ActivityLog\ActivityLogStruct;
+
 set_time_limit( 180 );
 
 class downloadOriginalController extends downloadController {
@@ -10,8 +13,6 @@ class downloadOriginalController extends downloadController {
     private $download_type;
     private $id_file;
     private $id_project;
-    private $project_date;
-
 
     public function __construct() {
 
@@ -36,7 +37,7 @@ class downloadOriginalController extends downloadController {
         //NOTE: Global $_POST Overriding from CLI Test scripts
         //$__postInput = filter_var_array( $_POST, $filterArgs );
 
-        $this->fname         = $__postInput[ 'filename' ];
+        $this->_user_provided_filename         = $__postInput[ 'filename' ];
         $this->id_file       = $__postInput[ 'id_file' ];
         $this->id_job        = $__postInput[ 'id_job' ];
         $this->download_type = $__postInput[ 'download_type' ];
@@ -52,7 +53,8 @@ class downloadOriginalController extends downloadController {
 
         //take the project ID and creation date, array index zero is good, all id are equals
         $this->id_project   = $files_job[0]['id_project'];
-        $this->project_date = $files_job[0]['create_date'];
+
+        $this->project = Projects_ProjectDao::findById( $this->id_project );
 
         $output_content  = array();
 
@@ -64,7 +66,7 @@ class downloadOriginalController extends downloadController {
 
             if ( is_array( $zipPathInfo ) ) {
                 $output_content[ $id_file ][ 'output_filename' ] = $zipPathInfo[ 'zipfilename' ];
-                $output_content[ $id_file ][ 'input_filename' ]  = $fs->getOriginalZipPath( $this->project_date, $this->id_project, $zipPathInfo[ 'zipfilename' ] );
+                $output_content[ $id_file ][ 'input_filename' ]  = $fs->getOriginalZipPath( $this->project->create_date, $this->id_project, $zipPathInfo[ 'zipfilename' ] );
             } else {
                 $output_content[ $id_file ][ 'output_filename' ] = $file[ 'filename' ];
                 $output_content[ $id_file ][ 'input_filename' ]  = $file[ 'originalFilePath' ];
@@ -90,8 +92,8 @@ class downloadOriginalController extends downloadController {
 
             if ( count( $output_content ) > 1 ) {
 
-                $this->_filename = $this->fname;
-                $pathInfo        = FilesStorage::pathinfo_fix( $this->fname );
+                $this->_filename = $this->_getDefaultFileName( $this->project );
+                $pathInfo        = FilesStorage::pathinfo_fix( $this->_filename );
 
                 if ( $pathInfo[ 'extension' ] != 'zip' ) {
                     $this->_filename = $pathInfo[ 'basename' ] . ".zip";
@@ -108,6 +110,20 @@ class downloadOriginalController extends downloadController {
             $this->setContent( $output_content );
 
         }
+
+        /**
+         * Retrieve user information
+         */
+        $this->checkLogin();
+
+        $activity             = new ActivityLogStruct();
+        $activity->id_job     = $this->id_job;
+        $activity->id_project = $this->id_project;
+        $activity->action     = ActivityLogStruct::DOWNLOAD_ORIGINAL;
+        $activity->ip         = Utils::getRealIpAddr();
+        $activity->uid        = $this->uid;
+        $activity->event_date = date( 'Y-m-d H:i:s' );
+        Activity::save( $activity );
 
     }
 

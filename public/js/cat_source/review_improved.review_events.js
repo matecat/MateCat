@@ -1,3 +1,12 @@
+if ( ReviewImproved.enabled() ) {
+    $(document).on('ready', function() {
+        // first step in the direction to not rely on HTML rendering.
+        // we fetch quality-report data on page load to get the score
+        // to show in quality-report button.
+        ReviewImproved.reloadQualityReport();
+    });
+}
+
 // ---------------- specific for review page
 
 if ( ReviewImproved.enabled() && config.isReview ) {
@@ -30,8 +39,8 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         }
 
         if ( ! section.hasClass('opened') ) {
-            UI.scrollSegment( section );
             UI.openSegment( section );
+            UI.scrollSegment( section );
         }
     });
 
@@ -129,14 +138,6 @@ if ( ReviewImproved.enabled() && config.isReview ) {
     $.extend( ReviewImproved, {
         renderButtons : renderButtons,
     });
-
-    $(document).on('ready', function() {
-        // first step in the direction to not rely on HTML rendering.
-        // we fetch quality-report data on page load to get the score
-        // to show in quality-report button.
-        ReviewImproved.reloadQualityReport();
-    });
-
 
     getLatestScoreForSegment = function( segment ) {
         if (! segment) {

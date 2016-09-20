@@ -573,14 +573,16 @@ function getFirstSegmentOfFilesInJob( $jid ) {
 function getWarning( $jid, $jpassword ) {
     $db  = Database::obtain();
     $jid = $db->escape( $jid );
+    $status_new = Constants_TranslationStatus::STATUS_NEW ;
 
     $query = "SELECT id_segment, serialized_errors_list
 		FROM segment_translations
 		JOIN jobs ON jobs.id = id_job AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
 		WHERE jobs.id = $jid
 		AND jobs.password = '$jpassword'
-		-- following is a condition on bitbask to filter by severity ERROR 
-		AND warning&1 = 1 ";
+		AND segment_translations.status != '$status_new' 
+		-- following is a condition on bitmask to filter by severity ERROR
+		AND warning & 1 = 1 ";
 
     $results = $db->fetch_array( $query );
 
@@ -804,14 +806,14 @@ function getSegmentsDownload( $jid, $password, $id_file, $no_status_new = 1 ) {
 function getSegmentsInfo( $jid, $password ) {
 
     $query = "select j.id as jid, j.id_project as pid,j.source,j.target,
-		j.last_opened_segment, j.id_translator as tid, j.id_tms, j.id_mt_engine,
+		j.id_translator as tid, j.id_tms, j.id_mt_engine,
 		p.id_customer as cid, j.id_translator as tid, j.status_owner as status,
 		j.owner as job_owner, j.create_date, j.last_update, j.tm_keys,
 
 		j.job_first_segment, j.job_last_segment,
 		j.new_words, j.draft_words, j.translated_words, j.approved_words, j.rejected_words,
 
-		p.name as pname, p.create_date , fj.id_file, p.status_analysis,
+		p.create_date , fj.id_file, p.status_analysis,
 		f.filename, f.mime_type
 
 			from jobs j 
@@ -1589,7 +1591,8 @@ function getEditLog( $jid, $pass ) {
 		j.source AS source_lang,
 		j.target AS target_lang,
 		s.raw_word_count rwc,
-		p.name as pname
+		p.name as pname,
+		p.id as id_project
 			FROM
 			jobs j 
 			INNER JOIN segment_translations st ON j.id=st.id_job 

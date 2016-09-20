@@ -15,7 +15,7 @@
     <div class="wrapper">
         <ul class="header-menu" tal:condition="php: !job_archived ">
 
-              <li id="quality-report-button" tal:condition="true:isReview" tal:attributes="class header_quality_report_item_class"></li>
+              <li id="quality-report-button" tal:attributes="class header_quality_report_item_class"></li>
 
             <li>
                 <a class="btn pull-left topmenu-drop">
@@ -23,7 +23,6 @@
                            <input type="hidden" name="action" value="downloadFile" />
                            <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
                            <input type="hidden" name="id_file" value="" />
-                           <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
                            <input type="hidden" name="password" tal:attributes="value password" />
                            <input type="hidden" name="download_type" value="all" />
 
@@ -54,7 +53,7 @@
                         </li>
 
                         <li tal:condition="not:isGDriveProject">
-                            <a class="originalDownload" title="ORIGINAL" alt="ORIGINAL" href="/?action=downloadOriginal&id_job=${jid}&password=${password}&filename=${downloadFileName}.zip&download_type=all" target="_blank" >
+                            <a class="originalDownload" title="ORIGINAL" alt="ORIGINAL" href="/?action=downloadOriginal&id_job=${jid}&password=${password}&download_type=all" target="_blank" >
                                 <span class="icon-download"></span>ORIGINAL
                             </a>
                         </li>
@@ -76,7 +75,7 @@
                             </a>
                         </li>
                         <li tal:condition="php: INIT::$ENABLE_OMEGAT_DOWNLOAD !== false">
-                            <a class="omegat" title="Export OMEGAT" alt="Export OMEGAT" href="/?action=downloadFile&id_job=${jid}&password=${password}&id_file=&filename=${downloadFileName}.zip&download_type=omegat&forceXliff=1">
+                            <a class="omegat" title="Export OMEGAT" alt="Export OMEGAT" href="/?action=downloadFile&id_job=${jid}&password=${password}&id_file=&download_type=omegat&forceXliff=1">
                                 <span class="icon-download"></span>EXPORT OMEGAT
                             </a>
                         </li>

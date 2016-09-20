@@ -1,9 +1,12 @@
 <?php
+use ActivityLog\Activity;
+use ActivityLog\ActivityLogStruct;
 
 
 /**
  * Description of catController
  *
+ * @property CatDecorator decorator
  * @author antonio
  */
 class catController extends viewController {
@@ -14,13 +17,12 @@ class catController extends viewController {
     private $tid = "";
     private $password = "";
     private $source = "";
-    private $pname = "";
     private $create_date = "";
-    private $project_status = 'NEW';
+
     private $start_from = 0;
     private $page = 0;
     private $start_time = 0.00;
-    private $downloadFileName;
+
     private $job_stats = array();
     private $source_rtl = false;
     private $target_rtl = false;
@@ -33,8 +35,6 @@ class catController extends viewController {
     private $firstSegmentOfFiles = '[]';
     private $fileCounter = '[]';
 
-    private $first_job_segment;
-    private $last_job_segment;
     private $last_opened_segment;
 
     private $qa_data = '[]';
@@ -42,6 +42,9 @@ class catController extends viewController {
     private $qa_overall = '';
 
     private $_keyList = array( 'totals' => array(), 'job_keys' => array() );
+
+    public $target_code;
+    public $source_code;
 
     /**
      * @var Chunks_ChunkStruct
@@ -84,13 +87,14 @@ class catController extends viewController {
         parent::makeTemplate( "index.html" );
 
         $filterArgs = array(
-            'jid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'jid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'password' => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
                 'start'    => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'page'     => array( 'filter' => FILTER_SANITIZE_NUMBER_INT )
         );
+
         $getInput   = (object)filter_input_array( INPUT_GET, $filterArgs );
 
         $this->jid        = $getInput->jid;
@@ -118,8 +122,6 @@ class catController extends viewController {
         } else {
             $this->filter_enabled = false;
         };
-
-        $this->downloadFileName = "";
 
         $this->doAuth();
 
@@ -223,17 +225,6 @@ class catController extends viewController {
 
         foreach ( $data as $i => $job ) {
 
-            $this->project_status = $job; // get one row values for the project are the same for every row
-
-            if ( empty( $this->pname ) ) {
-                $this->pname            = $job[ 'pname' ];
-                $this->downloadFileName = $job[ 'pname' ] . ".zip"; // will be overwritten below in case of one file job
-            }
-
-            if ( empty( $this->last_opened_segment ) ) {
-                $this->last_opened_segment = $job[ 'last_opened_segment' ];
-            }
-
             if ( empty( $this->cid ) ) {
                 $this->cid = $job[ 'cid' ];
             }
@@ -277,10 +268,6 @@ class catController extends viewController {
 
             $id_file = $job[ 'id_file' ];
 
-            if ( !isset( $this->data[ "$id_file" ] ) ) {
-                $files_found[ ] = $job[ 'filename' ];
-            }
-
             $wStruct = new WordCount_Struct();
 
             $wStruct->setIdJob( $this->jid );
@@ -302,12 +289,9 @@ class catController extends viewController {
             unset( $job[ 'pid' ] );
             unset( $job[ 'cid' ] );
             unset( $job[ 'tid' ] );
-            unset( $job[ 'pname' ] );
             unset( $job[ 'create_date' ] );
             unset( $job[ 'owner' ] );
-
-            unset( $job[ 'last_opened_segment' ] );
-
+            
             unset( $job[ 'new_words' ] );
             unset( $job[ 'draft_words' ] );
             unset( $job[ 'translated_words' ] );
@@ -325,17 +309,11 @@ class catController extends viewController {
 
         }
 
-        //Needed because a just created job has last_opened segment NULL
-        if ( empty( $this->last_opened_segment ) ) {
-            $this->last_opened_segment = getFirstSegmentId( $this->jid, $this->password );
-        }
+        $this->last_opened_segment = $this->job->last_opened_segment
+            ? $this->job->last_opened_segment
+            : getFirstSegmentId( $this->job->id, $this->job->password );
 
-        $this->first_job_segment = $this->project_status[ 'job_first_segment' ];
-        $this->last_job_segment  = $this->project_status[ 'job_last_segment' ];
 
-        if ( count( $files_found ) == 1 ) {
-            $this->downloadFileName = $files_found[ 0 ];
-        }
 
         /**
          * get first segment of every file
@@ -511,7 +489,7 @@ class catController extends viewController {
 
         //this gets MT engine active for the job
         $engineQuery         = new EnginesModel_EngineStruct();
-        $engineQuery->id     = $this->project_status[ 'id_mt_engine' ];
+        $engineQuery->id     = $this->job->id_mt_engine ;
         $engineQuery->active = 1;
         $active_mt_engine    = $engine->setCacheTTL( 60 * 10 )->read( $engineQuery );
 
@@ -522,6 +500,32 @@ class catController extends viewController {
          *
          */
         $this->translation_engines = array_unique( array_merge( $active_mt_engine, $tms_engine, $mt_engines ) );
+
+        $this->_saveActivity();
+
+    }
+
+    protected function _saveActivity(){
+
+        if( $this->isRevision() ){
+            $action = ActivityLogStruct::ACCESS_REVISE_PAGE;
+        } else {
+            $action = ActivityLogStruct::ACCESS_TRANSLATE_PAGE;
+        }
+
+        /**
+         * Retrieve user information
+         */
+        list( $uid, $email ) = $this->getLoginUserParams();
+
+        $activity             = new ActivityLogStruct();
+        $activity->id_job     = $this->jid;
+        $activity->id_project = $this->pid;
+        $activity->action     = $action;
+        $activity->ip         = Utils::getRealIpAddr();
+        $activity->uid        = $uid;
+        $activity->event_date = date( 'Y-m-d H:i:s' );
+        Activity::save( $activity );
 
     }
 
@@ -571,14 +575,12 @@ class catController extends viewController {
         $this->template->job_not_found = $this->job_not_found;
         $this->template->job_archived  = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
         $this->template->job_cancelled = $this->job_cancelled;
-        $this->template->logged_user   = ( $this->logged_user !== false ) ? $this->logged_user->shortName() : "";
-        $this->template->extended_user = ( $this->logged_user !== false ) ? trim( $this->logged_user->fullName() ) : "";
         $this->template->incomingUrl   = '/login?incomingUrl=' . $this->thisUrl;
 
         $this->template->page        = 'cattool';
         $this->template->cid         = $this->cid;
         $this->template->create_date = $this->create_date;
-        $this->template->pname       = $this->pname;
+        $this->template->pname       = $this->project->name;
         $this->template->tid         = var_export( $this->tid, true );
         $this->template->source      = $this->source;
         $this->template->source_rtl  = $this->source_rtl;
@@ -587,18 +589,19 @@ class catController extends viewController {
         $this->template->authURL = $this->authURL;
 
         $this->template->mt_engines = $this->translation_engines;
-        $this->template->mt_id      = $this->project_status[ 'id_mt_engine' ];
+        $this->template->mt_id      = $this->job->id_mt_engine ;
 
-        $this->template->first_job_segment   = $this->first_job_segment;
-        $this->template->last_job_segment    = $this->last_job_segment;
+        $this->template->first_job_segment   = $this->job->job_first_segment ;
+        $this->template->last_job_segment    = $this->job->job_last_segment ;
+
         $this->template->last_opened_segment = $this->last_opened_segment;
+
         $this->template->owner_email         = $this->job_owner;
 
-        $this->template->isLogged        = $this->isLoggedIn(); // used in template
-        $this->template->isAnonymousUser = var_export( !$this->isLoggedIn(), true );  // used by the client
 
-        $this->job_stats[ 'STATUS_BAR_NO_DISPLAY' ] = ( $this->project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
-        $this->job_stats[ 'ANALYSIS_COMPLETE' ]     = ( $this->project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? true : false );
+
+        $this->job_stats[ 'STATUS_BAR_NO_DISPLAY' ] = ( $this->project->status_analysis == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
+        $this->job_stats[ 'ANALYSIS_COMPLETE' ]     = ( $this->project->status_analysis == Constants_ProjectStatus::STATUS_DONE ? true : false );
 
         $this->template->user_keys             = $this->_keyList;
         $this->template->job_stats             = $this->job_stats;
@@ -609,10 +612,8 @@ class catController extends viewController {
         $end_time                    = microtime( true ) * 1000;
         $load_time                   = $end_time - $this->start_time;
         $this->template->load_time   = $load_time;
-        $this->template->tms_enabled = var_export( (bool)$this->project_status[ 'id_tms' ], true );
-        $this->template->mt_enabled  = var_export( (bool)$this->project_status[ 'id_mt_engine' ], true );
-
-        $this->template->downloadFileName       = urlencode( $this->downloadFileName );
+        $this->template->tms_enabled = var_export( (bool) $this->job->id_tms , true );
+        $this->template->mt_enabled  = var_export( (bool) $this->job->id_mt_engine , true );
 
         $this->template->warningPollingInterval = 1000 * ( INIT::$WARNING_POLLING_INTERVAL );
         $this->template->segmentQACheckInterval = 1000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL );
@@ -630,22 +631,6 @@ class catController extends viewController {
         $this->template->maxNumSegments       = INIT::$MAX_NUM_SEGMENTS;
         $this->template->copySourceInterval   = INIT::$COPY_SOURCE_INTERVAL;
         $this->template->time_to_edit_enabled = INIT::$TIME_TO_EDIT_ENABLED;
-
-        //check if it is a composite language, for cjk check that accepts only ISO 639 code
-        if ( strpos( $this->target_code, '-' ) !== false ) {
-            //pick only first part
-            $tmp_lang               = explode( '-', $this->target_code );
-            $target_code_no_country = $tmp_lang[ 0 ];
-            unset( $tmp_lang );
-        } else {
-            //not a RFC code, it's fine
-            $target_code_no_country = $this->target_code;
-        }
-
-        //check if cjk
-        if ( array_key_exists( $target_code_no_country, CatUtils::$cjk ) ) {
-//            $this->template->taglockEnabled = 0;
-        }
 
         /*
          * Line Feed PlaceHolding System
@@ -735,10 +720,6 @@ class catController extends viewController {
         }
 
         return $return;
-    }
-
-    public function getDownloadFileName() {
-        return $this->downloadFileName;
     }
 
     public function isCurrentProjectGDrive() {

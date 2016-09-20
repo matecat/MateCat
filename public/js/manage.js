@@ -10,8 +10,7 @@ UI = {
         this.body = $('body');
         this.firstLoad = firstLoad;
         this.pageStep = 25;
-        this.isMac = (navigator.platform == 'MacIntel')? true : false;
-        
+
         var page = location.pathname.split('/')[2];
         this.page = ('undefined'==typeof(page)||page == '')? 1 : parseInt(page);
 
@@ -674,6 +673,7 @@ UI = {
 		        '	    	<a href="#" title="Archive project" class="archive-project"></a>'+
 		        '			<a href="#" title="Resume project" class="resume-project"></a>'+
 		        '	    	<a href="#" title="Unarchive project" class="unarchive-project"></a>'+
+		        '	    	<a href="/activityLog/' + this.id + '/' + this.password + '" title="Download Activity Log" class="activity-log" target="_blank"></a>'+
 		        '		</div>'+
 	            '	</div>'+
 	            '	<div class="field">'+

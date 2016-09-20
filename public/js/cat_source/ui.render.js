@@ -64,8 +64,9 @@ $.extend(UI, {
 		this.preCloseTagAutocomplete = false;
         this.hiddenTextEnabled = true;
         this.markSpacesEnabled = false;
+		this.setGlobalTagProjection();
         this.tagModesEnabled = (typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
-        if(this.tagModesEnabled) {
+        if(this.tagModesEnabled && !this.enableTagProjection) {
             UI.body.addClass('tagModes');
         } else {
             UI.body.removeClass('tagModes');

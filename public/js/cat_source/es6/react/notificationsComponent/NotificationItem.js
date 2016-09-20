@@ -124,14 +124,14 @@ class NotificationItem extends React.Component {
             notificationStyle.borderTop = 0;
         }
 
-        // if (!this.props.autoDismiss) {
-        autoDismiss = <span className={'notification-close-button'} onClick={this.dismissNotification}>×</span>;
-        // }
+        if (this.props.dismissable) {
+            autoDismiss = <span className={'notification-close-button'} onClick={this.dismissNotification}>×</span>;
+        }
         if (this.props.allowHtml) {
-            title = <h2 className={this.styleNameTitle} dangerouslySetInnerHTML={ this.allowHTML(this.props.title) }></h2>;
+            title = <div className={this.styleNameTitle} dangerouslySetInnerHTML={ this.allowHTML(this.props.title) }></div>;
             message = <div className= {'notification-message'} dangerouslySetInnerHTML={ this.allowHTML(this.props.text) }></div>;
         } else {
-            title = <h2 className={this.styleNameTitle} > {this.props.title}</h2>
+            title = <div className={this.styleNameTitle} > {this.props.title}</div>
             message = <div className= {'notification-message'} >{this.props.text}</div>;
         }
         return <div className={this.styleNameContainer} style={notificationStyle}>
@@ -151,7 +151,8 @@ NotificationItem.propTypes = {
     closeCallback: React.PropTypes.func,
     openCallback: React.PropTypes.func,
     allowHtml: React.PropTypes.bool,
-    timer: React.PropTypes.number
+    timer: React.PropTypes.number,
+    dismissable: React.PropTypes.bool
 };
 
 NotificationItem.defaultProps = {
@@ -159,6 +160,7 @@ NotificationItem.defaultProps = {
     type: "info",
     autoDismiss: true,
     allowHtml: false,
+    dismissable: true,
     timer: 7000
 };
 

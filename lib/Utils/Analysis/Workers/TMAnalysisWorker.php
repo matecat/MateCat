@@ -62,8 +62,11 @@ class TMAnalysisWorker extends AbstractWorker {
      * @throws ReQueueException
      */
     public function process( AbstractElement $queueElement ) {
-
+        
         $this->_checkDatabaseConnection();
+
+        $this->project = \Projects_ProjectDao::findById( $queueElement->params->pid );
+        $this->featureSet = \FeatureSet::fromIdCustomer( $this->project->id_customer );
 
         //reset matches vector
         $this->_matches = null;
@@ -93,8 +96,6 @@ class TMAnalysisWorker extends AbstractWorker {
          */
         $this->_matches = $this->_getMatches( $queueElement );
 
-        $this->project = \Projects_ProjectDao::findById( $queueElement->params->pid );
-        $this->featureSet = \FeatureSet::fromIdCustomer( $this->project->id_customer );
 
         $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Segment {$queueElement->params->id_segment} - Job {$queueElement->params->id_job} matches retrieved." );
         $this->_tryRealignTagID( $queueElement );
@@ -107,32 +108,6 @@ class TMAnalysisWorker extends AbstractWorker {
 
         //ack segment
         $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Segment {$queueElement->params->id_segment} - Job {$queueElement->params->id_job} acknowledged." );
-
-    }
-
-    /**
-     * Check the connection.
-     * MySql timeout close the socket and throws Exception in the nex read/write access
-     *
-     * <code>
-     * By default, the server closes the connection after eight hours if nothing has happened.
-     * You can change the time limit by setting thewait_timeout variable when you start mysqld.
-     * @see http://dev.mysql.com/doc/refman/5.0/en/gone-away.html
-     * </code>
-     *
-     */
-    protected function _checkDatabaseConnection(){
-
-        $db = Database::obtain();
-        try {
-            $db->ping();
-        } catch ( PDOException $e ) {
-            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : {$e->getMessage()} " );
-            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Database connection reloaded. " );
-            $db->close();
-            //reconnect
-            $db->getConnection();
-        }
 
     }
 
@@ -726,10 +701,13 @@ class TMAnalysisWorker extends AbstractWorker {
 
             $this->_queueHandler->getRedisClient()->expire( RedisKeys::PROJECT_ENDING_SEMAPHORE . $_project_id, 60 * 60 * 24 /* 24 hours TTL */ );
 
-            // TODO: move the initialization of featureSet at earlier stage in
-            // order for other methods to run their own callbacks.
-
-            $this->featureSet->run('beforeTMAnalysisCloseProject', $this->project);
+            try {
+                $this->featureSet->run('beforeTMAnalysisCloseProject', $this->project);
+            } catch(\Exception $e) {
+                $this->_queueHandler->getRedisClient()->del( RedisKeys::PROJECT_ENDING_SEMAPHORE . $_project_id );
+                $this->_doLog("Requeueing project_id $_project_id because of error {$e->getMessage()}");
+                throw new ReQueueException();
+            }
 
             $_analyzed_report = getProjectSegmentsTranslationSummary( $_project_id );
 

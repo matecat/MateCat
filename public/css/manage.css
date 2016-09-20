@@ -171,7 +171,8 @@ body.manage input[type=button].revise {
 body.manage a.cancel-project,
 body.manage a.archive-project,
 body.manage a.resume-project,
-body.manage a.unarchive-project {
+body.manage a.unarchive-project,
+body.manage a.activity-log {
 	text-decoration: none;
 	color:#999;
 	margin-left: 10px;
@@ -182,7 +183,8 @@ body.manage a.unarchive-project {
 body.manage a.cancel-project:hover,
 body.manage a.archive-project:hover,
 body.manage a.resume-project:hover,
-body.manage a.unarchive-project:hover {
+body.manage a.unarchive-project:hover,
+body.manage a.activity-log:hover {
 	color:#000;
 }
 
@@ -1145,7 +1147,3 @@ width: 700px;
 .tablestats.revision td, .tablestats.revision-info td {text-align: left;}
 
 
-/* snapengage button */
-#SnapABug_SB {
-	background: rgb(107, 172, 58)!important;
-}

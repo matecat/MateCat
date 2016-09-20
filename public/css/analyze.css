@@ -1,7 +1,7 @@
 ﻿/* GENERALI */
 body {margin:0;   min-width: 1150px;padding: 30px 0 0 0!important;font-family:calibri, Arial, Helvetica, sans-serif;text-align:center;background:#f0f0f0;}
 th, td { padding: 0px; }
-table { border-collapse:separate; border-spacing: 0; border: 0; width: 100%;} 
+table { border-collapse:separate; border-spacing: 0; border: 0; width: 100%;}
 header{background:#4D4D4D;top:0;left:0;text-align:left;width:100%;position:fixed;z-index:999999999;border-bottom:1px solid #5F5F5F;padding:2px 0 0px 0;height:45px;}
 .logo{float:left;border:0;background:url(../img/logo.png) 0px 2px no-repeat;width:145px;height:31px; background-size: 130px 26px;margin-top:4px}
 /*.wrapper{width:960px;margin:0 auto;text-align:left}*/
@@ -615,7 +615,6 @@ a:hover{text-decoration:none}
 	}
 */
 
-.header{height:20px;width:100%; color:#a7a9ac; font-size:12px; float:left;text-align:left;background:#efefef;border-bottom:1px solid #ccc;margin-bottom:5px;-webkit-box-shadow: inset 0 1px 1px 1px #f4f7f9;box-shadow: inset 0 1px 1px 1px #f4f7f9;}
 .close{background:url(../img/x.png) center 1px no-repeat;width:22px;height:20px;display:block;position:absolute;right:0;top:0;}
 .close:hover, .close:focus, .x-stats:hover, .x-com:hover, .x-addcom:hover{background:url(../img/x.png) center -30px no-repeat;width:22px;height:20px;display:block;position:absolute;right:0;}
 
@@ -868,8 +867,10 @@ top: 25%;
 		padding: 4px;
 	}
 	.wrapper {
-  width: 98%;
+  		width: 98%;
+	}
 }
+
 @media only screen and (max-width : 1200px) {
 
 	.tablestats th {

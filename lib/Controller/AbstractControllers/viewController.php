@@ -52,14 +52,7 @@ abstract class viewController extends controller {
      *
      * @var Users_UserStruct
      */
-    protected $logged_user = false;
-
-    /**
-     * tell the children to set the template vars
-     *
-     * @return mixed
-     */
-    abstract function setTemplateVars();
+    protected $logged_user;
 
     /**
      * Try to identify the browser of users
@@ -152,7 +145,7 @@ abstract class viewController extends controller {
      */
     public function __construct( $isAuthRequired = false ) {
 
-	    if( !parent::isRightVersion() ) {
+	    if( !Bootstrap::areMandatoryKeysPresent() ) {
 		    header("Location: " . INIT::$HTTPHOST . INIT::$BASEURL . "badConfiguration" , true, 303);
 		    exit;
 	    }
@@ -178,19 +171,18 @@ abstract class viewController extends controller {
         }
 
         //even if no login in required, if user data is present, pull it out
+        $this->logged_user = new Users_UserStruct();
         if ( !empty( $_SESSION[ 'cid' ] ) ){
-            $userSearch = new Users_UserStruct();
-            $userSearch->email = $_SESSION[ 'cid' ];
+            $this->logged_user->uid = $_SESSION[ 'uid' ];
+            $this->logged_user->email = $_SESSION[ 'cid' ];
 
             $userDao = new Users_UserDao(Database::obtain());
-            $userObject = $userDao->read($userSearch);
+            $userObject = $userDao->setCacheTTL( 3600 )->read( $this->logged_user ); // one hour cache
 
             /**
              * @var $userObject Users_UserStruct
              */
-            $userObject = $userObject[0];
-//            $this->logged_user = getUserData( $_SESSION[ 'cid' ] );
-            $this->logged_user = $userObject;
+            $this->logged_user = $userObject[0];
         }
 
         if( $isAuthRequired  ) {
@@ -231,16 +223,7 @@ abstract class viewController extends controller {
         return true;
     }
 
-    /**
-     * Get Client Instance and retrieve authentication url
-     *
-     */
-    protected function generateAuthURL() {
 
-        $this->client  = OauthClient::getInstance()->getClient();
-        $this->authURL = $this->client->createAuthUrl();
-
-    }
 
     /**
      * Check user logged
@@ -265,7 +248,7 @@ abstract class viewController extends controller {
      */
     public function getLoginUserParams() {
         if ( $this->isLoggedIn() ){
-            return array( $_SESSION['uid'], $_SESSION['cid'] );
+            return array( $this->logged_user->getUid(), $this->logged_user->getEmail() );
         }
         return array( null, null );
     }
@@ -306,6 +289,63 @@ abstract class viewController extends controller {
 
         return 0;
     }
+
+    /**
+     * Return the content in the right format, it tell to the child class to execute template vars inflating
+     *
+     * @see controller::finalize
+     *
+     * @return mixed|void
+     */
+    public function finalize() {
+
+        /**
+         * Call child for template vars fill
+         *
+         */
+        $this->setTemplateVars();
+
+        $this->setTemplateFinalVars();
+
+        try {
+
+            $buffer = ob_get_contents();
+            ob_get_clean();
+            ob_start( "ob_gzhandler" ); // compress page before sending
+            $this->nocache();
+
+            header( 'Content-Type: text/html; charset=utf-8' );
+
+            /**
+             * Execute Template Rendering
+             */
+            echo $this->template->execute();
+
+        } catch ( Exception $e ) {
+            echo "<pre>";
+            print_r( $e );
+            echo "\n\n\n";
+            echo "</pre>";
+            exit;
+        }
+
+    }
+
+
+    /**
+     * setTemplateFinalVars
+     *
+     * Here you have the possiblity to set additional template variables that you always want available in the
+     * template. This is the pleace where to set variables like user_id, email address and so on.
+     */
+    private function setTemplateFinalVars() {
+        $this->template->logged_user   = $this->logged_user->shortName() ;
+        $this->template->extended_user = $this->logged_user->fullName() ;
+
+        $this->template->isLoggedIn    = $this->isLoggedIn();                       // used in template
+        $this->template->userMail      = $this->logged_user->getEmail() ;
+    }
+
     /**
      *
      * Set the variables for the browser support
@@ -316,6 +356,44 @@ abstract class viewController extends controller {
         $this->supportedBrowser = $this->isSupportedWebBrowser($browser_info);
         $this->userPlatform = strtolower( $browser_info[ 'platform' ] );
     }
+
+    /**
+     * tell the children to set the template vars
+     *
+     * @return mixed
+     */
+    abstract function setTemplateVars();
+
+    /**
+     * @return Users_UserStruct
+     */
+    public function getLoggedUser(){
+        return $this->logged_user;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAuthUrl(){
+        return $this->authURL;
+    }    public static function isRevision(){
+        //TODO: IMPROVE
+        $_from_url   = parse_url( $_SERVER[ 'REQUEST_URI' ] );
+        $is_revision_url = strpos( $_from_url[ 'path' ], "/revise" ) === 0;
+        return $is_revision_url;
+    }
+
+    /**
+     * Get Client Instance and retrieve authentication url
+     *
+     */
+    protected function generateAuthURL() {
+
+        $this->client  = OauthClient::getInstance()->getClient();
+        $this->authURL = $this->client->createAuthUrl();
+
+    }
+
     /**
      * Create an instance of skeleton PHPTAL template
      *
@@ -346,65 +424,5 @@ abstract class viewController extends controller {
             echo "</pre>";
             exit;
         }
-    }
-
-    /**
-     * Return the content in the right format, it tell to the child class to execute template vars inflating
-     *
-     * @see controller::finalize
-     *
-     * @return mixed|void
-     */
-    public function finalize() {
-
-        /**
-         * Call child for template vars fill
-         *
-         */
-        $this->setTemplateVars();
-
-        try {
-
-            $buffer = ob_get_contents();
-            ob_get_clean();
-            ob_start( "ob_gzhandler" ); // compress page before sending
-            $this->nocache();
-
-            header( 'Content-Type: text/html; charset=utf-8' );
-
-            /**
-             * Execute Template Rendering
-             */
-            echo $this->template->execute();
-
-        } catch ( Exception $e ) {
-            echo "<pre>";
-            print_r( $e );
-            echo "\n\n\n";
-            echo "</pre>";
-            exit;
-        }
-
-    }
-
-    public static function isRevision(){
-        //TODO: IMPROVE
-        $_from_url   = parse_url( $_SERVER[ 'REQUEST_URI' ] );
-        $is_revision_url = strpos( $_from_url[ 'path' ], "/revise" ) === 0;
-        return $is_revision_url;
-    }
-
-    /**
-     * @return Users_UserStruct
-     */
-    public function getLoggedUser(){
-        return $this->logged_user;
-    }
-
-    /**
-     * @return string
-     */
-    public function getAuthUrl(){
-        return $this->authURL;
     }
 }

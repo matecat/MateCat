@@ -3,6 +3,10 @@
  */
 $.extend(UI, {
 	init: function() {
+
+		this.isMac = (navigator.platform == 'MacIntel')? true : false;
+		this.shortcutLeader = (this.isMac) ? 'CMD' : 'CTRL' ;
+
 		this.initStart = new Date();
 		this.version = "x.x.x";
 		this.numContributionMatchesResults = 3;
@@ -27,7 +31,6 @@ $.extend(UI, {
         $('html').trigger('init');
         this.setTagMode();
 		this.detectFirstLast();
-		this.initSegmentNavBar();
 		rangy.init();
 		this.savedSel = null;
 		this.savedSelActiveElement = null;
@@ -69,7 +72,7 @@ $.extend(UI, {
             UI.consecutiveCopySourceNum = [];
         }, config.copySourceInterval*1000);
 
-        if(config.isAnonymousUser) this.body.addClass('isAnonymous');
+        if (!config.isLoggedIn) this.body.addClass('isAnonymous');
 
 		/**
 		 * Global Warnings array definition.

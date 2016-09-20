@@ -236,6 +236,7 @@ class FastAnalysis extends AbstractDaemon {
             $fastSegmentsRequest[ $pos ][ 'jsid' ]         = $segment[ 'jsid' ];
             $fastSegmentsRequest[ $pos ][ 'segment' ]      = $segment[ 'segment' ];
             $fastSegmentsRequest[ $pos ][ 'segment_hash' ] = $segment[ 'segment_hash' ];
+            $fastSegmentsRequest[ $pos ][ 'source' ]       = $segment[ 'source' ];
 
             //set a reverse lookup array to get the right segment is by its position
             $this->segment_hashes[ $segment[ 'jsid' ] ] = $pos;

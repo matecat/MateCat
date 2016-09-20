@@ -180,12 +180,15 @@ class EntryDao extends \DataAccess_AbstractDao {
      * Function to update the rebutted_at column
      *
      * @param Integer   $id         ID of the Entry
-     * @param String    $isToRebut  If 'true' rebut, else undo rebut
+     * @param Boolean   $isToRebut  If true rebut, else undo rebut
+     *
+     * @return EntryStruct
+     *
      */
     public function updateRebutted( $id, $isToRebut ) {
         $rebutted_at = null;
 
-        if( $isToRebut === 'true' ) {
+        if( $isToRebut === true ) {
             $rebutted_at = date('Y-m-d H:i:s');
         }
 
@@ -202,7 +205,7 @@ class EntryDao extends \DataAccess_AbstractDao {
 
         $stmt->execute( $opts );
 
-        return $opts;
+        return $this->findById( $opts['id'] );
     }
 
 }

@@ -8,8 +8,6 @@
 
 namespace Features\ReviewImproved\Controller\API;
 
-use Features\ReviewImproved\View\Json\QualityReportJSONFormatter as JsonFormatter ;
-
 use API\V2\JobPasswordValidator;
 use API\V2\ProtectedKleinController;
 use LQA\ChunkReviewDao;

@@ -29,8 +29,7 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
     }
 
     function main( $args = null ) {
-        $db2              = Database::obtain();
-        $db               = Database::obtain( '10.30.1.250', 'matecat', 'matecat01', 'matecat_sandbox' );
+        $db              = Database::obtain();
         $lastProcessedJob = (int)file_get_contents( self::$last_job_file_name );
 
         do {
@@ -142,7 +141,7 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                                 $querySegments,
                                 $_job_first_segment,
                                 $_job_last_segment,
-                                implode( ",", $segment_statuses ),
+                                "'" . implode("','", $segment_statuses) . "'",
                                 $_jid,
                                 $firstSeg,
                                 self::NR_OF_SEGS
@@ -168,7 +167,7 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                         usleep( 100 );
                     }
 
-                    $jobsStatsDao = new Jobs_JobStatsDao($db2);
+                    $jobsStatsDao = new Jobs_JobStatsDao($db);
                     foreach ( $job_stats as $fuzzy_band => $job_stats_data ) {
                         $job_incremental_pee = $job_stats[ $fuzzy_band ][ 'raw_post_editing_effort' ];
                         $time_to_edit_job    = $job_stats[ $fuzzy_band ][ 'time_to_edit_job' ];

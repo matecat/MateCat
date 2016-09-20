@@ -8,6 +8,7 @@
     <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>
     <link rel="stylesheet" href="${basepath}public/css/analyze.css?build=${build_number}"/>
     <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
+    <link href="${basepath}public/css/components-build.css?build=${build_number}" rel="stylesheet" type="text/css"/>
 
     <script type="text/javascript">
         var config = {
@@ -15,7 +16,6 @@
             status: '${project_status}',
             totalSegments: '${num_segments}',
             totalAnalyzed: '${num_segments_analyzed}',
-            isLoggedIn: '${isLoggedIn}',
             showModalBoxLogin: '${showModalBoxLogin}',
             id_project: '${pid}',
             id_job: '${jid}',
@@ -27,8 +27,10 @@
     <script type="text/javascript" src="${basepath}public/js/lib/jquery-ui.js"></script>
     <script type="text/javascript" src="${basepath}public/js/common.js?build=${build_number}"></script>
     <script type="text/javascript" src="${basepath}public/js/analyze.js?build=${build_number}"></script>
-    <script type='text/javascript' src="${basepath}public/js/login.js?build=${build_number}"></script>
     <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
+
+    <script src="${basepath}public/js/build/react.js?build=${build_number}"></script>
+    <script src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
 
     <div metal:use-macro="${php: INIT::$ROOT}/public/holidays/holidays.html/analyze_holidays"/>
 
@@ -73,21 +75,21 @@
         <h2>Invoicing Tips</h2>
         <ul id="standard-equivalent-words" class="cost-table">
 
-            <li class="box"><span class="word-number loading" tal:content="standard_analysis_wc_print"> </span><br/>
-                Standard weighted* words<br/>
-                    <span class="days">
+            <li class="box"><span class="word-number loading" tal:content="standard_analysis_wc_print"> </span>
+                <br/>
+                Standard weighted*
+                <span tal:condition="not:isCJK">words</span>
+                <span tal:condition="true:isCJK">characters</span>
+                <br/>
+                <span class="days">
                         <strong>
                             <span class="workDays" tal:content="standard_wc_time">11,5</span> work
                             <span class="unit" tal:content="standard_wc_unit">days</span>
-                        </strong> at 
-                        <span class="wordPerDay">3.000 w/day</span>
+                        </strong> at
+                        <span class="wordPerDay" tal:condition="not:isCJK">3.000 w/day</span>
+                        <span class="wordPerDay" tal:condition="true:isCJK">4.000 characters/day</span>
                     </span>
             </li>
-            <!--
-            <li class="desc">Trados analysis does not handle internal partial matches, machine translation, collaborative TMs like MyMemory and 100% in-context matches.
-            </li>
-            -->
-
         </ul>
 
         <ul id="matecat-equivalent-words" class="cost-table costbig">
@@ -96,40 +98,39 @@
                 <p class="promo-text">
                     <span>16</span>%<br/>less
                 </p>
-                <span class="word-number loading" tal:content="tm_analysis_wc_print"></span><br/>
-                MateCat weighted words<br/>
-                    <span class="days">
+                <span class="word-number loading" tal:content="tm_analysis_wc_print"></span>
+                <br/>
+                MateCat weighted
+                <span tal:condition="not:isCJK">words</span>
+                <span tal:condition="true:isCJK">characters</span>
+                <br/>
+                <span class="days">
                         <strong>
                             <span class="workDays" tal:content="fast_wc_time">9,5</span> work
                             <span class="unit" tal:content="fast_wc_unit">days</span>
-                        </strong> at 
-                        <span class="wordPerDay">3.000 w/day</span>
+                        </strong> at
+                        <span class="wordPerDay" tal:condition="not:isCJK">3.000 w/day</span>
+                        <span class="wordPerDay" tal:condition="true:isCJK">4.000 characters/day</span>
                     </span>
             </li>
-            <!-- <li class="desc">This is what MateCat reccomends you to use to estimate costs and delivery dates.
-           Payable words reppresent an estimation of the real effort required for the project. <a href="#" id="more" class="more">+</a>
-           <div class="content">
-
-           This is what MateCat reccomends you to use to estimate costs and delivery dates. Payable words reppresent an estimation of the real effort required for the project. eg. 100 repeated words are more like 30 new words to translate. To estimate fair payable %, MateCat use aggregated statistics on translator performance and/or industry accepted discount levels. MT payable % strictly depends on the language pair.
-
-           </div></li>-->
         </ul>
 
         <ul id="raw-words" class="cost-table">
-            <li class="box"><span class="word-number" tal:content="total_raw_word_count_print">40,500</span><br/>
-                Raw words<br/>
-                    <span class="days">
+            <li class="box"><span class="word-number" tal:content="total_raw_word_count_print">40,500</span>
+                <br/>
+                Raw
+                <span tal:condition="not:isCJK">words</span>
+                <span tal:condition="true:isCJK">characters</span>
+                <br/>
+                <span class="days">
                         <strong>
                             <span class="workDays" tal:content="raw_wc_time">11,5</span> work
                             <span class="unit" tal:content="raw_wc_unit">days</span>
-                        </strong> at 
-                        <span class="wordPerDay">3.000 w/day</span>
+                        </strong> at
+                        <span class="wordPerDay" tal:condition="not:isCJK">3.000 w/day</span>
+                        <span class="wordPerDay" tal:condition="true:isCJK">4.000 characters/day</span>
                     </span>
             </li>
-
-            <!--
-            <li class="desc">The total words without any repetition discount.</li>
-            -->
         </ul>
         <div class="cl"></div>
 
@@ -436,12 +437,11 @@
 </div>
 <!-- END DIV POPUP-SPLIT -->
 
-
-
+<div class="notifications-wrapper"></div>
 <footer>
     <div class="wrapper">
 
-        <nav>
+        <nav tal:condition="php: Bootstrap::areOauthKeysPresent()">
             <ul>
                 <li><a tal:attributes="href string:${basepath}manage/">Manage</a></li>
 				<li><a href="https://www.matecat.com/support/" target="_blank">User Guide</a></li>
@@ -498,9 +498,11 @@
 </script>
 
 <!-- FINE JS SPLIT JOB -->
-<script src="${basepath}public/js/lib/snapengage.js"></script>
+<div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_analyze"/>
 
 <div metal:use-macro="cookiebanner.html/cookieBanner"/>
+
+<div metal:use-macro="common.html/footer_variables" />
 
 </body>
 </html>
