@@ -47,11 +47,6 @@ route(
 );
 
 route(
-    '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-versions/[:version_number]', 'GET',
-    '\API\V2\SegmentVersion', 'detail'
-);
-
-route(
     '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues', 'POST',
     'API\V2\SegmentTranslationIssueController', 'create'
 );
