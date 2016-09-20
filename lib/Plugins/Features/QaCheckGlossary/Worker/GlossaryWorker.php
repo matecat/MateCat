@@ -20,6 +20,9 @@ class GlossaryWorker extends AbstractWorker {
     protected $unmatched ;
 
     public function process( AbstractElement $queueElement ) {
+
+        $this->_checkDatabaseConnection();
+
         $this->queueElement  = $queueElement ;
 
         $this->_checkForReQueueEnd( $this->queueElement );
