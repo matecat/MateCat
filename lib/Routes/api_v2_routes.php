@@ -32,11 +32,6 @@ route(
 );
 
 route(
-    '/api/v2/project-translation/[i:id_project]', 'GET',
-    'API_V2_ProjectTranslation', 'status'
-);
-
-route(
     '/api/v2/jobs/[:id_job]/[:password]/translation-issues', 'GET',
     'API\V2\ChunkTranslationIssueController', 'index'
 );
@@ -53,7 +48,7 @@ route(
 
 route(
     '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-versions/[:version_number]', 'GET',
-    'API_V2_SegmentVersion', 'detail'
+    '\API\V2\SegmentVersion', 'detail'
 );
 
 route(
@@ -79,11 +74,6 @@ route(
 route(
     '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation-issues/[:id_issue]/comments', 'GET',
     'API\V2\TranslationIssueComment', 'index'
-);
-
-route(
-    '/api/v2/jobs/[:id_job]/[:password]/segments/[:id_segment]/translation', 'GET',
-    'API\V2\TranslationController', 'index'
 );
 
 route(
