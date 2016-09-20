@@ -732,7 +732,8 @@ footer .wrapper {
 
 .advanced-options-box .options-box.option-unavailable p,
 .advanced-options-box .options-box.option-unavailable h3 {
-  opacity: 0.6; }
+  opacity: 0.6;
+}
 
 .advanced-options-box .options-box.qa-box img {
   width: 55px !important;
@@ -882,7 +883,9 @@ footer .wrapper {
 
 .option-unavailable .onoffswitch-label {
   cursor: not-allowed; }
-
+.option-unavailable-revise .option-tagp-languages {
+  display: none;
+}
 span.notify {
   margin-top: 10px; }
 

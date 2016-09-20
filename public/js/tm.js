@@ -19,6 +19,7 @@
 
 // script per lo slide del pannello di manage tmx
             UI.setDropDown();
+            UI.initOptionsTip();
 
             $(".popup-tm .x-popup, .popup-tm h1 .continue").click(function(e) {
                 e.preventDefault();
@@ -1640,6 +1641,75 @@
                 $(this).html("");
             });
         },
+
+        initOptionsTip: function () {
+
+            var guesstagText = "<div class='powerTip-options-tm'><div class='powerTip-options-tm-title'>​​Currently supported languages pairs:</div>" +
+                "<ul>";
+
+            for (var key in config.tag_projection_languages) {
+                guesstagText = guesstagText + "<li class='powerTip-options-tm-list'>"+ config.tag_projection_languages[key] +"</li>"
+            }
+            guesstagText = guesstagText + "</ul></div>";
+
+            $(".tooltip-guess-tags").data("powertip", guesstagText);
+            $(".tooltip-guess-tags").powerTip({
+                placement : 's',
+                popupId : "matecatTip",
+                mouseOnToPopup: true
+
+            });
+
+            var acceptedLanguagesLXQ = config.lexiqa_languages.slice();
+            var lexiqaText = "<div class='powerTip-options-tm'><div class='powerTip-options-tm-title'>Supported languages:</div>" +
+                "<ul>";
+            acceptedLanguagesLXQ.forEach(function (elem) {
+                var name = config.languages_array.find(function (e) {
+                    return e.code === elem;
+                }).name;
+                lexiqaText = lexiqaText + "<li class='powerTip-options-tm-list'>" + name + "</li>";
+            });
+            lexiqaText = lexiqaText + "</ul></div>";
+
+            $(".tooltip-lexiqa").data("powertip", lexiqaText);
+            $(".tooltip-lexiqa").powerTip({
+                placement : 's',
+                popupId : "matecatTip",
+                mouseOnToPopup: true
+
+            });
+        },
+
+        setLanguageTooltipTP: function () {
+            var gtTooltip = $(".tooltip-guess-tags").data("powertip");
+            $(".tagp .onoffswitch-container").data("powertip", gtTooltip);
+            $(".tagp .onoffswitch-container").powerTip({
+                placement : 's',
+                popupId : "matecatTip",
+                mouseOnToPopup: true
+            });
+        },
+
+        setLanguageTooltipLXQ: function () {
+            var lxTooltip = $(".tooltip-lexiqa").data("powertip");
+
+            $(".qa-box .onoffswitch-container").data("powertip", lxTooltip);
+            $(".qa-box .onoffswitch-container").powerTip({
+                placement : 's',
+                popupId : "matecatTip",
+                mouseOnToPopup: true
+            });
+        },
+
+        removeTooltipTP: function () {
+            $('.qa-box .onoffswitch-container').powerTip('destroy');
+            $('.tagp .onoffswitch-container').powerTip('destroy');
+        },
+
+        removeTooltipLXQ: function () {
+            $('.qa-box .onoffswitch-container').powerTip('destroy');
+            $('.tagp .onoffswitch-container').powerTip('destroy');
+        }
 
     });
 })(jQuery);
