@@ -2176,6 +2176,61 @@ input.email-export-tmx {
     padding: 0px 5px !important;
     margin-right: 9px;
 }
+/*** Ne Buttons  ***/
+
+.btn-orange-small {
+    background: #f26522;
+    width: 35px;
+    height: 29px;
+    border: 1px solid #848689;
+    border-radius: 2px;
+    color: white;
+    text-align: center;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+}
+.btn-orange-small:hover {
+    background: #d1581c;
+    cursor: pointer;
+    -webkit-box-shadow: 0 1px 2px #ccc;
+    box-shadow: 0 1px 2px #ccc;
+    border: 1px solid #000;
+}
+.btn-orange-small .text:before {
+    content: "\f00d";
+    vertical-align: text-top;
+}
+
+.btn-confirm-small {
+    height: 29px;
+    width: 100px;
+    text-align: center;
+    color: white;
+    text-decoration: none;
+    background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
+    border: 1px solid #848689;
+    font-weight: bold;
+    border-radius: 2px;
+    cursor: pointer;
+}
+.btn-confirm-small:hover {
+    background: #00A8D2;
+    box-shadow: 0 1px 2px #ccc;
+    border: 1px solid #000;
+    cursor: pointer;
+    -webkit-box-shadow: 0 1px 2px #ccc;
+}
+.btn-confirm-small .text:before {
+    content: "\f00c";
+    padding-right: 7px;
+    vertical-align: text-top;
+}
+
+.btn-confirm-small.confirmDelete {
+    margin-left: 12px;
+}
+/*******************/
 td.download-glossary-container .uploadloader {
     top: -18px;
     right: 85px;
@@ -3345,7 +3400,8 @@ color: #000;
 */
 
 
-
+.btn-confirm-small .text:before,
+.btn-orange-small .text:before,
 [class^="icon-"], [class*=" icon-"],
 .sorting_desc:after,
 .sorting_asc:after,
