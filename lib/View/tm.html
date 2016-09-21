@@ -413,7 +413,7 @@ $(function() {
                             </div>
 
                             <div class="options-box tagp">
-                                <h3>Guess tag position <a class="tooltip-guess-tags" powertip="">?</a></h3>
+                                <h3>Guess tag position</h3>
                                 <p>
                                     <span class="option-tagp-languages">Not available for:
                                         <span class="option-notsupported-languages"></span>.
@@ -421,6 +421,7 @@ $(function() {
                                     </span>
                                     <span class="option-tagp-revise">Not available in revise mode.<br/></span>
                                     Enable this functionality to let MateCat automatically place the tags where they belong.
+                                    <span class="tooltip-guess-tags" powertip="">Supported languages</span>
                                 </p>
                                 <div class="onoffswitch-container">
                                     <div class="onoffswitch">
@@ -456,8 +457,11 @@ $(function() {
                             </div>
 
                             <div tal:condition="not: deny_lexiqa" class="options-box qa-box">
-                                <h3>QA by <img src="/public/img/lexiqa2_2x.png" /> <a class="tooltip-lexiqa" powertip="">?</a></h3>
-                                <p><span class="option-qa-box-languages">Not available for: <span class="option-notsupported-languages"></span>. <br/></span>Linguistic QA with automated checks for punctuation, numerals, links, symbols, etc.</p>
+                                <h3>QA by <img src="/public/img/lexiqa2_2x.png" /> </h3>
+                                <p><span class="option-qa-box-languages">Not available for: <span class="option-notsupported-languages"></span>. <br/>
+                                </span>Linguistic QA with automated checks for punctuation, numerals, links, symbols, etc.
+                                    <span class="tooltip-lexiqa" powertip="">Supported languages</span>
+                                </p>
                                 <div class="onoffswitch-container">
                                     <div class="onoffswitch">
                                         <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="lexi_qa" />
