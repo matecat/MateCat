@@ -1093,7 +1093,11 @@ color:#333;}
     display: none;
 }
 
-.options-box p span {
+.options-box p span.option-notsupported-languages,
+.options-box p span.option-tagp-revise,
+.options-box p span.option-qa-box-languages,
+.options-box p span.option-notsupported-languages,
+.options-box p span.option-tagp-languages {
     line-height: 25px;
     display: none;
     font-weight: bold;
@@ -1116,24 +1120,8 @@ color:#333;}
 .tooltip-guess-tags,
 .tooltip-lexiqa {
     cursor: help;
-    position: absolute;
-    border: 1px solid #717171;
-    border-radius: 20px;
-    width: 13px !important;
-    font-size: 13px;
-    height: 11px;
     font-weight: bold;
-    padding-left: 0px;
-    padding-top: 2px;
-    margin-top: 2px;
-    line-height: 11px;
-    background: #0db1db;
-    margin-left: 5px;
-    color: #212121;
-    box-shadow: 1px 1px 1px #212121;
-    text-align: center;
-    text-decoration: none;
-    opacity: 1 !important;
+    text-decoration: underline;
 }
 
 .onoffswitch-container {

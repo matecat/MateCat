@@ -1659,11 +1659,11 @@
 
         initOptionsTip: function () {
 
-            var guesstagText = "<div class='powerTip-options-tm'><div class='powerTip-options-tm-title'>​​Currently supported languages pairs:</div>" +
+            var guesstagText = "<div class='powerTip-options-tm'><div class='powerTip-options-tm-title'>​​Supported bilingual languages pairs </br>(i.e. works for English to German and German to English):</div>" +
                 "<ul>";
 
             for (var key in config.tag_projection_languages) {
-                guesstagText = guesstagText + "<li class='powerTip-options-tm-list'>"+ config.tag_projection_languages[key] +"</li>"
+                guesstagText = guesstagText + "<li class='powerTip-options-tm-list'>"+ config.tag_projection_languages[key].replace("-", "<>") +"</li>"
             }
             guesstagText = guesstagText + "</ul></div>";
 
@@ -1676,7 +1676,7 @@
             });
 
             var acceptedLanguagesLXQ = config.lexiqa_languages.slice();
-            var lexiqaText = "<div class='powerTip-options-tm'><div class='powerTip-options-tm-title'>Supported languages:</div>" +
+            var lexiqaText = "<div class='powerTip-options-tm'><div class='powerTip-options-tm-title'>Any combination of the supported languages:</div>" +
                 "<ul>";
             acceptedLanguagesLXQ.forEach(function (elem) {
                 var name = config.languages_array.find(function (e) {
