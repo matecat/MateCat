@@ -885,6 +885,10 @@ box-shadow: 0 1px 2px #ccc;
     margin-right: 15px;
 }
 
+.header-dropdown-menu {
+	margin-right: 15px;
+}
+
 .header-menu .wrapper-dropdown-5 .dropdown {
 	left: -132px;
     width: 164px;
