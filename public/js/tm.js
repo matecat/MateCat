@@ -882,7 +882,8 @@
                 error: function() {
                     var TRcaller = this[3];
                     $(TRcaller).find('.addtmxfile, .addglossaryfile').hide();
-                    $(TRcaller).find('.upload-file-msg-error').text('There was an error uploading your file. Please retry!').show();
+                    $(TRcaller).find('.upload-file-msg-error').text('Error').show();
+                    UI.showErrorOnActiveTMTable('There was an error saving your data. Please retry!');
                     UI.UploadIframeId.remove();
                 },
                 success: function(d) {
@@ -1190,10 +1191,10 @@
 
         },
         showDeleteTmMessage: function (button) {
-            clearTimeout(this.timeoutDeleteKey);
             $("tr.tm-key-deleting").removeClass('tm-key-deleting');
-            var message = 'Do you really want to delete the key XXX? <a class="confirm-tm-key-delete" style="cursor: pointer">Continue</a>   ' +
-                '<a class="cancel-tm-key-delete" style="cursor: pointer">Cancel</a>';
+            var message = 'Do you really want to delete the key XXX? ' +
+                 '<a class="pull-right btn-confirm-small confirmDelete confirm-tm-key-delete" style="display: inline;">       <span class="text">Confirm</span>   </a>' +
+                 '<a class="pull-right btn-orange-small cancelDelete cancel-tm-key-delete">      <span class="text"></span>   </a>';
             var elem = $(button).closest("table");
             var tr = $(button).closest("tr");
             tr.addClass("tm-key-deleting");
@@ -1206,7 +1207,6 @@
             }
             var removeListeners = function () {
                 $('.confirm-tm-key-delete, .cancel-tm-key-delete').off('click');
-                clearTimeout(this.timeoutDeleteKey);
             };
             $('.confirm-tm-key-delete').off('click');
             $('.confirm-tm-key-delete').on('click', function (e) {
@@ -1222,10 +1222,6 @@
                 $("tr.tm-key-deleting").removeClass('tm-key-deleting');
                 removeListeners();
             });
-            this.timeoutDeleteKey = setTimeout(function () {
-                $('.cancel-tm-key-delete').click();
-                tr.removeClass('tm-key-deleting');
-            }, 5000)
         },
         deleteTM: function (button) {
             tr = $(button).parents('tr').first();
@@ -1257,7 +1253,7 @@
                 },
                 context: id,
                 error: function() {
-                    $(".mgmt-table-mt .tm-error-message").text("There was an error saving your data. Please retry!").show()
+                    $(".mgmt-table-mt .tm-error-message").text("There was an error saving your data. Please retry!").show();
                 },
                 success: function(d) {
                     // console.log('success');
