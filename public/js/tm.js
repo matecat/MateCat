@@ -848,7 +848,12 @@
                     $(TRcaller).find('.addtmxfile, .addglossaryfile').hide();
                     UI.UploadIframeId.remove();
                     $(TRcaller).find('.upload-file-msg-error').text('Error').show();
-                    UI.showErrorOnActiveTMTable(msg.errors[0].message);
+                    if ($(TRcaller).closest('table').attr("id") == 'inactivetm'){
+                        UI.showErrorOnInactiveTmTable(msg.errors[0].message);
+                    }else {
+                        UI.showErrorOnActiveTMTable(msg.errors[0].message)          ;
+                    }
+
                 }
             } else {
                 setTimeout(function() {
@@ -883,7 +888,11 @@
                     var TRcaller = this[3];
                     $(TRcaller).find('.addtmxfile, .addglossaryfile').hide();
                     $(TRcaller).find('.upload-file-msg-error').text('Error').show();
-                    UI.showErrorOnActiveTMTable('There was an error saving your data. Please retry!');
+                    if ($(TRcaller).closest('table').attr("id") == 'inactivetm'){
+                        UI.showErrorOnInactiveTmTable('There was an error saving your data. Please retry!');
+                    }else {
+                        UI.showErrorOnActiveTMTable('There was an error saving your data. Please retry!');
+                    }
                     UI.UploadIframeId.remove();
                 },
                 success: function(d) {
@@ -892,7 +901,11 @@
                     if(d.errors.length) {
                         $(TRcaller).find('.addtmxfile, .addglossaryfile').hide();
                         $(TRcaller).find('.upload-file-msg-error').text("Error").show();
-                        UI.showErrorOnActiveTMTable(d.errors[0].message);
+                        if ($(TRcaller).closest('table').attr("id") == 'inactivetm'){
+                            UI.showErrorOnInactiveTmTable(d.errors[0].message);
+                        } else {
+                            UI.showErrorOnActiveTMTable(d.errors[0].message);
+                        }
                         UI.UploadIframeId.remove();
                     } else {
                         $(TRcaller).find('.addglossaryfile, .canceladdglossary, .addtmxfile, .canceladdtmx').hide();
@@ -1159,7 +1172,11 @@
                         errorKey = $( tr ).attr( 'data-key' );
                         if ( errorMsg != '' ) {
                             tr.find('.message-glossary-export-error').show();
-                            UI.showErrorOnActiveTMTable( 'Error on downloading resource from TM server.' );
+                            if (tr.closest('table').attr("id") == 'inactivetm'){
+                                UI.showErrorOnInactiveTmTable('Error on downloading resource from TM server.');
+                            } else {
+                                UI.showErrorOnActiveTMTable('Error on downloading resource from TM server.');
+                            }
                         } else {
                             tr.find('.message-glossary-export-completed').show();
                         }
