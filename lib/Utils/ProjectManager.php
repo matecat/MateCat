@@ -128,7 +128,7 @@ class ProjectManager {
         $this->features = new FeatureSet();
 
         if ( !empty( $this->projectStructure['id_customer']) ) {
-           $this->features->loadFromIdCustomer(( $this->projectStructure['id_customer']));
+           $this->features->loadFromIdCustomer( $this->projectStructure['id_customer'] );
         }
 
         $this->projectStructure['array_files'] = $this->features->filter(
