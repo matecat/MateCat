@@ -182,6 +182,7 @@
                 UI.editarea.focus();
                 UI.highlightEditarea();
                 UI.createButtons();
+                UI.registerQACheck();
             });
         },
         /**
