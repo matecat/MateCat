@@ -15,6 +15,7 @@ class FeatureSet {
      */
     public function __construct( array $features = array() ) {
         $this->features = $features;
+        $this->loadFromMandatory();
     }
 
     /**
@@ -33,6 +34,15 @@ class FeatureSet {
     public function loadFromIdCustomer( $id_customer ) {
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
         $this->features = array_merge( $this->features, $features );
+    }
+
+    /**
+     * @param array $params
+     */
+    public function loadFeatures( $params = array() ) {
+       if ( array_key_exists('id_customer', $params) ) {
+            $this->loadFromIdCustomer( $params['id_customer'] ) ;
+        }
     }
 
     /**
@@ -112,6 +122,14 @@ class FeatureSet {
                 $obj->decorate();
             }
         }
+    }
+
+    private function loadFromMandatory() {
+        $features = [] ;
+        foreach( INIT::$MANDATORY_PLUGINS as $plugin) {
+            $features[] = new BasicFeatureStruct(array('feature_code' => $plugin));
+        }
+        $this->features = array_merge($this->features, $features);
     }
 
 }
