@@ -117,7 +117,7 @@ class createProjectController extends ajaxController {
         $this->source_language         = $__postInput[ 'source_language' ];
         $this->target_language         = $__postInput[ 'target_language' ];
         $this->job_subject             = $__postInput[ 'job_subject' ];
-        $this->mt_engine               = $__postInput[ 'mt_engine' ];       // null è ammesso
+        $this->mt_engine               = ( $__postInput[ 'mt_engine' ] != null ? $__postInput[ 'mt_engine' ] : 0 );       // null NON è ammesso
         $this->disable_tms_engine_flag = $__postInput[ 'disable_tms_engine' ]; // se false allora MyMemory
         $this->private_tm_key          = $__postPrivateTmKey;
         $this->private_tm_user         = $__postInput[ 'private_tm_user' ];
