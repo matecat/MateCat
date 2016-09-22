@@ -357,6 +357,8 @@ class INIT {
 
     public static $PLUGIN_LOAD_PATHS = array();
 
+    public static $MANDATORY_PLUGINS = array();
+
     /**
      * Definitions for the asynchronous task runner
      * @var array
