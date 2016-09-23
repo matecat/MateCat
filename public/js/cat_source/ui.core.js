@@ -3098,19 +3098,22 @@ UI = {
 	},
 	redoInSegment: function() {
 		this.editarea.html(this.undoStack[this.undoStack.length - 1 - this.undoStackPosition - 1 + 2]);
+        // $('.undoCursorPlaceholder').remove();
 		if (this.undoStackPosition > 0)
 			this.undoStackPosition--;
 		this.currentSegment.removeClass('waiting_for_check_result');
 		this.registerQACheck();
 	},
-	saveInUndoStack: function(fromWhich) {
-//		noRestore = (typeof noRestore == 'undefined')? 0 : 1;        
-		currentItem = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition];
+	saveInUndoStack: function() {
+		var currentItem = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition];
 
-		if (typeof currentItem != 'undefined') {
-			if (currentItem.trim() == this.editarea.html().trim())
-				return;
-		}
+        if (typeof currentItem != 'undefined') {
+            var regExp = /(<\s*\/*\s*(span class="undoCursorPlaceholder|span id="selectionBoundary)\s*.*span>)/gmi;
+            var editAreaText = this.editarea.html().replace(regExp, '');
+            var itemText = currentItem.replace(regExp, '');
+            if (itemText.trim() == editAreaText.trim())
+                return;
+        }
 
         if (this.editarea === '') return;
 		if (this.editarea.html() === '') return;
@@ -3122,23 +3125,23 @@ UI = {
             if ( (tt.length) && (!ss) )
                 return;
         }
-        var diff = 'null';
-
-        if( typeof currentItem != 'undefined'){
-            diff = this.dmp.diff_main( currentItem, this.editarea.html() );
-
-            // diff_main can return an array of one element (why?) , hence diff[1] could not exist.
-            // for that we chooiff[0] as a fallback
-            if(typeof diff[1] != 'undefined') {
-                diff = diff[1][1];
-            }
-            else {
-                diff = diff[0][1];
-            }
-        }
-
-        if ( diff == ' selected' )
-            return;
+        // var diff = 'null';
+        //
+        // if( typeof currentItem != 'undefined'){
+        //     diff = this.dmp.diff_main( currentItem, this.editarea.html() );
+        //
+        //     // diff_main can return an array of one element (why?) , hence diff[1] could not exist.
+        //     // for that we chooiff[0] as a fallback
+        //     if(typeof diff[1] != 'undefined') {
+        //         diff = diff[1][1];
+        //     }
+        //     else {
+        //         diff = diff[0][1];
+        //     }
+        // }
+        //
+        // if ( diff == ' selected' )
+        //     return;
 
 		var pos = this.undoStackPosition;
 		if (pos > 0) {
@@ -3147,10 +3150,13 @@ UI = {
 		}
                 
         saveSelection();
+        // var cursorPos = APP.getCursorPosition(this.editarea.get(0));
         $('.undoCursorPlaceholder').remove();
-        $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');      
+        $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
         restoreSelection();
-        this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
+        var htmlToSave = this.editarea.html();
+        this.undoStack.push(htmlToSave);
+        // $('.undoCursorPlaceholder').remove();
         
 	},
 	clearUndoStack: function() {
