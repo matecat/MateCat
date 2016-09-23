@@ -3119,7 +3119,7 @@ UI = {
 		if (this.editarea.html() === '') return;
         if (this.editarea.length === 0 ) return ;
 
-		var ss = this.editarea.html().match(/<span.*?contenteditable\="false".*\>/gi);
+		var ss = this.editarea.html().match(/<span.*?contenteditable\="false".*?\>/gi);
 		var tt = this.editarea.html().match(/&lt;/gi);
         if ( tt ) {
             if ( (tt.length) && (!ss) )
