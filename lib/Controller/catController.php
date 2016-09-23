@@ -291,7 +291,7 @@ class catController extends viewController {
             unset( $job[ 'tid' ] );
             unset( $job[ 'create_date' ] );
             unset( $job[ 'owner' ] );
-            
+
             unset( $job[ 'new_words' ] );
             unset( $job[ 'draft_words' ] );
             unset( $job[ 'translated_words' ] );
