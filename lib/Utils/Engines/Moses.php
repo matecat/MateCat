@@ -27,14 +27,6 @@ class Engines_Moses extends Engines_AbstractEngine implements Engines_EngineInte
         }
     }
 
-    protected function _fixLangCode( $lang ) {
-
-        $lang = strtolower( trim( $lang ) );
-        $l = explode( "-", $lang );
-        return $l[0];
-
-    }
-
     /**
      * @param $rawValue
      *
