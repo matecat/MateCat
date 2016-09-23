@@ -21,4 +21,5 @@ class Constants_Engines {
     const APERTIUM      = 'Apertium';
     const ALTLANG	    = 'Altlang';
     const LETSMT        = 'LetsMT';
-} 
+    const SMART_MATE    = 'SmartMATE';
+}
