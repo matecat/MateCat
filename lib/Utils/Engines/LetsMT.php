@@ -28,15 +28,6 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
         }
     }
 
-    protected function _fixLangCode( $lang ) {
-
-        $lang = strtolower( trim( $lang ) );
-        $l    = explode( "-", $lang );
-
-        return $l[ 0 ];
-
-    }
-
     /**
      * @param $rawValue
      *

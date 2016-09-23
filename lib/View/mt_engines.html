@@ -145,7 +145,7 @@
             </div>
         </div>
     </template>
-    <template id="mt-provider-tauyou-msg">
+    <template id="mt-provider-tauyou-msg">client
         <p>Customized machine translation engines from tauyou are created starting from the Translation Memories (TMs) from our clients, so that we provide the best possible adaptation for a particular language field. <br/>
             Our clients in more than 20 countries are post-editing machine translation in the languages they work on, including but not limited to all European Languages, Chinese, Japanese, Korean, and Russian. </p>
         <p>If you want to learn more about our managed MT services, <a href="mailto:info@tauyou.com?Subject=tauyou MT in MateCat" target="_top">please contact us</a>.</p>
@@ -566,6 +566,41 @@
         <p>More info on <a href="http://www.altlang.net/"
                            title="AltLang">http://www.altlang.net/</a></p>
         <a href="mailto:info@altlang.net" class="continuebtn btn-ok">Contact AltLang</a>
+    </template>
+    <!-- fine blocco altlang -->
+</div>
+
+<div metal:define-macro="template-smartmate">
+    <!-- inizio blocco altlang -->
+    <template id="mt-provider-smartmate-fields">
+        <p>Fill out the form with the connection data to your own SmartMATE system.</p>
+        <p class="required pull-left"><sup>*</sup> Required fields.</p>
+        <br class="clear" />
+        <span class="mt-error-key">Error message</span>
+        <label for="new-engine-name">Engine name<sup>*</sup></label>
+        <input class="required" id="new-engine-name" placeholder="here" />
+        <div class="provider-data">
+            <div class="provider-field">
+                <label for="user-name">User<sup>*</sup></label>
+                <input class="required" data-field-name="client_id" id="user-name" placeholder="here" />
+            </div>
+            <div class="provider-field">
+                <label>Key<sup>*</sup></label>
+                <input class="required" data-field-name="secret" placeholder="here" />
+            </div>
+        </div>
+    </template>
+
+    <template id="mt-provider-smartmate-msg">
+        <p><strong>SmartMATE</strong> is the software toolkit created by Capita TI that creates, manages and hosts MT engines,
+            solutions and services. Finely tuned on our client’s data, SmartMATE engines can be used as an additional
+            productivity tool in the localization process, as well as used to produce a fully automated translation
+            used for gisting purposes.</p>
+        <p>Based on the MOSES statistical machine translation model, <strong>SmartMATE</strong> has been developed as a secure environment,
+            offering customers a viable and cost-effective alternative to publicly available machine translation solutions.</p>
+        <p>More info on <a href="https://www.smartmate.co/"
+                           title="SmartMATE">https://www.smartmate.co/</a></p>
+        <a href="mailto:enquiries@smartmate.co" class="continuebtn btn-ok">Contact SmartMATE</a>
     </template>
     <!-- fine blocco altlang -->
 </div>
