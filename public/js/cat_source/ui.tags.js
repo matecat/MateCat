@@ -436,9 +436,11 @@ $.extend(UI, {
                 UI.numCharsUntilTagRight = null;
                 UI.numCharsUntilTagLeft = null;
                 UI.editarea.find('.test-invisible').remove();
+                UI.editarea.get(0).normalize();
                 return false;
-            };
+            }
         });
+
 
     },
     highlightCorrespondingTags: function (el) {
