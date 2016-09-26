@@ -81,12 +81,12 @@ $(function() {
                                     <thead>
                                     <tr>
                                         <th class="dragrow"></th>
-                                        <th class="activate">Use it</th>
+                                        <th class="activate">Enabled</th>
                                         <th class="check">Lookup</th>
                                         <th class="check">Update</th>
+                                        <th class="description">Description</th>
                                         <th class="privatekey">Private Key</th>
                                         <th class="owner">Owner</th>
-                                        <th class="description">Description</th>
                                         <th class="action">Actions</th>
 
 
@@ -101,9 +101,9 @@ $(function() {
                                             <td class="activate"><input type="checkbox" checked="checked" tal:attributes="disabled php: !key.edit || ( key.owner && !jobOwnerIsMe ); checked key/r"/></td>
                                             <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !jobOwnerIsMe ); checked key/r" /></td>
                                             <td class="update text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !jobOwnerIsMe ); checked key/w" /></td>
+                                            <td class="description"><div class="edit-desc">${php: key.owner ? ( jobOwnerIsMe || key.edit ? key.name : '**********' ) : key.name}</div></td>
                                             <td class="privatekey">${key/key}</td>
                                             <td class="owner">${php: key.owner ? ( jobOwnerIsMe ? 'You' : '*****' ) : 'You'}</td>
-                                            <td class="description"><div class="edit-desc">${php: key.owner ? ( jobOwnerIsMe || key.edit ? key.name : '**********' ) : key.name}</div></td>
                                             <td tal:condition="php: key.edit" class="action">
                                                     <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
                                                     <div  class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
@@ -128,15 +128,15 @@ $(function() {
                                         <td class="update text-center check">
                                             <input id="new-tm-write" type="checkbox" name="w" class="w" value="1" checked="" />
                                         </td>
+                                        <td class="description">
+                                            <textarea rows="1" cols="50" class="mgmt-input" id="new-tm-description" placeholder="Enter a short description" ></textarea>
+                                        </td>
                                         <td class="privatekey">
                                             <input class="mgmt-input pull-left" type="text" id="new-tm-key" placeholder="Have a Key? Add it here*" />
                                             <!--<a class="btn-ok pull-right">Create a New TM</a>-->
     <!--                                    <span class="text pull-left text-req">*required</span> -->
                                         </td>
                                         <td class="owner">You
-                                        </td>
-                                        <td class="description">
-                                            <textarea rows="1" cols="50" class="mgmt-input" id="new-tm-description" placeholder="Enter a short description" ></textarea>
                                         </td>
                                         <td class="action">
 
@@ -159,9 +159,9 @@ $(function() {
                                             <td class="activate"><input type="checkbox" disabled="disabled" checked="checked" /></td>
                                             <td class="lookup text-center check"><input type="checkbox" disabled="disabled" tal:attributes="checked key/r" /></td>
                                             <td class="update text-center check"><input type="checkbox" disabled="disabled" tal:attributes="checked key/w" /></td>
+                                            <td class="description">**********</td>
                                             <td class="privatekey">${key/key}</td>
                                             <td class="owner">*****</td>
-                                            <td class="description">**********</td>
                                             <td class="action"></td>
                                         </tr>
                                     </tal:block>
@@ -189,12 +189,12 @@ $(function() {
                                         <thead>
                                         <tr>
                                             <th class="dragrow"></th>
-                                            <th class="activate">Use it</th>
+                                            <th class="activate">Enable</th>
                                             <th class="check">Lookup</th>
                                             <th class="check">Update</th>
+                                            <th class="description">Description</th>
                                             <th class="privatekey">Private Key</th>
                                             <th class="owner">Owner</th>
-                                            <th class="description">Description</th>
                                             <th class="action">Actions</th>
                                         </tr>
                                         </thead>
@@ -206,9 +206,9 @@ $(function() {
                                                 <td class="activate"><input type="checkbox" /></td>
                                                 <td class="lookup text-center check"><input type="checkbox" /></td>
                                                 <td class="update text-center check"><input type="checkbox" /></td>
-                                                <td class="privatekey">${key/key}</td>
-                                                <td class="owner">You</td>
                                                 <td class="description"><div class="edit-desc">${key/name}</div></td>
+                                                <td class="privatekey">${key/key}</td>
+                                                <td class="owner"><span class="icon-owner icon-owner-private"></span></td>
                                                 <td class="action">
                                                     <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
                                                     <div  class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
@@ -231,11 +231,11 @@ $(function() {
                                             <td class="activate"><input type="checkbox" /></td>
                                             <td class="lookup text-center check"><input type="checkbox"/></td>
                                             <td class="update text-center check"><input type="checkbox"/></td>
-                                            <td class="privatekey">${key/key}</td>
-                                            <td class="owner">You</td>
                                             <td class="description">
                                                 <div class="edit-desc">${key/name}</div>
                                             </td>
+                                            <td class="privatekey">${key/key}</td>
+                                            <td class="owner"><span class="icon-owner icon-owner-shared"></span></td>
                                             <td class="action">
                                                 <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
                                                 <div  class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;

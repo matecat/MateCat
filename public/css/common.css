@@ -884,7 +884,7 @@ color:#333;}
 
 .slide-panel {
     height: 100%!important;
-    width: 950px;
+    width: 1100px;
     margin: 0 auto;
     overflow-x: hidden;
     overflow-y: auto;
@@ -1633,16 +1633,21 @@ margin:0 auto; overflow:hidden; width:100%;
 }
 
 .mgmt-tm .privatekey {
-	/*width:19%!important;*/
-	width:190px!important;
+    width: 150px !important;
+    font-size: 13px;
 }
 
 td.description, th.description {
-	/*width:32%!important;*/
-	width:290px!important;
+	width:491px!important;
 }
 
-th.owner,td.owner {width: 80px!important;}
+th.owner,td.owner {
+    width: 46px!important;
+}
+td.owner {
+    cursor: pointer;
+}
+
 
 .mgmt-tm .langpair {
 	/*width:14%!important;*/
@@ -1678,7 +1683,14 @@ th.activate, td.activate {
 
 
 
-#inactivetm th.check {
+#inactivetm th.check,
+#inactivetm th.privatekey,
+#inactivetm th.owner,
+#inactivetm th.action,
+#activetm th.privatekey,
+#activetm th.owner
+#ativetm th.action
+{
     visibility: hidden;
 }
 
@@ -1689,6 +1701,44 @@ th.activate, td.activate {
 
 #inactivetm tbody {
     background: #f3f3f3;
+}
+span.icon-owner.icon-owner-private:before {
+    content: "\e98f";
+}
+span.icon-owner.icon-owner-public:before {
+    content: "\e9ca";
+}
+span.icon-owner.icon-owner-shared:before {
+    content: "\e972";
+}
+.share-button {
+    width: 50px;
+    text-align: center;
+    margin-right: 15px;
+}
+
+.message-share-tmx {
+    font-size: 14px;
+    float: left;
+    width: 610px;
+    padding-left: 12px;
+    line-height: 34px;
+}
+
+input.message-share-tmx-input-email {
+    margin-top: 2px;
+    float: left;
+    margin-left: 16px;
+    width: 290px;
+    height: 24px;
+    padding-left: 4px;
+    background-color: #fbfbfb;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+}
+span.message-share-tmx-email, .message-share-tmx-openemailpopup {
+    text-decoration: underline;
+    cursor: pointer;
 }
 /*
 .new .privatekey {
@@ -1908,13 +1958,13 @@ body.cattool .mgmt-tm.mine thead,
 .popup-tm td.engine-name .edit-desc
 {
     height: 18px;
-    width: 235px!important;
-    height: 18px;
+    width: 450px!important;
     padding: 2px 4px;
     border-radius: 2px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    box-shadow: 0px 0px 0px 1px #e2e2e2;
 }
 
 .popup-tm td.engine-name .edit-desc {
@@ -2119,7 +2169,9 @@ td.uploadfile p {
 #activetm td.download-tmx-container,
 #inactivetm td.download-tmx-container,
 #activetm td.download-glossary-container,
-#inactivetm td.download-glossary-container
+#inactivetm td.download-glossary-container,
+#activetm td.share-tmx-container,
+#inactivetm td.share-tmx-container
 {
     display: block;
     background: #fff;

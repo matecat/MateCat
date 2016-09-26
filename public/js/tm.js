@@ -20,7 +20,7 @@
 // script per lo slide del pannello di manage tmx
             UI.setDropDown();
             UI.initOptionsTip();
-
+            UI.initTmxTooltips();
             $(".popup-tm .x-popup, .popup-tm h1 .continue").click(function(e) {
                 e.preventDefault();
                 UI.closeTMPanel();
@@ -278,6 +278,8 @@
 
                 UI.openExportTmx(this);
 
+            }).on('click', 'td.owner', function(e){
+                UI.openShareResource( $(this) );
             }).on('mousedown', '.mgmt-tm .downloadGlossary', function(e){
                 //Todo
                 if($(this).hasClass('disabled')) return false;
@@ -329,15 +331,6 @@
                     headers: {
                         4: {
                             sorter: true
-                        },
-                        5: {
-                            sorter: false
-                        },
-                        6: {
-                            sorter: false
-                        },
-                        7: {
-                            sorter: false
                         }
                     }
                 });
@@ -1520,7 +1513,7 @@
             UI.checkTMAddAvailability();
         },
         openExportTmx: function (elem) {
-            $(elem).parents('.action').find('.downloadtmx, .addtmx').each( function() { $(this).addClass('disabled'); } );
+            $(elem).parents('.action').find('a').each( function() { $(this).addClass('disabled'); } );
 
             var exportDiv = '<td class="download-tmx-container" style="display: none">' +
                 '<div class="message-export-tmx">We will send a link to download the exported TM to this email:</div>' +
@@ -1540,8 +1533,29 @@
             $(elem).parents('tr').append(exportDiv);
             $(elem).parents('tr').find('.download-tmx-container').slideToggle();
         },
+        openShareResource: function (elem) {
+            var tr = $(elem).parents('tr');
+            if (tr.find(".share-tmx-container").length) {
+                tr.find('.share-tmx-container').slideToggle(function () {
+                    $(this).remove();
+                });
+                return
+            }
+            $(elem).parents('.action').find('a').each( function() { $(this).addClass('disabled'); } );
+            var key = tr.find(".privatekey").text();
+            var exportDiv = '<td class="share-tmx-container" style="display: none">' +
+                    '<div class="message-share-tmx">Shared key ' +
+                    'is co-owned by you, <span class="message-share-tmx-email">pippo@translated.net</span> and ' +
+                    '<span class="message-share-tmx-openemailpopup">123 others</span></div>' +
+                    '<input class="message-share-tmx-input-email" placeholder="Enter email addresses.."/>'+
+                    '<div class="pull-right btn-ok share-button">Share</div>'+
+                '</td>';
+
+            tr.append(exportDiv);
+            tr.find('.share-tmx-container').slideToggle();
+        },
         openExportGlossary: function (elem, tr) {
-            tr.find('.downloadGlossary').addClass('disabled');
+            tr.find('.action a').addClass('disabled');
             var exportDiv = '<td class="download-glossary-container" style="display: none">' +
                 '<div class="message-export-glossary">We are exporting the glossary. Please wait...</div>' +
                 '<span class="message-glossary-export-completed">Export Completed</span>' +
@@ -1692,6 +1706,33 @@
                 popupId : "matecatTip",
                 mouseOnToPopup: true
 
+            });
+        },
+
+        initTmxTooltips: function () {
+            //Description input
+            $('.edit-desc').data("powertip", "<div style='line-height: 18px;font-size: 15px;'>Rename</div>");
+            $('.edit-desc').powerTip({
+                placement : 's',
+                popupId : "matecatTip",
+            });
+
+            $('.icon-owner-private').data("powertip", "<div style='line-height: 18px;font-size: 15px;'>Private resource,<br/>only available to you.</div>");
+            $('.icon-owner-private').powerTip({
+                placement : 's',
+                popupId : "matecatTip",
+            });
+
+            $('.icon-owner-public').data("powertip", "<div style='line-height: 20px;font-size: 15px;'>MyMemory, public<br/>translation memory.</div>");
+            $('.icon-owner-public').powerTip({
+                placement : 's',
+                popupId : "matecatTip",
+            });
+
+            $('.icon-owner-shared').data("powertip", "<div style='line-height: 20px;font-size: 15px;'>Shared resource.<br/> To see who owns the<br/> resource, select Share<br/> resource from the<br/> dropdown menu.</div>");
+            $('.icon-owner-shared').powerTip({
+                placement : 's',
+                popupId : "matecatTip",
             });
         },
 
