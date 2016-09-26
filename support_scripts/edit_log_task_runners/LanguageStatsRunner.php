@@ -25,38 +25,21 @@ class LanguageStatsRunner extends AbstractDaemon {
         $lsDao = new LanguageStats_LanguageStatsDAO( Database::obtain() );
 
         do {
-            //TODO: create DAO for this
             $today     = date( "Y-m-d" );
-            $queryJobs = "SELECT
-                        source,
-                        target,
-                        sum( total_time_to_edit ) as total_time_to_edit,
-                        sum( total_raw_wc ) as total_words,
-                        sum( COALESCE ( avg_post_editing_effort, 0) ) / sum( coalesce( total_raw_wc, 1) ) as total_post_editing_effort,
-                        count(*) as job_count
-                      FROM
-                        jobs j
-                      WHERE
-                        completed = 1
-                        AND source = '%s'
-                      GROUP BY target";
 
             $langsObj = Langs_Languages::getInstance();
 
-            //getlanguage list
+            //get language list
             $languages = $langsObj->getEnabledLanguages();
             $languages = Utils::array_column( $languages, 'code' );
+
+            $jobStatsDao = new Jobs_JobStatsDao( Database::obtain());
 
             foreach ( $languages as $source_language ) {
                 Log::doLog( "Current source_language: $source_language" );
                 echo "Current source_language: $source_language\n";
 
-                $languageStats = $db->fetch_array(
-                        sprintf(
-                                $queryJobs,
-                                $source_language
-                        )
-                );
+                $languageStats = $jobStatsDao->readBySource($source_language);
 
                 $languageTuples = array();
 
@@ -66,17 +49,18 @@ class LanguageStatsRunner extends AbstractDaemon {
                         continue;
                     }
 
-                    Log::doLog("Current language couple: " . $source_language . "-" . $languageCoupleStat['target']);
-                    echo "Current language couple: " . $source_language . "-" . $languageCoupleStat['target'] . "\n";
+                    Log::doLog("Current language couple: " . $source_language . "-" . $languageCoupleStat->target . "(" .$languageCoupleStat->fuzzy_band. ")") ;
+                    echo "Current language couple: " . $source_language . "-" . $languageCoupleStat->target ."(".$languageCoupleStat->fuzzy_band. ")\n";
 
                     $langStatsStruct                            = new LanguageStats_LanguageStatsStruct();
                     $langStatsStruct->date                      = $today;
-                    $langStatsStruct->source                    = $languageCoupleStat[ 'source' ];
-                    $langStatsStruct->target                    = $languageCoupleStat[ 'target' ];
-                    $langStatsStruct->total_word_count          = round( $languageCoupleStat[ 'total_words' ], 4 );
-                    $langStatsStruct->total_post_editing_effort = round( $languageCoupleStat[ 'total_post_editing_effort' ], 4 );
-                    $langStatsStruct->total_time_to_edit        = round( $languageCoupleStat[ 'total_time_to_edit' ], 4 );
-                    $langStatsStruct->job_count                 = $languageCoupleStat[ 'job_count' ];
+                    $langStatsStruct->source                    = $languageCoupleStat->source;
+                    $langStatsStruct->target                    = $languageCoupleStat->target;
+                    $langStatsStruct->fuzzy_band                = $languageCoupleStat->fuzzy_band;
+                    $langStatsStruct->total_word_count          = round( $languageCoupleStat->total_raw_wc, 4 );
+                    $langStatsStruct->total_post_editing_effort = round( $languageCoupleStat->avg_post_editing_effort, 4 );
+                    $langStatsStruct->total_time_to_edit        = round( $languageCoupleStat->total_time_to_edit, 4 );
+                    $langStatsStruct->job_count                 = $languageCoupleStat->job_count;
 
                     $languageTuples[] = $langStatsStruct;
                 }
@@ -122,9 +106,9 @@ class LanguageStatsRunner extends AbstractDaemon {
 
     private static function isLanguageStatValid( $languageStat ) {
         return (
-                $languageStat[ 'source' ] != $languageStat[ 'target' ] &&
-                preg_match( "#[a-z]-[a-zA-Z-]{2,}#", $languageStat[ 'source' ] ) &&
-                preg_match( "#[a-z]-[a-zA-Z-]{2,}#", $languageStat[ 'target' ] )
+                $languageStat->source != $languageStat->target &&
+                preg_match( "#[a-z]-[a-zA-Z-]{2,}#", $languageStat->source ) &&
+                preg_match( "#[a-z]-[a-zA-Z-]{2,}#", $languageStat->target )
         );
     }
 }

@@ -259,10 +259,6 @@ body.showingOutsourceTo {
 }
 
 
-body.showingOutsourceTo .SnapABug_Button {
-        z-index: 10000000000;
-}
-
 .split-box3 .total:hover {
     border: none;
     box-shadow: none;

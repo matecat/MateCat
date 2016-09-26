@@ -4,66 +4,6 @@
 
 if ( true )
 (function($, UI, undefined) {
-    function showModalNotSupportedLanguages(notAcceptedLanguages, acceptedLanguages) {
-        APP.alert({
-            title: 'Option not available',
-            okTxt: 'Continue',
-            msg: "Not available for " + notAcceptedLanguages.join(", ") +
-            ".</br> Only available for " + acceptedLanguages.join(", ") +"."
-        });
-    }
-
-    var findInLanguagesArray = function(lang_rfc) {
-        return  _.find(config.languages_array, function (e) {
-            return e.code === lang_rfc ;
-        });
-    }
-
-    function createSupportedLanguagesArrays(acceptedLanguages) {
-        var notAcceptedLanguages = [];
-        var notAcceptedLanguagesCodes = [], acceptedLanguagesCodes = [];
-        var foundLang ;
-
-        if (acceptedLanguages.indexOf(config.source_rfc) === -1 ) {
-            foundLang = findInLanguagesArray( config.source_rfc );
-            if ( !foundLang ) {
-                notAcceptedLanguages.push( config.source_rfc );
-                notAcceptedLanguagesCodes.push( config.source_rfc );
-            } else {
-                notAcceptedLanguagesCodes.push(foundLang.code.split("-")[0].toUpperCase());
-                notAcceptedLanguages.push(foundLang.name);
-            }
-        }
-
-        if (acceptedLanguages.indexOf(config.target_rfc) === -1) {
-            foundLang = findInLanguagesArray( config.target_rfc );
-            if ( !foundLang ) {
-                notAcceptedLanguages.push( config.target_rfc );
-                notAcceptedLanguagesCodes.push( config.target_rfc );
-            } else {
-                notAcceptedLanguages.push(foundLang.name);
-                notAcceptedLanguagesCodes.push( foundLang.code.split("-")[0].toUpperCase() );
-            }
-        }
-
-        acceptedLanguages.forEach(function (value, index, array) {
-            var result = _.find(config.languages_array, function (e) {
-                return e.code === value;
-            });
-            array[index] = result.name;
-
-            if (acceptedLanguagesCodes.indexOf(result.code.split("-")[0].toUpperCase()) === -1) {
-                acceptedLanguagesCodes.push(result.code.split("-")[0].toUpperCase() );
-            }
-        });
-
-        return {
-            accepted: acceptedLanguages,
-            acceptedCodes: acceptedLanguagesCodes,
-            notAccepted: notAcceptedLanguages,
-            notAcceptedCodes: notAcceptedLanguagesCodes
-        }
-    }
     $.extend(UI, {
         
         initAdvanceOptions: function() {
@@ -87,19 +27,21 @@ if ( true )
                 (LXQ.enabled()) ? lexiqaCheck.attr('checked', true) : lexiqaCheck.attr('checked', false);
                 lexiqaCheck.on('change', this.toggleLexiqaOption.bind(this));
             } else {
-
+                var notAcceptedLanguages = [];
                 var LXQContainer = $('.options-box.qa-box');
-                $('.options-box #lexi_qa').prop( "disabled", true ).attr('checked', false);
-
                 var acceptedLanguagesLXQ = config.lexiqa_languages.slice();
-                var languagesArraysLXQ = createSupportedLanguagesArrays(acceptedLanguagesLXQ);
-                LXQContainer.find('.option-supported-languages').html(languagesArraysLXQ.acceptedCodes.join(', '));
-                LXQContainer.find('.option-notsupported-languages').html(languagesArraysLXQ.notAcceptedCodes.join(', '));
-                LXQContainer.find('.onoffswitch').off('click').on('click', function () {
-                    showModalNotSupportedLanguages(languagesArraysLXQ.notAccepted, languagesArraysLXQ.accepted);
-                });
-
+                if (acceptedLanguagesLXQ.indexOf(config.source_rfc) === -1 ) {
+                    notAcceptedLanguages.push($('#source-lang option:selected').text());
+                }
+                if (acceptedLanguagesLXQ.indexOf(config.target_rfc) === -1) {
+                    notAcceptedLanguages.push(_.find(config.languages_array, function (e) {
+                        return e.code === config.target_rfc;
+                    }).name);
+                }
+                LXQContainer.find('.option-notsupported-languages').html(notAcceptedLanguages.join(', '));
+                $('.options-box #lexi_qa').prop( "disabled", true ).attr('checked', false);
                 LXQContainer.addClass('option-unavailable');
+                UI.setLanguageTooltipLXQ();
             }
             //Check Tag Projection
             if (UI.checkTpCanActivate()) {
@@ -107,17 +49,22 @@ if ( true )
                 tagProjectionCheck.on('change', this.toggleTagProjectionOption.bind(this));
             } else {
                 var tpContainer= $('.options-box.tagp');
+
                 $('.options-box #tagp_check').prop( "disabled", true ).attr('checked', false);
-
-                var acceptedLanguagesTP = config.tag_projection_languages.slice();
-                var languagesArraysTP = createSupportedLanguagesArrays(acceptedLanguagesTP);
-                tpContainer.find('.option-supported-languages').html(languagesArraysTP.acceptedCodes.join(', '));
-                tpContainer.find('.option-notsupported-languages').html(languagesArraysTP.notAcceptedCodes.join(', '));
-                tpContainer.find('.onoffswitch').off('click').on('click', function () {
-                    showModalNotSupportedLanguages(languagesArraysTP.notAccepted, languagesArraysTP.accepted);
-                });
+                if (config.isReview) {
+                    tpContainer.addClass('option-unavailable-revise');
+                } else {
+                    var sourceLang = _.find(config.languages_array, function (e) {
+                        return e.code === config.source_rfc;
+                    }).name;
+                    var targetLang = _.find(config.languages_array, function (e) {
+                        return e.code === config.target_rfc;
+                    }).name;
+                    var label = sourceLang + " - " + targetLang;
+                    tpContainer.find('.option-notsupported-languages').html(label);
+                }
                 tpContainer.addClass('option-unavailable');
-
+                UI.setLanguageTooltipTP();
             }
             //Check Speech To Text
             if (!('webkitSpeechRecognition' in window)) {

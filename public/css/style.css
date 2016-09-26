@@ -212,9 +212,10 @@ left: -5px;
   border: 1px solid #848689;
   font-size: 17px;
   color: #333;
-    display: block;
+    display: none;
 }
 .cattool #quality-report[data-vote=acceptable],
+.cattool #quality-report[data-vote=poor],
 .cattool #quality-report[data-vote=fail],
 .cattool.review #quality-report
 {
@@ -882,6 +883,10 @@ box-shadow: 0 1px 2px #ccc;
 
 .header-menu li:first-child {
     margin-right: 15px;
+}
+
+.header-dropdown-menu {
+	margin-right: 15px;
 }
 
 .header-menu .wrapper-dropdown-5 .dropdown {
@@ -2086,7 +2091,7 @@ body.rtl-target .editor .editarea span
 	background: linear-gradient(top,  #f6f6f6,  #e2e3e5);
 }
 .wrap {
-    display: table;
+    /*display: table;*/
 	float:left;
     width: 99%;
 	height:100%;

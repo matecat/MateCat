@@ -1,0 +1,18 @@
+<div metal:define-macro="footer_includes">
+    <script type="text/javascript">
+        /*<![CDATA[*/
+
+        if ( typeof config == 'undefined' ) {
+            config = {} ;
+        }
+
+        config.userMail = '${userMail}';
+        config.userFullName = '${extended_user}';
+        config.userShortName = '${logged_user}';
+
+        config.isLoggedIn = ${isLoggedIn|string:false};
+
+
+        /*]]>*/
+    </script>
+</div>

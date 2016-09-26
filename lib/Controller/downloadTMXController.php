@@ -7,9 +7,8 @@ use ActivityLog\ActivityLogStruct;
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 02/12/14
  * Time: 16.10
- * 
+ *
  */
-
 class downloadTMXController extends ajaxController {
 
     /**
@@ -75,13 +74,6 @@ class downloadTMXController extends ajaxController {
      */
     protected $user;
 
-    /**
-     * User email
-     *
-     * @var string
-     */
-    protected $userMail;
-
     public function __construct() {
 
         parent::__construct();
@@ -92,28 +84,28 @@ class downloadTMXController extends ajaxController {
         $this->checkLogin();
 
         $filterArgs = array(
-            'id_job'                  => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'password'                => array(
-                    'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-            ),
-            'tm_key' =>  array(
-                    'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-            ),
-            'tm_name' =>  array(
-                'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-            ),
-            'downloadToken' =>  array(
-                    'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-            ),
-            'email' =>  array(
-                    'filter' => FILTER_VALIDATE_EMAIL
-            ),
-            'source' =>  array(
-                    'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-            ),
-            'target' =>  array(
-                    'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-            )
+                'id_job'        => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'password'      => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+                'tm_key'        => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+                'tm_name'       => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+                'downloadToken' => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+                'email'         => array(
+                        'filter' => FILTER_VALIDATE_EMAIL
+                ),
+                'source'        => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+                'target'        => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                )
 
         );
 
@@ -131,13 +123,13 @@ class downloadTMXController extends ajaxController {
         $this->id_job            = $__postInput[ 'id_job' ];
         $this->password          = $__postInput[ 'password' ];
 
-        if( !$this->userIsLogged ){
+        if ( !$this->userIsLogged ) {
 
             $output = "<pre>\n";
-            $output .=  " - REQUEST URI: " . print_r( @$_SERVER['REQUEST_URI'], true ) . "\n";
-            $output .=  " - REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
-            $output .=  "\n\t";
-            $output .=  "Aborting...\n";
+            $output .= " - REQUEST URI: " . print_r( @$_SERVER[ 'REQUEST_URI' ], true ) . "\n";
+            $output .= " - REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
+            $output .= "\n\t";
+            $output .= "Aborting...\n";
             $output .= "</pre>";
 
             Log::$fileName = 'php_errors.txt';
@@ -151,7 +143,7 @@ class downloadTMXController extends ajaxController {
 
         $this->tmxHandler = new TMSService();
         $this->tmxHandler->setTmKey( $this->tm_key );
-        $this->tmxHandler->setName( $this->tm_name . ".zip" );
+        $this->tmxHandler->setName( $this->tm_name );
 
     }
 
@@ -163,15 +155,19 @@ class downloadTMXController extends ajaxController {
 
         try {
 
-            if( $this->download_to_email === false ){
-                $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "Invalid email provided for download." );
+            if ( $this->download_to_email === false ) {
+                $this->result[ 'errors' ][] = array(
+                        "code"    => -1,
+                        "message" => "Invalid email provided for download."
+                );
+
                 return;
             }
 
             $this->result[ 'data' ] = $this->tmxHandler->requestTMXEmailDownload(
-                $this->user->email,
-                $this->user->first_name,
-                $this->user->last_name
+                    ( $this->download_to_email != false ? $this->download_to_email : $this->user->email ),
+                    $this->user->first_name,
+                    $this->user->last_name
             );
 
             // TODO: Not used at moment, will be enabled when will be built the Log Activity Keys
@@ -185,18 +181,18 @@ class downloadTMXController extends ajaxController {
                 Activity::save( $activity );
             */
 
-        } catch( Exception $e ){
+        } catch ( Exception $e ) {
 
             $r = "<pre>";
 
-            $r .= print_r( "User Email: " . $this->userMail , true ) . "\n";
-            $r .= print_r( "User ID: " . $this->uid , true ) . "\n";
+            $r .= print_r( "User Email: " . $this->download_to_email, true ) . "\n";
+            $r .= print_r( "User ID: " . $this->uid, true ) . "\n";
             $r .= print_r( $e->getMessage(), true ) . "\n";
             $r .= print_r( $e->getTraceAsString(), true ) . "\n";
 
             $r .= "\n\n";
-            $r .=  " - REQUEST URI: " . print_r( @$_SERVER['REQUEST_URI'], true ) . "\n";
-            $r .=  " - REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
+            $r .= " - REQUEST URI: " . print_r( @$_SERVER[ 'REQUEST_URI' ], true ) . "\n";
+            $r .= " - REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
             $r .= "\n\n\n";
             $r .= "</pre>";
 
@@ -205,11 +201,11 @@ class downloadTMXController extends ajaxController {
 
             Utils::sendErrMailReport( $r, "Download TMX Error: " . $e->getMessage() );
 
-            $this->result[ 'errors' ][ ] = array( "code" => -2, "message" => "Download TMX Error: " . $e->getMessage() );
+            $this->result[ 'errors' ][] = array( "code" => -2, "message" => "Download TMX Error: " . $e->getMessage() );
+
             return;
 
         }
-
     }
 
 } 

@@ -128,7 +128,7 @@ class Utils {
 
 	public static function sendErrMailReport( $htmlContent, $subject = null ){
 
-        if ( EnvWrap::isTest() ) {
+        if ( !INIT::$SEND_ERR_MAIL_REPORT ) {
           return true ;
         }
 
@@ -482,5 +482,18 @@ class Utils {
 
 		return $job_owner;
 	}
+
+    /**
+     * @param $params
+     * @return string
+     */
+	public static function buildQueryString( $params ) {
+        $querystring = implode('&', array_map(function($key, $value) {
+            return "$key=" . urlencode( $value ) ;
+        }, array_keys( $params ), $params ));
+
+        return $querystring ;
+    }
+
 }
 

@@ -281,7 +281,7 @@ $(document).ready(function() {
 							desc: _fileName,
 							TMKey: d.data.key
 						} );
-
+                        UI.setDropDown();
 						return true;
 					}
 
@@ -296,7 +296,6 @@ $(document).ready(function() {
 
     function closeMLPanel() {
         $( ".popup-languages.slide").removeClass('open').hide("slide", { direction: "right" }, 400);
-        $("#SnapABug_Button").show();
         $(".popup-outer.lang-slide").hide();
         $('body').removeClass('side-popup');
 
@@ -314,7 +313,6 @@ $(document).ready(function() {
             ll.parent().addClass('on');
             ll.attr('checked','checked');
         });
-        $("#SnapABug_Button").hide();
         $(".popup-outer.lang-slide").show();
         $('body').addClass('side-popup');
 	});
@@ -398,45 +396,6 @@ APP.displayCurrentTargetLang = function() {
     $( '#target-lang' ).val( localStorage.getItem( 'currentTargetLang' ) );
 };
 
-
-function showModalNotSupportedLanguages(notAcceptedLanguages, acceptedLanguages) {
-	APP.alert({
-		title: 'Option not available',
-		okTxt: 'Continue',
-		msg: "Not available for " + notAcceptedLanguages.join(", ") +
-		".</br> Only available for " + acceptedLanguages.join(", ") +"."
-	});
-}
-
-function createSupportedLanguagesArrays(acceptedLanguages, targetLanguages, sourceAccepted) {
-	var notAcceptedLanguagesNames = [], acceptedLanguagesNames = [];
-	var notAcceptedLanguagesCodes = [], acceptedLanguagesCodes = [];
-	var notAcceptedLanguages = targetLanguages.filter(function(n) {
-		return acceptedLanguages.indexOf(n) === -1;
-	});
-	if (!sourceAccepted) {
-		notAcceptedLanguages.push($( '#source-lang' ).val());
-	}
-
-	notAcceptedLanguages.forEach(function (value, index, array) {
-		notAcceptedLanguagesNames.push($( '#target-lang option[value='+value+']' ).first().text());
-		if (notAcceptedLanguagesCodes.indexOf(value.split("-")[0].toUpperCase()) === -1) {
-			notAcceptedLanguagesCodes.push(value.split("-")[0].toUpperCase() );
-		}
-	});
-	acceptedLanguages.forEach(function (value, index, array) {
-		acceptedLanguagesNames.push($( '#target-lang option[value='+value+']' ).first().text());
-		if (acceptedLanguagesCodes.indexOf(value.split("-")[0].toUpperCase()) === -1) {
-			acceptedLanguagesCodes.push(value.split("-")[0].toUpperCase());
-		}
-	});
-	return {
-		accepted: acceptedLanguagesNames,
-		acceptedCodes: acceptedLanguagesCodes,
-		notAccepted: notAcceptedLanguagesNames,
-		notAcceptedCodes: notAcceptedLanguagesCodes
-	};
-}
 /**
  * Disable/Enable languages for LexiQA
  *
@@ -445,26 +404,36 @@ APP.checkForLexiQALangs = function(){
 
 	var acceptedLanguages = config.lexiqa_languages.slice();
 	var LXQCheck = $('.options-box.qa-box');
-
+    var notAcceptedLanguages = [];
 	var targetLanguages = $( '#target-lang' ).val().split(',');
 	var sourceAccepted = (acceptedLanguages.indexOf($( '#source-lang' ).val() ) > -1);
 	var targetAccepted = targetLanguages.filter(function(n) {
+                            if (acceptedLanguages.indexOf(n) === -1) {
+                                var elem = $.grep(config.languages_array, function(e){ return e.code == n; });
+                                notAcceptedLanguages.push(elem[0].name);
+                            }
 							return acceptedLanguages.indexOf(n) != -1;
 						}).length > 0;
+
+    if (!sourceAccepted) {
+        notAcceptedLanguages.push($( '#source-lang option:selected' ).text());
+    }
+
 	LXQCheck.find('.onoffswitch').off("click");
 	$('.options-box #lexi_qa').removeAttr("disabled");
 	LXQCheck.removeClass('option-unavailable');
+    LXQCheck.find('.option-qa-box-languages').hide();
+	UI.removeTooltipLXQ();
     //disable LexiQA
 	var disableLexiQA = !(sourceAccepted && targetAccepted && config.defaults.lexiqa);
-	if (!(sourceAccepted && targetAccepted)) {
-		var arrays = createSupportedLanguagesArrays(acceptedLanguages, targetLanguages, sourceAccepted);
-		LXQCheck.find('.option-supported-languages').html(arrays.acceptedCodes.join(', '));
-		LXQCheck.find('.option-notsupported-languages').html(arrays.notAcceptedCodes.join(', '));
-		LXQCheck.find('.onoffswitch').off("click").on('click', function () {
-			showModalNotSupportedLanguages(arrays.notAccepted, arrays.accepted);
-		});
+    if (notAcceptedLanguages.length > 0) {
+        LXQCheck.find('.option-notsupported-languages').html(notAcceptedLanguages.join(", ")).show();
+        LXQCheck.find('.option-qa-box-languages').show();
+    }
+    if (!(sourceAccepted && targetAccepted)) {
 		LXQCheck.addClass('option-unavailable');
 		$('.options-box #lexi_qa').prop( "disabled", disableLexiQA );
+		UI.setLanguageTooltipLXQ();
 	}
     $('.options-box #lexi_qa').attr('checked', !disableLexiQA);
 };
@@ -475,28 +444,46 @@ APP.checkForLexiQALangs = function(){
  */
 APP.checkForTagProjectionLangs = function(){
 	if ( $('.options-box #tagp_check').length == 0 ) return;
-	var acceptedLanguages = config.tag_projection_languages.slice();
+
+	var acceptedLanguages = config.tag_projection_languages;
 	var tpCheck = $('.options-box.tagp');
-	var targetLanguages = $( '#target-lang' ).val().split(',');
-	var sourceAccepted = (acceptedLanguages.indexOf($( '#source-lang' ).val() ) > -1);
-	var targetAccepted = targetLanguages.filter(function(n) {
-							return acceptedLanguages.indexOf(n) != -1;
-						}).length > 0;
+    var sourceLanguageCode = $( '#source-lang' ).val();
+    var sourceLanguageText = $( '#source-lang option:selected' ).text();
+    var languageCombinations = [];
+    var notSupportedCouples = [];
+
+    $( '#target-lang' ).val().split(',').forEach(function (value) {
+        var elem = {};
+        elem.targetCode = value;
+        elem.sourceCode = sourceLanguageCode;
+        elem.targetName = $( '#target-lang option[value="' + value + '"]' ).text();
+        elem.sourceName = sourceLanguageText;
+        languageCombinations.push(elem);
+    });
+    //Intersection between the combination of choosen languages and the supported
+    var arrayIntersection = languageCombinations.filter(function(n) {
+        var elemST = n.sourceCode.split("-")[0] + "-" + n.targetCode.split("-")[0];
+        var elemTS = n.targetCode.split("-")[0] + "-" + n.sourceCode.split("-")[0];
+        if (typeof acceptedLanguages[elemST] == 'undefined' && typeof acceptedLanguages[elemTS] == 'undefined') {
+            notSupportedCouples.push(n.sourceName+ " - " + n.targetName);
+        }
+        return (typeof acceptedLanguages[elemST] !== 'undefined' || typeof acceptedLanguages[elemTS] !== 'undefined');
+    });
+
 	tpCheck.removeClass('option-unavailable');
 	tpCheck.find('.onoffswitch').off('click');
+    tpCheck.find('.option-tagp-languages').hide();
 	$('.options-box #tagp_check').removeAttr("disabled");
-
-	//disable Tag Projection
-	var disableTP = !(sourceAccepted && targetAccepted && config.defaults.tag_projection);
-	if (!(sourceAccepted && targetAccepted)) {
-		var arrays = createSupportedLanguagesArrays(acceptedLanguages, targetLanguages, sourceAccepted);
-		tpCheck.find('.option-supported-languages').html(arrays.acceptedCodes.join(', '));
-		tpCheck.find('.option-notsupported-languages').html(arrays.notAcceptedCodes.join(', '));
-		tpCheck.find('.onoffswitch').off('click').on('click', function () {
-			showModalNotSupportedLanguages(arrays.notAccepted, arrays.accepted);
-		});
+	var disableTP = !(arrayIntersection.length > 0 && config.defaults.tag_projection);
+	if (notSupportedCouples.length > 0) {
+        tpCheck.find('.option-notsupported-languages').html(notSupportedCouples.join(', ')).show();
+        tpCheck.find('.option-tagp-languages').show();
+    }
+    //disable Tag Projection
+    if ( arrayIntersection.length == 0) {
 		tpCheck.addClass('option-unavailable');
 		$('.options-box #tagp_check').prop( "disabled", disableTP );
+		UI.setLanguageTooltipTP();
 	}
 	$('.options-box #tagp_check').attr('checked', !disableTP);
 };

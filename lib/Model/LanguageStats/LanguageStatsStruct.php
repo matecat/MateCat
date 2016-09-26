@@ -24,6 +24,13 @@ class LanguageStats_LanguageStatsStruct extends DataAccess_AbstractDaoObjectStru
     public $target;
 
     /**
+     * @var string The fuzzy band for this stats. <br />
+     *             It must be one of the keys specified in Analysis_PayableRates::$DEFAULT_PAYABLE_RATES
+     * @see Analysis_PayableRates::$DEFAULT_PAYABLE_RATES
+     */
+    public $fuzzy_band;
+    
+    /**
      * @var float The wordcount sum of all jobs having this language couple
      */
     public $total_word_count;

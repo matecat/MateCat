@@ -54,6 +54,9 @@ $.extend(UI, {
             $(editarea).addClass('fromSuggestion');
 
 			this.saveInUndoStack('copysuggestion');
+            if (!$('.percentuage', segment).length) {
+                UI.createHeader(segment);
+            }
 			$('.percentuage', segment).text(match).removeClass('per-orange per-green per-blue per-yellow').addClass(percentageClass).addClass('visible');
             $('.repetition', segment).hide();
 			if (which) {
@@ -151,7 +154,7 @@ $.extend(UI, {
 		$(".loader", n).removeClass('loader_on');
 	},
     appendAddTMXButton : function( segment ) {
-        $('.footer', segment).append('<div class="addtmx-tr white-tx"><a class="open-popup-addtm-tr">Add your personal TM</a></div>');
+        $('.footer', segment).append('<div class="addtmx-tr white-tx"><a class="open-popup-addtm-tr">Add private resources</a></div>');
     },
     getContribution_success: function(d, segment) {
         this.addInStorage('contribution-' + config.id_job + '-' + UI.getSegmentId(segment), JSON.stringify(d), 'contribution');

@@ -53,6 +53,7 @@ class AbstractGetFromCacheEngineTest extends AbstractTest
         $this->engine_struct_param->base_url = "http://mtserver01.deepfoobar.com:8019";
         $this->engine_struct_param->translate_relative_url = "translate";
         $this->engine_struct_param->contribute_relative_url = "contribute";
+        $this->engine_struct_param->update_relative_url = "update";
         $this->engine_struct_param->delete_relative_url = "delete";
         $this->engine_struct_param->others = "{}";
         $this->engine_struct_param->class_load = "foo_bar";
@@ -80,6 +81,7 @@ class AbstractGetFromCacheEngineTest extends AbstractTest
                 "base_url" => "http://mtserver01.deepfoobar.com:8019",
                 "translate_relative_url" => "translate",
                 "contribute_relative_url" => "contribute",
+                "update_relative_url" => "update",
                 "delete_relative_url" => "delete",
                 "others" => '"{}"',
                 "class_load" => "foo_bar",

@@ -89,7 +89,7 @@ UI = {
 	activateSegment: function(segment, isNotSimilar) {
 		this.createFooter(this.currentSegment, isNotSimilar);
 		this.createButtons(segment);
-		this.createHeader();
+		this.createHeader(segment);
 	},
     evalCurrentSegmentTranslationAndSourceTags : function( segment ) {
         if ( segment.length == 0 ) return ;
@@ -550,18 +550,19 @@ UI = {
 		}
 	},
 
-    createHeader: function(forceCreation) {
-
+    createHeader: function(segment, forceCreation) {
+        var segment$ = $(segment);
+        var segmentId = UI.getSegmentId(segment);
         forceCreation = forceCreation || false;
 
-        if ( $('h2.percentuage', this.currentSegment).length && !forceCreation ) {
+        if ( $('h2.percentuage', segment$).length && !forceCreation ) {
             return;
         }
-		var header = '<h2 title="" class="percentuage"><span></span></h2><a href="/referenceFile/' + config.id_job + '/' + config.password + '/' + this.currentSegmentId + '" id="segment-' + this.currentSegmentId + '-context" class="context" title="Open context" target="_blank">Context</a>';
-		$('#' + this.currentSegment.attr('id') + '-header').html(header);
+		var header = '<h2 title="" class="percentuage"><span></span></h2><a href="/referenceFile/' + config.id_job + '/' + config.password + '/' + segmentId + '" id="segment-' + segmentId + '-context" class="context" title="Open context" target="_blank">Context</a>';
+        $('#' + segment$.attr('id') + '-header').html(header);
 
-        if ( this.currentSegment.data( 'autopropagated' ) && !$( '.header .repetition', this.currentSegment ).length ) {
-            $( '.header', this.currentSegment ).prepend( '<span class="repetition">Autopropagated</span>' );
+        if ( segment$.data( 'autopropagated' ) && !$( '.header .repetition', segment$ ).length ) {
+            $( '.header', segment$ ).prepend( '<span class="repetition">Autopropagated</span>' );
         }
 
     },
@@ -621,7 +622,7 @@ UI = {
         var node = document.createElement("span");
         var br = document.createElement("br");
         node.setAttribute('class', 'monad softReturn ' + config.lfPlaceholderClass);
-        node.setAttribute('contenteditable', 'false');
+        // node.setAttribute('contenteditable', 'false');
         node.appendChild(br);
         insertNodeAtCursor(node);
         this.unnestMarkers();
@@ -2792,8 +2793,8 @@ UI = {
             }
         }
 
-		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker softReturn ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' )
-					.replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
+		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker softReturn ' + config.lfPlaceholderClass +'"><br /></span>' )
+					.replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'"><br /></span>' )
 					.replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
 					.replace( config.tabPlaceholderRegex, '<span class="tab-marker monad marker ' + config.tabPlaceholderClass +'" contenteditable="false">&#8677;</span>' )
 					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false">&nbsp;</span>' )
@@ -2969,7 +2970,7 @@ UI = {
             // AS callback return for setTranslation ( whe are here now ),
             // currentSegment pointer was already advanced by openSegment and header already created
             //Needed because two consecutive segments can have the same hash
-            this.createHeader(true);
+            this.createHeader(segment, true);
 
         }
     },
@@ -3097,19 +3098,22 @@ UI = {
 	},
 	redoInSegment: function() {
 		this.editarea.html(this.undoStack[this.undoStack.length - 1 - this.undoStackPosition - 1 + 2]);
+        // $('.undoCursorPlaceholder').remove();
 		if (this.undoStackPosition > 0)
 			this.undoStackPosition--;
 		this.currentSegment.removeClass('waiting_for_check_result');
 		this.registerQACheck();
 	},
-	saveInUndoStack: function(fromWhich) {
-//		noRestore = (typeof noRestore == 'undefined')? 0 : 1;        
-		currentItem = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition];
+	saveInUndoStack: function() {
+		var currentItem = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition];
 
-		if (typeof currentItem != 'undefined') {
-			if (currentItem.trim() == this.editarea.html().trim())
-				return;
-		}
+        if (typeof currentItem != 'undefined') {
+            var regExp = /(<\s*\/*\s*(span class="undoCursorPlaceholder|span id="selectionBoundary)\s*.*span>)/gmi;
+            var editAreaText = this.editarea.html().replace(regExp, '');
+            var itemText = currentItem.replace(regExp, '');
+            if (itemText.trim() == editAreaText.trim())
+                return;
+        }
 
         if (this.editarea === '') return;
 		if (this.editarea.html() === '') return;
@@ -3121,23 +3125,23 @@ UI = {
             if ( (tt.length) && (!ss) )
                 return;
         }
-        var diff = 'null';
-
-        if( typeof currentItem != 'undefined'){
-            diff = this.dmp.diff_main( currentItem, this.editarea.html() );
-
-            // diff_main can return an array of one element (why?) , hence diff[1] could not exist.
-            // for that we chooiff[0] as a fallback
-            if(typeof diff[1] != 'undefined') {
-                diff = diff[1][1];
-            }
-            else {
-                diff = diff[0][1];
-            }
-        }
-
-        if ( diff == ' selected' )
-            return;
+        // var diff = 'null';
+        //
+        // if( typeof currentItem != 'undefined'){
+        //     diff = this.dmp.diff_main( currentItem, this.editarea.html() );
+        //
+        //     // diff_main can return an array of one element (why?) , hence diff[1] could not exist.
+        //     // for that we chooiff[0] as a fallback
+        //     if(typeof diff[1] != 'undefined') {
+        //         diff = diff[1][1];
+        //     }
+        //     else {
+        //         diff = diff[0][1];
+        //     }
+        // }
+        //
+        // if ( diff == ' selected' )
+        //     return;
 
 		var pos = this.undoStackPosition;
 		if (pos > 0) {
@@ -3146,10 +3150,13 @@ UI = {
 		}
                 
         saveSelection();
+        // var cursorPos = APP.getCursorPosition(this.editarea.get(0));
         $('.undoCursorPlaceholder').remove();
-        $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');      
+        $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
         restoreSelection();
-        this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
+        var htmlToSave = this.editarea.html();
+        this.undoStack.push(htmlToSave);
+        // $('.undoCursorPlaceholder').remove();
         
 	},
 	clearUndoStack: function() {
@@ -3233,7 +3240,8 @@ UI = {
                     //$('#go2lexiqa').attr('href', result.qaurl);
                     }
                     //highlight the segments
-                    var source_val = UI.clearMarks($.trim($(".source", segment).html()));
+                    //var source_val = UI.clearMarks($.trim($(".source", segment).html()));
+                    source_val =$(".source", segment).html();
                     var highlights = {
                             source: {
                                 numbers: [],
@@ -3282,7 +3290,8 @@ UI = {
                     source_val = LXQ.highLightText(source_val, highlights.source,isSegmentCompleted,true,true,segment);
                     if (callback!=null)
                         saveSelection();
-                    target_val = UI.clearMarks($(".editarea", segment).html());
+                    //target_val = UI.clearMarks($(".editarea", segment).html());
+                    target_val = $(".editarea", segment).html();
                     target_val = LXQ.highLightText(target_val,highlights.target,isSegmentCompleted,true,false,segment);
                     
                     $(".editarea", segment).html(target_val);
@@ -3303,14 +3312,16 @@ UI = {
                 else {
                     //do something else
                     noVisibleErrorsFound = true;                  
-                    source_val = UI.clearMarks($.trim($(".source", segment).html()));
+                    //source_val = UI.clearMarks($.trim($(".source", segment).html()));
+                    source_val = $(".source", segment).html();
                     source_val = LXQ.cleanUpHighLighting(source_val);
                     
                     
                                         
                     if (callback!=null)
                         saveSelection();
-                    target_val = UI.clearMarks($.trim($(".editarea", segment).html()));
+                    //target_val = UI.clearMarks($.trim($(".editarea", segment).html()));
+                    target_val = $(".editarea", segment).html();
                     target_val = LXQ.cleanUpHighLighting(target_val);
                     $(".editarea", segment).html(target_val);
                     if (callback!=null)
@@ -3440,12 +3451,14 @@ UI = {
                         //console.dir (seg);
                         //var segEdit = UI.getEditAreaBySegmentId(element);
                         //console.dir(segEdit);
-                        var source_val = UI.clearMarks($.trim($(".source", seg).html()));
+                        //var source_val = UI.clearMarks($.trim($(".source", seg).html()));
+                        var source_val = $(".source", seg).html();
                         //console.log('source: '+source_val);
                                                 
                         source_val = LXQ.highLightText(source_val,highlights.source,true,LXQ.shouldHighlighWarningsForSegment(seg),true,seg);
                         
-                        var target_val = UI.clearMarks($.trim($(".editarea", seg).html()));
+                        //var target_val = UI.clearMarks($.trim($(".editarea", seg).html()));
+                        target_val = $(".editarea", segment).html();
                         target_val = LXQ.highLightText(target_val,highlights.target,true,LXQ.shouldHighlighWarningsForSegment(seg),false,seg);
                         $(".editarea", seg).html(target_val);
                         $(".source", seg).html(source_val);
@@ -3666,7 +3679,6 @@ UI = {
         var tab = 'opt';
         $('body').addClass('side-popup');
         $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
-        $("#SnapABug_Button").hide();
         $(".outer-tm").show();
         $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
         $.cookie('tmpanel-open', 1, { path: '/' });

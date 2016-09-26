@@ -53,8 +53,6 @@
                 source_lang: '${source}',
                 target_lang: '${target}',
                 ownerIsMe: ${jobOwnerIsMe},
-                isAnonymousUser: ${isAnonymousUser},
-                userMail: '${userMail}',
                 time_to_edit_enabled: ${time_to_edit_enabled},
                 build_number: '${build_number}',
                 warningPollingInterval: '${warningPollingInterval}',
@@ -99,18 +97,28 @@
 
         <script tal:condition="true:isReview" type="text/javascript">
             config.review_password = '${review_password}';
-            config.overall_quality_class = '${overall_quality_class}';
+
         </script>
 
         <script tal:condition="true:review_improved" type="text/javascript">
-            config.quality_report_href = '${quality_report_href}';
+
           /*<![CDATA[*/
           // TODO: remove the nested one, should be nested on the client.
           config.lqa_nested_categories = '${lqa_categories}';
           config.lqa_flat_categories = '${lqa_flat_categories}';
 
-          config.project_type = '${project_type}'; // TODO: move this into project metadata namespace
+
           /*]]>*/
+
+        </script>
+
+        <script type="text/javascript">
+            /*<![CDATA[*/
+            config.overall_quality_class = '${overall_quality_class}';
+            config.quality_report_href = '${quality_report_href}';
+
+            config.project_type = '${project_type}'; // TODO: move this into project metadata namespace
+            /*]]>*/
 
         </script>
 
@@ -178,7 +186,6 @@
                     <input type="hidden" name="action" value="downloadFile" />
                     <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
                     <input type="hidden" name="id_file" value="" />
-                    <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
                     <input type="hidden" name="password" tal:attributes="value password" />
                     <input type="hidden" name="download_type" value="all" />
                 </form>
@@ -356,7 +363,6 @@
             <p>Howto layer to show a basic tutorial of the cattool when the first-time user open it.</p>
             <form action=""><input id="hideTutorial" type="checkbox" value="" />Do not display again </form>
         </div>
-        <script src="${basepath}public/js/lib/snapengage.js"></script>
 		<script type="text/javascript">
 		$( ".open-popup-tmx" ).click(function() {
   $( this ).hide();
@@ -458,9 +464,7 @@ $(window).resize(function() {
     <template id="tpl-taglock-customize" tal:condition="not:tagLockCustomizable">
     </template>
 <div class="offline_stuffs" ></div>
-<!-- Snapengage -->
-<script src="${basepath}public/js/lib/snapengage.js"></script>
-<!-- // Snapengage -->
+
 
 <tal:block  tal:repeat="js_source footer_js">
   <script type="text/javascript" tal:attributes="src js_source"></script>
@@ -468,5 +472,7 @@ $(window).resize(function() {
 
 
 <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_translate"/>
+
+<div metal:use-macro="common.html/footer_includes" />
 
 </html>

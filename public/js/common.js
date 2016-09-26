@@ -143,14 +143,15 @@ APP = {
     },
     doRequest: function ( req, log ) {
 
-        logTxt = (typeof log == 'undefined') ? '' : '&type=' + log;
-        version = (typeof config.build_number == 'undefined') ? '' : '-v' + config.build_number;
-        builtURL = (req.url) ? req.url : config.basepath + '?action=' + req.data.action + logTxt + this.appendTime() + version + ',jid=' + config.id_job + ((typeof req.data.id_segment != 'undefined') ? ',sid=' + req.data.id_segment : '');
+        var logTxt = (typeof log == 'undefined') ? '' : '&type=' + log;
+        var version = (typeof config.build_number == 'undefined') ? '' : '-v' + config.build_number;
+        var builtURL = (req.url) ? req.url : config.basepath + '?action=' + req.data.action + logTxt + this.appendTime() + version + ',jid=' + config.id_job + ((typeof req.data.id_segment != 'undefined') ? ',sid=' + req.data.id_segment : '');
+        var reqType = (req.type) ? req.type : 'POST';
         var setup = {
             url: builtURL,
 
 			data: req.data,
-			type: 'POST',
+			type: reqType,
 			dataType: 'json'
 			//TODO set timeout longer than server curl for TM/MT
 		};
@@ -563,18 +564,18 @@ APP = {
      */
 
     addNotification: function (notification) {
-        if (!UI. notificationBox) {
-            UI.notificationBox = ReactDOM.render(
+        if (!APP. notificationBox) {
+            APP.notificationBox = ReactDOM.render(
                 React.createElement(NotificationBox),
                 $(".notifications-wrapper")[0]
             );
         }
         
-        return UI.notificationBox.addNotification(notification);
+        return APP.notificationBox.addNotification(notification);
     },
     removeNotification: function (notification) {
-        if (UI. notificationBox) {
-            UI.notificationBox.removeNotification(notification);
+        if (APP.notificationBox) {
+            APP.notificationBox.removeNotification(notification);
         }
     },
 
@@ -586,6 +587,30 @@ APP = {
         if (!results) return null;
         if (!results[2]) return '';
         return decodeURIComponent(results[2].replace(/\+/g, " "));
+    },
+    getCursorPosition :  function(editableDiv) {
+        var caretPos = 0,
+            sel, range;
+        if (window.getSelection) {
+            sel = window.getSelection();
+            if (sel.rangeCount) {
+                range = sel.getRangeAt(0);
+                if (range.commonAncestorContainer == editableDiv) {
+                    caretPos = range.endOffset;
+                }
+            }
+        } else if (document.selection && document.selection.createRange) {
+            range = document.selection.createRange();
+            if (range.parentElement() == editableDiv) {
+                var tempEl = document.createElement("span");
+                editableDiv.insertBefore(tempEl, editableDiv.firstChild);
+                var tempRange = range.duplicate();
+                tempRange.moveToElementText(tempEl);
+                tempRange.setEndPoint("EndToEnd", range);
+                caretPos = tempRange.text.length;
+            }
+        }
+        return caretPos;
     }
 };
 

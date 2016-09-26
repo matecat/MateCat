@@ -142,7 +142,7 @@ if ( ReviewImproved.enabled() )
         openPanel : function(data) {
             $('article').addClass('review-panel-opened');
             $('body').addClass('side-tools-opened review-side-panel-opened');
-            hackSnapEngage( true );
+            hackIntercomButton( true );
 
             $(document).trigger('review-panel:opened', data);
 
@@ -167,7 +167,7 @@ if ( ReviewImproved.enabled() )
         closePanel : function() {
             $(document).trigger('review-panel:closed');
 
-            hackSnapEngage( false );
+            hackIntercomButton( false );
 
             $('article').removeClass('review-panel-opened');
             $('body').removeClass('side-tools-opened review-side-panel-opened');
