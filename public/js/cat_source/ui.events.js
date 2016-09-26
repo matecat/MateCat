@@ -609,6 +609,9 @@ $.extend(UI, {
         }).on('click', '#previewDropdown .downloadTranslation a', function(e) {
             e.preventDefault();
             runDownload();
+		}).on('click', '#previewDropdown .previewLink a', function(e) {
+			e.preventDefault();
+			runDownload();
 		}).on('click', '#previewDropdown a.tmx', function(e) {
 			e.preventDefault();
 			window.open($(this).attr('href'));
