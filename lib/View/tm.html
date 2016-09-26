@@ -180,9 +180,10 @@ $(function() {
 
                                 <tal:block tal:condition="php: !empty(logged_user)">
 
-                                    <div style="float: right; margin-bottom: 18px;">
-                                        <label for="filterInactive">Search: </label>
-                                        <input id="filterInactive" type="text"/>
+                                    <div class="filter-box pull-right">
+                                        
+                                        <input id="filterInactive" onfocus="if(this.value == 'Filter resources') { this.value = ''; }" value="Filter resources" type="text"/>
+                                        <span class="icon-search"></span>
                                     </div>
 
                                     <table class="mgmt-tm mgmt-tm-nested scroll" id="inactivetm">
