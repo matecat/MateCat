@@ -20,8 +20,1796 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
     <link href="/public/css/manage.css" rel="stylesheet" type="text/css" />
     <link href="/public/css/common.css" rel="stylesheet" type="text/css" />
     <script src="/public/js/lib/jquery.js"></script>
+      <link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32" />
+  <link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16" />
+  <link href='/public/api/dist/css/screen.css' media='screen' rel='stylesheet' type='text/css'/>
+  <link href='/public/api/dist/css/print.css' media='print' rel='stylesheet' type='text/css'/>
+
+  <script src='/public/api/dist/lib/object-assign-pollyfill.js' type='text/javascript'></script>
+  <script src='/public/api/dist/lib/jquery-1.8.0.min.js' type='text/javascript'></script>
+  <script src='/public/api/dist/lib/jquery.slideto.min.js' type='text/javascript'></script>
+  <script src='/public/api/dist/lib/jquery.wiggle.min.js' type='text/javascript'></script>
+  <script src='/public/api/dist/lib/jquery.ba-bbq.min.js' type='text/javascript'></script>
+  <script src='/public/api/dist/lib/handlebars-4.0.5.js' type='text/javascript'></script>
+  <script src='/public/api/dist/lib/lodash.min.js' type='text/javascript'></script>
+  <script src='/public/api/dist/lib/backbone-min.js' type='text/javascript'></script>
+  <script src='/public/api/dist/swagger-ui.js' type='text/javascript'></script>
+  <script src='/public/api/dist/lib/highlight.9.1.0.pack.js' type='text/javascript'></script>
+  <script src='/public/api/dist/lib/highlight.9.1.0.pack_extended.js' type='text/javascript'></script>
+  <script src='/public/api/dist/lib/jsoneditor.min.js' type='text/javascript'></script>
+  <script src='/public/api/dist/lib/marked.js' type='text/javascript'></script>
+  <script src='/public/api/dist/lib/swagger-oauth.js' type='text/javascript'></script>
+  <script type="text/javascript">
+    $(function () {
+      var url = window.location.search.match(/url=([^&]+)/);
+      if (url && url.length > 1) {
+        url = decodeURIComponent(url[1]);
+      } else {
+        url = "http://petstore.swagger.io/v2/swagger.json";
+      }
+
+      hljs.configure({
+        highlightSizeThreshold: 5000
+      });
+      var spec = {
+        "swagger": "2.0",
+        "info": {
+          "description": "We developed a set of Rest API to let you integrate Matecat in your translation management system or in any other application. Use our API to create projects and check their status.",
+          "version": "1.0.0"
+        },
+        "host": "matecat.dev",
+        "schemes": [
+          "http"
+        ],
+        "basePath": "/api",
+        "produces": [
+          "application/json"
+        ],
+        "paths": {
+          "/new": {
+            "post": {
+              "tags": [
+                "Project"
+              ],
+              "summary": "Create new Project on Matecat",
+              "description": "Create new Project on Matecat With HTTP POST ( multipart/form-data ) protocol.\n/new has a maximum file size limit of 200 MB per file and a max number of files of 600. Matecat PRO accept only 68 file formats. A list of all accepted file are available here: https://www.matecat.com/api/docs.\n",
+              "parameters": [
+                {
+                  "name": "files",
+                  "in": "formData",
+                  "description": "The file(s) to be uploaded. You may also upload your own translation memories (TMX).",
+                  "required": true,
+                  "type": "file"
+                },
+                {
+                  "name": "project_name",
+                  "in": "query",
+                  "description": "The name of the project you want create.",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "source_lang",
+                  "in": "query",
+                  "description": "RFC 5646 language+region Code ( en-US case sensitive ) as specified in W3C standards.",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "target_lang",
+                  "in": "query",
+                  "description": "RFC 5646 language+region Code ( en-US case sensitive ) as specified in W3C standards. Multiple languages must be comma separated ( it-IT,fr-FR,es-ES case sensitive)",
+                  "required": true,
+                  "type": "integer"
+                },
+                {
+                  "name": "tms_engine",
+                  "in": "query",
+                  "description": "Identifier for Memory Server 0 means disabled, 1 means MyMemory)",
+                  "required": false,
+                  "type": "integer",
+                  "default": 1
+                },
+                {
+                  "name": "mt_engine",
+                  "in": "query",
+                  "description": "Identifier for Machine Translation Service 0 means disabled, 1 means get MT from MyMemory).",
+                  "required": false,
+                  "type": "integer",
+                  "default": 1
+                },
+                {
+                  "name": "private_tm_key",
+                  "in": "query",
+                  "description": "Private key(s) for MyMemory.  If a TMX file is uploaded and no key is provided, a new key will be created. - Existing MyMemory private keys or new to create a new key. - Multiple keys must be comma separated. Up to 5 keys allowed. (xxx345cvf,new,s342f234fc) - Only available if tms_engine is set to 1 or if is not used",
+                  "required": false,
+                  "type": "string"
+                },
+                {
+                  "name": "subject",
+                  "in": "query",
+                  "description": "The subject of the project you want to create.",
+                  "required": false,
+                  "type": "string",
+                  "default": "general"
+                },
+                {
+                  "name": "segmentation_rule",
+                  "in": "query",
+                  "description": "The segmentation rule you want to use to parse your file.",
+                  "required": false,
+                  "type": "string"
+                },
+                {
+                  "name": "owner_email",
+                  "in": "query",
+                  "description": "The email of the owner of the project.",
+                  "required": false,
+                  "type": "string",
+                  "default": "anonymous"
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "The metadata for the created project.",
+                  "schema": {
+                    "$ref": "#/definitions/NewProject"
+                  }
+                },
+                "default": {
+                  "description": "Unexpected error"
+                }
+              }
+            }
+          },
+          "/status": {
+            "get": {
+              "tags": [
+                "Project"
+              ],
+              "summary": "Retrieve the status of a project",
+              "description": "Check Status of a created Project With HTTP POST ( application/x-www-form-urlencoded ) protocol",
+              "parameters": [
+                {
+                  "name": "id_project",
+                  "in": "query",
+                  "description": "The identifier of the project, should be the value returned by the /new method.",
+                  "required": true,
+                  "type": "integer"
+                },
+                {
+                  "name": "project_pass",
+                  "in": "query",
+                  "description": "The password associated with the project, should be the value returned by the /new method ( associated with the id_project )",
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "An array of price estimates by product",
+                  "schema": {
+                    "$ref": "#/definitions/Status"
+                  }
+                },
+                "default": {
+                  "description": "Unexpected error"
+                }
+              }
+            }
+          },
+          "/change_project_password": {
+            "post": {
+              "tags": [
+                "Project"
+              ],
+              "summary": "Change password",
+              "description": "Change the password of a project.",
+              "parameters": [
+                {
+                  "name": "id_project",
+                  "in": "query",
+                  "description": "The id of the project you want to update.",
+                  "required": true,
+                  "type": "integer"
+                },
+                {
+                  "name": "old_pass",
+                  "in": "query",
+                  "description": "The OLD password of the project you want to update.",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "new_pass",
+                  "in": "query",
+                  "description": "The NEW password of the project you want to update.",
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "An array of price estimates by product",
+                  "schema": {
+                    "$ref": "#/definitions/ChangePasswordResponse"
+                  }
+                },
+                "default": {
+                  "description": "Unexpected error"
+                }
+              }
+            }
+          },
+          "/v1/jobs/{id_job}/{password}/stats": {
+            "get": {
+              "tags": [
+                "Project"
+              ],
+              "summary": "Statistics",
+              "description": "Statistics",
+              "parameters": [
+                {
+                  "name": "id_job",
+                  "in": "path",
+                  "description": "The id of the job",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "password",
+                  "in": "path",
+                  "description": "The password of the job",
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Statistics",
+                  "schema": {
+                    "$ref": "#/definitions/Stats"
+                  }
+                },
+                "default": {
+                  "description": "Unexpected error"
+                }
+              }
+            }
+          },
+          "/v2/projects/{id_project}/{password}/urls": {
+            "get": {
+              "tags": [
+                "Project"
+              ],
+              "summary": "Urls of a Project",
+              "description": "Urls of a Project",
+              "parameters": [
+                {
+                  "name": "id_project",
+                  "in": "path",
+                  "description": "The id of the project",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "password",
+                  "in": "path",
+                  "description": "The password of the project",
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "urls",
+                  "schema": {
+                    "$ref": "#/definitions/Urls"
+                  }
+                },
+                "default": {
+                  "description": "Unexpected error"
+                }
+              }
+            }
+          },
+          "/v2/projects/{id_project}/{password}/jobs/{id_job}/merge": {
+            "post": {
+              "tags": [
+                "Project"
+              ],
+              "summary": "Merge",
+              "description": "Merge a splitted project",
+              "parameters": [
+                {
+                  "name": "id_project",
+                  "in": "path",
+                  "description": "The id of the project",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "password",
+                  "in": "path",
+                  "description": "The password of the project",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "id_job",
+                  "in": "path",
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "urls"
+                },
+                "default": {
+                  "description": "Unexpected error"
+                }
+              }
+            }
+          },
+          "/v2/project-completion-status/{id_project}": {
+            "get": {
+              "tags": [
+                "Project"
+              ],
+              "summary": "Project completion status",
+              "description": "Add \"Mark as Complete\" button",
+              "parameters": [
+                {
+                  "name": "id_project",
+                  "in": "path",
+                  "description": "The id of the project",
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Project completion status"
+                },
+                "default": {
+                  "description": "Unexpected error"
+                }
+              }
+            }
+          },
+          "/v2/jobs/{id_job}/{password}/comments": {
+            "get": {
+              "tags": [
+                "Project",
+                "Comments"
+              ],
+              "summary": "Get Comments",
+              "description": "Get Comments",
+              "parameters": [
+                {
+                  "name": "id_job",
+                  "in": "path",
+                  "description": "The id of the job",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "password",
+                  "in": "path",
+                  "description": "The password of the job",
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Comments",
+                  "schema": {
+                    "$ref": "#/definitions/Comments"
+                  }
+                },
+                "default": {
+                  "description": "Unexpected error"
+                }
+              }
+            }
+          },
+          "/v2/jobs/{id_job}/{password}/quality-report": {
+            "get": {
+              "tags": [
+                "Project",
+                "Quality Report"
+              ],
+              "summary": "Quality report",
+              "description": "Quality report",
+              "parameters": [
+                {
+                  "name": "id_job",
+                  "in": "path",
+                  "description": "The id of the job",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "password",
+                  "in": "path",
+                  "description": "The password of the job",
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Quality report",
+                  "schema": {
+                    "$ref": "#/definitions/QualityReport"
+                  }
+                },
+                "default": {
+                  "description": "Unexpected error"
+                }
+              }
+            }
+          },
+          "/v2/jobs/{id_job}/{password}/translation-issues": {
+            "get": {
+              "tags": [
+                "Project",
+                "Translation Issues"
+              ],
+              "summary": "Project translation issues",
+              "description": "Project translation issues",
+              "parameters": [
+                {
+                  "name": "id_job",
+                  "in": "path",
+                  "description": "The id of the job",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "password",
+                  "in": "path",
+                  "description": "The password of the job (Translate password)",
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Translation issues",
+                  "schema": {
+                    "$ref": "#/definitions/TranslationIssues"
+                  }
+                },
+                "default": {
+                  "description": "Unexpected error"
+                }
+              }
+            }
+          },
+          "/v2/jobs/{id_job}/{password}/translation-versions": {
+            "get": {
+              "tags": [
+                "Project",
+                "Translation Versions"
+              ],
+              "summary": "Project translation versions",
+              "description": "Project translation versions",
+              "parameters": [
+                {
+                  "name": "id_job",
+                  "in": "path",
+                  "description": "The id of the job",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "password",
+                  "in": "path",
+                  "description": "The password of the job (Translate password)",
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Translation Versions",
+                  "schema": {
+                    "$ref": "#/definitions/TranslationVersions"
+                  }
+                },
+                "default": {
+                  "description": "Unexpected error"
+                }
+              }
+            }
+          },
+          "/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-versions": {
+            "get": {
+              "tags": [
+                "Project",
+                "Translation Versions"
+              ],
+              "summary": "Segment versions",
+              "description": "Segment versions",
+              "parameters": [
+                {
+                  "name": "id_job",
+                  "in": "path",
+                  "description": "The id of the job",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "password",
+                  "in": "path",
+                  "description": "The password of the job (Translate password)",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "id_segment",
+                  "in": "path",
+                  "description": "The id of the segment",
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Segment versions",
+                  "schema": {
+                    "$ref": "#/definitions/TranslationVersions"
+                  }
+                },
+                "default": {
+                  "description": "Unexpected error"
+                }
+              }
+            }
+          },
+          "/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-versions/{version_number}": {
+            "get": {
+              "tags": [
+                "Project",
+                "Translation Versions"
+              ],
+              "summary": "Get a Segment translation version",
+              "description": "Get a Segment translation version",
+              "parameters": [
+                {
+                  "name": "id_job",
+                  "in": "path",
+                  "description": "The id of the job",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "password",
+                  "in": "path",
+                  "description": "The password of the job (Translate password)",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "id_segment",
+                  "in": "path",
+                  "description": "The id of the segment",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "version_number",
+                  "in": "path",
+                  "description": "The version number",
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Segment version",
+                  "schema": {
+                    "$ref": "#/definitions/TranslationVersion"
+                  }
+                },
+                "default": {
+                  "description": "Unexpected error"
+                }
+              }
+            }
+          },
+          "/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues": {
+            "post": {
+              "tags": [
+                "Project",
+                "Translation Issues"
+              ],
+              "summary": "Create translation issues",
+              "description": "Create translation issues",
+              "parameters": [
+                {
+                  "name": "id_job",
+                  "in": "path",
+                  "description": "The id of the job",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "password",
+                  "in": "path",
+                  "description": "The password of the job (Translate password)",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "id_segment",
+                  "in": "path",
+                  "description": "The id of the segment",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "version_number",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "id_segment",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "id_job",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "id_category",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "severity",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "translation_version",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "target_text",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "start_node",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "start_offset",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "end_node",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "end_offset",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "is_full_segment",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "comment",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Segment version",
+                  "schema": {
+                    "$ref": "#/definitions/Issue"
+                  }
+                },
+                "default": {
+                  "description": "Unexpected error"
+                }
+              }
+            }
+          },
+          "/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues/{id_issue}": {
+            "post": {
+              "tags": [
+                "Project",
+                "Translation Issues"
+              ],
+              "summary": "Update translation issues",
+              "description": "Update translation issues",
+              "parameters": [
+                {
+                  "name": "id_job",
+                  "in": "path",
+                  "description": "The id of the job",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "password",
+                  "in": "path",
+                  "description": "The password of the job (Translate password)",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "id_segment",
+                  "in": "path",
+                  "description": "The id of the segment",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "id_issue",
+                  "in": "path",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "rebutted_at",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Update Translation issue"
+                },
+                "default": {
+                  "description": "Unexpected error"
+                }
+              }
+            },
+            "delete": {
+              "tags": [
+                "Project",
+                "Translation Issues"
+              ],
+              "summary": "Delete a translation Issue",
+              "description": "Delete a translation Issue",
+              "parameters": [
+                {
+                  "name": "id_job",
+                  "in": "path",
+                  "description": "The id of the job",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "password",
+                  "in": "path",
+                  "description": "The password of the job (Translate password)",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "id_segment",
+                  "in": "path",
+                  "description": "The id of the segment",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "id_issue",
+                  "in": "path",
+                  "description": "The id of the issue",
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Delete",
+                  "schema": {
+                    "$ref": "#/definitions/Issue"
+                  }
+                },
+                "default": {
+                  "description": "Unexpected error"
+                }
+              }
+            }
+          },
+          "/v2/jobs/{id_job}/{password}/segments/{id_segment}/translation-issues/{id_issue}/comments": {
+            "post": {
+              "tags": [
+                "Project",
+                "Translation Issues"
+              ],
+              "summary": "Add comment to a translation issue",
+              "description": "Create a comment translation issue",
+              "parameters": [
+                {
+                  "name": "id_job",
+                  "in": "path",
+                  "description": "The id of the job",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "password",
+                  "in": "path",
+                  "description": "The password of the job (Translate password)",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "id_segment",
+                  "in": "path",
+                  "description": "The id of the segment",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "id_issue",
+                  "in": "path",
+                  "description": "The id of the issue",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "comment",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "id_qa_entry",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "source_page",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "uid",
+                  "in": "query",
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Add comment"
+                },
+                "default": {
+                  "description": "Unexpected error"
+                }
+              }
+            },
+            "get": {
+              "tags": [
+                "Project",
+                "Translation Issues"
+              ],
+              "summary": "Get comments",
+              "description": "Get comments",
+              "parameters": [
+                {
+                  "name": "id_job",
+                  "in": "path",
+                  "description": "The id of the job",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "password",
+                  "in": "path",
+                  "description": "The password of the job (Translate password)",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "id_segment",
+                  "in": "path",
+                  "description": "The id of the segment",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "id_issue",
+                  "in": "path",
+                  "description": "The id of the issue",
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Get comments"
+                },
+                "default": {
+                  "description": "Unexpected error"
+                }
+              }
+            }
+          },
+          "/v2/jobs/{id_job}/{password}/options": {
+            "post": {
+              "tags": [
+                "Job",
+                "Options"
+              ],
+              "summary": "Update Options",
+              "description": "Update Options (speech2text, guess tags, lexiqa)",
+              "parameters": [
+                {
+                  "name": "id_job",
+                  "in": "path",
+                  "description": "The id of the job",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "password",
+                  "in": "path",
+                  "description": "The password of the job (Translate password)",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "speech2text",
+                  "in": "query",
+                  "description": "To enable Speech To Text option",
+                  "required": false,
+                  "type": "boolean"
+                },
+                {
+                  "name": "tag_projection",
+                  "in": "query",
+                  "description": "To enable Guess Tags option",
+                  "type": "boolean",
+                  "required": false
+                },
+                {
+                  "name": "lexiqa",
+                  "in": "query",
+                  "description": "To enable lexiqa option",
+                  "type": "boolean",
+                  "required": false
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Update Options",
+                  "schema": {
+                    "$ref": "#/definitions/Options"
+                  }
+                },
+                "default": {
+                  "description": "Unexpected error"
+                }
+              }
+            }
+          },
+          "/v2/glossaries/import/": {
+            "post": {
+              "tags": [
+                "Glossary"
+              ],
+              "summary": "Import Glossary",
+              "description": "Import glossary file (.xlsx)",
+              "parameters": [
+                {
+                  "name": "files",
+                  "in": "formData",
+                  "description": "The file(s) to be uploaded",
+                  "required": true,
+                  "type": "file"
+                },
+                {
+                  "name": "name",
+                  "in": "query",
+                  "description": "The file name.",
+                  "type": "string",
+                  "required": false
+                },
+                {
+                  "name": "tm_key",
+                  "in": "query",
+                  "description": "The tm key.",
+                  "required": false,
+                  "type": "string"
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Import Glossary"
+                },
+                "default": {
+                  "description": "Unexpected error"
+                }
+              }
+            }
+          },
+          "/v2/glossaries/import/status/{tm_key}": {
+            "get": {
+              "summary": "Glossary Upload status.",
+              "description": "Glossary Upload status.",
+              "parameters": [
+                {
+                  "name": "tm_key",
+                  "in": "path",
+                  "description": "The tm key.",
+                  "required": true,
+                  "type": "string"
+                },
+                {
+                  "name": "name",
+                  "in": "query",
+                  "description": "The file name.",
+                  "type": "string"
+                }
+              ],
+              "tags": [
+                "Glossary"
+              ],
+              "responses": {
+                "200": {
+                  "description": "Glossary Upload status",
+                  "schema": {
+                    "$ref": "#/definitions/UploadGlossaryStatusObject"
+                  }
+                },
+                "default": {
+                  "description": "Unexpected error"
+                }
+              }
+            }
+          },
+          "/v2/glossaries/export/{tm_key}": {
+            "get": {
+              "tags": [
+                "Glossary"
+              ],
+              "summary": "Download Glossary",
+              "description": "download Glossary",
+              "parameters": [
+                {
+                  "name": "tm_key",
+                  "in": "path",
+                  "description": "The tm key.",
+                  "required": true,
+                  "type": "string"
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Glossary"
+                },
+                "default": {
+                  "description": "Unexpected error"
+                }
+              }
+            }
+          }
+        },
+        "definitions": {
+          "NewProject": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "description": "Return the creation status of the project. The statuses can be:OK indicating that the creation worked.FAIL indicating that the creation is failed.",
+                "enum": [
+                  "OK",
+                  "FAIL"
+                ]
+              },
+              "id_project": {
+                "type": "string",
+                "description": "Return the unique id of the project just created. If creation status is FAIL this key will simply be omitted from the result."
+              },
+              "project_pass": {
+                "type": "string",
+                "description": "Return the password of the project just created. If creation status is FAIL this key will simply be omitted from the result."
+              },
+              "new_keys": {
+                "type": "string",
+                "description": "If you specified new as one or more value in the private_tm_key parameter, the new created keys are returned as CSV string (4rcf34rc,r34rcfewf3r2). Otherwise empty string is returned"
+              }
+            }
+          },
+          "Status": {
+            "type": "object",
+            "properties": {
+              "errors": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                },
+                "description": "A list of objects containing error message at system wide level. Every error has a negative numeric code and a textual message ( currently the only error reported is the wrong version number in config.inc.php file and happens only after Matecat updates, so you should never see it )."
+              },
+              "data": {
+                "$ref": "#/definitions/Data-Status"
+              },
+              "status": {
+                "type": "string",
+                "description": "The analysis status of the project. ANALYZING - analysis/creation still in progress; NO_SEGMENTS_FOUND - the project has no segments to analyze (have you uploaded a file containing only images?); ANALYSIS_NOT_ENABLED - no analysis will be performed because of Matecat configuration; DONE - the analysis/creation is completed; FAIL - the analysis/creation is failed.",
+                "enum": [
+                  "ANALYZING",
+                  "NO_SEGMENTS_FOUND",
+                  "ANALYSIS_NOT_ENABLED",
+                  "DONE",
+                  "FAIL"
+                ]
+              },
+              "analyze": {
+                "type": "string",
+                "description": "A link to the analyze page; it's a human readable version of this API output"
+              },
+              "jobs": {
+                "$ref": "#/definitions/Jobs-Status"
+              }
+            }
+          },
+          "Data-Status": {
+            "type": "object",
+            "description": "Holds all progress statisticts for every job and for overall project. It contains jobs and summary sub-sections.",
+            "properties": {
+              "jobs": {
+                "$ref": "#/definitions/Jobs"
+              },
+              "summary": {
+                "$ref": "#/definitions/Summary"
+              }
+            }
+          },
+          "Jobs-Status": {
+            "type": "object",
+            "description": "Section jobs contains all metadata about job (like URIs, quality reports and languages)",
+            "properties": {
+              "langpairs": {
+                "type": "object",
+                "description": "the language pairs for your project; an entry for every chunk in the project, with the id-password combination as key and the language pair as the value"
+              },
+              "job-url": {
+                "type": "object",
+                "description": "the links to the chunks of the project; an entry for every chunk in the project, with the id-password combination as key and the link to the chunk as the value."
+              },
+              "job-quality-details": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                },
+                "description": "a structure containing, for each chunk, an array of 5 objects, each object is a quality check performed on the job; the object contains the type of the check (Typing, Translation, Terminology, Language Quality, Style), the quantity of errors found, the allowed errors threshold and the rating given by the errors/threshold ratio (same as quality-overall)"
+              },
+              "quality-overall": {
+                "type": "object",
+                "description": "the overall quality rating for each chunk (Very good, Good, Acceptable, Poor, Fail)"
+              }
+            }
+          },
+          "Summary": {
+            "type": "object",
+            "description": "Sub-section summary holds statistict for the whole project that are not related to single job objects.",
+            "properties": {
+              "NAME": {
+                "type": "string",
+                "description": "A list of objects containing error message at system wide level. Every error has a negative numeric code and a textual message ( currently the only error reported is the wrong version number in config.inc.php file and happens only after Matecat updates, so you should never see it )."
+              },
+              "STATUS": {
+                "type": "string",
+                "description": "The status the project is from analysis perspective. NEW - just created, not analyzed yet, FAST_OK - preliminary (fast) analysis completed, now running translations (\"TM\") analysis, DONE - analysis complete.",
+                "enum": [
+                  "NEW",
+                  "FAST_OK",
+                  "DONE"
+                ]
+              },
+              "IN_QUEUE_BEFORE": {
+                "type": "string",
+                "description": "Number of segments belonging to other projects that are being analyzed before yours; it's the wait time for you."
+              },
+              "TOTAL_SEGMENTS": {
+                "type": "string",
+                "description": "number of segments belonging to your project."
+              },
+              "SEGMENTS_ANALYZED": {
+                "type": "string",
+                "description": "analysis progress, on TOTAL_SEGMENTS"
+              },
+              "TOTAL_RAW_WC": {
+                "type": "string",
+                "description": "number of words (word count) of your project, as extracted by the textual parsers"
+              },
+              "TOTAL_STANDARD_WC": {
+                "type": "string",
+                "description": "word count, minus the sentences that are repeated"
+              },
+              "TOTAL_FAST_WC": {
+                "type": "string",
+                "description": "word count, minus the sentences that are partially repeated"
+              },
+              "TOTAL_TM_WC": {
+                "type": "string",
+                "description": "word count, with sentences found in the cloud translation memory discounted from the total; this depends on the percentage of overlapping between the sentences of your project and the past translations"
+              },
+              "TOTAL_PAYABLE": {
+                "type": "string",
+                "description": "total word count, after analysis."
+              }
+            }
+          },
+          "Jobs": {
+            "type": "object",
+            "description": "Sub-section jobs holds statistict for all the job objects. The numerical keys on the first level are the IDs of the jobs contained in the project. Each job identifies a target language; as such, there is a 1-1 mapping between ID and target languages in your project. A job holds a chunks and a totals section.",
+            "properties": {
+              "id_job": {
+                "$ref": "#/definitions/Job"
+              }
+            }
+          },
+          "Job": {
+            "type": "object",
+            "description": "The numerical keys on the first level are the IDs of the jobs contained in the project. Each job identifies a target language; as such, there is a 1-1 mapping between ID and target languages in your project.",
+            "properties": {
+              "chunk": {
+                "type": "object",
+                "description": "A structure modeling a portion of content to translate.  A whole file can be splitted in multiple chunks, to be distributed to multiple translators, or can be enveloped in a single chunk. Each chunk has a password as first level key and a numerical ID as second level key to identify different chunks for the same file. Each chunk contains the same structure of the totals section. The sum of the chunks equals to the totals."
+              },
+              "totals": {
+                "$ref": "#/definitions/Totals"
+              }
+            }
+          },
+          "Totals": {
+            "type": "object",
+            "description": "Contains all analysis statistics for all files in the current job (i.e., all files that have to be translated in a target language)",
+            "properties": {
+              "job_pass": {
+                "$ref": "#/definitions/Total"
+              }
+            }
+          },
+          "Total": {
+            "type": "object",
+            "description": "password as first level key.",
+            "properties": {
+              "TOTAL_PAYABLE": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                },
+                "description": "total word count, after analysis"
+              },
+              "REPETITIONS": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                },
+                "description": "cumulative word count for the segments that repeat themselves in the file"
+              },
+              "INTERNAL_MATCHES": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                },
+                "description": "cumulative word count for the segments that fuzzily overlap with others in the file, while not being an exact repetition"
+              },
+              "MT": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                },
+                "description": "cumulative word count for all segments that can be translated with machine translation; it accounts for all the information that could not be discounted by repetitions, internal matches or translation memory"
+              },
+              "NEW": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                },
+                "description": "cumulative word count for segments that can't be discounted with repetition or internal matches; it's the net translation effort"
+              },
+              "TM_100": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                },
+                "description": "cumulative word count for the exact matches found in TM server"
+              },
+              "TM_75_99": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                },
+                "description": "cumulative word count for partial matches in the TM that cover 75-99% of each segment"
+              },
+              "ICE": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                },
+                "description": "cumulative word count for 100% TM matches that also share the same context with the TM"
+              },
+              "NUMBERS_ONLY": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                },
+                "description": "cumulative word counts for segments made of numberings, dates and similar not translatable data ( i.e. 93 / 127 )"
+              }
+            }
+          },
+          "ChangePasswordResponse": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "description": "Return the exit status of the action. The statuses can be OK or FAIL",
+                "enum": [
+                  "OK",
+                  "FAIL"
+                ]
+              },
+              "id_project": {
+                "type": "string",
+                "description": "Returns the id of the project just updated"
+              },
+              "project_pass": {
+                "type": "string",
+                "description": "Returns the new pass of the project just updated"
+              },
+              "message": {
+                "type": "string",
+                "description": "Return the error message for the action if the status is FAIL"
+              }
+            }
+          },
+          "Stats": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "DRAFT": {
+                "type": "number"
+              },
+              "TRANSLATED": {
+                "type": "number"
+              },
+              "APPROVED": {
+                "type": "number"
+              },
+              "REJECTED": {
+                "type": "number"
+              },
+              "TOTAL": {
+                "type": "number"
+              },
+              "PROGRESS": {
+                "type": "number"
+              },
+              "TOTAL_FORMATTED": {
+                "type": "number"
+              },
+              "PROGRESS_FORMATTED": {
+                "type": "string"
+              },
+              "APPROVED_FORMATTED": {
+                "type": "string"
+              },
+              "REJECTED_FORMATTED": {
+                "type": "string"
+              },
+              "DRAFT_FORMATTED": {
+                "type": "string"
+              },
+              "TRANSLATED_FORMATTED": {
+                "type": "string"
+              },
+              "APPROVED_PERC": {
+                "type": "number"
+              },
+              "REJECTED_PERC": {
+                "type": "number"
+              },
+              "DRAFT_PERC": {
+                "type": "number"
+              },
+              "TRANSLATED_PERC": {
+                "type": "number"
+              },
+              "PROGRESS_PERC": {
+                "type": "number"
+              },
+              "TRANSLATED_PERC_FORMATTED": {
+                "type": "number"
+              },
+              "DRAFT_PERC_FORMATTED": {
+                "type": "number"
+              },
+              "APPROVED_PERC_FORMATTED": {
+                "type": "number"
+              },
+              "REJECTED_PERC_FORMATTED": {
+                "type": "number"
+              },
+              "PROGRESS_PERC_FORMATTED": {
+                "type": "number"
+              },
+              "TODO_FORMATTED": {
+                "type": "string"
+              },
+              "DOWNLOAD_STATUS": {
+                "type": "string"
+              },
+              "ANALYSIS_COMPLETE": {
+                "type": "string"
+              }
+            }
+          },
+          "Urls": {
+            "type": "object",
+            "properties": {
+              "files": {
+                "$ref": "#/definitions/Files"
+              },
+              "jobs": {
+                "$ref": "#/definitions/UrlsJobs"
+              }
+            }
+          },
+          "Files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/JobFile"
+            }
+          },
+          "JobFile": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "original_download_url": {
+                "type": "string"
+              },
+              "translation_download_url": {
+                "type": "string"
+              },
+              "xliff_download_url": {
+                "type": "string"
+              }
+            }
+          },
+          "UrlsJobs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/UrlsJob"
+            }
+          },
+          "UrlsJob": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "target_lang": {
+                "type": "string"
+              },
+              "chunks": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/Chunk"
+                }
+              }
+            }
+          },
+          "Chunk": {
+            "type": "object",
+            "properties": {
+              "password": {
+                "type": "string"
+              },
+              "translate_url": {
+                "type": "string"
+              },
+              "revise_url": {
+                "type": "string"
+              }
+            }
+          },
+          "TranslationIssues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/Issue"
+            }
+          },
+          "Issue": {
+            "type": "object",
+            "properties": {
+              "comment": {
+                "type": "string"
+              },
+              "created_at": {
+                "type": "string"
+              },
+              "id": {
+                "type": "string"
+              },
+              "id_category": {
+                "type": "string"
+              },
+              "id_job": {
+                "type": "string"
+              },
+              "id_segment": {
+                "type": "string"
+              },
+              "is_full_segment": {
+                "type": "string"
+              },
+              "severity": {
+                "type": "string"
+              },
+              "start_node": {
+                "type": "string"
+              },
+              "start_offset": {
+                "type": "string"
+              },
+              "end_node": {
+                "type": "string"
+              },
+              "end_offset": {
+                "type": "string"
+              },
+              "translation_version": {
+                "type": "string"
+              },
+              "target_text": {
+                "type": "string"
+              },
+              "penality_points": {
+                "type": "string"
+              },
+              "rebutted_at": {
+                "type": "string"
+              }
+            }
+          },
+          "Comments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/Comment"
+            }
+          },
+          "Comment": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "id_job": {
+                "type": "string"
+              },
+              "id_segment": {
+                "type": "string"
+              },
+              "created_at": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "full_name": {
+                "type": "string"
+              },
+              "uid": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "resolved_at": {
+                "type": "string"
+              },
+              "source_page": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "mwssage_type": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          },
+          "QualityReport": {
+            "type": "object",
+            "properties": {
+              "chunk": {
+                "type": "object"
+              },
+              "job": {
+                "type": "object"
+              },
+              "project": {
+                "type": "object"
+              }
+            }
+          },
+          "TranslationVersions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/TranslationVersion"
+            }
+          },
+          "TranslationVersion": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "id_segment": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "id:job": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "translation": {
+                "type": "string"
+              },
+              "version_number": {
+                "type": "string"
+              },
+              "propagated_from": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "created_at": {
+                "type": "string"
+              }
+            }
+          },
+          "Options": {
+            "type": "object",
+            "properties": {
+              "speech2text": {
+                "type": "integer"
+              },
+              "tag_projection": {
+                "type": "integer"
+              },
+              "lexiqa": {
+                "type": "integer"
+              }
+            }
+          },
+          "UploadGlossaryStatusObject": {
+            "type": "object",
+            "properties": {
+              "errore": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "data": {
+                "$ref": "#/definitions/UploadGlossaryStatus"
+              },
+              "success": {
+                "type": "boolean"
+              }
+            }
+          },
+          "UploadGlossaryStatus": {
+            "type": "object",
+            "properties": {
+              "done": {
+                "type": "integer"
+              },
+              "total": {
+                "type": "integer"
+              },
+              "source_lang": {
+                "type": "string"
+              },
+              "target_lang": {
+                "type": "string"
+              },
+              "completed": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      };
+
+      // Pre load translate...
+//      if(window.SwaggerTranslator) {
+//        window.SwaggerTranslator.translate();
+//      }
+      window.swaggerUi = new SwaggerUi({
+        url: url,
+        spec: spec,
+        dom_id: "swagger-ui-container",
+        supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
+        onComplete: function(swaggerApi, swaggerUi){
+//          if(typeof initOAuth == "function") {
+//            initOAuth({
+//              clientId: "your-client-id",
+//              clientSecret: "your-client-secret-if-required",
+//              realm: "your-realms",
+//              appName: "your-app-name",
+//              scopeSeparator: " ",
+//              additionalQueryStringParams: {}
+//            });
+//          }
+//
+//          if(window.SwaggerTranslator) {
+//            window.SwaggerTranslator.translate();
+//          }
+        },
+        onFailure: function(data) {
+          log("Unable to Load SwaggerUI");
+        },
+        docExpansion: "none",
+        jsonEditor: false,
+        defaultModelRendering: 'schema',
+        showRequestHeaders: false
+      });
+
+      window.swaggerUi.load();
+
+      function log() {
+        if ('console' in window) {
+          console.log.apply(console, arguments);
+        }
+      }
+  });
+  </script>
 </head>
-<body class="api">
+<body class="api swagger-section pippo">
+
+
+
 <header>
     <div class="wrapper ">
         <a href="/" class="logo"></a>
@@ -32,671 +1820,23 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
         <a href="#top"><span class="logosmall"></span></a>
         <h1>API</h1>
         <ul class="menu">
-            <li><a href="#new-post">/new (POST)</a></li>
-            <li><a href="#status-post">/status (GET)</a></li>
-            <li><a href="#change_project_password-post">/change_project_password (POST)</a></li>
+            <li><a href="#api-swagger">List of commands</a></li>
             <li><a href="#file-format">Supported file format</a></li>
             <li><a href="#languages">Supported languages</a></li>
             <li><a href="#subjects">Supported subjects</a></li>
             <li><a href="#seg-rules">Supported segmentation rules</a></li>
         </ul>
     </div>
+            <a name="top" class="top"></a>
     <div class="coldx">
-        <a name="top" class="top"></a>
-        <div class="block">
-            <a name="new-post"><h3 class="method-title">/new (POST)</h3></a>
-            <dl>
-                <dt>Description</dt>
-                <dd><p>Create a new Project.</p>
-                </dd>
-                <dt class="url-label">URL Structure</dt>
-                <dd>
-                    <pre class="literal-block"><?=INIT::$HTTPHOST . INIT::$BASEURL?><b>api</b>/new</pre>
-                </dd>
-                <dt>Method</dt>
-                <dd>POST ( multipart/form-data )</dd>
-                <dt>Files To Upload</dt>
-                <dd>
-                    <p><span class="req">required</span> The file(s) to be uploaded. You may also upload your own translation memories (TMX)</p>
-<!--                    <p><span class="opt">optional</span> The TMX(s) to be uploaded.</p>-->
-                </dd>
-                <dt>Parameters</dt>
-                <dd>
-                    <ul class="parameters">
-                        <li><span class="req">required</span> <code class="param">project_name</code> <code>(string)</code> The name of the project you want
-                            create.
-                        </li>
-                        <li><span class="req">required</span> <code class="param">source_lang</code> <code>(string)</code> <a href="http://www.rfc-editor.org/rfc/rfc5646.txt" target="blank">RFC 5646</a> language+region Code ( en-US <b>case sensitive</b> ) as specified in <a href="http://www.w3.org/International/articles/language-tags/" target="blank">W3C standards</a>
-                        </li>
-                        <li><span class="req">required</span> <code class="param">target_lang</code> <code>(string)</code> <a href="http://www.rfc-editor.org/rfc/rfc5646.txt" target="blank">RFC 5646</a> language(s)+region(s) Code(s)  as specified in <a href="http://www.w3.org/International/articles/language-tags/" target="blank">W3C standards</a>.
-                            <br />Multiple languages must be comma separated ( <code>it-IT,fr-FR,es-ES</code> <b>case sensitive</b>)
-                        </li>
-                        <li><span class="opt">optional (default: 1)</span> <code class="param">tms_engine</code> <code>(int)</code> Identifier for Memory Server
-                            <code>0</code> means disabled, <code>1</code> means MyMemory)
-                        </li>
-                        <li><span class="opt">optional (default: 1)</span> <code class="param"> mt_engine</code> <code>(int)</code> Identifier for Machine Translation Service
-                            <code>0</code> means disabled, <code>1</code> means get MT from MyMemory)
-                        </li>
-                        <li><span class="opt">optional</span> <code class="param"> private_tm_key</code> <code>(string)</code>
-                            Private key(s) for MyMemory.
-                            <br />- If a TMX file is uploaded and no key is provided, a <code>new</code> key will be created.
-                            <br />- Existing MyMemory private keys or <code>new</code> to create a new key.
-                            <br />- Multiple keys must be comma separated. Up to 5 keys allowed. (<code>xxx345cvf,new,s342f234fc</code>)
-                            <br />- Only available if <code>tms_engine</code> is set to 1 or if is not used
-                            <br />
-                            <b>Be careful! All TMX files provided will be uploaded only into the first tm key. <br/>
-                                Other keys will have no content at the project start time and will be populated with the contributions coming from the translation process <br/>
-                                All the keys provided will join the project in read/write mode
-                            </b>
-
-                        </li>
-                        <li><span class="opt">optional  (default: general)</span> <code class="param"> subject</code> <code>(string)</code> The subject of the project you want to create.
-                        </li>
-                        <li><span class="opt">optional</span> <code class="param"> segmentation_rule</code> <code>(string)</code> The segmentation rule you want to use to parse your file .
-                        </li>
-                        <li><span class="opt">optional</span> <code class="param"> owner_email (default: anonymous)</code> <code>(string)</code> The email of the owner of the project.
-                        </li>
-                    </ul>
-                </dd>
-                <dt>Returns</dt>
-                <dd>
-                    <p>The metadata for the created project.</p>
-
-                    <p>More information on the returned metadata fields are available
-                        <a href="<?=INIT::$HTTPHOST . INIT::$BASEURL?>api/docs#metadata-new-details">here</a>
-                    </p>
-
-                    <p>A complete list of accepted languages in the right format are available
-                        <a href="<?=INIT::$HTTPHOST . INIT::$BASEURL?>api/docs#file-format">here</a>
-                    </p>
-
-                    <p><strong>Sample JSON response</strong></p>
-                            <pre class="literal-block">
-{
-    "status": "OK",
-    "id_project": 5368,
-    "project_pass": "76ba60c027b9",
-    "new_keys": "sdfasdfasf23r,23ffqwefqef3f"
-}                           </pre>
-                    <p><strong>Return value definitions</strong></p>
-                    <table id="metadata-new-details" class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
-                        <tbody>
-                        <tr>
-                            <th>field</th>
-                            <th>description</th>
-                        </tr>
-                        <tr>
-                            <td><code>status</code></td>
-                            <td>Return the creation status of the project. The statuses can be:
-                                <ul>
-                                    <li><code>OK</code> indicating that the creation worked.</li>
-                                    <li><code>FAIL</code> indicating that the creation is failed.</li>
-                                </ul>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><code>id_project</code></td>
-                            <td>Return the unique id of the project just created.
-                                If creation status is <code>FAIL</code> this key will simply be omitted from the result.
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><code>project_pass</code></td>
-                            <td>Return the password of the project just created.
-                                If creation status is <code>FAIL</code> this key will simply be omitted from the result.
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><code>new_keys</code></td>
-                            <td>If you specified <code>new</code> as one or more value in the <code>private_tm_key</code> parameter,
-                                the new created keys are returned as CSV string (<code>4rcf34rc,r34rcfewf3r2</code>)<br/>
-                                Otherwise <code>empty</code> string is returned
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-
-                    <p><strong>Errors</strong></p>
-                    <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
-
-                        <tbody>
-                        <tr>
-                            <th>status</th>
-                            <th>message</th>
-                        </tr>
-                        <tr>
-                            <td>FAIL</td>
-                            <td>The project creation is failed</td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">
-                                        <pre class="literal-block">
-{
-	status: "FAIL"
-	message: "Project Conversion Failure"
-	debug: [2]
-	0:  {
-		code: -110
-		message: "Error: there is a problem with this file, it cannot be converted back to the original one."
-		debug: "TEST_FAILURE_DOC1.docx"
-	}
-	1:  {
-		code: -100
-		message: "Conversion error. Try opening and saving the document with a new name. If this does not work, try converting to DOC."
-		debug: "TEST_FAILURE_DOC2.docx"
-	}
-
-}                                      </pre>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-
-                    <p><strong>Debug Codes</strong></p>
-                    <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
-
-                        <tbody>
-                        <tr>
-                            <th>code</th>
-                            <th>message</th>
-                            <th>debug</th>
-                        </tr>
-                        <tr>
-                            <td>-1</td>
-                            <td>"Error: missing file name."</td>
-                            <td>NULL</td>
-                        </tr>
-                        <tr>
-                            <td>-6</td>
-                            <td>"Error during upload. Please retry."</td>
-                            <td>NULL</td>
-                        </tr>
-                        <tr>
-                            <td>-100</td>
-                            <td>"Conversion error. Try opening and saving the document with a new name. If this does not work, try converting to DOC."</td>
-                            <td>The failed file name. </td>
-                        </tr>
-                        <tr>
-                            <td>-101</td>
-                            <td>"Error: failed to save converted file from cache to disk"</td>
-                            <td>The failed file name. </td>
-                        </tr>
-                        <tr>
-                            <td>-102</td>
-                            <td>"Error: File too large"</td>
-                            <td>The failed file name. </td>
-                        </tr>
-                        <tr>
-                            <td>-103</td>
-                            <td>"Error: failed to save file on disk"</td>
-                            <td>The failed file name. </td>
-                        </tr>
-                        <tr>
-                            <td>-110</td>
-                            <td>"Error: there is a problem with this file, it cannot be converted back to the original one."</td>
-                            <td>The failed file name. </td>
-                        </tr>
-                        </tbody>
-                    </table>
-
-                </dd>
-                <dt>Notes</dt>
-                <dd><p><code>/new</code> has a maximum file size limit of <?= $max_file_size_in_MB ?> MB per file and a max number of files of <?= INIT::$MAX_NUM_FILES ?>.</p></dd>
-                <dd><p>Matecat PRO accept only <?= $nr_supoported_files ?> file formats. A list of all accepted file are available
-                        <a href="<?=INIT::$HTTPHOST . INIT::$BASEURL?>api/docs#file-format">here</a></p>
-                </dd>
-            </dl>
-
-            <a class="gototop" href="#top">Go to top</a>
+        <div class="block block-api block-swagger">
+             <a name="api-swagger"><h3 class="method-title">List of commands</h3></a>      
+            <div id="swagger-ui-container" class="swagger-ui-wrap">
+                <div id="message-bar" class="swagger-ui-wrap" data-sw-translate>&nbsp;</div>
+            </div>
+              <a class="gototop" href="#top">Go to top</a>
         </div>
-        <div class="block">
-            <a name="status-post"><h3 class="method-title">/status (GET)</h3></a>
-            <dl>
-                <dt>Description</dt>
-                <dd><p>Retrieve the status of a project</p>
-                </dd>
-                <dt class="url-label">URL Structure</dt>
-                <dd>
-                    <pre class="literal-block"><?=INIT::$HTTPHOST . INIT::$BASEURL?><b>api</b>/status/?<code>id_project=<12345></code>&<code>project_pass=<1abcde123></abcde123></code></pre>
-                </dd>
-                <dt>Method</dt>
-                <dd>GET</dd>
-                <dt>Parameters</dt>
-                <dd>
-                    <ul class="parameters">
-                        <li><span class="req">required</span> <code class="param"> id_project</code> <code>(int)</code> The identifier of the project, should be the
-                            value returned by the <a href="<?=INIT::$HTTPHOST . INIT::$BASEURL?>api/docs#new-post"><code>/new</code></a> method.
-                        </li>
-                        <li><span class="req">required</span> <code class="param"> project_pass</code> <code>(string)</code> The password associated with the project, should be the
-                            value returned by the <a href="<?=INIT::$HTTPHOST . INIT::$BASEURL?>api/docs#new-post"><code>/new</code></a> method ( associated with the id_project )
-                        </li>
-                    </ul>
-                </dd>
-                <dt>Returns</dt>
-                <dd>
-                    <p>The metadata for the created project containing the status of the project.</p>
-
-                    <p>More information on the returned metadata fields are available
-                        <a href="<?=INIT::$HTTPHOST . INIT::$BASEURL?>api/docs#metadata-status-details">here</a>
-                    </p>
-
-                    <p><strong>Sample JSON response</strong></p>
-                                    <pre class="literal-block">
-{
-  "errors": [],
-  "data": {
-    "jobs": {
-      "19": {
-        "chunks": {
-          "2bfe688ec780": {
-            "34": {
-              "TOTAL_PAYABLE": [
-                166.4,
-                "166"
-              ],
-              "REPETITIONS": [
-                4,
-                "4"
-              ],
-              "MT": [
-                170,
-                "170"
-              ],
-              "NEW": [
-                0,
-                "0"
-              ],
-              "TM_100": [
-                9,
-                "9"
-              ],
-              "TM_75_99": [
-                26,
-                "26"
-              ],
-              "TM_50_74": [
-                0,
-                "0"
-              ],
-              "INTERNAL_MATCHES": [
-                4,
-                "4"
-              ],
-              "ICE": [
-                0,
-                "0"
-              ],
-              "NUMBERS_ONLY": [
-                0,
-                "0"
-              ],
-              "FILENAME": "Localizable.german+tagged.strings"
-            }
-          }
-        },
-        "totals": {
-          "2bfe688ec780": {
-            "TOTAL_PAYABLE": [
-              166.4,
-              "166"
-            ],
-            "REPETITIONS": [
-              4,
-              "4"
-            ],
-            "MT": [
-              170,
-              "170"
-            ],
-            "NEW": [
-              0,
-              "0"
-            ],
-            "TM_100": [
-              9,
-              "9"
-            ],
-            "TM_75_99": [
-              26,
-              "26"
-            ],
-            "TM_50_74": [
-              0,
-              "0"
-            ],
-            "INTERNAL_MATCHES": [
-              4,
-              "4"
-            ],
-            "ICE": [
-              0,
-              "0"
-            ],
-            "NUMBERS_ONLY": [
-              0,
-              "0"
-            ]
-          }
-        }
-      }
-    },
-    "summary": {
-      "IN_QUEUE_BEFORE": 0,
-      "STATUS": "DONE",
-      "TOTAL_SEGMENTS": 84,
-      "SEGMENTS_ANALYZED": 82,
-      "TOTAL_FAST_WC": "208.60",
-      "TOTAL_TM_WC": 166.4,
-      "TOTAL_STANDARD_WC": 191.9,
-      "STANDARD_WC_TIME": "31",
-      "FAST_WC_TIME": "33",
-      "TM_WC_TIME": "27",
-      "STANDARD_WC_UNIT": "minutes",
-      "TM_WC_UNIT": "minutes",
-      "FAST_WC_UNIT": "minutes",
-      "USAGE_FEE": "1.27",
-      "PRICE_PER_WORD": "0.030",
-      "DISCOUNT": "1",
-      "NAME": "Localizable.german_tagged.strings",
-      "TOTAL_RAW_WC": 213,
-      "TOTAL_PAYABLE": 166.4,
-      "PAYABLE_WC_TIME": "27",
-      "PAYABLE_WC_UNIT": "minutes",
-      "DISCOUNT_WC": "0"
-    }
-  },
-  "status": "DONE",
-  "analyze": "/analyze/Localizable.german_tagged.strings/19-ef48a60d432f",
-  "jobs": {
-    "langpairs": {
-      "19-2bfe688ec780": "de-DE|en-US"
-    },
-    "job-url": {
-      "19-2bfe688ec780": "/translate/Localizable.german_tagged.strings/de-DE-en-US/19-2bfe688ec780"
-    },
-    "job-quality-details": {
-      "19-2bfe688ec780": [
-        {
-          "type": "Typing",
-          "allowed": 0.3,
-          "found": 0,
-          "vote": "Excellent"
-        },
-        {
-          "type": "Translation",
-          "allowed": 0.3,
-          "found": 0,
-          "vote": "Excellent"
-        },
-        {
-          "type": "Terminology",
-          "allowed": 0.5,
-          "found": 0,
-          "vote": "Excellent"
-        },
-        {
-          "type": "Language Quality",
-          "allowed": 0.5,
-          "found": 0,
-          "vote": "Excellent"
-        },
-        {
-          "type": "Style",
-          "allowed": 0.8,
-          "found": 0,
-          "vote": "Excellent"
-        }
-      ]
-    },
-    "quality-overall": {
-      "19-2bfe688ec780": "Excellent"
-    }
-  }
-}
-</pre>
-                    <p><strong>Return value definitions</strong></p>
-                    <table id="metadata-status-details" class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
-
-                        <tbody>
-                        <tr>
-                            <th>field</th>
-                            <th>description</th>
-                        </tr>
-                        <tr>
-                            <td><code>errors</code></td>
-                            <td>A list of objects containing error message at system wide level. Every error has a negative numeric code and a textual message ( currently the only error reported is the wrong version number in <code>config.inc.php</code> file and happens only after Matecat updates, so you should never see it ).
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><code>data</code></td>
-                            <td>Holds all progress statisticts for every <code>job</code> and for overall project.<br/>
-                                It contains <code>jobs</code> and <code>summary</code> sub-sections.
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><code>summary</code></td>
-                            <td>Sub-section <code>summary</code> holds statistict for the whole project that are not related to single <code>job</code> objects:
-                                <ul>
-                                    <li><code>NAME</code>: the name of your project</li>
-                                    <li><code>STATUS</code>: the status the project is from analysis perspective
-                                        <ol>
-                                            <li><code>NEW</code>: just created, not analyzed yet</li>
-                                            <li><code>FAST_OK</code>: preliminary ("fast") analysis completed, now running translations ("TM") analysis</li>
-                                            <li><code>DONE</code>: analysis complete</li>
-                                        </ol>
-                                    </li>
-                                    <li><code>IN_QUEUE_BEFORE</code>: number of segments belonging to other projects that are being analyzed before yours; it's the wait time for you</li>
-                                    <li><code>TOTAL_SEGMENTS</code>: number of segments belonging to your project</li>
-                                    <li><code>SEGMENTS_ANALYZED</code>: analysis progress, on <code>TOTAL_SEGMENTS</code></li>
-                                    <li><code>TOTAL_RAW_WC</code>: number of words (word count) of your project, as extracted by the textual parsers</li>
-                                    <li><code>TOTAL_STANDARD_WC</code>: word count, minus the sentences that are repeated</li>
-                                    <li><code>TOTAL_FAST_WC</code>: word count, minus the sentences that are partially repeated</li>
-                                    <li><code>TOTAL_TM_WC</code>: word count, with sentences found in the cloud translation memory discounted from the total; this depends on the percentage of overlapping between the sentences of your project and the past translations</li>
-                                    <li><code>TOTAL_PAYABLE</code>: total word count, after analysis</li>
-                                </ul>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><code>jobs</code></td>
-                            <td>Sub-section <code>jobs</code> holds statistict for all the <code>job</code> objects.<br/>
-                                The numerical keys on the first level are the IDs of the jobs contained in the project.<br/>
-                                Each job identifies a target language; as such, there is a 1-1 mapping between ID and target languages in your project.<br/>
-                                A job holds a <code>chunks</code> and a <code>totals</code> section.
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><code>totals</code></td>
-                            <td>
-                                Contains all analysis statistics for all files in the current job (i.e., all files that have to be translated in a target language):
-                                <ul>
-                                    <li><code>TOTAL_PAYABLE</code>: total word count, after analysis</li>
-                                    <li><code>REPETITIONS</code>: cumulative word count for the segments that repeat themselves in the file</li>
-                                    <li><code>INTERNAL_MATCHES</code>: cumulative word count for the segments that fuzzily overlap with others in the file, while not being an exact repetition</li>
-                                    <li><code>MT</code>: cumulative word count for all segments that can be translated with machine translation; it accounts for all the information that could not be discounted by repetitions, internal matches or translation memory</li>
-                                    <li><code>NEW</code>: cumulative word count for segments that can't be discounted with repetition or internal matches; it's the net translation effort</li>
-                                    <li><code>TM_100</code>: cumulative word count for the exact matches found in TM server</li>
-                                    <li><code>TM_75_99</code>: cumulative word count for partial matches in the TM that cover 75-99% of each segment</li>
-                                    <li><code>ICE</code>: cumulative word count for 100% TM matches that also share the same context with the TM</li>
-                                    <li><code>NUMBERS_ONLY</code>: cumulative word counts for segments made of numberings, dates and similar not translatable data ( i.e.: 93/127 )</li>
-                                </ul>
-                        </tr>
-                        <tr>
-                            <td><code>chunks</code></td>
-                            <td>A structure modeling a portion of content to translate. <br/>
-                                A whole file can be splitted in multiple chunks, to be distributed to multiple translators, or can be enveloped in a single chunk.<br/>
-                                Each chunk has a password as first level key and a numerical ID as second level key to identify different chunks for the same file.<br/>
-                                Each chunk contains the same structure of the <code>totals</code> section.<br/>
-                                The sum of the <code>chunks</code> equals to the <code>totals</code>.
-                            </td>
-                        </tr>
-                        <tr id="project-status">
-                            <td><code>status</code></td>
-                            <td>The analysis status of the project:
-                                <ul>
-                                    <li><code>ANALYZING</code>: analysis/creation still in progress</li>
-                                    <li><code>NO_SEGMENTS_FOUND</code>: the project has no segments to analyze (have you uploaded a file containing only images?)</li>
-                                    <li><code>ANALYSIS_NOT_ENABLED</code>: no analysis will be performed because of Matecat configuration</li>
-                                    <li><code>DONE</code>: the analysis/creation is completed.</li>
-                                    <li><code>FAIL</code>: the analysis/creation is failed.</li>
-                                </ul>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><code>analyze</code></td>
-                            <td>A link to the analyze page; it's a human readable version of this API output</td>
-                        </tr>
-                        <tr>
-                            <td><code>jobs</code></td>
-                            <td>Section <code>jobs</code> contains all metadata about <code>job</code> (like URIs, quality reports and languages):
-                                <ul>
-                                    <li><code>langpairs</code>: the language pairs for your project; an entry for every chunk in the project, with the id-password combination as key and the language pair as the value
-                                    </li>
-                                    <li><code>job-url</code>: the links to the chunks of the project; an entry for every chunk in the project, with the id-password combination as key and the link to the chunk as the value.</li>
-                                    <li><code>job-quality-details</code>: a structure containing, for each chunk, an array of 5 objects: each object is a quality check performed on the job; the object contains the type of the check (<code>Typing</code>, <code>Translation</code>, <code>Terminology</code>, <code>Language Quality</code>, <code>Style</code>), the quantity of errors found, the allowed errors threshold and the rating given by the errors/threshold ratio (same as <code>quality-overall</code>)
-                                    </li>
-                                    <li><code>quality-overall</code>: the overall quality rating for each chunk (<code>Very good</code>, <code>Good</code>, <code>Acceptable</code>, <code>Poor</code>, <code>Fail</code>)</li>
-                                </ul>
-                        </tr>
-                        </tbody>
-                    </table>
-                </dd>
-                <dt>Errors</dt>
-                <dd>
-                    <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
-
-                        <tbody>
-                        <tr>
-                            <th>field</th>
-                            <th>description</th>
-                        </tr>
-                        <tr>
-                            <td>FAIL</td>
-                            <td>Wrong Password. Access denied</td>
-                        </tr>
-                        <tr>
-                            <td>FAIL</td>
-                            <td>No id project provided</td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">
-                                                <pre class="literal-block">
-{
-    "status":  "FAIL",
-    "message": "Wrong Password. Access denied"
-}                                               </pre>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </dd>
-            </dl>
-            <a class="gototop" href="#top">Go to top</a>
-        </div>
-
-        <!-- change Password Block -->
-        <div class="block">
-            <a name="change_project_password-post"><h3 class="method-title">/change_project_password (POST)</h3></a>
-            <dl>
-                <dt>Description</dt>
-                <dd><p>Change the password of a project.</p>
-                </dd>
-                <dt class="url-label">URL Structure</dt>
-                <dd>
-                    <pre class="literal-block"><?=INIT::$HTTPHOST . INIT::$BASEURL?><b>api</b>/change_project_password</pre>
-                </dd>
-                <dt>Method</dt>
-                <dd>POST ( application/x-www-form-urlencoded )</dd>
-                <dt>Parameters</dt>
-                <dd>
-                    <ul class="parameters">
-                        <li><span class="req">required</span> <code class="param">id_project</code> <code>(int)</code>
-                            The id of the project you want to update.
-                        </li>
-                        <li><span class="req">required</span> <code class="param">old_pass</code>
-                            <code>(string)</code> The OLD password of the project you want to update.</a>
-                        </li>
-                        <li><span class="req">required</span> <code class="param">new_pass</code>
-                            <code>(string)</code> The NEW password of the project you want to update.</a>
-                        </li>
-                    </ul>
-                </dd>
-                <dt>Returns</dt>
-                <dd>
-                    <p>The result status for the request.</p>
-
-                    <p><strong>Sample JSON response</strong></p>
-                                <pre class="literal-block">
-{
-    "status": "OK",
-    "id_project": "5425",
-    "project_pass": "3cde561e42d1"
-}                              </pre>
-                    <p><strong>Return value definitions</strong></p>
-                    <table id="metadata-change_project_password" class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
-                        <tbody>
-                        <tr>
-                            <th>field</th>
-                            <th>description</th>
-                        </tr>
-                        <tr>
-                            <td><code>status</code></td>
-                            <td>Return the exit status of the action. The statuses can be:
-                                <ul>
-                                    <li>
-                                        <code>OK</code> indicating that the action worked.
-                                    </li>
-                                    <li><code>FAIL</code> indicating that the action failed because of the project was
-                                        not found.
-                                    </li>
-                                </ul>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><code>id_project</code></td>
-                            <td>Returns the id of the project just updated.</td>
-                        </tr>
-                        <tr>
-                            <td><code>project_pass</code></td>
-                            <td>Returns the new pass of the project just updated.</td>
-                        </tr>
-                        <tr>
-                            <td><code>message</code></td>
-                            <td>Return the error message for the action if the status is <code>FAIL</code></td>
-                        </tr>
-                        </tbody>
-                    </table>
-
-                    <p><strong>Errors</strong></p>
-                    <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
-
-                        <tbody>
-                        <tr>
-                            <th>status</th>
-                            <th>message</th>
-                        </tr>
-                        <tr>
-                            <td>FAIL</td>
-                            <td>Wrong id or pass</td>
-                        </tr>
-                        <tr>
-                            <td colspan="2">
-                                            <pre class="literal-block">
-{
-    "status": "FAIL",
-    "message": "Wrong id or pass"
-}                                           </pre>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </dd>
-            </dl>
-
-            <a class="gototop" href="#top">Go to top</a>
-        </div>
-        <!-- END change Password Block -->
-
-        <div class="block">
+        <div class="block block-api">
             <a name="file-format"><h3 class="method-title">Supported file formats</h3></a>
 
 
@@ -742,7 +1882,6 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
                             <li><span class="extppt">pptx</span></li>
                             <li><span class="extppt">odp</span></li>
                             <li><span class="extppt">sxi</span></li>
-                            <li><span class="extxml">xml</span></li>
                         </ul>
                     </td>
                     <td>
@@ -795,7 +1934,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
             <a class="gototop" href="#top">Go to top</a>
         </div>
 
-        <div class="block">
+        <div class="block block-api">
             <a name="languages"><h3 class="method-title">Supported languages</h3></a>
 
             <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
@@ -816,10 +1955,10 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
                 </tr>
                 </tbody>
             </table>
-            <a class=" gototop" href="#top">Go to top</a>
+            <a class="gototop" href="#top">Go to top</a>
         </div>
 
-        <div class="block">
+        <div class="block block-api">
             <a name="subjects"><h3 class="method-title">Supported subjects</h3></a>
 
 
@@ -840,7 +1979,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
         </div>
 
 
-        <div class="block">
+        <div class="block block-api">
             <a name="seg-rules"><h3 class="method-title">Supported segmentation rules</h3></a>
 
 
@@ -860,8 +1999,9 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
             <a class="last gototop" href="#top">Go to top</a>
         </div>
 
-        <div class="block">
+        <div class="block block-api">
         </div>
+        
     </div>
 </div>
 <script type="text/javascript">
@@ -879,7 +2019,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
 
     var position = [];
 
-    jQuery('.block').each(function(){
+    jQuery('.block-api').each(function(){
         position.push(Math.abs(jQuery(this).position().top))
     })
 
