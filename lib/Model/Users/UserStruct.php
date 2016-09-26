@@ -23,7 +23,7 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
     }
 
     public function fullName() {
-        return $this->first_name . ' ' . $this->last_name;
+        return trim($this->first_name . ' ' . $this->last_name);
     }
 
     public function shortName() {

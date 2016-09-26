@@ -53,8 +53,6 @@
                 source_lang: '${source}',
                 target_lang: '${target}',
                 ownerIsMe: ${jobOwnerIsMe},
-                isAnonymousUser: ${isAnonymousUser},
-                userMail: '${userMail}',
                 time_to_edit_enabled: ${time_to_edit_enabled},
                 build_number: '${build_number}',
                 warningPollingInterval: '${warningPollingInterval}',
@@ -475,5 +473,7 @@ $(window).resize(function() {
 
 
 <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_translate"/>
+
+<div metal:use-macro="common.html/footer_includes" />
 
 </html>

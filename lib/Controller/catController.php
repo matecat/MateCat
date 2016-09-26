@@ -625,12 +625,7 @@ class catController extends viewController {
         $this->template->last_opened_segment = $this->last_opened_segment;
         $this->template->owner_email         = $this->job_owner;
 
-        /** user **/
-        $this->template->logged_user   = ( $this->logged_user !== false ) ? $this->logged_user->shortName() : "";
-        $this->template->extended_user = ( $this->logged_user !== false ) ? trim( $this->logged_user->fullName() ) : "";
-        $this->template->isLogged        = $this->isLoggedIn(); // used in template
-        $this->template->isAnonymousUser = var_export( !$this->isLoggedIn(), true );  // used by the client
-        $this->template->userMail        = ( $this->isLoggedIn() ? $this->logged_user->getEmail() : "" );
+
 
         $this->job_stats[ 'STATUS_BAR_NO_DISPLAY' ] = ( $this->project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
         $this->job_stats[ 'ANALYSIS_COMPLETE' ]     = ( $this->project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? true : false );

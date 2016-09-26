@@ -530,7 +530,7 @@
             var deactivate = isActive && (!tr.find('.lookup input').is(':checked') && !tr.find(' td.update input').is(':checked'));
             if(!tr.find('.activate input').is(':checked') || deactivate ) {
                 if(isActive) {
-                    if(config.isAnonymousUser) {
+                    if(!config.isLoggedIn) {
 
                             var data = {
                                 grant: ($(el).parents('td').hasClass('lookup')? 'lookup' : 'update'),
