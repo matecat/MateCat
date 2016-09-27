@@ -1940,8 +1940,7 @@ body.cattool .mgmt-tm.mine thead,
 
 
 
-.popup-tm tr.mine td.description .edit-desc:hover,
-.popup-tm td.engine-name .edit-desc:hover
+.popup-tm tr.mine td.description .edit-desc:hover
 {
     box-shadow: 0px 0px 0px 1px #ccc;
     cursor: text;
@@ -2218,7 +2217,8 @@ input.email-export-tmx {
     vertical-align: text-top;
 }
 
-.btn-confirm-small.confirmDelete {
+.btn-confirm-small.confirmDelete,
+.btn-confirm-small.continueDeletingMT {
     margin-left: 12px;
 }
 /*******************/
