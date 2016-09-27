@@ -1493,14 +1493,17 @@ font-size: 18px;
 	    background: linear-gradient(top,  #f6f6f6,  #e2e3e5);
 }
 
-#sign-in-o {
+#sign-in-o,
+#sign-in-o-mt {
 padding: 5px 10px 10px;
 margin: 0 auto;
 width: 200px;
 text-align: center;
 float: none!important;
 }
-
+#sign-in-o-mt {
+    width: 290px;
+}
 
 
 .popup .btnsplit .btn-cancel {
