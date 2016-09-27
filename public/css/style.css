@@ -3224,6 +3224,7 @@ section .toolbar  .autofillTag  {
     float: left;
     display: none;
     font-size: 60%;
+    text-decoration: none;
 }
 
 section .toolbar span {

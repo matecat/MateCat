@@ -688,14 +688,21 @@ body.manage #search-projectname
 	width: 170px !important;
 	}
 	
-
+.api .block-swagger {
+	margin-top: -20px;
+}
 
  .api a {
             color: #39699a;
         }
 		.api .menu {line-height:26px;}
+
+	.api a:hover {
+		text-decoration: none;
+	}
         #contentBox pre {
            background: #fbfbfb;
+	}
 padding: 5px 10px;
 border: 1px dashed #ccc;
 font-size: 1em;
@@ -729,7 +736,7 @@ padding-right: 20px;
         .api {padding-top:0;}
         .api header {position:relative;}
         .api h1, .api h2 {color:#000!important; margin-top:20px;}
-        .api h3 {color:#000!important;font-weight:bold!important; font-size:20px!important;margin-bottom:20px;padding-top:20px;}
+        .api h3 {color:#000!important;font-weight:bold!important; font-size:22px!important;margin-bottom:20px;padding-top:20px;}
         .gototop {text-align: right;
             margin: 10px 0;
             display: block;
@@ -778,8 +785,9 @@ position: fixed;
 padding-right: 1%;
 width: 13%;}
 .api .coldx {float: right;
-width: 85%;
-margin-top: 10px;}
+    width: 80%;
+    margin: 20px 2% 2%;
+}
 .menuscroll {margin-top: -30px;
 }
 .logosmall {display:none;}
@@ -826,7 +834,7 @@ border-left: 2px solid #c7254e;
 border-radius: 4px;}
 .opt {background-color: #dff0d8; border-left: 2px solid #3c763d; color: #3c763d;}
 
-.api p {margin:0;}
+.api p {margin:0; font-size: 16px; line-height: 1.6em;}
 
 
 .missing-outsource-data {

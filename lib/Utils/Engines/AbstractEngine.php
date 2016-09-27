@@ -42,13 +42,26 @@ abstract class Engines_AbstractEngine {
     }
 
     /**
+     * Override when some string languages are different
+     *
+     * @param $lang
+     *
+     * @return mixed
+     */
+    protected function _fixLangCode( $lang ){
+        $l = explode( "-", strtolower( trim( $lang ) ) );
+
+        return $l[ 0 ];
+    }
+
+    /**
      *
      *
      * @param $_string
      *
      * @return string
      */
-    protected function _preserveSpecialStrings( $_string ) {
+    public function _preserveSpecialStrings( $_string ) {
 
         preg_match_all( self::IOS_STRINGS_REGEXP, $_string, $matches );
         $matches = $matches[ 0 ];
@@ -71,7 +84,7 @@ abstract class Engines_AbstractEngine {
         return $_string;
     }
 
-    protected function _resetSpecialStrings( $_string ) {
+    public function _resetSpecialStrings( $_string ) {
 
         if( ! is_array( $this->_patterns_found ) ) return $_string;
 
@@ -118,7 +131,7 @@ abstract class Engines_AbstractEngine {
 
     abstract protected function _decode( $rawValue );
 
-    protected function _call( $url, Array $curl_options = array() ) {
+    public function _call( $url, Array $curl_options = array() ) {
 
         $mh       = new MultiCurlHandler();
         $uniq_uid = uniqid( '', true );
@@ -205,7 +218,7 @@ abstract class Engines_AbstractEngine {
 
     }
 
-    protected function _setAdditionalCurlParams( Array $curlOptParams = array() ) {
+    public function _setAdditionalCurlParams( Array $curlOptParams = array() ) {
 
         /*
          * Append array elements from the second array

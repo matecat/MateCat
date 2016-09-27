@@ -91,8 +91,12 @@
                 }
             });
             $(".add-mt-engine").click(function() {
+                if ($(this).hasClass("disabled")) {
+                    return false;
+                }
                 $(this).hide();
-//            $('.add-mt-provider-cancel-int').click();
+                UI.resetMTProviderPanel();
+                $(".mgmt-table-mt tr.new").removeClass('hide').show();
                 $('#add-mt-provider-cancel').show();
                 $("#add-mt-provider-confirm").addClass('hide');
                 $(".insert-tm").removeClass('hide');
@@ -331,6 +335,15 @@
                     headers: {
                         4: {
                             sorter: true
+                        },
+                        5: {
+                            sorter: false
+                        },
+                        6: {
+                            sorter: false
+                        },
+                        7: {
+                            sorter: false
                         }
                     }
                 });
@@ -338,14 +351,6 @@
 
             });
 
-            $(".add-mt-engine").click(function() {
-
-                $(this).hide();
-                console.log('ADD MT ENGINE');
-                UI.resetMTProviderPanel();
-                $(".mgmt-table-mt tr.new").removeClass('hide').show();
-
-            });
             $(".mgmt-table-tm .add-tm").click(function() {
                 $(this).hide();
                 UI.openAddNewTm();
