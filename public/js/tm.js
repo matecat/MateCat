@@ -1035,13 +1035,17 @@
         },
         saveTMdescription: function (field) {
             var tr = field.parents('tr').first();
-
+            var old_descr = tr.find('.edit-desc').data('descr');
+            var new_descr = field.text();
+            if (old_descr === new_descr) {
+                return;
+            }
             APP.doRequest({
                 data: {
                     action: 'userKeys',
                     exec: 'update',
                     key: tr.find('.privatekey').text(),
-                    description: field.text()
+                    description: new_descr
                 },
                 error: function() {
                     UI.showErrorOnActiveTMTable('There was an error saving your description. Please retry!');
@@ -1049,11 +1053,13 @@
                     $('.popup-tm').removeClass('saving');
                 },
                 success: function(d) {
-                    UI.hideAllBoxOnTables();
+                    tr.find('.edit-desc').data('descr', new_descr);
                     $('.popup-tm').removeClass('saving');
                     if(d.errors.length) {
                         UI.showErrorOnActiveTMTable(d.errors[0].message);
                         // APP.showMessage({msg: d.errors[0].message});
+                    } else {
+                        UI.hideAllBoxOnTables();
                     }
                 }
             });

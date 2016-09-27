@@ -76,7 +76,10 @@
                                             <td class="update text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !jobOwnerIsMe ); checked key/w" /></td>
                                             <td class="privatekey">${key/key}</td>
                                             <td class="owner">${php: key.owner ? ( jobOwnerIsMe ? 'You' : '*****' ) : 'You'}</td>
-                                            <td class="description"><div class="edit-desc">${php: key.owner ? ( jobOwnerIsMe || key.edit ? key.name : '**********' ) : key.name}</div></td>
+                                            <td class="description">
+                                                <div class="edit-desc" data-descr="${php: key.owner ? ( jobOwnerIsMe || key.edit ? key.name : '**********' ) : key.name}">
+                                                    ${php: key.owner ? ( jobOwnerIsMe || key.edit ? key.name : '**********' ) : key.name}
+                                                </div></td>
                                             <td tal:condition="php: key.edit" class="action">
                                                     <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
                                                     <div  class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
@@ -181,7 +184,7 @@
                                                 <td class="update text-center check"><input type="checkbox" /></td>
                                                 <td class="privatekey">${key/key}</td>
                                                 <td class="owner">You</td>
-                                                <td class="description"><div class="edit-desc">${key/name}</div></td>
+                                                <td class="description"><div class="edit-desc" data-descr="${key/name}">${key/name}</div></td>
                                                 <td class="action">
                                                     <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
                                                     <div  class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
@@ -207,7 +210,7 @@
                                             <td class="privatekey">${key/key}</td>
                                             <td class="owner">You</td>
                                             <td class="description">
-                                                <div class="edit-desc">${key/name}</div>
+                                                <div class="edit-desc" data-descr="${key/name}">${key/name}</div>
                                             </td>
                                             <td class="action">
                                                 <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
