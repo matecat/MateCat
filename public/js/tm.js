@@ -1553,6 +1553,65 @@
 
             tr.append(exportDiv);
             tr.find('.share-tmx-container').slideToggle();
+            var message = "<div class='share-popup-container'>" +
+                    "<div class='share-popup-top'>" +
+                        "<span class='share-popup-top-label'>Key to share:</span>"+
+                        "<input value='957fc9f32bf0a57687f0' class='share-popup-input-key'/>" +
+                    "</div>"+
+                    "<div class='share-popup-container-list'>" +
+                        "<span class='share-popup-list-title'>Who share the key:</span>"+
+                        "<div class='share-popup-list'>" +
+                            "<div class='share-popup-list-item'>"+
+                                "<span class='share-popup-item-name'>Federico Ricciuti</span>"+
+                                "<span class='share-popup-item-email'>federico.ricciuti@gmail.com</span>"+
+                            "</div>"+
+                "<div class='share-popup-list-item'>"+
+                "<span class='share-popup-item-name'>Federico Ricciuti</span>"+
+                "<span class='share-popup-item-email'>federico.ricciuti@gmail.com</span>"+
+                "</div>"+
+                "<div class='share-popup-list-item'>"+
+                "<span class='share-popup-item-name'>Federico Ricciuti</span>"+
+                "<span class='share-popup-item-email'>federico.ricciuti@gmail.com</span>"+
+                "</div>"+
+                "<div class='share-popup-list-item'>"+
+                "<span class='share-popup-item-name'>Federico Ricciuti</span>"+
+                "<span class='share-popup-item-email'>federico.ricciuti@gmail.com</span>"+
+                "</div>"+
+                "<div class='share-popup-list-item'>"+
+                "<span class='share-popup-item-name'>Federico Ricciuti</span>"+
+                "<span class='share-popup-item-email'>federico.ricciuti@gmail.com</span>"+
+                "</div>"+
+                "<div class='share-popup-list-item'>"+
+                "<span class='share-popup-item-name'>Federico Ricciuti</span>"+
+                "<span class='share-popup-item-email'>federico.ricciuti@gmail.com</span>"+
+                "</div>"+
+                "<div class='share-popup-list-item'>"+
+                "<span class='share-popup-item-name'>Federico Ricciuti</span>"+
+                "<span class='share-popup-item-email'>federico.ricciuti@gmail.com</span>"+
+                "</div>"+
+                "<div class='share-popup-list-item'>"+
+                "<span class='share-popup-item-name'>Federico Ricciuti</span>"+
+                "<span class='share-popup-item-email'>federico.ricciuti@gmail.com</span>"+
+                "</div>"+
+                "<div class='share-popup-list-item'>"+
+                "<span class='share-popup-item-name'>Federico Ricciuti</span>"+
+                "<span class='share-popup-item-email'>federico.ricciuti@gmail.com</span>"+
+                "</div>"+
+                        "</div>"+
+                    "</div>"+
+                    "<div class='share-popup-container-bottom'>" +
+                        "<span class='share-popup-bottom-label'>Share the key:</span>"+
+                        "<input class='share-popup-container-input-email' placeholder='Enter email addresses..'>"+
+                        "<div class='pull-right btn-ok share-button'>Share</div>"+
+                    "</div>"+
+                "</div>";
+            tr.find('.message-share-tmx-openemailpopup').on("click", function () {
+                APP.confirm({
+                    name: 'share-window',
+                    cancelTxt: 'Cancel',
+                    msg: message
+                });
+            });
         },
         openExportGlossary: function (elem, tr) {
             tr.find('.action a').addClass('disabled');

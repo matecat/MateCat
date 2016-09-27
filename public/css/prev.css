@@ -486,7 +486,6 @@ footer nav li:first-child
 	    margin: -200px 0 0 -250px;
 	    padding: 0 0px 20px 0px;
 	    position: fixed;
-	    top: 50%;
 	    left: 50%;
 	    z-index: 999999999999999999999999999;
     }

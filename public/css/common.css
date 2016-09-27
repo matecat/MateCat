@@ -864,7 +864,6 @@ color:#333;}
 	    margin: -200px 0 0 -250px;
 	    padding: 0 0px 20px 0px;
 	    position: fixed;
-	    top: 50%;
 	    left: 50%;
 	    z-index: 999999999999999999999999999;
     }
@@ -4474,4 +4473,100 @@ table.activitylog th .th-inner:after {
     padding: 5px 17px !important;
     min-width: 110px;
 }
+
+/*** Share Key Popup ***/
+.share-popup-top {
+    position: relative;
+    width: 100%;
+    height: 70px;
+}
+
+span.share-popup-top-label, .share-popup-list-title, .share-popup-bottom-label {
+    width: 100%;
+    float: left;
+    text-align: left;
+    font-size: 16px;
+    line-height: 20px;
+}
+
+input.share-popup-input-key {
+    width: 96%;
+    margin-top: 5px;
+    padding-left: 10px;
+    font-size: 15px;
+}
+
+.share-popup-container-list {
+    width: 100%;
+    max-height: 300px;
+    position: relative;
+    float: left;
+}
+
+.share-popup-list {
+    width: 100%;
+    max-height: 230px;
+    min-height: 45px;
+    float: left;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-top: 1px solid #cacaca;
+    margin-top: 5px;
+    box-shadow: inset 0 2px 2px -1px rgba(0,0,0,.1);
+    -webkit-box-shadow: inset 0 2px 2px -1px rgba(0,0,0,.1);
+}
+
+.share-popup-container-bottom {
+    width: 100%;
+    height: 87px;
+    float: left;
+    margin-top: 30px;
+}
+
+.share-popup-container-bottom .share-button {
+    cursor: pointer !important;
+    font-size: 17px;
+    height: 25px;
+    line-height: 35px;
+    padding: 0px;
+    height: 35px;
+    width: 100px;
+    margin-top: 5px;
+    margin-left: 0px;
+}
+
+input.share-popup-container-input-email {
+    margin-top: 5px;
+    float: left;
+    margin-left: 0px;
+    width: 344px;
+    height: 34px;
+    padding-left: 4px;
+    background-color: #fbfbfb;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+}
+
+.share-popup-list-item {
+    width: 100%;
+    height: 45px;
+    float: left;
+    border-bottom: 1px solid #cacaca;
+}
+
+span.share-popup-item-name, .share-popup-item-email {
+    text-align: left;
+    width: 100%;
+    float: left;
+    margin-left: 12px;
+    font-size: 16px;
+    line-height: 26px;
+}
+
+span.share-popup-item-email {
+    font-size: 15px;
+    color: #5d5d5d;
+    line-height: 13px;
+}
+/***********************/
 

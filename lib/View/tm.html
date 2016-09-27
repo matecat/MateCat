@@ -7,36 +7,6 @@
 <body>
 
 <div metal:define-macro="tm_panel">
-<script type="text/javascript">
-/*<![CDATA[*/
-function isVisible($el) {
-  var winTop = $(window).scrollTop();
-  var winBottom = winTop + $(window).height();
-  var elTop = $el.offset().top;
-  var elBottom = elTop + $el.height();
-  return ((elBottom<= winBottom) && (elTop >= winTop));
-}
-
-$(function() {
-    $(".popup-tm.slide-panel").on("scroll", function(){
-        if (!isVisible($(".active-tm-container h3"))) {
-            $('.active-tm-container .notification-message').addClass('fixed-msg');
-        }
-        else {
-            $('.active-tm-container .notification-message').removeClass('fixed-msg');
-        }
-        if (!isVisible($(".inactive-tm-container h3"))) {
-            $('.inactive-tm-container .notification-message').addClass('fixed-msg');
-        }
-        else {
-            $('.inactive-tm-container .notification-message').removeClass('fixed-msg');
-        }
-    })
-
-});
-
-/*]]>*/
-</script>
 
     <div class="popup-outer outer-tm hide"></div>
     <!-- inizio popup tm mgmt -->
