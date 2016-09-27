@@ -81,8 +81,12 @@
                 }
             });
             $(".add-mt-engine").click(function() {
+                if ($(this).hasClass("disabled")) {
+                    return false;
+                }
                 $(this).hide();
-//            $('.add-mt-provider-cancel-int').click();
+                UI.resetMTProviderPanel();
+                $(".mgmt-table-mt tr.new").removeClass('hide').show();
                 $('#add-mt-provider-cancel').show();
                 $("#add-mt-provider-confirm").addClass('hide');
                 $(".insert-tm").removeClass('hide');
@@ -314,14 +318,6 @@
 
             });
 
-            $(".add-mt-engine").click(function() {
-
-                $(this).hide();
-                console.log('ADD MT ENGINE');
-                UI.resetMTProviderPanel();
-                $(".mgmt-table-mt tr.new").removeClass('hide').show();
-
-            });
             $(".mgmt-table-tm .add-tm").click(function() {
                 $(this).hide();
                 UI.openAddNewTm();
@@ -1458,6 +1454,28 @@
 
             $(elem).parents('tr').append(exportDiv);
             $(elem).parents('tr').find('.download-tmx-container').slideToggle();
+        },
+        openShareResource: function (elem) {
+            var tr = $(elem).parents('tr');
+            if (tr.find(".share-tmx-container").length) {
+                tr.find('.share-tmx-container').slideToggle(function () {
+                    $(this).remove();
+                });
+                return
+            }
+            $(elem).parents('.action').find('a').each( function() { $(this).addClass('disabled'); } );
+            var key = tr.find(".privatekey").text();
+            var exportDiv = '<td class="share-tmx-container" style="display: none">' +
+                    '<div class="message-share-tmx">Shared key ' +
+                    'is co-owned by you, <span class="message-share-tmx-email">pippo@translated.net</span> and ' +
+                    '<span class="message-share-tmx-openemailpopup">123 others</span></div>' +
+                    '<input class="message-share-tmx-input-email" placeholder="Enter email addresses.."/>'+
+                    '<div class="pull-right btn-ok share-button">Share</div>'+
+                '</td>';
+
+            tr.append(exportDiv);
+            tr.find('.share-tmx-container').slideToggle();
+
         },
         openExportGlossary: function (elem, tr) {
             tr.find('.downloadGlossary').addClass('disabled');
