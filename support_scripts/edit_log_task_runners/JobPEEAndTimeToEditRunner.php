@@ -141,7 +141,7 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                                 $querySegments,
                                 $_job_first_segment,
                                 $_job_last_segment,
-                                "'" . implode("','", $segment_statuses) . "'",
+                                implode(",", $segment_statuses),
                                 $_jid,
                                 $firstSeg,
                                 self::NR_OF_SEGS
@@ -151,28 +151,16 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                         //iterate over segments.
                         foreach ( $segments as $i => $segment ) {
                             $segment = new EditLog_EditLogSegmentStruct( $segment );
-
-                            echo "ID\t\t: " . $segment->id."\n";
-                            echo "suggestion\t: " . $segment->suggestion."\n";
-                            echo "translation\t: " . $segment->translation."\n";
-                            echo "MATCH_TYPE\t: " . $segment->match_type."\n";
-
-
+                            
                             if ( $segment->isValidForPeeTable() ) {
                                 $job_stats[ 'ALL' ][ 'raw_wc_job' ] += $segment->raw_word_count;
                                 $job_stats[ 'ALL' ][ 'time_to_edit_job' ] += $segment->time_to_edit;
                                 $job_stats[ 'ALL' ][ 'raw_post_editing_effort' ] += $segment->getPEE() * $segment->raw_word_count;
 
-                                echo "MyMemory TMS_MATCH: " . MyMemory::TMS_MATCH( $segment->suggestion, $segment->translation ) . "\n";
-                                echo "PEE: " . $segment->getPEE() . "\n";
-                                echo "Raw wc: " . $segment->raw_word_count . "\n";
-                                echo "\nPEE * raw_wc: " . $segment->getPEE() * $segment->raw_word_count . "\n";
-
                                 $job_stats[ $segment->match_type ][ 'raw_wc_job' ] += $segment->raw_word_count;
                                 $job_stats[ $segment->match_type ][ 'time_to_edit_job' ] += $segment->time_to_edit;
                                 $job_stats[ $segment->match_type ][ 'raw_post_editing_effort' ] += $segment->getPEE() * $segment->raw_word_count;
                             }
-                            echo "=====================\n";
                         }
 
                         //sleep 100 nanosecs
