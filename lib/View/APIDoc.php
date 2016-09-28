@@ -2018,6 +2018,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
     </div>
 </div>
 <script type="text/javascript">
+// add active class to menu
 
   $(".menu a").click(function() {
         if ($(this).hasClass('active')) {
@@ -2031,6 +2032,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
         }
        
     });
+// anchor menu when scrolling
 
     $(window).scroll(function() {
         var scroll = $(window).scrollTop();
