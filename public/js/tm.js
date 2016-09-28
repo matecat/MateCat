@@ -859,8 +859,10 @@
                 context: [Key, fileName, true, TRcaller],
                 error: function() {
                     var TRcaller = this[3];
-                    $(TRcaller).find('.addtmxfile, .addglossaryfile').hide();
+                    $(TRcaller).find('.addtmxfile, .addglossaryfile, .uploadprogress').hide();
                     $(TRcaller).find('.upload-file-msg-error').text('Error').show();
+                    $(TRcaller).find('.canceladdglossary').show();
+                    $(TRcaller).find('input[type="file"]').attr("disabled", false);
                     if ($(TRcaller).closest('table').attr("id") == 'inactivetm'){
                         UI.showErrorOnInactiveTmTable('There was an error saving your data. Please retry!');
                     }else {
@@ -872,8 +874,10 @@
                     var TRcaller = this[3];
 
                     if(d.errors.length) {
-                        $(TRcaller).find('.addtmxfile, .addglossaryfile').hide();
-                        $(TRcaller).find('.upload-file-msg-error').text("Error").show();
+                        $(TRcaller).find('.addtmxfile, .addglossaryfile, .uploadprogress').hide();
+                        $(TRcaller).find('.upload-file-msg-error').text('Error').show();
+                        $(TRcaller).find('.canceladdglossary').text('Error').show();
+                        $(TRcaller).find('input[type="file"]').attr("disabled", false);
                         if ($(TRcaller).closest('table').attr("id") == 'inactivetm'){
                             UI.showErrorOnInactiveTmTable(d.errors[0].message);
                         } else {
