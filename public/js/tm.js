@@ -212,6 +212,7 @@
 
                 UI.checkTMGrantsModifications(this);
                 if(APP.isCattool) UI.saveTMdata(false);
+                UI.checkTMKeysUpdateChecks();
 
             }).on('click', '.mgmt-table-mt tr .enable-mt input', function() {
 
@@ -226,6 +227,8 @@
                 if(!tr.find('td.lookup input').is(':checked') && !tr.find('td.update input').is(':checked')) {
                     UI.checkTMGrantsModifications(this);
                     tr.find('.activate input').prop('checked', false);
+                } else {
+                    UI.checkTMKeysUpdateChecks();
                 }
 
             }).on('click', '.mgmt-table-mt tr .action .deleteMT', function() {
@@ -1831,6 +1834,15 @@
         removeTooltipLXQ: function () {
             $('.qa-box .onoffswitch-container').powerTip('destroy');
             $('.tagp .onoffswitch-container').powerTip('destroy');
+        },
+
+        checkTMKeysUpdateChecks: function () {
+            var updateCheck = $("#activetm").find("tr:not(.new)  .update input:checked").length;
+            if ( updateCheck  === 0) {
+                $("#activetm").find("tr.mymemory .update input").prop('checked', true);
+            } else {
+                $("#activetm").find("tr.mymemory .update input").prop('checked', false);
+            }
         }
 
     });
