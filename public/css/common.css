@@ -1704,15 +1704,12 @@ th.activate, td.activate {
 #inactivetm tbody {
     background: #f3f3f3;
 }
-span.icon-owner.icon-owner-private:before {
-    content: "\e98f";
+.icon-owner.icon-owner-private,
+.icon-owner.icon-owner-shared,
+.icon-owner.icon-owner-public {
+    color: #6f6f6f;
 }
-span.icon-owner.icon-owner-public:before {
-    content: "\e9ca";
-}
-span.icon-owner.icon-owner-shared:before {
-    content: "\e972";
-}
+
 .share-button {
     width: 50px;
     text-align: center;

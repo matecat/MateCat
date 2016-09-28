@@ -210,8 +210,8 @@
                 UI.disableTM(this);
             }).on('change', '.mgmt-table-tm tr.mine .activate input', function() {
 
-                if(APP.isCattool) UI.saveTMdata(false);
                 UI.checkTMGrantsModifications(this);
+                if(APP.isCattool) UI.saveTMdata(false);
 
             }).on('click', '.mgmt-table-mt tr .enable-mt input', function() {
 
@@ -259,7 +259,7 @@
 
                 UI.openExportTmx(this);
 
-            }).on('click', 'td.owner', function(e){
+            }).on('click', 'td.owner, .shareKey', function(e){
                 UI.openShareResource( $(this) );
             }).on('mousedown', '.mgmt-tm .downloadGlossary', function(e){
                 //Todo
@@ -939,24 +939,24 @@
         },
 
         extractTMdataFromTable: function () {
-            categories = ['ownergroup', 'mine', 'anonymous'];
+            var categories = ['ownergroup', 'mine', 'anonymous'];
             var newArray = {};
             $.each(categories, function (index, value) {
-                data = UI.extractTMDataFromRowCategory(this);
-                newArray[value] = data;
+                newArray[value] = UI.extractTMDataFromRowCategory(this);
             });
             return JSON.stringify(newArray);
         },
         extractTMDataFromRowCategory: function(cat) {
-            tt = $('#activetm tbody tr.' + cat);
-            dataOb = [];
+            var tt = $('#activetm tbody tr.' + cat);
+            var dataOb = [];
             $(tt).each(function () {
-                r = (($(this).find('.lookup input').is(':checked'))? 1 : 0);
-                w = (($(this).find('.update input').is(':checked'))? 1 : 0);
-                if(!r && !w) {
+                var r = (($(this).find('.lookup input').is(':checked'))? 1 : 0);
+                var w = (($(this).find('.update input').is(':checked'))? 1 : 0);
+                var isMymemory = $(this).hasClass('mymemory');
+                if ((!r && !w) || isMymemory) {
                     return true;
                 }
-                dd = {
+                var dd = {
                     tm: $(this).attr('data-tm'),
                     glos: $(this).attr('data-glos'),
                     owner: $(this).attr('data-owner'),
@@ -964,9 +964,9 @@
                     name: $(this).find('.description').text().trim(),
                     r: r,
                     w: w
-                }
+                };
                 dataOb.push(dd);
-            })
+            });
             return dataOb;
         },
 
@@ -1005,9 +1005,11 @@
                 },
                 success: function(d) {
                     $('.popup-tm').removeClass('saving');
-                    UI.hideAllBoxOnTables();
                     if(d.errors.length) {
                         UI.showErrorOnActiveTMTable('There was an error saving your data. Please retry!');
+                        // APP.showMessage({msg: d.errors[0].message});
+                    } else {
+                        UI.hideAllBoxOnTables();
                     }
                 }
             });
@@ -1543,13 +1545,14 @@
                 tr.find('.share-tmx-container').slideToggle(function () {
                     $(this).remove();
                 });
+                tr.find('.action').find('a').each( function() { $(this).removeClass('disabled'); } );
                 return
             }
-            $(elem).parents('.action').find('a').each( function() { $(this).addClass('disabled'); } );
+            tr.find('.action').find('a').each( function() { $(this).addClass('disabled'); } );
             var key = tr.find(".privatekey").text();
             var exportDiv = '<td class="share-tmx-container" style="display: none">' +
                     '<div class="message-share-tmx">Shared key ' +
-                    'is co-owned by you, <span class="message-share-tmx-email">pippo@translated.net</span> and ' +
+                    'is co-owned by you, <span class="message-share-tmx-email message-share-tmx-openemailpopup">pippo@translated.net</span> and ' +
                     '<span class="message-share-tmx-openemailpopup">123 others</span></div>' +
                     '<input class="message-share-tmx-input-email" placeholder="Enter email addresses.."/>'+
                     '<div class="pull-right btn-ok share-button">Share</div>'+

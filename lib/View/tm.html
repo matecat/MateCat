@@ -40,7 +40,7 @@
                             </tal:block>
 
                             <div class="block pull-right ">
-                                <a class="btn-ok clear add-tm">Add a Key</a>
+                                <a class="btn-ok clear add-tm">Add a resource</a>
                             </div>
                             <div class="active-tm-container">
                                 <h3 class="pull-left">Active Resources</h3>
@@ -64,7 +64,24 @@
                                     </thead>
 
                                     <tbody class="list sortable">
-
+                                    <tr class="mymemory" data-tm="1" data-glos="1" >
+                                        <td class="dragrow">
+                                            <div class="status"></div>
+                                        </td>
+                                        <td class="activate"><input type="checkbox" disabled="true" checked="true"/></td>
+                                        <td class="lookup text-center check"><input type="checkbox" disabled="true" checked="true"/></td>
+                                        <td class="update text-center check"><input type="checkbox" disabled="true" checked="true"/></td>
+                                        <td class="description">
+                                            <div class="" data-descr="MyMemory collaborative translation memory shared with all MateCat users.">MyMemory collaborative translation memory shared with all MateCat users.</div>
+                                        </td>
+                                        <td class="privatekey"></td>
+                                        <td class="owner">
+                                            <span class="icon-owner icon-earth icon-owner-public"></span>
+                                        </td>
+                                        <td class="action">
+                                            <a class="btn pull-left addtmx" style="width: 110px !important;"><span class="text">Import TMX</span></a>
+                                        </td>
+                                    </tr>
                                     <tal:block tal:condition="php: page == 'cattool'" tal:repeat="key user_keys/job_keys">
                                         <tr tal:condition="php: key.edit || key.owner" tal:attributes="class php: key.owner ? ( jobOwnerIsMe ? 'mine' : 'ownergroup' ) : 'mine'" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-key="${key/key}" data-owner="${key/owner}">
                                             <td class="dragrow"><div class="status"></div></td>
@@ -82,10 +99,11 @@
                                                     <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
                                                     <div  class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
                                                         <ul class="dropdown pull-left">
-                                                            <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>
                                                             <li><a class="addGlossary" title="Import Glossary" alt="Import Glossary"><span class="icon-upload"></span>Import Glossary</a></li>
+                                                            <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>
                                                             <li><a class="downloadGlossary" title="Export Glossary" alt="Export Glossary"><span class="icon-download"></span>Export Glossary</a></li>
-                                                            <li><a class="deleteTM" title="Delete Key" alt="Delete Key"><span class="icon-trash-o"></span>Delete Key</a></li>
+                                                            <li><a class="shareKey" title="Share resource" alt="Share resource"><span class="icon-users"></span>Share resource</a></li>
+                                                            <li><a class="deleteTM" title="Delete resource" alt="Delete resource"><span class="icon-trash-o"></span>Delete resource</a></li>
                                                         </ul>
                                                     </div>
                                             </td>
@@ -174,6 +192,7 @@
                                         </thead>
                                         <tbody class="list">
 
+
                                         <tal:block tal:condition="php: page == 'cattool'" tal:repeat="key user_keys/totals">
                                             <tr class="mine" data-tm="1" data-glos="1" data-key="${key/key}">
                                                 <td class="dragrow"><div class="status"></div></td>
@@ -187,10 +206,11 @@
                                                     <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
                                                     <div  class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
                                                         <ul class="dropdown pull-left">
-                                                            <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>
                                                             <li><a class="addGlossary" title="Import Glossary" alt="Import Glossary"><span class="icon-upload"></span>Import Glossary</a></li>
+                                                            <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>
                                                             <li><a class="downloadGlossary" title="Export Glossary" alt="Export Glossary"><span class="icon-download"></span>Export Glossary</a></li>
-                                                            <li><a class="deleteTM" title="Delete Key" alt="Delete Key"><span class="icon-trash-o"></span>Delete Key</a></li>
+                                                            <li><a class="shareKey" title="Share resource" alt="Share resource"><span class="icon-users"></span>Share resource</a></li>
+                                                            <li><a class="deleteTM" title="Delete resource" alt="Delete resource"><span class="icon-trash-o"></span>Delete resource</a></li>
                                                         </ul>
                                                     </div>
                                                 </td>
@@ -209,15 +229,20 @@
                                                 <div class="edit-desc" data-descr="${key/name}">${key/name}</div>
                                             </td>
                                             <td class="privatekey">${key/key}</td>
-                                            <td class="owner"><span class="icon-owner icon-owner-shared"></span></td>
+                                            <td class="owner">
+                                                <!--<span class="icon-owner icon-users icon-owner-shared"></span>-->
+                                                <!--<span class="icon-owner icon-earth icon-owner-public"></span>-->
+                                                <span class="icon-owner icon-lock icon-owner-private"></span>
+                                            </td>
                                             <td class="action">
                                                 <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
                                                 <div  class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
                                                     <ul class="dropdown pull-left">
-                                                        <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>
                                                         <li><a class="addGlossary" title="Import Glossary" alt="Import Glossary"><span class="icon-upload"></span>Import Glossary</a></li>
+                                                        <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>
                                                         <li><a class="downloadGlossary" title="Export Glossary" alt="Export Glossary"><span class="icon-download"></span>Export Glossary</a></li>
-                                                        <li><a class="deleteTM" title="Delete Key" alt="Delete Key"><span class="icon-trash-o"></span>Delete Key</a></li>
+                                                        <li><a class="shareKey" title="Share resource" alt="Share resource"><span class="icon-users"></span>Share resource</a></li>
+                                                        <li><a class="deleteTM" title="Delete resource" alt="Delete resource"><span class="icon-trash-o"></span>Delete resource</a></li>
                                                     </ul>
                                                 </div>
 
