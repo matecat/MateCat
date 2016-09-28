@@ -1832,25 +1832,8 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
                 <li data-id="Job"><a class="anchor_api">Job</a></li>
                 <li data-id="Options"><a class="anchor_api">Options</a></li>
                 <li data-id="Glossary"><a class="anchor_api">Glossary</a></li>
-             
-               <script>
-                 $(".anchor_api").click(function() {
-                    var name = $(this).closest("li").attr("data-id");
-                      $('html, body').animate({
-                          scrollTop: $("#resource_"+name).offset().top
-                      }, 500,function() {
-                        
-                    });  
-                       if ($(this).hasClass("selected")) {
-                            console.log("selected");
-                        }
-                        else {
-                          $(this).addClass('selected');
-                          $("#resource_"+name+ " #endpointListTogger_"+name).click();
-                            console.log("selected");
-                        }
-                  });
-</script>
+              
+            
             <li><a href="#file-format">Supported file format</a></li>
             <li><a href="#languages">Supported languages</a></li>
             <li><a href="#subjects">Supported subjects</a></li>
@@ -2060,28 +2043,9 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
         }
 
     });
+  
 
-    var position = [];
-
-    $('.resource').each(function(){
-        position.push(Math.abs($(this).position().top))
-    })
-
-    console.log(position)
-
-    $(window).scroll( function() {
-
-        var value = $(this).scrollTop() + $('.menu').height();
-
-        $.each(position, function(i){
-            if(this > value){
-                $('.active').removeClass('active');
-                 $(".menu li").eq(i-1).addClass('active');
-    
-                return false;
-            }
-        })
-    });
+// smooth scrolling
 
     $(function() {
         $('a[href*=#]:not([href=#])').click(function() {
@@ -2097,6 +2061,29 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
             }
         });
     });
+
+// scroll to id + add active on menu
+
+ $(".anchor_api").click(function() {
+                    var name = $(this).closest("li").attr("data-id");
+                      $('html, body').animate({
+                          scrollTop: $("#resource_"+name).offset().top
+                      }, 500,function() {
+                        
+                    });  
+                       if ($(this).hasClass("selected") && $("#resource_"+name).hasClass('active')) {
+                            console.log("selected");
+                        }
+                        else {
+                          if (!$("#resource_"+name).hasClass('active')) {
+                            console.log("selected");
+                            $(this).addClass('selected');
+                          $("#resource_"+name+ " #endpointListTogger_"+name).click();
+                            console.log("selected");
+                        }
+                          
+                        }
+                  });
 </script>
 </body>
 </html>
