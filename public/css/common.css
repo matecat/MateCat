@@ -3376,11 +3376,11 @@ color: #000;
 
 @font-face {
 	font-family: 'icomoon';
-	src:url('fonts/icomoon.eot?-9xrcdu');
-	src:url('fonts/icomoon.eot?#iefix-9xrcdu') format('embedded-opentype'),
-		url('fonts/icomoon.woff?-9xrcdu') format('woff'),
-		url('fonts/icomoon.ttf?-9xrcdu') format('truetype'),
-		url('fonts/icomoon.svg?-9xrcdu#icomoon') format('svg');
+	src:url('fonts/icomoon.eot?-ci9ja7');
+	src:url('fonts/icomoon.eot?#iefix-ci9ja7') format('embedded-opentype'),
+		url('fonts/icomoon.woff?-ci9ja7') format('woff'),
+		url('fonts/icomoon.ttf?-ci9ja7') format('truetype'),
+		url('fonts/icomoon.svg?-ci9ja7#icomoon') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -3954,6 +3954,15 @@ text-align: left;
 }
 
 
+.icon-users:before {
+  content: "\e972";
+}
+.icon-lock:before {
+  content: "\e98f";
+}
+.icon-earth:before {
+  content: "\e9ca";
+}
 .icon-uniE96B:before {
   content: "\e96b";
 }
