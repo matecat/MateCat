@@ -393,7 +393,8 @@ class setTranslationController extends ajaxController {
 
         $this->feature_set->run('postAddSegmentTranslation', array(
             'chunk' => $this->chunk,
-            'is_review' => $this->isRevision()
+            'is_review' => $this->isRevision(),
+            'logged_user' => $this->logged_user
         ));
 
         if ( INIT::$DQF_ENABLED && !empty( $this->jobData[ 'dqf_key' ] ) &&
