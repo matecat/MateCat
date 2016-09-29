@@ -124,6 +124,8 @@ function renderQuote( clickedButton ) {
         }
 
         renderNormalQuote( chunk );
+
+        $(document).trigger('outsource-rendered', { quote_data : quoteData } );
     });
 }
 
