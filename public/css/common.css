@@ -3509,7 +3509,7 @@ body.tagModes .splitArea .locked.selfClosingTag:before,
 body.tagModes:not(.tagmode-default-extended) .suggestion_source .locked.selfClosingTag:before,
 body.tagModes:not(.tagmode-default-extended) .translation .locked.selfClosingTag:before
 {
-content: "\e603";	
+content: "\e604";
 visibility: visible;
 position: absolute;
 font-size: 10px;
