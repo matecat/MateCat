@@ -2179,6 +2179,7 @@ input.email-export-tmx {
     font-weight: bold;
     cursor: pointer;
     text-decoration: none;
+    line-height: 29px;
 }
 .btn-orange-small:hover {
     background: #d1581c;
@@ -2191,7 +2192,9 @@ input.email-export-tmx {
     content: "\f00d";
     vertical-align: text-top;
 }
-
+.btn-orange-small .text {
+    color: #fff;
+}
 .btn-confirm-small {
     height: 29px;
     width: 100px;
@@ -2203,6 +2206,7 @@ input.email-export-tmx {
     font-weight: bold;
     border-radius: 2px;
     cursor: pointer;
+    line-height: 29px;
 }
 .btn-confirm-small:hover {
     background: #00A8D2;
@@ -2216,7 +2220,9 @@ input.email-export-tmx {
     padding-right: 7px;
     vertical-align: text-top;
 }
-
+.btn-confirm-small .text {
+    color: #fff;
+}
 .btn-confirm-small.confirmDelete,
 .btn-confirm-small.continueDeletingMT {
     margin-left: 12px;

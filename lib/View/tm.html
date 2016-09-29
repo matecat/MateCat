@@ -147,9 +147,7 @@
                             </div>
                             <div class="inactive-tm-container">
                                 <h3 class="pull-left">Inactive Resources</h3>
-                                <p class="tm-warning-message notification-message" style="display: none;">Warning: the errmsg will appear here... </p>
-                                <p class="tm-error-message notification-message" style="display: none;"> Error: the errmsg will appear here... </p>
-                                <p class="tm-success-message activetm notification-message" style="display: none;"> Success: the success msg will appear here... </p>
+
                                 <tal:block tal:condition="php: empty(logged_user)">
                                     <p><a id='sign-in-o' tal:attributes="data-oauth authURL" href="#" class="btn btn-grey pull-left" >Login to see your TM</a></p>
                                 </tal:block>
@@ -160,7 +158,9 @@
                                         <label for="filterInactive">Search: </label>
                                         <input id="filterInactive" type="text"/>
                                     </div>
-
+                                    <p class="tm-warning-message notification-message" style="display: none;">Warning: the errmsg will appear here... </p>
+                                    <p class="tm-error-message notification-message" style="display: none;"> Error: the errmsg will appear here... </p>
+                                    <p class="tm-success-message activetm notification-message" style="display: none;"> Success: the success msg will appear here... </p>
                                     <table class="mgmt-tm mgmt-tm-nested scroll" id="inactivetm">
                                         <thead>
                                         <tr>
