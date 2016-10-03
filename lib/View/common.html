@@ -9,10 +9,13 @@
         config.userMail = '${userMail}';
         config.userFullName = '${extended_user}';
         config.userShortName = '${logged_user}';
-
         config.isLoggedIn = ${isLoggedIn|string:false};
-
 
         /*]]>*/
     </script>
+
+    <tal:block  tal:repeat="js_source footer_js">
+        <script type="text/javascript" tal:attributes="src js_source"></script>
+    </tal:block>
+
 </div>
