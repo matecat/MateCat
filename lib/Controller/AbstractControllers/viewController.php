@@ -342,6 +342,7 @@ abstract class viewController extends controller {
      */
     private function setInitialTemplateVars() {
         $this->template->footer_js = array();
+        $this->template->config_js = array() ;
         $this->template->css_resources = array();
     }
 
