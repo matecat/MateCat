@@ -12,7 +12,21 @@ class INIT {
             'DB_PASS'
     );
 
+    /**
+     * @var $ENV
+     *
+     * General server environment settings to define the the usage of hard links rather than copy php method
+     * must be one of these:
+     *
+     * - production
+     * - development
+     * - test
+     *
+     * @see EnvWrap
+     *
+     */
     public static $ENV ;
+
     public static $ROOT;
     public static $BASEURL;
     public static $HTTPHOST;
