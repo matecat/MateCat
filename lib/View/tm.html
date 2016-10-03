@@ -5,38 +5,11 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 </head>
 <body>
+<style>
 
+</style>
 <div metal:define-macro="tm_panel">
-<script type="text/javascript">
-/*<![CDATA[*/
-function isVisible($el) {
-  var winTop = $(window).scrollTop();
-  var winBottom = winTop + $(window).height();
-  var elTop = $el.offset().top;
-  var elBottom = elTop + $el.height();
-  return ((elBottom<= winBottom) && (elTop >= winTop));
-}
 
-$(function() {
-    $(".popup-tm.slide-panel").on("scroll", function(){
-        if (!isVisible($(".active-tm-container h3"))) {
-            $('.active-tm-container .notification-message').addClass('fixed-msg');
-        }
-        else {
-            $('.active-tm-container .notification-message').removeClass('fixed-msg');
-        }
-        if (!isVisible($(".inactive-tm-container h3"))) {
-            $('.inactive-tm-container .notification-message').addClass('fixed-msg');
-        }
-        else {
-            $('.inactive-tm-container .notification-message').removeClass('fixed-msg');
-        }
-    })
-
-});
-
-/*]]>*/
-</script>
 
     <div class="popup-outer outer-tm hide"></div>
     <!-- inizio popup tm mgmt -->
@@ -103,7 +76,10 @@ $(function() {
                                             <td class="update text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !jobOwnerIsMe ); checked key/w" /></td>
                                             <td class="privatekey">${key/key}</td>
                                             <td class="owner">${php: key.owner ? ( jobOwnerIsMe ? 'You' : '*****' ) : 'You'}</td>
-                                            <td class="description"><div class="edit-desc">${php: key.owner ? ( jobOwnerIsMe || key.edit ? key.name : '**********' ) : key.name}</div></td>
+                                            <td class="description">
+                                                <div class="edit-desc" data-descr="${php: key.owner ? ( jobOwnerIsMe || key.edit ? key.name : '**********' ) : key.name}">
+                                                    ${php: key.owner ? ( jobOwnerIsMe || key.edit ? key.name : '**********' ) : key.name}
+                                                </div></td>
                                             <td tal:condition="php: key.edit" class="action">
                                                     <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
                                                     <div  class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
@@ -171,9 +147,7 @@ $(function() {
                             </div>
                             <div class="inactive-tm-container">
                                 <h3 class="pull-left">Inactive Resources</h3>
-                                <p class="tm-warning-message notification-message" style="display: none;">Warning: the errmsg will appear here... </p>
-                                <p class="tm-error-message notification-message" style="display: none;"> Error: the errmsg will appear here... </p>
-                                <p class="tm-success-message activetm notification-message" style="display: none;"> Success: the success msg will appear here... </p>
+
                                 <tal:block tal:condition="php: empty(logged_user)">
                                     <p><a id='sign-in-o' tal:attributes="data-oauth authURL" href="#" class="btn btn-grey pull-left" >Login to see your TM</a></p>
                                 </tal:block>
@@ -185,7 +159,9 @@ $(function() {
                                         <input id="filterInactive" onfocus="if(this.value == 'Filter resources') { this.value = ''; }" value="Filter resources" type="text"/>
                                         <span class="icon-search"></span>
                                     </div>
-
+                                    <p class="tm-warning-message notification-message" style="display: none;">Warning: the errmsg will appear here... </p>
+                                    <p class="tm-error-message notification-message" style="display: none;"> Error: the errmsg will appear here... </p>
+                                    <p class="tm-success-message activetm notification-message" style="display: none;"> Success: the success msg will appear here... </p>
                                     <table class="mgmt-tm mgmt-tm-nested scroll" id="inactivetm">
                                         <thead>
                                         <tr>
@@ -209,7 +185,7 @@ $(function() {
                                                 <td class="update text-center check"><input type="checkbox" /></td>
                                                 <td class="privatekey">${key/key}</td>
                                                 <td class="owner">You</td>
-                                                <td class="description"><div class="edit-desc">${key/name}</div></td>
+                                                <td class="description"><div class="edit-desc" data-descr="${key/name}">${key/name}</div></td>
                                                 <td class="action">
                                                     <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
                                                     <div  class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
@@ -235,7 +211,7 @@ $(function() {
                                             <td class="privatekey">${key/key}</td>
                                             <td class="owner">You</td>
                                             <td class="description">
-                                                <div class="edit-desc">${key/name}</div>
+                                                <div class="edit-desc" data-descr="${key/name}">${key/name}</div>
                                             </td>
                                             <td class="action">
                                                 <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
@@ -302,8 +278,14 @@ $(function() {
                                 </div>
                            
                             <div class="block pull-right ">
-                                <a class="btn-ok clear add-tm add-mt-engine">Add a MT engine</a>
+                                <tal:block tal:condition="php: empty(logged_user)">
+                                        <a class="btn-ok clear add-tm add-mt-engine disabled">Add a MT engine</a>
+                                </tal:block>
+                                <tal:block tal:condition="php: !empty(logged_user)">
+                                    <a class="btn-ok clear add-tm add-mt-engine">Add a MT engine</a>
+                                </tal:block>
                             </div>
+
                             <h3 class="pull-left">Available MT</h3>
                             <p class="tm-error-message" style="display: none;"> Error: the errmsg will appear here... </p>
                             <p class="tm-warning-message" style="display: none;"><span></span></p>
@@ -391,6 +373,11 @@ $(function() {
                                 </tbody>
 
                             </table>
+                            <tal:block tal:condition="php: empty(logged_user)">
+                                <tal:block tal:condition="php: page == 'home'">
+                                <p><a id='sign-in-o-mt' tal:attributes="data-oauth authURL" href="#" class="btn btn-grey pull-left" >Login to see your custom MT engines</a></p>
+                                </tal:block>
+                            </tal:block>
                         </div>
 
                     </div>

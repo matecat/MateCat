@@ -320,12 +320,15 @@ class NewController extends ajaxController {
      * @throws Exception
      */
     private function validateEngines() {
+
         if ( $this->tms_engine != 0 ) {
             Engine::getInstance( $this->tms_engine );
         }
+
         if ( $this->mt_engine != 0 && $this->mt_engine != 1 ) {
-            Engine::getInstance( $this->mt_engine );
+            throw new Exception( "Invalid MT Engine.", -2 );
         }
+
     }
 
     public function finalize() {

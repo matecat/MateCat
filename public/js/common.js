@@ -56,7 +56,7 @@ APP = {
             APP.googole_popup( $( this ).data( 'oauth' ) );
         } );
 
-        $( '#sign-in-o' ).click( function ( e ) {
+        $( '#sign-in-o, #sign-in-o-mt' ).click( function ( e ) {
             $( '#sign-in' ).trigger( 'click' );
         } );
     },
