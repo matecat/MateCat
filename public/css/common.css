@@ -864,6 +864,7 @@ color:#333;}
 	    margin: -200px 0 0 -250px;
 	    padding: 0 0px 20px 0px;
 	    position: fixed;
+        top: 50%;
 	    left: 50%;
 	    z-index: 999999999999999999999999999;
     }
@@ -966,7 +967,10 @@ color:#333;}
     height: 30px;
     font-size: 16px;
 }
-
+.mymemory-descr {
+    margin-left: 7px;
+    width: 100%;
+}
 /*
 .editing .popup-tm {
     top:20px;
@@ -4539,24 +4543,43 @@ table.activitylog th .th-inner:after {
 .share-popup-top {
     position: relative;
     width: 100%;
-    height: 70px;
+    height: 90px;
 }
+.share-popup-description {
+    float: left;
+    line-height: 19px;
+    font-size: 16px;
+    font-style: italic;
+}
+.share-popup-top-label, .share-popup-list-title, .share-popup-bottom-label {
 
-span.share-popup-top-label, .share-popup-list-title, .share-popup-bottom-label {
-    width: 100%;
     float: left;
     text-align: left;
     font-size: 16px;
     line-height: 20px;
 }
 
-input.share-popup-input-key {
-    width: 96%;
+.share-popup-input-key {
+    width: 76%;
     margin-top: 5px;
     padding-left: 10px;
     font-size: 15px;
+    float: left;
+    height: 25px;
 }
-
+.share-popup-copy-result {
+    font-size: 14px;
+    clear: left;
+}
+.share-popup-copy-link-button.btn-grey {
+    float: left;
+    width: 80px;
+    height: 30px;
+    padding: 0px;
+    font-size: 15px;
+    line-height: 30px;
+    margin-top: 4px;
+}
 .share-popup-container-list {
     width: 100%;
     max-height: 300px;

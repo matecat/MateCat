@@ -282,6 +282,25 @@
                 e.preventDefault();
                 UI.showDeleteTmMessage(this);
                 // UI.deleteTM($(this));
+            }).on('keydown', function(e) {
+
+                var esc = 27 ;
+
+                var handleEscPressed = function() {
+                    if ($( '.modal:not([data-type=view])' ).length) {
+                        e.stopPropagation();
+                        APP.closePopup();
+                        return;
+                    } else if ( $('.popup-tm.open').length) {
+                        e.stopPropagation();
+                        UI.closeTMPanel();
+                        UI.clearTMPanel();
+                        return;
+                    }
+                };
+
+                if ( e.which == esc ) handleEscPressed() ;
+
             });
             $(".popup-tm.slide-panel").on("scroll", function(){
                 if (!isVisible($(".active-tm-container h3"))) {
@@ -1554,7 +1573,7 @@
             tr.find('.action').find('a').each( function() { $(this).addClass('disabled'); } );
             var key = tr.find(".privatekey").text();
             var exportDiv = '<td class="share-tmx-container" style="display: none">' +
-                    '<div class="message-share-tmx">Shared key ' +
+                    '<div class="message-share-tmx">Shared resource ' +
                     'is co-owned by you, <span class="message-share-tmx-email message-share-tmx-openemailpopup">pippo@translated.net</span> and ' +
                     '<span class="message-share-tmx-openemailpopup">123 others</span></div>' +
                     '<input class="message-share-tmx-input-email" placeholder="Enter email addresses.."/>'+
@@ -1563,13 +1582,21 @@
 
             tr.append(exportDiv);
             tr.find('.share-tmx-container').slideToggle();
+            var key = tr.find('.privatekey').text();
+            var description = tr.find('.edit-desc').data('descr');
+            if (description.length) {
+                description = "<span class='share-popup-description'>"+description+"</span>";
+            }
             var message = "<div class='share-popup-container'>" +
                     "<div class='share-popup-top'>" +
-                        "<span class='share-popup-top-label'>Key to share:</span>"+
-                        "<input value='957fc9f32bf0a57687f0' class='share-popup-input-key'/>" +
+                        "<span class='share-popup-top-label'>Resource to share:  </span>"+
+                        description +
+                        "<input value='"+key+"' class='share-popup-input-key'/>" +
+                        "<div class='share-popup-copy-link-button btn-grey'>Copy Key</div>" +
+                        "<div class='share-popup-copy-result'></div>"+
                     "</div>"+
                     "<div class='share-popup-container-list'>" +
-                        "<span class='share-popup-list-title'>Who share the key:</span>"+
+                        "<span class='share-popup-list-title'>Who owns the resource:</span>"+
                         "<div class='share-popup-list'>" +
                             "<div class='share-popup-list-item'>"+
                                 "<span class='share-popup-item-name'>Federico Ricciuti</span>"+
@@ -1610,7 +1637,7 @@
                         "</div>"+
                     "</div>"+
                     "<div class='share-popup-container-bottom'>" +
-                        "<span class='share-popup-bottom-label'>Share the key:</span>"+
+                        "<span class='share-popup-bottom-label'>Share ownership of the resource with:</span>"+
                         "<input class='share-popup-container-input-email' placeholder='Enter email addresses..'>"+
                         "<div class='pull-right btn-ok share-button'>Share</div>"+
                     "</div>"+
@@ -1620,6 +1647,25 @@
                     name: 'share-window',
                     cancelTxt: 'Cancel',
                     msg: message
+                });
+
+                var copyTextareaBtn = document.querySelector('.share-popup-copy-link-button');
+
+                copyTextareaBtn.addEventListener('click', function(event) {
+                    var copyTextarea = document.querySelector('.share-popup-input-key');
+                    copyTextarea.select();
+
+                    try {
+                        var successful = document.execCommand('copy');
+                        var msg = successful ? 'successful' : 'unsuccessful';
+                        if (successful) {
+                            $('.share-popup-copy-result').text('Link copied to clipboard.');
+                        } else {
+                            $('.share-popup-copy-result').text('Error copying to the clipboard, do it manually.');
+                        }
+                    } catch (err) {
+                        $('.share-popup-copy-result').text('Error copying to the clipboard, do it manually.');
+                    }
                 });
             });
         },

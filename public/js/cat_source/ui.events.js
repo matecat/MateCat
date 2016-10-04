@@ -284,8 +284,6 @@ $.extend(UI, {
 			if($('body').hasClass('shortcutsDisabled')) {
 				UI.bindShortcuts();
 			}
-		}).on('click', '.popup-settings .x-popup', function() {
-			console.log('close');
 		}).on('click', '.popup-settings .submenu li', function(e) {
 			e.preventDefault();
 			$('.popup-settings .submenu li.active').removeClass('active');
