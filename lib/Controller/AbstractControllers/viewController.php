@@ -301,6 +301,9 @@ abstract class viewController extends controller {
 
         $this->setInitialTemplateVars();
 
+        $featureSet = new FeatureSet();
+        $featureSet->run('appendDecorators', $this, $this->template);
+
         /**
          * Call child for template vars fill
          *
