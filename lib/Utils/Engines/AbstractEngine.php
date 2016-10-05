@@ -42,13 +42,26 @@ abstract class Engines_AbstractEngine {
     }
 
     /**
+     * Override when some string languages are different
+     *
+     * @param $lang
+     *
+     * @return mixed
+     */
+    protected function _fixLangCode( $lang ){
+        $l = explode( "-", strtolower( trim( $lang ) ) );
+
+        return $l[ 0 ];
+    }
+
+    /**
      *
      *
      * @param $_string
      *
      * @return string
      */
-    protected function _preserveSpecialStrings( $_string ) {
+    public function _preserveSpecialStrings( $_string ) {
 
         preg_match_all( self::IOS_STRINGS_REGEXP, $_string, $matches );
         $matches = $matches[ 0 ];
@@ -71,7 +84,7 @@ abstract class Engines_AbstractEngine {
         return $_string;
     }
 
-    protected function _resetSpecialStrings( $_string ) {
+    public function _resetSpecialStrings( $_string ) {
 
         if( ! is_array( $this->_patterns_found ) ) return $_string;
 
@@ -118,7 +131,7 @@ abstract class Engines_AbstractEngine {
 
     abstract protected function _decode( $rawValue );
 
-    protected function _call( $url, Array $curl_options = array() ) {
+    public function _call( $url, Array $curl_options = array() ) {
 
         $mh       = new MultiCurlHandler();
         $uniq_uid = uniqid( '', true );
@@ -205,16 +218,20 @@ abstract class Engines_AbstractEngine {
 
     }
 
-    protected function _setAdditionalCurlParams( Array $curlOptParams = array() ) {
+    public function _setAdditionalCurlParams( Array $curlOptParams = array() ) {
 
         /*
          * Append array elements from the second array
          * to the first array while not overwriting the elements from
          * the first array and not re-indexing
          *
-         * Use the + array union operator
+         * In this case we CAN NOT use the + array union operator because if there is a file handler in the $curlOptParams
+         * the resource is duplicated and the reference to the first one is lost with + operator, in this way the CURLOPT_FILE does not works
          */
-        $this->curl_additional_params = $curlOptParams + $this->curl_additional_params;
+        foreach( $curlOptParams as $key => $value ){
+            $this->curl_additional_params[ $key ] = $value;
+        }
+
     }
 
     public function getConfigStruct() {

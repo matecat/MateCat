@@ -9,17 +9,9 @@
  */
 
 namespace Contribution;
-use \Jobs_JobStruct,
-        \Engine,
-        \Engines_AbstractEngine,
-        \TmKeyManagement_TmKeyManagement,
-        \TmKeyManagement_Filter,
-        \Exception,
+use \Exception,
         \Log,
-        \WorkerClient,
-        \Utils,
-        \CatUtils,
-        \INIT
+        \WorkerClient
     ;
 
 use TaskRunner\Commons\ContextList;

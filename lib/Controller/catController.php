@@ -17,13 +17,12 @@ class catController extends viewController {
     private $tid = "";
     private $password = "";
     private $source = "";
-    private $pname = "";
     private $create_date = "";
-    private $project_status = 'NEW';
+
     private $start_from = 0;
     private $page = 0;
     private $start_time = 0.00;
-    private $downloadFileName;
+
     private $job_stats = array();
     private $source_rtl = false;
     private $target_rtl = false;
@@ -36,8 +35,6 @@ class catController extends viewController {
     private $firstSegmentOfFiles = '[]';
     private $fileCounter = '[]';
 
-    private $first_job_segment;
-    private $last_job_segment;
     private $last_opened_segment;
 
     private $qa_data = '[]';
@@ -125,8 +122,6 @@ class catController extends viewController {
         } else {
             $this->filter_enabled = false;
         };
-
-        $this->downloadFileName = "";
 
         $this->doAuth();
 
@@ -230,17 +225,6 @@ class catController extends viewController {
 
         foreach ( $data as $i => $job ) {
 
-            $this->project_status = $job; // get one row values for the project are the same for every row
-
-            if ( empty( $this->pname ) ) {
-                $this->pname            = $job[ 'pname' ];
-                $this->downloadFileName = $job[ 'pname' ] . ".zip"; // will be overwritten below in case of one file job
-            }
-
-            if ( empty( $this->last_opened_segment ) ) {
-                $this->last_opened_segment = $job[ 'last_opened_segment' ];
-            }
-
             if ( empty( $this->cid ) ) {
                 $this->cid = $job[ 'cid' ];
             }
@@ -284,10 +268,6 @@ class catController extends viewController {
 
             $id_file = $job[ 'id_file' ];
 
-            if ( !isset( $this->data[ "$id_file" ] ) ) {
-                $files_found[ ] = $job[ 'filename' ];
-            }
-
             $wStruct = new WordCount_Struct();
 
             $wStruct->setIdJob( $this->jid );
@@ -309,11 +289,8 @@ class catController extends viewController {
             unset( $job[ 'pid' ] );
             unset( $job[ 'cid' ] );
             unset( $job[ 'tid' ] );
-            unset( $job[ 'pname' ] );
             unset( $job[ 'create_date' ] );
             unset( $job[ 'owner' ] );
-
-            unset( $job[ 'last_opened_segment' ] );
 
             unset( $job[ 'new_words' ] );
             unset( $job[ 'draft_words' ] );
@@ -332,17 +309,11 @@ class catController extends viewController {
 
         }
 
-        //Needed because a just created job has last_opened segment NULL
-        if ( empty( $this->last_opened_segment ) ) {
-            $this->last_opened_segment = getFirstSegmentId( $this->jid, $this->password );
-        }
+        $this->last_opened_segment = $this->job->last_opened_segment
+            ? $this->job->last_opened_segment
+            : getFirstSegmentId( $this->job->id, $this->job->password );
 
-        $this->first_job_segment = $this->project_status[ 'job_first_segment' ];
-        $this->last_job_segment  = $this->project_status[ 'job_last_segment' ];
 
-        if ( count( $files_found ) == 1 ) {
-            $this->downloadFileName = $files_found[ 0 ];
-        }
 
         /**
          * get first segment of every file
@@ -518,7 +489,7 @@ class catController extends viewController {
 
         //this gets MT engine active for the job
         $engineQuery         = new EnginesModel_EngineStruct();
-        $engineQuery->id     = $this->project_status[ 'id_mt_engine' ];
+        $engineQuery->id     = $this->job->id_mt_engine ;
         $engineQuery->active = 1;
         $active_mt_engine    = $engine->setCacheTTL( 60 * 10 )->read( $engineQuery );
 
@@ -609,7 +580,7 @@ class catController extends viewController {
         $this->template->page        = 'cattool';
         $this->template->cid         = $this->cid;
         $this->template->create_date = $this->create_date;
-        $this->template->pname       = $this->pname;
+        $this->template->pname       = $this->project->name;
         $this->template->tid         = var_export( $this->tid, true );
         $this->template->source      = $this->source;
         $this->template->source_rtl  = $this->source_rtl;
@@ -618,17 +589,19 @@ class catController extends viewController {
         $this->template->authURL = $this->authURL;
 
         $this->template->mt_engines = $this->translation_engines;
-        $this->template->mt_id      = $this->project_status[ 'id_mt_engine' ];
+        $this->template->mt_id      = $this->job->id_mt_engine ;
 
-        $this->template->first_job_segment   = $this->first_job_segment;
-        $this->template->last_job_segment    = $this->last_job_segment;
+        $this->template->first_job_segment   = $this->job->job_first_segment ;
+        $this->template->last_job_segment    = $this->job->job_last_segment ;
+
         $this->template->last_opened_segment = $this->last_opened_segment;
+
         $this->template->owner_email         = $this->job_owner;
 
 
 
-        $this->job_stats[ 'STATUS_BAR_NO_DISPLAY' ] = ( $this->project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
-        $this->job_stats[ 'ANALYSIS_COMPLETE' ]     = ( $this->project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? true : false );
+        $this->job_stats[ 'STATUS_BAR_NO_DISPLAY' ] = ( $this->project->status_analysis == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
+        $this->job_stats[ 'ANALYSIS_COMPLETE' ]     = ( $this->project->status_analysis == Constants_ProjectStatus::STATUS_DONE ? true : false );
 
         $this->template->user_keys             = $this->_keyList;
         $this->template->job_stats             = $this->job_stats;
@@ -639,10 +612,8 @@ class catController extends viewController {
         $end_time                    = microtime( true ) * 1000;
         $load_time                   = $end_time - $this->start_time;
         $this->template->load_time   = $load_time;
-        $this->template->tms_enabled = var_export( (bool)$this->project_status[ 'id_tms' ], true );
-        $this->template->mt_enabled  = var_export( (bool)$this->project_status[ 'id_mt_engine' ], true );
-
-        $this->template->downloadFileName       = urlencode( $this->downloadFileName );
+        $this->template->tms_enabled = var_export( (bool) $this->job->id_tms , true );
+        $this->template->mt_enabled  = var_export( (bool) $this->job->id_mt_engine , true );
 
         $this->template->warningPollingInterval = 1000 * ( INIT::$WARNING_POLLING_INTERVAL );
         $this->template->segmentQACheckInterval = 1000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL );
@@ -749,10 +720,6 @@ class catController extends viewController {
         }
 
         return $return;
-    }
-
-    public function getDownloadFileName() {
-        return $this->downloadFileName;
     }
 
     public function isCurrentProjectGDrive() {

@@ -38,7 +38,7 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                             where completed = 1
                             and id > %d";
 
-            $queryFirst = "select id, password, job_first_segment, job_last_segment
+            $queryFirst = "select id, password, job_first_segment, job_last_segment, source, target
                             from jobs
                             where completed = 1
                             and id >= %d and id <= %d";
@@ -46,7 +46,8 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
             $querySegments = "select suggestion,
                          translation,
                          raw_word_count,
-                         time_to_edit
+                         time_to_edit, 
+                         match_type
                          from segment_translations st
                          join segments s on st.id_segment = s.id
                             and s.id between %d and %d
@@ -54,17 +55,19 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                          and id_job = %d
                          and show_in_cattool = 1
                          and id_segment >= %d
-                         limit %d";
+                         limit %d;";
 
-            $queryUpdateJob = "update jobs
-                                set avg_post_editing_effort = %f,
-                                total_time_to_edit = %f,
-                                total_raw_wc = %d
-                                where id = %d and password = '%s'";
+            $queryUpdateJob = "insert into jobs_stats 
+                                (id_job, password, fuzzy_band, source, target, total_time_to_edit, avg_post_editing_effort, total_raw_wc)
+                                VALUES (%d, '%s', '%s','%s','%s',%f, %f, %d)
+                                on duplicate key update 
+                                    avg_post_editing_effort = VALUES (avg_post_editing_effort),
+                                    total_time_to_edit = VALUES (total_time_to_edit),
+                                    total_raw_wc       = VALUES (total_raw_wc)";
 
             $segment_statuses = array(
-                Constants_TranslationStatus::STATUS_TRANSLATED,
-                Constants_TranslationStatus::STATUS_APPROVED
+                $db->getConnection()->quote( Constants_TranslationStatus::STATUS_TRANSLATED ),
+                $db->getConnection()->quote( Constants_TranslationStatus::STATUS_APPROVED )
             );
 
             $minJobMaxJob = $db->query_first(
@@ -102,13 +105,28 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                     $_password          = $job[ 'password' ];
                     $_job_first_segment = $job[ 'job_first_segment' ];
                     $_job_last_segment  = $job[ 'job_last_segment' ];
+                    $_source            = $job[ 'source' ];
+                    $_target            = $job[ 'target' ];
 
                     Log::doLog( "job $_jid -> " . ( $_job_last_segment - $_job_first_segment ) . " segments" );
                     echo "job $_jid -> " . ( $_job_last_segment - $_job_first_segment ) . " segments\n";
 
-                    $raw_post_editing_effort_job = 0;
-                    $raw_wc_job                  = 0;
-                    $time_to_edit_job            = 0;
+                    $job_stats = array(
+                        'ALL' => array(
+                            'raw_post_editing_effort' => 0,
+                            'raw_wc_job' => 0,
+                            'time_to_edit_job' => 0
+                        )
+                    );
+
+                    $payable_rates_keys = array_keys(Analysis_PayableRates::$DEFAULT_PAYABLE_RATES);
+                    foreach( $payable_rates_keys as $fuzzy_band){
+                        $job_stats [ $fuzzy_band ] = array(
+                            'raw_post_editing_effort' => 0,
+                            'raw_wc_job' => 0,
+                            'time_to_edit_job' => 0
+                        );
+                    }
 
                     //get a chunk of self::NR_OF_SEGS segments each time.
                     for ( $firstSeg = $_job_first_segment; $firstSeg <= $_job_last_segment; $firstSeg += self::NR_OF_SEGS ) {
@@ -133,11 +151,15 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                         //iterate over segments.
                         foreach ( $segments as $i => $segment ) {
                             $segment = new EditLog_EditLogSegmentStruct( $segment );
-
+                            
                             if ( $segment->isValidForPeeTable() ) {
-                                $raw_wc_job += $segment->raw_word_count;
-                                $time_to_edit_job += $segment->time_to_edit;
-                                $raw_post_editing_effort_job += $segment->getPEE() * $segment->raw_word_count;
+                                $job_stats[ 'ALL' ][ 'raw_wc_job' ] += $segment->raw_word_count;
+                                $job_stats[ 'ALL' ][ 'time_to_edit_job' ] += $segment->time_to_edit;
+                                $job_stats[ 'ALL' ][ 'raw_post_editing_effort' ] += $segment->getPEE() * $segment->raw_word_count;
+
+                                $job_stats[ $segment->match_type ][ 'raw_wc_job' ] += $segment->raw_word_count;
+                                $job_stats[ $segment->match_type ][ 'time_to_edit_job' ] += $segment->time_to_edit;
+                                $job_stats[ $segment->match_type ][ 'raw_post_editing_effort' ] += $segment->getPEE() * $segment->raw_word_count;
                             }
                         }
 
@@ -145,20 +167,27 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                         usleep( 100 );
                     }
 
-                    $job_incremental_pee = $raw_post_editing_effort_job;
+                    $jobsStatsDao = new Jobs_JobStatsDao($db);
+                    foreach ( $job_stats as $fuzzy_band => $job_stats_data ) {
+                        $job_incremental_pee = $job_stats[ $fuzzy_band ][ 'raw_post_editing_effort' ];
+                        $time_to_edit_job    = $job_stats[ $fuzzy_band ][ 'time_to_edit_job' ];
+                        $raw_wc_job          = $job_stats[ $fuzzy_band ][ 'raw_wc_job' ];
 
-                    Log::doLog( "job pee: $job_incremental_pee\njob time to edit: $time_to_edit_job\njob total wc:$raw_wc_job\nWriting into DB" );
-                    echo "job pee: $job_incremental_pee\njob time to edit: $time_to_edit_job\njob total wc:$raw_wc_job\nWriting into DB\n";
-                    $db->query(
-                        sprintf(
-                            $queryUpdateJob,
-                            $job_incremental_pee,
-                            $time_to_edit_job,
-                            $raw_wc_job,
-                            $_jid,
-                            $_password
-                        )
-                    );
+                        Log::doLog( "job pee[".$fuzzy_band."]: $job_incremental_pee\njob time to edit: $time_to_edit_job\njob total wc:$raw_wc_job\nWriting into DB" );
+                        echo "job pee[".$fuzzy_band."]: $job_incremental_pee\njob time to edit: $time_to_edit_job\njob total wc:$raw_wc_job\nWriting into DB\n";
+
+                        $jobStatsObj = new Jobs_JobStatsStruct();
+                        $jobStatsObj->id_job = $_jid;
+                        $jobStatsObj->password = $_password;
+                        $jobStatsObj->fuzzy_band = $fuzzy_band;
+                        $jobStatsObj->source = $_source;
+                        $jobStatsObj->target = $_target;
+                        $jobStatsObj->avg_post_editing_effort = $job_incremental_pee;
+                        $jobStatsObj->total_time_to_edit = $time_to_edit_job;
+                        $jobStatsObj->total_raw_wc = $raw_wc_job;
+
+                        $jobsStatsDao->create( $jobStatsObj );
+                    }
 
                     Log::doLog( "done" );
                     echo "done.\n";

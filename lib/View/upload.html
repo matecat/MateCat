@@ -37,6 +37,7 @@
 
     <script src="${basepath}public/js/lib/jquery.js"></script>
     <script src="${basepath}public/js/common.js"></script>
+    <script src="${basepath}public/js/lib/jquery.powertip.min.js"></script>
     <script src="${basepath}public/js/gdrive.upload.js"></script>
     <script src="${basepath}public/js/gdrive.picker.js"></script>
     <script src="${basepath}public/js/upload.js"></script>
@@ -60,7 +61,7 @@
             blueimp_dataType: 'json',
             gdriveAuthURL: ${structure php:json_encode(gdriveAuthURL)},
             defaults : {
-                tag_projection : false,
+                tag_projection : true,
                 speech2text : false,
                 lexiqa : true,
             },

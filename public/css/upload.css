@@ -785,6 +785,7 @@ min-height: 220px;
 }
 span.gdrive-icon {
     background: url(../img/logo-drive-16.png);
+    background-size: 100%;
     width: 16px;
     height: 14px;
     display: block;

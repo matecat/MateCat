@@ -118,6 +118,7 @@ class ContributionStructTest extends AbstractTest {
                 'api_key' => 'demo@matecat.com',
                 'uid' => 1234,
                 'oldTranslationStatus' => 'NEW',
+                'propagationRequest'   => true
         );
 
         $this->assertEquals( $expected, $this->contributionStruct->toArray() );

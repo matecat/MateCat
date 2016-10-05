@@ -154,8 +154,11 @@
          */
         checkTpCanActivate: function () {
             if (_.isUndefined(this.tpCanActivate)) {
-                this.tpCanActivate = config.tag_projection_languages.indexOf(config.source_rfc) > -1 &&
-                    config.tag_projection_languages.indexOf(config.target_rfc) > -1 &&
+                var acceptedLanguages = config.tag_projection_languages
+                var elemST = config.source_rfc.split("-")[0] + "-" + config.target_rfc.split("-")[0];
+                var elemTS = config.target_rfc.split("-")[0] + "-" + config.source_rfc.split("-")[0];
+                var supportedPair = (typeof acceptedLanguages[elemST] !== 'undefined' || typeof acceptedLanguages[elemTS] !== 'undefined');
+                this.tpCanActivate = supportedPair > 0 &&
                     !config.isReview;
             }
             return this.tpCanActivate;
@@ -179,6 +182,7 @@
                 UI.editarea.focus();
                 UI.highlightEditarea();
                 UI.createButtons();
+                UI.registerQACheck();
             });
         },
         /**
@@ -206,8 +210,8 @@
                     id_job: config.id_job,
                     source: source,
                     target: target,
-                    source_lang: config.source_lang,
-                    target_lang: config.target_lang,
+                    source_lang: config.source_rfc,
+                    target_lang: config.target_rfc,
                     sl: suggestion
                 }
             });

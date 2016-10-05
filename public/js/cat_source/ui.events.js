@@ -421,14 +421,20 @@ $.extend(UI, {
             if(UI.currentSegmentId == UI.firstWarnedSegment) UI.setNextWarnedSegment();
 		}).on('allTranslated', function() {
 			if(config.survey) UI.displaySurvey(config.survey);
-		}).on('mousedown', function() {
-
+		}).on('mousedown', function(e) {
+			if ($(e.target).hasClass("editarea")) {
+				return;
+			}
             //when the catoool is not loaded because of the job is archived,
             // saveSelection leads to a javascript error
             //so, add a check to see if the cattool page is really created/loaded
             if( $('body' ).hasClass( '.job_archived' ) || $('body' ).hasClass( '.job_cancelled' ) ){
                 return false;
             }
+			/*Show the cursor position to paste the glossary item (Ex: check dbclick)
+			 We have to know the old cursor position when clicking for example
+			 on a glossary item to paste the text in the correct position
+			 */
 
             if(!$('.editor .rangySelectionBoundary.focusOut').length) {
                 if(!UI.isSafari) saveSelection();
@@ -442,11 +448,12 @@ $.extend(UI, {
             ).remove();
 
             if ( UI.editarea != '') {
-                hasFocusBefore = UI.editarea.is(":focus");
+                var hasFocusBefore = UI.editarea.is(":focus");
                 setTimeout(function() {
-                    hasFocusAfter = UI.editarea.is(":focus");
+                    var hasFocusAfter = UI.editarea.is(":focus");
                     if(hasFocusBefore && hasFocusAfter){
                         $('.editor .rangySelectionBoundary.focusOut').remove();
+						UI.editarea.get(0).normalize();
                     }
                 }, 600);
             }
@@ -821,7 +828,7 @@ $.extend(UI, {
                 }, 10);
 
 				if (range.startOffset != range.endOffset) { // if something is selected when the left button is pressed...
-					r = range.startContainer.innerText;
+					r = range.startContainer.data;
 					if ((r[0] == '<') && (r[r.length - 1] == '>')) { // if a tag is selected
                         e.preventDefault();
 
@@ -871,7 +878,7 @@ $.extend(UI, {
                 }, 10);
 
 				if (range.startOffset != range.endOffset) {
-					r = range.startContainer.innerText;
+					r = range.startContainer.data;
 					if ((r[0] == '<') && (r[r.length - 1] == '>')) {
 						saveSelection();
 						rr = document.createRange();
