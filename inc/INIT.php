@@ -357,11 +357,15 @@ class INIT {
 
     public static $PLUGIN_LOAD_PATHS = array();
 
+    public static $MANDATORY_PLUGINS = array();
+
     /**
      * Definitions for the asynchronous task runner
      * @var array
      */
     public static $TASK_RUNNER_CONFIG = null;
+
+    public static $SEND_ERR_MAIL_REPORT = true ;
 
     /**
      * Initialize the Class Instance

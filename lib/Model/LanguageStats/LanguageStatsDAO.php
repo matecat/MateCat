@@ -36,8 +36,8 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
         $this->_validateNotNullFields( $obj );
 
         $query = "INSERT INTO " . self::TABLE .
-                " (date, source, target, total_word_count, total_post_editing_effort, total_time_to_edit, job_count)
-                VALUES ( '%s', '%s', '%s', %f, %f, %f, %u )
+                " (date, source, target, fuzzy_band, total_word_count, total_post_editing_effort, total_time_to_edit, job_count)
+                VALUES ( '%s', '%s', '%s', '%s', %f, %f, %f, %u )
                 ON DUPLICATE KEY UPDATE
                           total_post_editing_effort = values( total_post_editing_effort ),
                           total_time_to_edit = values( total_time_to_edit ),
@@ -48,6 +48,7 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
                 $obj->date,
                 $obj->source,
                 $obj->target,
+                $obj->fuzzy_band,
                 $obj->total_word_count,
                 $obj->total_post_editing_effort,
                 $obj->total_time_to_edit,
@@ -97,6 +98,11 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
             $where_conditions[] = sprintf( $condition, $this->con->escape( $obj->target ) );
         }
 
+        if ( $obj->fuzzy_band !== null ) {
+            $condition          = "fuzzy_band = '%s'";
+            $where_conditions[] = sprintf( $condition, $this->con->escape( $obj->target ) );
+        }
+
         if ( count( $where_conditions ) ) {
             $where_string = implode( " AND ", $where_conditions );
         } else {
@@ -122,14 +128,14 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
         $obj_arr = $this->sanitizeArray( $obj_arr );
 
         $query = "INSERT INTO " . self::TABLE .
-                " (date, source, target, total_word_count, total_post_editing_effort, total_time_to_edit, job_count)
+                " (date, source, target, fuzzy_band, total_word_count, total_post_editing_effort, total_time_to_edit, job_count)
                 VALUES %s
                 ON DUPLICATE KEY UPDATE
                           total_post_editing_effort = values( total_post_editing_effort ),
                           total_time_to_edit = values( total_time_to_edit ),
                           job_count = values( job_count )";
 
-        $tuple_template = "( '%s', '%s', '%s', %f, %f, %f, %u )";
+        $tuple_template = "( '%s', '%s', '%s', '%s', %f, %f, %f, %u )";
 
         $values = array();
 
@@ -147,6 +153,7 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
                         $obj->date,
                         $obj->source,
                         $obj->target,
+                        $obj->fuzzy_band,
                         $obj->total_word_count,
                         $obj->total_post_editing_effort,
                         $obj->total_time_to_edit,
@@ -227,6 +234,10 @@ class LanguageStats_LanguageStatsDAO extends DataAccess_AbstractDao {
 
         if ( is_null( $obj->target ) || empty( $obj->target ) ) {
             throw new Exception( "Invalid target" );
+        }
+
+        if ( is_null( $obj->fuzzy_band ) || empty( $obj->fuzzy_band ) ) {
+            throw new Exception( "Invalid fuzzy band" );
         }
 
     }

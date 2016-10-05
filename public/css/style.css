@@ -885,6 +885,10 @@ box-shadow: 0 1px 2px #ccc;
     margin-right: 15px;
 }
 
+.header-dropdown-menu {
+	margin-right: 15px;
+}
+
 .header-menu .wrapper-dropdown-5 .dropdown {
 	left: -132px;
     width: 164px;
@@ -2087,7 +2091,7 @@ body.rtl-target .editor .editarea span
 	background: linear-gradient(top,  #f6f6f6,  #e2e3e5);
 }
 .wrap {
-    display: table;
+    /*display: table;*/
 	float:left;
     width: 99%;
 	height:100%;
@@ -2106,9 +2110,6 @@ body.rtl-target .editor .editarea span
 }
 .wrap:after{clear:both}
 
-.text
-{
-}
 .source
 {
 	display: table-cell;
@@ -2451,50 +2452,6 @@ section.modified.editor .status
 .joblist ul li{padding:0 !important }
 .joblist ul li a{padding:15px }
 
-
-
-/*notifications*/
-/*
-.h-notification{background:#fff;height:18px;color:#666;font-weight:bold;text-shadow:none !important;padding:4px 0 0 10px;text-shadow: #333 0px 1px 2px;font-size:12px;border-bottom:1px solid #ccc}
-.notification-box ul, .joblist ul{margin:0px 0 0 0;overflow-y:auto;max-height:200px}
-.notification-box ul li, .joblist ul li{margin:0;padding:10px;border-bottom:1px solid #000;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in; }
-.notification-box ul li a, .joblist ul li a{display:block;text-decoration:none;color:#000;}
-.notification-box ul li:hover, .joblist ul li:hover{background:#fff}
-.notification-box {	display:none;	background:#f3f3f3;	position:absolute;	width:270px;	z-index:100;	border:1px solid #000;	text-align:left;	padding:0;	top: 35px; 	text-shadow:none;	margin:5px 0 0 0px;right:0px;	margin-right: -1px;	color:#000;	font-size:14px;	-moz-box-shadow: 0 0 5px #888;-webkit-box-shadow: 0 0 5px #000;box-shadow: 0 0 5px #000;}
-.arrow-notification{display:block;width:25px;height:25px;background:url(../img/arrow-notification.png) 0 0 no-repeat;position:absolute;margin:-9px 0 0 252px}
-*/
-
-/*comment*/
-/*
-.comment-area{position:absolute;top:3px;z-index:99999999999999;background:#fff;-moz-box-shadow: 0 1px 3px #ccc;-webkit-box-shadow: 0 1px 3px #ccc;margin:-17px 0 0 45px;border:1px solid #36698e;-moz-border-radius: 2px;border-radius: 2px;width:200px;}
-.comment-area .sugg-submit{font-size:12px !important;padding:0 15px;}
-.text-c{font-size:12px !important}
-.comment-area .sugg-submit {margin:10px 10px 0 0;float:right}
-.openarea{top:-2px;}
-.openarea .h-notification{height:15px;}
-.h-add{background:#e2ebf0;color:#333}
-.openarea .corner{margin:21px 0 0 -38px; background:url(../img/cornerbig.png) 0 0 no-repeat;}
-.c-blue{background:url(../img/cornerbigblue.png) 0 0 no-repeat !important;margin:20px 0 0 -28px !important;}
-.c-close{background:#fff;opacity:0.8;border:1px solid #36698e; -moz-border-radius: 2px;border-radius: 2px;color:#333;text-shadow:none;float:left;  overflow:hidden;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;width:18px !important;text-align:left;margin:5px 0 0 10px;-moz-box-shadow: 0 1px 3px #ccc;-webkit-box-shadow: 0 1px 3px #ccc;}
-.addcomment{display:none;height:20px;font-weight:bold;text-shadow:none !important;padding:4px 0 0 10px;text-shadow: #333 0px 1px 2px;font-size:14px;}
-.gray:hover .addcomment, .gray2:hover .addcomment{display:block;opacity:0.5;}
-.addcomment:hover{opacity:1 !important;}
-.c-close:hover{opacity:1;-moz-box-shadow: 0 1px 3px #666;-webkit-box-shadow: 0 1px 3px #666;margin-top:-1px !important;}
-.c-close .x-com, .x-addcom{display:none;}
-.comment-area ul{background:#fff;padding:0px 0px 0 0px;text-align:left;font-size:12px;-moz-border-radius: 2px;border-radius: 2px;line-height:16px;float:left;width:200px;}
-.comment-area li{padding:5px 0 5px 0;margin:0;border-bottom:1px solid #ccc;width:200px;}
-.corner{background:url(../img/comment-corner.png) 0 0 no-repeat;display:block;width:25px;height:20px;position:absolute;margin:2px 0 0 -24px;padding:10px 10px;cursor:pointer}
-.date{color:#999;float:right}
-.comment-area ul p{margin:0;padding:0 10px}
-.spancomm {background:url(../img/bg-cmt.png) 0 0 repeat-x;padding:2px 5px 2px 0; }
-.spancomm .lft, .spancomm .rgt{background:url(../img/cm-left.png) 0 0 no-repeat;display:block;width:10px;height:25px;float:left;margin:-3px 0 0 0}
-.spancomm .rgt{background:url(../img/cm-right.png) 0 0 no-repeat;}
-.con-input{float:left;width:77%;margin:13px 0 10px 10px;border:1px solid #727272;-moz-box-shadow: inset 0 1px 2px #888;font-size:12px !important;
-		   -webkit-box-shadow: inset 0 1px 2px #888;-moz-border-radius: 2px;border-radius: 2px;box-shadow: inner 0 1px 2px #888;padding:5px 5px 6px 5px;}
-.comment-area .h-notification{text-align:left;margin:0;padding:4px 0 2px 10px;width:190px;background:#efefef}
-.comment-area textarea{background:#fff;width:168px;margin:10px 0 0 10px;border:1px solid #36698e;min-height:30px;width:168px;padding:5px;}
-.x-com, .x-addcom {float:right;background: url(../img/x.png) center 1px no-repeat;width:22px;margin:-17px 0 0px 0;padding:0 !important;position:absolute;right:0;}
-*/
 
 
 /*stats*/
@@ -3220,6 +3177,7 @@ section .toolbar  .autofillTag  {
     float: left;
     display: none;
     font-size: 60%;
+    text-decoration: none;
 }
 
 section .toolbar span {

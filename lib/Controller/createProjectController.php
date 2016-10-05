@@ -117,7 +117,7 @@ class createProjectController extends ajaxController {
         $this->source_language         = $__postInput[ 'source_language' ];
         $this->target_language         = $__postInput[ 'target_language' ];
         $this->job_subject             = $__postInput[ 'job_subject' ];
-        $this->mt_engine               = $__postInput[ 'mt_engine' ];       // null è ammesso
+        $this->mt_engine               = ( $__postInput[ 'mt_engine' ] != null ? $__postInput[ 'mt_engine' ] : 0 );       // null NON è ammesso
         $this->disable_tms_engine_flag = $__postInput[ 'disable_tms_engine' ]; // se false allora MyMemory
         $this->private_tm_key          = $__postPrivateTmKey;
         $this->private_tm_user         = $__postInput[ 'private_tm_user' ];
@@ -136,14 +136,6 @@ class createProjectController extends ajaxController {
             $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "Missing file name." );
         }
 
-        if ( empty( $this->source_language ) ) {
-            $this->result[ 'errors' ][ ] = array( "code" => -3, "message" => "Missing source language." );
-        }
-
-        if ( empty( $this->target_language ) ) {
-            $this->result[ 'errors' ][ ] = array( "code" => -4, "message" => "Missing target language." );
-        }
-
         if ( empty( $this->job_subject ) ) {
             $this->result[ 'errors' ][ ] = array( "code" => -5, "message" => "Missing job subject." );
         }
@@ -152,9 +144,14 @@ class createProjectController extends ajaxController {
             $this->result[ 'errors' ][ ] = array( "code" => -6, "message" => "invalid pretranslate_100 value" );
         }
 
+        //if user is logged in, set the uid and the userIsLogged flag
+        $this->checkLogin( false );
+
         $this->lang_handler = Langs_Languages::getInstance();
-        $this->validateSourceLang();
-        $this->validateTargetLangs();
+        $this->__validateSourceLang();
+        $this->__validateTargetLangs();
+        $this->__validateUserMTEngine();
+
     }
 
     public function doAction() {
@@ -307,9 +304,6 @@ class createProjectController extends ajaxController {
             $projectStructure[ 'dqf_key' ] = $this->dqf_key;
         }
 
-        //if user is logged in, set the uid and the userIsLogged flag
-        $this->checkLogin( false );
-
         if ( $this->userIsLogged ) {
             $projectStructure[ 'userIsLogged' ] = true;
             $projectStructure[ 'uid' ]          = $this->uid;
@@ -325,7 +319,7 @@ class createProjectController extends ajaxController {
 
     }
 
-    private function validateTargetLangs() {
+    private function __validateTargetLangs() {
         $targets = explode( ',', $this->target_language );
         $targets = array_map('trim',$targets);
         $targets = array_unique($targets);
@@ -345,7 +339,7 @@ class createProjectController extends ajaxController {
         $this->target_language = implode(',', $targets);
     }
 
-    private function validateSourceLang() {
+    private function __validateSourceLang() {
         if ( empty( $this->source_language ) ) {
             $this->result[ 'errors' ][]    = array( "code" => -3, "message" => "Missing source language." );
         }
@@ -381,6 +375,28 @@ class createProjectController extends ajaxController {
         $this->metadata = $options ; 
     }
 
+    private function __validateUserMTEngine() {
+
+        if( array_search( $this->mt_engine, [ 0, 1 ] ) === false ){
+
+            if( !$this->userIsLogged ) {
+                $this->result[ 'errors' ][]    = array( "code" => -2, "message" => "Invalid MT Engine." );
+                return;
+            }
+
+            $engineQuery      = new EnginesModel_EngineStruct();
+            $engineQuery->id  = $this->mt_engine;
+            $engineQuery->uid = $this->uid;
+            $enginesDao       = new EnginesModel_EngineDAO();
+            $engine            = $enginesDao->setCacheTTL( 60 * 5 )->read( $engineQuery );
+
+            if ( empty( $engine ) ){
+                $this->result[ 'errors' ][]    = array( "code" => -2, "message" => "Invalid MT Engine." );
+            }
+
+        }
+
+    }
+
 }
 
-?>

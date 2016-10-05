@@ -73,7 +73,7 @@ $.extend(UI, {
             UI.consecutiveCopySourceNum = [];
         }, config.copySourceInterval*1000);
 
-        if(config.isAnonymousUser) this.body.addClass('isAnonymous');
+        if (!config.isLoggedIn) this.body.addClass('isAnonymous');
 
 		/**
 		 * Global Warnings array definition.

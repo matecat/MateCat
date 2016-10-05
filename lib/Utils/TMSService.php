@@ -392,7 +392,10 @@ class TMSService {
     }
 
     public function downloadGlossary(){
-        return $this->mymemory_engine->downloadExport( $this->tm_key, null, true );
+        $fileName = "/tmp/GLOSS_" . $this->tm_key;
+        $fHandle = $this->mymemory_engine->downloadExport( $this->tm_key, null, true, $fileName );
+        fclose( $fHandle ); //flush data and close
+        return $fileName;
     }
 
     /**

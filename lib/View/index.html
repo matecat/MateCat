@@ -53,8 +53,6 @@
                 source_lang: '${source}',
                 target_lang: '${target}',
                 ownerIsMe: ${jobOwnerIsMe},
-                isAnonymousUser: ${isAnonymousUser},
-                userMail: '${userMail}',
                 time_to_edit_enabled: ${time_to_edit_enabled},
                 build_number: '${build_number}',
                 warningPollingInterval: '${warningPollingInterval}',
@@ -188,7 +186,6 @@
                     <input type="hidden" name="action" value="downloadFile" />
                     <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
                     <input type="hidden" name="id_file" value="" />
-                    <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
                     <input type="hidden" name="password" tal:attributes="value password" />
                     <input type="hidden" name="download_type" value="all" />
                 </form>
@@ -476,5 +473,7 @@ $(window).resize(function() {
 
 
 <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_translate"/>
+
+<div metal:use-macro="common.html/footer_includes" />
 
 </html>

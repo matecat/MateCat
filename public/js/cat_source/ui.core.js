@@ -67,6 +67,7 @@ UI = {
 	activateSegment: function(segment, isNotSimilar) {
 		this.createFooter(this.currentSegment, isNotSimilar);
 		this.createButtons(segment);
+		this.createHeader(segment);
 	},
 
     evalCurrentSegmentTranslationAndSourceTags : function( segment ) {
@@ -577,7 +578,7 @@ UI = {
         var node = document.createElement("span");
         var br = document.createElement("br");
         node.setAttribute('class', 'monad softReturn ' + config.lfPlaceholderClass);
-        node.setAttribute('contenteditable', 'false');
+        // node.setAttribute('contenteditable', 'false');
         node.appendChild(br);
         insertNodeAtCursor(node);
         this.unnestMarkers();
@@ -2330,6 +2331,14 @@ UI = {
     decodePlaceholdersToText: function (str) {
         if(!UI.hiddenTextEnabled) return str;
 		var _str = str;
+        if(UI.markSpacesEnabled) {
+            if(jumpSpacesEncode) {
+                _str = this.encodeSpacesAsPlaceholders(htmlDecode(_str), true);
+            }
+        }
+
+		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker softReturn ' + config.lfPlaceholderClass +'"><br /></span>' )
+					.replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'"><br /></span>' )
 		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker softReturn ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' )
 					.replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
 					.replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
@@ -2604,19 +2613,22 @@ UI = {
 	},
 	redoInSegment: function() {
 		this.editarea.html(this.undoStack[this.undoStack.length - 1 - this.undoStackPosition - 1 + 2]);
+        // $('.undoCursorPlaceholder').remove();
 		if (this.undoStackPosition > 0)
 			this.undoStackPosition--;
 		this.currentSegment.removeClass('waiting_for_check_result');
 		this.registerQACheck();
 	},
-	saveInUndoStack: function(fromWhich) {
-//		noRestore = (typeof noRestore == 'undefined')? 0 : 1;        
+	saveInUndoStack: function() {
 		var currentItem = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition];
 
-		if (typeof currentItem != 'undefined') {
-			if (currentItem.trim() == this.editarea.html().trim())
-				return;
-		}
+        if (typeof currentItem != 'undefined') {
+            var regExp = /(<\s*\/*\s*(span class="undoCursorPlaceholder|span id="selectionBoundary)\s*.*span>)/gmi;
+            var editAreaText = this.editarea.html().replace(regExp, '');
+            var itemText = currentItem.replace(regExp, '');
+            if (itemText.trim() == editAreaText.trim())
+                return;
+        }
 
         if (this.editarea === '') return;
 		if (this.editarea.html() === '') return;
@@ -2628,23 +2640,23 @@ UI = {
             if ( (tt.length) && (!ss) )
                 return;
         }
-        var diff = 'null';
-
-        if( typeof currentItem != 'undefined'){
-            diff = this.dmp.diff_main( currentItem, this.editarea.html() );
-
-            // diff_main can return an array of one element (why?) , hence diff[1] could not exist.
-            // for that we chooiff[0] as a fallback
-            if(typeof diff[1] != 'undefined') {
-                diff = diff[1][1];
-            }
-            else {
-                diff = diff[0][1];
-            }
-        }
-
-        if ( diff == ' selected' )
-            return;
+        // var diff = 'null';
+        //
+        // if( typeof currentItem != 'undefined'){
+        //     diff = this.dmp.diff_main( currentItem, this.editarea.html() );
+        //
+        //     // diff_main can return an array of one element (why?) , hence diff[1] could not exist.
+        //     // for that we chooiff[0] as a fallback
+        //     if(typeof diff[1] != 'undefined') {
+        //         diff = diff[1][1];
+        //     }
+        //     else {
+        //         diff = diff[0][1];
+        //     }
+        // }
+        //
+        // if ( diff == ' selected' )
+        //     return;
 
 		var pos = this.undoStackPosition;
 		if (pos > 0) {
@@ -2653,10 +2665,13 @@ UI = {
 		}
                 
         saveSelection();
+        // var cursorPos = APP.getCursorPosition(this.editarea.get(0));
         $('.undoCursorPlaceholder').remove();
-        $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');      
+        $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
         restoreSelection();
-        this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
+        var htmlToSave = this.editarea.html();
+        this.undoStack.push(htmlToSave);
+        // $('.undoCursorPlaceholder').remove();
         
 	},
 	clearUndoStack: function() {
@@ -2720,7 +2735,8 @@ UI = {
                     //$('#go2lexiqa').attr('href', result.qaurl);
                     }
                     //highlight the segments
-                    var source_val = UI.clearMarks($.trim($(".source", segment).html()));
+                    //var source_val = UI.clearMarks($.trim($(".source", segment).html()));
+                    source_val =$(".source", segment).html();
                     var highlights = {
                             source: {
                                 numbers: [],
@@ -2769,7 +2785,8 @@ UI = {
                     source_val = LXQ.highLightText(source_val, highlights.source,isSegmentCompleted,true,true,segment);
                     if (callback!=null)
                         saveSelection();
-                    target_val = UI.clearMarks($(".editarea", segment).html());
+                    //target_val = UI.clearMarks($(".editarea", segment).html());
+                    target_val = $(".editarea", segment).html();
                     target_val = LXQ.highLightText(target_val,highlights.target,isSegmentCompleted,true,false,segment);
                     
                     SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(segment), UI.getSegmentFileId(segment), target_val);
@@ -2791,14 +2808,16 @@ UI = {
                 else {
                     //do something else
                     noVisibleErrorsFound = true;                  
-                    source_val = UI.clearMarks($.trim($(".source", segment).html()));
+                    //source_val = UI.clearMarks($.trim($(".source", segment).html()));
+                    source_val = $(".source", segment).html();
                     source_val = LXQ.cleanUpHighLighting(source_val);
                     
                     
                                         
                     if (callback!=null)
                         saveSelection();
-                    target_val = UI.clearMarks($.trim($(".editarea", segment).html()));
+                    //target_val = UI.clearMarks($.trim($(".editarea", segment).html()));
+                    target_val = $(".editarea", segment).html();
                     target_val = LXQ.cleanUpHighLighting(target_val);
                     SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(segment), UI.getSegmentFileId(segment), target_val);
                     if (callback!=null)
@@ -2912,12 +2931,14 @@ UI = {
                         //console.dir (seg);
                         //var segEdit = UI.getEditAreaBySegmentId(element);
                         //console.dir(segEdit);
-                        var source_val = UI.clearMarks($.trim($(".source", seg).html()));
+                        //var source_val = UI.clearMarks($.trim($(".source", seg).html()));
+                        var source_val = $(".source", seg).html();
                         //console.log('source: '+source_val);
                                                 
                         source_val = LXQ.highLightText(source_val,highlights.source,true,LXQ.shouldHighlighWarningsForSegment(seg),true,seg);
                         
-                        var target_val = UI.clearMarks($.trim($(".editarea", seg).html()));
+                        //var target_val = UI.clearMarks($.trim($(".editarea", seg).html()));
+                        target_val = $(".editarea", segment).html();
                         target_val = LXQ.highLightText(target_val,highlights.target,true,LXQ.shouldHighlighWarningsForSegment(seg),false,seg);
                         $(".editarea", seg).html(target_val);
                         $(".source", seg).html(source_val);

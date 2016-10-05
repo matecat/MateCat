@@ -142,6 +142,7 @@ class GDriveController extends KleinController {
                 throw new Exception( 'Unable to get the file URL.' );
             }
         } catch (Exception $e) {
+            \Log::doLog( $e->getMessage() );
             $this->isImportingSuccessful = false;
         }
     }

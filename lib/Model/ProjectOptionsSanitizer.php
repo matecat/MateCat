@@ -9,7 +9,7 @@ class ProjectOptionsSanitizer {
     private $target_lang ;
 
     private $boolean_keys = array('speech2text', 'lexiqa', 'tag_projection');
-    
+
     public static $lexiQA_allowed_languages = array(
         'en-US',
         'en-GB',
@@ -21,20 +21,20 @@ class ProjectOptionsSanitizer {
      * All combinations of languages for Tag Ptojection
      */
     public static $tag_projection_allowed_languages = array(
-        'en-de',
-        'de-it',
-        'de-fr',
-        'en-es',
-        'en-fr',
-        'en-pt',
-        'en-ru',
-        'fr-it',
-        'it-es',
-        'en-it'
+        'en-de' => 'English - German',
+        'en-es' => 'English - Spanish',
+        'en-fr' => 'English - French',
+        'en-it' => 'English - Italian',
+        'en-pt' => 'English - Portuguese',
+        'en-ru' => 'English - Russian',
+        'de-it' => 'German - Italian',
+        'de-fr' => 'German - French',
+        'fr-it' => 'French - Italian',
+        'it-es' => 'Italian - Spanish'
     );
 
 
-    
+
     public function __construct( $input_options ) { 
         $this->options = $input_options ; 
     }
@@ -105,23 +105,38 @@ class ProjectOptionsSanitizer {
      * If tag project is requested to be enabled, check if language combination is allowed.
      */
     private function sanitizeTagProjection() {
-        if ( $this->options['tag_projection'] == true && $this->checkSourceAndTargetAreInCombination( self::$tag_projection_allowed_languages ) ) {
+        if ( $this->options['tag_projection'] == true && $this->checkSourceAndTargetAreInCombinationForTagProjection( self::$tag_projection_allowed_languages ) ) {
             $this->sanitized['tag_projection'] = TRUE;
         } else {
             $this->sanitized['tag_projection'] = FALSE;
 
         }
     }
-    
+
     private function checkSourceAndTargetAreInCombination( $langs ) {
+        $all_langs = array_merge( $this->target_lang, array($this->source_lang) );
+
+        $all_langs = array_unique( $all_langs ) ;
+
+        $found = count( array_intersect( $langs, $all_langs ) ) ;
+        return $found == 2 ;
+    }
+
+    private function checkSourceAndTargetAreInCombinationForTagProjection( $langs ) {
         $lang_combination = array();
-        foreach ($this->target_lang as &$value) {
+        $found = false;
+        foreach ($this->target_lang as $value) {
             array_push($lang_combination, explode('-',$value)[0] . '-' . explode('-',$this->source_lang)[0]);
             array_push($lang_combination, explode('-',$this->source_lang)[0] . '-' . explode('-',$value)[0]);
         }
 
-        $found = count( array_intersect( $langs, $lang_combination ) ) ;
-        return $found > 0 ;
+        foreach ($lang_combination as $langPair) {
+            if (array_key_exists($langPair, $langs)) {
+                $found = true;
+                break;
+            }
+        }
+        return $found ;
     }
 
 }

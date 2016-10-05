@@ -17,17 +17,10 @@ class ProjectPasswordValidator extends Base {
      */
     private $project ;
 
-    /**
-     * @var \Jobs_JobStruct
-     */
-    private $job ;
-
     private $id_project;
-    private $id_job;
     private $password ;
 
     public function __construct( Request $request  ) {
-        $this->id_job = $request->id_job ;
         $this->id_project = $request->id_project ;
         $this->password = $request->password ;
 
@@ -40,18 +33,16 @@ class ProjectPasswordValidator extends Base {
                 $this->password
         );
 
-        $this->job = \Jobs_JobDao::getById( $this->id_job );
-
-        if ( !$this->job || $this->job->id_project != $this->project->id ) {
-            throw new \Exceptions_RecordNotFound('job not found');
+        if (!$this->project) {
+            throw new \Exceptions_RecordNotFound();
         }
+
     }
 
+    /**
+     * @return \Projects_ProjectStruct
+     */
     public function getProject() {
         return $this->project ;
-    }
-
-    public function getJob() {
-        return $this->job ; 
     }
 }

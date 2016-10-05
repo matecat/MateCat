@@ -62,6 +62,7 @@ class FetchArray2Test extends AbstractTest
                 "base_url" => "",
                 "translate_relative_url" => "",
                 "contribute_relative_url" => NULL,
+                "update_relative_url" => NULL,
                 "delete_relative_url" => NULL,
                 "others" => "{}",
                 "class_load" => "NONE",

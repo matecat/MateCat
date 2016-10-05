@@ -1002,13 +1002,15 @@ LXQ.init  = function () {
             });
             var html = '';
             if (insource) {
-                html = UI.clearMarks($.trim($(".source", segment).html()));
+                //html = UI.clearMarks($.trim($(".source", segment).html()));
+                html = $(".source", segment).html();
                 html = highLightText(html,highlights.source,true,LXQ.shouldHighlighWarningsForSegment(segment),true,segment);
                 // $(".source", segment).html(html);
                 SegmentActions.replaceSourceText(UI.getSegmentId(segment), UI.getSegmentFileId(segment), html);
             }
             else {
-                html = UI.clearMarks($.trim($(".editarea", segment).html()));
+                //html = UI.clearMarks($.trim($(".editarea", segment).html()));
+                html = $(".editarea", segment).html();
                 html = highLightText(html,highlights.target,(segment===UI.currentSegment ? true : false),
                     LXQ.shouldHighlighWarningsForSegment(segment),false,segment);
                 // $(".editarea", segment).html(html);

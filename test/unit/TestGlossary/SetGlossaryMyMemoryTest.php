@@ -236,7 +236,7 @@ LABEL;
     /**
      * The actual behaviour is that if there are multiple set call for glossary with the same segment the last inserted will be returned
      * @group regression
-     * @covers Engines_MyMemory::update
+     * @covers Engines_MyMemory::updateGlossary
      */
 
     public function test_set_two_matches_for_the_same_source_word_of_glossary_word_and_verify_that_return_the_last_inserted()
