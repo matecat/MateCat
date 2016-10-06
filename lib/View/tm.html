@@ -154,9 +154,10 @@
 
                                 <tal:block tal:condition="php: !empty(logged_user)">
 
-                                    <div style="float: right; margin-bottom: 18px;">
-                                        <label for="filterInactive">Search: </label>
-                                        <input id="filterInactive" type="text"/>
+                                    <div class="filter-box pull-right">
+                                        
+                                        <input id="filterInactive" onfocus="if(this.value == 'Filter resources') { this.value = ''; }" value="Filter resources" type="text"/>
+                                        <span class="icon-search"></span>
                                     </div>
                                     <p class="tm-warning-message notification-message" style="display: none;">Warning: the errmsg will appear here... </p>
                                     <p class="tm-error-message notification-message" style="display: none;"> Error: the errmsg will appear here... </p>
