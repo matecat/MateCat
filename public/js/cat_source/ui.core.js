@@ -3458,7 +3458,7 @@ UI = {
                         source_val = LXQ.highLightText(source_val,highlights.source,true,LXQ.shouldHighlighWarningsForSegment(seg),true,seg);
                         
                         //var target_val = UI.clearMarks($.trim($(".editarea", seg).html()));
-                        target_val = $(".editarea", segment).html();
+                        var target_val = $(".editarea", seg).html();
                         target_val = LXQ.highLightText(target_val,highlights.target,true,LXQ.shouldHighlighWarningsForSegment(seg),false,seg);
                         $(".editarea", seg).html(target_val);
                         $(".source", seg).html(source_val);
