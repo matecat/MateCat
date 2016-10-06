@@ -11,16 +11,7 @@ namespace Features\ReviewImproved\Controller;
 use Features\ReviewImproved\Model\QualityReportModel ;
 use Features\ReviewImproved\Decorator\QualityReportDecorator ;
 
-class QualityReportController {
-
-    /**
-     * @var \PHPTAL
-     */
-    private $view;
-    private $request;
-    private $response;
-    private $service;
-
+class QualityReportController extends \BaseKleinViewController  {
 
     /**
      * @var \Jobs_JobStruct
@@ -36,19 +27,13 @@ class QualityReportController {
      */
     private $model ;
 
-    public function __construct( \Klein\Request $request, \Klein\Response $response, $service) {
-        $this->request = $request;
-        $this->response = $response;
-        $this->service = $service;
-    }
-
-    public function setView( $template_name ) {
-        $this->view = new \PHPTAL( $template_name );
-    }
-
     public function respond() {
-        $model = $this->getModel() ;
 
+        $this->setLoggedUser();
+
+        $this->setDefaultTemplateData();
+
+        $model = $this->getModel() ;
         $decorator = new QualityReportDecorator( $model );
 
         $decorator->setDownloadURI( $this->downloadURI() );

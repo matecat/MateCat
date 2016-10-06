@@ -155,8 +155,10 @@
             }).on('click', '.mgmt-tm tr.new a.uploadtm:not(.disabled)', function() {
                 var keyValue = $('#new-tm-key').val();
                 var descKey = $('#new-tm-description').val();
-                UI.checkTMKey('key').done(function () {
-                    UI.saveTMkey(keyValue, descKey);
+
+
+                UI.saveTMkey(keyValue, descKey).done(function () {
+                    UI.checkTMKey('key')
                 });
 
 
@@ -883,8 +885,10 @@
                 context: [Key, fileName, true, TRcaller],
                 error: function() {
                     var TRcaller = this[3];
-                    $(TRcaller).find('.addtmxfile, .addglossaryfile').hide();
+                    $(TRcaller).find('.addtmxfile, .addglossaryfile, .uploadprogress').hide();
                     $(TRcaller).find('.upload-file-msg-error').text('Error').show();
+                    $(TRcaller).find('.canceladdglossary').show();
+                    $(TRcaller).find('input[type="file"]').attr("disabled", false);
                     if ($(TRcaller).closest('table').attr("id") == 'inactivetm'){
                         UI.showErrorOnInactiveTmTable('There was an error saving your data. Please retry!');
                     }else {
@@ -896,8 +900,10 @@
                     var TRcaller = this[3];
 
                     if(d.errors.length) {
-                        $(TRcaller).find('.addtmxfile, .addglossaryfile').hide();
-                        $(TRcaller).find('.upload-file-msg-error').text("Error").show();
+                        $(TRcaller).find('.addtmxfile, .addglossaryfile, .uploadprogress').hide();
+                        $(TRcaller).find('.upload-file-msg-error').text('Error').show();
+                        $(TRcaller).find('.canceladdglossary').text('Error').show();
+                        $(TRcaller).find('input[type="file"]').attr("disabled", false);
                         if ($(TRcaller).closest('table').attr("id") == 'inactivetm'){
                             UI.showErrorOnInactiveTmTable(d.errors[0].message);
                         } else {
@@ -1069,7 +1075,7 @@
         },
         saveTMkey: function (key, desc) {
             delete UI.newTmKey;
-            APP.doRequest({
+            return APP.doRequest({
                 data: {
                     action: 'userKeys',
                     exec: 'newKey',
@@ -1085,9 +1091,6 @@
                     UI.hideAllBoxOnTables();
                     if(d.errors.length) {
                         UI.showErrorOnActiveTMTable(d.errors[0].message);
-//                    APP.showMessage({msg: d.errors[0].message});
-                    } else {
-                        UI.clearTMUploadPanel();
                     }
                 }
             });

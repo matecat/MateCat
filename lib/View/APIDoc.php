@@ -1820,7 +1820,20 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
         <a href="#top"><span class="logosmall"></span></a>
         <h1>API</h1>
         <ul class="menu">
-            <li><a href="#api-swagger">List of commands</a></li>
+              
+            
+                <li data-id="Project"><a class="anchor_api">Project</a></li>
+
+              
+                <li data-id="Comments"><a class="anchor_api">Comments</a></li>
+                <li data-id="Quality_Report"><a class="anchor_api">Quality Report</a></li>
+                <li data-id="Translation_Issues"><a class="anchor_api">Translation Issues</a></li>
+                <li data-id="Translation_Versions"><a class="anchor_api">Translation Versions</a></li>
+                <li data-id="Job"><a class="anchor_api">Job</a></li>
+                <li data-id="Options"><a class="anchor_api">Options</a></li>
+                <li data-id="Glossary"><a class="anchor_api">Glossary</a></li>
+              
+            
             <li><a href="#file-format">Supported file format</a></li>
             <li><a href="#languages">Supported languages</a></li>
             <li><a href="#subjects">Supported subjects</a></li>
@@ -2005,48 +2018,44 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
     </div>
 </div>
 <script type="text/javascript">
-    jQuery(window).scroll(function() {
-        var scroll = jQuery(window).scrollTop();
+// add active class to menu
 
-        if (scroll >= 30) {
-            jQuery(".colsx").addClass("menuscroll");
+  $(".menu a").click(function() {
+        if ($(this).hasClass('active')) {
+          console.log('active');
+          
         }
         else {
-            jQuery(".colsx").removeClass("menuscroll");
+          $(".menu a").removeClass('active');
+           $(this).addClass('active');
+           console.log('inactive');
+        }
+       
+    });
+// anchor menu when scrolling
+
+    $(window).scroll(function() {
+        var scroll = $(window).scrollTop();
+
+        if (scroll >= 30) {
+            $(".colsx").addClass("menuscroll");
+        }
+        else {
+            $(".colsx").removeClass("menuscroll");
         }
 
     });
+  
 
-    var position = [];
+// smooth scrolling
 
-    jQuery('.block-api').each(function(){
-        position.push(Math.abs(jQuery(this).position().top))
-    })
-
-    console.log(position)
-
-    jQuery(window).scroll( function() {
-
-        var value = jQuery(this).scrollTop() + jQuery('.menu').height();
-
-        jQuery.each(position, function(i){
-            if(this > value){
-                jQuery('.selected').removeClass('selected');
-                jQuery(".menu li").eq(i-1).addClass('selected');
-                return false;
-            }
-        })
-    });
-    jQuery( ".menu a " ).click(function() {
-        jQuery(this).addClass('selected');
-    });
-    jQuery(function() {
-        jQuery('a[href*=#]:not([href=#])').click(function() {
+    $(function() {
+        $('a[href*=#]:not([href=#])').click(function() {
             if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
-                var target = jQuery(this.hash);
+                var target = $(this.hash);
                 target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
                 if (target.length) {
-                    jQuery('html,body').animate({
+                    $('html,body').animate({
                         scrollTop: target.offset().top
                     }, 1000);
                     return false;
@@ -2054,6 +2063,29 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
             }
         });
     });
+
+// scroll to id + add active on menu
+
+ $(".anchor_api").click(function() {
+                    var name = $(this).closest("li").attr("data-id");
+                      $('html, body').animate({
+                          scrollTop: $("#resource_"+name).offset().top
+                      }, 500,function() {
+                        
+                    });  
+                       if ($(this).hasClass("selected") && $("#resource_"+name).hasClass('active')) {
+                            console.log("selected");
+                        }
+                        else {
+                          if (!$("#resource_"+name).hasClass('active')) {
+                            console.log("selected");
+                            $(this).addClass('selected');
+                          $("#resource_"+name+ " #endpointListTogger_"+name).click();
+                            console.log("selected");
+                        }
+                          
+                        }
+                  });
 </script>
 </body>
 </html>
