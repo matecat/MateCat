@@ -64,10 +64,9 @@ UI = {
 
 	},
 
-	activateSegment: function(segment, isNotSimilar) {
-		this.createFooter(this.currentSegment, isNotSimilar);
+	activateSegment: function(segment) {
+        SegmentActions.createFooter(UI.getSegmentId(segment));
 		this.createButtons(segment);
-		this.createHeader(segment);
 	},
 
     evalCurrentSegmentTranslationAndSourceTags : function( segment ) {
@@ -205,6 +204,10 @@ UI = {
 
     getSegmentId: function (segment) {
         if(typeof segment == 'undefined') return false;
+        if ( segment.el ) {
+            return segment.el.attr('id').replace('segment-', '');
+        }
+
         /*
          sometimes:
          typeof $(segment).attr('id') == 'undefined'
@@ -486,41 +489,42 @@ UI = {
      * @param segment DOMElement the <section> tag of the segment
      * @param forceEmptyContribution boolean default true. To force to reload the footer.
      */
-	createFooter: function(segment, forceEmptyContribution) {
-        var sid = UI.getSegmentId( segment );
-
-		forceEmptyContribution = (typeof forceEmptyContribution == 'undefined')? true : forceEmptyContribution;
-
-        /* If the segment just translated is equal or similar (Levenshtein distance) to the
-         * current segment force to reload the matches
-        **/
-		if ( $('.matches .overflow', segment).text() !== '' ) {
-			if (!forceEmptyContribution) {
-				$('.matches .overflow', segment).empty();
-				return false;
-			}
-		}
-        // If the footer is already present skip (prefetched segment)
-		if ( $('.footer ul.submenu', segment).length ) {
-            return false;
-        }
-
-        var segmentFooter = new UI.SegmentFooter( segment );
-        $('.footer', segment).append( segmentFooter.html() );
-
-        // If the Messages Tab is present open it by default
-        if ($('.footer', segment).find('.open.segment-notes').length) {
-            this.forceShowMatchesTab();
-        }
-
-        UI.currentSegment.trigger('afterFooterCreation', segment);
-
-        // FIXME: arcane. Whatever it does, it should go in the contribution module.
-		if ($(segment).hasClass('loaded') && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
-            var d = JSON.parse( UI.getFromStorage('contribution-' + config.id_job + '-' + sid ) );
-			UI.processContributions( d, segment );
-		}
-	},
+	// createFooter: function(segment, forceEmptyContribution) {
+     //    var sid = UI.getSegmentId( segment );
+    //
+	// 	forceEmptyContribution = (typeof forceEmptyContribution == 'undefined')? true : forceEmptyContribution;
+    //
+     //    /* If the segment just translated is equal or similar (Levenshtein distance) to the
+     //     * current segment force to reload the matches
+     //    **/
+	// 	if ( $('.matches .overflow', segment).text() !== '' ) {
+	// 		if (!forceEmptyContribution) {
+	// 			$('.matches .overflow', segment).empty();
+	// 			return false;
+	// 		}
+	// 	}
+     //    // If the footer is already present skip (prefetched segment)
+	// 	if ( $('.footer ul.submenu', segment).length ) {
+     //        return false;
+     //    }
+    //
+     //    var segmentFooter = new UI.SegmentFooter( segment );
+     //    $('.footer', segment).append( segmentFooter.html() );
+    //
+     //    // If the Messages Tab is present open it by default
+     //    if ($('.footer', segment).find('.open.segment-notes').length) {
+     //        this.forceShowMatchesTab();
+     //    }
+    //
+     //    UI.currentSegment.trigger('afterFooterCreation', segment);
+    //
+     //    // FIXME: arcane. Whatever it does, it should go in the contribution module.
+     //    // Maybe to handle the case the contribution arrives before the create footer???
+	// 	if ($(segment).hasClass('loaded') && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
+     //        var d = JSON.parse( UI.getFromStorage('contribution-' + config.id_job + '-' + sid ) );
+	// 		UI.processContributions( d, segment );
+	// 	}
+	// },
 
 	createJobMenu: function() {
 		var menu = '<nav id="jobMenu" class="topMenu">' +
@@ -969,7 +973,6 @@ UI = {
 		if (window.getSelection().isCollapsed)
 			return false;
 		var selContainer = $(window.getSelection().getRangeAt(0).startContainer.parentNode);
-		console.log(selContainer);
 		if (what == 'editarea') {
 			return ((selContainer.hasClass('editarea')) && (!selContainer.is(UI.editarea)));
 		} else if (what == 'readonly') {
@@ -2938,7 +2941,7 @@ UI = {
                         source_val = LXQ.highLightText(source_val,highlights.source,true,LXQ.shouldHighlighWarningsForSegment(seg),true,seg);
                         
                         //var target_val = UI.clearMarks($.trim($(".editarea", seg).html()));
-                        target_val = $(".editarea", segment).html();
+                        var target_val = $(".editarea", seg).html();
                         target_val = LXQ.highLightText(target_val,highlights.target,true,LXQ.shouldHighlighWarningsForSegment(seg),false,seg);
                         $(".editarea", seg).html(target_val);
                         $(".source", seg).html(source_val);

@@ -190,7 +190,6 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/ui.editarea.js',
                     basePath + 'cat_source/ui.scrollsegment.js',
                     basePath + 'cat_source/ui.classes.js',
-                    basePath + 'cat_source/ui.classes.segment_footer.js',
                     basePath + 'cat_source/ui.init.js',
                     basePath + 'cat_source/ui.render.js',
                     basePath + 'cat_source/ui.events.js',

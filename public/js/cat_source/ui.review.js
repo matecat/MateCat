@@ -136,22 +136,22 @@ if ( Review.enabled() )
 
 if ( Review.enabled() && Review.type == 'simple' ) {
 
-    UI.SegmentFooter.registerTab({
+    SegmentActions.registerTab({
         code                : 'review',
         tab_class           : 'review',
         label               : 'Revise',
         activation_priority : 60,
         tab_position        : 50,
-        is_enabled    : function(segment) {
+        is_enabled    : function(sid) {
             return true;
         },
-        tab_markup          : function(segment) {
+        tab_markup          : function(sid) {
             return this.label ;
         },
-        content_markup      : function(segment) {
+        content_markup      : function(sid) {
             return $('#tpl-review-tab').html();
         },
-        is_hidden    : function(segment) {
+        is_hidden    : function(sid) {
             return false;
         },
     });

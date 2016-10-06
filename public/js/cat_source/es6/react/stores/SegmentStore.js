@@ -231,6 +231,12 @@ AppDispatcher.register(function(action) {
         case SegmentConstants.ADD_EDITAREA_CLASS:
             SegmentStore.emitChange(action.actionType, action.id, action.className);
             break;
+        case SegmentConstants.REGISTER_TAB:
+            SegmentStore.emitChange(action.actionType, action.tab);
+            break;
+        case SegmentConstants.CREATE_FOOTER:
+            SegmentStore.emitChange(action.actionType, action.sid);
+            break;
         default:
     }
 });

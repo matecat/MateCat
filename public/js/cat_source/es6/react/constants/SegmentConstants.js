@@ -19,5 +19,6 @@ module.exports = keyMirror({
     REPLACE_SOURCE: null,
     ADD_EDITAREA_CLASS: null,
     UPDATE_ALL_SEGMENTS:null,
-    CREATE_FOOTER: null
+    CREATE_FOOTER: null,
+    REGISTER_TAB: null
 });

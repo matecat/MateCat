@@ -171,108 +171,109 @@ $.extend(UI, {
 		this.renderContributionErrors(d.errors, segment);
     },
 
-  renderContributions: function(d, segment) {
-    if(!d) return true;
+    renderContributions: function(d, segment) {
+        if(!d) return true;
 
-    var isActiveSegment = $(segment).hasClass('editor');
-    var editarea = $('.editarea', segment);
+        var isActiveSegment = $(segment).hasClass('editor');
+        var editarea = $('.editarea', segment);
 
-    if ( d.data.hasOwnProperty('matches') && d.data.matches.length) {
-      var editareaLength = editarea.text().trim().length;
-      if (isActiveSegment) {
-        editarea.removeClass("indent");
-      } else {
-        if (editareaLength === 0)
-          editarea.addClass("indent");
-      }
-      var translation = d.data.matches[0].translation;
+        if ( d.data.hasOwnProperty('matches') && d.data.matches.length) {
+            var editareaLength = editarea.text().trim().length;
+            if (isActiveSegment) {
+                editarea.removeClass("indent");
+            } else {
+                if (editareaLength === 0)
+                    editarea.addClass("indent");
+            }
+            var translation = d.data.matches[0].translation;
 
-      var match = d.data.matches[0].match;
+            var match = d.data.matches[0].match;
 
-      var segment_id = segment.attr('id');
-      $(segment).addClass('loaded');
-      $('.sub-editor.matches .overflow', segment).empty();
+            var segment_id = segment.attr('id');
+            $(segment).addClass('loaded');
+            $('.sub-editor.matches .overflow', segment).empty();
 
-      $.each(d.data.matches, function(index) {
+            $.each(d.data.matches, function(index) {
 
-        if ((this.segment === '') || (this.translation === '')) return;
+                if ((this.segment === '') || (this.translation === '')) return;
 
-        var disabled = (this.id == '0') ? true : false;
-        cb = this.created_by;
+                var disabled = (this.id == '0') ? true : false;
+                cb = this.created_by;
 
-        if ("sentence_confidence" in this &&
-            (
-                this.sentence_confidence !== "" &&
-                this.sentence_confidence !== 0 &&
-                this.sentence_confidence != "0" &&
-                this.sentence_confidence !== null &&
-                this.sentence_confidence !== false &&
-                typeof this.sentence_confidence != 'undefined'
-                )
-            ) {
-                suggestion_info = "Quality: <b>" + this.sentence_confidence + "</b>";
-            } else if (this.match != 'MT') {
-          suggestion_info = this.last_update_date;
-        } else {
-          suggestion_info = '';
-        }
+                if ("sentence_confidence" in this &&
+                    (
+                        this.sentence_confidence !== "" &&
+                        this.sentence_confidence !== 0 &&
+                        this.sentence_confidence != "0" &&
+                        this.sentence_confidence !== null &&
+                        this.sentence_confidence !== false &&
+                        typeof this.sentence_confidence != 'undefined'
+                        )
+                    ) {
+                        suggestion_info = "Quality: <b>" + this.sentence_confidence + "</b>";
+                    } else if (this.match != 'MT') {
+                  suggestion_info = this.last_update_date;
+                } else {
+                    suggestion_info = '';
+                }
 
 
-        if (typeof d.data.fieldTest == 'undefined') {
-            percentClass = UI.getPercentuageClass(this.match);
-            percentText = this.match;
-        } else {
-            quality = parseInt(this.quality);
-            percentClass = (quality > 98)? 'per-green' : (quality == 98)? 'per-red' : 'per-gray';
-            percentText = 'MT';
-        }
+                if (typeof d.data.fieldTest == 'undefined') {
+                    percentClass = UI.getPercentuageClass(this.match);
+                    percentText = this.match;
+                } else {
+                    quality = parseInt(this.quality);
+                    percentClass = (quality > 98)? 'per-green' : (quality == 98)? 'per-red' : 'per-gray';
+                    percentText = 'MT';
+                }
 
-				if (!$('.sub-editor.matches', segment).length) {
-					UI.createFooter(segment);
-				}
-				// Attention Bug: We are mixing the view mode and the raw data mode.
-				// before doing a enanched  view you will need to add a data-original tag
+
+                if (!$('.sub-editor.matches', segment).length) {
+                    SegmentActions.createFooter(UI.getSegmentId(segment));
+                }
+                // Attention Bug: We are mixing the view mode and the raw data mode.
+                // before doing a enanched  view you will need to add a data-original tag
                 //
                 suggestionDecodedHtml = UI.decodePlaceholdersToText(this.segment);
-				translationDecodedHtml = UI.decodePlaceholdersToText( this.translation);
+                translationDecodedHtml = UI.decodePlaceholdersToText( this.translation);
 
-		  		//If Tag Projection is enable I take out the tags from the contributions
-				// if (UI.currentSegmentTPEnabled) {
-				// 	suggestionDecodedHtml = UI.removeAllTags(suggestionDecodedHtml);
-				// 	translationDecodedHtml = UI.removeAllTags(translationDecodedHtml);
-				// }
+                //If Tag Projection is enable I take out the tags from the contributions
+                // if (UI.currentSegmentTPEnabled) {
+                // 	suggestionDecodedHtml = UI.removeAllTags(suggestionDecodedHtml);
+                // 	translationDecodedHtml = UI.removeAllTags(translationDecodedHtml);
+                // }
 
                 var toAppend = $('<ul class="suggestion-item graysmall" data-item="' + (index + 1) + '" data-id="' +
-					this.id + '"><li class="sugg-source" >' + ((disabled) ? '' : ' <a id="' + segment_id +
-					'-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') +
-					'<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' +
-					suggestionDecodedHtml + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span -->' +
-					'<span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) +
-					'</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' +
-					translationDecodedHtml +
-					'</span></li><ul class="graysmall-details"><li class="percent ' + percentClass + '">' +
-					percentText + '</li><li>' + suggestion_info + '</li><li class="graydesc">Source: <span class="bold">' +
-					cb + '</span></li></ul></ul>');
+                    this.id + '"><li class="sugg-source" >' + ((disabled) ? '' : ' <a id="' + segment_id +
+                    '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') +
+                    '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' +
+                    suggestionDecodedHtml + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span -->' +
+                    '<span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) +
+                    '</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' +
+                    translationDecodedHtml +
+                    '</span></li><ul class="graysmall-details"><li class="percent ' + percentClass + '">' +
+                    percentText + '</li><li>' + suggestion_info + '</li><li class="graydesc">Source: <span class="bold">' +
+                    cb + '</span></li></ul></ul>');
 
                 toAppend.find('li:first').data('original', this.segment);
 
                 $('.sub-editor.matches .overflow', segment).append( toAppend );
 
-			});
+            });
 
 
 
-			UI.setDeleteSuggestion(segment);
+            UI.setDeleteSuggestion(segment);
             UI.setContributionSourceDiff(segment);
             //If Tag Projection is enable I take out the tags from the contributions
             if (!UI.enableTagProjection) {
                 UI.markSuggestionTags(segment);
             }
-			if (editareaLength === 0) {
+            if (editareaLength === 0) {
 
                 UI.setChosenSuggestion(1, segment);
 
-				translation = $('#' + segment_id + ' .matches ul.graysmall').first().find('.translation').html();
+                translation = $('#' + segment_id + ' .matches ul.graysmall').first().find('.translation').html();
                 /*If Tag Projection is enable and the current contribution is 100% match I leave the tags and i replace
                  * the source with the text with tags, the segment is tagged
                  */
@@ -290,68 +291,64 @@ $.extend(UI, {
                 };
 
                 if ( Speech2Text.enabled() && Speech2Text.isContributionToBeAllowed( match ) ) {
-				    copySuggestion();
+                    copySuggestion();
                 } else if ( !Speech2Text.enabled() ) {
                     copySuggestion();
                 }
 
-				if (UI.body.hasClass('searchActive')) {
-					UI.addWarningToSearchDisplay();
+                if (UI.body.hasClass('searchActive')) {
+                    UI.addWarningToSearchDisplay();
                 }
 
-			}
+            }
 
-			$('.translated', segment).removeAttr('disabled');
-			$('.draft', segment).removeAttr('disabled');
-		} else {
-			if (UI.debug)
-				console.log('no matches');
-
-      $(segment).addClass('loaded');
-
-      if((config.mt_enabled)&&(!config.id_translator)) {
+            $('.translated', segment).removeAttr('disabled');
+            $('.draft', segment).removeAttr('disabled');
+        } else {
+            $(segment).addClass('loaded');
+            if((config.mt_enabled)&&(!config.id_translator)) {
                 $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No matches could be found for this segment. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li></ul>');
             } else {
                 $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No match found for this segment</li></ul>');
             }
-    }
-    $(window).trigger('renderContribution:complete', segment);
-  },
-        renderContributionErrors: function(errors, segment) {
-            $('.tab.sub-editor.matches .engine-errors', segment).empty();
-            $('.tab.sub-editor.matches .engine-errors', segment).hide();
-            $.each(errors, function(){
-                var percentClass = "";
-                var messageClass = "";
-                var imgClass = "";
-                var  messageTypeText = '';
-                if(this.code == '-2001') {
-                    console.log('ERROR -2001');
-                    percentClass = "per-red";
-                    messageClass = 'error';
-                    imgClass = 'error-img';
-                    messageTypeText = 'Error: ';
-                }
-                else if (this.code == '-2002') {
-                    console.log('WARNING -2002');
-                    percentClass = "per-orange";
-                    messageClass = 'warning';
-                    imgClass = 'warning-img';
-                    messageTypeText = 'Warning: ';
-                }
-                else {
-                    return;
-                }
-                $('.tab.sub-editor.matches .engine-errors', segment).show();
-                var percentText = this.created_by_type;
-                var suggestion_info = '';
-                var cb = this.created_by;
+        }
+        $(window).trigger('renderContribution:complete', segment);
+    },
+    renderContributionErrors: function(errors, segment) {
+        $('.tab.sub-editor.matches .engine-errors', segment).empty();
+        $('.tab.sub-editor.matches .engine-errors', segment).hide();
+        $.each(errors, function(){
+            var percentClass = "";
+            var messageClass = "";
+            var imgClass = "";
+            var  messageTypeText = '';
+            if(this.code == '-2001') {
+                console.log('ERROR -2001');
+                percentClass = "per-red";
+                messageClass = 'error';
+                imgClass = 'error-img';
+                messageTypeText = 'Error: ';
+            }
+            else if (this.code == '-2002') {
+                console.log('WARNING -2002');
+                percentClass = "per-orange";
+                messageClass = 'warning';
+                imgClass = 'warning-img';
+                messageTypeText = 'Warning: ';
+            }
+            else {
+                return;
+            }
+            $('.tab.sub-editor.matches .engine-errors', segment).show();
+            var percentText = this.created_by_type;
+            var suggestion_info = '';
+            var cb = this.created_by;
 
-                $('.tab.sub-editor.matches .engine-errors', segment).append('<ul class="engine-error-item graysmall"><li class="engine-error">' +
-                        '<div class="' + imgClass + '"></div><span class="engine-error-message ' + messageClass + '">' + messageTypeText + this.message +
-                        '</span></li></ul>');
-            });
-        },
+            $('.tab.sub-editor.matches .engine-errors', segment).append('<ul class="engine-error-item graysmall"><li class="engine-error">' +
+                    '<div class="' + imgClass + '"></div><span class="engine-error-message ' + messageClass + '">' + messageTypeText + this.message +
+                    '</span></li></ul>');
+        });
+    },
 	setDeleteSuggestion: function(segment) {
 
         $('.sub-editor .overflow a.trash', segment).click(function(e) {

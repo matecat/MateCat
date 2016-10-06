@@ -10,21 +10,21 @@ if ( SegmentNotes.enabled() )
 
     window.segmentNotes = {};
 
-    window.UI.SegmentFooter.registerTab({
+    SegmentActions.registerTab({
         code : 'notes',
         label : 'Messages',
         tab_class : 'segment-notes',
         activation_priority : 60,
         tab_position : 50,
-        is_enabled : function( footer ) {
-            var notes = window.segmentNotes[ footer.segment.absoluteId ] ;
+        is_enabled : function( sid ) {
+            var notes = window.segmentNotes[ sid ] ;
             return notes != null;
         },
-        tab_markup : function( footer ) {
+        tab_markup : function( sid ) {
             return this.label ;
         },
-        content_markup : function( footer ) {
-            return SegmentNotes.panelHTML( footer.segment );
+        content_markup : function( sid ) {
+            return SegmentNotes.panelHTML( sid );
         },
         is_hidden : function( footer ) {
             return false;
@@ -66,12 +66,12 @@ if ( SegmentNotes.enabled() )
         return $('<div>').append( panel ).html();
     }
 
-    var panelHTML = function( segment ) {
-        var notes = segmentNotes[ segment.absoluteId ] ;
+    var panelHTML = function( sid ) {
+        var notes = segmentNotes[ sid ] ;
         var output = '' ;
 
         if ( notes != null ) {
-            output = buildNotesForm(segment.absoluteId, notes) ;
+            output = buildNotesForm(sid, notes) ;
         }
         return output;
     }

@@ -16,8 +16,6 @@
                 return false ;
             }
 
-            this.openSegmentStart = new Date();
-
             if (UI.warningStopped) {
                 UI.warningStopped = false;
                 UI.checkWarnings(false);
@@ -39,8 +37,6 @@
 
             if ( editarea.length > 0 ) this.saveInUndoStack('open');
 
-            this.autoSave = true;
-
             var s1 = $('#segment-' + this.lastTranslatedSegmentId + ' .source').text();
             var s2 = $('.source', segment.el).text();
             var isNotSimilar = lev(s1,s2)/Math.max(s1.length,s2.length)*100 >50;
@@ -55,21 +51,19 @@
             $('section').first().nextAll('.undoCursorPlaceholder').remove();
             this.getNextSegment(this.currentSegment, 'untranslated');
 
-            if ((!this.readonly)&&(!getNormally)) {
-                $('#segment-' + segment.id + ' .alternatives .overflow').hide();
-            }
+            // if ((!this.readonly)&&(!getNormally)) {
+            //     $('#segment-' + segment.id + ' .alternatives .overflow').hide();
+            // }
             this.setCurrentSegment();
 
             if (!this.readonly) {
-
                 if(getNormally) {
                     this.getContribution(segment.el, 0);
                 } else {
-                    console.log('riprova dopo 3 secondi');
                     $(segment.el).removeClass('loaded');
                     $(".loader", segment.el).addClass('loader_on');
                     setTimeout(function() {
-                        $('.alternatives .overflow', segment.el).show();
+                        // $('.alternatives .overflow', segment.el).show();
                         UI.getContribution(segment.el, 0);
                     }, 3000);
                 }
@@ -87,9 +81,6 @@
                 clearTimeout(UI.focusEditarea);
                 UI.currentSegment.trigger('EditAreaFocused');
             }, 100);
-
-            this.currentIsLoaded = false;
-            this.nextIsLoaded = false;
 
             if(!this.noGlossary) this.getGlossary(segment.el, true, 0);
 
@@ -120,8 +111,6 @@
                 }
             }
 
-            this.editStart = new Date();
-
             $(editarea).removeClass("indent");
 
             if (!this.readonly) {
@@ -131,9 +120,6 @@
                 if(!this.noGlossary) this.getGlossary(segment.el, true, 1);
                 if(!this.noGlossary) this.getGlossary(segment.el, true, 2);
             }
-
-            if (this.debug)
-                console.log('close/open time: ' + ((new Date()) - this.openSegmentStart));
 
             $(window).trigger({
                 type: "segmentOpened",

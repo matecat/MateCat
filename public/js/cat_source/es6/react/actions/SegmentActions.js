@@ -132,7 +132,21 @@ var SegmentActions = {
             fid: fid,
             className: className
         });
-    }
+    },
+    /************ FOOTER ***************/
+    registerTab: function (tab) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.REGISTER_TAB,
+            tab: tab
+        });
+    },
+    createFooter: function (sid) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.CREATE_FOOTER,
+            sid: sid
+        });
+    },
+    /***********************************/
 
 
 
