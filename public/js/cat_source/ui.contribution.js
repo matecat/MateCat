@@ -5,10 +5,6 @@ $('html').on('copySourceToTarget', 'section', function() {
     UI.setChosenSuggestion(0);
 });
 
-$(document).on('afterFooterCreation', function(e, segment) {
-    UI.appendAddTMXButton( segment );
-});
-
 $.extend(UI, {
 	chooseSuggestion: function(w) {
 		var ulDataItem = '.editor .tab.matches ul[data-item=';
@@ -73,12 +69,23 @@ $.extend(UI, {
 	},
 	getContribution: function(segment, next) {
         var txt;
-		var current = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
+        var current = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
+        /* If the segment just translated is equal or similar (Levenshtein distance) to the
+         * current segment force to reload the matches
+        **/
+        var s1 = $('#segment-' + this.lastTranslatedSegmentId + ' .source').text();
+        var s2 = $('.source', current).text();
+        var areSimilar = lev(s1,s2)/Math.max(s1.length,s2.length)*100 < 50;
+        var isEqual = (s1 == s2) && s1 !== '';
 
-		if ($(current).hasClass('loaded') && current.find('.footer .matches .overflow').text().length) {
+        var callNewContributions = areSimilar || isEqual;
+
+
+
+
+		if ($(current).hasClass('loaded') && current.find('.footer .matches .overflow').text().length && !callNewContributions) {
             this.spellCheck();
             if (!next) {
-                this.currentIsLoaded = true;
                 this.blockButtons = false;
                 this.currentSegmentQA();
             }
@@ -147,12 +154,8 @@ $.extend(UI, {
 	getContribution_complete: function(n) {
 		$(".loader", n).removeClass('loader_on');
 	},
-    appendAddTMXButton : function( segment ) {
-        $('.footer', segment).append('<div class="addtmx-tr white-tx"><a class="open-popup-addtm-tr">Add private resources</a></div>');
-    },
     getContribution_success: function(d, segment) {
         this.addInStorage('contribution-' + config.id_job + '-' + UI.getSegmentId(segment), JSON.stringify(d), 'contribution');
-        this.appendAddTMXButton( segment );
         this.processContributions(d, segment);
         this.currentSegmentQA();
         $(document).trigger('getContribution:complete', segment);
@@ -179,12 +182,6 @@ $.extend(UI, {
 
         if ( d.data.hasOwnProperty('matches') && d.data.matches.length) {
             var editareaLength = editarea.text().trim().length;
-            if (isActiveSegment) {
-                editarea.removeClass("indent");
-            } else {
-                if (editareaLength === 0)
-                    editarea.addClass("indent");
-            }
             var translation = d.data.matches[0].translation;
 
             var match = d.data.matches[0].match;
@@ -192,6 +189,7 @@ $.extend(UI, {
             var segment_id = segment.attr('id');
             $(segment).addClass('loaded');
             $('.sub-editor.matches .overflow', segment).empty();
+
 
             $.each(d.data.matches, function(index) {
 

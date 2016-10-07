@@ -663,7 +663,6 @@ UI = {
 	},
 	deActivateSegment: function(byButton, segment) {
 		UI.removeButtons(byButton, segment);
-		UI.removeFooter(byButton, segment);
 
         $(document).trigger('segment:deactivate', {
             deactivated_segment : UI.lastOpenedSegment,
@@ -1049,10 +1048,6 @@ UI = {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
 		$('#' + segment.attr('id') + '-buttons').empty();
 		$('p.warnings', segment).empty();
-	},
-	removeFooter: function(byButton) {
-		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
-		$('#' + segment.attr('id') + ' .footer').empty();
 	},
 	removeStatusMenu: function(statusMenu) {
 		statusMenu.empty().hide();
@@ -1900,8 +1895,6 @@ UI = {
             'currentSegmentQA is deprecated, use segmentQA and pass a segment as argument',
             getStackTrace().split("\n")[2]
         );
-
-        var that = this;
         UI.segmentQA.apply( this, UI.currentSegment );
     },
 

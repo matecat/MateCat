@@ -37,14 +37,9 @@
 
             if ( editarea.length > 0 ) this.saveInUndoStack('open');
 
-            var s1 = $('#segment-' + this.lastTranslatedSegmentId + ' .source').text();
-            var s2 = $('.source', segment.el).text();
-            var isNotSimilar = lev(s1,s2)/Math.max(s1.length,s2.length)*100 >50;
-            var isEqual = (s1 == s2);
 
-            var getNormally = isNotSimilar || isEqual;
 
-            this.activateSegment(segment, getNormally);
+            this.activateSegment(segment);
 
             segment.el.trigger('open');
             
@@ -57,16 +52,9 @@
             this.setCurrentSegment();
 
             if (!this.readonly) {
-                if(getNormally) {
-                    this.getContribution(segment.el, 0);
-                } else {
-                    $(segment.el).removeClass('loaded');
-                    $(".loader", segment.el).addClass('loader_on');
-                    setTimeout(function() {
-                        // $('.alternatives .overflow', segment.el).show();
-                        UI.getContribution(segment.el, 0);
-                    }, 3000);
-                }
+                $(segment.el).removeClass('loaded');
+                $(".loader", segment.el).addClass('loader_on');
+                this.getContribution(segment.el, 0);
             }
 
             this.currentSegment.addClass('opened');
@@ -110,8 +98,6 @@
                     UI.editarea.attr('contenteditable', 'true');
                 }
             }
-
-            $(editarea).removeClass("indent");
 
             if (!this.readonly) {
                 this.getContribution(segment.el, 1);

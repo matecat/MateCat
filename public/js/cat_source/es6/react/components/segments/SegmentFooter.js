@@ -5,6 +5,7 @@
 var React = require('react');
 var SegmentConstants = require('../../constants/SegmentConstants');
 var SegmentStore = require('../../stores/SegmentStore');
+var SegmentTabMatches = require('./SegmentFooterTabMatches').default;
 class SegmentFooter extends React.Component {
 
     constructor(props) {
@@ -12,7 +13,8 @@ class SegmentFooter extends React.Component {
         this.tabs = [];
         this.state = {
             tabs_labels: [],
-            tabs_containers: []
+            tabs_containers: [],
+            contributions: null
         };
         this.registerTab = this.registerTab.bind(this);
         this.createFooter = this.createFooter.bind(this);
@@ -29,6 +31,12 @@ class SegmentFooter extends React.Component {
                 tabs_labels: labels,
                 tabs_containers: containers
             });
+        }
+    }
+
+    setContributions(sid, matches) {
+        if (this.props.sid == sid) {
+
         }
     }
 
@@ -141,12 +149,14 @@ class SegmentFooter extends React.Component {
         console.log("Mount SegmentFooter" + this.props.sid);
         SegmentStore.addListener(SegmentConstants.CREATE_FOOTER, this.createFooter);
         SegmentStore.addListener(SegmentConstants.REGISTER_TAB, this.registerTab);
+        SegmentStore.addListener(SegmentConstants.SET_CONTRIBUTIONS, this.setContributions);
     }
 
     componentWillUnmount() {
         console.log("Unmount SegmentFooter" + this.props.sid);
         SegmentStore.removeListener(SegmentConstants.CREATE_FOOTER, this.createFooter);
         SegmentStore.removeListener(SegmentConstants.REGISTER_TAB, this.registerTab);
+        SegmentStore.removeListener(SegmentConstants.SET_CONTRIBUTIONS, this.setContributions);
     }
 
     componentWillMount() {
@@ -176,12 +186,12 @@ class SegmentFooter extends React.Component {
         });
 
         this.state.tabs_containers.forEach(function (tab) {
-            var item = <div
-                            key={"container_" + tab.code}
-                            className={"tab sub-editor "+ tab.active_class + " " + tab.tab_class}
-                            id={"segment-" + tab.id_segment + " " + tab.tab_class}
-                            dangerouslySetInnerHTML={self.allowHTML(tab.rendered_body)}>
-                        </div>;
+            var item =<SegmentTabMatches
+                key={"container_" + tab.code}
+                code = {tab.code}
+                active_class = {tab.active_class}
+                tab_class = {tab.tab_class}
+                id_segment = {tab.id_segment}/>;
             containers.push(item);
         });
 
@@ -193,6 +203,9 @@ class SegmentFooter extends React.Component {
                     {labels}
                 </ul>
                 {containers}
+                <div className="addtmx-tr white-tx">
+                    <a className="open-popup-addtm-tr">Add private resources</a>
+                </div>
             </div>
         )
     }
