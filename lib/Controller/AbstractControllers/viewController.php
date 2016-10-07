@@ -307,6 +307,9 @@ abstract class viewController extends controller {
          */
         $this->setTemplateVars();
 
+        $featureSet = new FeatureSet();
+        $featureSet->run('appendDecorators', $this, $this->template);
+
         $this->setTemplateFinalVars();
 
         try {

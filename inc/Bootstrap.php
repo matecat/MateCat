@@ -13,8 +13,6 @@ class Bootstrap {
     protected static $CONFIG;
     protected static $_ROOT;
 
-    public static $MANDATORY_PLUGINS_SET ;
-
     private  $mandatoryFeatureSet ;
 
     public static function start() {

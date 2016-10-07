@@ -120,7 +120,6 @@ class FeatureSet {
                 $obj->decorate();
             }
 
-            $this->runOnFeature('appendDecorators', $feature, array( $controller, $template ) ) ;
         }
 
     }
