@@ -155,8 +155,10 @@
             }).on('click', '.mgmt-tm tr.new a.uploadtm:not(.disabled)', function() {
                 var keyValue = $('#new-tm-key').val();
                 var descKey = $('#new-tm-description').val();
-                UI.checkTMKey('key').done(function () {
-                    UI.saveTMkey(keyValue, descKey);
+
+
+                UI.saveTMkey(keyValue, descKey).done(function () {
+                    UI.checkTMKey('key')
                 });
 
 
@@ -1047,7 +1049,7 @@
         },
         saveTMkey: function (key, desc) {
             delete UI.newTmKey;
-            APP.doRequest({
+            return APP.doRequest({
                 data: {
                     action: 'userKeys',
                     exec: 'newKey',
@@ -1063,9 +1065,6 @@
                     UI.hideAllBoxOnTables();
                     if(d.errors.length) {
                         UI.showErrorOnActiveTMTable(d.errors[0].message);
-//                    APP.showMessage({msg: d.errors[0].message});
-                    } else {
-                        UI.clearTMUploadPanel();
                     }
                 }
             });

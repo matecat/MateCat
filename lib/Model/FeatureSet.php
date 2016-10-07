@@ -87,22 +87,17 @@ class FeatureSet {
         $args = array_slice( func_get_args(), 1 );
 
         foreach ( $this->features as $feature ) {
-            $name = "Features\\" . $feature->toClassName();
-
-            if ( class_exists( $name ) ) {
-                $obj  = new $name( $feature );
-
-                if ( method_exists( $obj, $method ) ) {
-                    call_user_func_array( array( $obj, $method ), $args );
-                }
-            }
+            $this->runOnFeature($method, $feature, $args);
         }
     }
 
     /**
      * appendDecorators
      *
-     * Loads feature specific decorators, if any
+     * Loads feature specific decorators, if any is found.
+     *
+     * Also, gives a last chance to plugins to define a custom decorator class to be
+     * added to any call.
      *
      * @param $name name of the decorator to activate
      * @param viewController $controller the controller to work on
@@ -111,25 +106,53 @@ class FeatureSet {
      */
     public function appendDecorators($name, viewController $controller, PHPTAL $template) {
         foreach( $this->features as $feature ) {
-            $cls = "Features\\" . $feature->toClassName() . "\\Decorator\\$name" ;
+
+            $baseClass = "Features\\" . $feature->toClassName()  ;
+
+            $cls =  "$baseClass\\Decorator\\$name" ;
 
             // XXX: keep this log line because due to a bug in Log class
             // if this line is missing it won't log load errors.
             Log::doLog('loading Decorator ' . $cls );
 
             if ( class_exists( $cls ) ) {
-                $obj = new $cls( $controller, $template) ;
+                $obj = new $cls( $controller, $template ) ;
                 $obj->decorate();
             }
+
         }
+
     }
 
+    /**
+     * Loads plugins into the featureset from the list of mandatory plugins.
+     */
     private function loadFromMandatory() {
         $features = [] ;
         foreach( INIT::$MANDATORY_PLUGINS as $plugin) {
             $features[] = new BasicFeatureStruct(array('feature_code' => $plugin));
         }
         $this->features = array_merge($this->features, $features);
+    }
+
+    /**
+     * Runs a command on a single feautre
+     *
+     * @param $method
+     * @param $feature
+     * @param $args
+     */
+    private function runOnFeature($method, BasicFeatureStruct $feature, $args)
+    {
+        $name = "Features\\" . $feature->toClassName();
+
+        if (class_exists($name)) {
+            $obj = new $name($feature);
+
+            if (method_exists($obj, $method)) {
+                call_user_func_array(array($obj, $method), $args);
+            }
+        }
     }
 
 }

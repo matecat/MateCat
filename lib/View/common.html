@@ -1,18 +1,25 @@
 <div metal:define-macro="footer_includes">
     <script type="text/javascript">
         /*<![CDATA[*/
-
         if ( typeof config == 'undefined' ) {
             config = {} ;
         }
-
         config.userMail = '${userMail}';
         config.userFullName = '${extended_user}';
         config.userShortName = '${logged_user}';
-
         config.isLoggedIn = ${isLoggedIn|string:false};
-
-
         /*]]>*/
+
+    <tal:block  tal:repeat="config_data config_js">
+        /*<![CDATA[*/
+        config.plugin_data = ${structure php: json_encode( config_data )} ;
+        /*]]>*/
+    </tal:block>
+
     </script>
+
+    <tal:block  tal:repeat="js_source footer_js">
+        <script type="text/javascript" tal:attributes="src js_source"></script>
+    </tal:block>
+
 </div>

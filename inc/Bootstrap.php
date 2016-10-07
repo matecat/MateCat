@@ -13,8 +13,6 @@ class Bootstrap {
     protected static $CONFIG;
     protected static $_ROOT;
 
-    public static $MANDATORY_PLUGINS_SET ;
-
     private  $mandatoryFeatureSet ;
 
     public static function start() {
@@ -53,15 +51,16 @@ class Bootstrap {
         INIT::$OAUTH_CONFIG = $OAUTH_CONFIG[ 'OAUTH_CONFIG' ];
         INIT::obtain();
 
-
+        // Overridable defaults
         INIT::$ROOT                           = self::$_ROOT; // Accessible by Apache/PHP
         INIT::$BASEURL                        = "/"; // Accessible by the browser
         INIT::$TIME_TO_EDIT_ENABLED           = false;
         INIT::$DEFAULT_NUM_RESULTS_FROM_TM    = 3;
         INIT::$THRESHOLD_MATCH_TM_NOT_TO_SHOW = 50;
+        INIT::$TRACKING_CODES_VIEW_PATH       = INIT::$ROOT . "/lib/View";
 
         //get the environment configuration
-        self::getEnvConfig();
+        self::initConfig();
 
         if ( empty( INIT::$STORAGE_DIR ) ) {
             INIT::$STORAGE_DIR = INIT::$ROOT . "/local_storage" ;
@@ -295,41 +294,46 @@ class Bootstrap {
     }
 
     /**
-     * This function is meant to check for a wrong configuration of the filesystems either
-     * in development and production environment.
-     *
-     * We use this function in that phase of development, planning to remove it in the future.
-     *
-     * If you don't need this check set the defined CHECK_FS to false
+     * Returns an array of configuration params as parsed from config.ini file.
+     * The returned array only return entries that match the current environment.
      *
      */
     public static function getEnvConfig() {
 
-        /**
-         *
-         * General server environment settings to define the the usage of hard links rather than copy php method
-         * must be one of these:
-         *
-         * - production
-         * - development
-         * - test
-         *
-         * @see EnvWrap
-         *
-         */
-        INIT::$ENV = self::$CONFIG['ENV'];
-
-        //load environment specific parameters
-        if( getenv( 'ENV' ) !== false ){
+        if ( getenv( 'ENV' ) !== false ) {
             self::$CONFIG['ENV'] = getenv( 'ENV' );
         }
 
-        $env = self::$CONFIG[ self::$CONFIG['ENV'] ];
+        return self::$CONFIG[ self::$CONFIG['ENV'] ];
+    }
 
+    /**
+     * Returns a specific key from parsed coniguration file
+     *
+     * @param $key
+     * @return mixed
+     */
+    public static function getEnvConfigKey( $key ) {
+        $config = self::getEnvConfig() ;
+        return $config[ $key ] ;
+    }
+
+    /**
+     * TODO: move this to a private instance method on a singleton of this class.
+     *
+     * This function initializes the configuration peforming all required checks to be sure
+     * that configuraiton is safe.
+     *
+     * If any sanity check is to be done, this is the right place to do it.
+     */
+    public static function initConfig() {
+
+        INIT::$ENV = self::$CONFIG['ENV'];
         INIT::$BUILD_NUMBER = self::$_INI_VERSION;
 
-        foreach( $env as $KEY => $value ){
+        $env = self::getEnvConfig();
 
+        foreach( $env as $KEY => $value ){
             if ( property_exists( 'INIT', $KEY ) ) {
                 INIT::${$KEY} = $value;
             }
