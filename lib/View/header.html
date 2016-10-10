@@ -40,17 +40,20 @@
                 </a>
                 <div class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
                     <ul id="previewDropdown" class="dropdown pull-left" tal:attributes="data-download php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )? 'true' : 'false'">
-                        <li tal:condition="not:isGDriveProject" class="previewLink">
-                            <a title="Preview" alt="Preview" href="#" >
-                                <span class="icon-download"></span>PREVIEW
-                            </a>
-                        </li>
+                        <tal:block tal:condition="true:project_completion_feature_enabled" >
+                            <li tal:condition="not:isGDriveProject" class="previewLink">
+                                <a title="Preview" alt="Preview" href="#" >
+                                    <span class="icon-download"></span>PREVIEW
+                                </a>
+                            </li>
 
-                        <li tal:condition="not:isGDriveProject" class="downloadTranslation">
-                            <a title="Download Translation" alt="Download Translation" href="#" >
-                                <span class="icon-download"></span>DOWNLOAD TRANSLATION
-                            </a>
-                        </li>
+                            <li tal:condition="not:isGDriveProject" class="downloadTranslation">
+                                <a title="Download Translation" alt="Download Translation" href="#" >
+                                    <span class="icon-download"></span>DOWNLOAD TRANSLATION
+                                </a>
+                            </li>
+                        </tal:block>
+
 
                         <li tal:condition="not:isGDriveProject">
                             <a class="originalDownload" title="ORIGINAL" alt="ORIGINAL" href="/?action=downloadOriginal&id_job=${jid}&password=${password}&download_type=all" target="_blank" >

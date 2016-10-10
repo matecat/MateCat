@@ -673,7 +673,7 @@ UI = {
 		        '	    	<a href="#" title="Archive project" class="archive-project"></a>'+
 		        '			<a href="#" title="Resume project" class="resume-project"></a>'+
 		        '	    	<a href="#" title="Unarchive project" class="unarchive-project"></a>'+
-		        '	    	<a href="/activityLog/' + this.id + '/' + this.password + '" title="Download Activity Log" class="activity-log" target="_blank"></a>'+
+		        '	    	<a href="/activityLog/' + this.id + '/' + this.password + '" title="Activity Log" class="activity-log" target="_blank"></a>'+
 		        '		</div>'+
 	            '	</div>'+
 	            '	<div class="field">'+
@@ -757,7 +757,7 @@ UI = {
     				'				<ul class="dropdown">'+
     				'					<li><a class="change" href="#" title="Change job password"><span class="icon-refresh"></span>Change Password</a></li>'+
         			'					<li><a class="cancel" href="#" title="Cancel Job"><span class="icon-trash-o"></span>Cancel</a></li>'+
-				'					<li><a class="revise" href="#" title="Revise Job"><span class="icon-edit"></span>Revise</a></li>'+
+				// '						<li><a class="revise" href="#" title="Revise Job"><span class="icon-edit"></span>Revise</a></li>'+
         			'					<li><a class="archive" href="#" title="Archive Job"><span class="icon-drawer"></span>Archive</a></li>'+
         			'					<li><a class="resume" href="#" title="Resume Job"><span class="icon-trash-o noticon"></span>Resume</a></li>'+
         			'					<li><a class="unarchive" href="#" title="Unarchive Job"><span class="noticon icon-drawer"></span>Unarchive</a></li>'+

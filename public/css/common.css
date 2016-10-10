@@ -2033,6 +2033,25 @@ td.uploadfile .uploadprogress .error {
 	color:red;
 }
 
+.filter-box {
+    position: relative;
+    margin-top: 5px;
+}
+
+.filter-box span {
+    position: absolute;
+    top: 2px;
+    color: #ccc;
+}
+
+.filter-box input {
+    padding:3px 10px 3px 30px;
+    border-radius: 2px;
+    border: 1px solid #ccc;
+    color: #999;
+        width: 123px;
+}
+
 .dataTables_length, .dataTables_info {display: none;}
 .dataTables_filter {
 float: right;
@@ -2374,8 +2393,8 @@ width: 1042px;
     background: #6D6E71;
 }
 .mgmt-container .icon-search {
-margin-top: 2px;
-margin-left: 5px;
+margin-top: 3px;
+margin-left: 8px;
 }
 
 .mgmt-container .search {
