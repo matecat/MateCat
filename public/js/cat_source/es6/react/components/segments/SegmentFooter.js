@@ -6,30 +6,83 @@ var React = require('react');
 var SegmentConstants = require('../../constants/SegmentConstants');
 var SegmentStore = require('../../stores/SegmentStore');
 var SegmentTabMatches = require('./SegmentFooterTabMatches').default;
+var SegmentTabConcordance = require('./SegmentFooterTabConcordance').default;
+var SegmentTabGlossary = require('./SegmentFooterTabGlossary').default;
+var SegmentTabConflicts = require('./SegmentFooterTabConflicts').default;
 class SegmentFooter extends React.Component {
 
     constructor(props) {
         super(props);
-        this.tabs = [];
+        var tMLabel;
+        if ( config.mt_enabled ) {
+            tMLabel =  'Translation Matches';
+        }
+        else {
+            tMLabel = 'Translation Matches' + " (No MT) ";
+        }
+        this.tabs = {
+            matches: {
+                label: tMLabel,
+                code : 'tm',
+                tab_class : 'matches',
+                enabled: false,
+                visible: false,
+                open: false,
+                elements: []
+            },
+            concordances: {
+                label: 'Concordance',
+                code : 'cc',
+                tab_class : 'concordances',
+                enabled : false,
+                visible : false,
+                open : false,
+                elements : []
+            },
+            glossary: {
+                label : 'Glossary',
+                code : 'gl',
+                tab_class : 'glossary',
+                enabled : false,
+                visible : false,
+                open : false,
+                elements : []
+            },
+            alternatives: {
+                label : 'Translation conflicts',
+                code : 'al',
+                tab_class : 'alternatives',
+                enabled : false,
+                visible : false,
+                open : false,
+                elements : []
+            }
+        };
         this.state = {
-            tabs_labels: [],
-            tabs_containers: [],
-            contributions: null
+            tabs: {},
         };
         this.registerTab = this.registerTab.bind(this);
         this.createFooter = this.createFooter.bind(this);
-        this.createTabLabels = this.createTabLabels.bind(this);
-        this.createTabContainers = this.createTabContainers.bind(this);
+        this.getTabContainer = this.getTabContainer.bind(this);
         this.changeTab = this.changeTab.bind(this);
+    }
+
+    registerTab(tabName, visible, open) {
+        this.tabs[tabName].visible = visible;
+        // Ensure there is only one tab open.
+        if (open === true) {
+            for (var key in this.tabs) {
+                this.tabs[key].open = false;
+            }
+        }
+        this.tabs[tabName].open = open;
+        this.tabs[tabName].enabled = true;
     }
 
     createFooter(sid) {
         if (this.props.sid == sid) {
-            var labels = this.createTabLabels();
-            var containers = this.createTabContainers();
             this.setState({
-                tabs_labels: labels,
-                tabs_containers: containers
+                tabs: this.tabs
             });
         }
     }
@@ -40,87 +93,46 @@ class SegmentFooter extends React.Component {
         }
     }
 
-    createTabLabels() {
-        var sid = this.props.sid;
-        var enabled = _.select(this.tabs, function(item) {
-            return item.is_enabled(sid);
-        });
-        var tabsSorted = _.sortBy( enabled, 'tab_position');
-
-        var active = this.getFirstTabActive();
-
-        return  _.map( tabsSorted , function(item) {
-            var active_class = active.code == item.code ?  'active' : '' ;
-            var hidden_class = item.is_hidden( sid ) ? 'hide' : '' ;
-
-            return {
-                code: item.code,
-                hidden_class : hidden_class,
-                active_class : active_class,
-                id_segment : sid ,
-                tab_markup : item.tab_markup( sid ),
-                code : item.code,
-                tab_class : item.tab_class
-            }
-        });
-    }
-
-    createTabContainers() {
-        var sid = this.props.sid;
-        var enabled = _.select(this.tabs, function(item) {
-            return item.is_enabled( sid );
-        });
-        var tabs = _.sortBy( enabled, 'tab_position');
-
-        var active = this.getFirstTabActive();
-        return _.map( tabs, function( item ) {
-            var active_class =  active.code == item.code ? 'open' : '' ;
-
-            return {
-                code: item.code,
-                active_class : active_class,
-                id_segment : sid ,
-                rendered_body : item.content_markup( sid ),
-                tab_class : item.tab_class
-            };
-        });
-
-    }
-
-    getFirstTabActive() {
-        // find a list of all enabled ones
-        // call a function to determine if they want to be active
-        // for those who want to be active
-        // sort by activation priority and pick the first
-
-        var active_candidates = _.select(this.tabs, function(item) {
-            if ( !item.is_enabled( self ) ) return false;
-            if ( item.is_hidden ( self ) ) return false;
-            if ( typeof item.is_active == 'function' ) {
-                return item.is_active( self );
-            }
-            return true; // every visible tabs wants to be active by default
-        });
-
-        var sorted = _
-            .sortBy(active_candidates, 'activation_priority')
-            .reverse();
-
-        return _.first( sorted );
-    }
-
-    registerTab(tab) {
-        // Ensure no duplicates
-        var found = _.select(this.tabs, function(item) {
-            return item.code == tab.code ;
-        });
-
-        if ( found.length ) {
-            throw new Error("Trying to register a tab twice", tab);
+    getTabContainer(tab, active_class) {
+        var open_class = (active_class == 'active') ? 'open' : '';
+        switch(tab.code) {
+            case 'tm':
+                return <SegmentTabMatches
+                    key={"container_" + tab.code}
+                    code = {tab.code}
+                    active_class = {open_class}
+                    tab_class = {tab.tab_class}
+                    id_segment = {this.props.sid}/>;
+                break;
+            case 'cc':
+                return <SegmentTabConcordance
+                    key={"container_" + tab.code}
+                    code = {tab.code}
+                    active_class = {open_class}
+                    tab_class = {tab.tab_class}
+                    id_segment = {this.props.sid}/>;
+                break;
+            case 'gl':
+                return <SegmentTabGlossary
+                    key={"container_" + tab.code}
+                    code = {tab.code}
+                    active_class = {open_class}
+                    tab_class = {tab.tab_class}
+                    id_segment = {this.props.sid}/>;
+                break;
+            case 'al':
+                return <SegmentTabConflicts
+                    key={"container_" + tab.code}
+                    code = {tab.code}
+                    active_class = {open_class}
+                    tab_class = {tab.tab_class}
+                    id_segment = {this.props.sid}/>;
+                break;
+            default:
+                return ''
         }
-
-        this.tabs.push(tab);
     }
+
     changeTab(e) {
         e.preventDefault();
 
@@ -170,30 +182,27 @@ class SegmentFooter extends React.Component {
         var labels = [];
         var containers = [];
         var self = this;
-        this.state.tabs_labels.forEach(function (tab) {
-            var item = <li
-                        key={tab.code}
-                        className={tab.hidden_class + " " + tab.active_class + " tab-switcher tab-switcher-"+tab.code}
-                        id={"segment-"+tab.id_segment + tab.code}
-                        data-tab-class={tab.tab_class}
-                        data-code={tab.code}
-                        onClick={self.changeTab}>
-                        <a tabIndex="-1" href="#">{tab.tab_markup}
-                            <span className={"number"}/>
-                        </a>
-                        </li>;
-            labels.push(item);
-        });
-
-        this.state.tabs_containers.forEach(function (tab) {
-            var item =<SegmentTabMatches
-                key={"container_" + tab.code}
-                code = {tab.code}
-                active_class = {tab.active_class}
-                tab_class = {tab.tab_class}
-                id_segment = {tab.id_segment}/>;
-            containers.push(item);
-        });
+        for ( var key in this.state.tabs ) {
+            var tab = this.state.tabs[key];
+            if ( tab.enabled) {
+                var hidden_class = tab.visible ? '' : 'hide';
+                var active_class = tab.open ? 'active' : '';
+                var label = <li
+                    key={ tab.code }
+                    className={ hidden_class + " " + active_class + " tab-switcher tab-switcher-" + tab.code }
+                    id={"segment-" + this.props.sid + tab.code}
+                    data-tab-class={ tab.tab_class }
+                    data-code={ tab.code }
+                    onClick={ self.changeTab }>
+                    <a tabIndex="-1" href="#">{ tab.label }
+                        <span className={"number"}/>
+                    </a>
+                </li>;
+                labels.push(label);
+                var container = self.getTabContainer(tab, active_class);
+                containers.push(container);
+            }
+        }
 
         return (
             <div className="footer toggle"

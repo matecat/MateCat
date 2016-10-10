@@ -305,7 +305,7 @@ if ( Review.enabled() && Review.type == 'simple' ) {
             e.preventDefault();
             var goToNextNotApproved = ($(button).hasClass('approved')) ? false : true;
             UI.tempDisablingReadonlyAlert = true;
-            UI.currentSegment.removeClass('modified');
+            SegmentActions.removeClassToSegment(UI.getSegmentId( UI.currentSegment ), 'modified');
             UI.currentSegment.data('modified', false);
 
 

@@ -52,13 +52,10 @@
             this.setCurrentSegment();
 
             if (!this.readonly) {
-                $(segment.el).removeClass('loaded');
-                $(".loader", segment.el).addClass('loader_on');
                 this.getContribution(segment.el, 0);
             }
 
-            this.currentSegment.addClass('opened');
-
+            SegmentActions.addClassToSegment(UI.getSegmentId(this.currentSegment), 'opened');
             this.currentSegment.attr('data-searchItems', ($('mark.searchMarker', this.editarea).length));
 
             this.fillCurrentSegmentWarnings(this.globalWarnings, true);
@@ -85,7 +82,7 @@
             this.opening = false;
 
 
-            segment.el.addClass("editor");
+            SegmentActions.addClassToSegment(UI.getSegmentId(segment), 'editor');
 
             if (!this.readonly) {
                 /* Check if is right-to-left language, because there is a bug that make

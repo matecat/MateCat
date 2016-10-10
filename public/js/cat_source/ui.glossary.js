@@ -130,8 +130,7 @@ if (true)
                         UI.segmentQA( n );
                     }
 
-                    $( n ).addClass( 'glossary-loaded' );
-
+                    SegmentActions.addClassToSegment(UI.getSegmentId(n), 'glossary-loaded');
                     if ( typeof d.errors != 'undefined' && d.errors.length ) {
                         if ( d.errors[0].code == -1 ) {
                             UI.noGlossary = true;

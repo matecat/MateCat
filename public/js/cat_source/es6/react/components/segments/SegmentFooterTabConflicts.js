@@ -8,37 +8,16 @@ var SegmentStore = require('../../stores/SegmentStore');
 class SegmentFooterTabConflicts extends React.Component {
 
     constructor(props) {
-        var code = 'tm';
-        var tab_class ='matches';
-        var label = 'Translation Matches';
-    }
-
-    is_enabled(sid) {
-        if (this.props.sid == sid) {
-            return true;
-        }
-    }
-    tab_markup(sid) {
-        if (this.props.sid == sid) {
-            if (config.mt_enabled) {
-                return this.label;
-            }
-            else {
-                return this.label + " (No MT) ";
-            }
-        }
-    }
-    is_hidden(sid) {
-        return false;
+        super(props);
     }
 
     componentDidMount() {
-        console.log("Mount SegmentFooter" + this.props.sid);
+        console.log("Mount SegmentFooterMatches" + this.props.id_segment);
 
     }
 
     componentWillUnmount() {
-        console.log("Unmount SegmentFooter" + this.props.sid);
+        console.log("Unmount SegmentFooterMatches" + this.props.id_segment);
 
     }
 
@@ -51,11 +30,12 @@ class SegmentFooterTabConflicts extends React.Component {
 
     render() {
 
-
         return (
-            <div>
-                <div className="overflow"></div>
-                <div className="engine-errors"></div>
+
+            <div key={"container_" + this.props.code} className={"tab sub-editor "+ this.props.active_class + " " + this.props.tab_class}
+                 id={"segment-" + this.props.id_segment + " " + this.props.tab_class}>
+                <div className="overflow">
+                </div>
             </div>
         )
     }

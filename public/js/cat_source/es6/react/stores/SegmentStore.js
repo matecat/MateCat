@@ -197,6 +197,9 @@ AppDispatcher.register(function(action) {
         case SegmentConstants.ADD_SEGMENT_CLASS:
             SegmentStore.emitChange(action.actionType, action.id, action.newClass);
             break;
+        case SegmentConstants.REMOVE_SEGMENT_CLASS:
+            SegmentStore.emitChange(action.actionType, action.id, action.className);
+            break;
         case SegmentConstants.SET_SEGMENT_STATUS:
             setStatus(action.id, action.fid, action.status);
             SegmentStore.emitChange(SegmentConstants.UPDATE_SEGMENTS, _segments[action.fid], action.fid);
@@ -232,7 +235,7 @@ AppDispatcher.register(function(action) {
             SegmentStore.emitChange(action.actionType, action.id, action.className);
             break;
         case SegmentConstants.REGISTER_TAB:
-            SegmentStore.emitChange(action.actionType, action.tab);
+            SegmentStore.emitChange(action.actionType, action.tab, action.visible, action.open);
             break;
         case SegmentConstants.CREATE_FOOTER:
             SegmentStore.emitChange(action.actionType, action.sid);

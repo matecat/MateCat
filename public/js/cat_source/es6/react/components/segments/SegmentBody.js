@@ -61,6 +61,7 @@ class SegmentBody extends React.Component {
 
             if (UI.hasSourceOrTargetTags(segment)) {
                 segment.addClass('hasTagsToggle');
+
             } else {
                 segment.removeClass('hasTagsToggle');
             }

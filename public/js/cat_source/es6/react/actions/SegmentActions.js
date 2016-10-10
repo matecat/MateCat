@@ -61,6 +61,14 @@ var SegmentActions = {
         });
     },
 
+    removeClassToSegment: function (sid, className) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.REMOVE_SEGMENT_CLASS,
+            id: sid,
+            className: className
+        });
+    },
+
     setStatus: function (sid, fid, status) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_SEGMENT_STATUS,
@@ -134,10 +142,12 @@ var SegmentActions = {
         });
     },
     /************ FOOTER ***************/
-    registerTab: function (tab) {
+    registerTab: function (tab, visible, open) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.REGISTER_TAB,
-            tab: tab
+            tab: tab,
+            visible: visible,
+            open: open
         });
     },
     createFooter: function (sid) {

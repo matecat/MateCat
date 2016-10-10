@@ -478,7 +478,6 @@
             }
 
             this.nextUntranslatedSegmentIdByServer = d.nextSegmentId;
-            this.propagationsAvailable = d.data.prop_available;
             this.getNextSegment(this.currentSegment, 'untranslated');
 
             if (config.alternativesEnabled) {
@@ -516,11 +515,11 @@
             }
 
             if ( isModified ) {
-                el.addClass('modified');
+                SegmentActions.addClassToSegment(UI.getSegmentId( el ), 'modified');
                 el.data('modified', true);
                 el.trigger('modified');
             } else {
-                el.removeClass('modified');
+                SegmentActions.removeClassToSegment(UI.getSegmentId( el ), 'modified');
                 el.data('modified', false);
                 el.trigger('modified');
             }

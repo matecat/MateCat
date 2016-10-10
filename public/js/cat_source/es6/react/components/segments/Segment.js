@@ -17,6 +17,7 @@ class Segment extends React.Component {
         this.createSegmentClasses = this.createSegmentClasses.bind(this);
         this.hightlightEditarea = this.hightlightEditarea.bind(this);
         this.addClass = this.addClass.bind(this);
+        this.removeClass = this.removeClass.bind(this);
         this.setAsAutopropagated = this.setAsAutopropagated.bind(this);
 
         this.state = {
@@ -81,8 +82,21 @@ class Segment extends React.Component {
     addClass(sid, newClass) {
         if (this.props.segment.sid == sid) {
             var classes = this.state.segment_classes;
-            if (classes.indexOf(newClass)) {
+            if (classes.indexOf(newClass) < 0) {
                 classes.push(newClass);
+                this.setState({
+                    segment_classes: classes
+                });
+            }
+        }
+    }
+
+    removeClass(sid, className) {
+        if (this.props.segment.sid == sid) {
+            var classes = this.state.segment_classes;
+            var index = classes.indexOf(className);
+            if ( index > -1 ) {
+                classes.splice(index, 1);
                 this.setState({
                     segment_classes: classes
                 });
@@ -102,6 +116,7 @@ class Segment extends React.Component {
         console.log("Mount Segment" + this.props.segment.sid);
         SegmentStore.addListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.addListener(SegmentConstants.ADD_SEGMENT_CLASS, this.addClass);
+        SegmentStore.addListener(SegmentConstants.REMOVE_SEGMENT_CLASS, this.removeClass);
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_PROPAGATION, this.setAsAutopropagated);
     }
 
@@ -110,6 +125,7 @@ class Segment extends React.Component {
         console.log("Unmount Segment" + this.props.segment.sid);
         SegmentStore.removeListener(SegmentConstants.HIGHLIGHT_EDITAREA, this.hightlightEditarea);
         SegmentStore.removeListener(SegmentConstants.ADD_SEGMENT_CLASS, this.addClass);
+        SegmentStore.removeListener(SegmentConstants.REMOVE_SEGMENT_CLASS, this.removeClass);
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_PROPAGATION, this.setAsAutopropagated);
     }
 

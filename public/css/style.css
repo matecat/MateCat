@@ -2765,15 +2765,9 @@ section.mismatch li.tag-mismatch
 	display: block;
 }
 
-#dialog,
-#alertConfirmTranslation
+#dialog
 {
 	display: none;
-}
-
-#alertConfirmTranslation p
-{
-    font-size: 80%;
 }
 
 /*RTL language*/

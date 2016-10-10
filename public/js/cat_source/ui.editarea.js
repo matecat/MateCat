@@ -273,7 +273,6 @@ $.extend( UI, {
             operation = 'clicking';
         }
 
-        UI.notYetOpened = false;
         UI.closeTagAutocompletePanel();
         UI.removeHighlightCorrespondingTags();
 
@@ -333,20 +332,21 @@ $.extend( UI, {
         }, 50);
     },
     inputEditAreaEventHandler: function (e) {
-        UI.currentSegment.addClass('modified').removeClass('waiting_for_check_result');
+        SegmentActions.removeClassToSegment(UI.getSegmentId(UI.currentSegment), 'waiting_for_check_result');
+        SegmentActions.addClassToSegment(UI.getSegmentId(UI.currentSegment), 'modified');
         UI.currentSegment.data('modified', true);
         UI.currentSegment.trigger('modified');
 
         if ( UI.hasSourceOrTargetTags( e.target ) ) {
-            UI.currentSegment.addClass( 'hasTagsToggle' );
+            SegmentActions.addClassToSegment(UI.getSegmentId(UI.currentSegment), 'hasTagsToggle');
         } else {
-            UI.currentSegment.removeClass( 'hasTagsToggle' );
+            SegmentActions.removeClassToSegment(UI.getSegmentId(UI.currentSegment), 'hasTagsToggle');
         }
 
         if ( UI.hasMissingTargetTags( $(e.target).closest('section') ) ) {
-            UI.currentSegment.addClass( 'hasTagsAutofill' );
+            SegmentActions.addClassToSegment(UI.getSegmentId(UI.currentSegment), 'hasTagsAutofill');
         } else {
-            UI.currentSegment.removeClass( 'hasTagsAutofill' );
+            SegmentActions.removeClassToSegment(UI.getSegmentId(UI.currentSegment), 'hasTagsAutofill');
         }
 
         UI.registerQACheck();

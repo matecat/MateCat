@@ -14,12 +14,8 @@ $.extend(UI, {
 		this.numContributionMatchesResults = 3;
 		this.numDisplayContributionMatches = 3;
 		this.numMatchesResults = 10;
-		this.numSegments = $('section').length;
 		this.editarea = '';
 		this.byButton = false;
-		this.notYetOpened = true;
-		this.pendingScroll = 0;
-		this.firstScroll = true;
 		this.blockGetMoreSegments = true;
 		this.searchParams = {};
 		this.searchParams.search = 0;
@@ -38,20 +34,12 @@ $.extend(UI, {
 		this.savedSelActiveElement = null;
 		this.firstOpenedSegment = false;
 		this.autoscrollCorrectionEnabled = true;
-//        this.offlineModeEnabled = false;
         this.offline = false;
         this.searchEnabled = true;
 		if (this.searchEnabled)
             $('#filterSwitch').show( 100, function(){ APP.fitText( $('.breadcrumbs'), $('#pname'), 30) } );
         this.fixHeaderHeightChange();
         this.setHideMatches();
-
-		/*this.viewConcordanceInContextMenu = true;
-		if (!this.viewConcordanceInContextMenu)
-			$('#searchConcordance').hide();
-		this.viewSpellCheckInContextMenu = true;
-		if (!this.viewSpellCheckInContextMenu)
-			$('#spellCheck').hide();*/
 
 		setTimeout(function() {
 			UI.autoscrollCorrectionEnabled = false;
@@ -60,11 +48,9 @@ $.extend(UI, {
 		this.surveyDisplayed = false;
 		this.warningStopped = false;
 		this.abortedOperations = [];
-        this.propagationsAvailable = false;
         this.logEnabled = true;
         this.unsavedSegmentsToRecover = [];
         this.recoverUnsavedSegmentsTimer = false;
-        this.savingMemoryErrorNotificationEnabled = false;
         this.setTranslationTail = [];
         this.executingSetTranslation = false;
         this.localStorageArray = [];
@@ -168,7 +154,6 @@ $.extend(UI, {
 
 		this.setShortcuts();
 		this.createJobMenu();
-		$('#alertConfirmTranslation p').text('To confirm your translation, please press on Translated or use the shortcut ' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+Enter.');
 		APP.initMessageBar();
 		this.checkVersion();
         this.initTM();
@@ -185,98 +170,9 @@ $.extend(UI, {
 	 * Register tabs in segment footer
 	 */
 	registerFooterTabs: function () {
-		SegmentActions.registerTab({
-			code                : 'cc',
-			tab_class           : 'concordances',
-			label               : 'Concordance',
-			activation_priority : 10,
-			tab_position        : 20,
-			is_enabled    : function(sid) {
-				return true;
-			},
-			tab_markup          : function(sid) {
-				return this.label ;
-			},
-			content_markup      : function(sid) {
-				var template = MateCat.Templates['segment_footer/tabs/concordances_body'];
-				return template({ tms_enabled : config.tms_enabled });
-			},
-			is_hidden    : function(sid) {
-				return false;
-			},
-			on_activation : function( footer ) {
-				$('.cc-search .search-source', footer).focus();
-			}
-		});
-
-		SegmentActions.registerTab({
-			code                : 'tm',
-			tab_class           : 'matches',
-			label               : 'Translation Matches',
-			activation_priority : 50,
-			tab_position        : 10,
-			is_enabled          : function(sid) {
-				return true;
-			},
-			tab_markup          : function(sid) {
-				if ( config.mt_enabled ) {
-					return this.label ;
-				}
-				else {
-					return this.label + " (No MT) ";
-				}
-			},
-			content_markup      : function(sid) {
-				return '<div class="overflow"></div>' +
-					'<div class="engine-errors"></div>' ;
-			},
-			is_hidden    : function(segment) {
-				return false;
-			}
-		});
-
-		SegmentActions.registerTab({
-			code                : 'gl',
-			tab_class           : 'glossary',
-			label               : 'Glossary',
-			activation_priority : 30,
-			tab_position        : 30,
-			is_enabled          : function(sid) {
-				return true;
-			},
-			tab_markup          : function(sid) {
-				return this.label ;
-			},
-			content_markup      : function(sid) {
-				var template = MateCat.Templates['segment_footer/tabs/glossary_body'];
-				return template({ tms_enabled : config.tms_enabled });
-			},
-			is_hidden    : function(sid) {
-				return false;
-			},
-			on_activation : function( footer ) {
-				$('.gl-search .search-source', footer).focus();
-			}
-		});
-
-		SegmentActions.registerTab({
-			code                : 'al',
-			tab_class           : 'alternatives',
-			label               : 'Translation conflicts ',
-			activation_priority : 30,
-			tab_position        : 40,
-			is_enabled          : function(sid) {
-				return true;
-			},
-			tab_markup          : function(sid) {
-				return this.label ;
-			},
-			content_markup      : function(sid) {
-				return '<div class="overflow"></div>' ;
-			},
-			is_hidden    : function(sid) {
-				return true;
-			}
-		});
+        SegmentActions.registerTab('concordances', true, false);
+        SegmentActions.registerTab('matches', true, true);
+        SegmentActions.registerTab('glossary', true, false);
+        SegmentActions.registerTab('alternatives', false, false);
 	}
 });

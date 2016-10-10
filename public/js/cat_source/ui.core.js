@@ -284,7 +284,9 @@ UI = {
 
             segment.find('.editarea').attr('contenteditable', 'false');
 
-            $(segment).removeClass("editor waiting_for_check_result opened");
+            SegmentActions.removeClassToSegment(UI.getSegmentId(segment), 'waiting_for_check_result');
+            SegmentActions.removeClassToSegment(UI.getSegmentId(segment), 'opened');
+            SegmentActions.removeClassToSegment(UI.getSegmentId(segment), 'editor');
             $('span.locked.mismatch', segment).removeClass('mismatch');
 
 
@@ -1903,7 +1905,7 @@ UI = {
             segment = new UI.Segment( segment );
         }
 
-		segment.el.addClass('waiting_for_check_result');
+        SegmentActions.addClassToSegment(UI.getSegmentId(segment), 'waiting_for_check_result');
         
 		var dd = new Date();
 		ts = dd.getTime();
@@ -1957,7 +1959,7 @@ UI = {
                         UI.fillCurrentSegmentWarnings(d.details, false); // update warnings
                         UI.markTagMismatch(d.details);
                         delete UI.checkSegmentsArray[d.token]; // delete the token from the tail
-                        segment.el.removeClass('waiting_for_check_result');
+                        SegmentActions.removeClassToSegment(UI.getSegmentId(segment), 'waiting_for_check_result');
                     }
 				}
 
@@ -2604,7 +2606,7 @@ UI = {
 
 		if (this.undoStackPosition < (this.undoStack.length - 1))
 			this.undoStackPosition++;
-		this.currentSegment.removeClass('waiting_for_check_result');
+        SegmentActions.removeClassToSegment(UI.getSegmentId(this.currentSegment), 'waiting_for_check_result');
 		this.registerQACheck();
 	},
 	redoInSegment: function() {
@@ -2612,7 +2614,7 @@ UI = {
         // $('.undoCursorPlaceholder').remove();
 		if (this.undoStackPosition > 0)
 			this.undoStackPosition--;
-		this.currentSegment.removeClass('waiting_for_check_result');
+        SegmentActions.removeClassToSegment(UI.getSegmentId(this.currentSegment), 'waiting_for_check_result');
 		this.registerQACheck();
 	},
 	saveInUndoStack: function() {

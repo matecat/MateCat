@@ -50,7 +50,7 @@ $.extend(UI, {
             $(document).trigger('contribution:copied', { translation: translation, segment: segment });
 
             if (which) {
-				this.currentSegment.addClass('modified');
+                SegmentActions.addClassToSegment(UI.getSegmentId( this.currentSegment ), 'modified');
                 this.currentSegment.data('modified', true);
                 this.currentSegment.trigger('modified');
             };
@@ -80,11 +80,10 @@ $.extend(UI, {
 
         var callNewContributions = areSimilar || isEqual;
 
-
-
-
-		if ($(current).hasClass('loaded') && current.find('.footer .matches .overflow').text().length && !callNewContributions) {
+        if ($(current).hasClass('loaded') && current.find('.footer .matches .overflow').text().length && !callNewContributions) {
             this.spellCheck();
+            SegmentActions.addClassToSegment(UI.getSegmentId(segment), 'loaded');
+            $(".loader", segment.el).removeClass('loader_on');
             if (!next) {
                 this.blockButtons = false;
                 this.currentSegmentQA();
@@ -93,7 +92,7 @@ $.extend(UI, {
                 this.blockButtons = false;
             return false;
 		}
-
+        $(".loader", segment.el).addClass('loader_on');
 		if ((!current.length) && (next)) {
 			return false;
 		}
@@ -179,7 +178,7 @@ $.extend(UI, {
 
         var isActiveSegment = $(segment).hasClass('editor');
         var editarea = $('.editarea', segment);
-
+        SegmentActions.addClassToSegment(UI.getSegmentId(segment), 'loaded');
         if ( d.data.hasOwnProperty('matches') && d.data.matches.length) {
             var editareaLength = editarea.text().trim().length;
             var translation = d.data.matches[0].translation;
@@ -187,10 +186,7 @@ $.extend(UI, {
             var match = d.data.matches[0].match;
 
             var segment_id = segment.attr('id');
-            $(segment).addClass('loaded');
             $('.sub-editor.matches .overflow', segment).empty();
-
-
             $.each(d.data.matches, function(index) {
 
                 if ((this.segment === '') || (this.translation === '')) return;
@@ -303,7 +299,6 @@ $.extend(UI, {
             $('.translated', segment).removeAttr('disabled');
             $('.draft', segment).removeAttr('disabled');
         } else {
-            $(segment).addClass('loaded');
             if((config.mt_enabled)&&(!config.id_translator)) {
                 $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No matches could be found for this segment. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li></ul>');
             } else {

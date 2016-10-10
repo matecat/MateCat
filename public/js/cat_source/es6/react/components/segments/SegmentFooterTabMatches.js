@@ -9,28 +9,6 @@ class SegmentFooterTabMatches extends React.Component {
 
     constructor(props) {
         super(props);
-        var code = 'tm';
-        var tab_class ='matches';
-        var label = 'Translation Matches';
-    }
-
-    is_enabled(sid) {
-        if (this.props.sid == sid) {
-            return true;
-        }
-    }
-    tab_markup(sid) {
-        if (this.props.sid == sid) {
-            if (config.mt_enabled) {
-                return this.label;
-            }
-            else {
-                return this.label + " (No MT) ";
-            }
-        }
-    }
-    is_hidden(sid) {
-        return false;
     }
 
     componentDidMount() {
@@ -51,8 +29,6 @@ class SegmentFooterTabMatches extends React.Component {
     }
 
     render() {
-
-
         return (
         <div
             key={"container_" + this.props.code}
