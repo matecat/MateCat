@@ -78,7 +78,7 @@
                                         <td class="owner">
                                             <span class="icon-owner icon-earth icon-owner-public"></span>
                                         </td>
-                                        <td class="action">
+                                        <td tal:condition="php: !empty( INIT::$DEFAULT_TM_KEY )" class="action">
                                             <a class="btn pull-left addtmx" style="width: 110px !important;"><span class="text">Import TMX</span></a>
                                         </td>
                                     </tr>
