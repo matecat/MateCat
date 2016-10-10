@@ -130,7 +130,7 @@ class CatDecorator {
           }
       } else {
           if($this->isGDriveProject) {
-            $label = 'PREVIEW ON GOOGLE DRIVE';
+            $label = 'PREVIEW IN GOOGLE DRIVE';
           } else {
             $label = 'PREVIEW';
           }
