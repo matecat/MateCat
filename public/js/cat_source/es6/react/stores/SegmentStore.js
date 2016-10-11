@@ -202,7 +202,7 @@ AppDispatcher.register(function(action) {
             break;
         case SegmentConstants.SET_SEGMENT_STATUS:
             setStatus(action.id, action.fid, action.status);
-            SegmentStore.emitChange(SegmentConstants.UPDATE_SEGMENTS, _segments[action.fid], action.fid);
+            SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_STATUS, action.id, action.status);
             break;
         case SegmentConstants.UPDATE_ALL_SEGMENTS:
             SegmentStore.emitChange(SegmentConstants.UPDATE_ALL_SEGMENTS);
@@ -239,6 +239,12 @@ AppDispatcher.register(function(action) {
             break;
         case SegmentConstants.CREATE_FOOTER:
             SegmentStore.emitChange(action.actionType, action.sid);
+            break;
+        case SegmentConstants.SET_CONTRIBUTIONS:
+            SegmentStore.emitChange(action.actionType, action.sid, action.matches, action.fieldTest);
+            break;
+        case SegmentConstants.CHOOSE_CONTRIBUTION:
+            SegmentStore.emitChange(action.actionType, action.sid, action.index);
             break;
         default:
     }

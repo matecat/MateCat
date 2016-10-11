@@ -12,12 +12,12 @@ class SegmentFooterTabConflicts extends React.Component {
     }
 
     componentDidMount() {
-        console.log("Mount SegmentFooterMatches" + this.props.id_segment);
+        console.log("Mount SegmentFooterConflicts" + this.props.id_segment);
 
     }
 
     componentWillUnmount() {
-        console.log("Unmount SegmentFooterMatches" + this.props.id_segment);
+        console.log("Unmount SegmentFooterConflicts" + this.props.id_segment);
 
     }
 

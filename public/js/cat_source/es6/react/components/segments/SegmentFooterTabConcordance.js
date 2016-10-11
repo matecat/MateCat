@@ -12,12 +12,12 @@ class SegmentFooterTabConcordance extends React.Component {
     }
 
     componentDidMount() {
-        console.log("Mount SegmentFooterMatches" + this.props.id_segment);
+        console.log("Mount SegmentFooterConcordance" + this.props.id_segment);
 
     }
 
     componentWillUnmount() {
-        console.log("Unmount SegmentFooterMatches" + this.props.id_segment);
+        console.log("Unmount SegmentFooterConcordance" + this.props.id_segment);
 
     }
 

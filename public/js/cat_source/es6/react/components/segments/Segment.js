@@ -19,11 +19,13 @@ class Segment extends React.Component {
         this.addClass = this.addClass.bind(this);
         this.removeClass = this.removeClass.bind(this);
         this.setAsAutopropagated = this.setAsAutopropagated.bind(this);
+        this.setSegmentStatus = this.setSegmentStatus.bind(this);
 
         this.state = {
             segment_classes : [],
             modified: false,
-            autopropagated: this.props.segment.autopropagated_from != 0
+            autopropagated: this.props.segment.autopropagated_from != 0,
+            status: this.props.segment.status
         };
     }
 
@@ -35,8 +37,8 @@ class Segment extends React.Component {
             classes.push('readonly');
         }
 
-        if ( this.props.segment.status ) {
-            classes.push( 'status-' + this.props.segment.status.toLowerCase() );
+        if ( this.state.status ) {
+            classes.push( 'status-' + this.state.status.toLowerCase() );
         }
         else {
             classes.push('status-new');
@@ -51,7 +53,7 @@ class Segment extends React.Component {
         else if ( splitGroup.length ) {
             classes.push('splitInner');
         }
-        if (this.props.enableTagProjection && (this.props.segment.status.toLowerCase() === 'draft' || this.props.segment.status.toLowerCase() === 'new')
+        if (this.props.enableTagProjection && (this.state.status.toLowerCase() === 'draft' || this.state.status.toLowerCase() === 'new')
             && !UI.checkXliffTagsInText(this.props.segment.translation)){
             classes.push('enableTP');
             this.dataAttrTagged = "nottagged";
@@ -111,6 +113,14 @@ class Segment extends React.Component {
             });
         }
     }
+    setSegmentStatus(sid, status) {
+        if (this.props.segment.sid == sid) {
+            this.setState({
+                status: status
+            });
+        }
+    }
+
 
     componentDidMount() {
         console.log("Mount Segment" + this.props.segment.sid);
@@ -118,6 +128,7 @@ class Segment extends React.Component {
         SegmentStore.addListener(SegmentConstants.ADD_SEGMENT_CLASS, this.addClass);
         SegmentStore.addListener(SegmentConstants.REMOVE_SEGMENT_CLASS, this.removeClass);
         SegmentStore.addListener(SegmentConstants.SET_SEGMENT_PROPAGATION, this.setAsAutopropagated);
+        SegmentStore.addListener(SegmentConstants.SET_SEGMENT_STATUS, this.setSegmentStatus);
     }
 
 
@@ -127,6 +138,7 @@ class Segment extends React.Component {
         SegmentStore.removeListener(SegmentConstants.ADD_SEGMENT_CLASS, this.addClass);
         SegmentStore.removeListener(SegmentConstants.REMOVE_SEGMENT_CLASS, this.removeClass);
         SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_PROPAGATION, this.setAsAutopropagated);
+        SegmentStore.removeListener(SegmentConstants.SET_SEGMENT_STATUS, this.setSegmentStatus);
     }
 
     allowHTML(string) {

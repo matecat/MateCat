@@ -6,15 +6,6 @@ $('html').on('copySourceToTarget', 'section', function() {
 });
 
 $.extend(UI, {
-	chooseSuggestion: function(w) {
-		var ulDataItem = '.editor .tab.matches ul[data-item=';
-		this.copySuggestionInEditarea(this.currentSegment, $(ulDataItem + w + '] li.b .translation').html(),
-			$('.editor .editarea'), $(ulDataItem + w + '] ul.graysmall-details .percent').text(), false, false, w, $(ulDataItem + w + '] li.graydesc .bold').text());
-		this.setChosenSuggestion(w);
-		this.editarea.focus();
-		SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
-		this.disableTPOnSegment();
-	},
 	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which, createdBy) {
 		if (typeof (decode) == "undefined") {
 			decode = false;
@@ -53,7 +44,7 @@ $.extend(UI, {
                 SegmentActions.addClassToSegment(UI.getSegmentId( this.currentSegment ), 'modified');
                 this.currentSegment.data('modified', true);
                 this.currentSegment.trigger('modified');
-            };
+            }
 		}
 
 		// a value of 0 for 'which' means the choice has been made by the
@@ -82,8 +73,8 @@ $.extend(UI, {
 
         if ($(current).hasClass('loaded') && current.find('.footer .matches .overflow').text().length && !callNewContributions) {
             this.spellCheck();
-            SegmentActions.addClassToSegment(UI.getSegmentId(segment), 'loaded');
-            $(".loader", segment.el).removeClass('loader_on');
+            SegmentActions.addClassToSegment(UI.getSegmentId(current), 'loaded');
+            $(".loader", current).removeClass('loader_on');
             if (!next) {
                 this.blockButtons = false;
                 this.currentSegmentQA();
@@ -92,7 +83,7 @@ $.extend(UI, {
                 this.blockButtons = false;
             return false;
 		}
-        $(".loader", segment.el).addClass('loader_on');
+        $(".loader", current).addClass('loader_on');
 		if ((!current.length) && (next)) {
 			return false;
 		}
@@ -157,7 +148,6 @@ $.extend(UI, {
         this.addInStorage('contribution-' + config.id_job + '-' + UI.getSegmentId(segment), JSON.stringify(d), 'contribution');
         this.processContributions(d, segment);
         this.currentSegmentQA();
-        $(document).trigger('getContribution:complete', segment);
     },
   	processContributions: function(d, segment) {
 		if(!d) return true;
@@ -176,9 +166,7 @@ $.extend(UI, {
     renderContributions: function(d, segment) {
         if(!d) return true;
 
-        var isActiveSegment = $(segment).hasClass('editor');
         var editarea = $('.editarea', segment);
-        SegmentActions.addClassToSegment(UI.getSegmentId(segment), 'loaded');
         if ( d.data.hasOwnProperty('matches') && d.data.matches.length) {
             var editareaLength = editarea.text().trim().length;
             var translation = d.data.matches[0].translation;
@@ -186,78 +174,12 @@ $.extend(UI, {
             var match = d.data.matches[0].match;
 
             var segment_id = segment.attr('id');
-            $('.sub-editor.matches .overflow', segment).empty();
-            $.each(d.data.matches, function(index) {
+            if (!$('.sub-editor.matches', segment).length) {
+                SegmentActions.createFooter(UI.getSegmentId(segment));
+            }
+            SegmentActions.setSegmentContributions(UI.getSegmentId(segment), d.data.matches, d.data.fieldTest);
 
-                if ((this.segment === '') || (this.translation === '')) return;
-
-                var disabled = (this.id == '0') ? true : false;
-                cb = this.created_by;
-
-                if ("sentence_confidence" in this &&
-                    (
-                        this.sentence_confidence !== "" &&
-                        this.sentence_confidence !== 0 &&
-                        this.sentence_confidence != "0" &&
-                        this.sentence_confidence !== null &&
-                        this.sentence_confidence !== false &&
-                        typeof this.sentence_confidence != 'undefined'
-                        )
-                    ) {
-                        suggestion_info = "Quality: <b>" + this.sentence_confidence + "</b>";
-                    } else if (this.match != 'MT') {
-                  suggestion_info = this.last_update_date;
-                } else {
-                    suggestion_info = '';
-                }
-
-
-                if (typeof d.data.fieldTest == 'undefined') {
-                    percentClass = UI.getPercentuageClass(this.match);
-                    percentText = this.match;
-                } else {
-                    quality = parseInt(this.quality);
-                    percentClass = (quality > 98)? 'per-green' : (quality == 98)? 'per-red' : 'per-gray';
-                    percentText = 'MT';
-                }
-
-
-                if (!$('.sub-editor.matches', segment).length) {
-                    SegmentActions.createFooter(UI.getSegmentId(segment));
-                }
-                // Attention Bug: We are mixing the view mode and the raw data mode.
-                // before doing a enanched  view you will need to add a data-original tag
-                //
-                suggestionDecodedHtml = UI.decodePlaceholdersToText(this.segment);
-                translationDecodedHtml = UI.decodePlaceholdersToText( this.translation);
-
-                //If Tag Projection is enable I take out the tags from the contributions
-                // if (UI.currentSegmentTPEnabled) {
-                // 	suggestionDecodedHtml = UI.removeAllTags(suggestionDecodedHtml);
-                // 	translationDecodedHtml = UI.removeAllTags(translationDecodedHtml);
-                // }
-
-                var toAppend = $('<ul class="suggestion-item graysmall" data-item="' + (index + 1) + '" data-id="' +
-                    this.id + '"><li class="sugg-source" >' + ((disabled) ? '' : ' <a id="' + segment_id +
-                    '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') +
-                    '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' +
-                    suggestionDecodedHtml + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span -->' +
-                    '<span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) +
-                    '</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' +
-                    translationDecodedHtml +
-                    '</span></li><ul class="graysmall-details"><li class="percent ' + percentClass + '">' +
-                    percentText + '</li><li>' + suggestion_info + '</li><li class="graydesc">Source: <span class="bold">' +
-                    cb + '</span></li></ul></ul>');
-
-                toAppend.find('li:first').data('original', this.segment);
-
-                $('.sub-editor.matches .overflow', segment).append( toAppend );
-
-            });
-
-
-
-            UI.setDeleteSuggestion(segment);
+            // UI.setDeleteSuggestion(segment);
             UI.setContributionSourceDiff(segment);
             //If Tag Projection is enable I take out the tags from the contributions
             if (!UI.enableTagProjection) {
@@ -305,7 +227,7 @@ $.extend(UI, {
                 $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No match found for this segment</li></ul>');
             }
         }
-        $(window).trigger('renderContribution:complete', segment);
+        SegmentActions.addClassToSegment(UI.getSegmentId(segment), 'loaded');
     },
     renderContributionErrors: function(errors, segment) {
         $('.tab.sub-editor.matches .engine-errors', segment).empty();
@@ -342,96 +264,35 @@ $.extend(UI, {
                     '</span></li></ul>');
         });
     },
-	setDeleteSuggestion: function(segment) {
+	setDeleteSuggestion: function(source, target) {
 
-        $('.sub-editor .overflow a.trash', segment).click(function(e) {
-			e.preventDefault();
-
-            var source, target;
-
-			var ul = $(this).parents('.graysmall');
-
-            if( config.brPlaceholdEnabled ){
-
-                source = $('.sugg-source', ul).data('original');
-                source = htmlDecode( source );
-
-                target = UI.postProcessEditarea( ul, '.translation' );
-                console.log('source 1: ', source);
-
-            } else {
-
-                source = $('.sugg-source', ul).data('original');
-                source = htmlDecode( source );
-
-                target = $('.translation', ul).text();
-                console.log('source 2: ', source);
+        return APP.doRequest({
+            data: {
+                action: 'deleteContribution',
+                source_lang: config.source_lang,
+                target_lang: config.target_lang,
+                id_job: config.id_job,
+                password: config.password,
+                seg: source,
+                tra: target,
+                id_translator: config.id_translator
+            },
+            error: function() {
+                UI.failedConnection(0, 'deleteContribution');
+            },
+            success: function(d) {
+                UI.setDeleteSuggestion_success(d);
             }
-
-            target = view2rawxliff(target);
-            source = view2rawxliff(source);
-
-            ul.remove();
-			APP.doRequest({
-				data: {
-					action: 'deleteContribution',
-					source_lang: config.source_lang,
-					target_lang: config.target_lang,
-					id_job: config.id_job,
-					password: config.password,
-					seg: source,
-					tra: target,
-					id_translator: config.id_translator
-				},
-				error: function() {
-					UI.failedConnection(0, 'deleteContribution');
-				},
-				success: function(d) {
-					UI.setDeleteSuggestion_success(d);
-				}
-			});
-		});
+        });
 	},
 	setDeleteSuggestion_success: function(d) {
 		if (d.errors.length)
 			this.processErrors(d.errors, 'setDeleteSuggestion');
-		if (this.debug)
-			console.log('match deleted');
 
-		$(".editor .matches .graysmall").each(function(index) {
-			$(this).find('.graysmall-message').text(UI.suggestionShortcutLabel + (index + 1));
-			$(this).attr('data-item', index + 1);
-//			UI.reinitMMShortcuts();
-		});
-	},
-	reinitMMShortcuts: function() {//console.log('reinitMMShortcuts');
-		var keys = (this.isMac) ? 'alt+meta' : 'alt+ctrl';
-		$('body').unbind('keydown.alt1').unbind('keydown.alt2').unbind('keydown.alt3').unbind('keydown.alt4').unbind('keydown.alt5');
-		$("body, .editarea").bind('keydown.alt1', keys + '+1', function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-			UI.chooseSuggestion('1');
-		}).bind('keydown.alt2', keys + '+2', function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-			UI.chooseSuggestion('2');
-		}).bind('keydown.alt3', keys + '+3', function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-			UI.chooseSuggestion('3');
-		}).bind('keydown.alt4', keys + '+4', function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-			UI.chooseSuggestion('4');
-		}).bind('keydown.alt5', keys + '+5', function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-			UI.chooseSuggestion('5');
-		}).bind('keydown.alt6', keys + '+6', function(e) {
-			e.preventDefault();
-			e.stopPropagation();
-			UI.chooseSuggestion('6');
-		});
+		// $(".editor .matches .graysmall").each(function(index) {
+		// 	$(this).find('.graysmall-message').text(UI.suggestionShortcutLabel + (index + 1));
+		// 	$(this).attr('data-item', index + 1);
+		// });
 	},
 	setChosenSuggestion: function(w, segment) {
         var currentSegment = (segment)? segment : UI.currentSegment;

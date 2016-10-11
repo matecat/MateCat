@@ -2216,7 +2216,8 @@ body.rtl-target .editor .editarea span
 	width:20px;
     position:absolute;
 	right:5px;
-	top:14px
+	top:14px;
+	cursor: pointer;
 }
 .graysmall-message{
     bottom:0px;

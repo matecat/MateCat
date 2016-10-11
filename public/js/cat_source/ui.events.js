@@ -134,8 +134,7 @@ $.extend(UI, {
 			var tab;
 			var active = $('.editor .submenu li.active');
 			if(active.hasClass('tab-switcher-tm')) {
-				tab = 'matches';
-				$('.editor .tab.' + tab + ' .graysmall[data-item=1]').trigger('dblclick');
+				SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 1);
 			} else if(active.hasClass('tab-switcher-al')) {
 				tab = 'alternatives';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=1]').trigger('dblclick');
@@ -145,8 +144,7 @@ $.extend(UI, {
 			var tab;
 			var active = $('.editor .submenu li.active');
 			if(active.hasClass('tab-switcher-tm')) {
-				tab = 'matches';
-				$('.editor .tab.' + tab + ' .graysmall[data-item=2]').trigger('dblclick');
+				SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 2);
 			} else if(active.hasClass('tab-switcher-al')) {
 				tab = 'alternatives';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=2]').trigger('dblclick');
@@ -156,8 +154,7 @@ $.extend(UI, {
 			var tab;
 			var active = $('.editor .submenu li.active');
 			if(active.hasClass('tab-switcher-tm')) {
-				tab = 'matches';
-				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');
+				SegmentActions.chooseContribution(UI.getSegmentId(UI.currentSegment), 3);
 			} else if(active.hasClass('.tab-switcher-al')) {
 				tab = 'alternatives';
 				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');
@@ -463,8 +460,6 @@ $.extend(UI, {
 			UI.someUserSelection = (sel.type == 'Range') ? true : false;
 		}).on('dblclick', 'section.readonly', function() {
 			clearTimeout(UI.selectingReadonly);
-		}).on('dblclick', '.matches .graysmall', function() {
-			UI.chooseSuggestion($(this).attr('data-item'));
 		}).on('dblclick', '.alternatives .graysmall', function() {
 			UI.chooseAlternative($(this));
         }).on('dblclick', '.glossary .sugg-target', function() {
@@ -653,7 +648,7 @@ $.extend(UI, {
 		}).on('click', '.alternatives a', function(e) {
 			e.preventDefault();
 			$('.editor .tab-switcher-al').click();
-		}).on('click', '.sub-editor.glossary .overflow a.trash', function(e) {
+		}).on('click', '.sub-editor.glossary .overflow .trash', function(e) {
 			e.preventDefault();
 			ul = $(this).parents('ul.graysmall').first();
 			UI.deleteGlossaryItem($(this).parents('ul.graysmall').first());

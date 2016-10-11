@@ -133,7 +133,7 @@
         }, speed);
 
         return scrollAnimation.promise() ; 
-    }
+    };
 
     $.extend(UI, {
         scrollSegment : scrollSegment,

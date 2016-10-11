@@ -1156,6 +1156,7 @@ UI = {
                 speech2textEnabledFn: Speech2Text.enabled,
             }), mountPoint);
             SegmentActions.renderSegments(segments, fid);
+            UI.registerFooterTabs();
         }
     },
 

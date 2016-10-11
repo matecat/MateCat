@@ -16,7 +16,7 @@ class SegmentsContainer extends React.Component {
             fid: ""
         };
         this.renderSegments = this.renderSegments.bind(this);
-        this.updateSegments = this.updateSegments.bind(this);
+        // this.updateSegments = this.updateSegments.bind(this);
         this.updateAllSegments = this.updateAllSegments.bind(this);
         this.splitSegments = this.splitSegments.bind(this);
     }
@@ -29,13 +29,13 @@ class SegmentsContainer extends React.Component {
             });
         }
     }
-    updateSegments(segments, fid) {
-        if (fid == this.props.fid) {
-            this.setState({
-                segments: segments,
-            });
-        }
-    }
+    // updateSegments(segments, fid) {
+    //     if (fid == this.props.fid) {
+    //         this.setState({
+    //             segments: segments,
+    //         });
+    //     }
+    // }
 
     updateAllSegments() {
         this.forceUpdate()
@@ -55,14 +55,14 @@ class SegmentsContainer extends React.Component {
     componentDidMount() {
         SegmentStore.addListener(SegmentConstants.RENDER_SEGMENTS, this.renderSegments);
         SegmentStore.addListener(SegmentConstants.SPLIT_SEGMENT, this.splitSegments);
-        SegmentStore.addListener(SegmentConstants.UPDATE_SEGMENTS, this.updateSegments);
+        // SegmentStore.addListener(SegmentConstants.UPDATE_SEGMENTS, this.updateSegments);
         SegmentStore.addListener(SegmentConstants.UPDATE_ALL_SEGMENTS, this.updateAllSegments);
     }
 
     componentWillUnmount() {
         SegmentStore.removeListener(SegmentConstants.RENDER_SEGMENTS, this.renderSegments);
         SegmentStore.removeListener(SegmentConstants.SPLIT_SEGMENT, this.splitSegments);
-        SegmentStore.removeListener(SegmentConstants.UPDATE_SEGMENTS, this.updateSegments);
+        // SegmentStore.removeListener(SegmentConstants.UPDATE_SEGMENTS, this.updateSegments);
         SegmentStore.removeListener(SegmentConstants.UPDATE_ALL_SEGMENTS, this.updateAllSegments);
     }
 

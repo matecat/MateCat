@@ -37,8 +37,6 @@
 
             if ( editarea.length > 0 ) this.saveInUndoStack('open');
 
-
-
             this.activateSegment(segment);
 
             segment.el.trigger('open');

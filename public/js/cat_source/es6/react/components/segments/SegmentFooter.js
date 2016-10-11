@@ -87,12 +87,6 @@ class SegmentFooter extends React.Component {
         }
     }
 
-    setContributions(sid, matches) {
-        if (this.props.sid == sid) {
-
-        }
-    }
-
     getTabContainer(tab, active_class) {
         var open_class = (active_class == 'active') ? 'open' : '';
         switch(tab.code) {
@@ -161,14 +155,12 @@ class SegmentFooter extends React.Component {
         console.log("Mount SegmentFooter" + this.props.sid);
         SegmentStore.addListener(SegmentConstants.CREATE_FOOTER, this.createFooter);
         SegmentStore.addListener(SegmentConstants.REGISTER_TAB, this.registerTab);
-        SegmentStore.addListener(SegmentConstants.SET_CONTRIBUTIONS, this.setContributions);
     }
 
     componentWillUnmount() {
         console.log("Unmount SegmentFooter" + this.props.sid);
         SegmentStore.removeListener(SegmentConstants.CREATE_FOOTER, this.createFooter);
         SegmentStore.removeListener(SegmentConstants.REGISTER_TAB, this.registerTab);
-        SegmentStore.removeListener(SegmentConstants.SET_CONTRIBUTIONS, this.setContributions);
     }
 
     componentWillMount() {

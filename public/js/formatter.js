@@ -60,11 +60,6 @@ function htmlDecode(value) {
 	}
 
 	 function view2rawxliff(segment){
-		// input : <g id="43">bang & olufsen < 3 </g> <x id="33"/>; --> valore della funzione .text() in cat.js su source, target, source suggestion,target suggestion
-		// output : <g> bang &amp; olufsen are > 555 </g> <x/>
-		// caso controverso <g id="4" x="&lt; dfsd &gt;"> 
-		//segment=htmlDecode(segment);
-		console.log ("decoded" + segment);
 		segment = placehold_xliff_tags (segment);
 		segment = htmlEncode(segment);
 		segment = restore_xliff_tags(segment);	

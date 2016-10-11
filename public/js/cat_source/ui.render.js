@@ -57,7 +57,7 @@ $.extend(UI, {
         this.downOpts = {offset: '130%'};
 		this.upOpts = {offset: '-40%'};
 		this.readonly = (this.body.hasClass('archived')) ? true : false;
-		this.suggestionShortcutLabel = 'CTRL+';
+
 
 		this.taglockEnabled = config.taglockEnabled;
 		this.debug = false;

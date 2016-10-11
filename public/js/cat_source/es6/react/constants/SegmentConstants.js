@@ -22,5 +22,6 @@ module.exports = keyMirror({
     UPDATE_ALL_SEGMENTS:null,
     CREATE_FOOTER: null,
     REGISTER_TAB: null,
-    SET_CONTRIBUTIONS: null
+    SET_CONTRIBUTIONS: null,
+    CHOOSE_CONTRIBUTION: null
 });
