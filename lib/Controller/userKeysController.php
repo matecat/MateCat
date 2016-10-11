@@ -15,7 +15,7 @@ class userKeysController extends ajaxController {
     private $exec;
 
     private static $allowed_exec = array(
-            'delete', 'update', 'newKey'
+            'delete', 'update', 'newKey', 'info'
     );
 
     public function __construct() {
@@ -43,7 +43,7 @@ class userKeysController extends ajaxController {
         );
 
         //filter input
-        $_postInput = filter_input_array( INPUT_POST, $filterArgs );
+        $_postInput = filter_var_array( $_REQUEST, $filterArgs );
 
         //assign variables
         $this->exec        = $_postInput[ 'exec' ];
@@ -126,6 +126,19 @@ class userKeysController extends ajaxController {
                     break;
                 case 'newKey':
                     $userMemoryKeys = $mkDao->create( $memoryKeyToUpdate );
+                    break;
+                case 'info':
+                    $userMemoryKeys = $mkDao->read( $memoryKeyToUpdate );
+
+                    $_userStructs = [];
+                    foreach( $userMemoryKeys[0]->tm_key->getInUsers() as $userStruct ){
+                        $_userStructs[] = new Users_ClientUserFacade( $userStruct );
+                    }
+                    $this->result = [
+                            'errors'  => [],
+                            "data"    => $_userStructs,
+                            "success" => true
+                    ];
                     break;
                 default:
                     throw new Exception( "Unexpected Exception", -4 );

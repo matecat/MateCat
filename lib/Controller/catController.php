@@ -14,7 +14,6 @@ class catController extends viewController {
     private $data = array();
     private $cid = "";
     private $jid = "";
-    private $tid = "";
     private $password = "";
     private $source = "";
     private $create_date = "";
@@ -288,7 +287,6 @@ class catController extends viewController {
             unset( $job[ 'jid' ] );
             unset( $job[ 'pid' ] );
             unset( $job[ 'cid' ] );
-            unset( $job[ 'tid' ] );
             unset( $job[ 'create_date' ] );
             unset( $job[ 'owner' ] );
 
@@ -343,10 +341,9 @@ class catController extends viewController {
          * Take the keys of the user
          */
         try {
-            $_keyList = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-            $dh       = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $uid ) );
-
-            $keyList = $_keyList->read( $dh );
+            $_keyDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+            $dh      = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $uid ) );
+            $keyList = $_keyDao->read( $dh );
 
         } catch ( Exception $e ) {
             $keyList = array();
@@ -378,8 +375,6 @@ class catController extends viewController {
          */
         $job_keyList = json_decode( $data[ 0 ][ 'tm_keys' ], true );
 
-        $this->tid = count( $job_keyList ) > 0;
-
         /**
          * Start this N^2 cycle from keys of the job,
          * these should be statistically lesser than the keys of the user
@@ -399,7 +394,7 @@ class catController extends viewController {
                 $_index_position = array_search( $jobKey->key, $reverse_lookup_user_personal_keys[ 'pos' ] );
                 if ( $_index_position !== false ) {
 
-                    //i found a key in the job that is present in my database
+                    //I FOUND A KEY IN THE JOB THAT IS PRESENT IN MY KEYRING
                     //i'm owner?? and the key is an owner type key?
                     if ( !$jobKey->owner && $this->userRole != TmKeyManagement_Filter::OWNER ) {
                         $jobKey->r = $jobKey->{TmKeyManagement_Filter::$GRANTS_MAP[ $this->userRole ][ 'r' ]};

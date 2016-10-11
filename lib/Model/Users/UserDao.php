@@ -133,22 +133,27 @@ class Users_UserDao extends DataAccess_AbstractDao {
     }
 
     public function getByUids( $uids_array ) {
+
         $sanitized_array = array();
-        foreach($uids_array as $k => $v) {
-            array_push($sanitized_array, ( (int) $v['uid']) );
+        foreach ( $uids_array as $k => $v ) {
+            array_push( $sanitized_array, ( (int)$v[ 'uid' ] ) );
         }
 
-        if (empty($sanitized_array)) {
+        if ( empty( $sanitized_array ) ) {
             return array();
         }
 
         $query = "SELECT * FROM " . self::TABLE .
-            " WHERE uid IN ( " . implode(', ', $sanitized_array) . " ) " ;
+                " WHERE uid IN ( " . str_repeat( '?,', count( $sanitized_array ) - 1) . '?' . " ) ";
 
-        Log::doLog($query);
-        $arr_result = $this->con->fetch_array( $query );
+        $stmt = $this->setCacheTTL( 60 * 10 )->_getStatementForCache( $query );
 
-        return $this->_buildResult( $arr_result );
+        return $this->_fetchObject(
+                $stmt,
+                new Users_UserStruct(),
+                $sanitized_array
+        );
+
     }
 
     /**

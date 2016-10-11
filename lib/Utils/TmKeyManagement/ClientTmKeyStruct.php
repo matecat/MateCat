@@ -35,4 +35,8 @@ class TmKeyManagement_ClientTmKeyStruct extends TmKeyManagement_TmKeyStruct {
 
     }
 
+    public function addInUsers( TmKeyManagement_TmKeyStruct $keyToClone ){
+        $this->in_users = $keyToClone->getInUsers();
+    }
+
 }

@@ -94,6 +94,13 @@ class TmKeyManagement_TmKeyStruct extends stdClass {
     public $target;
 
     /**
+     * User Structs of key owners
+     *
+     * @var Users_UserStruct[]
+     */
+    protected $in_users;
+
+    /**
      * @var int How much readable chars for hashed keys
      */
     protected $readable_chars = 5;
@@ -173,4 +180,11 @@ class TmKeyManagement_TmKeyStruct extends stdClass {
 
     }
 
-} 
+    /**
+     * @return Users_UserStruct[]
+     */
+    public function getInUsers() {
+        return $this->in_users;
+    }
+
+}

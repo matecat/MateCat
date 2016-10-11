@@ -212,7 +212,9 @@ abstract class DataAccess_AbstractDao {
 
         $_existingResult = null;
         if ( isset( $this->cache_con ) && !empty( $this->cache_con ) ) {
-            $_existingResult = unserialize( $this->cache_con->get( md5( $query ) ) );
+            $cacheQuery = md5( $query );
+            Log::doLog( "Fetching from cache $cacheQuery - query: \"" . $query . "\"" );
+            $_existingResult = unserialize( $this->cache_con->get( $cacheQuery ) );
         }
 
         return $_existingResult;
@@ -290,7 +292,7 @@ abstract class DataAccess_AbstractDao {
         if ( $_cacheResult !== false && $_cacheResult !== null ) {
             return $_cacheResult;
         }
-        
+
         $stmt->setFetchMode( PDO::FETCH_CLASS, get_class( $fetchClass ) );
         $stmt->execute( $bindParams );
         $result = $stmt->fetchAll();

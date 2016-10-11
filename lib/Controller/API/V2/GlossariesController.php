@@ -100,7 +100,7 @@ class GlossariesController extends KleinController {
         }
 
         if ( !$this->response->isLocked() ) {
-            $this->setSuccesResponse( 202 );
+            $this->setSuccessResponse( 202 );
         }
 
         unlink( $fileInfo->file_path );
@@ -118,7 +118,7 @@ class GlossariesController extends KleinController {
         }
 
         if ( !$this->response->isLocked() ) {
-            $this->setSuccesResponse( null, $result[ 'data' ] );
+            $this->setSuccessResponse( null, $result[ 'data' ] );
         }
 
     }
@@ -185,7 +185,7 @@ class GlossariesController extends KleinController {
 
     }
 
-    protected function setSuccesResponse( $code = 200, Array $data = [] ) {
+    protected function setSuccessResponse( $code = 200, Array $data = [] ) {
 
         $this->response->code( $code );
         $this->response->json( [

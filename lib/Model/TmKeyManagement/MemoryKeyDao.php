@@ -60,38 +60,43 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         $obj = $this->sanitize( $obj );
 
         $where_conditions = array();
-        $query            = "SELECT uid,
-                                    key_value,
-                                    key_name,
-                                    key_tm AS tm,
-                                    key_glos AS glos
-                             FROM " . self::TABLE . " WHERE %s and deleted = 0
-			     ORDER BY creation_date desc";
+        $query            = "SELECT  m1.uid, 
+                                     m1.key_value, 
+                                     m1.key_name, 
+                                     m1.key_tm AS tm, 
+                                     m1.key_glos AS glos, 
+                                     sum(1) AS owners_tot, 
+                                     group_concat( DISTINCT m2.uid ) AS owner_uids
+                             FROM " . self::TABLE . " m1
+                             LEFT JOIN " . self::TABLE . " AS m2 ON m1.key_value = m2.key_value
+                             WHERE %s and m1.deleted = 0
+                             GROUP BY m1.key_value
+			                 ORDER BY m1.creation_date desc";
 
         if ( $obj->uid !== null ) {
-            $where_conditions[ ] = "uid = " . $obj->uid;
+            $where_conditions[ ] = "m1.uid = " . $obj->uid;
         }
 
         //tm_key conditions
         if ( $obj->tm_key !== null ) {
 
             if ( $obj->tm_key->key !== null ) {
-                $condition           = "key_value = '%s'";
+                $condition           = "m1.key_value = '%s'";
                 $where_conditions[ ] = sprintf( $condition, $this->con->escape( $obj->tm_key->key ) );
             }
 
             if ( $obj->tm_key->name !== null ) {
-                $condition           = "key_name = '%s'";
+                $condition           = "m1.key_name = '%s'";
                 $where_conditions[ ] = sprintf( $condition, $this->con->escape( $obj->tm_key->name ) );
             }
 
             if ( $obj->tm_key->tm !== null ) {
-                $condition           = "key_tm = %d";
+                $condition           = "m1.key_tm = %d";
                 $where_conditions[ ] = sprintf( $condition, $this->con->escape( $obj->tm_key->tm ) );
             }
 
             if ( $obj->tm_key->glos !== null ) {
-                $condition           = "key_glos = %d";
+                $condition           = "m1.key_glos = %d";
                 $where_conditions[ ] = sprintf( $condition, $this->con->escape( $obj->tm_key->glos ) );
             }
         }
@@ -106,7 +111,15 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         $arr_result = $this->con->fetch_array( $query );
 
+        $userDao = new Users_UserDao( Database::obtain() );
+
+        foreach( $arr_result as $k => $row ){
+            $users = $userDao->getByUids( explode( ",", $row[ 'owner_uids' ] ) );
+            $arr_result[ $k ][ 'in_users' ] = $users;
+        }
+
         return $this->_buildResult( $arr_result );
+
     }
 
     /**
@@ -506,7 +519,8 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
                                     'key'  => (string)$item[ 'key_value' ],
                                     'name' => (string)$item[ 'key_name' ],
                                     'tm'   => (bool)$item[ 'tm' ],
-                                    'glos' => (bool)$item[ 'glos' ]
+                                    'glos' => (bool)$item[ 'glos' ],
+                                    'in_users'  => $item[ 'in_users' ]
                             )
                     )
             );
