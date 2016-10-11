@@ -780,7 +780,7 @@ background: #efefef;
 			line-height:30px;
         }
 		
-		.api .block:last-child {height: 20px;
+		.api .block:last-child {
 min-height: 20px;}
 
 .fileformat th {
