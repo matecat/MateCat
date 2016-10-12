@@ -48,7 +48,7 @@
 
             getNormally = isNotSimilar || isEqual;
 
-            this.activateSegment(segment, getNormally);
+            this.activateSegment(segment.el, getNormally);
 
             segment.el.trigger('open');
             
