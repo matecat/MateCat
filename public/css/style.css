@@ -1935,15 +1935,7 @@ body.archived section .status-container
 	box-shadow: inset 0 1px 2px #ccc;
 	-webkit-box-shadow: inset 0 1px 2px #ccc;
     word-break: normal;
-/*	-moz-transition:background-color 2s;
-	-webkit-transition:background-color 2s !important;
-	-o-transition:background-color 2s;
-	transition:background-color 2s !important;
-	background-color: #fff !important;*/
-/*	transition:none;
-	-webkit-transition: none;*/
-
-	/*background-color: transparent;*/
+	font-variant-ligatures: none;
 }
 .editor.highlighted1 .editarea
 {

@@ -87,7 +87,7 @@ UI = {
 
 	},
 	activateSegment: function(segment, isNotSimilar) {
-		this.createFooter(this.currentSegment, isNotSimilar);
+		this.createFooter(segment, isNotSimilar);
 		this.createButtons(segment);
 		this.createHeader(segment);
 	},
