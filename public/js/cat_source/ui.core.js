@@ -1763,7 +1763,7 @@ UI = {
             }
         } else {
             if(isGDriveFile){
-                label = 'PREVIEW ON GOOGLE DRIVE';
+                label = 'PREVIEW IN GOOGLE DRIVE';
             } else {
                 label = 'PREVIEW';
             }
