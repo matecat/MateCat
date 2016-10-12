@@ -52,6 +52,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
     /**
      * @param TmKeyManagement_MemoryKeyStruct $obj
+     * @param bool                            $traverse
      *
      * @return array|void
      * @throws Exception
@@ -158,15 +159,6 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
                 $set_array[ ] = sprintf( $condition, $this->con->escape( $obj->tm_key->name ) );
             }
 
-//            if ( $obj->tm_key->tm !== null ) {
-//                $condition    = "key_tm = %d";
-//                $set_array[ ] = sprintf( $condition, $obj->tm_key->tm );
-//            }
-//
-//            if ( $obj->tm_key->glos !== null ) {
-//                $condition    = "key_glos = %d";
-//                $set_array[ ] = sprintf( $condition, $obj->tm_key->glos );
-//            }
         }
 
         $set_string   = null;
@@ -195,7 +187,6 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         $this->_validatePrimaryKey( $obj );
 
         $query = "DELETE FROM " . self::TABLE . " WHERE uid = %d and key_value = '%s'";
-//        $query = "UPDATE " . self::TABLE . "set deleted = 1 WHERE uid = %d and key_value = '%s'";
 
         $query = sprintf(
                 $query,
@@ -217,7 +208,6 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         $this->_validatePrimaryKey( $obj );
 
-//        $query = "DELETE FROM " . self::TABLE . " WHERE uid = %d and key_value = '%s'";
         $query = "UPDATE " . self::TABLE . " set deleted = 1 WHERE uid = %d and key_value = '%s'";
 
         $query = sprintf(
@@ -337,15 +327,6 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
                 $set_array[ ] = sprintf( $condition, $this->con->escape( $obj->tm_key->name ) );
             }
 
-//            if ( $obj->tm_key->tm !== null ) {
-//                $condition    = "key_tm = %d";
-//                $set_array[ ] = sprintf( $condition, $obj->tm_key->tm );
-//            }
-//
-//            if ( $obj->tm_key->glos !== null ) {
-//                $condition    = "key_glos = %d";
-//                $set_array[ ] = sprintf( $condition, $obj->tm_key->glos );
-//            }
         }
 
         $set_string   = null;
