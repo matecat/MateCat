@@ -56,7 +56,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
      * @return array|void
      * @throws Exception
      */
-    public function read( TmKeyManagement_MemoryKeyStruct $obj ) {
+    public function read( TmKeyManagement_MemoryKeyStruct $obj, $traverse = false ) {
         $obj = $this->sanitize( $obj );
 
         $where_conditions = array();
@@ -111,11 +111,21 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         $arr_result = $this->con->fetch_array( $query );
 
-        $userDao = new Users_UserDao( Database::obtain() );
+        if( $traverse ){
 
-        foreach( $arr_result as $k => $row ){
-            $users = $userDao->getByUids( explode( ",", $row[ 'owner_uids' ] ) );
-            $arr_result[ $k ][ 'in_users' ] = $users;
+            $userDao = new Users_UserDao( Database::obtain() );
+
+            foreach( $arr_result as $k => $row ){
+                $users = $userDao->getByUids( explode( ",", $row[ 'owner_uids' ] ) );
+                $arr_result[ $k ][ 'in_users' ] = $users;
+            }
+
+        } else {
+
+            foreach( $arr_result as $k => $row ){
+                $arr_result[ $k ][ 'in_users' ] = $row[ 'owner_uids' ];
+            }
+
         }
 
         return $this->_buildResult( $arr_result );
@@ -514,12 +524,13 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         foreach ( $array_result as $item ) {
 
             $build_arr = array(
-                    'uid'       => $item[ 'uid' ],
-                    'tm_key'    => new TmKeyManagement_TmKeyStruct( array(
-                                    'key'  => (string)$item[ 'key_value' ],
-                                    'name' => (string)$item[ 'key_name' ],
-                                    'tm'   => (bool)$item[ 'tm' ],
-                                    'glos' => (bool)$item[ 'glos' ],
+                    'uid'    => $item[ 'uid' ],
+                    'tm_key' => new TmKeyManagement_TmKeyStruct( array(
+                                    'key'       => (string)$item[ 'key_value' ],
+                                    'name'      => (string)$item[ 'key_name' ],
+                                    'tm'        => (bool)$item[ 'tm' ],
+                                    'glos'      => (bool)$item[ 'glos' ],
+                                    'is_shared' => ( $item[ 'owners_tot' ] > 1 ),
                                     'in_users'  => $item[ 'in_users' ]
                             )
                     )

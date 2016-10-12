@@ -57,6 +57,7 @@ class userKeysController extends ajaxController {
                     'code'    => -2,
                     'message' => "Key missing"
             );
+            $this->result[ 'success' ]  = false;
         }
 
         if ( array_search( $this->exec, self::$allowed_exec ) === false ) {
@@ -64,6 +65,7 @@ class userKeysController extends ajaxController {
                     'code'    => -5,
                     'message' => "No method $this->exec allowed."
             );
+            $this->result[ 'success' ]  = false;
         }
 
         //ONLY LOGGED USERS CAN PERFORM ACTIONS ON KEYS
@@ -72,6 +74,7 @@ class userKeysController extends ajaxController {
                     'code'    => -1,
                     'message' => "Login is required to perform this action"
             );
+            $this->result[ 'success' ]  = false;
         }
 
     }
@@ -151,6 +154,7 @@ class userKeysController extends ajaxController {
 
         } catch ( Exception $e ) {
             $this->result[ 'data' ]     = 'KO';
+            $this->result[ 'success' ]  = false;
             $this->result[ 'errors' ][] = array( "code" => $e->getCode(), "message" => $e->getMessage() );
         }
 
