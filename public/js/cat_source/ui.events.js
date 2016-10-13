@@ -1129,8 +1129,6 @@ $.extend(UI, {
 			} else {
 				gl.removeClass('disabled');
 			}
-		}).on('click', '.sub-editor .gl-search .set-glossary', function(e) {
-			e.preventDefault();
 		}).on('click', '.sub-editor .gl-search .set-glossary:not(.disabled)', function(e) {
 			e.preventDefault();
 			UI.setGlossaryItem();

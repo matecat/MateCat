@@ -282,7 +282,8 @@
                     .replace(String.fromCharCode( parseInt( 0xA0, 10 ) ), config.nbspPlaceholder );
             var decoded_source = UI.decodePlaceholdersToText(source, true);
             currentSegment.find('.source').html(decoded_source);
-            UI.lockTags(currentSegment.find(".source"))
+            UI.lockTags(currentSegment.find(".source"));
+            UI.markGlossaryItemsInSource(UI.cachedGlossaryData);
         },
         /**
          * Set the tag projection to true and reload file

@@ -364,7 +364,7 @@ $.extend(UI, {
         },
 	setDeleteSuggestion: function(segment) {
 
-        $('.sub-editor .overflow a.trash', segment).click(function(e) {
+        $('.sub-editor.matches .overflow a.trash', segment).click(function(e) {
 			e.preventDefault();
 
             var source, target;

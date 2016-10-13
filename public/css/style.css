@@ -1382,6 +1382,7 @@ background: #09beec;
 	color: #666;
 	width:50%;
 	font-size: 80%;
+	font-style: italic;
 }
 .sub-editor .gl-search .comment a:hover,
 .sub-editor .glossary-add-comment a:hover
