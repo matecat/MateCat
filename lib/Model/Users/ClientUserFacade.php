@@ -29,4 +29,8 @@ class Users_ClientUserFacade extends stdClass {
 
     }
 
+    public function __toString() {
+        return json_encode( $this );
+    }
+
 }

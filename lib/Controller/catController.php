@@ -414,6 +414,9 @@ class catController extends viewController {
                         }
                     }
 
+                    //copy the is_shared value from the key inside the Keyring into the key coming from job
+                    $jobKey->setShared( $reverse_lookup_user_personal_keys[ 'elements' ][ $_index_position ]->tm_key->isShared() );
+
                     unset( $this->_keyList[ 'totals' ][ $_index_position ] );
 
                 } else {

@@ -87,7 +87,7 @@ UI = {
 
 	},
 	activateSegment: function(segment, isNotSimilar) {
-		this.createFooter(this.currentSegment, isNotSimilar);
+		this.createFooter(segment, isNotSimilar);
 		this.createButtons(segment);
 		this.createHeader(segment);
 	},
@@ -1763,7 +1763,7 @@ UI = {
             }
         } else {
             if(isGDriveFile){
-                label = 'PREVIEW ON GOOGLE DRIVE';
+                label = 'PREVIEW IN GOOGLE DRIVE';
             } else {
                 label = 'PREVIEW';
             }
