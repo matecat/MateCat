@@ -87,9 +87,9 @@ UI = {
 
 	},
 	activateSegment: function(segment, isNotSimilar) {
-		this.createFooter(segment, isNotSimilar);
+		this.createFooter(segment.el, isNotSimilar);
 		this.createButtons(segment);
-		this.createHeader(segment);
+		this.createHeader(segment.el);
 	},
     evalCurrentSegmentTranslationAndSourceTags : function( segment ) {
         if ( segment.length == 0 ) return ;
