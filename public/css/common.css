@@ -1723,7 +1723,7 @@ th.activate, td.activate {
 .message-share-tmx {
     font-size: 14px;
     float: left;
-    width: 610px;
+    width: 565px;
     padding-left: 12px;
     line-height: 34px;
 }
@@ -1742,6 +1742,10 @@ input.message-share-tmx-input-email {
 span.message-share-tmx-email, .message-share-tmx-openemailpopup {
     text-decoration: underline;
     cursor: pointer;
+}
+
+.cancelsharetmx {
+    margin-right: 14px;
 }
 /*
 .new .privatekey {
@@ -3017,6 +3021,10 @@ input.email-export-tmx
 	box-shadow: inset 0 1px 2px #ddd;
 -webkit-box-shadow: inset 0 1px 2px #ddd;
 }
+input#new-tm-key {
+    margin-right: 15px !important;
+}
+
 input.email-export-tmx {
     width: 200px;
 }

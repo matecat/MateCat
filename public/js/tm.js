@@ -134,10 +134,10 @@
             });
 
             // script per fare apparire e scomparire la riga con l'upload della tmx
-            $('body').on('click', 'tr.mine a.canceladdtmx, tr.ownergroup a.canceladdtmx, tr.mine a.canceladdglossary, tr.ownergroup a.canceladdglossary, #inactivetm tr.new .action .addtmxfile', function() {
+            $('body').on('click', 'tr.mine a.canceladdtmx, tr a.cancelsharetmx, tr.ownergroup a.canceladdtmx, tr.mine a.canceladdglossary, tr.ownergroup a.canceladdglossary, #inactivetm tr.new .action .addtmxfile', function() {
 
-                $(this).parents('tr').find('.action .addtmx, .action .addGlossary').removeClass('disabled');
-                $(this).parents('td.uploadfile').slideToggle(function () {
+                $(this).parents('tr').find('.action a').removeClass('disabled');
+                $(this).parents('td.uploadfile, .share-tmx-container').slideToggle(function () {
                     $(this).remove();
                 });
                 UI.hideAllBoxOnTables();
@@ -158,7 +158,7 @@
 
 
                 UI.saveTMkey(keyValue, descKey).done(function () {
-                    UI.checkTMKey('key')
+                    UI.checkTMKey('key');
                 });
 
 
@@ -229,9 +229,9 @@
                 if(!tr.find('td.lookup input').is(':checked') && !tr.find('td.update input').is(':checked')) {
                     UI.checkTMGrantsModifications(this);
                     tr.find('.activate input').prop('checked', false);
-                } else {
-                    UI.checkTMKeysUpdateChecks();
                 }
+                UI.checkTMKeysUpdateChecks();
+
 
             }).on('click', '.mgmt-table-mt tr .action .deleteMT', function() {
                 UI.showMTDeletingMessage($(this));
@@ -259,12 +259,12 @@
                     $('#inactivetm').addClass('filtering');
                     UI.filterInactiveTM($('#filterInactive').val());
                 }
-            }).on('mousedown', '.mgmt-tm .downloadtmx', function(e){
+            }).on('mousedown', '.mgmt-tm .downloadtmx:not(.disabled)', function(e){
                 e.preventDefault();
 
                 UI.openExportTmx(this);
 
-            }).on('click', 'td.owner:, .shareKey', function(e){
+            }).on('click', 'td.owner, .shareKey:not(.disabled)', function(e){
                 if ( $(this).closest('tr').hasClass('mymemory')) return;
                 UI.openShareResource( $(this) );
             }).on('mousedown', '.mgmt-tm .downloadGlossary', function(e){
@@ -281,10 +281,9 @@
             }).on('mousedown', '.mgmt-tm .canceladd-export-tmx', function(e){
                 e.preventDefault();
                 UI.closeExportTmx($(this).closest('tr'));
-            }).on('mousedown', '.mgmt-tm .deleteTM', function(e){
+            }).on('mousedown', '.mgmt-tm .deleteTM:not(.disabled)', function(e){
                 e.preventDefault();
                 UI.showDeleteTmMessage(this);
-                // UI.deleteTM($(this));
             }).on('keydown', function(e) {
 
                 var esc = 27 ;
@@ -647,11 +646,13 @@
 
         },
         addTMKeyToList: function ( uploading ) {
-
+            var descr = $( '#new-tm-description' ).val();
+            var key = $( '#new-tm-key' ).val();
+            descr = (descr.length) ? descr : "Private TM and Glossary";
             var keyParams = {
                 r: $( '#new-tm-read' ).is( ':checked' ),
                 w: $( '#new-tm-write' ).is( ':checked' ),
-                desc: $( '#new-tm-description' ).val(),
+                desc: descr,
                 TMKey: $( '#new-tm-key' ).val()
             };
 
@@ -666,8 +667,18 @@
             UI.pulseTMadded( $( '#activetm tr.mine' ).last() );
 
             if ( APP.isCattool ) UI.saveTMdata( false );
+            UI.checkTMKeysUpdateChecks();
+            UI.checkKeyIsShared(key);
         },
-
+        checkKeyIsShared: function (key) {
+            UI.getUserSharedKey(key).done(function (response) {
+                var users = response.data;
+                if (users.length > 1) {
+                    $('tr.mine[data-key='+ key +'] .icon-owner').removeClass('icon-lock icon-owner-private')
+                        .addClass('icon-users icon-owner-shared');
+                }
+            });
+        },
         /**
          * Row structure
          * @var keyParams
@@ -695,9 +706,11 @@
                 '    <td class="activate"><input type="checkbox" checked="checked"/></td>' +
                 '    <td class="lookup check text-center"><input type="checkbox"' + ( keyParams.r ? ' checked="checked"' : '' ) + ' /></td>' +
                 '    <td class="update check text-center"><input type="checkbox"' + ( keyParams.w ? ' checked="checked"' : '' ) + ' /></td>' +
+                '    <td class="description"><div class="edit-desc" data-descr="'+ keyParams.desc +'">' + keyParams.desc + '</div></td>' +
                 '    <td class="privatekey">' + keyParams.TMKey + '</td>' +
-                '    <td class="owner">You</td>' +
-                '    <td class="description"><div class="edit-desc">' + keyParams.desc + '</div></td>' +
+                '    <td class="owner">' +
+                '       <span  class="icon-owner icon-lock icon-owner-private"></span>'+
+                '   </td>' +
                 '    <td class="action">' +
                 '       <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>'+
                 '          <div class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;'+
@@ -705,6 +718,7 @@
                 '                   <li><a class="addGlossary" title="Import Glossary" alt="Import Glossary"><span class="icon-upload"></span>Import Glossary</a></li>'+
                 '                   <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>' +
                 '                   <li><a class="downloadGlossary" title="Export Glossary" alt="Export Glossary"><span class="icon-download"></span>Export Glossary</a></li>' +
+                '                   <li><a class="shareKey" title="Share resource" alt="Share resource"><span class="icon-users"></span>Share resource</a></li>' +
                 '                  <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>'+
                 '              </ul>'+
                 '          </div>'+
@@ -744,7 +758,7 @@
         clearTMPanel: function () {
 
             $('#activetm .edit-desc').removeAttr('contenteditable');
-            $('#activetm td.action .addtmx').removeClass('disabled');
+            $('#activetm td.action a').removeClass('disabled');
             $("#activetm tr.new").hide();
             $("tr.tm-key-deleting").removeClass('tm-key-deleting');
             $("#activetm tr.new .addtmxfile, #activetm tr.new .addtmxfile .addglossaryfile").removeClass('disabled');
@@ -1076,6 +1090,9 @@
         },
         saveTMkey: function (key, desc) {
             delete UI.newTmKey;
+            if ( desc.length == 0 ) {
+                desc = "Private TM and Glossary";
+            }
             return APP.doRequest({
                 data: {
                     action: 'userKeys',
@@ -1608,18 +1625,20 @@
                 var exportDiv = '';
                 if ( users.length === 0 ) {
                     exportDiv = '<td class="share-tmx-container" style="display: none">' +
-                        '<div class="message-share-tmx">This resource is not shared </div>' +
-                        '<input class="message-share-tmx-input-email" placeholder="Enter email addresses.."/>'+
+                        '<div class="message-share-tmx">You can share ownership of the resource by sharing the key with your colleagues.</div>' +
+                        '<input class="message-share-tmx-input-email" placeholder="Enter email addresses separated by comma"/>'+
+                        '<a class="pull-right btn-orange-small cancelsharetmx"><span class="text"></span>   </a>' +
                         '<div class="pull-right btn-ok share-button">Share</div>'+
                         '</td>';
-                } else if ( users.length > 1 ) {
+                } else if ( users.length > 0 ) {
                     var totalShareUsers = (users.length === 1) ? '' : 'and <span class="message-share-tmx-openemailpopup">'+ (users.length - 1) +' others</span>';
                     exportDiv = '<td class="share-tmx-container" style="display: none">' +
                         '<div class="message-share-tmx">Shared resource ' +
                         'is co-owned by you, <span class="message-share-tmx-email message-share-tmx-openemailpopup">'+ users[0].email +'</span>  ' +
                         totalShareUsers +
                         '</div>' +
-                        '<input class="message-share-tmx-input-email" placeholder="Enter email addresses.."/>'+
+                        '<input class="message-share-tmx-input-email" placeholder="Enter email addresses separated by comma"/>'+
+                        '<a class="pull-right btn-orange-small cancelsharetmx"><span class="text"></span>   </a>' +
                         '<div class="pull-right btn-ok share-button">Share</div>'+
                         '</td>';
                 } else {
@@ -1629,6 +1648,9 @@
 
                 tr.append(exportDiv);
                 tr.find('.share-tmx-container').slideToggle();
+
+                //If still not shared dont create the popup
+                if ( users.length === 0 ) return;
 
                 var description = tr.find('.edit-desc').data('descr');
 
@@ -1678,25 +1700,27 @@
 
                     var copyTextareaBtn = document.querySelector('.share-popup-copy-link-button');
 
-                    copyTextareaBtn.addEventListener('click', function(event) {
+                    var copyFn = function() {
                         var copyTextarea = document.querySelector('.share-popup-input-key');
                         copyTextarea.select();
 
                         try {
                             var successful = document.execCommand('copy');
-                            var msg = successful ? 'successful' : 'unsuccessful';
                             if (successful) {
-                                $('.share-popup-copy-result').text('Link copied to clipboard.');
+                                $('.share-popup-copy-result').text('Key copied to clipboard.');
                             } else {
                                 $('.share-popup-copy-result').text('Error copying to the clipboard, do it manually.');
                             }
                         } catch (err) {
                             $('.share-popup-copy-result').text('Error copying to the clipboard, do it manually.');
                         }
-                    });
+                    };
+
+                    copyTextareaBtn.removeEventListener('click', copyFn);
+
+                    copyTextareaBtn.addEventListener('click', copyFn);
                 });
             });
-
 
         },
         openExportGlossary: function (elem, tr) {
@@ -1749,7 +1773,7 @@
             $(elem).find('td.download-tmx-container').slideToggle(function () {
                 $(this).remove();
             });
-            $(elem).find('.action .downloadtmx, .action .addtmx').removeClass('disabled');
+            $(elem).find('.action a').removeClass('disabled');
         },
         addFormUpload: function (elem, type) {
             var label, format;
@@ -1762,9 +1786,7 @@
                         '</p>';
                 format = '.xlsx,.xls';
             }
-            $(elem).parents('.action').find('.addtmx, .addGlossary').each(function (el) {
-                $(this).addClass('disabled');
-            });
+            $(elem).parents('.action a').addClass('disabled');
             var nr = '<td class="uploadfile" style="display: none">' +
                 label +
                 '<form class="existing add-TM-Form pull-left" action="/" method="post">' +
@@ -1913,7 +1935,7 @@
         },
 
         checkTMKeysUpdateChecks: function () {
-            var updateCheck = $("#activetm").find("tr:not(.new)  .update input:checked").length;
+            var updateCheck = $("#activetm").find("tr:not(.mymemory, .new)  .update input:checked").length;
             if ( updateCheck  === 0) {
                 $("#activetm").find("tr.mymemory .update input").prop('checked', true);
             } else {
