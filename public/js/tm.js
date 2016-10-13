@@ -69,7 +69,7 @@
                 } else {
                     checkbox = $('table.mgmt-mt tr[data-id=' + $(this).val() + '] .enable-mt input');
                     UI.activateMT(checkbox);
-                };
+                }
             });
             $("#mt_engine_int").change(function() {
                 $('#add-mt-provider-cancel').hide();
@@ -264,7 +264,8 @@
 
                 UI.openExportTmx(this);
 
-            }).on('click', 'td.owner, .shareKey', function(e){
+            }).on('click', 'td.owner:, .shareKey', function(e){
+                if ( $(this).closest('tr').hasClass('mymemory')) return;
                 UI.openShareResource( $(this) );
             }).on('mousedown', '.mgmt-tm .downloadGlossary', function(e){
                 //Todo
@@ -1564,6 +1565,24 @@
             $(elem).parents('tr').append(exportDiv);
             $(elem).parents('tr').find('.download-tmx-container').slideToggle();
         },
+        getUserSharedKey: function (keyValue) {
+            return APP.doRequest({
+                data: {
+                    action: 'userKeys',
+                    exec: 'info',
+                    key: keyValue
+                },
+                error: function() {
+                    console.log('getUserSharedKey error');
+                },
+                success: function(d) {
+                    if(d.success !== true) {
+                        UI.showErrorOnKeyInput('Error');
+
+                    }
+                }
+            });
+        },
         openShareResource: function (elem) {
             var tr = $(elem).parents('tr');
             if (tr.find(".share-tmx-container").length) {
@@ -1573,104 +1592,112 @@
                 tr.find('.action').find('a').each( function() { $(this).removeClass('disabled'); } );
                 return
             }
-            tr.find('.action').find('a').each( function() { $(this).addClass('disabled'); } );
-            var key = tr.find(".privatekey").text();
-            var exportDiv = '<td class="share-tmx-container" style="display: none">' +
-                    '<div class="message-share-tmx">Shared resource ' +
-                    'is co-owned by you, <span class="message-share-tmx-email message-share-tmx-openemailpopup">pippo@translated.net</span> and ' +
-                    '<span class="message-share-tmx-openemailpopup">123 others</span></div>' +
-                    '<input class="message-share-tmx-input-email" placeholder="Enter email addresses.."/>'+
-                    '<div class="pull-right btn-ok share-button">Share</div>'+
-                '</td>';
 
-            tr.append(exportDiv);
-            tr.find('.share-tmx-container').slideToggle();
-            var key = tr.find('.privatekey').text();
-            var description = tr.find('.edit-desc').data('descr');
-            if (description.length) {
-                description = "<span class='share-popup-description'>"+description+"</span>";
-            }
-            var message = "<div class='share-popup-container'>" +
+            var key = tr.find(".privatekey").text();
+            this.getUserSharedKey(key).done(function (response) {
+                if ( response.success !== true ) return;
+
+                var users = response.data;
+                //Remove the user from the list
+                var indexOfUser = users.map(function(item) { return item.email; }).indexOf(config.userMail);
+                var user = users.splice(indexOfUser,1);
+                user = user[0];
+
+                tr.find('.action').find('a').each( function() { $(this).addClass('disabled'); } );
+                //Create the container
+                var exportDiv = '';
+                if ( users.length === 0 ) {
+                    exportDiv = '<td class="share-tmx-container" style="display: none">' +
+                        '<div class="message-share-tmx">This resource is not shared </div>' +
+                        '<input class="message-share-tmx-input-email" placeholder="Enter email addresses.."/>'+
+                        '<div class="pull-right btn-ok share-button">Share</div>'+
+                        '</td>';
+                } else if ( users.length > 1 ) {
+                    var totalShareUsers = (users.length === 1) ? '' : 'and <span class="message-share-tmx-openemailpopup">'+ (users.length - 1) +' others</span>';
+                    exportDiv = '<td class="share-tmx-container" style="display: none">' +
+                        '<div class="message-share-tmx">Shared resource ' +
+                        'is co-owned by you, <span class="message-share-tmx-email message-share-tmx-openemailpopup">'+ users[0].email +'</span>  ' +
+                        totalShareUsers +
+                        '</div>' +
+                        '<input class="message-share-tmx-input-email" placeholder="Enter email addresses.."/>'+
+                        '<div class="pull-right btn-ok share-button">Share</div>'+
+                        '</td>';
+                } else {
+                    return false;
+                }
+
+
+                tr.append(exportDiv);
+                tr.find('.share-tmx-container').slideToggle();
+
+                var description = tr.find('.edit-desc').data('descr');
+
+                if (description.length) {
+                    description = "<span class='share-popup-description'>"+description+"</span>";
+                }
+
+                //Create the users list with the logged user first
+                var htmlUsersList = '<div class="share-popup-list-item">'+
+                    '<span class="share-popup-item-name">'+user.first_name + ' ' + user.last_name + ' (you)</span>'+
+                    '<span class="share-popup-item-email">'+ user.email+ '</span>'+
+                    '</div>';
+                users.forEach(function (item) {
+                    htmlUsersList = htmlUsersList +
+                        '<div class="share-popup-list-item">'+
+                        '<span class="share-popup-item-name">'+item.first_name + ' ' + item.last_name + '</span>'+
+                        '<span class="share-popup-item-email">'+ item.email+ '</span>'+
+                        '</div>';
+                });
+
+                var message = "<div class='share-popup-container'>" +
                     "<div class='share-popup-top'>" +
-                        "<span class='share-popup-top-label'>Resource to share:  </span>"+
-                        description +
-                        "<input value='"+key+"' class='share-popup-input-key'/>" +
-                        "<div class='share-popup-copy-link-button btn-grey'>Copy Key</div>" +
-                        "<div class='share-popup-copy-result'></div>"+
+                    "<span class='share-popup-top-label'>Resource to share:  </span>"+
+                    description +
+                    "<input value='"+key+"' class='share-popup-input-key'/>" +
+                    "<div class='share-popup-copy-link-button btn-grey'>Copy Key</div>" +
+                    "<div class='share-popup-copy-result'></div>"+
                     "</div>"+
                     "<div class='share-popup-container-list'>" +
-                        "<span class='share-popup-list-title'>Who owns the resource:</span>"+
-                        "<div class='share-popup-list'>" +
-                            "<div class='share-popup-list-item'>"+
-                                "<span class='share-popup-item-name'>Federico Ricciuti</span>"+
-                                "<span class='share-popup-item-email'>federico.ricciuti@gmail.com</span>"+
-                            "</div>"+
-                "<div class='share-popup-list-item'>"+
-                "<span class='share-popup-item-name'>Federico Ricciuti</span>"+
-                "<span class='share-popup-item-email'>federico.ricciuti@gmail.com</span>"+
-                "</div>"+
-                "<div class='share-popup-list-item'>"+
-                "<span class='share-popup-item-name'>Federico Ricciuti</span>"+
-                "<span class='share-popup-item-email'>federico.ricciuti@gmail.com</span>"+
-                "</div>"+
-                "<div class='share-popup-list-item'>"+
-                "<span class='share-popup-item-name'>Federico Ricciuti</span>"+
-                "<span class='share-popup-item-email'>federico.ricciuti@gmail.com</span>"+
-                "</div>"+
-                "<div class='share-popup-list-item'>"+
-                "<span class='share-popup-item-name'>Federico Ricciuti</span>"+
-                "<span class='share-popup-item-email'>federico.ricciuti@gmail.com</span>"+
-                "</div>"+
-                "<div class='share-popup-list-item'>"+
-                "<span class='share-popup-item-name'>Federico Ricciuti</span>"+
-                "<span class='share-popup-item-email'>federico.ricciuti@gmail.com</span>"+
-                "</div>"+
-                "<div class='share-popup-list-item'>"+
-                "<span class='share-popup-item-name'>Federico Ricciuti</span>"+
-                "<span class='share-popup-item-email'>federico.ricciuti@gmail.com</span>"+
-                "</div>"+
-                "<div class='share-popup-list-item'>"+
-                "<span class='share-popup-item-name'>Federico Ricciuti</span>"+
-                "<span class='share-popup-item-email'>federico.ricciuti@gmail.com</span>"+
-                "</div>"+
-                "<div class='share-popup-list-item'>"+
-                "<span class='share-popup-item-name'>Federico Ricciuti</span>"+
-                "<span class='share-popup-item-email'>federico.ricciuti@gmail.com</span>"+
-                "</div>"+
-                        "</div>"+
+                    "<span class='share-popup-list-title'>Who owns the resource:</span>"+
+                    "<div class='share-popup-list'>" +
+                    htmlUsersList +
+                    "</div>"+
                     "</div>"+
                     "<div class='share-popup-container-bottom'>" +
-                        "<span class='share-popup-bottom-label'>Share ownership of the resource with:</span>"+
-                        "<input class='share-popup-container-input-email' placeholder='Enter email addresses..'>"+
-                        "<div class='pull-right btn-ok share-button'>Share</div>"+
+                    "<span class='share-popup-bottom-label'>Share ownership of the resource with:</span>"+
+                    "<input class='share-popup-container-input-email' placeholder='Enter email addresses..'>"+
+                    "<div class='pull-right btn-ok share-button'>Share</div>"+
                     "</div>"+
-                "</div>";
-            tr.find('.message-share-tmx-openemailpopup').on("click", function () {
-                APP.confirm({
-                    name: 'share-window',
-                    cancelTxt: 'Cancel',
-                    msg: message
-                });
+                    "</div>";
+                tr.find('.message-share-tmx-openemailpopup').on("click", function () {
+                    APP.confirm({
+                        name: 'share-window',
+                        cancelTxt: 'Cancel',
+                        msg: message
+                    });
 
-                var copyTextareaBtn = document.querySelector('.share-popup-copy-link-button');
+                    var copyTextareaBtn = document.querySelector('.share-popup-copy-link-button');
 
-                copyTextareaBtn.addEventListener('click', function(event) {
-                    var copyTextarea = document.querySelector('.share-popup-input-key');
-                    copyTextarea.select();
+                    copyTextareaBtn.addEventListener('click', function(event) {
+                        var copyTextarea = document.querySelector('.share-popup-input-key');
+                        copyTextarea.select();
 
-                    try {
-                        var successful = document.execCommand('copy');
-                        var msg = successful ? 'successful' : 'unsuccessful';
-                        if (successful) {
-                            $('.share-popup-copy-result').text('Link copied to clipboard.');
-                        } else {
+                        try {
+                            var successful = document.execCommand('copy');
+                            var msg = successful ? 'successful' : 'unsuccessful';
+                            if (successful) {
+                                $('.share-popup-copy-result').text('Link copied to clipboard.');
+                            } else {
+                                $('.share-popup-copy-result').text('Error copying to the clipboard, do it manually.');
+                            }
+                        } catch (err) {
                             $('.share-popup-copy-result').text('Error copying to the clipboard, do it manually.');
                         }
-                    } catch (err) {
-                        $('.share-popup-copy-result').text('Error copying to the clipboard, do it manually.');
-                    }
+                    });
                 });
             });
+
+
         },
         openExportGlossary: function (elem, tr) {
             tr.find('.action a').addClass('disabled');
