@@ -3859,9 +3859,7 @@ cursor: pointer;
 }
 
 .addtmxfile .text:before,
-.addglossaryfile .text:before,
-/*.addtmx .text:before, */
-.open-popup-addtm-tr:before
+.addglossaryfile .text:before
  {
 	content: "\ea10";
 	padding-right: 5px;
@@ -3874,7 +3872,7 @@ cursor: pointer;
 	padding-right: 7px;
 }
 
-
+.open-popup-addtm-tr:before,
 .downloadtmx .text:before {
 		content: "\e602";
 	padding-right: 5px;
