@@ -1631,6 +1631,8 @@
                         '<div class="pull-right btn-ok share-button">Share</div>'+
                         '</td>';
                 } else if ( users.length > 0 ) {
+                    $('tr.mine[data-key='+ key +'] .icon-owner').removeClass('icon-lock icon-owner-private')
+                        .addClass('icon-users icon-owner-shared');
                     var totalShareUsers = (users.length === 1) ? '' : 'and <span class="message-share-tmx-openemailpopup">'+ (users.length - 1) +' others</span>';
                     exportDiv = '<td class="share-tmx-container" style="display: none">' +
                         '<div class="message-share-tmx">Shared resource ' +

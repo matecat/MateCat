@@ -2159,6 +2159,10 @@ span.email-export-tmx-email-error,
 	padding: 5px 5px 5px 5px!important;
 }
 
+#inactivetm th.dragrow {
+    width: 10px !important;
+}
+
 td.uploadfile p {
     margin: 0 10px;
 }
@@ -3101,8 +3105,9 @@ overflow: hidden;
     resize: none;
     box-shadow: inset 0 1px 2px #ddd;
     -webkit-box-shadow: inset 0 1px 2px #ddd;
-    margin-left: 12px;
+    margin-left: 0px;
     margin-top: 4px !important;
+    width: 450px !important;
 }
 tr.new {
 vertical-align: top;
