@@ -1025,7 +1025,7 @@ function countThisTranslatedHashInJob( $jid, $jpassword, $sid ) {
         AND password = '%s'
         AND segment_translations.status IN( 
           '" . Constants_TranslationStatus::STATUS_TRANSLATED . "' , 
-          '" . Constants_TranslationStatus::STATUS_TRANSLATED . "' 
+          '" . Constants_TranslationStatus::STATUS_APPROVED . "' 
         )
     ";
 
