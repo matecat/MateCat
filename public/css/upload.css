@@ -1358,6 +1358,7 @@ div.continue-gdrive {
     padding: 0.50rem 0.70rem 0.0rem 2.3rem;
     background: url(../img/logo-drive-16.png) 0.7rem 0.55rem no-repeat;
     margin-right: 10px;
+    background-size: 20px;
 }
 
 .continue-gdrive span.clear-gdrive {

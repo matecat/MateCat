@@ -57,9 +57,9 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
           "description": "We developed a set of Rest API to let you integrate Matecat in your translation management system or in any other application. Use our API to create projects and check their status.",
           "version": "1.0.0"
         },
-        "host": "matecat.dev",
+        "host": "www.matecat.com",
         "schemes": [
-          "http"
+          "https"
         ],
         "basePath": "/api",
         "produces": [
