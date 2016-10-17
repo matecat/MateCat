@@ -65,7 +65,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
      *
      * @param Users_UserStruct $UserQuery
      *
-     * @return Users_UserStruct|Users_UserStruct[]
+     * @return DataAccess_IDaoStruct|DataAccess_IDaoStruct[]
      * @throws Exception
      */
     public function read( Users_UserStruct $UserQuery ) {

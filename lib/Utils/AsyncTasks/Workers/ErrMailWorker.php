@@ -97,7 +97,7 @@ class ErrMailWorker extends AbstractWorker {
 
             $mail = new PHPMailer();
 
-            $mail->IsSMTP();
+            $mail->isSMTP();
             $mail->Host       = $mailConf->server_configuration['Host'];
             $mail->Port       = $mailConf->server_configuration['Port'];
             $mail->Sender     = $mailConf->server_configuration['Sender'];
@@ -106,11 +106,11 @@ class ErrMailWorker extends AbstractWorker {
             $mail->From       = $mailConf->server_configuration['From'];
             $mail->FromName   = $mailConf->server_configuration['FromName'];
             $mail->ReturnPath = $mailConf->server_configuration['ReturnPath'];
-            $mail->AddReplyTo( $mail->ReturnPath, $mail->FromName );
+            $mail->addReplyTo( $mail->ReturnPath, $mail->FromName );
 
             if( !empty( $mailConf->email_list ) ){
                 foreach( $mailConf->email_list as $email => $uName ){
-                    $mail->AddAddress( $email, $uName );
+                    $mail->addAddress( $email, $uName );
                 }
             } else{
                 $this->_doLog( "--- (Worker " . $this->_workerPid . ") : No eMail list found. Ensure that 'TaskRunner\\Commons\\Params->email_list' exists and contains a valid mail list. One per row." );
@@ -121,7 +121,7 @@ class ErrMailWorker extends AbstractWorker {
 
         $mail->XMailer  = 'MateCat Mailer';
         $mail->CharSet = 'UTF-8';
-        $mail->IsHTML();
+        $mail->isHTML();
 
         /*
          *
@@ -152,9 +152,9 @@ class ErrMailWorker extends AbstractWorker {
         $txtContent = preg_replace(  '|<br[\x{20}/]*>|ui', "\n\n", $mailConf->body );
         $mail->AltBody = strip_tags( $txtContent );
 
-        $mail->MsgHTML($mail->Body);
+        $mail->msgHTML($mail->Body);
 
-        if(!$mail->Send()) {
+        if(!$mail->send()) {
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Mailer Error: " . $mail->ErrorInfo );
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Message could not be sent: \n\n" . $mail->AltBody );
             throw new ReQueueException( 'Mailer Error: ' . $mail->ErrorInfo );

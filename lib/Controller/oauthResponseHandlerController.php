@@ -105,10 +105,4 @@ class oauthResponseHandlerController extends viewController{
 		$this->template->javascript_loader="javascript:doload('".$this->redirectUrl."');";
 	}
 
-	private function sendNotifyMail($data){
-		$message="Dear ".$data['firstname']."\n\nA Matecat account has been automatically created for you with the following name: ".$data['mail'];
-		$mail_res=mailer('Matecat Team','noreply@'.INIT::$HTTPHOST,$data['name'],$data['mail'],'Welcome to Matecat!',$message);
-	}
 }
-
-?>

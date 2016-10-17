@@ -1,6 +1,7 @@
 <?php
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
+use Exceptions\NotFoundError;
 
 
 /**
@@ -173,7 +174,7 @@ class catController extends viewController {
             // TODO: why is this check here and not in constructor? At least it should be moved in a specific
             // function and not-found handled via exception.
             $this->findJobByIdAndPassword();
-        } catch( \Exceptions_RecordNotFound $e ){
+        } catch( NotFoundError $e ){
             $this->job_not_found = true;
             return;
         }
