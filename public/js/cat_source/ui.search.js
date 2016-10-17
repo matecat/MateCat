@@ -214,9 +214,9 @@ $.extend(UI, {
 		if (this.searchParams['exact-match'])
 			query += ' exactly';
 		if (this.searchParams.source)
-			query += ' <span class="param">' + this.searchParams.source + '</span> in source';
+			query += ' <span class="param">' + htmlEncode(this.searchParams.source) + '</span> in source';
 		if (this.searchParams.target)
-			query += ' <span class="param">' + this.searchParams.target + '</span> in target';
+			query += ' <span class="param">' + htmlEncode(this.searchParams.target) + '</span> in target';
 
 		if (this.searchParams.status)
 			query += (((this.searchParams.source) || (this.searchParams.target)) ? ' and' : '') + ' status <span class="param">' + this.searchParams.status + '</span>';
@@ -272,7 +272,7 @@ $.extend(UI, {
 		var where = options.where;
 		var seg = options.seg;
 		var singleSegment = options.singleSegment || false;
-
+		var status, what, q, hasTags;
 		if (typeof where == 'undefined') {
 			this.clearSearchMarkers();
 		}
@@ -288,8 +288,8 @@ $.extend(UI, {
 
 		} else if (this.searchMode == 'source&target') { // search mode: source&target
 			console.log('source & target');
-			var status = (p.status == 'all') ? '' : '.status-' + p.status;
-			var q = (singleSegment) ? '#' + $(singleSegment).attr('id') : "section" + status + ':not(.status-new)';
+			status = (p.status == 'all') ? '' : '.status-' + p.status;
+			q = (singleSegment) ? '#' + $(singleSegment).attr('id') : "section" + status + ':not(.status-new)';
             var psource = p.source.replace(/(\W)/gi, "\\$1");
             var ptarget = p.target.replace(/(\W)/gi, "\\$1");
 
@@ -307,7 +307,7 @@ $.extend(UI, {
 				$('section').has('.source mark.searchPreMarker').has('.targetarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker').removeClass('searchPreMarker');
 
 				$('mark.searchPreMarker:not(.searchMarker)').each(function() {
-					var a = $(this).text();
+					var a = $(this).html();
 					$(this).replaceWith(a);
 				});
 			} else {
@@ -343,8 +343,8 @@ $.extend(UI, {
 				q = "section" + status + what;
 			}
 			hasTags = (txt.match(/<.*?\>/gi) !== null) ? true : false;
-            var regTxt = txt.replace('<', UI.openTagPlaceholder).replace('>', UI.closeTagPlaceholder);
-            regTxt = regTxt.replace(/(\W)/gi, "\\$1");
+            // var regTxt = txt.replace(/</g, UI.openTagPlaceholder).replace(/>/g, UI.closeTagPlaceholder);
+            var regTxt = txt.replace(/(\W)/gi, "\\$1");
             regTxt = regTxt.replace(/\(/gi, "\\(").replace(/\)/gi, "\\)");
 
             var reg = new RegExp('(' + htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
@@ -381,31 +381,35 @@ $.extend(UI, {
 		if (!hasTags) {
 			this.execSearchResultsMarking(UI.filterExactMatch(items, txt), regex, false);
 		} else {
-			inputReg = new RegExp(txt, "g" + ignoreCase);
-			this.execSearchResultsMarking($(q), regex, inputReg);
+			var inputReg = new RegExp(txt, "g" + ignoreCase);
+			this.execSearchResultsMarking(items, regex, inputReg);
 		}
 	},
 	execSearchResultsMarking: function(areas, regex, testRegex) {
-        searchMarker = (UI.searchMode == 'source&target')? 'searchPreMarker' : 'searchMarker';
+        var searchMarker = (UI.searchMode == 'source&target')? 'searchPreMarker' : 'searchMarker';
 		$(areas).each(function() {
 
 			if (!testRegex || ($(this).text().match(testRegex) !== null)) {
-				var tt = $(this).html()
-                    .replace(/&lt;/g, UI.openTagPlaceholder)
- 					.split(UI.openTagPlaceholder);
-
-				$.each(tt, function(i, elem){
-					elem = elem.replace(/&gt;/g, UI.closeTagPlaceholder)
-							.split(UI.closeTagPlaceholder);
-					$.each(elem, function(j, text){
-						elem[j] = text.replace(regex, '<mark class="' + searchMarker + '">$1</mark>')
-					});
-					tt[i] = elem.join(UI.closeTagPlaceholder);
-				});
-				tt = tt.join(UI.openTagPlaceholder)
-						.replace(window.openTagReg, '&lt;')
-						.replace(window.closeTagReg, '&gt;')
-                		.replace(/(<span[^>]+>)[^<]*<mark[^>]*>(.*?)<\/mark>[^<]*(<\/span>?)/gi, "$1$3$4");
+				var tt = $(this).html();
+				if (LXQ.cleanUpHighLighting) {
+					tt = LXQ.cleanUpHighLighting(tt);
+				}
+				tt = tt.replace(regex, '<mark class="' + searchMarker + '">$1</mark>');
+                 //    .replace(/&lt;/g, UI.openTagPlaceholder)
+ 				// 	.split(UI.openTagPlaceholder);
+                //
+				// $.each(tt, function(i, elem){
+				// 	elem = elem.replace(/&gt;/g, UI.closeTagPlaceholder)
+				// 			.split(UI.closeTagPlaceholder);
+				// 	$.each(elem, function(j, text){
+				// 		elem[j] = text.replace(regex, '<mark class="' + searchMarker + '">$1</mark>')
+				// 	});
+				// 	tt[i] = elem.join(UI.closeTagPlaceholder);
+				// });
+				// tt = tt.join(UI.openTagPlaceholder)
+				// 		.replace(window.openTagReg, '&lt;')
+				// 		.replace(window.closeTagReg, '&gt;')
+                	// 	.replace(/(<span[^>]+>)[^<]*<mark[^>]*>(.*?)<\/mark>[^<]*(<\/span>?)/gi, "$1$3$4");
                 $(this).html(tt);
 			}
 		});
@@ -424,7 +428,7 @@ $.extend(UI, {
 	},
 	clearSearchMarkers: function() {
 		$('mark.searchMarker').each(function() {
-			$(this).replaceWith($(this).text());
+			$(this).replaceWith($(this).html());
 		});
 		$('section.currSearchResultSegment').removeClass('currSearchResultSegment');
 	},
