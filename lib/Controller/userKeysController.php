@@ -211,24 +211,37 @@ class userKeysController extends ajaxController {
      * @param TmKeyManagement_MemoryKeyStruct $memoryKeyToUpdate
      * @param TmKeyManagement_MemoryKeyDao    $mkDao
      */
-    protected function _shareKey( Array $emailList, TmKeyManagement_MemoryKeyStruct $memoryKeyToUpdate, TmKeyManagement_MemoryKeyDao $mkDao ){
+    protected function _shareKey( Array $emailList, TmKeyManagement_MemoryKeyStruct $memoryKeyToUpdate, TmKeyManagement_MemoryKeyDao $mkDao ) {
 
         $userDao = new Users_UserDao();
 
-        foreach( $emailList as $pos => $email ){
+        foreach ( $emailList as $pos => $email ) {
 
-            $userQuery = Users_UserStruct::getStruct();
-            $userQuery->email = $email;
+            $userQuery                  = Users_UserStruct::getStruct();
+            $userQuery->email           = $email;
             $alreadyRegisteredRecipient = $userDao->setCacheTTL( 60 * 10 )->read( $userQuery );
 
-            if( !empty( $alreadyRegisteredRecipient ) ){
+            if ( !empty( $alreadyRegisteredRecipient ) ) {
 
+                // do not send the email to myself
+                if ( $memoryKeyToUpdate->uid == $alreadyRegisteredRecipient[ 0 ]->uid ) {
+                    continue;
+                }
+
+                $memoryKeyToUpdate->uid = $alreadyRegisteredRecipient[ 0 ]->uid;
                 $this->_addToUserKeyRing( $memoryKeyToUpdate, $mkDao );
 
                 /**
                  * @var Users_UserStruct[] $alreadyRegisteredRecipient
                  */
-                $email = new TmKeyManagement_ShareKeyEmail( $this->logged_user, [ $alreadyRegisteredRecipient[0]->email, $alreadyRegisteredRecipient[0]->fullName() ], $memoryKeyToUpdate );
+                $email = new TmKeyManagement_ShareKeyEmail(
+                        $this->logged_user,
+                        [
+                                $alreadyRegisteredRecipient[ 0 ]->email,
+                                $alreadyRegisteredRecipient[ 0 ]->fullName()
+                        ],
+                        $memoryKeyToUpdate
+                );
                 $email->send();
 
             } else {
