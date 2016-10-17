@@ -283,7 +283,7 @@ abstract class DataAccess_AbstractDao {
      * @param DataAccess_IDaoStruct $fetchClass
      * @param array                 $bindParams
      *
-     * @return bool|DataAccess_IDaoStruct[]
+     * @return DataAccess_IDaoStruct|DataAccess_IDaoStruct[]
      */
     protected function _fetchObject( PDOStatement $stmt, DataAccess_IDaoStruct $fetchClass, Array $bindParams ){
 
@@ -293,6 +293,7 @@ abstract class DataAccess_AbstractDao {
             return $_cacheResult;
         }
 
+        /** @noinspection PhpMethodParametersCountMismatchInspection */
         $stmt->setFetchMode( PDO::FETCH_CLASS, get_class( $fetchClass ) );
         $stmt->execute( $bindParams );
         $result = $stmt->fetchAll();

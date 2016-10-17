@@ -26,14 +26,13 @@ class Comments_CommentEmail {
         $mailConf[ 'fromName' ]   = INIT::$MAILER_FROM_NAME;
         $mailConf[ 'returnPath' ] = INIT::$MAILER_RETURN_PATH;
 
-        $queue_element               = array_merge( array(), $mailConf );
-        $queue_element[ 'address' ]  = array( $this->user->email, $this->user->first_name );
-        $queue_element[ 'subject' ]  = $this->buildSubject();
-        $queue_element[ 'htmlBody' ] = $this->buildHTMLMessage();
-        $queue_element[ 'altBody' ]  = $this->buildTextMessage();
+        $mailConf[ 'address' ]  = array( $this->user->email, $this->user->first_name );
+        $mailConf[ 'subject' ]  = $this->buildSubject();
+        $mailConf[ 'htmlBody' ] = $this->buildHTMLMessage();
+        $mailConf[ 'altBody' ]  = $this->buildTextMessage();
 
         WorkerClient::init( new AMQHandler() );
-        \WorkerClient::enqueue( 'MAIL', '\AsyncTasks\Workers\CommentMailWorker', $queue_element, array( 'persistent' => WorkerClient::$_HANDLER->persistent ) );
+        \WorkerClient::enqueue( 'MAIL', '\AsyncTasks\Workers\MailWorker', $mailConf, array( 'persistent' => WorkerClient::$_HANDLER->persistent ) );
 
         Log::doLog( 'Message has been sent' );
         return true;

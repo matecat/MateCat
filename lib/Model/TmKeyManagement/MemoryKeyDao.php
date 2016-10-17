@@ -225,6 +225,28 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         return null;
     }
 
+    public function enable( TmKeyManagement_MemoryKeyStruct $obj ) {
+        $obj = $this->sanitize( $obj );
+
+        $this->_validatePrimaryKey( $obj );
+
+        $query = "UPDATE " . self::TABLE . " set deleted = 0 WHERE uid = %d and key_value = '%s'";
+
+        $query = sprintf(
+                $query,
+                $obj->uid,
+                $obj->tm_key->key
+        );
+
+        $this->con->query( $query );
+
+        if ( $this->con->affected_rows > 0 ) {
+            return $obj;
+        }
+
+        return null;
+    }
+
 
     /**
      * @param $obj_arr TmKeyManagement_MemoryKeyStruct[] An array of TmKeyManagement_MemoryKeyStruct objects
