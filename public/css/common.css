@@ -2245,7 +2245,7 @@ input.email-export-tmx {
     padding: 0px 5px !important;
     margin-right: 9px;
 }
-/*** Ne Buttons  ***/
+/*** New Buttons  ***/
 
 .btn-orange-small {
     background: #f26522;
@@ -2306,6 +2306,37 @@ input.email-export-tmx {
 .btn-confirm-small.continueDeletingMT {
     margin-left: 12px;
 }
+
+.btn-confirm-medium {
+    color: #fff;
+    background: #09beec;
+    border: 1px solid #848689;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 8px 18px;
+    border-radius: 2px;
+    font-size: 18px;
+    background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
+    background: -moz-linear-gradient(top, #09beec, #119ec4);
+    background: linear-gradient(top, #09beec, #119ec4);
+    margin: 16px 0 16px 20px;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-confirm-medium:hover {
+    cursor: pointer;
+    -webkit-box-shadow: 0 1px 2px #ccc;
+    box-shadow: 0 1px 2px #ccc;
+    border: 1px solid #000;
+}
+
+.btn-confirm-medium:active {
+    -moz-box-shadow: inset 0 0 1px 1px #888;
+    -webkit-box-shadow: inset 0 0 1px 1px #888;
+    box-shadow: inset 0 0 1px 1px #888;
+}
+
 /*******************/
 td.download-glossary-container .uploadloader {
     top: -18px;
@@ -4508,6 +4539,16 @@ table.activitylog th .th-inner:after {
     font-size: 14px;
     clear: left;
 }
+
+.share-popup-input-result {
+    font-size: 15px;
+    clear: left;
+    text-align: left;
+    margin-top: 30px;
+    color: red;
+    line-height: 20px;
+}
+
 .share-popup-copy-link-button.btn-grey {
     float: left;
     width: 80px;
@@ -4539,7 +4580,7 @@ table.activitylog th .th-inner:after {
 
 .share-popup-container-bottom {
     width: 100%;
-    height: 87px;
+    height: 95px;
     float: left;
     margin-top: 30px;
 }

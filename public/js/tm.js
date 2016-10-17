@@ -303,6 +303,9 @@
 
                 if ( e.which == esc ) handleEscPressed() ;
 
+            }).on('click', '.share-button', function (e) {
+                e.preventDefault();
+                UI.clickOnShareButton($(this));
             });
             $(".popup-tm.slide-panel").on("scroll", function(){
                 if (!isVisible($(".active-tm-container h3"))) {
@@ -1594,7 +1597,7 @@
                 },
                 success: function(d) {
                     if(d.success !== true) {
-                        UI.showErrorOnKeyInput('Error');
+                        UI.showErrorOnActiveTMTable('Error');
 
                     }
                 }
@@ -1639,7 +1642,7 @@
                         'is co-owned by you, <span class="message-share-tmx-email message-share-tmx-openemailpopup">'+ users[0].email +'</span>  ' +
                         totalShareUsers +
                         '</div>' +
-                        '<input class="message-share-tmx-input-email" placeholder="Enter email addresses separated by comma"/>'+
+                        '<input class="message-share-tmx-input-email" placeholder="Enter email addresses separated by comma" type="email" multiple/>'+
                         '<a class="pull-right btn-orange-small cancelsharetmx"><span class="text"></span>   </a>' +
                         '<div class="pull-right btn-ok share-button">Share</div>'+
                         '</td>';
@@ -1689,8 +1692,9 @@
                     "</div>"+
                     "<div class='share-popup-container-bottom'>" +
                     "<span class='share-popup-bottom-label'>Share ownership of the resource with:</span>"+
-                    "<input class='share-popup-container-input-email' placeholder='Enter email addresses..'>"+
-                    "<div class='pull-right btn-ok share-button'>Share</div>"+
+                    "<input class='share-popup-container-input-email' placeholder='Enter email addresses separated by comma'>"+
+                    "<div class='pull-right btn-confirm-medium share-button share-button-popup'>Share</div>"+
+                    "<div class='share-popup-input-result'></div>"+
                     "</div>"+
                     "</div>";
                 tr.find('.message-share-tmx-openemailpopup').on("click", function () {
@@ -1835,7 +1839,7 @@
         hideAllBoxOnTables: function () {
             $('.mgmt-container .active-tm-container .tm-error-message, .mgmt-container .active-tm-container .tm-warning-message, .mgmt-container .active-tm-container .tm-success-message,' +
                 '.mgmt-container .inactive-tm-container .tm-error-message, .mgmt-container .inactive-tm-container .tm-warning-message, .mgmt-container .inactive-tm-container .tm-success-message,' +
-                '.mgmt-table-mt .tm-error-message').fadeOut(150, function () {
+                '.mgmt-table-mt .tm-error-message').fadeOut(0, function () {
                 $(this).html("");
             });
         },
@@ -1943,6 +1947,44 @@
             } else {
                 $("#activetm").find("tr.mymemory .update input").prop('checked', false);
             }
+        },
+        clickOnShareButton(button) {
+            UI.hideAllBoxOnTables();
+            var key = button.closest('tr').data('key');
+            UI.shareKeyByEmail(button.closest('.share-tmx-container').find('.message-share-tmx-input-email').val(), key).done(function (response) {
+                if (response.errors.length === 0) {
+                    APP.closePopup();
+                    button.closest('.share-tmx-container').find('.cancelsharetmx').click();
+                    UI.showSuccessOnActiveTMTable('The key has been shared.');
+                    setTimeout(function () {
+                        UI.hideAllBoxOnTables();
+                    }, 4000)
+                } else {
+                    if (button.hasClass('share-button-popup')) {
+                        $('.share-popup-input-result').text('There was a problem sharing the key, try again or contact the support.');
+                    } else {
+                        UI.showErrorOnActiveTMTable('There was a problem sharing the key, try again or contact the support.');
+                    }
+                }
+            });
+
+        },
+        /**
+         * Share a key to one or more email, separated by comma
+         * @param container
+         */
+        shareKeyByEmail: function (emails, key) {
+            return APP.doRequest({
+                data: {
+                    action: 'userKeys',
+                    exec: 'share',
+                    key: key,
+                    emails: emails
+                },
+                error: function() {
+                    UI.showErrorOnActiveTMTable('There was a problem sharing the key, try again or contact the support.');
+                }
+            });
         }
 
     });
