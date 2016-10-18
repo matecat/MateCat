@@ -178,19 +178,15 @@
 
             }).on('click', '.mgmt-tm tr.mine td.description .edit-desc', function() {
 
-                $('.mgmt-tm .edit-desc[contenteditable=true]').blur();
+                // $('.mgmt-tm .edit-desc[contenteditable=true]').blur();
                 $('#activetm tr.mine td.description .edit-desc:not(.current)').removeAttr('contenteditable');
 
                 $(this).attr('contenteditable', true);
+                $(this).focus();
 
-            }).on('blur', '#activetm td.description .edit-desc', function() {
 
+            }).on('blur', '#activetm td.description .edit-desc, #inactivetm td.description .edit-desc', function() {
                 $(this).removeAttr('contenteditable');
-                UI.saveTMdata(false);
-
-            }).on('blur', '#inactivetm td.description .edit-desc', function() {
-                $(this).removeAttr('contenteditable');
-
                 UI.saveTMdescription($(this));
 
             }).on('keydown', '.mgmt-tm td.description .edit-desc', 'return', function(e) {
