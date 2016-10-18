@@ -37,8 +37,6 @@ class MailWorker extends AbstractWorker {
         $mail = new PHPMailer();
 
         $mail->isSMTP();
-        $mail->SMTPAuth = true;
-        $mail->SMTPSecure = "tls";
 
         $mail->Host     = $queueElement->params[ 'Host' ];
         $mail->Port     = $queueElement->params[ 'port' ];
