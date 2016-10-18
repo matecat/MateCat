@@ -78,8 +78,8 @@
                                         <td class="owner">
                                             <span class="icon-owner icon-earth icon-owner-public"></span>
                                         </td>
-                                        <td tal:condition="php: !empty( INIT::$DEFAULT_TM_KEY )" class="action">
-                                            <a class="btn pull-left addtmx" style="width: 110px !important;"><span class="text">Import TMX</span></a>
+                                        <td class="action">
+                                            <a tal:condition="php: !empty( INIT::$DEFAULT_TM_KEY )" class="btn pull-left addtmx" style="width: 110px !important;"><span class="text">Import TMX</span></a>
                                         </td>
                                     </tr>
                                     <tal:block tal:condition="php: page == 'cattool'" tal:repeat="key user_keys/job_keys">

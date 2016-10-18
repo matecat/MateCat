@@ -1946,7 +1946,8 @@
         },
         clickOnShareButton(button) {
             UI.hideAllBoxOnTables();
-            var key = button.closest('tr').data('key');
+            var tr = button.closest('tr');
+            var key = ( tr.length ) ? button.closest('tr').data('key') : button.closest('.share-popup-container').find('.share-popup-input-key').val();
             UI.shareKeyByEmail(button.closest('.share-tmx-container').find('.message-share-tmx-input-email').val(), key).done(function (response) {
                 if (response.errors.length === 0) {
                     APP.closePopup();
