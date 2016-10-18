@@ -648,7 +648,8 @@ a:hover{text-decoration:none}
     color: #666;
     font-size: 18px;
     margin: 0px 10px 0 0px;
-    padding: 0px 0 0 30px;
+    padding: 0px 0 0 0px;
+	line-height: 13px;
 }
 .loadingbar p.label
 {
@@ -672,7 +673,7 @@ a:hover{text-decoration:none}
 	-moz-box-shadow: inset 0 1px 3px 0px #ccc;
 	-webkit-box-shadow: inset 0 1px 3px 0px #ccc;
 	box-shadow: inset 0 1px 3px 0px #ccc;
-	margin:3px 0 0 5px !important;
+	margin:-2px 0 0 5px !important;
 	/*
 		margin:3px auto 0px auto !important;
 	*/
@@ -680,7 +681,7 @@ a:hover{text-decoration:none}
 	background:#fff;
 	border-radius:10px;
 	overflow:hidden;
-	margin-right:2px !important;
+	margin-right:105px !important;
 }
 
 .approved-bar
