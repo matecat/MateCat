@@ -37,6 +37,7 @@ class MailWorker extends AbstractWorker {
         $mail = new PHPMailer();
 
         $mail->isSMTP();
+
         $mail->Host     = $queueElement->params[ 'Host' ];
         $mail->Port     = $queueElement->params[ 'port' ];
         $mail->Sender   = $queueElement->params[ 'sender' ];

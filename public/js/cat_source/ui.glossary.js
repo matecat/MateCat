@@ -71,7 +71,7 @@ if (true)
         },
 
         getGlossary: function ( segment, entireSegment, next ) {
-
+            var n, txt;
             if ( typeof next != 'undefined' ) {
                 var segmentToLookForGlossary ;
 
@@ -139,8 +139,10 @@ if (true)
                     }
                     n = this[0];
                     UI.processLoadedGlossary( d, this );
-
-                    UI.cachedGlossaryData = d;
+                    // I store for the current
+                    if ( this[1] == 0 ) {
+                        UI.cachedGlossaryData = d;
+                    }
                     if ( !this[1] && (!UI.body.hasClass( 'searchActive' )) ) UI.markGlossaryItemsInSource( d );
                 },
                 complete: function () {
@@ -166,6 +168,8 @@ if (true)
                 }
             }
             var numMatches = Object.size( d.data.matches );
+            var existingMatches = $( '.tab-switcher-gl a .number', segment.el ).data('num');
+            numMatches = ( existingMatches && existingMatches > 0) ? existingMatches + numMatches : numMatches;
             if ( numMatches ) {
                 UI.renderGlossary( d, segment.el );
                 $( '.tab-switcher-gl a .number', segment.el ).text( ' (' + numMatches + ')' ).attr( 'data-num', numMatches );
@@ -176,7 +180,7 @@ if (true)
 
         markGlossaryItemsInSource: function ( d ) {
 
-            if ( ! Object.size( d.data.matches ) ) return ;
+            if ( !d || ! Object.size( d.data.matches ) ) return ;
 
             var container = $('.source', UI.currentSegment ) ;
 
@@ -378,7 +382,7 @@ if (true)
                         commentOriginal = commentOriginal.replace( /\#\{/gi, "<mark>" );
                         commentOriginal = commentOriginal.replace( /\}\#/gi, "</mark>" );
                         var addCommentHtml = '<div class="glossary-add-comment">' +
-                            '<a href="#">(+) Comment</a>' +
+                            '<a href="#">Add a Comment</a>' +
                             '<div class="input gl-comment" contenteditable="true" ></div>' +
                             '</div>' ;
                         $( '.sub-editor.glossary .overflow .results', segment )
@@ -446,6 +450,7 @@ if (true)
                         UI.footerMessage( msg, this[0] );
                     }
                     UI.processLoadedGlossary( d, this );
+                    UI.markGlossaryItemsInSource(d);
                 },
                 complete: function () {
                     $( '.gl-search', UI.currentSegment ).removeClass( 'setting' );
