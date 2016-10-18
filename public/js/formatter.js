@@ -41,78 +41,56 @@ function htmlDecode(value) {
 		segment = segment.replace(/<(\/mrk)>/gi, LTPLACEHOLDER+"$1"+GTPLACEHOLDER,segment);
 		console.log ("after placehold " + segment);
 	return segment;
-	}
+ }
 
-	 function restore_xliff_tags(segment){
-	 	
-	 	//console.log("a");
-		//console.log(segment);
-		segment = segment.replace(re_lt,"<");
-		segment = segment.replace(re_gt,">");
-	 	//console.log("b");
-		return segment;
-	}
+ function restore_xliff_tags(segment){
 
-	 function restore_xliff_tags_for_wiew(segment){
-		segment = segment.replace(re_lt,"&lt;");
-		segment = segment.replace(re_gt,"&gt;");
-		return segment;
-	}
+	//console.log("a");
+	//console.log(segment);
+	segment = segment.replace(re_lt,"<");
+	segment = segment.replace(re_gt,">");
+	//console.log("b");
+	return segment;
+}
 
-	 function view2rawxliff(segment){
-		// input : <g id="43">bang & olufsen < 3 </g> <x id="33"/>; --> valore della funzione .text() in cat.js su source, target, source suggestion,target suggestion
-		// output : <g> bang &amp; olufsen are > 555 </g> <x/>
-		// caso controverso <g id="4" x="&lt; dfsd &gt;"> 
-		//segment=htmlDecode(segment);
-		console.log ("decoded" + segment);
-		segment = placehold_xliff_tags (segment);
-		segment = htmlEncode(segment);
-		segment = restore_xliff_tags(segment);	
-		
-		return segment;
-	}
+ function restore_xliff_tags_for_wiew(segment){
+	segment = segment.replace(re_lt,"&lt;");
+	segment = segment.replace(re_gt,"&gt;");
+	return segment;
+}
 
+ function view2rawxliff(segment){
+	// input : <g id="43">bang & olufsen < 3 </g> <x id="33"/>; --> valore della funzione .text() in cat.js su source, target, source suggestion,target suggestion
+	// output : <g> bang &amp; olufsen are > 555 </g> <x/>
+	// caso controverso <g id="4" x="&lt; dfsd &gt;">
+	//segment=htmlDecode(segment);
+	console.log ("decoded" + segment);
+	segment = placehold_xliff_tags (segment);
+	segment = htmlEncode(segment);
+	segment = restore_xliff_tags(segment);
 
-	 function rawxliff2view(segment){
-		// input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
-		// output : &lt;g id="43"&gt;bang & < 3 olufsen &lt;/g&gt;;  &lt;x id="33"/&gt;
-		segment = placehold_xliff_tags (segment);
-		segment = htmlDecode(segment);	
-		segment = segment.replace(/<(.*?)>/i, "&lt;$1&gt;");
-		segment = restore_xliff_tags_for_wiew(segment);		// li rendering avviene via concat o via funzione html()
-		return segment;
-	}
-
-	function rawxliff2rawview(segment){
-		// input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
-		segment = placehold_xliff_tags (segment);
-		segment = htmlDecode(segment);		
-		segment = restore_xliff_tags_for_wiew(segment);		
-		return segment;
-	}
-
-$("document").ready(function(){
-	var raw="Ciao a <g id=\"1\">\"</g>tutti &amp; 4 &gt; 3<g id=\"2\">\" € @ ò</g>";
-	// view="&lt;g id=\"1\"&gt;\"&lt;/g&gt;tutti & 4 > 3\" € @ ò &lt;/g&gt;";
-	
-	var view=$("#view").text();
-	console.log("view text is " + view);
-
-	/*var html=$("#view").html();
-	console.log("view html is " + html);*/
-	console.log ("view2rawxliff " +view2rawxliff(view));	
-	console.log("");
-
-	console.log("raw from var is "+ raw);
-	console.log ("rawxliff2view " +rawxliff2view(raw));	
-	//$("#out").html(rawxliff2view(raw));
-	$("#cont").append("<p id=\"outcreated\">"+ rawxliff2view(raw) + "</p>");
-	$("#cont").append($("<p>").attr("id","c2").text(rawxliff2view(raw)));
+	return segment;
+}
 
 
+ function rawxliff2view(segment){
+	// input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
+	// output : &lt;g id="43"&gt;bang & < 3 olufsen &lt;/g&gt;;  &lt;x id="33"/&gt;
+	segment = placehold_xliff_tags (segment);
+	segment = htmlDecode(segment);
+	segment = segment.replace(/<(.*?)>/i, "&lt;$1&gt;");
+	segment = restore_xliff_tags_for_wiew(segment);		// li rendering avviene via concat o via funzione html()
+	return segment;
+}
 
-	//console.log ("view2rawxliff " + view2rawxliff(raw));	
-})
+function rawxliff2rawview(segment){
+	// input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
+	segment = placehold_xliff_tags (segment);
+	segment = htmlDecode(segment);
+	segment = restore_xliff_tags_for_wiew(segment);
+	return segment;
+}
+
 
 
 
