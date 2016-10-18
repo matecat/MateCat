@@ -136,7 +136,11 @@ class Users_UserDao extends DataAccess_AbstractDao {
 
         $sanitized_array = array();
         foreach ( $uids_array as $k => $v ) {
-            array_push( $sanitized_array, ( (int)$v[ 'uid' ] ) );
+            if ( !is_numeric( $v ) ) {
+                array_push( $sanitized_array, ( (int)$v[ 'uid' ] ) );
+            } else {
+                array_push( $sanitized_array, ( (int)$v ) );
+            }
         }
 
         if ( empty( $sanitized_array ) ) {
