@@ -44,12 +44,14 @@ var _segments = {};
 /**
  * Update all
  */
-function updateAll(segments, fid) {
-    // if ( _segments[fid] ) {
-    //
-    // } else {
+function updateAll(segments, fid, where) {
+    if ( _segments[fid] && where === "before" ) {
+        Array.prototype.unshift.apply( _segments[fid], normalizeSplittedSegments(segments));
+    } else if( _segments[fid] && where === "after" ) {
+        Array.prototype.push.apply( _segments[fid], normalizeSplittedSegments(segments));
+    } else {
         _segments[fid] = normalizeSplittedSegments(segments);
-    // }
+    }
 }
 
 function normalizeSplittedSegments(segments) {
@@ -186,6 +188,10 @@ AppDispatcher.register(function(action) {
         case SegmentConstants.RENDER_SEGMENTS:
             updateAll(action.segments, action.fid);
             SegmentStore.emitChange(action.actionType, _segments[action.fid], action.fid);
+            break;
+        case SegmentConstants.ADD_SEGMENTS:
+            updateAll(action.segments, action.fid, action.where);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, _segments[action.fid], action.fid);
             break;
         case SegmentConstants.SPLIT_SEGMENT:
             splitSegment(action.oldSid, action.newSegments, action.fid, action.splitGroup);

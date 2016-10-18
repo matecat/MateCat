@@ -35,7 +35,6 @@ if (SegmentFilter.enabled())
 
                 lastFilterData = data;
 
-                $('#outer').empty();
 
                 UI.render({
                     firstLoad: false,

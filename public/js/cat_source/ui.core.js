@@ -398,7 +398,6 @@ UI = {
                 } else {
                     $.cookie('source_copied_to_target-' + config.id_job + "-" + config.password, '1', { expires:1 });
                     APP.closePopup();
-                    $('#outer').empty();
                     UI.render({
                         firstLoad: false,
                         segmentToOpen: UI.currentSegmentId
@@ -797,11 +796,11 @@ UI = {
 	getMoreSegments_success: function(d) {
 		if (d.errors.length)
 			this.processErrors(d.errors, 'getMoreSegments');
-		where = d.data.where;
-        section = $('section');
+		var where = d.data.where;
+        var section = $('section');
 		if (typeof d.data.files != 'undefined') {
-			firstSeg = section.first();
-			lastSeg = section.last();
+			var firstSeg = section.first();
+			var lastSeg = section.last();
 			var numsegToAdd = 0;
 			$.each(d.data.files, function() {
 				numsegToAdd = numsegToAdd + this.segments.length;
@@ -840,7 +839,7 @@ UI = {
 
 	getSegments: function(options) {
 
-		where = (this.startSegmentId) ? 'center' : 'after';
+		var where = (this.startSegmentId) ? 'center' : 'after';
 		var step = this.initSegNum;
 		$('#outer').addClass('loading');
 		var seg = (options.segmentToScroll) ? options.segmentToScroll : this.startSegmentId;
@@ -1009,7 +1008,6 @@ UI = {
 		this.infiniteScroll = false;
 		config.last_opened_segment = segmentId;
 		window.location.hash = segmentId;
-		$('#outer').empty();
 		this.render({
 			firstLoad: false
 		});
@@ -1018,7 +1016,6 @@ UI = {
 		this.infiniteScroll = false;
 		config.last_opened_segment = this.nextUntranslatedSegmentId;
 		window.location.hash = this.nextUntranslatedSegmentId;
-		$('#outer').empty();
 		this.render({
 			firstLoad: false
 		});
@@ -1031,12 +1028,10 @@ UI = {
 			return;
 		if (segmentId === '') {
 			this.startSegmentId = config.last_opened_segment;
-			$('#outer').empty();
 			this.render({
 				firstLoad: false
 			});
 		} else {
-			$('#outer').empty();
 			this.render({
 				firstLoad: false
 			});
@@ -1059,6 +1054,7 @@ UI = {
         if (where === "center" && !starting) {
             $('.article-segments-container').each(function (index, value) {
                 ReactDOM.unmountComponentAtNode(value);
+                delete UI.SegmentsContainer;
             });
             $('article').remove();
         }
@@ -1121,7 +1117,7 @@ UI = {
 				}
 			}
 
-			UI.renderSegments(this.segments, false, fid);
+			UI.renderSegments(this.segments, false, fid, where);
 
 
             if (LXQ.enabled())
@@ -1144,24 +1140,27 @@ UI = {
 
 	},
 
-    renderSegments: function (segments, justCreated, fid) {
+    renderSegments: function (segments, justCreated, fid, where) {
 
         if((typeof this.split_points_source == 'undefined') || (!this.split_points_source.length) || justCreated) {
-            var mountPoint = $(".article-segments-container-" + fid)[0];
-            ReactDOM.render(React.createElement(SegmentsContainer,{
-                fid : fid,
-                enableTagProjection: UI.enableTagProjection,
-                decodeTextFn: UI.decodeText,
-                tagModesEnabled: UI.tagModesEnabled,
-                speech2textEnabledFn: Speech2Text.enabled,
-            }), mountPoint);
-            SegmentActions.renderSegments(segments, fid);
+            if ( !this.SegmentsContainer ) {
+                var mountPoint = $(".article-segments-container-" + fid)[0];
+                this.SegmentsContainer = ReactDOM.render(React.createElement(SegmentsContainer, {
+                    fid: fid,
+                    enableTagProjection: UI.enableTagProjection,
+                    decodeTextFn: UI.decodeText,
+                    tagModesEnabled: UI.tagModesEnabled,
+                    speech2textEnabledFn: Speech2Text.enabled,
+                }), mountPoint);
+                SegmentActions.renderSegments(segments, fid);
+            } else {
+                SegmentActions.addSegments(segments, fid, where);
+            }
             UI.registerFooterTabs();
         }
     },
 
 	renderAndScrollToSegment: function(sid) {
-		$('#outer').empty();
 		this.render({
 			firstLoad: false,
 			caller: 'link2file',
@@ -3003,7 +3002,6 @@ UI = {
         }
     },
     restart: function () {
-        $('#outer').empty();
         this.start();
     },
     /**

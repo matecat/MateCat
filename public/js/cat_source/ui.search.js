@@ -113,7 +113,6 @@ $.extend(UI, {
 			if (this.pendingRender.detectSegmentToScroll) {
 				this.pendingRender.segmentToScroll = this.nextUnloadedResultSegment();
 			}
-			$('#outer').empty();
 
 			this.render(this.pendingRender);
 			this.pendingRender = false;
@@ -175,7 +174,6 @@ $.extend(UI, {
 					APP.alert({msg: d.errors[0].message});
 					return false;
 				}
-				$('#outer').empty();
 				UI.render({
 					firstLoad: false
 				});
@@ -530,7 +528,6 @@ $.extend(UI, {
 						};
 					} else {
 						var seg2scroll = this.nextUnloadedResultSegment();
-						$('#outer').empty();
 						this.render({
 							firstLoad: false,
 							applySearch: true,
@@ -575,7 +572,6 @@ $.extend(UI, {
 					};
 				} else {
 					seg2scroll = this.nextUnloadedResultSegment();
-					$('#outer').empty();
 					this.render({
 						firstLoad: false,
 						applySearch: true,

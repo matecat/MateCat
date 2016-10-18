@@ -6,8 +6,7 @@
 
     var tryToRenderAgain = function( segment, highlight ) {
         
-        $('#outer').empty();
-        
+
         var id_segment = segment.selector.split('-')[1];
 
         UI.render({

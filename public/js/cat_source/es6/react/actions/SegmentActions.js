@@ -35,6 +35,14 @@ var SegmentActions = {
             fid: fid
         });
     },
+    addSegments: function (segments, fid, where) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.ADD_SEGMENTS,
+            segments: segments,
+            fid: fid,
+            where: where
+        });
+    },
     /* TODO
      */
     propagateTranslation: function (sid, status) {

@@ -289,7 +289,6 @@ LXQ.init  = function () {
                 else {                    
                     config.last_opened_segment = segid;
                     window.location.hash = segid;
-                    $('#outer').empty();
                     UI.render({
                         firstLoad: false
                     });
@@ -1229,7 +1228,6 @@ LXQ.init  = function () {
                     config.last_opened_segment = segid;
                     //config.last_opened_segment = this.nextUntranslatedSegmentId;
                     window.location.hash = segid;
-                    $('#outer').empty();
                     UI.render({
                         firstLoad: false
                     });
@@ -1246,7 +1244,6 @@ LXQ.init  = function () {
                     config.last_opened_segment = segid;
                     //config.last_opened_segment = this.nextUntranslatedSegmentId;
                     window.location.hash = segid;
-                    $('#outer').empty();
                     UI.render({
                         firstLoad: false
                     });                    

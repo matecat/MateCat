@@ -370,7 +370,6 @@
             if ($('#segment-' + this.currentSegmentId).length) {
                 UI.scrollSegment(this.currentSegment, false, quick);
             } else {
-                $('#outer').empty();
                 this.render({
                     firstLoad: false,
                     segmentToOpen: this.currentSegmentId

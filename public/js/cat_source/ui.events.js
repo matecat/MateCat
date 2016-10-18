@@ -797,7 +797,6 @@ $.extend(UI, {
 			e.preventDefault();
 
 			if (!($('#segment-' + UI.currentSegmentId).length)) {
-				$('#outer').empty();
 				UI.render({
 					firstLoad: false
 				});

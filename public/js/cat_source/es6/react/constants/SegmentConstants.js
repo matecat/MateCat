@@ -7,6 +7,7 @@ var keyMirror = require('keymirror');
 module.exports = keyMirror({
     HIGHLIGHT_EDITAREA: null,
     RENDER_SEGMENTS: null,
+    ADD_SEGMENTS: null,
     SPLIT_SEGMENT: null,
     ADD_SEGMENT_CLASS: null,
     REMOVE_SEGMENT_CLASS: null,
