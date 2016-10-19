@@ -56,8 +56,8 @@
                                         <th class="check">Update</th>
                                         <th class="description">Description</th>
                                         <th class="privatekey">Private Key</th>
-                                        <th class="owner">Owner</th>
-                                        <th class="action">Actions</th>
+                                        <th class="owner"></th>
+                                        <th class="action"></th>
 
 
                                     </tr>
@@ -75,8 +75,8 @@
                                             <div class="mymemory-descr" data-descr="MyMemory: Collaborative translation memory shared with all MateCat users.">MyMemory: Collaborative translation memory shared with all MateCat users.</div>
                                         </td>
                                         <td class="privatekey"></td>
-                                        <td class="owner">
-                                            <span class="icon-owner icon-earth icon-owner-public"></span>
+                                        <td class="owner text-center">
+                                            <a class="icon-owner icon-earth icon-owner-public"></a>
                                         </td>
                                         <td class="action">
                                             <a tal:condition="php: !empty( INIT::$DEFAULT_TM_KEY )" class="btn pull-left addtmx" style="width: 110px !important;"><span class="text">Import TMX</span></a>
@@ -93,9 +93,9 @@
                                                     ${php: key.owner ? ( jobOwnerIsMe || key.edit ? key.name : '**********' ) : key.name}
                                                 </div></td>
                                             <td class="privatekey">${key/key}</td>
-                                            <td class="owner">
-                                                <span tal:condition="php: !key.isShared()" class="icon-owner icon-lock icon-owner-private"></span>
-                                                <span tal:condition="php: key.isShared()" class="icon-owner icon-users icon-owner-shared"></span>
+                                            <td class="owner text-center">
+                                                <a tal:condition="php: !key.isShared()" class="icon-owner icon-lock icon-owner-private"></a>
+                                                <a tal:condition="php: key.isShared()" class="icon-owner icon-users icon-owner-shared"></a>
                                             </td>
 
                                             <td tal:condition="php: key.edit" class="action">
@@ -205,9 +205,9 @@
                                                 <td class="update text-center check"><input type="checkbox" /></td>
                                                 <td class="description"><div class="edit-desc" data-descr="${key/name}">${key/name}</div></td>
                                                 <td class="privatekey">${key/key}</td>
-                                                <td class="owner">
-                                                    <span tal:condition="php: !key.isShared()" class="icon-owner icon-lock icon-owner-private"></span>
-                                                    <span tal:condition="php: key.isShared()" class="icon-owner icon-users icon-owner-shared"></span>
+                                                <td class="owner text-center">
+                                                    <a tal:condition="php: !key.isShared()" class="icon-owner icon-lock icon-owner-private"></a>
+                                                    <a tal:condition="php: key.isShared()" class="icon-owner icon-users icon-owner-shared"></a>
                                                 </td>
                                                 <td class="action">
                                                     <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
@@ -236,11 +236,11 @@
                                                 <div class="edit-desc" data-descr="${key/name}">${key/name}</div>
                                             </td>
                                             <td class="privatekey">${key/key}</td>
-                                            <td class="owner">
+                                            <td class="owner text-center">
                                                 <!--<span class="icon-owner icon-users icon-owner-shared"></span>-->
                                                 <!--<span class="icon-owner icon-earth icon-owner-public"></span>-->
-                                                <span tal:condition="php: !key.isShared()" class="icon-owner icon-lock icon-owner-private"></span>
-                                                <span tal:condition="php: key.isShared()" class="icon-owner icon-users icon-owner-shared"></span>
+                                                <a tal:condition="php: !key.isShared()" class="icon-owner icon-lock icon-owner-private"></a>
+                                                <a tal:condition="php: key.isShared()" class="icon-owner icon-users icon-owner-shared"></a>
                                             </td>
                                             <td class="action">
                                                 <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
