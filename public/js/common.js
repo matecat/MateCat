@@ -90,7 +90,7 @@ APP = {
     confirm: function ( options ) {
         this.waitingConfirm = true;
         this.popup( {
-            type: 'confirm',
+            type: (options.type || 'confirm'),
             name: options.name,
             onConfirm: options.callback,
             caller: options.caller,
@@ -107,7 +107,7 @@ APP = {
     confirmAndCheckbox: function(options){
         this.waitingConfirm = true;
         this.popup( {
-            type: 'confirm_checkbox',
+            type: (options.type || 'confirm_checkbox'),
             name: options.name,
             onConfirm: options.callback,
             caller: options.caller,

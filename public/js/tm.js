@@ -1595,7 +1595,7 @@
                 },
                 success: function(d) {
                     if(d.success !== true) {
-                        UI.showErrorOnActiveTMTable('Error');
+                        UI.showErrorOnActiveTMTable('Error retrieving the information, try again');
 
                     }
                 }
@@ -1637,7 +1637,7 @@
                     var totalShareUsers = (users.length === 1) ? '' : 'and <span class="message-share-tmx-openemailpopup">'+ (users.length - 1) +' others</span>';
                     exportDiv = '<td class="share-tmx-container" style="display: none">' +
                         '<div class="message-share-tmx">Shared resource ' +
-                        'is co-owned by you, <span class="message-share-tmx-email message-share-tmx-openemailpopup">'+ users[0].email +'</span>  ' +
+                        'is co-owned by you, <span class="message-share-tmx-email message-share-tmx-openemailpopup">'+ users[0].first_name + ' ' + users[0].last_name +'</span>  ' +
                         totalShareUsers +
                         '</div>' +
                         '<input class="message-share-tmx-input-email" placeholder="Enter email addresses separated by comma" type="email" multiple/>'+
@@ -1699,9 +1699,11 @@
                     "</div>";
                 tr.find('.message-share-tmx-openemailpopup').on("click", function () {
                     APP.confirm({
+                        type: 'share_key_popup',
                         name: 'share-window',
                         cancelTxt: 'Cancel',
-                        msg: message
+                        msg: message,
+                        title: 'Share resource'
                     });
 
                     var copyTextareaBtn = document.querySelector('.share-popup-copy-link-button');
@@ -1833,7 +1835,7 @@
         showSuccessOnActiveTMTable: function (message) {
             $('.mgmt-container .active-tm-container .tm-success-message').html(message).fadeIn(100);
         },
-        showSuccessOnInactiveTmTable: function (message) {
+        showSuccessOnInactiveTMTable: function (message) {
             $('.mgmt-container .inactive-tm-container .tm-success-message').html(message).fadeIn(100);
         },
         hideAllBoxOnTables: function () {
@@ -1950,13 +1952,28 @@
         },
         clickOnShareButton(button) {
             var tr = button.closest('tr');
-            var key = ( tr.length ) ? button.closest('tr').data('key') : button.closest('.share-popup-container').find('.share-popup-input-key').val();
+            var key = ( tr.length ) ? tr.data('key') : button.closest('.share-popup-container').find('.share-popup-input-key').val();
+            var descr = ( tr.length ) ? tr.find('.edit-desc').data('descr') : button.closest('.share-popup-container').find('.share-popup-description').text();
+            var msg = 'The resource <span>' + descr + '(' + key + ')' +'</span> has been shared.';
             UI.shareKeyByEmail(button.closest('.share-tmx-container').find('.message-share-tmx-input-email').val(), key).done(function (response) {
                 UI.hideAllBoxOnTables();
                 if (response.errors.length === 0) {
-                    APP.closePopup();
-                    button.closest('.share-tmx-container').find('.cancelsharetmx').click();
-                    UI.showSuccessOnActiveTMTable('The key has been shared.');
+                    if (button.hasClass('share-button-popup')) {
+                        APP.closePopup();
+                        UI.showSuccessOnActiveTMTable(msg);
+                        $('.share-tmx-container').slideToggle(function () {
+                            $(this).remove();
+                        });
+                    } else {
+                        button.closest('.share-tmx-container').find('.cancelsharetmx').click();
+                        if ( tr.closest('table').attr("id") == 'inactivetm'){
+                            UI.showSuccessOnInactiveTMTable(msg);
+                        }else {
+                            UI.showSuccessOnActiveTMTable(msg);
+                        }
+                    }
+
+
                     setTimeout(function () {
                         UI.hideAllBoxOnTables();
                     }, 4000)

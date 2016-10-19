@@ -1372,8 +1372,8 @@ text-align: right;
 margin-left: 10px;
 }
 
-.modal .popup-confirm p,
-.modal .popup-alert p
+.modal p,
+.modal p
 {
     padding: 0 20px;
     margin: 0;
