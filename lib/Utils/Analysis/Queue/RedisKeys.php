@@ -18,6 +18,11 @@ namespace Analysis\Queue;
 class RedisKeys {
 
     /**
+     * FallBack for bugs on key name to not loose messages
+     */
+    const DEFAULT_QUEUE_NAME = " unknown_queue";
+
+    /**
      * Key that holds the number of segments to wait before this job executed
      */
     const TOTAL_SEGMENTS_TO_WAIT = "seg_to_wait:";

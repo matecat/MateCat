@@ -23,6 +23,7 @@ class WorkerClient {
      * The handler is passed to have a more correct dependency injection
      *
      * @param AMQHandler|null $handler
+     * @throws Exception
      */
     public static function init( AMQHandler $handler = null ) {
         if ( \INIT::$TASK_RUNNER_CONFIG ) {

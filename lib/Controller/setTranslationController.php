@@ -811,6 +811,7 @@ class setTranslationController extends ajaxController {
         $contributionStruct->fromRevision         = self::isRevision();
         $contributionStruct->id_job               = $this->id_job;
         $contributionStruct->job_password         = $this->password;
+        $contributionStruct->id_segment           = $this->id_segment;
         $contributionStruct->segment              = $this->segment[ 'segment' ];
         $contributionStruct->translation          = $_Translation[ 'translation' ];
         $contributionStruct->api_key              = \INIT::$MYMEMORY_API_KEY;
