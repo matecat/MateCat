@@ -1446,7 +1446,7 @@ background: #09beec;
 .search-options
 {
 	margin-top: -35px;
-	width: 220px;
+	width: 255px;
 	clear: left;
 }
 
@@ -1464,7 +1464,7 @@ background: #09beec;
 {
     float: left;
     display: none;
-    width: 100%;
+    width: 92%;
     background: #a5a5a5;
     color: #fff;
     text-align: left;

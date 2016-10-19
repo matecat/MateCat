@@ -28,6 +28,11 @@ class ContributionStruct extends DataAccess_AbstractDaoObjectStruct implements D
     protected $cached_results = array();
 
     /**
+     * @var int
+     */
+    public $id_segment = null;
+
+    /**
      * @var bool
      */
     public $fromRevision = false;
