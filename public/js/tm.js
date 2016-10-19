@@ -707,8 +707,8 @@
                 '    <td class="update check text-center"><input type="checkbox"' + ( keyParams.w ? ' checked="checked"' : '' ) + ' /></td>' +
                 '    <td class="description"><div class="edit-desc" data-descr="'+ keyParams.desc +'">' + keyParams.desc + '</div></td>' +
                 '    <td class="privatekey">' + keyParams.TMKey + '</td>' +
-                '    <td class="owner">' +
-                '       <span  class="icon-owner icon-lock icon-owner-private"></span>'+
+                '    <td class="owner text-center">' +
+                '       <a class="icon-owner icon-lock icon-owner-private"></a>'+
                 '   </td>' +
                 '    <td class="action">' +
                 '       <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>'+
@@ -1676,23 +1676,25 @@
 
                 var message = "<div class='share-popup-container'>" +
                     "<div class='share-popup-top'>" +
-                    "<span class='share-popup-top-label'>Resource to share:  </span>"+
+                    "<h3 class='popup-tm pull-left'>Resource to share: "+
                     description +
-                    "<input value='"+key+"' class='share-popup-input-key'/>" +
-                    "<div class='share-popup-copy-link-button btn-grey'>Copy Key</div>" +
-                    "<div class='share-popup-copy-result'></div>"+
-                    "</div>"+
-                    "<div class='share-popup-container-list'>" +
-                    "<span class='share-popup-list-title'>Who owns the resource:</span>"+
-                    "<div class='share-popup-list'>" +
-                    htmlUsersList +
-                    "</div>"+
+                    "</h3>"+
                     "</div>"+
                     "<div class='share-popup-container-bottom'>" +
-                    "<span class='share-popup-bottom-label'>Share ownership of the resource with:</span>"+
+                    "<p>You can share ownership of the resource sharing this key: "+ 
+                    "<span class='share-popup-input-key'>"+key+
+                    " <a class='share-popup-copy-link-button icon-copy-key'></a></span> "+              
+                    "or entering the email address below.</p>"+  
+                    "<div class='share-popup-copy-result'></div>"+                        
                     "<input class='share-popup-container-input-email' placeholder='Enter email addresses separated by comma'>"+
                     "<div class='pull-right btn-confirm-medium share-button share-button-popup'>Share</div>"+
                     "<div class='share-popup-input-result'></div>"+
+                    "</div>"+
+                    "</div>"+
+                    "<div class='share-popup-container-list'>" +
+                    "<span class='share-popup-list-title'>Who owns the resource</span>"+
+                    "<div class='share-popup-list'>" +
+                    htmlUsersList +
                     "</div>"+
                     "</div>";
                 tr.find('.message-share-tmx-openemailpopup').on("click", function () {

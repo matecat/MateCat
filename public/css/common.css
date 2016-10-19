@@ -1712,6 +1712,22 @@ th.activate, td.activate {
 .icon-owner.icon-owner-shared,
 .icon-owner.icon-owner-public {
     color: #6f6f6f;
+    text-decoration: none;
+}
+.icon-owner.icon-owner-private {
+    padding: 2px 0px 2px 6px;
+    cursor: pointer;
+}
+.icon-owner.icon-owner-shared {
+    padding: 2px 2px;
+    cursor: pointer;
+}
+
+.icon-owner.icon-owner-private:hover,
+.icon-owner.icon-owner-shared:hover {
+
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
 
 .share-button {
@@ -1734,6 +1750,7 @@ input.message-share-tmx-input-email {
     margin-left: 15px;
     width: 290px;
     height: 24px;
+    font-size: 14px;
     padding-left: 4px;
     background-color: #fbfbfb;
     border: 1px solid #ccc;
@@ -3455,6 +3472,9 @@ color: #000;
 /* TODO: add icons to main set
 */
 
+.icon-copy-key:before {
+    content: "\e92c";
+}
 
 .autofillTag {
     display: block;
@@ -3558,6 +3578,7 @@ header .filter:before,
 .more-options:before,
 .export-tmx-button-label:before,
 .canceladd-export-tmx:before,
+.icon-copy-key:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .splitArea .locked.startTag:before,
@@ -4503,14 +4524,14 @@ table.activitylog th .th-inner:after {
 .share-popup-top {
     position: relative;
     width: 100%;
-    height: 90px;
 }
-.share-popup-description {
-    float: left;
-    line-height: 19px;
-    font-size: 16px;
-    font-style: italic;
+
+.share-popup-top h3 {
+    font-size:20px!important;
+    text-align: left;
 }
+
+
 .share-popup-top-label, .share-popup-list-title, .share-popup-bottom-label {
 
     float: left;
@@ -4519,13 +4540,16 @@ table.activitylog th .th-inner:after {
     line-height: 20px;
 }
 
+.share-popup-container-bottom p {
+    margin: 0!important;
+    text-align: left;
+    padding: 0!important;
+    font-size: 16px!important;
+}
+
 .share-popup-input-key {
-    width: 76%;
-    margin-top: 5px;
-    padding-left: 10px;
-    font-size: 15px;
-    float: left;
-    height: 25px;
+    border-bottom: 1px dashed #ccc;
+    font-weight: bold;
 }
 .share-popup-copy-result {
     font-size: 14px;
@@ -4574,7 +4598,7 @@ table.activitylog th .th-inner:after {
     width: 100%;
     height: 95px;
     float: left;
-    margin-top: 30px;
+    margin-bottom: 30px;
 }
 
 .share-popup-container-bottom .share-button {
