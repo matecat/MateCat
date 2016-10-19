@@ -589,11 +589,11 @@
 
         },
         cancelTMDisable: function (context) {
-            options = $.parseJSON(context);
+            var options = $.parseJSON(context);
             $('.mgmt-tm tr.mine[data-key="' + options.key + '"] td.' + options.grant + ' input').click();
         },
         continueTMDisable: function (context) {
-            options = $.parseJSON(context);
+            var options = $.parseJSON(context);
             el = $('.mgmt-tm tr.mine[data-key="' + options.key + '"] td.' + options.grant + ' input');
             UI.disableTM(el);
             $("#inactivetm").trigger("update");
@@ -862,7 +862,7 @@
                     UI.UploadIframeId.remove();
                     $(TRcaller).find('.upload-file-msg-error').text('Error').show();
                     if ($(TRcaller).closest('table').attr("id") == 'inactivetm'){
-                        UI.showErrorOnInactiveTmTable(msg.errors[0].message);
+                        UI.showErrorOnInactiveTMTable(msg.errors[0].message);
                     }else {
                         UI.showErrorOnActiveTMTable(msg.errors[0].message)          ;
                     }
@@ -904,7 +904,7 @@
                     $(TRcaller).find('.canceladdglossary').show();
                     $(TRcaller).find('input[type="file"]').attr("disabled", false);
                     if ($(TRcaller).closest('table').attr("id") == 'inactivetm'){
-                        UI.showErrorOnInactiveTmTable('There was an error saving your data. Please retry!');
+                        UI.showErrorOnInactiveTMTable('There was an error saving your data. Please retry!');
                     }else {
                         UI.showErrorOnActiveTMTable('There was an error saving your data. Please retry!');
                     }
@@ -919,7 +919,7 @@
                         $(TRcaller).find('.canceladdglossary').text('Error').show();
                         $(TRcaller).find('input[type="file"]').attr("disabled", false);
                         if ($(TRcaller).closest('table').attr("id") == 'inactivetm'){
-                            UI.showErrorOnInactiveTmTable(d.errors[0].message);
+                            UI.showErrorOnInactiveTMTable(d.errors[0].message);
                         } else {
                             UI.showErrorOnActiveTMTable(d.errors[0].message);
                         }
@@ -1159,6 +1159,7 @@
         },
         downloadGlossary: function( elem ) {
             var tr = elem.closest('tr');
+            UI.hideAllBoxOnTables();
             this.openExportGlossary(elem, tr);
 
             //add a random string to avoid collision for concurrent javascript requests
@@ -1198,14 +1199,15 @@
                         if ( errorMsg != '' ) {
                             tr.find('.message-glossary-export-error').show();
                             if (tr.closest('table').attr("id") == 'inactivetm'){
-                                UI.showErrorOnInactiveTmTable('Error on downloading resource from TM server.');
+                                UI.showErrorOnInactiveTMTable('Export failed. No glossary found in the resource.');
                             } else {
-                                UI.showErrorOnActiveTMTable('Error on downloading resource from TM server.');
+                                UI.showErrorOnActiveTMTable('Export failed. No glossary found in the resource.');
                             }
+
                         } else {
                             tr.find('.message-glossary-export-completed').show();
                         }
-
+                        tr.find('.action a').removeClass('disabled');
                         $( '#' + iFrameID ).remove();
 
                         setTimeout(function () {
@@ -1252,8 +1254,8 @@
         showDeleteTmMessage: function (button) {
             $("tr.tm-key-deleting").removeClass('tm-key-deleting');
             var message = 'Do you really want to delete the key XXX? ' +
-                 '<a class="pull-right btn-confirm-small confirmDelete confirm-tm-key-delete" style="display: inline;">       <span class="text">Confirm</span>   </a>' +
-                 '<a class="pull-right btn-orange-small cancelDelete cancel-tm-key-delete">      <span class="text"></span>   </a>';
+                    '<a class="pull-right btn-orange-small cancelDelete cancel-tm-key-delete">      <span class="text"></span>   </a>' +
+                    '<a class="pull-right btn-confirm-small confirmDelete confirm-tm-key-delete" style="display: inline;">       <span class="text">Confirm</span>   </a>';
             var elem = $(button).closest("table");
             var tr = $(button).closest("tr");
             tr.addClass("tm-key-deleting");
@@ -1262,7 +1264,7 @@
             if (elem.attr("id") === "activetm") {
                 UI.showWarningOnActiveTMTable(message);
             } else {
-                UI.showWarningOnInactiveTmTable(message);
+                UI.showWarningOnInactiveTMTable(message);
             }
             var removeListeners = function () {
                 $('.confirm-tm-key-delete, .cancel-tm-key-delete').off('click');
@@ -1569,11 +1571,11 @@
                 '<input type="email" required class="email-export-tmx mgmt-input" value="' + config.userMail + '"/>' +
                 '<span class="uploadloader"></span>'+
                 '<span class="email-export-tmx-email-sent">Request submitted</span>' +
-                '<a class="pull-right btn-ok export-tmx-button">' +
-                    '<span class="text export-tmx-button-label">Confirm</span>' +
-                '</a>' +
                 '<a class="pull-right btn-grey canceladd-export-tmx">' +
                     '<span class="text"></span>'+
+                '</a>' +
+                '<a class="pull-right btn-ok export-tmx-button">' +
+                '   <span class="text export-tmx-button-label">Confirm</span>' +
                 '</a>' +
                 '<span class="email-export-tmx-email-error">We got an error,</br> please contact support</span>' +
                 '</td>';
@@ -1795,11 +1797,11 @@
                 '    <input type="submit" class="addtm-add-submit" style="display: none" />' +
                 '    <input type="file" name="uploaded_file" accept="'+ format +'"/>' +
                 '</form>' +
-                '   <a class="existingKey pull-right btn-ok add'+ type +'file">' +
-                '       <span class="text">Confirm</span>' +
-                '   </a>' +
                 '   <a class="pull-right btn-grey canceladd'+ type +'">' +
                 '      <span class="text"></span>' +
+                '   </a>' +
+                '   <a class="existingKey pull-right btn-ok add'+ type +'file">' +
+                '       <span class="text">Confirm</span>' +
                 '   </a>' +
                 '   <span class="upload-file-msg-error"></span>' +
                 '   <span class="upload-file-msg-success">Import Complete</span>' +
@@ -1817,13 +1819,13 @@
         showErrorOnActiveTMTable: function (message) {
             $('.mgmt-container .active-tm-container .tm-error-message').html(message).fadeIn(100);
         },
-        showErrorOnInactiveTmTable: function (message) {
+        showErrorOnInactiveTMTable: function (message) {
             $('.mgmt-container .inactive-tm-container .tm-error-message').html(message).fadeIn(100);
         },
         showWarningOnActiveTMTable: function (message) {
             $('.mgmt-container .active-tm-container .tm-warning-message').html(message).fadeIn(100);
         },
-        showWarningOnInactiveTmTable: function (message) {
+        showWarningOnInactiveTMTable: function (message) {
             $('.mgmt-container .inactive-tm-container .tm-warning-message').html(message).fadeIn(100);
         },
         showSuccessOnActiveTMTable: function (message) {
@@ -1886,19 +1888,19 @@
                 popupId : "matecatTip",
             });
 
-            $('.icon-owner-private').data("powertip", "<div style='line-height: 18px;font-size: 15px;'>Private resource,<br/>only available to you.</div>");
+            $('.icon-owner-private').data("powertip", "<div style='line-height: 18px;font-size: 15px;'>Private resource, only available to you.<br/>Click to share.</div>");
             $('.icon-owner-private').powerTip({
                 placement : 's',
                 popupId : "matecatTip",
             });
 
-            $('.icon-owner-public').data("powertip", "<div style='line-height: 20px;font-size: 15px;'>MyMemory, public<br/>translation memory.</div>");
+            $('.icon-owner-public').data("powertip", "<div style='line-height: 20px;font-size: 15px;'>Public translation memory.</div>");
             $('.icon-owner-public').powerTip({
                 placement : 's',
                 popupId : "matecatTip",
             });
 
-            $('.icon-owner-shared').data("powertip", "<div style='line-height: 20px;font-size: 15px;'>Shared resource.<br/> To see who owns the<br/> resource, select Share<br/> resource from the<br/> dropdown menu.</div>");
+            $('.icon-owner-shared').data("powertip", "<div style='line-height: 20px;font-size: 15px;'>Shared resource.<br>Click to see who owns the resource.</div>");
             $('.icon-owner-shared').powerTip({
                 placement : 's',
                 popupId : "matecatTip",
@@ -1945,10 +1947,10 @@
             }
         },
         clickOnShareButton(button) {
-            UI.hideAllBoxOnTables();
             var tr = button.closest('tr');
             var key = ( tr.length ) ? button.closest('tr').data('key') : button.closest('.share-popup-container').find('.share-popup-input-key').val();
             UI.shareKeyByEmail(button.closest('.share-tmx-container').find('.message-share-tmx-input-email').val(), key).done(function (response) {
+                UI.hideAllBoxOnTables();
                 if (response.errors.length === 0) {
                     APP.closePopup();
                     button.closest('.share-tmx-container').find('.cancelsharetmx').click();
@@ -1960,7 +1962,11 @@
                     if (button.hasClass('share-button-popup')) {
                         $('.share-popup-input-result').text('There was a problem sharing the key, try again or contact the support.');
                     } else {
-                        UI.showErrorOnActiveTMTable('There was a problem sharing the key, try again or contact the support.');
+                        if (tr.closest('table').attr("id") == 'inactivetm'){
+                            UI.showErrorOnInactiveTMTable('There was a problem sharing the key, try again or contact the support.');
+                        }else {
+                            UI.showErrorOnActiveTMTable('There was a problem sharing the key, try again or contact the support.');
+                        }
                     }
                 }
             });

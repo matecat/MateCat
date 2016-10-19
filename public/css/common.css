@@ -884,7 +884,7 @@ color:#333;}
 
 .slide-panel {
     height: 100%!important;
-    width: 1100px;
+    width: 1085px;
     margin: 0 auto;
     overflow-x: hidden;
     overflow-y: auto;
@@ -1610,13 +1610,13 @@ margin: 2px 8px 0 0;
 
 
 div.mgmt-container {
-margin: 0 auto;
-overflow: hidden;
-width: 96%;
-padding-top: 20px;
-  padding-bottom: 100px;
-text-align: left;
-min-height: 400px;
+    margin: 0 auto;
+    overflow: hidden;
+    width: 1039px;
+    padding-top: 20px;
+    padding-bottom: 150px;
+    text-align: left;
+    min-height: 400px;
 }
 
 
@@ -1731,7 +1731,7 @@ th.activate, td.activate {
 input.message-share-tmx-input-email {
     margin-top: 2px;
     float: left;
-    margin-left: 16px;
+    margin-left: 15px;
     width: 290px;
     height: 24px;
     padding-left: 4px;
@@ -1742,10 +1742,6 @@ input.message-share-tmx-input-email {
 span.message-share-tmx-email, .message-share-tmx-openemailpopup {
     text-decoration: underline;
     cursor: pointer;
-}
-
-.cancelsharetmx {
-    margin-right: 14px;
 }
 /*
 .new .privatekey {
@@ -1851,14 +1847,11 @@ cursor: pointer!important;
 font-size:14px;
 }
 
-.mgmt-tm .btn-ok {
-    margin-left: 12px;
-}
-
 .mgmt-tm .canceladdtmx,
 .mgmt-tm .canceladdglossary
 {
     width: 35px;
+    margin-left: 12px;
 }
 
 .canceladdtmx ,
@@ -1870,7 +1863,6 @@ font-size:14px;
 .mgmt-tm .btn-ok {
     padding: 7px 5px!important
 }
-
 
 span.mt-error-key {
     display: none;
@@ -2115,7 +2107,7 @@ margin-top: 10px;
  {
     display: block;
     background: #fff;
-    padding: 10px 14px 20px 5px;
+    padding: 10px 17px 20px 5px;
     height: 20px;
     width: initial!important;
     border-top: 1px solid #E1E1E1;
@@ -2204,7 +2196,7 @@ td.uploadfile p {
 {
     display: block;
     background: #fff;
-    padding: 10px 5px 20px;
+    padding: 10px 17px 20px 5px;
     height: 53px;
     border-top: 1px solid #E1E1E1;
     box-shadow: inset 0px 2px 5px 0px #E4E4E4;
@@ -2302,7 +2294,7 @@ input.email-export-tmx {
 .btn-confirm-small .text {
     color: #fff;
 }
-.btn-confirm-small.confirmDelete,
+.cancel-tm-key-delete.cancelDelete,
 .btn-confirm-small.continueDeletingMT {
     margin-left: 12px;
 }
@@ -3421,8 +3413,8 @@ display: none;
 
 .fixed-msg {
     position: fixed;
-    top: 0px;
-    width: 865px;
+    top: 16px;
+    width: 1007px;
     z-index: 10000;
 }
 
