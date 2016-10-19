@@ -7,7 +7,14 @@ class checkFileConversionController extends ajaxController {
       public function __construct() {
 
             parent::__construct();
-            $this->file_name = $this->get_from_get_post('file_name');
+
+            $filterArgs = array(
+                    'file_name' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+            );
+            $__postInput = filter_input_array( INPUT_POST, $filterArgs );
+
+            $this->file_name = $__postInput[ 'file_name' ];
+
       }
 
       public function doAction() {
@@ -30,5 +37,3 @@ class checkFileConversionController extends ajaxController {
       }
 
 }
-
-?>

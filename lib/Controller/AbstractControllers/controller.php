@@ -81,21 +81,6 @@ abstract class controller {
         header("Pragma: no-cache");
     }
 
-    /**
-     * Get the values from GET OR POST global Vars
-     *
-     * @deprecated
-     *
-     * @param $varname
-     *
-     * @return null
-     */
-    protected function get_from_get_post($varname) {
-        $ret = null;
-        $ret = isset($_GET[$varname]) ? $_GET[$varname] : (isset($_POST[$varname]) ? $_POST[$varname] : null);
-        return $ret;
-    }
-
     public function sessionStart(){
         Bootstrap::sessionStart();
     }
