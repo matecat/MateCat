@@ -970,6 +970,7 @@ color:#333;}
 .mymemory-descr {
     margin-left: 7px;
     width: 100%;
+    color: #666;
 }
 /*
 .editing .popup-tm {
@@ -1727,9 +1728,21 @@ th.activate, td.activate {
 .icon-owner.icon-owner-shared:hover {
 
     border: 1px solid #ccc;
-    border-radius: 4px;
+    border-radius: 3px;
+    -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
 }
 
+.icon-owner.icon-owner-private:active,
+.icon-owner.icon-owner-shared:active {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    /* margin-top: 5px!important; */
+    -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.1);
+}
 .share-button {
     width: 50px;
     text-align: center;
@@ -2109,9 +2122,13 @@ margin-top: 10px;
 #activetm tbody {
     display: block;
     background: #e4f2fb;
-
 }
 
+
+
+tr.mymemory td.dragrow .status {
+    display: none!important;
+}
 
 #activetm tr:not(.new),
 #inactivetm tr:not(.new) {
@@ -2464,7 +2481,9 @@ color: #999;}
     background: #fff;
 }
 
-
+#activetm tr.mymemory td {
+    background-color: #f8f8f8 !important;
+}
 
 .slide-panel td
 {
@@ -4527,8 +4546,9 @@ table.activitylog th .th-inner:after {
 }
 
 .share-popup-top h3 {
-    font-size:20px!important;
+    font-size:18px!important;
     text-align: left;
+    margin-top: -5px!important;
 }
 
 
@@ -4544,12 +4564,28 @@ table.activitylog th .th-inner:after {
     margin: 0!important;
     text-align: left;
     padding: 0!important;
+    margin-bottom: 5px!important;
     font-size: 16px!important;
 }
 
+.share-popup-container-list h3 {
+    font-size: 18px;
+        background: #f4f4f4;
+    text-align: left;
+    margin: 0!important;
+        margin: 0 !important;
+    padding: 5px 12px;
+}
+
 .share-popup-input-key {
+font-weight: bold;
+    border: 0;
+    text-align: center;
+    width: 165px;
     border-bottom: 1px dashed #ccc;
-    font-weight: bold;
+}
+.share-popup-input-key:focus {
+    border: 0;    
 }
 .share-popup-copy-result {
     font-size: 14px;
@@ -4562,6 +4598,7 @@ table.activitylog th .th-inner:after {
     text-align: left;
     margin-top: 30px;
     color: red;
+    margin-top: -4px!important;
     line-height: 20px;
 }
 
@@ -4579,6 +4616,9 @@ table.activitylog th .th-inner:after {
     max-height: 300px;
     position: relative;
     float: left;
+    margin-top: 10px;
+    border: 1px solid #d5d5d5;
+    border-radius: 4px;
 }
 
 .share-popup-list {
@@ -4589,7 +4629,6 @@ table.activitylog th .th-inner:after {
     overflow-y: auto;
     overflow-x: hidden;
     border-top: 1px solid #cacaca;
-    margin-top: 5px;
     box-shadow: inset 0 2px 2px -1px rgba(0,0,0,.1);
     -webkit-box-shadow: inset 0 2px 2px -1px rgba(0,0,0,.1);
 }
@@ -4610,6 +4649,7 @@ table.activitylog th .th-inner:after {
     height: 35px;
     width: 100px;
     margin-top: 5px;
+    margin-bottom: 0;
     margin-left: 0px;
 }
 
@@ -4632,18 +4672,22 @@ input.share-popup-container-input-email {
     border-bottom: 1px solid #cacaca;
 }
 
+.share-popup-list-item:last-child {
+    border-bottom: none;
+}
+
 span.share-popup-item-name, .share-popup-item-email {
     text-align: left;
     width: 100%;
     float: left;
     margin-left: 12px;
-    font-size: 16px;
+    font-size: 15px;
     line-height: 26px;
 }
 
 span.share-popup-item-email {
-    font-size: 15px;
-    color: #5d5d5d;
+    font-size: 14px;
+    color: #999;
     line-height: 13px;
 }
 /***********************/

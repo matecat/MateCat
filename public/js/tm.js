@@ -1676,15 +1676,12 @@
 
                 var message = "<div class='share-popup-container'>" +
                     "<div class='share-popup-top'>" +
-                    "<h3 class='popup-tm pull-left'>Resource to share: "+
-                    description +
+                    "<h3 class='popup-tm pull-left'>Share ownership of the resource: <br />"+
+                    description + " - " + key +
                     "</h3>"+
                     "</div>"+
                     "<div class='share-popup-container-bottom'>" +
-                    "<p>You can share ownership of the resource sharing this key: "+ 
-                    "<span class='share-popup-input-key'>"+key+
-                    " <a class='share-popup-copy-link-button icon-copy-key'></a></span> "+              
-                    "or entering the email address below.</p>"+  
+                    "<p>This action cannot be undone.</p>"+  
                     "<div class='share-popup-copy-result'></div>"+                        
                     "<input class='share-popup-container-input-email' placeholder='Enter email addresses separated by comma'>"+
                     "<div class='pull-right btn-confirm-medium share-button share-button-popup'>Share</div>"+
@@ -1692,7 +1689,7 @@
                     "</div>"+
                     "</div>"+
                     "<div class='share-popup-container-list'>" +
-                    "<span class='share-popup-list-title'>Who owns the resource</span>"+
+                    "<h3 class='popup-tm'>Who owns the resource</h3>"+
                     "<div class='share-popup-list'>" +
                     htmlUsersList +
                     "</div>"+
@@ -1727,7 +1724,13 @@
                     copyTextareaBtn.removeEventListener('click', copyFn);
 
                     copyTextareaBtn.addEventListener('click', copyFn);
+                    $('.share-popup-copy-link-button').data("powertip", "<div style='line-height: 20px;font-size: 15px;'>Click to copy to clipboard</div>");
+                    $('.share-popup-copy-link-button').powerTip({
+                        placement : 'n',
+                        popupId : "matecatTip",
+                    });
                 });
+
             });
 
         },
