@@ -5,7 +5,8 @@ function doSearchQuery( Array $queryParams ) {
 
     $key = $queryParams[ 'key' ]; //no escape: not related with Database
 
-    $src = preg_replace( array( "#'#", '#"#' ), array( '&apos;', '&quot;' ), $queryParams[ 'src' ] );
+//    $src = preg_replace( array( "#'#", '#"#' ), array( '&apos;', '&quot;' ), $queryParams[ 'src' ] );
+    $src = $queryParams[ 'src' ] ;
 
     // in the database at the target we have not html entities but normal quotes
     //so we have do not escape the translations
@@ -43,7 +44,7 @@ function doSearchQuery( Array $queryParams ) {
      *
      */
     $_regexpEscapedSrc = preg_replace( '#([\%\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1', $queryParams[ 'src' ] );
-    $_regexpEscapedSrc = preg_replace( array( "#'#", '#"#' ), array( '&apos;', '&quot;' ), $_regexpEscapedSrc );
+//    $_regexpEscapedSrc = preg_replace( array( "#'#", '#"#' ), array( '&apos;', '&quot;' ), $_regexpEscapedSrc );
     $_regexpEscapedSrc = $db->escape( $_regexpEscapedSrc );
 
     $_regexpEscapedTrg = preg_replace( '#([\%\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1', $queryParams[ 'trg' ] );
@@ -1025,7 +1026,7 @@ function countThisTranslatedHashInJob( $jid, $jpassword, $sid ) {
         AND password = '%s'
         AND segment_translations.status IN( 
           '" . Constants_TranslationStatus::STATUS_TRANSLATED . "' , 
-          '" . Constants_TranslationStatus::STATUS_TRANSLATED . "' 
+          '" . Constants_TranslationStatus::STATUS_APPROVED . "' 
         )
     ";
 

@@ -27,6 +27,8 @@ class SetContributionWorker extends AbstractWorker {
     const ERR_SET_FAILED = 4;
     const ERR_NO_TM_ENGINE = 5;
 
+    const REDIS_PROPAGATED_ID_KEY = "prop:id_job:%s:id_segment:%s";
+
     /**
      * @var Engines_MyMemory
      */
@@ -127,7 +129,19 @@ class SetContributionWorker extends AbstractWorker {
                 if( $contributionStruct->propagationRequest ){
                     $this->_update( $config, $contributionStruct );
                 } else {
-                    $this->_set( $config, $contributionStruct );
+
+                    $redisSetKey = sprintf( self::REDIS_PROPAGATED_ID_KEY, $contributionStruct->id_job, $contributionStruct->id_segment );
+                    $alreadySet  = $this->_queueHandler->getRedisClient()->get( $redisSetKey );
+
+                    if( !empty( $alreadySet ) ){
+                        $this->_update( $config, $contributionStruct );
+                    } else {
+                        $this->_set( $config, $contributionStruct );
+                    }
+
+                    $this->_queueHandler->getRedisClient()->set( $redisSetKey, 1 );
+                    $this->_queueHandler->getRedisClient()->expire( $redisSetKey, 60 * 60 * 24 * 60 ); //TTL 2 months
+
                 }
 
             }
