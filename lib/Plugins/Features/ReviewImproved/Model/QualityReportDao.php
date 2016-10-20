@@ -17,6 +17,47 @@ class QualityReportDao extends \DataAccess_AbstractDao {
 
     }
 
+
+    public function getAverages( \Chunks_ChunkStruct $chunk ) {
+        $sql = <<<SQL
+
+      SELECT
+        ROUND( AVG( time_to_edit ) ) AS avg_time_to_edit,
+        ROUND( AVG( edit_distance ) ) AS avg_edit_distance
+
+      FROM segment_translations st
+
+      JOIN jobs
+        ON jobs.id = st.id_job
+        AND jobs.password = :password
+        AND jobs.id = :id_job
+
+      JOIN segments s
+        ON s.id = st.id_segment
+        AND s.id >= jobs.job_first_segment
+        AND s.id <= jobs.job_last_segment
+
+      JOIN files_job fj
+        ON st.id_job = fj.id_job
+           AND s.id_file = fj.id_file
+
+      JOIN files f ON f.id = fj.id_file
+
+        WHERE show_in_cattool
+SQL;
+
+        $conn  = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->setFetchMode( \PDO::FETCH_ASSOC );
+
+        $stmt->execute( array(
+            'id_job'   => $chunk->id,
+            'password' => $chunk->password
+        ) );
+
+        return $stmt->fetch();
+
+    }
     /**
      * @param \Chunks_ChunkStruct $chunk
      *
@@ -37,6 +78,7 @@ SELECT
   st.translation as translation,
   st.status as translation_status,
   st.edit_distance as edit_distance,
+  st.time_to_edit  as time_to_edit,
 
   s.id AS segment_id,
   s.segment AS segment_source,

@@ -80,7 +80,13 @@
 
         <tr>
             <th>Reviewer name</th>
-            <td colspan="5" tal:content="model/chunk/review/reviewer_name"></td>
+            <td colspan="1" tal:content="model/chunk/review/reviewer_name"></td>
+
+            <th>Avg. Edit distance</th>
+            <td colspan="1" tal:content="model/chunk/avg_edit_distance"></td>
+
+            <th>Avg. Time to edit name</th>
+            <td colspan="1" tal:content="model/chunk/avg_time_to_edit"></td>
         </tr>
     </table>
 
@@ -125,6 +131,14 @@
                     <th>Original Target</th>
                     <td tal:content="segment/original_translation"></td>
                 </tr>
+
+               <tr>
+                   <th>Time to edit</th>
+                   <td tal:content="segment/time_to_edit"></td>
+
+                   <th></th>
+                   <td></td>
+               </tr>
             </table>
 
             <tal:block tal:condition="true: segment/issues">
