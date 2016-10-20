@@ -1124,8 +1124,8 @@ UI = {
 		} else {
 			next = UI.currentFile.next().find( selector ).first();
 			if (next.length) {
-				UI.scrollSegment(next);
-				$(UI.targetContainerSelector(), next).trigger("click", "moving");
+                $(UI.targetContainerSelector(), next).trigger("click", "moving");
+                UI.scrollSegment(next);
 			} else {
                 UI.closeSegment(UI.currentSegment, 1, 'save');
             }
@@ -1177,15 +1177,17 @@ UI = {
 			UI.scrollSegment(prev);
 	},
 	gotoSegment: function(id) {
-        if ( !this.segmentIsLoaded(id) && UI.parsedHash.splittedSegmentId ) {
+
+	    if ( !this.segmentIsLoaded(id) && UI.parsedHash.splittedSegmentId ) {
             id = UI.parsedHash.splittedSegmentId ;
         }
 
         if ( MBC.enabled() && MBC.wasAskedByCommentHash( id ) ) {
             MBC.openSegmentComment( UI.Segment.findEl( id ) ) ;
-        } else {
-            SegmentActivator.activate(id);
+        } else if ( _.isUndefined(UI.currentSegment) || UI.getSegmentId(UI.currentSegment) !== id ) {
+            SegmentActivator.activate(id)
         }
+
     },
 	justSelecting: function(what) {
 		if (window.getSelection().isCollapsed)
