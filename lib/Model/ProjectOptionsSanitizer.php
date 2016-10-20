@@ -114,6 +114,8 @@ class ProjectOptionsSanitizer {
     }
 
     private function checkSourceAndTargetAreInCombination( $langs ) {
+        $this->__ensureLanguagesAreSet();
+
         $all_langs = array_merge( $this->target_lang, array($this->source_lang) );
 
         $all_langs = array_unique( $all_langs ) ;
@@ -123,6 +125,8 @@ class ProjectOptionsSanitizer {
     }
 
     private function checkSourceAndTargetAreInCombinationForTagProjection( $langs ) {
+        $this->__ensureLanguagesAreSet();
+
         $lang_combination = array();
         $found = false;
         foreach ($this->target_lang as $value) {
@@ -137,6 +141,12 @@ class ProjectOptionsSanitizer {
             }
         }
         return $found ;
+    }
+
+    private function __ensureLanguagesAreSet() {
+        if (is_null( $this->target_lang ) || is_null( $this->source_lang ) ) {
+            throw  new Exception('Trying to sanitize options, but languages are not set') ;
+        }
     }
 
 }
