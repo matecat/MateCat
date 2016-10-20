@@ -47,10 +47,16 @@ class ProjectOptionsSanitizer {
         $this->source_lang = $source ; 
         $this->target_lang = $target ; 
     }
-    
+
+    /**
+     * This method populates an array of sanitized input options. Known keys are sanitized.
+     * Unknown keys are let as they are and copied to the sanitized array.
+     *
+     * @return array
+     */
     public function sanitize() {
-        $this->sanitized = array(); 
-        
+        $this->sanitized = $this->options ;
+
         if ( isset( $this->options['speech2text'] ) ) {
             $this->sanitizeSpeech2Text() ;
         }
@@ -80,8 +86,15 @@ class ProjectOptionsSanitizer {
 
     private function sanitizeSegmentationRule() {
         $rules = array( 'patent' );
-        if ( array_search( @$this->options[ 'segmentation_rule' ], $rules ) !== false ) {
-            $this->sanitized[ 'segmentation_rule' ] = $this->options[ 'segmentation_rule' ];
+
+        if (
+            array_key_exists('segmentation_rule', $this->options ) &&
+            in_array( $this->options['segmentation_rule'], $rules )
+        ) {
+            $this->sanitized['segmentation_rule'] = $this->options['segmentation_rule'];
+        }
+        else {
+            unset( $this->sanitized['segmentation_rule'] );
         }
     }
 
