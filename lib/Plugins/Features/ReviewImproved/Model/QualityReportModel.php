@@ -37,6 +37,9 @@ class QualityReportModel {
 
     private $date_format;
 
+    private $avg_time_to_edit ;
+    private $avg_edit_distance ;
+
 
     /**
      * @param \Chunks_ChunkStruct $chunk
@@ -84,7 +87,18 @@ class QualityReportModel {
         $this->date_format = $format;
     }
 
+    private function __setAverages() {
+        $dao = new QualityReportDao() ;
+        $avgs = $dao->getAverages( $this->getChunk() );
+
+        $this->avg_edit_distance = round( $avgs['avg_edit_distance'] / 1000, 2);
+        $this->avg_time_to_edit = round( $avgs['avg_time_to_edit'] / 1000, 2);
+    }
+
     private function buildQualityReportStructure( $records ) {
+
+        $this->__setAverages();
+
         $scoreFormatted = number_format( $this->getChunkReviewModel()->getScore(), 2, '.', ',' );
 
         $this->quality_report_structure = array(
@@ -95,7 +109,9 @@ class QualityReportModel {
                                 'score'         => $scoreFormatted,
                                 'reviewer_name' => $this->getReviewerName()
                         ),
-                        'files'  => array()
+                        'files'  => array(),
+                        'avg_time_to_edit' => $this->avg_time_to_edit,
+                        'avg_edit_distance' => $this->avg_edit_distance
                 ),
                 'job'     => array(
                         'source' => $this->chunk->getJob()->source,
@@ -187,7 +203,9 @@ class QualityReportModel {
                 'id'                   => $record[ 'segment_id' ],
                 'source'               => $record[ 'segment_source' ],
                 'status'               => $record[ 'translation_status' ],
+                // TODO: the following `round` is wrong, this should be done later in a presentation layer...
                 'edit_distance'        => round( $record[ 'edit_distance' ] / 1000, 2 ),
+                'time_to_edit'         => round( $record[ 'time_to_edit' ] / 1000, 2 ),
                 'issues'               => array(),
                 'qa_checks'            => array()
         ) );
