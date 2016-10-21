@@ -250,8 +250,12 @@ class Upload {
     public static function fixFileName( $string ) {
         //Roberto: removed STRIP_HIGH flag. Non-latin filenames are supported.
         $string = filter_var( $string, FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES) );
-        $string = preg_replace( '/[^\pL0-9\040\.\-\=_&()\'\"]/u', '', $string ); //strips whitespace and odd chars
-        $string = preg_replace( '/[\040]+/', '_', $string ); //strips whitespace and odd chars
+
+        //Fix Bug: Zip files, file names with contiguous whitespaces ( replaced with only one _ and not found inside the zip on download )
+        $string = preg_replace( '/\p{Zs}/u', chr(0x1A), $string ); // substitute whitespaces
+        $string = preg_replace( '/[^\pL0-9\.\-\=_&()\'\"\x1A]/u', '', $string ); //strips odd chars and preserve preceding placeholder
+        $string = preg_replace( '/' . chr(0x1A) . '/', '_', $string ); //strips whitespace and odd chars
+
         return $string;
     }
 
