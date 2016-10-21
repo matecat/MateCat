@@ -69,7 +69,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
                                      sum(1) AS owners_tot, 
                                      group_concat( DISTINCT m2.uid ) AS owner_uids
                              FROM " . self::TABLE . " m1
-                             LEFT JOIN " . self::TABLE . " AS m2 ON m1.key_value = m2.key_value
+                             LEFT JOIN " . self::TABLE . " AS m2 ON m1.key_value = m2.key_value AND m2.deleted = 0
                              WHERE %s and m1.deleted = 0
                              GROUP BY m1.key_value
 			                 ORDER BY m1.creation_date desc";
