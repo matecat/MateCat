@@ -134,7 +134,7 @@
             });
 
             // script per fare apparire e scomparire la riga con l'upload della tmx
-            $('body').on('click', 'tr.mine a.canceladdtmx, tr a.cancelsharetmx, tr.ownergroup a.canceladdtmx, tr.mine a.canceladdglossary, tr.ownergroup a.canceladdglossary, #inactivetm tr.new .action .addtmxfile', function() {
+            $('body').on('click', 'tr a.canceladdtmx, tr a.cancelsharetmx, tr.ownergroup a.canceladdtmx, tr.mine a.canceladdglossary, tr.ownergroup a.canceladdglossary, #inactivetm tr.new .action .addtmxfile', function() {
 
                 $(this).parents('tr').find('.action a').removeClass('disabled');
                 $(this).parents('td.uploadfile, .share-tmx-container').slideToggle(function () {
@@ -1720,7 +1720,7 @@
             var exportDiv = '<td class="download-glossary-container" style="display: none">' +
                 '<div class="message-export-glossary">We are exporting the glossary. Please wait...</div>' +
                 '<span class="message-glossary-export-completed">Export Completed</span>' +
-                '<span class="message-glossary-export-error">Export Failed</span>' +
+                '<span class="message-glossary-export-error">Export failed. No glossary found in the resource.</span>' +
                 '<span class="uploadloader"></span>'+
                 '</td>';
 
@@ -1778,7 +1778,7 @@
                         '</p>';
                 format = '.xlsx,.xls';
             }
-            $(elem).parents('.action a').addClass('disabled');
+            $(elem).closest("tr").find('.action a').addClass('disabled');
             var nr = '<td class="uploadfile" style="display: none">' +
                 label +
                 '<form class="existing add-TM-Form pull-left" action="/" method="post">' +
