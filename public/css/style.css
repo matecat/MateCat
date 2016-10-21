@@ -71,6 +71,7 @@ header .wrapper{
     color: #777;
     height: 27px;
     padding-top: 13px;
+	cursor: pointer;
 }
 
 #notifbox a
@@ -3949,4 +3950,18 @@ section:hover .segment-side-buttons {
 	right: 6px;
 	font-size: 0.8rem;
 	color: #999;
+}
+
+/********** QA Component **********/
+.qa-wrapper {
+	position: absolute;
+	width: 100%;
+	top: 83px;
+}
+.qa-container {
+	background-color: #efefef;
+	height:50px;
+	box-shadow: 0 1px 3px #666;
+	border-radius: 0 0 2px 2px;
+	display: none;
 }

@@ -2234,6 +2234,9 @@ UI = {
 
 				//check for errors
 				if (UI.globalWarnings.length > 0) {
+
+				    UI.renderQAPanel();
+
 					//for now, put only last in the pointer to segment id
 					// warningPosition = '#' + data.details[ Object.keys(data.details).sort().shift() ].id_segment;
 
@@ -2249,7 +2252,7 @@ UI = {
 					//if everything is ok, switch css to ok
 					$('#notifbox').attr('class', 'notific').attr("title", "Well done, no errors found!").find('.numbererror').text('');
 					//reset the pointer to offending segment
-					$('#point2seg').attr('href', '#');
+					// $('#point2seg').attr('href', '#');
 				}
 
 				// check for messages
@@ -2261,13 +2264,21 @@ UI = {
 				}
 
 
-				UI.setNextWarnedSegment();
+				// UI.setNextWarnedSegment();
 
                 $(document).trigger('getWarning:global:success', { resp : data }) ;
            
 			}
 		});
 	},
+    renderQAPanel: function () {
+	    if ( !this.QAComponent ) {
+            var mountPoint = $(".qa-wrapper")[0];
+            this.QAComponent = ReactDOM.render(React.createElement(QAComponent, {
+                issues: UI.globalWarnings
+            }), mountPoint);
+        }
+    },
 	displayMessage: function(messages) {
         var self = this;
 		if($('body').hasClass('incomingMsg')) return false;

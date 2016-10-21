@@ -1209,8 +1209,9 @@ $.extend(UI, {
 		$("#point2seg").bind('mousedown', function(e) {
 			e.preventDefault();
             UI.saveSegment(UI.currentSegment);
-			UI.scrollSegment($('#segment-' + $(this).attr('data-segment')));
-            UI.setNextWarnedSegment();
+			QAComponent.togglePanel();
+            // UI.scrollSegment($('#segment-' + $(this).attr('data-segment')));
+            // UI.setNextWarnedSegment();
 		});
 
 		$("#navSwitcher").on('click', function(e) {
