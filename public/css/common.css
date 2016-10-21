@@ -3436,11 +3436,12 @@ display: none;
 }
 
 .tm-error-message {
-        border-top: 3px solid #ec3d3d;
+    border-top: 3px solid #ec3d3d;
+    /*background-color: rgb(251, 218, 218);*/
 }
 
 .tm-warning-message {
-        border-top: 3px solid #ebad1a;
+    border-top: 3px solid #ebad1a;
 }
 
 .tm-success-message {
@@ -4546,11 +4547,11 @@ table.activitylog th .th-inner:after {
 }
 
 .share-popup-top h3 {
-    font-size:18px!important;
+    font-size:16px!important;
     text-align: left;
     margin-top: -5px!important;
+    font-weight: normal;
 }
-
 
 .share-popup-top-label, .share-popup-list-title, .share-popup-bottom-label {
 
@@ -4566,6 +4567,7 @@ table.activitylog th .th-inner:after {
     padding: 0!important;
     margin-bottom: 5px!important;
     font-size: 16px!important;
+    font-weight: bold;
 }
 
 .share-popup-container-list h3 {

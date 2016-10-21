@@ -1625,6 +1625,8 @@
                 //Create the container
                 var exportDiv = '';
                 if ( users.length === 0 ) {
+                    $('tr.mine[data-key='+ key +'] .icon-owner').removeClass('icon-users icon-owner-shared')
+                        .addClass('icon-lock icon-owner-private');
                     exportDiv = '<td class="share-tmx-container" style="display: none">' +
                         '<div class="message-share-tmx">You can share ownership of the resource by sharing the key with your colleagues.</div>' +
                         '<input class="message-share-tmx-input-email" placeholder="Enter email addresses separated by comma"/>'+
@@ -1677,7 +1679,7 @@
                 var message = "<div class='share-popup-container'>" +
                     "<div class='share-popup-top'>" +
                     "<h3 class='popup-tm pull-left'>Share ownership of the resource: <br />"+
-                    description + " - " + key +
+                    description + " - <span class='share-popup-key'>" + key + "</span>" +
                     "</h3>"+
                     "</div>"+
                     "<div class='share-popup-container-bottom'>" +
@@ -1703,27 +1705,6 @@
                         title: 'Share resource'
                     });
 
-                    var copyTextareaBtn = document.querySelector('.share-popup-copy-link-button');
-
-                    var copyFn = function() {
-                        var copyTextarea = document.querySelector('.share-popup-input-key');
-                        copyTextarea.select();
-
-                        try {
-                            var successful = document.execCommand('copy');
-                            if (successful) {
-                                $('.share-popup-copy-result').text('Key copied to clipboard.');
-                            } else {
-                                $('.share-popup-copy-result').text('Error copying to the clipboard, do it manually.');
-                            }
-                        } catch (err) {
-                            $('.share-popup-copy-result').text('Error copying to the clipboard, do it manually.');
-                        }
-                    };
-
-                    copyTextareaBtn.removeEventListener('click', copyFn);
-
-                    copyTextareaBtn.addEventListener('click', copyFn);
                     $('.share-popup-copy-link-button').data("powertip", "<div style='line-height: 20px;font-size: 15px;'>Click to copy to clipboard</div>");
                     $('.share-popup-copy-link-button').powerTip({
                         placement : 'n',
@@ -1912,6 +1893,14 @@
                 placement : 's',
                 popupId : "matecatTip",
             });
+            var mymemoryChecks = $('#activetm tr.mymemory .activate, #activetm tr.mymemory .lookup, #activetm tr.mymemory .update');
+            mymemoryChecks.data("powertip", "<div style='line-height: 20px;font-size: 15px;'>Settings for MyMemory cannot be changed manually.</div>");
+            mymemoryChecks.powerTip({
+                placement : 's',
+                popupId : "matecatTip",
+            });
+
+
         },
 
         setLanguageTooltipTP: function () {
@@ -1955,10 +1944,40 @@
         },
         clickOnShareButton(button) {
             var tr = button.closest('tr');
-            var key = ( tr.length ) ? tr.data('key') : button.closest('.share-popup-container').find('.share-popup-input-key').val();
+            var key = ( tr.length ) ? tr.data('key') : button.closest('.share-popup-container').find('.share-popup-key').text();
             var descr = ( tr.length ) ? tr.find('.edit-desc').data('descr') : button.closest('.share-popup-container').find('.share-popup-description').text();
-            var msg = 'The resource <span>' + descr + '(' + key + ')' +'</span> has been shared.';
-            UI.shareKeyByEmail(button.closest('.share-tmx-container').find('.message-share-tmx-input-email').val(), key).done(function (response) {
+            var msg = 'The resource <span style="font-weight: bold">' + descr + '(' + key + ')' +'</span> has been shared.';
+
+            var validateEmail = function(emails) {
+                var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                var result = true;
+                emails.split(',').forEach(function (email) {
+                   if ( !re.test(email) )
+                       result = email;
+                });
+                return result;
+            };
+
+            var emails = (button.hasClass('share-button-popup')) ? button.closest('.share-popup-container-bottom').find('.share-popup-container-input-email').val()
+                : button.closest('.share-tmx-container').find('.message-share-tmx-input-email').val();
+
+            var validateReturn = validateEmail(emails);
+
+            if ( validateReturn !== true ) {
+                var errorMsg = 'The email <span style="font-weight: bold">'+ validateReturn +'</span> is not valid.';
+                if (button.hasClass('share-button-popup')) {
+                    $('.share-popup-input-result').html(errorMsg);
+                } else {
+                    if (tr.closest('table').attr("id") == 'inactivetm'){
+                        UI.showErrorOnInactiveTMTable(errorMsg);
+                    }else {
+                        UI.showErrorOnActiveTMTable(errorMsg);
+                    }
+                }
+                return;
+            }
+
+            UI.shareKeyByEmail(emails, key).done(function (response) {
                 UI.hideAllBoxOnTables();
                 if (response.errors.length === 0) {
                     if (button.hasClass('share-button-popup')) {
@@ -1981,13 +2000,14 @@
                         UI.hideAllBoxOnTables();
                     }, 4000)
                 } else {
+                    var errorMsg = response.errors[0].message;
                     if (button.hasClass('share-button-popup')) {
-                        $('.share-popup-input-result').text('There was a problem sharing the key, try again or contact the support.');
+                        $('.share-popup-input-result').text(errorMsg);
                     } else {
                         if (tr.closest('table').attr("id") == 'inactivetm'){
-                            UI.showErrorOnInactiveTMTable('There was a problem sharing the key, try again or contact the support.');
+                            UI.showErrorOnInactiveTMTable(errorMsg);
                         }else {
-                            UI.showErrorOnActiveTMTable('There was a problem sharing the key, try again or contact the support.');
+                            UI.showErrorOnActiveTMTable(errorMsg);
                         }
                     }
                 }
