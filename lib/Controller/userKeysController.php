@@ -79,8 +79,8 @@ class userKeysController extends ajaxController {
             $this->result[ 'success' ]  = false;
         }
 
-        //ONLY LOGGED USERS CAN PERFORM ACTIONS ON KEYS
-        if ( !$this->userIsLogged ) {
+        //ONLY LOGGED USERS CAN PERFORM ACTIONS ON KEYS, BUT INFO ARE PUBLIC
+        if ( !$this->userIsLogged && $this->exec != 'info' ) {
             $this->result[ 'errors' ][] = array(
                     'code'    => -1,
                     'message' => "Login is required to perform this action"
