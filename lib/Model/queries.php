@@ -360,13 +360,6 @@ function encryptPass( $clear_pass, $salt ) {
     return sha1( $clear_pass . $salt );
 }
 
-function mailer( $toUser, $toMail, $fromUser, $fromMail, $subject, $message ) {
-    //optional headerfields
-    $header = "From: " . $fromUser . " <" . $fromMail . ">\r\n";
-    //mail command
-    mail( $toMail, $subject, $message, $header );
-}
-
 function checkLogin( $user, $pass ) {
     //get link
     $db = Database::obtain();
