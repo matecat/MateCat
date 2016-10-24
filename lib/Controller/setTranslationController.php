@@ -309,13 +309,12 @@ class setTranslationController extends ajaxController {
             $_Translation[ 'suggestion_position' ]    = 0;
             $_Translation[ 'warning' ]                = false;
             $_Translation[ 'translation_date' ]       = date( "Y-m-d H:i:s" );
-            $res                                      = addTranslation( $_Translation );
 
-            if ( $res < 0 ) {
-                $this->result[ 'errors' ][] = array( "code" => -101, "message" => "database errors" );
+            CatUtils::addSegmentTranslation( $_Translation, $this->result[ 'errors' ] );
+
+            if ( !empty( $this->result[ 'errors' ] ) ) {
                 $db->rollback();
-
-                return $res;
+                return -1;
             }
 
             /*
@@ -377,11 +376,9 @@ class setTranslationController extends ajaxController {
          * Translation is inserted here.
          *
          */
-        $res = CatUtils::addSegmentTranslation( $_Translation );
+        CatUtils::addSegmentTranslation( $_Translation, $this->result[ 'errors' ] );
 
-        if ( !empty( $res[ 'errors' ] ) ) {
-            $this->result[ 'errors' ] = $res[ 'errors' ];
-
+        if ( !empty( $this->result[ 'errors' ] ) ) {
             $msg = "\n\n Error addSegmentTranslation \n\n Database Error \n\n " .
                 var_export( array_merge( $this->result, $_POST ), true );
             Log::doLog( $msg );
@@ -577,7 +574,16 @@ class setTranslationController extends ajaxController {
 
         }
 
-        $db->commit();
+        //COMMIT THE TRANSACTION
+        try {
+            $db->commit();
+        } catch ( Exception $e ) {
+            $this->result[ 'errors' ][] = array( "code" => -101, "message" => $e->getMessage() );
+            Log::doLog( "Lock: Transaction Aborted. " . $e->getMessage() );
+            $db->rollback();
+
+            return $e->getCode();
+        }
 
         $this->feature_set->run('setTranslationCommitted', array(
                 'translation'     => $_Translation,

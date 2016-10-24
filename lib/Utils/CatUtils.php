@@ -585,16 +585,16 @@ class CatUtils {
         return array($data, $stats);
     }
 
-    public static function addSegmentTranslation( array $_Translation ) {
+    public static function addSegmentTranslation( array $_Translation, array &$errors ) {
 
-        $updateRes = addTranslation( $_Translation );
-
-        if ($updateRes < 0) {
-            $result['errors'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the translation for the segment {$_Translation['id_segment']} - Error: $updateRes");
-            return $result;
+        try {
+            //if needed here can be placed a check for affected_rows == 0 //( $updateRes )
+            $updateRes = addTranslation( $_Translation );
+        } catch ( Exception $e ){
+            $errors[] = array( "code" => -101, "message" => $e->getMessage() );
         }
 
-        return 0;
+        return $errors;
 
     }
 
