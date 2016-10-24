@@ -2177,7 +2177,7 @@ span.email-export-tmx-email-error,
 .mgmt-tm .upload-file-msg-error {
     color: red;
     margin-right: 20px;
-    max-width: 250px;
+    max-width: 310px;
 }
 
 #activetm td.dragrow {
@@ -2192,8 +2192,6 @@ span.email-export-tmx-email-error,
 td.uploadfile p {
     margin: 0 10px;
 }
-
-
 
 #activetm td.dragrow .status {
 	cursor: move;
@@ -3437,15 +3435,17 @@ display: none;
 
 .tm-error-message {
     border-top: 3px solid #ec3d3d;
-    /*background-color: rgb(251, 218, 218);*/
+    background-color: rgb(251, 218, 218);
 }
 
 .tm-warning-message {
     border-top: 3px solid #ebad1a;
+    background-color: #d1e0d1;
 }
 
 .tm-success-message {
     border-top: 3px solid #4F8A10;
+    background-color: #fbf0d6;
 }
 
 .fixed-msg {

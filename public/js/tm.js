@@ -134,7 +134,7 @@
             });
 
             // script per fare apparire e scomparire la riga con l'upload della tmx
-            $('body').on('click', 'tr a.canceladdtmx, tr a.cancelsharetmx, tr.ownergroup a.canceladdtmx, tr.mine a.canceladdglossary, tr.ownergroup a.canceladdglossary, #inactivetm tr.new .action .addtmxfile', function() {
+            $('body').on('click', 'tr a.canceladdtmx, tr a.cancelsharetmx, tr.ownergroup a.canceladdtmx, tr a.canceladdglossary, tr.ownergroup a.canceladdglossary, #inactivetm tr.new .action .addtmxfile', function() {
 
                 $(this).parents('tr').find('.action a').removeClass('disabled');
                 $(this).parents('td.uploadfile, .share-tmx-container').slideToggle(function () {
@@ -156,10 +156,14 @@
                 var keyValue = $('#new-tm-key').val();
                 var descKey = $('#new-tm-description').val();
 
-
-                UI.saveTMkey(keyValue, descKey).done(function () {
+                if (config.isLoggedIn) {
+                    UI.saveTMkey(keyValue, descKey).done(function () {
+                        UI.checkTMKey('key');
+                    });
+                } else {
                     UI.checkTMKey('key');
-                });
+                    delete UI.newTmKey;
+                }
 
 
             }).on('click', 'tr .uploadfile .addtmxfile:not(.disabled)', function() {
@@ -235,7 +239,7 @@
                 UI.useTM(this);
             }).on('change', '#new-tm-read, #new-tm-write', function() {
                 UI.checkTMgrants();
-            }).on('change', 'tr.mine td.uploadfile input[type="file"], tr.ownergroup td.uploadfile input[type="file"]', function() {
+            }).on('change', 'tr td.uploadfile input[type="file"], tr.ownergroup td.uploadfile input[type="file"]', function() {
                 if(this.files[0].size > config.maxTMXFileSize) {
                     numMb = config.maxTMXFileSize/(1024*1024);
                     APP.alert('File is too big.<br/>The maximuxm size allowed is ' + numMb + 'MB.');
@@ -261,7 +265,8 @@
                 UI.openExportTmx(this);
 
             }).on('click', 'td.owner, .shareKey:not(.disabled)', function(e){
-                if ( $(this).closest('tr').hasClass('mymemory')) return;
+                var tr = $(this).closest('tr');
+                if ( tr.hasClass('mymemory') || ( (tr.hasClass('ownergroup') || tr.hasClass('anonymous')) && !config.isLoggedIn) ) return;
                 UI.openShareResource( $(this) );
             }).on('mousedown', '.mgmt-tm .downloadGlossary', function(e){
                 //Todo
@@ -302,6 +307,9 @@
             }).on('click', '.share-button', function (e) {
                 e.preventDefault();
                 UI.clickOnShareButton($(this));
+            }).on('keydown', '.message-share-tmx-input-email, .share-popup-container-input-email', function () {
+                $(this).removeClass('error');
+                UI.hideAllBoxOnTables();
             });
             $(".popup-tm.slide-panel").on("scroll", function(){
                 if (!isVisible($(".active-tm-container h3"))) {
@@ -590,11 +598,11 @@
         },
         cancelTMDisable: function (context) {
             var options = $.parseJSON(context);
-            $('.mgmt-tm tr.mine[data-key="' + options.key + '"] td.' + options.grant + ' input').click();
+            $('.mgmt-tm tr[data-key="' + options.key + '"] td.' + options.grant + ' input').click();
         },
         continueTMDisable: function (context) {
             var options = $.parseJSON(context);
-            el = $('.mgmt-tm tr.mine[data-key="' + options.key + '"] td.' + options.grant + ' input');
+            el = $('.mgmt-tm tr[data-key="' + options.key + '"] td.' + options.grant + ' input');
             UI.disableTM(el);
             $("#inactivetm").trigger("update");
         },
@@ -667,7 +675,10 @@
 
             if ( APP.isCattool ) UI.saveTMdata( false );
             UI.checkTMKeysUpdateChecks();
-            UI.checkKeyIsShared(key);
+            if (config.isLoggedIn) {
+                UI.checkKeyIsShared(key);
+            }
+            this.initTmxTooltips();
         },
         checkKeyIsShared: function (key) {
             UI.getUserSharedKey(key).done(function (response) {
@@ -858,6 +869,7 @@
                 } else {
                     // console.log('error');
                     TRcaller.removeClass('startUploading');
+                    TRcaller.find('.action a').removeClass('disabled');
                     $(TRcaller).find('.addtmxfile, .addglossaryfile').hide();
                     UI.UploadIframeId.remove();
                     $(TRcaller).find('.upload-file-msg-error').text('Error').show();
@@ -898,56 +910,56 @@
                 type: typeReq,
                 context: [Key, fileName, true, TRcaller],
                 error: function() {
-                    var TRcaller = this[3];
-                    $(TRcaller).find('.addtmxfile, .addglossaryfile, .uploadprogress').hide();
-                    $(TRcaller).find('.upload-file-msg-error').text('Error').show();
-                    $(TRcaller).find('.canceladdglossary').show();
-                    $(TRcaller).find('input[type="file"]').attr("disabled", false);
-                    if ($(TRcaller).closest('table').attr("id") == 'inactivetm'){
+                    var TDcaller = this[3];
+                    $(TDcaller).find('.addtmxfile, .addglossaryfile, .uploadprogress').hide();
+                    $(TDcaller).find('.upload-file-msg-error').text('Error').show();
+                    $(TDcaller).find('.canceladdglossary').show();
+                    $(TDcaller).find('input[type="file"]').attr("disabled", false);
+                    if ($(TDcaller).closest('table').attr("id") == 'inactivetm'){
                         UI.showErrorOnInactiveTMTable('There was an error saving your data. Please retry!');
                     }else {
                         UI.showErrorOnActiveTMTable('There was an error saving your data. Please retry!');
                     }
+                    $(TDcaller).closest('tr').find('.action a').removeClass('disabled');
                     UI.UploadIframeId.remove();
                 },
                 success: function(d) {
-                    var TRcaller = this[3];
-
+                    var TDcaller = this[3];
+                    $(TDcaller).closest('tr').find('.action a').removeClass('disabled');
                     if(d.errors.length) {
-                        $(TRcaller).find('.addtmxfile, .addglossaryfile, .uploadprogress').hide();
-                        $(TRcaller).find('.upload-file-msg-error').text('Error').show();
-                        $(TRcaller).find('.canceladdglossary').text('Error').show();
-                        $(TRcaller).find('input[type="file"]').attr("disabled", false);
-                        if ($(TRcaller).closest('table').attr("id") == 'inactivetm'){
+                        $(TDcaller).find('.addtmxfile, .addglossaryfile, .uploadprogress').hide();
+                        $(TDcaller).find('.upload-file-msg-error').text('Error').show();
+                        $(TDcaller).find('.canceladdglossary').text('Error').show();
+                        $(TDcaller).find('input[type="file"]').attr("disabled", false);
+                        if ($(TDcaller).closest('table').attr("id") == 'inactivetm'){
                             UI.showErrorOnInactiveTMTable(d.errors[0].message);
                         } else {
                             UI.showErrorOnActiveTMTable(d.errors[0].message);
                         }
                         UI.UploadIframeId.remove();
                     } else {
-                        $(TRcaller).find('.addglossaryfile, .canceladdglossary, .addtmxfile, .canceladdtmx').hide();
-                        $(TRcaller).find('input[type="file"]').attr("disabled", true);
-                        $(TRcaller).find('.uploadprogress').show();
+                        $(TDcaller).find('.addglossaryfile, .canceladdglossary, .addtmxfile, .canceladdtmx').hide();
+                        $(TDcaller).find('input[type="file"]').attr("disabled", true);
+                        $(TDcaller).find('.uploadprogress').show();
 
                         if(d.data.total == null) {
                             setTimeout(function() {
-                                UI.pollForUploadProgress(Key, fileName, TRcaller, type);
+                                UI.pollForUploadProgress(Key, fileName, TDcaller, type);
                             }, 1000);
                         } else {
                             if(d.data.completed) {
-                                var tr = $(TRcaller).parents('tr');
+                                var tr = $(TDcaller).parents('tr');
                                 $(tr).find('.addtmx, .addGlossary').removeClass('disabled');
-                                UI.pulseTMadded(tr);
 
-                                $(TRcaller).find('.uploadprogress,.canceladdtmx,.addtmxfile, .addglossaryfile, .cancelladdglossary').hide();
+                                $(TDcaller).find('.uploadprogress,.canceladdtmx,.addtmxfile, .addglossaryfile, .cancelladdglossary').hide();
 
                                 if( !tr.find('td.description .edit-desc').text() ){
                                     tr.find('td.description .edit-desc').text(fileName);
                                 }
 
-                                $(TRcaller).find(".upload-file-msg-success").show();
+                                $(TDcaller).find(".upload-file-msg-success").show();
                                 setTimeout(function() {
-                                    $(TRcaller).slideToggle(function () {
+                                    $(TDcaller).slideToggle(function () {
                                         this.remove();
                                     });
                                 }, 3000);
@@ -959,12 +971,13 @@
                                 return false;
                             }
                             var progress = (parseInt(d.data.done)/parseInt(d.data.total))*100;
-                            $(TRcaller).find('.progress .inner').css('width', progress + '%');
+                            $(TDcaller).find('.progress .inner').css('width', progress + '%');
                             setTimeout(function() {
-                                UI.pollForUploadProgress(Key, fileName, TRcaller, type);
+                                UI.pollForUploadProgress(Key, fileName, TDcaller, type);
                             }, 1000);
                         }
                     }
+
                 }
             });
         },
@@ -1057,6 +1070,7 @@
             });
         },
         saveTMdescription: function (field) {
+            if (!config.isLoggedIn) return;
             var tr = field.parents('tr').first();
             var old_descr = tr.find('.edit-desc').data('descr');
             var new_descr = field.text();
@@ -1612,6 +1626,7 @@
             }
 
             var key = tr.find(".privatekey").text();
+            if ( key.indexOf('*') >-1) return;
             this.getUserSharedKey(key).done(function (response) {
                 if ( response.success !== true ) return;
 
@@ -1628,7 +1643,7 @@
                     $('tr.mine[data-key='+ key +'] .icon-owner').removeClass('icon-users icon-owner-shared')
                         .addClass('icon-lock icon-owner-private');
                     exportDiv = '<td class="share-tmx-container" style="display: none">' +
-                        '<div class="message-share-tmx">You can share ownership of the resource by sharing the key with your colleagues.</div>' +
+                        '<div class="message-share-tmx">Share ownership of the resource by sharing the key. This action cannot be undone.</div>' +
                         '<input class="message-share-tmx-input-email" placeholder="Enter email addresses separated by comma"/>'+
                         '<a class="pull-right btn-orange-small cancelsharetmx"><span class="text"></span>   </a>' +
                         '<div class="pull-right btn-ok share-button">Share</div>'+
@@ -1754,7 +1769,7 @@
                     setTimeout(function () {
                         line.find('.uploadloader').hide();
                         line.find('.export-tmx-button').hide();
-                        line.find('.canceladd-export-tmx').removeClass('disabled');
+                        line.find('.action a').removeClass('disabled');
                         line.find('.email-export-tmx-email-error').show();
                     }, 2000);
                 }
@@ -1870,17 +1885,27 @@
 
         initTmxTooltips: function () {
             //Description input
-            $('.edit-desc').data("powertip", "<div style='line-height: 18px;font-size: 15px;'>Rename</div>");
-            $('.edit-desc').powerTip({
-                placement : 's',
-                popupId : "matecatTip",
-            });
+            if (config.isLoggedIn) {
+                $('.edit-desc').data("powertip", "<div style='line-height: 18px;font-size: 15px;'>Rename</div>");
+                $('.edit-desc').powerTip({
+                    placement: 's',
+                    popupId: "matecatTip",
+                });
 
-            $('.icon-owner-private').data("powertip", "<div style='line-height: 18px;font-size: 15px;'>Private resource, only available to you.<br/>Click to share.</div>");
-            $('.icon-owner-private').powerTip({
-                placement : 's',
-                popupId : "matecatTip",
-            });
+                $('.icon-owner-private').data("powertip", "<div style='line-height: 18px;font-size: 15px;'>Private resource, only available to you.<br/>Click to share.</div>");
+                $('.icon-owner-private').powerTip({
+                    placement : 's',
+                    popupId : "matecatTip",
+                });
+            } else {
+                $('.icon-owner-private').data("powertip", "<div style='line-height: 18px;font-size: 15px;'>To retrieve resource information or share it <br/>you must be logged.<br/></div>");
+                $('.icon-owner-private').powerTip({
+                    placement : 's',
+                    popupId : "matecatTip",
+                });
+            }
+
+
 
             $('.icon-owner-public').data("powertip", "<div style='line-height: 20px;font-size: 15px;'>Public translation memory.</div>");
             $('.icon-owner-public').powerTip({
@@ -1893,7 +1918,7 @@
                 placement : 's',
                 popupId : "matecatTip",
             });
-            var mymemoryChecks = $('#activetm tr.mymemory .activate, #activetm tr.mymemory .lookup, #activetm tr.mymemory .update');
+            var mymemoryChecks = $('#activetm tr.mymemory .activate div, #activetm tr.mymemory .lookup div, #activetm tr.mymemory .update div');
             mymemoryChecks.data("powertip", "<div style='line-height: 20px;font-size: 15px;'>Settings for MyMemory cannot be changed manually.</div>");
             mymemoryChecks.powerTip({
                 placement : 's',
@@ -1967,12 +1992,14 @@
                 var errorMsg = 'The email <span style="font-weight: bold">'+ validateReturn +'</span> is not valid.';
                 if (button.hasClass('share-button-popup')) {
                     $('.share-popup-input-result').html(errorMsg);
+                    $('.share-popup-container-input-email').addClass('error');
                 } else {
                     if (tr.closest('table').attr("id") == 'inactivetm'){
                         UI.showErrorOnInactiveTMTable(errorMsg);
                     }else {
                         UI.showErrorOnActiveTMTable(errorMsg);
                     }
+                    tr.find('.message-share-tmx-input-email').addClass('error');
                 }
                 return;
             }
@@ -2003,12 +2030,14 @@
                     var errorMsg = response.errors[0].message;
                     if (button.hasClass('share-button-popup')) {
                         $('.share-popup-input-result').text(errorMsg);
+                        $('.share-popup-container-input-email').addClass('error');
                     } else {
                         if (tr.closest('table').attr("id") == 'inactivetm'){
                             UI.showErrorOnInactiveTMTable(errorMsg);
                         }else {
                             UI.showErrorOnActiveTMTable(errorMsg);
                         }
+                        tr.find('.message-share-tmx-input-email').addClass('error');
                     }
                 }
             });
