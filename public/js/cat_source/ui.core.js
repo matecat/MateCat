@@ -2275,8 +2275,10 @@ UI = {
 	    if ( !this.QAComponent ) {
             var mountPoint = $(".qa-wrapper")[0];
             this.QAComponent = ReactDOM.render(React.createElement(QAComponent, {
-                issues: UI.globalWarnings
             }), mountPoint);
+            this.QAComponent.setIssues(UI.globalWarnings);
+        } else {
+            this.QAComponent.setIssues(UI.globalWarnings);
         }
     },
 	displayMessage: function(messages) {

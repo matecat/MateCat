@@ -1211,7 +1211,7 @@ $.extend(UI, {
             UI.saveSegment(UI.currentSegment);
 			QAComponent.togglePanel();
             // UI.scrollSegment($('#segment-' + $(this).attr('data-segment')));
-            // UI.setNextWarnedSegment();
+            UI.setNextWarnedSegment();
 		});
 
 		$("#navSwitcher").on('click', function(e) {
