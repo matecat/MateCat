@@ -28,6 +28,9 @@ if ( ReviewImproved.enabled() ) {
             }
             return status;
         },
+        autoCopySuggestionEnabled: function () {
+            return false;
+        },
     });
 })(jQuery, window);
 }
