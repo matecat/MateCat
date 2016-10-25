@@ -105,8 +105,9 @@
                 segment_edit_min        : segment_edit_min, 
                 s2t_enabled             : Speech2Text.enabled(),
                 notEnableTagProjection  : !this.enableTagProjection,
-                dataAttrTagged          : dataAttrTagged
-            };
+                dataAttrTagged          : dataAttrTagged,
+                copySourceKey           : (UI.isMac) ? "ALT+CTRL+I" : "CTRL+I"
+            }
 
         },
 

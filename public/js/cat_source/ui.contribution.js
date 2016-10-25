@@ -297,12 +297,11 @@ $.extend(UI, {
 
                 var copySuggestion = function() {
                     UI.copySuggestionInEditarea(segment, translation, editarea, match, false, true, 1);
-                }
-
-                if ( Speech2Text.enabled() && Speech2Text.isContributionToBeAllowed( match ) ) {
+                };
+                if ( UI.autoCopySuggestionEnabled() &&
+                    ((Speech2Text.enabled() && Speech2Text.isContributionToBeAllowed( match )) || !Speech2Text.enabled() )
+                ) {
 				    copySuggestion();
-                } else if ( !Speech2Text.enabled() ) {
-                    copySuggestion();
                 }
 
 				if (UI.body.hasClass('searchActive')) {
@@ -327,6 +326,9 @@ $.extend(UI, {
     }
     $(window).trigger('renderContribution:complete', segment);
   },
+    autoCopySuggestionEnabled: function () {
+        return true;
+    },
         renderContributionErrors: function(errors, segment) {
             $('.tab.sub-editor.matches .engine-errors', segment).empty();
             $('.tab.sub-editor.matches .engine-errors', segment).hide();
