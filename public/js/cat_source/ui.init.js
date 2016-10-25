@@ -126,7 +126,8 @@ $.extend(UI, {
 				"label" : "Copy source to target",
 				"equivalent": "click on > between source and target",
 				"keystrokes" : {
-					"standard": "alt+ctrl+i",
+					"standard": "ctrl+i",
+					"mac": "alt+ctrl+i"
 				}
 			},
 			"undoInSegment": {
