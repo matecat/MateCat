@@ -55,9 +55,6 @@ $.extend(UI, {
 		}).on('keydown.shortcuts', null, UI.shortcuts.gotoCurrent.keystrokes.mac, function(e) {
 			e.preventDefault();
 			UI.pointToOpenSegment();
-		}).on('keydown.shortcuts', null, UI.shortcuts.copySource.keystrokes.standard, function(e) {
-			e.preventDefault();
-			UI.copySource();
 		}).on('keydown.shortcuts', null, UI.shortcuts.undoInSegment.keystrokes.standard, function(e) {
 			e.preventDefault();
 			UI.undoInSegment(segment);
@@ -77,6 +74,18 @@ $.extend(UI, {
 		}).on('keydown.shortcuts', null, UI.shortcuts.openSearch.keystrokes.mac, function(e) {
             if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
 		});
+
+		if (UI.isMac) {
+			$("body").on('keydown.shortcuts', null, UI.shortcuts.copySource.keystrokes.mac, function(e) {
+				e.preventDefault();
+				UI.copySource();
+			});
+		} else {
+			$("body").on('keydown.shortcuts', null, UI.shortcuts.copySource.keystrokes.standard, function(e) {
+				e.preventDefault();
+				UI.copySource();
+			});
+		}
 	},
 	unbindShortcuts: function() {
 		$("body").off(".shortcuts").addClass('shortcutsDisabled');
