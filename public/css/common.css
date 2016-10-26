@@ -1758,7 +1758,7 @@ padding: 15px 31px 10px 10px;
 select#mt_engine_int {
     font-size: 18px;
 height: 30px;
-margin: 5px 0 9px;
+margin: 20px 0 9px;
 width: 100%;
 }
 
@@ -2100,7 +2100,9 @@ margin-top: 10px;
     background: #e4f2fb;
 }
 
-
+tr.tm-error, td.tm-error {
+    border: 1px solid red !important;
+}
 
 tr.mymemory td.dragrow .status {
     display: none!important;
@@ -2109,7 +2111,6 @@ tr.mymemory td.dragrow .status {
 #activetm tr:not(.new),
 #inactivetm tr:not(.new) {
     display: block;
-    width: 100%;
 }
 
 #activetm td.uploadfile,
@@ -2380,8 +2381,8 @@ span.email-export-tmx-email-error {
 }
 
 .mgmt-tm tr.tm-key-deleting {
-    opacity: 0.6;
     pointer-events: none;
+    border: 1px solid #f9f903;
 }
 /************************/
 .anonymous td.dragrow {
@@ -2578,7 +2579,6 @@ margin-top: 3px;
 .insert-tm .canceladdtmx ,
 .insert-tm .canceladdglossary {
     margin: 15px 0;
-    margin-top: 1px;
 }
 
 .nonumber {display:none;}

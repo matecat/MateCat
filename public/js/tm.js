@@ -240,6 +240,7 @@
             }).on('change', '#new-tm-read, #new-tm-write', function() {
                 UI.checkTMgrants();
             }).on('change', 'tr td.uploadfile input[type="file"], tr.ownergroup td.uploadfile input[type="file"]', function() {
+                UI.hideAllBoxOnTables();
                 if(this.files[0].size > config.maxTMXFileSize) {
                     numMb = config.maxTMXFileSize/(1024*1024);
                     APP.alert('File is too big.<br/>The maximuxm size allowed is ' + numMb + 'MB.');
@@ -279,9 +280,16 @@
                 UI.startExportTmx(this);
 
 
+            }).on('keydown', '.email-export-tmx.mgmt-input', function(e){
+                if (e.which == 13) { // enter
+                    e.preventDefault();
+                    UI.startExportTmx(this);
+                }
+                UI.hideAllBoxOnTables();
             }).on('mousedown', '.mgmt-tm .canceladd-export-tmx', function(e){
                 e.preventDefault();
                 UI.closeExportTmx($(this).closest('tr'));
+                UI.hideAllBoxOnTables();
             }).on('mousedown', '.mgmt-tm .deleteTM:not(.disabled)', function(e){
                 e.preventDefault();
                 UI.showDeleteTmMessage(this);
@@ -905,6 +913,7 @@
             }else {
                 UI.showErrorOnActiveTMTable(msg);
             }
+            $tr.addClass('tm-error');
         },
         showStartUpload: function ($tr) {
             $tr.find('.addglossaryfile, .canceladdglossary, .addtmxfile, .canceladdtmx').hide();
@@ -913,8 +922,15 @@
         },
         showSuccessUpload: function ($tr) {
             $tr.find('.action a').removeClass('disabled');
-            $tr.find('.uploadprogress,.canceladdtmx,.addtmxfile, .addglossaryfile, .cancelladdglossary').hide();
-            $tr.find(".upload-file-msg-success").show();
+            $tr.find('.canceladdtmx,.addtmxfile, .addglossaryfile, .cancelladdglossary').hide();
+
+            $tr.find('.progress .inner').css('width', '90%');
+            setTimeout(function () {
+                $tr.find(".upload-file-msg-success").show();
+                $tr.find(".uploadprogress").hide();
+            }, 1000);
+
+
         },
         pollForUploadProgress: function(Key, fileName, TRcaller, type) {
             var glossaryUrl = '/api/v2/glossaries/import/status/' + Key +'/' + fileName;
@@ -1225,6 +1241,7 @@
                             } else {
                                 UI.showErrorOnActiveTMTable('Export failed. No glossary found in the resource.');
                             }
+                            tr.find('.download-glossary-container').addClass('tm-error');
 
                         } else {
                             tr.find('.message-glossary-export-completed').show();
@@ -1276,14 +1293,16 @@
         },
         showDeleteTmMessage: function (button) {
             $("tr.tm-key-deleting").removeClass('tm-key-deleting');
-            var message = 'Do you really want to delete the key XXX? ' +
+            var message = 'Do you really want to delete the resource "YYY" (XXX)? ' +
                     '<a class="pull-right btn-orange-small cancelDelete cancel-tm-key-delete">      <span class="text"></span>   </a>' +
                     '<a class="pull-right btn-confirm-small confirmDelete confirm-tm-key-delete" style="display: inline;">       <span class="text">Confirm</span>   </a>';
             var elem = $(button).closest("table");
             var tr = $(button).closest("tr");
             tr.addClass("tm-key-deleting");
             var key = tr.find('.privatekey').text();
+            var descr = tr.find('.edit-desc').data('descr');
             message = message.replace('XXX', key);
+            message = message.replace('YYY', descr);
             if (elem.attr("id") === "activetm") {
                 UI.showWarningOnActiveTMTable(message);
             } else {
@@ -1779,7 +1798,10 @@
                         line.find('.uploadloader').hide();
                         line.find('.export-tmx-button').hide();
                         line.find('.action a').removeClass('disabled');
+                        line.find('.canceladd-export-tmx').removeClass('disabled');
                         line.find('.email-export-tmx-email-error').show();
+                        UI.showErrorMessage(line, "We got an error, please contact support");
+                        line.find('.download-tmx-container').addClass('tm-error');
                     }, 2000);
                 }
             });
@@ -1852,8 +1874,15 @@
                 '.mgmt-table-mt .tm-error-message').fadeOut(0, function () {
                 $(this).html("");
             });
+            $('.tm-error').removeClass('tm-error');
         },
-
+        showErrorMessage: function (tr, message) {
+            if (tr.closest('table').attr("id") == 'inactivetm'){
+                UI.showErrorOnInactiveTMTable(message);
+            }else {
+                UI.showErrorOnActiveTMTable(message);
+            }
+        },
         initOptionsTip: function () {
 
             var guesstagText = "<div class='powerTip-options-tm'><div class='powerTip-options-tm-title'>​​Supported bilingual languages pairs </br>(i.e. works for English to German and German to English):</div>" +
@@ -1980,7 +2009,7 @@
             var tr = button.closest('tr');
             var key = ( tr.length ) ? tr.data('key') : button.closest('.share-popup-container').find('.share-popup-key').text();
             var descr = ( tr.length ) ? tr.find('.edit-desc').data('descr') : button.closest('.share-popup-container').find('.share-popup-description').text();
-            var msg = 'The resource <span style="font-weight: bold">' + descr + '(' + key + ')' +'</span> has been shared.';
+            var msg = 'The resource <span style="font-weight: bold">"' + descr + '" (' + key + ')' +'</span> has been shared.';
 
             var validateEmail = function(emails) {
                 var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -2019,6 +2048,7 @@
                     if (button.hasClass('share-button-popup')) {
                         APP.closePopup();
                         UI.showSuccessOnActiveTMTable(msg);
+                        $('tr .action a').removeClass('disabled');
                         $('.share-tmx-container').slideToggle(function () {
                             $(this).remove();
                         });
@@ -2030,7 +2060,6 @@
                             UI.showSuccessOnActiveTMTable(msg);
                         }
                     }
-
 
                     setTimeout(function () {
                         UI.hideAllBoxOnTables();
