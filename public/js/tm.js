@@ -264,7 +264,7 @@
 
                 UI.openExportTmx(this);
 
-            }).on('click', 'td.owner, .shareKey:not(.disabled)', function(e){
+            }).on('click', '.shareKey:not(.disabled)', function(e){
                 var tr = $(this).closest('tr');
                 if ( tr.hasClass('mymemory') || ( (tr.hasClass('ownergroup') || tr.hasClass('anonymous')) && !config.isLoggedIn) ) return;
                 UI.openShareResource( $(this) );
@@ -307,9 +307,13 @@
             }).on('click', '.share-button', function (e) {
                 e.preventDefault();
                 UI.clickOnShareButton($(this));
-            }).on('keydown', '.message-share-tmx-input-email, .share-popup-container-input-email', function () {
+            }).on('keydown', '.message-share-tmx-input-email, .share-popup-container-input-email', function (e) {
                 $(this).removeClass('error');
                 UI.hideAllBoxOnTables();
+                if (e.which == 13) {
+                    e.preventDefault();
+                    UI.clickOnShareButton($(this).parent().find('.share-button'));
+                }
             });
             $(".popup-tm.slide-panel").on("scroll", function(){
                 if (!isVisible($(".active-tm-container h3"))) {
@@ -728,7 +732,7 @@
                 '                   <li><a class="addGlossary" title="Import Glossary" alt="Import Glossary"><span class="icon-upload"></span>Import Glossary</a></li>'+
                 '                   <li><a class="downloadtmx" title="Export TMX" alt="Export TMX"><span class="icon-download"></span>Export TMX</a></li>' +
                 '                   <li><a class="downloadGlossary" title="Export Glossary" alt="Export Glossary"><span class="icon-download"></span>Export Glossary</a></li>' +
-                '                   <li><a class="shareKey" title="Share resource" alt="Share resource"><span class="icon-users"></span>Share resource</a></li>' +
+                '                   <li><a class="shareKey" title="Share resource" alt="Share resource"><span class="icon-share"></span>Share resource</a></li>' +
                 '                  <li><a class="deleteTM" title="Delete TMX" alt="Delete TMX"><span class="icon-trash-o"></span>Delete TM</a></li>'+
                 '              </ul>'+
                 '          </div>'+
@@ -847,11 +851,11 @@
             var fileName = filePath.split('\\')[filePath.split('\\').length-1];
 
             var TRcaller = $(form).parents('.uploadfile');
-            TRcaller.addClass('startUploading');
-
+            // TRcaller.addClass('startUploading');
+            UI.showStartUpload(TRcaller);
             setTimeout(function() {
                 UI.pollForUploadCallback(Key, fileName, TRcaller, type);
-            }, 3000);
+            }, 1000);
 
             return false;
 
@@ -863,16 +867,18 @@
                 if(msg.success === true) {
                     setTimeout(function() {
                         //delay because server can take some time to process large file
-                        TRcaller.removeClass('startUploading');
+                        // TRcaller.removeClass('startUploading');
                         UI.pollForUploadProgress(Key, fileName, TRcaller, type);
-                    }, 3000);
+                    }, 2000);
                 } else {
                     // console.log('error');
-                    TRcaller.removeClass('startUploading');
+
+                    // TRcaller.removeClass('startUploading');
+
                     TRcaller.find('.action a').removeClass('disabled');
-                    $(TRcaller).find('.addtmxfile, .addglossaryfile').hide();
+                    UI.showErrorUpload($(TRcaller));
                     UI.UploadIframeId.remove();
-                    $(TRcaller).find('.upload-file-msg-error').text('Error').show();
+
                     if ($(TRcaller).closest('table').attr("id") == 'inactivetm'){
                         UI.showErrorOnInactiveTMTable(msg.errors[0].message);
                     }else {
@@ -886,6 +892,29 @@
                 }, 1000);
             }
 
+        },
+        showErrorUpload: function ($tr, text) {
+            var msg =  (text) ? text : 'Error uploading your file. Please try again.';
+            var msg2 = 'Error uploading your file. Please try again.';
+            $tr.find('.addtmxfile, .addglossaryfile, .uploadprogress').hide();
+            $tr.find('.upload-file-msg-error').text(msg2).show();
+            $tr.find('.canceladdglossary, .canceladdtmx').show();
+            $tr.find('input[type="file"]').attr("disabled", false);
+            if ($tr.closest('table').attr("id") == 'inactivetm'){
+                UI.showErrorOnInactiveTMTable(msg);
+            }else {
+                UI.showErrorOnActiveTMTable(msg);
+            }
+        },
+        showStartUpload: function ($tr) {
+            $tr.find('.addglossaryfile, .canceladdglossary, .addtmxfile, .canceladdtmx').hide();
+            $tr.find('input[type="file"]').attr("disabled", true);
+            $tr.find('.uploadprogress').show();
+        },
+        showSuccessUpload: function ($tr) {
+            $tr.find('.action a').removeClass('disabled');
+            $tr.find('.uploadprogress,.canceladdtmx,.addtmxfile, .addglossaryfile, .cancelladdglossary').hide();
+            $tr.find(".upload-file-msg-success").show();
         },
         pollForUploadProgress: function(Key, fileName, TRcaller, type) {
             var glossaryUrl = '/api/v2/glossaries/import/status/' + Key +'/' + fileName;
@@ -911,15 +940,7 @@
                 context: [Key, fileName, true, TRcaller],
                 error: function() {
                     var TDcaller = this[3];
-                    $(TDcaller).find('.addtmxfile, .addglossaryfile, .uploadprogress').hide();
-                    $(TDcaller).find('.upload-file-msg-error').text('Error').show();
-                    $(TDcaller).find('.canceladdglossary').show();
-                    $(TDcaller).find('input[type="file"]').attr("disabled", false);
-                    if ($(TDcaller).closest('table').attr("id") == 'inactivetm'){
-                        UI.showErrorOnInactiveTMTable('There was an error saving your data. Please retry!');
-                    }else {
-                        UI.showErrorOnActiveTMTable('There was an error saving your data. Please retry!');
-                    }
+                    UI.showErrorUpload($(TDcaller));
                     $(TDcaller).closest('tr').find('.action a').removeClass('disabled');
                     UI.UploadIframeId.remove();
                 },
@@ -927,20 +948,11 @@
                     var TDcaller = this[3];
                     $(TDcaller).closest('tr').find('.action a').removeClass('disabled');
                     if(d.errors.length) {
-                        $(TDcaller).find('.addtmxfile, .addglossaryfile, .uploadprogress').hide();
-                        $(TDcaller).find('.upload-file-msg-error').text('Error').show();
-                        $(TDcaller).find('.canceladdglossary').text('Error').show();
-                        $(TDcaller).find('input[type="file"]').attr("disabled", false);
-                        if ($(TDcaller).closest('table').attr("id") == 'inactivetm'){
-                            UI.showErrorOnInactiveTMTable(d.errors[0].message);
-                        } else {
-                            UI.showErrorOnActiveTMTable(d.errors[0].message);
-                        }
+                        UI.showErrorUpload($(TDcaller), d.errors[0].message);
+
                         UI.UploadIframeId.remove();
                     } else {
-                        $(TDcaller).find('.addglossaryfile, .canceladdglossary, .addtmxfile, .canceladdtmx').hide();
-                        $(TDcaller).find('input[type="file"]').attr("disabled", true);
-                        $(TDcaller).find('.uploadprogress').show();
+                        UI.showStartUpload($(TDcaller));
 
                         if(d.data.total == null) {
                             setTimeout(function() {
@@ -949,22 +961,17 @@
                         } else {
                             if(d.data.completed) {
                                 var tr = $(TDcaller).parents('tr');
-                                $(tr).find('.addtmx, .addGlossary').removeClass('disabled');
-
-                                $(TDcaller).find('.uploadprogress,.canceladdtmx,.addtmxfile, .addglossaryfile, .cancelladdglossary').hide();
+                                UI.showSuccessUpload(tr);
 
                                 if( !tr.find('td.description .edit-desc').text() ){
                                     tr.find('td.description .edit-desc').text(fileName);
                                 }
 
-                                $(TDcaller).find(".upload-file-msg-success").show();
                                 setTimeout(function() {
                                     $(TDcaller).slideToggle(function () {
                                         this.remove();
                                     });
                                 }, 3000);
-
-
 
                                 UI.UploadIframeId.remove();
 
@@ -981,6 +988,7 @@
                 }
             });
         },
+
         allTMUploadsCompleted: function () {
             if($('#activetm .uploadfile.uploading').length) {
                 APP.alert({msg: 'There is one or more TM uploads in progress. Try again when all uploads are completed!'});
@@ -1228,7 +1236,8 @@
                             tr.find('td.download-glossary-container').slideToggle(function () {
                                 $(this).remove();
                             });
-                        }, 3000);
+                            UI.hideAllBoxOnTables();
+                        }, 5000);
 
                     }
 
@@ -1892,7 +1901,7 @@
                     popupId: "matecatTip",
                 });
 
-                $('.icon-owner-private').data("powertip", "<div style='line-height: 18px;font-size: 15px;'>Private resource, only available to you.<br/>Click to share.</div>");
+                $('.icon-owner-private').data("powertip", "<div style='line-height: 18px;font-size: 15px;'>Private resource.<br/>Share it from the dropdown menu.</div>");
                 $('.icon-owner-private').powerTip({
                     placement : 's',
                     popupId : "matecatTip",
@@ -1913,7 +1922,7 @@
                 popupId : "matecatTip",
             });
 
-            $('.icon-owner-shared').data("powertip", "<div style='line-height: 20px;font-size: 15px;'>Shared resource.<br>Click to see who owns the resource.</div>");
+            $('.icon-owner-shared').data("powertip", "<div style='line-height: 20px;font-size: 15px;'>Shared resource.<br/>Select Share resource from the dropdown menu to see owners.</div>");
             $('.icon-owner-shared').powerTip({
                 placement : 's',
                 popupId : "matecatTip",
@@ -1977,7 +1986,7 @@
                 var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
                 var result = true;
                 emails.split(',').forEach(function (email) {
-                   if ( !re.test(email) )
+                   if ( !re.test(email.trim()) )
                        result = email;
                 });
                 return result;
