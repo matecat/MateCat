@@ -137,7 +137,7 @@ class TMSService {
                 switch ( $importStatus->responseStatus ) {
                     case "503" :
                     case "400" :
-                        throw new Exception( "Can't load TMX files right now, please try later", -15 );
+                        throw new Exception( "Error uploading TMX file. Please, try again in 5 minutes.", -15 );
                         break;
                     case "403" :
                         throw new Exception( "Invalid key provided", -15 );
