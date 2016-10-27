@@ -111,9 +111,9 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
         $parameters[ 'mt' ]       = $_config[ 'get_mt' ];
         $parameters[ 'numres' ]   = $_config[ 'num_result' ];
 
-        ( $_config[ 'isConcordance' ] ? $parameters[ 'conc' ] = 'true' : null );
-        ( $_config[ 'isConcordance' ] ? $parameters[ 'extended' ] = '1' : null );
-        ( $_config[ 'mt_only' ] ? $parameters[ 'mtonly' ] = '1' : null );
+        ( @$_config[ 'isConcordance' ] ? $parameters[ 'conc' ] = 'true' : null );
+        ( @$_config[ 'isConcordance' ] ? $parameters[ 'extended' ] = '1' : null );
+        ( @$_config[ 'mt_only' ] ? $parameters[ 'mtonly' ] = '1' : null );
 
         if ( !empty( $_config[ 'id_user' ] ) ) {
             if ( !is_array( $_config[ 'id_user' ] ) ) {
