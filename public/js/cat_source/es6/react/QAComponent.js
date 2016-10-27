@@ -18,15 +18,36 @@ class QAComponent extends React.Component {
             current_counter: 1,
             selected_box: ''
         };
+        this.getCurrentArray = this.getCurrentArray.bind(this);
+        QAComponent.togglePanel = QAComponent.togglePanel.bind(this);
     }
 
     static togglePanel() {
         $('.qa-container').toggleClass("qa-open");
-        $('.qa-container').slideToggle()
+        $('.qa-container').slideToggle();
+        if ( !$('.qa-container').hasClass('qa-open') ) {
+            this.setState({
+                issues_selected: false,
+                lxq_selected: false,
+                current_counter: 1,
+                selected_box: ''
+            });
+        }
+    }
+
+    scrollToSegment(segmentId) {
+        if ( segmentId) {
+            UI.scrollSegment($('#segment-' + segmentId));
+            window.location.hash = segmentId;
+        }
     }
 
     setIssues(issues) {
         this.setState({ issues: issues });
+    }
+
+    setLxqIssues(issues) {
+        this.setState({ lxq_issues: issues });
     }
 
     selectBox(type) {
@@ -34,72 +55,71 @@ class QAComponent extends React.Component {
             case 'issues':
                 this.setState({
                     issues_selected: true,
+                    lxq_selected: false,
                     current_counter: 1,
-                    selected_box: type
+                    selected_box: type,
                 });
+                this.scrollToSegment(this.state.issues[this.state.current_counter - 1]);
                 break;
             case 'lxq':
                 this.setState({
                     lxq_selected: true,
+                    issues_selected: false,
                     current_counter: 1,
                     selected_box: type
                 });
+                this.scrollToSegment(this.state.lxq_issues[this.state.current_counter - 1]);
                 break;
         }
+
     }
 
     getCurrentArray() {
         switch (this.state.selected_box) {
             case 'issues':
-                current_array = this.state.issues;
-                UI.scrollSegment(current_array[this.state.current_counter]);
-                break;
+                return this.state.issues;
             case 'lxq':
-                current_array = this.state.lxq_issues;
-                break;
+                return this.state.lxq_issues;
         }
     }
 
     moveUp() {
-        var current_array = this.getCurrentArray();
         if ( this.state.selected_box === '' ) return;
+        var current_array = this.getCurrentArray();
 
         var counter = this.state.current_counter;
+        var newCounter;
         if ( counter  === 1) {
-            this.setState({
-                current_counter: current_array.length
-            });
+            newCounter = current_array.length;
         }  else {
-            this.setState({
-                current_counter: this.state.current_counter - 1
-            });
+            newCounter = this.state.current_counter - 1;
+
         }
-
-
+        this.setState({
+            current_counter: newCounter
+        });
+        this.scrollToSegment(current_array[newCounter - 1]);
     }
 
     moveDown() {
-        var current_array = [];
         if ( this.state.selected_box === '' ) return;
-        switch (this.state.selected_box) {
-            case 'issues':
-                current_array = this.state.issues;
-                break;
-            case 'lxq':
-                current_array = this.state.lxq_issues;
-                break;
-        }
+        var current_array = this.getCurrentArray();
+
         var counter = this.state.current_counter;
+        var newCounter;
         if ( counter  === current_array.length) {
-            this.setState({
-                current_counter: 1
-            });
+            newCounter = 1;
+
         } else {
-            this.setState({
-                current_counter: this.state.current_counter +1
-            });
+            newCounter = this.state.current_counter + 1;
         }
+        this.setState({
+            current_counter: newCounter
+        });
+        this.scrollToSegment(current_array[newCounter - 1]);
     }
+
+
 
     componentDidMount() {
 
@@ -118,6 +138,7 @@ class QAComponent extends React.Component {
         var issues_html = '';
         var counter;
         var lxq_container = '';
+        var lxq_options = '';
         if ( this.state.issues.length > 0 ) {
             var selected = '';
             if ( this.state.issues_selected ) {
@@ -129,15 +150,26 @@ class QAComponent extends React.Component {
                 <span className="qa-issues-counter">{this.state.issues.length}</span>
                 Issues
             </div>;
-
         }
         if ( this.state.lxq_issues.length > 0 ) {
             var selected = '';
             if ( this.state.lxq_selected ) {
                 counter = <div className="qa-counter">{'1/'+ this.state.lxq_issues.length}</div>;
                 selected = 'selected';
+                lxq_options = <ul className="lexiqa-popup-items">
+
+                    <li className="lexiqa-popup-item">QA checks and guide
+                        <a className="lexiqa-popup-icon lexiqa-quide-icon" id="lexiqa-quide-link" href="https://backend.lexiqa.net/documentation.html" target="_blank" alt="Read the quick user guide of lexiqa"/>
+                    </li>
+                    <li className="lexiqa-popup-item">Full QA report
+                        <a className="lexiqa-popup-icon lexiqa-report-icon" id="lexiqa-report-link" href="https://backend.lexiqa.net/errorreport?id=matecat-43-8da867622645&amp;type=translate" target="_blank" alt="Read the full QA report"/>
+                    </li>
+                    <li className="lexiqa-popup-item">Powered by
+                        <a className="lexiqa-popup-icon lexiqa-logo-icon" href="http://lexiqa.net" target="_blank" alt="lexiQA logo"/>
+                    </li>
+                </ul>;
             }
-            lxq_container = <div className={"qa-lexiqa-container " + selected}>
+            lxq_container = <div className={"qa-lexiqa-container " + selected} onClick={this.selectBox.bind(this, 'lxq')}>
                 <span className="icon-qa-lexiqa"/>
                 <span className="qa-lexiqa-counter">{this.state.lxq_issues.length}</span>
                 Suggestions
@@ -150,6 +182,7 @@ class QAComponent extends React.Component {
                             {issues_html}
                             {lxq_container}
                         </div>
+                        {lxq_options}
                         <div className="qa-actions">
                             {counter}
                             <div className="qa-arrows">

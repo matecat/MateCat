@@ -3991,7 +3991,7 @@ section:hover .segment-side-buttons {
 }
 
 .qa-issues-container, .qa-lexiqa-container {
-	width: 200px;
+	width: 150px;
 	height: 50px;
 	align-items: center;
 	display: flex;
@@ -4042,12 +4042,12 @@ section:hover .segment-side-buttons {
 }
 .qa-issues-counter {
 	top: 10px;
-	left: 60px;
+	left: 35px;
 }
 
 .qa-lexiqa-counter {
 	top: 10px;
-	left: 35px;
+	left: 15px;
 }
 
 .icon-qa-right-arrow:before, .icon-qa-left-arrow:before {

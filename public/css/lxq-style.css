@@ -1270,6 +1270,7 @@ LEXIQA POPUP
           align-items: center;
   padding: 0;
   z-index: 9999;
+  flex-grow: 4;
 }
 
 .lexiqa-popup-items .lexiqa-popup-item {
@@ -1299,49 +1300,66 @@ LEXIQA POPUP
     height: 1.5rem;
     line-height: 1.5rem;
 }
+.lexiqa-popup-item .lexiqa-quide-icon {
+    content: url("../img/lexiqa_icons_report.svg");
+  background-color: #787878;
+  border-radius: 100%;
+}
 
-.lexiqa-popup-item:first-of-type .lexiqa-popup-icon {
+.lexiqa-popup-item .lexiqa-report-icon {
+    content: url("../img/lexiqa_icons_info.svg");
+  background-color: #787878;
+  border-radius: 100%;
+}
+
+.lexiqa-popup-item .lexiqa-logo-icon {
     content: url("../img/lexiqa_icons_logo.png");
     width: auto;
 }
 
-.lexiqa-popup-item:nth-of-type(2) .lexiqa-popup-icon {
-    content: url("../img/lexiqa_icons_info.svg");
-}
 
-.lexiqa-popup-item:nth-of-type(2) .lexiqa-popup-icon,
-.lexiqa-popup-item:nth-of-type(3) .lexiqa-popup-icon,
-.lexiqa-popup-item:last-of-type .lexiqa-popup-icon:first-of-type,
-.lexiqa-popup-item:last-of-type .lexiqa-popup-icon:last-of-type {
-    background-color: #787878;
-    border-radius: 100%;
-}
+/*.lexiqa-popup-item:first-of-type .lexiqa-popup-icon {*/
+    /*content: url("../img/lexiqa_icons_logo.png");*/
+    /*width: auto;*/
+/*}*/
 
-.lexiqa-popup-item:nth-of-type(2) .lexiqa-popup-icon:hover,
-.lexiqa-popup-item:nth-of-type(3) .lexiqa-popup-icon:hover,
-.lexiqa-popup-item:last-of-type .lexiqa-popup-icon:first-of-type:hover,
-.lexiqa-popup-item:last-of-type .lexiqa-popup-icon:last-of-type:hover {
-    background-color: #333;
-}
+/*.lexiqa-popup-item:nth-of-type(2) .lexiqa-popup-icon {*/
+    /*content: url("../img/lexiqa_icons_info.svg");*/
+/*}*/
 
-.lexiqa-popup-item:nth-of-type(3) .lexiqa-popup-icon {
-    content: url("../img/lexiqa_icons_report.svg");
-}
+/*.lexiqa-popup-item:nth-of-type(2) .lexiqa-popup-icon,*/
+/*.lexiqa-popup-item:nth-of-type(3) .lexiqa-popup-icon,*/
+/*.lexiqa-popup-item:last-of-type .lexiqa-popup-icon:first-of-type,*/
+/*.lexiqa-popup-item:last-of-type .lexiqa-popup-icon:last-of-type {*/
+    /*background-color: #787878;*/
+    /*border-radius: 100%;*/
+/*}*/
 
-.lexiqa-popup-item:last-of-type .lexiqa-popup-icon:first-of-type {
-    content: url("../img/lexiqa_icons_previous.svg");
-}
+/*.lexiqa-popup-item:nth-of-type(2) .lexiqa-popup-icon:hover,*/
+/*.lexiqa-popup-item:nth-of-type(3) .lexiqa-popup-icon:hover,*/
+/*.lexiqa-popup-item:last-of-type .lexiqa-popup-icon:first-of-type:hover,*/
+/*.lexiqa-popup-item:last-of-type .lexiqa-popup-icon:last-of-type:hover {*/
+    /*background-color: #333;*/
+/*}*/
 
-.lexiqa-popup-item:last-of-type .lexiqa-popup-icon:last-of-type {
-    content: url("../img/lexiqa_icons_next.svg");
-}
+/*.lexiqa-popup-item:nth-of-type(3) .lexiqa-popup-icon {*/
+    /*content: url("../img/lexiqa_icons_report.svg");*/
+/*}*/
 
-.lexiqa-popup-items .lexiqa-popup-item:last-of-type {
-  -webkit-box-flex: 3;
-  -webkit-flex-grow: 3;
-      -ms-flex-positive: 3;
-          flex-grow: 3;
-}
+/*.lexiqa-popup-item:last-of-type .lexiqa-popup-icon:first-of-type {*/
+    /*content: url("../img/lexiqa_icons_previous.svg");*/
+/*}*/
+
+/*.lexiqa-popup-item:last-of-type .lexiqa-popup-icon:last-of-type {*/
+    /*content: url("../img/lexiqa_icons_next.svg");*/
+/*}*/
+
+/*.lexiqa-popup-items .lexiqa-popup-item:last-of-type {*/
+  /*-webkit-box-flex: 3;*/
+  /*-webkit-flex-grow: 3;*/
+      /*-ms-flex-positive: 3;*/
+          /*flex-grow: 3;*/
+/*}*/
 
 .lexiqa-popup-switch {
     margin-right: 0.5rem;
