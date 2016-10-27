@@ -22,7 +22,7 @@ CREATE TABLE `activity_log` (
  PARTITION p2017 VALUES LESS THAN (2018) ENGINE = InnoDB,
  PARTITION p2018 VALUES LESS THAN (2019) ENGINE = InnoDB,
  PARTITION p2019 VALUES LESS THAN (2020) ENGINE = InnoDB,
- PARTITION p9999 VALUES LESS THAN MAXVALUE ENGINE = InnoDB) */;
+ PARTITION p9999 VALUES LESS THAN MAXVALUE ENGINE = InnoDB) */; 
 
 CREATE TABLE `api_keys` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -34,7 +34,7 @@ CREATE TABLE `api_keys` (
   `enabled` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `api_key` (`api_key`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `chunk_completion_events` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -73,7 +73,7 @@ CREATE TABLE `chunk_completion_updates` (
   KEY `id_project` (`id_project`) USING BTREE,
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `create_date` (`create_date`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `comments` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -91,7 +91,22 @@ CREATE TABLE `comments` (
   PRIMARY KEY (`id`),
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `id_segment` (`id_job`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+
+CREATE TABLE `connected_services` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uid` int(11) NOT NULL,
+  `service` varchar(30) NOT NULL,
+  `oauth_access_token` varchar(255) NOT NULL,
+  `created_at` timestamp NOT NULL,
+  `expires_at` timestamp NULL DEFAULT NULL,
+  `last_usage_at` timestamp NULL DEFAULT NULL,
+  `refreshed_at` timestamp NULL DEFAULT NULL,
+  `refresh_count` int(11) NOT NULL DEFAULT '0',
+  `expired_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uid_service` (`uid`,`service`) USING BTREE
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `engines` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -215,6 +230,21 @@ CREATE TABLE `jobs` (
   KEY `create_date_idx` (`create_date`) USING BTREE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
+CREATE TABLE `jobs_stats` (
+  `id_job` int(11) NOT NULL,
+  `password` varchar(45) NOT NULL,
+  `fuzzy_band` varchar(20) NOT NULL,
+  `source` varchar(45) NOT NULL,
+  `target` varchar(45) NOT NULL,
+  `total_time_to_edit` bigint(20) NOT NULL DEFAULT '0',
+  `avg_post_editing_effort` float DEFAULT NULL,
+  `total_raw_wc` bigint(20) DEFAULT '1',
+  PRIMARY KEY (`id_job`,`password`,`fuzzy_band`),
+  KEY `fuzzybands__index` (`fuzzy_band`),
+  KEY `source` (`source`),
+  KEY `target` (`target`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+
 CREATE TABLE `language_stats` (
   `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `source` varchar(255) NOT NULL,
@@ -276,7 +306,7 @@ CREATE TABLE `owner_features` (
   `enabled` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uid_feature` (`uid`,`feature_code`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `phinxlog` (
   `version` bigint(20) NOT NULL,
@@ -328,7 +358,7 @@ CREATE TABLE `qa_categories` (
   `severities` text COMMENT 'json field',
   PRIMARY KEY (`id`),
   KEY `id_model` (`id_model`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `qa_chunk_reviews` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -346,7 +376,7 @@ CREATE TABLE `qa_chunk_reviews` (
   KEY `id_project` (`id_project`),
   KEY `review_password` (`review_password`),
   KEY `id_job` (`id_job`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `qa_entries` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -369,7 +399,7 @@ CREATE TABLE `qa_entries` (
   `rebutted_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `job_and_segment` (`id_job`,`id_segment`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `qa_entry_comments` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -381,7 +411,7 @@ CREATE TABLE `qa_entry_comments` (
   PRIMARY KEY (`id`),
   KEY `id_qa_entry` (`id_qa_entry`),
   KEY `create_date` (`create_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `qa_models` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -391,7 +421,7 @@ CREATE TABLE `qa_models` (
   `pass_type` varchar(255) DEFAULT NULL,
   `pass_options` text,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `remote_files` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -399,10 +429,12 @@ CREATE TABLE `remote_files` (
   `id_job` bigint(20) NOT NULL,
   `remote_id` varchar(255) NOT NULL,
   `is_original` tinyint(1) DEFAULT '0',
+  `uid` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `id_file` (`id_file`) USING BTREE,
-  KEY `id_job` (`id_job`) USING BTREE
-) ENGINE=MyISAM DEFAULT CHARSET=utf8; 
+  KEY `id_job` (`id_job`) USING BTREE,
+  KEY `uid` (`uid`) USING BTREE
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `segment_notes` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -438,7 +470,7 @@ CREATE TABLE `segment_translation_versions` (
   KEY `id_segment` (`id_segment`) USING BTREE,
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `creation_date` (`creation_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `segment_translations` (
   `id_segment` bigint(20) NOT NULL,
@@ -622,6 +654,10 @@ INSERT INTO `phinxlog` ( version ) VALUES ( '20160608130816' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20160613103347' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20160902141754' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20160909113520' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20160916105911' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20161027154703' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20161107094229' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20161107121652' );
 
 CREATE SCHEMA `matecat_conversions_log` DEFAULT CHARACTER SET utf8 ;
 USE matecat_conversions_log ;
