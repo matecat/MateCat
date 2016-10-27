@@ -27,7 +27,7 @@ class SetContributionWorker extends AbstractWorker {
     const ERR_SET_FAILED = 4;
     const ERR_NO_TM_ENGINE = 5;
 
-    const REDIS_PROPAGATED_ID_KEY = "prop:id_job:%s:id_segment:%s";
+    const REDIS_PROPAGATED_ID_KEY = "j:%s:s:%s";
 
     /**
      * @var Engines_MyMemory
