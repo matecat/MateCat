@@ -121,12 +121,14 @@ class SetContributionWorker extends AbstractWorker {
             $config = array_merge( $config, $this->_extractAvailableKeysForUser( $contributionStruct, $jobStruct ) );
 
             $redisSetKey = sprintf( self::REDIS_PROPAGATED_ID_KEY, $contributionStruct->id_job, $contributionStruct->id_segment );
-            $alreadySet  = $this->_queueHandler->getRedisClient()->setnx( $redisSetKey, 1 );
+            $isANewSet  = $this->_queueHandler->getRedisClient()->setnx( $redisSetKey, 1 );
 
-            if( !empty( $alreadySet ) && $contributionStruct->propagationRequest ){
+            if( empty( $isANewSet ) && $contributionStruct->propagationRequest ){
                 $this->_update( $config, $contributionStruct );
+                $this->_doLog( "Key UPDATE: $redisSetKey, " . var_export( $isANewSet, true ) );
             } else {
                 $this->_set( $config, $contributionStruct );
+                $this->_doLog( "Key SET: $redisSetKey, " . var_export( $isANewSet, true ) );
             }
 
             $this->_queueHandler->getRedisClient()->expire(
