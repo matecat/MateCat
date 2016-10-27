@@ -379,8 +379,10 @@ if (true)
                         rightTxt = rightTxt.replace( /\#\{/gi, "<mark>" );
                         rightTxt = rightTxt.replace( /\}\#/gi, "</mark>" );
                         var commentOriginal = this.comment;
-                        commentOriginal = commentOriginal.replace( /\#\{/gi, "<mark>" );
-                        commentOriginal = commentOriginal.replace( /\}\#/gi, "</mark>" );
+                        if (commentOriginal) {
+                            commentOriginal = commentOriginal.replace(/\#\{/gi, "<mark>");
+                            commentOriginal = commentOriginal.replace(/\}\#/gi, "</mark>");
+                        }
                         var addCommentHtml = '<div class="glossary-add-comment">' +
                             '<a href="#">Add a Comment</a>' +
                             '<div class="input gl-comment" contenteditable="true" ></div>' +
@@ -401,7 +403,7 @@ if (true)
                                 '</span>' +
                                 '</li>' +
                                 '<li class="details">' +
-                                ((this.comment === '') ? addCommentHtml : '<div class="comment" data-original="'+ UI.decodePlaceholdersToText( commentOriginal, true ) +'">' + UI.decodePlaceholdersToText( commentOriginal, true ) + '</div>') +
+                                (( !this.comment || this.comment === '') ? addCommentHtml : '<div class="comment" data-original="'+ UI.decodePlaceholdersToText( commentOriginal, true ) +'">' + UI.decodePlaceholdersToText( commentOriginal, true ) + '</div>') +
                                 '<ul class="graysmall-details">' +
                                 '<li>' + this.last_update_date + '</li>' +
                                 '<li class="graydesc">Source: <span class="bold">' + cb + '</span></li>' +
