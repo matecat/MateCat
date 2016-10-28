@@ -181,7 +181,7 @@ class Engines_MyMemory extends Engines_AbstractEngine implements Engines_EngineI
             $parameters[ 'key' ] = implode( ",", $_config[ 'id_user' ] );
         }
 
-        $this->call( "update_relative_url", $parameters );
+        $this->call( "update_relative_url", $parameters, true );
 
         if ( $this->result->responseStatus != "200" ) {
             return false;
