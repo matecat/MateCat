@@ -139,6 +139,7 @@ class QAComponent extends React.Component {
         var counter;
         var lxq_container = '';
         var lxq_options = '';
+        var buttonClass = 'qa-arrows-disabled';
         if ( this.state.issues.length > 0 ) {
             var selected = '';
             if ( this.state.issues_selected ) {
@@ -159,10 +160,11 @@ class QAComponent extends React.Component {
                 lxq_options = <ul className="lexiqa-popup-items">
 
                     <li className="lexiqa-popup-item">QA checks and guide
-                        <a className="lexiqa-popup-icon lexiqa-quide-icon" id="lexiqa-quide-link" href="https://backend.lexiqa.net/documentation.html" target="_blank" alt="Read the quick user guide of lexiqa"/>
+                        <a className="lexiqa-popup-icon lexiqa-quide-icon" id="lexiqa-quide-link" href={config.lexiqaServer + '/documentation.html'} target="_blank" alt="Read the quick user guide of lexiqa"/>
                     </li>
                     <li className="lexiqa-popup-item">Full QA report
-                        <a className="lexiqa-popup-icon lexiqa-report-icon" id="lexiqa-report-link" href="https://backend.lexiqa.net/errorreport?id=matecat-43-8da867622645&amp;type=translate" target="_blank" alt="Read the full QA report"/>
+                        <a className="lexiqa-popup-icon lexiqa-report-icon" id="lexiqa-report-link" target="_blank" alt="Read the full QA report"
+                        href={config.lexiqaServer + '/errorreport?id='+this.partnerid+'-' + config.id_job + '-' + config.password+'&type='+(config.isReview?'revise':'translate')}/>
                     </li>
                     <li className="lexiqa-popup-item">Powered by
                         <a className="lexiqa-popup-icon lexiqa-logo-icon" href="http://lexiqa.net" target="_blank" alt="lexiQA logo"/>
@@ -176,6 +178,9 @@ class QAComponent extends React.Component {
             </div>;
 
         }
+        if ( this.state.lxq_selected || this.state.issues_selected) {
+            buttonClass = 'qa-arrows-enabled';
+        }
         return  <div className="qa-container">
                     <div className="qa-container-inside">
                         <div className="qa-issues-types">
@@ -185,7 +190,7 @@ class QAComponent extends React.Component {
                         {lxq_options}
                         <div className="qa-actions">
                             {counter}
-                            <div className="qa-arrows">
+                            <div className={'qa-arrows ' + buttonClass}>
                                 <div className="qa-move-up" onClick={this.moveUp.bind(this)}>
                                     <span className="icon-qa-left-arrow"/>
                                 </div>

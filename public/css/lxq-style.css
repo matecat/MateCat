@@ -1271,6 +1271,7 @@ LEXIQA POPUP
   padding: 0;
   z-index: 9999;
   flex-grow: 4;
+  max-width: 700px;
 }
 
 .lexiqa-popup-items .lexiqa-popup-item {

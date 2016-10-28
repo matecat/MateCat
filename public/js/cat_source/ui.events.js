@@ -1207,6 +1207,10 @@ $.extend(UI, {
 		$("#point2seg").bind('mousedown', function(e) {
 			e.preventDefault();
             UI.saveSegment(UI.currentSegment);
+			if ($('.searchbox').is(':visible')) {
+				UI.toggleSearch(e);
+			}
+			$('.mbc-history-balloon-outer').removeClass('mbc-visible');
 			QAComponent.togglePanel();
             // UI.scrollSegment($('#segment-' + $(this).attr('data-segment')));
             // UI.setNextWarnedSegment();

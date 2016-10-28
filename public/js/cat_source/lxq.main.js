@@ -197,30 +197,30 @@ LXQ.init  = function () {
         //     // $('.lxq-history-balloon-outer').append(root);
         // };
         
-        var renderHistoryWithNoComments = function () {
-            $('.lxq-history-balloon-has-comment').remove();
-            $('.lxq-history-balloon-has-no-comments').show();
-            //$('.lxq-comment-highlight-history').removeClass('lxq-visible');
-        };
-        var updateHistoryWithLoadedSegments = function () {
-            if (LXQ.lexiqaData.segments.length == 0) {
-                $('#lexiqabox')
-                    .addClass('lxq-history-balloon-icon-has-no-comments')
-                    .removeClass('lxq-history-balloon-icon-has-comment');
-                renderHistoryWithNoComments();
-            }
-            else {
-                $('#lexiqabox')
-                    .removeClass('lxq-history-balloon-icon-has-no-comments')
-                    .addClass('lxq-history-balloon-icon-has-comment');
-                // renderHistoryWithErrors();
-            }
-        };
+        // var renderHistoryWithNoComments = function () {
+        //     $('.lxq-history-balloon-has-comment').remove();
+        //     $('.lxq-history-balloon-has-no-comments').show();
+        //     //$('.lxq-comment-highlight-history').removeClass('lxq-visible');
+        // };
+        // var updateHistoryWithLoadedSegments = function () {
+        //     if (LXQ.lexiqaData.segments.length == 0) {
+        //         $('#lexiqabox')
+        //             .addClass('lxq-history-balloon-icon-has-no-comments')
+        //             .removeClass('lxq-history-balloon-icon-has-comment');
+        //         renderHistoryWithNoComments();
+        //     }
+        //     else {
+        //         $('#lexiqabox')
+        //             .removeClass('lxq-history-balloon-icon-has-no-comments')
+        //             .addClass('lxq-history-balloon-icon-has-comment');
+        //         // renderHistoryWithErrors();
+        //     }
+        // };
         
         var refreshElements = function () {
             //initCommentLinks();
             //renderCommentIconLinks();
-            updateHistoryWithLoadedSegments();
+            // updateHistoryWithLoadedSegments();
         };
         var hidePopUp = function () {
             if ($('#lexiqa-popup').hasClass('lxq-visible')) {
@@ -252,53 +252,53 @@ LXQ.init  = function () {
         });
 
 
-        $(document).on('lxq:ready', function (ev) {
-            //console.log('---------- lxq:ready')
-            //$( '#lxq-history' ).remove();
-            $('.lxq-history-balloon-outer').remove();
-            //$( '.header-menu li#filterSwitch' ).before( $( tpls.historyIcon ) );
-            $('.header-menu').append($(tpls.historyOuter).append($(tpls.historyNoComments)));
-
-
-            refreshElements();
-
-            // open a comment if was asked by hash
-            // var lastAsked = popLastCommentHash();
-            // if ( lastAsked ) {
-            //     openSegmentComment( UI.Segment.findEl( lastAsked.segmentId ) );
-            // }
-        });
+        // $(document).on('lxq:ready', function (ev) {
+        //     //console.log('---------- lxq:ready')
+        //     //$( '#lxq-history' ).remove();
+        //     $('.lxq-history-balloon-outer').remove();
+        //     //$( '.header-menu li#filterSwitch' ).before( $( tpls.historyIcon ) );
+        //     $('.header-menu').append($(tpls.historyOuter).append($(tpls.historyNoComments)));
+        //
+        //
+        //     refreshElements();
+        //
+        //     // open a comment if was asked by hash
+        //     // var lastAsked = popLastCommentHash();
+        //     // if ( lastAsked ) {
+        //     //     openSegmentComment( UI.Segment.findEl( lastAsked.segmentId ) );
+        //     // }
+        // });
 
             
-        $(document).on('click', '#lexiqabox', function (ev) {
-            ev.preventDefault();
-            if ($('.searchbox').is(':visible')) {
-                UI.toggleSearch(ev);
-            }
-
-            var lexiqaPopupHeight = $('#lexiqa-popup').height() + 30;
-
-            $('#lexiqa-popup').toggleClass('lxq-visible').focus();
-
-            if ($('#lexiqa-popup').hasClass('lxq-visible')) {
-                $('#outer').css('margin-top', lexiqaPopupHeight);
-                //go the first segment with errors...
-                var segid = getFristSegmentWithWarning();
-                if (UI.segmentIsLoaded(segid) === true)
-                    UI.gotoSegment(segid);
-                else {                    
-                    config.last_opened_segment = segid;
-                    window.location.hash = segid;
-                    $('#outer').empty();
-                    UI.render({
-                        firstLoad: false
-                    });
-                }
-            } else {
-                $('#outer').css('margin-top', 20);
-            }
-            $('.mbc-history-balloon-outer').removeClass('mbc-visible');
-        });
+        // $(document).on('click', '#lexiqabox', function (ev) {
+        //     ev.preventDefault();
+        //     if ($('.searchbox').is(':visible')) {
+        //         UI.toggleSearch(ev);
+        //     }
+        //
+        //     var lexiqaPopupHeight = $('#lexiqa-popup').height() + 30;
+        //
+        //     $('#lexiqa-popup').toggleClass('lxq-visible').focus();
+        //
+        //     if ($('#lexiqa-popup').hasClass('lxq-visible')) {
+        //         $('#outer').css('margin-top', lexiqaPopupHeight);
+        //         //go the first segment with errors...
+        //         var segid = getFristSegmentWithWarning();
+        //         if (UI.segmentIsLoaded(segid) === true)
+        //             UI.gotoSegment(segid);
+        //         else {
+        //             config.last_opened_segment = segid;
+        //             window.location.hash = segid;
+        //             $('#outer').empty();
+        //             UI.render({
+        //                 firstLoad: false
+        //             });
+        //         }
+        //     } else {
+        //         $('#outer').css('margin-top', 20);
+        //     }
+        //     $('.mbc-history-balloon-outer').removeClass('mbc-visible');
+        // });
         var isNumeric = function (n) {
             return !isNaN(parseFloat(n)) && isFinite(n);
         }
@@ -1239,39 +1239,39 @@ LXQ.init  = function () {
             $('#lexiqa-quide-link').attr('href', config.lexiqaServer + '/documentation.html');
             $('#lexiqa-report-link').attr('href', config.lexiqaServer + '/errorreport?id='+this.partnerid+'-' + config.id_job + '-' + config.password+'&type='+(config.isReview?'revise':'translate'));
 
-            $('#lexiqa-prev-seg').on('click', function (e) {
-                e.preventDefault();
-                var segid = getPreviousSegmentWithWarning();
-                if (UI.segmentIsLoaded(segid) === true)
-                    UI.gotoSegment(segid);
-                else {
-                    config.last_opened_segment = segid;
-                    //config.last_opened_segment = this.nextUntranslatedSegmentId;
-                    window.location.hash = segid;
-                    $('#outer').empty();
-                    UI.render({
-                        firstLoad: false
-                    });
-                }
-            });
-            $('#lexiqa-next-seg').on('click', function (e) {
-                e.preventDefault();
-                //UI.gotoSegment(getNextSegmentWithWarning());
-                var segid = getNextSegmentWithWarning();
-                if (UI.segmentIsLoaded(segid) === true)
-                    UI.gotoSegment(segid);
-                else {                    
-                    //UI.reloadWarning();
-                    config.last_opened_segment = segid;
-                    //config.last_opened_segment = this.nextUntranslatedSegmentId;
-                    window.location.hash = segid;
-                    $('#outer').empty();
-                    UI.render({
-                        firstLoad: false
-                    });                    
-                }
-            });
-        }
+            // $('#lexiqa-prev-seg').on('click', function (e) {
+            //     e.preventDefault();
+            //     var segid = getPreviousSegmentWithWarning();
+            //     if (UI.segmentIsLoaded(segid) === true)
+            //         UI.gotoSegment(segid);
+            //     else {
+            //         config.last_opened_segment = segid;
+            //         //config.last_opened_segment = this.nextUntranslatedSegmentId;
+            //         window.location.hash = segid;
+            //         $('#outer').empty();
+            //         UI.render({
+            //             firstLoad: false
+            //         });
+            //     }
+            // });
+            // $('#lexiqa-next-seg').on('click', function (e) {
+            //     e.preventDefault();
+            //     //UI.gotoSegment(getNextSegmentWithWarning());
+            //     var segid = getNextSegmentWithWarning();
+            //     if (UI.segmentIsLoaded(segid) === true)
+            //         UI.gotoSegment(segid);
+            //     else {
+            //         //UI.reloadWarning();
+            //         config.last_opened_segment = segid;
+            //         //config.last_opened_segment = this.nextUntranslatedSegmentId;
+            //         window.location.hash = segid;
+            //         $('#outer').empty();
+            //         UI.render({
+            //             firstLoad: false
+            //         });
+            //     }
+            // });
+        };
         // Interfaces
         $.extend(LXQ, {
             refreshElements: refreshElements,
@@ -1348,8 +1348,8 @@ LXQ.init  = function () {
                         //do something here -- enable qa errors
                         if ((ind = LXQ.lexiqaData.segments.indexOf(id_segment))<0) {
                             LXQ.addSegmentWaring(id_segment);
-                            $('#lexiqabox').attr('class', 'warningbox').attr("title", "Go to lexiQA for QA analysis")
-                                .find('.numbererror').text(LXQ.lexiqaData.segments.length);
+                            // $('#lexiqabox').attr('class', 'warningbox').attr("title", "Go to lexiQA for QA analysis")
+                            //     .find('.numbererror').text(LXQ.lexiqaData.segments.length);
                             //$('#go2lexiqa').attr('href', result.qaurl);
                         }
                         //highlight the segments
@@ -1471,19 +1471,7 @@ LXQ.init  = function () {
 
         },
         lxqRemoveSegmentFromWarningList: function(id_segment){
-            if ((ind = LXQ.lexiqaData.segments.indexOf(id_segment))>=0) {
-                LXQ.lexiqaData.segments.splice(ind,1);
-                delete LXQ.lexiqaData.lexiqaWarnings[id_segment];
-            }
-            if ( LXQ.lexiqaData.segments.length ==0) {
-                //remove link and warning
-                $('#lexiqabox').attr('class', 'lexnotific').attr("title", "Well done, no errors found!").find('.numbererror').text('');
-                //$('#go2lexiqa').attr('href', "#");
-                //result.qaurl = '#';
-            }
-            else {
-                $('#lexiqabox').attr('class', 'warningbox').attr("title", "Go to lexiQA for QA analysis").find('.numbererror').text(LXQ.lexiqaData.segments.length);
-            }
+            LXQ.removeSegmentWarning(id_segment);
         },
         getLexiqaWarnings: function() {
             if (!LXQ.enabled()) {
@@ -1552,10 +1540,7 @@ LXQ.init  = function () {
                                 errorCnt++;
                             }
                             else {
-                                if ((ind = LXQ.lexiqaData.segments.indexOf(element.segid))>=0) {
-                                    LXQ.lexiqaData.segments.splice(ind,1);
-                                    delete LXQ.lexiqaData.lexiqaWarnings[element.segid];
-                                }
+                                LXQ.removeSegmentWarning(element.segid);
                             }
                             //if (seg === false)
                             if (!UI.segmentIsLoaded(element.segid))
@@ -1585,15 +1570,13 @@ LXQ.init  = function () {
                             LXQ.buildPowertipDataForSegment(seg);
 
                         });
-                        //console.log('LXQ.lexiqaData.lexiqaWarnings');
-                        //console.dir(LXQ.lexiqaData.lexiqaWarnings);
-                        $('#lexiqabox').attr('class', 'warningbox').attr("title", "Go to lexiQA for QA analysis").find('.numbererror').text(errorCnt);
+                        // $('#lexiqabox').attr('class', 'warningbox').attr("title", "Go to lexiQA for QA analysis").find('.numbererror').text(errorCnt);
                         if( LXQ.enabled() ) {
                             LXQ.reloadPowertip();
                         }
                     }
                     else {
-                        $('#lexiqabox').attr('class', 'lexnotific').attr("title", "Well done, no errors found!").find('.numbererror').text('');
+                        // $('#lexiqabox').attr('class', 'lexnotific').attr("title", "Well done, no errors found!").find('.numbererror').text('');
                         results.qaurl= "#";
                     }
 
@@ -1614,6 +1597,14 @@ LXQ.init  = function () {
                 }), mountPoint);
                 UI.QAComponent.setLxqIssues(LXQ.lexiqaData.segments);
             } else {
+                UI.QAComponent.setLxqIssues(LXQ.lexiqaData.segments);
+            }
+        },
+        removeSegmentWarning: function (idSegment) {
+            if ((ind = LXQ.lexiqaData.segments.indexOf(idSegment))>=0) {
+                LXQ.lexiqaData.segments.splice(ind,1);
+                delete LXQ.lexiqaData.lexiqaWarnings[idSegment];
+                LXQ.lexiqaData.segments.sort();
                 UI.QAComponent.setLxqIssues(LXQ.lexiqaData.segments);
             }
         }

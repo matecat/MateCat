@@ -3956,7 +3956,7 @@ section:hover .segment-side-buttons {
 .qa-wrapper {
 	position: absolute;
 	width: 100%;
-	top: 83px;
+	top: 82px;
 }
 .qa-container {
 	background-color: #efefef;
@@ -3977,14 +3977,14 @@ section:hover .segment-side-buttons {
 
 .qa-issues-types {
 	display: flex;
-	flex-grow: 3;
+	flex-grow: 1;
 	flex-direction: row;
 	justify-content: flex-start;
 }
 
 .qa-actions {
 	display: flex;
-	flex-grow: 2;
+	flex-grow: 1;
 	flex-direction: row;
 	justify-content: flex-end;
 	align-items: center;
@@ -4055,11 +4055,22 @@ section:hover .segment-side-buttons {
 	font-size: 25px;
 }
 
-.icon-qa-left-arrow, .qa-move-down {
+.qa-move-up, .qa-move-down {
 	color: #797979;
 }
-.icon-qa-left-arrow:hover, .qa-move-down:hover {
+
+.qa-move-up:hover,
+.qa-move-down:hover {
 	color: black;
+}
+
+.qa-arrows.qa-arrows-disabled .qa-move-up,
+.qa-arrows.qa-arrows-disabled .qa-move-down,
+.qa-arrows.qa-arrows-disabled .qa-move-up:hover,
+.qa-arrows.qa-arrows-disabled .qa-move-down:hover{
+	cursor: default;
+	opacity: 0.5;
+	color: #797979;
 }
 
 .qa-move-up {
