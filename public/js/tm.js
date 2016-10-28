@@ -21,6 +21,7 @@
             UI.setDropDown();
             UI.initOptionsTip();
             UI.initTmxTooltips();
+            UI.checkTMKeysUpdateChecks();
             $(".popup-tm .x-popup, .popup-tm h1 .continue").click(function(e) {
                 e.preventDefault();
                 UI.closeTMPanel();
