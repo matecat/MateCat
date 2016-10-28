@@ -2243,14 +2243,6 @@ UI = {
 					if (openingSegment)
 						UI.fillCurrentSegmentWarnings(data.details, true);
 
-					//switch to css for warning
-					$('#notifbox').attr('class', 'warningbox').attr("title", "Click to see the segments with potential issues").find('.numbererror').text(UI.globalWarnings.length);
-
-				} else {
-					//if everything is ok, switch css to ok
-					$('#notifbox').attr('class', 'notific').attr("title", "Well done, no errors found!").find('.numbererror').text('');
-					//reset the pointer to offending segment
-					// $('#point2seg').attr('href', '#');
 				}
 
 				// check for messages

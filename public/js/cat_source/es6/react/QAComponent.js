@@ -35,6 +35,10 @@ class QAComponent extends React.Component {
         }
     }
 
+    getTotalIssues() {
+        return this.state.lxq_issues.length + this.state.issues.length;
+    }
+
     scrollToSegment(segmentId) {
         if ( segmentId) {
             UI.scrollSegment($('#segment-' + segmentId));
@@ -119,7 +123,22 @@ class QAComponent extends React.Component {
         this.scrollToSegment(current_array[newCounter - 1]);
     }
 
+    updateIcon() {
+        var totalIssues = this.getTotalIssues();
+        if ( totalIssues > 0 ) {
+            $('#notifbox').attr('class', 'warningbox').attr("title", "Click to see the segments with potential issues").find('.numbererror').text(totalIssues);
+        } else {
+            $('#notifbox').attr('class', 'notific').attr("title", "Well done, no errors found!").find('.numbererror').text('');
+        }
+    }
 
+    componentDidUpdate() {
+        this.updateIcon();
+        var totalIssues = this.getTotalIssues();
+        if ( totalIssues == 0 && $('.qa-container').hasClass('qa-open')) {
+            QAComponent.togglePanel();
+        }
+    }
 
     componentDidMount() {
 
