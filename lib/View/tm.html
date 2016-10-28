@@ -93,11 +93,13 @@
                                                     ${php: key.owner ? ( jobOwnerIsMe || key.edit ? key.name : '**********' ) : key.name}
                                                 </div></td>
                                             <td class="privatekey">${key/key}</td>
-                                            <td class="owner text-center">
+                                            <td tal:condition="php: key.owner && ( jobOwnerIsMe || key.edit )" class="owner text-center">
                                                 <a tal:condition="php: !key.isShared()" class="icon-owner icon-lock icon-owner-private"></a>
                                                 <a tal:condition="php: key.isShared()" class="icon-owner icon-users icon-owner-shared"></a>
                                             </td>
-
+                                            <td tal:condition="php: !(key.owner && ( jobOwnerIsMe || key.edit))" class="owner text-center">
+                                                <a class="">*****</a>
+                                            </td>
                                             <td tal:condition="php: key.edit" class="action">
                                                     <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
                                                     <div  class="wrapper-dropdown-5 pull-left" tabindex="1">&nbsp;
