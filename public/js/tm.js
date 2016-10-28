@@ -1925,7 +1925,7 @@
         initTmxTooltips: function () {
             //Description input
             if (config.isLoggedIn) {
-                $('.edit-desc').data("powertip", "<div style='line-height: 18px;font-size: 15px;'>Rename</div>");
+                $('tr:not(.ownergroup) .edit-desc').data("powertip", "<div style='line-height: 18px;font-size: 15px;'>Rename</div>");
                 $('.edit-desc').powerTip({
                     placement: 's',
                     popupId: "matecatTip",

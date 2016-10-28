@@ -1915,6 +1915,13 @@ body.cattool .mgmt-tm.mine thead,
     color: #999;
 }
 
+td.share-tmx-container,
+td.download-tmx-container,
+td.download-glossary-container,
+td.uploadfile,
+{
+    color: black !important;
+}
 
 .btn-grey .text,
 .canceladdtmx.btn-grey .text, 
@@ -2456,7 +2463,8 @@ color: #999;}
     background: #fff;
 }
 
-#activetm tr.mymemory td {
+#activetm tr.mymemory td,
+#activetm tr.ownergroup td {
     background-color: #f8f8f8 !important;
 }
 
