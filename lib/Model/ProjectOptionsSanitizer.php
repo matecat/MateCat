@@ -27,10 +27,18 @@ class ProjectOptionsSanitizer {
         'en-it' => 'English - Italian',
         'en-pt' => 'English - Portuguese',
         'en-ru' => 'English - Russian',
+        'en-cs' => 'English - Czech',
+        'en-nl' => 'English - Flemish',
+        'en-fi' => 'English - Finnish',
+        'en-pl' => 'English - Polish',
+        'en-da' => 'English - Danish',
+        'en-sv' => 'English - Swedish',
+        'en-el' => 'English - Greek',
+        'en-hu' => 'English - Hungarian',
         'de-it' => 'German - Italian',
         'de-fr' => 'German - French',
         'fr-it' => 'French - Italian',
-        'it-es' => 'Italian - Spanish'
+        'it-es' => 'Italian - Spanish',
     );
 
 
