@@ -70,8 +70,11 @@ header .wrapper{
     width: 45px;
     color: #777;
     height: 27px;
-    padding-top: 13px;
+    padding-top: 12px;
 	cursor: pointer;
+}
+#notifbox.warningbox {
+	padding-top: 12px !important;
 }
 
 #notifbox a
