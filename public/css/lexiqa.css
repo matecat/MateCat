@@ -101,17 +101,30 @@
 }
 
 #powerTip .tooltip-error-ignore {
-	background-color: #efefef;
-	color: #333;
-    padding: 0.5rem;
-	text-decoration: none;
-	cursor: pointer;
-    text-transform: uppercase;
-    font-size: 0.8rem;
+    color: rgb(206, 199, 199);
+    text-decoration: none;
+    cursor: pointer;
     border-radius: 0 4px 4px 0;
+    padding-left: 10px;
+    height: 40px;
 }
 
 #powerTip .tooltip-error-ignore:hover {
-	background-color: #999;
     color: #fff;
+}
+.tooltip-error-container:not(:first-child) {
+    border-top: 1px solid rgba(255, 255, 255, 0.36);
+}
+
+.tooltip-error-ignore .icon-cancel-circle:before {
+    line-height: 40px;
+    float: left;
+    font-size: 18px;
+}
+
+.tooltip-error-ignore-text {
+    margin-left: 5px;
+    margin-right: 10px;
+    float: left;
+    line-height: 40px;
 }

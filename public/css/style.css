@@ -4011,7 +4011,7 @@ section:hover .segment-side-buttons {
 }
 
 .qa-issues-container.selected, .qa-lexiqa-container.selected {
-	border-bottom: 2px solid black;
+	border-bottom: 3px solid #4d4d4d;
 }
 
 .qa-counter {
