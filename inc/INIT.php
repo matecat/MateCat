@@ -182,6 +182,12 @@ class INIT {
      */
     public static $MYMEMORY_TM_API_KEY = 'tmanalysis@matecat.com' ;
 
+    /**
+     * Default key used to call the TM Server on Import TMX panel
+     * @var string
+     */
+    public static $DEFAULT_TM_KEY = '' ;
+
 
     public static $ENABLED_BROWSERS = array( 'applewebkit', 'chrome', 'safari' ); //, 'firefox');
 

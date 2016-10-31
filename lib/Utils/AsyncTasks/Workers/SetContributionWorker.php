@@ -20,14 +20,14 @@ use CatUtils,
         TmKeyManagement_Filter,
         TmKeyManagement_TmKeyManagement,
         TaskRunner\Commons\AbstractElement;
-use Constants_TranslationStatus;
+use INIT;
 
 class SetContributionWorker extends AbstractWorker {
 
     const ERR_SET_FAILED = 4;
     const ERR_NO_TM_ENGINE = 5;
 
-    const REDIS_PROPAGATED_ID_KEY = "prop:id_job:%s:id_segment:%s";
+    const REDIS_PROPAGATED_ID_KEY = "j:%s:s:%s";
 
     /**
      * @var Engines_MyMemory
@@ -120,31 +120,21 @@ class SetContributionWorker extends AbstractWorker {
 
             $config = array_merge( $config, $this->_extractAvailableKeysForUser( $contributionStruct, $jobStruct ) );
 
-            if( $contributionStruct->oldTranslationStatus == Constants_TranslationStatus::STATUS_NEW ){
+            $redisSetKey = sprintf( self::REDIS_PROPAGATED_ID_KEY, $contributionStruct->id_job, $contributionStruct->id_segment );
+            $isANewSet  = $this->_queueHandler->getRedisClient()->setnx( $redisSetKey, 1 );
 
-                $this->_set( $config, $contributionStruct );
-
+            if( empty( $isANewSet ) && $contributionStruct->propagationRequest ){
+                $this->_update( $config, $contributionStruct );
+                $this->_doLog( "Key UPDATE: $redisSetKey, " . var_export( $isANewSet, true ) );
             } else {
-
-                if( $contributionStruct->propagationRequest ){
-                    $this->_update( $config, $contributionStruct );
-                } else {
-
-                    $redisSetKey = sprintf( self::REDIS_PROPAGATED_ID_KEY, $contributionStruct->id_job, $contributionStruct->id_segment );
-                    $alreadySet  = $this->_queueHandler->getRedisClient()->get( $redisSetKey );
-
-                    if( !empty( $alreadySet ) ){
-                        $this->_update( $config, $contributionStruct );
-                    } else {
-                        $this->_set( $config, $contributionStruct );
-                    }
-
-                    $this->_queueHandler->getRedisClient()->set( $redisSetKey, 1 );
-                    $this->_queueHandler->getRedisClient()->expire( $redisSetKey, 60 * 60 * 24 * 60 ); //TTL 2 months
-
-                }
-
+                $this->_set( $config, $contributionStruct );
+                $this->_doLog( "Key SET: $redisSetKey, " . var_export( $isANewSet, true ) );
             }
+
+            $this->_queueHandler->getRedisClient()->expire(
+                    $redisSetKey,
+                    60 * 60 * 24 * INIT::JOB_ARCHIVABILITY_THRESHOLD
+            ); //TTL 3 months, the time for job archivability
 
         } else {
 
