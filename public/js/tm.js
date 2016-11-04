@@ -1957,8 +1957,8 @@
                 placement : 's',
                 popupId : "matecatTip",
             });
-            var mymemoryChecks = $('#activetm tr.mymemory .activate div, #activetm tr.mymemory .lookup div, #activetm tr.mymemory .update div');
-            mymemoryChecks.data("powertip", "<div style='line-height: 20px;font-size: 15px;'>Settings for MyMemory cannot be changed manually.</div>");
+            var mymemoryChecks = $('#activetm tr.mymemory .update div');
+            mymemoryChecks.data("powertip", "<div style='line-height: 20px;font-size: 15px;'>Add a private resource to disable updating.</div>");
             mymemoryChecks.powerTip({
                 placement : 's',
                 popupId : "matecatTip",
