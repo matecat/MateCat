@@ -761,13 +761,8 @@ UI = {
 			this.startSegmentId = (hash) ? hash : config.last_opened_segment;
 		}
 	},
-// temp
-//	enableSearch: function() {
-//		$('#filterSwitch').show();
-//		this.searchEnabled = true;
-//	},
     fixHeaderHeightChange: function() {
-        headerHeight = $('header .wrapper').height() + ((this.body.hasClass('filterOpen'))? $('header .searchbox').height() : 0) + ((this.body.hasClass('incomingMsg'))? $('header #messageBar').height() : 0);
+        var headerHeight = $('header .wrapper').height() + ((this.body.hasClass('filterOpen'))? $('header .searchbox').height() : 0) + ((this.body.hasClass('incomingMsg'))? $('header #messageBar').height() : 0);
         $('#outer').css('margin-top', headerHeight + 'px');
     },
 
@@ -1974,6 +1969,8 @@ UI = {
             labelDownloading = 'OPENING FILES...';
         }
         button.addClass('disabled' ).data( 'oldValue', button.val() ).val(labelDownloading);
+        APP.fitText($('.breadcrumbs'), $('#pname'), 30);
+
     },
 
     reEnableDownloadButton : function() {
