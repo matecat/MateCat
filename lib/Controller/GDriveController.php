@@ -7,11 +7,13 @@ use Google_Http_Request ;
 use Utils ;
 use INIT ;
 use ConversionHandler ;
-use GDrive;
 use Constants;
 use Exception;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+
+use ConnectedServices\GDrive as GDrive ;
+
 
 class GDriveController extends KleinController {
 

@@ -1,5 +1,8 @@
 <?php
 
+
+use ConnectedServices\GDrive ;
+
 class newProjectController extends viewController {
 
     private $guid = '';
@@ -329,7 +332,7 @@ class newProjectController extends viewController {
     }
 
     private function generateGDriveAuthUrl(){
-        $this->gdriveAuthUrl = \GDrive::generateGDriveAuthUrl();
+        $this->gdriveAuthUrl = GDrive::generateGDriveAuthUrl();
     }
 
     private function isToDenyLexiQA() {

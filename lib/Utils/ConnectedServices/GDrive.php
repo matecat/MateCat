@@ -1,11 +1,17 @@
 <?php
 
-use OauthClient ;
-use Google_Service_Drive ;
-use Google_Service_Drive_DriveFile ;
-use RemoteFiles_RemoteFileDao ;
-use Google_Service_Drive_Permission ;
-use Exception ;
+
+namespace ConnectedServices ;
+
+use Exception;
+use Files_FileDao;
+use Jobs_JobDao ;
+use Google_Service_Drive;
+use Google_Service_Drive_DriveFile;
+use Google_Service_Drive_Permission;
+use OauthClient;
+use OauthTokenEncryption;
+use RemoteFiles_RemoteFileDao;
 
 class GDrive {
 
@@ -16,11 +22,11 @@ class GDrive {
     const MIME_DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
     const MIME_PPTX = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
     const MIME_XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-    
+
     const MIME_GOOGLE_DOCS = 'application/vnd.google-apps.document';
     const MIME_GOOGLE_SLIDES = 'application/vnd.google-apps.presentation';
     const MIME_GOOGLE_SHEETS = 'application/vnd.google-apps.spreadsheet';
-    
+
     public static function officeMimeFromGoogle ( $googleMime ) {
         switch( $googleMime ) {
             case self::MIME_GOOGLE_DOCS:
@@ -35,7 +41,7 @@ class GDrive {
 
         return $googleMime;
     }
-    
+
     public static function officeExtensionFromMime ( $googleMime ) {
         switch( $googleMime ) {
             case self::MIME_GOOGLE_DOCS:
@@ -50,7 +56,7 @@ class GDrive {
             case self::MIME_XLSX:
                 return '.xlsx';
         }
-        
+
         return null;
     }
 
@@ -196,4 +202,3 @@ class GDrive {
         return $authURL;
     }
 }
-

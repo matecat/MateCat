@@ -2,6 +2,7 @@
 
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
+use ConnectedServices\GDrive ;
 
 set_time_limit( 180 );
 
@@ -520,7 +521,7 @@ class downloadFileController extends downloadController {
     }
 
     private function updateFileOnGDrive( $remoteId, $gdriveFile, $content ) {
-        $mimeType = \GDrive::officeMimeFromGoogle( $gdriveFile->mimeType );
+        $mimeType = GDrive::officeMimeFromGoogle( $gdriveFile->mimeType );
         $gdriveFile->setMimeType( $mimeType );
 
         $additionalParams = array(
