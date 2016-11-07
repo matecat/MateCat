@@ -4026,7 +4026,7 @@ section:hover .segment-side-buttons {
 .qa-move-up, .qa-move-down {
 	width: 50px;
 	float: left;
-	height: 30px;
+	height: 25px;
 	cursor: pointer;
 }
 
@@ -4053,8 +4053,13 @@ section:hover .segment-side-buttons {
 	left: 15px;
 }
 
-.icon-qa-right-arrow:before, .icon-qa-left-arrow:before {
-	content: "\e902";
+.icon-qa-right-arrow:before {
+	content: "\ea3c";
+	font-size: 25px;
+}
+
+.icon-qa-left-arrow:before {
+	content: "\ea40";
 	font-size: 25px;
 }
 
@@ -4076,7 +4081,4 @@ section:hover .segment-side-buttons {
 	color: #797979;
 }
 
-.qa-move-up {
-	transform: scale(-1, 1);
-}
 
