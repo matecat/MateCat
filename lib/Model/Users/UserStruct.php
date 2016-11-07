@@ -6,7 +6,9 @@
  * Date: 01/04/15
  * Time: 12.54
  */
-class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+
+
+class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct   implements DataAccess_IDaoStruct {
 
     public $uid;
     public $email;
@@ -55,6 +57,40 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
         return $this->last_name;
     }
 
+    // TODO ------- start duplicated code, find a way to remove duplication
+
+    /**
+     * Returns the decoded access token.
+     *
+     * @param null $field
+     *
+     */
+    public function getDecryptedOauthAccessToken() {
+        return $this->cachable('decrypted', $this, function($object) {
+            $oauthTokenEncryption = OauthTokenEncryption::getInstance();
+            return $oauthTokenEncryption->decrypt( $object->oauth_access_token );
+        });
+    }
+
+    /**
+     * @param null $field
+     * @return mixed
+     * @throws \Exception
+     */
+    public function getDecodedOauthAccessToken($field=null) {
+        $decoded = json_decode( $this->getDecryptedOauthAccessToken(), TRUE );
+
+        if ( $field ) {
+            if ( array_key_exists( $field, $decoded ) ) {
+                return $decoded[ $field ] ;
+            }
+            else {
+                throw new \Exception('key not found on token: ' . $field ) ;
+            }
+        }
+
+        return $decoded  ;
+    }
 
 
 }

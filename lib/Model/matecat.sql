@@ -97,7 +97,7 @@ CREATE TABLE `connected_services` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `uid` int(11) NOT NULL,
   `service` varchar(30) NOT NULL,
-  `oauth_access_token` varchar(255) NOT NULL,
+  `oauth_access_token` text NOT NULL,
   `created_at` timestamp NOT NULL,
   `expires_at` timestamp NULL DEFAULT NULL,
   `last_usage_at` timestamp NULL DEFAULT NULL,

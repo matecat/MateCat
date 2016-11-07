@@ -1,5 +1,8 @@
 <?php
 
+
+namespace ConnectedServices\GDrive ;
+
 use Bootstrap ;
 use Log;
 use API\V2\KleinController ;
@@ -13,7 +16,6 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
 use ConnectedServices\GDrive as GDrive ;
-
 
 class GDriveController extends KleinController {
 
@@ -51,7 +53,8 @@ class GDriveController extends KleinController {
     }
 
     private function doAuth() {
-        $this->gdriveService = GDrive::getService( array( 'uid' => $_SESSION[ 'uid' ] ) );
+        $session = new Session( $_SESSION ) ;
+        $this->gdriveService = $session->getService() ;
     }
 
     private function doImport() {
@@ -60,13 +63,13 @@ class GDriveController extends KleinController {
 
         \Log::doLog( $state );
 
-        if( $this->isAsyncReq && GDrive::sessionHasFiles( $_SESSION )) {
+        if( $this->isAsyncReq && Session::sessionHasFiles( $_SESSION )) {
             $this->guid = $_SESSION[ "upload_session" ];
         } else {
             $this->guid = Utils::create_guid();
             setcookie( "upload_session", $this->guid, time() + 86400, '/' );
             $_SESSION[ "upload_session" ] = $this->guid;
-            unset( $_SESSION[ GDrive::SESSION_FILE_LIST ] );
+            unset( $_SESSION[ Session::SESSION_FILE_LIST ] );
         }
 
         $listOfIds = array();
@@ -91,7 +94,7 @@ class GDriveController extends KleinController {
     private function importFile( $fileId ) {
         try {
             $file = $this->gdriveService->files->get( $fileId );
-            $mime = GDrive::officeMimeFromGoogle( $file->mimeType );
+            $mime = RemoteFileService::officeMimeFromGoogle( $file->mimeType );
             $links = $file->getExportLinks() ;
 
             $downloadUrl = '';
@@ -105,7 +108,7 @@ class GDriveController extends KleinController {
             if ($downloadUrl) {
 
                 $fileName = $this->sanetizeFileName( $file->getTitle() );
-                $file_extension = GDrive::officeExtensionFromMime( $file->mimeType );
+                $file_extension = RemoteFileService::officeExtensionFromMime( $file->mimeType );
 
                 if ( substr( $fileName, -5 ) !== $file_extension ) {
                     $fileName .= $file_extension;
@@ -154,14 +157,14 @@ class GDriveController extends KleinController {
     }
 
     private function addFileToSession( $fileId, $fileName, $fileHash ) {
-        if( !isset( $_SESSION[ GDrive::SESSION_FILE_LIST ] )
-                || !is_array( $_SESSION[ GDrive::SESSION_FILE_LIST ] ) ) {
-            $_SESSION[ GDrive::SESSION_FILE_LIST ] = array();
+        if( !isset( $_SESSION[ Session::SESSION_FILE_LIST ] )
+                || !is_array( $_SESSION[ Session::SESSION_FILE_LIST ] ) ) {
+            $_SESSION[ Session::SESSION_FILE_LIST ] = array();
         }
 
-        $_SESSION[ GDrive::SESSION_FILE_LIST ][ $fileId ] = array(
-            GDrive::SESSION_FILE_NAME => $fileName,
-            GDrive::SESSION_FILE_HASH => $fileHash
+        $_SESSION[ GDrive\Session::SESSION_FILE_LIST ][ $fileId ] = array(
+            Session::SESSION_FILE_NAME => $fileName,
+            Session::SESSION_FILE_HASH => $fileHash
         );
     }
 
@@ -242,12 +245,12 @@ class GDriveController extends KleinController {
     public function listImportedFiles() {
         $response = array();
 
-        $fileList = $_SESSION[ GDrive::SESSION_FILE_LIST ];
+        $fileList = $_SESSION[ Session::SESSION_FILE_LIST ];
 
         foreach ( $fileList as $fileId => $file) {
             $path = $this->getGDriveFilePath( $file );
 
-            $fileName = $file[ GDrive::SESSION_FILE_NAME ];
+            $fileName = $file[ Session::SESSION_FILE_NAME ];
 
             if(file_exists($path) !== false) {
                 $fileSize = filesize($path);
@@ -261,7 +264,7 @@ class GDriveController extends KleinController {
                     'fileExtension' => $fileExtension
                 );
             } else {
-                unset( $_SESSION[ GDrive::SESSION_FILE_LIST ][ $fileId ] );
+                unset( $_SESSION[ Session::SESSION_FILE_LIST ][ $fileId ] );
             }
         }
 
@@ -269,7 +272,7 @@ class GDriveController extends KleinController {
     }
 
     private function getGDriveFilePath( $file ) {
-        $fileName = $file[ GDrive::SESSION_FILE_NAME ];
+        $fileName = $file[ Session::SESSION_FILE_NAME ];
 
         $cacheFileDir = $this->getCacheFileDir( $file );
 
@@ -285,7 +288,7 @@ class GDriveController extends KleinController {
             $sourceLang = $lang;
         }
 
-        $fileHash = $file[ GDrive::SESSION_FILE_HASH ];
+        $fileHash = $file[ Session::SESSION_FILE_HASH ];
 
         $cacheTreeAr = array(
             'firstLevel'  => $fileHash{0} . $fileHash{1},
@@ -309,13 +312,13 @@ class GDriveController extends KleinController {
 
         $newSourceLang = $this->request->sourceLanguage;
 
-        $fileList = $_SESSION[ GDrive::SESSION_FILE_LIST ];
+        $fileList = $_SESSION[ Session::SESSION_FILE_LIST ];
 
         $success = true;
 
         foreach( $fileList as $fileId => $file ) {
             if($success) {
-                $fileHash = $file[ GDrive::SESSION_FILE_HASH ];
+                $fileHash = $file[ Session::SESSION_FILE_HASH ];
 
                 if($newSourceLang !== $originalSourceLang) {
 
@@ -385,11 +388,11 @@ class GDriveController extends KleinController {
         $success = false;
 
         if( $fileId === 'all' ) {
-            foreach( $_SESSION[ GDrive::SESSION_FILE_LIST ] as $singleFileId => $file ) {
+            foreach( $_SESSION[ Session::SESSION_FILE_LIST ] as $singleFileId => $file ) {
                 $this->deleteSingleFile( $singleFileId );
             }
 
-            unset( $_SESSION[ GDrive::SESSION_FILE_LIST ] );
+            unset( $_SESSION[ Session::SESSION_FILE_LIST ] );
 
             $success = true;
         } else {
@@ -404,14 +407,14 @@ class GDriveController extends KleinController {
     private function deleteSingleFile( $fileId ) {
         $success = false;
 
-        if( isset( $_SESSION[ GDrive::SESSION_FILE_LIST ][ $fileId ] ) ) {
-            $file = $_SESSION[ GDrive::SESSION_FILE_LIST ][ $fileId ];
+        if( isset( $_SESSION[ Session::SESSION_FILE_LIST ][ $fileId ] ) ) {
+            $file = $_SESSION[ Session::SESSION_FILE_LIST ][ $fileId ];
 
             $pathCache = $this->getCacheFileDir( $file );
 
             $this->deleteDirectory($pathCache);
 
-            unset( $_SESSION[ GDrive::SESSION_FILE_LIST ][ $fileId ] );
+            unset( $_SESSION[ Session::SESSION_FILE_LIST ][ $fileId ] );
 
             Log::doLog( 'File ' . $fileId . ' removed.' );
 
@@ -444,20 +447,22 @@ class GDriveController extends KleinController {
         $message = "";
         $success = false;
 
-        if( isset($_SESSION[ 'uid' ]) ) {
-            try {
-                $service = GDrive::getService( array( 'uid' => $_SESSION[ 'uid' ] ) );
+        try {
+            $session = new Session( $_SESSION ) ;
+            $service = $session->getService();
 
-                $about = $service->about->get();
-
-                $message = "OK";
-
-                $success = true;
-            } catch (Exception $e) {
-                $message = "An error occurred: " . $e->getMessage();
+            if ( !$service ) {
+                throw  new Exception('Cannot create service, token may be missing') ;
             }
-        } else {
-            $message = "Not logged in.";
+
+            // Ensure service is callable
+            $service->about->get();
+
+            $message = "OK";
+            $success = true;
+
+        } catch (Exception $e) {
+            $message = "An error occurred: " . $e->getMessage();
         }
 
         $this->response->json(array(

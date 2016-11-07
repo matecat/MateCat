@@ -11,7 +11,7 @@ class AddConnectedServices extends AbstractMatecatMigration
         `id` int(11) NOT NULL AUTO_INCREMENT,
         `uid` int(11) NOT NULL,
         `service` varchar(30) NOT NULL,
-        `oauth_access_token` varchar(255) NOT NULL,
+        `oauth_access_token` text NOT NULL,
         `created_at` timestamp NOT NULL,
         `expires_at` timestamp,
         `last_usage_at` timestamp,

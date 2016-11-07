@@ -1,0 +1,62 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: fregini
+ * Date: 07/11/2016
+ * Time: 16:50
+ */
+
+namespace ConnectedServices;
+
+
+use OauthTokenEncryption ;
+
+class ConnectedServiceStruct extends \DataAccess_AbstractDaoSilentStruct   implements \DataAccess_IDaoStruct {
+
+    public $id ;
+    public $uid ;
+    public $service ;
+    public $oauth_access_token ;
+    public $created_at ;
+    public $expires_at ;
+    public $expired_at ;
+    public $last_usage_at ;
+    public $refreshed_at ;
+    public $refresh_count ;
+
+
+    // TODO ------- start duplicated code, find a way to remove duplication
+    /**
+     * Returns the decoded access token.
+     *
+     * @param null $field
+     *
+     */
+    public function getDecryptedOauthAccessToken() {
+        return $this->cachable('decrypted', $this, function($object) {
+            $oauthTokenEncryption = OauthTokenEncryption::getInstance();
+            return $oauthTokenEncryption->decrypt( $object->oauth_access_token );
+        });
+    }
+    /**
+     * @param null $field
+     * @return mixed
+     * @throws \Exception
+     */
+    public function getDecodedOauthAccessToken($field=null) {
+        $decoded = json_decode( $this->getDecryptedOauthAccessToken(), TRUE );
+
+        if ( $field ) {
+            if ( array_key_exists( $field, $decoded ) ) {
+                return $decoded[ $field ] ;
+            }
+            else {
+                throw new \Exception('key not found on token: ' . $field ) ;
+            }
+        }
+
+        return $decoded  ;
+    }
+
+
+}

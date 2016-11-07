@@ -109,7 +109,12 @@ var GDrive = function() {
     }
 
     function displayGoogleLogin(param) {
+
+        $('#loginlink').click();
+        return ; // TEMP hack to simulate behaviour
+
         $("#sign-in").data("oauth", config.gdriveAuthURL);
+
         if (param && param === "drive") {
             $(".login-google-drive").show();
         } else {

@@ -14,7 +14,12 @@ class downloadFileController extends downloadController {
     protected $jobInfo;
     protected $forceXliff;
     protected $downloadToken;
-    protected $gdriveService;
+
+    /**
+     * @var GDrive\RemoteFileService
+     */
+    protected $remoteFileService;
+
     protected $openOriginalFiles;
     protected $id_file ;
 
@@ -333,7 +338,7 @@ class downloadFileController extends downloadController {
             try {
 
                 if ( $this->anyRemoteFile() && !$this->forceXliff ) {
-                    $this->startGDriveService();
+                    $this->startRemoteFileService();
 
                     if( $this->openOriginalFiles ) {
                         $this->outputResultForOriginalFiles();
@@ -487,51 +492,34 @@ class downloadFileController extends downloadController {
 
     }
 
-    private function startGDriveService() {
-        $oauthTokenEncryption = OauthTokenEncryption::getInstance();
 
+    /**
+     *
+     * This prepares the object that will handle communication with remote file service.
+     *
+     *
+     *
+     */
+    private function startRemoteFileService() {
         // Get the user data from the project owner
         $project = \Projects_ProjectDao::findByJobId( $this->id_job );
         $userDao = new \Users_UserDao( \Database::obtain() );
         $user = $userDao->getByEmail( $project->id_customer );
 
         // This is necessary to ensure the stored token will be valid even for not logged users
-        \AuthCookie::tryToRefreshToken( $project->id_customer );
+        // \AuthCookie::tryToRefreshToken( $project->id_customer );
 
-        $this->gdriveService = GDrive::getService(
-                array( 'access_token' => $oauthTokenEncryption->decrypt( $user->oauth_access_token ) )
+        $this->remoteFileService = new GDrive\RemoteFileService(
+            $user->getDecryptedOauthAccessToken()
         );
     }
-
 
 
     private function updateRemoteFiles($output_content) {
         foreach( $output_content as $id_file => $output_file ) {
             $remoteFile = \RemoteFiles_RemoteFileDao::getByFileAndJob( $id_file, $this->id_job );
-
-            try {
-                $gdriveFile = $this->gdriveService->files->get( $remoteFile->remote_id );
-
-                $this->updateFileOnGDrive( $remoteFile->remote_id, $gdriveFile, $output_file[ 'document_content' ] ) ;
-                $this->remoteFiles[ $remoteFile->id ] = $gdriveFile ;
-            } catch ( Exception $e ) {
-                Log::doLog( 'Failed to access file from Google Drive: ' . $e->getMessage() );
-            }
+            $this->remoteFiles[ $remoteFile->id ] = $this->remoteFileService->updateFile( $remoteFile, $output_file[ 'document_content' ] );
         }
-    }
-
-    private function updateFileOnGDrive( $remoteId, $gdriveFile, $content ) {
-        $mimeType = GDrive::officeMimeFromGoogle( $gdriveFile->mimeType );
-        $gdriveFile->setMimeType( $mimeType );
-
-        $additionalParams = array(
-            'mimeType' => $mimeType,
-            'data' => $content,
-            'uploadType' => 'media',
-            'newRevision' => FALSE
-        );
-
-        $upload = $this->gdriveService->files->update( $remoteId, $gdriveFile, $additionalParams );
     }
 
     protected function createOmegaTZip( $output_content, $sourceLang, $targetLang ) {

@@ -240,8 +240,6 @@
             and
             <a class="load-gdrive load-gdrive-disabled" href="#">Google Drive files</a>
             <span class="gdrive-icon"></span>
-            <!--<span class="btn-success min">or</span>
-            <span class="btn-success btn ">Add from Google Drive</span>-->
         </span>
     </tal:block>
 
@@ -885,33 +883,6 @@
         </div>
     </div>
 </div>
-
-<!--<div class="modal popup-languages" data-type="view">
-    <div class="popup-outer"></div>
-    <div class="popup">
-        <a href="#" class="x-popup"></a>
-
-        <h1>
-            <a id="chooseMultilang" href="#" class="btn-ok right">Continue</a>
-            <a id="cancelMultilang" href="#" class="btn-cancel right">Cancel</a>
-            Choose Multiple Languages (<span class="number">1</span>)
-            <a href="#" id="deselectMultilang">Deselect all</a>
-        </h1>
-
-        <div class="popup-box">
-            <ul class="listlang">
-
-                <tal:block tal:repeat="language target_languages">
-                    <li tal:attributes="class language/top">
-                        <input type="checkbox" tal:attributes="value language/code; id language/code"/>
-                        <label tal:attributes="for language/name" tal:content="language/name" onClick="return false">-&#45;&#45;</label>
-                    </li>
-                </tal:block>
-
-            </ul>
-        </div>
-    </div>
-</div>-->
 
 <div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
 <div metal:use-macro="popup_google_login.html/googleDriveLoginPopup"/>
