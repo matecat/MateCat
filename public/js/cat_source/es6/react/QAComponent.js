@@ -25,6 +25,7 @@ class QAComponent extends React.Component {
     static togglePanel() {
         $('.qa-container').toggleClass("qa-open");
         $('.qa-container').slideToggle();
+
         if ( !$('.qa-container').hasClass('qa-open') ) {
             this.setState({
                 issues_selected: false,
@@ -32,6 +33,24 @@ class QAComponent extends React.Component {
                 current_counter: 1,
                 selected_box: ''
             });
+        } else {
+            var selectedBox = '';
+            var issue_selected = false, lxq_selected = false;
+            if ( this.state.issues.length > 0 ) {
+                issue_selected = true;
+                selectedBox = 'issues';
+            } else if ( this.state.lxq_issues.length > 0 ) {
+                lxq_selected = true;
+                selectedBox = 'lxq';
+            }
+            this.setState({
+                issues_selected: issue_selected,
+                lxq_selected: lxq_selected,
+                current_counter: 1,
+                selected_box: selectedBox
+            });
+            var current_array = this.getCurrentArray();
+            this.scrollToSegment(current_array[0]);
         }
     }
 
@@ -174,7 +193,7 @@ class QAComponent extends React.Component {
         if ( this.state.lxq_issues.length > 0 ) {
             var selected = '';
             if ( this.state.lxq_selected ) {
-                counter = <div className="qa-counter">{'1/'+ this.state.lxq_issues.length}</div>;
+                counter = <div className="qa-counter">{this.state.current_counter +'/'+ this.state.lxq_issues.length}</div>;
                 selected = 'selected';
                 lxq_options = <ul className="lexiqa-popup-items">
 
