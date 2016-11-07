@@ -1884,6 +1884,7 @@ UI = {
 				newStr += this.outerHTML;
 			}
 		});
+        // saveSelection();
         if (LXQ.enabled()) {
             $.powerTip.destroy($('.tooltipa',this.currentSegment));
             $.powerTip.destroy($('.tooltipas',this.currentSegment));
@@ -1895,11 +1896,14 @@ UI = {
         }
         UI.lockTags();
         this.saveInUndoStack('formatSelection');
-		saveSelection();
-		$('.editor .editarea .formatSelection-placeholder').after($('.editor .editarea .rangySelectionBoundary'));
-		$('.editor .editarea .formatSelection-placeholder').remove();
+
+        $('.editor .editarea .formatSelection-placeholder').after($('.editor .editarea .rangySelectionBoundary'));
+        $('.editor .editarea .formatSelection-placeholder').remove();
         $('.editor .editarea').trigger('afterFormatSelection');
-	},
+        setTimeout(function () {
+            setCursorPosition(document.getElementsByClassName("undoCursorPlaceholder")[0]);
+        }, 0);
+    },
 
     /**
      * setStatus
