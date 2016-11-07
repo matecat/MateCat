@@ -840,7 +840,7 @@ UI = {
 	getMoreSegments_success: function(d) {
 		if (d.errors.length)
 			this.processErrors(d.errors, 'getMoreSegments');
-		where = d.data.where;
+		var where = d.data.where;
         section = $('section');
 		if (typeof d.data.files != 'undefined') {
 			firstSeg = section.first();
@@ -970,7 +970,7 @@ UI = {
 	},
 	getSegments: function(options) {
 
-		where = (this.startSegmentId) ? 'center' : 'after';
+		var where = (this.startSegmentId) ? 'center' : 'after';
 		var step = this.initSegNum;
 		$('#outer').addClass('loading');
 		var seg = (options.segmentToScroll) ? options.segmentToScroll : this.startSegmentId;
