@@ -303,7 +303,10 @@
                 type: 'POST',
                 data : data
             }).done( function( data ) {
-                UI.render();
+                UI.render({
+                    segmentToScroll: UI.getSegmentId(UI.currentSegment),
+                    segmentToOpen: UI.getSegmentId(UI.currentSegment)
+                });
                 UI.checkWarnings(false);
             });
 
@@ -325,7 +328,10 @@
                 type: 'POST',
                 data : data
             }).done( function( data ) {
-                UI.render(false);
+                UI.render({
+                    segmentToScroll: UI.getSegmentId(UI.currentSegment),
+                    segmentToOpen: UI.getSegmentId(UI.currentSegment)
+                });
                 UI.checkWarnings(false);
             });
 

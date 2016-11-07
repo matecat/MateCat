@@ -4,12 +4,7 @@
 $.extend(UI, {
 	render: function(options) {
         options = options || {};
-		firstLoad = (options.firstLoad || false);
-		segmentToOpen = (options.segmentToOpen || false);
-		segmentToScroll = (options.segmentToScroll || false);
-		scrollToFile = (options.scrollToFile || false);
-		highlight = (options.highlight || false);
-		seg = (segmentToOpen || false);
+		var seg = (options.segmentToOpen || false);
 		this.segmentToScrollAtRender = (seg) ? seg : false;
 //		this.isWebkit = $.browser.webkit;
 //		this.isChrome = $.browser.webkit && !!window.chrome;
@@ -22,8 +17,7 @@ $.extend(UI, {
 //		console.log('window.scrollTop: ', $(window).scrollTop());
 		this.isMac = (navigator.platform == 'MacIntel') ? true : false;
 		this.body = $('body');
-		this.firstLoad = firstLoad;
-
+		this.firstLoad = (options.firstLoad || false);
 //        if (firstLoad)
 //            this.startRender = true;
 		this.initSegNum = 100; // number of segments initially loaded
