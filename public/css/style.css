@@ -4000,7 +4000,7 @@ section:hover .segment-side-buttons {
 	display: flex;
 	text-align: center;
 	justify-content: center;
-	font-size: 19px;
+	font-size: 15px;
 	font-weight: normal;
 	position: relative;
 	cursor: pointer;
@@ -4011,65 +4011,90 @@ section:hover .segment-side-buttons {
 }
 
 .qa-issues-container.selected, .qa-lexiqa-container.selected {
-	border-bottom: 3px solid #4d4d4d;
+	box-shadow: inset 0px -3px 0px #4d4d4d;
 }
 
 .qa-counter {
-	width: 100px;
-	font-size: 21px;
+	width: 70px;
+	font-size: 16px;
+	color:#333;
 }
 
 .qa-arrows {
-	width: 100px;
+	width: 80px;
 }
 
 .qa-move-up, .qa-move-down {
-	width: 50px;
-	float: left;
-	height: 25px;
-	cursor: pointer;
+    width: 25px;
+    float: left;
+    height: 22px;
+    cursor: pointer;
+    border-radius: 3px;
+    padding: 5px 2px 2px;
+    border: 1px solid #C6C6C6;
+    -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    background-color: #f8f8f8;
+    background-image: -webkit-linear-gradient(top, #f8f8f8, #f1f1f1);
+    background-image: -moz-linear-gradient(top, #f8f8f8, #f1f1f1);
+    background-image: -o-linear-gradient(top, #f8f8f8, #f1f1f1);
+    background-image: linear-gradient(top, #f8f8f8, #f1f1f1);
 }
 
 .icon-qa-issues, .icon-qa-lexiqa {
 	width: 30px;
 	height: 30px;
 	margin-right: 10px;
+	margin-top: 8px;
 }
 .icon-qa-issues:before {
 	content: "\ea7f";
-	font-size: 30px;
+	font-size: 25px;
 }
 .icon-qa-lexiqa:before {
 	content: "\f044";
-	font-size: 30px;
+	font-size: 25px;
+	margin-top: 5px;
 }
 .qa-issues-counter {
 	top: 10px;
-	left: 35px;
+	left: 40px;
 }
 
 .qa-lexiqa-counter {
 	top: 10px;
-	left: 15px;
+	left: 22px;
 }
 
 .icon-qa-right-arrow:before {
 	content: "\ea3c";
-	font-size: 25px;
+	font-size: 18px;
 }
 
 .icon-qa-left-arrow:before {
 	content: "\ea40";
-	font-size: 25px;
+	font-size: 18px;
 }
 
 .qa-move-up, .qa-move-down {
 	color: #797979;
 }
 
+.qa-move-down {
+	margin-left: 15px;
+}
+
 .qa-move-up:hover,
 .qa-move-down:hover {
 	color: black;
+}
+
+.qa-move-up:active,
+.qa-move-down:active {
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+    background-color: #eee;
+    background-image: -webkit-linear-gradient(top, #eee, #e0e0e0);
 }
 
 .qa-arrows.qa-arrows-disabled .qa-move-up,
