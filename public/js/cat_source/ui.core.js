@@ -761,13 +761,8 @@ UI = {
 			this.startSegmentId = (hash) ? hash : config.last_opened_segment;
 		}
 	},
-// temp
-//	enableSearch: function() {
-//		$('#filterSwitch').show();
-//		this.searchEnabled = true;
-//	},
     fixHeaderHeightChange: function() {
-        headerHeight = $('header .wrapper').height() + ((this.body.hasClass('filterOpen'))? $('header .searchbox').height() : 0) + ((this.body.hasClass('incomingMsg'))? $('header #messageBar').height() : 0);
+        var headerHeight = $('header .wrapper').height() + ((this.body.hasClass('filterOpen'))? $('header .searchbox').height() : 0) + ((this.body.hasClass('incomingMsg'))? $('header #messageBar').height() : 0);
         $('#outer').css('margin-top', headerHeight + 'px');
     },
 
@@ -1889,6 +1884,7 @@ UI = {
 				newStr += this.outerHTML;
 			}
 		});
+        // saveSelection();
         if (LXQ.enabled()) {
             $.powerTip.destroy($('.tooltipa',this.currentSegment));
             $.powerTip.destroy($('.tooltipas',this.currentSegment));
@@ -1900,11 +1896,14 @@ UI = {
         }
         UI.lockTags();
         this.saveInUndoStack('formatSelection');
-		saveSelection();
-		$('.editor .editarea .formatSelection-placeholder').after($('.editor .editarea .rangySelectionBoundary'));
-		$('.editor .editarea .formatSelection-placeholder').remove();
+
+        $('.editor .editarea .formatSelection-placeholder').after($('.editor .editarea .rangySelectionBoundary'));
+        $('.editor .editarea .formatSelection-placeholder').remove();
         $('.editor .editarea').trigger('afterFormatSelection');
-	},
+        setTimeout(function () {
+            setCursorPosition(document.getElementsByClassName("undoCursorPlaceholder")[0]);
+        }, 0);
+    },
 
     /**
      * setStatus
@@ -1974,6 +1973,8 @@ UI = {
             labelDownloading = 'OPENING FILES...';
         }
         button.addClass('disabled' ).data( 'oldValue', button.val() ).val(labelDownloading);
+        APP.fitText($('.breadcrumbs'), $('#pname'), 30);
+
     },
 
     reEnableDownloadButton : function() {
