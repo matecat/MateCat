@@ -13,5 +13,17 @@ $(document).ready(function(){
 					}
 				}
 			})
-	})
+	});
+
+	$('.user-menu-preferences').on('click', function () {
+		$('#login-modal').css('display', 'block');
+	});
+	$('.close-login').on('click', function () {
+		$('#login-modal').css('display', 'none');
+	});
+	window.onclick = function(event) {
+		if (event.target == document.getElementById('#login-modal')) {
+			$('#login-modal').css('display', 'none');
+		}
+	}
 });

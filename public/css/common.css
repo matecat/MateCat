@@ -321,12 +321,6 @@ footer #statistics
     margin-top: -17px;
 }
 
-#welcomebox
-{
-    float: right;
-    margin-left: 8px;
-}
-
     /*browser supported box */
 
 .iepopup.nobrowser {
@@ -558,8 +552,6 @@ border-bottom: 3px solid #1B5D7B!important;
 	.logged .dropdown-icon img {
 border: 1px solid #555;
 }
-
-#logoutlink {font-weight:normal;}
 
 .userinfo {
 padding: 0;
@@ -4681,4 +4673,191 @@ span.share-popup-item-email {
     line-height: 13px;
 }
 /***********************/
+/***** Login Footer ****/
 
+#logoutlink {
+    font-weight:normal;
+}
+
+#welcomebox
+{
+    float: right;
+    margin-left: 8px;
+    cursor: pointer;
+    position: relative;
+}
+
+#welcomebox .icon-sort-up {
+    font-size: 22px;
+    float: right;
+    margin-left: 9px;
+
+}
+.user-menu {
+    position: absolute;
+    top: -92px;
+    background-color: white;
+    color: black;
+    text-align: left;
+    font-size: 19px;
+    left: 0px;
+    box-shadow: 0px 0px 16px 0px rgba(0, 0, 0, 0.4);
+    visibility: hidden;
+    transform: translateY(1em);
+    transition: all 0.3s ease-in-out 0s, visibility 0s linear 0.3s, z-index 0s linear 0.01s;
+    z-index: -1;
+    opacity: 0;
+}
+
+.user-menu li {
+    width: 120px;
+    height: 20px;
+    padding: 10px;
+    line-height: 20px;
+    border-bottom: 1px solid black;
+}
+
+#welcomebox:hover .user-menu {
+    visibility: visible;
+    opacity: 1;
+    z-index: 1;
+    transform: translateY(0%);
+    transition-delay: 0s, 0s, 0.3s;
+}
+
+/* The Modal (background) */
+.modal-login {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 200px;
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.modal-login-header {
+    padding: 2px 16px;
+    color: black;
+    border: 1px solid black;
+    text-align: left;
+    min-height: 30px;
+}
+
+.modal-login-header h2 {
+    margin: 0;
+    line-height: 30px;
+}
+
+
+/* Modal Body */
+.modal-login-body {
+    padding: 10px 16px;
+    min-height: 50px;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+    color: #000;
+}
+
+/* Modal Footer */
+.modal-login-footer {
+    padding: 2px 16px;
+    color: black;
+    border: 1px solid black;
+    text-align: left;
+    min-height: 30px;
+}
+
+/* Modal Content */
+.modal-login-content {
+    position: relative;
+    background-color: #fefefe;
+    margin: auto;
+    padding: 0;
+    border: 1px solid #888;
+    width:40%;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    -webkit-animation-name: animatetop;
+    -webkit-animation-duration: 0.4s;
+    animation-name: animatetop;
+    animation-duration: 0.4s;
+    text-align: center;
+}
+.modal-login-body h1 {
+    text-align: center;
+}
+
+.user-info-form,
+.user-reset-password,
+.user-gdrive {
+    margin: 0 auto;
+    width: 90%;
+    min-height: 60px;
+}
+
+.user-gdrive {
+    margin-top: 25px;
+}
+
+.user-info-form label {
+    float: left;
+    margin-top: 20px;
+    font-size: 16px;
+}
+
+.user-info-form input {
+    margin-top: 5px;
+    width: 100%;
+}
+
+.user-reset-password label {
+    float: left;
+    font-size: 18px;
+    margin-top: 25px;
+}
+.onoffswitch-drive {
+    position: relative;
+    width: 60px;
+    zoom: 0.7;
+    margin-top: 8px;
+    float: left;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.user-gdrive > label {
+    line-height: 32px;
+    float: left;
+    margin-left: 90px;
+    font-size: 18px;
+}
+
+a.btn-confirm-medium.send-user-updates {
+    margin-bottom: 30px;
+}
+
+a.reset-password.btn-confirm-medium {
+    float: right;
+}
+
+/* The Close Button */
+.close-login {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-login:hover,
+.close-login:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/***********************/
