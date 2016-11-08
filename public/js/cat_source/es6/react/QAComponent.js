@@ -202,7 +202,7 @@ class QAComponent extends React.Component {
                     </li>
                     <li className="lexiqa-popup-item">Full QA report
                         <a className="lexiqa-popup-icon lexiqa-report-icon" id="lexiqa-report-link" target="_blank" alt="Read the full QA report"
-                        href={config.lexiqaServer + '/errorreport?id='+this.partnerid+'-' + config.id_job + '-' + config.password+'&type='+(config.isReview?'revise':'translate')}/>
+                        href={config.lexiqaServer + '/errorreport?id='+LXQ.partnerid+'-' + config.id_job + '-' + config.password+'&type='+(config.isReview?'revise':'translate')}/>
                     </li>
                     <li className="lexiqa-popup-item">Powered by
                         <a className="lexiqa-popup-icon lexiqa-logo-icon" href="http://lexiqa.net" target="_blank" alt="lexiQA logo"/>
@@ -216,7 +216,8 @@ class QAComponent extends React.Component {
             </div>;
 
         }
-        if ( this.state.lxq_selected || this.state.issues_selected) {
+        var current_array = this.getCurrentArray();
+        if ( (this.state.lxq_selected || this.state.issues_selected) && current_array.length > 1 ) {
             buttonClass = 'qa-arrows-enabled';
         }
         return  <div className="qa-container">
