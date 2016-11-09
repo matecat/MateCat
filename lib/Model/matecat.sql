@@ -94,18 +94,19 @@ CREATE TABLE `comments` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `connected_services` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `uid` int(11) NOT NULL,
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `uid` bigint(20) NOT NULL,
   `service` varchar(30) NOT NULL,
+  `remote_id` varchar(255) DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
   `oauth_access_token` text NOT NULL,
   `created_at` timestamp NOT NULL,
-  `expires_at` timestamp NULL DEFAULT NULL,
-  `last_usage_at` timestamp NULL DEFAULT NULL,
-  `refreshed_at` timestamp NULL DEFAULT NULL,
-  `refresh_count` int(11) NOT NULL DEFAULT '0',
+  `updated_at` timestamp NULL DEFAULT NULL,
   `expired_at` timestamp NULL DEFAULT NULL,
+  `disabled_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uid_service` (`uid`,`service`) USING BTREE
+  UNIQUE KEY `uid_email_service` (`uid`,`email`,`service`) USING BTREE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `engines` (
@@ -429,11 +430,11 @@ CREATE TABLE `remote_files` (
   `id_job` bigint(20) NOT NULL,
   `remote_id` varchar(255) NOT NULL,
   `is_original` tinyint(1) DEFAULT '0',
-  `uid` bigint(20) DEFAULT NULL,
+  `connected_service_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `id_file` (`id_file`) USING BTREE,
   KEY `id_job` (`id_job`) USING BTREE,
-  KEY `uid` (`uid`) USING BTREE
+  KEY `connected_service_id` (`connected_service_id`) USING BTREE
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `segment_notes` (
@@ -656,8 +657,8 @@ INSERT INTO `phinxlog` ( version ) VALUES ( '20160902141754' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20160909113520' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20160916105911' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161027154703' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20161107080000' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161107094229' );
-INSERT INTO `phinxlog` ( version ) VALUES ( '20161107121652' );
 
 CREATE SCHEMA `matecat_conversions_log` DEFAULT CHARACTER SET utf8 ;
 USE matecat_conversions_log ;

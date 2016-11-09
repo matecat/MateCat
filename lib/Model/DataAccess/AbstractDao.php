@@ -401,7 +401,6 @@ abstract class DataAccess_AbstractDao {
             if ( in_array( $key, static::$primary_keys )) {
                 $map[] =  " $key = :$key " ;
             }
-
         }
 
         return implode(' AND ', $map);
@@ -444,14 +443,14 @@ abstract class DataAccess_AbstractDao {
      *
      * @return bool
      */
-    public static function updateStruct( $struct, $options=array() ) {
+    public static function updateStruct( DataAccess_IDaoStruct $struct, $options=array() ) {
         $struct->ensureValid();
 
         $attrs = $struct->attributes();
 
         $sql = " UPDATE " . static::TABLE ;
-        $sql .= " SET " . self::buildUpdateSet( $attrs, $options['fields'] );
-        $sql .= " WHERE " . self::buildPkeyCondition( $attrs );
+        $sql .= " SET " . static::buildUpdateSet( $attrs, $options['fields'] );
+        $sql .= " WHERE " . static::buildPkeyCondition( $attrs );
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
@@ -465,6 +464,22 @@ abstract class DataAccess_AbstractDao {
         \Log::doLog("data", $data);
 
         return $stmt->execute( $data );
+    }
+
+    public static function insertStruct( DataAccess_IDaoStruct $struct, $options=array() ) {
+        // TODO: allow the mast to be passed as option.
+        $mask = array_keys( $struct->toArray() );
+        $mask = array_diff($mask, static::$auto_increment_fields) ;
+
+        $sql = self::buildInsertStatement( $struct->toArray(), $mask ) ;
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $data = $struct->toArray( $mask ) ;
+
+        \Log::doLog("SQL", $sql);
+        \Log::doLog("data", $data );
+
+        return $stmt->execute( $data )  ;
     }
 
 }

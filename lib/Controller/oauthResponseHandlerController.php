@@ -22,7 +22,7 @@ class oauthResponseHandlerController extends viewController{
 		$this->user_logged = true;
 
 		$this->client = OauthClient::getInstance()->getClient();
-                $this->client->setAccessType( "offline" );
+        $this->client->setAccessType( "offline" );
 
 		$oauthTokenEncryption = OauthTokenEncryption::getInstance();
 

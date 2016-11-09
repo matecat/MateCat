@@ -8,19 +8,24 @@ class AddConnectedServices extends AbstractMatecatMigration
 
     CREATE TABLE `connected_services` (
 
-        `id` int(11) NOT NULL AUTO_INCREMENT,
-        `uid` int(11) NOT NULL,
+        `id` bigint(20) NOT NULL AUTO_INCREMENT,
+        `uid` bigint(20) NOT NULL,
         `service` varchar(30) NOT NULL,
+        
+        `remote_id` varchar(255), 
+        `name` varchar(255) NOT NULL, 
+        `email` varchar(255) NOT NULL,
+        
         `oauth_access_token` text NOT NULL,
-        `created_at` timestamp NOT NULL,
-        `expires_at` timestamp,
-        `last_usage_at` timestamp,
-        `refreshed_at` timestamp, 
-        `refresh_count` int NOT NULL DEFAULT 0, 
-        `expired_at` timestamp,
 
+        `created_at` timestamp NOT NULL,
+        `updated_at` timestamp,
+        
+        `expired_at` timestamp,
+        `disabled_at` timestamp,
+        
         PRIMARY KEY ( `id` ),
-        UNIQUE KEY `uid_service` ( `uid`, `service` ) USING BTREE
+        UNIQUE KEY `uid_email_service` ( `uid`, `email`, `service` ) USING BTREE
 
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

@@ -5,6 +5,10 @@ use TaskRunner\Commons\QueueElement;
 
 class Utils {
 
+    public static function mysqlTimestamp( $time ) {
+        return date( 'Y-m-d H:i:s', $time );
+    }
+
 	public static function api_timestamp( $date_string ) {
 		$datetime = new \DateTime( $date_string );
 		return $datetime->format( 'c' );

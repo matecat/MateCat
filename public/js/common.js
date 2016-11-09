@@ -80,8 +80,6 @@ APP = {
         } );
     },
     googole_popup: function ( url ) {
-        //var rid=$('#rid').text();
-        //url=url+'&rid='+rid;
         var newWindow = window.open( url, 'name', 'height=600,width=900' );
         if ( window.focus ) {
             newWindow.focus();

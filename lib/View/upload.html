@@ -46,7 +46,6 @@
 
     <script type="text/javascript">
         /*<![CDATA[*/
-
         var config = {
             basepath: '${basepath | string:/}',
             hostpath: '${hostpath | string:/}',
@@ -59,7 +58,6 @@
             maxNumberFiles: ${maxNumberFiles},
             ownerIsMe: true,
             blueimp_dataType: 'json',
-            gdriveAuthURL: ${structure php:json_encode(gdriveAuthURL)},
             defaults : {
                 tag_projection : true,
                 speech2text : false,
@@ -70,6 +68,12 @@
             tag_projection_languages: ${tag_projection_languages},
             languages_array : ${languages_array}
         };
+        /*]]>*/
+    </script>
+
+    <script tal:condition="php: !empty(logged_user)" type="text/javascript">
+        /*<![CDATA[*/
+        config.gdriveAuthURL = ${structure php:json_encode(gdriveAuthURL)} ;
         /*]]>*/
     </script>
 
@@ -761,42 +765,6 @@
     {% } %}
 </script>
 
-<!-- script tal:condition="not:volume_analysis_enabled" id="job-links-list" type="text/x-tmpl">
-    <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0" id="info-login">
-        <thead>
-        <tr>
-            <th class="job-detail">
-                <a tal:attributes="href string:${basepath}manage/?new=1">Login</a> to add the jobs to your management
-                panel.
-            </th>
-        </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
-    <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0" id="project-{%=o.id_project%}">
-        <thead>
-        <tr>
-            <th class="job-detail">Jobs</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for (var i=0, file; file=o.files[i]; i++) { %}
-        <tr class="row">
-            <td class="job-detail">
-                	<span class="urls">
-                        <div class="langs">{%=o.srcLangHumanReadable%}&nbsp;&gt;&nbsp;{%=o.trgLangHumanReadable[i]%}
-                        </div>
-                		<a class="url" target="_blank" href="{%=file.href%}">{%=file.href%}</a>
-	        	    </span>
-            </td>
-        </tr>
-        {% } %}
-        </tbody>
-    </table>
-
-</script -->
-
 <!-- <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script> -->
 <script src="${basepath}public/js/lib/jquery-ui-1.8.20.custom.min.js"></script>
 
@@ -919,10 +887,60 @@
             </tal:block>
 
             <tal:block tal:condition="php: !empty(logged_user)">
-                <div id='welcomebox' tal:attributes="title extended_user">
-                    <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)
-                </div>
-            </tal:block>
+                    <div id='welcomebox' tal:attributes="title extended_user">
+                        <span tal:content='extended_user'></span>
+                        <span class="icon-sort-up"></span>
+                        <!--(<a id='logoutlink' href='#'>Logout</a>)-->
+                        <ul class="user-menu">
+                            <li class="user-menu-preferences">Preferences</li>
+                            <li id='logoutlink'>Logout</li>
+                        </ul>
+
+                        <div id="login-modal" class="modal-login">
+                            <div class="modal-login-content">
+                                <div class="modal-login-header">
+                                    <span class="close-login">×</span>
+                                    <h2>Preferences</h2>
+                                </div>
+                                <div class="modal-login-body">
+                                    <h1>Preferences</h1>
+                                    <div class="user-info-form">
+                                        <label for="user-login-name">Name</label><br/>
+                                        <input type="text" name="name" id="user-login-name" value="Federico"/><br/>
+                                        <label for="user-login-name">Surname</label><br/>
+                                        <input type="text" name="name" id="user-login-surname" value="Federico"/><br/>
+                                        <label for="user-login-name">Email</label><br/>
+                                        <input type="text" name="name" id="user-login-email" value="Federico"/><br/>
+                                    </div>
+                                    <div class="user-reset-password">
+                                        <label>Reset Password</label>
+                                        <a class="reset-password btn-confirm-medium"> Reset </a>
+                                    </div>
+                                    <div class="user-gdrive">
+                                        <div class="onoffswitch-drive">
+                                            <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="gdrive_check" checked="checked"/>
+                                            <label class="onoffswitch-label" for="gdrive_check">
+                                                <span class="onoffswitch-inner"></span>
+                                                <span class="onoffswitch-switch"></span>
+                                                <span class="onoffswitch-label-status-active">ON</span>
+                                                <span class="onoffswitch-label-status-inactive">OFF</span>
+                                                <span class="onoffswitch-label-status-unavailable">Unavailable</span>
+                                            </label>
+                                        </div>
+                                        <label>Connect your Google Drive</label>
+                                    </div>
+                                    <br/>
+                                    <a class="btn-confirm-medium send-user-updates">Update preferences</a>
+                                </div>
+                                <div class="modal-login-footer">
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </tal:block>
+
 
         </nav>
 

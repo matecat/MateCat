@@ -16,14 +16,16 @@ class ConnectedServiceStruct extends \DataAccess_AbstractDaoSilentStruct   imple
     public $id ;
     public $uid ;
     public $service ;
-    public $oauth_access_token ;
-    public $created_at ;
-    public $expires_at ;
-    public $expired_at ;
-    public $last_usage_at ;
-    public $refreshed_at ;
-    public $refresh_count ;
+    public $email ;
+    public $name;
 
+    public $oauth_access_token ;
+
+    public $created_at ;
+    public $updated_at ;
+
+    public $expired_at ;
+    public $disabled_at ;
 
     // TODO ------- start duplicated code, find a way to remove duplication
     /**
@@ -38,6 +40,15 @@ class ConnectedServiceStruct extends \DataAccess_AbstractDaoSilentStruct   imple
             return $oauthTokenEncryption->decrypt( $object->oauth_access_token );
         });
     }
+
+    /**
+     *
+     */
+    public function setEncryptedAccessToken($token) {
+        $oauthTokenEncryption = OauthTokenEncryption::getInstance();
+        $this->oauth_access_token = $oauthTokenEncryption->encrypt( $token );
+    }
+
     /**
      * @param null $field
      * @return mixed
