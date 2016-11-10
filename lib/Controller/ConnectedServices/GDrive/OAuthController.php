@@ -8,10 +8,14 @@
 
 namespace ConnectedServices\GDrive;
 
+use API\App\Json\ConnectedService as ConnectedServiceFormatter;
+use API\App\Json\ConnectedService;
 use API\V2\KleinController;
+use ConnectedServices\ConnectedServiceDao;
+use ConnectedServices\ConnectedServiceStruct;
 use ConnectedServices\GDriveUserAuthorizationModel;
 
-class OAuthController extends KleinController
+class OAuthController extends \BaseKleinViewController
 {
 
     /**
@@ -21,7 +25,7 @@ class OAuthController extends KleinController
 
     public function response() {
 
-        // get the code from querystring
+        // get the cod e from querystring
         // use the code to ask for a token
         // encrypt the token in database
 
@@ -34,14 +38,19 @@ class OAuthController extends KleinController
         $error = $this->request->param( 'error' );
 
         if ( isset($code) && $code ) {
-
             $this->__handleCode( $code ) ;
-
         } else if ( isset( $error ) ) {
-
             $this->__handleError( $error );
-
         }
+
+        $body =<<<EOF
+<html><head>
+<script> window.close(); </script>
+</head>
+</html>
+EOF;
+
+        $this->response->body( $body );
     }
 
     private function __handleError( $error ) {
@@ -62,5 +71,8 @@ class OAuthController extends KleinController
         if ( !$this->user ) {
             throw  new \Exception('Logged user not found.') ;
         }
+
+        $this->setView( \INIT::$TEMPLATE_ROOT . '/ConnectedServices/gdrive_oauth.html');
+
     }
 }

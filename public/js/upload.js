@@ -116,11 +116,4 @@ $(document).ready(function(){
     })
 });
 
-// TODO: TEMP to start he new login flow...
-$(document).on('change', '#gdrive_check', function(e) {
-
-    APP.googole_popup( config.gdriveAuthURL );
-
-});
-
 

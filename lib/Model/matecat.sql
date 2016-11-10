@@ -105,6 +105,7 @@ CREATE TABLE `connected_services` (
   `updated_at` timestamp NULL DEFAULT NULL,
   `expired_at` timestamp NULL DEFAULT NULL,
   `disabled_at` timestamp NULL DEFAULT NULL,
+  `is_default` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uid_email_service` (`uid`,`email`,`service`) USING BTREE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 

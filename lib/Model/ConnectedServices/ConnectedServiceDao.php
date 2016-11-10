@@ -14,6 +14,21 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
     protected static $primary_keys = array('id');
     protected static $auto_increment_fields = array('id');
 
+    public function findServicesByUser(\Users_UserStruct $user ) {
+        $conn = $this->con->getConnection() ;
+
+        $stmt = $conn->prepare(
+            "SELECT * FROM connected_services WHERE " .
+            " uid = :uid "
+        );
+
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'ConnectedServices\ConnectedServiceStruct' );
+        $stmt->execute(
+            array( 'uid' => $user->uid )
+        );
+
+        return $stmt->fetchAll();
+    }
 
     /**
      * @param \Users_UserStruct $user

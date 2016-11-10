@@ -84,6 +84,7 @@ APP = {
         if ( window.focus ) {
             newWindow.focus();
         }
+        return newWindow ;
     },
     confirm: function ( options ) {
         this.waitingConfirm = true;
@@ -630,3 +631,41 @@ var _prum = [['id',
     p.src = '//rum-static.pingdom.net/prum.min.js';
     s.parentNode.insertBefore( p, s );
 })();
+
+
+// ---------------------------------------------------
+// Functions related to login and connected services ( GDrive etc. )
+
+APP.STORE = {} ;
+APP.STORE.USER = {} ;
+
+(function(APP, $, mundefined) {
+
+    var loadUserData = function() {
+        $.get('/api/app/user').done(function( data ) {
+            APP.STORE.USER = data ;
+
+        });
+    }
+
+    $(document).on('change', '#gdrive_check', function(e) {
+        var popup = APP.googole_popup( config.gdriveAuthURL );
+        var interval = setInterval( function() {
+            console.log('interval...');
+
+            if ( popup.closed ) {
+                loadUserData();
+                clearInterval( interval ) ;
+            }
+        }, 600 );
+    });
+
+    $(document).ready( loadUserData ) ;
+
+    $.extend( APP, {
+        notifyStoreChanged : function() {
+
+        }
+    });
+
+})( APP, jQuery );

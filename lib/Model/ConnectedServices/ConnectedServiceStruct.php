@@ -27,6 +27,8 @@ class ConnectedServiceStruct extends \DataAccess_AbstractDaoSilentStruct   imple
     public $expired_at ;
     public $disabled_at ;
 
+    public $is_default ;
+
     // TODO ------- start duplicated code, find a way to remove duplication
     /**
      * Returns the decoded access token.
@@ -41,12 +43,14 @@ class ConnectedServiceStruct extends \DataAccess_AbstractDaoSilentStruct   imple
         });
     }
 
-    /**
-     *
-     */
     public function setEncryptedAccessToken($token) {
         $oauthTokenEncryption = OauthTokenEncryption::getInstance();
         $this->oauth_access_token = $oauthTokenEncryption->encrypt( $token );
+    }
+
+    public function changeAccessTokenToDecrypted() {
+        $oauthTokenEncryption = OauthTokenEncryption::getInstance();
+        $this->oauth_access_token = $oauthTokenEncryption->decrypt( $this->oauth_access_token ) ;
     }
 
     /**

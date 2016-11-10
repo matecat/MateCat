@@ -352,7 +352,7 @@ abstract class DataAccess_AbstractDao {
             }
         }
 
-        $sql = "INSERT INTO " . static::$TABLE . "(" .
+        $sql = "INSERT INTO " . static::TABLE . "(" .
                 implode(', ', $first ) . ") VALUES (" .
                 implode(', ', $second) . ");" ;
 

@@ -13,4 +13,4 @@ $klein->respond('GET', '/utils/pee', function() {
     $instance->finalize();
 });
 
-
+route( '/api/app/user', 'GET', 'API\App\UserInfoController', 'show' );

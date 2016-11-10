@@ -24,6 +24,8 @@ class AddConnectedServices extends AbstractMatecatMigration
         `expired_at` timestamp,
         `disabled_at` timestamp,
         
+        `is_default` tinyint(4) NOT NULL DEFAULT 0,
+
         PRIMARY KEY ( `id` ),
         UNIQUE KEY `uid_email_service` ( `uid`, `email`, `service` ) USING BTREE
 

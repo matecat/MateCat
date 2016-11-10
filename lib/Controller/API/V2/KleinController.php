@@ -30,7 +30,9 @@ abstract class KleinController {
     }
 
     public function respond($method) {
-        $this->$method() ;
+        if ( !$this->response->isLocked() ) {
+            $this->$method() ;
+        }
     }
 
     abstract protected function afterConstruct() ;

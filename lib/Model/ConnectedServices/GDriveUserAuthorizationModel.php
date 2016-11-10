@@ -61,6 +61,7 @@ class GDriveUserAuthorizationModel {
             'email' => $this->user_email,
             'name' => $this->user_name,
             'service' => ConnectedServiceDao::GDRIVE_SERVICE,
+            'is_default' => 1,
             'created_at' => Utils::mysqlTimestamp( time() )
         ));
         $service->setEncryptedAccessToken( $this->token ) ;
