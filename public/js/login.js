@@ -16,29 +16,53 @@ $.extend(APP, {
                         window.location.reload();
                     }
                 }
-            })
+            });
         });
 
         $('.user-menu-preferences').on('click', function () {
-            APP.ModalWindow.showModalComponent(PreferencesModal, 'Preferences');
+            APP.ModalWindow.showModalComponent(PreferencesModal, {}, 'Preferences');
 
-            // var style = {
-            //     'width': '80%',
-            //     'maxWidth': '800px',
-            //     'minWidth': '600px'
-            // };
-            // UI.ModalWindow.showModalComponent(LoginModal, 'Login or register', style);
+
         });
 
         $('#modal').on('openresetpassword', function () {
-            APP.ModalWindow.showModalComponent(ResetPasswordModal, "Reset Password");
+            APP.ModalWindow.showModalComponent(ResetPasswordModal, {}, "Reset Password");
         });
         $('#modal').on('openforgotpassword', function () {
-            APP.ModalWindow.showModalComponent(ForgotPasswordModal, "Forgot Password");
+            APP.ModalWindow.showModalComponent(ForgotPasswordModal, {}, "Forgot Password");
         });
         $('#modal').on('openregister', function () {
-            APP.ModalWindow.showModalComponent(RegisterModal, "Register Now");
+            var props = {
+                googleUrl: $('#sign-in').data('oauth')
+            };
+            APP.ModalWindow.showModalComponent(RegisterModal, props, "Register Now");
         });
+        $('#modal').on('openlogin', function () {
+            var style = {
+                'width': '80%',
+                'maxWidth': '800px',
+                'minWidth': '600px'
+            };
+            var props = {
+                googleUrl: $('#sign-in').data('oauth')
+            };
+            APP.ModalWindow.showModalComponent(LoginModal, props, 'Login or register', style);
+        });
+
+        /// TODO
+        $('a.authLink').click(function(e){
+            e.preventDefault();
+
+            $('#modal').trigger('openlogin');
+        });
+
+        // $('#sign-in').click(function(e){
+        //     e.preventDefault();
+        //     APP.googole_popup($(this).data('oauth'));
+        // });
+        // $( document ).on('click', '.x-popup', function() {
+        //     $( '.login-google' ).hide();
+        // });
 
     }
 });

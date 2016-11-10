@@ -4743,11 +4743,6 @@ span.share-popup-item-email {
     font-size: 16px;
 }
 
-.user-info-form input {
-    margin-top: 5px;
-    width: 100%;
-}
-
 .user-reset-password label {
     float: left;
     font-size: 18px;
@@ -4781,14 +4776,20 @@ a.reset-password.btn-confirm-medium {
 
 .login-container-right {
     width: 60%;
-    border-right: 2px dashed grey;
-    margin-bottom: 20px;
+    padding: 20px 15px;
     display: inline-block;
+    float: left;
+    box-sizing: border-box;
 }
 .login-container-left {
     width: 39%;
     display: inline-block;
+    margin: 20px 0;
+    border-left: 2px dashed grey;
+    box-sizing: border-box;
 }
+
+
 .login-container-right h2,
 .login-container-right p,
 .login-container-right ul {
@@ -4798,14 +4799,70 @@ a.reset-password.btn-confirm-medium {
 .login-container-right ul {
     margin-left: 30px;
     list-style: circle;
+    margin-top: 25px;
 }
 
 .login-container-right .register-button {
-    margin-top: 43px;
+    margin-top: 30px;
 }
 
 .forgot-password {
     cursor: pointer;
+}
+
+.login-container-left input,
+.register-form-container input[type=text],
+.forgot-password-modal input,
+.reset-password-modal input,
+.user-info-form input {
+    margin: 10px 0;
+    height: 25px;
+    width: 170px;
+    padding-left: 5px;
+}
+
+.user-info-form input {
+    margin-top: 5px;
+    width: 100%;
+}
+
+.login-container-right li {
+    margin-bottom: 15px;
+}
+
+.google-login-button,
+.login-button,
+.register-button,
+.register-submit,
+.send-password-button,
+.reset-password-button {
+    width: 160px;
+    margin-left: 0px;
+}
+
+.login-form-container,
+.register-form-container {
+    border-top: 1px solid black;
+    width: 225px;
+    margin: 0 auto;
+    padding-top: 10px;
+}
+.forgot-password-modal,
+.reset-password-modal {
+    width: 300px;
+    margin: 10px auto;
+}
+
+.forgot-password-modal input,
+.reset-password-modal input {
+    width: 300px;
+}
+
+.register-form-container {
+    width: 350px;
+}
+.register-modal .google-login-button {
+    margin-bottom: 0;
 }
 /***********************/
 

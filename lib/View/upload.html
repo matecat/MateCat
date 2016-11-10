@@ -940,17 +940,7 @@
 
             </ul>
 
-            <tal:block tal:condition="php: empty(logged_user)">
-                <div id='welcomebox'>
-                    <span>Anonymous</span> (<a id='loginlink' class="authLink" href="${authURL}">login</a>)
-                </div>
-            </tal:block>
-
-            <tal:block tal:condition="php: !empty(logged_user)">
-                <div id='welcomebox' tal:attributes="title extended_user">
-                    <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)
-                </div>
-            </tal:block>
+            <div metal:use-macro="common.html/login_includes" />
 
         </nav>
 

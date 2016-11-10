@@ -7,7 +7,8 @@ class ModalWindowComponent extends React.Component {
         super(props);
         this.state = {
             isShowingModal: false,
-            children: '',
+            component: '',
+            compProps: {},
             title: '',
             styleContainer:''
         };
@@ -18,15 +19,17 @@ class ModalWindowComponent extends React.Component {
         this.setState({
             isShowingModal: false,
             component: '',
+            compProps: {},
             title: '',
             styleContainer:''
         });
     }
 
-    showModalComponent(component, title, style) {
+    showModalComponent(component, props, title, style) {
         this.setState({
             isShowingModal: true,
             component: component,
+            compProps: props,
             title: title,
             styleContainer: style
         });
@@ -56,7 +59,7 @@ class ModalWindowComponent extends React.Component {
             this.state.isShowingModal &&
             <ModalContainerComponent onClose={this.onCloseModal.bind(this)}
                                      title={this.state.title} styleContainer={this.state.styleContainer}>
-                <this.state.component/>
+                <this.state.component {...this.state.compProps}/>
             </ModalContainerComponent>
         }
         </div>;

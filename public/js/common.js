@@ -80,14 +80,7 @@ APP = {
             content: content
         } );
     },
-    googole_popup: function ( url ) {
-        //var rid=$('#rid').text();
-        //url=url+'&rid='+rid;
-        var newWindow = window.open( url, 'name', 'height=600,width=900' );
-        if ( window.focus ) {
-            newWindow.focus();
-        }
-    },
+
     confirm: function ( options ) {
         this.waitingConfirm = true;
         this.popup( {
@@ -614,6 +607,10 @@ APP = {
         return caretPos;
     }
 };
+
+$(document).ready(function(){
+    APP.init();
+});
 
 $.extend( $.expr[":"], {
     "containsNC": function ( elem, i, match ) {

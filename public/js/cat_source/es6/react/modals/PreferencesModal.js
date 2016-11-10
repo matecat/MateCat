@@ -14,7 +14,7 @@ class PreferencesModal extends React.Component {
     componentDidMount() {}
 
     render() {
-        return <div>
+        return <div className="preferences-modal">
                     <h1>Preferences</h1>
                     <div className="user-info-form">
                         <label htmlFor="user-login-name">Name</label><br/>

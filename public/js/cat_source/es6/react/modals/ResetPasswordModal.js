@@ -15,9 +15,13 @@ class ResetPasswordModal extends React.Component {
     }
 
     render() {
-        return <div>
-                    <h1>Reset Password</h1>
-                </div>;
+        return <div className="reset-password-modal">
+            <h2>Reset Password</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit</p>
+            <input type="text" name="password" placeholder="New password" /><br/>
+            <input type="text" name="new_password" placeholder="Repeat again" /><br/>
+            <a className="reset-password-button btn-confirm-medium" > Reset </a> <br/>
+        </div>;
     }
 }
 
