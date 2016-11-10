@@ -308,48 +308,48 @@
                                 <li id='logoutlink'>Logout</li>
                             </ul>
 
-                            <div id="login-modal" class="modal-login">
-                                <div class="modal-login-content">
-                                    <div class="modal-login-header">
-                                        <span class="close-login">×</span>
-                                        <h2>Preferences</h2>
-                                    </div>
-                                    <div class="modal-login-body">
-                                        <h1>Preferences</h1>
-                                        <div class="user-info-form">
-                                            <label for="user-login-name">Name</label><br/>
-                                            <input type="text" name="name" id="user-login-name" value="Federico"/><br/>
-                                            <label for="user-login-name">Surname</label><br/>
-                                            <input type="text" name="name" id="user-login-surname" value="Federico"/><br/>
-                                            <label for="user-login-name">Email</label><br/>
-                                            <input type="text" name="name" id="user-login-email" value="Federico"/><br/>
-                                        </div>
-                                        <div class="user-reset-password">
-                                            <label>Reset Password</label>
-                                            <a class="reset-password btn-confirm-medium"> Reset </a>
-                                        </div>
-                                        <div class="user-gdrive">
-                                            <div class="onoffswitch-drive">
-                                                <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="gdrive_check" checked="checked"/>
-                                                <label class="onoffswitch-label" for="gdrive_check">
-                                                    <span class="onoffswitch-inner"></span>
-                                                    <span class="onoffswitch-switch"></span>
-                                                    <span class="onoffswitch-label-status-active">ON</span>
-                                                    <span class="onoffswitch-label-status-inactive">OFF</span>
-                                                    <span class="onoffswitch-label-status-unavailable">Unavailable</span>
-                                                </label>
-                                            </div>
-                                            <label>Connect your Google Drive</label>
-                                        </div>
-                                        <br/>
-                                        <a class="btn-confirm-medium send-user-updates">Update preferences</a>
-                                    </div>
-                                    <div class="modal-login-footer">
+                            <!--<div id="login-modal" class="modal-login">-->
+                                <!--<div class="modal-login-content">-->
+                                    <!--<div class="modal-login-header">-->
+                                        <!--<span class="close-login">×</span>-->
+                                        <!--<h2>Preferences</h2>-->
+                                    <!--</div>-->
+                                    <!--<div class="modal-login-body">-->
+                                        <!--<h1>Preferences</h1>-->
+                                        <!--<div class="user-info-form">-->
+                                            <!--<label for="user-login-name">Name</label><br/>-->
+                                            <!--<input type="text" name="name" id="user-login-name" value="Federico"/><br/>-->
+                                            <!--<label for="user-login-name">Surname</label><br/>-->
+                                            <!--<input type="text" name="name" id="user-login-surname" value="Federico"/><br/>-->
+                                            <!--<label for="user-login-name">Email</label><br/>-->
+                                            <!--<input type="text" name="name" id="user-login-email" value="Federico"/><br/>-->
+                                        <!--</div>-->
+                                        <!--<div class="user-reset-password">-->
+                                            <!--<label>Reset Password</label>-->
+                                            <!--<a class="reset-password btn-confirm-medium"> Reset </a>-->
+                                        <!--</div>-->
+                                        <!--<div class="user-gdrive">-->
+                                            <!--<div class="onoffswitch-drive">-->
+                                                <!--<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="gdrive_check" checked="checked"/>-->
+                                                <!--<label class="onoffswitch-label" for="gdrive_check">-->
+                                                    <!--<span class="onoffswitch-inner"></span>-->
+                                                    <!--<span class="onoffswitch-switch"></span>-->
+                                                    <!--<span class="onoffswitch-label-status-active">ON</span>-->
+                                                    <!--<span class="onoffswitch-label-status-inactive">OFF</span>-->
+                                                    <!--<span class="onoffswitch-label-status-unavailable">Unavailable</span>-->
+                                                <!--</label>-->
+                                            <!--</div>-->
+                                            <!--<label>Connect your Google Drive</label>-->
+                                        <!--</div>-->
+                                        <!--<br/>-->
+                                        <!--<a class="btn-confirm-medium send-user-updates">Update preferences</a>-->
+                                    <!--</div>-->
+                                    <!--<div class="modal-login-footer">-->
 
-                                    </div>
-                                </div>
+                                    <!--</div>-->
+                                <!--</div>-->
 
-                            </div>
+                            <!--</div>-->
                         </div>
                     </tal:block>
 
@@ -409,6 +409,7 @@
             <p>Howto layer to show a basic tutorial of the cattool when the first-time user open it.</p>
             <form action=""><input id="hideTutorial" type="checkbox" value="" />Do not display again </form>
         </div>
+        <div id="modal" style="z-index: 999999999"></div>
 		<script type="text/javascript">
 		$( ".open-popup-tmx" ).click(function() {
   $( this ).hide();

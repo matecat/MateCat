@@ -190,6 +190,7 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/ui.offline.js',
                     basePath + 'cat_source/ui.split.js',
                     basePath + 'cat_source/ui.opensegment.js',
+                    basePath + 'cat_source/ui.login.js',
 
                     basePath + 'cat_source/sse.js',
                     basePath + 'cat_source/db.js',
@@ -210,8 +211,7 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/speech2text.js',
 
                     basePath + 'tm.js',
-                    basePath + 'advancedOptionsTab.js',
-                    basePath + 'logout.js'
+                    basePath + 'advancedOptionsTab.js'
                 ],
                 dest: buildPath + 'app.js'
             },

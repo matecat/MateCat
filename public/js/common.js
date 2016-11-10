@@ -564,7 +564,7 @@ APP = {
      */
 
     addNotification: function (notification) {
-        if (!APP. notificationBox) {
+        if (!APP.notificationBox) {
             APP.notificationBox = ReactDOM.render(
                 React.createElement(NotificationBox),
                 $(".notifications-wrapper")[0]
