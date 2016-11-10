@@ -37,7 +37,7 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
      * @return \ConnectedServices\ConnectedServiceStruct[]
      *
      */
-    public function findServiceByUserAndName( \Users_UserStruct $user, $name ) {
+    public function findServicesByUserAndName( \Users_UserStruct $user, $name ) {
         $conn = $this->con->getConnection() ;
 
         $stmt = $conn->prepare(
@@ -52,6 +52,29 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
 
         return $stmt->fetchAll();
     }
+
+    /**
+     * @param \Users_UserStruct $user
+     * @param $name
+     * @return ConnectedServiceStruct
+     */
+
+    public function findDefaultServiceByUserAndName( \Users_UserStruct $user, $name ) {
+        $conn = $this->con->getConnection() ;
+
+        $stmt = $conn->prepare(
+            "SELECT * FROM connected_services WHERE " .
+            " uid = :uid AND service = :service AND is_default LIMIT 1"
+        );
+
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'ConnectedServices\ConnectedServiceStruct' );
+        $stmt->execute(
+            array( 'uid' => $user->uid, 'service' => $name )
+        );
+
+        return $stmt->fetch();
+    }
+
 
     /**
      * @param \Users_UserStruct $user

@@ -49,7 +49,7 @@ class ConnectedService {
             'created_at' => Utils::api_timestamp( $item->created_at ),
             'updated_at' => Utils::api_timestamp( $item->expired_at ),
             'disabled_at' => Utils::api_timestamp( $item->disabled_at ),
-            'is_default' => $item->is_default,
+            'is_default' => !!$item->is_default,
         );
     }
 

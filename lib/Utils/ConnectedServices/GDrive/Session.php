@@ -51,13 +51,13 @@ class Session
      */
     public static function getTokenByUser( \Users_UserStruct $user ) {
         $serviceDao = new ConnectedServiceDao() ;
-        $serviceStruct = $serviceDao->findServiceByUserAndName( $user, 'gdrive' ) ;
+        $serviceStruct = $serviceDao->findDefaultServiceByUserAndName( $user, 'gdrive' ) ;
 
         if ( !$serviceStruct ) {
             return null ;
         }
         else {
-            return $serviceStruct->getDecodedOauthAccessToken('access_token');
+            return $serviceStruct->getDecodedOauthAccessToken();
         }
     }
 
