@@ -1,6 +1,6 @@
-$.extend(UI, {
+$.extend(APP, {
     setLoginEvents: function () {
-        UI.ModalWindow = ReactDOM.render(
+        APP.ModalWindow = ReactDOM.render(
             React.createElement(ModalWindow),
             $("#modal")[0]
         );
@@ -20,7 +20,7 @@ $.extend(UI, {
         });
 
         $('.user-menu-preferences').on('click', function () {
-            UI.ModalWindow.showModalComponent(PreferencesModal, 'Preferences');
+            APP.ModalWindow.showModalComponent(PreferencesModal, 'Preferences');
 
             // var style = {
             //     'width': '80%',
@@ -31,13 +31,13 @@ $.extend(UI, {
         });
 
         $('#modal').on('openresetpassword', function () {
-            UI.ModalWindow.showModalComponent(ResetPasswordModal, "Reset Password");
+            APP.ModalWindow.showModalComponent(ResetPasswordModal, "Reset Password");
         });
         $('#modal').on('openforgotpassword', function () {
-            UI.ModalWindow.showModalComponent(ForgotPasswordModal, "Forgot Password");
+            APP.ModalWindow.showModalComponent(ForgotPasswordModal, "Forgot Password");
         });
         $('#modal').on('openregister', function () {
-            UI.ModalWindow.showModalComponent(RegisterModal, "Register Now");
+            APP.ModalWindow.showModalComponent(RegisterModal, "Register Now");
         });
 
     }

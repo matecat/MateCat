@@ -2,6 +2,7 @@ APP = null;
 
 APP = {
     init: function () {
+        this.setLoginEvents();
         this.isCattool = $( 'body' ).hasClass( 'cattool' );
         $( "body" ).on( 'click', '.modal .x-popup', function ( e ) {
             e.preventDefault();

@@ -167,6 +167,7 @@
         <tal:block tal:condition="not:use_compiled_assets" >
             <script src="${basepath}public/js/build/react.js?build=${build_number}"></script>
             <script src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
+            <script src="${basepath}public/js/build/common.js?build=${build_number}"></script>
             <script src="${basepath}public/js/build/app.js?build=${build_number}"></script>
         </tal:block>
 
@@ -409,7 +410,7 @@
             <p>Howto layer to show a basic tutorial of the cattool when the first-time user open it.</p>
             <form action=""><input id="hideTutorial" type="checkbox" value="" />Do not display again </form>
         </div>
-        <div id="modal" style="z-index: 999999999"></div>
+
 		<script type="text/javascript">
 		$( ".open-popup-tmx" ).click(function() {
   $( this ).hide();
