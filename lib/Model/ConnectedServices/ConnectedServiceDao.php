@@ -4,7 +4,11 @@
 namespace ConnectedServices ;
 
 use Database ;
+use Exceptions\ValidationError;
 use PDO ;
+use Utils ;
+
+use ConnectedServices\ConnectedServiceStruct as Struct ;
 
 class ConnectedServiceDao extends \DataAccess_AbstractDao {
 
@@ -13,6 +17,62 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
 
     protected static $primary_keys = array('id');
     protected static $auto_increment_fields = array('id');
+
+    public function findById( $id ) {
+        $conn = $this->con->getConnection() ;
+        $stmt = $conn->prepare(
+            "SELECT * FROM connected_services WHERE id = :id"
+        );
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'ConnectedServices\ConnectedServiceStruct' );
+        $stmt->execute( array( 'id' => $id ) );
+
+        return $stmt->fetch();
+    }
+
+    public function updateOauthToken( $token, ConnectedServiceStruct $service ) {
+        $service->updated_at = Utils::mysqlTimestamp( time() );
+        $service->setEncryptedAccessToken( $token ) ;
+
+        return $this->updateStruct( $service, array('fields' => array('oauth_access_token', 'updated_at')));
+    }
+
+    /**
+     * Sets the default ConnectedService
+     */
+    public function setDefaultService( ConnectedServiceStruct $service ) {
+        if ( empty( $service->uid) || empty( $service->service ) ) {
+            throw  new ValidationError('Service is not valid for update') ;
+        }
+
+        $conn = $this->con->getConnection() ;
+
+        $stmt = $conn->prepare(
+            "UPDATE connected_services SET is_default = 0 WHERE uid = :uid AND service = :service"
+        );
+        $stmt->execute( array( 'uid' => $service->uid, 'service' => $service->service ) );
+
+        $stmt = $conn->prepare(
+            "UPDATE connected_services SET is_default = 1 WHERE uid = :uid AND service = :service AND id = :id"
+        );
+        $stmt->execute( array( 'uid' => $service->uid, 'service' => $service->service, 'id' => $service->id ));
+    }
+
+    public function findServiceByUserAndId( \Users_UserStruct $user, $id_service ) {
+        $conn = $this->con->getConnection() ;
+
+        $stmt = $conn->prepare(
+            "SELECT * FROM connected_services WHERE " .
+            " uid = :uid AND id = :id "
+        );
+
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'ConnectedServices\ConnectedServiceStruct' );
+        $stmt->execute(
+            array( 'uid' => $user->uid, 'id' => $id_service )
+        );
+
+        return $stmt->fetch();
+
+    }
 
     public function findServicesByUser(\Users_UserStruct $user ) {
         $conn = $this->con->getConnection() ;

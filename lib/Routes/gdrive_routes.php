@@ -27,7 +27,3 @@ route(
     '/gdrive/delete/[:fileId]', 'GET',
     'ConnectedServices\GDrive\GDriveController', 'deleteImportedFile'
 );
-route(
-    '/gdrive/verify', 'GET',
-    'ConnectedServices\GDrive\GDriveController', 'isGDriveAccessible'
-);

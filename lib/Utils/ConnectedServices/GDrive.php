@@ -46,5 +46,26 @@ class GDrive {
         return $client ;
     }
 
+    /**
+     * This function returns a new token if the previous is expired.
+     * If not expired false is returned.
+     *
+     * @param $raw_token
+     * @return mixed
+     */
+    public static function getsNewToken( $raw_token ) {
+        $client = self::getClient() ;
+        $client->setAccessToken( $raw_token ) ;
+
+        if ( $client->isAccessTokenExpired() ) {
+            $client->refreshToken( $raw_token );
+
+            return $client->getAccessToken();
+        }
+        else {
+            return false;
+        }
+    }
+
 
 }

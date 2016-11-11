@@ -241,6 +241,7 @@ module.exports = function(grunt) {
 
             common: {
                 src: [
+                    basePath + 'lib/sprintf.min.js',
                     basePath + 'common.js',
                     basePath + 'login.js'
                 ],

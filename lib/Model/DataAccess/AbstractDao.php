@@ -466,8 +466,20 @@ abstract class DataAccess_AbstractDao {
         return $stmt->execute( $data );
     }
 
+    /**
+     * Inserts a struct into database.
+     *
+     * If an `auto_increment_field` is defined for the table, the last inserted is returned.
+     * Otherwise it returns TRUE on success.
+     *
+     * Returns FALSE on failure.
+     *
+     * @param DataAccess_IDaoStruct $struct
+     * @param array $options
+     * @return bool|string
+     */
     public static function insertStruct( DataAccess_IDaoStruct $struct, $options=array() ) {
-        // TODO: allow the mast to be passed as option.
+        // TODO: allow the mask to be passed as option.
         $mask = array_keys( $struct->toArray() );
         $mask = array_diff($mask, static::$auto_increment_fields) ;
 
@@ -476,10 +488,20 @@ abstract class DataAccess_AbstractDao {
         $stmt = $conn->prepare( $sql );
         $data = $struct->toArray( $mask ) ;
 
-        \Log::doLog("SQL", $sql);
-        \Log::doLog("data", $data );
+        \Log::doLog("insert SQL :", $sql);
+        \Log::doLog("insert data :", $data );
 
-        return $stmt->execute( $data )  ;
+        if ( $stmt->execute( $data ) ) {
+            if ( count( static::$auto_increment_fields ) ) {
+                return $conn->lastInsertId() ;
+            }
+            else {
+                return true;
+            }
+        }
+        else {
+            return false;
+        }
     }
 
 }

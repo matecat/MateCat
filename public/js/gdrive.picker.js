@@ -75,17 +75,28 @@ var gdrive = new GDrive() ;
         }
     }
 
+    function tryToRefreshToken( service ) {
+        return $.get( sprintf( '/api/app/connected_services/%s/verify', service.id ) );
+    }
+
     $(document).on('click', '.load-gdrive', function() {
 
         // is this enough to know if the user is logged in?
         if ( APP.STORE.USER.user ) {
-            if ( ! ( gdrive.pickerApiLoaded && gdrive.authApiLoaded ) ) return ;
-
            var default_service = getDefaultService();
 
            if ( default_service ) {
-               // open the picker with
-               gdrive.createPicker( default_service ) ;
+               if ( ! ( gdrive.pickerApiLoaded && gdrive.authApiLoaded ) ) return ;
+               // check if the token expired and try to refresh
+
+               tryToRefreshToken( default_service )
+               .done( function( data ) {
+                   console.log( data ) ;
+                   gdrive.createPicker( default_service ) ;
+               }).fail( function() {
+                   console.debug( arguments );
+               });
+
            }
            else {
                $('#modal').trigger('openpreferences');

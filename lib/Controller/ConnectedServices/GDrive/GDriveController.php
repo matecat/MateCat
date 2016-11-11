@@ -443,9 +443,9 @@ class GDriveController extends KleinController {
         $this->response->redirect( '/login' );
     }
 
-    public function isGDriveAccessible() {
-        $message = "";
-        $success = false;
+    public function verifyToken() {
+
+        $id_service = $this->request->param('id_service');
 
         try {
             $session = new Session( $_SESSION ) ;

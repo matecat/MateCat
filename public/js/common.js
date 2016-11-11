@@ -639,7 +639,7 @@ var _prum = [['id',
 APP.STORE = {} ;
 APP.STORE.USER = {} ;
 
-(function(APP, $, mundefined) {
+(function(APP, $, undefined) {
 
     var loadUserData = function() {
         $.get('/api/app/user').done(function( data ) {
