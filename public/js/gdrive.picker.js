@@ -76,20 +76,25 @@ var gdrive = new GDrive() ;
     }
 
     $(document).on('click', '.load-gdrive', function() {
+
         // is this enough to know if the user is logged in?
         if ( APP.STORE.USER.user ) {
+            if ( ! ( gdrive.pickerApiLoaded && gdrive.authApiLoaded ) ) return ;
+
            var default_service = getDefaultService();
 
            if ( default_service ) {
-               if ( ! ( gdrive.pickerApiLoaded && gdrive.authApiLoaded ) ) return ;
                // open the picker with
                gdrive.createPicker( default_service ) ;
            }
            else {
+               $('#modal').trigger('openpreferences');
                // TODO: open preferences panel to link a gdrive account
            }
 
        } else {
+            $('#modal').trigger('openlogin');
+
            // TODO: show signup form
        }
     });

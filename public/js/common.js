@@ -3,6 +3,7 @@ APP = null;
 APP = {
     init: function () {
         this.setLoginEvents();
+
         this.isCattool = $( 'body' ).hasClass( 'cattool' );
         $( "body" ).on( 'click', '.modal .x-popup', function ( e ) {
             e.preventDefault();
@@ -643,28 +644,16 @@ APP.STORE.USER = {} ;
     var loadUserData = function() {
         $.get('/api/app/user').done(function( data ) {
             APP.STORE.USER = data ;
-
         });
     }
-
-    $(document).on('change', '#gdrive_check', function(e) {
-        var popup = APP.googole_popup( config.gdriveAuthURL );
-        var interval = setInterval( function() {
-            console.log('interval...');
-
-            if ( popup.closed ) {
-                loadUserData();
-                clearInterval( interval ) ;
-            }
-        }, 600 );
-    });
 
     $(document).ready( loadUserData ) ;
 
     $.extend( APP, {
         notifyStoreChanged : function() {
 
-        }
+        },
+        loadUserData : loadUserData
     });
 
 })( APP, jQuery );

@@ -25,6 +25,9 @@ $.extend(APP, {
 
         });
 
+        $('#modal').on('openpreferences', function () {
+            APP.ModalWindow.showModalComponent(PreferencesModal, {}, 'Preferences');
+        });
         $('#modal').on('openresetpassword', function () {
             APP.ModalWindow.showModalComponent(ResetPasswordModal, {}, "Reset Password");
         });

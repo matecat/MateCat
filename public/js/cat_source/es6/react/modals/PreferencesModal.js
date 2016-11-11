@@ -13,6 +13,21 @@ class PreferencesModal extends React.Component {
 
     componentDidMount() {}
 
+    checkboxChange() {
+        var url = config.gdriveAuthURL ;
+        var newWindow = window.open( url, 'name', 'height=600,width=900' );
+
+        if ( window.focus ) {
+            newWindow.focus();
+        }
+        var interval = setInterval( function() {
+            if ( newWindow.closed ) {
+                APP.loadUserData();
+                clearInterval( interval ) ;
+            }
+        }, 600 );
+    }
+
     render() {
         return <div className="preferences-modal">
                     <h1>Preferences</h1>
@@ -30,7 +45,7 @@ class PreferencesModal extends React.Component {
                     </div>
                     <div className="user-gdrive">
                         <div className="onoffswitch-drive">
-                            <input type="checkbox" name="onoffswitch" className="onoffswitch-checkbox" id="gdrive_check"/>
+                            <input type="checkbox" name="onoffswitch" onChange={this.checkboxChange} className="onoffswitch-checkbox" id="gdrive_check"/>
                             <label className="onoffswitch-label" htmlFor="gdrive_check">
                                 <span className="onoffswitch-inner"/>
                                 <span className="onoffswitch-switch"/>
