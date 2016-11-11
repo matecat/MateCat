@@ -21,12 +21,13 @@ $.extend(APP, {
 
         $('.user-menu-preferences').on('click', function () {
             APP.ModalWindow.showModalComponent(PreferencesModal, {}, 'Preferences');
-
-
         });
 
-        $('#modal').on('openpreferences', function () {
-            APP.ModalWindow.showModalComponent(PreferencesModal, {}, 'Preferences');
+        $('#modal').on('openpreferences', function (e, param) {
+            var props = {};
+            if (param)
+                props = param;
+            APP.ModalWindow.showModalComponent(PreferencesModal, param, 'Preferences');
         });
         $('#modal').on('openresetpassword', function () {
             APP.ModalWindow.showModalComponent(ResetPasswordModal, {}, "Reset Password");
