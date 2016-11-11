@@ -1,6 +1,5 @@
 
 $(document).ready(function(){
-    APP.init();
 
     //set 
     if (!$('#source-lang option.custom').length) {
@@ -93,19 +92,6 @@ $(document).ready(function(){
             $(this).removeClass('on').find('input').removeAttr('checked');
         });
     });
-
-    $( 'a.authLink' ).click(function(e){
-        e.preventDefault();
-
-        $(".login-google").show();
-
-        return false;
-    });
-
-    $('#sign-in').click(function(e){
-        e.preventDefault();
-        APP.googole_popup($(this).data('oauth'));
-    })
 
     $('#dqf_key').on('paste', function(e){
         UI.checkDQFKey();

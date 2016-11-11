@@ -92,7 +92,6 @@ $.extend(UI, {
 	},
 	setEvents: function() {
 		this.bindShortcuts();
-
         var resetTextArea = _.debounce( function () {
             console.debug( 'resetting') ;
             var $this = $(this);
@@ -405,22 +404,7 @@ $.extend(UI, {
 				UI.writeNewShortcut(c, s, this);
 			}
 			$(s).remove();
-		} ).on('click', '.authLink', function(e){
-            e.preventDefault();
-
-            $(".login-google").show();
-
-            return false;
-        } ).on('click', '#sign-in', function(e){
-            e.preventDefault();
-
-            var url = $(this).data('oauth');
-
-            var newWindow = window.open(url, 'name', 'height=600,width=900');
-            if (window.focus) {
-                newWindow.focus();
-            }
-        });
+		} );
 
 		$(window).on('scroll', function() {
 			UI.browserScrollPositionRestoreCorrection();

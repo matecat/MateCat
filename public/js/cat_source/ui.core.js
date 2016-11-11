@@ -3501,8 +3501,7 @@ UI = {
         UI.lexiqaData.lexiqaFetching = false;
         UI.lexiqaData.segments = [];
         UI.lexiqaData.segmentsInfo = {}; 
-        
-        APP.init();
+
         // If some icon is added on the top header menu, the file name is resized
         APP.addDomObserver($('.header-menu')[0], function() {
             APP.fitText($('.breadcrumbs'), $('#pname'), 30);

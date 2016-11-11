@@ -21,5 +21,27 @@
     <tal:block  tal:repeat="js_source footer_js">
         <script type="text/javascript" tal:attributes="src js_source"></script>
     </tal:block>
+    <div id="modal" style="z-index: 999999999"></div>
+</div>
 
+
+
+<div metal:define-macro="login_includes" style="float: right">
+    <tal:block tal:condition="php: empty(logged_user)">
+        <div id='welcomebox'>
+            <span>Anonymous</span> (<a id='loginlink' class="authLink" href="${authURL}">Login</a>)
+        </div>
+    </tal:block>
+
+    <tal:block tal:condition="php: !empty(logged_user)">
+        <div id='welcomebox' tal:attributes="title extended_user">
+            <span tal:content='extended_user'></span>
+            <span class="icon-sort-up"></span>
+            <!--(<a id='logoutlink' href='#'>Logout</a>)-->
+            <ul class="user-menu">
+                <li class="user-menu-preferences">Preferences</li>
+                <li id='logoutlink'>Logout</li>
+            </ul>
+        </div>
+    </tal:block>
 </div>

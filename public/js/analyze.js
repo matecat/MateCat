@@ -832,7 +832,6 @@ function precomputeOutsourceQuotes( elementsToAskQuoteFor ) {
 }
 
 $(document).ready(function() {
-	APP.init();
 	if (config.showModalBoxLogin == 1) {
 	    $('#popupWrapper').fadeToggle();
 	}

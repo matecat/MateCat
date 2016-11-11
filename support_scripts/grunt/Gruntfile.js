@@ -164,7 +164,6 @@ module.exports = function(grunt) {
                     },
                 },
                 src: [
-                    basePath + 'common.js',
                     basePath + 'build/templates.js',
                     basePath + 'cat_source/ui.core.js',
                     basePath + 'cat_source/ui.segment.js',
@@ -190,6 +189,7 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/ui.offline.js',
                     basePath + 'cat_source/ui.split.js',
                     basePath + 'cat_source/ui.opensegment.js',
+                    basePath + 'cat_source/ui.login.js',
 
                     basePath + 'cat_source/sse.js',
                     basePath + 'cat_source/db.js',
@@ -210,8 +210,7 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/speech2text.js',
 
                     basePath + 'tm.js',
-                    basePath + 'advancedOptionsTab.js',
-                    basePath + 'logout.js'
+                    basePath + 'advancedOptionsTab.js'
                 ],
                 dest: buildPath + 'app.js'
             },
@@ -238,6 +237,14 @@ module.exports = function(grunt) {
 					basePath + 'lib/jquery.powertip.min.js'
                 ],
                 dest: buildPath + 'libs.js'
+            },
+
+            common: {
+                src: [
+                    basePath + 'common.js',
+                    basePath + 'login.js'
+                ],
+                dest: buildPath + 'common.js'
             }
 
         },
@@ -389,6 +396,7 @@ module.exports = function(grunt) {
         'browserify:components',
         'concat:libs',
         'concat:app',
+        'concat:common',
         'replace:version'
     ]);
 
@@ -415,6 +423,7 @@ module.exports = function(grunt) {
     grunt.registerTask('concat:js', [
         'handlebars',
         'concat:app',
+        'concat:common',
         'replace:version'
     ]);
 
