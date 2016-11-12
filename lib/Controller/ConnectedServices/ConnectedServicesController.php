@@ -41,15 +41,13 @@ class ConnectedServicesController extends KleinController {
     }
 
     private function __handleGDrive() {
-        $newToken = GDrive::getsNewToken( $this->service->getDecryptedOauthAccessToken() );
-        if ( $newToken ) {
-            $dao = new ConnectedServiceDao();
-            $dao->updateOauthToken( $newToken, $this->service ) ;
+        $verifier = new GDriveTokenVerifyModel( $this->service ) ;
+        if ( $verifier->validOrRefreshed() ) {
+            $this->response->code( 200 ) ;
         }
         else {
-            // token is still valid
+            $this->response->code( 403 ) ;
         }
-        $this->response->code(200);
     }
 
     private function __validateOwnership() {

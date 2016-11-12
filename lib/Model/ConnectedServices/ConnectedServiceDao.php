@@ -36,6 +36,11 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
         return $this->updateStruct( $service, array('fields' => array('oauth_access_token', 'updated_at')));
     }
 
+    public function setServiceExpired( $time, ConnectedServiceStruct $service ) {
+        $service->expired_at = Utils::mysqlTimestamp( $time );
+        return $this->updateStruct( $service, array('fields' => array('expired_at')));
+    }
+
     /**
      * Sets the default ConnectedService
      */
@@ -74,6 +79,10 @@ class ConnectedServiceDao extends \DataAccess_AbstractDao {
 
     }
 
+    /**
+     * @param \Users_UserStruct $user
+     * @return ConnectedServiceStruct[]
+     */
     public function findServicesByUser(\Users_UserStruct $user ) {
         $conn = $this->con->getConnection() ;
 

@@ -94,6 +94,7 @@ var gdrive = new GDrive() ;
                    console.log( data ) ;
                    gdrive.createPicker( default_service ) ;
                }).fail( function() {
+                   $('#modal').trigger('openpreferences');
                    console.debug( arguments );
                });
 

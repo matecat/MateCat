@@ -37,15 +37,13 @@ class ConnectedService {
          * @var $item ConnectedServiceStruct
          */
 
-        $item->changeAccessTokenToDecrypted();
-
         return array(
             'id' => $item->id,
             'uid' => $item->uid,
             'service' => $item->service,
             'email' => $item->email,
             'name' => $item->name,
-            'oauth_access_token' => $item->oauth_access_token,
+            'oauth_access_token' => $item->getDecryptedOauthAccessToken(),
             'created_at' => Utils::api_timestamp( $item->created_at ),
             'updated_at' => Utils::api_timestamp( $item->expired_at ),
             'disabled_at' => Utils::api_timestamp( $item->disabled_at ),
