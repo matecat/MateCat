@@ -217,7 +217,6 @@ module.exports = function(grunt) {
 
             libs: {
                 src: [
-                    basePath + 'lib/lodash.min.js',
                     basePath + 'lib/handlebars.runtime-v4.0.5.js',
                     basePath + 'lib/jquery-1.11.0.min.js',
                     basePath + 'lib/waypoints.min.js',
@@ -240,8 +239,11 @@ module.exports = function(grunt) {
 
             common: {
                 src: [
+                    basePath + 'lib/lodash.min.js',
                     basePath + 'lib/sprintf.min.js',
                     basePath + 'common.js',
+
+                    basePath + 'user_store.js',
                     basePath + 'login.js'
                 ],
                 dest: buildPath + 'common.js'
