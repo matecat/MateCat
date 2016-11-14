@@ -94,8 +94,9 @@ class GDriveUserAuthorizationModel {
         $this->token = $gdriveClient->getAccessToken();
 
         if ( is_array( $this->token ) ) {
-            // Enforce token to be passed passed around as json_string, to favour encryption and storage
-            $this->token = json_encode( $this->token ) ;
+            // Enforce token to be passed passed around as json_string, to favour encryption and storage.
+            // Prevent slash escape, see: http://stackoverflow.com/a/14419483/1297909
+            $this->token = GDrive::accessTokenToJsonString( $this->token ) ;
         }
 
         $infoService = new Google_Service_Oauth2($gdriveClient);

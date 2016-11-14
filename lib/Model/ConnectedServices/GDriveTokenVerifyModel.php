@@ -39,7 +39,11 @@ class GDriveTokenVerifyModel {
             }
         }
 
-        $this->__updateToken($newToken);
+
+        if ( $newToken ) {
+            $this->__updateToken($newToken);
+        }
+
         return true;
     }
 
@@ -51,11 +55,9 @@ class GDriveTokenVerifyModel {
     }
 
     private function __updateToken($newToken) {
-        if ( $newToken ) {
-            $dao = new ConnectedServiceDao();
-            $dao->updateOauthToken( $newToken, $this->service ) ;
+        $dao = new ConnectedServiceDao();
+        $dao->updateOauthToken( $newToken, $this->service ) ;
 
-            $this->refreshed = true ;
-        }
+        $this->refreshed = true ;
     }
 }
