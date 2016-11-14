@@ -21,6 +21,7 @@ Features::loadRoutes( $klein );
 
 $klein->onError(function (\Klein\Klein $klein, $err_msg, $err_type, Exception $exception) {
     // TODO: still need to catch fatal errors here with 500 code
+    $klein->response()->noCache();
 
     switch( $err_type ) {
         case 'API\V2\AuthenticationError':

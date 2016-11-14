@@ -43,14 +43,12 @@ class ConnectedServiceStruct extends \DataAccess_AbstractDaoSilentStruct   imple
         });
     }
 
+    /**
+     * @param $token
+     */
     public function setEncryptedAccessToken($token) {
         $oauthTokenEncryption = OauthTokenEncryption::getInstance();
         $this->oauth_access_token = $oauthTokenEncryption->encrypt( $token );
-    }
-
-    public function changeAccessTokenToDecrypted() {
-        $oauthTokenEncryption = OauthTokenEncryption::getInstance();
-        $this->oauth_access_token = $oauthTokenEncryption->decrypt( $this->oauth_access_token ) ;
     }
 
     /**
@@ -72,6 +70,5 @@ class ConnectedServiceStruct extends \DataAccess_AbstractDaoSilentStruct   imple
 
         return $decoded  ;
     }
-
 
 }

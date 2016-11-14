@@ -42,10 +42,10 @@ class Bootstrap {
             INIT::$HTTPHOST = INIT::$PROTOCOL . "://" . $_SERVER[ 'HTTP_HOST' ];
 
         } else {
-            if ( INIT::$DEBUG ) {
-//                echo "\nDebug: PHP Running in CLI mode.\n\n";
-            }
-            //Possible CLI configurations. We definitely don't want sessions in our cron scripts
+            // Possible CLI configurations. We definitely don't want sessions in our cron scripts
+            //
+            // Read HTTPHOST from config.ini
+            INIT::$HTTPHOST ;
         }
 
         INIT::$OAUTH_CONFIG = $OAUTH_CONFIG[ 'OAUTH_CONFIG' ];

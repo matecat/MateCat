@@ -13,34 +13,21 @@ $db->connect();
 
 function usage() {
     echo "Usage: \n
---email foo@example.org       The email address of the user\n";
-
+--id_service 42      The if the token to refresh \n";
     exit;
 }
 
-$options = getopt( 'h', array( 'email:'));
+$options = getopt( 'h', array( 'id_service:'));
 
 if (array_key_exists('h', $options))          usage() ;
 if (empty($options))                          usage() ;
-if (!array_key_exists('email', $options))     usage() ;
-
-$dao = new Users_UserDao( Database::obtain() ) ;
-$user = $dao->getByEmail( $options['email'] ) ;
-
-$oauthTokenEncryption = OauthTokenEncryption::getInstance();
-$accessToken = $oauthTokenEncryption->decrypt( $user->oauth_access_token );
+if (!array_key_exists('id_service', $options))     usage() ;
 
 
+$dao = new \ConnectedServices\ConnectedServiceDao() ;
+$service = $dao->findById( $options['id_service'] ) ;
 
-$service = ConnectedServices\GDrive::getService( ['uid' => $user->uid ] );
+$verifier = new \ConnectedServices\GDriveTokenVerifyModel($service) ;
+$verifier->validOrRefreshed() ;
+var_dump( $verifier ) ;
 
-if ( $service === NULL ) {
-
-    die('Service is null');
-}
-
-$about = $service->about->get();
-
-echo var_export( $about , true );
-
-echo "\n" ;

@@ -14,3 +14,8 @@ $klein->respond('GET', '/utils/pee', function() {
 });
 
 route( '/api/app/user', 'GET', 'API\App\UserInfoController', 'show' );
+
+route(
+    '/api/app/connected_services/[:id_service]/verify', 'GET',
+    'ConnectedServices\ConnectedServicesController', 'verify'
+);

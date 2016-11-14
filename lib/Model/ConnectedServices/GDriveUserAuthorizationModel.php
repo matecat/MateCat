@@ -26,6 +26,17 @@ class GDriveUserAuthorizationModel {
        $this->user = $user ;
     }
 
+    /**
+     * Updates or creates the service record.
+     *
+     * If the record does not exist, it is created.
+     * If the record exists, it is updated.
+     *
+     * In the process, the current service becomes the default.
+     * `is_default` flag from the other ones is removed.
+     *
+     * @param $code
+     */
     public function updateOrCreateRecordByCode( $code ) {
         $this->__collectProperties( $code );
 
@@ -42,16 +53,21 @@ class GDriveUserAuthorizationModel {
             $this->__updateService($service);
         }
         else {
-            $this->__insertService();
+            $service = $this->__insertService();
         }
+
+        $dao->setDefaultService( $service );
     }
 
+    /**
+     * @param ConnectedServiceStruct $service
+     */
     private function __updateService(ConnectedServiceStruct $service ) {
-        $service->setEncryptedAccessToken( $this->token );
-        $service->updated_at = Utils::mysqlTimestamp( time() ) ;
-        $service->disabled_at = null;
 
         $dao = new ConnectedServiceDao() ;
+        $dao->updateOauthToken( $this->token, $service ) ;
+
+        $service->disabled_at = null;
         $dao->updateStruct( $service ) ;
     }
 
@@ -66,14 +82,22 @@ class GDriveUserAuthorizationModel {
         ));
         $service->setEncryptedAccessToken( $this->token ) ;
         $dao = new ConnectedServiceDao();
-        $dao->insertStruct( $service ) ;
 
+        $lastId = $dao->insertStruct( $service ) ;
+
+        return $dao->findById( $lastId ) ;
     }
 
     private function __collectProperties( $code ) {
         $gdriveClient = GDrive::getClient();
         $gdriveClient->authenticate($code);
         $this->token = $gdriveClient->getAccessToken();
+
+        if ( is_array( $this->token ) ) {
+            // Enforce token to be passed passed around as json_string, to favour encryption and storage.
+            // Prevent slash escape, see: http://stackoverflow.com/a/14419483/1297909
+            $this->token = GDrive::accessTokenToJsonString( $this->token ) ;
+        }
 
         $infoService = new Google_Service_Oauth2($gdriveClient);
         $this->userInfo = $infoService->userinfo->get();
