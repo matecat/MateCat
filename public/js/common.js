@@ -633,27 +633,3 @@ var _prum = [['id',
 })();
 
 
-// ---------------------------------------------------
-// Functions related to login and connected services ( GDrive etc. )
-
-APP.STORE = {} ;
-APP.STORE.USER = {} ;
-
-(function(APP, $, undefined) {
-
-    var loadUserData = function() {
-        $.get('/api/app/user').done(function( data ) {
-            APP.STORE.USER = data ;
-        });
-    }
-
-    $(document).ready( loadUserData ) ;
-
-    $.extend( APP, {
-        notifyStoreChanged : function() {
-
-        },
-        loadUserData : loadUserData
-    });
-
-})( APP, jQuery );

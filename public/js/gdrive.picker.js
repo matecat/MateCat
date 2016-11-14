@@ -63,52 +63,51 @@ var gdrive = new GDrive() ;
 (function( $, gdrive, undefined) {
     var default_service;
 
-    function getDefaultService() {
-        if ( APP.STORE.USER.connected_services.length ) {
-            var selectable = $( APP.STORE.USER.connected_services).filter( function() {
-                return !this.expired_at && !this.disabled_at ;
-            });
-            var defaults =  $( selectable ).filter(function() {
-                return this.is_default ;
-            });
-            return defaults[0] || selectable[0] ;
+    /**
+     * Reads the store and returns the first selectable or first default or null
+     *
+     * @returns {*}
+     */
+    function tryToRefreshToken( service ) {
+        return $.getJSON( sprintf( '/api/app/connected_services/%s/verify', service.id ) );
+    }
+
+    function gdriveInitComplete() {
+        return ( gdrive.pickerApiLoaded && gdrive.authApiLoaded ) ;
+    }
+
+    function openGoogleDrivePickerIntent() {
+        // TODO: is this enough to know if the user is logged in?
+        if ( APP.USER.STORE.user ) {
+            var default_service = APP.USER.getDefaultConnectedService();
+            if ( default_service ) {
+
+                if ( ! gdriveInitComplete() ) return ;
+
+                tryToRefreshToken( default_service )
+                    .done( function( data ) {
+                        // replace the service in store with the one returned
+                        APP.USER.upsertConnectedService( data.connected_service ) ;
+
+                        gdrive.createPicker( default_service ) ;
+                    }).fail( function() {
+                        $('#modal').trigger('openpreferences');
+                    });
+            }
+            else {
+                $('#modal').trigger('openpreferences');
+                // TODO: open preferences panel to link a gdrive account
+            }
+
+        } else {
+            $('#modal').trigger('openlogin');
+            // TODO: show signup form
         }
     }
 
-    function tryToRefreshToken( service ) {
-        return $.get( sprintf( '/api/app/connected_services/%s/verify', service.id ) );
-    }
-
-    $(document).on('click', '.load-gdrive', function() {
-
-        // is this enough to know if the user is logged in?
-        if ( APP.STORE.USER.user ) {
-           var default_service = getDefaultService();
-
-           if ( default_service ) {
-               if ( ! ( gdrive.pickerApiLoaded && gdrive.authApiLoaded ) ) return ;
-               // check if the token expired and try to refresh
-
-               tryToRefreshToken( default_service )
-               .done( function( data ) {
-                   console.log( data ) ;
-                   gdrive.createPicker( default_service ) ;
-               }).fail( function() {
-                   $('#modal').trigger('openpreferences');
-                   console.debug( arguments );
-               });
-
-           }
-           else {
-               $('#modal').trigger('openpreferences');
-               // TODO: open preferences panel to link a gdrive account
-           }
-
-       } else {
-            $('#modal').trigger('openlogin');
-
-           // TODO: show signup form
-       }
+    $(document).on('click', '.load-gdrive', function(e) {
+        e.preventDefault();
+        openGoogleDrivePickerIntent();
     });
 
 })(jQuery, gdrive );
