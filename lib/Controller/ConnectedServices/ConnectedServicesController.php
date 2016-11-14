@@ -9,6 +9,7 @@
 namespace ConnectedServices;
 
 
+use API\App\Json\ConnectedService;
 use API\V2\KleinController;
 use ConnectedServices\ConnectedServiceDao;
 use ConnectedServices\ConnectedServiceStruct;
@@ -42,12 +43,16 @@ class ConnectedServicesController extends KleinController {
 
     private function __handleGDrive() {
         $verifier = new GDriveTokenVerifyModel( $this->service ) ;
+
         if ( $verifier->validOrRefreshed() ) {
             $this->response->code( 200 ) ;
         }
         else {
             $this->response->code( 403 ) ;
         }
+
+        $formatter = new ConnectedService( array() );
+        $this->response->json( array( 'connected_service' => $formatter->renderItem( $this->service ) ) ) ;
     }
 
     private function __validateOwnership() {
