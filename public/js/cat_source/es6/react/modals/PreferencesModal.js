@@ -22,7 +22,7 @@ class PreferencesModal extends React.Component {
         }
         var interval = setInterval( function() {
             if ( newWindow.closed ) {
-                APP.loadUserData();
+                APP.USER.loadUserData();
                 clearInterval( interval ) ;
             }
         }, 600 );
