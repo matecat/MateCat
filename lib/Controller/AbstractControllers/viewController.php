@@ -226,15 +226,15 @@ abstract class viewController extends controller {
 
 
     /**
-     * Check user logged
+     * isLoggedIn
+     *
+     * Check user logged. For user to be logged in we need both uid and cid.
+     * TODO: check why cid is necessary. Ideally we should only need uid and
+     * infer the cid from it.
      *
      * @return bool
      */
     public function isLoggedIn() {        
-        if( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ) {
-            AuthCookie::tryToRefreshToken( $_SESSION[ 'cid' ] );
-        }
-        
         return (
                 ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ) &&
                 ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) )
