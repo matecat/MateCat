@@ -2,6 +2,11 @@
 
 class ApiKeys_ApiKeyDao extends DataAccess_AbstractDao {
 
+    /**
+     * @param $key
+     * @param array $options
+     * @return ApiKeys_ApiKeyStruct
+     */
   static function findByKey( $key, $options=array() ) {
     $conn = Database::obtain()->getConnection();
     $stmt = $conn->prepare("SELECT * FROM api_keys WHERE enabled AND api_key = :key ");
@@ -30,6 +35,10 @@ class ApiKeys_ApiKeyDao extends DataAccess_AbstractDao {
     return $result[0];
   }
 
+    /**
+     * @param $id
+     * @return ApiKeys_ApiKeyStruct[]
+     */
   public function getById( $id ) {
     $conn = $this->con->getConnection();
 

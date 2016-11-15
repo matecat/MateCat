@@ -1,7 +1,12 @@
 <?php
 namespace API\V2  ;
 
-class ProtectedKleinController extends KleinController {
+/**
+ * This class checks the request headers and ensures a valid API key/secret pair is found.
+ *
+ */
+
+abstract class ProtectedKleinController extends KleinController {
     protected $api_key ;
     protected $api_secret ;
     protected $api_record ;
@@ -29,6 +34,7 @@ class ProtectedKleinController extends KleinController {
             $this->api_record = \ApiKeys_ApiKeyDao::findByKey( $this->api_key ) ;
 
             return $this->api_record &&
+                $this->api_record->enabled &&
                 $this->api_record->validSecret( $this->api_secret );
         }
         else {
