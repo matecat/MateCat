@@ -19,7 +19,7 @@ UI = {
     init: function () {
         this.conversionBlocked = false;
         this.RTLCheckDone = false;
-        this.skipLangDetectArr = {}
+        this.skipLangDetectArr = {};
 
         var base = Math.log( config.maxFileSize ) / Math.log( 1024 );
         config.maxFileSizePrint = parseInt( Math.pow( 1024, ( base - Math.floor( base ) ) ) + 0.5 ) + ' MB';
