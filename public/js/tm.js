@@ -1721,24 +1721,24 @@
                 });
 
                 var message = "<div class='share-popup-container'>" +
-                    "<div class='share-popup-top'>" +
-                    "<h3 class='popup-tm pull-left'>Share ownership of the resource: <br />"+
-                    description + " - <span class='share-popup-key'>" + key + "</span>" +
-                    "</h3>"+
+                        "<div class='share-popup-top'>" +
+                        "<h3 class='popup-tm pull-left'>Share ownership of the resource: <br />"+
+                        description + " - <span class='share-popup-key'>" + key + "</span>" +
+                        "</h3>"+
+                        "</div>"+
+                        "<div class='share-popup-container-bottom'>" +
+                        "<p>This action cannot be undone.</p>"+
+                        "<div class='share-popup-copy-result'></div>"+
+                        "<input class='share-popup-container-input-email' placeholder='Enter email addresses separated by comma'>"+
+                        "<div class='pull-right btn-confirm-medium share-button share-button-popup'>Share</div>"+
+                        "<div class='share-popup-input-result'></div>"+
+                        "</div>"+
                     "</div>"+
-                    "<div class='share-popup-container-bottom'>" +
-                    "<p>This action cannot be undone.</p>"+  
-                    "<div class='share-popup-copy-result'></div>"+                        
-                    "<input class='share-popup-container-input-email' placeholder='Enter email addresses separated by comma'>"+
-                    "<div class='pull-right btn-confirm-medium share-button share-button-popup'>Share</div>"+
-                    "<div class='share-popup-input-result'></div>"+
-                    "</div>"+
-                    "</div>"+
-                    "<div class='share-popup-container-list'>" +
-                    "<h3 class='popup-tm'>Who owns the resource</h3>"+
-                    "<div class='share-popup-list'>" +
-                    htmlUsersList +
-                    "</div>"+
+                        "<div class='share-popup-container-list'>" +
+                        "<h3 class='popup-tm'>Who owns the resource</h3>"+
+                        "<div class='share-popup-list'>" +
+                        htmlUsersList +
+                        "</div>"+
                     "</div>";
                 tr.find('.message-share-tmx-openemailpopup').on("click", function () {
                     APP.confirm({
