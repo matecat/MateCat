@@ -119,7 +119,10 @@ body.searchActive #filterSwitch
 
 
 
-.numbererror, .qa-issues-counter, .qa-lexiqa-counter
+.numbererror,
+.qa-total-issues-counter,
+.qa-issues-counter,
+.qa-lexiqa-counter
 {
     position: absolute;
     border:1px solid #fff;
@@ -4015,7 +4018,7 @@ section:hover .segment-side-buttons {
 }
 
 .qa-counter {
-	width: 70px;
+	width: 125px;
 	font-size: 16px;
 	color:#333;
 }
@@ -4042,11 +4045,17 @@ section:hover .segment-side-buttons {
     background-image: linear-gradient(top, #f8f8f8, #f1f1f1);
 }
 
-.icon-qa-issues, .icon-qa-lexiqa {
+.icon-qa-issues,
+.icon-qa-total-issues,
+.icon-qa-lexiqa {
 	width: 30px;
 	height: 30px;
 	margin-right: 10px;
 	margin-top: 8px;
+}
+.icon-qa-total-issues:before {
+	content: "\e903";
+	font-size: 25px;
 }
 .icon-qa-issues:before {
 	content: "\ea7f";
@@ -4057,6 +4066,10 @@ section:hover .segment-side-buttons {
 	font-size: 25px;
 	margin-top: 5px;
 }
+.qa-total-issues-counter {
+	top: 10px;
+	left: 50px;
+}
 .qa-issues-counter {
 	top: 10px;
 	left: 40px;
@@ -4064,7 +4077,7 @@ section:hover .segment-side-buttons {
 
 .qa-lexiqa-counter {
 	top: 10px;
-	left: 22px;
+	left: 35px;
 }
 
 .icon-qa-right-arrow:before {

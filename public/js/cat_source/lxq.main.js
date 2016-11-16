@@ -30,7 +30,9 @@ var LXQ = {
                 $('#lexiqabox').removeAttr('style');
                 if (!LXQ.initialized) {
                     LXQ.init();
-}
+                } else {
+                    UI.QAComponent.setLxqIssues(LXQ.lexiqaData.segments);
+                }
                 UI.render();
             });
 
@@ -58,6 +60,7 @@ var LXQ = {
                 }
                 $('#lexiqabox').css('display', 'none');
                 UI.render();
+                UI.QAComponent.setLxqIssues([]);
             });
         }
     },
@@ -1595,10 +1598,8 @@ LXQ.init  = function () {
                 var mountPoint = $(".qa-wrapper")[0];
                 UI.QAComponent = ReactDOM.render(React.createElement(QAComponent, {
                 }), mountPoint);
-                UI.QAComponent.setLxqIssues(LXQ.lexiqaData.segments);
-            } else {
-                UI.QAComponent.setLxqIssues(LXQ.lexiqaData.segments);
             }
+            UI.QAComponent.setLxqIssues(LXQ.lexiqaData.segments);
         },
         removeSegmentWarning: function (idSegment) {
             if ((ind = LXQ.lexiqaData.segments.indexOf(idSegment))>=0) {
