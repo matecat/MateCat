@@ -40,8 +40,11 @@ class RegisterModal extends React.Component {
             };
             return null;
         }
-        console.log("Send Register Data");
-        // ... continue submitting data to server
+        console.log("Send Register Data", this.state);
+        $('#modal').trigger('opensuccess', [{
+            title: 'Register Now',
+            text: 'To complete your registration please follow the instructions in the email we sent you to ' + this.state.emailAddress + '.'
+        }]);
     }
 
     errorFor(field) {

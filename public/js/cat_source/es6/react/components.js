@@ -30,6 +30,7 @@ window.SegmentFilter_MainPanel = require('./segment_filter/MainPanel').default ;
 window.NotificationBox = require('./notificationsComponent/NotificationBox').default;
 
 window.ModalWindow = require('./modals/ModalWindowComponent').default;
+window.SuccessModal = require('./modals/SuccessModal').default;
 window.PreferencesModal = require('./modals/PreferencesModal').default;
 window.ResetPasswordModal = require('./modals/ResetPasswordModal').default;
 window.LoginModal = require('./modals/LoginModal').default;

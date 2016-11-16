@@ -1910,7 +1910,7 @@ body.cattool .mgmt-tm.mine thead,
 td.share-tmx-container,
 td.download-tmx-container,
 td.download-glossary-container,
-td.uploadfile,
+td.uploadfile
 {
     color: black !important;
 }

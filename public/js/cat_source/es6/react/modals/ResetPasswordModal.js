@@ -33,7 +33,10 @@ class ResetPasswordModal extends React.Component {
         this.setState({showErrors: true});
         if($.isEmptyObject(this.state.validationErrors) == false) return null;
         console.log("Send Reset Password Data");
-        // ... continue submitting data to server
+        $('#modal').trigger('opensuccess', [{
+            title: 'Reset Password',
+            text: 'Your password has been changed.'
+        }]);
     }
 
     errorFor(field) {

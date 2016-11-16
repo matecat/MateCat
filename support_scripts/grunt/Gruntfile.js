@@ -189,8 +189,6 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/ui.offline.js',
                     basePath + 'cat_source/ui.split.js',
                     basePath + 'cat_source/ui.opensegment.js',
-                    basePath + 'cat_source/ui.login.js',
-
                     basePath + 'cat_source/sse.js',
                     basePath + 'cat_source/db.js',
                     basePath + 'cat_source/mbc.main.js',
@@ -208,7 +206,6 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/handlebars-helpers.js',
 
                     basePath + 'cat_source/speech2text.js',
-
                     basePath + 'tm.js',
                     basePath + 'advancedOptionsTab.js'
                 ],
@@ -277,6 +274,7 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/templates/**/*.hbs',
                     basePath + 'cat_source/*.js',
                     basePath + 'tm.js',
+                    basePath + 'login.js',
                     basePath + 'advancedOptionsTab.js'
                 ],
                 tasks: ['concat:js'],

@@ -23,11 +23,15 @@ $.extend(APP, {
             APP.ModalWindow.showModalComponent(PreferencesModal, {}, 'Preferences');
         });
 
+        $('#modal').on('opensuccess', function (e, param) {
+            APP.ModalWindow.showModalComponent(SuccessModal, param, param.title);
+        });
+
         $('#modal').on('openpreferences', function (e, param) {
             var props = {};
             if (param)
                 props = param;
-            APP.ModalWindow.showModalComponent(PreferencesModal, param, 'Preferences');
+            APP.ModalWindow.showModalComponent(PreferencesModal, props, 'Preferences');
         });
         $('#modal').on('openresetpassword', function () {
             APP.ModalWindow.showModalComponent(ResetPasswordModal, {}, "Reset Password");
@@ -60,13 +64,18 @@ $.extend(APP, {
             $('#modal').trigger('openlogin');
         });
 
-        // $('#sign-in').click(function(e){
-        //     e.preventDefault();
-        //     APP.googole_popup($(this).data('oauth'));
-        // });
-        // $( document ).on('click', '.x-popup', function() {
-        //     $( '.login-google' ).hide();
-        // });
-
+        this.checkLoginFromQueryString();
+    },
+    checkLoginFromQueryString: function () {
+        var keyParam = APP.getParameterByName("open");
+        var modal$ = $('#modal');
+        switch (keyParam) {
+            case "reset":
+                modal$.trigger('openresetpassword');
+                break;
+            case "preference":
+                modal$.trigger('openpreferences');
+                break;
+        }
     }
 });
