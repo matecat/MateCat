@@ -33,8 +33,7 @@ class loginPageController extends viewController {
 		}
 
                 if( isset($_SESSION[ 'oauthScope' ]) && $_SESSION[ 'oauthScope' ] === 'GDrive' ) {
-                        $this->authURL = \GDrive::generateGDriveAuthUrl();
-
+                        $this->authURL = \ConnectedServices\GDrive::generateGDriveAuthUrl() ;
                         unset( $_SESSION[ 'oauthScope' ] );
                 }
 	}

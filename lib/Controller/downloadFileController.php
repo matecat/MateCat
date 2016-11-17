@@ -338,7 +338,7 @@ class downloadFileController extends downloadController {
             try {
 
                 if ( $this->anyRemoteFile() && !$this->forceXliff ) {
-                    $this->startRemoteFileService();
+                    $this->startRemoteFileService($output_content);
 
                     if( $this->openOriginalFiles ) {
                         $this->outputResultForOriginalFiles();
@@ -494,30 +494,32 @@ class downloadFileController extends downloadController {
 
 
     /**
-     *
      * This prepares the object that will handle communication with remote file service.
-     *
-     *
-     *
+     * We assume that the whole project was created with files coming from the same remote account.
+     * We look for the first remote_file record and seek for the connected service to read for the auth_token.
      */
-    private function startRemoteFileService() {
-        // Get the user data from the project owner
-        $project = \Projects_ProjectDao::findByJobId( $this->id_job );
-        $userDao = new \Users_UserDao( \Database::obtain() );
-        $user = $userDao->getByEmail( $project->id_customer );
+    private function startRemoteFileService( $output_content ) {
+        $keys = array_keys( $output_content ) ;
+        $firstFileId = $keys[ 0 ] ;
 
-        // This is necessary to ensure the stored token will be valid even for not logged users
-        // \AuthCookie::tryToRefreshToken( $project->id_customer );
+        // find the proper remote file by id_job and file_id
+        $remoteFile = RemoteFiles_RemoteFileDao::getByFileAndJob($firstFileId, $this->job->id );
+
+        $dao = new \ConnectedServices\ConnectedServiceDao() ;
+        $connectedService = $dao->findById( $remoteFile->connected_service_id ) ;
+
+
+        $verifier = new \ConnectedServices\GDriveTokenVerifyModel( $connectedService ) ;
 
         $this->remoteFileService = new GDrive\RemoteFileService(
-            $user->getDecryptedOauthAccessToken()
+            $connectedService->getDecryptedOauthAccessToken()
         );
     }
 
 
     private function updateRemoteFiles($output_content) {
         foreach( $output_content as $id_file => $output_file ) {
-            $remoteFile = \RemoteFiles_RemoteFileDao::getByFileAndJob( $id_file, $this->id_job );
+            $remoteFile = \RemoteFiles_RemoteFileDao::getByFileAndJob( $id_file, $this->job->id );
             $this->remoteFiles[ $remoteFile->id ] = $this->remoteFileService->updateFile( $remoteFile, $output_file[ 'document_content' ] );
         }
     }

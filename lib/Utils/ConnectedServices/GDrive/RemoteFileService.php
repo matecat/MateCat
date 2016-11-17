@@ -8,24 +8,12 @@
 
 namespace ConnectedServices\GDrive;
 
-
 use ConnectedServices\AbstractRemoteFileService;
-
 use ConnectedServices\GDrive;
-use Google_Service_Drive_DriveFile ;
-
 use \Exception ;
-use OauthTokenEncryption ;
-use Google_Service_Drive;
-
-use Google_Service_Drive_Permission ;
-
 use Files_FileDao ;
-
 use RemoteFiles_RemoteFileDao ;
-
 use Jobs_JobDao ;
-
 use Log  ;
 
 class RemoteFileService extends AbstractRemoteFileService
@@ -49,11 +37,17 @@ class RemoteFileService extends AbstractRemoteFileService
         $this->gdriveService = self::getService( $this->raw_token ) ;
     }
 
+    /**
+     * @param $token json_encoded string
+     * @return \Google_Service_Drive
+     */
     public static function getService ( $token ) {
+
         $oauthClient = GDrive::getClient() ;
         $oauthClient->setAccessToken( $token );
         $oauthClient->setAccessType( "offline" );
-        $gdriveService = new Google_Service_Drive( $oauthClient );
+        $gdriveService = new \Google_Service_Drive( $oauthClient );
+
 
         return $gdriveService;
     }
@@ -81,9 +75,6 @@ class RemoteFileService extends AbstractRemoteFileService
             // TODO: handle the case in which someone is asking for access to the file
             // but we are unable to refresh the token.
             $authUrl = $this->gdriveService->getClient()->createAuthUrl();
-
-
-
         }
     }
 
@@ -102,65 +93,12 @@ class RemoteFileService extends AbstractRemoteFileService
         $upload = $this->gdriveService->files->update( $remoteId, $gdriveFile, $additionalParams );
     }
 
-
-    /**
-     * Method to insert a new permission in a Google Drive file to grant anyone to access it by
-     * its URL.
-     *
-     * @param   \Array                           $session
-     * @param   Google_Service_Drive            $service
-     * @param   String                          $fileId
-     * @return  \Google_Service_Drive_Permission
-     */
-    public static function grantFileAccessByUrl ( $session, $service, $fileId ) {
-        $dao = new \Users_UserDao( \Database::obtain() );
-        $user = $dao->getByUid( $session[ 'uid' ] );
-
-        if($user != null) {
-            $urlPermission = new Google_Service_Drive_Permission();
-            $urlPermission->setValue( $user->email );
-            $urlPermission->setType( 'anyone' );
-            $urlPermission->setRole( 'reader' );
-            $urlPermission->setWithLink( true );
-
-            try {
-                return $service->permissions->insert( $fileId, $urlPermission );
-            } catch (Exception $e) {
-                print "An error occurred: " . $e->getMessage();
-            }
-        }
-
-        return null;
-    }
-
-
-    public static function insertRemoteFile ( $id_file, $id_job, $service, $session ) {
-        $file = Files_FileDao::getById( $id_file );
-        $listRemoteFiles = RemoteFiles_RemoteFileDao::getByFileId( $id_file, 1 );
-        $remoteFile = $listRemoteFiles[0];
-
-        $job = Jobs_JobDao::getById( $id_job );
-
-        $gdriveFile = $service->files->get( $remoteFile->remote_id );
-
-        $fileTitle = $gdriveFile->getTitle();
-
-        $translatedFileTitle = $fileTitle . ' - ' . $job->target;
-
-        $copiedFile = self::copyFile( $service, $remoteFile->remote_id, $translatedFileTitle );
-
-        RemoteFiles_RemoteFileDao::insert( $id_file, $id_job, $copiedFile->id );
-
-        self::grantFileAccessByUrl( $session, $service, $copiedFile->id );
-    }
-
-
-    public static function copyFile ( $service, $originFileId, $copyTitle ) {
-        $copiedFile = new Google_Service_Drive_DriveFile();
+    public function copyFile ( $originFileId, $copyTitle ) {
+        $copiedFile = new \Google_Service_Drive_DriveFile()  ;
         $copiedFile->setTitle( $copyTitle );
 
         try {
-            return $service->files->copy( $originFileId, $copiedFile );
+            return $this->gdriveService->files->copy( $originFileId, $copiedFile );
         } catch (Exception $e) {
             print "An error occurred: " . $e->getMessage();
         }

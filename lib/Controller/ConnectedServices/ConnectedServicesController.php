@@ -52,7 +52,7 @@ class ConnectedServicesController extends KleinController {
         }
 
         $formatter = new ConnectedService( array() );
-        $this->response->json( array( 'connected_service' => $formatter->renderItem( $this->service ) ) ) ;
+        $this->response->json( array( 'connected_service' => $formatter->renderItem( $verifier->getService() ) ) ) ;
     }
 
     private function __validateOwnership() {
