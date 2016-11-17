@@ -241,7 +241,7 @@ class INIT {
     public static $OAUTH_GDRIVE_SCOPES;
 
     public static $ENABLE_OMEGAT_DOWNLOAD = false;
-    public static $UNLOCKABLE_TAGS = true;
+    public static $UNLOCKABLE_TAGS = false;
 
     public function __construct(){
 
