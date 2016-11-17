@@ -3470,39 +3470,14 @@ color: #000;
     font-weight: normal;
     font-style: normal;
 }
-
-
-/*
-/* mbc extend iconmoon set with icons for matecat chat
-/* TODO: add icons to main set
-*/
-
 .icon-copy-key:before {
     content: "\e92c";
 }
-
-.autofillTag {
-    display: block;
-    float: left;
-    cursor: pointer;
-    color: #444!important;
-}
-
-.autofillTag:hover, 
-.autofillTag.active {
-    color: #333!important;
-}
-
-.autofillTag:before {
-    content: "\e23a";
-    font-size: 19px;
-    display: block;    
-}
 /*
 /* mbc extend iconmoon set with icons for matecat chat
 */
 
-
+.tagLockCustomize,
 .btn-confirm-small .text:before,
 .btn-orange-small .text:before,
 [class^="icon-"], [class*=" icon-"],
@@ -4166,6 +4141,9 @@ text-align: left;
 }
 .icon-lock:before {
     content: "\e98f";
+}
+.icon-unlocked:before {
+    content: "\e990";
 }
 .icon-earth:before {
     content: "\e9ca";
