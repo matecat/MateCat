@@ -29,17 +29,24 @@ class PreferencesModal extends React.Component {
     }
 
     render() {
+        var gdriveMessage = '';
+        if (this.props.showGDriveMessage) {
+            gdriveMessage = <div className="preference-modal-message">
+                Connect a google drive account to add files
+            </div>;
+        }
         return <div className="preferences-modal">
                     <h1>Preferences</h1>
                     <div className="user-info-form">
                         <label htmlFor="user-login-name">Name</label><br/>
-                        <input type="text" name="name" id="user-login-name" defaultValue="Federico"/><br/>
+                        <input type="text" name="name" id="user-login-name" defaultValue="Federico" disabled="true"/><br/>
                         <label htmlFor="user-login-name">Surname</label><br/>
-                        <input type="text" name="name" id="user-login-surname" defaultValue="Ricciuti"/><br/>
+                        <input type="text" name="name" id="user-login-surname" defaultValue="Ricciuti" disabled="true"/><br/>
                         <label htmlFor="user-login-name">Email</label><br/>
-                        <input type="text" name="name" id="user-login-email" defaultValue="federico@translated.net"/><br/>
+                        <input type="text" name="name" id="user-login-email" defaultValue="federico@translated.net" disabled="true"/><br/>
                     </div>
                     <div className="user-reset-password">
+                        {gdriveMessage}
                         <label>Reset Password</label>
                         <a className="reset-password btn-confirm-medium" onClick={this.openResetPassword.bind(this)}> Reset </a>
                     </div>

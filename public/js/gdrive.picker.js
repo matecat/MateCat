@@ -91,17 +91,15 @@ var gdrive = new GDrive() ;
 
                         gdrive.createPicker( default_service ) ;
                     }).fail( function() {
-                        $('#modal').trigger('openpreferences');
+                        $('#modal').trigger('openpreferences', [{showGDriveMessage: true}]);
                     });
             }
             else {
-                $('#modal').trigger('openpreferences');
-                // TODO: open preferences panel to link a gdrive account
+                $('#modal').trigger('openpreferences', [{showGDriveMessage: true}]);
             }
 
         } else {
             $('#modal').trigger('openlogin');
-            // TODO: show signup form
         }
     }
 

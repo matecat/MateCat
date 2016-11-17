@@ -1910,7 +1910,7 @@ body.cattool .mgmt-tm.mine thead,
 td.share-tmx-container,
 td.download-tmx-container,
 td.download-glossary-container,
-td.uploadfile,
+td.uploadfile
 {
     color: black !important;
 }
@@ -4731,6 +4731,11 @@ span.share-popup-item-email {
     margin: 0 auto;
     width: 90%;
     min-height: 60px;
+    position:relative;
+}
+
+.user-reset-password {
+    min-height: 80px;
 }
 
 .user-gdrive {
@@ -4863,6 +4868,16 @@ a.reset-password.btn-confirm-medium {
 }
 .register-modal .google-login-button {
     margin-bottom: 0;
+}
+
+.preference-modal-message {
+    box-shadow: 0 2px 2px #e2e2e2;
+    border-radius: 2px;
+    border: 1px solid #ccc;
+    line-height: 20px;
+    padding: 10px 15px;
+    background: rgb(195, 224, 195);
+    margin-top: 20px;
 }
 /***********************/
 
