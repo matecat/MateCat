@@ -34,6 +34,31 @@ class CreateRecordInQaJobReviewsTest extends IntegrationTest {
         $this->assertNotEmpty( $reviews );
     }
 
+
+    function tests_qa_job_review_record_for_multiple_targets() {
+        // Create a project with multilanguage target
+
+        $project = integrationCreateTestProject( array(
+            'headers' => $this->test_data->headers,
+            'files' => array(
+                test_file_path('zip-with-model-json.zip')
+            ),
+            'params' => array(
+                'target_lang' => 'it-IT,pt-BR'
+            )
+        ));
+
+        // $project = $this->createProject();
+        $project = Projects_ProjectDao::findById( $project->id_project );
+
+        $this->assertNotNull( $project->id );
+        $reviews = ChunkReviewDao::findByProjectId( $project->id ) ;
+        $this->assertCount(2, $reviews) ;
+        $jobs = $project->getJobs();
+        $this->assertNotNull( ChunkReviewDao::findByIdJob( $jobs[0]->id ) );
+        $this->assertNotNull( ChunkReviewDao::findByIdJob( $jobs[1]->id ) );
+    }
+
     function tests_update_chunk_review_records_on_split() {
         $project = $this->createProject();
         $project = Projects_ProjectDao::findById( $project->id_project );
