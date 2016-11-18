@@ -10,33 +10,72 @@ class ResetPasswordModal extends React.Component {
         super(props);
         this.state = {
             showErrors: false,
-            validationErrors: {}
+            validationErrors: {},
+            generalError: ''
         };
 
         this.state.validationErrors = RuleRunner.run(this.state, fieldValidations);
         this.handleFieldChanged = this.handleFieldChanged.bind(this);
         this.handleSubmitClicked = this.handleSubmitClicked.bind(this);
+        this.sendResetPassword = this.sendResetPassword.bind(this);
         this.errorFor = this.errorFor.bind(this);
     }
 
     handleFieldChanged(field) {
         return (e) => {
             var newState = update(this.state, {
-                [field]: {$set: e.target.value}
+                [field]: {$set: e.target.value},
             });
             newState.validationErrors = RuleRunner.run(newState, fieldValidations);
+            newState.generalError = '';
             this.setState(newState);
         }
     }
 
     handleSubmitClicked() {
+        var self = this;
         this.setState({showErrors: true});
         if($.isEmptyObject(this.state.validationErrors) == false) return null;
         console.log("Send Reset Password Data");
-        $('#modal').trigger('opensuccess', [{
-            title: 'Reset Password',
-            text: 'Your password has been changed.'
-        }]);
+        this.sendResetPassword().done(function (data) {
+            $('#modal').trigger('opensuccess', [{
+                title: 'Reset Password',
+                text: 'Your password has been changed.'
+            }]);
+        }).fail(function (data) {
+            if (data.error) {
+                self.setState({
+                    generalError: data.error.message
+                });
+            } else {
+                self.setState({
+                    generalError: 'There was a problem saving the data, please try again later or contact support.'
+                });
+            }
+        });
+
+    }
+
+    sendResetPassword() {
+        // return APP.doRequest({
+        //     data: {
+        //         action: 'resetPassword',
+        //
+        //     }
+        // });
+
+        //Error
+        var deferred = $.Deferred();
+        deferred.reject({error: {
+            message:'Error submitting your data'
+        }
+        });
+
+        //Success
+        // var deferred = $.Deferred();
+        // deferred.resolve();
+
+        return deferred.promise();
     }
 
     errorFor(field) {
@@ -52,14 +91,21 @@ class ResetPasswordModal extends React.Component {
     }
 
     render() {
+        var generalErrorHtml = '';
+        if (this.state.generalError.length) {
+            generalErrorHtml = <span style={ {color: 'red',fontSize: '14px'} } className="text">{this.state.generalError}</span>;
+        }
         return <div className="reset-password-modal">
             <h2>Reset Password</h2>
             <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit</p>
             <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password1")}
-                       placeholder="Password" name="password1" errorText={this.errorFor("password1")}/>
+                       placeholder="Password" name="password1" errorText={this.errorFor("password1")} tabindex={1}/>
             <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password2")}
-                       placeholder="Confirm Password" name="password2" errorText={this.errorFor("password2")}/>
-            <a className="reset-password-button btn-confirm-medium" onClick={this.handleSubmitClicked.bind()}> Reset </a> <br/>
+                       placeholder="Confirm Password" name="password2" errorText={this.errorFor("password2")} tabindex={1}/>
+            <a className="reset-password-button btn-confirm-medium" onClick={this.handleSubmitClicked}
+               onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}
+               tabIndex="3"> Reset </a> <br/>
+            {generalErrorHtml}
         </div>;
     }
 }
