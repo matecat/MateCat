@@ -32,11 +32,19 @@ class ResetPasswordModal extends React.Component {
     handleSubmitClicked() {
         this.setState({showErrors: true});
         if($.isEmptyObject(this.state.validationErrors) == false) return null;
-        console.log("Send Reset Password Data");
-        $('#modal').trigger('opensuccess', [{
-            title: 'Reset Password',
-            text: 'Your password has been changed.'
-        }]);
+
+        $.post('/api/app/user/password', {
+            password: this.state.password1,
+            password_confirmation: this.state.password2
+        }).done(function( data ) {
+            $('#modal').trigger('opensuccess', [{
+                title: 'Reset Password',
+                text: 'Your password has been changed.'
+            }]);
+        }).fail(function( response ) {
+            var data = JSON.parse( response.responseText );
+            console.error('failed post for reset password', data );
+        });
     }
 
     errorFor(field) {
@@ -55,9 +63,9 @@ class ResetPasswordModal extends React.Component {
         return <div className="reset-password-modal">
             <h2>Reset Password</h2>
             <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit</p>
-            <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password1")}
+            <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password1")}
                        placeholder="Password" name="password1" errorText={this.errorFor("password1")}/>
-            <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password2")}
+            <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password2")}
                        placeholder="Confirm Password" name="password2" errorText={this.errorFor("password2")}/>
             <a className="reset-password-button btn-confirm-medium" onClick={this.handleSubmitClicked.bind()}> Reset </a> <br/>
         </div>;

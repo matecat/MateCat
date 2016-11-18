@@ -50,8 +50,20 @@ class LoginModal extends React.Component {
     handleSubmitClicked() {
         this.setState({showErrors: true});
         if($.isEmptyObject(this.state.validationErrors) == false) return null;
-        console.log("Send Login Data");
-        // ... continue submitting data to server
+
+        APP.doRequest()
+        $.post('/api/app/user/login',  {
+            email : this.state.emailAddress,
+            password : this.state.password
+        }).done( function( data ) {
+            // reload page
+            window.location.href = window.location.href ;
+
+            console.log('login ok');
+        }).fail( function( response ) {
+            // TODO: notify login failure.
+            console.log("Send Login Data");
+        });
     }
 
     errorFor(field) {
@@ -85,7 +97,7 @@ class LoginModal extends React.Component {
                         <div className="login-form-container">
                             <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("emailAddress")}
                                        placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")}/>
-                            <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password")}
+                            <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password")}
                                        placeholder="Password" name="password" errorText={this.errorFor("password")}/>
                             <a className="login-button btn-confirm-medium" onClick={this.handleSubmitClicked.bind()}> Log in </a><br/>
                             <span className="forgot-password" onClick={this.openForgotPassword}>Forgot password?</span>

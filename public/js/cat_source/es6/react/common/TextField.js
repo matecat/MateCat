@@ -15,14 +15,21 @@ export default class TextField extends React.Component {
 
     render() {
         var errorHtml = '';
+        var type = 'text' ;
+
+        if ( this.props.type ) {
+            type = this.props.type ;
+        }
+
         if (this.shouldDisplayError()) {
             errorHtml = <div className="validation-error">
                 <span style={this.spanStyle} className="text">{this.props.errorText}</span>
             </div>
         }
+
         return (
             <div>
-                <input type="text" placeholder={this.props.placeholder}
+                <input type={type} placeholder={this.props.placeholder}
                        value={this.props.text} name={this.props.name} onChange={this.props.onFieldChanged} className={this.props.classes}/>
                 {errorHtml}
             </div>

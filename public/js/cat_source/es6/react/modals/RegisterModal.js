@@ -40,11 +40,28 @@ class RegisterModal extends React.Component {
             };
             return null;
         }
-        console.log("Send Register Data", this.state);
-        $('#modal').trigger('opensuccess', [{
-            title: 'Register Now',
-            text: 'To complete your registration please follow the instructions in the email we sent you to ' + this.state.emailAddress + '.'
-        }]);
+
+        var that = this ;
+
+        $.post('/api/app/user', { user: {
+            first_name: this.state.name,
+            last_name: this.state.surname,
+            email: this.state.emailAddress,
+            password: this.state.password,
+            password_confirmation: this.state.password
+        }}).done(function( data ) {
+            console.log("Send Register Data", this.state);
+
+            $('#modal').trigger('opensuccess', [{
+                title: 'Register Now',
+                text: 'To complete your registration please follow the instructions in the email we sent you to ' + that.state.emailAddress + '.'
+            }]);
+
+        }).fail(function(response) {
+            var data = JSON.parse( response.responseText );
+            console.error('failed post to submit a new user', data );
+        });
+
     }
 
     errorFor(field) {
@@ -92,7 +109,7 @@ class RegisterModal extends React.Component {
                 <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("emailAddress")}
                            placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")}/>
                 <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password")}
-                           placeholder="Password" name="password" errorText={this.errorFor("password")}/>
+                           type="password" placeholder="Password" name="password" errorText={this.errorFor("password")}/>
                 <input type="checkbox" id="check-conditions" name="terms" ref={(input) => this.textInput = input} onChange={this.changeCheckbox.bind(this)}/>
                 <label htmlFor="check-conditions" style={this.checkStyle}>Accept terms and conditions</label><br/>
                 <a className="register-submit btn-confirm-medium" onClick={this.handleSubmitClicked.bind()}> Register Now </a><br/>

@@ -4,6 +4,8 @@ APP = {
     init: function () {
         this.setLoginEvents();
 
+        this.evalFlashMessages();
+
         this.isCattool = $( 'body' ).hasClass( 'cattool' );
         $( "body" ).on( 'click', '.modal .x-popup', function ( e ) {
             e.preventDefault();
@@ -606,6 +608,26 @@ APP = {
             }
         }
         return caretPos;
+    },
+
+    evalFlashMessages : function() {
+        if ( config.flash_messages && Object.keys( config.flash_messages ).length ) {
+            _.each(['warning', 'notice', 'error'], function( type ) {
+                if ( config.flash_messages[ type ] ) {
+                    _.each(config.flash_messages[ type ],function( obj ) {
+                        APP.addNotification({
+                            autoDismiss: false,
+                            dismissable: true,
+                            position : "bl",
+                            text : obj.message,
+                            title: type,
+                            type : type,
+                            allowHtml : true
+                        });
+                    });
+                }
+            });
+        }
     }
 };
 

@@ -35,12 +35,17 @@ class ForgotPasswordModal extends React.Component {
     handleSubmitClicked() {
         this.setState({showErrors: true});
         if($.isEmptyObject(this.state.validationErrors) == false) return null;
-        console.log("Send forgot password Data");
-        $('#modal').trigger('opensuccess', [{
-            title: 'Forgot Password',
-            text: 'We sent you an email. Follow the instructions to create a new password.'
-        }]);
-        // ... continue submitting data to server
+
+        $.post('/api/app/user/forgot_password', { email: this.state.emailAddress } )
+        .done( function( data ) {
+            $('#modal').trigger('opensuccess', [{
+                title: 'Forgot Password',
+                text: 'We sent you an email. Follow the instructions to create a new password.'
+            }]);
+        }).fail( function( response ) {
+            var data = JSON.parse( response.responseText );
+            console.error('failed post for reset password', data );
+        });
     }
 
     errorFor(field) {

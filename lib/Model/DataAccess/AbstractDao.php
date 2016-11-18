@@ -496,11 +496,16 @@ abstract class DataAccess_AbstractDao {
                 return $conn->lastInsertId() ;
             }
             else {
-                return true;
+                return TRUE;
             }
         }
         else {
-            return false;
+
+            if ( $options['raise'] ) {
+                throw new Exception( $stmt->errorInfo() ) ;
+            }
+
+            return FALSE;
         }
     }
 

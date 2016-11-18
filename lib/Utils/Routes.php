@@ -3,6 +3,16 @@
 
 class Routes {
 
+    public static function passwordReset( $confirmation_token, $options ) {
+        $host = self::httpHost( $options );
+        return "$host/api/app/user/password_reset/$confirmation_token";
+    }
+
+    public static function signupConfirmation( $confirmation_token, $options = array() ) {
+        $host = self::httpHost( $options );
+        return "$host/api/app/user/confirm/$confirmation_token";
+    }
+
     /**
      * @param $id_job
      * @param $password
@@ -71,6 +81,17 @@ class Routes {
         $params[ 'project_name' ] . "/" .
         $params[ 'id_project' ] . "-" .
         $params[ 'password' ];
+    }
+
+    public static function appRoot( $options = array() ) {
+        $query = isset( $options['query'] ) ? $options['query'] : null ;
+
+        $url = self::httpHost( $options ) . \INIT::$BASEURL ;
+
+        if ( $query ) {
+            $url .= '?' . http_build_query( $query ) ;
+        }
+        return $url ;
     }
 
     /**

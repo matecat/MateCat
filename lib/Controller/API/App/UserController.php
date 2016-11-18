@@ -9,10 +9,15 @@ use API\V2\KleinController;
 use ConnectedServices\ConnectedServiceDao ;
 use ConnectedServices\ConnectedServiceStruct;
 use Exceptions\NotFoundError;
+use Exceptions\ValidationError;
 use Users_UserDao ;
+use Utils ;
 
-class UserInfoController extends KleinController  {
+class UserController extends KleinController  {
 
+    /**
+     * @var \Users_UserStruct
+     */
     protected $user ;
     protected $connectedServices ;
 
@@ -27,6 +32,17 @@ class UserInfoController extends KleinController  {
             ),
             'connected_services' => ( new ConnectedService( $this->connectedServices ))->render()
         ));
+    }
+
+    public function updatePassword() {
+        $new_password = filter_var($this->request->param('password'), FILTER_SANITIZE_STRING );
+
+        \Users_UserValidator::validatePassword( $new_password );
+
+        $this->user->pass = Utils::encryptPass( $new_password, $this->user->salt ) ;
+        \Users_UserDao::updateStruct( $this->user, array('fields' => array('pass') ) ) ;
+
+        $this->response->code( 200 ) ;
     }
 
     protected function afterConstruct() {
