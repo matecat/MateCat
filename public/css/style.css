@@ -2092,7 +2092,10 @@ body.rtl-target .editor .editarea span
 	padding-top: 5px;
 
 }
-.editor .wrap{/*padding-bottom:25px; */height:87% !important;}
+.editor .wrap {
+	padding-bottom:25px;
+	height:87% !important;
+}
 
 
 
