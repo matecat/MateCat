@@ -283,7 +283,7 @@ class QAComponent extends React.Component {
             lxq_container = <div className={"qa-lexiqa-container " + selected} onClick={this.selectBox.bind(this, 'lxq')}>
                 <span className="icon-qa-lexiqa"/>
                 <span className="qa-lexiqa-counter">{this.state.lxq_issues.length}</span>
-                LexiQA
+                lexiQA
             </div>;
 
         }
