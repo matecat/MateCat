@@ -13,8 +13,6 @@ $.extend(UI, {
 
 		this.isMac = (navigator.platform == 'MacIntel') ? true : false;
 		this.body = $('body');
-		this.firstLoad = firstLoad;
-
 		this.firstLoad = (options.firstLoad || false);
 		this.initSegNum = 100; // number of segments initially loaded
 		this.moreSegNum = 25;
