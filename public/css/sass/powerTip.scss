@@ -1,9 +1,12 @@
 /* PowerTip Plugin */
+
+$primary-color: rgb(77, 77, 77);
+
+
 #matecatTip {
   cursor: default;
-  background-color: #333;
-  background-color: rgb(77, 77, 77);
-  border-radius: 6px;
+  background-color: $primary-color;
+  border-radius: 4px;
   color: #fff;
   display: none;
   padding: 10px;
@@ -29,22 +32,22 @@
 }
 #matecatTip.n:before {
   border-top: 10px solid #333;
-  border-top: 10px solid rgba(0, 0, 0, 0.8);
+  border-top: 10px solid $primary-color;
   bottom: -10px;
 }
 #matecatTip.e:before {
   border-right: 10px solid #333;
-  border-right: 10px solid rgba(0, 0, 0, 0.8);
+  border-right: 10px solid $primary-color;
   left: -10px;
 }
 #matecatTip.s:before {
   border-bottom: 10px solid #333;
-  border-bottom: 10px solid rgba(0, 0, 0, 0.8);
+  border-bottom: 10px solid $primary-color;
   top: -10px;
 }
 #matecatTip.w:before {
   border-left: 10px solid #333;
-  border-left: 10px solid rgba(0, 0, 0, 0.8);
+  border-left: 10px solid $primary-color;
   right: -10px;
 }
 #matecatTip.ne:before, #matecatTip.se:before {
@@ -59,18 +62,18 @@
 }
 #matecatTip.ne:before, #matecatTip.nw:before {
   border-top: 10px solid #333;
-  border-top: 10px solid rgba(0, 0, 0, 0.8);
+  border-top: 10px solid $primary-color;
   bottom: -10px;
 }
 #matecatTip.se:before, #matecatTip.sw:before {
   border-bottom: 10px solid #333;
-  border-bottom: 10px solid rgba(0, 0, 0, 0.8);
+  border-bottom: 10px solid $primary-color;
   top: -10px;
 }
 #matecatTip.nw-alt:before, #matecatTip.ne-alt:before,
 #matecatTip.sw-alt:before, #matecatTip.se-alt:before {
   border-top: 10px solid #333;
-  border-top: 10px solid rgba(0, 0, 0, 0.8);
+  border-top: 10px solid $primary-color;
   bottom: -10px;
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
@@ -83,7 +86,7 @@
 #matecatTip.sw-alt:before, #matecatTip.se-alt:before {
   border-top: none;
   border-bottom: 10px solid #333;
-  border-bottom: 10px solid rgba(0, 0, 0, 0.8);
+  border-bottom: 10px solid $primary-color;
   bottom: auto;
   top: -10px;
 }

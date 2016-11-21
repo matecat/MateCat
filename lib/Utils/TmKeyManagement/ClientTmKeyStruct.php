@@ -6,6 +6,11 @@
  * Time: 15.52
  */
 
+/**
+ * This object is meant to wrap an internal structure to expose only some values to the client and obfuscate others
+ *
+ * Class TmKeyManagement_ClientTmKeyStruct
+ */
 class TmKeyManagement_ClientTmKeyStruct extends TmKeyManagement_TmKeyStruct {
 
     /**
@@ -33,6 +38,33 @@ class TmKeyManagement_ClientTmKeyStruct extends TmKeyManagement_TmKeyStruct {
 
         return $this;
 
+    }
+
+    /**
+     * Facade loader for the client results
+     *
+     * @param TmKeyManagement_TmKeyStruct $keyToClone
+     *
+     * @return $this
+     */
+    public function loadInUsers( TmKeyManagement_TmKeyStruct $keyToClone ){
+        $_userStructs = [];
+        foreach( $keyToClone->getInUsers() as $userStruct ){
+            $_userStructs[] = new Users_ClientUserFacade( $userStruct );
+        }
+        $this->in_users = $_userStructs;
+
+        return $this;
+    }
+
+    /**
+     * Used to force the shared parameters if the TmKeyManagement_ClientTmKeyStruct wraps a TmKeyManagement_TmKeyStruct
+     * which comes from job data ( json keys in the database does not knows about sharing )
+     *
+     * @param $shared
+     */
+    public function setShared( $shared ){
+        $this->is_shared = $shared;
     }
 
 }

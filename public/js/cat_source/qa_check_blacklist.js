@@ -33,27 +33,28 @@ if (QaCheckBlacklist.enabled() )
      * @param matched_words
      */
     function updateBlacklistItemsInSegment( editarea, matched_words ) {
+        saveSelection() ;
+
         editarea.find('.blacklistItem').each(function(index)  {
             $(this).replaceWith( this.childNodes );
         });
 
-        editarea[0].normalize() ;
+        if ( matched_words.length ) {
+            editarea[0].normalize() ;
 
-        var newHTML = editarea.html() ;
+            var newHTML = editarea.html() ;
 
-        $(matched_words).each(function(index, value) {
-            value = escapeRegExp( value );
-            var re = new RegExp('\\b(' + value + ')\\b',"g");
-            newHTML = newHTML.replace(
-                re , '<span class="blacklistItem">$1</span>'
-            );
-        });
-
-        editarea.html( newHTML );
-
-        if ( editarea.find('.undoCursorPlaceholder').length ) {
-            setCursorPosition( editarea.find('.undoCursorPlaceholder')[0] );
+            $(matched_words).each(function(index, value) {
+                value = escapeRegExp( value );
+                var re = new RegExp('\\b(' + value + ')\\b',"g");
+                newHTML = newHTML.replace(
+                    re , '<span class="blacklistItem">$1</span>'
+                );
+            });
+            editarea.html( newHTML );
         }
+
+        restoreSelection();
 
         $('.blacklistItem', editarea).on('click', blacklistItemClick);
         addTip( editarea ) ;

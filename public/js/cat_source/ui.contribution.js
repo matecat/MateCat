@@ -203,13 +203,12 @@ $.extend(UI, {
                 }
 
                 var copySuggestion = function() {
-                    UI.copySuggestionInEditarea(segment, translation, editarea, match, false, true, 1, d.data.matches[0].created_by);
+                    UI.copySuggestionInEditarea(segment, translation, editarea, match, false, true, 1);
                 };
-
-                if ( Speech2Text.enabled() && Speech2Text.isContributionToBeAllowed( match ) ) {
-                    copySuggestion();
-                } else if ( !Speech2Text.enabled() ) {
-                    copySuggestion();
+                if ( UI.autoCopySuggestionEnabled() &&
+                    ((Speech2Text.enabled() && Speech2Text.isContributionToBeAllowed( match )) || !Speech2Text.enabled() )
+                ) {
+				    copySuggestion();
                 }
 
                 if (UI.body.hasClass('searchActive')) {
@@ -229,35 +228,38 @@ $.extend(UI, {
         }
         SegmentActions.addClassToSegment(UI.getSegmentId(segment), 'loaded');
     },
-    renderContributionErrors: function(errors, segment) {
-        $('.tab.sub-editor.matches .engine-errors', segment).empty();
-        $('.tab.sub-editor.matches .engine-errors', segment).hide();
-        $.each(errors, function(){
-            var percentClass = "";
-            var messageClass = "";
-            var imgClass = "";
-            var  messageTypeText = '';
-            if(this.code == '-2001') {
-                console.log('ERROR -2001');
-                percentClass = "per-red";
-                messageClass = 'error';
-                imgClass = 'error-img';
-                messageTypeText = 'Error: ';
-            }
-            else if (this.code == '-2002') {
-                console.log('WARNING -2002');
-                percentClass = "per-orange";
-                messageClass = 'warning';
-                imgClass = 'warning-img';
-                messageTypeText = 'Warning: ';
-            }
-            else {
-                return;
-            }
-            $('.tab.sub-editor.matches .engine-errors', segment).show();
-            var percentText = this.created_by_type;
-            var suggestion_info = '';
-            var cb = this.created_by;
+    autoCopySuggestionEnabled: function () {
+        return true;
+    },
+        renderContributionErrors: function(errors, segment) {
+            $('.tab.sub-editor.matches .engine-errors', segment).empty();
+            $('.tab.sub-editor.matches .engine-errors', segment).hide();
+            $.each(errors, function(){
+                var percentClass = "";
+                var messageClass = "";
+                var imgClass = "";
+                var  messageTypeText = '';
+                if(this.code == '-2001') {
+                    console.log('ERROR -2001');
+                    percentClass = "per-red";
+                    messageClass = 'error';
+                    imgClass = 'error-img';
+                    messageTypeText = 'Error: ';
+                }
+                else if (this.code == '-2002') {
+                    console.log('WARNING -2002');
+                    percentClass = "per-orange";
+                    messageClass = 'warning';
+                    imgClass = 'warning-img';
+                    messageTypeText = 'Warning: ';
+                }
+                else {
+                    return;
+                }
+                $('.tab.sub-editor.matches .engine-errors', segment).show();
+                var percentText = this.created_by_type;
+                var suggestion_info = '';
+                var cb = this.created_by;
 
             $('.tab.sub-editor.matches .engine-errors', segment).append('<ul class="engine-error-item graysmall"><li class="engine-error">' +
                     '<div class="' + imgClass + '"></div><span class="engine-error-message ' + messageClass + '">' + messageTypeText + this.message +

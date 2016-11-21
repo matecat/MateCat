@@ -164,8 +164,8 @@
                     .replace(/\r\n/g, config.crlfPlaceholder )
                     .replace(/\t/g, config.tabPlaceholder )
                     .replace(String.fromCharCode( parseInt( 0xA0, 10 ) ), config.nbspPlaceholder );
-
             SegmentActions.replaceSourceText(UI.getSegmentId(currentSegment), UI.getSegmentFileId(currentSegment), source);
+            UI.markGlossaryItemsInSource(UI.cachedGlossaryData);
         },
         /**
          * Set the tag projection to true and reload file
@@ -184,7 +184,10 @@
                 type: 'POST',
                 data : data
             }).done( function( data ) {
-                UI.render();
+                UI.render({
+                    segmentToScroll: UI.getSegmentId(UI.currentSegment),
+                    segmentToOpen: UI.getSegmentId(UI.currentSegment)
+                });
                 UI.checkWarnings(false);
             });
 
@@ -206,7 +209,10 @@
                 type: 'POST',
                 data : data
             }).done( function( data ) {
-                UI.render(false);
+                UI.render({
+                    segmentToScroll: UI.getSegmentId(UI.currentSegment),
+                    segmentToOpen: UI.getSegmentId(UI.currentSegment)
+                });
                 UI.checkWarnings(false);
             });
 

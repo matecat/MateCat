@@ -352,32 +352,32 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
               }
             }
           },
-          "/v2/project-completion-status/{id_project}": {
-            "get": {
-              "tags": [
-                "Project"
-              ],
-              "summary": "Project completion status",
-              "description": "Add \"Mark as Complete\" button",
-              "parameters": [
-                {
-                  "name": "id_project",
-                  "in": "path",
-                  "description": "The id of the project",
-                  "required": true,
-                  "type": "string"
-                }
-              ],
-              "responses": {
-                "200": {
-                  "description": "Project completion status"
-                },
-                "default": {
-                  "description": "Unexpected error"
-                }
-              }
-            }
-          },
+//          "/v2/project-completion-status/{id_project}": {
+//            "get": {
+//              "tags": [
+//                "Project"
+//              ],
+//              "summary": "Project completion status",
+//              "description": "Add \"Mark as Complete\" button",
+//              "parameters": [
+//                {
+//                  "name": "id_project",
+//                  "in": "path",
+//                  "description": "The id of the project",
+//                  "required": true,
+//                  "type": "string"
+//                }
+//              ],
+//              "responses": {
+//                "200": {
+//                  "description": "Project completion status"
+//                },
+//                "default": {
+//                  "description": "Unexpected error"
+//                }
+//              }
+//            }
+//          },
           "/v2/jobs/{id_job}/{password}/comments": {
             "get": {
               "tags": [

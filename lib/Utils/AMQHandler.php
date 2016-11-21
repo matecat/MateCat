@@ -82,7 +82,7 @@ class AMQHandler extends Stomp {
         }
 
         if( !empty( $this->clientType ) && $this->clientType != self::CLIENT_TYPE_SUBSCRIBER ){
-            throw new Exception( "This client is a $this->clientType. A client can only publisher or subscriber, not both." );
+            throw new Exception( "This client is a $this->clientType. A client can be only publisher or subscriber, not both." );
         } elseif( $this->clientType == self::CLIENT_TYPE_SUBSCRIBER ) {
             //already connected, we want to change the queue
             $this->queueName = $queueName;

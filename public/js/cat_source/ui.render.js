@@ -4,12 +4,7 @@
 $.extend(UI, {
 	render: function(options) {
         options = options || {};
-		firstLoad = (options.firstLoad || false);
-		segmentToOpen = (options.segmentToOpen || false);
-		segmentToScroll = (options.segmentToScroll || false);
-		scrollToFile = (options.scrollToFile || false);
-		highlight = (options.highlight || false);
-		seg = (segmentToOpen || false);
+		var seg = (options.segmentToOpen || false);
 		this.segmentToScrollAtRender = (seg) ? seg : false;
 
 		this.isSafari = (navigator.userAgent.search("Safari") >= 0 && navigator.userAgent.search("Chrome") < 0);
@@ -20,6 +15,7 @@ $.extend(UI, {
 		this.body = $('body');
 		this.firstLoad = firstLoad;
 
+		this.firstLoad = (options.firstLoad || false);
 		this.initSegNum = 100; // number of segments initially loaded
 		this.moreSegNum = 25;
 		this.numOpenedSegments = 0;

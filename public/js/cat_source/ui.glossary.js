@@ -71,7 +71,7 @@ if (true)
         },
 
         getGlossary: function ( segment, entireSegment, next ) {
-
+            var n, txt;
             if ( typeof next != 'undefined' ) {
                 var segmentToLookForGlossary ;
 
@@ -138,8 +138,10 @@ if (true)
                     }
                     n = this[0];
                     UI.processLoadedGlossary( d, this );
-
-                    UI.cachedGlossaryData = d;
+                    // I store for the current
+                    if ( this[1] == 0 ) {
+                        UI.cachedGlossaryData = d;
+                    }
                     if ( !this[1] && (!UI.body.hasClass( 'searchActive' )) ) UI.markGlossaryItemsInSource( d );
                 },
                 complete: function () {
@@ -165,6 +167,8 @@ if (true)
                 }
             }
             var numMatches = Object.size( d.data.matches );
+            var existingMatches = $( '.tab-switcher-gl a .number', segment.el ).data('num');
+            numMatches = ( existingMatches && existingMatches > 0) ? existingMatches + numMatches : numMatches;
             if ( numMatches ) {
                 UI.renderGlossary( d, segment.el );
                 $( '.tab-switcher-gl a .number', segment.el ).text( ' (' + numMatches + ')' ).attr( 'data-num', numMatches );
@@ -175,7 +179,7 @@ if (true)
 
         markGlossaryItemsInSource: function ( d ) {
 
-            if ( ! Object.size( d.data.matches ) ) return ;
+            if ( !d || ! Object.size( d.data.matches ) ) return ;
 
             var container = $('.source', UI.currentSegment ) ;
 
@@ -374,10 +378,12 @@ if (true)
                         rightTxt = rightTxt.replace( /\#\{/gi, "<mark>" );
                         rightTxt = rightTxt.replace( /\}\#/gi, "</mark>" );
                         var commentOriginal = this.comment;
-                        commentOriginal = commentOriginal.replace( /\#\{/gi, "<mark>" );
-                        commentOriginal = commentOriginal.replace( /\}\#/gi, "</mark>" );
+                        if (commentOriginal) {
+                            commentOriginal = commentOriginal.replace(/\#\{/gi, "<mark>");
+                            commentOriginal = commentOriginal.replace(/\}\#/gi, "</mark>");
+                        }
                         var addCommentHtml = '<div class="glossary-add-comment">' +
-                            '<a href="#">(+) Comment</a>' +
+                            '<a href="#">Add a Comment</a>' +
                             '<div class="input gl-comment" contenteditable="true" ></div>' +
                             '</div>' ;
                         $( '.sub-editor.glossary .overflow .results', segment )
@@ -396,7 +402,7 @@ if (true)
                                 '</span>' +
                                 '</li>' +
                                 '<li class="details">' +
-                                ((this.comment === '') ? addCommentHtml : '<div class="comment" data-original="'+ UI.decodePlaceholdersToText( commentOriginal, true ) +'">' + UI.decodePlaceholdersToText( commentOriginal, true ) + '</div>') +
+                                (( !this.comment || this.comment === '') ? addCommentHtml : '<div class="comment" data-original="'+ UI.decodePlaceholdersToText( commentOriginal, true ) +'">' + UI.decodePlaceholdersToText( commentOriginal, true ) + '</div>') +
                                 '<ul class="graysmall-details">' +
                                 '<li>' + this.last_update_date + '</li>' +
                                 '<li class="graydesc">Source: <span class="bold">' + cb + '</span></li>' +
@@ -445,6 +451,7 @@ if (true)
                         UI.footerMessage( msg, this[0] );
                     }
                     UI.processLoadedGlossary( d, this );
+                    UI.markGlossaryItemsInSource(d);
                 },
                 complete: function () {
                     $( '.gl-search', UI.currentSegment ).removeClass( 'setting' );

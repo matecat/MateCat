@@ -5,7 +5,8 @@ function doSearchQuery( Array $queryParams ) {
 
     $key = $queryParams[ 'key' ]; //no escape: not related with Database
 
-    $src = preg_replace( array( "#'#", '#"#' ), array( '&apos;', '&quot;' ), $queryParams[ 'src' ] );
+//    $src = preg_replace( array( "#'#", '#"#' ), array( '&apos;', '&quot;' ), $queryParams[ 'src' ] );
+    $src = $queryParams[ 'src' ] ;
 
     // in the database at the target we have not html entities but normal quotes
     //so we have do not escape the translations
@@ -43,7 +44,7 @@ function doSearchQuery( Array $queryParams ) {
      *
      */
     $_regexpEscapedSrc = preg_replace( '#([\%\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1', $queryParams[ 'src' ] );
-    $_regexpEscapedSrc = preg_replace( array( "#'#", '#"#' ), array( '&apos;', '&quot;' ), $_regexpEscapedSrc );
+//    $_regexpEscapedSrc = preg_replace( array( "#'#", '#"#' ), array( '&apos;', '&quot;' ), $_regexpEscapedSrc );
     $_regexpEscapedSrc = $db->escape( $_regexpEscapedSrc );
 
     $_regexpEscapedTrg = preg_replace( '#([\%\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1', $queryParams[ 'trg' ] );
@@ -357,13 +358,6 @@ function randomString( $maxlength = 15 ) {
 
 function encryptPass( $clear_pass, $salt ) {
     return sha1( $clear_pass . $salt );
-}
-
-function mailer( $toUser, $toMail, $fromUser, $fromMail, $subject, $message ) {
-    //optional headerfields
-    $header = "From: " . $fromUser . " <" . $fromMail . ">\r\n";
-    //mail command
-    mail( $toMail, $subject, $message, $header );
 }
 
 function checkLogin( $user, $pass ) {
@@ -1025,7 +1019,7 @@ function countThisTranslatedHashInJob( $jid, $jpassword, $sid ) {
         AND password = '%s'
         AND segment_translations.status IN( 
           '" . Constants_TranslationStatus::STATUS_TRANSLATED . "' , 
-          '" . Constants_TranslationStatus::STATUS_TRANSLATED . "' 
+          '" . Constants_TranslationStatus::STATUS_APPROVED . "' 
         )
     ";
 
@@ -1188,17 +1182,18 @@ function addTranslation( array $_Translation ) {
         $msg = "\n\n Error setTranslationUpdate \n\n Empty translation found after DB Escape: \n\n " . var_export( array_merge( array( 'db_query' => $query ), $_POST ), true );
         Log::doLog( $msg );
         Utils::sendErrMailReport( $msg );
-
-        return -1;
+        throw new PDOException( $msg );
     }
 
-    Log::doLog( $query );
+//    Log::doLog( $query );
+
     try {
         $db->query($query);
     } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
-        return $e->getCode() * -1;
+        throw new PDOException( "Error occurred storing (UPDATE) the translation for the segment {$_Translation['id_segment']} - Error: {$e->getCode()}" );
     }
+
     return $db->affected_rows;
 }
 

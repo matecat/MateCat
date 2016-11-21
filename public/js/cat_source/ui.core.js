@@ -1248,9 +1248,9 @@ UI = {
          * @see propagateTranslation
          *
          */
-        sameContentIndex = -1;
+        var sameContentIndex = -1;
         $.each(d.data.editable, function(ind) {
-            if( this.translation == UI.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' ) ) {
+            if( this.translation == htmlEncode(UI.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' )) ) {
                 sameContentIndex = ind;
             }
         });
@@ -1259,12 +1259,12 @@ UI = {
         sameContentIndex1 = -1;
         $.each(d.data.not_editable, function(ind) {
             //Remove trailing spaces for string comparison
-            if( this.translation == UI.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' ) ) sameContentIndex1 = ind;
+            if( this.translation == htmlEncode(UI.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' )) ) sameContentIndex1 = ind;
         });
         if(sameContentIndex1 != -1) d.data.not_editable.splice(sameContentIndex1, 1);
 
-        numAlt = d.data.editable.length + d.data.not_editable.length;
-        numSeg = 0;
+        var numAlt = d.data.editable.length + d.data.not_editable.length;
+        var numSeg = 0;
         $.each(d.data.editable, function() {
             numSeg += this.involved_id.length;
         });
@@ -1488,6 +1488,7 @@ UI = {
 				newStr += this.outerHTML;
 			}
 		});
+        // saveSelection();
         if (LXQ.enabled()) {
             $.powerTip.destroy($('.tooltipa',this.currentSegment));
             $.powerTip.destroy($('.tooltipas',this.currentSegment));
@@ -1498,11 +1499,14 @@ UI = {
             replaceSelectedHtml(newStr);
         }
         this.saveInUndoStack('formatSelection');
-		saveSelection();
-		$('.editor .editarea .formatSelection-placeholder').after($('.editor .editarea .rangySelectionBoundary'));
-		$('.editor .editarea .formatSelection-placeholder').remove();
+
+        $('.editor .editarea .formatSelection-placeholder').after($('.editor .editarea .rangySelectionBoundary'));
+        $('.editor .editarea .formatSelection-placeholder').remove();
         $('.editor .editarea').trigger('afterFormatSelection');
-	},
+        setTimeout(function () {
+            setCursorPosition(document.getElementsByClassName("undoCursorPlaceholder")[0]);
+        }, 0);
+    },
 
 	setStatusButtons: function(button) {
 		var isTranslatedButton = ($(button).hasClass('translated')) ? true : false;
@@ -1551,6 +1555,8 @@ UI = {
             labelDownloading = 'OPENING FILES...';
         }
         button.addClass('disabled' ).data( 'oldValue', button.val() ).val(labelDownloading);
+        APP.fitText($('.breadcrumbs'), $('#pname'), 30);
+
     },
 
     reEnableDownloadButton : function() {
@@ -2936,9 +2942,9 @@ UI = {
                         source_val = LXQ.highLightText(source_val,highlights.source,true,LXQ.shouldHighlighWarningsForSegment(seg),true,seg);
                         
                         //var target_val = UI.clearMarks($.trim($(".editarea", seg).html()));
-                        var target_val = $(".editarea", seg).html();
+                        var target_val = $(".targetarea", seg).html();
                         target_val = LXQ.highLightText(target_val,highlights.target,true,LXQ.shouldHighlighWarningsForSegment(seg),false,seg);
-                        $(".editarea", seg).html(target_val);
+                        $(".targetarea", seg).html(target_val);
                         $(".source", seg).html(source_val);
                         // $('.lxq-error-seg',seg).attr('numberoferrors',LXQ.getVisibleWarningsCountForSegment(seg));
                         // if (element.show) {

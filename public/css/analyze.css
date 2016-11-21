@@ -438,7 +438,14 @@ div.wrapper div:last-child {border:none;}
 
 .total strong{display: inline-block;width: 80px;}
 
-.total .wordsum{font-size:20px;color:#000;text-align:right;margin-right:15px; margin-top:10px;/*margin:0 45px 0 0;padding:0px 20px 0 20px;*/}
+.total .wordsum{
+	font-size:20px;
+	color:#000;
+	text-align:right;
+	margin-right:15px;
+	margin-top:10px;/*margin:0 45px 0 0;padding:0px 20px 0 20px;*/
+	padding: 0;
+}
 
 /*
 .popup-split.error-number .total .wordsum .total-w {
@@ -508,15 +515,16 @@ a:hover{text-decoration:none}
 .error-count
 {
     display: none;
-    margin-right: 15px;
+    margin-right: 15px !important;
     font-size: 20px;
     text-align: right;
     color: #d65757!important;
-    margin-top: -20px!important;
 }
 .popup-split.error-number .error-count
 {
     display: block;
+	padding: 0;
+	margin-top: 0px;
 }
 .popup-split.error-number .error-count.current{
     color: black !important;
@@ -550,7 +558,12 @@ a:hover{text-decoration:none}
 .job-details{float:right}
 .job-perc{color:#999;margin:0;float:left;padding:10px;font-size:18px;color:#000 ;text-align:right;}
 
-.job-perc p{float:left;font-size:14px;margin:1px 6px 0 3px !important}
+.job-perc p{
+	float:left;
+	font-size:14px;
+	margin:1px 6px 0 3px !important;
+	padding: 0;
+}
 .job-perc .operation-btn{opacity:0.5;background: -webkit-gradient(linear, left top, left bottom, from(#b7b7b7), to(#999));
 						 background: -moz-linear-gradient(top,  #b7b7b7,  #999);
 						 background: linear-gradient(top,  #b7b7b7,  #999);
@@ -648,7 +661,8 @@ a:hover{text-decoration:none}
     color: #666;
     font-size: 18px;
     margin: 0px 10px 0 0px;
-    padding: 0px 0 0 30px;
+    padding: 0px 0 0 0px;
+	line-height: 13px;
 }
 .loadingbar p.label
 {
@@ -672,7 +686,7 @@ a:hover{text-decoration:none}
 	-moz-box-shadow: inset 0 1px 3px 0px #ccc;
 	-webkit-box-shadow: inset 0 1px 3px 0px #ccc;
 	box-shadow: inset 0 1px 3px 0px #ccc;
-	margin:3px 0 0 5px !important;
+	margin:-2px 0 0 5px !important;
 	/*
 		margin:3px auto 0px auto !important;
 	*/
@@ -680,7 +694,7 @@ a:hover{text-decoration:none}
 	background:#fff;
 	border-radius:10px;
 	overflow:hidden;
-	margin-right:2px !important;
+	margin-right:105px !important;
 }
 
 .approved-bar
