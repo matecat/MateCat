@@ -35,6 +35,26 @@ class ConnectedServicesController extends KleinController {
         }
     }
 
+    public function update() {
+        $this->__validateOwnership() ;
+
+        $params = filter_var_array( $this->request->params(), array(
+            'disabled' => FILTER_VALIDATE_BOOLEAN
+        ));
+
+        if ( $params['disabled'] ) {
+            $this->service->disabled_at = \Utils::mysqlTimestamp( time() ) ;
+        }
+        else {
+           $this->service->disabled_at = null ;
+        }
+
+        ConnectedServiceDao::updateStruct($this->service, array('disabled_at') ) ;
+
+        $formatter = new ConnectedService( array() );
+        $this->response->json( array( 'connected_service' => $formatter->renderItem( $this->service ) ) ) ;
+    }
+
     protected function afterConstruct() {
         \Bootstrap::sessionStart() ;
 
