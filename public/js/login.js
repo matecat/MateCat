@@ -20,7 +20,7 @@ $.extend(APP, {
         });
 
         $('.user-menu-preferences').on('click', function () {
-            APP.ModalWindow.showModalComponent(PreferencesModal, {}, 'Preferences');
+            $('#modal').trigger('openpreferences');
         });
 
         $('#modal').on('opensuccess', function (e, param) {
@@ -28,9 +28,14 @@ $.extend(APP, {
         });
 
         $('#modal').on('openpreferences', function (e, param) {
-            var props = {};
-            if (param)
+            var props = {
+                user: APP.USER.STORE.user,
+                services: APP.USER.STORE.connected_services
+            };
+            if (param) {
                 props = param;
+                $.extend(props, param);
+            }
             APP.ModalWindow.showModalComponent(PreferencesModal, props, 'Preferences');
         });
         $('#modal').on('openresetpassword', function () {

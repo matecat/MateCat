@@ -4817,6 +4817,7 @@ a.reset-password.btn-confirm-medium {
 
 .login-container-left input,
 .register-form-container input[type=text],
+.register-form-container input[type=password],
 .forgot-password-modal input,
 .reset-password-modal input,
 .user-info-form input {
@@ -4829,6 +4830,7 @@ a.reset-password.btn-confirm-medium {
 .user-info-form input {
     margin-top: 5px;
     width: 100%;
+    color: #000;
 }
 
 .login-container-right li {

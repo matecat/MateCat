@@ -47,7 +47,7 @@ class RegisterModal extends React.Component {
         this.sendRegisterData().done(function (data) {
             $('#modal').trigger('opensuccess', [{
                 title: 'Register Now',
-                text: 'To complete your registration please follow the instructions in the email we sent you to ' + this.state.emailAddress + '.'
+                text: 'To complete your registration please follow the instructions in the email we sent you to ' + self.state.emailAddress + '.'
             }]);
         }).fail(function (data) {
             var data = JSON.parse( response.responseText );

@@ -39,11 +39,11 @@ class PreferencesModal extends React.Component {
                     <h1>Preferences</h1>
                     <div className="user-info-form">
                         <label htmlFor="user-login-name">Name</label><br/>
-                        <input type="text" name="name" id="user-login-name" defaultValue="Federico" disabled="true"/><br/>
+                        <input type="text" name="name" id="user-login-name" defaultValue={this.props.user.first_name} disabled="true"/><br/>
                         <label htmlFor="user-login-name">Surname</label><br/>
-                        <input type="text" name="name" id="user-login-surname" defaultValue="Ricciuti" disabled="true"/><br/>
+                        <input type="text" name="name" id="user-login-surname" defaultValue={this.props.user.last_name} disabled="true"/><br/>
                         <label htmlFor="user-login-name">Email</label><br/>
-                        <input type="text" name="name" id="user-login-email" defaultValue="federico@translated.net" disabled="true"/><br/>
+                        <input type="text" name="name" id="user-login-email" defaultValue={this.props.user.email} disabled="true"/><br/>
                     </div>
                     <div className="user-reset-password">
                         {gdriveMessage}

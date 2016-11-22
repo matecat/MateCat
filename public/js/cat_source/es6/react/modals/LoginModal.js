@@ -49,10 +49,10 @@ class LoginModal extends React.Component {
         this.sendLoginData().done(function (data) {
             window.location.reload()
         }).fail(function (response) {
-            var data = JSON.parse(response.responseText);
+            var data = JSON.parse( response.responseText );
             if (data) {
                 self.setState({
-                    generalError: data.error.message
+                    generalError: data
                 });
             } else {
                 self.setState({
@@ -121,7 +121,7 @@ class LoginModal extends React.Component {
 
 const fieldValidations = [
     RuleRunner.ruleRunner("emailAddress", "Email address", FormRules.requiredRule, FormRules.checkEmail),
-    RuleRunner.ruleRunner("password", "Password", FormRules.requiredRule, FormRules.minLength(6)),
+    RuleRunner.ruleRunner("password", "Password", FormRules.requiredRule, FormRules.minLength(8)),
 ];
 
 LoginModal.propTypes = {
