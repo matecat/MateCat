@@ -55,9 +55,10 @@ class EntryDao extends \DataAccess_AbstractDao {
         $sql = "SELECT qa_entries.* FROM qa_entries
           JOIN segment_translations
             ON segment_translations.id_segment = qa_entries.id_segment
+            AND qa_entries.id_job = segment_translations.id_job
           JOIN jobs
-            ON jobs.id = segment_translations.id_job
-            AND jobs.password = :password AND jobs.id = :id ";
+            ON jobs.id = qa_entries.id_job
+           WHERE qa_entries.id_job = :id AND jobs.password = :password ";
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
