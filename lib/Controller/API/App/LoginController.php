@@ -22,7 +22,7 @@ class LoginController extends KleinController {
         $dao = new \Users_UserDao() ;
         $user = $dao->getByEmail( $params['email'] ) ;
 
-        if ( $user && $user->passwordMatch( $params['password'] ) ) {
+        if ( $user && !is_null($user->email_confirmed_at) && $user->passwordMatch( $params['password'] ) ) {
             \AuthCookie::setCredentials($user->email, $user->uid ) ;
             $this->response->code( 200 ) ;
         }
