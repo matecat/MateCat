@@ -492,11 +492,13 @@ class downloadFileController extends downloadController {
 
     }
 
-
     /**
      * This prepares the object that will handle communication with remote file service.
      * We assume that the whole project was created with files coming from the same remote account.
      * We look for the first remote_file record and seek for the connected service to read for the auth_token.
+     *
+     * @param $output_content
+     * @throws Exception
      */
     private function startRemoteFileService( $output_content ) {
         $keys = array_keys( $output_content ) ;
@@ -508,12 +510,22 @@ class downloadFileController extends downloadController {
         $dao = new \ConnectedServices\ConnectedServiceDao() ;
         $connectedService = $dao->findById( $remoteFile->connected_service_id ) ;
 
+        if ( $connectedService->disabled_at )  {
+            // TODO: check how this exception is handled
+            throw new Exception('Cannot use disabled service');
+        }
 
         $verifier = new \ConnectedServices\GDriveTokenVerifyModel( $connectedService ) ;
 
-        $this->remoteFileService = new GDrive\RemoteFileService(
-            $connectedService->getDecryptedOauthAccessToken()
-        );
+        if ( $verifier->validOrRefreshed() ) {
+            $this->remoteFileService = new GDrive\RemoteFileService(
+                $connectedService->getDecryptedOauthAccessToken()
+            );
+        }
+        else {
+            // TODO: check how this exception is handled
+            throw new Exception('Unable to refresh token for service');
+        }
     }
 
 
