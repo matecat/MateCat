@@ -510,9 +510,9 @@ class downloadFileController extends downloadController {
         $dao = new \ConnectedServices\ConnectedServiceDao() ;
         $connectedService = $dao->findById( $remoteFile->connected_service_id ) ;
 
-        if ( $connectedService->disabled_at )  {
+        if ( !$connectedService || $connectedService->disabled_at )  {
             // TODO: check how this exception is handled
-            throw new Exception('Cannot use disabled service');
+            throw new Exception('Connected service missing or disabled');
         }
 
         $verifier = new \ConnectedServices\GDriveTokenVerifyModel( $connectedService ) ;
