@@ -238,7 +238,6 @@ class INIT {
     public static $OAUTH_REDIRECT_URL;
     public static $OAUTH_SCOPES;
     public static $OAUTH_BROWSER_API_KEY;
-    public static $OAUTH_GDRIVE_SCOPES;
 
     public static $ENABLE_OMEGAT_DOWNLOAD = false;
     public static $UNLOCKABLE_TAGS = false;
@@ -251,19 +250,12 @@ class INIT {
         self::$OAUTH_BROWSER_API_KEY = INIT::$OAUTH_CONFIG[ 'OAUTH_BROWSER_API_KEY' ];
 
         self::$OAUTH_REDIRECT_URL = INIT::$HTTPHOST . "/oauth/response";
+
         self::$OAUTH_SCOPES       = array(
                 'https://www.googleapis.com/auth/userinfo.email',
                 'https://www.googleapis.com/auth/userinfo.profile',
                 'profile'
         );
-        self::$OAUTH_GDRIVE_SCOPES = array(
-                'https://www.googleapis.com/auth/userinfo.email',
-                'https://www.googleapis.com/auth/userinfo.profile',
-                'https://www.googleapis.com/auth/drive',
-                'https://www.googleapis.com/auth/drive.install',
-                'profile'
-        );
-
         self::$MIME_TYPES = include( 'Mime2Extension.php' );
 
     }

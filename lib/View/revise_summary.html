@@ -19,9 +19,8 @@
     </script>
     <script type="text/javascript" src="${basepath}public/js/lib/jquery.js?build=${build_number}"></script>
     <script type="text/javascript" src="${basepath}public/js/lib/jquery.cookie.js"></script>
-    <script type="text/javascript" src="${basepath}public/js/common.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/build/common.js?build=${build_number}"></script>
     <script type="text/javascript" src="${basepath}public/js/editlog.js?build=${build_number}"></script>
-    <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
 
     <script src="${basepath}public/js/build/react.js?build=${build_number}"></script>
     <script src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
@@ -255,17 +254,7 @@
                 <li><a href="https://www.matecat.com/support/" target="_blank">Support</a></li>
             </ul>
 
-            <tal:block tal:condition="php: empty(logged_user)">
-                <div id='welcomebox'>
-                    <span>Anonymous</span> (<a id='loginlink' class="authLink" href="${incomingUrl}">Login</a>)
-                </div>
-            </tal:block>
-
-            <tal:block tal:condition="php: !empty(logged_user)">
-                <div id='welcomebox' tal:attributes="title extended_user">
-                    <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>Logout</a>)
-                </div>
-            </tal:block>
+            <div metal:use-macro="common.html/login_includes" />
 
         </nav>
 
@@ -330,11 +319,7 @@
                 scrollTop: $( "#highlight" ).offset().top
             }, 1000 );
         } );
-        $('a.authLink').click(function(e){
-            e.preventDefault();
-            $(".login-google").show();
-            return false;
-        });
+
         $('#sign-in').click(function(e){
             e.preventDefault();
             APP.googole_popup($(this).data('oauth'));

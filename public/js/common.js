@@ -2,6 +2,8 @@ APP = null;
 
 APP = {
     init: function () {
+        this.setLoginEvents();
+
         this.isCattool = $( 'body' ).hasClass( 'cattool' );
         $( "body" ).on( 'click', '.modal .x-popup', function ( e ) {
             e.preventDefault();
@@ -79,14 +81,7 @@ APP = {
             content: content
         } );
     },
-    googole_popup: function ( url ) {
-        //var rid=$('#rid').text();
-        //url=url+'&rid='+rid;
-        var newWindow = window.open( url, 'name', 'height=600,width=900' );
-        if ( window.focus ) {
-            newWindow.focus();
-        }
-    },
+
     confirm: function ( options ) {
         this.waitingConfirm = true;
         this.popup( {
@@ -564,7 +559,7 @@ APP = {
      */
 
     addNotification: function (notification) {
-        if (!APP. notificationBox) {
+        if (!APP.notificationBox) {
             APP.notificationBox = ReactDOM.render(
                 React.createElement(NotificationBox),
                 $(".notifications-wrapper")[0]
@@ -614,6 +609,10 @@ APP = {
     }
 };
 
+$(document).ready(function(){
+    APP.init();
+});
+
 $.extend( $.expr[":"], {
     "containsNC": function ( elem, i, match ) {
         return (elem.textContent || elem.innerText || "").toLowerCase().indexOf( (match[3] || "").toLowerCase() ) >= 0;
@@ -632,3 +631,5 @@ var _prum = [['id',
     p.src = '//rum-static.pingdom.net/prum.min.js';
     s.parentNode.insertBefore( p, s );
 })();
+
+

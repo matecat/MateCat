@@ -3,6 +3,8 @@
 define( 'DEFAULT_NUM_RESULTS', 2 );
 set_time_limit( 0 );
 
+use ConnectedServices\GDrive as GDrive ;
+
 class createProjectController extends ajaxController {
 
     private $file_name;

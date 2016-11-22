@@ -226,15 +226,15 @@ abstract class viewController extends controller {
 
 
     /**
-     * Check user logged
+     * isLoggedIn
+     *
+     * Check user logged. For user to be logged in we need both uid and cid.
+     * TODO: check why cid is necessary. Ideally we should only need uid and
+     * infer the cid from it.
      *
      * @return bool
      */
     public function isLoggedIn() {        
-        if( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ) {
-            AuthCookie::tryToRefreshToken( $_SESSION[ 'cid' ] );
-        }
-        
         return (
                 ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ) &&
                 ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) )
@@ -242,9 +242,13 @@ abstract class viewController extends controller {
     }
 
     /**
-     * GatUser Login Info
+     * getLoginUserParams
      *
-     * @return bool
+     * TODO: clarify. We check from session variables and then rely $this->logged_user ??
+     *
+     * @deprecated
+     *
+     * @return array()
      */
     public function getLoginUserParams() {
         if ( $this->isLoggedIn() ){
@@ -263,12 +267,7 @@ abstract class viewController extends controller {
         $browser_name = strtolower( $browser_info[ 'name' ] );
         $browser_platform = strtolower( $browser_info[ 'platform' ] );
         $return_value = 0;
- //	    log::doLog ("bname $browser_name");
 
-/*        if (  ($browser_name=="internet explorer" or $browser_name=="mozilla firefox")  and  $_SERVER[ 'REQUEST_URI' ]=="/" ) {
-                return -2;
-         }
-*/
         foreach ( INIT::$ENABLED_BROWSERS as $enabled_browser ) {
             if ( stripos( $browser_name, $enabled_browser ) !== false ) {
                 // Safari supported only on Mac

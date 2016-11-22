@@ -22,7 +22,7 @@ class oauthResponseHandlerController extends viewController{
 		$this->user_logged = true;
 
 		$this->client = OauthClient::getInstance()->getClient();
-                $this->client->setAccessType( "offline" );
+        $this->client->setAccessType( "offline" );
 
 		$oauthTokenEncryption = OauthTokenEncryption::getInstance();
 
@@ -83,9 +83,9 @@ class oauthResponseHandlerController extends viewController{
 
 			//set stuff
 			AuthCookie::setCredentials($this->userData['email'], $result['uid']);
-			//$_SESSION['cid'] = $this->userdata['email'];
 
-                        $_SESSION[ 'uid' ] = $result[ 'uid' ];
+     $_SESSION[ 'cid' ]  = $this->userData['email'];
+     $_SESSION[ 'uid' ]  = $result[ 'uid' ];
 
 			$_theresAnonymousProject = ( isset($_SESSION['_anonym_pid']) && !empty($_SESSION['_anonym_pid']) );
 			$_incomingFromNewProject = ( isset($_SESSION['_newProject']) && !empty($_SESSION['_newProject']) );

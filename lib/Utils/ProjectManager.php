@@ -11,10 +11,8 @@ use Analysis\DqfQueueHandler;
 
 include_once INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
 
+use ConnectedServices\GDrive as GDrive  ;
 use FeatureSet ;
-
-use GDrive;
-
 use RemoteFiles_RemoteFileDao;
 
 class ProjectManager {

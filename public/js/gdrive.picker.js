@@ -3,71 +3,36 @@ var GDrive = function() {
     
     var scope = [ 'https://www.googleapis.com/auth/drive.readonly' ];
 
-    var pickerApiLoaded = false;
-    var authApiLoaded = false;
-    var isGDriveAccessible = false;
-    var isToOpenPicker = false;
-    var oauthToken;
+    this.pickerApiLoaded = false;
+    this.authApiLoaded = false;
 
     function onAuthApiLoad() {
-        authApiLoaded = true;
-    }
-
-    function doAuthorize() {
-        if ( pickerApiLoaded && authApiLoaded && isGDriveAccessible ) {
-            window.gapi.auth.authorize({
-                    'client_id': clientId,
-                    'scope': scope,
-                    'immediate': false
-                },
-                handleAuthResult
-            );
-        } else if( isGDriveAccessible === false) {
-            displayGoogleLogin();
-            setOpenPickerAfterLogin( 'true' );
-        }
-    }
-
-    function handleAuthResult(authResult) {
-        if (authResult && !authResult.error) {
-            oauthToken = authResult.access_token;
-            createPicker();
-        }
+        gdrive.authApiLoaded = true;
     }
 
     function onPickerApiLoad() {
-        pickerApiLoaded = true;
-
-        if( isToOpenPicker ) {
-            doAuthorize();
-        }
+        gdrive.pickerApiLoaded = true;
     }
 
-    function createPicker() {
-        if ( pickerApiLoaded && authApiLoaded && oauthToken && isGDriveAccessible ) {
-            if( isToOpenPicker ) {
-                isToOpenPicker = false;
-                setOpenPickerAfterLogin( 'false' );
-            }
+    this.createPicker = function(service) {
+        var token = JSON.parse( service.oauth_access_token );
 
-            var picker = new google.picker.PickerBuilder().
-                addView(google.picker.ViewId.DOCUMENTS).
-                addView(google.picker.ViewId.PRESENTATIONS).
-                addView(google.picker.ViewId.SPREADSHEETS).
-                setOAuthToken(oauthToken).
-                setDeveloperKey(developerKey).
-                setCallback(pickerCallback).
-                enableFeature(google.picker.Feature.MINE_ONLY).
-                enableFeature(google.picker.Feature.MULTISELECT_ENABLED).
-                build();
-            picker.setVisible(true);
-        } else if( isGDriveAccessible === false && oauthToken) {
-            displayGoogleLogin("drive");
-            setOpenPickerAfterLogin( 'true' );
-        } else if( isGDriveAccessible === false) {
-            displayGoogleLogin();
-            setOpenPickerAfterLogin( 'true' );
-        }
+        console.log( token.access_token ) ;
+
+        var picker = new google.picker.PickerBuilder().
+        addView(google.picker.ViewId.DOCUMENTS).
+        addView(google.picker.ViewId.PRESENTATIONS).
+        addView(google.picker.ViewId.SPREADSHEETS).
+
+        setOAuthToken( token.access_token ).
+
+        setDeveloperKey(window.developerKey).
+
+        setCallback(pickerCallback).
+        enableFeature(google.picker.Feature.MINE_ONLY).
+        enableFeature(google.picker.Feature.MULTISELECT_ENABLED).
+        build();
+        picker.setVisible(true);
     }
 
     function pickerCallback( data ) {
@@ -87,57 +52,64 @@ var GDrive = function() {
         }
     }
 
-    function setOpenPickerAfterLogin( openPicker ) {
-        localStorage[ 'openPicker' ] = openPicker;
-    }
-
-    function isToOpenPickerAfterLogin() {
-        return ( localStorage[ 'openPicker' ] === 'true' );
-    }
-
-    function loadPicker() {
-        $('.load-gdrive').removeClass('load-gdrive-disabled');
-
-        $('.load-gdrive').click( function () {
-            doAuthorize();
-        });
-
+    this.loadPicker = function() {
         gapi.load( 'auth', { 'callback': onAuthApiLoad } );
         gapi.load( 'picker', { 'callback': onPickerApiLoad } );
-
-        isToOpenPicker = isToOpenPickerAfterLogin();
     }
-
-    function displayGoogleLogin(param) {
-        $("#sign-in").data("oauth", config.gdriveAuthURL);
-        if (param && param === "drive") {
-            $(".login-google-drive").show();
-        } else {
-            $(".login-google").show();
-        }
-
-        $('.modal .x-popup').click( function() {
-            setOpenPickerAfterLogin( 'false' );
-        });
-    }
-
-    function verifyGDrive( data ) {
-        isGDriveAccessible = data.success;
-
-        loadPicker();
-    }
-
-    this.apiLoaded = function () {
-        $.ajax({
-            cache: false,
-            url: '/gdrive/verify',
-            dataType: 'json'
-        }).done( verifyGDrive );
-    };
 };
 
-var gdrive = new GDrive();
+var gdrive = new GDrive() ;
 
-function onApiLoad() {
-    gdrive.apiLoaded();
+(function( $, gdrive, undefined) {
+    var default_service;
+
+    /**
+     * Reads the store and returns the first selectable or first default or null
+     *
+     * @returns {*}
+     */
+    function tryToRefreshToken( service ) {
+        return $.getJSON( sprintf( '/api/app/connected_services/%s/verify', service.id ) );
+    }
+
+    function gdriveInitComplete() {
+        return ( gdrive.pickerApiLoaded && gdrive.authApiLoaded ) ;
+    }
+
+    function openGoogleDrivePickerIntent() {
+        // TODO: is this enough to know if the user is logged in?
+        if ( APP.USER.STORE.user ) {
+            var default_service = APP.USER.getDefaultConnectedService();
+            if ( default_service ) {
+
+                if ( ! gdriveInitComplete() ) return ;
+
+                tryToRefreshToken( default_service )
+                    .done( function( data ) {
+                        // replace the service in store with the one returned
+                        APP.USER.upsertConnectedService( data.connected_service ) ;
+
+                        gdrive.createPicker( default_service ) ;
+                    }).fail( function() {
+                        $('#modal').trigger('openpreferences', [{showGDriveMessage: true}]);
+                    });
+            }
+            else {
+                $('#modal').trigger('openpreferences', [{showGDriveMessage: true}]);
+            }
+
+        } else {
+            $('#modal').trigger('openlogin');
+        }
+    }
+
+    $(document).on('click', '.load-gdrive', function(e) {
+        e.preventDefault();
+        openGoogleDrivePickerIntent();
+    });
+
+})(jQuery, gdrive );
+
+function onGDriveApiLoad() {
+    gdrive.loadPicker();
 }

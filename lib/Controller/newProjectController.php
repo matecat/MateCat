@@ -1,5 +1,8 @@
 <?php
 
+
+use ConnectedServices\GDrive ;
+
 class newProjectController extends viewController {
 
     private $guid = '';
@@ -19,8 +22,6 @@ class newProjectController extends viewController {
     private $incomingUrl;
 
     private $keyList = array();
-
-    private $gdriveAuthUrl;
 
     public function __construct() {
 
@@ -293,7 +294,6 @@ class newProjectController extends viewController {
 
         $this->template->incomingURL = $this->incomingUrl;
         $this->template->authURL     = $this->authURL;
-        $this->template->gdriveAuthURL = $this->gdriveAuthUrl;
 
         $this->template->user_keys = $this->keyList;
 
@@ -308,6 +308,10 @@ class newProjectController extends viewController {
         $this->template->lexiqa_languages = json_encode( ProjectOptionsSanitizer::$lexiQA_allowed_languages ); 
 
         $this->template->deny_lexiqa = $this->isToDenyLexiQA();
+
+        if ( $this->isLoggedIn() ) {
+            $this->template->gdriveAuthURL = GDrive::generateGDriveAuthUrl();
+        }
 
     }
 
@@ -329,7 +333,7 @@ class newProjectController extends viewController {
     }
 
     private function generateGDriveAuthUrl(){
-        $this->gdriveAuthUrl = \GDrive::generateGDriveAuthUrl();
+
     }
 
     private function isToDenyLexiQA() {

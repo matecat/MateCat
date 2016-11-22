@@ -3205,8 +3205,14 @@ UI = {
         return l == 'ko-KR';
     },
     start: function () {
-        
-        APP.init();
+
+        UI.lexiqaData = {};
+        UI.lexiqaData.lexiqaWarnings = {};
+        UI.lexiqaData.enableHighlighting = true;
+        UI.lexiqaData.lexiqaFetching = false;
+        UI.lexiqaData.segments = [];
+        UI.lexiqaData.segmentsInfo = {}; 
+
         // If some icon is added on the top header menu, the file name is resized
         APP.addDomObserver($('.header-menu')[0], function() {
             APP.fitText($('.breadcrumbs'), $('#pname'), 30);

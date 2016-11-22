@@ -29,21 +29,6 @@
     border-radius: 0 0 0 6px;
     }
 
-.login-button
-    {
-    width: 330px;
-    font-weight: normal;
-    padding: 8px 0 8px 45px;
-    text-align: center;
-    color: #fff;
-    font-size: 16px !important;
-    text-shadow: 0 -1px 0 #003366;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    }
-
-
 .login-google .outer,
 .login-google-drive .outer{
     margin-top: 10px;
