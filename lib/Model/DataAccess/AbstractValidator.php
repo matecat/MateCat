@@ -13,6 +13,8 @@ abstract class DataAccess_AbstractValidator {
      */
     protected $errors = array();
 
+    protected $struct ;
+
     public function __construct( $struct ) {
         $this->struct = $struct;
     }
@@ -35,8 +37,6 @@ abstract class DataAccess_AbstractValidator {
         return implode(', ', $this->getErrorMessages());
     }
 
-    public function validate(){
-        throw new \Exceptions\ValidationError( "Error: " . get_class( $this ) . "::validate() is not implemented. You must implement it before to perform a call." );
-    }
+    abstract function validate();
 
 }

@@ -82,7 +82,10 @@ var gdrive = new GDrive() ;
             var default_service = APP.USER.getDefaultConnectedService();
             if ( default_service ) {
 
-                if ( ! gdriveInitComplete() ) return ;
+                if ( ! gdriveInitComplete() ) {
+                    console.log( 'gdriveInitComplete not complete');
+                    return ;
+                }
 
                 tryToRefreshToken( default_service )
                     .done( function( data ) {

@@ -44,17 +44,16 @@ class RegisterModal extends React.Component {
             };
             return null;
         }
-        console.log("Send Register Data", this.state);
-
         this.sendRegisterData().done(function (data) {
             $('#modal').trigger('opensuccess', [{
                 title: 'Register Now',
                 text: 'To complete your registration please follow the instructions in the email we sent you to ' + this.state.emailAddress + '.'
             }]);
         }).fail(function (data) {
-            if (data.error) {
+            var data = JSON.parse( response.responseText );
+            if (data) {
                 self.setState({
-                    generalError: data.error.message
+                    generalError: data
                 });
             } else {
                 self.setState({
@@ -90,25 +89,13 @@ class RegisterModal extends React.Component {
 
 
     sendRegisterData() {
-        // return APP.doRequest({
-        //     data: {
-        //         action: 'registerUser',
-        //
-        //     }
-        // });
-
-        //Error
-        // var deferred = $.Deferred();
-        // deferred.reject({error: {
-        //     message:'Error submitting your data'
-        //     }
-        // });
-
-        //Success
-        var deferred = $.Deferred();
-        deferred.resolve();
-
-        return deferred.promise();
+        return $.post('/api/app/user', { user: {
+            first_name: this.state.name,
+            last_name: this.state.surname,
+            email: this.state.emailAddress,
+            password: this.state.password,
+            password_confirmation: this.state.password
+        }});
     }
 
     render() {
@@ -129,7 +116,7 @@ class RegisterModal extends React.Component {
                 <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("emailAddress")}
                            placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")} tabindex={3}/>
                 <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password")}
-                           placeholder="Password" name="password" errorText={this.errorFor("password")} tabindex={4}/>
+                           type="password" placeholder="Password" name="password" errorText={this.errorFor("password")} tabindex={4}/>
                 <input type="checkbox" id="check-conditions" name="terms" ref={(input) => this.textInput = input} onChange={this.changeCheckbox.bind(this)} tabIndex={5}/>
                 <label htmlFor="check-conditions" style={this.checkStyle}>Accept terms and conditions</label><br/>
                 <a className="register-submit btn-confirm-medium"

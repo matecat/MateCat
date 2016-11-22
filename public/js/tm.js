@@ -1721,24 +1721,24 @@
                 });
 
                 var message = "<div class='share-popup-container'>" +
-                    "<div class='share-popup-top'>" +
-                    "<h3 class='popup-tm pull-left'>Share ownership of the resource: <br />"+
-                    description + " - <span class='share-popup-key'>" + key + "</span>" +
-                    "</h3>"+
+                        "<div class='share-popup-top'>" +
+                        "<h3 class='popup-tm pull-left'>Share ownership of the resource: <br />"+
+                        description + " - <span class='share-popup-key'>" + key + "</span>" +
+                        "</h3>"+
+                        "</div>"+
+                        "<div class='share-popup-container-bottom'>" +
+                        "<p>This action cannot be undone.</p>"+
+                        "<div class='share-popup-copy-result'></div>"+
+                        "<input class='share-popup-container-input-email' placeholder='Enter email addresses separated by comma'>"+
+                        "<div class='pull-right btn-confirm-medium share-button share-button-popup'>Share</div>"+
+                        "<div class='share-popup-input-result'></div>"+
+                        "</div>"+
                     "</div>"+
-                    "<div class='share-popup-container-bottom'>" +
-                    "<p>This action cannot be undone.</p>"+  
-                    "<div class='share-popup-copy-result'></div>"+                        
-                    "<input class='share-popup-container-input-email' placeholder='Enter email addresses separated by comma'>"+
-                    "<div class='pull-right btn-confirm-medium share-button share-button-popup'>Share</div>"+
-                    "<div class='share-popup-input-result'></div>"+
-                    "</div>"+
-                    "</div>"+
-                    "<div class='share-popup-container-list'>" +
-                    "<h3 class='popup-tm'>Who owns the resource</h3>"+
-                    "<div class='share-popup-list'>" +
-                    htmlUsersList +
-                    "</div>"+
+                        "<div class='share-popup-container-list'>" +
+                        "<h3 class='popup-tm'>Who owns the resource</h3>"+
+                        "<div class='share-popup-list'>" +
+                        htmlUsersList +
+                        "</div>"+
                     "</div>";
                 tr.find('.message-share-tmx-openemailpopup').on("click", function () {
                     APP.confirm({
@@ -1886,22 +1886,6 @@
         },
         initOptionsTip: function () {
 
-            var guesstagText = "<div class='powerTip-options-tm'><div class='powerTip-options-tm-title'>​​Supported bilingual languages pairs </br>(i.e. works for English to German and German to English):</div>" +
-                "<ul>";
-
-            for (var key in config.tag_projection_languages) {
-                guesstagText = guesstagText + "<li class='powerTip-options-tm-list'>"+ config.tag_projection_languages[key].replace("-", "<>") +"</li>"
-            }
-            guesstagText = guesstagText + "</ul></div>";
-
-            $(".tooltip-guess-tags").data("powertip", guesstagText);
-            $(".tooltip-guess-tags").powerTip({
-                placement : 's',
-                popupId : "matecatTip",
-                mouseOnToPopup: true
-
-            });
-
             var acceptedLanguagesLXQ = config.lexiqa_languages.slice();
             var lexiqaText = "<div class='powerTip-options-tm'><div class='powerTip-options-tm-title'>Any combination of the supported languages:</div>" +
                 "<ul>";
@@ -1957,8 +1941,8 @@
                 placement : 's',
                 popupId : "matecatTip",
             });
-            var mymemoryChecks = $('#activetm tr.mymemory .activate div, #activetm tr.mymemory .lookup div, #activetm tr.mymemory .update div');
-            mymemoryChecks.data("powertip", "<div style='line-height: 20px;font-size: 15px;'>Settings for MyMemory cannot be changed manually.</div>");
+            var mymemoryChecks = $('#activetm tr.mymemory .update div');
+            mymemoryChecks.data("powertip", "<div style='line-height: 20px;font-size: 15px;'>Add a private resource to disable updating.</div>");
             mymemoryChecks.powerTip({
                 placement : 's',
                 popupId : "matecatTip",

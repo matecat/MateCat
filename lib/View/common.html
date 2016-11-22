@@ -16,6 +16,12 @@
         /*]]>*/
     </tal:block>
 
+    <tal:block tal:condition="php: !empty(flashMessages)">
+        /*<![CDATA[*/
+        config.flash_messages = ${structure php: json_encode(flashMessages)} ;
+        /*]]>*/
+        </tal:block>
+
     </script>
 
     <tal:block  tal:repeat="js_source footer_js">

@@ -8,10 +8,13 @@ class ActivityLogDecorator {
 
     protected $template;
 
+    protected $featureSet;
+
     public function __construct( activityLogController $controller, PHPTAL $template ) {
 
         $this->controller     = $controller;
         $this->template       = $template;
+        $this->featureSet     = new FeatureSet();
 
     }
 
@@ -90,6 +93,10 @@ class ActivityLogDecorator {
 
         $outputContent = [];
         foreach( $rawContent as $k => $value ){
+
+            // This filter allows our support team at matecat.com to have their email addresses
+            // replaced by a "MateCat Support Team" tag.
+            $value = $this->featureSet->filter('filterActivityLogEntry', $value);
 
             if( empty( $value->email ) ) {
                 $value->first_name = "Anonymous";

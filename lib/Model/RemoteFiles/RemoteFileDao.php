@@ -6,12 +6,14 @@ class RemoteFiles_RemoteFileDao extends DataAccess_AbstractDao {
      * @param int       $id_job
      * @param string    $remote_id
      */
-    public static function insert( $id_file, $id_job, $remote_id, $is_original = 0 ) {
+    public static function insert( $id_file, $id_job, $remote_id, $connected_service_id, $is_original = 0 ) {
         $data = array();
         $data[ 'id_file' ] = (int) $id_file;
         $data[ 'id_job' ] = (int) $id_job;
         $data[ 'remote_id' ] = (string) $remote_id;
         $data[ 'is_original' ] = $is_original;
+
+        $data[ 'connected_service_id'] = $connected_service_id ;
 
         $db = Database::obtain();
         $db->insert( 'remote_files', $data );

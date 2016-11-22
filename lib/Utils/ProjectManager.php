@@ -12,8 +12,6 @@ use Analysis\DqfQueueHandler;
 include_once INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
 
 use ConnectedServices\GDrive as GDrive  ;
-use FeatureSet ;
-use RemoteFiles_RemoteFileDao;
 
 class ProjectManager {
     
@@ -50,13 +48,12 @@ class ProjectManager {
      */
     protected $project ;
 
-    protected $gdriveService;
-
-    protected $isGDriveProject = false;
+    protected $gdriveSession ;
 
     const TRANSLATED_USER = 'translated_user';
 
     public function __construct( ArrayObject $projectStructure = null ) {
+
 
         if ( $projectStructure == null ) {
             $projectStructure = new RecursiveArrayObject(
@@ -135,6 +132,8 @@ class ProjectManager {
                 $this->projectStructure
         );
 
+        // TODO: change to abstract connnected service session
+        $this->gdriveSession = new GDrive\Session( $_SESSION ) ;
 
     }
 
@@ -356,11 +355,6 @@ class ProjectManager {
             }
         }
 
-        if ( GDrive::sessionHasFiles( $_SESSION ) ) {
-            $this->gdriveService = GDrive::getService( array( 'uid' => $_SESSION[ 'uid' ] ) );
-            $this->isGDriveProject = true;
-        }
-
         //now, upload dir contains only hash-links
         //we start copying files to "file" dir, inserting metadata in db and extracting segments
         foreach ( $linkFiles[ 'conversionHashes' ][ 'sha' ] as $linkFile ) {
@@ -407,16 +401,14 @@ class ProjectManager {
 
                     $file_insert_params = array();
 
-                    $gdriveFileId = GDrive::findFileIdByName( $originalFileName, $_SESSION );
-                    
+
                     $mimeType = FilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
                     $fid      = insertFile( $this->projectStructure, $originalFileName, $mimeType,
                         $fileDateSha1Path, $file_insert_params  );
 
-                    if($gdriveFileId != null) {
-                        RemoteFiles_RemoteFileDao::insert( $fid, 0, $gdriveFileId, 1 );
-
-                        unset( $_SESSION[ GDrive::SESSION_FILE_LIST ][ $gdriveFileId ] );
+                    $gdriveFileId = $this->gdriveSession->findFileIdByName( $originalFileName ) ;
+                    if ($gdriveFileId) {
+                        $this->gdriveSession->createRemoteFile( $fid, $gdriveFileId );
                     }
 
                     $this->fileStorage->moveFromCacheToFileDir(
@@ -1013,11 +1005,13 @@ class ProjectManager {
                 }
                 insertFilesJob( $jid, $fid );
 
-                if( $this->isGDriveProject ) {
-                    GDrive::insertRemoteFile( $fid, $jid, $this->gdriveService, $_SESSION );
+                if ( $this->gdriveSession->hasFiles() ) {
+                    $this->gdriveSession->createRemoteCopiesWhereToSaveTranslation( $fid, $jid ) ;
                 }
             }
         }
+
+        $this->gdriveSession->clearFiles();
 
         $this->features->run('processJobsCreated', $projectStructure );
     }

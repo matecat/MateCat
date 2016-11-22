@@ -6,16 +6,11 @@ namespace ConnectedServices\GDrive ;
 use Bootstrap ;
 use Log;
 use API\V2\KleinController ;
-use Google_Http_Request ;
 use Utils ;
 use INIT ;
 use ConversionHandler ;
 use Constants;
 use Exception;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
-
-use ConnectedServices\GDrive as GDrive ;
 
 class GDriveController extends KleinController {
 
@@ -23,53 +18,52 @@ class GDriveController extends KleinController {
     private $target_lang = Constants::DEFAULT_TARGET_LANG;
     private $seg_rule = null;
 
-    private $gdriveService = null;
-
     private $guid = null;
 
     private $isAsyncReq;
 
     private $isImportingSuccessful = true;
 
+    /**
+     * @var Session
+     */
+    private $gdriveUserSession;
+
+    /**
+     * @var RemoteFileService
+     */
+    private $gdriveConnectedService ;
+
     public function open() {
 
         $this->setIsAsyncReq( $this->request->param('isAsync') );
 
-        $this->doAuth();
+        $this->correctSourceTargetLang();
 
-        if( $this->gdriveService != null ) {
-            $this->correctSourceTargetLang();
+        $this->doImport();
 
-            $this->doImport();
+        $this->finalize();
 
-            if( $this->isImportingSuccessful ) {
-                $this->finalize();
-            } else {
-                $this->redirectToLogin();
-            }
-        } else {
-            $this->redirectToLogin();
-        }
     }
 
-    private function doAuth() {
-        $session = new Session( $_SESSION ) ;
-        $this->gdriveService = $session->getService() ;
+    private function initSessionService() {
+        $this->gdriveUserSession = new Session( $_SESSION ) ;
     }
 
     private function doImport() {
 
         $state = json_decode( $this->request->param('state'), TRUE );
-
         \Log::doLog( $state );
 
-        if( $this->isAsyncReq && Session::sessionHasFiles( $_SESSION )) {
+        // TODO: check why this is necessary here.
+        if ( $this->isAsyncReq && $this->gdriveUserSession->hasFiles() ) {
             $this->guid = $_SESSION[ "upload_session" ];
         } else {
             $this->guid = Utils::create_guid();
             setcookie( "upload_session", $this->guid, time() + 86400, '/' );
             $_SESSION[ "upload_session" ] = $this->guid;
-            unset( $_SESSION[ Session::SESSION_FILE_LIST ] );
+
+            $this->gdriveUserSession->clearFiles();
         }
 
         $listOfIds = array();
@@ -86,111 +80,11 @@ class GDriveController extends KleinController {
 
         $countIds = count( $listOfIds );
 
+        $this->gdriveUserSession->setConversionParams($this->guid, $this->source_lang, $this->target_lang, $this->seg_rule) ;
+
         for( $i = 0; $i < $countIds && $this->isImportingSuccessful === true; $i++ ) {
-            $this->importFile( $listOfIds[$i] );
+            $this->gdriveUserSession->importFile( $listOfIds[$i] );
         }
-    }
-
-    private function importFile( $fileId ) {
-        try {
-            $file = $this->gdriveService->files->get( $fileId );
-            $mime = RemoteFileService::officeMimeFromGoogle( $file->mimeType );
-            $links = $file->getExportLinks() ;
-
-            $downloadUrl = '';
-
-            if($links != null) {
-                $downloadUrl = $links[ $mime ];
-            } else {
-                $downloadUrl = $file->getDownloadUrl();
-            }
-
-            if ($downloadUrl) {
-
-                $fileName = $this->sanetizeFileName( $file->getTitle() );
-                $file_extension = RemoteFileService::officeExtensionFromMime( $file->mimeType );
-
-                if ( substr( $fileName, -5 ) !== $file_extension ) {
-                    $fileName .= $file_extension;
-                }
-
-                $request = new \Google_Http_Request( $downloadUrl, 'GET', null, null );
-                $httpRequest = $this->gdriveService
-                        ->getClient()
-                        ->getAuth()
-                        ->authenticatedRequest( $request );
-
-                if ( $httpRequest->getResponseHttpCode() == 200 ) {
-                    $body = $httpRequest->getResponseBody();
-                    $directory = Utils::uploadDirFromSessionCookie( $this->guid );
-
-                    if( !is_dir( $directory ) ) {
-                        mkdir( $directory, 0755, true );
-                    }
-
-                    $filePath = Utils::uploadDirFromSessionCookie( $this->guid, $fileName );
-                    $saved = file_put_contents( $filePath, $httpRequest->getResponseBody() );
-
-                    if ( $saved !== FALSE ) {
-                        $fileHash = sha1_file( $filePath );
-
-                        $this->addFileToSession( $fileId, $fileName, $fileHash );
-
-                        $this->doConversion( $fileName );
-                    } else {
-                        throw new Exception( 'Error when saving file.' );
-                    }
-                } else {
-                    throw new Exception( 'Error when downloading file.' );
-                }
-            } else {
-                throw new Exception( 'Unable to get the file URL.' );
-            }
-        } catch (Exception $e) {
-            \Log::doLog( $e->getMessage() );
-            $this->isImportingSuccessful = false;
-        }
-    }
-
-    private function sanetizeFileName( $fileName ) {
-        return str_replace('/', '_', $fileName);
-    }
-
-    private function addFileToSession( $fileId, $fileName, $fileHash ) {
-        if( !isset( $_SESSION[ Session::SESSION_FILE_LIST ] )
-                || !is_array( $_SESSION[ Session::SESSION_FILE_LIST ] ) ) {
-            $_SESSION[ Session::SESSION_FILE_LIST ] = array();
-        }
-
-        $_SESSION[ GDrive\Session::SESSION_FILE_LIST ][ $fileId ] = array(
-            Session::SESSION_FILE_NAME => $fileName,
-            Session::SESSION_FILE_HASH => $fileHash
-        );
-    }
-
-    private function doConversion( $file_name ) {
-        $uploadDir = $this->guid;
-
-        $intDir         = INIT::$UPLOAD_REPOSITORY .
-            DIRECTORY_SEPARATOR . $uploadDir;
-
-        $errDir         = INIT::$STORAGE_DIR .
-            DIRECTORY_SEPARATOR .
-            'conversion_errors'  .
-            DIRECTORY_SEPARATOR . $uploadDir;
-
-        $conversionHandler = new ConversionHandler();
-        $conversionHandler->setFileName( $file_name );
-        $conversionHandler->setSourceLang( $this->source_lang );
-        $conversionHandler->setTargetLang( $this->target_lang );
-        $conversionHandler->setSegmentationRule( $this->seg_rule );
-        $conversionHandler->setCookieDir( $uploadDir );
-        $conversionHandler->setIntDir( $intDir );
-        $conversionHandler->setErrDir( $errDir );
-
-        $conversionHandler->doAction();
-
-        return $conversionHandler->getResult();
     }
 
     private function correctSourceTargetLang() {
@@ -212,7 +106,7 @@ class GDriveController extends KleinController {
                 $targetLangHistory   = $_COOKIE[ Constants::COOKIE_TARGET_LANG ];
                 $targetLangAr        = explode( '||', urldecode( $targetLangHistory ) );
 
-                if(count( $targetLangAr ) > 0) {
+                if (count( $targetLangAr ) > 0) {
                     $this->target_lang = $targetLangAr[0];
                 }
             }
@@ -243,106 +137,15 @@ class GDriveController extends KleinController {
     }
 
     public function listImportedFiles() {
-        $response = array();
-
-        $fileList = $_SESSION[ Session::SESSION_FILE_LIST ];
-
-        foreach ( $fileList as $fileId => $file) {
-            $path = $this->getGDriveFilePath( $file );
-
-            $fileName = $file[ Session::SESSION_FILE_NAME ];
-
-            if(file_exists($path) !== false) {
-                $fileSize = filesize($path);
-
-                $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
-
-                $response[ 'files' ][] = array(
-                    'fileId' => $fileId,
-                    'fileName' => $fileName,
-                    'fileSize' => $fileSize,
-                    'fileExtension' => $fileExtension
-                );
-            } else {
-                unset( $_SESSION[ Session::SESSION_FILE_LIST ][ $fileId ] );
-            }
-        }
-
+        $response = $this->gdriveUserSession->getFileStructureForJsonOutput();
         $this->response->json($response);
-    }
-
-    private function getGDriveFilePath( $file ) {
-        $fileName = $file[ Session::SESSION_FILE_NAME ];
-
-        $cacheFileDir = $this->getCacheFileDir( $file );
-
-        $path = $cacheFileDir . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig" . DIRECTORY_SEPARATOR . $fileName;
-
-        return $path;
-    }
-
-    private function getCacheFileDir( $file, $lang = '' ){
-        $sourceLang = $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ];
-
-        if( $lang !== '' ) {
-            $sourceLang = $lang;
-        }
-
-        $fileHash = $file[ Session::SESSION_FILE_HASH ];
-
-        $cacheTreeAr = array(
-            'firstLevel'  => $fileHash{0} . $fileHash{1},
-            'secondLevel' => $fileHash{2} . $fileHash{3},
-            'thirdLevel'  => substr( $fileHash, 4 )
-        );
-
-        $cacheTree = implode(DIRECTORY_SEPARATOR, $cacheTreeAr);
-
-        $cacheFileDir = INIT::$CACHE_REPOSITORY . DIRECTORY_SEPARATOR . $cacheTree . "|" . $sourceLang;
-
-        return $cacheFileDir;
-    }
-
-    private function getUploadDir(){
-        return INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . filter_input(INPUT_COOKIE, 'upload_session');
     }
 
     public function changeSourceLanguage() {
         $originalSourceLang = $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ];
-
         $newSourceLang = $this->request->sourceLanguage;
 
-        $fileList = $_SESSION[ Session::SESSION_FILE_LIST ];
-
-        $success = true;
-
-        foreach( $fileList as $fileId => $file ) {
-            if($success) {
-                $fileHash = $file[ Session::SESSION_FILE_HASH ];
-
-                if($newSourceLang !== $originalSourceLang) {
-
-                    $originalCacheFileDir = $this->getCacheFileDir( $file, $originalSourceLang );
-
-                    $newCacheFileDir = $this->getCacheFileDir( $file, $newSourceLang );
-
-                    $renameDirSuccess = rename($originalCacheFileDir, $newCacheFileDir);
-
-                    $uploadDir = $this->getUploadDir();
-
-                    $originalUploadRefFile = $uploadDir . DIRECTORY_SEPARATOR . $fileHash . '|' . $originalSourceLang;
-                    $newUploadRefFile = $uploadDir . DIRECTORY_SEPARATOR . $fileHash . '|' . $newSourceLang;
-
-                    $renameFileRefSuccess = rename($originalUploadRefFile, $newUploadRefFile);
-
-                    if(!$renameDirSuccess || !$renameFileRefSuccess) {
-                        Log::doLog('Error when moving cache file dir to ' . $newCacheFileDir);
-
-                        $success = false;
-                    }
-                }
-            }
-        }
+        $success = $this->gdriveUserSession->changeSourceLanguage( $newSourceLang, $originalSourceLang );
 
         if( $success ) {
             $_SESSION[ Constants::SESSION_ACTUAL_SOURCE_LANG ] = $newSourceLang;
@@ -367,36 +170,15 @@ class GDriveController extends KleinController {
         $this->response->json($response);
     }
 
-    private function deleteDirectory($dir) {
-        $it = new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS);
-        $files = new RecursiveIteratorIterator($it, RecursiveIteratorIterator::CHILD_FIRST);
-
-        foreach($files as $file) {
-            if ($file->isDir()){
-                rmdir($file->getRealPath());
-            } else {
-                unlink($file->getRealPath());
-            }
-        }
-
-        rmdir($dir);
-    }
-
     public function deleteImportedFile() {
         $fileId = $this->request->fileId;
-
         $success = false;
 
-        if( $fileId === 'all' ) {
-            foreach( $_SESSION[ Session::SESSION_FILE_LIST ] as $singleFileId => $file ) {
-                $this->deleteSingleFile( $singleFileId );
-            }
-
-            unset( $_SESSION[ Session::SESSION_FILE_LIST ] );
-
+        if ( $fileId === 'all' ) {
+            $this->gdriveUserSession->removeAllFiles() ;
             $success = true;
         } else {
-            $success = $this->deleteSingleFile( $fileId );
+            $success = $this->gdriveUserSession->removeFile( $fileId );
         }
 
         $this->response->json( array(
@@ -404,28 +186,9 @@ class GDriveController extends KleinController {
         ));
     }
 
-    private function deleteSingleFile( $fileId ) {
-        $success = false;
-
-        if( isset( $_SESSION[ Session::SESSION_FILE_LIST ][ $fileId ] ) ) {
-            $file = $_SESSION[ Session::SESSION_FILE_LIST ][ $fileId ];
-
-            $pathCache = $this->getCacheFileDir( $file );
-
-            $this->deleteDirectory($pathCache);
-
-            unset( $_SESSION[ Session::SESSION_FILE_LIST ][ $fileId ] );
-
-            Log::doLog( 'File ' . $fileId . ' removed.' );
-
-            $success = true;
-        }
-
-        return  $success;
-    }
-
     protected function afterConstruct() {
         Bootstrap::sessionStart();
+        $this->initSessionService();
     }
 
     private function setIsAsyncReq( $isAsyncReq ) {
@@ -434,41 +197,6 @@ class GDriveController extends KleinController {
         } else {
             $this->isAsyncReq = false;
         }
-    }
-
-    private function redirectToLogin() {
-        $_SESSION[ 'oauthScope' ] = 'GDrive';
-        $_SESSION[ 'incomingUrl' ] = $this->request->uri();
-
-        $this->response->redirect( '/login' );
-    }
-
-    public function verifyToken() {
-
-        $id_service = $this->request->param('id_service');
-
-        try {
-            $session = new Session( $_SESSION ) ;
-            $service = $session->getService();
-
-            if ( !$service ) {
-                throw  new Exception('Cannot create service, token may be missing') ;
-            }
-
-            // Ensure service is callable
-            $service->about->get();
-
-            $message = "OK";
-            $success = true;
-
-        } catch (Exception $e) {
-            $message = "An error occurred: " . $e->getMessage();
-        }
-
-        $this->response->json(array(
-            "success" => $success,
-            "message" => $message
-        ));
     }
 
 }

@@ -48,8 +48,9 @@ class LoginModal extends React.Component {
         if($.isEmptyObject(this.state.validationErrors) == false) return null;
         this.sendLoginData().done(function (data) {
             window.location.reload()
-        }).fail(function (data) {
-            if (data.error) {
+        }).fail(function (response) {
+            var data = JSON.parse(response.responseText);
+            if (data) {
                 self.setState({
                     generalError: data.error.message
                 });
@@ -63,25 +64,10 @@ class LoginModal extends React.Component {
     }
 
     sendLoginData() {
-        // return APP.doRequest({
-        //     data: {
-        //         action: 'loginUser',
-        //
-        //     }
-        // });
-
-        //Error
-        var deferred = $.Deferred();
-        deferred.reject({error: {
-            message:'Error submitting your data'
-        }
+        return $.post('/api/app/user/login',  {
+            email : this.state.emailAddress,
+            password : this.state.password
         });
-
-        //Success
-        // var deferred = $.Deferred();
-        // deferred.resolve();
-
-        return deferred.promise();
     }
 
     errorFor(field) {
@@ -119,7 +105,7 @@ class LoginModal extends React.Component {
                         <div className="login-form-container">
                             <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("emailAddress")}
                                        placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")} tabindex={1}/>
-                            <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password")}
+                            <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password")}
                                        placeholder="Password" name="password" errorText={this.errorFor("password")} tabindex={2}/>
                             <a className="login-button btn-confirm-medium"
                                onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}

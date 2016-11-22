@@ -45,10 +45,11 @@ class ForgotPasswordModal extends React.Component {
                 title: 'Forgot Password',
                 text: 'We sent you an email. Follow the instructions to create a new password.'
             }]);
-        }).fail(function (data) {
-            if (data.error) {
+        }).fail(function (response) {
+            var data = JSON.parse( response.responseText );
+            if (data) {
                 self.setState({
-                    generalError: data.error.message
+                    generalError: data
                 });
             } else {
                 self.setState({
@@ -59,25 +60,7 @@ class ForgotPasswordModal extends React.Component {
     }
 
     sendForgotPassword() {
-        // return APP.doRequest({
-        //     data: {
-        //         action: 'registerUser',
-        //
-        //     }
-        // });
-
-        //Error
-        // var deferred = $.Deferred();
-        // deferred.reject({error: {
-        //     message:'Error submitting your data'
-        // }
-        // });
-
-        //Success
-        var deferred = $.Deferred();
-        deferred.resolve();
-
-        return deferred.promise();
+        $.post('/api/app/user/forgot_password', { email: this.state.emailAddress } )
     }
 
     errorFor(field) {

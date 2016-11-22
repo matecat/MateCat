@@ -63,7 +63,6 @@ class GDriveUserAuthorizationModel {
      * @param ConnectedServiceStruct $service
      */
     private function __updateService(ConnectedServiceStruct $service ) {
-
         $dao = new ConnectedServiceDao() ;
         $dao->updateOauthToken( $this->token, $service ) ;
 

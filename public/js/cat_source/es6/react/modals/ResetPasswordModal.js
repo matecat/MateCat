@@ -36,16 +36,16 @@ class ResetPasswordModal extends React.Component {
         var self = this;
         this.setState({showErrors: true});
         if($.isEmptyObject(this.state.validationErrors) == false) return null;
-        console.log("Send Reset Password Data");
         this.sendResetPassword().done(function (data) {
             $('#modal').trigger('opensuccess', [{
                 title: 'Reset Password',
                 text: 'Your password has been changed.'
             }]);
-        }).fail(function (data) {
-            if (data.error) {
+        }).fail(function (response) {
+            var data = JSON.parse( response.responseText );
+            if (data) {
                 self.setState({
-                    generalError: data.error.message
+                    generalError: data
                 });
             } else {
                 self.setState({
@@ -57,25 +57,10 @@ class ResetPasswordModal extends React.Component {
     }
 
     sendResetPassword() {
-        // return APP.doRequest({
-        //     data: {
-        //         action: 'resetPassword',
-        //
-        //     }
-        // });
-
-        //Error
-        var deferred = $.Deferred();
-        deferred.reject({error: {
-            message:'Error submitting your data'
-        }
+        return $.post('/api/app/user/password', {
+            password: this.state.password1,
+            password_confirmation: this.state.password2
         });
-
-        //Success
-        // var deferred = $.Deferred();
-        // deferred.resolve();
-
-        return deferred.promise();
     }
 
     errorFor(field) {
@@ -98,9 +83,9 @@ class ResetPasswordModal extends React.Component {
         return <div className="reset-password-modal">
             <h2>Reset Password</h2>
             <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit</p>
-            <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password1")}
+            <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password1")}
                        placeholder="Password" name="password1" errorText={this.errorFor("password1")} tabindex={1}/>
-            <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password2")}
+            <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password2")}
                        placeholder="Confirm Password" name="password2" errorText={this.errorFor("password2")} tabindex={1}/>
             <a className="reset-password-button btn-confirm-medium" onClick={this.handleSubmitClicked}
                onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}
