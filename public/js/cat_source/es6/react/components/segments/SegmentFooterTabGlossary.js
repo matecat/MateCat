@@ -11,15 +11,28 @@ class SegmentFooterTabGlossary extends React.Component {
         super(props);
     }
 
+    setGlossary(sid, matches) {
+        if ( this.props.id_segment == sid ) {
+            var matchesProcessed = this.processContributions(matches);
+            this.setState({
+                matches: matchesProcessed
+            });
+        }
+    }
+
     componentDidMount() {
         console.log("Mount SegmentFooterGlossary" + this.props.id_segment);
+        SegmentStore.addListener(SegmentConstants.RENDER_GLOSSARY, this.setGlossary);
 
     }
 
     componentWillUnmount() {
         console.log("Unmount SegmentFooterGlossary" + this.props.id_segment);
+        SegmentStore.removeListener(SegmentConstants.RENDER_GLOSSARY, this.setGlossary);
 
     }
+
+
 
     componentWillMount() {
 

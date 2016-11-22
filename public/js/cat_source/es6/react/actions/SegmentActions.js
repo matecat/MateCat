@@ -178,6 +178,13 @@ var SegmentActions = {
             sid: sid,
             index: index
         });
+    },
+    renderSegmentGlossary: function(sid, matches) {
+        AppDispatcher.dispatch({
+            actionType: SegmentConstants.RENDER_GLOSSARY,
+            sid: sid,
+            matches: matches
+        });
     }
     /***********************************/
 

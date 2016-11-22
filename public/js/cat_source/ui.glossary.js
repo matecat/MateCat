@@ -155,7 +155,6 @@ if (true)
 
             storeGlossaryData( segment, d.data.matches ) ;
 
-            // XXX: this variable `next` was intentionally left global, changing to local breaks glossary updates
             next = context[1];
 
             // TODO: refactor this to avoid timeout check
@@ -370,13 +369,10 @@ if (true)
                             this.comment = this.source_note;
                         }
 
-                        cl_suggestion = UI.getPercentuageClass( this.match );
                         var leftTxt = this.segment;
-                        leftTxt = leftTxt.replace( /\#\{/gi, "<mark>" );
-                        leftTxt = leftTxt.replace( /\}\#/gi, "</mark>" );
+
                         var rightTxt = this.translation;
-                        rightTxt = rightTxt.replace( /\#\{/gi, "<mark>" );
-                        rightTxt = rightTxt.replace( /\}\#/gi, "</mark>" );
+
                         var commentOriginal = this.comment;
                         if (commentOriginal) {
                             commentOriginal = commentOriginal.replace(/\#\{/gi, "<mark>");
@@ -532,10 +528,6 @@ if (true)
 
             return  APP.doRequest( {
                 data: data,
-                context: [
-                    UI.currentSegment,
-                    next
-                ],
                 error: function () {
                     UI.failedConnection( 0, 'glossary' );
                 },

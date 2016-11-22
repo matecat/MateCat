@@ -252,6 +252,9 @@ AppDispatcher.register(function(action) {
         case SegmentConstants.CHOOSE_CONTRIBUTION:
             SegmentStore.emitChange(action.actionType, action.sid, action.index);
             break;
+        case SegmentConstants.RENDER_GLOSSARY:
+            SegmentStore.emitChange(action.actionType, action.sid, action.matches);
+            break;
         default:
     }
 });
