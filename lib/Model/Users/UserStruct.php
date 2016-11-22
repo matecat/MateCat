@@ -19,7 +19,6 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct   implements D
     public $pass;
     public $oauth_access_token ;
 
-    public $new_pass ;
     public $email_confirmed_at ;
     public $confirmation_token ;
     public $confirmation_token_created_at ;
