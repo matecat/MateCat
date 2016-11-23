@@ -78,8 +78,17 @@
                 searchable_statuses : JSON.parse( '${ php: json_encode(searchable_statuses)}'),
                 isGDriveProject : ${isGDriveProject|string:false},
                 remoteFilesInJob : JSON.parse( '${ php: json_encode(remoteFilesInJob)}'),
-		        lexiqaServer: 'https://backend.lexiqa.net',
-                lxq_enabled: ${lxq_enabled | string:false},
+                /*
+                 We proose that lxq_server is in a configuration file
+                 lexiqaServer: ${lxq_server},
+                */
+		            lexiqaServer: 'https://backend.lexiqa.net',
+                lxq_enabled:  ${lxq_enabled | string:false},
+                /*
+                 We proose that lxq_server is in a configuration file
+                 lxq_license: ${lxq_license},
+                */
+                lxq_license: 'THIS SHOULD BE YOUR LEXIQA LICENSE',
                 qa_check_glossary_enabled : ${qa_check_glossary_enabled | string:false },
                 qa_check_blacklist_enabled : ${qa_check_blacklist_enabled | string:false },
                 support_mail : '${support_mail}',
@@ -164,6 +173,13 @@
 
         <script src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
 
+        <tal:block tal:condition="true:${lxq_enabled}" >
+            <!--
+             We proose that lxq_server is in a configuration file
+            <script src="${lxq_server}/js/lxqlicense.js"></script>
+            -->
+            <script src="https://backend.lexiqa.net/js/lxqlicense.js"></script>
+        </tal:block>
         <tal:block tal:condition="true:use_compiled_assets" >
             <script src="${basepath}public/js/build/app.min.js?build=${build_number}"></script>
         </tal:block>
@@ -183,7 +199,7 @@
       tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled && !job_archived">
 
         <header metal:use-macro="header.html/main_header">
-            <div class="wrapper">   
+            <div class="wrapper">
                 <form id="fileDownload" action="${basepath}" method="post">
                     <input type="hidden" name="action" value="downloadFile" />
                     <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
@@ -194,29 +210,29 @@
                 </form>
                 <a href="#" class="filter"> <span class="arrow-top "></span></a>
 
-                <a href="${basepath}" class="logo">                 
+                <a href="${basepath}" class="logo">
                 </a>
-                <div class="breadcrumbs">    
+                <div class="breadcrumbs">
                     <div class="joblist">
                         <a href="#" class="arrow-notification"></a>
                         <ul>
                             <li>
                                 <a href="">
-                                    <b>Job1</b> 
+                                    <b>Job1</b>
                                 </a>
                             </li>
                             <li>
                                 <a href="">
-                                    <b>Another job</b> 
+                                    <b>Another job</b>
                                 </a>
                             </li>
                             <li>
                                 <a href="">
-                                    <b>Eaaasy job</b> 
+                                    <b>Eaaasy job</b>
                                 </a>
                             </li>
                         </ul>
-                    </div>  
+                    </div>
 
                     <a href="#" id="pname" tal:content="pname">Project</a>
                     <span class="details">&nbsp;(<span tal:replace="jid">---</span>) &gt; <b><span tal:replace="source_code">---</span> </b> &gt; <b><span tal:replace="target_code">---</span></b></span>
@@ -256,13 +272,13 @@
 				</li>
 			</ul>
 
-			<div class="tab sub-editor" id="settings-shortcuts">	
+			<div class="tab sub-editor" id="settings-shortcuts">
 				<div class="overflow">
 					<p>Click on a shortcut to change it, then perform the new keystrokes combination.</p>
 					<a href="#" id="default-shortcuts" class="btn-ok">Restore default</a>
 				</div>
 			</div>
- 			<div class="tab sub-editor" id="settings-other">	
+ 			<div class="tab sub-editor" id="settings-other">
 				<div class="overflow">Other</div>
 			</div>
 		</div>
@@ -388,11 +404,11 @@ $(window).resize(function() {
     colWidth = $bodyCells.map(function() {
         return $(this).width();
     }).get();
-    
+
     // Set the width of thead columns
     $table.find('thead tr').children().each(function(i, v) {
         $(v).width(colWidth[i]);
-    });    
+    });
 }).resize(); // Trigger resize handler
 
 });
