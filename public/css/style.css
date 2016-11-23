@@ -3096,6 +3096,11 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 	border-bottom: 1px dotted #c0c;
 }
 
+.monad mark.inGlossary {
+	border-bottom: none !important;
+	color: #767676 !important;
+}
+
 /*.popup-settings #settings-shortcuts .list dt
 {
 	float: left;
