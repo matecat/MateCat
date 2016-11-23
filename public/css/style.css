@@ -3201,8 +3201,40 @@ float: left;
     font-size: 100%!important;
 }
 
+.autofillTag {
+	display: block;
+	float: left;
+	cursor: pointer;
+	color: #444!important;
+}
 
+.autofillTag:before {
+	content: "\e23a";
+	font-size: 19px;
+	display: block;
+}
 
+.tagLockCustomize {
+	display: block;
+	float: left;
+	cursor: pointer;
+	color: #444!important;
+	text-decoration: none;
+}
+
+.tagLockCustomize:before {
+	content: "\e98f";
+	font-size: 19px;
+	display: block;
+	margin-left: 5px;
+}
+
+section .toolbar .autofillTag {
+	float: left;
+	display: none;
+	font-size: 60%;
+	text-decoration: none;
+}
 .editToolbar
 {
 	/*float: left;*/	
@@ -3356,6 +3388,7 @@ body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.end
 }
 
 
+
 .tagModeToggle ,
 .autofillTag  {
 padding: 4px 2px 0px 2px;
@@ -3367,10 +3400,15 @@ color: #666!important;
 }
 
 
-
-.tagModeToggle:hover, .tagModeToggle.active {
-	color:#333!important;
+.tagLockCustomize:hover,
+.tagLockCustomize.active,
+.tagModeToggle:hover,
+.tagModeToggle.active,
+.autofillTag:hover,
+.autofillTag.active {
+	color: #333!important;
 }
+
 
 .icon-tag-expand {
 	display: none;
@@ -3410,10 +3448,17 @@ section.editor .toolbar {
     margin-top: -23px;
 }
 
+.tagModeToggle,
+.autofillTag,
+.tagLockCustomize{
+	margin-right: 10px;
+}
+
 body.tagModes .editor.hasTags .textarea-container .tagMode {
     display: block;
 }
 body.tagModes .editor.hasTagsToggle .toolbar .tagModeToggle,
+body.tagModes .editor.hasTagsToggle .toolbar .tagLockCustomize,
 body.tagModes .editor.hasTagsAutofill .toolbar .autofillTag {
 	display: block;
 }
@@ -3422,16 +3467,9 @@ body.tagmarkDisabled .toolbar .tagModeToggle ,
 body.tagmarkDisabled .toolbar .autofillTag  {
 	display: none !important;
 }
-body.tagModes .editor .toolbar .tagLockCustomize {
-	float: left;
-	margin-right: 8px;
-	width: 16px;
-	height: 17px;
-	background: url(../img/icon-lock.png) center 1px no-repeat;
-	background-size: 16px 16px;
-}
-body.tagModes .editor .toolbar .tagLockCustomize.unlock {
-	background-image: url(../img/icon-unlock.png);
+
+.tagLockCustomize.unlock:before {
+	content: "\e990";
 }
 .tagModeToggle span.icon-expand, .tagModeToggle span.icon-compress {
 -ms-transform: rotate(45deg);

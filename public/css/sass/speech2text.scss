@@ -6,26 +6,6 @@
     border-color:#ccc;
 }
 
-.segmentButton, .toolbar a {
-    height: 20px;
-    zoom: 0.8;
-    min-width: 20px;
-    cursor: pointer;
-    border-radius: 3px;
-    padding: 2px;
-    border: 1px solid #C6C6C6;
-    @include box-shadow(0 1px 1px rgba(0,0,0,.1));
-    @include linear-gradient(#f8f8f8, top, #f8f8f8, #f1f1f1);
-
-    &:hover {
-        color: #000000;
-    }
-
-    &:active {
-        background-color: #fff;
-        background-image: -webkit-linear-gradient(top, #fff, #f4f4f4);
-    }
-}
 
 .editarea.micActive {
     width: 94%;
@@ -113,10 +93,6 @@ section.opened {
         margin-top: 3px;
         width: 100%;
     }
-}
-
-.tagModeToggle, .autofillTag {
-    margin-right: 10px;
 }
 
 $tlbr-btn-bg: -webkit-linear-gradient(top, #f8f8f8, #f1f1f1);
