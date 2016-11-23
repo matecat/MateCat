@@ -13,7 +13,7 @@ class LoginModal extends React.Component {
             validationErrors: {},
             generalError: ''
         };
-
+        this.requestRunning = false;
         this.state.validationErrors = RuleRunner.run(this.state, fieldValidations);
         this.handleFieldChanged = this.handleFieldChanged.bind(this);
         this.handleSubmitClicked = this.handleSubmitClicked.bind(this);
@@ -46,8 +46,12 @@ class LoginModal extends React.Component {
         var self = this;
         this.setState({showErrors: true});
         if($.isEmptyObject(this.state.validationErrors) == false) return null;
+        if ( this.requestRunning ) {
+            return false;
+        }
+        this.requestRunning = true;
         this.sendLoginData().done(function (data) {
-            window.location.reload()
+            window.location.reload();
         }).fail(function (response) {
             if (response.responseText.length) {
                 var data = JSON.parse( response.responseText );
@@ -56,9 +60,10 @@ class LoginModal extends React.Component {
                 });
             } else {
                 self.setState({
-                    generalError: 'There was a problem, please try again later or contact support.'
+                    generalError: 'Login failed.'
                 });
             }
+            self.requestRunning = false;
         });
 
     }

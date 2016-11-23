@@ -13,7 +13,7 @@ class RegisterModal extends React.Component {
             validationErrors: {},
             generalError: ''
         };
-
+        this.requestRunning = false;
         this.state.validationErrors = RuleRunner.run(this.state, fieldValidations);
         this.handleFieldChanged = this.handleFieldChanged.bind(this);
         this.handleSubmitClicked = this.handleSubmitClicked.bind(this);
@@ -44,6 +44,10 @@ class RegisterModal extends React.Component {
             };
             return null;
         }
+        if ( this.requestRunning ) {
+            return false;
+        }
+        this.requestRunning = true;
         this.sendRegisterData().done(function (data) {
             $('#modal').trigger('opensuccess', [{
                 title: 'Register Now',
@@ -61,6 +65,7 @@ class RegisterModal extends React.Component {
                     generalError: 'There was a problem saving the data, please try again later or contact support.'
                 });
             }
+            self.requestRunning = false;
         });
     }
 

@@ -13,7 +13,7 @@ class ResetPasswordModal extends React.Component {
             validationErrors: {},
             generalError: ''
         };
-
+        this.requestRunning = false;
         this.state.validationErrors = RuleRunner.run(this.state, fieldValidations);
         this.handleFieldChanged = this.handleFieldChanged.bind(this);
         this.handleSubmitClicked = this.handleSubmitClicked.bind(this);
@@ -36,6 +36,12 @@ class ResetPasswordModal extends React.Component {
         var self = this;
         this.setState({showErrors: true});
         if($.isEmptyObject(this.state.validationErrors) == false) return null;
+
+        if ( this.requestRunning ) {
+            return false;
+        }
+        this.requestRunning = true;
+
         this.sendResetPassword().done(function (data) {
             $('#modal').trigger('opensuccess', [{
                 title: 'Reset Password',
@@ -52,6 +58,7 @@ class ResetPasswordModal extends React.Component {
                     generalError: 'There was a problem saving the data, please try again later or contact support.'
                 });
             }
+            self.requestRunning = false;
         });
 
     }
