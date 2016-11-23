@@ -12,6 +12,7 @@ class ForgotPasswordModal extends React.Component {
             validationErrors: {},
             generalError: ''
         };
+        this.requestRunning = false;
 
         this.state.validationErrors = RuleRunner.run(this.state, fieldValidations);
         this.handleFieldChanged = this.handleFieldChanged.bind(this);
@@ -38,46 +39,32 @@ class ForgotPasswordModal extends React.Component {
         var self = this;
         this.setState({showErrors: true});
         if($.isEmptyObject(this.state.validationErrors) == false) return null;
-        console.log("Send forgot password Data");
-
+        if ( this.requestRunning ) {
+            return false;
+        }
+        this.requestRunning = true;
         this.sendForgotPassword().done(function (data) {
             $('#modal').trigger('opensuccess', [{
                 title: 'Forgot Password',
                 text: 'We sent you an email. Follow the instructions to create a new password.'
             }]);
-        }).fail(function (data) {
-            if (data.error) {
+        }).fail(function (response) {
+            var data = JSON.parse( response.responseText );
+            if (data) {
                 self.setState({
-                    generalError: data.error.message
+                    generalError: data
                 });
             } else {
                 self.setState({
                     generalError: 'There was a problem saving the data, please try again later or contact support.'
                 });
             }
+            self.requestRunning = false;
         });
     }
 
     sendForgotPassword() {
-        // return APP.doRequest({
-        //     data: {
-        //         action: 'registerUser',
-        //
-        //     }
-        // });
-
-        //Error
-        // var deferred = $.Deferred();
-        // deferred.reject({error: {
-        //     message:'Error submitting your data'
-        // }
-        // });
-
-        //Success
-        var deferred = $.Deferred();
-        deferred.resolve();
-
-        return deferred.promise();
+        return $.post('/api/app/user/forgot_password', { email: this.state.emailAddress } )
     }
 
     errorFor(field) {
@@ -101,7 +88,8 @@ class ForgotPasswordModal extends React.Component {
             <h2>Forgot Password</h2>
             <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit</p>
             <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("emailAddress")}
-                       placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")} tabindex={1}/>
+                       placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")} tabindex={1}
+                       onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
             <a className="send-password-button btn-confirm-medium"
                onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}
                onClick={this.handleSubmitClicked.bind()} tabIndex={2}> Send </a>

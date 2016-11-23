@@ -16,6 +16,12 @@
         /*]]>*/
     </tal:block>
 
+    <tal:block tal:condition="php: !empty(flashMessages)">
+        /*<![CDATA[*/
+        config.flash_messages = ${structure php: json_encode(flashMessages)} ;
+        /*]]>*/
+        </tal:block>
+
     </script>
 
     <tal:block  tal:repeat="js_source footer_js">
@@ -38,6 +44,8 @@
             <span tal:content='extended_user'></span>
             <!-- <span class="icon-sort-up"></span>
             <(<a id='logoutlink' href='#'>Logout</a>)
+            <span tal:content='logged_user'></span>
+            <span class="icon-sort-up"></span>
             <ul class="user-menu">
                 <li class="user-menu-preferences">Preferences</li>
                 <li id='logoutlink'>Logout</li>

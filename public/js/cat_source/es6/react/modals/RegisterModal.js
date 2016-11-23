@@ -13,7 +13,7 @@ class RegisterModal extends React.Component {
             validationErrors: {},
             generalError: ''
         };
-
+        this.requestRunning = false;
         this.state.validationErrors = RuleRunner.run(this.state, fieldValidations);
         this.handleFieldChanged = this.handleFieldChanged.bind(this);
         this.handleSubmitClicked = this.handleSubmitClicked.bind(this);
@@ -44,15 +44,19 @@ class RegisterModal extends React.Component {
             };
             return null;
         }
-        console.log("Send Register Data", this.state);
-
+        if ( this.requestRunning ) {
+            return false;
+        }
+        this.requestRunning = true;
         this.sendRegisterData().done(function (data) {
             $('#modal').trigger('opensuccess', [{
                 title: 'Register Now',
-                text: 'To complete your registration please follow the instructions in the email we sent you to ' + this.state.emailAddress + '.'
+                text: 'To complete your registration please follow the instructions in the email we sent you to ' + self.state.emailAddress + '.'
             }]);
-        }).fail(function (data) {
-            if (data.error) {
+        }).fail(function (response) {
+
+            if (response.responseText.length) {
+                var data = JSON.parse( response.responseText );
                 self.setState({
                     generalError: data.error.message
                 });
@@ -61,6 +65,7 @@ class RegisterModal extends React.Component {
                     generalError: 'There was a problem saving the data, please try again later or contact support.'
                 });
             }
+            self.requestRunning = false;
         });
     }
 
@@ -90,25 +95,13 @@ class RegisterModal extends React.Component {
 
 
     sendRegisterData() {
-        // return APP.doRequest({
-        //     data: {
-        //         action: 'registerUser',
-        //
-        //     }
-        // });
-
-        //Error
-        // var deferred = $.Deferred();
-        // deferred.reject({error: {
-        //     message:'Error submitting your data'
-        //     }
-        // });
-
-        //Success
-        var deferred = $.Deferred();
-        deferred.resolve();
-
-        return deferred.promise();
+        return $.post('/api/app/user', { user: {
+            first_name: this.state.name,
+            last_name: this.state.surname,
+            email: this.state.emailAddress,
+            password: this.state.password,
+            password_confirmation: this.state.password
+        }});
     }
 
     render() {
@@ -123,13 +116,17 @@ class RegisterModal extends React.Component {
             <div className="register-form-container">
                 <h2>Register with your email</h2>
                 <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("name")}
-                               placeholder="Name" name="name" errorText={this.errorFor("name")} tabindex={1}/>
+                               placeholder="Name" name="name" errorText={this.errorFor("name")} tabindex={1}
+                           onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
                 <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("surname")}
-                           placeholder="Surname" name="name" errorText={this.errorFor("surname")} tabindex={2}/>
+                           placeholder="Surname" name="name" errorText={this.errorFor("surname")} tabindex={2}
+                           onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
                 <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("emailAddress")}
-                           placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")} tabindex={3}/>
+                           placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")} tabindex={3}
+                           onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
                 <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password")}
-                           placeholder="Password" name="password" errorText={this.errorFor("password")} tabindex={4}/>
+                           type="password" placeholder="Password" name="password" errorText={this.errorFor("password")} tabindex={4}
+                           onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
                 <br />
                 <input type="checkbox" id="check-conditions" name="terms" ref={(input) => this.textInput = input} onChange={this.changeCheckbox.bind(this)} tabIndex={5}/>
                 <label htmlFor="check-conditions" style={this.checkStyle}>Accept terms and conditions</label><br/>
@@ -149,7 +146,7 @@ const fieldValidations = [
     RuleRunner.ruleRunner("name", "Name", FormRules.requiredRule),
     RuleRunner.ruleRunner("surname", "Surname", FormRules.requiredRule),
     RuleRunner.ruleRunner("emailAddress", "Email address", FormRules.requiredRule, FormRules.checkEmail),
-    RuleRunner.ruleRunner("password", "Password", FormRules.requiredRule, FormRules.minLength(6)),
+    RuleRunner.ruleRunner("password", "Password", FormRules.requiredRule, FormRules.minLength(8)),
 ];
 
 export default RegisterModal ;

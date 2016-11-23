@@ -23,9 +23,7 @@ class GDriveTokenVerifyModel {
         $this->expired = false ;
 
         try {
-
             $newToken = GDrive::getsNewToken( $this->service->getDecryptedOauthAccessToken() );
-
         } catch(\Exception $e ) {
 
             if ( preg_match( '/invalid_grant/', $e->getMessage() ) ) {
@@ -39,12 +37,15 @@ class GDriveTokenVerifyModel {
             }
         }
 
-
         if ( $newToken ) {
             $this->__updateToken($newToken);
         }
 
         return true;
+    }
+
+    public function getService() {
+        return $this->service ;
     }
 
     private function __expireService() {
@@ -56,7 +57,7 @@ class GDriveTokenVerifyModel {
 
     private function __updateToken($newToken) {
         $dao = new ConnectedServiceDao();
-        $dao->updateOauthToken( $newToken, $this->service ) ;
+        $this->service = $dao->updateOauthToken( $newToken, $this->service ) ;
 
         $this->refreshed = true ;
     }

@@ -53,14 +53,7 @@ APP = {
             $( this ).parents( '.modal' ).find( '.x-popup' ).click();
         } );
 
-        $( '#sign-in' ).click( function ( e ) {
-            e.preventDefault();
-            APP.googole_popup( $( this ).data( 'oauth' ) );
-        } );
 
-        $( '#sign-in-o, #sign-in-o-mt' ).click( function ( e ) {
-            $( '#sign-in' ).trigger( 'click' );
-        } );
     },
     alert: function ( options ) {
         //FIXME
@@ -606,7 +599,38 @@ APP = {
             }
         }
         return caretPos;
+    },
+
+    evalFlashMessagesForNotificationBox : function() {
+        if ( config.flash_messages && Object.keys( config.flash_messages ).length ) {
+
+            _.each(['warning', 'notice', 'error'], function( type ) {
+                if ( config.flash_messages[ type ] ) {
+                    _.each(config.flash_messages[ type ],function( obj ) {
+                        APP.addNotification({
+                            autoDismiss: false,
+                            dismissable: true,
+                            position : "bl",
+                            text : obj.value,
+                            title: type,
+                            type : type,
+                            allowHtml : true
+                        });
+                    });
+                }
+            });
+
+        }
+    },
+
+    lookupFlashServiceParam : function( name ) {
+        if ( config.flash_messages && config.flash_messages.service ) {
+            return _.filter( config.flash_messages.service, function( service, index ) {
+                return service.key == name ;
+            });
+        }
     }
+
 };
 
 $(document).ready(function(){

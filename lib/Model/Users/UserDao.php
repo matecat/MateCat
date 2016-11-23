@@ -11,17 +11,32 @@ class Users_UserDao extends DataAccess_AbstractDao {
     const TABLE = "users";
     const STRUCT_TYPE = "Users_UserStruct";
 
+    protected static $auto_increment_fields = array('uid');
+    protected static $primary_keys = array('uid');
+
+    /**
+     * @param $token
+     * @return Users_UserStruct
+     */
+    public function getByConfirmationToken( $token ) {
+        $conn = $this->con->getConnection();
+        $stmt = $conn->prepare( " SELECT * FROM users WHERE confirmation_token = ?");
+        $stmt->execute( array($token )) ;
+        $stmt->setFetchMode(PDO::FETCH_CLASS, '\Users_UserStruct');
+        return $stmt->fetch();
+    }
+
     public function createUser( Users_UserStruct $obj ){
         $conn = $this->con->getConnection();
 
         $obj->create_date = date('Y-m-d H:i:s');
 
         $stmt = $conn->prepare("INSERT INTO users " .
-            " ( uid, email, salt, pass, create_date, first_name, last_name, api_key ) " .
+            " ( uid, email, salt, pass, create_date, first_name, last_name, confirmation_token ) " .
             " VALUES " .
             " ( " .
             " :uid, :email, :salt, :pass, :create_date, " .
-            " :first_name, :last_name, :api_key " .
+            " :first_name, :last_name, :confirmation_token " .
             " )"
         );
 
@@ -29,7 +44,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
                 'uid', 'email',
                 'salt', 'pass',
                 'create_date', 'first_name',
-                'last_name', 'api_key'
+                'last_name', 'confirmation_token'
                 ))
         );
 

@@ -4730,7 +4730,7 @@ footer nav ul li {
     color: black;
     text-align: left;
     font-size: 19px;
-    left: 0px;
+    left: -60px;
     box-shadow: 0px 0px 16px 0px rgba(0, 0, 0, 0.4);
     visibility: hidden;
     transform: translateY(1em);
@@ -4878,6 +4878,7 @@ footer nav ul li {
 
 .login-container-left input,
 .register-form-container input[type=text],
+.register-form-container input[type=password],
 .forgot-password-modal input,
 .reset-password-modal input,
 .user-info-form input {
@@ -4900,6 +4901,7 @@ footer nav ul li {
 .user-info-form input {
     margin-top: 5px;
     width: 100%;
+    color: #000;
 }
 
 .login-container-right li {

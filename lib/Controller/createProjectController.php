@@ -355,7 +355,8 @@ class createProjectController extends ajaxController {
     }
 
     private function clearSessionFiles() {
-        unset( $_SESSION[ GDrive::SESSION_FILE_LIST ] );
+        $gdriveSession = new GDrive\Session( $_SESSION ) ;
+        $gdriveSession->clearFiles() ;
     }
 
     private static function sanitizeTmKeyArr( $elem ) {

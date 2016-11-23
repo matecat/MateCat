@@ -20,7 +20,7 @@ $.extend(APP, {
         });
 
         $('.user-menu-preferences').on('click', function () {
-            APP.ModalWindow.showModalComponent(PreferencesModal, {}, 'Preferences');
+            $('#modal').trigger('openpreferences');
         });
 
         $('#modal').on('opensuccess', function (e, param) {
@@ -28,9 +28,14 @@ $.extend(APP, {
         });
 
         $('#modal').on('openpreferences', function (e, param) {
-            var props = {};
-            if (param)
+            var props = {
+                user: APP.USER.STORE.user,
+                service: APP.USER.STORE.connected_services[0]
+            };
+            if (param) {
                 props = param;
+                $.extend(props, param);
+            }
             APP.ModalWindow.showModalComponent(PreferencesModal, props, 'Preferences');
         });
         $('#modal').on('openresetpassword', function () {
@@ -41,18 +46,21 @@ $.extend(APP, {
         });
         $('#modal').on('openregister', function () {
             var props = {
-                googleUrl: $('#sign-in').data('oauth')
+                googleUrl: $('#loginlink').attr('href')
             };
             APP.ModalWindow.showModalComponent(RegisterModal, props, "Register Now");
         });
         $('#modal').on('openlogin', function () {
+            if ( $('.popup-tm.open').length) {
+                UI.closeTMPanel();
+            }
             var style = {
                 'width': '80%',
                 'maxWidth': '800px',
                 'minWidth': '600px'
             };
             var props = {
-                googleUrl: $('#sign-in').data('oauth')
+                googleUrl: $('#loginlink').attr('href')
             };
             APP.ModalWindow.showModalComponent(LoginModal, props, 'Login or register', style);
         });
@@ -60,17 +68,27 @@ $.extend(APP, {
         /// TODO
         $('a.authLink').click(function(e){
             e.preventDefault();
-
             $('#modal').trigger('openlogin');
         });
 
-        this.checkLoginFromQueryString();
+        $( '#sign-in' ).click( function ( e ) {
+            e.preventDefault();
+            $('#modal').trigger('openlogin');
+        } );
+
+        $( '#sign-in-o, #sign-in-o-mt' ).click( function ( e ) {
+            $( '#sign-in' ).trigger( 'click' );
+        } );
+
+        this.checkForPopupToOpen();
     },
-    checkLoginFromQueryString: function () {
-        var keyParam = APP.getParameterByName("open");
+    checkForPopupToOpen: function () {
+        var openFromFlash = APP.lookupFlashServiceParam("open");
+        if ( !openFromFlash ) return ;
+
         var modal$ = $('#modal');
-        switch (keyParam) {
-            case "reset":
+        switch ( openFromFlash[ 0 ].value ) {
+            case "passwordReset":
                 modal$.trigger('openresetpassword');
                 break;
             case "preference":

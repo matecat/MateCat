@@ -16,9 +16,22 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct   implements D
     public $first_name;
     public $last_name;
     public $salt;
-    public $api_key;
     public $pass;
-    public $oauth_access_token ; 
+    public $oauth_access_token ;
+
+    public $email_confirmed_at ;
+    public $confirmation_token ;
+    public $confirmation_token_created_at ;
+
+    public function clearAuthToken() {
+        $this->confirmation_token = null ;
+        $this->confirmation_token_created_at = null ;
+    }
+
+    public function initAuthToken() {
+        $this->confirmation_token = Utils::randomString() ;
+        $this->confirmation_token_created_at = Utils::mysqlTimestamp( time() );
+    }
 
     public static function getStruct() {
         return new Users_UserStruct();
@@ -55,6 +68,16 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct   implements D
      */
     public function getLastName() {
         return $this->last_name;
+    }
+
+    /**
+     * Returns true if password matches
+     *
+     * @param $password
+     * @return bool
+     */
+    public function passwordMatch( $password ) {
+        return Utils::encryptPass( $password, $this->salt ) == $this->pass ;
     }
 
     // TODO ------- start duplicated code, find a way to remove duplication

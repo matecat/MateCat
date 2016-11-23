@@ -566,11 +566,14 @@ CREATE TABLE `users` (
   `create_date` datetime NOT NULL,
   `first_name` varchar(50) NOT NULL,
   `last_name` varchar(50) NOT NULL,
-  `api_key` varchar(100) NOT NULL,
   `oauth_access_token` text,
+  `email_confirmed_at` timestamp NULL DEFAULT NULL,
+  `new_pass` varchar(50) DEFAULT NULL,
+  `confirmation_token` varchar(50) DEFAULT NULL,
+  `confirmation_token_created_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`uid`),
   UNIQUE KEY `email` (`email`) USING BTREE,
-  KEY `api_key` (`api_key`)
+  UNIQUE KEY `confirmation_token` (`confirmation_token`) USING BTREE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 
@@ -651,6 +654,7 @@ INSERT INTO `phinxlog` ( version ) VALUES ( '20160916105911' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161027154703' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161107080000' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161107094229' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20161118144241' );
 
 CREATE SCHEMA `matecat_conversions_log` DEFAULT CHARACTER SET utf8 ;
 USE matecat_conversions_log ;

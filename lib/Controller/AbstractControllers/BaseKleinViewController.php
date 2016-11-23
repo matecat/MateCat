@@ -54,10 +54,6 @@ class BaseKleinViewController extends \API\V2\KleinController
     }
 
     private function isLoggedIn() {
-        if( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ) {
-            AuthCookie::tryToRefreshToken( $_SESSION[ 'cid' ] );
-        }
-
         return (
             ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ) &&
             ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) )

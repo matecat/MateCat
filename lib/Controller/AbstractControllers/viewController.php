@@ -337,15 +337,29 @@ abstract class viewController extends controller {
 
 
     /**
+     * @return string
+     * @deprecated use getAuthUrl instead.
+     */
+    public function generateAuthURL() {
+        return $this->getAuthUrl();
+    }
+
+    /**
      * setInitialTemplateVars
      *
      * Initialize template variables that must be initialized to avoid templte errors.
      * These variables are expected to be overridden.
      */
     private function setInitialTemplateVars() {
+
+        if ( is_null( $this->template) ) {
+            throw new Exception('Tempalte is not defined');
+        }
+
         $this->template->footer_js = array();
         $this->template->config_js = array() ;
         $this->template->css_resources = array();
+        $this->template->authURL = $this->getAuthUrl() ;
     }
 
     /**
@@ -391,7 +405,11 @@ abstract class viewController extends controller {
      * @return string
      */
     public function getAuthUrl(){
-        return $this->authURL;
+        if ( is_null($this->authURL ) ) {
+            $this->client  = OauthClient::getInstance()->getClient();
+            $this->authURL = $this->client->createAuthUrl();
+        }
+        return $this->authURL ;
     }
 
     public static function isRevision(){
@@ -399,17 +417,6 @@ abstract class viewController extends controller {
         $_from_url   = parse_url( $_SERVER[ 'REQUEST_URI' ] );
         $is_revision_url = strpos( $_from_url[ 'path' ], "/revise" ) === 0;
         return $is_revision_url;
-    }
-
-    /**
-     * Get Client Instance and retrieve authentication url
-     *
-     */
-    protected function generateAuthURL() {
-
-        $this->client  = OauthClient::getInstance()->getClient();
-        $this->authURL = $this->client->createAuthUrl();
-
     }
 
     /**
