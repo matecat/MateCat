@@ -103,13 +103,12 @@ class LoginModal extends React.Component {
         }
         return <div className="login-modal">
                     <div className="login-container-right">
-                        <h2>All the advatnages</h2>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-                            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                        <h2>Register now</h2>
+                        <p>Log in to access advanced functionalities.</p>
                         <ul className="">
-                            <li>Lorem ipsum dolor sit amet</li>
-                            <li>Lorem ipsum dolor sit amet</li>
-                            <li>Lorem ipsum dolor sit amet</li>
+                            <li>TM, MT, glossary management</li>
+                            <li>Google Drive Integration</li>
+                            <li>Management panel</li>
                         </ul>
                         <a className="register-button btn-confirm-medium" onClick={this.openRegisterModal}> Register now </a>
                     </div>

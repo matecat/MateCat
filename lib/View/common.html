@@ -26,7 +26,7 @@
 
 
 
-<div metal:define-macro="login_includes" style="float: right">
+<div metal:define-macro="login_includes" style="float: left">
     <tal:block tal:condition="php: empty(logged_user)">
         <div id='welcomebox'>
             <span>Anonymous</span> (<a id='loginlink' class="authLink" href="${authURL}">Login</a>)
@@ -36,9 +36,14 @@
     <tal:block tal:condition="php: !empty(logged_user)">
         <div id='welcomebox' tal:attributes="title extended_user">
             <span tal:content='extended_user'></span>
-            <span class="icon-sort-up"></span>
-            <!--(<a id='logoutlink' href='#'>Logout</a>)-->
+            <!-- <span class="icon-sort-up"></span>
+            <(<a id='logoutlink' href='#'>Logout</a>)
             <ul class="user-menu">
+                <li class="user-menu-preferences">Preferences</li>
+                <li id='logoutlink'>Logout</li>
+            </ul>-->
+            <ul class="user-menu-flat">
+                <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
                 <li class="user-menu-preferences">Preferences</li>
                 <li id='logoutlink'>Logout</li>
             </ul>

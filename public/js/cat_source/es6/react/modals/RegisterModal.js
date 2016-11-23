@@ -117,7 +117,7 @@ class RegisterModal extends React.Component {
             generalErrorHtml = <div><span style={ {color: 'red',fontSize: '14px'} } className="text">{this.state.generalError}</span><br/></div>;
         }
         return <div className="register-modal">
-            <h2>Register</h2>
+            <h2>Register with Google Login</h2>
             <a className="google-login btn-confirm-medium" onClick={this.googole_popup.bind(this)}> Google login </a>
             <p>By clicking you accept terms and conditions</p>
             <div className="register-form-container">
@@ -130,14 +130,16 @@ class RegisterModal extends React.Component {
                            placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")} tabindex={3}/>
                 <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password")}
                            placeholder="Password" name="password" errorText={this.errorFor("password")} tabindex={4}/>
+                <br />
                 <input type="checkbox" id="check-conditions" name="terms" ref={(input) => this.textInput = input} onChange={this.changeCheckbox.bind(this)} tabIndex={5}/>
                 <label htmlFor="check-conditions" style={this.checkStyle}>Accept terms and conditions</label><br/>
                 <a className="register-submit btn-confirm-medium"
                    onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}
                    onClick={this.handleSubmitClicked.bind()} tabIndex={6}> Register Now </a>
                 {generalErrorHtml}
-                <br/>
-                <span style={{cursor:'pointer'}} onClick={this.openLoginModal}>Already registered? Login</span>
+               <p>
+                <a style={{cursor:'pointer'}} onClick={this.openLoginModal}>Already registered? Login</a>
+                </p>
             </div>
         </div>;
     }
