@@ -17,8 +17,13 @@ class ModalComponent extends React.Component {
     }
 
     componentDidMount() {
-
+        $("body").addClass("side-popup");
     }
+
+    componentWillUnmount() {
+        $("body").removeClass("side-popup");
+    }
+
 
     allowHTML(string) {
         return { __html: string };
