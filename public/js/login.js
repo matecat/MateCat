@@ -46,7 +46,7 @@ $.extend(APP, {
         });
         $('#modal').on('openregister', function () {
             var props = {
-                googleUrl: $('#sign-in').data('oauth')
+                googleUrl: $('#loginlink').attr('href')
             };
             APP.ModalWindow.showModalComponent(RegisterModal, props, "Register Now");
         });
@@ -60,7 +60,7 @@ $.extend(APP, {
                 'minWidth': '600px'
             };
             var props = {
-                googleUrl: $('#sign-in').data('oauth')
+                googleUrl: $('#loginlink').attr('href')
             };
             APP.ModalWindow.showModalComponent(LoginModal, props, 'Login or register', style);
         });
