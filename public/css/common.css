@@ -3666,14 +3666,6 @@ top: -2px;
 left: 9999px;
 }
 
-#logoutlink:before {
-    content: "\f011";
-    font-size: 14px;
-    display: block;
-    float: left;
-    margin: 3px 6px 0 0px;
-}
-
 
 .editToolbar .uppercase:after {
     content: "\ea6c";
@@ -4707,9 +4699,11 @@ span.share-popup-item-email {
 /***** Login Footer ****/
 
 #logoutlink {
-    float: left;
-    margin: 0;
     margin-bottom: 20px;
+    text-decoration: underline;
+    float: left;
+    cursor: pointer;
+    color: #39699a;
 }
 
 footer nav ul li {
@@ -4798,7 +4792,7 @@ footer nav ul li {
     background: #f8f6f6;
     width: 95%;
     min-height: 40px;
-    margin-bottom: 40px;
+    margin-bottom: 25px;
 }
 
 .user-reset-password {
@@ -5063,8 +5057,11 @@ footer nav ul li {
 }
 
 .matecat-modal-header h2 {
-    margin: 0;
+    margin: 0!important;
     line-height: 30px;
+    font-size: 24px;
+    width: auto!important;
+    float: none!important;
 }
 
 

@@ -64,7 +64,7 @@ $.extend(APP, {
             var props = {
                 googleUrl: $('#loginlink').attr('href')
             };
-            APP.ModalWindow.showModalComponent(LoginModal, props, 'Login or register', style);
+            APP.ModalWindow.showModalComponent(LoginModal, props, '', style);
         });
 
         /// TODO
