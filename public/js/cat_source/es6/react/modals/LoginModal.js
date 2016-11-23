@@ -22,8 +22,6 @@ class LoginModal extends React.Component {
     }
 
     googole_popup(  ) {
-        //var rid=$('#rid').text();
-        //url=url+'&rid='+rid;
         var url = this.props.googleUrl;
         var newWindow = window.open( url, 'name', 'height=600,width=900' );
         if ( window.focus ) {

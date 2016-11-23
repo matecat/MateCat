@@ -37,7 +37,7 @@ class  ForgotPasswordEmail extends AbstractEmail
     protected function _getTemplateVariables() {
         return array(
             'user'           => $this->user->toArray(),
-            'password_reset_url' => \Routes::forgotPassword( $this->user->confirmation_token )
+            'password_reset_url' => \Routes::passwordReset( $this->user->confirmation_token )
         );
     }
 

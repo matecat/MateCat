@@ -46,7 +46,7 @@ $.extend(APP, {
         });
         $('#modal').on('openregister', function () {
             var props = {
-                googleUrl: $('#sign-in').data('oauth')
+                googleUrl: $('#loginlink').attr('href')
             };
             APP.ModalWindow.showModalComponent(RegisterModal, props, "Register Now");
         });
@@ -60,7 +60,7 @@ $.extend(APP, {
                 'minWidth': '600px'
             };
             var props = {
-                googleUrl: $('#sign-in').data('oauth')
+                googleUrl: $('#loginlink').attr('href')
             };
             APP.ModalWindow.showModalComponent(LoginModal, props, 'Login or register', style);
         });
@@ -80,13 +80,15 @@ $.extend(APP, {
             $( '#sign-in' ).trigger( 'click' );
         } );
 
-        this.checkLoginFromQueryString();
+        this.checkForPopupToOpen();
     },
-    checkLoginFromQueryString: function () {
-        var keyParam = APP.getParameterByName("open");
+    checkForPopupToOpen: function () {
+        var openFromFlash = APP.lookupFlashServiceParam("open");
+        if ( !openFromFlash ) return ;
+
         var modal$ = $('#modal');
-        switch (keyParam) {
-            case "reset":
+        switch ( openFromFlash[ 0 ].value ) {
+            case "passwordReset":
                 modal$.trigger('openresetpassword');
                 break;
             case "preference":
