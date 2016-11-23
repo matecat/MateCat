@@ -4700,7 +4700,7 @@ span.share-popup-item-email {
     color: black;
     text-align: left;
     font-size: 19px;
-    left: 0px;
+    left: -60px;
     box-shadow: 0px 0px 16px 0px rgba(0, 0, 0, 0.4);
     visibility: hidden;
     transform: translateY(1em);
