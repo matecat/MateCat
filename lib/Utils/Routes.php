@@ -3,7 +3,7 @@
 
 class Routes {
 
-    public static function passwordReset( $confirmation_token, $options ) {
+    public static function passwordReset( $confirmation_token, $options = array() ) {
         $host = self::httpHost( $options );
         return "$host/api/app/user/password_reset/$confirmation_token";
     }
