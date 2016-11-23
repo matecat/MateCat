@@ -7,8 +7,9 @@ class FlashMessage {
     const WARNING = 'warning' ;
     const ERROR = 'error' ;
     const INFO = 'info' ;
+    const SERVICE = 'service' ;
 
-    public static function set( $key, $message, $type = self::WARNING ) {
+    public static function set( $key, $value, $type = self::WARNING ) {
         Bootstrap::sessionStart();
 
         if ( isset( $_SESSION[ self::KEY ] ) ) {
@@ -21,7 +22,7 @@ class FlashMessage {
 
         $_SESSION[ self::KEY ] [ $type ] [] = array(
             'key' => $key,
-            'message' => $message
+            'value' => $value
         );
     }
 

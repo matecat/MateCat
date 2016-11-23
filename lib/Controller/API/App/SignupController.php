@@ -44,13 +44,13 @@ class SignupController extends KleinController {
         }
         catch( ValidationError $e ) {
             FlashMessage::set('passwordReset', $e->getMessage(), FlashMessage::ERROR );
+
             $this->response->redirect( \Routes::appRoot() ) ;
         }
 
         if ( !$this->response->isLocked() ) {
-            $this->response->redirect( \Routes::appRoot( array(
-                'query' => array( 'open' => 'reset' )
-            ) ) ) ;
+            FlashMessage::set('popup', 'passwordReset', FlashMessage::SERVICE );
+            $this->response->redirect( \Routes::appRoot( ) ) ;
         }
     }
 

@@ -80,13 +80,15 @@ $.extend(APP, {
             $( '#sign-in' ).trigger( 'click' );
         } );
 
-        this.checkLoginFromQueryString();
+        this.checkForPopupToOpen();
     },
-    checkLoginFromQueryString: function () {
-        var keyParam = APP.getParameterByName("open");
+    checkForPopupToOpen: function () {
+        var openFromFlash = APP.lookupFlashServiceParam("open");
+        if ( !openFromFlash ) return ;
+
         var modal$ = $('#modal');
-        switch (keyParam) {
-            case "reset":
+        switch ( openFromFlash[ 0 ].value ) {
+            case "passwordReset":
                 modal$.trigger('openresetpassword');
                 break;
             case "preference":

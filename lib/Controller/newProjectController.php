@@ -66,9 +66,6 @@ class newProjectController extends viewController {
         // check if user is logged and generate authURL for logging in
         $this->doAuth();
 
-        $this->generateAuthURL();
-        $this->generateGDriveAuthUrl();
-
         list( $uid, $cid ) = $this->getLoginUserParams();
         $engine = new EnginesModel_EngineDAO( Database::obtain() );
         $engineQuery         = new EnginesModel_EngineStruct();
@@ -293,7 +290,7 @@ class newProjectController extends viewController {
         $this->template->incomingUrl                = '/login?incomingUrl=' . $_SERVER[ 'REQUEST_URI' ];
 
         $this->template->incomingURL = $this->incomingUrl;
-        $this->template->authURL     = $this->authURL;
+        $this->template->authURL     = $this->getAuthUrl();
 
         $this->template->user_keys = $this->keyList;
 
@@ -332,10 +329,6 @@ class newProjectController extends viewController {
         }
 
         return Constants::DEFAULT_TARGET_LANG;
-    }
-
-    private function generateGDriveAuthUrl(){
-
     }
 
     private function isToDenyLexiQA() {

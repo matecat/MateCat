@@ -4,8 +4,6 @@ APP = {
     init: function () {
         this.setLoginEvents();
 
-        this.evalFlashMessages();
-
         this.isCattool = $( 'body' ).hasClass( 'cattool' );
         $( "body" ).on( 'click', '.modal .x-popup', function ( e ) {
             e.preventDefault();
@@ -603,8 +601,9 @@ APP = {
         return caretPos;
     },
 
-    evalFlashMessages : function() {
+    evalFlashMessagesForNotificationBox : function() {
         if ( config.flash_messages && Object.keys( config.flash_messages ).length ) {
+
             _.each(['warning', 'notice', 'error'], function( type ) {
                 if ( config.flash_messages[ type ] ) {
                     _.each(config.flash_messages[ type ],function( obj ) {
@@ -612,7 +611,7 @@ APP = {
                             autoDismiss: false,
                             dismissable: true,
                             position : "bl",
-                            text : obj.message,
+                            text : obj.value,
                             title: type,
                             type : type,
                             allowHtml : true
@@ -620,8 +619,18 @@ APP = {
                     });
                 }
             });
+
+        }
+    },
+
+    lookupFlashServiceParam : function( name ) {
+        if ( config.flash_messages && config.flash_messages.service ) {
+            return _.filter( config.flash_messages.service, function( service, index ) {
+                return service.key == name ;
+            });
         }
     }
+
 };
 
 $(document).ready(function(){
