@@ -30,8 +30,10 @@ $.extend(APP, {
         $('#modal').on('openpreferences', function (e, param) {
             var props = {
                 user: APP.USER.STORE.user,
-                service: APP.USER.STORE.connected_services[0]
             };
+            if (APP.USER.STORE.connected_services && APP.USER.STORE.connected_services.length ) {
+                props.service = APP.USER.STORE.connected_services[0]
+            }
             if (param) {
                 props = param;
                 $.extend(props, param);

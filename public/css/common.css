@@ -4944,10 +4944,10 @@ footer nav ul li {
 }
 
 .forgot-password-modal {
-    background: url(../img/matecat_watch.png) no-repeat 467px 120px;
-    background-size: 25%;
-    width: calc(64% + 1px);
-    padding: 3% 18%;
+    background: url(../img/matecat_watch.png) no-repeat 467px 136px;
+    background-size: 23%;
+    width: 384px;
+    padding: 25px 90px;
 }
 
 

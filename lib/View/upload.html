@@ -60,7 +60,13 @@
             defaults : {
                 tag_projection : true,
                 speech2text : false,
-                lexiqa : true,
+                lexiqa : true, <tal:block tal:condition="php: !empty(logged_user)">
+                            <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
+                        </tal:block>
+
+                        <tal:block tal:condition="php: empty(logged_user)">
+                            <li><a href="${authURL}" class="authLink">Manage</a></li>
+                        </tal:block>
             },
             lexiqa_languages: ${lexiqa_languages},
             deny_lexiqa: ${deny_lexiqa | string:false},
@@ -867,12 +873,15 @@
         <nav tal:condition="php: Bootstrap::areOauthKeysPresent()">
 
             <ul>
-                 <div metal:use-macro="common.html/login_includes" />
-               
+
+                <tal:block tal:condition="php: !empty(logged_user)">
+                    <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
+                </tal:block>
 
                 <tal:block tal:condition="php: empty(logged_user)">
                     <li><a href="${authURL}" class="authLink">Manage</a></li>
                 </tal:block>
+                <div metal:use-macro="common.html/login_includes" />
 
             </ul>
 
