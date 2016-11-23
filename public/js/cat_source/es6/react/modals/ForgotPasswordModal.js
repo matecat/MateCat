@@ -60,7 +60,7 @@ class ForgotPasswordModal extends React.Component {
     }
 
     sendForgotPassword() {
-        $.post('/api/app/user/forgot_password', { email: this.state.emailAddress } )
+        return $.post('/api/app/user/forgot_password', { email: this.state.emailAddress } )
     }
 
     errorFor(field) {

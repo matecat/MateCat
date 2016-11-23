@@ -42,8 +42,8 @@ class ResetPasswordModal extends React.Component {
                 text: 'Your password has been changed.'
             }]);
         }).fail(function (response) {
-            var data = JSON.parse( response.responseText );
-            if (data) {
+            if (response.responseText.length) {
+                var data = JSON.parse( response.responseText );
                 self.setState({
                     generalError: data
                 });

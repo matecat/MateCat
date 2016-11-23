@@ -49,11 +49,12 @@ class RegisterModal extends React.Component {
                 title: 'Register Now',
                 text: 'To complete your registration please follow the instructions in the email we sent you to ' + self.state.emailAddress + '.'
             }]);
-        }).fail(function (data) {
-            var data = JSON.parse( response.responseText );
-            if (data) {
+        }).fail(function (response) {
+
+            if (response.responseText.length) {
+                var data = JSON.parse( response.responseText );
                 self.setState({
-                    generalError: data
+                    generalError: data.error.message
                 });
             } else {
                 self.setState({
@@ -134,7 +135,7 @@ const fieldValidations = [
     RuleRunner.ruleRunner("name", "Name", FormRules.requiredRule),
     RuleRunner.ruleRunner("surname", "Surname", FormRules.requiredRule),
     RuleRunner.ruleRunner("emailAddress", "Email address", FormRules.requiredRule, FormRules.checkEmail),
-    RuleRunner.ruleRunner("password", "Password", FormRules.requiredRule, FormRules.minLength(6)),
+    RuleRunner.ruleRunner("password", "Password", FormRules.requiredRule, FormRules.minLength(8)),
 ];
 
 export default RegisterModal ;

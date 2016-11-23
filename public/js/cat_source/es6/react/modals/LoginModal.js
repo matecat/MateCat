@@ -49,8 +49,8 @@ class LoginModal extends React.Component {
         this.sendLoginData().done(function (data) {
             window.location.reload()
         }).fail(function (response) {
-            var data = JSON.parse( response.responseText );
-            if (data) {
+            if (response.responseText.length) {
+                var data = JSON.parse( response.responseText );
                 self.setState({
                     generalError: data
                 });

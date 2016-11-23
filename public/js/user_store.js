@@ -14,7 +14,7 @@ APP.USER.STORE = {} ;
         return $.getJSON('/api/app/user').done(function( data ) {
             APP.USER.STORE = data ;
         });
-    }
+    };
 
     function getDefaultConnectedService() {
         if ( APP.USER.STORE.connected_services.length ) {

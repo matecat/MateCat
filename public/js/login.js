@@ -30,7 +30,7 @@ $.extend(APP, {
         $('#modal').on('openpreferences', function (e, param) {
             var props = {
                 user: APP.USER.STORE.user,
-                services: APP.USER.STORE.connected_services
+                service: APP.USER.STORE.connected_services[0]
             };
             if (param) {
                 props = param;
@@ -51,6 +51,9 @@ $.extend(APP, {
             APP.ModalWindow.showModalComponent(RegisterModal, props, "Register Now");
         });
         $('#modal').on('openlogin', function () {
+            if ( $('.popup-tm.open').length) {
+                UI.closeTMPanel();
+            }
             var style = {
                 'width': '80%',
                 'maxWidth': '800px',
@@ -65,9 +68,17 @@ $.extend(APP, {
         /// TODO
         $('a.authLink').click(function(e){
             e.preventDefault();
-
             $('#modal').trigger('openlogin');
         });
+
+        $( '#sign-in' ).click( function ( e ) {
+            e.preventDefault();
+            $('#modal').trigger('openlogin');
+        } );
+
+        $( '#sign-in-o, #sign-in-o-mt' ).click( function ( e ) {
+            $( '#sign-in' ).trigger( 'click' );
+        } );
 
         this.checkLoginFromQueryString();
     },

@@ -3,6 +3,9 @@ class PreferencesModal extends React.Component {
 
     constructor(props) {
         super(props);
+        this.state = {
+            service: this.props.service
+        }
     }
 
     openResetPassword() {
@@ -11,21 +14,48 @@ class PreferencesModal extends React.Component {
 
     componentWillMount() { }
 
-    componentDidMount() {}
+    componentDidMount() {
+        if ( this.state.service && !this.props.service.disabled_at) {
+            $(this.checkDrive).attr('checked', true);
+        } else {
+
+        }
+    }
 
     checkboxChange() {
-        var url = config.gdriveAuthURL ;
-        var newWindow = window.open( url, 'name', 'height=600,width=900' );
+        var self = this;
+        var selected = $(this.checkDrive).is(':checked');
+        if ( selected ) {
+            var url = config.gdriveAuthURL;
+            var newWindow = window.open(url, 'name', 'height=600,width=900');
 
-        if ( window.focus ) {
-            newWindow.focus();
-        }
-        var interval = setInterval( function() {
-            if ( newWindow.closed ) {
-                APP.USER.loadUserData();
-                clearInterval( interval ) ;
+            if (window.focus) {
+                newWindow.focus();
             }
-        }, 600 );
+            var interval = setInterval(function () {
+                if (newWindow.closed) {
+                    APP.USER.loadUserData().done(function () {
+                        self.setState({
+                            service: APP.USER.STORE.connected_services[0]
+                        });
+                    });
+                    clearInterval(interval);
+                }
+            }, 600);
+        } else {
+            this.disableGDrive().done(function (data) {
+                APP.USER.upsertConnectedService(data.connected_service);
+                self.setState({
+                    service: APP.USER.STORE.connected_services[0]
+                });
+            });
+        }
+
+    }
+
+    disableGDrive() {
+        return $.post('/api/app/connected_services/' + this.props.service.id, { disabled: true } );
+
     }
 
     render() {
@@ -34,6 +64,11 @@ class PreferencesModal extends React.Component {
             gdriveMessage = <div className="preference-modal-message">
                 Connect a google drive account to add files
             </div>;
+        }
+
+        var services_label = 'Connect your Google Drive';
+        if ( this.state.service && !this.state.service.disabled_at) {
+            services_label = 'Connected to '+ this.state.service.email+' Google Drive';
         }
         return <div className="preferences-modal">
                     <h1>Preferences</h1>
@@ -52,7 +87,9 @@ class PreferencesModal extends React.Component {
                     </div>
                     <div className="user-gdrive">
                         <div className="onoffswitch-drive">
-                            <input type="checkbox" name="onoffswitch" onChange={this.checkboxChange} className="onoffswitch-checkbox" id="gdrive_check"/>
+                            <input type="checkbox" name="onoffswitch" onChange={this.checkboxChange.bind(this)}
+                                   ref={(input) => this.checkDrive = input}
+                                   className="onoffswitch-checkbox" id="gdrive_check"/>
                             <label className="onoffswitch-label" htmlFor="gdrive_check">
                                 <span className="onoffswitch-inner"/>
                                 <span className="onoffswitch-switch"/>
@@ -61,10 +98,10 @@ class PreferencesModal extends React.Component {
                                 <span className="onoffswitch-label-status-unavailable">Unavailable</span>
                             </label>
                         </div>
-                        <label>Connect your Google Drive</label>
+                        <label>{services_label}</label>
                     </div>
                     <br/>
-                    <a className="btn-confirm-medium send-user-updates">Update preferences</a>
+                    {/*<a className="btn-confirm-medium send-user-updates">Update preferences</a>*/}
             </div>;
     }
 }
