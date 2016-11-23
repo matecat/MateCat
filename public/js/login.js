@@ -4,20 +4,20 @@ $.extend(APP, {
             React.createElement(ModalWindow),
             $("#modal")[0]
         );
-        $('#logoutlink').on('click',function(event){
-            //stop form submit
-            event.preventDefault();
-            $.post('/ajaxLogout',{logout:1},function(data){
-                if('unlogged'==data){
-                    //ok, unlogged
-                    if($('body').hasClass('manage')) {
-                        location.href = config.hostpath + config.basepath;
-                    } else {
-                        window.location.reload();
-                    }
-                }
-            });
-        });
+        // $('#logoutlink').on('click',function(event){
+        //     //stop form submit
+        //     event.preventDefault();
+        //     $.post('/ajaxLogout',{logout:1},function(data){
+        //         if('unlogged'==data){
+        //             //ok, unlogged
+        //             if($('body').hasClass('manage')) {
+        //                 location.href = config.hostpath + config.basepath;
+        //             } else {
+        //                 window.location.reload();
+        //             }
+        //         }
+        //     });
+        // });
 
         $('.user-menu-preferences').on('click', function () {
             $('#modal').trigger('openpreferences');

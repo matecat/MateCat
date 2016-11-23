@@ -41,7 +41,7 @@
 
     <tal:block tal:condition="php: !empty(logged_user)">
         <div id='welcomebox' tal:attributes="title extended_user">
-            <span tal:content='logged_user'></span>
+            <span class="user-menu-preferences" >Profile (${logged_user})</span>
             <!-- <span class="icon-sort-up"></span>
             <(<a id='logoutlink' href='#'>Logout</a>)
             <span tal:content='logged_user'></span>
@@ -50,10 +50,10 @@
                 <li class="user-menu-preferences">Preferences</li>
                 <li id='logoutlink'>Logout</li>
             </ul>-->
-            <ul class="user-menu-flat">
-                <li class="user-menu-preferences">Preferences</li>
-                <li id='logoutlink'>Logout</li>
-            </ul>
+            <!--<ul class="user-menu-flat">-->
+                <!--<li class="user-menu-preferences">Preferences</li>-->
+                <!--<li id='logoutlink'>Logout</li>-->
+            <!--</ul>-->
         </div>
     </tal:block>
 </div>
