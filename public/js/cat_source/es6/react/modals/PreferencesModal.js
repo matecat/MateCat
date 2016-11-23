@@ -57,6 +57,18 @@ class PreferencesModal extends React.Component {
         return $.post('/api/app/connected_services/' + this.props.service.id, { disabled: true } );
 
     }
+    logoutUser() {
+        $.post('/ajaxLogout',{logout:1},function(data){
+            if('unlogged'==data){
+                //ok, unlogged
+                if($('body').hasClass('manage')) {
+                    location.href = config.hostpath + config.basepath;
+                } else {
+                    window.location.reload();
+                }
+            }
+        });
+    }
 
     render() {
         var gdriveMessage = '';
@@ -99,7 +111,7 @@ class PreferencesModal extends React.Component {
                         <label>{services_label}</label>
                     </div>
                     <br/>
-                    {/*<a className="btn-confirm-medium send-user-updates">Update preferences</a>*/}
+                    <div id='logoutlink' onClick={this.logoutUser.bind(this)}>Logout</div>
             </div>;
     }
 }

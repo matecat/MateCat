@@ -4699,8 +4699,6 @@ span.share-popup-item-email {
 }
 
 footer nav ul li {
-    border-right: none;
-    border-left: 1px solid #fff;
     margin-left: 4px;
 }
 
@@ -4711,6 +4709,7 @@ footer nav ul li {
     cursor: pointer;
     position: relative;
     margin-top: 5px;
+    margin-left: 8px;
 }
 
 .manage #welcomebox {
