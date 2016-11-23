@@ -55,14 +55,7 @@ APP = {
             $( this ).parents( '.modal' ).find( '.x-popup' ).click();
         } );
 
-        $( '#sign-in' ).click( function ( e ) {
-            e.preventDefault();
-            APP.googole_popup( $( this ).data( 'oauth' ) );
-        } );
 
-        $( '#sign-in-o, #sign-in-o-mt' ).click( function ( e ) {
-            $( '#sign-in' ).trigger( 'click' );
-        } );
     },
     alert: function ( options ) {
         //FIXME

@@ -10,21 +10,15 @@ class LoginModal extends React.Component {
         super(props);
         this.state = {
             showErrors: false,
-            validationErrors: {}
+            validationErrors: {},
+            generalError: ''
         };
 
         this.state.validationErrors = RuleRunner.run(this.state, fieldValidations);
         this.handleFieldChanged = this.handleFieldChanged.bind(this);
         this.handleSubmitClicked = this.handleSubmitClicked.bind(this);
+        this.sendLoginData = this.sendLoginData.bind(this);
         this.errorFor = this.errorFor.bind(this);
-    }
-
-    openRegisterModal() {
-        $('#modal').trigger('openregister');
-    }
-
-    openForgotPassword() {
-        $('#modal').trigger('openforgotpassword');
     }
 
     googole_popup(  ) {
@@ -43,26 +37,36 @@ class LoginModal extends React.Component {
                 [field]: {$set: e.target.value}
             });
             newState.validationErrors = RuleRunner.run(newState, fieldValidations);
+            newState.generalError = '';
             this.setState(newState);
         }
     }
 
     handleSubmitClicked() {
+        var self = this;
         this.setState({showErrors: true});
         if($.isEmptyObject(this.state.validationErrors) == false) return null;
+        this.sendLoginData().done(function (data) {
+            window.location.reload()
+        }).fail(function (response) {
+            if (response.responseText.length) {
+                var data = JSON.parse( response.responseText );
+                self.setState({
+                    generalError: data
+                });
+            } else {
+                self.setState({
+                    generalError: 'There was a problem, please try again later or contact support.'
+                });
+            }
+        });
 
-        APP.doRequest()
-        $.post('/api/app/user/login',  {
+    }
+
+    sendLoginData() {
+        return $.post('/api/app/user/login',  {
             email : this.state.emailAddress,
             password : this.state.password
-        }).done( function( data ) {
-            // reload page
-            window.location.href = window.location.href ;
-
-            console.log('login ok');
-        }).fail( function( response ) {
-            // TODO: notify login failure.
-            console.log("Send Login Data");
         });
     }
 
@@ -70,15 +74,19 @@ class LoginModal extends React.Component {
         return this.state.validationErrors[field];
     }
 
-    componentWillMount() {
+    openRegisterModal() {
+    $('#modal').trigger('openregister');
+}
 
-    }
-
-    componentDidMount() {
-
+    openForgotPassword() {
+        $('#modal').trigger('openforgotpassword');
     }
 
     render() {
+        var generalErrorHtml = '';
+        if (this.state.generalError.length) {
+            generalErrorHtml = <span style={ {color: 'red',fontSize: '14px'} } className="text">{this.state.generalError}</span>;
+        }
         return <div className="login-modal">
                     <div className="login-container-right">
                         <h2>All the advatnages</h2>
@@ -96,10 +104,14 @@ class LoginModal extends React.Component {
                         <a className="google-login-button btn-confirm-medium" onClick={this.googole_popup.bind(this)}> Google login </a>
                         <div className="login-form-container">
                             <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("emailAddress")}
-                                       placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")}/>
+                                       placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")} tabindex={1}/>
                             <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password")}
-                                       placeholder="Password" name="password" errorText={this.errorFor("password")}/>
-                            <a className="login-button btn-confirm-medium" onClick={this.handleSubmitClicked.bind()}> Log in </a><br/>
+                                       placeholder="Password" name="password" errorText={this.errorFor("password")} tabindex={2}/>
+                            <a className="login-button btn-confirm-medium"
+                               onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}
+                               onClick={this.handleSubmitClicked.bind()} tabIndex={3}> Log in </a>
+                            {generalErrorHtml}
+                            <br/>
                             <span className="forgot-password" onClick={this.openForgotPassword}>Forgot password?</span>
                         </div>
                     </div>
@@ -109,7 +121,7 @@ class LoginModal extends React.Component {
 
 const fieldValidations = [
     RuleRunner.ruleRunner("emailAddress", "Email address", FormRules.requiredRule, FormRules.checkEmail),
-    RuleRunner.ruleRunner("password", "Password", FormRules.requiredRule, FormRules.minLength(6)),
+    RuleRunner.ruleRunner("password", "Password", FormRules.requiredRule, FormRules.minLength(8)),
 ];
 
 LoginModal.propTypes = {

@@ -30,7 +30,7 @@ export default class TextField extends React.Component {
         return (
             <div>
                 <input type={type} placeholder={this.props.placeholder}
-                       value={this.props.text} name={this.props.name} onChange={this.props.onFieldChanged} className={this.props.classes}/>
+                       value={this.props.text} name={this.props.name} onChange={this.props.onFieldChanged} className={this.props.classes}  tabIndex={this.props.tabindex}/>
                 {errorHtml}
             </div>
         );

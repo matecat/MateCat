@@ -12,7 +12,7 @@ route(
 );
 
 route('/gdrive/oauth/response', 'GET',
-    'ConnectedServices\GDrive\OauthController', 'response'
+    'ConnectedServices\GDrive\OAuthController', 'response'
 );
 
 route(
