@@ -55,16 +55,7 @@ class oauthResponseHandlerController extends viewController{
 			$this->user_logged = false;
 		}
 
-		//get url to redirect to
-		//add default if not set
-		if(!isset($_SESSION['incomingUrl']) or empty($_SESSION['incomingUrl'])){
-			$_SESSION['incomingUrl']='/';
-		}
-
-		$this->redirectUrl = $_SESSION['incomingUrl'];
-
-		//remove no more used var
-		unset($_SESSION['incomingUrl']);
+		$this->redirectUrl = empty($_SESSION['wanted_url']) ? Routes::appRoot() : $_SESSION['wanted_url'] ;
 	}
 
 	public function doAction(){

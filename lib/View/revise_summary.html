@@ -243,13 +243,8 @@
 
         <nav tal:condition="php: Bootstrap::areOauthKeysPresent()">
             <ul>
-                <tal:block tal:condition="php: !empty(logged_user)">
-                    <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
-                </tal:block>
 
-                <tal:block tal:condition="php: empty(logged_user)">
-                    <li><a href="${incomingUrl}" class="authLink">Manage</a></li>
-                </tal:block>
+                <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
 
                 <li><a href="https://www.matecat.com/support/" target="_blank">Support</a></li>
             </ul>
@@ -333,7 +328,6 @@
 <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_analyze"/>
 
 <div metal:use-macro="cookiebanner.html/cookieBanner"/>
-<div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
 
 </body>
 </html>

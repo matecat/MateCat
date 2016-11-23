@@ -39,7 +39,6 @@ class ajaxUtilsController extends ajaxController {
 
             case 'stayAnonymous':
                 unset( $_SESSION[ '_anonym_pid' ] );
-                unset( $_SESSION[ 'incomingUrl' ] );
                 unset( $_SESSION[ '_newProject' ] );
                 break;
 			case 'ping':
