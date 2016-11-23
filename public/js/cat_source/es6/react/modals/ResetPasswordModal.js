@@ -91,9 +91,11 @@ class ResetPasswordModal extends React.Component {
             <h2>Reset Password</h2>
             <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit</p>
             <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password1")}
-                       placeholder="Password" name="password1" errorText={this.errorFor("password1")} tabindex={1}/>
+                       placeholder="Password" name="password1" errorText={this.errorFor("password1")} tabindex={1}
+                       onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
             <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password2")}
-                       placeholder="Confirm Password" name="password2" errorText={this.errorFor("password2")} tabindex={1}/>
+                       placeholder="Confirm Password" name="password2" errorText={this.errorFor("password2")} tabindex={1}
+                       onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
             <a className="reset-password-button btn-confirm-medium" onClick={this.handleSubmitClicked}
                onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}
                tabIndex="3"> Reset </a> <br/>

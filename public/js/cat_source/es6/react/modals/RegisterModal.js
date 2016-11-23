@@ -116,13 +116,17 @@ class RegisterModal extends React.Component {
             <div className="register-form-container">
                 <h2>Register with your email</h2>
                 <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("name")}
-                               placeholder="Name" name="name" errorText={this.errorFor("name")} tabindex={1}/>
+                               placeholder="Name" name="name" errorText={this.errorFor("name")} tabindex={1}
+                           onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
                 <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("surname")}
-                           placeholder="Surname" name="name" errorText={this.errorFor("surname")} tabindex={2}/>
+                           placeholder="Surname" name="name" errorText={this.errorFor("surname")} tabindex={2}
+                           onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
                 <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("emailAddress")}
-                           placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")} tabindex={3}/>
+                           placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")} tabindex={3}
+                           onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
                 <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password")}
-                           type="password" placeholder="Password" name="password" errorText={this.errorFor("password")} tabindex={4}/>
+                           type="password" placeholder="Password" name="password" errorText={this.errorFor("password")} tabindex={4}
+                           onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
                 <input type="checkbox" id="check-conditions" name="terms" ref={(input) => this.textInput = input} onChange={this.changeCheckbox.bind(this)} tabIndex={5}/>
                 <label htmlFor="check-conditions" style={this.checkStyle}>Accept terms and conditions</label><br/>
                 <a className="register-submit btn-confirm-medium"

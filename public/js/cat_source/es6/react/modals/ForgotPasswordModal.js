@@ -88,7 +88,8 @@ class ForgotPasswordModal extends React.Component {
             <h2>Forgot Password</h2>
             <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit</p>
             <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("emailAddress")}
-                       placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")} tabindex={1}/>
+                       placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")} tabindex={1}
+                       onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
             <a className="send-password-button btn-confirm-medium"
                onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}
                onClick={this.handleSubmitClicked.bind()} tabIndex={2}> Send </a>
