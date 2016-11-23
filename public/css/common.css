@@ -3462,11 +3462,11 @@ color: #000;
 
 @font-face {
     font-family: 'icomoon';
-    src:  url('fonts/icomoon.eot?dfxy2n');
-    src:  url('fonts/icomoon.eot?dfxy2n#iefix') format('embedded-opentype'),
-    url('fonts/icomoon.ttf?dfxy2n') format('truetype'),
-    url('fonts/icomoon.woff?dfxy2n') format('woff'),
-    url('fonts/icomoon.svg?dfxy2n#icomoon') format('svg');
+    src:  url('fonts/icomoon.eot?fikff4');
+    src:  url('fonts/icomoon.eot?fikff4#iefix') format('embedded-opentype'),
+    url('fonts/icomoon.ttf?fikff4') format('truetype'),
+    url('fonts/icomoon.woff?fikff4') format('woff'),
+    url('fonts/icomoon.svg?fikff4#icomoon') format('svg');
     font-weight: normal;
     font-style: normal;
 }
@@ -4279,6 +4279,9 @@ text-align: left;
 }
 .icon-paw:before {
     content: "\f1b0";
+}
+.icon-file-text:before {
+    content: "\e922";
 }
 
 

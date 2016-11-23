@@ -261,7 +261,7 @@ class QAComponent extends React.Component {
             issues_html = <div className={"qa-issues-container "+ selected} onClick={this.selectBox.bind(this, 'issues')}>
                 <span className="icon-qa-issues"/>
                 <span className="qa-issues-counter">{this.state.issues.length}</span>
-                Issues
+                Tag issues
             </div>;
         }
         if ( this.state.lxq_issues.length > 0 ) {
@@ -272,10 +272,10 @@ class QAComponent extends React.Component {
                 lxq_options = <ul className="lexiqa-popup-items">
 
                     <li className="lexiqa-popup-item">QA checks and guide
-                        <a className="lexiqa-popup-icon lexiqa-quide-icon" id="lexiqa-quide-link" href={config.lexiqaServer + '/documentation.html'} target="_blank" alt="Read the quick user guide of lexiqa"/>
+                        <a className="lexiqa-popup-icon lexiqa-quide-icon icon-info" id="lexiqa-quide-link" href={config.lexiqaServer + '/documentation.html'} target="_blank" alt="Read the quick user guide of lexiqa"/>
                     </li>
                     <li className="lexiqa-popup-item">Full QA report
-                        <a className="lexiqa-popup-icon lexiqa-report-icon" id="lexiqa-report-link" target="_blank" alt="Read the full QA report"
+                        <a className="lexiqa-popup-icon lexiqa-report-icon icon-file-text" id="lexiqa-report-link" target="_blank" alt="Read the full QA report"
                         href={config.lexiqaServer + '/errorreport?id='+LXQ.partnerid+'-' + config.id_job + '-' + config.password+'&type='+(config.isReview?'revise':'translate')}/>
                     </li>
                 </ul>;

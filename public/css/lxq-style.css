@@ -1302,15 +1302,13 @@ LEXIQA POPUP
     line-height: 1.5rem;
 }
 .lexiqa-popup-item .lexiqa-quide-icon {
-    content: url("../img/lexiqa_icons_report.svg");
-  background-color: #787878;
-  border-radius: 100%;
+    color: #4d4d4d;
+    font-size: 30px;
 }
 
 .lexiqa-popup-item .lexiqa-report-icon {
-    content: url("../img/lexiqa_icons_info.svg");
-  background-color: #787878;
-  border-radius: 100%;
+    font-size: 25px;
+    color: #4d4d4d;
 }
 
 .lexiqa-popup-item .lexiqa-logo-icon {
