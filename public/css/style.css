@@ -4110,7 +4110,8 @@ section:hover .segment-side-buttons {
 .icon-qa-lexiqa:before {
 	content: "\f044";
 	font-size: 25px;
-	margin-top: 5px;
+	margin-top: 0px;
+	display: block;
 }
 .qa-total-issues-counter {
 	top: 10px;
