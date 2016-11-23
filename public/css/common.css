@@ -3699,7 +3699,7 @@ left: 9999px;
 .login-modal .login-container-right li:before {
     content: "\ea10";
     margin-left: -40px;
-    padding: 20px;
+    padding: 11px;
     color: #3aa9dd;
 }
 
@@ -4944,13 +4944,16 @@ footer nav ul li {
 }
 
 .forgot-password-modal {
-    background: url(../img/matecat_watch.png) no-repeat 467px 136px;
+    background: url(../img/matecat_watch.png) no-repeat 476px 136px;
     background-size: 23%;
     width: 384px;
-    padding: 25px 90px;
+    padding: 25px 96px;
 }
 
-
+.reset-password-modal {
+    padding: 5% 10%;
+    width: 80%;
+}
 
 .register-modal {
     padding: 10px 0;
@@ -5020,6 +5023,8 @@ footer nav ul li {
     color: #000;
     background-color: #fff;
     border-radius: 0 0 4px 4px;
+    margin: 0 auto;
+    overflow: hidden;
 
 }
 
