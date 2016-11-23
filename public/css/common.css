@@ -1128,6 +1128,11 @@ color:#333;}
     text-decoration: underline;
 }
 
+.tooltip-guess-tags {
+    color: #000;
+    cursor: pointer;
+}
+
 .onoffswitch-container {
     position: relative;
     width: 140px;
