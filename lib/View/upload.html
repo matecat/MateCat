@@ -867,10 +867,8 @@
         <nav tal:condition="php: Bootstrap::areOauthKeysPresent()">
 
             <ul>
-
-                <tal:block tal:condition="php: !empty(logged_user)">
-                    <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
-                </tal:block>
+                 <div metal:use-macro="common.html/login_includes" />
+               
 
                 <tal:block tal:condition="php: empty(logged_user)">
                     <li><a href="${authURL}" class="authLink">Manage</a></li>
@@ -878,7 +876,7 @@
 
             </ul>
 
-            <div metal:use-macro="common.html/login_includes" />
+           
 
 
         </nav>

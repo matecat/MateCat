@@ -5,6 +5,10 @@ Author:          andreamartines
 Description:      Common CSS rules.
  */
 
+ html, body {
+    height: 100%;
+}
+
 body
 {
 	min-width: 1024px;
@@ -3454,15 +3458,14 @@ color: #000;
 
 @font-face {
     font-family: 'icomoon';
-    src:  url('fonts/icomoon.eot?bvvuvy');
-    src:  url('fonts/icomoon.eot?bvvuvy#iefix') format('embedded-opentype'),
-    url('fonts/icomoon.ttf?bvvuvy') format('truetype'),
-    url('fonts/icomoon.woff?bvvuvy') format('woff'),
-    url('fonts/icomoon.svg?bvvuvy#icomoon') format('svg');
+    src:  url('fonts/icomoon.eot?dfxy2n');
+    src:  url('fonts/icomoon.eot?dfxy2n#iefix') format('embedded-opentype'),
+    url('fonts/icomoon.ttf?dfxy2n') format('truetype'),
+    url('fonts/icomoon.woff?dfxy2n') format('woff'),
+    url('fonts/icomoon.svg?dfxy2n#icomoon') format('svg');
     font-weight: normal;
     font-style: normal;
 }
-
 
 /*
 /* mbc extend iconmoon set with icons for matecat chat
@@ -3494,7 +3497,7 @@ color: #000;
 /* mbc extend iconmoon set with icons for matecat chat
 */
 
-
+#logoutlink:before,
 .btn-confirm-small .text:before,
 .btn-orange-small .text:before,
 [class^="icon-"], [class*=" icon-"],
@@ -3576,6 +3579,7 @@ header .filter:before,
 .export-tmx-button-label:before,
 .canceladd-export-tmx:before,
 .icon-copy-key:before,
+.login-modal .login-container-right li:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag:before,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .splitArea .locked.startTag:before,
@@ -3650,6 +3654,14 @@ top: -2px;
 left: 9999px;
 }
 
+#logoutlink:before {
+    content: "\f011";
+    font-size: 14px;
+    display: block;
+    float: left;
+    margin: 2px;
+}
+
 
 .editToolbar .uppercase:after {
     content: "\ea6c";
@@ -3682,6 +3694,13 @@ left: 9999px;
   font-size: 18px;
   margin-left: -16px;
   margin-top: 3px;
+}
+
+.login-modal .login-container-right li:before {
+    content: "\ea10";
+    margin-left: -40px;
+    padding: 20px;
+    color: #3aa9dd;
 }
 
 body.rtl-target.tagModes:not(.tagmode-default-extended) .editarea .locked.startTag:before,
@@ -3783,7 +3802,7 @@ float: left;
 }
 
 #point2seg:after {
-      content: "\f071";
+      content: "\e903";
   font-size: 24px;
 }
 
@@ -4567,7 +4586,7 @@ font-weight: bold;
     border-bottom: 1px dashed #ccc;
 }
 .share-popup-input-key:focus {
-    border: 0;    
+    border: 0;
 }
 .share-popup-copy-result {
     font-size: 14px;
@@ -4679,12 +4698,23 @@ span.share-popup-item-email {
     font-weight:normal;
 }
 
+footer nav ul li {
+    border-right: none;
+    border-left: 1px solid #fff;
+    margin-left: 4px;
+}
+
+
 #welcomebox
 {
     float: right;
-    margin-left: 8px;
     cursor: pointer;
     position: relative;
+    margin-top: 5px;
+}
+
+.manage #welcomebox {
+    margin-top: 0;
 }
 
 #welcomebox .icon-sort-up {
@@ -4709,6 +4739,7 @@ span.share-popup-item-email {
     opacity: 0;
 }
 
+
 .user-menu li {
     width: 120px;
     height: 20px;
@@ -4724,12 +4755,21 @@ span.share-popup-item-email {
     transform: translateY(0%);
     transition-delay: 0s, 0s, 0.3s;
 }
+.success-modal {
+    padding: 20px;
+}
+
+.validation-error {
+    margin-top: -15px;
+    text-align: left;
+}
 
 .user-info-form,
 .user-reset-password,
 .user-gdrive {
     margin: 0 auto;
-    width: 90%;
+    width: 97%;
+    float: left;
     min-height: 60px;
     position:relative;
 }
@@ -4738,13 +4778,11 @@ span.share-popup-item-email {
     min-height: 80px;
 }
 
-.user-gdrive {
-    margin-top: 25px;
-}
+
 
 .user-info-form label {
     float: left;
-    margin-top: 20px;
+    margin-top: 5px;
     font-size: 16px;
 }
 
@@ -4770,27 +4808,49 @@ span.share-popup-item-email {
     margin-left: 90px;
     font-size: 18px;
 }
-
-a.btn-confirm-medium.send-user-updates {
-    margin-bottom: 30px;
-}
-
-a.reset-password.btn-confirm-medium {
+.user-menu-flat {
+    margin-right: 8px;
     float: right;
 }
 
+.user-menu-flat li {
+    text-decoration: underline;
+    cursor: pointer;
+    padding-right: 0;
+}
+
+.user-menu-flat li:first-child {
+    border-left: 1px solid;
+    margin-left: 4px;
+}
+
+.user-menu-flat li:last-child {
+    border-right: none;
+}
+
+.reset-password.btn-confirm-medium {
+    float: left;
+}
+
 .login-container-right {
-    width: 60%;
-    padding: 20px 15px;
+    width: 61%;
+    padding: 3% 20% 3% 2%;
+    font-size:17px;
     display: inline-block;
     float: left;
     box-sizing: border-box;
+    background: url(https://www.matecat.com/wp-content/themes/stanleywp/images/bgfeat5.png) no-repeat;
+    background-size: 84%;
+    background-position: 370% center;
 }
 .login-container-left {
     width: 39%;
     display: inline-block;
-    margin: 20px 0;
-    border-left: 2px dashed grey;
+    width: 39%;
+    display: inline-block;
+    padding: 20px 0;
+    background: #f8f8f8;
+    border-left: 1px solid #ccc;
     box-sizing: border-box;
 }
 
@@ -4803,12 +4863,13 @@ a.reset-password.btn-confirm-medium {
 
 .login-container-right ul {
     margin-left: 30px;
-    list-style: circle;
     margin-top: 25px;
 }
 
 .login-container-right .register-button {
     margin-top: 30px;
+    float: left;
+    margin-left: 50px;
 }
 
 .forgot-password {
@@ -4821,10 +4882,20 @@ a.reset-password.btn-confirm-medium {
 .forgot-password-modal input,
 .reset-password-modal input,
 .user-info-form input {
-    margin: 10px 0;
-    height: 25px;
-    width: 170px;
-    padding-left: 5px;
+        margin-top: 5px;
+    font-size: 14px;
+    width: 100%;
+    padding: .7em .6em;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-shadow: inset 0 1px 3px #ddd;
+    border-radius: 4px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    margin-bottom: 15px;
+    font-size: 15px;
+    color: #333;
 }
 
 .user-info-form input {
@@ -4849,24 +4920,48 @@ a.reset-password.btn-confirm-medium {
 
 .login-form-container,
 .register-form-container {
-    border-top: 1px solid black;
+    border-top: 1px solid #ccc;
     width: 225px;
     margin: 0 auto;
     padding-top: 10px;
+
 }
 .forgot-password-modal,
 .reset-password-modal {
-    width: 300px;
-    margin: 10px auto;
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px 0;
 }
 
-.forgot-password-modal input,
-.reset-password-modal input {
-    width: 300px;
+.preferences-modal input:disabled {
+    color: #999;
+    cursor: not-allowed;
+}
+
+.preferences-modal .reset-password {
+    float: left;
+    margin: 10px 0;
+}
+
+.forgot-password-modal {
+    background: url(../img/matecat_watch.png) no-repeat 467px 120px;
+    background-size: 25%;
+    width: calc(64% + 1px);
+    padding: 3% 18%;
+}
+
+
+
+.register-modal {
+    padding: 10px 0;
+}
+
+.register-modal h2 {
+    padding: 10px 0 10px 0;
 }
 
 .register-form-container {
-    width: 350px;
+    width: 73%;
 }
 .register-modal .google-login-button {
     margin-bottom: 0;
@@ -4886,11 +4981,10 @@ a.reset-password.btn-confirm-medium {
 /********Modal window ****/
 .matecat-modal {
     display: block;
-    position: fixed;
     z-index: 999999999;
-    padding-top: 200px;
-    left: 0;
-    top: 0;
+     position: fixed;
+  left: 0;
+  top: 0;
     width: 100%;
     height: 100%;
     overflow: auto;
@@ -4899,11 +4993,19 @@ a.reset-password.btn-confirm-medium {
 }
 
 .matecat-modal-header {
-    padding: 2px 16px;
-    color: black;
-    border: 1px solid black;
     text-align: left;
     min-height: 30px;
+    border-radius: 4px 4px 0 0;
+    overflow: visible;
+    max-height: inherit;
+    font-size: 24px;
+    background: #4D4D4D url(../img/logo-ico.png) 12px 12px no-repeat;
+    padding: 10px 10px 7px 58px;
+    background-size: 35px;
+    /* border-bottom: 1px solid #000; */
+    color: #fff;
+    margin: 0 !important;
+    text-align: left;
 }
 
 .matecat-modal-header h2 {
@@ -4914,18 +5016,17 @@ a.reset-password.btn-confirm-medium {
 
 /* Modal Body */
 .matecat-modal-body {
-    padding: 10px 16px;
     min-height: 50px;
-    border-left: 1px solid black;
-    border-right: 1px solid black;
     color: #000;
+    background-color: #fff;
+    border-radius: 0 0 4px 4px;
+
 }
 
 /* Modal Footer */
 .matecat-modal-footer {
     padding: 2px 16px;
     color: black;
-    border: 1px solid black;
     text-align: left;
     min-height: 30px;
 }
@@ -4933,12 +5034,13 @@ a.reset-password.btn-confirm-medium {
 /* Modal Content */
 .matecat-modal-content {
     position: relative;
-    background-color: #fefefe;
-    margin: auto;
-    padding: 0;
-    border: 1px solid #888;
+    margin: auto;    
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
     width: 40%;
-    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    border-radius: 4px;
     -webkit-animation-name: animatetop;
     -webkit-animation-duration: 0.4s;
     animation-name: animatetop;
@@ -4946,22 +5048,28 @@ a.reset-password.btn-confirm-medium {
     text-align: center;
     max-width: 600px;
     min-width: 400px;
+        -webkit-box-shadow: 0 1px 20px #000;
+    box-shadow: 0 1px 20px #000;
 }
 .matecat-modal-body h1 {
     text-align: center;
 }
 
+.preferences-modal {
+    padding: 20px;
+}
+
 /* The Close Button */
 .close-matecat-modal {
-    color: #aaa;
+    color: #fff;
     float: right;
-    font-size: 28px;
+    font-size: 20px;
     font-weight: bold;
 }
 
 .close-matecat-modal:hover,
 .close-matecat-modal:focus {
-    color: black;
+    color: red;
     text-decoration: none;
     cursor: pointer;
 }

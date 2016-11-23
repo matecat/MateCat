@@ -71,7 +71,6 @@ class PreferencesModal extends React.Component {
             services_label = 'Connected to '+ this.state.service.email+' Google Drive';
         }
         return <div className="preferences-modal">
-                    <h1>Preferences</h1>
                     <div className="user-info-form">
                         <label htmlFor="user-login-name">Name</label><br/>
                         <input type="text" name="name" id="user-login-name" defaultValue={this.props.user.first_name} disabled="true"/><br/>
@@ -82,8 +81,7 @@ class PreferencesModal extends React.Component {
                     </div>
                     <div className="user-reset-password">
                         {gdriveMessage}
-                        <label>Reset Password</label>
-                        <a className="reset-password btn-confirm-medium" onClick={this.openResetPassword.bind(this)}> Reset </a>
+                        <a className="reset-password btn-confirm-medium" onClick={this.openResetPassword.bind(this)}>Reset Password</a>
                     </div>
                     <div className="user-gdrive">
                         <div className="onoffswitch-drive">

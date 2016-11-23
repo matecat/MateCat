@@ -408,8 +408,6 @@ $.extend(UI, {
 
 		$(window).on('scroll', function() {
 			UI.browserScrollPositionRestoreCorrection();
-		}).on('cachedSegmentObjects', function() {
-            if(UI.currentSegmentId == UI.firstWarnedSegment) UI.setNextWarnedSegment();
 		}).on('allTranslated', function() {
 			if(config.survey) UI.displaySurvey(config.survey);
 		}).on('mousedown', function(e) {
@@ -1200,8 +1198,13 @@ $.extend(UI, {
 		$("#point2seg").bind('mousedown', function(e) {
 			e.preventDefault();
             UI.saveSegment(UI.currentSegment);
-			UI.scrollSegment($('#segment-' + $(this).attr('data-segment')));
-            UI.setNextWarnedSegment();
+			if ($('.searchbox').is(':visible')) {
+				UI.toggleSearch(e);
+			}
+			$('.mbc-history-balloon-outer').removeClass('mbc-visible');
+			QAComponent.togglePanel();
+            // UI.scrollSegment($('#segment-' + $(this).attr('data-segment')));
+            // UI.setNextWarnedSegment();
 		});
 
 		$("#navSwitcher").on('click', function(e) {
