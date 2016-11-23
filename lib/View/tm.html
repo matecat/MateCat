@@ -98,7 +98,7 @@
                                                 <a tal:condition="php: key.isShared()" class="icon-owner icon-users icon-owner-shared"></a>
                                             </td>
                                             <td tal:condition="php: !(key.owner && ( jobOwnerIsMe || key.edit))" class="owner text-center">
-                                                <a class="">*****</a>
+                                                <a class=""></a>
                                             </td>
                                             <td tal:condition="php: key.edit" class="action">
                                                     <a class="btn pull-left addtmx"><span class="text">Import TMX</span></a>
@@ -158,7 +158,7 @@
                                             <td class="update text-center check"><input type="checkbox" disabled="disabled" tal:attributes="checked key/w" /></td>
                                             <td class="description">**********</td>
                                             <td class="privatekey">${key/key}</td>
-                                            <td class="owner">*****</td>
+                                            <td class="owner"></td>
                                             <td class="action"></td>
                                         </tr>
                                     </tal:block>
@@ -450,7 +450,7 @@
                                     </span>
                                     <span class="option-tagp-revise">Not available in revise mode.<br/></span>
                                     Enable this functionality to let MateCat automatically place the tags where they belong.
-                                    <span class="tooltip-guess-tags" powertip="">Supported languages</span>
+                                        <a class="tooltip-guess-tags" href="https://www.matecat.com/support/translating-projects/guess-tag-position/" target="_blank">Supported languages</a>
                                 </p>
                                 <div class="onoffswitch-container">
                                     <div class="onoffswitch">

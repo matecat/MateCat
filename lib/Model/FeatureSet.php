@@ -72,7 +72,11 @@ class FeatureSet {
                     array_shift( $args );
                     array_unshift( $args, $filterable );
 
-                    $filterable = call_user_func_array( array( $obj, $method ), $args );
+                    try {
+                        $filterable = call_user_func_array( array( $obj, $method ), $args );
+                    } catch ( Exception $e ) {
+                        Log::doLog("Exception running filter " . $method . ": " . $e->getMessage() );
+                    }
                 }
             }
         }
