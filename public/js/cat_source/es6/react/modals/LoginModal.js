@@ -101,7 +101,7 @@ class LoginModal extends React.Component {
                         <a className="register-button btn-confirm-medium" onClick={this.openRegisterModal}>Sign up</a>
                     </div>
                     <div className="login-container-left">
-                        <a className="google-login-button btn-confirm-medium" onClick={this.googole_popup.bind(this)}> Google login </a>
+                        <a className="google-login-button btn-confirm-medium" onClick={this.googole_popup.bind(this)}></a>
                         <div className="login-form-container">
                             <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("emailAddress")}
                                        placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")} tabindex={1}

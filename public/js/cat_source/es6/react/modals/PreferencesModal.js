@@ -111,7 +111,7 @@ class PreferencesModal extends React.Component {
                         <label>{services_label}</label>
                     </div>
                     <br/>
-                    <div id='logoutlink' onClick={this.logoutUser.bind(this)}>Logout</div>
+                    <div id='logoutlink' className='btn-confirm-medium' onClick={this.logoutUser.bind(this)}>Logout</div>
             </div>;
     }
 }

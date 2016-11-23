@@ -38,7 +38,7 @@ $.extend(APP, {
                 props = param;
                 $.extend(props, param);
             }
-            APP.ModalWindow.showModalComponent(PreferencesModal, props, 'Preferences');
+            APP.ModalWindow.showModalComponent(PreferencesModal, props, 'Profile');
         });
         $('#modal').on('openresetpassword', function () {
             APP.ModalWindow.showModalComponent(ResetPasswordModal, {}, "Reset Password");
