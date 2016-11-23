@@ -275,7 +275,7 @@ class QAComponent extends React.Component {
                         <a className="lexiqa-popup-icon lexiqa-quide-icon icon-info" id="lexiqa-quide-link" href={config.lexiqaServer + '/documentation.html'} target="_blank" alt="Read the quick user guide of lexiqa"/>
                     </li>
                     <li className="lexiqa-popup-item">Full QA report
-                        <a className="lexiqa-popup-icon lexiqa-report-icon icon-file-text" id="lexiqa-report-link" target="_blank" alt="Read the full QA report"
+                        <a className="lexiqa-popup-icon lexiqa-report-icon icon-file" id="lexiqa-report-link" target="_blank" alt="Read the full QA report"
                         href={config.lexiqaServer + '/errorreport?id='+LXQ.partnerid+'-' + config.id_job + '-' + config.password+'&type='+(config.isReview?'revise':'translate')}/>
                     </li>
                 </ul>;
