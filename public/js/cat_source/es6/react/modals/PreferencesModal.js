@@ -57,6 +57,18 @@ class PreferencesModal extends React.Component {
         return $.post('/api/app/connected_services/' + this.props.service.id, { disabled: true } );
 
     }
+    logoutUser() {
+        $.post('/ajaxLogout',{logout:1},function(data){
+            if('unlogged'==data){
+                //ok, unlogged
+                if($('body').hasClass('manage')) {
+                    location.href = config.hostpath + config.basepath;
+                } else {
+                    window.location.reload();
+                }
+            }
+        });
+    }
 
     render() {
         var gdriveMessage = '';
@@ -71,7 +83,6 @@ class PreferencesModal extends React.Component {
             services_label = 'Connected to '+ this.state.service.email+' Google Drive';
         }
         return <div className="preferences-modal">
-                    <h1>Preferences</h1>
                     <div className="user-info-form">
                         <label htmlFor="user-login-name">Name</label><br/>
                         <input type="text" name="name" id="user-login-name" defaultValue={this.props.user.first_name} disabled="true"/><br/>
@@ -82,8 +93,7 @@ class PreferencesModal extends React.Component {
                     </div>
                     <div className="user-reset-password">
                         {gdriveMessage}
-                        <label>Reset Password</label>
-                        <a className="reset-password btn-confirm-medium" onClick={this.openResetPassword.bind(this)}> Reset </a>
+                        <a className="reset-password btn-confirm-medium" onClick={this.openResetPassword.bind(this)}>Reset Password</a>
                     </div>
                     <div className="user-gdrive">
                         <div className="onoffswitch-drive">
@@ -101,7 +111,7 @@ class PreferencesModal extends React.Component {
                         <label>{services_label}</label>
                     </div>
                     <br/>
-                    {/*<a className="btn-confirm-medium send-user-updates">Update preferences</a>*/}
+                    <div id='logoutlink' onClick={this.logoutUser.bind(this)}>Logout</div>
             </div>;
     }
 }

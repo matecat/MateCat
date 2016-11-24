@@ -873,10 +873,11 @@
                 <tal:block tal:condition="php: empty(logged_user)">
                     <li><a href="${authURL}" class="authLink">Manage</a></li>
                 </tal:block>
+                <div metal:use-macro="common.html/login_includes" />
 
             </ul>
 
-            <div metal:use-macro="common.html/login_includes" />
+           
 
 
         </nav>

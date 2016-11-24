@@ -58,12 +58,8 @@ class SdlXliffSAXTranslationReplacer extends XliffSAXTranslationReplacer {
                     //write the confidence level for this segment ( Translated, Draft, etc. )
                     if ( isset( $this->segments[ 'matecat|' . $this->currentId ] ) && $_sdlStatus_confWritten == false ) {
 
-                            //get translation of current segment, by indirect indexing: id -> positional index -> segment
-                            //actually there may be more that one segment to that ID if there are two mrk of the same source segment
-                            $id_list = $this->segments[ 'matecat|' . $this->currentId ];
-                            $seg     = $this->segments[ $id_list[ $this->markerPos ] ];
                             //append definition attribute
-                            $tag .= $this->prepareTargetStatuses( $seg );
+                            $tag .= $this->prepareTargetStatuses( $this->lastSegment[ $this->markerPos ] );
 
                             //prepare for an eventual next cycle
                             $this->markerPos++;
@@ -129,7 +125,7 @@ class SdlXliffSAXTranslationReplacer extends XliffSAXTranslationReplacer {
                 //WARNING BECAUSE SOURCE AND SEG-SOURCE TAGS CAN BE EMPTY IN SOME CASES!!!!!
                 //so check for isEmpty also in conjunction with name
                 if( $this->isEmpty && ( 'source' == $name || 'seg-source' == $name ) ) {
-                    $this->postProcAndflush( $this->outputFP, $tag );
+                    $this->postProcAndFlush( $this->outputFP, $tag );
 
                 } else {
                     //these are NOT source/seg-source/value empty tags, THERE IS A CONTENT, write it in buffer
@@ -138,14 +134,14 @@ class SdlXliffSAXTranslationReplacer extends XliffSAXTranslationReplacer {
                 }
 
             } else {
-                $this->postProcAndflush( $this->outputFP, $tag );
+                $this->postProcAndFlush( $this->outputFP, $tag );
             }
 
         }
 
     }
 
-    protected function prepareTargetStatuses( $seg ){
+    protected function prepareTargetStatuses( $segment ){
 
         $statusMap = array(
                 'NEW'        => '',
@@ -155,7 +151,7 @@ class SdlXliffSAXTranslationReplacer extends XliffSAXTranslationReplacer {
                 'REJECTED'   => 'RejectedTranslation',
         );
 
-        return "conf=\"{$statusMap[ $seg[ 'status' ] ]}\" ";
+        return "conf=\"{$statusMap[ $segment[ 'status' ] ]}\" ";
 
     }
 

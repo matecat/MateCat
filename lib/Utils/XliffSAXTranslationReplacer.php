@@ -16,6 +16,7 @@ class XliffSAXTranslationReplacer {
     protected $currentBuffer;//the current piece of text it's been parsed
     protected $len;//length of the currentBuffer
     protected $segments; //array of translations
+    protected $lastSegment = [];
     protected $currentId;//id of current <trans-unit>
 
     protected $target_lang;
@@ -230,7 +231,7 @@ class XliffSAXTranslationReplacer {
                 //WARNING BECAUSE SOURCE AND SEG-SOURCE TAGS CAN BE EMPTY IN SOME CASES!!!!!
                 //so check for isEmpty also in conjunction with name
                 if( $this->isEmpty && ( 'source' == $name || 'seg-source' == $name ) ) {
-                    $this->postProcAndflush( $this->outputFP, $tag );
+                    $this->postProcAndFlush( $this->outputFP, $tag );
 
                 } else {
                     //these are NOT source/seg-source/value empty tags, THERE IS A CONTENT, write it in buffer
@@ -239,7 +240,7 @@ class XliffSAXTranslationReplacer {
                 }
 
             } else {
-                $this->postProcAndflush( $this->outputFP, $tag );
+                $this->postProcAndFlush( $this->outputFP, $tag );
             }
 
         }
@@ -272,6 +273,22 @@ class XliffSAXTranslationReplacer {
                     //get translation of current segment, by indirect indexing: id -> positional index -> segment
                     //actually there may be more that one segment to that ID if there are two mrk of the same source segment
                     $id_list = $this->segments[ 'matecat|' . $this->currentId ];
+
+                    /*
+                     * At the end of every cycle the segment grouping information is lost: unset( 'matecat|' . $this->currentId )
+                     *
+                     * We need to take the info about the last segment parsed
+                     *          ( normally more than 1 db row because of mrk tags )
+                     *
+                     * So, copy the current segment data group to an another structure to take the last one segment
+                     * for the next tagOpen ( possible sdl:seg-defs )
+                     *
+                     */
+                    $this->lastSegment = array_slice(
+                            $this->segments,
+                            reset( $this->segments[ 'matecat|' . $this->currentId ] ),
+                            count( $this->segments[ 'matecat|' . $this->currentId ] )
+                    );
 
                     //init translation
                     $translation = '';
@@ -317,6 +334,7 @@ class XliffSAXTranslationReplacer {
 
                         /*
                          * WARNING: this unset needs to manage the duplicated Trans-unit IDs
+                         *
                          */
                         unset(  $this->segments[ 'matecat|' . $this->currentId ][ $pos ] );
 
@@ -330,7 +348,7 @@ class XliffSAXTranslationReplacer {
 
                 //signal we are leaving a target
                 $this->inTarget = false;
-                $this->postProcAndflush( $this->outputFP, $tag, $treatAsCDATA = true );
+                $this->postProcAndFlush( $this->outputFP, $tag, $treatAsCDATA = true );
 
             } elseif ( 'source' == $name
                     || 'seg-source' == $name
@@ -344,7 +362,7 @@ class XliffSAXTranslationReplacer {
                 $tag                  = $this->CDATABuffer . "</$name>";
                 $this->CDATABuffer    = "";
                 //flush to pointer
-                $this->postProcAndflush( $this->outputFP, $tag );
+                $this->postProcAndFlush( $this->outputFP, $tag );
 
             } elseif ( $this->bufferIsActive ) { // this is a tag ( <g | <mrk ) inside a seg or seg-source tag
                 $this->CDATABuffer .= "</$name>";
@@ -352,7 +370,7 @@ class XliffSAXTranslationReplacer {
 
             } else { //generic tag closure do Nothing
                 //flush to pointer
-                $this->postProcAndflush( $this->outputFP, $tag );
+                $this->postProcAndFlush( $this->outputFP, $tag );
             }
 
 
@@ -376,7 +394,7 @@ class XliffSAXTranslationReplacer {
         if ( !$this->inTarget && !$this->bufferIsActive ) {
 
             //flush to pointer
-            $this->postProcAndflush( $this->outputFP, $data );
+            $this->postProcAndFlush( $this->outputFP, $data );
 
         } elseif ( $this->bufferIsActive ) {
             $this->CDATABuffer .= $data;

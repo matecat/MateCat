@@ -4,20 +4,20 @@ $.extend(APP, {
             React.createElement(ModalWindow),
             $("#modal")[0]
         );
-        $('#logoutlink').on('click',function(event){
-            //stop form submit
-            event.preventDefault();
-            $.post('/ajaxLogout',{logout:1},function(data){
-                if('unlogged'==data){
-                    //ok, unlogged
-                    if($('body').hasClass('manage')) {
-                        location.href = config.hostpath + config.basepath;
-                    } else {
-                        window.location.reload();
-                    }
-                }
-            });
-        });
+        // $('#logoutlink').on('click',function(event){
+        //     //stop form submit
+        //     event.preventDefault();
+        //     $.post('/ajaxLogout',{logout:1},function(data){
+        //         if('unlogged'==data){
+        //             //ok, unlogged
+        //             if($('body').hasClass('manage')) {
+        //                 location.href = config.hostpath + config.basepath;
+        //             } else {
+        //                 window.location.reload();
+        //             }
+        //         }
+        //     });
+        // });
 
         $('.user-menu-preferences').on('click', function () {
             $('#modal').trigger('openpreferences');
@@ -30,13 +30,15 @@ $.extend(APP, {
         $('#modal').on('openpreferences', function (e, param) {
             var props = {
                 user: APP.USER.STORE.user,
-                service: APP.USER.STORE.connected_services[0]
             };
+            if (APP.USER.STORE.connected_services && APP.USER.STORE.connected_services.length ) {
+                props.service = APP.USER.STORE.connected_services[0]
+            }
             if (param) {
                 props = param;
                 $.extend(props, param);
             }
-            APP.ModalWindow.showModalComponent(PreferencesModal, props, 'Preferences');
+            APP.ModalWindow.showModalComponent(PreferencesModal, props, 'Profile');
         });
         $('#modal').on('openresetpassword', function () {
             APP.ModalWindow.showModalComponent(ResetPasswordModal, {}, "Reset Password");
@@ -62,7 +64,7 @@ $.extend(APP, {
             var props = {
                 googleUrl: $('#loginlink').attr('href')
             };
-            APP.ModalWindow.showModalComponent(LoginModal, props, 'Login or register', style);
+            APP.ModalWindow.showModalComponent(LoginModal, props, '', style);
         });
 
         /// TODO

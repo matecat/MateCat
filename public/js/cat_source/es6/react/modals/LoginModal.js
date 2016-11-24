@@ -13,7 +13,7 @@ class LoginModal extends React.Component {
             validationErrors: {},
             generalError: ''
         };
-
+        this.requestRunning = false;
         this.state.validationErrors = RuleRunner.run(this.state, fieldValidations);
         this.handleFieldChanged = this.handleFieldChanged.bind(this);
         this.handleSubmitClicked = this.handleSubmitClicked.bind(this);
@@ -44,8 +44,12 @@ class LoginModal extends React.Component {
         var self = this;
         this.setState({showErrors: true});
         if($.isEmptyObject(this.state.validationErrors) == false) return null;
+        if ( this.requestRunning ) {
+            return false;
+        }
+        this.requestRunning = true;
         this.sendLoginData().done(function (data) {
-            window.location.reload()
+            window.location.reload();
         }).fail(function (response) {
             if (response.responseText.length) {
                 var data = JSON.parse( response.responseText );
@@ -54,9 +58,10 @@ class LoginModal extends React.Component {
                 });
             } else {
                 self.setState({
-                    generalError: 'There was a problem, please try again later or contact support.'
+                    generalError: 'Login failed.'
                 });
             }
+            self.requestRunning = false;
         });
 
     }
@@ -87,27 +92,26 @@ class LoginModal extends React.Component {
         }
         return <div className="login-modal">
                     <div className="login-container-right">
-                        <h2>All the advatnages</h2>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-                            sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                        <h2>Sign up now to:</h2>
                         <ul className="">
-                            <li>Lorem ipsum dolor sit amet</li>
-                            <li>Lorem ipsum dolor sit amet</li>
-                            <li>Lorem ipsum dolor sit amet</li>
+                            <li>Manage your TMs, glossaries and MT engines</li>
+                            <li>Acess the management panel</li>
+                            <li>Translate Google Drive Files</li>
                         </ul>
-                        <a className="register-button btn-confirm-medium" onClick={this.openRegisterModal}> Register now </a>
+                        <a className="register-button btn-confirm-medium" onClick={this.openRegisterModal}>Sign up</a>
                     </div>
                     <div className="login-container-left">
-                        <h2>Log in</h2>
-                        <a className="google-login-button btn-confirm-medium" onClick={this.googole_popup.bind(this)}> Google login </a>
+                        <a className="google-login-button btn-confirm-medium" onClick={this.googole_popup.bind(this)}></a>
                         <div className="login-form-container">
                             <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("emailAddress")}
-                                       placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")} tabindex={1}/>
+                                       placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")} tabindex={1}
+                                       onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
                             <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password")}
-                                       placeholder="Password" name="password" errorText={this.errorFor("password")} tabindex={2}/>
+                                       placeholder="Password" name="password" errorText={this.errorFor("password")} tabindex={2}
+                                       onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
                             <a className="login-button btn-confirm-medium"
                                onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}
-                               onClick={this.handleSubmitClicked.bind()} tabIndex={3}> Log in </a>
+                               onClick={this.handleSubmitClicked.bind()} tabIndex={3}> Sign in </a>
                             {generalErrorHtml}
                             <br/>
                             <span className="forgot-password" onClick={this.openForgotPassword}>Forgot password?</span>

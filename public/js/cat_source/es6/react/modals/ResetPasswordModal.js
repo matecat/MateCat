@@ -13,7 +13,7 @@ class ResetPasswordModal extends React.Component {
             validationErrors: {},
             generalError: ''
         };
-
+        this.requestRunning = false;
         this.state.validationErrors = RuleRunner.run(this.state, fieldValidations);
         this.handleFieldChanged = this.handleFieldChanged.bind(this);
         this.handleSubmitClicked = this.handleSubmitClicked.bind(this);
@@ -36,6 +36,12 @@ class ResetPasswordModal extends React.Component {
         var self = this;
         this.setState({showErrors: true});
         if($.isEmptyObject(this.state.validationErrors) == false) return null;
+
+        if ( this.requestRunning ) {
+            return false;
+        }
+        this.requestRunning = true;
+
         this.sendResetPassword().done(function (data) {
             $('#modal').trigger('opensuccess', [{
                 title: 'Reset Password',
@@ -52,6 +58,7 @@ class ResetPasswordModal extends React.Component {
                     generalError: 'There was a problem saving the data, please try again later or contact support.'
                 });
             }
+            self.requestRunning = false;
         });
 
     }
@@ -84,9 +91,11 @@ class ResetPasswordModal extends React.Component {
             <h2>Reset Password</h2>
             <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit</p>
             <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password1")}
-                       placeholder="Password" name="password1" errorText={this.errorFor("password1")} tabindex={1}/>
+                       placeholder="Password" name="password1" errorText={this.errorFor("password1")} tabindex={1}
+                       onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
             <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password2")}
-                       placeholder="Confirm Password" name="password2" errorText={this.errorFor("password2")} tabindex={1}/>
+                       placeholder="Confirm Password" name="password2" errorText={this.errorFor("password2")} tabindex={1}
+                       onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
             <a className="reset-password-button btn-confirm-medium" onClick={this.handleSubmitClicked}
                onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}
                tabIndex="3"> Reset </a> <br/>
