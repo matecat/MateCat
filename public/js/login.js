@@ -35,7 +35,6 @@ $.extend(APP, {
                 props.service = APP.USER.STORE.connected_services[0]
             }
             if (param) {
-                props = param;
                 $.extend(props, param);
             }
             APP.ModalWindow.showModalComponent(PreferencesModal, props, 'Profile');
@@ -50,12 +49,16 @@ $.extend(APP, {
             var props = {
                 googleUrl: $('#loginlink').attr('href')
             };
+            if (config.showModalBoxLogin == 1) {
+                props.redeemMessage = true
+            }
             APP.ModalWindow.showModalComponent(RegisterModal, props, "Register Now");
         });
-        $('#modal').on('openlogin', function () {
+        $('#modal').on('openlogin', function (e, param) {
             if ( $('.popup-tm.open').length) {
                 UI.closeTMPanel();
             }
+            var title = '';
             var style = {
                 'width': '80%',
                 'maxWidth': '800px',
@@ -64,10 +67,19 @@ $.extend(APP, {
             var props = {
                 googleUrl: $('#loginlink').attr('href')
             };
-            APP.ModalWindow.showModalComponent(LoginModal, props, '', style);
+
+            if (config.showModalBoxLogin == 1) {
+                props.redeemMessage = true;
+                title = 'Add project to your management panel';
+            }
+
+            if (param) {
+                $.extend(props, param);
+            }
+            APP.ModalWindow.showModalComponent(LoginModal, props, title, style);
         });
 
-        /// TODO
+        //Link footer
         $('a.authLink').click(function(e){
             e.preventDefault();
             $('#modal').trigger('openlogin');
@@ -82,12 +94,16 @@ $.extend(APP, {
             $( '#sign-in' ).trigger( 'click' );
         } );
 
+        if (config.showModalBoxLogin == 1) {
+            $('#modal').trigger('openlogin');
+        }
+
         this.checkForPopupToOpen();
     },
     checkForPopupToOpen: function () {
-        var openFromFlash = APP.lookupFlashServiceParam("open");
-        if ( !openFromFlash ) return ;
 
+        var openFromFlash = APP.lookupFlashServiceParam("popup");
+        if ( !openFromFlash ) return ;
         var modal$ = $('#modal');
         switch ( openFromFlash[ 0 ].value ) {
             case "passwordReset":

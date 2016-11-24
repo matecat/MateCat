@@ -71,7 +71,6 @@
         <h1 id="pid" title="" data-pid="" data-pwd="" tal:attributes="title pname|default; data-pid pid; data-pwd project_password">
             <span id="pname" tal:content="pname|nothing">Project name</span> - Volume Analysis</h1>
 
-        <h2>Invoicing Tips</h2>
         <ul id="standard-equivalent-words" class="cost-table">
 
             <li class="box"><span class="word-number loading" tal:content="standard_analysis_wc_print"> </span>
@@ -226,7 +225,6 @@
 
 <div class="body">
     <div class="wrapper">
-        <h2>Job details</h2>
         <tal:block tal:define="id_for_job php:array()" tal:repeat="id_for_job jobs">
 
             <div tal:attributes="data-jid string:${repeat/id_for_job/key}; class string:jobcontainer ${id_for_job/splitted}">

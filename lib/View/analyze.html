@@ -81,7 +81,6 @@
         <h1 id="pid" title="" data-pid="" data-pwd="" tal:attributes="title pname|default; data-pid pid; data-pwd project_password">
             <span id="pname" tal:content="pname|nothing">Project name</span> - Volume Analysis</h1>
 
-        <h2>Invoicing Tips</h2>
         <ul id="standard-equivalent-words" class="cost-table">
 
             <li class="box"><span class="word-number loading" tal:content="standard_analysis_wc_print"> </span>
@@ -234,7 +233,6 @@
 
 <div class="body">
     <div class="wrapper">
-        <h2>Job details</h2>
         <tal:block tal:define="id_for_job php:array()" tal:repeat="id_for_job jobs">
 
             <div tal:attributes="data-jid string:${repeat/id_for_job/key}; class string:jobcontainer ${id_for_job/splitted}">
@@ -405,32 +403,6 @@
     </div>
 </footer>
 
-<!-- POPUP LOGIN -->
-<div id='popupWrapper'>
-    <div class="popup-outer"></div>
-    <div class="popup">
-
-        <a href="#" class="x-popup"></a>
-
-        <h1>Login</h1>
-
-        <h2>
-            Log in to add the project to your management panel.<br/>If the project is not added, you will not be able to
-            retrieve the URL.
-        </h2>
-
-        <div class="outer">
-            <div class="inner">
-                <button id="sign-in" name="" type="button" class="login-button"
-                        tal:attributes='data-oauth oauthFormUrl'>Sign in using Google
-                </button>
-            </div>
-        </div>
-        <br/> Or <br/>
-        <a href="#" class="anonymous"> Stay anonymous</a>
-
-    </div>
-</div>
 <script>
 $(".deliverychange").click(function() {
     $(this).hide();

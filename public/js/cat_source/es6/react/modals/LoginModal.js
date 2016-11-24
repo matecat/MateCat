@@ -23,6 +23,7 @@ class LoginModal extends React.Component {
 
     googole_popup(  ) {
         var url = this.props.googleUrl;
+        this.checkRedeemProject();
         var newWindow = window.open( url, 'name', 'height=600,width=900' );
         if ( window.focus ) {
             newWindow.focus();
@@ -48,7 +49,7 @@ class LoginModal extends React.Component {
             return false;
         }
         this.requestRunning = true;
-        this.sendLoginData().done(function (data) {
+        this.checkRedeemProject().then(this.sendLoginData().done(function (data) {
             window.location.reload();
         }).fail(function (response) {
             if (response.responseText.length) {
@@ -62,8 +63,18 @@ class LoginModal extends React.Component {
                 });
             }
             self.requestRunning = false;
-        });
+        }));
 
+    }
+
+    checkRedeemProject() {
+        if (this.props.redeemMessage) {
+            return $.post('/api/app/user/redeem_project');
+        } else {
+            var deferred = $.Deferred();
+            deferred.resolve();
+            return deferred.promise();
+        }
     }
 
     sendLoginData() {
@@ -90,18 +101,31 @@ class LoginModal extends React.Component {
         if (this.state.generalError.length) {
             generalErrorHtml = <span style={ {color: 'red',fontSize: '14px'} } className="text">{this.state.generalError}</span>;
         }
+        var htmlMessage = <div className="login-container-right">
+            <h2>Sign up now to:</h2>
+            <ul className="">
+                <li>Manage your TMs, glossaries and MT engines</li>
+                <li>Acess the management panel</li>
+                <li>Translate Google Drive Files</li>
+            </ul>
+            <a className="register-button btn-confirm-medium" onClick={this.openRegisterModal}>Sign up</a>
+        </div>;
+
+        if ( this.props.redeemMessage )  {
+            htmlMessage = <div className="login-container-right">
+                <h3 style={{fontSize: "21px"}}>Sign up or sign in to add the project to your management panel and:</h3>
+                <ul className="">
+                    <li>Track the progress of your translations</li>
+                    <li>Monitor the activity for increased security</li>
+                    <li>Manage TMs, MT and glossaries</li>
+                </ul>
+                <a className="register-button btn-confirm-medium" onClick={this.openRegisterModal}>Sign up</a>
+            </div>
+        }
         return <div className="login-modal">
-                    <div className="login-container-right">
-                        <h2>Sign up now to:</h2>
-                        <ul className="">
-                            <li>Manage your TMs, glossaries and MT engines</li>
-                            <li>Acess the management panel</li>
-                            <li>Translate Google Drive Files</li>
-                        </ul>
-                        <a className="register-button btn-confirm-medium" onClick={this.openRegisterModal}>Sign up</a>
-                    </div>
+                    {htmlMessage}
                     <div className="login-container-left">
-                        <a className="google-login-button btn-confirm-medium" onClick={this.googole_popup.bind(this)}></a>
+                        <a className="google-login-button btn-confirm-medium" onClick={this.googole_popup.bind(this)}/>
                         <div className="login-form-container">
                             <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("emailAddress")}
                                        placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")} tabindex={1}

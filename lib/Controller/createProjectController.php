@@ -317,7 +317,7 @@ class createProjectController extends ajaxController {
 
         // Strictly related to the UI ( not API ) interaction, should yet be moved away from controller.
         $this->__clearSessionFiles();
-        $this->__assignLastCreatedPid( $projectManager['id_project'] ) ;
+        $this->__assignLastCreatedPid( $projectStructure['id_project'] ) ;
 
         $this->result = $projectStructure[ 'result' ];
 

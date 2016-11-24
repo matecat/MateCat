@@ -14,6 +14,7 @@ class LoginController extends KleinController {
 
 
     public function login() {
+        \Bootstrap::sessionStart();
         $params = filter_var_array( $this->request->params(), array(
             'email' => FILTER_SANITIZE_EMAIL,
             'password' => FILTER_SANITIZE_STRING

@@ -28,7 +28,10 @@ export default class TextField extends React.Component {
         }
 
         return (
-            <div>
+            <div style={ {
+                        position:'relative',
+                        marginBottom: '17px'
+                        } }>
                 <input type={type} placeholder={this.props.placeholder}
                        value={this.props.text} name={this.props.name} onChange={this.props.onFieldChanged} className={this.props.classes}  tabIndex={this.props.tabindex}
                        onKeyPress={this.props.onKeyPress}/>

@@ -827,7 +827,7 @@ color:#333;}
 	    display: none;
     }
 
-    #popupWrapper, .mgmt-popup-outer
+    .mgmt-popup-outer
     {
 	    display: none;
     }
@@ -4720,10 +4720,6 @@ footer nav ul li {
     margin-left: 8px;
 }
 
-.started #welcomebox {
-    margin-top: 5px;
-}
-
 .manage #welcomebox {
     margin-top: 0;
 }
@@ -4771,8 +4767,8 @@ footer nav ul li {
 }
 
 .validation-error {
-    margin-top: -15px;
     text-align: left;
+    float: left;
 }
 
 .user-info-form,
@@ -4938,7 +4934,6 @@ footer nav ul li {
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
-    margin-bottom: 15px;
     font-size: 15px;
     color: #333;
 }
