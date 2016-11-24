@@ -5,6 +5,26 @@ use TaskRunner\Commons\QueueElement;
 
 class Utils {
 
+    public static function tryToRedeemProject( $email ) {
+        if (
+            isset( $_SESSION['redeem_project']) && $_SESSION['redeem_project'] === TRUE &&
+            isset( $_SESSION['last_created_pid'])
+        ) {
+            updateProjectOwner( $email, $_SESSION['last_created_pid'] );
+        }
+
+        unset( $_SESSION['redeem_project'] );
+        unset( $_SESSION['last_created_pid'] );
+    }
+
+    /**
+     *  TODO: this is a helper function to be used when transitioning to
+     *  more decoupled implementations.
+     */
+    public static function userIsLogged() {
+        return isset($_SESSION['uid']) ;
+    }
+
     public static function encryptPass( $clear_pass, $salt ) {
         return sha1( $clear_pass . $salt );
     }

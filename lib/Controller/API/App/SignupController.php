@@ -35,7 +35,13 @@ class SignupController extends KleinController {
             FlashMessage::set('confirmToken', $e->getMessage(), FlashMessage::ERROR );
         }
 
-        $this->response->redirect( \Routes::appRoot() );
+        $this->response->redirect( $this->__flushWantedURL()  );
+    }
+
+    public function redeemProject() {
+        \Bootstrap::sessionStart();
+        $_SESSION['redeem_project'] = TRUE ;
+        $this->response->code( 200 ) ;
     }
 
     public function authForPasswordReset() {
@@ -66,6 +72,12 @@ class SignupController extends KleinController {
     }
 
     protected function afterConstruct() {
+    }
+
+    private function __flushWantedURL() {
+        $url = isset( $_SESSION['wanted_url'] ) ? $_SESSION['wanted_url'] : \Routes::appRoot();
+        unset($_SESSION['wanted_url']) ;
+        return $url ;
     }
 
 }

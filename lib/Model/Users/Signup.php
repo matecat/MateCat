@@ -29,7 +29,8 @@ class Signup {
             'password' => FILTER_SANITIZE_STRING,
             'password_confirmation' => FILTER_SANITIZE_STRING,
             'first_name' => FILTER_SANITIZE_STRING,
-            'last_name' => FILTER_SANITIZE_STRING
+            'last_name' => FILTER_SANITIZE_STRING,
+            'wanted_url' => FILTER_SANITIZE_URL
         ));
 
         $this->user = new Users_UserStruct( $params );
@@ -62,6 +63,8 @@ class Signup {
 
         \Users_UserDao::insertStruct( $this->user, array('raise' => TRUE ) );
 
+        $this->__saveWantedUrl();
+
         $this->__sendConfirmationRequestEmail();
 
     }
@@ -73,6 +76,11 @@ class Signup {
     private function __sendConfirmationRequestEmail() {
         $email = new SignupEmail( $this->getUser() ) ;
         $email->send();
+    }
+
+    private function __saveWantedUrl() {
+        \Bootstrap::sessionStart();
+        $_SESSION['wanted_url'] = $this->params['wanted_url'] ;
     }
 
     private function __prepareUserRecord() {
@@ -121,9 +129,10 @@ class Signup {
         $user->email_confirmed_at = Utils::mysqlTimestamp( time() ) ;
         $user->confirmation_token = null ;
 
-        Users_UserDao::updateStruct( $user, array('fields' => array( 'confirmation_token', 'email_confirmed_at' )  ) ) ;
+        Users_UserDao::updateStruct( $user, array('fields' => array( 'confirmation_token', 'email_confirmed_at' ) ) ) ;
 
         AuthCookie::setCredentials($user->email, $user->uid);
+        Utils::tryToRedeemProject( $user->email ) ;
     }
 
     public static function passwordReset( $token ) {

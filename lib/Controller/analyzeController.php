@@ -178,20 +178,11 @@ class analyzeController extends viewController {
 
         $this->template->isLoggedIn = $this->isLoggedIn();
 
-        if ( \Bootstrap::areOauthKeysPresent() && isset( $_SESSION[ '_anonym_pid' ] )
-                && !empty( $_SESSION[ '_anonym_pid' ] ) ) {
-            $_SESSION[ 'incomingUrl' ]         = INIT::$HTTPHOST . $_SERVER[ 'REQUEST_URI' ];
-            $_SESSION[ '_newProject' ]         = 1;
-            $this->template->showModalBoxLogin = true;
-        } else {
-            $this->template->showModalBoxLogin = false;
-        }
+        $this->__evalModalBoxForLogin();
 
         //url to which to send data in case of login
         $client                       = OauthClient::getInstance()->getClient();
         $this->template->oauthFormUrl = $client->createAuthUrl();
-
-        $this->template->incomingUrl = '/login?incomingUrl=' . $_SERVER[ 'REQUEST_URI' ];
 
         //perform check on running daemons and send a mail randomly
         $misconfiguration = Status::thereIsAMisconfiguration();
@@ -202,6 +193,18 @@ class analyzeController extends viewController {
 
         $this->template->daemon_misconfiguration = var_export( $misconfiguration, true );
 
+    }
+
+    private function __evalModalBoxForLogin() {
+        if (
+            !$this->isLoggedIn() &&
+            is_null( $this->project->id_customer ) &&
+            isset( $_SESSION[ 'last_created_pid' ] ) && $_SESSION['last_created_pid'] == $this->project->id
+        ) {
+            $this->template->showModalBoxLogin = true;
+        } else {
+            $this->template->showModalBoxLogin = false;
+        }
     }
 
 }

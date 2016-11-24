@@ -57,7 +57,7 @@ class Session {
     }
 
     public function changeSourceLanguage($newSourceLang, $originalSourceLang) {
-        $fileList = $_SESSION[ self::FILE_LIST ] ;
+        $fileList = $this->session[ self::FILE_LIST ] ;
         $success = true;
         foreach( $fileList as $fileId => $file ) {
             if ($success) {

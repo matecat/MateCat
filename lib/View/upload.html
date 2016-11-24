@@ -850,8 +850,6 @@
     </div>
 </div>
 
-<div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
-<div metal:use-macro="popup_google_login.html/googleDriveLoginPopup"/>
 <div class="notifications-wrapper"></div>
 <footer>
 
@@ -869,7 +867,7 @@
             <ul>
 
                 <tal:block tal:condition="php: !empty(logged_user)">
-                    <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
+                    <li><a tal:attributes="href string:${basepath}manage/">Manage</a></li>
                 </tal:block>
 
                 <tal:block tal:condition="php: empty(logged_user)">

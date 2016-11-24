@@ -172,6 +172,7 @@ abstract class viewController extends controller {
 
         //even if no login in required, if user data is present, pull it out
         $this->logged_user = new Users_UserStruct();
+
         if ( !empty( $_SESSION[ 'cid' ] ) ){
             $this->logged_user->uid = $_SESSION[ 'uid' ];
             $this->logged_user->email = $_SESSION[ 'cid' ];
@@ -186,7 +187,6 @@ abstract class viewController extends controller {
         }
 
         if( $isAuthRequired  ) {
-            //if auth is required, stat procedure
             $this->doAuth();
         }
 
@@ -204,19 +204,14 @@ abstract class viewController extends controller {
         //if no login set and login is required
         if ( !$this->isLoggedIn() ) {
             //take note of url we wanted to go after
-            $_SESSION[ 'incomingUrl' ] = $_SERVER[ 'REQUEST_URI' ];
-            parse_str( $_SERVER[ 'QUERY_STRING' ], $queryStringArray );
-            if ( isset( $queryStringArray[ 'new' ] ) ) {
-                $_SESSION[ '_newProject' ] = (bool)$queryStringArray[ 'new' ];
-            }
-
-            //signal redirection
+            $_SESSION[ 'wanted_url' ] = $_SERVER[ 'REQUEST_URI' ];
             $mustRedirectToLogin = true;
         }
 
         if ( $mustRedirectToLogin ) {
-            //redirect to login page
-            header( 'Location: /login' );
+            FlashMessage::set('popup', 'login', FlashMessage::SERVICE );
+
+            header( 'Location: ' . Routes::appRoot() )  ;
             exit;
         }
 

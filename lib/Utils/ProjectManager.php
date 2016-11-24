@@ -132,8 +132,9 @@ class ProjectManager {
                 $this->projectStructure
         );
 
-        // TODO: change to abstract connnected service session
-        $this->gdriveSession = new GDrive\Session( $_SESSION ) ;
+        if ( Utils::userIsLogged() ) {
+            $this->gdriveSession = new GDrive\Session( $_SESSION ) ;
+        }
 
     }
 
@@ -406,9 +407,11 @@ class ProjectManager {
                     $fid      = insertFile( $this->projectStructure, $originalFileName, $mimeType,
                         $fileDateSha1Path, $file_insert_params  );
 
-                    $gdriveFileId = $this->gdriveSession->findFileIdByName( $originalFileName ) ;
-                    if ($gdriveFileId) {
-                        $this->gdriveSession->createRemoteFile( $fid, $gdriveFileId );
+                    if ( $this->gdriveSession )  {
+                        $gdriveFileId = $this->gdriveSession->findFileIdByName( $originalFileName ) ;
+                        if ($gdriveFileId) {
+                            $this->gdriveSession->createRemoteFile( $fid, $gdriveFileId );
+                        }
                     }
 
                     $this->fileStorage->moveFromCacheToFileDir(
@@ -492,20 +495,6 @@ class ProjectManager {
             return false;
         }
 
-        //Log::doLog( array_pop( array_chunk( $SegmentTranslations[$fid], 25, true ) ) );
-        //create job
-
-        if ( isset( $_SESSION[ 'cid' ] ) and !empty( $_SESSION[ 'cid' ] ) ) {
-            $owner                             = $_SESSION[ 'cid' ];
-            $this->projectStructure[ 'owner' ] = $owner;
-        } else {
-            $_SESSION[ '_anonym_pid' ] = $this->projectStructure[ 'id_project' ];
-
-            //default user
-            $owner = '';
-        }
-
-
         $isEmptyProject = false;
         //Throws exception
         try {
@@ -570,6 +559,7 @@ class ProjectManager {
         }
 
 
+        // TODO: this remapping is for presentation purpose and should be removed from here.
         $this->projectStructure[ 'result' ][ 'code' ]            = 1;
         $this->projectStructure[ 'result' ][ 'data' ]            = "OK";
         $this->projectStructure[ 'result' ][ 'ppassword' ]       = $this->projectStructure[ 'ppassword' ];
@@ -585,9 +575,6 @@ class ProjectManager {
 
         if ( INIT::$VOLUME_ANALYSIS_ENABLED )
             $this->projectStructure[ 'result' ][ 'analyze_url' ]     = $this->analyzeURL();
-
-
-
 
         /*
          * This is the old code.
@@ -1005,13 +992,13 @@ class ProjectManager {
                 }
                 insertFilesJob( $jid, $fid );
 
-                if ( $this->gdriveSession->hasFiles() ) {
+                if ( $this->gdriveSession && $this->gdriveSession->hasFiles() ) {
                     $this->gdriveSession->createRemoteCopiesWhereToSaveTranslation( $fid, $jid ) ;
                 }
             }
         }
 
-        $this->gdriveSession->clearFiles();
+        if ( $this->gdriveSession ) $this->gdriveSession->clearFiles();
 
         $this->features->run('processJobsCreated', $projectStructure );
     }
