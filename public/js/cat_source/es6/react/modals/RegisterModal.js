@@ -111,8 +111,8 @@ class RegisterModal extends React.Component {
         }
         return <div className="register-modal">
             <h2>Register with Google Login</h2>
-            <a className="google-login btn-confirm-medium" onClick={this.googole_popup.bind(this)}> Google login </a>
-            <p>By clicking you accept terms and conditions</p>
+            <a className="google-login-button btn-confirm-medium" onClick={this.googole_popup.bind(this)}></a>
+            <p>By clicking you accept <a href="/terms" target="_blank">terms and conditions</a></p>
             <div className="register-form-container">
                 <h2>Register with your email</h2>
                 <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("name")}
@@ -129,7 +129,7 @@ class RegisterModal extends React.Component {
                            onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
                 <br />
                 <input type="checkbox" id="check-conditions" name="terms" ref={(input) => this.textInput = input} onChange={this.changeCheckbox.bind(this)} tabIndex={5}/>
-                <label htmlFor="check-conditions" style={this.checkStyle}>Accept terms and conditions</label><br/>
+                <label htmlFor="check-conditions" style={this.checkStyle}>Accept <a href="/terms" target="_blank">terms and conditions</a></label><br/>
                 <a className="register-submit btn-confirm-medium"
                    onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}
                    onClick={this.handleSubmitClicked.bind()} tabIndex={6}> Register Now </a>

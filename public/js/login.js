@@ -38,7 +38,7 @@ $.extend(APP, {
                 props = param;
                 $.extend(props, param);
             }
-            APP.ModalWindow.showModalComponent(PreferencesModal, props, 'Preferences');
+            APP.ModalWindow.showModalComponent(PreferencesModal, props, 'Profile');
         });
         $('#modal').on('openresetpassword', function () {
             APP.ModalWindow.showModalComponent(ResetPasswordModal, {}, "Reset Password");
@@ -64,7 +64,7 @@ $.extend(APP, {
             var props = {
                 googleUrl: $('#loginlink').attr('href')
             };
-            APP.ModalWindow.showModalComponent(LoginModal, props, 'Login or register', style);
+            APP.ModalWindow.showModalComponent(LoginModal, props, '', style);
         });
 
         /// TODO

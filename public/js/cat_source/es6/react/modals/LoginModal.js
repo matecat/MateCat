@@ -92,18 +92,16 @@ class LoginModal extends React.Component {
         }
         return <div className="login-modal">
                     <div className="login-container-right">
-                        <h2>Register now</h2>
-                        <p>Log in to access advanced functionalities.</p>
+                        <h2>Sign up now to:</h2>
                         <ul className="">
-                            <li>TM, MT, glossary management</li>
-                            <li>Google Drive Integration</li>
-                            <li>Management panel</li>
+                            <li>Manage your TMs, glossaries and MT engines</li>
+                            <li>Acess the management panel</li>
+                            <li>Translate Google Drive Files</li>
                         </ul>
-                        <a className="register-button btn-confirm-medium" onClick={this.openRegisterModal}> Register now </a>
+                        <a className="register-button btn-confirm-medium" onClick={this.openRegisterModal}>Sign up</a>
                     </div>
                     <div className="login-container-left">
-                        <h2>Log in</h2>
-                        <a className="google-login-button btn-confirm-medium" onClick={this.googole_popup.bind(this)}> Google login </a>
+                        <a className="google-login-button btn-confirm-medium" onClick={this.googole_popup.bind(this)}></a>
                         <div className="login-form-container">
                             <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("emailAddress")}
                                        placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")} tabindex={1}
@@ -113,7 +111,7 @@ class LoginModal extends React.Component {
                                        onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
                             <a className="login-button btn-confirm-medium"
                                onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}
-                               onClick={this.handleSubmitClicked.bind()} tabIndex={3}> Log in </a>
+                               onClick={this.handleSubmitClicked.bind()} tabIndex={3}> Sign in </a>
                             {generalErrorHtml}
                             <br/>
                             <span className="forgot-password" onClick={this.openForgotPassword}>Forgot password?</span>

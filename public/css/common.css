@@ -3309,6 +3309,18 @@ column-count: 3;
 
 
 }
+
+@media (max-height: 700px) {
+    .register-modal,
+    .preferences-modal {
+    overflow-x: hidden;
+    height: 300px;
+    overflow-y: scroll;
+}
+
+}
+
+
 /* retina display query */
 @media only screen and (-webkit-min-device-pixel-ratio: 2),
 only screen and (min--moz-device-pixel-ratio: 2),
@@ -3654,14 +3666,6 @@ top: -2px;
 left: 9999px;
 }
 
-#logoutlink:before {
-    content: "\f011";
-    font-size: 14px;
-    display: block;
-    float: left;
-    margin: 2px;
-}
-
 
 .editToolbar .uppercase:after {
     content: "\ea6c";
@@ -3699,7 +3703,7 @@ left: 9999px;
 .login-modal .login-container-right li:before {
     content: "\ea10";
     margin-left: -40px;
-    padding: 20px;
+    padding: 11px;
     color: #3aa9dd;
 }
 
@@ -4695,7 +4699,11 @@ span.share-popup-item-email {
 /***** Login Footer ****/
 
 #logoutlink {
-    font-weight:normal;
+    margin-bottom: 20px;
+    text-decoration: underline;
+    float: left;
+    cursor: pointer;
+    color: #39699a;
 }
 
 footer nav ul li {
@@ -4708,8 +4716,12 @@ footer nav ul li {
     float: right;
     cursor: pointer;
     position: relative;
-    margin-top: 5px;
+    text-decoration: underline;
     margin-left: 8px;
+}
+
+.started #welcomebox {
+    margin-top: 5px;
 }
 
 .manage #welcomebox {
@@ -4773,6 +4785,16 @@ footer nav ul li {
     position:relative;
 }
 
+.user-gdrive {
+    border: 1px solid #ccc;
+    padding: 10px 0 0 10px;
+    border-radius: 4px;
+    background: #f8f6f6;
+    width: 95%;
+    min-height: 40px;
+    margin-bottom: 25px;
+}
+
 .user-reset-password {
     min-height: 80px;
 }
@@ -4804,7 +4826,7 @@ footer nav ul li {
 .user-gdrive > label {
     line-height: 32px;
     float: left;
-    margin-left: 90px;
+    margin-left: 65px;
     font-size: 18px;
 }
 .user-menu-flat {
@@ -4871,8 +4893,32 @@ footer nav ul li {
     margin-left: 50px;
 }
 
+
+.google-login-button {
+    background: url(../img/btn_google_signin_dark_normal_web@2x.png) no-repeat;
+}
+
+.google-login-button:hover {
+    background: url(../img/btn_google_signin_dark_pressed_web@2x.png) no-repeat;
+    box-shadow: none;
+} 
+
+.google-login-button:focus {
+    background: url(../img/btn_google_signin_dark_focus_web@2x.png) no-repeat;
+}
+
+.google-login-button,
+.google-login-button:hover,
+.google-login-button:focus {
+    background-size: 100%;
+    border: none;
+    height: 30px;
+}
+
 .forgot-password {
     cursor: pointer;
+    text-decoration: underline;
+    color:#39699a;
 }
 
 .login-container-left input,
@@ -4943,13 +4989,16 @@ footer nav ul li {
 }
 
 .forgot-password-modal {
-    background: url(../img/matecat_watch.png) no-repeat 467px 136px;
+    background: url(../img/matecat_watch.png) no-repeat 476px 136px;
     background-size: 23%;
     width: 384px;
-    padding: 25px 90px;
+    padding: 25px 96px;
 }
 
-
+.reset-password-modal {
+    padding: 5% 10%;
+    width: 80%;
+}
 
 .register-modal {
     padding: 10px 0;
@@ -5008,8 +5057,11 @@ footer nav ul li {
 }
 
 .matecat-modal-header h2 {
-    margin: 0;
+    margin: 0!important;
     line-height: 30px;
+    font-size: 24px;
+    width: auto!important;
+    float: none!important;
 }
 
 
@@ -5019,6 +5071,8 @@ footer nav ul li {
     color: #000;
     background-color: #fff;
     border-radius: 0 0 4px 4px;
+    margin: 0 auto;
+    overflow: hidden;
 
 }
 
