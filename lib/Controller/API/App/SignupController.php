@@ -38,6 +38,12 @@ class SignupController extends KleinController {
         $this->response->redirect( $this->__flushWantedURL()  );
     }
 
+    public function redeemProject() {
+        \Bootstrap::sessionStart();
+        $_SESSION['redeem_project'] = TRUE ;
+        $this->response->code( 200 ) ;
+    }
+
     public function authForPasswordReset() {
         try {
             Signup::passwordReset( $this->request->param('token') ) ;

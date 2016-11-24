@@ -60,7 +60,7 @@ class oauthResponseHandlerController extends viewController{
 
 	public function doAction(){
 
-		if($this->user_logged && !empty($this->userData)){
+		if ($this->user_logged && !empty($this->userData)) {
 			//user has been validated, data was by Google
 			//check if user exists in db; if not, create
             //
@@ -72,24 +72,14 @@ class oauthResponseHandlerController extends viewController{
 				die("error in insert");
 			}
 
-			//set stuff
 			AuthCookie::setCredentials($this->userData['email'], $result['uid']);
 
-     $_SESSION[ 'cid' ]  = $this->userData['email'];
-     $_SESSION[ 'uid' ]  = $result[ 'uid' ];
+             $_SESSION[ 'cid' ]  = $this->userData['email'];
+             $_SESSION[ 'uid' ]  = $result[ 'uid' ];
 
-			$_theresAnonymousProject = ( isset($_SESSION['_anonym_pid']) && !empty($_SESSION['_anonym_pid']) );
-			$_incomingFromNewProject = ( isset($_SESSION['_newProject']) && !empty($_SESSION['_newProject']) );
+            Utils::tryToRedeemProject( $this->userData['email'] );
 
-			if( $_theresAnonymousProject && $_incomingFromNewProject ){
-				//update anonymous project with user credentials
-				$result = updateProjectOwner( $this->userData['email'], $_SESSION['_anonym_pid'] );
-			}
 		}
-
-		//destroy session info of last anonymous project
-		unset($_SESSION['_anonym_pid']);
-		unset($_SESSION['_newProject']);
 	}
 
 	public function setTemplateVars() {

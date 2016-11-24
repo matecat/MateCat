@@ -129,9 +129,10 @@ class Signup {
         $user->email_confirmed_at = Utils::mysqlTimestamp( time() ) ;
         $user->confirmation_token = null ;
 
-        Users_UserDao::updateStruct( $user, array('fields' => array( 'confirmation_token', 'email_confirmed_at' )  ) ) ;
+        Users_UserDao::updateStruct( $user, array('fields' => array( 'confirmation_token', 'email_confirmed_at' ) ) ) ;
 
         AuthCookie::setCredentials($user->email, $user->uid);
+        Utils::tryToRedeemProject( $user->email ) ;
     }
 
     public static function passwordReset( $token ) {

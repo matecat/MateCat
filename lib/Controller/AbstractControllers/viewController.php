@@ -205,13 +205,6 @@ abstract class viewController extends controller {
         if ( !$this->isLoggedIn() ) {
             //take note of url we wanted to go after
             $_SESSION[ 'wanted_url' ] = $_SERVER[ 'REQUEST_URI' ];
-
-            parse_str( $_SERVER[ 'QUERY_STRING' ], $queryStringArray );
-            if ( isset( $queryStringArray[ 'new' ] ) ) {
-                $_SESSION[ '_newProject' ] = (bool)$queryStringArray[ 'new' ];
-            }
-
-            //signal redirection
             $mustRedirectToLogin = true;
         }
 

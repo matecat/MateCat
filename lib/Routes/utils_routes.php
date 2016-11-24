@@ -16,13 +16,14 @@ $klein->respond('GET', '/utils/pee', function() {
 route( '/api/app/user',                         'GET', 'API\App\UserController', 'show' );
 route( '/api/app/user/password',                'POST', 'API\App\UserController', 'updatePassword' );
 
-route( '/api/app/user/login',                'POST', 'API\App\LoginController', 'login' );
+route( '/api/app/user/login',                   'POST', 'API\App\LoginController', 'login' );
 
 route( '/api/app/user',                         'POST', 'API\App\SignupController', 'create' );
 route( '/api/app/user/resend_email_confirm',    'POST', 'API\App\SignupController', 'resendEmailConfirm' );
 route( '/api/app/user/forgot_password',         'POST', 'API\App\SignupController', 'forgotPassword' );
 route( '/api/app/user/password_reset/[:token]', 'GET', 'API\App\SignupController', 'authForPasswordReset' );
 route( '/api/app/user/confirm/[:token]',        'GET', 'API\App\SignupController', 'confirm' );
+route( '/api/app/user/redeem_project',          'POST', 'API\App\SignupController', 'redeemProject' );
 
 route(
     '/api/app/connected_services/[:id_service]/verify', 'GET',

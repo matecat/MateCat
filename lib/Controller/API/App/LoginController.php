@@ -24,6 +24,7 @@ class LoginController extends KleinController {
 
         if ( $user && !is_null($user->email_confirmed_at) && $user->passwordMatch( $params['password'] ) ) {
             \AuthCookie::setCredentials($user->email, $user->uid ) ;
+            \Utils::tryToRedeemProject( $user->email ) ;
             $this->response->code( 200 ) ;
         }
         else {
