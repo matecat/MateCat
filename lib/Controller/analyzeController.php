@@ -198,7 +198,6 @@ class analyzeController extends viewController {
     private function __evalModalBoxForLogin() {
         if (
             !$this->isLoggedIn() &&
-            is_null( $this->project->id_customer ) &&
             isset( $_SESSION[ 'last_created_pid' ] ) && $_SESSION['last_created_pid'] == $this->project->id
         ) {
             $this->template->showModalBoxLogin = true;

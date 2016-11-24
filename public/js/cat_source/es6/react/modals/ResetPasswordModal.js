@@ -88,7 +88,6 @@ class ResetPasswordModal extends React.Component {
             generalErrorHtml = <span style={ {color: 'red',fontSize: '14px'} } className="text">{this.state.generalError}</span>;
         }
         return <div className="reset-password-modal">
-            <h2>Reset Password</h2>
             <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit</p>
             <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password1")}
                        placeholder="Password" name="password1" errorText={this.errorFor("password1")} tabindex={1}

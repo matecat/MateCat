@@ -827,7 +827,7 @@ color:#333;}
 	    display: none;
     }
 
-    #popupWrapper, .mgmt-popup-outer
+    .mgmt-popup-outer
     {
 	    display: none;
     }

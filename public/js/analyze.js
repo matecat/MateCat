@@ -149,19 +149,19 @@ UI = {
 			$(".loadingbar").addClass("closebar");
 		});
 
-		$("#popupWrapper .x-popup, #popupWrapper .popup-outer, #popupWrapper .popup a.anonymous").click(function(e) {
-			e.preventDefault();
-			APP.doRequest({
-				data: {
-					action: 'ajaxUtils',
-					exec: 'stayAnonymous'
-				},
-				success: function(d) {
-					$(".popup-outer").fadeOut();
-					$(".popup").fadeOut('fast');
-				}
-			});
-		});
+		// $("#popupWrapper .x-popup, #popupWrapper .popup-outer, #popupWrapper .popup a.anonymous").click(function(e) {
+		// 	e.preventDefault();
+		// 	APP.doRequest({
+		// 		data: {
+		// 			action: 'ajaxUtils',
+		// 			exec: 'stayAnonymous'
+		// 		},
+		// 		success: function(d) {
+		// 			$(".popup-outer").fadeOut();
+		// 			$(".popup").fadeOut('fast');
+		// 		}
+		// 	});
+		// });
 
 		this.pollData();
 	},
@@ -832,13 +832,6 @@ function precomputeOutsourceQuotes( elementsToAskQuoteFor ) {
 }
 
 $(document).ready(function() {
-	if (config.showModalBoxLogin == 1) {
-	    $('#popupWrapper').fadeToggle();
-	}
-	$('#sign-in').click(function(e) {
-		e.preventDefault();
-		APP.googole_popup($(e.target).data('oauth'));
-		});
 	UI.init();
 	if ( config.enable_outsource ) {
 		UI.outsourceInit();

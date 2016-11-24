@@ -48,7 +48,7 @@ class RegisterModal extends React.Component {
             return false;
         }
         this.requestRunning = true;
-        this.sendRegisterData().done(function (data) {
+        this.checkRedeemProject().then(this.sendRegisterData().done(function (data) {
             $('#modal').trigger('opensuccess', [{
                 title: 'Register Now',
                 text: 'To complete your registration please follow the instructions in the email we sent you to ' + self.state.emailAddress + '.'
@@ -66,7 +66,7 @@ class RegisterModal extends React.Component {
                 });
             }
             self.requestRunning = false;
-        });
+        }));
     }
 
     errorFor(field) {
@@ -92,8 +92,6 @@ class RegisterModal extends React.Component {
         this.setState(this.state);
     }
 
-
-
     sendRegisterData() {
         return $.post('/api/app/user', {
             user: {
@@ -105,6 +103,16 @@ class RegisterModal extends React.Component {
                 wanted_url: window.location.href
             }
         });
+    }
+
+    checkRedeemProject() {
+        if (this.props.redeemMessage) {
+            return $.post('/api/app/user/redeem_project');
+        } else {
+            var deferred = $.Deferred();
+            deferred.resolve();
+            return deferred.promise();
+        }
     }
 
     render() {

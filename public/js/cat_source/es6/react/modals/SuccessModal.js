@@ -8,7 +8,7 @@ class SuccessModal extends React.Component {
 
     render() {
         return <div className="success-modal">
-            <h2>{this.props.title}</h2>
+            {/*<h2>{this.props.title}</h2>*/}
             <p>{this.props.text}</p>
         </div>;
     }

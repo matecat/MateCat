@@ -10,33 +10,35 @@ class ModalWindowComponent extends React.Component {
             component: '',
             compProps: {},
             title: '',
-            styleContainer:''
+            styleContainer:'',
+            onCloseCallback: false
         };
         this.showModalComponent = this.showModalComponent.bind(this);
     }
 
     onCloseModal() {
+        if ( this.props.onCloseCallback) {
+            this.props.onCloseCallback();
+        }
         this.setState({
             isShowingModal: false,
             component: '',
             compProps: {},
             title: '',
-            styleContainer:''
+            styleContainer:'',
+            onCloseCallback: false
         });
     }
 
-    showModalComponent(component, props, title, style) {
+    showModalComponent(component, props, title, style, onCloseCallback) {
         this.setState({
             isShowingModal: true,
             component: component,
             compProps: props,
             title: title,
-            styleContainer: style
+            styleContainer: style,
+            onCloseCallback: onCloseCallback
         });
-    }
-
-    openResetPassword() {
-        $('#modal').trigger('openresetpassword');
     }
 
     componentWillMount() {
