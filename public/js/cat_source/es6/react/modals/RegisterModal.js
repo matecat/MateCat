@@ -95,13 +95,16 @@ class RegisterModal extends React.Component {
 
 
     sendRegisterData() {
-        return $.post('/api/app/user', { user: {
-            first_name: this.state.name,
-            last_name: this.state.surname,
-            email: this.state.emailAddress,
-            password: this.state.password,
-            password_confirmation: this.state.password
-        }});
+        return $.post('/api/app/user', {
+            user: {
+                first_name: this.state.name,
+                last_name: this.state.surname,
+                email: this.state.emailAddress,
+                password: this.state.password,
+                password_confirmation: this.state.password,
+                wanted_url: window.location.href
+            }
+        });
     }
 
     render() {

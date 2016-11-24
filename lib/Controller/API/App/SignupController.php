@@ -28,6 +28,7 @@ class SignupController extends KleinController {
     }
 
     public function confirm() {
+        \Bootstrap::sessionStart();
         try {
             Signup::confirm( $this->request->param('token') ) ;
         }
