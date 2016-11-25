@@ -137,10 +137,6 @@ class Signup {
 
     }
 
-    public static function passwordReset( $token ) {
-
-    }
-
     public static function forgotPassword( $email ) {
         $email = filter_var( $email, FILTER_SANITIZE_EMAIL ) ;
 
