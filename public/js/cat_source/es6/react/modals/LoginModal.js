@@ -28,6 +28,12 @@ class LoginModal extends React.Component {
         if ( window.focus ) {
             newWindow.focus();
         }
+        var interval = setInterval(function () {
+            if (newWindow.closed) {
+                clearInterval(interval);
+                window.location.reload();
+            }
+        }, 600);
     }
 
     handleFieldChanged(field) {
