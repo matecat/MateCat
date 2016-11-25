@@ -43,7 +43,11 @@ $.extend(APP, {
             APP.ModalWindow.showModalComponent(ResetPasswordModal, {}, "Reset Password");
         });
         $('#modal').on('openforgotpassword', function () {
-            APP.ModalWindow.showModalComponent(ForgotPasswordModal, {}, "Forgot Password");
+            var props = {};
+            if (config.showModalBoxLogin == 1) {
+                props.redeemMessage = true
+            }
+            APP.ModalWindow.showModalComponent(ForgotPasswordModal, props, "Forgot Password");
         });
         $('#modal').on('openregister', function () {
             var props = {
