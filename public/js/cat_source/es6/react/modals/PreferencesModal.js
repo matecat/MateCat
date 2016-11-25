@@ -82,6 +82,12 @@ class PreferencesModal extends React.Component {
         if ( this.state.service && !this.state.service.disabled_at) {
             services_label = 'Connected to '+ this.state.service.email+' Google Drive';
         }
+        var resetPasswordHtml = '';
+        if ( this.props.user.has_password ) {
+            resetPasswordHtml = <a className="reset-password btn-confirm-medium"
+                                   onClick={this.openResetPassword.bind(this)}>Reset Password</a>;
+
+        }
         return <div className="preferences-modal">
                     <div className="user-info-form">
                         <label htmlFor="user-login-name">Name</label><br/>
@@ -93,7 +99,7 @@ class PreferencesModal extends React.Component {
                     </div>
                     <div className="user-reset-password">
                         {gdriveMessage}
-                        <a className="reset-password btn-confirm-medium" onClick={this.openResetPassword.bind(this)}>Reset Password</a>
+                        {resetPasswordHtml}
                     </div>
                     <div className="user-gdrive">
                         <div className="onoffswitch-drive">
