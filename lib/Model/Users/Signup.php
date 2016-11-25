@@ -132,28 +132,13 @@ class Signup {
         Users_UserDao::updateStruct( $user, array('fields' => array( 'confirmation_token', 'email_confirmed_at' ) ) ) ;
 
         AuthCookie::setCredentials($user->email, $user->uid);
-        Utils::tryToRedeemProject( $user->email ) ;
+
+        return $user ;
+
     }
 
     public static function passwordReset( $token ) {
-        $dao = new \Users_UserDao() ;
-        $user = $dao->getByConfirmationToken( $token );
 
-        if ( !$user ) {
-            throw new ValidationError('Confirmation token not found');
-        }
-
-        if ( strtotime( $user->confirmation_token_created_at ) < strtotime('3 days ago') ) {
-            $user->clearAuthToken();
-            Users_UserDao::updateStruct( $user, array('fields' => array('confirmation_token')  ) ) ;
-
-            throw new ValidationError('Auth token expired, repeat the operation.') ;
-        }
-
-        $user->clearAuthToken() ;
-
-        Users_UserDao::updateStruct( $user, array('fields' => array('confirmation_token', 'confirmation_token_created_at')  ) ) ;
-        AuthCookie::setCredentials($user->email, $user->uid);
     }
 
     public static function forgotPassword( $email ) {

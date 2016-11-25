@@ -6,8 +6,13 @@ use API\V2\KleinController;
 use Exceptions\ValidationError;
 use Monolog\Handler\Curl\Util;
 use Symfony\Component\Config\Definition\Exception\Exception;
+use Users\PasswordReset;
 use Users\Signup ;
 use FlashMessage ;
+
+use Users\RedeemableProject ;
+
+use AuthCookie ;
 
 class SignupController extends AbstractStatefulKleinController  {
 
@@ -29,13 +34,22 @@ class SignupController extends AbstractStatefulKleinController  {
 
     public function confirm() {
         try {
-            Signup::confirm( $this->request->param('token') ) ;
+            $user = Signup::confirm( $this->request->param('token') ) ;
+
+            $project = new RedeemableProject($user, $_SESSION );
+            $project->tryToRedeem() ;
+
+            if ( $project->getDestinationURL() ) {
+                $this->response->redirect( $project->getDestinationURL() ) ;
+            } else {
+                $this->response->redirect( $this->__flushWantedURL() ) ;
+            }
         }
         catch( ValidationError $e ) {
             FlashMessage::set('confirmToken', $e->getMessage(), FlashMessage::ERROR );
+            $this->response->redirect( $this->__flushWantedURL()  );
         }
 
-        $this->response->redirect( $this->__flushWantedURL()  );
     }
 
     public function redeemProject() {
@@ -45,17 +59,26 @@ class SignupController extends AbstractStatefulKleinController  {
 
     public function authForPasswordReset() {
         try {
-            Signup::passwordReset( $this->request->param('token') ) ;
+            $reset = new PasswordReset( $this->request->param('token'), $_SESSION ) ;
+            $reset->authenticateUser();
+
+            $project = new RedeemableProject( $reset->getUser(), $_SESSION ) ;
+            $project->tryToRedeem()  ;
+
+            if ( $project->getDestinationURL() ) {
+                $this->response->redirect( $project->getDestinationURL() ) ;
+            }
+            else {
+                $this->response->redirect( \Routes::appRoot() ) ;
+            }
+
+            FlashMessage::set('popup', 'passwordReset', FlashMessage::SERVICE );
         }
+
         catch( ValidationError $e ) {
             FlashMessage::set('passwordReset', $e->getMessage(), FlashMessage::ERROR );
 
             $this->response->redirect( \Routes::appRoot() ) ;
-        }
-
-        if ( !$this->response->isLocked() ) {
-            FlashMessage::set('popup', 'passwordReset', FlashMessage::SERVICE );
-            $this->response->redirect( \Routes::appRoot( ) ) ;
         }
     }
 
@@ -73,6 +96,7 @@ class SignupController extends AbstractStatefulKleinController  {
     private function __flushWantedURL() {
         $url = isset( $_SESSION['wanted_url'] ) ? $_SESSION['wanted_url'] : \Routes::appRoot();
         unset($_SESSION['wanted_url']) ;
+
         return $url ;
     }
 

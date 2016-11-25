@@ -74,10 +74,14 @@ class oauthResponseHandlerController extends viewController{
 
 			AuthCookie::setCredentials($this->userData['email'], $result['uid']);
 
-             $_SESSION[ 'cid' ]  = $this->userData['email'];
-             $_SESSION[ 'uid' ]  = $result[ 'uid' ];
+            $_SESSION[ 'cid' ]  = $this->userData['email'];
+            $_SESSION[ 'uid' ]  = $result[ 'uid' ];
 
-            Utils::tryToRedeemProject( $this->userData['email'] );
+            $dao = new Users_UserDao();
+            $user = $dao->getByUid( $result['uid'] ) ;
+            $project = new \Users\RedeemableProject($user, $_SESSION)  ;
+
+            if ( $project->isPresent() && $project->isRedeemable() ) $project->redeem();
 
 		}
 	}

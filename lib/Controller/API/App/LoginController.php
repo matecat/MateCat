@@ -9,6 +9,7 @@
 namespace API\App;
 
 use API\V2\KleinController;
+use Users\RedeemableProject;
 
 class LoginController extends AbstractStatefulKleinController  {
 
@@ -24,7 +25,10 @@ class LoginController extends AbstractStatefulKleinController  {
 
         if ( $user && !is_null($user->email_confirmed_at) && $user->passwordMatch( $params['password'] ) ) {
             \AuthCookie::setCredentials($user->email, $user->uid ) ;
-            \Utils::tryToRedeemProject( $user->email ) ;
+
+            $project = new RedeemableProject( $user, $_SESSION ) ;
+
+            $project->tryToRedeem();
             $this->response->code( 200 ) ;
         }
         else {
