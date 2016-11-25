@@ -19,9 +19,9 @@ class CleanPasswordFieldForGoogleLogins extends AbstractMatecatMigration
 {
 
     public $sql_up = array(
-        " UPDATE users set pass = NULL WHERE oauth_access_token IS NULL ",
         " ALTER TABLE users MODIFY COLUMN pass VARCHAR(50) DEFAULT NULL ",
-        " ALTER TABLE users MODIFY COLUMN salt VARCHAR(50) DEFAULT NULL "
+        " ALTER TABLE users MODIFY COLUMN salt VARCHAR(50) DEFAULT NULL ",
+        " UPDATE users set pass = NULL, salt = NULL WHERE oauth_access_token IS NULL "
     );
 
     public $sql_down = array(
