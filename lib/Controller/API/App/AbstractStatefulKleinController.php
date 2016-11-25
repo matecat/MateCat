@@ -16,8 +16,8 @@ abstract class AbstractStatefulKleinController extends KleinController {
 
     public function __construct($request, $response, $service, $app)
     {
-        parent::__construct($request, $response, $service, $app);
         \Bootstrap::sessionStart();
+        parent::__construct($request, $response, $service, $app);
     }
 
 }
