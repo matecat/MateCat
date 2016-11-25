@@ -28,7 +28,8 @@ class UserController extends AbstractStatefulKleinController  {
                 'uid' => $this->user->uid,
                 'first_name' => $this->user->first_name,
                 'last_name' => $this->user->last_name,
-                'email' => $this->user->email
+                'email' => $this->user->email,
+                'has_password' => !is_null($this->user->pass)
             ),
             'connected_services' => ( new ConnectedService( $this->connectedServices ))->render()
         ));

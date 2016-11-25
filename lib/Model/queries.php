@@ -332,19 +332,6 @@ from language_stats
 
 
 function insertUser( $data ) {
-    //random, unique to user salt
-    @$data[ 'salt' ] = Utils::randomString( 15 );
-
-    //if no pass available, create a random one
-    if ( !isset( $data[ 'pass' ] ) or empty( $data[ 'pass' ] ) ) {
-        @$data[ 'pass' ] = Utils::randomString( 15 );
-    }
-    //now encrypt pass
-    $clear_pass     = $data[ 'pass' ];
-    $encrypted_pass = Utils::encryptPass( $clear_pass, $data[ 'salt' ] );
-    $data[ 'pass' ] = $encrypted_pass;
-
-    //creation data
     @$data[ 'create_date' ] = date( 'Y-m-d H:i:s' );
 
     //insert into db
