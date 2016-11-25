@@ -46,7 +46,7 @@ class ForgotPasswordModal extends React.Component {
         this.checkRedeemProject().then(this.sendForgotPassword().done(function (data) {
             $('#modal').trigger('opensuccess', [{
                 title: 'Forgot Password',
-                text: 'We sent an email to ' + this.state.emailAddress +'. Follow the instructions to create a new password.'
+                text: 'We sent an email to ' + self.state.emailAddress +'. Follow the instructions to create a new password.'
             }]);
         }).fail(function (response) {
             var data = JSON.parse( response.responseText );

@@ -116,6 +116,9 @@ $.extend(APP, {
             case "preference":
                 modal$.trigger('openpreferences');
                 break;
+            case "login":
+                modal$.trigger('openlogin');
+                break;
         }
     }
 });
