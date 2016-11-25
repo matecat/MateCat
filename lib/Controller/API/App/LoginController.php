@@ -10,11 +10,10 @@ namespace API\App;
 
 use API\V2\KleinController;
 
-class LoginController extends KleinController {
+class LoginController extends AbstractStatefulKleinController  {
 
 
     public function login() {
-        \Bootstrap::sessionStart();
         $params = filter_var_array( $this->request->params(), array(
             'email' => FILTER_SANITIZE_EMAIL,
             'password' => FILTER_SANITIZE_STRING
