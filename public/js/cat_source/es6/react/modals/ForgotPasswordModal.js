@@ -43,7 +43,7 @@ class ForgotPasswordModal extends React.Component {
             return false;
         }
         this.requestRunning = true;
-        this.sendForgotPassword().done(function (data) {
+        this.checkRedeemProject().then(this.sendForgotPassword().done(function (data) {
             $('#modal').trigger('opensuccess', [{
                 title: 'Forgot Password',
                 text: 'We sent an email to ' + this.state.emailAddress +'. Follow the instructions to create a new password.'
@@ -60,11 +60,21 @@ class ForgotPasswordModal extends React.Component {
                 });
             }
             self.requestRunning = false;
-        });
+        }));
     }
 
     sendForgotPassword() {
         return $.post('/api/app/user/forgot_password', { email: this.state.emailAddress } )
+    }
+
+    checkRedeemProject() {
+        if (this.props.redeemMessage) {
+            return $.post('/api/app/user/redeem_project');
+        } else {
+            var deferred = $.Deferred();
+            deferred.resolve();
+            return deferred.promise();
+        }
     }
 
     errorFor(field) {
