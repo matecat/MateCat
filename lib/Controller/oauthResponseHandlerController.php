@@ -38,7 +38,7 @@ class oauthResponseHandlerController extends viewController{
 		$code         = $__postInput[ 'code' ];
 		$error        = $__postInput[ 'error' ];
 
-		if(isset($code) && $code){
+		if (isset($code) && $code) {
 			$this->client->authenticate($code);
 
 			$user = $plus->userinfo->get();
@@ -54,8 +54,6 @@ class oauthResponseHandlerController extends viewController{
 		else if (isset($error)){
 			$this->user_logged = false;
 		}
-
-		$this->redirectUrl = empty($_SESSION['wanted_url']) ? Routes::appRoot() : $_SESSION['wanted_url'] ;
 	}
 
 	public function doAction(){
@@ -79,15 +77,14 @@ class oauthResponseHandlerController extends viewController{
 
             $dao = new Users_UserDao();
             $user = $dao->getByUid( $result['uid'] ) ;
+
             $project = new \Users\RedeemableProject($user, $_SESSION)  ;
-
-            if ( $project->isPresent() && $project->isRedeemable() ) $project->redeem();
-
+            $project->tryToRedeem()  ;
 		}
 	}
 
-	public function setTemplateVars() {
-		$this->template->javascript_loader="javascript:doload('".$this->redirectUrl."');";
-	}
-
+	public function setTemplateVars()
+    {
+        // TODO: Implement setTemplateVars() method.
+    }
 }
