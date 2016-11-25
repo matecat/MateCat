@@ -64,7 +64,10 @@ class ForgotPasswordModal extends React.Component {
     }
 
     sendForgotPassword() {
-        return $.post('/api/app/user/forgot_password', { email: this.state.emailAddress } )
+        return $.post('/api/app/user/forgot_password', {
+            email: this.state.emailAddress,
+            wanted_url: window.location.href
+        } )
     }
 
     checkRedeemProject() {
