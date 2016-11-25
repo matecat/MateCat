@@ -13,7 +13,7 @@ use Exceptions\ValidationError;
 use Users_UserDao ;
 use Utils ;
 
-class UserController extends KleinController  {
+class UserController extends AbstractStatefulKleinController  {
 
     /**
      * @var \Users_UserStruct
@@ -46,8 +46,6 @@ class UserController extends KleinController  {
     }
 
     protected function afterConstruct() {
-        \Bootstrap::sessionStart();
-
         if ( !isset( $_SESSION['uid'] ) ) {
             throw new NotFoundError('user session not found');
         }

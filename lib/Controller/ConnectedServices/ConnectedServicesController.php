@@ -9,13 +9,14 @@
 namespace ConnectedServices;
 
 
+use API\App\AbstractStatefulKleinController;
 use API\App\Json\ConnectedService;
 use API\V2\KleinController;
 use ConnectedServices\ConnectedServiceDao;
 use ConnectedServices\ConnectedServiceStruct;
 use ConnectedServices\GDrive;
 
-class ConnectedServicesController extends KleinController {
+class ConnectedServicesController extends AbstractStatefulKleinController  {
 
     /**
      * @var \Users_UserStruct
@@ -56,9 +57,7 @@ class ConnectedServicesController extends KleinController {
     }
 
     protected function afterConstruct() {
-        \Bootstrap::sessionStart() ;
 
-        $this->response->noCache();
     }
 
     private function __handleGDrive() {

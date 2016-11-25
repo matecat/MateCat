@@ -9,7 +9,7 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 use Users\Signup ;
 use FlashMessage ;
 
-class SignupController extends KleinController {
+class SignupController extends AbstractStatefulKleinController  {
 
     public function create() {
         // TODO: filter input params
@@ -28,7 +28,6 @@ class SignupController extends KleinController {
     }
 
     public function confirm() {
-        \Bootstrap::sessionStart();
         try {
             Signup::confirm( $this->request->param('token') ) ;
         }
@@ -40,7 +39,6 @@ class SignupController extends KleinController {
     }
 
     public function redeemProject() {
-        \Bootstrap::sessionStart();
         $_SESSION['redeem_project'] = TRUE ;
         $this->response->code( 200 ) ;
     }
@@ -72,13 +70,15 @@ class SignupController extends KleinController {
 
     }
 
-    protected function afterConstruct() {
-    }
-
     private function __flushWantedURL() {
         $url = isset( $_SESSION['wanted_url'] ) ? $_SESSION['wanted_url'] : \Routes::appRoot();
         unset($_SESSION['wanted_url']) ;
         return $url ;
+    }
+
+    protected function afterConstruct()
+    {
+        // TODO: Implement afterConstruct() method.
     }
 
 }
