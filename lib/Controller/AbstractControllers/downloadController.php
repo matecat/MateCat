@@ -13,10 +13,6 @@ abstract class downloadController extends controller {
     protected $_filename = "unknown";
     protected $_user_provided_filename ;
 
-    protected $uid;
-    protected $userIsLogged = false;
-    protected $userMail;
-
     protected $id_job ;
 
     /**

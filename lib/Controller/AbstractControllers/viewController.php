@@ -48,13 +48,6 @@ abstract class viewController extends controller {
     protected $authURL;
 
     /**
-     * The logged user's object
-     *
-     * @var Users_UserStruct
-     */
-    protected $logged_user;
-
-    /**
      * Try to identify the browser of users
      *
      * @return array
@@ -170,21 +163,7 @@ abstract class viewController extends controller {
 
         }
 
-        //even if no login in required, if user data is present, pull it out
-        $this->logged_user = new Users_UserStruct();
-
-        if ( !empty( $_SESSION[ 'cid' ] ) ){
-            $this->logged_user->uid = $_SESSION[ 'uid' ];
-            $this->logged_user->email = $_SESSION[ 'cid' ];
-
-            $userDao = new Users_UserDao(Database::obtain());
-            $userObject = $userDao->setCacheTTL( 3600 )->read( $this->logged_user ); // one hour cache
-
-            /**
-             * @var $userObject Users_UserStruct
-             */
-            $this->logged_user = $userObject[0];
-        }
+        $this->setUserCredentials();
 
         if( $isAuthRequired  ) {
             $this->doAuth();
@@ -223,17 +202,10 @@ abstract class viewController extends controller {
     /**
      * isLoggedIn
      *
-     * Check user logged. For user to be logged in we need both uid and cid.
-     * TODO: check why cid is necessary. Ideally we should only need uid and
-     * infer the cid from it.
-     *
      * @return bool
      */
-    public function isLoggedIn() {        
-        return (
-                ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ) &&
-                ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) )
-        );
+    public function isLoggedIn() {
+        return $this->userIsLogged;
     }
 
     /**
@@ -246,7 +218,7 @@ abstract class viewController extends controller {
      * @return array()
      */
     public function getLoginUserParams() {
-        if ( $this->isLoggedIn() ){
+        if ( $this->isLoggedIn() ) {
             return array( $this->logged_user->getUid(), $this->logged_user->getEmail() );
         }
         return array( null, null );
