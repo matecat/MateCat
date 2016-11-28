@@ -57,15 +57,13 @@ class PreferencesModal extends React.Component {
         return $.post('/api/app/connected_services/' + this.props.service.id, { disabled: true } );
 
     }
+
     logoutUser() {
-        $.post('/ajaxLogout',{logout:1},function(data){
-            if('unlogged'==data){
-                //ok, unlogged
-                if($('body').hasClass('manage')) {
-                    location.href = config.hostpath + config.basepath;
-                } else {
-                    window.location.reload();
-                }
+        $.post('/api/app/user/logout',function(data){
+            if ($('body').hasClass('manage')) {
+                location.href = config.hostpath + config.basepath;
+            } else {
+                window.location.reload();
             }
         });
     }

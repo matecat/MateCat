@@ -11,8 +11,15 @@ namespace API\App;
 use API\V2\KleinController;
 use Users\RedeemableProject;
 
+Use AuthCookie ;
+
 class LoginController extends AbstractStatefulKleinController  {
 
+    public function logout() {
+        unset( $_SESSION[ 'cid' ] );
+        AuthCookie::destroyAuthentication();
+        $this->response->code(200);
+    }
 
     public function login() {
         $params = filter_var_array( $this->request->params(), array(
