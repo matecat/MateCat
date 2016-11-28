@@ -95,6 +95,7 @@ class Signup {
     private function __prepareNewUser() {
         $this->user->create_date = Utils::mysqlTimestamp( time() );
         $this->user->salt = Utils::randomString() ;
+        $this->user->pass = Utils::encryptPass( $this->params['password'], $this->user->salt ) ;
 
         $this->user->confirmation_token = Utils::randomString() ;
         $this->user->confirmation_token_created_at = Utils::mysqlTimestamp( time() );
