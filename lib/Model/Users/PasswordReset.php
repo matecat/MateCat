@@ -34,29 +34,32 @@ class PasswordReset
 
 
     public function getUser() {
+        if ( !isset( $this->user) ) {
+            $dao = new \Users_UserDao() ;
+            $this->user = $dao->getByConfirmationToken( $this->token );
+        }
         return $this->user ;
     }
 
     public function authenticateUser() {
-        $dao = new \Users_UserDao() ;
-        $user = $dao->getByConfirmationToken( $this->token );
+        $this->getUser() ;
 
-        if ( !$user ) {
+        if ( !$this->user ) {
             throw new ValidationError('Confirmation token not found');
         }
 
-        if ( strtotime( $user->confirmation_token_created_at ) < strtotime('3 days ago') ) {
-            $user->clearAuthToken();
-            Users_UserDao::updateStruct( $user, array('fields' => array('confirmation_token')  ) ) ;
+        if ( strtotime( $this->user->confirmation_token_created_at ) < strtotime('3 days ago') ) {
+            $this->user->clearAuthToken();
+            Users_UserDao::updateStruct( $this->user, array('fields' => array('confirmation_token')  ) ) ;
 
             throw new ValidationError('Auth token expired, repeat the operation.') ;
         }
 
-        $user->clearAuthToken() ;
+        $this->user->clearAuthToken() ;
 
-        Users_UserDao::updateStruct( $user, array('fields' => array('confirmation_token', 'confirmation_token_created_at')  ) ) ;
+        Users_UserDao::updateStruct( $this->user, array('fields' => array('confirmation_token', 'confirmation_token_created_at')  ) ) ;
 
-        AuthCookie::setCredentials($this->getUser()->email, $this->getUser()->uid);
+        AuthCookie::setCredentials($this->user->email, $this->user->uid);
 
     }
 }
