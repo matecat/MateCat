@@ -17,6 +17,7 @@ route( '/api/app/user',                         'GET', 'API\App\UserController',
 route( '/api/app/user/password',                'POST', 'API\App\UserController', 'updatePassword' );
 
 route( '/api/app/user/login',                   'POST', 'API\App\LoginController', 'login' );
+route( '/api/app/user/logout',                  'POST', 'API\App\LoginController', 'logout' );
 
 route( '/api/app/user',                         'POST', 'API\App\SignupController', 'create' );
 route( '/api/app/user/resend_email_confirm',    'POST', 'API\App\SignupController', 'resendEmailConfirm' );
