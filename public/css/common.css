@@ -5122,4 +5122,8 @@ footer nav ul li {
     cursor: pointer;
 }
 
+div#matecat-modal p {
+    line-height: 27px;
+}
+
 /***********************/

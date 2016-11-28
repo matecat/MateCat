@@ -49,10 +49,7 @@ class RegisterModal extends React.Component {
         }
         this.requestRunning = true;
         this.checkRedeemProject().then(this.sendRegisterData().done(function (data) {
-            $('#modal').trigger('opensuccess', [{
-                title: 'Register Now',
-                text: 'To complete your registration please follow the instructions in the email we sent you to ' + self.state.emailAddress + '.'
-            }]);
+            $('#modal').trigger('confirmregister', [{emailAddress: self.state.emailAddress}]);
         }).fail(function (response) {
 
             if (response.responseText.length) {
@@ -143,7 +140,7 @@ class RegisterModal extends React.Component {
                 <label htmlFor="check-conditions" style={this.checkStyle}>Accept <a href="/terms" target="_blank">terms and conditions</a></label><br/>
                 <a className="register-submit btn-confirm-medium"
                    onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}
-                   onClick={this.handleSubmitClicked.bind()} tabIndex={6}> Register Now </a>
+                   onClick={this.handleSubmitClicked} tabIndex={6}> Register Now </a>
                 {generalErrorHtml}
                <p>
                 <a style={{cursor:'pointer'}} onClick={this.openLoginModal}>Already registered? Login</a>
