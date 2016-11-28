@@ -27,6 +27,10 @@ $.extend(APP, {
             APP.ModalWindow.showModalComponent(SuccessModal, param, param.title);
         });
 
+        $('#modal').on('confirmregister', function (e, param) {
+            APP.ModalWindow.showModalComponent(ConfirmRegister, param, 'Confirm Registration');
+        });
+
         $('#modal').on('openpreferences', function (e, param) {
             var props = {
                 user: APP.USER.STORE.user,

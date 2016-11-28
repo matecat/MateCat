@@ -33,6 +33,7 @@ window.QAComponent = require('./QAComponent').default;
 
 window.ModalWindow = require('./modals/ModalWindowComponent').default;
 window.SuccessModal = require('./modals/SuccessModal').default;
+window.ConfirmRegister = require('./modals/ConfirmRegister').default;
 window.PreferencesModal = require('./modals/PreferencesModal').default;
 window.ResetPasswordModal = require('./modals/ResetPasswordModal').default;
 window.LoginModal = require('./modals/LoginModal').default;
