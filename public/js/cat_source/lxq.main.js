@@ -79,7 +79,7 @@ LXQ.init  = function () {
           {
               licenseKey: config.lxq_license,
               partnerId: 'matecat',
-              lxqServer: config.lxqServer,
+              lxqServer: config.lexiqaServer,
               projectId: config.id_job+'-'+config.password
           }
       );

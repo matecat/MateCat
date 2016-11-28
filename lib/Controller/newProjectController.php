@@ -1,5 +1,7 @@
 <?php
 
+use LexiQA\LexiQADecorator;
+
 class newProjectController extends viewController {
 
     private $guid = '';
@@ -305,9 +307,7 @@ class newProjectController extends viewController {
         $this->template->currentTargetLang = $this->getCurrentTargetLang();
         
         $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages ); 
-        $this->template->lexiqa_languages = json_encode( ProjectOptionsSanitizer::$lexiQA_allowed_languages ); 
-
-        $this->template->deny_lexiqa = $this->isToDenyLexiQA();
+        LexiQADecorator::getInstance( $this->template )->featureEnabled( $this->logged_user, Database::obtain() )->decorateViewLexiQA();
 
     }
 
@@ -330,31 +330,6 @@ class newProjectController extends viewController {
 
     private function generateGDriveAuthUrl(){
         $this->gdriveAuthUrl = \GDrive::generateGDriveAuthUrl();
-    }
-
-    private function isToDenyLexiQA() {
-        $database = \Database::obtain();
-
-        $userDao = new \Users_UserDao( $database );
-        $user = $userDao->getByUid( $_SESSION[ 'uid' ] );
-
-        if( $user != null ) {
-            $ownerFeatureDao = new OwnerFeatures_OwnerFeatureDao($database);
-
-            $isQaGlossaryEnabled = $ownerFeatureDao->isFeatureEnabled(
-                    \Features::QACHECK_GLOSSARY, $user->email
-            );
-
-            $isQaGBlacklistEnabled = $ownerFeatureDao->isFeatureEnabled(
-                    \Features::QACHECK_BLACKLIST, $user->email
-            );
-
-            if( $isQaGlossaryEnabled === true || $isQaGBlacklistEnabled === true ) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private function evalTragetLangHistory() {

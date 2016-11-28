@@ -74,25 +74,27 @@
                 searchable_statuses : JSON.parse( '${ php: json_encode(searchable_statuses)}'),
                 isGDriveProject : ${isGDriveProject|string:false},
                 remoteFilesInJob : JSON.parse( '${ php: json_encode(remoteFilesInJob)}'),
-                /*
-                 We proose that lxq_server is in a configuration file
-                 lexiqaServer: ${lxq_server},
+
+                /**
+                 * We proose that lxq_server is in a configuration file
+                 * lxq_license: {lxq_license},
+                 *
+                 * THIS SHOULD BE YOUR LEXIQA LICENSE, Request your license key at
+                 * @see http://www.lexiqa.net
+                 *
                 */
-		            lexiqaServer: 'https://backend.lexiqa.net',
-                lxq_enabled:  ${lxq_enabled | string:false},
-                /*
-                 We proose that lxq_server is in a configuration file
-                 lxq_license: ${lxq_license},
-                */
-                lxq_license: 'THIS SHOULD BE YOUR LEXIQA LICENSE',
+                lxq_license: '${lxq_license | string:}',
+                lxq_enabled:  ${lxq_enabled},
+                lexiqa_languages: ${lexiqa_languages | string:[]},
+                lexiqaServer: '${lexiqaServer | string:}',
+                deny_lexiqa: ${deny_lexiqa | string:false},
+
                 qa_check_glossary_enabled : ${qa_check_glossary_enabled | string:false },
                 qa_check_blacklist_enabled : ${qa_check_blacklist_enabled | string:false },
                 support_mail : '${support_mail}',
                 qa_check_blacklist_enabled : ${qa_check_blacklist_enabled | string:false },
                 speech2text_enabled: ${speech2text_enabled | string:false},
                 tag_projection_enabled: ${tag_projection_enabled | string:false},
-                lexiqa_languages: ${lexiqa_languages},
-                deny_lexiqa: ${deny_lexiqa | string:false},
                 tag_projection_languages: ${tag_projection_languages},
                 languages_array : ${languages_array},
                 segmentation_rule : '${segmentation_rule}'
@@ -169,13 +171,10 @@
 
         <script src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
 
-        <tal:block tal:condition="true:${lxq_enabled}" >
-            <!--
-             We proose that lxq_server is in a configuration file
-            <script src="${lxq_server}/js/lxqlicense.js"></script>
-            -->
-            <script src="https://backend.lexiqa.net/js/lxqlicense.js"></script>
+        <tal:block tal:condition="php: INIT::$LXQ_LICENSE" >
+        <script src="${lexiqaServer | null}/js/lxqlicense.js"></script>
         </tal:block>
+
         <tal:block tal:condition="true:use_compiled_assets" >
             <script src="${basepath}public/js/build/app.min.js?build=${build_number}"></script>
         </tal:block>

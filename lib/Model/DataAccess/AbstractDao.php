@@ -48,6 +48,10 @@ abstract class DataAccess_AbstractDao {
         $this->con = $con;
     }
 
+    public function getConnection(){
+        return $this->con;
+    }
+
     public function create( DataAccess_IDaoStruct $obj ) {
         throw new Exception( "Abstract method " . __METHOD__ . " must be overridden " );
     }
