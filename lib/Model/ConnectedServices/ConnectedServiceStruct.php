@@ -37,10 +37,8 @@ class ConnectedServiceStruct extends \DataAccess_AbstractDaoSilentStruct   imple
      *
      */
     public function getDecryptedOauthAccessToken() {
-        return $this->cachable('decrypted', $this, function($object) {
-            $oauthTokenEncryption = OauthTokenEncryption::getInstance();
-            return $oauthTokenEncryption->decrypt( $object->oauth_access_token );
-        });
+        $oauthTokenEncryption = OauthTokenEncryption::getInstance();
+        return $oauthTokenEncryption->decrypt( $this->oauth_access_token );
     }
 
     /**
