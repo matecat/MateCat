@@ -13,7 +13,7 @@ use AuthCookie ;
 class Signup {
 
     /**
-     * Users_UserStruct
+     * @var Users_UserStruct
      */
     protected $user ;
 
@@ -59,14 +59,17 @@ class Signup {
 
         $this->__doValidation() ;
 
-        $this->__prepareUserRecord() ;
+        if ( !$this->user ) {
+            $this->__prepareNewUser() ;
+            \Users_UserDao::insertStruct( $this->user, array('raise' => TRUE ) );
+        } else {
+            $this->__updateExistingUser() ;
+            \Users_UserDao::updateStruct( $this->user, array('raise' => TRUE ) );
 
-        \Users_UserDao::insertStruct( $this->user, array('raise' => TRUE ) );
+        }
 
         $this->__saveWantedUrl();
-
         $this->__sendConfirmationRequestEmail();
-
     }
 
     public function getError() {
@@ -83,10 +86,16 @@ class Signup {
         $_SESSION['wanted_url'] = $this->params['wanted_url'] ;
     }
 
-    private function __prepareUserRecord() {
+    private function __updateExistingUser() {
+        $this->user->pass = Utils::encryptPass( $this->params['password'], $this->user->salt ) ;
+
+        $this->user->confirmation_token = Utils::randomString() ;
+        $this->user->confirmation_token_created_at = Utils::mysqlTimestamp( time() );
+    }
+
+    private function __prepareNewUser() {
         $this->user->create_date = Utils::mysqlTimestamp( time() );
         $this->user->salt = Utils::randomString() ;
-        $this->user->pass = Utils::encryptPass( $this->params['password'], $this->user->salt ) ;
 
         $this->user->confirmation_token = Utils::randomString() ;
         $this->user->confirmation_token_created_at = Utils::mysqlTimestamp( time() );
@@ -95,10 +104,9 @@ class Signup {
 
     private function __doValidation() {
         $dao = new \Users_UserDao() ;
-        $exists = $dao->getByEmail( $this->user->email );
+        $this->user = $dao->getByEmail( $this->user->email );
 
-        // TODO: handle case in which the user exists but confirmation token expired
-        if ( $exists ) {
+        if ( $this->user && !is_null($this->user->email_confirmed_at) ) {
             throw new \Exceptions\ValidationError('User with same email already exists');
         }
 
