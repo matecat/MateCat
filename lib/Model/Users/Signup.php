@@ -59,13 +59,12 @@ class Signup {
 
         $this->__doValidation() ;
 
-        if ( !$this->user ) {
+        if ( isset( $this->user->uid ) ) {
+            $this->__updatePersistedUser() ;
+            \Users_UserDao::updateStruct( $this->user, array('raise' => TRUE ) );
+        } else {
             $this->__prepareNewUser() ;
             \Users_UserDao::insertStruct( $this->user, array('raise' => TRUE ) );
-        } else {
-            $this->__updateExistingUser() ;
-            \Users_UserDao::updateStruct( $this->user, array('raise' => TRUE ) );
-
         }
 
         $this->__saveWantedUrl();
@@ -86,7 +85,7 @@ class Signup {
         $_SESSION['wanted_url'] = $this->params['wanted_url'] ;
     }
 
-    private function __updateExistingUser() {
+    private function __updatePersistedUser() {
         $this->user->pass = Utils::encryptPass( $this->params['password'], $this->user->salt ) ;
 
         $this->user->confirmation_token = Utils::randomString() ;
@@ -104,9 +103,13 @@ class Signup {
 
     private function __doValidation() {
         $dao = new \Users_UserDao() ;
-        $this->user = $dao->getByEmail( $this->user->email );
+        $persisted = $dao->getByEmail( $this->user->email );
 
-        if ( $this->user && !is_null($this->user->email_confirmed_at) ) {
+        if ( $persisted ) {
+            $this->user = $persisted ;
+        }
+
+        if ( $persisted && !is_null($persisted->email_confirmed_at) ) {
             throw new \Exceptions\ValidationError('User with same email already exists');
         }
 
