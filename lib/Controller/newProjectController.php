@@ -270,7 +270,6 @@ class newProjectController extends viewController {
         $this->template->maxTMXFileSize             = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
         $this->template->maxNumberFiles             = INIT::$MAX_NUM_FILES;
 
-        $this->template->authURL     = $this->getAuthUrl();
 
         $this->template->user_keys = $this->keyList;
 
@@ -286,9 +285,6 @@ class newProjectController extends viewController {
 
         $this->template->deny_lexiqa = $this->isToDenyLexiQA();
 
-        if ( $this->isLoggedIn() ) {
-            $this->template->gdriveAuthURL = GDrive::generateGDriveAuthUrl();
-        }
 
     }
 

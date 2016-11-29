@@ -269,15 +269,9 @@
         <footer>
             <div class="wrapper">
 
-                <nav tal:condition="php: Bootstrap::areOauthKeysPresent()">
+                <nav>
                     <ul>
-                        <tal:block tal:condition="php: !empty(logged_user)">
-                            <li><a tal:attributes="href string:${basepath}manage/">Manage</a></li>
-                        </tal:block>
-
-                        <tal:block tal:condition="php: empty(logged_user)">
-                            <li><a href="${authURL}" class="authLink">Manage</a></li>
-                        </tal:block>
+                        <li><a tal:attributes="href string:${basepath}manage/">Manage</a></li>
 
                         <tal:block tal:condition="footer_show_revise_link">
                             <li><a

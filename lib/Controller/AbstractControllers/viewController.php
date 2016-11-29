@@ -327,6 +327,7 @@ abstract class viewController extends controller {
         $this->template->config_js = array() ;
         $this->template->css_resources = array();
         $this->template->authURL = $this->getAuthUrl() ;
+        $this->template->gdriveAuthURL = \ConnectedServices\GDrive::generateGDriveAuthUrl();
     }
 
     /**

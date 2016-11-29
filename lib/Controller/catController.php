@@ -123,8 +123,6 @@ class catController extends viewController {
             $this->filter_enabled = false;
         };
 
-        $this->generateAuthURL();
-
         $this->project = Projects_ProjectDao::findByJobId( $this->jid );
         $this->feature_set = FeatureSet::fromIdCustomer( $this->project->id_customer );
 
@@ -573,8 +571,6 @@ class catController extends viewController {
         $this->template->source      = $this->source;
         $this->template->source_rtl  = $this->source_rtl;
         $this->template->target_rtl  = $this->target_rtl;
-
-        $this->template->authURL = $this->authURL;
 
         $this->template->mt_engines = $this->translation_engines;
         $this->template->mt_id      = $this->job->id_mt_engine ;

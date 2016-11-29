@@ -31,6 +31,7 @@ class BaseKleinViewController extends \API\App\AbstractStatefulKleinController
 
         $oauth_client = OauthClient::getInstance()->getClient();
         $this->view->authURL = $oauth_client->createAuthUrl();
+        $this->view->gdriveAuthURL = \ConnectedServices\GDrive::generateGDriveAuthUrl();
 
     }
 

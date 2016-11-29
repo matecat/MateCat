@@ -182,7 +182,6 @@ class analyzeController extends viewController {
 
         //url to which to send data in case of login
         $client                       = OauthClient::getInstance()->getClient();
-        $this->template->oauthFormUrl = $client->createAuthUrl();
 
         //perform check on running daemons and send a mail randomly
         $misconfiguration = Status::thereIsAMisconfiguration();

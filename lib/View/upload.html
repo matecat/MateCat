@@ -70,12 +70,6 @@
         /*]]>*/
     </script>
 
-    <script tal:condition="php: !empty(logged_user)" type="text/javascript">
-        /*<![CDATA[*/
-        config.gdriveAuthURL = ${structure php:json_encode(gdriveAuthURL)} ;
-        /*]]>*/
-    </script>
-
     <div metal:use-macro="${php: INIT::$ROOT}/public/holidays/holidays.html/upload_holidays"/>
 
 </head>
@@ -857,28 +851,18 @@
 
         <ul class="external-links">
             <li><a href="https://www.matecat.com/open-source/" target="_blank">Open source</a></li>
-
             <li><a tal:attributes="href string:${basepath}api/docs" target="_blank">API</a></li>
             <li><a href="https://www.matecat.com/terms" target="_blank">Terms</a></li>
         </ul>
 
-        <nav tal:condition="php: Bootstrap::areOauthKeysPresent()">
-
+        <nav>
             <ul>
-
-                <tal:block tal:condition="php: !empty(logged_user)">
+                <tal:block>
                     <li><a tal:attributes="href string:${basepath}manage/">Manage</a></li>
                 </tal:block>
-
-                <tal:block tal:condition="php: empty(logged_user)">
-                    <li><a href="${authURL}" class="authLink">Manage</a></li>
-                </tal:block>
-
             </ul>
+
             <div metal:use-macro="common.html/login_includes" />
-           
-
-
         </nav>
 
     </div>
