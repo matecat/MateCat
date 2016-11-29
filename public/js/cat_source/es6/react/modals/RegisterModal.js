@@ -76,10 +76,17 @@ class RegisterModal extends React.Component {
 
     googole_popup(  ) {
         var url = this.props.googleUrl;
+        this.checkRedeemProject();
         var newWindow = window.open( url, 'name', 'height=600,width=900' );
         if ( window.focus ) {
             newWindow.focus();
         }
+        var interval = setInterval(function () {
+            if (newWindow.closed) {
+                clearInterval(interval);
+                window.location.reload();
+            }
+        }, 600);
     }
 
     changeCheckbox() {
