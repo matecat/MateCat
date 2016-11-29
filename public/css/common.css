@@ -4882,16 +4882,16 @@ footer nav ul li {
 
 
 .google-login-button {
-    background: url(../img/btn_google_signin_dark_normal_web@2x.png) no-repeat;
+    background: url(../img/btn_google_normal_2x.png) no-repeat;
 }
 
 .google-login-button:hover {
-    background: url(../img/btn_google_signin_dark_pressed_web@2x.png) no-repeat;
+    background: url(../img/btn_google_pressed_2x.png) no-repeat;
     box-shadow: none;
 }
 
 .google-login-button:focus {
-    background: url(../img/btn_google_signin_dark_focus_web@2x.png) no-repeat;
+    background: url(../img/btn_google_focus_2x.png) no-repeat;
 }
 
 .google-login-button,
