@@ -848,7 +848,7 @@ if ( MBC.enabled() )
             if ( $( '.searchbox' ).is( ':visible' ) ) {
                 UI.toggleSearch( ev );
             }               
-            if (LXQ.enabled()) LXQ.hidePopUp();
+            // if (LXQ.enabled()) LXQ.hidePopUp();
         } );
 
         $( document ).on( 'mbc:comment:new', function ( ev, data ) {
