@@ -440,7 +440,8 @@ $.extend(UI, {
                 return false;
             }
         });
-        $(body)
+        // TODO test.inivisible break some doms with text
+        $('body').find('.test-invisible').remove();
 
 
     },

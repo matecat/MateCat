@@ -2202,8 +2202,8 @@ UI = {
 				var warningPosition = '';
 				UI.globalWarnings = data.details;
                 //The tags with tag projection enabled doesn't show the tags in the source, so dont show the warning
-                UI.globalWarnings = UI.filterTagsWithTagProjection(UI.globalWarnings);
-				UI.translationMismatches = data.translation_mismatches;
+                UI.globalWarnings.tag_issues = UI.filterTagsWithTagProjection(UI.globalWarnings.tag_issues);
+				UI.translationMismatches = UI.globalWarnings.translation_mismatches;
 
 				//check for errors
 				if (UI.globalWarnings) {
@@ -2234,8 +2234,12 @@ UI = {
             this.QAComponent = ReactDOM.render(React.createElement(QAComponent, {
             }), mountPoint);
         }
-        this.QAComponent.setTagIssues(UI.globalWarnings);
-        this.QAComponent.setTranslationConflitcts(["202435"]);
+        if ( UI.globalWarnings.tag_issues ) {
+            this.QAComponent.setTagIssues(UI.globalWarnings.tag_issues);
+        }
+        if ( UI.globalWarnings.translation_mismatches ) {
+            this.QAComponent.setTranslationConflitcts(UI.globalWarnings.translation_mismatches);
+        }
     },
 	displayMessage: function(messages) {
         var self = this;
@@ -2322,7 +2326,7 @@ UI = {
         var glossarySourcesAr = [];
         $('section.editor .tab.glossary .results .sugg-target .translation').each(function () {
             glossarySourcesAr.push($(this).text());
-        })
+        });
 
 		APP.doRequest({
 			data: {
@@ -2641,7 +2645,7 @@ UI = {
         }
     },
     removeFromStorage: function (key) {
-        if(this.isPrivateSafari) {
+        if(this.isPrivateSafari) {translation_conflicts
             foundVal = 0;
             $.each(this.localStorageArray, function (index) {
                 if(this.key == key) foundIndex = index;

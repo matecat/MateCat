@@ -29,6 +29,7 @@ class QAComponent extends React.Component {
             current_counter: 1,
             selected_box: ''
         };
+        this.showTotal = false;
         this.getCurrentArray = this.getCurrentArray.bind(this);
         QAComponent.togglePanel = QAComponent.togglePanel.bind(this);
     }
@@ -48,7 +49,7 @@ class QAComponent extends React.Component {
         } else {
             var selectedBox = '';
             var issue_selected = false, lxq_selected = false, total_issue_selected = false, translation_conflicts_selected = false;
-            if ( this.state.total_issues.length > 0) {
+            if ( this.checkShowTotalIssues()) {
                 total_issue_selected = true;
                 selectedBox = 'total_issues';
             } else if ( this.state.tag_issues.length > 0 ) {
@@ -75,6 +76,14 @@ class QAComponent extends React.Component {
     }
 
     getTotalIssues() {
+        var total = 0;
+        //Show the total only if more than 1 arrays exist
+        $.each([this.state.lxq_issues, this.state.tag_issues, this.state.translation_conflicts], function (item) {
+            if (item.length) {
+                total++;
+            }
+        });
+        this.showTotal = (total > 1);
         if (this.state.total_issues.length) {
             return this.state.total_issues.length;
         } else {
@@ -145,7 +154,7 @@ class QAComponent extends React.Component {
                     current_counter: 1,
                     selected_box: type,
                 });
-                this.scrollToSegment(this.state.tag_issues[this.state.current_counter - 1]);
+                this.scrollToSegment(this.state.total_issues[this.state.current_counter - 1]);
                 break;
             case 'lxq':
                 this.setState({
@@ -241,6 +250,16 @@ class QAComponent extends React.Component {
         }
     }
 
+    checkShowTotalIssues() {
+        var total = 0;
+        //Show the total only if more than 1 arrays exist
+        $.each([this.state.lxq_issues, this.state.tag_issues, this.state.translation_conflicts], function (index, item) {
+            if (item.length) {
+                total++;
+            }
+        });
+        return (total > 1);
+    }
 
     allowHTML(string) {
         return { __html: string };
@@ -260,7 +279,7 @@ class QAComponent extends React.Component {
             buttonArrowsClass = 'qa-arrows-enabled';
             counterLabel = 'Segments';
         }
-        if ( this.state.total_issues.length > 0 ) {
+        if ( this.checkShowTotalIssues() ) {
             let selected = '';
             if ( this.state.total_issues_selected ) {
                 counter = <div className="qa-counter">{this.state.current_counter + '/'+ this.state.total_issues.length + ' ' + counterLabel}</div>;
