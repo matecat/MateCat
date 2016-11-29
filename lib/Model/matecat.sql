@@ -306,7 +306,6 @@ CREATE TABLE `owner_features` (
 
 CREATE TABLE `phinxlog` (
   `version` bigint(20) NOT NULL,
-  `migration_name` varchar(100) DEFAULT NULL,
   `start_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `end_time` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`version`)
@@ -428,7 +427,8 @@ CREATE TABLE `remote_files` (
   `connected_service_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `id_file` (`id_file`) USING BTREE,
-  KEY `id_job` (`id_job`) USING BTREE
+  KEY `id_job` (`id_job`) USING BTREE,
+  KEY `connected_service_id` (`connected_service_id`) USING BTREE
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `segment_notes` (
@@ -528,15 +528,14 @@ CREATE TABLE `segments` (
   `xliff_ext_succ_tags` text,
   `raw_word_count` double(20,2) DEFAULT NULL,
   `show_in_cattool` tinyint(4) DEFAULT '1',
-  `id_project` int(11) NOT NULL,
-  PRIMARY KEY (`id`,`id_project`),
-  UNIQUE KEY `id` (`id`),
+  PRIMARY KEY (`id`),
   KEY `id_file` (`id_file`) USING BTREE,
   KEY `internal_id` (`internal_id`) USING BTREE,
+  KEY `mrk_id` (`xliff_mrk_id`) USING BTREE,
   KEY `show_in_cat` (`show_in_cattool`) USING BTREE,
   KEY `raw_word_count` (`raw_word_count`) USING BTREE,
-  KEY `segment_hash` (`segment_hash`) USING HASH COMMENT 'MD5 hash of segment content',
-  KEY `id_project` (`id_project`)
+  KEY `id_file_part_idx` (`id_file_part`),
+  KEY `segment_hash` (`segment_hash`) USING HASH COMMENT 'MD5 hash of segment content'
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `translation_warnings` (
