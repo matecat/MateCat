@@ -290,8 +290,6 @@ class newProjectController extends viewController {
             $this->template->gdriveAuthURL = GDrive::generateGDriveAuthUrl();
         }
 
-        $this->template->flashMessages = FlashMessage::flush();
-
     }
 
     private function getCurrentTargetLang() {

@@ -69,7 +69,7 @@ class SignupController extends AbstractStatefulKleinController  {
                 $this->response->redirect( $project->getDestinationURL() ) ;
             }
             else {
-                $this->response->redirect( \Routes::appRoot() ) ;
+                $this->response->redirect( $this->__flushWantedURL() ) ;
             }
 
             FlashMessage::set('popup', 'passwordReset', FlashMessage::SERVICE );
@@ -88,7 +88,7 @@ class SignupController extends AbstractStatefulKleinController  {
     }
 
     public function forgotPassword() {
-        Signup::forgotPassword( $this->request->param('email') ) ;
+        Signup::forgotPassword( $this->request->param('email'), $this->request->param('wanted_url') ) ;
         $this->response->code( 200 );
 
     }

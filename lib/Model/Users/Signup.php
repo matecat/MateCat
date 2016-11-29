@@ -81,7 +81,6 @@ class Signup {
     }
 
     private function __saveWantedUrl() {
-        \Bootstrap::sessionStart();
         $_SESSION['wanted_url'] = $this->params['wanted_url'] ;
     }
 
@@ -149,8 +148,13 @@ class Signup {
 
     }
 
-    public static function forgotPassword( $email ) {
+    public static function forgotPassword( $email,  $wanted_url ) {
         $email = filter_var( $email, FILTER_SANITIZE_EMAIL ) ;
+
+        if ( $wanted_url ) {
+            $wanted_url = filter_var( $wanted_url, FILTER_SANITIZE_URL ) ;
+            $_SESSION['wanted_url'] = $wanted_url ;
+        }
 
         $dao = new Users_UserDao();
         $user = $dao->getByEmail( $email );

@@ -341,6 +341,8 @@ abstract class viewController extends controller {
 
         $this->template->isLoggedIn    = $this->isLoggedIn();
         $this->template->userMail      = $this->logged_user->getEmail() ;
+
+        $this->template->flashMessages = FlashMessage::flush();
     }
 
     /**
