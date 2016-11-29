@@ -76,34 +76,38 @@ var gdrive = new GDrive() ;
         return ( gdrive.pickerApiLoaded && gdrive.authApiLoaded ) ;
     }
 
+    function showPreferencesWithMessage() {
+
+        $('#modal').trigger('openpreferences', [{showGDriveMessage: true}]);
+
+    }
+
     function openGoogleDrivePickerIntent() {
-        // TODO: is this enough to know if the user is logged in?
-        if ( APP.USER.STORE.user ) {
-            var default_service = APP.USER.getDefaultConnectedService();
-            if ( default_service ) {
-
-                if ( ! gdriveInitComplete() ) {
-                    console.log( 'gdriveInitComplete not complete');
-                    return ;
-                }
-
-                tryToRefreshToken( default_service )
-                    .done( function( data ) {
-                        // replace the service in store with the one returned
-                        APP.USER.upsertConnectedService( data.connected_service ) ;
-
-                        gdrive.createPicker( default_service ) ;
-                    }).fail( function() {
-                        $('#modal').trigger('openpreferences', [{showGDriveMessage: true}]);
-                    });
-            }
-            else {
-                $('#modal').trigger('openpreferences', [{showGDriveMessage: true}]);
-            }
-
-        } else {
-            $('#modal').trigger('openlogin');
+        if ( ! gdriveInitComplete() ) {
+            console.log( 'gdriveInitComplete not complete');
+            return ;
         }
+
+        // TODO: is this enough to know if the user is logged in?
+        if ( !APP.USER.STORE.user ) {
+            $('#modal').trigger('openlogin');
+            return ;
+        }
+
+        var default_service = APP.USER.getDefaultConnectedService();
+
+        if ( !default_service ) {
+            showPreferencesWithMessage();
+            return ;
+        }
+
+        tryToRefreshToken( default_service )
+        .done( function( data ) {
+            APP.USER.upsertConnectedService( data.connected_service ) ;
+            gdrive.createPicker( data.connected_service ) ;
+        }).fail( function() {
+            showPreferencesWithMessage()
+        });
     }
 
     $(document).on('click', '.load-gdrive', function(e) {
