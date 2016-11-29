@@ -35,20 +35,26 @@ class PreferencesModal extends React.Component {
             var interval = setInterval(function () {
                 if (newWindow.closed) {
                     APP.USER.loadUserData().done(function () {
-                        self.setState({
-                            service: APP.USER.STORE.connected_services[0]
-                        });
+                        if ( APP.USER.STORE.connected_services.length ) {
+                            self.setState({
+                                service: APP.USER.STORE.connected_services[0]
+                            });
+                        } else {
+                            $(self.checkDrive).attr('checked', false);
+                        }
                     });
                     clearInterval(interval);
                 }
             }, 600);
         } else {
-            this.disableGDrive().done(function (data) {
-                APP.USER.upsertConnectedService(data.connected_service);
-                self.setState({
-                    service: APP.USER.STORE.connected_services[0]
+            if ( APP.USER.STORE.connected_services.length ) {
+                this.disableGDrive().done(function (data) {
+                    APP.USER.upsertConnectedService(data.connected_service);
+                    self.setState({
+                        service: APP.USER.STORE.connected_services[0]
+                    });
                 });
-            });
+            }
         }
 
     }

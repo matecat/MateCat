@@ -12,14 +12,7 @@ class ConfirmRegister extends React.Component {
     resendEmail() {
         var self = this;
         $.post('/api/app/user/resend_email_confirm', {
-            user: {
-                first_name: this.state.name,
-                last_name: this.state.surname,
-                email: this.state.emailAddress,
-                password: this.state.password,
-                password_confirmation: this.state.password,
-                wanted_url: window.location.href
-            }
+            email: this.props.emailAddress
         }).done(function () {
             self.setState({
                 resend: true
