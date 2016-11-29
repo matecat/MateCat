@@ -51,9 +51,10 @@ class MailWorker extends AbstractWorker {
 
         $mail->Subject = $queueElement->params[ 'subject' ];
         $mail->Body    = $queueElement->params[ 'htmlBody' ];
-        $mail->AltBody = $queueElement->params[ 'altBody' ];
 
         $mail->msgHTML( $mail->Body );
+
+        $mail->AltBody = $queueElement->params[ 'altBody' ];
 
         $mail->XMailer = 'MateCat Mailer';
         $mail->CharSet = 'UTF-8';

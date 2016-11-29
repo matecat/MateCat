@@ -6,5 +6,6 @@ class RemoteFiles_RemoteFileStruct extends DataAccess_AbstractDaoSilentStruct im
     public $id_job ;
     public $remote_id ;
     public $is_original ;
+    public $connected_service_id ;
 
 }

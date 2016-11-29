@@ -36,17 +36,15 @@
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 
     <script src="${basepath}public/js/lib/jquery.js"></script>
-    <script src="${basepath}public/js/common.js"></script>
+    <script src="${basepath}public/js/build/common.js"></script>
     <script src="${basepath}public/js/lib/jquery.powertip.min.js"></script>
     <script src="${basepath}public/js/gdrive.upload.js"></script>
     <script src="${basepath}public/js/gdrive.picker.js"></script>
     <script src="${basepath}public/js/upload.js"></script>
     <script src="${basepath}public/js/lib/jquery.tablesorter-fork-mottie.js"></script>
-    <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
 
     <script type="text/javascript">
         /*<![CDATA[*/
-
         var config = {
             basepath: '${basepath | string:/}',
             hostpath: '${hostpath | string:/}',
@@ -59,7 +57,6 @@
             maxNumberFiles: ${maxNumberFiles},
             ownerIsMe: true,
             blueimp_dataType: 'json',
-            gdriveAuthURL: ${structure php:json_encode(gdriveAuthURL)},
             defaults : {
                 tag_projection : true,
                 speech2text : false,
@@ -70,6 +67,12 @@
             tag_projection_languages: ${tag_projection_languages},
             languages_array : ${languages_array}
         };
+        /*]]>*/
+    </script>
+
+    <script tal:condition="php: !empty(logged_user)" type="text/javascript">
+        /*<![CDATA[*/
+        config.gdriveAuthURL = ${structure php:json_encode(gdriveAuthURL)} ;
         /*]]>*/
     </script>
 
@@ -240,8 +243,6 @@
             and
             <a class="load-gdrive load-gdrive-disabled" href="#">Google Drive files</a>
             <span class="gdrive-icon"></span>
-            <!--<span class="btn-success min">or</span>
-            <span class="btn-success btn ">Add from Google Drive</span>-->
         </span>
     </tal:block>
 
@@ -763,43 +764,6 @@
     {% } %}
 </script>
 
-<!-- script tal:condition="not:volume_analysis_enabled" id="job-links-list" type="text/x-tmpl">
-    <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0" id="info-login">
-        <thead>
-        <tr>
-            <th class="job-detail">
-                <a tal:attributes="href string:${basepath}manage/?new=1">Login</a> to add the jobs to your management
-                panel.
-            </th>
-        </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
-    <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0" id="project-{%=o.id_project%}">
-        <thead>
-        <tr>
-            <th class="job-detail">Jobs</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for (var i=0, file; file=o.files[i]; i++) { %}
-        <tr class="row">
-            <td class="job-detail">
-                	<span class="urls">
-                        <div class="langs">{%=o.srcLangHumanReadable%}&nbsp;&gt;&nbsp;{%=o.trgLangHumanReadable[i]%}
-                        </div>
-                		<a class="url" target="_blank" href="{%=file.href%}">{%=file.href%}</a>
-	        	    </span>
-            </td>
-        </tr>
-        {% } %}
-        </tbody>
-    </table>
-
-</script -->
-
-<!-- <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script> -->
 <script src="${basepath}public/js/lib/jquery-ui-1.8.20.custom.min.js"></script>
 
 <!-- The Templates plugin is included to render the upload/download listings -->
@@ -886,35 +850,6 @@
     </div>
 </div>
 
-<!--<div class="modal popup-languages" data-type="view">
-    <div class="popup-outer"></div>
-    <div class="popup">
-        <a href="#" class="x-popup"></a>
-
-        <h1>
-            <a id="chooseMultilang" href="#" class="btn-ok right">Continue</a>
-            <a id="cancelMultilang" href="#" class="btn-cancel right">Cancel</a>
-            Choose Multiple Languages (<span class="number">1</span>)
-            <a href="#" id="deselectMultilang">Deselect all</a>
-        </h1>
-
-        <div class="popup-box">
-            <ul class="listlang">
-
-                <tal:block tal:repeat="language target_languages">
-                    <li tal:attributes="class language/top">
-                        <input type="checkbox" tal:attributes="value language/code; id language/code"/>
-                        <label tal:attributes="for language/name" tal:content="language/name" onClick="return false">-&#45;&#45;</label>
-                    </li>
-                </tal:block>
-
-            </ul>
-        </div>
-    </div>
-</div>-->
-
-<div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
-<div metal:use-macro="popup_google_login.html/googleDriveLoginPopup"/>
 <div class="notifications-wrapper"></div>
 <footer>
 
@@ -932,7 +867,7 @@
             <ul>
 
                 <tal:block tal:condition="php: !empty(logged_user)">
-                    <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
+                    <li><a tal:attributes="href string:${basepath}manage/">Manage</a></li>
                 </tal:block>
 
                 <tal:block tal:condition="php: empty(logged_user)">
@@ -940,18 +875,9 @@
                 </tal:block>
 
             </ul>
+            <div metal:use-macro="common.html/login_includes" />
+           
 
-            <tal:block tal:condition="php: empty(logged_user)">
-                <div id='welcomebox'>
-                    <span>Anonymous</span> (<a id='loginlink' class="authLink" href="${authURL}">login</a>)
-                </div>
-            </tal:block>
-
-            <tal:block tal:condition="php: !empty(logged_user)">
-                <div id='welcomebox' tal:attributes="title extended_user">
-                    <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)
-                </div>
-            </tal:block>
 
         </nav>
 
@@ -1049,7 +975,7 @@
 
     APP.displayCurrentTargetLang();
 </script>
-<script type="text/javascript" src="//apis.google.com/js/api.js?onload=onApiLoad"></script>
+<script type="text/javascript" src="//apis.google.com/js/api.js?onload=onGDriveApiLoad"></script>
 
 <div metal:use-macro="common.html/footer_includes" />
 

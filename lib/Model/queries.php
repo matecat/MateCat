@@ -331,67 +331,7 @@ from language_stats
 }
 
 
-function randomString( $maxlength = 15 ) {
-    //allowed alphabet
-    $possible = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-    //init counter lenght
-    $i = 0;
-    //init string
-    $salt = '';
-
-    //add random characters to $password until $length is reached
-    while ( $i < $maxlength ) {
-        //pick a random character from the possible ones
-        $char = substr( $possible, mt_rand( 0, $maxlength - 1 ), 1 );
-        //have we already used this character in $salt?
-        if ( !strstr( $salt, $char ) ) {
-            //no, so it's OK to add it onto the end of whatever we've already got...
-            $salt .= $char;
-            //... and increase the counter by one
-            $i++;
-        }
-    }
-
-    return $salt;
-}
-
-function encryptPass( $clear_pass, $salt ) {
-    return sha1( $clear_pass . $salt );
-}
-
-function checkLogin( $user, $pass ) {
-    //get link
-    $db = Database::obtain();
-
-    //escape untrusted input
-    $user = $db->escape( $user );
-
-    //query
-    $q_get_credentials = "select pass,salt from users where email='$user'";
-    $result            = $db->query_first( $q_get_credentials );
-
-    //one way transform input pass
-    $enc_string = encryptPass( $pass, $result[ 'salt' ] );
-
-    //check
-    return $enc_string == $result[ 'pass' ];
-}
-
 function insertUser( $data ) {
-    //random, unique to user salt
-    @$data[ 'salt' ] = randomString( 15 );
-
-    //if no pass available, create a random one
-    if ( !isset( $data[ 'pass' ] ) or empty( $data[ 'pass' ] ) ) {
-        @$data[ 'pass' ] = randomString( 15 );
-    }
-    //now encrypt pass
-    $clear_pass     = $data[ 'pass' ];
-    $encrypted_pass = encryptPass( $clear_pass, $data[ 'salt' ] );
-    $data[ 'pass' ] = $encrypted_pass;
-
-    //creation data
     @$data[ 'create_date' ] = date( 'Y-m-d H:i:s' );
 
     //insert into db

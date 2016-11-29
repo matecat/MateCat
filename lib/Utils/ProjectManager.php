@@ -11,11 +11,7 @@ use Analysis\DqfQueueHandler;
 
 include_once INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
 
-use FeatureSet ;
-
-use GDrive;
-
-use RemoteFiles_RemoteFileDao;
+use ConnectedServices\GDrive as GDrive  ;
 
 class ProjectManager {
     
@@ -52,13 +48,12 @@ class ProjectManager {
      */
     protected $project ;
 
-    protected $gdriveService;
-
-    protected $isGDriveProject = false;
+    protected $gdriveSession ;
 
     const TRANSLATED_USER = 'translated_user';
 
     public function __construct( ArrayObject $projectStructure = null ) {
+
 
         if ( $projectStructure == null ) {
             $projectStructure = new RecursiveArrayObject(
@@ -137,6 +132,9 @@ class ProjectManager {
                 $this->projectStructure
         );
 
+        if ( Utils::userIsLogged() ) {
+            $this->gdriveSession = new GDrive\Session( $_SESSION ) ;
+        }
 
     }
 
@@ -358,11 +356,6 @@ class ProjectManager {
             }
         }
 
-        if ( GDrive::sessionHasFiles( $_SESSION ) ) {
-            $this->gdriveService = GDrive::getService( array( 'uid' => $_SESSION[ 'uid' ] ) );
-            $this->isGDriveProject = true;
-        }
-
         //now, upload dir contains only hash-links
         //we start copying files to "file" dir, inserting metadata in db and extracting segments
         foreach ( $linkFiles[ 'conversionHashes' ][ 'sha' ] as $linkFile ) {
@@ -409,16 +402,16 @@ class ProjectManager {
 
                     $file_insert_params = array();
 
-                    $gdriveFileId = GDrive::findFileIdByName( $originalFileName, $_SESSION );
-                    
+
                     $mimeType = FilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
                     $fid      = insertFile( $this->projectStructure, $originalFileName, $mimeType,
                         $fileDateSha1Path, $file_insert_params  );
 
-                    if($gdriveFileId != null) {
-                        RemoteFiles_RemoteFileDao::insert( $fid, 0, $gdriveFileId, 1 );
-
-                        unset( $_SESSION[ GDrive::SESSION_FILE_LIST ][ $gdriveFileId ] );
+                    if ( $this->gdriveSession )  {
+                        $gdriveFileId = $this->gdriveSession->findFileIdByName( $originalFileName ) ;
+                        if ($gdriveFileId) {
+                            $this->gdriveSession->createRemoteFile( $fid, $gdriveFileId );
+                        }
                     }
 
                     $this->fileStorage->moveFromCacheToFileDir(
@@ -502,20 +495,6 @@ class ProjectManager {
             return false;
         }
 
-        //Log::doLog( array_pop( array_chunk( $SegmentTranslations[$fid], 25, true ) ) );
-        //create job
-
-        if ( isset( $_SESSION[ 'cid' ] ) and !empty( $_SESSION[ 'cid' ] ) ) {
-            $owner                             = $_SESSION[ 'cid' ];
-            $this->projectStructure[ 'owner' ] = $owner;
-        } else {
-            $_SESSION[ '_anonym_pid' ] = $this->projectStructure[ 'id_project' ];
-
-            //default user
-            $owner = '';
-        }
-
-
         $isEmptyProject = false;
         //Throws exception
         try {
@@ -580,6 +559,7 @@ class ProjectManager {
         }
 
 
+        // TODO: this remapping is for presentation purpose and should be removed from here.
         $this->projectStructure[ 'result' ][ 'code' ]            = 1;
         $this->projectStructure[ 'result' ][ 'data' ]            = "OK";
         $this->projectStructure[ 'result' ][ 'ppassword' ]       = $this->projectStructure[ 'ppassword' ];
@@ -595,9 +575,6 @@ class ProjectManager {
 
         if ( INIT::$VOLUME_ANALYSIS_ENABLED )
             $this->projectStructure[ 'result' ][ 'analyze_url' ]     = $this->analyzeURL();
-
-
-
 
         /*
          * This is the old code.
@@ -1015,11 +992,13 @@ class ProjectManager {
                 }
                 insertFilesJob( $jid, $fid );
 
-                if( $this->isGDriveProject ) {
-                    GDrive::insertRemoteFile( $fid, $jid, $this->gdriveService, $_SESSION );
+                if ( $this->gdriveSession && $this->gdriveSession->hasFiles() ) {
+                    $this->gdriveSession->createRemoteCopiesWhereToSaveTranslation( $fid, $jid ) ;
                 }
             }
         }
+
+        if ( $this->gdriveSession ) $this->gdriveSession->clearFiles();
 
         $this->features->run('processJobsCreated', $projectStructure );
     }

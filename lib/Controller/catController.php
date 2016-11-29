@@ -123,20 +123,11 @@ class catController extends viewController {
             $this->filter_enabled = false;
         };
 
-        $this->doAuth();
-
         $this->generateAuthURL();
 
         $this->project = Projects_ProjectDao::findByJobId( $this->jid );
         $this->feature_set = FeatureSet::fromIdCustomer( $this->project->id_customer );
 
-    }
-
-    private function doAuth() {
-        if ( !$this->isLoggedIn() ) {
-            //take note of url we wanted to go after
-            $this->thisUrl = $_SESSION[ 'incomingUrl' ] = $_SERVER[ 'REQUEST_URI' ];
-        }
     }
 
     /**
@@ -556,7 +547,6 @@ class catController extends viewController {
             $this->template->job_cancelled       = $this->job_cancelled;
             $this->template->logged_user         = ( $this->logged_user !== false ) ? $this->logged_user->shortName() : "";
             $this->template->extended_user       = ( $this->logged_user !== false ) ? trim( $this->logged_user->fullName() ) : "";
-            $this->template->incomingUrl         = '/login?incomingUrl=' . $this->thisUrl;
 
             return;
 
@@ -574,7 +564,6 @@ class catController extends viewController {
         $this->template->job_not_found = $this->job_not_found;
         $this->template->job_archived  = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
         $this->template->job_cancelled = $this->job_cancelled;
-        $this->template->incomingUrl   = '/login?incomingUrl=' . $this->thisUrl;
 
         $this->template->page        = 'cattool';
         $this->template->cid         = $this->cid;

@@ -92,7 +92,6 @@ $.extend(UI, {
 	},
 	setEvents: function() {
 		this.bindShortcuts();
-
         var resetTextArea = _.debounce( function () {
             console.debug( 'resetting') ;
             var $this = $(this);
@@ -405,27 +404,10 @@ $.extend(UI, {
 				UI.writeNewShortcut(c, s, this);
 			}
 			$(s).remove();
-		} ).on('click', '.authLink', function(e){
-            e.preventDefault();
-
-            $(".login-google").show();
-
-            return false;
-        } ).on('click', '#sign-in', function(e){
-            e.preventDefault();
-
-            var url = $(this).data('oauth');
-
-            var newWindow = window.open(url, 'name', 'height=600,width=900');
-            if (window.focus) {
-                newWindow.focus();
-            }
-        });
+		} );
 
 		$(window).on('scroll', function() {
 			UI.browserScrollPositionRestoreCorrection();
-		}).on('cachedSegmentObjects', function() {
-            if(UI.currentSegmentId == UI.firstWarnedSegment) UI.setNextWarnedSegment();
 		}).on('allTranslated', function() {
 			if(config.survey) UI.displaySurvey(config.survey);
 		}).on('mousedown', function(e) {
@@ -1216,8 +1198,13 @@ $.extend(UI, {
 		$("#point2seg").bind('mousedown', function(e) {
 			e.preventDefault();
             UI.saveSegment(UI.currentSegment);
-			UI.scrollSegment($('#segment-' + $(this).attr('data-segment')));
-            UI.setNextWarnedSegment();
+			if ($('.searchbox').is(':visible')) {
+				UI.toggleSearch(e);
+			}
+			$('.mbc-history-balloon-outer').removeClass('mbc-visible');
+			QAComponent.togglePanel();
+            // UI.scrollSegment($('#segment-' + $(this).attr('data-segment')));
+            // UI.setNextWarnedSegment();
 		});
 
 		$("#navSwitcher").on('click', function(e) {

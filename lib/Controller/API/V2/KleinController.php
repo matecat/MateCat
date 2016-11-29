@@ -4,7 +4,7 @@ namespace API\V2 ;
 
 use Klein\Klein;
 
-class KleinController {
+abstract class KleinController {
 
     /**
      * @var \Klein\Request
@@ -30,8 +30,12 @@ class KleinController {
     }
 
     public function respond($method) {
-        $this->$method() ;
+        if ( !$this->response->isLocked() ) {
+            $this->$method() ;
+        }
     }
+
+    abstract protected function afterConstruct() ;
 
     /**
      *

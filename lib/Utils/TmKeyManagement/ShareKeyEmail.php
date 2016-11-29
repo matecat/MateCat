@@ -8,7 +8,7 @@
  */
 
 
-class TmKeyManagement_ShareKeyEmail {
+class TmKeyManagement_ShareKeyEmail extends \Email\AbstractEmail {
 
     protected $userMail = [];
 
@@ -24,36 +24,30 @@ class TmKeyManagement_ShareKeyEmail {
         $this->keyStruct = $keyStruct;
         $this->sender = $sender;
 
+
+        $this->_setLayout('skeleton.html') ;
+        $this->_setTemplate('ShareKey/message_content.html') ;
+
     }
 
-    public function send(  ){
+    public function send() {
 
-        $mailConf[ 'Host' ]       = INIT::$SMTP_HOST;
-        $mailConf[ 'port' ]       = INIT::$SMTP_PORT;
-        $mailConf[ 'sender' ]     = INIT::$SMTP_SENDER;
-        $mailConf[ 'hostname' ]   = INIT::$SMTP_HOSTNAME;
-        $mailConf[ 'from' ]       = INIT::$SMTP_SENDER;
-        $mailConf[ 'fromName' ]   = INIT::$MAILER_FROM_NAME;
-        $mailConf[ 'returnPath' ] = INIT::$MAILER_RETURN_PATH;
+        $mailConf = $this->_getDefaultMailConf();
 
         $mailConf[ 'address' ] = array( $this->userMail[ 0 ], $this->userMail[ 1 ] );
-        $mailConf[ 'subject' ] = "MateCat - Resource shared";
+        $mailConf[ 'subject' ] = $this->_getLayoutVariables()['title'] ;
 
-        $messageBody            = $this->_buildMessageContent();
-        $mailConf[ 'htmlBody' ] = $this->_buildHTMLMessage( $mailConf[ 'subject' ], $messageBody );
-        $mailConf[ 'altBody' ]  = $this->_buildTxtMessage( $messageBody );
+        $mailConf[ 'htmlBody' ] = $this->_buildHTMLMessage();
+        $mailConf[ 'altBody' ]  = $this->_buildTxtMessage( $this->_buildMessageContent() );
 
-        WorkerClient::init( new AMQHandler() );
-        \WorkerClient::enqueue( 'MAIL', '\AsyncTasks\Workers\MailWorker', $mailConf, array( 'persistent' => WorkerClient::$_HANDLER->persistent ) );
-
-        Log::doLog( 'Message has been sent' );
+        $this->_enqueueEmailDelivery( $mailConf );
 
         return true;
 
     }
 
-    protected function _buildMessageContent(){
-
+    protected function _getTemplateVariables()
+    {
         $params                     = [];
         $params[ "senderFullName" ] = $this->sender->fullName();
         $params[ "senderEmail" ]    = $this->sender->email;
@@ -61,31 +55,14 @@ class TmKeyManagement_ShareKeyEmail {
         $params[ "tm_key_value" ]   = $this->keyStruct->tm_key->key;
         $params[ "addressMail" ]    = $this->userMail[ 0 ];
 
-        ob_start();
-        extract( $params, EXTR_OVERWRITE );
-        include( INIT::$TEMPLATE_ROOT . "/Emails/ShareKey/message_content.html"  );
-        return ob_get_clean();
-
+        return $params ;
     }
 
-    /**
-     * @param $title
-     * @param $messageBody
-     *
-     * @return string
-     */
-    protected function _buildHTMLMessage( $title, $messageBody ){
-
-        ob_start();
-        include( INIT::$TEMPLATE_ROOT . "/Emails/ShareKey/skeleton.html"  );
-        return ob_get_clean();
-
-    }
-
-    protected function _buildTxtMessage( $messageBody ){
-        $messageBody = preg_replace( "#<[/]*span[^>]*>#i", "\r\n", $messageBody );
-        $messageBody = preg_replace( "#<[/]*(ol|ul|li)[^>]*>#i", "\r\n", $messageBody );
-        return preg_replace( "#<br[^>]*>#i", "\r\n", $messageBody );
+    protected function _getLayoutVariables() {
+        return array(
+            'title' => "MateCat - Resource shared",
+            'messageBody' => $this->_buildMessageContent()
+        );
     }
 
 }

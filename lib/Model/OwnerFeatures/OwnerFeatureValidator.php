@@ -2,12 +2,6 @@
 
 class OwnerFeatures_OwnerFeatureValidator extends DataAccess_AbstractValidator {
 
-    private $struct ;
-
-    public function __construct( $struct ) {
-        $this->struct = $struct;
-    }
-
     public function isValid() {
         // all validation logic for this struct goes here
     }
@@ -16,6 +10,10 @@ class OwnerFeatures_OwnerFeatureValidator extends DataAccess_AbstractValidator {
         if ( !$this->isValid() ) {
             throw new \Exceptions\ValidationError('invalid');
         }
+    }
+
+    public function validate() {
+
     }
 
 }

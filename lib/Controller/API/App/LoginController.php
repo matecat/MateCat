@@ -1,0 +1,50 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: fregini
+ * Date: 22/11/2016
+ * Time: 09:38
+ */
+
+namespace API\App;
+
+use API\V2\KleinController;
+use Users\RedeemableProject;
+
+Use AuthCookie ;
+
+class LoginController extends AbstractStatefulKleinController  {
+
+    public function logout() {
+        unset( $_SESSION[ 'cid' ] );
+        AuthCookie::destroyAuthentication();
+        $this->response->code(200);
+    }
+
+    public function login() {
+        $params = filter_var_array( $this->request->params(), array(
+            'email' => FILTER_SANITIZE_EMAIL,
+            'password' => FILTER_SANITIZE_STRING
+        ));
+
+        $dao = new \Users_UserDao() ;
+        $user = $dao->getByEmail( $params['email'] ) ;
+
+        if ( $user && !is_null($user->email_confirmed_at) && $user->passwordMatch( $params['password'] ) ) {
+            \AuthCookie::setCredentials($user->email, $user->uid ) ;
+
+            $project = new RedeemableProject( $user, $_SESSION ) ;
+
+            $project->tryToRedeem();
+            $this->response->code( 200 ) ;
+        }
+        else {
+            $this->response->code( 404 ) ;
+        }
+
+    }
+
+    protected function afterConstruct()
+    {
+    }
+}

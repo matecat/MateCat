@@ -3,6 +3,8 @@
 define( 'DEFAULT_NUM_RESULTS', 2 );
 set_time_limit( 0 );
 
+use ConnectedServices\GDrive as GDrive ;
+
 class createProjectController extends ajaxController {
 
     private $file_name;
@@ -313,10 +315,17 @@ class createProjectController extends ajaxController {
         $projectManager = new ProjectManager( $projectStructure );
         $projectManager->createProject();
 
-        $this->clearSessionFiles();
+        // Strictly related to the UI ( not API ) interaction, should yet be moved away from controller.
+        $this->__clearSessionFiles();
+        $this->__assignLastCreatedPid( $projectStructure['id_project'] ) ;
 
         $this->result = $projectStructure[ 'result' ];
 
+    }
+
+    private function __assignLastCreatedPid( $pid ) {
+        $_SESSION['redeem_project'] = FALSE ;
+        $_SESSION['last_created_pid'] = $pid  ;
     }
 
     private function __validateTargetLangs() {
@@ -352,8 +361,12 @@ class createProjectController extends ajaxController {
         }
     }
 
-    private function clearSessionFiles() {
-        unset( $_SESSION[ GDrive::SESSION_FILE_LIST ] );
+    private function __clearSessionFiles() {
+
+        if ( $this->userIsLogged ) {
+            $gdriveSession = new GDrive\Session( $_SESSION ) ;
+            $gdriveSession->clearFiles() ;
+        }
     }
 
     private static function sanitizeTmKeyArr( $elem ) {
