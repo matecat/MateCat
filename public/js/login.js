@@ -55,7 +55,7 @@ $.extend(APP, {
         });
         $('#modal').on('openregister', function () {
             var props = {
-                googleUrl: $('#loginlink').attr('href')
+                googleUrl: config.authURL
             };
             if (config.showModalBoxLogin == 1) {
                 props.redeemMessage = true
@@ -73,7 +73,7 @@ $.extend(APP, {
                 'minWidth': '600px'
             };
             var props = {
-                googleUrl: $('#loginlink').attr('href')
+                googleUrl: config.authURL
             };
 
             if (config.showModalBoxLogin == 1) {
