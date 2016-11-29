@@ -54,6 +54,7 @@ class WarningModel {
         $this->queue = array() ;
         $this->scope = null;
         $this->resetSeverity() ;
+        return $this;
     }
 
     /**
@@ -63,9 +64,11 @@ class WarningModel {
      * This is done deleting all warnings matching the given scope.
      *
      * @param $scope string of the scope to delete before warnings are inserted.
+     * @return $this
      */
     public function resetScope($scope) {
         $this->scope = $scope ;
+        return $this;
     }
 
     /**
@@ -73,10 +76,12 @@ class WarningModel {
      *
      * Add warning to the queue for later insert and merge severity with the current value.
      * @param WarningStruct $warning
+     * @return $this
      */
     public function addWarning( WarningStruct $warning ) {
         $this->queue[] = $warning ;
         $this->severity = $this->severity | $warning->severity ;
+        return $this;
     }
 
 
@@ -84,7 +89,7 @@ class WarningModel {
      * save
      *
      * Saves the queued warnings, taking care of doing a reset of the scope if necessary, and
-     * to update the warning field on the semgent_translations.
+     * to update the warning field on the segment_translations.
      * 
      */
     public function save() {
