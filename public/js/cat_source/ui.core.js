@@ -2126,31 +2126,6 @@ UI = {
         iFrameDownload.contents().find("#fileDownload").submit();
 
     },
-	/**
-	 * fill segments with relative errors from polling
-	 *
-	 * @param {type} segment
-	 * @param {type} warnings
-	 * @returns {undefined}
-	 */
-	setNextWarnedSegment: function(sid) {
-		sid = sid || UI.currentSegmentId;
-		idList = UI.globalWarnings;
-		idList.sort();
-		found = false;
-		$.each(idList, function() {
-			if (this > sid) {
-				$('#point2seg').attr('href', '#' + this);
-                $('#point2seg').attr('data-segment', this);
-				found = true;
-				return false;
-			}
-		});
-		if(!found) {
-			$('#point2seg').attr('href', '#' + UI.firstWarnedSegment);
-            $('#point2seg').attr('data-segment', UI.firstWarnedSegment);
-		}
-	},
 	fillWarnings: function(segment, warnings) {
 		//add Warnings to current Segment
 		var parentTag = segment.find('p.warnings').parent();
@@ -2225,21 +2200,15 @@ UI = {
 			success: function(data) {//console.log('check warnings success');
 				UI.startWarning();
 				var warningPosition = '';
-				UI.globalWarnings = data.details.sort();
-                //The tags with tag projection enabled doesn't show the tags in the source, so tdont show the warning
-                UI.globalWarnings = UI.filterTagsWithTagProjection(UI.globalWarnings);
-				UI.firstWarnedSegment = UI.globalWarnings[0];
-				UI.translationMismatches = data.translation_mismatches;
+				UI.globalWarnings = data.details;
+                //The tags with tag projection enabled doesn't show the tags in the source, so dont show the warning
+                UI.globalWarnings.tag_issues = UI.filterTagsWithTagProjection(UI.globalWarnings.tag_issues);
+				UI.translationMismatches = UI.globalWarnings.translation_mismatches;
 
 				//check for errors
-				if (UI.globalWarnings.length > 0) {
+				if (UI.globalWarnings) {
 
 				    UI.renderQAPanel();
-
-					//for now, put only last in the pointer to segment id
-					// warningPosition = '#' + data.details[ Object.keys(data.details).sort().shift() ].id_segment;
-
-                    // data.details = UI.filterTagsWithTagProjection(data.details);
 
 					if (openingSegment)
 						UI.fillCurrentSegmentWarnings(data.details, true);
@@ -2254,9 +2223,6 @@ UI = {
 					}
 				}
 
-
-				// UI.setNextWarnedSegment();
-
                 $(document).trigger('getWarning:global:success', { resp : data }) ;
            
 			}
@@ -2267,9 +2233,12 @@ UI = {
             var mountPoint = $(".qa-wrapper")[0];
             this.QAComponent = ReactDOM.render(React.createElement(QAComponent, {
             }), mountPoint);
-            this.QAComponent.setIssues(UI.globalWarnings);
-        } else {
-            this.QAComponent.setIssues(UI.globalWarnings);
+        }
+        if ( UI.globalWarnings.tag_issues ) {
+            this.QAComponent.setTagIssues(UI.globalWarnings.tag_issues);
+        }
+        if ( UI.globalWarnings.translation_mismatches ) {
+            this.QAComponent.setTranslationConflitcts(UI.globalWarnings.translation_mismatches);
         }
     },
 	displayMessage: function(messages) {
@@ -2357,7 +2326,7 @@ UI = {
         var glossarySourcesAr = [];
         $('section.editor .tab.glossary .results .sugg-target .translation').each(function () {
             glossarySourcesAr.push($(this).text());
-        })
+        });
 
 		APP.doRequest({
 			data: {
@@ -2676,7 +2645,7 @@ UI = {
         }
     },
     removeFromStorage: function (key) {
-        if(this.isPrivateSafari) {
+        if(this.isPrivateSafari) {translation_conflicts
             foundVal = 0;
             $.each(this.localStorageArray, function (index) {
                 if(this.key == key) foundIndex = index;
@@ -3158,7 +3127,9 @@ UI = {
         saveSelection();
         // var cursorPos = APP.getCursorPosition(this.editarea.get(0));
         $('.undoCursorPlaceholder').remove();
-        $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
+        if ($('.rangySelectionBoundary').closest('.editarea').length) {
+            $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
+        }
         restoreSelection();
         var htmlToSave = this.editarea.html();
         this.undoStack.push(htmlToSave);
