@@ -43,6 +43,10 @@ class RemoteFileService extends AbstractRemoteFileService
      */
     public static function getService ( $token ) {
 
+        if ( is_array( $token ) ) {
+            $token = json_encode( $token ) ;
+        }
+
         $oauthClient = GDrive::getClient() ;
         $oauthClient->setAccessToken( $token );
         $oauthClient->setAccessType( "offline" );

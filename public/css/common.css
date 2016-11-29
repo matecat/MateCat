@@ -1124,6 +1124,11 @@ color:#333;}
     text-decoration: underline;
 }
 
+.tooltip-guess-tags {
+    color: #000;
+    cursor: pointer;
+}
+
 .onoffswitch-container {
     position: relative;
     width: 140px;
@@ -3487,28 +3492,11 @@ color: #000;
 .icon-copy-key:before {
     content: "\e92c";
 }
-
-.autofillTag {
-    display: block;
-    float: left;
-    cursor: pointer;
-    color: #444!important;
-}
-
-.autofillTag:hover, 
-.autofillTag.active {
-    color: #333!important;
-}
-
-.autofillTag:before {
-    content: "\e23a";
-    font-size: 19px;
-    display: block;    
-}
 /*
 /* mbc extend iconmoon set with icons for matecat chat
 */
 
+.tagLockCustomize,
 #logoutlink:before,
 .btn-confirm-small .text:before,
 .btn-orange-small .text:before,
@@ -4181,6 +4169,9 @@ text-align: left;
 }
 .icon-lock:before {
     content: "\e98f";
+}
+.icon-unlocked:before {
+    content: "\e990";
 }
 .icon-earth:before {
     content: "\e9ca";
@@ -4897,7 +4888,7 @@ footer nav ul li {
 .google-login-button:hover {
     background: url(../img/btn_google_signin_dark_pressed_web@2x.png) no-repeat;
     box-shadow: none;
-} 
+}
 
 .google-login-button:focus {
     background: url(../img/btn_google_signin_dark_focus_web@2x.png) no-repeat;
@@ -5082,7 +5073,7 @@ footer nav ul li {
 /* Modal Content */
 .matecat-modal-content {
     position: relative;
-    margin: auto;    
+    margin: auto;
     position: absolute;
     left: 50%;
     top: 50%;

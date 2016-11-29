@@ -171,7 +171,11 @@ class EditLog_EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct im
      */
     public function getPEE() {
         $post_editing_effort = round(
-                ( 1 - MyMemory::TMS_MATCH( $this->suggestion, $this->translation ) ) * 100
+                ( 1 - MyMemory::TMS_MATCH(
+                                self::cleanSegmentForPee($this->suggestion),
+                                self::cleanSegmentForPee($this->translation)
+                        )
+                ) * 100
         );
 
         if ( $post_editing_effort < 0 ) {
@@ -181,5 +185,11 @@ class EditLog_EditLogSegmentStruct extends DataAccess_AbstractDaoObjectStruct im
         }
 
         return $post_editing_effort;
+    }
+
+    private static function cleanSegmentForPee( $segment ){
+        $segment = htmlspecialchars_decode( $segment, ENT_QUOTES);
+
+        return $segment;
     }
 }
