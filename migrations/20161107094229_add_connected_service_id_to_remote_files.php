@@ -2,11 +2,11 @@
 
 use Phinx\Migration\AbstractMigration;
 
-class AddUidToRemoteFiles extends AbstractMatecatMigration
+class AddConnectedServiceIdToRemoteFiles extends AbstractMatecatMigration
 {
 
     public $sql_up = <<<EOF
-    ALTER TABLE remote_files ADD column uid bigint;
+    ALTER TABLE remote_files ADD column connected_service_id bigint;
     
     ALTER TABLE remote_files ADD INDEX `connected_service_id` ( connected_service_id ) USING BTREE ;
     
