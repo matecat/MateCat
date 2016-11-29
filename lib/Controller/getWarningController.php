@@ -156,7 +156,7 @@ class getWarningController extends ajaxController {
 
         $this->result[ 'messages' ] = $this->getGlobalMessage();
 
-        $this->result[ 'details' ] = array_values( $result );
+        $this->result[ 'details' ][ 'tag_issues' ] = array_values( $result );
         $tMismatch                 = getTranslationsMismatches( $this->__postInput->id_job, $this->__postInput->password );
 
         $result = array( 'total' => count( $tMismatch ), 'mine' => 0, 'list_in_my_job' => array() );
@@ -167,14 +167,11 @@ class getWarningController extends ajaxController {
                 $result[ 'list_in_my_job' ][] = $row[ 'first_of_my_job' ];
 
                 //append to global list
-                $this->result[ 'details' ][] = $row[ 'first_of_my_job' ];
+                $this->result[ 'details' ][ 'translation_mismatches' ][] = $row[ 'first_of_my_job' ];
 
             }
         }
 
-        //???? php maps internally numerical keys of array_unique as string so with json_encode
-        //it become an object and not an array!!
-        $this->result[ 'details' ]                = array_values( array_unique( $this->result[ 'details' ] ) );
         $this->result[ 'translation_mismatches' ] = $result;
 
         $this->invokeGlobalWarningsOnFeatures();
