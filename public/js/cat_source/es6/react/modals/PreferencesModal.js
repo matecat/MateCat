@@ -15,7 +15,7 @@ class PreferencesModal extends React.Component {
     componentWillMount() { }
 
     componentDidMount() {
-        if ( this.state.service && !this.props.service.disabled_at) {
+        if ( this.state.service && !this.state.service.disabled_at) {
             $(this.checkDrive).attr('checked', true);
         } else {
 
@@ -35,9 +35,10 @@ class PreferencesModal extends React.Component {
             var interval = setInterval(function () {
                 if (newWindow.closed) {
                     APP.USER.loadUserData().done(function () {
-                        if ( APP.USER.STORE.connected_services.length ) {
+                        var service = APP.USER.getDefaultConnectedService();
+                        if ( service ) {
                             self.setState({
-                                service: APP.USER.STORE.connected_services[0]
+                                service: service
                             });
                         } else {
                             $(self.checkDrive).attr('checked', false);
@@ -51,7 +52,7 @@ class PreferencesModal extends React.Component {
                 this.disableGDrive().done(function (data) {
                     APP.USER.upsertConnectedService(data.connected_service);
                     self.setState({
-                        service: APP.USER.STORE.connected_services[0]
+                        service: APP.USER.getDefaultConnectedService()
                     });
                 });
             }
@@ -60,7 +61,7 @@ class PreferencesModal extends React.Component {
     }
 
     disableGDrive() {
-        return $.post('/api/app/connected_services/' + this.props.service.id, { disabled: true } );
+        return $.post('/api/app/connected_services/' + this.state.service.id, { disabled: true } );
 
     }
 

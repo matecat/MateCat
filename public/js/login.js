@@ -36,7 +36,7 @@ $.extend(APP, {
                 user: APP.USER.STORE.user,
             };
             if (APP.USER.STORE.connected_services && APP.USER.STORE.connected_services.length ) {
-                props.service = APP.USER.STORE.connected_services[0]
+                props.service = APP.USER.getDefaultConnectedService();
             }
             if (param) {
                 $.extend(props, param);
