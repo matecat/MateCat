@@ -12,7 +12,7 @@ class MainPanel extends React.Component {
             selectedStatus : '',
             samplingEnabled : false,
             samplingType : 'edit_distance_high_to_low',
-            samplingSize : '10',
+            samplingSize : '5',
             filtering : false,
             filteredCount : 0
         }
