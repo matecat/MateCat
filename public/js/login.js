@@ -28,7 +28,11 @@ $.extend(APP, {
         });
 
         $('#modal').on('confirmregister', function (e, param) {
-            APP.ModalWindow.showModalComponent(ConfirmRegister, param, 'Confirm Registration');
+            var style = {
+                width: '25%',
+                maxWidth: '450px'
+            };
+            APP.ModalWindow.showModalComponent(ConfirmRegister, param, 'Confirm Registration', style);
         });
 
         $('#modal').on('openpreferences', function (e, param) {
@@ -51,7 +55,10 @@ $.extend(APP, {
             if (config.showModalBoxLogin == 1) {
                 props.redeemMessage = true
             }
-            APP.ModalWindow.showModalComponent(ForgotPasswordModal, props, "Forgot Password");
+            var style = {
+                width: '577px',
+            };
+            APP.ModalWindow.showModalComponent(ForgotPasswordModal, props, "Forgot Password", style);
         });
         $('#modal').on('openregister', function () {
             var props = {

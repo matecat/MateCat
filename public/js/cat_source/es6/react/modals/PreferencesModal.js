@@ -79,7 +79,7 @@ class PreferencesModal extends React.Component {
         var gdriveMessage = '';
         if (this.props.showGDriveMessage) {
             gdriveMessage = <div className="preference-modal-message">
-                Connect a google drive account to add files
+                Connect a Google Drive account to add files
             </div>;
         }
 
