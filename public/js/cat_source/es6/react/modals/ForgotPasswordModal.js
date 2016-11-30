@@ -98,7 +98,7 @@ class ForgotPasswordModal extends React.Component {
             generalErrorHtml = <div><span style={ {color: 'red',fontSize: '14px'} } className="text">{this.state.generalError}</span><br/></div>;
         }
         return <div className="forgot-password-modal">
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit</p>
+            <p>Enter the email address associated with your account and we'll send you the link to reset your password.</p>
             <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("emailAddress")}
                        placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")} tabindex={1}
                        onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
