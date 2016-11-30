@@ -657,7 +657,8 @@ $.extend(UI, {
 		if ( UI.searchIsOpen() )  {
             UI.closeSearch();
 		} else {
-            UI.openSearch();
+			UI.closeAllMenus(e);
+			UI.openSearch();
 		}
         this.fixHeaderHeightChange();
 	},
