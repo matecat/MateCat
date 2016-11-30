@@ -127,7 +127,7 @@ class RegisterModal extends React.Component {
         return <div className="register-modal">
             <h2>Register with Google Login</h2>
             <a className="google-login-button btn-confirm-medium" onClick={this.googole_popup.bind(this)}></a>
-            <p>By clicking you accept <a href="/terms" target="_blank">terms and conditions</a></p>
+            <p>By clicking you accept <a href="https://www.matecat.com/terms/" target="_blank">terms and conditions</a></p>
             <div className="register-form-container">
                 <h2>Register with your email</h2>
                 <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("name")}
