@@ -844,11 +844,8 @@ if ( MBC.enabled() )
         } );
 
         $( document ).on( 'click', '#mbc-history', function ( ev ) {
+            UI.closeAllMenus(ev);
             $( '.mbc-history-balloon-outer' ).toggleClass( 'mbc-visible' );
-            if ( $( '.searchbox' ).is( ':visible' ) ) {
-                UI.toggleSearch( ev );
-            }               
-            // if (LXQ.enabled()) LXQ.hidePopUp();
         } );
 
         $( document ).on( 'mbc:comment:new', function ( ev, data ) {
