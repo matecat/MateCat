@@ -53,7 +53,6 @@ $.extend(UI, {
 		this.closeTagPlaceholder = 'MATECAT-closeTagPlaceholder-MATECAT';
 		this.tempViewPoint = '';
 		this.checkUpdatesEvery = 180000;
-		this.autoUpdateEnabled = true;
 		this.goingToNext = false;
 		this.preCloseTagAutocomplete = false;
         this.hiddenTextEnabled = true;
@@ -79,12 +78,13 @@ $.extend(UI, {
 		this.taglockEnabled = config.taglockEnabled;
 		this.debug = false;
         this.findCommonPartInSegmentIds();
-		UI.detectStartSegment(); 
-		options.openCurrentSegmentAfter = ((!seg) && (!this.firstLoad)) ? true : false;
+		UI.detectStartSegment();
+
+		options.openCurrentSegmentAfter = ( (!seg) && (!this.firstLoad) ) ? true : false ;
 		
 		var getSegmentsAjax = UI.getSegments(options);
 
-		if (this.firstLoad && this.autoUpdateEnabled) {
+		if ( this.firstLoad ) {
 			this.lastUpdateRequested = new Date();
 			setTimeout(function() {
 				UI.getUpdates();
