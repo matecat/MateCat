@@ -10,6 +10,11 @@ if (SegmentFilter.enabled())
 
     var lastFilterData = null ;
 
+    var keyForLocalStorage = function() {
+        var page = ( config.isReview ? 'revise' : 'translate' );
+        return 'SegmentFilter-' + page + '-' + config.id_job + '-' + config.password ;
+    } ;
+
     $.extend(SF, {
         getLastFilterData : function() {
             return lastFilterData;
@@ -18,9 +23,38 @@ if (SegmentFilter.enabled())
         filterPanelOpen : function() {
             return UI.body.hasClass('filtering');
         },
+
         filtering : function() {
             // TODO change this, more specific when filter is submitted.
             return lastFilterData != null;
+        },
+
+        getStoredState : function() {
+            var data = localStorage.getItem( keyForLocalStorage() ) ;
+            if ( data ) {
+                try {
+                    return JSON.parse( data ) ;
+                }
+                catch( e ) {
+                    this.clearStoredData();
+                    console.error( e.message );
+                }
+            }
+        },
+
+        clearStoredData : function() {
+            return localStorage.removeItem( keyForLocalStorage() ) ;
+        },
+
+        saveState : function( data ) {
+            localStorage.setItem(keyForLocalStorage(), JSON.stringify(
+                window.segment_filter_panel.state
+            ) ) ;
+        },
+
+        restore : function( data ) {
+            window.segment_filter_panel.setState( this.getStoredState() ) ;
+            $(document).trigger('segment-filter-submit');
         },
 
         filterSubmit : function( data ) {
@@ -35,13 +69,14 @@ if (SegmentFilter.enabled())
 
                 lastFilterData = data;
 
-                $('#outer').empty();
-
                 window.segment_filter_panel.setState({
                     filteredCount : data.count,
                     filtering : true
                 });
 
+                SegmentFilter.saveState( window.segment_filter_panel.state ) ;
+
+                $('#outer').empty();
                 return UI.render({
                     segmentToOpen: data['segment_ids'][0]
                 });
@@ -52,7 +87,10 @@ if (SegmentFilter.enabled())
             UI.body.addClass('filtering');
             $(document).trigger('header-tool:open', { name: 'filter' });
         },
+
         closeFilter : function() {
+            this.clearStoredData();
+
             UI.body.removeClass('filtering');
             $('.muted').removeClass('muted');
             lastFilterData = null;

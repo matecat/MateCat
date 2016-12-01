@@ -798,7 +798,6 @@ UI = {
 		if (where == 'before') {
 			$("section").each(function() {
 				if ($(this).offset().top > $(window).scrollTop()) {
-//				if ($(this).offset().top > $(window).scrollTop()) {
 					UI.segMoving = UI.getSegmentId($(this));
 					return false;
 				}
@@ -3154,6 +3153,14 @@ UI = {
     },
     start: function () {
 
+        // TODO: the following variables used to be set in UI.init() which is called
+        // very during rendering. Those have been moved here because of the init change
+        // of SegmentFilter, see below.
+        UI.firstLoad = true;
+        UI.body = $('body');
+        UI.checkSegmentsArray = {} ;
+
+        APP.init();
         // If some icon is added on the top header menu, the file name is resized
         APP.addDomObserver($('.header-menu')[0], function() {
             APP.fitText($('.breadcrumbs'), $('#pname'), 30);
@@ -3163,7 +3170,16 @@ UI = {
             APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30);
         });
 
-        UI.render().done(function() {
+        var initialRenderPromise ;
+        if ( SegmentFilter.enabled() && SegmentFilter.getStoredState() ) {
+            SegmentFilter.openFilter();
+            initialRenderPromise = ( new $.Deferred() ).resolve();
+        }
+        else {
+            initialRenderPromise = UI.render();
+        }
+
+        initialRenderPromise.done(function() {
             UI.firstLoad = false ;
         }).done( function() {
             UI.checkWarnings(true);

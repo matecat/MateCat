@@ -16,16 +16,11 @@ $.extend(UI, {
 //		console.log('body.scrollTop: ', $('body').scrollTop());
 //		console.log('window.scrollTop: ', $(window).scrollTop());
 		this.isMac = (navigator.platform == 'MacIntel') ? true : false;
-		this.body = $('body');
 
 		this.initSegNum = 100; // number of segments initially loaded
 		this.moreSegNum = 25;
 		this.numOpenedSegments = 0;
-		this.hasToBeRerendered = false;
-		this.maxMinutesBeforeRerendering = 60;
-		setTimeout(function() {
-			UI.hasToBeRerendered = true;
-		}, this.maxMinutesBeforeRerendering*60000);	
+
 		this.loadingMore = false;
 		this.infiniteScroll = true;
 		this.noMoreSegmentsAfter = false;

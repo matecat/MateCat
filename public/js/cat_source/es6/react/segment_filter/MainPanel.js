@@ -7,15 +7,30 @@ class MainPanel extends React.Component {
     }
 
     defaultState() {
-        return {
-            searchSettingsOpen : false, 
-            selectedStatus : '',
-            samplingEnabled : false,
-            samplingType : 'edit_distance_high_to_low',
-            samplingSize : '5',
-            filtering : false,
-            filteredCount : 0
+        if ( SegmentFilter.getStoredState() ) {
+            return SegmentFilter.getStoredState() ;
         }
+        else {
+            return {
+                searchSettingsOpen : false,
+                selectedStatus : '',
+                samplingEnabled : false,
+                samplingType : 'edit_distance_high_to_low',
+                samplingSize : '5',
+                filtering : false,
+                filteredCount : 0
+            }
+        }
+    }
+
+    componentDidMount() {
+        if ( SegmentFilter.getStoredState() )  {
+            this.makeCall();
+        }
+    }
+
+    componentWillUnmount() {
+
     }
 
     resetState() {
@@ -39,6 +54,10 @@ class MainPanel extends React.Component {
 
     submitClick(e) {
         e.preventDefault() ;
+        this.makeCall();
+    }
+
+    makeCall() {
         let sample  ;
 
         if ( this.state.samplingEnabled ) {
