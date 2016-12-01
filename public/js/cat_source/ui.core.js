@@ -2191,42 +2191,42 @@ UI = {
 
         if (UI.logEnabled) dataMix.logs = this.extractLogs();
 
-		APP.doRequest({
-			data: dataMix,
-			error: function() {
-				UI.warningStopped = true;
-				UI.failedConnection(0, 'getWarning');
-			},
-			success: function(data) {//console.log('check warnings success');
-				UI.startWarning();
-				var warningPosition = '';
-				UI.globalWarnings = data.details;
+        APP.doRequest({
+            data: dataMix,
+            error: function() {
+                UI.warningStopped = true;
+                UI.failedConnection(0, 'getWarning');
+            },
+            success: function(data) {//console.log('check warnings success');
+                UI.startWarning();
+
+                UI.translationMismatches = data.translation_mismatches;
+                UI.globalWarnings = data.details;
                 //The tags with tag projection enabled doesn't show the tags in the source, so dont show the warning
                 UI.globalWarnings.tag_issues = UI.filterTagsWithTagProjection(UI.globalWarnings.tag_issues);
-				UI.translationMismatches = UI.globalWarnings.translation_mismatches;
 
-				//check for errors
-				if (UI.globalWarnings) {
+                //check for errors
+                if (UI.globalWarnings) {
 
-				    UI.renderQAPanel();
+                    UI.renderQAPanel();
 
-					if (openingSegment)
-						UI.fillCurrentSegmentWarnings(data.details, true);
+                    if (openingSegment)
+                        UI.fillCurrentSegmentWarnings(data.details, true);
 
-				}
+                }
 
-				// check for messages
-				if ( data.messages ) {
-					var msgArray = $.parseJSON(data.messages);
-					if (msgArray.length > 0) {
-						UI.displayMessage(msgArray);
-					}
-				}
+                // check for messages
+                if ( data.messages ) {
+                    var msgArray = $.parseJSON(data.messages);
+                    if (msgArray.length > 0) {
+                        UI.displayMessage(msgArray);
+                    }
+                }
 
                 $(document).trigger('getWarning:global:success', { resp : data }) ;
 
-			}
-		});
+            }
+        });
 	},
     renderQAPanel: function () {
 	    if ( !this.QAComponent ) {
