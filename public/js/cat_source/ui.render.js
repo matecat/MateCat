@@ -17,9 +17,7 @@ $.extend(UI, {
 //		console.log('window.scrollTop: ', $(window).scrollTop());
 		this.isMac = (navigator.platform == 'MacIntel') ? true : false;
 		this.body = $('body');
-		this.firstLoad = (options.firstLoad || false);
-//        if (firstLoad)
-//            this.startRender = true;
+
 		this.initSegNum = 100; // number of segments initially loaded
 		this.moreSegNum = 25;
 		this.numOpenedSegments = 0;
@@ -80,18 +78,20 @@ $.extend(UI, {
         this.findCommonPartInSegmentIds();
 		UI.detectStartSegment();
 
-		options.openCurrentSegmentAfter = ( (!seg) && (!this.firstLoad) ) ? true : false ;
-		
-		var getSegmentsAjax = UI.getSegments(options);
+		options.openCurrentSegmentAfter = ( (!seg) && (!UI.firstLoad) ) ? true : false ;
 
-		if ( this.firstLoad ) {
+		if ( UI.firstLoad ) {
+
 			this.lastUpdateRequested = new Date();
+
 			setTimeout(function() {
 				UI.getUpdates();
 			}, UI.checkUpdatesEvery);
+
 		}
-		
-		return getSegmentsAjax ; 
+
+		return UI.getSegments(options);
+
 	},
 });
 

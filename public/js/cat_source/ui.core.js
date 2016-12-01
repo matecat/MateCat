@@ -409,7 +409,6 @@ UI = {
                     APP.closePopup();
                     $('#outer').empty();
                     UI.render({
-                        firstLoad: false,
                         segmentToOpen: UI.currentSegmentId
                     });
                 }
@@ -1011,14 +1010,16 @@ UI = {
 		this.body.addClass('loaded');
 
 		if (typeof d.data.files != 'undefined') {
-			this.renderFiles(d.data.files, where, this.firstLoad);
+			this.renderFiles(d.data.files, where, UI.firstLoad);
 			if ((options.openCurrentSegmentAfter) && (!options.segmentToScroll) && (!options.segmentToOpen)) {
                 seg = (UI.firstLoad) ? this.currentSegmentId : UI.startSegmentId;
 				this.gotoSegment(seg);
 			}
+
 			if (options.segmentToScroll) {
 				this.scrollSegment($('#segment-' + options.segmentToScroll), options.highlight );
 			}
+
 			if (options.segmentToOpen) {
 				$('#segment-' + options.segmentToOpen + ' ' + UI.targetContainerSelector()).click();
 			}
@@ -1146,7 +1147,6 @@ UI = {
 		} else {
 			$('#outer').empty();
 			this.render({
-				firstLoad: false,
 				segmentToOpen: this.currentSegmentId
 			});
 		}
@@ -1233,18 +1233,14 @@ UI = {
 		config.last_opened_segment = segmentId;
 		window.location.hash = segmentId;
 		$('#outer').empty();
-		this.render({
-			firstLoad: false
-		});
+		this.render();
 	},
 	renderUntranslatedOutOfView: function() {
 		this.infiniteScroll = false;
 		config.last_opened_segment = this.nextUntranslatedSegmentId;
 		window.location.hash = this.nextUntranslatedSegmentId;
 		$('#outer').empty();
-		this.render({
-			firstLoad: false
-		});
+		this.render();
 	},
 	reloadWarning: function() {
 		this.renderUntranslatedOutOfView();
@@ -1260,9 +1256,7 @@ UI = {
 			});
 		} else {
 			$('#outer').empty();
-			this.render({
-				firstLoad: false
-			});
+			this.render();
 		}
 	},
 	pointToOpenSegment: function(quick) {
@@ -1495,7 +1489,6 @@ UI = {
 	renderAndScrollToSegment: function(sid) {
 		$('#outer').empty();
 		this.render({
-			firstLoad: false,
 			caller: 'link2file',
 			segmentToScroll: sid,
 			scrollToFile: true
@@ -3170,14 +3163,14 @@ UI = {
             APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30);
         });
 
-        UI.render({
-            firstLoad: true
+        UI.render().done(function() {
+            UI.firstLoad = false ;
         }).done( function() {
-            // launch segments check on opening
             UI.checkWarnings(true);
         });
 
         $('html').trigger('start');
+
         if (LXQ.enabled()) {
             $('#lexiqabox').removeAttr("style");
             LXQ.initPopup();

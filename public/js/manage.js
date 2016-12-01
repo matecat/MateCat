@@ -42,8 +42,8 @@ UI = {
                         $('#select-target option[selected=selected]').removeAttr('selected');
                         $(this).attr('selected','selected');
                     }
-                })    	
-            };
+				})
+			};
 
             if(typeof this.filters.status != 'undefined') {
                 $('#select-status option[selected=selected]').removeAttr('selected');

@@ -30,24 +30,22 @@ if (SegmentFilter.enabled())
                               config.id_job, config.password, $.param( data )
                               );
 
-            $.getJSON(path).done(function( data ) {
+            return $.getJSON(path).pipe(function( data ) {
                 $(document).trigger('segment-filter:filter-data:load', { data: data });
 
                 lastFilterData = data;
 
                 $('#outer').empty();
 
-                UI.render({
-                    firstLoad: false,
-                    segmentToOpen: data['segment_ids'][0]
-                });
-
                 window.segment_filter_panel.setState({
                     filteredCount : data.count,
                     filtering : true
                 });
 
-            });
+                return UI.render({
+                    segmentToOpen: data['segment_ids'][0]
+                });
+            })
         },
 
         openFilter : function() {
