@@ -980,7 +980,7 @@ LXQ.init  = function () {
                 restoreSelection();
                 $(target).addClass('lxq-invisible');
                 UI.saveInUndoStack('lxq-replaceWord');
-                UI.currentSegmentQA();
+                UI.segmentQA(UI.currentSegment);
             }
         };
         var ignoreError = function(errorid) {

@@ -1942,27 +1942,6 @@ class QA {
 
     }
 
-    public function performGlossaryCheck( $glossaryList ) {
-
-        $targetSeg = strip_tags( $this->target_seg );
-        $targetSeg = preg_split( '/\s+/', $targetSeg );
-
-        foreach ( $glossaryList as $glossaryWord ) {
-            $found = false;
-            foreach ( $targetSeg as $token ) {
-                if ( strtolower( $token ) == strtolower( $glossaryWord ) ) {
-                    $found = true;
-                    break;
-                }
-            }
-
-            if ( !$found ) {
-                $this->_addError( self::ERR_GLOSSARY_MISMATCH );
-            }
-
-        }
-    }
-
 }
 
 ?>
