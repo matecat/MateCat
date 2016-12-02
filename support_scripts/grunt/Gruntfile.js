@@ -17,7 +17,7 @@ module.exports = function(grunt) {
 	    basePath + '../css/jquery.powertip.min.css',
 	    basePath + '../css/lxq-style.css',
 	    basePath + '../css/lexiqa.css',
-    ]
+    ];
 
     var conf = grunt.file.read( incPath + 'version.ini' );
     var version = conf.match(/version[ ]+=[ ]+.*/gi)[0].replace(/version[ ]+=[ ]+(.*?)/gi, "$1");
