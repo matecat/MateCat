@@ -126,10 +126,6 @@ if (true)
                 },
                 success: function ( d ) {
 
-                    if ( !$( n ).hasClass( 'glossary-loaded' ) ) {
-                        UI.segmentQA( n );
-                    }
-
                     $( n ).addClass( 'glossary-loaded' );
 
                     if ( typeof d.errors != 'undefined' && d.errors.length ) {

@@ -332,7 +332,7 @@ UI = {
 
         this.highlightEditarea();
 
-        this.currentSegmentQA();
+        this.segmentQA(UI.currentSegment );
         $(this.currentSegment).trigger('copySourceToTarget');
         if(!config.isReview) {
             var alreadyCopied = false;
@@ -1225,7 +1225,7 @@ UI = {
 	registerQACheck: function() {
 		clearTimeout(UI.pendingQACheck);
 		UI.pendingQACheck = setTimeout(function() {
-			UI.currentSegmentQA();
+			UI.segmentQA(UI.currentSegment);
 		}, config.segmentQACheckInterval);
 	},
 	reloadToSegment: function(segmentId) {
@@ -2288,16 +2288,6 @@ UI = {
         var id_segment = UI.getSegmentId(UI.currentSegment);
         LXQ.doLexiQA(UI.currentSegment, translation, id_segment,false, function () {}) ;
     },
-	currentSegmentQA: function() {
-        console.warn(
-            'currentSegmentQA is deprecated, use segmentQA and pass a segment as argument',
-            getStackTrace().split("\n")[2]
-        );
-
-        var that = this;
-        UI.segmentQA.apply( this, UI.currentSegment );
-    },
-
     segmentQA : function( segment ) {
         if ( ! ( segment instanceof UI.Segment) ) {
             segment = new UI.Segment( segment );
@@ -2323,11 +2313,6 @@ UI = {
 		}
 
 		this.checkSegmentsArray[token] = trg_content;
-        var glossarySourcesAr = [];
-        $('section.editor .tab.glossary .results .sugg-target .translation').each(function () {
-            glossarySourcesAr.push($(this).text());
-        });
-
 		APP.doRequest({
 			data: {
 				action: 'getWarning',
@@ -2338,7 +2323,6 @@ UI = {
 				src_content: src_content,
 				trg_content: trg_content,
                 segment_status: segment_status,
-                glossaryList: glossarySourcesAr
 			},
 			error: function() {
 				UI.failedConnection(0, 'getWarning');
