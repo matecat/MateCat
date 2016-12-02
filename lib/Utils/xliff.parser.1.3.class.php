@@ -42,11 +42,12 @@
 
 class Xliff_Parser {
 
-	// This var wants to be like a "static final" in Java, but this is PHP...
-	// It's used by fix_non_well_formed_xml() to speed up things.
 	private static $find_xliff_tags_reg = null;
 
 	public static function Xliff2Array($file_content) {
+
+	    $xliff = [];
+
 		// Pre-Processing.
 		// Fixing non UTF-8 encoding (often I get Unicode UTF-16)
 		$enc = mb_detect_encoding($file_content);
@@ -65,7 +66,6 @@ class Xliff_Parser {
 			$xliff['parser-errors'][] = "Cannot import XLIFF version $tmp[1]. We only support XLIFF (version 1.0, 1.1, 1.2).";
 			return $xliff;
 		}
-
 
 		// Getting the Files
 
@@ -184,74 +184,75 @@ class Xliff_Parser {
 
 						// Add here other trans-unit sub-elements you need, copying and pasting the 3 lines below
 
-						unset($temp);
-						preg_match('|<seg-source.*?>(.*?)</seg-source>|si', $trans_unit, $temp);
-						if (isset($temp[1])) {
-							$markers = $temp[1];
-							unset($temp);
-							$markers = preg_split('#(<mrk\s.*?type="seg".*?>(.*?)</mrk>)#si', $markers, -1, PREG_SPLIT_DELIM_CAPTURE);
+                        unset( $temp );
+                        preg_match( '|<seg-source.*?>(.*?)</seg-source>|si', $trans_unit, $temp );
+                        if ( isset( $temp[ 1 ] ) ) {
+
+                            $markers = $temp[ 1 ];
+
+                            unset( $temp );
+
+                            $markers = preg_split( '#<mrk\s#si', $markers, -1 );
 
                             //same markers are in the target tag if it is present with pre-translations, because seg-target does not exists
                             //in XLIFF standard definition
-                            //so, we split for the same markers and use same positional indexes
-                            if( isset( $xliff['files'][$i]['trans-units'][$j]['target']['raw-content'] ) ){
-                                $target_markers = preg_split('#(<mrk\s.*?type="seg".*?>(.*?)</mrk>)#si', $xliff['files'][$i]['trans-units'][$j]['target']['raw-content'], -1, PREG_SPLIT_DELIM_CAPTURE);
+                            //so, we split for the same markers and use same positional indexes, by the way,
+                            // there can be empty markers in translation ( <mrk ... /> ) and not in seg-source
+                            // the regular expressions must be different
+                            if ( isset( $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'target' ][ 'raw-content' ] ) ) {
+                                $target_markers = preg_split( '#<mrk\s#si', $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'target' ][ 'raw-content' ], -1 );
                             }
 
-							$mi = 0;
-							$k = 0;
-							while (isset($markers[$mi + 1])) {
-								unset($mid);
-								preg_match('|mid\s?=\s?["\'](.*?)["\']|si', $markers[$mi + 1], $mid);
+                            $mi = 0;
+                            $k  = 0;
+                            while ( isset( $markers[ $mi + 1 ] ) ) {
+                                unset( $mid );
 
-								// For not loosing info I attach the last external tag to the last seg marker.
-								if (!isset($markers[$mi + 5])) {
-									$last_ext_tags = $markers[$mi + 3];
-								} else {
-									$last_ext_tags = '';
-								}
+                                preg_match( '|mid\s?=\s?["\'](.*?)["\']|si', $markers[ $mi + 1 ], $mid );
 
-								$xliff['files'][$i]['trans-units'][$j]['seg-source'][$k]['mid'] = $mid[1];
-								$xliff['files'][$i]['trans-units'][$j]['seg-source'][$k]['ext-prec-tags'] = $markers[$mi];
-								$xliff['files'][$i]['trans-units'][$j]['seg-source'][$k]['raw-content'] = $markers[$mi + 2];
-								$xliff['files'][$i]['trans-units'][$j]['seg-source'][$k]['ext-succ-tags'] = $last_ext_tags;
+                                //re-build the mrk tag after the split
+                                $originalMark = trim( '<mrk ' . $markers[ $mi + 1 ] );
 
-								// Different from source and target content, I expect that if you used seg-source it is a a well done tool so I don't try to fix.
+                                $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-source' ][ $k ][ 'mid' ]           = $mid[ 1 ];
+                                $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-source' ][ $k ][ 'ext-prec-tags' ] = "";
+                                $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-source' ][ $k ][ 'raw-content' ]   = str_replace( '</mrk>', '', preg_replace( '#<mrk\s[^>]+>(.*)#', '$1', $originalMark ) );
+                                $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-source' ][ $k ][ 'ext-succ-tags' ] = "";
+
+								// Different from source and target content, I expect that if you used seg-source it is a well done tool, so I don't try to fix.
                                 if( isset( $xliff['files'][$i]['trans-units'][$j]['target']['raw-content'] ) && !empty( $xliff['files'][$i]['trans-units'][$j]['target']['raw-content'] ) ){
 
                                     unset($mt_id);
 
                                     //if mark tags are present in target ( target segmentation )
-                                    if( isset( $target_markers[$mi + 1] ) ){
+                                    if ( isset( $target_markers[ $mi + 1 ] ) ) {
+
+                                        $originalTransMark = trim( '<mrk ' . $target_markers[ $mi + 1 ] );
 
                                         //target and seg-source can have different mark id, so i store the target mid
                                         //with same rules
-                                        preg_match('|mid\s?=\s?["\'](.*?)["\']|si', $target_markers[$mi + 1], $mt_id);
-
-                                        // For not loosing info I attach the last external tag to the last seg marker.
-                                        if (!isset($target_markers[$mi + 5])) {
-                                            $last_ext_tags = $target_markers[$mi + 3];
-                                        } else {
-                                            $last_ext_tags = '';
-                                        }
+                                        preg_match( '|mid\s?=\s?["\'](.*?)["\']|si', $target_markers[ $mi + 1 ], $mt_id );
 
                                         //use seg-target to store segmented translations and use the same positional indexes in source
-                                        $xliff['files'][$i]['trans-units'][$j]['seg-target'][$k]['mid'] = $mt_id[1];
-                                        $xliff['files'][$i]['trans-units'][$j]['seg-target'][$k]['ext-prec-tags'] = $target_markers[$mi];
-                                        $xliff['files'][$i]['trans-units'][$j]['seg-target'][$k]['raw-content'] = $target_markers[$mi + 2];
-                                        $xliff['files'][$i]['trans-units'][$j]['seg-target'][$k]['ext-succ-tags'] = $last_ext_tags;
+                                        $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-target' ][ $k ][ 'mid' ]           = $mt_id[ 1 ];
+                                        $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-target' ][ $k ][ 'ext-prec-tags' ] = "";
+                                        $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-target' ][ $k ][ 'raw-content' ]   = str_replace( '</mrk>', '', preg_replace( '#<mrk\s[^>]+>(.*)#', '$1', $originalTransMark ) );
+                                        $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-target' ][ $k ][ 'ext-succ-tags' ] = "";
 
                                     }
 
                                 }
 
-                                $mi = $mi + 3;
+                                $mi++;
 								$k++;
+
 							}
 						}
 					}
-					$j++;
+
+						$j++;
+
 				} // End of trans-units
+
 			} // End of files
 
 			$i++;
