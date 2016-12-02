@@ -1960,7 +1960,7 @@ UI = {
 		return errors.substring(0, errors.length - 1);
 	},
 	goToFirstError: function() {
-		location.href = $('#point2seg').attr('href');
+        $("#point2seg").trigger('mousedown');
 	},
 
 
