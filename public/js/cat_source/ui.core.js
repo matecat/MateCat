@@ -2313,7 +2313,6 @@ UI = {
 		}
 
 		this.checkSegmentsArray[token] = trg_content;
-        console.log("Get Warning: id-" + segment.id + " src-" + src_content + " trg-" + trg_content)
 		APP.doRequest({
 			data: {
 				action: 'getWarning',
