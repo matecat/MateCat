@@ -1,5 +1,7 @@
 <?php
 
+use LexiQA\LexiQADecorator;
+
 class CatDecorator {
 
     private $controller;
@@ -170,13 +172,13 @@ class CatDecorator {
         $chunk_options_model = new ChunkOptionsModel( $this->job ) ; 
         
         $this->template->tag_projection_enabled = $chunk_options_model->isEnabled('tag_projection')   ; 
-        $this->template->speech2text_enabled = $chunk_options_model->isEnabled( 'speech2text' ) ; 
-        $this->template->lxq_enabled = $chunk_options_model->isEnabled( 'lexiqa' ) ; 
-        $this->template->deny_lexiqa = false ;
+        $this->template->speech2text_enabled = $chunk_options_model->isEnabled( 'speech2text' ) ;
+
+        LexiQADecorator::getInstance( $this->template )->checkJobHasLexiQAEnabled( $chunk_options_model )->decorateViewLexiQA();
+
         $this->template->segmentation_rule = $chunk_options_model->project_metadata[ 'segmentation_rule' ];
-        
-        $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages ); 
-        $this->template->lexiqa_languages = json_encode( ProjectOptionsSanitizer::$lexiQA_allowed_languages ); 
+        $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages );
+
     }
 
     private function decorateForCJK() {

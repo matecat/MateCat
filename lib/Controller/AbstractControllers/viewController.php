@@ -48,13 +48,6 @@ abstract class viewController extends controller {
     protected $authURL;
 
     /**
-     * The logged user's object
-     *
-     * @var Users_UserStruct
-     */
-    protected $logged_user;
-
-    /**
      * Try to identify the browser of users
      *
      * @return array
@@ -170,22 +163,13 @@ abstract class viewController extends controller {
 
         }
 
-        //even if no login in required, if user data is present, pull it out
-        $this->logged_user = new Users_UserStruct();
-        if ( !empty( $_SESSION[ 'cid' ] ) ){
-            $this->logged_user->uid = $_SESSION[ 'uid' ];
-            $this->logged_user->email = $_SESSION[ 'cid' ];
-
-            $userDao = new Users_UserDao(Database::obtain());
-            $userObject = $userDao->setCacheTTL( 3600 )->read( $this->logged_user ); // one hour cache
-
-            /**
-             * @var $userObject Users_UserStruct
-             */
-            $this->logged_user = $userObject[0];
+        if( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ) {
+             AuthCookie::tryToRefreshToken( $_SESSION[ 'cid' ] );
         }
 
-        if( $isAuthRequired  ) {
+        $this->setUserCredentials();
+
+        if( $isAuthRequired ) {
             //if auth is required, stat procedure
             $this->doAuth();
         }
@@ -230,24 +214,17 @@ abstract class viewController extends controller {
      *
      * @return bool
      */
-    public function isLoggedIn() {        
-        if( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ) {
-            AuthCookie::tryToRefreshToken( $_SESSION[ 'cid' ] );
-        }
-        
-        return (
-                ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ) &&
-                ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) )
-        );
+    public function isLoggedIn() {
+        return $this->userIsLogged;
     }
 
     /**
      * GatUser Login Info
      *
-     * @return bool
+     * @return array
      */
     public function getLoginUserParams() {
-        if ( $this->isLoggedIn() ){
+        if ( $this->isLoggedIn() ) {
             return array( $this->logged_user->getUid(), $this->logged_user->getEmail() );
         }
         return array( null, null );

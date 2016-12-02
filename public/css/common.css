@@ -1128,6 +1128,11 @@ color:#333;}
     text-decoration: underline;
 }
 
+.tooltip-guess-tags {
+    color: #000;
+    cursor: pointer;
+}
+
 .onoffswitch-container {
     position: relative;
     width: 140px;
@@ -3462,15 +3467,14 @@ color: #000;
 
 @font-face {
     font-family: 'icomoon';
-    src:  url('fonts/icomoon.eot?bvvuvy');
-    src:  url('fonts/icomoon.eot?bvvuvy#iefix') format('embedded-opentype'),
-    url('fonts/icomoon.ttf?bvvuvy') format('truetype'),
-    url('fonts/icomoon.woff?bvvuvy') format('woff'),
-    url('fonts/icomoon.svg?bvvuvy#icomoon') format('svg');
+    src:  url('fonts/icomoon.eot?7sjwen');
+    src:  url('fonts/icomoon.eot?7sjwen#iefix') format('embedded-opentype'),
+    url('fonts/icomoon.ttf?7sjwen') format('truetype'),
+    url('fonts/icomoon.woff?7sjwen') format('woff'),
+    url('fonts/icomoon.svg?7sjwen#icomoon') format('svg');
     font-weight: normal;
     font-style: normal;
 }
-
 
 /*
 /* mbc extend iconmoon set with icons for matecat chat
@@ -3480,29 +3484,11 @@ color: #000;
 .icon-copy-key:before {
     content: "\e92c";
 }
-
-.autofillTag {
-    display: block;
-    float: left;
-    cursor: pointer;
-    color: #444!important;
-}
-
-.autofillTag:hover, 
-.autofillTag.active {
-    color: #333!important;
-}
-
-.autofillTag:before {
-    content: "\e23a";
-    font-size: 19px;
-    display: block;    
-}
 /*
 /* mbc extend iconmoon set with icons for matecat chat
 */
 
-
+.tagLockCustomize,
 .btn-confirm-small .text:before,
 .btn-orange-small .text:before,
 [class^="icon-"], [class*=" icon-"],
@@ -3791,7 +3777,7 @@ float: left;
 }
 
 #point2seg:after {
-      content: "\f071";
+      content: "\e903";
   font-size: 24px;
 }
 
@@ -4167,6 +4153,9 @@ text-align: left;
 .icon-lock:before {
     content: "\e98f";
 }
+.icon-unlocked:before {
+    content: "\e990";
+}
 .icon-earth:before {
     content: "\e9ca";
 }
@@ -4280,6 +4269,12 @@ text-align: left;
 }
 .icon-paw:before {
     content: "\f1b0";
+}
+.icon-file-text:before {
+    content: "\e922";
+}
+.icon-file:before {
+    content: "\e904";
 }
 
 
@@ -4575,7 +4570,7 @@ font-weight: bold;
     border-bottom: 1px dashed #ccc;
 }
 .share-popup-input-key:focus {
-    border: 0;    
+    border: 0;
 }
 .share-popup-copy-result {
     font-size: 14px;

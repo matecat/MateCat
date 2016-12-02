@@ -424,8 +424,6 @@ $.extend(UI, {
 
 		$(window).on('scroll', function() {
 			UI.browserScrollPositionRestoreCorrection();
-		}).on('cachedSegmentObjects', function() {
-            if(UI.currentSegmentId == UI.firstWarnedSegment) UI.setNextWarnedSegment();
 		}).on('allTranslated', function() {
 			if(config.survey) UI.displaySurvey(config.survey);
 		}).on('mousedown', function(e) {
@@ -1216,8 +1214,8 @@ $.extend(UI, {
 		$("#point2seg").bind('mousedown', function(e) {
 			e.preventDefault();
             UI.saveSegment(UI.currentSegment);
-			UI.scrollSegment($('#segment-' + $(this).attr('data-segment')));
-            UI.setNextWarnedSegment();
+			UI.closeAllMenus(e, true);
+			QAComponent.togglePanel();
 		});
 
 		$("#navSwitcher").on('click', function(e) {
@@ -1225,6 +1223,7 @@ $.extend(UI, {
 		});
 
 		$("#pname").on('click', function(e) {
+			UI.closeAllMenus(e);
 			e.preventDefault();
 			UI.toggleFileMenu();
 		});

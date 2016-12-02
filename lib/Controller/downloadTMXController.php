@@ -62,12 +62,6 @@ class downloadTMXController extends ajaxController {
     protected $tmxHandler;
 
     /**
-     * User id
-     * @var int
-     */
-    protected $uid;
-
-    /**
      * User
      *
      * @var Users_UserStruct

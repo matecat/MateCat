@@ -70,7 +70,11 @@ header .wrapper{
     width: 45px;
     color: #777;
     height: 27px;
-    padding-top: 13px;
+    padding-top: 12px;
+	cursor: pointer;
+}
+#notifbox.warningbox {
+	padding-top: 12px !important;
 }
 
 #notifbox a
@@ -113,9 +117,13 @@ body.searchActive #filterSwitch
     color:yellow;
 }
 
- 
 
-.numbererror
+
+.numbererror,
+.qa-total-issues-counter,
+.qa-issues-counter,
+.qa-conflicts-issues-counter,
+.qa-lexiqa-counter
 {
     position: absolute;
     border:1px solid #fff;
@@ -2092,7 +2100,10 @@ body.rtl-target .editor .editarea span
 	padding-top: 5px;
 
 }
-.editor .wrap{/*padding-bottom:25px; */height:87% !important;}
+.editor .wrap {
+	padding-bottom:25px;
+	height:87% !important;
+}
 
 
 
@@ -3096,6 +3107,11 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 	border-bottom: 1px dotted #c0c;
 }
 
+.monad mark.inGlossary {
+	border-bottom: none !important;
+	color: #767676 !important;
+}
+
 /*.popup-settings #settings-shortcuts .list dt
 {
 	float: left;
@@ -3193,8 +3209,40 @@ float: left;
     font-size: 100%!important;
 }
 
+.autofillTag {
+	display: block;
+	float: left;
+	cursor: pointer;
+	color: #444!important;
+}
 
+.autofillTag:before {
+	content: "\e23a";
+	font-size: 19px;
+	display: block;
+}
 
+.tagLockCustomize {
+	display: block;
+	float: left;
+	cursor: pointer;
+	color: #444!important;
+	text-decoration: none;
+}
+
+.tagLockCustomize:before {
+	content: "\e98f";
+	font-size: 19px;
+	display: block;
+	margin-left: 5px;
+}
+
+section .toolbar .autofillTag {
+	float: left;
+	display: none;
+	font-size: 60%;
+	text-decoration: none;
+}
 .editToolbar
 {
 	/*float: left;*/	
@@ -3348,6 +3396,7 @@ body.rtl-target.tagModes:not(.tagmode-default-extended) .translation .locked.end
 }
 
 
+
 .tagModeToggle ,
 .autofillTag  {
 padding: 4px 2px 0px 2px;
@@ -3359,10 +3408,15 @@ color: #666!important;
 }
 
 
-
-.tagModeToggle:hover, .tagModeToggle.active {
-	color:#333!important;
+.tagLockCustomize:hover,
+.tagLockCustomize.active,
+.tagModeToggle:hover,
+.tagModeToggle.active,
+.autofillTag:hover,
+.autofillTag.active {
+	color: #333!important;
 }
+
 
 .icon-tag-expand {
 	display: none;
@@ -3402,10 +3456,17 @@ section.editor .toolbar {
     margin-top: -23px;
 }
 
+.tagModeToggle,
+.autofillTag,
+.tagLockCustomize{
+	margin-right: 10px;
+}
+
 body.tagModes .editor.hasTags .textarea-container .tagMode {
     display: block;
 }
 body.tagModes .editor.hasTagsToggle .toolbar .tagModeToggle,
+body.tagModes .editor.hasTagsToggle .toolbar .tagLockCustomize,
 body.tagModes .editor.hasTagsAutofill .toolbar .autofillTag {
 	display: block;
 }
@@ -3414,16 +3475,9 @@ body.tagmarkDisabled .toolbar .tagModeToggle ,
 body.tagmarkDisabled .toolbar .autofillTag  {
 	display: none !important;
 }
-body.tagModes .editor .toolbar .tagLockCustomize {
-	float: left;
-	margin-right: 8px;
-	width: 16px;
-	height: 17px;
-	background: url(../img/icon-lock.png) center 1px no-repeat;
-	background-size: 16px 16px;
-}
-body.tagModes .editor .toolbar .tagLockCustomize.unlock {
-	background-image: url(../img/icon-unlock.png);
+
+.tagLockCustomize.unlock:before {
+	content: "\e990";
 }
 .tagModeToggle span.icon-expand, .tagModeToggle span.icon-compress {
 -ms-transform: rotate(45deg);
@@ -3950,3 +4004,180 @@ section:hover .segment-side-buttons {
 	font-size: 0.8rem;
 	color: #999;
 }
+
+/********** QA Component **********/
+.qa-wrapper {
+	position: absolute;
+	width: 100%;
+	top: 82px;
+}
+.qa-container {
+	background-color: #efefef;
+	height:50px;
+	box-shadow: 0 1px 3px #666;
+	border-radius: 0 0 2px 2px;
+	display: none;
+	color: #4d4d4d;
+}
+.qa-container-inside {
+	height: 100%;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	padding: 0 8% 0 5%;
+	align-items: center;
+}
+
+.qa-issues-types {
+	display: flex;
+	flex-grow: 1;
+	flex-direction: row;
+	justify-content: flex-start;
+}
+
+.qa-actions {
+	display: flex;
+	flex-grow: 1;
+	flex-direction: row;
+	justify-content: flex-end;
+	align-items: center;
+}
+
+.qa-issues-container, .qa-lexiqa-container {
+	width: 150px;
+	height: 50px;
+	align-items: center;
+	display: flex;
+	text-align: center;
+	justify-content: center;
+	font-size: 15px;
+	font-weight: normal;
+	position: relative;
+	cursor: pointer;
+	box-sizing: border-box;
+}
+.qa-issues-container:hover, .qa-lexiqa-container:hover {
+	background-color: #d0d0d0;
+}
+
+.qa-issues-container.selected, .qa-lexiqa-container.selected {
+	box-shadow: inset 0px -3px 0px #4d4d4d;
+}
+
+.qa-counter {
+	width: 125px;
+	font-size: 16px;
+	color:#333;
+}
+
+.qa-arrows {
+	width: 80px;
+}
+
+.qa-move-up, .qa-move-down {
+    width: 25px;
+    float: left;
+    height: 22px;
+    cursor: pointer;
+    border-radius: 3px;
+    padding: 5px 2px 2px;
+    border: 1px solid #C6C6C6;
+    -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    background-color: #f8f8f8;
+    background-image: -webkit-linear-gradient(top, #f8f8f8, #f1f1f1);
+    background-image: -moz-linear-gradient(top, #f8f8f8, #f1f1f1);
+    background-image: -o-linear-gradient(top, #f8f8f8, #f1f1f1);
+    background-image: linear-gradient(top, #f8f8f8, #f1f1f1);
+}
+
+.icon-qa-issues,
+.icon-conflicts,
+.icon-qa-total-issues,
+.icon-qa-lexiqa {
+	width: 30px;
+	height: 30px;
+	margin-right: 10px;
+	margin-top: 8px;
+}
+.icon-conflicts {
+	margin-right: -2px;
+	margin-left: 15px;
+}
+.icon-qa-total-issues:before {
+	content: "\e903";
+	font-size: 25px;
+}
+.icon-conflicts:before {
+	content: "\f071";
+	font-size: 25px;
+}
+.icon-qa-issues:before {
+	content: "\ea7f";
+	font-size: 25px;
+}
+.icon-qa-lexiqa:before {
+	content: "\f044";
+	font-size: 25px;
+	margin-top: 0px;
+	display: block;
+}
+.qa-total-issues-counter {
+	top: 10px;
+	left: 50px;
+}
+.qa-issues-counter {
+	top: 10px;
+	left: 25px;
+}
+.qa-conflicts-issues-counter {
+	top: 10px;
+	left: 15px;
+}
+
+.qa-lexiqa-counter {
+	top: 10px;
+	left: 35px;
+}
+
+.icon-qa-right-arrow:before {
+	content: "\ea3c";
+	font-size: 18px;
+}
+
+.icon-qa-left-arrow:before {
+	content: "\ea40";
+	font-size: 18px;
+}
+
+.qa-move-up, .qa-move-down {
+	color: #797979;
+}
+
+.qa-move-down {
+	margin-left: 15px;
+}
+
+.qa-move-up:hover,
+.qa-move-down:hover {
+	color: black;
+}
+
+.qa-move-up:active,
+.qa-move-down:active {
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+    background-color: #eee;
+    background-image: -webkit-linear-gradient(top, #eee, #e0e0e0);
+}
+
+.qa-arrows.qa-arrows-disabled .qa-move-up,
+.qa-arrows.qa-arrows-disabled .qa-move-down,
+.qa-arrows.qa-arrows-disabled .qa-move-up:hover,
+.qa-arrows.qa-arrows-disabled .qa-move-down:hover{
+	cursor: default;
+	opacity: 0.5;
+	color: #797979;
+}
+
+

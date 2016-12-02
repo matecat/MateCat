@@ -131,6 +131,7 @@ class MultiCurlHandler {
             $this->multi_curl_info[ $tokenHash ][ 'curlinfo_size_upload' ]                 = curl_getinfo( $curl_resource, CURLINFO_SIZE_UPLOAD );
             $this->multi_curl_info[ $tokenHash ][ 'curlinfo_size_download' ]               = curl_getinfo( $curl_resource, CURLINFO_SIZE_DOWNLOAD );
             $this->multi_curl_info[ $tokenHash ][ 'curlinfo_header_size' ]                 = curl_getinfo( $curl_resource, CURLINFO_HEADER_SIZE );
+            $this->multi_curl_info[ $tokenHash ][ 'curlinfo_header_out' ]                  = curl_getinfo( $curl_resource, CURLINFO_HEADER_OUT );
             $this->multi_curl_info[ $tokenHash ][ 'http_code' ]                            = curl_getinfo( $curl_resource, CURLINFO_HTTP_CODE );
             $this->multi_curl_info[ $tokenHash ][ 'error' ]                                = curl_error( $curl_resource );
 
@@ -149,7 +150,7 @@ class MultiCurlHandler {
                                             $this->multi_curl_info[ $tokenHash ][ 'curlinfo_starttransfer_transfer_time' ]
                                     ) * 1000000 ) ) . "μs"
             );
-            $this->multi_curl_info[ $tokenHash ][ 'timing' ] = curl_getinfo( $curl_resource, CURLINFO_HTTP_CODE );
+            $this->multi_curl_info[ $tokenHash ][ 'timing' ] = $timing;
 
             //HEADERS
             if ( isset( $this->curl_headers_requests[ $tokenHash ] ) ) {
@@ -163,6 +164,7 @@ class MultiCurlHandler {
             }
 
             Log::doLog( " $tokenHash ... Called: " . $this->multi_curl_info[ $tokenHash ][ 'curlinfo_effective_url' ] . "\n Timing " . print_r( $timing, true ) );
+//            Log::doLog( " $tokenHash ... Called: " . print_r( $this->multi_curl_info[ $tokenHash ], true ) );
 
         }
 
