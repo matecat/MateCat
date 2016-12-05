@@ -14,6 +14,15 @@ var ManageActions = {
             project: projects,
         });
     },
+    /** Render the more projects
+     * @param projects
+     */
+    renderMoreProjects: function (projects) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.RENDER_MORE_PROJECTS,
+            project: projects,
+        });
+    },
 
 
 };

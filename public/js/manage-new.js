@@ -7,6 +7,7 @@ UI = {
     render: function () {
         var self = this;
         var headerMountPoint = $("header")[0];
+        UI.page = 1;
         ReactDOM.render(React.createElement(Header, {
 
         }), headerMountPoint);
@@ -14,6 +15,10 @@ UI = {
         this.getProjects().done(function (response) {
             var projects = $.parseJSON(response.data);
             self.renderProjects(projects);
+        });
+
+        $(document).on('getmoreprojects', function () {
+            self.renderMoreProjects();
         });
 
     },
@@ -24,6 +29,14 @@ UI = {
             ManageActions.renderProjects(projects);
         }
 
+    },
+
+    renderMoreProjects: function () {
+        UI.page = UI.page + 1;
+        this.getProjects().done(function (response) {
+            var projects = $.parseJSON(response.data);
+            ManageActions.renderMoreProjects(projects);
+        });
     },
     /**
      *

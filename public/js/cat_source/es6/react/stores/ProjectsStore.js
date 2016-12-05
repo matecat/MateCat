@@ -35,28 +35,34 @@ var AppDispatcher = require('../dispatcher/AppDispatcher');
 var EventEmitter = require('events').EventEmitter;
 var ManageConstants = require('../constants/ManageConstants');
 var assign = require('object-assign');
+var Immutable = require('immutable');
 
 EventEmitter.prototype.setMaxListeners(0);
-// Todo : Possiamo gestire la persistenza qui dentro con LokiJS
 
-var  _projects = [];
-
-/**
- * Update all
- */
-function updateAll(projects) {
-    _projects = projects;
-
-}
 
 
 
 
 var ProjectsStore = assign({}, EventEmitter.prototype, {
 
+    projects : null,
+
+    /**
+     * Update all
+     */
+    updateAll: function (projects) {
+        this.projects = Immutable.fromJS(projects);
+    },
+    /**
+     * Add Projects (pagination)
+     */
+    addProjects: function(projects) {
+        this.projects = this.projects.concat(Immutable.fromJS(projects));
+    },
     emitChange: function(event, args) {
         this.emit.apply(this, arguments);
-    }
+    },
+
 });
 
 
@@ -65,11 +71,15 @@ AppDispatcher.register(function(action) {
 
     switch(action.actionType) {
         case ManageConstants.RENDER_PROJECTS:
-            updateAll(action.project);
-            ProjectsStore.emitChange(action.actionType, _projects);
+            ProjectsStore.updateAll(action.project);
+            ProjectsStore.emitChange(action.actionType, ProjectsStore.projects);
+            break;
+        case ManageConstants.RENDER_MORE_PROJECTS:
+            ProjectsStore.addProjects(action.project);
+            ProjectsStore.emitChange(ManageConstants.RENDER_PROJECTS, ProjectsStore.projects);
             break;
 
     }
-});_projects
+});
 
 module.exports = ProjectsStore;

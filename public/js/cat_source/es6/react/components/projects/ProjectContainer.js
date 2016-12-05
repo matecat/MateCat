@@ -13,6 +13,7 @@ class ProjectContainer extends React.Component {
     }
 
     componentDidMount() {
+        console.log("Mounted Segment : " + this.props.project.get('id'));
     }
 
     componentWillUnmount() {
@@ -20,10 +21,16 @@ class ProjectContainer extends React.Component {
 
     componentWillUpdate() {}
 
-    componentDidUpdate() {}
+    componentDidUpdate() {
+        console.log("Updated Segment : " + this.props.project.get('id'));
+    }
 
+    shouldComponentUpdate(nextProps){
+         return nextProps.project !== this.props.project;
+    }
     render() {
-        return <div className="project-container">{this.props.project.name}</div>;
+        console.log("Render Segment : " + this.props.project.get('id'));
+        return <div className="project-container">{this.props.project.get('name')}</div>;
     }
 }
 

@@ -38,10 +38,10 @@ class ProjectsContainer extends React.Component {
 
     render() {
         var items = [];
-        this.state.projects.forEach(function (project) {
+        this.state.projects.map(function(project, i){
             var item = <Project
-                key={project.id}
-                project={project}/>
+                key={i}
+                project={project}/>;
             items.push(item);
         });
         return <div className="projects-container">{items}</div>;
