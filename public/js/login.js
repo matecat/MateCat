@@ -120,12 +120,16 @@ $.extend(APP, {
         var openFromFlash = APP.lookupFlashServiceParam("popup");
         if ( !openFromFlash ) return ;
         var modal$ = $('#modal');
+
         switch ( openFromFlash[ 0 ].value ) {
             case "passwordReset":
                 modal$.trigger('openresetpassword');
                 break;
-            case "preference":
-                modal$.trigger('openpreferences');
+            case "profile":
+                // TODO: optimized this, establish a list of events to happen after user data is loaded
+                APP.USER.loadUserData().done( function() {
+                    modal$.trigger('openpreferences');
+                });
                 break;
             case "login":
                 modal$.trigger('openlogin');

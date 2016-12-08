@@ -343,7 +343,7 @@ abstract class viewController extends controller {
         $this->template->isLoggedIn    = $this->isLoggedIn();
         $this->template->userMail      = $this->logged_user->getEmail() ;
 
-        $this->template->flashMessages = FlashMessage::flush();
+        $this->collectFlashMessages();
     }
 
     /**
@@ -419,5 +419,10 @@ abstract class viewController extends controller {
             echo "</pre>";
             exit;
         }
+    }
+
+    protected function collectFlashMessages() {
+        $messages = FlashMessage::flush() ;
+        $this->template->flashMessages = $messages ;
     }
 }
