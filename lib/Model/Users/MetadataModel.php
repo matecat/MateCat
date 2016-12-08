@@ -31,12 +31,12 @@ class MetadataModel {
         // validate
         $features = new \FeatureSet() ;
 
-        $metadataFilters = $features->filter('filterMetadataFilters', array() ) ;
-
+        $metadataFilters = $features->filter('filterUserMetadataFilters', array() ) ;
         $this->metadata = filter_var_array($this->metadata, $metadataFilters) ;
 
-        $dao = new MetadataDao() ;
+        $this->metadata = $features->filter('filterValidateUserMetadata', $this->metadata, array('user' => $this->user ) ) ;
 
+        $dao = new MetadataDao() ;
         foreach( $this->metadata as $key => $value ) {
             $dao->set($this->user->uid, $key, $value);
         }
