@@ -70,6 +70,16 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct   implements D
         return $this->last_name;
     }
 
+    public function getMetadataAsKeyValue() {
+        $dao = new \Users\MetadataDao() ;
+        $collection = $dao->allByProjectId($this->uid) ;
+        $data  = array();
+        foreach ($collection as $record ) {
+            $data[ $record->key ] = $record->value;
+        }
+        return $data;
+    }
+
     /**
      * Returns true if password matches
      *

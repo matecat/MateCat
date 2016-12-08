@@ -561,6 +561,16 @@ CREATE TABLE `translators` (
   KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
+CREATE TABLE `user_metadata` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `uid` bigint(20) NOT NULL,
+  `key` varchar(255) NOT NULL,
+  `value` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uid_and_key` (`uid`,`key`) USING BTREE,
+  KEY `uid` (`uid`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 CREATE TABLE `users` (
   `uid` bigint(20) NOT NULL AUTO_INCREMENT,
   `email` varchar(50) NOT NULL,
@@ -660,6 +670,7 @@ INSERT INTO `phinxlog` ( version ) VALUES ( '20161107094229' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161118144241' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161122093431' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161125145959' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20161207184244' );
 
 CREATE SCHEMA `matecat_conversions_log` DEFAULT CHARACTER SET utf8 ;
 USE matecat_conversions_log ;

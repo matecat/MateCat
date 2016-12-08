@@ -31,7 +31,10 @@ class UserController extends AbstractStatefulKleinController  {
                 'email' => $this->user->email,
                 'has_password' => !is_null($this->user->pass)
             ),
-            'connected_services' => ( new ConnectedService( $this->connectedServices ))->render()
+            'connected_services' => ( new ConnectedService( $this->connectedServices ))->render(),
+
+            // TODO: this is likely to be unsafe to be passed here without a whitelist.
+            'metadata' =>  $this->user->getMetadataAsKeyValue()
         ));
     }
 

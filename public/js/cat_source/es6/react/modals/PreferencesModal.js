@@ -1,11 +1,14 @@
 class PreferencesModal extends React.Component {
 
-
     constructor(props) {
         super(props);
+
         this.state = {
-            service: this.props.service
+            service: this.props.service,
+            coupon: this.props.coupon
         }
+
+        this.handleCouponChange = this.handleCouponChange.bind( this );
     }
 
     openResetPassword() {
@@ -60,6 +63,19 @@ class PreferencesModal extends React.Component {
 
     }
 
+    submitUserChanges() {
+        console.log( this.state.coupon ) ;
+
+        return $.post('/api/app/user/metadata', { metadata : {
+                coupon : this.state.coupon
+            }
+        });
+    }
+
+    handleCouponChange(event) {
+        this.setState({ coupon : event.target.value } );
+    }
+
     disableGDrive() {
         return $.post('/api/app/connected_services/' + this.state.service.id, { disabled: true } );
 
@@ -93,6 +109,9 @@ class PreferencesModal extends React.Component {
                                    onClick={this.openResetPassword.bind(this)}>Reset Password</a>;
 
         }
+
+        // find if the use has the coupon already. If he has then do not show the input field.
+
         return <div className="preferences-modal">
                     <div className="user-info-form">
                         <label htmlFor="user-login-name">Name</label><br/>
@@ -101,10 +120,18 @@ class PreferencesModal extends React.Component {
                         <input type="text" name="name" id="user-login-surname" defaultValue={this.props.user.last_name} disabled="true"/><br/>
                         <label htmlFor="user-login-name">Email</label><br/>
                         <input type="text" name="name" id="user-login-email" defaultValue={this.props.user.email} disabled="true"/><br/>
+
+                        <label htmlFor="user-coupon">Coupon</label><br/>
+                        <input type="text" name="coupon" id="user-coupon" defaultValue={this.state.coupon} value={this.state.coupon} onChange={this.handleCouponChange} /><br/>
+
                     </div>
                     <div className="user-reset-password">
                         {gdriveMessage}
                         {resetPasswordHtml}
+
+                        <a className="btn-confirm-medium"
+                                   onClick={this.submitUserChanges.bind(this)}>Save changes</a>
+
                     </div>
                     <div className="user-gdrive">
                         <div className="onoffswitch-drive">
