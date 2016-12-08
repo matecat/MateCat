@@ -67,6 +67,8 @@ class PreferencesModal extends React.Component {
         return $.post('/api/app/user/metadata', { metadata : {
                 coupon : this.state.coupon
             }
+        }).done( function( data ) {
+            APP.USER.STORE.metadata = data ;
         });
     }
 
