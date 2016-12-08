@@ -310,6 +310,7 @@ class createProjectController extends ajaxController {
             $projectStructure[ 'userIsLogged' ] = true;
             $projectStructure[ 'uid' ]          = $this->uid;
             $projectStructure[ 'id_customer' ]  = $this->userMail;
+            $projectStructure[ 'owner' ]        = $this->userMail ;
         }
 
         $projectManager = new ProjectManager( $projectStructure );
