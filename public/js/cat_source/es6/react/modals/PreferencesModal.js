@@ -64,8 +64,6 @@ class PreferencesModal extends React.Component {
     }
 
     submitUserChanges() {
-        console.log( this.state.coupon ) ;
-
         return $.post('/api/app/user/metadata', { metadata : {
                 coupon : this.state.coupon
             }
