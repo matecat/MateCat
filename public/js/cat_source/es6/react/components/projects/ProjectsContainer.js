@@ -2,10 +2,13 @@
  * React Component for the editarea.
 
  */
-var React = require('react');
+// var React = require('react');
 var ProjectsStore = require('../../stores/ProjectsStore');
 var ManageConstants = require('../../constants/ManageConstants');
 var Project = require('./ProjectContainer').default;
+var FilterProjects = require("../FilterProjects").default;
+
+
 class ProjectsContainer extends React.Component {
 
     constructor(props) {
@@ -37,14 +40,28 @@ class ProjectsContainer extends React.Component {
     componentDidUpdate() {}
 
     render() {
-        var items = [];
-        this.state.projects.map(function(project, i){
-            var item = <Project
+        var items = this.state.projects.map((project, i) => (
+            <Project
                 key={i}
-                project={project}/>;
-            items.push(item);
-        });
-        return <div className="projects-container">{items}</div>;
+                project={project}/>
+        ));
+        return <div className="content">
+                <div className="row">
+                    <div className="col s6">
+                        <h1>Projects List</h1>
+                    </div>
+                    <div className="col s3">
+                        <FilterProjects
+                            filterFunction={this.props.filterFunction}
+                        />
+                    </div>
+                </div>
+            <div id="projects">
+                    <div className="projects-container" ref={(container) => this.container = container}>
+                        {items}
+                    </div>
+                </div>
+            </div>;
     }
 }
 

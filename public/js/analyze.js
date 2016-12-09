@@ -15,7 +15,7 @@ UI = {
 		APP.fitText($('#pid'), $('#pname'), 50);
 		$(".subfile .filename").each(function() {
 			APP.fitText($(this), $(this), 50);
-		})
+		});
 
 		this.checkStatus('FAST_OK');
 		var sew = $('#standard-equivalent-words .word-number');
@@ -164,6 +164,8 @@ UI = {
 		});
 
 		this.pollData();
+
+        this.checkQueryParams();
 	},
 	performPreCheckSplitComputation: function(doStringSanitization) {
 
@@ -750,8 +752,34 @@ UI = {
         $('body').append(form);
         $('#downloadAnalysisReportForm').submit();
 
-    }
-}
+    },
+	checkQueryParams: function () {
+        var jobId = APP.getParameterByName("jobid");
+        var open = APP.getParameterByName("open");
+        var job$ = $('div[data-jid=' + jobId + ']');
+        if (jobId && open && job$ ) {
+            switch (open) {
+                case 'analysis':
+                    console.log('Open Analysis ' + jobId);
+                    job$[0].scrollIntoView( true );
+                    setTimeout(function () {
+                        $('div[data-jid=' + jobId + '] .uploadbtn.translate').trigger('click');
+                    }, 500);
+                    break;
+                case 'split':
+                    job$[0].scrollIntoView( true );
+                    var interval = setInterval(function () {
+                        if (!$('div[data-jid=' + jobId + '] .dosplit').hasClass('disabled')) {
+                            $('div[data-jid=' + jobId + '] .dosplit').trigger('click');
+                            clearInterval(interval);
+                        }
+                    }, 500);
+                    break
+            }
+        }
+
+	}
+};
 
 function fit_text_to_container(container, child) {
 	if (typeof (child) != 'undefined') {

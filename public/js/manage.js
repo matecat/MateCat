@@ -659,7 +659,7 @@ UI = {
         $.each(d, function() {
             var project = this;
             var newProject = '';
-
+			var use_prefix =(this.jobs.length > 1)? true : false;
 			newProject += '<div data-pid="'+this.id+'" data-password="' + this.password + '" class="article">'+
 	            '	<div class="head">'+
 		        '	    <h2>'+this.name+'</h2>'+
@@ -708,11 +708,11 @@ UI = {
 				'		<tbody>';
 
     		$.each(this.jobs, function() {
-            var use_prefix = (APP.objectSize(this) > 1)? true : false;
-            var index = 0;
 
-            $.each(this, function() {
-                index++;
+            var index = 1;
+
+            // $.each(this, function() {
+            //     index++;
 
                 var private_tm_keys = '';
                 var possibly_different_review_password = ( typeof this.review_password == 'undefined' ? this.password : this.review_password );
@@ -771,7 +771,7 @@ UI = {
 
 
 				newProject += newJob;
-            })
+            // })
         });
 
 			newProject +='		</tbody>'+	

@@ -10,9 +10,10 @@
     <!--<link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />-->
 
     <script type="text/javascript" src="${basepath}public/js/lib/jquery.js?build=${build_number}"></script>
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery.tablesorter-fork-mottie.js?build=${build_number}"></script>
     <script type="text/javascript" src="${basepath}public/js/lib/jquery-ui-1.8.20.custom.min.js?build=${build_number}"></script>
     <script type="text/javascript" src="${basepath}public/js/lib/jquery.hotkeys.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
+
     <script type="text/javascript" src="${basepath}public/js/common.js?build=${build_number}"></script>
     <script type="text/javascript" src="${basepath}public/js/manage-new.js?build=${build_number}"></script>
     <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
@@ -26,6 +27,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></script>
 
     <script src="${basepath}public/js/build/react.js?build=${build_number}"></script>
+
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.7/react-with-addons.min.js"></script>-->
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.7/react-dom.min.js"></script>-->
+
+
     <script src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
 
     <script type="text/javascript">
@@ -36,6 +42,37 @@
             enable_omegat: ${enable_omegat}
         };
     </script>
+    <style>
+        .slide-appear {
+            opacity    : 0;
+            transition : opacity .7s ease-in;
+        }
+
+        .slide-appear.slide-appear-active {
+            opacity : 1;
+        }
+
+           .slide-enter {
+               max-height : 0;
+               opacity    : 0;
+               transition : all .3s ease-in;
+           }
+
+        .slide-enter.slide-enter-active {
+            max-height : 1000px;
+            opacity : 1;
+        }
+
+           .slide-leave {
+               max-height : 1000px;
+               transition : all .3s ease-out;
+           }
+
+        .slide-leave.slide-leave-active {
+            max-height : 0;
+        }
+
+    </style>
 
 </head>
 
@@ -57,9 +94,7 @@
 
     <!--	<h1>Field test - 1</h1> -->
 
-    <h1>Projects List</h1>
 
-    <div id="projects"></div>
 
 </div>
 

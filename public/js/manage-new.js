@@ -2,42 +2,95 @@ UI = null;
 
 UI = {
     init: function () {
-
+        this.Search = {};
+        this.performingSearchRequest = false;
+        this.filterProjectsFromName = this.filterProjectsFromName.bind(this);
+        this.renderMoreProjects = this.renderMoreProjects.bind(this);
+        this.closeSearchCallback = this.closeSearchCallback.bind(this);
+        this.filterProjectsFromStatus = this.filterProjectsFromStatus.bind(this);
     },
     render: function () {
         var self = this;
         var headerMountPoint = $("header")[0];
-        UI.page = 1;
+        this.Search.currentPage = 1;
         ReactDOM.render(React.createElement(Header, {
-
+            searchFn: _.debounce(function(name) {
+                            self.filterProjectsFromName(name);
+                        }, 300),
+            closeSearchCallback: this.closeSearchCallback
         }), headerMountPoint);
 
         this.getProjects().done(function (response) {
             var projects = $.parseJSON(response.data);
             self.renderProjects(projects);
         });
-
-        $(document).on('getmoreprojects', function () {
-            self.renderMoreProjects();
-        });
-
+        window.addEventListener('scroll', this.scrollDebounceFn());
     },
     renderProjects: function (projects) {
         if ( !this.ProjectsContainer ) {
-            var mountPoint = $("#projects")[0];
-            this.ProjectsContainer = ReactDOM.render(React.createElement(ProjectsContainer, {}), mountPoint);
+            var mountPoint = $("#contentBox")[0];
+            this.ProjectsContainer = ReactDOM.render(React.createElement(ProjectsContainer, {
+                filterFunction: this.filterProjectsFromStatus
+            }), mountPoint);
             ManageActions.renderProjects(projects);
         }
 
     },
 
     renderMoreProjects: function () {
-        UI.page = UI.page + 1;
+        UI.Search.currentPage = UI.Search.currentPage + 1;
         this.getProjects().done(function (response) {
             var projects = $.parseJSON(response.data);
             ManageActions.renderMoreProjects(projects);
         });
     },
+
+    filterProjectsFromName: function(name) {
+        console.log("Search " + name);
+        if (!this.performingSearchRequest) {
+            var self = this;
+            this.performingSearchRequest = true;
+            var filter = {
+                pn: name
+            };
+            this.Search.filter = $.extend( this.Search.filter, filter );
+            UI.Search.currentPage = 1;
+            this.getProjects().done(function (response) {
+                var projects = $.parseJSON(response.data);
+                ManageActions.renderProjects(projects);
+                self.performingSearchRequest = false;
+            });
+
+        }
+    },
+
+    filterProjectsFromStatus: function(status) {
+        var self = this;
+        var filter = {
+            status: status
+        };
+        this.Search.filter = $.extend( this.Search.filter, filter );
+        UI.Search.currentPage = 1;
+        this.getProjects().done(function (response) {
+            var projects = $.parseJSON(response.data);
+            ManageActions.renderProjects(projects);
+        });
+
+
+    },
+
+    closeSearchCallback: function () {
+        UI.Search.currentPage = 1;
+        if ( this.Search.filter.pn ) {
+            delete this.Search.filter.pn;
+        }
+        this.getProjects().done(function (response) {
+            var projects = $.parseJSON(response.data);
+            ManageActions.renderProjects(projects);
+        });
+    },
+
+
     /**
      *
      * @param res Job or Project: obj, prj
@@ -71,7 +124,7 @@ UI = {
             res: 		res,            //Project or Job:
             id:			id,             // Job Id
             password:   password,
-            page:		UI.page,        //Tha pagination ??
+            page:		UI.Search.currentPage,        //Tha pagination ??
             step:		UI.pageStep,    //??
             only_if:	only_if,        // ??
             undo:		0               // ??
@@ -109,7 +162,7 @@ UI = {
             res: 		res,
             id:			id,
             password:   password,
-            page:		UI.page,
+            page:		UI.Search.currentPage,
             step:		UI.pageStep,
             undo:		1
         };
@@ -162,7 +215,7 @@ UI = {
         var d = {
             action: 'getProjects',
             project: id,
-            page:	UI.page
+            page:	UI.Search.currentPage
         };
         // Add filters ??
         ar = $.extend(d,{});
@@ -181,15 +234,16 @@ UI = {
      * Retrieve Projects. Passing filters is possible to retrieve projects
      */
     getProjects: function() {
-        var d = {
+        var data = {
             action: 'getProjects',
-            page:	UI.page
+            page:	UI.Search.currentPage,
+            filter: (!$.isEmptyObject(UI.Search.filter)) ? 1 : 0,
         };
         // Filters
-        ar = $.extend(d,{});
+        data = $.extend(data,UI.Search.filter);
 
         return APP.doRequest({
-            data: ar,
+            data: data,
             success: function(d){
                 data = $.parseJSON(d.data);
                 if( typeof d.errors != 'undefined' && d.errors.length ){
@@ -226,10 +280,23 @@ UI = {
             },
             success : function ( data ) {}
         });
+    },
+    scrollDebounceFn: function() {
+        var self = this;
+        return _.debounce(function() {
+            self.handleScroll();
+        }, 300)
+    },
+
+    handleScroll: function() {
+        if($(window).scrollTop() + $(window).height() > $(document).height() - 200) {
+            console.log("Scroll end");
+            this.renderMoreProjects();
+        }
     }
 };
 
 $(document).ready(function(){
-    UI.render();
     UI.init();
+    UI.render();
 });
