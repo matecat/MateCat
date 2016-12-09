@@ -21,11 +21,6 @@ abstract class AbstractEmail
     /**
      * @return array
      */
-    abstract protected function _getLayoutVariables();
-
-    /**
-     * @return array
-     */
     abstract protected function _getTemplateVariables();
 
 
@@ -113,5 +108,12 @@ abstract class AbstractEmail
         return preg_replace( "#<br[^>]*>#i", "\r\n", $messageBody );
     }
 
+    protected function _getLayoutVariables() {
+        return array(
+            'title' => 'MateCat',
+            'messageBody' => $this->_buildMessageContent(),
+            'closingLine' => "Kind regards, "
+        );
+    }
 
 }
