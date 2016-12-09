@@ -93,6 +93,8 @@ class oauthResponseHandlerController extends viewController{
             $project->tryToRedeem()  ;
 
             if ( $newUser ) {
+                $email = new \Email\WelcomeEmail($user) ;
+                $email->send() ;
                 FlashMessage::set('popup', 'profile', FlashMessage::SERVICE);
             }
 		}
