@@ -125,7 +125,6 @@ class RegisterModal extends React.Component {
             generalErrorHtml = <div><span style={ {color: 'red',fontSize: '14px'} } className="text">{this.state.generalError}</span><br/></div>;
         }
         return <div className="register-modal">
-            <h2>Register with Google Login</h2>
             <a className="google-login-button btn-confirm-medium" onClick={this.googole_popup.bind(this)}></a>
             <p>By clicking you accept <a href="https://www.matecat.com/terms/" target="_blank">terms and conditions</a></p>
             <div className="register-form-container">
@@ -142,7 +141,7 @@ class RegisterModal extends React.Component {
                 <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password")}
                            type="password" placeholder="Password" name="password" errorText={this.errorFor("password")} tabindex={4}
                            onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
-                <br />
+              
                 <input type="checkbox" id="check-conditions" name="terms" ref={(input) => this.textInput = input} onChange={this.changeCheckbox.bind(this)} tabIndex={5}/>
                 <label htmlFor="check-conditions" style={this.checkStyle}>Accept <a href="/terms" target="_blank">terms and conditions</a></label><br/>
                 <a className="register-submit btn-confirm-medium"
