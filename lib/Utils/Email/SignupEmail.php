@@ -19,6 +19,8 @@ class SignupEmail extends AbstractEmail
      */
     private $user ;
 
+    private $title = 'Confirm your registration with MateCat' ;
+
     public function __construct( \Users_UserStruct $user ) {
 
         $this->user = $user ;
@@ -29,7 +31,7 @@ class SignupEmail extends AbstractEmail
     public function send() {
         $recipient  = array( $this->user->email, $this->user->fullName() );
 
-        $this->doSend( $recipient, 'Welcome to MateCat!',
+        $this->doSend( $recipient, $this->title,
             $this->_buildHTMLMessage(),
             $this->_buildTxtMessage( $this->_buildMessageContent() )
         );
@@ -44,9 +46,19 @@ class SignupEmail extends AbstractEmail
     }
 
     protected function _getLayoutVariables() {
-        return array(
-            'title' => 'Welcome to Matecat',
-            'messageBody' => $this->_buildMessageContent()
-        );
+        $vars = parent::_getLayoutVariables();
+        $vars['title'] = $this->title ;
+
+        return $vars ;
+    }
+
+    protected function _getDefaultMailConf() {
+        $mailConf = parent::_getDefaultMailConf();
+
+        $mailConf[ 'from' ]       = 'noreply@matecat.com';
+        $mailConf[ 'sender' ]     = 'noreply@matecat.com';
+        $mailConf[ 'returnPath' ] = 'noreply@matecat.com';
+
+        return $mailConf ;
     }
 }

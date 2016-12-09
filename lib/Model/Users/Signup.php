@@ -4,6 +4,7 @@ namespace Users ;
 
 use Email\ForgotPasswordEmail;
 use Email\SignupEmail;
+use Email\WelcomeEmail;
 use Exceptions\ValidationError;
 use Users_UserStruct ;
 use Utils ;
@@ -141,6 +142,9 @@ class Signup {
         $user->confirmation_token = null ;
 
         Users_UserDao::updateStruct( $user, array('fields' => array( 'confirmation_token', 'email_confirmed_at' ) ) ) ;
+
+        $email = new WelcomeEmail( $user ) ;
+        $email->send() ;
 
         AuthCookie::setCredentials($user->email, $user->uid);
 

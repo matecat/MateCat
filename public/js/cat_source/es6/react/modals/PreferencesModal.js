@@ -105,7 +105,7 @@ class PreferencesModal extends React.Component {
         }
         var resetPasswordHtml = '';
         if ( this.props.user.has_password ) {
-            resetPasswordHtml = <a className="reset-password btn-confirm-medium"
+            resetPasswordHtml = <a className="reset-password pull-right"
                                    onClick={this.openResetPassword.bind(this)}>Reset Password</a>;
 
         }
@@ -114,25 +114,36 @@ class PreferencesModal extends React.Component {
 
         return <div className="preferences-modal">
                     <div className="user-info-form">
-                        <label htmlFor="user-login-name">Name</label><br/>
-                        <input type="text" name="name" id="user-login-name" defaultValue={this.props.user.first_name} disabled="true"/><br/>
-                        <label htmlFor="user-login-name">Surname</label><br/>
-                        <input type="text" name="name" id="user-login-surname" defaultValue={this.props.user.last_name} disabled="true"/><br/>
-                        <label htmlFor="user-login-name">Email</label><br/>
-                        <input type="text" name="name" id="user-login-email" defaultValue={this.props.user.email} disabled="true"/><br/>
 
-                        <label htmlFor="user-coupon">Coupon</label><br/>
-                        <input type="text" name="coupon" id="user-coupon" defaultValue={this.state.coupon} value={this.state.coupon} onChange={this.handleCouponChange} /><br/>
+                        <div className="half-form half-form-left">
+                            <label htmlFor="user-login-name">Name</label><br/>
+                            <input type="text" name="name" id="user-login-name" defaultValue={this.props.user.first_name} disabled="true"/><br/>
+                        </div>
+                        <div className="half-form half-form-right">
+                            <label htmlFor="user-login-name">Surname</label><br/>
+                            <input type="text" name="name" id="user-login-surname" defaultValue={this.props.user.last_name} disabled="true"/><br/>
+                         </div>
+
+                            <label htmlFor="user-login-name">Email</label><br/>
+                            <input type="text" name="name" id="user-login-email" defaultValue={this.props.user.email} disabled="true"/><br/>
+
+
+                        <div className="half-form half-form-left">
+
+                            <label htmlFor="user-coupon">Coupon</label><br/>
+                            <input type="text" name="coupon" id="user-coupon" defaultValue={this.state.coupon} value={this.state.coupon} onChange={this.handleCouponChange} /><br/>
+                        </div>
+                        <div className="half-form half-form-right">
+                            <a className="btn-confirm-medium" onClick={this.submitUserChanges.bind(this)}>Save changes</a>
+                        </div>
 
                     </div>
+
                     <div className="user-reset-password">
                         {gdriveMessage}
                         {resetPasswordHtml}
-
-                        <a className="btn-confirm-medium"
-                                   onClick={this.submitUserChanges.bind(this)}>Save changes</a>
-
                     </div>
+
                     <div className="user-gdrive">
                         <div className="onoffswitch-drive">
                             <input type="checkbox" name="onoffswitch" onChange={this.checkboxChange.bind(this)}
@@ -149,7 +160,7 @@ class PreferencesModal extends React.Component {
                         <label>{services_label}</label>
                     </div>
                     <br/>
-                    <div id='logoutlink' onClick={this.logoutUser.bind(this)}>Logout</div>
+                    <div id='logoutlink' className="pull-right" onClick={this.logoutUser.bind(this)}>Logout</div>
             </div>;
     }
 }

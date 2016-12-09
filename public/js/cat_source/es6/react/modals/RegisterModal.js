@@ -11,9 +11,9 @@ class RegisterModal extends React.Component {
         this.state = {
             showErrors: false,
             validationErrors: {},
-            generalError: ''
+            generalError: '',
+            requestRunning: false
         };
-        this.requestRunning = false;
         this.state.validationErrors = RuleRunner.run(this.state, fieldValidations);
         this.handleFieldChanged = this.handleFieldChanged.bind(this);
         this.handleSubmitClicked = this.handleSubmitClicked.bind(this);
@@ -44,25 +44,24 @@ class RegisterModal extends React.Component {
             };
             return null;
         }
-        if ( this.requestRunning ) {
+        if ( this.state.requestRunning ) {
             return false;
         }
-        this.requestRunning = true;
+        this.setState({requestRunning: true});
         this.checkRedeemProject().then(this.sendRegisterData().done(function (data) {
             $('#modal').trigger('confirmregister', [{emailAddress: self.state.emailAddress}]);
         }).fail(function (response) {
-
+            var generalErrorText;
             if (response.responseText.length) {
                 var data = JSON.parse( response.responseText );
-                self.setState({
-                    generalError: data.error.message
-                });
+                generalErrorText = data.error.message
             } else {
-                self.setState({
-                    generalError: 'There was a problem saving the data, please try again later or contact support.'
-                });
+                generalErrorText = 'There was a problem saving the data, please try again later or contact support.'
             }
-            self.requestRunning = false;
+            self.setState({
+                generalError: generalErrorText,
+                requestRunning: false
+            });
         }));
     }
 
@@ -124,9 +123,10 @@ class RegisterModal extends React.Component {
         if (this.state.generalError.length) {
             generalErrorHtml = <div><span style={ {color: 'red',fontSize: '14px'} } className="text">{this.state.generalError}</span><br/></div>;
         }
+        var loaderClass = (this.state.requestRunning) ? 'show' : '';
+
         return <div className="register-modal">
-            <h2>Register with Google Login</h2>
-            <a className="google-login-button btn-confirm-medium" onClick={this.googole_popup.bind(this)}></a>
+            <a className="google-login-button btn-confirm-medium" onClick={this.googole_popup.bind(this)}/>
             <p>By clicking you accept <a href="https://www.matecat.com/terms/" target="_blank">terms and conditions</a></p>
             <div className="register-form-container">
                 <h2>Register with your email</h2>
@@ -142,12 +142,12 @@ class RegisterModal extends React.Component {
                 <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password")}
                            type="password" placeholder="Password" name="password" errorText={this.errorFor("password")} tabindex={4}
                            onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
-                <br />
+              
                 <input type="checkbox" id="check-conditions" name="terms" ref={(input) => this.textInput = input} onChange={this.changeCheckbox.bind(this)} tabIndex={5}/>
                 <label htmlFor="check-conditions" style={this.checkStyle}>Accept <a href="/terms" target="_blank">terms and conditions</a></label><br/>
                 <a className="register-submit btn-confirm-medium"
                    onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}
-                   onClick={this.handleSubmitClicked} tabIndex={6}> Register Now </a>
+                   onClick={this.handleSubmitClicked} tabIndex={6}><span className={"button-loader " + loaderClass}/> Register Now </a>
                 {generalErrorHtml}
                <p>
                 <a style={{cursor:'pointer'}} onClick={this.openLoginModal}>Already registered? Login</a>

@@ -2331,6 +2331,7 @@ input.email-export-tmx {
     margin: 16px 0 16px 20px;
     display: inline-block;
     text-align: center;
+    position: relative;
 }
 
 .btn-confirm-medium:hover {
@@ -3315,11 +3316,22 @@ column-count: 3;
 
 }
 
-@media (max-height: 700px) {
-    .register-modal,
-    .preferences-modal {
+
+@media (max-height: 500px) {
+    .register-modal
+   {
     overflow-x: hidden;
     height: 300px;
+    overflow-y: scroll;
+}
+
+}
+
+@media (max-height: 300px) {
+
+    .preferences-modal {
+    overflow-x: hidden;
+    height: 200px;
     overflow-y: scroll;
 }
 
@@ -4689,7 +4701,8 @@ span.share-popup-item-email {
 /***********************/
 /***** Login Footer ****/
 
-#logoutlink {
+#logoutlink,
+.reset-password {
     margin-bottom: 20px;
     text-decoration: underline;
     float: left;
@@ -4766,9 +4779,8 @@ footer nav ul li {
 .user-reset-password,
 .user-gdrive {
     margin: 0 auto;
-    width: 97%;
+    width: 100%;
     float: left;
-    min-height: 60px;
     position:relative;
 }
 
@@ -4777,20 +4789,18 @@ footer nav ul li {
     padding: 10px 0 0 10px;
     border-radius: 4px;
     background: #f8f6f6;
-    width: 95%;
+    width: 98%;
     min-height: 40px;
     margin-bottom: 25px;
+    margin-top: 20px;
 }
 
-.user-reset-password {
-    min-height: 80px;
-}
 
 
 
 .user-info-form label {
     float: left;
-    margin-top: 5px;
+    margin-top: 7px;
     font-size: 16px;
 }
 
@@ -4803,7 +4813,7 @@ footer nav ul li {
     position: relative;
     width: 60px;
     zoom: 0.7;
-    margin-top: 8px;
+    margin-top: 6px;
     float: left;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -4814,7 +4824,10 @@ footer nav ul li {
     line-height: 32px;
     float: left;
     margin-left: 65px;
-    font-size: 18px;
+    font-size: 16px;
+    max-width: 70%;
+    text-align: left;
+    word-wrap: break-word;
 }
 .user-menu-flat {
     margin-right: 8px;
@@ -4882,16 +4895,21 @@ footer nav ul li {
 
 
 .google-login-button {
-    background: url(../img/btn_gg_normal.png) no-repeat;
+    background: url(../img/btn_gg_sprite.png) no-repeat; 
+    background-position: 0 0;   
 }
 
 .google-login-button:hover {
-    background: url(../img/btn_gg_pressed.png) no-repeat;
-    box-shadow: none;
+    background: url(../img/btn_gg_sprite.png) no-repeat;  
+        background-position: 0 -101px;   
+        box-shadow: none;
+  
 }
 
 .google-login-button:focus {
-    background: url(../img/btn_gg_focus.png) no-repeat;
+    background: url(../img/btn_gg_sprite.png) no-repeat;
+        background-position: 0 -50px;   
+    
 }
 
 .google-login-button,
@@ -5010,6 +5028,24 @@ footer nav ul li {
     background: rgb(195, 224, 195);
     margin-top: 20px;
 }
+
+.button-loader {
+    background: url(../img/loader.gif) center center no-repeat;
+    width: 20px;
+    height: 20px;
+    visibility: hidden;
+    position: absolute;
+    background-size: 20px 20px;
+    left: 15px;
+    opacity:0;
+}
+.button-loader.show {
+    visibility: visible;
+    opacity:1;
+    -webkit-transition: all 0.3s ease-in;
+    -moz-transition: all 0.3s ease-in;
+    -o-transition: all 0.3s ease-in;
+}
 /***********************/
 
 /********Modal window ****/
@@ -5094,8 +5130,16 @@ footer nav ul li {
     text-align: center;
 }
 
+.matecat-modal-content .half-form-left {
+    margin-right: 4%;
+}
+.matecat-modal-content .half-form {
+    width: 48%;
+    float: left;
+}
+
 .preferences-modal {
-    padding: 20px;
+    padding: 10px 20px;
 }
 
 /* The Close Button */
@@ -5114,7 +5158,7 @@ footer nav ul li {
 }
 
 div#matecat-modal p {
-    line-height: 27px;
+    line-height: 17px;
 }
 
 /***********************/
