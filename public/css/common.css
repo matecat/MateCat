@@ -2331,6 +2331,7 @@ input.email-export-tmx {
     margin: 16px 0 16px 20px;
     display: inline-block;
     text-align: center;
+    position: relative;
 }
 
 .btn-confirm-medium:hover {
@@ -4700,7 +4701,8 @@ span.share-popup-item-email {
 /***********************/
 /***** Login Footer ****/
 
-#logoutlink {
+#logoutlink,
+.reset-password {
     margin-bottom: 20px;
     text-decoration: underline;
     float: left;
@@ -4823,6 +4825,9 @@ footer nav ul li {
     float: left;
     margin-left: 65px;
     font-size: 16px;
+    max-width: 70%;
+    text-align: left;
+    word-wrap: break-word;
 }
 .user-menu-flat {
     margin-right: 8px;
@@ -5022,6 +5027,24 @@ footer nav ul li {
     padding: 10px 15px;
     background: rgb(195, 224, 195);
     margin-top: 20px;
+}
+
+.button-loader {
+    background: url(../img/loader.gif) center center no-repeat;
+    width: 20px;
+    height: 20px;
+    visibility: hidden;
+    position: absolute;
+    background-size: 20px 20px;
+    left: 15px;
+    opacity:0;
+}
+.button-loader.show {
+    visibility: visible;
+    opacity:1;
+    -webkit-transition: all 0.3s ease-in;
+    -moz-transition: all 0.3s ease-in;
+    -o-transition: all 0.3s ease-in;
 }
 /***********************/
 
