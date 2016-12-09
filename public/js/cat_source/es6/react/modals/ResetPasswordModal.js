@@ -11,9 +11,9 @@ class ResetPasswordModal extends React.Component {
         this.state = {
             showErrors: false,
             validationErrors: {},
-            generalError: ''
+            generalError: '',
+            requestRunning: false
         };
-        this.requestRunning = false;
         this.state.validationErrors = RuleRunner.run(this.state, fieldValidations);
         this.handleFieldChanged = this.handleFieldChanged.bind(this);
         this.handleSubmitClicked = this.handleSubmitClicked.bind(this);
@@ -37,10 +37,10 @@ class ResetPasswordModal extends React.Component {
         this.setState({showErrors: true});
         if($.isEmptyObject(this.state.validationErrors) == false) return null;
 
-        if ( this.requestRunning ) {
+        if ( this.state.requestRunning ) {
             return false;
         }
-        this.requestRunning = true;
+        this.setState({requestRunning: true});
 
         this.sendResetPassword().done(function (data) {
             $('#modal').trigger('opensuccess', [{
@@ -48,17 +48,16 @@ class ResetPasswordModal extends React.Component {
                 text: 'Your password has been changed.'
             }]);
         }).fail(function (response) {
+            var text;
             if (response.responseText.length) {
-                var data = JSON.parse( response.responseText );
-                self.setState({
-                    generalError: data
-                });
+                text =  JSON.parse( response.responseText );
             } else {
-                self.setState({
-                    generalError: 'There was a problem saving the data, please try again later or contact support.'
-                });
+                text = 'There was a problem saving the data, please try again later or contact support.'
             }
-            self.requestRunning = false;
+            self.setState({
+                generalError: text,
+                requestRunning: false
+            });
         });
 
     }
@@ -87,6 +86,8 @@ class ResetPasswordModal extends React.Component {
         if (this.state.generalError.length) {
             generalErrorHtml = <span style={ {color: 'red',fontSize: '14px'} } className="text">{this.state.generalError}</span>;
         }
+        var loaderClass = (this.state.requestRunning) ? 'show' : '';
+
         return <div className="reset-password-modal">
             <p>Enter the new password</p>
             <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password1")}
@@ -97,7 +98,7 @@ class ResetPasswordModal extends React.Component {
                        onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
             <a className="reset-password-button btn-confirm-medium" onClick={this.handleSubmitClicked}
                onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}
-               tabIndex="3"> Reset </a> <br/>
+               tabIndex="3"><span className={"button-loader " + loaderClass}/> Reset </a> <br/>
             {generalErrorHtml}
         </div>;
     }

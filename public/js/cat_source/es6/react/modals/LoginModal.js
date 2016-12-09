@@ -11,9 +11,9 @@ class LoginModal extends React.Component {
         this.state = {
             showErrors: false,
             validationErrors: {},
-            generalError: ''
+            generalError: '',
+            requestRunning: false
         };
-        this.requestRunning = false;
         this.state.validationErrors = RuleRunner.run(this.state, fieldValidations);
         this.handleFieldChanged = this.handleFieldChanged.bind(this);
         this.handleSubmitClicked = this.handleSubmitClicked.bind(this);
@@ -51,24 +51,24 @@ class LoginModal extends React.Component {
         var self = this;
         this.setState({showErrors: true});
         if($.isEmptyObject(this.state.validationErrors) == false) return null;
-        if ( this.requestRunning ) {
+        if ( this.state.requestRunning ) {
             return false;
         }
-        this.requestRunning = true;
+        this.setState({requestRunning: true});
         this.checkRedeemProject().then(this.sendLoginData().done(function (data) {
             window.location.reload();
         }).fail(function (response) {
+            var text;
             if (response.responseText.length) {
-                var data = JSON.parse( response.responseText );
-                self.setState({
-                    generalError: data
-                });
+                text = JSON.parse( response.responseText );
+
             } else {
-                self.setState({
-                    generalError: 'Login failed.'
-                });
+                text = 'Login failed.'
             }
-            self.requestRunning = false;
+            self.setState({
+                generalError: text,
+                requestRunning: false
+            });
         }));
 
     }
@@ -107,6 +107,9 @@ class LoginModal extends React.Component {
         if (this.state.generalError.length) {
             generalErrorHtml = <span style={ {color: 'red',fontSize: '14px'} } className="text">{this.state.generalError}</span>;
         }
+
+        var loaderClass = (this.state.requestRunning) ? 'show' : '';
+
         var htmlMessage = <div className="login-container-right">
             <h2>Sign up now to:</h2>
             <ul className="">
@@ -141,7 +144,7 @@ class LoginModal extends React.Component {
                                        onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
                             <a className="login-button btn-confirm-medium"
                                onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}
-                               onClick={this.handleSubmitClicked.bind()} tabIndex={3}> Sign in </a>
+                               onClick={this.handleSubmitClicked.bind()} tabIndex={3}><span className={"button-loader " + loaderClass}/> Sign in </a>
                             {generalErrorHtml}
                             <br/>
                             <span className="forgot-password" onClick={this.openForgotPassword}>Forgot password?</span>

@@ -10,9 +10,9 @@ class ForgotPasswordModal extends React.Component {
         this.state = {
             showErrors: false,
             validationErrors: {},
-            generalError: ''
+            generalError: '',
+            requestRunning: false
         };
-        this.requestRunning = false;
 
         this.state.validationErrors = RuleRunner.run(this.state, fieldValidations);
         this.handleFieldChanged = this.handleFieldChanged.bind(this);
@@ -39,10 +39,10 @@ class ForgotPasswordModal extends React.Component {
         var self = this;
         this.setState({showErrors: true});
         if($.isEmptyObject(this.state.validationErrors) == false) return null;
-        if ( this.requestRunning ) {
+        if ( this.state.requestRunning ) {
             return false;
         }
-        this.requestRunning = true;
+        this.setState({requestRunning: true});
         this.checkRedeemProject().then(this.sendForgotPassword().done(function (data) {
             $('#modal').trigger('opensuccess', [{
                 title: 'Forgot Password',
@@ -50,16 +50,16 @@ class ForgotPasswordModal extends React.Component {
             }]);
         }).fail(function (response) {
             var data = JSON.parse( response.responseText );
+            var text;
             if (data) {
-                self.setState({
-                    generalError: data
-                });
+                text = data;
             } else {
-                self.setState({
-                    generalError: 'There was a problem saving the data, please try again later or contact support.'
-                });
+                text = 'There was a problem saving the data, please try again later or contact support.'
             }
-            self.requestRunning = false;
+            self.setState({
+                generalError: text,
+                requestRunning: false
+            });
         }));
     }
 
@@ -97,6 +97,8 @@ class ForgotPasswordModal extends React.Component {
         if (this.state.generalError.length) {
             generalErrorHtml = <div><span style={ {color: 'red',fontSize: '14px'} } className="text">{this.state.generalError}</span><br/></div>;
         }
+        var loaderClass = (this.state.requestRunning) ? 'show' : '';
+
         return <div className="forgot-password-modal">
             <p>Enter the email address associated with your account and we'll send you the link to reset your password.</p>
             <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("emailAddress")}
@@ -104,7 +106,7 @@ class ForgotPasswordModal extends React.Component {
                        onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
             <a className="send-password-button btn-confirm-medium"
                onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}
-               onClick={this.handleSubmitClicked.bind()} tabIndex={2}> Send </a>
+               onClick={this.handleSubmitClicked.bind()} tabIndex={2}><span className={"button-loader " + loaderClass}/> Send </a>
             {generalErrorHtml}
             <br/>
             <span className="forgot-password" onClick={this.openLoginModal}>Back to login</span>
