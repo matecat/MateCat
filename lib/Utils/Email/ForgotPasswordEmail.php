@@ -28,7 +28,7 @@ class  ForgotPasswordEmail extends AbstractEmail
     public function send() {
         $recipient  = array( $this->user->email, $this->user->fullName() );
 
-        $this->doSend( $recipient, 'Password reset',
+        $this->doSend( $recipient, 'Password Reset',
             $this->_buildHTMLMessage(),
             $this->_buildTxtMessage( $this->_buildMessageContent() )
         );
