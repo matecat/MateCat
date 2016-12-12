@@ -13,6 +13,8 @@ use Users\Signup;
 class  ForgotPasswordEmail extends AbstractEmail
 {
 
+    protected $title = 'Password reset' ;
+
     /**
      * @var \Users_UserStruct
      */
@@ -28,7 +30,7 @@ class  ForgotPasswordEmail extends AbstractEmail
     public function send() {
         $recipient  = array( $this->user->email, $this->user->fullName() );
 
-        $this->doSend( $recipient, 'Password Reset',
+        $this->doSend( $recipient, $this->title ,
             $this->_buildHTMLMessage(),
             $this->_buildTxtMessage( $this->_buildMessageContent() )
         );
@@ -42,10 +44,9 @@ class  ForgotPasswordEmail extends AbstractEmail
     }
 
     protected function _getLayoutVariables() {
-        return array(
-            'title' => 'Password reset',
-            'messageBody' => $this->_buildMessageContent()
-        );
+        $vars  = parent::_getLayoutVariables();
+        $var['title'] = $this->title ;
+        return $vars ;
     }
 
 
