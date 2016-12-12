@@ -37,11 +37,6 @@ class ajaxUtilsController extends ajaxController {
 
         switch ( $this->__postInput['exec'] ) {
 
-            case 'stayAnonymous':
-                unset( $_SESSION[ '_anonym_pid' ] );
-                unset( $_SESSION[ 'incomingUrl' ] );
-                unset( $_SESSION[ '_newProject' ] );
-                break;
 			case 'ping':
                 $db = Database::obtain();
                 $db->query("SELECT 1");
@@ -73,9 +68,7 @@ class ajaxUtilsController extends ajaxController {
                 break;
             case 'clearNotCompletedUploads':
                 try {
-                    if( GDrive::sessionHasFiles( $_SESSION ) ) {
-                        unset( $_SESSION[ \GDrive::SESSION_FILE_LIST ] );
-                    }
+                    ConnectedServices\GDrive\Session::cleanupSessionFiles();
 
                     Utils::deleteDir( INIT::$UPLOAD_REPOSITORY . '/' . $_COOKIE[ 'upload_session' ] . '/' );
                 } catch ( Exception $e ) {

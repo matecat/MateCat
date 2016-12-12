@@ -22,7 +22,7 @@ class oauthResponseHandlerController extends viewController{
 		$this->user_logged = true;
 
 		$this->client = OauthClient::getInstance()->getClient();
-                $this->client->setAccessType( "offline" );
+        $this->client->setAccessType( "offline" );
 
 		$oauthTokenEncryption = OauthTokenEncryption::getInstance();
 
@@ -38,7 +38,7 @@ class oauthResponseHandlerController extends viewController{
 		$code         = $__postInput[ 'code' ];
 		$error        = $__postInput[ 'error' ];
 
-		if(isset($code) && $code){
+		if (isset($code) && $code) {
 			$this->client->authenticate($code);
 
 			$user = $plus->userinfo->get();
@@ -54,22 +54,11 @@ class oauthResponseHandlerController extends viewController{
 		else if (isset($error)){
 			$this->user_logged = false;
 		}
-
-		//get url to redirect to
-		//add default if not set
-		if(!isset($_SESSION['incomingUrl']) or empty($_SESSION['incomingUrl'])){
-			$_SESSION['incomingUrl']='/';
-		}
-
-		$this->redirectUrl = $_SESSION['incomingUrl'];
-
-		//remove no more used var
-		unset($_SESSION['incomingUrl']);
 	}
 
 	public function doAction(){
 
-		if($this->user_logged && !empty($this->userData)){
+		if ($this->user_logged && !empty($this->userData)) {
 			//user has been validated, data was by Google
 			//check if user exists in db; if not, create
             //
@@ -81,28 +70,21 @@ class oauthResponseHandlerController extends viewController{
 				die("error in insert");
 			}
 
-			//set stuff
 			AuthCookie::setCredentials($this->userData['email'], $result['uid']);
-			//$_SESSION['cid'] = $this->userdata['email'];
 
-                        $_SESSION[ 'uid' ] = $result[ 'uid' ];
+            $_SESSION[ 'cid' ]  = $this->userData['email'];
+            $_SESSION[ 'uid' ]  = $result[ 'uid' ];
 
-			$_theresAnonymousProject = ( isset($_SESSION['_anonym_pid']) && !empty($_SESSION['_anonym_pid']) );
-			$_incomingFromNewProject = ( isset($_SESSION['_newProject']) && !empty($_SESSION['_newProject']) );
+            $dao = new Users_UserDao();
+            $user = $dao->getByUid( $result['uid'] ) ;
 
-			if( $_theresAnonymousProject && $_incomingFromNewProject ){
-				//update anonymous project with user credentials
-				$result = updateProjectOwner( $this->userData['email'], $_SESSION['_anonym_pid'] );
-			}
+            $project = new \Users\RedeemableProject($user, $_SESSION)  ;
+            $project->tryToRedeem()  ;
 		}
-
-		//destroy session info of last anonymous project
-		unset($_SESSION['_anonym_pid']);
-		unset($_SESSION['_newProject']);
 	}
 
-	public function setTemplateVars() {
-		$this->template->javascript_loader="javascript:doload('".$this->redirectUrl."');";
-	}
-
+	public function setTemplateVars()
+    {
+        // TODO: Implement setTemplateVars() method.
+    }
 }

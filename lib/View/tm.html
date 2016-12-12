@@ -170,7 +170,7 @@
                                 <h3 class="pull-left">Inactive Resources</h3>
 
                                 <tal:block tal:condition="php: empty(logged_user)">
-                                    <p><a id='sign-in-o' tal:attributes="data-oauth authURL" href="#" class="btn btn-grey pull-left" >Login to see your TM</a></p>
+                                    <p><a id='sign-in-o' href="#" class="btn btn-grey pull-left" >Login to see your TM</a></p>
                                 </tal:block>
 
                                 <tal:block tal:condition="php: !empty(logged_user)">
@@ -407,7 +407,7 @@
                             </table>
                             <tal:block tal:condition="php: empty(logged_user)">
                                 <tal:block tal:condition="php: page == 'home'">
-                                <p><a id='sign-in-o-mt' tal:attributes="data-oauth authURL" href="#" class="btn btn-grey pull-left" >Login to see your custom MT engines</a></p>
+                                <p><a id='sign-in-o-mt' href="#" class="btn btn-grey pull-left" >Login to see your custom MT engines</a></p>
                                 </tal:block>
                             </tal:block>
                         </div>

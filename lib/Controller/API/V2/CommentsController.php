@@ -14,7 +14,7 @@ use API\V2\Validators\ChunkPasswordValidator;
 
 use Comments_CommentDao ;
 
-class CommentsController extends ProtectedKleinController {
+class CommentsController extends KleinController {
 
     /**
      *
@@ -41,6 +41,5 @@ class CommentsController extends ProtectedKleinController {
     protected function afterConstruct() {
         $this->validator = new Validators\ChunkPasswordValidator( $this->request );
     }
-
 
 }

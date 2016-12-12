@@ -10,7 +10,7 @@ use Features\SegmentFilter\Model\SegmentFilterModel;
 use Features\SegmentFilter\Model\FilterDefinition ;
 
 
-class FilterController extends \API\V2\ProtectedKleinController {
+class FilterController extends \API\V2\KleinController {
 
     /**
      * @var JobPasswordValidator

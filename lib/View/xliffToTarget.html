@@ -28,10 +28,9 @@
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 
     <script src="${basepath}public/js/lib/jquery.js"></script>
-    <script src="${basepath}public/js/common.js"></script>
+    <script src="${basepath}public/js/build/common.js"></script>
     <script src="${basepath}public/js/upload.js"></script>
 
-    <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
     <script src="${basepath}public/js/build/react.js?build=${build_number}"></script>
     <script src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
 
@@ -441,8 +440,6 @@
 
 
 </script>
-
-<div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 <script src="/public/js/lib/dropzone/dropzone.js"></script>
@@ -899,8 +896,6 @@
         </div>
     </div>
 </div>
-
-<div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
 
 <div class="notifications-wrapper"></div>
 <footer>

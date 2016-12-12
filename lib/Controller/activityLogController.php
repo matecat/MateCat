@@ -92,7 +92,6 @@ class activityLogController extends viewController {
      * @return mixed
      */
     function doAction() {
-
         $this->project_data = getProjectJobData( $this->id_project );
 
         $pCheck = new AjaxPasswordCheck();
@@ -116,7 +115,7 @@ class activityLogController extends viewController {
         );
 
         //NO ACTIVITY DATA FOR THIS PROJECT
-        if ( empty( $this->rawLogContent ) ){
+        if ( empty( $this->rawLogContent ) ) {
             $this->finalizeEmptyActivity();
         }
 
@@ -124,18 +123,16 @@ class activityLogController extends viewController {
             $this->jobLanguageDefinition[ $val[ 'jid' ] ] = $val[ 'lang_pair' ];
         }
 
+        parent::makeTemplate( 'activity_log.html' );
     }
 
     public function setTemplateVars() {
-
-        parent::makeTemplate( 'activity_log.html' );
         $this->decorator = new ActivityLogDecorator( $this, $this->template );
         $this->decorator->decorate();
 
     }
 
-    public function finalizeEmptyActivity(){
-
+    public function finalizeEmptyActivity() {
         parent::makeTemplate("activity_log_not_found.html");
         $this->nocache();
         $this->template->projectID = $this->id_project;
