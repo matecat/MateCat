@@ -49,10 +49,6 @@ class BaseKleinViewController extends \API\App\AbstractStatefulKleinController
         }
     }
 
-    protected function afterConstruct() {
-
-    }
-
     public function setView( $template_name ) {
         $this->view = new \PHPTALWithAppend( $template_name );
 

@@ -9,11 +9,11 @@
 namespace Features\ReviewImproved\Controller\API;
 
 use API\V2\JobPasswordValidator;
-use API\V2\ProtectedKleinController;
+use API\V2\KleinController;
 use LQA\ChunkReviewDao;
 use Features\ReviewImproved\Model\QualityReportModel ;
 
-class QualityReportController extends ProtectedKleinController
+class QualityReportController extends KleinController
 {
 
     /**
