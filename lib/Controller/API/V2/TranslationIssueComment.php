@@ -5,7 +5,7 @@ use LQA\EntryCommentDao ;
 use LQA\EntryDao ;
 use Database ;
 
-class TranslationIssueComment extends ProtectedKleinController {
+class TranslationIssueComment extends KleinController {
     /**
      * @var Validators\SegmentTranslationIssue
      */

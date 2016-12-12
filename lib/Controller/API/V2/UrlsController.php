@@ -11,7 +11,7 @@ namespace API\V2;
 use API\V2\Json\ProjectUrls;
 use API\V2\Validators\ProjectPasswordValidator ;
 
-class UrlsController extends ProtectedKleinController {
+class UrlsController extends KleinController {
 
     /**
      * @var ProjectPasswordValidator

@@ -102,9 +102,4 @@ class SignupController extends AbstractStatefulKleinController  {
         return $url ;
     }
 
-    protected function afterConstruct()
-    {
-        // TODO: Implement afterConstruct() method.
-    }
-
 }

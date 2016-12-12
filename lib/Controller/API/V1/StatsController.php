@@ -3,10 +3,10 @@
 namespace API\V1;
 
 
-use API\V2\ProtectedKleinController;
+use API\V2\KleinController;
 use API\V2\Validators\ChunkPasswordValidator;
 
-class StatsController extends ProtectedKleinController {
+class StatsController extends KleinController {
 
     /**
      * @var ChunkPasswordValidator
