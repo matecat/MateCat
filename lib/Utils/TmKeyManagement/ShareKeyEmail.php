@@ -59,10 +59,11 @@ class TmKeyManagement_ShareKeyEmail extends \Email\AbstractEmail {
     }
 
     protected function _getLayoutVariables() {
-        return array(
-            'title' => "MateCat - Resource shared",
-            'messageBody' => $this->_buildMessageContent()
-        );
+        $vars = parent::_getLayoutVariables();
+        $vars['showTitle'] = TRUE ;
+        $vars['title'] = "MateCat - Resource shared" ;
+
+        return $vars ;
     }
 
 }

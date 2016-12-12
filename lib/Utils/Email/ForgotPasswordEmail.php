@@ -45,7 +45,7 @@ class  ForgotPasswordEmail extends AbstractEmail
 
     protected function _getLayoutVariables() {
         $vars  = parent::_getLayoutVariables();
-        $var['title'] = $this->title ;
+        $vars['title'] = $this->title ;
         return $vars ;
     }
 
