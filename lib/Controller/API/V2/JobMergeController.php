@@ -11,7 +11,7 @@ use API\V2\Validators\ProjectPasswordValidator;
 use ProjectManager ;
 
 
-class JobMergeController extends ProtectedKleinController {
+class JobMergeController extends KleinController {
 
     /**
      * @var ProjectPasswordValidator

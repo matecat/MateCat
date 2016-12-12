@@ -1885,7 +1885,6 @@
             }
         },
         initOptionsTip: function () {
-            
             var acceptedLanguagesLXQ = config.lexiqa_languages.slice();
             var lexiqaText = "<div class='powerTip-options-tm'><div class='powerTip-options-tm-title'>Any combination of the supported languages:</div>" +
                 "<ul>";

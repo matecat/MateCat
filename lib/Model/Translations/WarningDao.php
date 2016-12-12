@@ -8,7 +8,7 @@ use Features\Ebay;
 class WarningDao extends \DataAccess_AbstractDao {
 
     public static $primary_keys = array();
-    public static $TABLE = 'translation_warnings' ;
+    const TABLE = 'translation_warnings' ;
 
     public static function findByChunkAndScope( \Chunks_ChunkStruct $chunk, $scope ) {
         $sql = "SELECT * FROM translation_warnings " .

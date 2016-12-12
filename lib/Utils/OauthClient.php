@@ -32,15 +32,4 @@ class OauthClient {
 		return $this->client;
 	}
 
-        /**
-         * Set the OAuth Scopes to the array containing Google Drive scopes
-         *
-         * @return OauthClient instance
-         */
-        public function setScopesToGDrive() {
-                $this->client->setScopes(INIT::$OAUTH_GDRIVE_SCOPES);
-                $this->client->setAccessType("offline");
-                $this->client->setPrompt("consent");
-		return self::$instance;
-        }
-} 
+}

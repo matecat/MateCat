@@ -1,5 +1,8 @@
 <?php
 
+
+use ConnectedServices\GDrive ;
+
 class newProjectController extends viewController {
 
     private $guid = '';
@@ -13,14 +16,7 @@ class newProjectController extends viewController {
 
     private $project_name='';
 
-    /**
-     * @var string The actual URL
-     */
-    private $incomingUrl;
-
     private $keyList = array();
-
-    private $gdriveAuthUrl;
 
     public function __construct() {
 
@@ -61,12 +57,6 @@ class newProjectController extends viewController {
         }
 
         $this->initUploadDir();
-
-        // check if user is logged and generate authURL for logging in
-        $this->doAuth();
-
-        $this->generateAuthURL();
-        $this->generateGDriveAuthUrl();
 
         list( $uid, $cid ) = $this->getLoginUserParams();
         $engine = new EnginesModel_EngineDAO( Database::obtain() );
@@ -239,16 +229,6 @@ class newProjectController extends viewController {
         return $ret;
     }
 
-    private function doAuth() {
-
-        //if no login set and login is required
-        if ( !$this->isLoggedIn() ) {
-            //take note of url we wanted to go after
-            $this->incomingUrl = $_SESSION[ 'incomingUrl' ] = $_SERVER[ 'REQUEST_URI' ];
-        }
-
-    }
-
     public function setTemplateVars() {
         $source_languages = $this->lang_handler->getEnabledLanguages( 'en' );
         $target_languages = $this->lang_handler->getEnabledLanguages( 'en' );
@@ -289,11 +269,7 @@ class newProjectController extends viewController {
         $this->template->maxFileSize                = INIT::$MAX_UPLOAD_FILE_SIZE;
         $this->template->maxTMXFileSize             = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
         $this->template->maxNumberFiles             = INIT::$MAX_NUM_FILES;
-        $this->template->incomingUrl                = '/login?incomingUrl=' . $_SERVER[ 'REQUEST_URI' ];
 
-        $this->template->incomingURL = $this->incomingUrl;
-        $this->template->authURL     = $this->authURL;
-        $this->template->gdriveAuthURL = $this->gdriveAuthUrl;
 
         $this->template->user_keys = $this->keyList;
 
@@ -308,6 +284,7 @@ class newProjectController extends viewController {
         $this->template->lexiqa_languages = json_encode( ProjectOptionsSanitizer::$lexiQA_allowed_languages ); 
 
         $this->template->deny_lexiqa = $this->isToDenyLexiQA();
+
 
     }
 
@@ -326,10 +303,6 @@ class newProjectController extends viewController {
         }
 
         return Constants::DEFAULT_TARGET_LANG;
-    }
-
-    private function generateGDriveAuthUrl(){
-        $this->gdriveAuthUrl = \GDrive::generateGDriveAuthUrl();
     }
 
     private function isToDenyLexiQA() {

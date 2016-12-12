@@ -167,6 +167,7 @@
         <tal:block tal:condition="not:use_compiled_assets" >
             <script src="${basepath}public/js/build/react.js?build=${build_number}"></script>
             <script src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
+            <script src="${basepath}public/js/build/common.js?build=${build_number}"></script>
             <script src="${basepath}public/js/build/app.js?build=${build_number}"></script>
         </tal:block>
 
@@ -266,18 +267,11 @@
         <div class="notifications-wrapper"></div>
 
         <footer>
-            <a href="#" id="settingsSwitcher" title="Settings"></a>
             <div class="wrapper">
 
-                <nav tal:condition="php: Bootstrap::areOauthKeysPresent()">
+                <nav>
                     <ul>
-                        <tal:block tal:condition="php: !empty(logged_user)">
-                            <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
-                        </tal:block>
-
-                        <tal:block tal:condition="php: empty(logged_user)">
-                            <li><a href="${authURL}" class="authLink">Manage</a></li>
-                        </tal:block>
+                        <li><a tal:attributes="href string:${basepath}manage/">Manage</a></li>
 
                         <tal:block tal:condition="footer_show_revise_link">
                             <li><a
@@ -293,17 +287,7 @@
                         <li><a href="https://www.matecat.com/support/" target="_blank">Support</a></li>
                     </ul>
 
-                    <tal:block tal:condition="php: empty(logged_user)">
-                        <div id='welcomebox'>
-                            <span>Anonymous</span> (<a id='loginlink' class="authLink" href="${authURL}">Login</a>)
-                        </div>
-                    </tal:block>
-
-                    <tal:block tal:condition="php: !empty(logged_user)">
-                        <div id='welcomebox' tal:attributes="title extended_user">
-                            <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>Logout</a>)
-                        </div>
-                    </tal:block>
+                    <div metal:use-macro="common.html/login_includes" />
 
                 </nav>
 
@@ -361,6 +345,7 @@
             <p>Howto layer to show a basic tutorial of the cattool when the first-time user open it.</p>
             <form action=""><input id="hideTutorial" type="checkbox" value="" />Do not display again </form>
         </div>
+
 		<script type="text/javascript">
 		$( ".open-popup-tmx" ).click(function() {
   $( this ).hide();
@@ -392,10 +377,6 @@ $(window).resize(function() {
 
 });
 		</script>
-
-
-
-    <div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
 
     <div metal:use-macro="cookiebanner.html/cookieBanner"/>
 

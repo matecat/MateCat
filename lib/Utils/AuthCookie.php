@@ -58,13 +58,14 @@ class AuthCookie {
         $valid = false;
         //get cookie data, if available
         $cookie = self::getData();
+
         if ( is_array( $cookie ) ) {
             //cookie is an JSON string containing: username,expire date,hash(secret in config file+username+expire date)
             //expire date is timestamp in seconds
             //compute expected hash based on data in cookie
             $expected_hash = hash( 'sha256', INIT::$AUTHSECRET . $cookie[ 'username' ] . $cookie[ 'uid' ] . $cookie[ 'expire_date' ] );            
             //check if valid hash and expiration still in time
-            if ( $cookie[ 'hash' ] == $expected_hash and time() < $cookie[ 'expire_date' ] and self::tryToRefreshToken( $cookie[ 'username' ] ) ) {
+            if ( $cookie[ 'hash' ] == $expected_hash and time() < $cookie[ 'expire_date' ] ) {
                 //ok, refresh value
                 //log::doLog("Validation succeed, refreshing cookie");
                 self::setCredentials( $cookie[ 'username' ], $cookie[ 'uid' ] );
@@ -81,58 +82,6 @@ class AuthCookie {
         return $valid;
     }
     
-    public static function tryToRefreshToken($username){
-        $oauthTokenEncryption = OauthTokenEncryption::getInstance();
-        $valid = false;
-        
-        $userData = getUserData( $username );
-        
-        if ( is_array( $userData ) && array_key_exists( 'oauth_access_token', $userData ) ) {
-            $accessToken = $userData[ 'oauth_access_token' ];
-
-            if( $oauthTokenEncryption->isTokenEncrypted( $accessToken ) ) {
-                $accessToken = $oauthTokenEncryption->decrypt( $accessToken );
-            } else {
-                $userDataEncryptToken = array(
-                    'email'                 => $username,
-                    'oauth_access_token'    => $oauthTokenEncryption->encrypt( $accessToken )
-                );
-                tryInsertUserFromOAuth( $userDataEncryptToken );
-            }
-
-            if ( $accessToken !== '' ) {
-                $valid = self::validOrRefreshedToken( $username, $accessToken );
-            }
-        }
-        
-        return $valid;
-    }
-    
-    private static function validOrRefreshedToken($username, $accessToken) {
-        $client = OauthClient::getInstance()->getClient();
-        $oauthTokenEncryption = OauthTokenEncryption::getInstance();
-
-        $client->setAccessToken( $accessToken );
-        
-        if ( $client->isAccessTokenExpired() && $client->getRefreshToken() != null ) {
-            $client->refreshToken( $client->getRefreshToken() );
-            
-            $newToken = $oauthTokenEncryption->encrypt( $client->getAccessToken() );
-            
-            $userData = array(
-                'email'                 => $username,
-                'oauth_access_token'    => $newToken
-            );
-            
-            $result = tryInsertUserFromOAuth( $userData );
-
-            if( false == $result ){
-                return false;
-            }
-        }
-        
-        return true;
-    }
 }
 
 ?>

@@ -34,3 +34,15 @@ window.ProjectsStore = require('./stores/ProjectsStore');
 window.ProjectsContainer = require('./components/projects/ProjectsContainer').default;
 
 window.Header = require("./components/Header").default;
+
+window.QAComponent = require('./components/QAComponent').default;
+
+window.ModalWindow = require('./modals/ModalWindowComponent').default;
+window.SuccessModal = require('./modals/SuccessModal').default;
+window.ConfirmRegister = require('./modals/ConfirmRegister').default;
+window.PreferencesModal = require('./modals/PreferencesModal').default;
+window.ResetPasswordModal = require('./modals/ResetPasswordModal').default;
+window.LoginModal = require('./modals/LoginModal').default;
+window.ForgotPasswordModal = require('./modals/ForgotPasswordModal').default;
+window.RegisterModal = require('./modals/RegisterModal').default;
+

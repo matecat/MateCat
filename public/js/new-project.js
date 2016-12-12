@@ -26,7 +26,7 @@ $(document).ready(function() {
             }
 	});
 
-        APP.tryListGDriveFiles();
+    // APP.tryListGDriveFiles();
 
 	$("#target-lang").change(function(e) {
 

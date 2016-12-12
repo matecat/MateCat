@@ -5,10 +5,56 @@ use TaskRunner\Commons\QueueElement;
 
 class Utils {
 
+    /**
+     *  TODO: this is a helper function to be used when transitioning to
+     *  more decoupled implementations.
+     */
+    public static function userIsLogged() {
+        return isset($_SESSION['uid']) ;
+    }
+
+    public static function encryptPass( $clear_pass, $salt ) {
+        return sha1( $clear_pass . $salt );
+    }
+
+    public static function randomString( $maxlength = 15 ) {
+        //allowed alphabet
+        $possible = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+        //init counter lenght
+        $i = 0;
+        //init string
+        $salt = '';
+
+        //add random characters to $password until $length is reached
+        while ( $i < $maxlength ) {
+            //pick a random character from the possible ones
+            $char = substr( $possible, mt_rand( 0, $maxlength - 1 ), 1 );
+            //have we already used this character in $salt?
+            if ( !strstr( $salt, $char ) ) {
+                //no, so it's OK to add it onto the end of whatever we've already got...
+                $salt .= $char;
+                //... and increase the counter by one
+                $i++;
+            }
+        }
+
+        return $salt;
+    }
+
+
+    public static function mysqlTimestamp( $time ) {
+        return date( 'Y-m-d H:i:s', $time );
+    }
+
 	public static function api_timestamp( $date_string ) {
-		$datetime = new \DateTime( $date_string );
-		return $datetime->format( 'c' );
-	}
+        if ( $date_string == null ) {
+            return null ;
+        } else {
+            $datetime = new \DateTime( $date_string );
+            return $datetime->format( 'c' );
+        }
+    }
 
     public static function underscoreToCamelCase($string) {
         return str_replace(' ', '', ucwords(str_replace('_', ' ', $string)));

@@ -8,6 +8,9 @@
         config.userFullName = '${extended_user}';
         config.userShortName = '${logged_user}';
         config.isLoggedIn = ${isLoggedIn|string:false};
+
+        config.gdriveAuthURL = ${structure php:json_encode(gdriveAuthURL)} ;
+        config.authURL = ${structure php:json_encode(authURL)} ;
         /*]]>*/
 
     <tal:block  tal:repeat="config_data config_js">
@@ -16,10 +19,32 @@
         /*]]>*/
     </tal:block>
 
+    <tal:block tal:condition="php: !empty(flashMessages)">
+        /*<![CDATA[*/
+        config.flash_messages = ${structure php: json_encode(flashMessages)} ;
+        /*]]>*/
+        </tal:block>
+
     </script>
 
     <tal:block  tal:repeat="js_source footer_js">
         <script type="text/javascript" tal:attributes="src js_source"></script>
     </tal:block>
+    <div id="modal" style="z-index: 999999999"></div>
+</div>
 
+
+
+<div metal:define-macro="login_includes" style="float: left">
+    <tal:block tal:condition="php: empty(logged_user)">
+        <div id='welcomebox'>
+            <span>Anonymous</span> (<a id='loginlink' class="authLink" href="javascript:void(0);">Login</a>)
+        </div>
+    </tal:block>
+
+    <tal:block tal:condition="php: !empty(logged_user)">
+        <div id='welcomebox' tal:attributes="title extended_user">
+            <span class="user-menu-preferences" >Profile (${logged_user})</span>
+        </div>
+    </tal:block>
 </div>

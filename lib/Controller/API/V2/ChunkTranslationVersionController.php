@@ -11,7 +11,7 @@ namespace API\V2;
 use API\V2\Json\SegmentVersion as JsonFormatter;
 
 
-class ChunkTranslationVersionController extends ProtectedKleinController {
+class ChunkTranslationVersionController extends KleinController {
 
     /**
      * @var Validators\ChunkPasswordValidator

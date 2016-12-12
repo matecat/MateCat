@@ -3,7 +3,7 @@ namespace API\V2  ;
 use API\V2\Json\SegmentVersion as JsonFormatter;
 
 
-class SegmentVersion extends ProtectedKleinController {
+class SegmentVersion extends KleinController {
 
     private $job ;
     private $validator ;
