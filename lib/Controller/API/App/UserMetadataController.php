@@ -30,9 +30,13 @@ class UserMetadataController extends AbstractStatefulKleinController
         $model = new MetadataModel( $user, $this->request->param('metadata') ) ;
 
         $model->save() ;
+        $data = $user->getMetadataAsKeyValue() ;
+        if ( empty ( $data ) ) {
+            $data = null ;
+        }
 
         $this->response->json(
-            $user->getMetadataAsKeyValue()
+            $data
         );
 
     }
