@@ -44,7 +44,4 @@ class LoginController extends AbstractStatefulKleinController  {
 
     }
 
-    protected function afterConstruct()
-    {
-    }
 }

@@ -4,12 +4,9 @@ namespace API\V2 ;
 
 use Features ;
 
-class ProjectCompletionStatus extends ProtectedKleinController {
+class ProjectCompletionStatus extends KleinController {
 
     private $validator ;
-
-    protected function afterConstruct() {
-    }
 
     protected function validateRequest() {
         $this->validator = new ProjectValidator(
