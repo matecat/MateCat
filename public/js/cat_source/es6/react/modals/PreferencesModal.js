@@ -126,40 +126,32 @@ class PreferencesModal extends React.Component {
 
         }
 
-        this.spanStyle = {
-            color: 'red',
-            fontSize: '14px'
-        };
+       
 
         var couponHtml = '';
         if ( !this.state.coupon) {
             couponHtml = <div className="coupon-container">
-                            <div className="half-form half-form-left">
-                                    <label htmlFor="user-coupon">Coupon</label><br/>
+                           
+                                    <h2 htmlFor="user-coupon">Coupon</h2>
                                     <input type="text" name="coupon" id="user-coupon"
                                            onKeyPress={(e) => { (e.key === 'Enter' ? this.submitUserChanges() : this.onKeyPressCopupon) }}
-                                           ref={(input) => this.couponInput = input}/><br/>
-                                    <div className="validation-error">
-                                        <span style={this.spanStyle} className="text">{this.state.couponError}</span>
-                                    </div>
-                                </div>
-                                <div className="half-form half-form-right">
+                                           ref={(input) => this.couponInput = input}/>        
                                 <a className="btn-confirm-medium" onClick={this.submitUserChanges.bind(this)}>Save changes</a>
-                            </div>
+                                <div className="validation-error">
+                                        <span style={this.spanStyle} className="text">{this.state.couponError}</span>
+                                </div>
                         </div>
         } else {
-            this.spanStyle = {
-                color: 'green',
-                fontSize: '14px'
-            };
-            couponHtml = <div className="coupon-container">
-                <div className="half-form half-form-left">
-                    <label htmlFor="user-coupon">Coupon</label><br/>
-                    <input type="text" name="coupon" id="user-coupon" defaultValue={this.state.coupon} disabled /><br/>
-                    <div className="validation-error">
+           
+            couponHtml = <div className="coupon-container coupon-success">
+               
+                    <h2 htmlFor="user-coupon">Coupon</h2>
+                     <div className="validation-success">
                         <span style={this.spanStyle} className="text">Coupon activated</span>
                     </div>
-                </div>
+                    <input type="text" name="coupon" id="user-coupon" defaultValue={this.state.coupon} disabled /><br/>
+                   
+                
             </div>
         }
 
@@ -177,6 +169,7 @@ class PreferencesModal extends React.Component {
                         {gdriveMessage}
 
                     </div>
+                    <span className="clear"></span>
                     <h2>Google Drive</h2>
                     <div className="user-gdrive">
 
