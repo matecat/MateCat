@@ -1,0 +1,27 @@
+.nav-mc-bar {
+  nav {
+    input[type=text] {
+    border-bottom: 1px solid #ffffff;
+    box-shadow: 0 1px 0 0 #ffffff;
+    }
+    input[type=text]:focus {
+    border-bottom: 1px solid #09BEEC;
+    box-shadow: 0 1px 0 0 #09BEEC;
+    }
+    a {
+      .btn-flat {
+        background-color: white;
+      }
+      .btn-flat:focus {
+        background-color: gray;
+        border-radius: 32px;
+      }
+    }
+  }
+  p {
+    margin: 0;
+  }
+}
+.middle-v {
+  vertical-align: middle;
+}
