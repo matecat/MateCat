@@ -1054,6 +1054,8 @@ color:#333;}
     top: 5px;
     line-height: 20px;
 }
+
+
 .onoffswitch-label-status-unavailable {
     display: none;
 }
@@ -4784,6 +4786,12 @@ footer nav ul li {
     position:relative;
 }
 
+.user-info-form {
+    font-size: 18px;
+    line-height: 30px;
+    margin-bottom: 20px;
+}
+
 .user-gdrive {
     border: 1px solid #ccc;
     padding: 10px 0 0 10px;
@@ -4792,7 +4800,7 @@ footer nav ul li {
     width: 98%;
     min-height: 40px;
     margin-bottom: 25px;
-    margin-top: 20px;
+    margin-top: 10px;
 }
 
 
@@ -4820,12 +4828,17 @@ footer nav ul li {
     -ms-user-select: none;
 }
 
+.user-info-form .grey-txt {
+    color: #666;
+}
+
 .user-gdrive > label {
     line-height: 32px;
     float: left;
     margin-left: 65px;
-    font-size: 16px;
-    max-width: 70%;
+    margin-top: -2px;
+    font-size: 15px;
+    max-width: 75%;
     text-align: left;
     word-wrap: break-word;
 }
@@ -4970,11 +4983,15 @@ footer nav ul li {
 .login-form-container,
 .register-form-container {
     border-top: 1px solid #ccc;
-    width: 225px;
     margin: 0 auto;
     padding-top: 10px;
 
 }
+
+.login-form-container {
+    width: 225px;
+}
+
 .forgot-password-modal,
 .reset-password-modal {
     width: 100%;
@@ -4988,8 +5005,7 @@ footer nav ul li {
 }
 
 .preferences-modal .reset-password {
-    float: left;
-    margin: 10px 0;
+    margin-right: 20px;
 }
 
 .forgot-password-modal {
@@ -5005,16 +5021,14 @@ footer nav ul li {
 }
 
 .register-modal {
-    padding: 10px 0;
+    padding: 10px 15%;
+    width: 70%;
 }
 
 .register-modal h2 {
     padding: 10px 0 10px 0;
 }
 
-.register-form-container {
-    width: 73%;
-}
 .register-modal .google-login-button {
     margin-bottom: 0;
 }
@@ -5140,6 +5154,7 @@ footer nav ul li {
 
 .preferences-modal {
     padding: 10px 20px;
+    text-align: left;
 }
 
 /* The Close Button */
@@ -5158,7 +5173,7 @@ footer nav ul li {
 }
 
 div#matecat-modal p {
-    line-height: 17px;
+    line-height: 20px;
 }
 
 /***********************/
