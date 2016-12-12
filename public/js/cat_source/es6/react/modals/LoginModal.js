@@ -115,7 +115,7 @@ class LoginModal extends React.Component {
             <ul className="">
                 <li>Manage your TMs, glossaries and MT engines</li>
                 <li>Access the management panel</li>
-                <li>Translate Google Drive Files</li>
+                <li>Translate Google Drive files</li>
             </ul>
             <a className="register-button btn-confirm-medium" onClick={this.openRegisterModal}>Sign up</a>
         </div>;
