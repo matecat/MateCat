@@ -67,7 +67,6 @@ abstract class KleinController {
     }
 
     protected function validateRequest() {
-        throw new \Exception( 'to be implemented' );
     }
 
     /**
