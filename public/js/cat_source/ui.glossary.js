@@ -126,10 +126,6 @@ if (true)
                 },
                 success: function ( d ) {
 
-                    if ( !$( n ).hasClass( 'glossary-loaded' ) ) {
-                        UI.segmentQA( n );
-                    }
-
                     $( n ).addClass( 'glossary-loaded' );
 
                     if ( typeof d.errors != 'undefined' && d.errors.length ) {
@@ -206,7 +202,7 @@ if (true)
                         .replace( /\(/gi, '\\(' )
                         .replace( /\)/gi, '\\)' );
 
-                var re = new RegExp( glossaryTerm_escaped.trim(), "gi" );
+                var re = new RegExp( '\\b'+ glossaryTerm_escaped.trim() + '\\b', "gi" );
                 var regexInTags = new RegExp( "<[^>]*?("+glossaryTerm_escaped.trim()+")[^>]*?>" , "gi" );
 
                 var glossaryTerm_marked = cleanString.replace( re, '<mark>' + glossaryTerm_noPlaceholders + '</mark>' );
@@ -219,6 +215,7 @@ if (true)
                 var intervalForTags = [];
 
                 while(matchInTags) {
+
                     //regex start index matches the beginning of the tag.
                     //so we add the position of the glossary entry into the glossary element
                     var elemIndex = matchInTags.index + matchInTags[0].indexOf(matchInTags[1]);
@@ -236,7 +233,10 @@ if (true)
 
                 //find all glossary matches
                 var match = re.exec(cleanString);
-
+                //Check if glossary term break a marker EX: &lt;g id="3"&gt;
+                if (glossaryTerm_escaped == 'lt' || glossaryTerm_escaped == 'gt') {
+                    return;
+                }
                 while(match) {
                     //check if this glossary element was found into a tag.
                     var matchInTag = intervalForTags.filter(

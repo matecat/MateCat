@@ -50,7 +50,10 @@
         lxqTooltipBody: ''+
             '<div class="tooltip-error-container"> '+
                 '<span class="tooltip-error-category">xxxx</span> '+
-                '<a class="tooltip-error-ignore">ignore</a> </div> ',
+                '<div class="tooltip-error-ignore">' +
+                    '<span class="icon-cancel-circle"></span>' +
+                    '<span class="tooltip-error-ignore-text">Ignore</span> </div> ' +
+            '</div>',
         lxqTooltipSpellcheckBody: ''+
             '<div class="tooltip-error-container"> '+
                 '<a class="tooltip-error-category">xxxx</a> '                 

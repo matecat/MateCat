@@ -263,7 +263,7 @@ $.extend(UI, {
 
 			//lock tags and run again getWarnings
 			UI.lockTags(UI.editarea);
-			UI.currentSegmentQA();
+			UI.segmentQA(UI.currentSegment);
 
 		}).on('click', '.tagLockCustomize', function(e) {
 			e.preventDefault();
@@ -348,7 +348,7 @@ $.extend(UI, {
 			restoreSelection();
 			UI.closeTagAutocompletePanel();
 			UI.lockTags(UI.editarea);
-			UI.currentSegmentQA();
+			UI.segmentQA(UI.currentSegment);
 		}).on('click', '.modal.survey .x-popup', function() {
 			UI.surveyDisplayed = true;
 			if(typeof $.cookie('surveyedJobs') != 'undefined') {
@@ -424,8 +424,6 @@ $.extend(UI, {
 
 		$(window).on('scroll', function() {
 			UI.browserScrollPositionRestoreCorrection();
-		}).on('cachedSegmentObjects', function() {
-            if(UI.currentSegmentId == UI.firstWarnedSegment) UI.setNextWarnedSegment();
 		}).on('allTranslated', function() {
 			if(config.survey) UI.displaySurvey(config.survey);
 		}).on('mousedown', function(e) {
@@ -744,7 +742,7 @@ $.extend(UI, {
 					e.preventDefault();
 					$('.selected', $(this)).remove();
 					UI.saveInUndoStack('cancel');
-					UI.currentSegmentQA();
+					UI.segmentQA(UI.currentSegment);
 				} else {
 					var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
                     var numSpacesBefore = $('.space-marker', UI.editarea).length;
@@ -1216,8 +1214,8 @@ $.extend(UI, {
 		$("#point2seg").bind('mousedown', function(e) {
 			e.preventDefault();
             UI.saveSegment(UI.currentSegment);
-			UI.scrollSegment($('#segment-' + $(this).attr('data-segment')));
-            UI.setNextWarnedSegment();
+			UI.closeAllMenus(e, true);
+			QAComponent.togglePanel();
 		});
 
 		$("#navSwitcher").on('click', function(e) {
@@ -1225,6 +1223,7 @@ $.extend(UI, {
 		});
 
 		$("#pname").on('click', function(e) {
+			UI.closeAllMenus(e);
 			e.preventDefault();
 			UI.toggleFileMenu();
 		});

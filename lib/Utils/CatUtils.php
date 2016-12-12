@@ -344,7 +344,7 @@ class CatUtils {
         $segment = self::placehold_xliff_tags($segment);
 
         //replace all outgoing spaces couples to a space and a &nbsp; so they can be displayed to the browser
-        $segment = preg_replace('/[[:blank:]]{2}/', " &nbsp;", $segment);
+        $segment = preg_replace('/[ ]{2}/', " &nbsp;", $segment);
 
         $segment = html_entity_decode($segment, ENT_NOQUOTES | 16 /* ENT_XML1 */, 'UTF-8');
         $segment = preg_replace_callback( '/([\xF0-\xF7]...)/s', 'CatUtils::htmlentitiesFromUnicode', $segment );
@@ -360,7 +360,7 @@ class CatUtils {
         $segment = str_replace("\n", self::lfPlaceholder, $segment );
         $segment = str_replace("\r", self::crPlaceholder, $segment ); //x0D character
         $segment = str_replace("\t", self::tabPlaceholder, $segment ); //x09 character
-        $segment = preg_replace( '/\x{a0}/u', self::nbspPlaceholder, $segment ); //xA0 character ( NBSP )
+        $segment = preg_replace( '/[\x{c2}]{0,1}\x{a0}/u', self::nbspPlaceholder, $segment ); //xA0 character ( NBSP )
         return $segment;
     }
 
