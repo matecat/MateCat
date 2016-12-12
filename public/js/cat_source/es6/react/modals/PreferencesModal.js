@@ -5,10 +5,11 @@ class PreferencesModal extends React.Component {
 
         this.state = {
             service: this.props.service,
-            coupon: this.props.coupon
-        }
+            coupon: this.props.metadata.coupon,
+            couponError: ''
+        };
 
-        this.handleCouponChange = this.handleCouponChange.bind( this );
+        this.onKeyPressCopupon = this.onKeyPressCopupon.bind( this );
     }
 
     openResetPassword() {
@@ -64,16 +65,30 @@ class PreferencesModal extends React.Component {
     }
 
     submitUserChanges() {
+        var self = this;
         return $.post('/api/app/user/metadata', { metadata : {
-                coupon : this.state.coupon
+                coupon : this.couponInput.value
             }
         }).done( function( data ) {
-            APP.USER.STORE.metadata = data ;
+            if (data) {
+                APP.USER.STORE.metadata = data;
+                self.setState({
+                    coupon: APP.USER.STORE.metadata.coupon
+                });
+            } else {
+                self.setState({
+                    couponError: 'Invalid Coupon'
+                });
+            }
+        }).fail(function () {
+            self.setState({
+                couponError: 'Invalid Coupon'
+            });
         });
     }
 
-    handleCouponChange(event) {
-        this.setState({ coupon : event.target.value } );
+    onKeyPressCopupon() {
+        this.setState({ couponError : '' } );
     }
 
     disableGDrive() {
@@ -110,6 +125,43 @@ class PreferencesModal extends React.Component {
 
         }
 
+        this.spanStyle = {
+            color: 'red',
+            fontSize: '14px'
+        };
+
+        var couponHtml = '';
+        if ( !this.state.coupon) {
+            couponHtml = <div className="coupon-container">
+                            <div className="half-form half-form-left">
+                                    <label htmlFor="user-coupon">Coupon</label><br/>
+                                    <input type="text" name="coupon" id="user-coupon"
+                                           onKeyPress={(e) => { (e.key === 'Enter' ? this.submitUserChanges() : this.onKeyPressCopupon) }}
+                                           ref={(input) => this.couponInput = input}/><br/>
+                                    <div className="validation-error">
+                                        <span style={this.spanStyle} className="text">{this.state.couponError}</span>
+                                    </div>
+                                </div>
+                                <div className="half-form half-form-right">
+                                <a className="btn-confirm-medium" onClick={this.submitUserChanges.bind(this)}>Save changes</a>
+                            </div>
+                        </div>
+        } else {
+            this.spanStyle = {
+                color: 'green',
+                fontSize: '14px'
+            };
+            couponHtml = <div className="coupon-container">
+                <div className="half-form half-form-left">
+                    <label htmlFor="user-coupon">Coupon</label><br/>
+                    <input type="text" name="coupon" id="user-coupon" defaultValue={this.state.coupon} disabled /><br/>
+                    <div className="validation-error">
+                        <span style={this.spanStyle} className="text">Coupon activated</span>
+                    </div>
+                </div>
+            </div>
+        }
+
         // find if the use has the coupon already. If he has then do not show the input field.
 
         return <div className="preferences-modal">
@@ -128,14 +180,7 @@ class PreferencesModal extends React.Component {
                             <input type="text" name="name" id="user-login-email" defaultValue={this.props.user.email} disabled="true"/><br/>
 
 
-                        <div className="half-form half-form-left">
-
-                            <label htmlFor="user-coupon">Coupon</label><br/>
-                            <input type="text" name="coupon" id="user-coupon" defaultValue={this.state.coupon} value={this.state.coupon} onChange={this.handleCouponChange} /><br/>
-                        </div>
-                        <div className="half-form half-form-right">
-                            <a className="btn-confirm-medium" onClick={this.submitUserChanges.bind(this)}>Save changes</a>
-                        </div>
+                        {couponHtml}
 
                     </div>
 

@@ -22,6 +22,8 @@ class UserController extends AbstractStatefulKleinController  {
     protected $connectedServices ;
 
     public function show() {
+        $metadata = $this->user->getMetadataAsKeyValue() ;
+
         // TODO: move this into a formatter class
         $this->response->json( array(
             'user' => array(
@@ -34,7 +36,7 @@ class UserController extends AbstractStatefulKleinController  {
             'connected_services' => ( new ConnectedService( $this->connectedServices ))->render(),
 
             // TODO: this is likely to be unsafe to be passed here without a whitelist.
-            'metadata' =>  $this->user->getMetadataAsKeyValue()
+            'metadata' =>  ( empty( $metadata ) ? NULL : $metadata )
         ));
     }
 
