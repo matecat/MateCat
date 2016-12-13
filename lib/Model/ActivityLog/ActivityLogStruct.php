@@ -78,7 +78,7 @@ class ActivityLogStruct extends DataAccess_AbstractDaoSilentStruct implements Da
     /**
      * @var int
      */
-    public $id;
+    public $ID;
 
     /**
      * @var int

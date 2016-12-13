@@ -14,6 +14,20 @@ $klein->with('/api/v2/projects/[:id_project]/[:password]', function() {
 
 });
 
+$klein->with('/api/v2/activity', function() {
+
+    route(
+            '/project/[:id_project]/[:password]/last', 'GET',
+            '\API\V2\ActivityLogController', 'lastOnProject'
+    );
+
+    route(
+            '/job/[:id_job]/[:password]/last', 'GET',
+            'API\V2\ActivityLogController', 'lastOnJob'
+    );
+
+});
+
 $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
     // TODO: group all similarly prefixed APIs into this block
     route( '/comments',     'GET', 'API\V2\CommentsController', 'index' );
@@ -110,4 +124,3 @@ route(
     '/api/v2/glossaries/export/[:tm_key].?[:downloadToken]?', 'GET',
     '\API\V2\GlossariesController', 'download'
 );
-
