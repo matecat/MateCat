@@ -4775,6 +4775,12 @@ footer nav ul li {
 .validation-error {
     text-align: left;
     float: left;
+    color: red;
+}
+
+.coupon-container .validation-success {
+    color: green;
+    margin-top: 2px;
 }
 
 .user-info-form,
@@ -4789,7 +4795,7 @@ footer nav ul li {
 .user-info-form {
     font-size: 18px;
     line-height: 30px;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
 }
 
 .user-gdrive {
@@ -4939,13 +4945,14 @@ footer nav ul li {
     color:#39699a;
 }
 
+.preferences-modal input[type=text],
 .login-container-left input,
 .register-form-container input[type=text],
 .register-form-container input[type=password],
 .forgot-password-modal input,
 .reset-password-modal input,
 .user-info-form input {
-        margin-top: 5px;
+    margin-top: 5px;
     font-size: 14px;
     width: 100%;
     padding: .7em .6em;
@@ -4958,6 +4965,25 @@ footer nav ul li {
     box-sizing: border-box;
     font-size: 15px;
     color: #333;
+}
+.coupon-container input#user-coupon {
+    width: 70%;
+    float: left;
+}
+
+.coupon-container.coupon-success input#user-coupon {
+    width: 100%!important;
+}
+
+.coupon-container {
+    width: 100%;
+    margin: 0 auto;
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+.coupon-container .btn-confirm-medium {
+    margin: 7px 0px 7px 20px;
 }
 
 .user-info-form input {
