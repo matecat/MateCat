@@ -4783,22 +4783,29 @@ footer nav ul li {
     margin-top: 2px;
 }
 
+.coupon-container p {
+    line-height: 5px!important;
+}
+
 .user-info-form,
 .user-reset-password,
 .user-gdrive {
     margin: 0 auto;
-    width: 100%;
+    width: 93%;
     float: left;
     position:relative;
 }
 
-.user-info-form {
+.preferences-modal .user-info-form {
     font-size: 18px;
     line-height: 30px;
     margin-bottom: 30px;
+    background: #f4f4f4;
+    border-bottom: 1px solid #ccc;
+    padding: 20px 20px;
 }
 
-.user-gdrive {
+.preferences-modal .user-gdrive {
     border: 1px solid #ccc;
     padding: 10px 0 0 10px;
     border-radius: 4px;
@@ -4809,16 +4816,40 @@ footer nav ul li {
     margin-top: 10px;
 }
 
+.user-name {
+    margin-left: 20px;
+    line-height: 25px;
+}
 
+.preferences-modal .user-name strong {
+    font-size: 24px;
+}
 
+.preferences-modal .avatar-user {
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    font-size: 21px;
+    color: #fff;
+    padding: 10px 10px 10px 10px;
+    background: #22c4ee;
+    border: 1px solid #ccc;
+    -moz-border-radius: 50px;
+    -webkit-border-radius: 50px;
+    border-radius: 50px;
+}
 
-.user-info-form label {
+.preferences-modal .user-info-attributes {
+    padding: 20px;
+}
+
+.preferences-modal .user-info-form label {
     float: left;
     margin-top: 7px;
     font-size: 16px;
 }
 
-.user-reset-password label {
+.preferences-modal .user-reset-password label {
     float: left;
     font-size: 18px;
     margin-top: 25px;
@@ -4967,7 +4998,7 @@ footer nav ul li {
     color: #333;
 }
 .coupon-container input#user-coupon {
-    width: 70%;
+    width: 81%;
     float: left;
 }
 
@@ -4979,7 +5010,6 @@ footer nav ul li {
     width: 100%;
     margin: 0 auto;
     overflow: hidden;
-    margin-bottom: 30px;
 }
 
 .coupon-container .btn-confirm-medium {
@@ -5028,6 +5058,7 @@ footer nav ul li {
 .preferences-modal input:disabled {
     color: #999;
     cursor: not-allowed;
+    background: #f4f4f4;
 }
 
 .preferences-modal .reset-password {
@@ -5037,7 +5068,7 @@ footer nav ul li {
 .forgot-password-modal {
     background: url(../img/matecat_watch.png) no-repeat 476px 136px;
     background-size: 23%;
-    width: 384px;
+    width: 385px;
     padding: 25px 96px;
 }
 
@@ -5179,7 +5210,6 @@ footer nav ul li {
 }
 
 .preferences-modal {
-    padding: 10px 20px;
     text-align: left;
 }
 

@@ -136,7 +136,7 @@ class PreferencesModal extends React.Component {
                                     <input type="text" name="coupon" id="user-coupon"
                                            onKeyPress={(e) => { (e.key === 'Enter' ? this.submitUserChanges() : this.onKeyPressCopupon) }}
                                            ref={(input) => this.couponInput = input}/>        
-                                <a className="btn-confirm-medium" onClick={this.submitUserChanges.bind(this)}>Save changes</a>
+                                <a className="btn-confirm-medium" onClick={this.submitUserChanges.bind(this)}>Apply</a>
                                 <div className="validation-error">
                                         <span style={this.spanStyle} className="text">{this.state.couponError}</span>
                                 </div>
@@ -159,11 +159,14 @@ class PreferencesModal extends React.Component {
 
         return <div className="preferences-modal">
                     <div className="user-info-form">
-
+                        <div className="avatar-user pull-left">{config.userShortName}</div>
+                        <div className="user-name pull-left">
                             <strong>{this.props.user.first_name} {this.props.user.last_name}</strong><br/>
                         <span className="grey-txt">{this.props.user.email}</span><br/>
+                        </div>
                     </div>
-                    {couponHtml}
+                    <div className="user-info-attributes">
+                    
 
                     <div className="user-reset-password">
                         {gdriveMessage}
@@ -186,10 +189,13 @@ class PreferencesModal extends React.Component {
                             </label>
                         </div>
                         <label>{services_label}</label>
+
                     </div>
+                    {couponHtml}
                     <br/>
                      {resetPasswordHtml}
-                    <div id='logoutlink' className="pull-left" onClick={this.logoutUser.bind(this)}>Logout</div>
+                    <div id='logoutlink' className="pull-right" onClick={this.logoutUser.bind(this)}>Logout</div>
+                    </div>
             </div>;
     }
 }
