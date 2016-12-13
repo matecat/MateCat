@@ -19,9 +19,7 @@ $.extend(APP, {
         //     });
         // });
 
-        $('.user-menu-preferences').on('click', function () {
-            $('#modal').trigger('openpreferences');
-        });
+
 
         $('#modal').on('opensuccess', function (e, param) {
             APP.ModalWindow.showModalComponent(SuccessModal, param, param.title);
@@ -95,7 +93,11 @@ $.extend(APP, {
         });
 
         //Link footer
-        $('a.authLink').click(function(e){
+        $('.user-menu-preferences').on('click', function () {
+            $('#modal').trigger('openpreferences');
+        });
+
+        $('#welcomebox:has(.authLink)').click(function(e){
             e.preventDefault();
             $('#modal').trigger('openlogin');
         });
