@@ -1,5 +1,4 @@
 UI = null;
-
 UI = {
     init: function () {
         this.Search = {};
@@ -9,6 +8,9 @@ UI = {
         this.renderMoreProjects = this.renderMoreProjects.bind(this);
         this.closeSearchCallback = this.closeSearchCallback.bind(this);
         this.filterProjectsFromStatus = this.filterProjectsFromStatus.bind(this);
+        this.openJobSettings = this.openJobSettings.bind(this);
+
+        ProjectsStore.addListener(ManageConstants.OPEN_JOB_SETTINGS, this.openJobSettings);
     },
     render: function () {
         var self = this;
@@ -90,7 +92,14 @@ UI = {
             ManageActions.renderProjects(projects);
         });
     },
-
+    /**
+     * Open the settings for the job
+     */
+    openJobSettings: function (job, prName) {
+        $.cookie('tmpanel-open', 1, { path: '/' });
+        var url = '/translate/'+ prName +'/'+ job.source +'-'+ job.target +'/'+ job.id +'-'+ job.password ;
+        window.open(url, '_blank');
+    },
 
     /**
      *

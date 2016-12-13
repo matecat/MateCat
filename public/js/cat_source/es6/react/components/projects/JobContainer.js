@@ -27,6 +27,10 @@ class JobContainer extends React.Component {
         return '/analyze/'+ this.props.projectName +'/'+this.props.projectId+'-' + this.props.projectPassword + '?open=split&jobid=' + this.props.job.get('id');
     }
 
+    openSettings() {
+        ManageActions.openJobSettings(this.props.job.toJS(), this.props.projectName);
+    }
+
     render () {
         var translateUrl = this.getTranslateUrl();
         var analysisUrl = this.getAnalysisUrl();
@@ -43,14 +47,14 @@ class JobContainer extends React.Component {
                         <ul className="job-activity-icon right">
 
                             <li>
-                                <a href="#!"
-                                   className="btn-floating btn-flat waves-effect waves-dark z-depth-0">
+                                <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0"
+                                    onClick={this.openSettings.bind(this)}>
                                     <i className="material-icons">settings</i>
                                 </a>
                             </li>
                             <li>
                                 <a className='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0'
-                                   href='#' data-activates='dropdown2'>
+                                   data-activates='dropdown2'>
                                     <i className="material-icons">more_vert</i>
                                 </a>
                                 <ul id='dropdown2' className='dropdown-content'>

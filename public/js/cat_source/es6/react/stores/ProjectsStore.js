@@ -49,6 +49,9 @@ AppDispatcher.register(function(action) {
             ProjectsStore.addProjects(action.project);
             ProjectsStore.emitChange(ManageConstants.RENDER_PROJECTS, ProjectsStore.projects);
             break;
+        case ManageConstants.OPEN_JOB_SETTINGS:
+            ProjectsStore.emitChange(ManageConstants.OPEN_JOB_SETTINGS, action.job, action.prName);
+            break;
 
     }
 });

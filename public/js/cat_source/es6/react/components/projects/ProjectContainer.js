@@ -175,11 +175,11 @@ class ProjectContainer extends React.Component {
                             <div className="col m5 s4">
                                 <ul className="project-activity-icon right">
 
-                                    <li>
-                                        <a href="#!" className="btn-floating btn-flat waves-effect waves-dark z-depth-0">
-                                            <i className="material-icons">settings</i>
-                                        </a>
-                                    </li>
+                                    {/*<li>*/}
+                                        {/*<a href="#!" className="btn-floating btn-flat waves-effect waves-dark z-depth-0">*/}
+                                            {/*<i className="material-icons">settings</i>*/}
+                                        {/*</a>*/}
+                                    {/*</li>*/}
                                     <li>
                                         <a className='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0'
                                            href='#' data-activates='dropdown1'>

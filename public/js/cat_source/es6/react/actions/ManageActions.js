@@ -24,6 +24,14 @@ var ManageActions = {
         });
     },
 
+    openJobSettings: function (job, prName) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.OPEN_JOB_SETTINGS,
+            job: job,
+            prName: prName
+        });
+    }
+
 
 };
 

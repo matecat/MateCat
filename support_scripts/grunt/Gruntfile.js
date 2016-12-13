@@ -381,16 +381,32 @@ module.exports = function(grunt) {
             }
         },
         replace: {
-          version: {
-            src: [
-                buildPath + 'app.js'
-            ],
-            dest: buildPath + 'app.js',
-            replacements: [{
-              from: /this\.version \= \"(.*?)\"/gi,
-              to: 'this.version = "' + version + '"'
-            }]
-          }
+            version: {
+                src: [
+                    buildPath + 'app.js'
+                ],
+                dest: buildPath + 'app.js',
+                replacements: [{
+                    from: /this\.version \= \"(.*?)\"/gi,
+                    to: 'this.version = "' + version + '"'
+                }]
+            },
+            css: {
+                src: [
+                    cssBase + 'build/*'
+                ],
+                dest: cssBase + 'build/',
+                replacements: [
+                    {
+                        from: '../img/',
+                        to: '../../img/'
+                    },
+                    {
+                        from: 'fonts/',
+                        to: '../fonts/'
+                    }
+                ]
+            }
         }
     });
 
@@ -462,7 +478,8 @@ module.exports = function(grunt) {
      */
     grunt.registerTask('development', [
         'bundle:js',
-        'sass'
+        'sass',
+        'replace:css'
     ]);
 
 

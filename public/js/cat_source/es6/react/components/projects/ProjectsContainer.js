@@ -4,7 +4,6 @@
  */
 // var React = require('react');
 var ProjectsStore = require('../../stores/ProjectsStore');
-var ManageConstants = require('../../constants/ManageConstants');
 var Project = require('./ProjectContainer').default;
 var FilterProjects = require("../FilterProjects").default;
 

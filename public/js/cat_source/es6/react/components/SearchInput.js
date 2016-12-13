@@ -26,9 +26,6 @@ class SearchInput extends React.Component {
                             <input id="icon_prefix" type="text" className="valid"
                                    ref={(input) => this.textInput = input}
                                    onChange={this.filterByName.bind(this)}/>
-                            <i className="material-icons"
-                               onClick={this.closeSearch.bind(this)}
-                            >close</i>
                         </div>
                     </div>
                 </form>

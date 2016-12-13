@@ -29,6 +29,7 @@ window.SegmentFilter_MainPanel = require('./components/segment_filter/MainPanel'
 
 window.NotificationBox = require('./components/notificationsComponent/NotificationBox').default;
 
+window.ManageConstants = require('./constants/ManageConstants');
 window.ManageActions = require('./actions/ManageActions');
 window.ProjectsStore = require('./stores/ProjectsStore');
 window.ProjectsContainer = require('./components/projects/ProjectsContainer').default;
