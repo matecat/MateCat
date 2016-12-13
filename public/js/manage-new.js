@@ -3,6 +3,7 @@ UI = null;
 UI = {
     init: function () {
         this.Search = {};
+        this.Search.filter = {};
         this.performingSearchRequest = false;
         this.filterProjectsFromName = this.filterProjectsFromName.bind(this);
         this.renderMoreProjects = this.renderMoreProjects.bind(this);
@@ -28,7 +29,7 @@ UI = {
     },
     renderProjects: function (projects) {
         if ( !this.ProjectsContainer ) {
-            var mountPoint = $("#contentBox")[0];
+            var mountPoint = $("#main-container")[0];
             this.ProjectsContainer = ReactDOM.render(React.createElement(ProjectsContainer, {
                 filterFunction: this.filterProjectsFromStatus
             }), mountPoint);

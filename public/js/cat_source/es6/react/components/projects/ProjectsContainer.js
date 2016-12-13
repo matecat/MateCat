@@ -39,29 +39,33 @@ class ProjectsContainer extends React.Component {
 
     componentDidUpdate() {}
 
+    shouldComponentUpdate(nextProps, nextState) {
+        return (nextState.projects !== this.state.projects)
+    }
+
     render() {
         var items = this.state.projects.map((project, i) => (
             <Project
                 key={i}
                 project={project}/>
         ));
-        return <div className="content">
-                <div className="row">
-                    <div className="col s6">
-                        <h1>Projects List</h1>
-                    </div>
-                    <div className="col s3">
-                        <FilterProjects
-                            filterFunction={this.props.filterFunction}
-                        />
-                    </div>
-                </div>
-            <div id="projects">
-                    <div className="projects-container" ref={(container) => this.container = container}>
-                        {items}
-                    </div>
-                </div>
-            </div>;
+        return <section className="content">
+                    <section className="add-project">
+                        <a className="btn-floating btn-large waves-effect waves-light right create-new blue-matecat" href="/"><i className="material-icons">add</i></a>
+                    </section>
+                    <FilterProjects
+                        filterFunction={this.props.filterFunction}
+                    />
+                    <section className="project-list">
+                        <div className="container">
+                            <div className="row">
+                                <div className="col s12" ref={(container) => this.container = container}>
+                                    {items}
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </section>;
     }
 }
 

@@ -18,22 +18,32 @@ class Header extends React.Component {
 
 
     render () {
-        return <nav>
-                <div className="nav-wrapper">
-                    <a href="#!" className="brand-logo">Logo</a>
-
-                    <SearchInput
-                        closeSearchCallback={this.props.closeSearchCallback}
-                        onChange={this.props.searchFn}/>
-
-                    <ul className="side-nav" id="mobile-demo">
-                        <li><a href="sass.html">Sass</a></li>
-                        <li><a href="badges.html">Components</a></li>
-                        <li><a href="collapsible.html">Javascript</a></li>
-                        <li><a href="mobile.html">Mobile</a></li>
-                    </ul>
-                </div>
-            </nav>
+        return <section className="nav-mc-bar">
+                    <nav role="navigation">
+                        <div className="nav-wrapper container">
+                            <div className="row">
+                                <div className="col s4">
+                                    <a id="logo-container" href="#">
+                                        <img src="public/img/logo-matecat2.png" className="responsive-img middle-v"/>
+                                    </a>
+                                </div>
+                                <SearchInput
+                                    closeSearchCallback={this.props.closeSearchCallback}
+                                    onChange={this.props.searchFn}/>
+                                <div className="col s4">
+                                    <ul className="right">
+                                        <li>
+                                            <a href="" className="right waves-effect waves-light">
+                                                <span id="nome-cognome">Nome Cognome </span>
+                                                <button className="btn-floating btn-flat waves-effect waves-dark z-depth-0 center hoverable">RS</button>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+                </section>;
     }
 }
 export default Header ;

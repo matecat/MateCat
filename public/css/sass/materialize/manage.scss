@@ -1,0 +1,239 @@
+@import "index";
+@import "../components-main";
+
+.add-project {
+	margin-top: -28px;
+	padding-bottom: 28px;
+	padding-right: 28px;
+}
+
+.project-list {
+	.row {
+		margin-bottom: 0;
+	}
+	.card-panel {
+		border-radius: 0;
+	}
+}
+.project {
+	background-color: #f1f1f1;
+	padding: 0;
+	cursor: pointer;
+
+	.head-project {
+		background-color: #f1f1f1;
+		padding: 15px 0 30px 0;
+		border-top: 3px solid $secondary-color;
+		&.open-project {
+			background-color: $secondary-color;
+		}
+		.project-id {
+			background-color: $secondary-color;
+	    padding-left: 30px;
+	    line-height: 2.7rem;
+	    color: #ffffff;
+	    border-right: 1px solid #f1f1f1;
+		}
+		.project-name {
+			// background-color: orange;
+			cursor: pointer;
+			.input-field {
+		    position: relative;
+		    margin-top: 0rem;
+		    .prefix {
+		    	font-size: 1.5rem;
+		    }
+		    .prefix:focus {
+		    	// color: #0c5e73
+		    }
+		    input[type=text] {
+		    	// background-color: transparent;
+			    // border: none;
+			    // border-bottom: 1px solid #4d4d4d;
+			    // border-radius: 0;
+			    // outline: none;
+			    height: 2.6rem;
+			    // width: 100%;
+			    // font-size: 1rem;
+			    margin: 0 0 0 0;
+			    padding: 0;
+			    // box-shadow: none;
+			    // box-sizing: content-box;
+			    // transition: all 0.3s;
+		    }
+		    input[type=text]:focus {
+		    	border-bottom: 1px solid $secondary-color;
+    			box-shadow: 0 1px 0 0 #09beec;
+		    }
+			}
+		}
+		.project-activity-icon {
+			// background-color: yellow;
+		  margin: 0;
+		  padding-right: 30px;
+		  li {
+		  	float: left;
+		  	margin-left: 0rem;
+		  	a{
+		  	
+		  		margin-left: 10px;
+		  		i {
+		  			color: #0c5e73;
+		  		}
+		  	}
+				a:hover {
+					color: black;
+				}
+		  }
+		}
+	}
+	.foot-project {
+		padding: 0px 15px 15px 0;
+	}
+}
+
+.jobs{
+	margin-top: -15px;
+	.job {
+		background-color: #ffffff;
+		padding: 0px;
+		margin: 0 15px 1px 15px;
+		.head-job {
+			padding: 10px 0 0 0;
+			&.open-head-job {
+				border-top: 2px solid $secondary-color;
+				// background-color: yellow;
+				// border-top: 3px solid $secondary-color;
+			}
+			.job-id {
+				padding-left: 15px;
+				// background-color: green;
+		    line-height: 2.7rem;
+		    color: black;
+			}
+		}
+		.job-activity-icon {
+		  margin: 0;
+		  padding-right: 15px;
+		  // background-color: orange;
+		  li {
+		  	float: left;
+		  	a{
+		  		margin-left: 10px;
+		  		i {
+		  			color: #0c5e73;
+		  		}
+		  	}
+		  }
+		}
+		.body-job {
+			padding: 15px;
+			margin: 0 0 15px 0;
+			.progress-bar {
+				background-color: white;
+				line-height: 20px;
+				padding: 3;
+				.progress {
+					height: 30px;
+					border-radius: 4px;
+					margin: 0;
+				}
+			}
+			.payable-words {
+				// background-color: purple;
+				line-height: 2.3rem;
+			}
+
+			.combo-language {
+				span {
+					padding: 7px 10px;
+					border: 1px solid black;
+				}
+				&.single {
+					ul {
+						margin: 0;
+						li {
+							display: inline-block;
+							margin-right: 5px;
+						}
+					}
+				}
+		
+				&.multiple {
+					ul {
+						margin: 0;
+						li {
+							display: inline-block;
+							margin-right: 5px;
+						}
+						.btn {
+							background-color: white;
+							color: black;
+							padding: 0 8px;
+							border-right: 0;
+							line-height: 2.2rem;								
+							// border-left: 4px solid transparent;
+							// &.btn:active {
+							// 	border-left: 3px solid $secondary-color;
+							// }
+							// &.btn:focus {
+							// 	border-left: 3px solid $secondary-color;
+							// }
+							.progress {
+								margin: -0.5rem 0 1rem 0;
+								background-color: #e2dfdf;
+								padding: 0 22px;
+								height: 6px;
+								border-radius: 6px;
+								.determinate {
+
+								}
+							}
+							&.btn:hover {
+								// border-left: 4px solid $secondary-color;
+								background-color: #f1f1f1;
+								transition: .3s ease-out;
+							}
+							&.btn-active-combo {
+								border-left: 4px solid $secondary-color;
+								transition: .3s ease-out;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	.button-list {
+		&.split-outsource {
+			padding-right: 8px;
+  		border-right: 1px solid gray;
+  	}
+		.btn {
+			padding: 0 15px;
+		}
+		.green {
+			background-color: #4CAF50 !important;
+			&:hover {
+			background-color: #5dbd3d !important;
+			}
+		}
+		.white {
+			background-color: #ffffff !important;
+			color: gray;
+			&:hover {
+			background-color: #f1f1f1 !important;
+			}
+			.rotate {
+				-webkit-transform: rotate(135deg);
+		    -moz-transform: rotate(135deg);
+		    -o-transform: rotate(135deg);
+		    -ms-transform: rotate(135deg);
+		    transform: rotate(135deg);
+			}
+		}
+	}
+}
+.material-icons {
+	vertical-align: middle;
+}

@@ -44,7 +44,7 @@ module.exports = function(grunt) {
     var cssWatchFilesUploadPage = [
         cssBase + 'sass/variables.scss',
         cssBase + 'common.css',
-        cssBase + 'upload.css',
+        cssBase + 'upload-page.scss',
         cssBase + 'popup.css',
         cssBase + 'sass/notifications.scss'
     ];
@@ -52,6 +52,12 @@ module.exports = function(grunt) {
         cssBase + 'sass/variables.scss',
         cssBase + 'sass/notifications.scss'
     ];
+
+    var cssWatchMaterialize = [
+        cssBase + 'sass/materilize/*'
+    ];
+
+
 
     var es2015Preset = require('babel-preset-es2015');
     var reactPreset = require('babel-preset-react');
@@ -307,6 +313,14 @@ module.exports = function(grunt) {
                     livereload : true
                 }
             },
+            cssManage: {
+                files:  cssWatchMaterialize,
+                tasks: ['sass:distManage'],
+                options: {
+                    interrupt: true,
+                    livereload : true
+                }
+            },
         },
         sass: {
             distCattol: {
@@ -317,7 +331,7 @@ module.exports = function(grunt) {
                 src: [
                     cssBase + 'sass/main.scss'
                 ],
-                dest: cssBase + 'app.css'
+                dest: cssBase + 'build/app.css'
             },
             distUpload: {
                 options : {
@@ -327,7 +341,7 @@ module.exports = function(grunt) {
                 src: [
                     cssBase + 'sass/upload-main.scss'
                 ],
-                dest: cssBase + 'upload-build.css'
+                dest: cssBase + 'build/upload-build.css'
             },
             distComponents: {
                 options : {
@@ -337,7 +351,17 @@ module.exports = function(grunt) {
                 src: [
                     cssBase + 'sass/components-main.scss'
                 ],
-                dest: cssBase + 'components-build.css'
+                dest: cssBase + 'build/components-build.css'
+            },
+            distManage: {
+                options : {
+                    sourceMap : false,
+                    includePaths: [ cssBase, cssBase + 'libs/' ]
+                },
+                src: [
+                    cssBase + 'sass/materialize/manage.scss'
+                ],
+                dest: cssBase + 'build/manage-build.css'
             }
         },
         jshint: {

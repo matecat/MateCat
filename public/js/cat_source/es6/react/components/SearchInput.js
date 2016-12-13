@@ -17,17 +17,23 @@ class SearchInput extends React.Component {
 
     render () {
 
-        return (<form>
+        return (
+                <form className="col s4">
+
+                    <div className="row">
                         <div className="input-field">
-                            <input id="search" type="search" required
+                            <i className="material-icons prefix">search</i>
+                            <input id="icon_prefix" type="text" className="valid"
                                    ref={(input) => this.textInput = input}
                                    onChange={this.filterByName.bind(this)}/>
-                                <label htmlFor="search"><i className="material-icons">search</i></label>
-                                <i className="material-icons"
-                                    onClick={this.closeSearch.bind(this)}
-                                >close</i>
+                            <i className="material-icons"
+                               onClick={this.closeSearch.bind(this)}
+                            >close</i>
                         </div>
-                    </form>
+                    </div>
+                </form>
+
+
         );
     }
 }
