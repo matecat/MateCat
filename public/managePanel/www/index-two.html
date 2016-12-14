@@ -8,7 +8,7 @@
   <!-- CSS  -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <!-- Materialize css -->
-  <link rel="stylesheet" href="assets/css/app.css">
+  <link rel="stylesheet" href="assets/css/manage.css">
 </head>
 <body>
 <header>
@@ -35,7 +35,7 @@
               <!-- <li>Nome Cognome</li> -->
               <li>
                 <a href="" class="right waves-effect waves-light">
-                  <span id="nome-cognome">Nome Cognome 
+                  <span id="nome-cognome" class="hide-on-small-only">Nome Cognome</span>
                   <button class="btn-floating btn-flat waves-effect waves-dark z-depth-0 center hoverable">RS</button>
                 </a>
               </li>
@@ -73,8 +73,8 @@
 <section class="project-list">
   <div class="container">
     <div class="row">
-      <div class="col s12">
-        
+      <div class="col m12">
+        <!-- Card Project -->
         <div class="card-panel project">
           <div class="head-project">
             <div class="row">
@@ -83,45 +83,45 @@
                   <div id="id-prject"><span>ID:</span>134123</div>
                 </div>
               </div>
-              <div class="col m5 s4">
-                <div class="project-name">
-                  <form>
-                    <div class="row">
-                      <div class="input-field col s12">
-                        <input id="icon_prefix" type="text" value="PROJECT NAME"><i class="material-icons prefix">mode_edit</i>
-                      </div>
-                    </div>
-                  </form>
-                </div>
-              </div>
-
-              <div class="col m5 s4">
+              <div class="col m5 push-m5 s8">
                 <ul class="project-activity-icon right">
                   
-                  <li>
+                  <!-- <li>
                     <a href="#!" class="btn-floating btn-flat waves-effect waves-dark z-depth-0">
                       <i class="material-icons">settings</i>
                     </a>
-                  </li>
+                  </li> -->
                   <li>
                     <a class='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0' href='#' data-activates='dropdown1'>
                       <i class="material-icons">more_vert</i>
                     </a>
                   <!-- Dropdown Structure -->
                     <ul id='dropdown1' class='dropdown-content'>
-                      <li><a href="#!">one</a></li>
-                      <li><a href="#!">two</a></li>
-                      <li><a href="#!">three</a></li>
+                      
+                        <li><a href="#!"><i class="material-icons">search</i> one</a></li>
+                        <li><a href="#!">two</a></li>
+                        <li><a href="#!">three</a></li>
+                      
                     </ul>
                   </li>
                 </ul>
               </div>
-              
+              <div class="col m5 pull-m5 s12">
+                <div class="project-name">
+                  <form>
+                    <div class="row">
+                      <div class="input-field col s12">
+                        <input id="icon_prefix" type="text" value="PROJECT NAME"><i class="material-icons prefix hide-on-small-only">mode_edit</i>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
             </div>
           </div>
-          <section class="jobs">
-            <!--  card job -->
-            <div class="card job z-depth-1">
+          <!-- Job multicombo preview -->
+          <section class="jobs-preview">
+            <div class="card job-preview z-depth-1">
               <div class="head-job" style="display:none;">
                 <div class="row">
                   <div class="col s2">
@@ -142,7 +142,7 @@
                         <a class='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0' href='#' data-activates='dropdown2'>
                           <i class="material-icons">more_vert</i>
                         </a>
-                      <!-- Dropdown Structure -->
+                      
                         <ul id='dropdown2' class='dropdown-content'>
                           <li><a href="#!">one</a></li>
                           <li><a href="#!">two</a></li>
@@ -155,85 +155,81 @@
               </div>
               <div class="body-job">
                 <div class="row">
-                  <div class="col s10">
-                    <div class="row">
-                      <div class="col s10">
-                        <div class="combo-language multiple">
-                          <ul>
-                            <li>
-                              <span id="source">EN</span> <i class="material-icons">play_arrow</i>
-                            </li>
-                            <li>
-                              <a class="btn waves-effect waves-dark"><badge>ITA</badge>
-                                <div class="progress">
-                                  <div class="determinate" style="width: 70%"></div>
-                                </div>
-                              </a>
-                            </li>
-                            <li>
-                              <a class="btn waves-effect waves-dark btn-active-combo"><badge>FRA</badge>
-                                <div class="progress">
-                                  <div class="determinate" style="width: 70%"></div>
-                                </div>
-                              </a>
-                            </li>
-                            <li>
-                              <a class="btn waves-effect waves-dark btn-active-combo"><badge>GER</badge>
-                                <div class="progress">
-                                  <div class="determinate" style="width: 70%"></div>
-                                </div>
-                              </a>
-                            </li>
-                            <li>
-                              <a class="btn waves-effect waves-dark"><badge>NED</badge>
-                                <div class="progress">
-                                  <div class="determinate" style="width: 70%"></div>
-                                  <div class="determinate green" style="width: 30%"></div>
-                                </div>
-                              </a>
-                            </li>
-                            <li>
-                              <a class="btn waves-effect waves-dark"><badge>JPN</badge>
-                                <div class="progress">
-                                  <div class="determinate" style="width: 70%"></div>
-                                  <div class="determinate green" style="width: 30%"></div>
-                                </div>
-                              </a>
-                            </li>
-                            <li>
-                              <a class="btn waves-effect waves-dark"><badge>ESP</badge>
-                                <div class="progress">
-                                  <div class="determinate" style="width: 70%"></div>
-                                  <div class="determinate green" style="width: 30%"></div>
-                                </div>
-                              </a>
-                            </li>
-                            <li>
-                              <span id="more-combo">+20</span>
-                            </li>
-                            <li>
-                              <div class="payable-words">
-                                <a href="#!">3242 payable words</a>
-                              </div>
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
+                  <div class="col s11">
+                    <div class="combo-language multiple">
+                      <ul>
+                        <li>
+                          <span id="source">EN</span> <i class="material-icons">play_arrow</i>
+                        </li>
+                        <li>
+                          <a class="btn waves-effect waves-dark"><badge>ITA</badge>
+                            <div class="progress">
+                              <div class="determinate" style="width: 90%"></div>
+                            </div>
+                          </a>
+                        </li>
+                        <li>
+                          <a class="btn waves-effect waves-dark btn-active-combo"><badge>FRA</badge>
+                            <div class="progress">
+                              <div class="determinate rotate" style="width: 90%"></div>
+                            </div>
+                          </a>
+                        </li>
+                        <li>
+                          <a class="btn waves-effect waves-dark btn-active-combo"><badge>GER</badge>
+                            <div class="progress">
+                              <div class="determinate" style="width: 90%"></div>
+                            </div>
+                          </a>
+                        </li>
+                        <li>
+                          <a class="btn waves-effect waves-dark"><badge>NED</badge>
+                            <div class="progress">
+                              <div class="determinate" style="width: 90%"></div>
+                              <div class="determinate green" style="width: 30%"></div>
+                            </div>
+                          </a>
+                        </li>
+                        <li>
+                          <a class="btn waves-effect waves-dark"><badge>JPN</badge>
+                            <div class="progress">
+                              <div class="determinate" style="width: 90%"></div>
+                              <div class="determinate green" style="width: 30%"></div>
+                            </div>
+                          </a>
+                        </li>
+                        <li>
+                          <a class="btn waves-effect waves-dark"><badge>ESP</badge>
+                            <div class="progress">
+                              <div class="determinate" style="width: 90%"></div>
+                              <div class="determinate green" style="width: 30%"></div>
+                            </div>
+                          </a>
+                        </li>
+                        <li>
+                          <span id="more-combo">+20</span>
+                        </li>
+                        <li>
+                          <div class="payable-words">
+                            <a href="#!">3242 payable words</a>
+                          </div>
+                        </li>
+                      </ul>
                     </div>
                   </div>
-                  <div class="col s2">
-                    <div class="row">
-                      <div class="col s12 right">
-                        <div class="button-list open right">
-                          <a class="btn waves-effect waves-light btn-flat" style="display: none;">close</a>
-                          <a class="btn waves-effect waves-light">Open all</a>
-                        </div>
-                      </div>
+                  <div class="col s1 right">
+                    <div class="button-list open right">
+                      <a class="btn waves-effect waves-light">Open all</a>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+          </section>
+          <!-- Closing multicombo preview -->
+          <section class="jobs">
+            <!--  card job -->
+            
             <!-- closing card job -->
           </section>
           
@@ -250,8 +246,8 @@
           </div>
 
         </div>
-
-
+        <!-- Closing Card Project -->
+        <!-- Card Project -->
         <div class="card-panel project">
           <div class="head-project open-project">
             <div class="row">
@@ -260,37 +256,37 @@
                   <div id="id-prject"><span>ID:</span>134123</div>
                 </div>
               </div>
-              <div class="col m5 s4">
-                <div class="project-name">
-                  <form>
-                    <div class="row">
-                      <div class="input-field col s12">
-                        <input id="icon_prefix" type="text" value="PROJECT NAME"><i class="material-icons prefix">mode_edit</i>
-                      </div>
-                    </div>
-                  </form>
-                </div>
-              </div>
-              <div class="col m5 s4">
+              <div class="col m5 push-m5 s8">
                 <ul class="project-activity-icon right">
                   
-                  <li>
+                  <!-- <li>
                     <a href="#!" class="btn-floating btn-flat waves-effect waves-dark z-depth-0">
                       <i class="material-icons">settings</i>
                     </a>
-                  </li>
+                  </li> -->
                   <li>
-                    <a class='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0' href='#' data-activates='dropdown1'>
+                    <a class='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0' href='#' data-activates='dropdown3'>
                       <i class="material-icons">more_vert</i>
                     </a>
                   <!-- Dropdown Structure -->
-                    <ul id='dropdown1' class='dropdown-content'>
+                    <ul id='dropdown3' class='dropdown-content'>
                       <li><a href="#!">one</a></li>
                       <li><a href="#!">two</a></li>
                       <li><a href="#!">three</a></li>
                     </ul>
                   </li>
                 </ul>
+              </div>
+              <div class="col m5 pull-m5 s12">
+                <div class="project-name">
+                  <form>
+                    <div class="row">
+                      <div class="input-field col s12">
+                        <input id="icon_prefix" type="text" value="PROJECT NAME"><i class="material-icons prefix hide-on-small-only">mode_edit</i>
+                      </div>
+                    </div>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
@@ -313,11 +309,11 @@
                       </a>
                     </li>
                     <li>
-                      <a class='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0' href='#' data-activates='dropdown2'>
+                      <a class='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0' href='#' data-activates='dropdown4'>
                         <i class="material-icons">more_vert</i>
                       </a>
                     <!-- Dropdown Structure -->
-                      <ul id='dropdown2' class='dropdown-content'>
+                      <ul id='dropdown4' class='dropdown-content'>
                         <li><a href="#!">one</a></li>
                         <li><a href="#!">two</a></li>
                         <li><a href="#!">three</a></li>
@@ -329,80 +325,71 @@
             </div>
             <div class="body-job">
               <div class="row">
-                <div class="col s10">
-                  <div class="row">
-                    <div class="col s10">
-                      <div class="combo-language multiple">
-                        <ul>
-                          <li>
-                            <span id="source">EN</span> <i class="material-icons">play_arrow</i>
-                          </li>
-                          <li>
-                            <a class="btn waves-effect waves-dark"><badge>ITA</badge>
-                              <div class="progress">
-                                <div class="determinate" style="width: 70%"></div>
-                              </div>
-                            </a>
-                          </li>
-                          <li>
-                            <a class="btn waves-effect waves-dark btn-active-combo"><badge>FRA</badge>
-                              <div class="progress">
-                                <div class="determinate" style="width: 70%"></div>
-                              </div>
-                            </a>
-                          </li>
-                          <li>
-                            <a class="btn waves-effect waves-dark btn-active-combo"><badge>GER</badge>
-                              <div class="progress">
-                                <div class="determinate" style="width: 70%"></div>
-                              </div>
-                            </a>
-                          </li>
-                          <li>
-                            <a class="btn waves-effect waves-dark"><badge>NED</badge>
-                              <div class="progress">
-                                <div class="determinate" style="width: 70%"></div>
-                                <div class="determinate green" style="width: 30%"></div>
-                              </div>
-                            </a>
-                          </li>
-                          <li>
-                            <a class="btn waves-effect waves-dark"><badge>JPN</badge>
-                              <div class="progress">
-                                <div class="determinate" style="width: 70%"></div>
-                                <div class="determinate green" style="width: 30%"></div>
-                              </div>
-                            </a>
-                          </li>
-                          <li>
-                            <a class="btn waves-effect waves-dark"><badge>ESP</badge>
-                              <div class="progress">
-                                <div class="determinate" style="width: 70%"></div>
-                                <div class="determinate green" style="width: 30%"></div>
-                              </div>
-                            </a>
-                          </li>
-                          <li>
-                            <span id="more-combo">+20</span>
-                          </li>
-                          <li>
-                            <div class="payable-words">
-                              <a href="#!">3242 payable words</a>
-                            </div>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
+                <div class="col s11">
+                  <div class="combo-language multiple">
+                    <ul>
+                      <li>
+                        <span id="source">EN</span> <i class="material-icons">play_arrow</i>
+                      </li>
+                      <li>
+                        <a class="btn waves-effect waves-dark"><badge>ITA</badge>
+                          <div class="progress">
+                            <div class="determinate" style="width: 90%"></div>
+                          </div>
+                        </a>
+                      </li>
+                      <li>
+                        <a class="btn waves-effect waves-dark btn-active-combo"><badge>FRA</badge>
+                          <div class="progress">
+                            <div class="determinate" style="width: 90%"></div>
+                          </div>
+                        </a>
+                      </li>
+                      <li>
+                        <a class="btn waves-effect waves-dark btn-active-combo"><badge>GER</badge>
+                          <div class="progress">
+                            <div class="determinate" style="width: 90%"></div>
+                          </div>
+                        </a>
+                      </li>
+                      <li>
+                        <a class="btn waves-effect waves-dark"><badge>NED</badge>
+                          <div class="progress">
+                            <div class="determinate" style="width: 90%"></div>
+                            <div class="determinate green" style="width: 30%"></div>
+                          </div>
+                        </a>
+                      </li>
+                      <li>
+                        <a class="btn waves-effect waves-dark"><badge>JPN</badge>
+                          <div class="progress">
+                            <div class="determinate" style="width: 90%"></div>
+                            <div class="determinate green" style="width: 30%"></div>
+                          </div>
+                        </a>
+                      </li>
+                      <li>
+                        <a class="btn waves-effect waves-dark"><badge>ESP</badge>
+                          <div class="progress">
+                            <div class="determinate" style="width: 90%"></div>
+                            <div class="determinate green" style="width: 30%"></div>
+                          </div>
+                        </a>
+                      </li>
+                      <li>
+                        <span id="more-combo">+20</span>
+                      </li>
+                      <li>
+                        <div class="payable-words">
+                          <a href="#!">3242 payable words</a>
+                        </div>
+                      </li>
+                    </ul>
                   </div>
                 </div>
-                <div class="col s2">
-                  <div class="row">
-                    <div class="col s12 right">
-                      <div class="button-list open right">
-                        <a class="btn waves-effect waves-light btn-flat" style="display: none;">close</a>
-                        <a class="btn waves-effect waves-light">Open all</a>
-                      </div>
-                    </div>
+                <div class="col s1 right">
+                  <div class="button-list open right">
+                    <a class="btn waves-effect waves-light">Open all</a>
                   </div>
                 </div>
               </div>
@@ -431,11 +418,11 @@
                         </a>
                       </li>
                       <li>
-                        <a class='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0' href='#' data-activates='dropdown2'>
+                        <a class='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0' href='#' data-activates='dropdown5'>
                           <i class="material-icons">more_vert</i>
                         </a>
                       <!-- Dropdown Structure -->
-                        <ul id='dropdown2' class='dropdown-content'>
+                        <ul id='dropdown5' class='dropdown-content'>
                           <li><a href="#!">one</a></li>
                           <li><a href="#!">two</a></li>
                           <li><a href="#!">three</a></li>
@@ -501,81 +488,6 @@
             </div>
 
             <!--  card job -->
-            <div class="card job z-depth-1">
-              <div class="head-job open-head-job">
-                <div class="row">
-                  <div class="col s2">
-                    <div class="job-id">
-                      <div id="id-job"><span>ID:</span>134123</div>
-                    </div>
-                  </div>
-                  <div class="col s10">
-                    <ul class="job-activity-icon right">
-                      
-                      <li>
-                        <a href="#!" class="btn-floating btn-flat waves-effect waves-dark z-depth-0">
-                          <i class="material-icons">settings</i>
-                        </a>
-                      </li>
-                      <li>
-                        <a class='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0' href='#' data-activates='dropdown2'>
-                          <i class="material-icons">more_vert</i>
-                        </a>
-                      <!-- Dropdown Structure -->
-                        <ul id='dropdown2' class='dropdown-content'>
-                          <li><a href="#!">one</a></li>
-                          <li><a href="#!">two</a></li>
-                          <li><a href="#!">three</a></li>
-                        </ul>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-              <div class="body-job">
-                <div class="row">
-                  <div class="col s7">
-                    <div class="row">
-                      <div class="col s3">
-                        <div class="combo-language">
-                          <span id="source">EN</span> <i class="material-icons">play_arrow</i> <span id="target">ITA</span>
-                        </div>
-                      </div>
-                      <div class="col s7">
-                        <div class="progress-bar">
-                          <div class="progress">
-                            <div class="determinate" style="width: 70%"></div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="col s2">
-                        <div class="payable-words">
-                          <a href="#!"><span id="words">3242</span> words</a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col s5">
-                    <div class="row">
-                      <div class="col s10">
-                        <div class="button-list split-outsource right">
-                          <a class="btn waves-effect white waves-dark">split 
-                            <i class="large material-icons rotate">swap_horiz</i>
-                          </a>
-                          <a class="btn waves-effect waves-light green">outsource</a>
-                        </div>
-                      </div>
-                      <div class="col s2 right">
-                        <div class="button-list open right">
-                          <a class="btn waves-effect waves-light">open</a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!-- chiusura card job -->
             <!--  card job -->
             <div class="card job z-depth-1">
               <div class="head-job open-head-job">
@@ -594,11 +506,11 @@
                         </a>
                       </li>
                       <li>
-                        <a class='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0' href='#' data-activates='dropdown2'>
+                        <a class='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0' href='#' data-activates='dropdown7'>
                           <i class="material-icons">more_vert</i>
                         </a>
                       <!-- Dropdown Structure -->
-                        <ul id='dropdown2' class='dropdown-content'>
+                        <ul id='dropdown7' class='dropdown-content'>
                           <li><a href="#!">one</a></li>
                           <li><a href="#!">two</a></li>
                           <li><a href="#!">three</a></li>
@@ -610,26 +522,26 @@
               </div>
               <div class="body-job">
                 <div class="row">
-                  <div class="col s7">
+                  <div class="col s8">
                     <div class="row">
-                      <div class="col s3">
+                      <div class="col s4">
                         <div class="combo-language single">
                           <ul>
                             <li>
-                              <span id="source">EN</span> <i class="material-icons">play_arrow</i>
+                              <span id="source">EN-EN</span> <i class="material-icons">play_arrow</i>
                             </li>
                             <li>
-                              <span id="more-combo">FRA</span>
+                              <span id="more-combo">FRA-FRA</span>
                             </li>
                           </ul>
                         </div>
                       </div>
-                      <div class="col s9">
+                      <div class="col s8">
                         <div class="row">
                           <div class="col s9">
                             <div class="progress-bar">
                               <div class="progress">
-                                <div class="determinate" style="width: 70%"></div>
+                                <div class="determinate" style="width: 90%"></div>
                               </div>
                             </div>
                           </div>
@@ -642,7 +554,7 @@
                       </div>
                     </div>
                   </div>
-                  <div class="col s5">
+                  <div class="col s4">
                     <div class="row">
                       <div class="col s10">
                         <div class="button-list split-outsource right">
@@ -653,6 +565,94 @@
                         </div>
                       </div>
                       <div class="col s2 right">
+                        <div class="button-list open right">
+                          <a class="btn waves-effect waves-light">open</a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- chiusura card job -->
+            <!-- chiusura card job -->
+            <!--  card job -->
+            <div class="card job z-depth-1">
+              <div class="head-job open-head-job">
+                <div class="row">
+                  <div class="col s2">
+                    <div class="job-id">
+                      <div id="id-job"><span>ID:</span>134123</div>
+                    </div>
+                  </div>
+                  <div class="col s10">
+                    <ul class="job-activity-icon right">
+                      
+                      <li>
+                        <a href="#!" class="btn-floating btn-flat waves-effect waves-dark z-depth-0">
+                          <i class="material-icons">settings</i>
+                        </a>
+                      </li>
+                      <li>
+                        <a class='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0' href='#' data-activates='dropdown8'>
+                          <i class="material-icons">more_vert</i>
+                        </a>
+                      <!-- Dropdown Structure -->
+                        <ul id='dropdown8' class='dropdown-content'>
+                          <li><a href="#!">one</a></li>
+                          <li><a href="#!">two</a></li>
+                          <li><a href="#!">three</a></li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="body-job">
+                <div class="row">
+                  <div class="col s8">
+                    <div class="row">
+                      <div class="col s3">
+                        <div class="combo-language single">
+                          <ul>
+                            <li>
+                              <span id="source">DEN-DEN</span> <i class="material-icons">play_arrow</i>
+                            </li>
+                            <li>
+                              <span id="more-combo">DEN-DEN</span>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                      <div class="col s9">
+                        <div class="row">
+                          <div class="col s7">
+                            <div class="progress-bar">
+                              <div class="progress">
+                                <div class="determinate" style="width: 90%"></div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col s5">
+                            <div class="payable-words">
+                              <a class="" href="#!">3242 payable words</a>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col s4">
+                    <div class="row">
+                      <div class="col s9">
+                        <div class="button-list split-outsource right">
+                          <a class="btn waves-effect white waves-dark">split 
+                            <i class="large material-icons rotate">swap_horiz</i>
+                          </a>
+                          <a class="btn waves-effect waves-light green">outsource</a>
+                        </div>
+                      </div>
+                      <div class="col s3 right">
                         <div class="button-list open right">
                           <a class="btn waves-effect waves-light">open</a>
                         </div>
@@ -682,11 +682,11 @@
                         </a>
                       </li>
                       <li>
-                        <a class='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0' href='#' data-activates='dropdown2'>
+                        <a class='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0' href='#' data-activates='dropdown9'>
                           <i class="material-icons">more_vert</i>
                         </a>
                       <!-- Dropdown Structure -->
-                        <ul id='dropdown2' class='dropdown-content'>
+                        <ul id='dropdown9' class='dropdown-content'>
                           <li><a href="#!">one</a></li>
                           <li><a href="#!">two</a></li>
                           <li><a href="#!">three</a></li>
@@ -698,30 +698,41 @@
               </div>
               <div class="body-job">
                 <div class="row">
-                  <div class="col s7">
+                  <div class="col s8">
                     <div class="row">
                       <div class="col s3">
-                        <div class="combo-language">
-                          <span id="source">EN</span> <i class="material-icons">play_arrow</i> <span id="target">GER</span>
+                        <div class="combo-language single">
+                          <ul>
+                            <li>
+                              <span id="source">DEN-DEN</span> <i class="material-icons">play_arrow</i>
+                            </li>
+                            <li>
+                              <span id="more-combo">DEN-DEN</span>
+                            </li>
+                          </ul>
                         </div>
                       </div>
-                      <div class="col s7">
-                        <div class="progress-bar">
-                          <div class="progress">
-                            <div class="determinate" style="width: 70%"></div>
+                      <div class="col s9">
+                        <div class="row">
+                          <div class="col s7">
+                            <div class="progress-bar">
+                              <div class="progress">
+                                <div class="determinate" style="width: 90%"></div>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
-                      <div class="col s2">
-                        <div class="payable-words">
-                          <a href="#!"><span id="words">3242</span> words</a>
+                          <div class="col s5">
+                            <div class="payable-words">
+                              <a class="" href="#!">3242 payable words</a>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <div class="col s5">
+                  <div class="col s4">
                     <div class="row">
-                      <div class="col s10">
+                      <div class="col s9">
                         <div class="button-list split-outsource right">
                           <a class="btn waves-effect white waves-dark">split 
                             <i class="large material-icons rotate">swap_horiz</i>
@@ -729,7 +740,7 @@
                           <a class="btn waves-effect waves-light green">outsource</a>
                         </div>
                       </div>
-                      <div class="col s2 right">
+                      <div class="col s3 right">
                         <div class="button-list open right">
                           <a class="btn waves-effect waves-light">open</a>
                         </div>
@@ -741,82 +752,7 @@
             </div>
             <!-- chiusura card job -->
 
-            <!--  card job -->
-            <div class="card job z-depth-1">
-              <div class="head-job open-head-job">
-                <div class="row">
-                  <div class="col s2">
-                    <div class="job-id">
-                      <div id="id-job"><span>ID:</span>134123</div>
-                    </div>
-                  </div>
-                  <div class="col s10">
-                    <ul class="job-activity-icon right">
-                      
-                      <li>
-                        <a href="#!" class="btn-floating btn-flat waves-effect waves-dark z-depth-0">
-                          <i class="material-icons">settings</i>
-                        </a>
-                      </li>
-                      <li>
-                        <a class='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0' href='#' data-activates='dropdown2'>
-                          <i class="material-icons">more_vert</i>
-                        </a>
-                      <!-- Dropdown Structure -->
-                        <ul id='dropdown2' class='dropdown-content'>
-                          <li><a href="#!">one</a></li>
-                          <li><a href="#!">two</a></li>
-                          <li><a href="#!">three</a></li>
-                        </ul>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-              <div class="body-job">
-                <div class="row">
-                  <div class="col s7">
-                    <div class="row">
-                      <div class="col s3">
-                        <div class="combo-language">
-                          <span id="source">EN</span> <i class="material-icons">play_arrow</i> <span id="target">NED</span>
-                        </div>
-                      </div>
-                      <div class="col s7">
-                        <div class="progress-bar">
-                          <div class="progress">
-                            <div class="determinate" style="width: 70%"></div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="col s2">
-                        <div class="payable-words">
-                          <a href="#!"><span id="words">3242</span> words</a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col s5">
-                    <div class="row">
-                      <div class="col s10">
-                        <div class="button-list split-outsource right">
-                          <a class="btn waves-effect white waves-dark">split 
-                            <i class="large material-icons rotate">swap_horiz</i>
-                          </a>
-                          <a class="btn waves-effect waves-light green">outsource</a>
-                        </div>
-                      </div>
-                      <div class="col s2 right">
-                        <div class="button-list open right">
-                          <a class="btn waves-effect waves-light">open</a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!-- chiusura card job -->
+            
            
           </section>
           
@@ -833,7 +769,7 @@
           </div>
 
         </div>
-        <!-- Chiusura card project-->
+        <!-- Closing Card project-->
 
       </div>
     </div>
