@@ -20,15 +20,20 @@ class ConfirmRegister extends React.Component {
         });
     }
 
+    closeModal() {
+        $('#modal').trigger('closemodal');
+    }
+
     render() {
         var resend = '';
         if ( this.state.resend ) {
             resend = <p className="resend-message">Email sent again</p>
         }
         return <div className="success-modal">
-            <p>{'To complete your registration please follow the instructions in the email we sent you to ' + this.props.emailAddress + '.'}</p><br/>
-            <a className="register-submit btn-confirm-medium"
-               onClick={this.resendEmail.bind(this)} > Resend the email </a>
+            <p>{'To complete your registration please follow the instructions in the email we sent you to ' + this.props.emailAddress + '.'}</p>
+            <a className="btn-confirm-small" style={{width: "120px"}}
+               onClick={this.closeModal.bind(this)}> OK </a><br/>
+            <div id="resendlink"  onClick={this.resendEmail.bind(this)}>Resend Email</div>
             {resend}
         </div>;
     }
