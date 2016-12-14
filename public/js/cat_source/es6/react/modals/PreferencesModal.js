@@ -136,7 +136,7 @@ class PreferencesModal extends React.Component {
                                     <input type="text" name="coupon" id="user-coupon"
                                            onKeyPress={(e) => { (e.key === 'Enter' ? this.submitUserChanges() : this.onKeyPressCopupon) }}
                                            ref={(input) => this.couponInput = input}/>
-                                <a className="btn-confirm-medium" onClick={this.submitUserChanges.bind(this)}>Save changes</a>
+                                <a className="btn-confirm-medium" onClick={this.submitUserChanges.bind(this)}>Apply</a>
                                 <div className="validation-error">
                                         <span style={this.spanStyle} className="text">{this.state.couponError}</span>
                                 </div>
@@ -187,6 +187,7 @@ class PreferencesModal extends React.Component {
                             </div>
                             <label>{services_label}</label>
                         </div>
+                        {couponHtml}
                         <br/>
                          {resetPasswordHtml}
                         <div id='logoutlink' className="pull-right" onClick={this.logoutUser.bind(this)}>Logout</div>

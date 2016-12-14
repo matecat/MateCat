@@ -4995,8 +4995,9 @@ footer nav ul li {
     color: #333;
 }
 .coupon-container input#user-coupon {
-    width: 70%;
+    width: 76%;
     float: left;
+    box-sizing: border-box;
 }
 
 .coupon-container.coupon-success input#user-coupon {
@@ -5011,7 +5012,9 @@ footer nav ul li {
 }
 
 .coupon-container .btn-confirm-medium {
-    margin: 7px 0px 7px 20px;
+    margin: 6px 0% 0 3%;
+    width: 21%;
+    box-sizing: border-box;
 }
 
 .user-info-form input {
