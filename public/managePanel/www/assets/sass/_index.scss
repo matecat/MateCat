@@ -91,7 +91,38 @@
 
 .jobs{
 	margin-top: -15px;
-	.job {
+	.button-list {
+		&.split-outsource {
+			padding-right: 8px;
+  		border-right: 1px solid gray;
+  	}
+		.btn {
+			padding: 0 15px;
+		}
+		.green {
+			background-color: #4CAF50 !important;
+			&:hover {
+			background-color: #5dbd3d !important;
+			}
+		}
+		.white {
+			background-color: #ffffff !important;
+			color: gray;
+			&:hover {
+			background-color: #f1f1f1 !important;
+			}
+			.rotate {
+				-webkit-transform: rotate(135deg);
+		    -moz-transform: rotate(135deg);
+		    -o-transform: rotate(135deg);
+		    -ms-transform: rotate(135deg);
+		    transform: rotate(135deg);
+			}
+		}
+	}
+}
+
+.job, .job-preview {
 		background-color: #ffffff;
 		padding: 0px;
 		margin: 0 15px 1px 15px;
@@ -143,7 +174,7 @@
 
 			.combo-language {
 				span {
-					padding: 7px 10px;
+					padding: 7px 12px;
 					border: 1px solid black;
 				}
 				&.single {
@@ -201,36 +232,10 @@
 			}
 		}
 	}
-	.button-list {
-		&.split-outsource {
-			padding-right: 8px;
-  		border-right: 1px solid gray;
-  	}
-		.btn {
-			padding: 0 15px;
-		}
-		.green {
-			background-color: #4CAF50 !important;
-			&:hover {
-			background-color: #5dbd3d !important;
-			}
-		}
-		.white {
-			background-color: #ffffff !important;
-			color: gray;
-			&:hover {
-			background-color: #f1f1f1 !important;
-			}
-			.rotate {
-				-webkit-transform: rotate(135deg);
-		    -moz-transform: rotate(135deg);
-		    -o-transform: rotate(135deg);
-		    -ms-transform: rotate(135deg);
-		    transform: rotate(135deg);
-			}
-		}
+	.job-preview {
+		margin: -15px 15px 30px;
 	}
-}
+
 .material-icons {
 	vertical-align: middle;
 }
