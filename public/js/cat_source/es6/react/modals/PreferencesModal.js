@@ -111,11 +111,11 @@ class PreferencesModal extends React.Component {
         var gdriveMessage = '';
         if (this.props.showGDriveMessage) {
             gdriveMessage = <div className="preference-modal-message">
-                Connect your Google account to translate files in your Google Drive
+                Connect your Google account to translate files in your Drive
             </div>;
         }
 
-        var services_label = 'Connect your Google account to translate files in Google Drive';
+        var services_label = 'Connect your Google account to translate files in Drive';
         if ( this.state.service && !this.state.service.disabled_at) {
             services_label = 'Connected to Google Drive ('+ this.state.service.email+')';
         }
