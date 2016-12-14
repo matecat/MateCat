@@ -110,6 +110,18 @@ class INIT {
     public static $MAX_NUM_FILES = 100;
 
     /**
+     * We proose that lxq_server is in a configuration file
+     * lxq_license: ${lxq_license},
+     *
+     * THIS SHOULD BE YOUR LEXIQA LICENSE, Request your license key at
+     * @see http://www.lexiqa.net
+     *
+     */
+    public static $LXQ_LICENSE = false;
+
+    public static $LXQ_SERVER  = "https://backend.lexiqa.net";
+
+    /**
      * Time zone string that should match the one set in the database.
      * @var string
      */

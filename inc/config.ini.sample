@@ -32,6 +32,9 @@ SMTP_HOSTNAME = 'localhost'
 FILTERS_ADDRESS = https://translated-matecat-filters-v1.p.mashape.com
 FILTERS_MASHAPE_KEY = Register to https://market.mashape.com/translated/matecat-filters to obtain your Mashape Key
 
+; THIS SHOULD BE YOUR LEXIQA LICENSE, Request your license key at
+; @see http://www.lexiqa.net
+LXQ_LICENSE = false
 
 ;----------------------------------------
 [staging]
@@ -57,6 +60,9 @@ SMTP_HOSTNAME = 'localhost'
 FILTERS_ADDRESS = https://translated-matecat-filters-v1.p.mashape.com
 FILTERS_MASHAPE_KEY = Register to https://market.mashape.com/translated/matecat-filters to obtain your Mashape Key
 
+; THIS SHOULD BE YOUR LEXIQA LICENSE, Request your license key at
+; @see http://www.lexiqa.net
+LXQ_LICENSE = false
 
 ;----------------------------------------
 [production]
@@ -81,3 +87,7 @@ SMTP_HOSTNAME = 'localhost'
 ; Filters Configuration
 FILTERS_ADDRESS = https://translated-matecat-filters-v1.p.mashape.com
 FILTERS_MASHAPE_KEY = Register to https://market.mashape.com/translated/matecat-filters to obtain your Mashape Key
+
+; THIS SHOULD BE YOUR LEXIQA LICENSE, Request your license key at
+; @see http://www.lexiqa.net
+LXQ_LICENSE = false

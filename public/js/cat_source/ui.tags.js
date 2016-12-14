@@ -406,13 +406,13 @@ $.extend(UI, {
     checkTagProximity: function () {
         if(UI.editarea.html() == '') return false;
 
-        selection = window.getSelection();
+        var selection = window.getSelection();
         if(selection.rangeCount < 1) return false;
-        range = selection.getRangeAt(0);
+        var range = selection.getRangeAt(0);
         if(!range.collapsed) return true;
-        nextEl = $(range.endContainer.nextElementSibling);
-        prevEl = $(range.endContainer.previousElementSibling);
-        tempRange = range;
+        var nextEl = $(range.endContainer.nextElementSibling);
+        var prevEl = $(range.endContainer.previousElementSibling);
+        var tempRange = range;
         UI.editarea.find('.test-invisible').remove();
         pasteHtmlAtCaret('<span class="test-invisible"></span>');
         var coso = $.parseHTML(UI.editarea.html());
@@ -440,6 +440,8 @@ $.extend(UI, {
                 return false;
             }
         });
+        // TODO test.inivisible break some doms with text
+        $('body').find('.test-invisible').remove();
 
 
     },

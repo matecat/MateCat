@@ -6,46 +6,67 @@
 var React = require('react');
 
 class QAComponent extends React.Component {
+    get uniqEs6() {
+        return this._uniqEs6;
+    }
+
+    set uniqEs6(value) {
+        this._uniqEs6 = value;
+    }
 
     constructor(props) {
         super(props);
 
         this.state = {
-            issues: [],
-            issues_selected: false,
+            total_issues: [],
+            total_issues_selected: false,
+            tag_issues: [],
+            tag_issues_selected: false,
+            translation_conflicts: [],
+            translation_conflicts_selected: false,
             lxq_issues: [],
             lxq_selected: false,
             current_counter: 1,
             selected_box: ''
         };
+        this.showTotal = false;
         this.getCurrentArray = this.getCurrentArray.bind(this);
         QAComponent.togglePanel = QAComponent.togglePanel.bind(this);
     }
 
     static togglePanel() {
-        $('.qa-container').toggleClass("qa-open");
-        $('.qa-container').slideToggle();
+        var qa_cont = $('.qa-container');
+        qa_cont.toggleClass("qa-open");
+        qa_cont.slideToggle();
 
-        if ( !$('.qa-container').hasClass('qa-open') ) {
+        if ( !qa_cont.hasClass('qa-open') ) {
             this.setState({
-                issues_selected: false,
+                tag_issues_selected: false,
                 lxq_selected: false,
                 current_counter: 1,
                 selected_box: ''
             });
         } else {
             var selectedBox = '';
-            var issue_selected = false, lxq_selected = false;
-            if ( this.state.issues.length > 0 ) {
+            var issue_selected = false, lxq_selected = false, total_issue_selected = false, translation_conflicts_selected = false;
+            if ( this.checkShowTotalIssues()) {
+                total_issue_selected = true;
+                selectedBox = 'total_issues';
+            } else if ( this.state.tag_issues.length > 0 ) {
                 issue_selected = true;
-                selectedBox = 'issues';
+                selectedBox = 'tag_issues';
             } else if ( this.state.lxq_issues.length > 0 ) {
                 lxq_selected = true;
                 selectedBox = 'lxq';
+            } else if ( this.state.translation_conflicts.length > 0 ) {
+                translation_conflicts_selected = true;
+                selectedBox = 'conflicts';
             }
             this.setState({
-                issues_selected: issue_selected,
+                total_issues_selected: total_issue_selected,
+                tag_issues_selected: issue_selected,
                 lxq_selected: lxq_selected,
+                translation_conflicts_selected: translation_conflicts_selected,
                 current_counter: 1,
                 selected_box: selectedBox
             });
@@ -55,7 +76,19 @@ class QAComponent extends React.Component {
     }
 
     getTotalIssues() {
-        return this.state.lxq_issues.length + this.state.issues.length;
+        var total = 0;
+        //Show the total only if more than 1 arrays exist
+        $.each([this.state.lxq_issues, this.state.tag_issues, this.state.translation_conflicts], function (item) {
+            if (item.length) {
+                total++;
+            }
+        });
+        this.showTotal = (total > 1);
+        if (this.state.total_issues.length) {
+            return this.state.total_issues.length;
+        } else {
+            return this.state.lxq_issues.length + this.state.tag_issues.length + this.state.translation_conflicts;
+        }
     }
 
     scrollToSegment(segmentId) {
@@ -65,33 +98,85 @@ class QAComponent extends React.Component {
         }
     }
 
-    setIssues(issues) {
-        this.setState({ issues: issues });
+    setTagIssues(issues) {
+        var total = this.createTotalIssues(issues, this.state.lxq_issues, this.state.translation_conflicts);
+        this.setState({
+            tag_issues: issues,
+            total_issues: total
+        });
+    }
+
+    setTranslationConflitcts(issues) {
+        var total = this.createTotalIssues(this.state.tag_issues, this.state.lxq_issues, issues);
+        this.setState({
+            translation_conflicts: issues,
+            total_issues: total
+        });
     }
 
     setLxqIssues(issues) {
-        this.setState({ lxq_issues: issues });
+        var total = this.createTotalIssues(this.state.tag_issues, issues, this.state.translation_conflicts);
+        this.setState({
+            lxq_issues: issues,
+            total_issues: total
+        });
     }
+
+    createTotalIssues(tag_issues, lxq_issues, traslation_conflicts) {
+        return QAComponent._uniqueArray(tag_issues.concat(lxq_issues, traslation_conflicts)).sort();
+    }
+
+    static _uniqueArray(arrArg) {
+        return arrArg.filter((elem, pos, arr) => {
+            return arr.indexOf(elem) == pos;
+        });
+    };
 
     selectBox(type) {
         switch (type) {
-            case 'issues':
+            case 'tag_issues':
                 this.setState({
-                    issues_selected: true,
+                    total_issues_selected: false,
+                    tag_issues_selected: true,
                     lxq_selected: false,
+                    translation_conflicts_selected: false,
                     current_counter: 1,
                     selected_box: type,
                 });
-                this.scrollToSegment(this.state.issues[this.state.current_counter - 1]);
+                this.scrollToSegment(this.state.tag_issues[this.state.current_counter - 1]);
+                break;
+            case 'total_issues':
+                this.setState({
+                    total_issues_selected: true,
+                    tag_issues_selected: false,
+                    lxq_selected: false,
+                    translation_conflicts_selected: false,
+                    current_counter: 1,
+                    selected_box: type,
+                });
+                this.scrollToSegment(this.state.total_issues[this.state.current_counter - 1]);
                 break;
             case 'lxq':
                 this.setState({
+                    total_issues_selected: false,
                     lxq_selected: true,
-                    issues_selected: false,
+                    tag_issues_selected: false,
+                    translation_conflicts_selected: false,
                     current_counter: 1,
                     selected_box: type
                 });
                 this.scrollToSegment(this.state.lxq_issues[this.state.current_counter - 1]);
+                break;
+            case 'conflicts':
+                this.setState({
+                    total_issues_selected: false,
+                    lxq_selected: false,
+                    tag_issues_selected: false,
+                    translation_conflicts_selected: true,
+                    current_counter: 1,
+                    selected_box: type
+                });
+                this.scrollToSegment(this.state.translation_conflicts[this.state.current_counter - 1]);
                 break;
         }
 
@@ -99,10 +184,16 @@ class QAComponent extends React.Component {
 
     getCurrentArray() {
         switch (this.state.selected_box) {
-            case 'issues':
-                return this.state.issues;
+            case 'total_issues':
+                return this.state.total_issues;
+            case 'tag_issues':
+                return this.state.tag_issues;
             case 'lxq':
                 return this.state.lxq_issues;
+            case 'conflicts':
+                return this.state.translation_conflicts;
+            default:
+                return []
         }
     }
 
@@ -130,7 +221,7 @@ class QAComponent extends React.Component {
 
         var counter = this.state.current_counter;
         var newCounter;
-        if ( counter  === current_array.length) {
+        if ( counter  >= current_array.length) {
             newCounter = 1;
 
         } else {
@@ -159,13 +250,15 @@ class QAComponent extends React.Component {
         }
     }
 
-    componentDidMount() {
-
-    }
-
-
-    componentWillUnmount() {
-
+    checkShowTotalIssues() {
+        var total = 0;
+        //Show the total only if more than 1 arrays exist
+        $.each([this.state.lxq_issues, this.state.tag_issues, this.state.translation_conflicts], function (index, item) {
+            if (item.length) {
+                total++;
+            }
+        });
+        return (total > 1);
     }
 
     allowHTML(string) {
@@ -173,62 +266,90 @@ class QAComponent extends React.Component {
     }
 
     render() {
-        var issues_html = '';
+        var tag_issues_html = '';
+        var translation_conflicts_html = '';
+        var total_issues_html = '';
         var counter;
         var lxq_container = '';
         var lxq_options = '';
-        var buttonClass = 'qa-arrows-disabled';
-        if ( this.state.issues.length > 0 ) {
-            var selected = '';
-            if ( this.state.issues_selected ) {
-                counter = <div className="qa-counter">{this.state.current_counter + '/'+ this.state.issues.length}</div>;
+        var buttonArrowsClass = 'qa-arrows-disabled';
+        var counterLabel = 'Segment';
+        var current_array = this.getCurrentArray();
+        if ( (this.state.lxq_selected || this.state.tag_issues_selected || this.state.total_issues_selected) && current_array.length > 1 ) {
+            buttonArrowsClass = 'qa-arrows-enabled';
+            counterLabel = 'Segments';
+        }
+        if ( this.checkShowTotalIssues() ) {
+            let selected = '';
+            if ( this.state.total_issues_selected ) {
+                counter = <div className="qa-counter">{this.state.current_counter + '/'+ this.state.total_issues.length + ' ' + counterLabel}</div>;
                 selected = 'selected';
             }
-            issues_html = <div className={"qa-issues-container "+ selected} onClick={this.selectBox.bind(this, 'issues')}>
+            total_issues_html = <div className={"qa-issues-container "+ selected} onClick={this.selectBox.bind(this, 'total_issues')}>
+                <span className="icon-qa-total-issues"/>
+                <span className="qa-total-issues-counter">{this.state.total_issues.length}</span>
+                All
+            </div>;
+        }
+        if ( this.state.translation_conflicts.length > 0 ) {
+            let selected = '';
+            if ( this.state.translation_conflicts_selected ) {
+                counter = <div className="qa-counter">{this.state.current_counter + '/'+ this.state.translation_conflicts.length + ' ' + counterLabel}</div>;
+                selected = 'selected';
+            }
+            translation_conflicts_html = <div className={"qa-issues-container "+ selected} onClick={this.selectBox.bind(this, 'conflicts')}>
+                <span className="icon-conflicts"/>
+                <span className="qa-conflicts-issues-counter">{this.state.translation_conflicts.length}</span>
+                Translation Conflicts
+            </div>;
+        }
+        if ( this.state.tag_issues.length > 0 ) {
+            let selected = '';
+            if ( this.state.tag_issues_selected ) {
+                counter = <div className="qa-counter">{this.state.current_counter + '/'+ this.state.tag_issues.length + ' ' + counterLabel}</div>;
+                selected = 'selected';
+            }
+            tag_issues_html = <div className={"qa-issues-container "+ selected} onClick={this.selectBox.bind(this, 'tag_issues')}>
                 <span className="icon-qa-issues"/>
-                <span className="qa-issues-counter">{this.state.issues.length}</span>
-                Issues
+                <span className="qa-issues-counter">{this.state.tag_issues.length}</span>
+                Tag issues
             </div>;
         }
         if ( this.state.lxq_issues.length > 0 ) {
-            var selected = '';
+            let selected = '';
             if ( this.state.lxq_selected ) {
-                counter = <div className="qa-counter">{this.state.current_counter +'/'+ this.state.lxq_issues.length}</div>;
+                counter = <div className="qa-counter">{this.state.current_counter +'/'+ this.state.lxq_issues.length + ' ' + counterLabel}</div>;
                 selected = 'selected';
                 lxq_options = <ul className="lexiqa-popup-items">
 
                     <li className="lexiqa-popup-item">QA checks and guide
-                        <a className="lexiqa-popup-icon lexiqa-quide-icon" id="lexiqa-quide-link" href={config.lexiqaServer + '/documentation.html'} target="_blank" alt="Read the quick user guide of lexiqa"/>
+                        <a className="lexiqa-popup-icon lexiqa-quide-icon icon-info" id="lexiqa-quide-link" href={config.lexiqaServer + '/documentation.html'} target="_blank" alt="Read the quick user guide of lexiqa"/>
                     </li>
                     <li className="lexiqa-popup-item">Full QA report
-                        <a className="lexiqa-popup-icon lexiqa-report-icon" id="lexiqa-report-link" target="_blank" alt="Read the full QA report"
-                        href={config.lexiqaServer + '/errorreport?id='+this.partnerid+'-' + config.id_job + '-' + config.password+'&type='+(config.isReview?'revise':'translate')}/>
-                    </li>
-                    <li className="lexiqa-popup-item">Powered by
-                        <a className="lexiqa-popup-icon lexiqa-logo-icon" href="http://lexiqa.net" target="_blank" alt="lexiQA logo"/>
+                        <a className="lexiqa-popup-icon lexiqa-report-icon icon-file" id="lexiqa-report-link" target="_blank" alt="Read the full QA report"
+                        href={config.lexiqaServer + '/errorreport?id='+LXQ.partnerid+'-' + config.id_job + '-' + config.password+'&type='+(config.isReview?'revise':'translate')}/>
                     </li>
                 </ul>;
             }
             lxq_container = <div className={"qa-lexiqa-container " + selected} onClick={this.selectBox.bind(this, 'lxq')}>
                 <span className="icon-qa-lexiqa"/>
                 <span className="qa-lexiqa-counter">{this.state.lxq_issues.length}</span>
-                Suggestions
+                lexiQA
             </div>;
 
-        }
-        if ( this.state.lxq_selected || this.state.issues_selected) {
-            buttonClass = 'qa-arrows-enabled';
         }
         return  <div className="qa-container">
                     <div className="qa-container-inside">
                         <div className="qa-issues-types">
-                            {issues_html}
+                            {total_issues_html}
+                            {tag_issues_html}
+                            {translation_conflicts_html}
                             {lxq_container}
                         </div>
                         {lxq_options}
                         <div className="qa-actions">
                             {counter}
-                            <div className={'qa-arrows ' + buttonClass}>
+                            <div className={'qa-arrows ' + buttonArrowsClass}>
                                 <div className="qa-move-up" onClick={this.moveUp.bind(this)}>
                                     <span className="icon-qa-left-arrow"/>
                                 </div>
