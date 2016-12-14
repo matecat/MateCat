@@ -94,35 +94,39 @@ class PreferencesModal extends React.Component {
 
         }
         return <div className="preferences-modal">
-                    <div className="user-info-form">
-                        
+                     <div className="user-info-form">
+                        <div className="avatar-user pull-left">{config.userShortName}</div>
+                        <div className="user-name pull-left">
                             <strong>{this.props.user.first_name} {this.props.user.last_name}</strong><br/>
                         <span className="grey-txt">{this.props.user.email}</span><br/>
-                    </div>
-                    <div className="user-reset-password">
-                        {gdriveMessage}
-                       
-                    </div>
-                    <h2>Google Drive</h2>
-                    <div className="user-gdrive">
-                    
-                        <div className="onoffswitch-drive">
-                            <input type="checkbox" name="onoffswitch" onChange={this.checkboxChange.bind(this)}
-                                   ref={(input) => this.checkDrive = input}
-                                   className="onoffswitch-checkbox" id="gdrive_check"/>
-                            <label className="onoffswitch-label" htmlFor="gdrive_check">
-                                <span className="onoffswitch-inner"/>
-                                <span className="onoffswitch-switch"/>
-                                <span className="onoffswitch-label-status-active">ON</span>
-                                <span className="onoffswitch-label-status-inactive">OFF</span>
-                                <span className="onoffswitch-label-status-unavailable">Unavailable</span>
-                            </label>
                         </div>
-                        <label>{services_label}</label>
                     </div>
-                    <br/>
-                     {resetPasswordHtml}
-                    <div id='logoutlink' className="pull-left" onClick={this.logoutUser.bind(this)}>Logout</div>
+                    <div className="user-info-attributes">
+                        <div className="user-reset-password">
+                            {gdriveMessage}
+                           
+                        </div>
+                        <h2>Google Drive</h2>
+                        <div className="user-gdrive">
+                        
+                            <div className="onoffswitch-drive">
+                                <input type="checkbox" name="onoffswitch" onChange={this.checkboxChange.bind(this)}
+                                       ref={(input) => this.checkDrive = input}
+                                       className="onoffswitch-checkbox" id="gdrive_check"/>
+                                <label className="onoffswitch-label" htmlFor="gdrive_check">
+                                    <span className="onoffswitch-inner"/>
+                                    <span className="onoffswitch-switch"/>
+                                    <span className="onoffswitch-label-status-active">ON</span>
+                                    <span className="onoffswitch-label-status-inactive">OFF</span>
+                                    <span className="onoffswitch-label-status-unavailable">Unavailable</span>
+                                </label>
+                            </div>
+                            <label>{services_label}</label>
+                        </div>
+                        <br/>
+                         {resetPasswordHtml}
+                        <div id='logoutlink' className="pull-right" onClick={this.logoutUser.bind(this)}>Logout</div>
+                    </div>
             </div>;
     }
 }
