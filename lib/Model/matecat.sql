@@ -151,7 +151,7 @@ CREATE TABLE `files` (
   KEY `id_project` (`id_project`),
   KEY `sha1` (`sha1_original_file`) USING HASH,
   KEY `filename` (`filename`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE `files_job` (
   `id_job` int(11) NOT NULL,
@@ -421,11 +421,12 @@ CREATE TABLE `remote_files` (
   `id_job` bigint(20) NOT NULL,
   `remote_id` varchar(255) NOT NULL,
   `is_original` tinyint(1) DEFAULT '0',
-  `uid` bigint(20) DEFAULT NULL,
+  `connected_service_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `id_file` (`id_file`) USING BTREE,
   KEY `id_job` (`id_job`) USING BTREE
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8; 
+  KEY `connected_service_id` (`connected_service_id`) USING BTREE
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE `segment_notes` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
