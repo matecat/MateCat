@@ -6983,71 +6983,6 @@ button.picker__today:focus, button.picker__clear:focus, button.picker__close:foc
 
 .jobs {
   margin-top: -15px; }
-  .jobs .job {
-    background-color: #ffffff;
-    padding: 0px;
-    margin: 0 15px 1px 15px; }
-    .jobs .job .head-job {
-      padding: 10px 0 0 0; }
-      .jobs .job .head-job.open-head-job {
-        border-top: 2px solid #09beec; }
-      .jobs .job .head-job .job-id {
-        padding-left: 15px;
-        line-height: 2.7rem;
-        color: black; }
-    .jobs .job .job-activity-icon {
-      margin: 0;
-      padding-right: 15px; }
-      .jobs .job .job-activity-icon li {
-        float: left; }
-        .jobs .job .job-activity-icon li a {
-          margin-left: 10px; }
-          .jobs .job .job-activity-icon li a i {
-            color: #0c5e73; }
-    .jobs .job .body-job {
-      padding: 15px;
-      margin: 0 0 15px 0; }
-      .jobs .job .body-job .progress-bar {
-        background-color: white;
-        line-height: 20px;
-        padding: 3; }
-        .jobs .job .body-job .progress-bar .progress {
-          height: 30px;
-          border-radius: 4px;
-          margin: 0; }
-      .jobs .job .body-job .payable-words {
-        line-height: 2.3rem; }
-      .jobs .job .body-job .combo-language span {
-        padding: 7px 10px;
-        border: 1px solid black; }
-      .jobs .job .body-job .combo-language.single ul {
-        margin: 0; }
-        .jobs .job .body-job .combo-language.single ul li {
-          display: inline-block;
-          margin-right: 5px; }
-      .jobs .job .body-job .combo-language.multiple ul {
-        margin: 0; }
-        .jobs .job .body-job .combo-language.multiple ul li {
-          display: inline-block;
-          margin-right: 5px; }
-        .jobs .job .body-job .combo-language.multiple ul .btn, .jobs .job .body-job .combo-language.multiple ul .btn-large {
-          background-color: white;
-          color: black;
-          padding: 0 8px;
-          border-right: 0;
-          line-height: 2.2rem; }
-          .jobs .job .body-job .combo-language.multiple ul .btn .progress, .jobs .job .body-job .combo-language.multiple ul .btn-large .progress {
-            margin: -0.5rem 0 1rem 0;
-            background-color: #e2dfdf;
-            padding: 0 22px;
-            height: 6px;
-            border-radius: 6px; }
-          .jobs .job .body-job .combo-language.multiple ul .btn.btn:hover, .jobs .job .body-job .combo-language.multiple ul .btn-large:hover {
-            background-color: #f1f1f1;
-            transition: .3s ease-out; }
-          .jobs .job .body-job .combo-language.multiple ul .btn.btn-active-combo, .jobs .job .body-job .combo-language.multiple ul .btn-active-combo.btn-large {
-            border-left: 4px solid #09beec;
-            transition: .3s ease-out; }
   .jobs .button-list.split-outsource {
     padding-right: 8px;
     border-right: 1px solid gray; }
@@ -7068,6 +7003,75 @@ button.picker__today:focus, button.picker__clear:focus, button.picker__close:foc
       -o-transform: rotate(135deg);
       -ms-transform: rotate(135deg);
       transform: rotate(135deg); }
+
+.job, .job-preview {
+  background-color: #ffffff;
+  padding: 0px;
+  margin: 0 15px 1px 15px; }
+  .job .head-job, .job-preview .head-job {
+    padding: 10px 0 0 0; }
+    .job .head-job.open-head-job, .job-preview .head-job.open-head-job {
+      border-top: 2px solid #09beec; }
+    .job .head-job .job-id, .job-preview .head-job .job-id {
+      padding-left: 15px;
+      line-height: 2.7rem;
+      color: black; }
+  .job .job-activity-icon, .job-preview .job-activity-icon {
+    margin: 0;
+    padding-right: 15px; }
+    .job .job-activity-icon li, .job-preview .job-activity-icon li {
+      float: left; }
+      .job .job-activity-icon li a, .job-preview .job-activity-icon li a {
+        margin-left: 10px; }
+        .job .job-activity-icon li a i, .job-preview .job-activity-icon li a i {
+          color: #0c5e73; }
+  .job .body-job, .job-preview .body-job {
+    padding: 15px;
+    margin: 0 0 15px 0; }
+    .job .body-job .progress-bar, .job-preview .body-job .progress-bar {
+      background-color: white;
+      line-height: 20px;
+      padding: 3; }
+      .job .body-job .progress-bar .progress, .job-preview .body-job .progress-bar .progress {
+        height: 30px;
+        border-radius: 4px;
+        margin: 0; }
+    .job .body-job .payable-words, .job-preview .body-job .payable-words {
+      line-height: 2.3rem; }
+    .job .body-job .combo-language span, .job-preview .body-job .combo-language span {
+      padding: 7px 12px;
+      border: 1px solid black; }
+    .job .body-job .combo-language.single ul, .job-preview .body-job .combo-language.single ul {
+      margin: 0; }
+      .job .body-job .combo-language.single ul li, .job-preview .body-job .combo-language.single ul li {
+        display: inline-block;
+        margin-right: 5px; }
+    .job .body-job .combo-language.multiple ul, .job-preview .body-job .combo-language.multiple ul {
+      margin: 0; }
+      .job .body-job .combo-language.multiple ul li, .job-preview .body-job .combo-language.multiple ul li {
+        display: inline-block;
+        margin-right: 5px; }
+      .job .body-job .combo-language.multiple ul .btn, .job .body-job .combo-language.multiple ul .btn-large, .job-preview .body-job .combo-language.multiple ul .btn, .job-preview .body-job .combo-language.multiple ul .btn-large {
+        background-color: white;
+        color: black;
+        padding: 0 8px;
+        border-right: 0;
+        line-height: 2.2rem; }
+        .job .body-job .combo-language.multiple ul .btn .progress, .job .body-job .combo-language.multiple ul .btn-large .progress, .job-preview .body-job .combo-language.multiple ul .btn .progress, .job-preview .body-job .combo-language.multiple ul .btn-large .progress {
+          margin: -0.5rem 0 1rem 0;
+          background-color: #e2dfdf;
+          padding: 0 22px;
+          height: 6px;
+          border-radius: 6px; }
+        .job .body-job .combo-language.multiple ul .btn.btn:hover, .job .body-job .combo-language.multiple ul .btn-large:hover, .job-preview .body-job .combo-language.multiple ul .btn.btn:hover, .job-preview .body-job .combo-language.multiple ul .btn-large:hover {
+          background-color: #f1f1f1;
+          transition: .3s ease-out; }
+        .job .body-job .combo-language.multiple ul .btn.btn-active-combo, .job .body-job .combo-language.multiple ul .btn-active-combo.btn-large, .job-preview .body-job .combo-language.multiple ul .btn.btn-active-combo, .job-preview .body-job .combo-language.multiple ul .btn-active-combo.btn-large {
+          border-left: 4px solid #09beec;
+          transition: .3s ease-out; }
+
+.job-preview {
+  margin: -15px 15px 30px; }
 
 .material-icons {
   vertical-align: middle; }
