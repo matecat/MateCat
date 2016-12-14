@@ -7,5 +7,6 @@ var keyMirror = require('keymirror');
 module.exports = keyMirror({
     RENDER_PROJECTS: null,
     RENDER_MORE_PROJECTS: null,
-    OPEN_JOB_SETTINGS: null
+    OPEN_JOB_SETTINGS: null,
+    CLOSE_ALL_JOBS: null
 });

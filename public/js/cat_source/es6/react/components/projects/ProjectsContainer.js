@@ -25,6 +25,13 @@ class ProjectsContainer extends React.Component {
         });
     }
 
+    onClickFn(event) {
+        console.log("On Click event", event);
+        //Check if the click comes from a Project container
+        if ($(event.nativeEvent.target).closest(".card-panel").size() === 0) {
+            ManageActions.closeAllJobs();
+        }
+    }
 
     componentDidMount() {
         ProjectsStore.addListener(ManageConstants.RENDER_PROJECTS, this.renderProjects);
@@ -49,7 +56,7 @@ class ProjectsContainer extends React.Component {
                 project={project}
                 lastActivityFn={this.props.getLastActivity}/>
         ));
-        return <section className="content">
+        return <section className="content" onClick={this.onClickFn.bind(this)}>
                     <section className="add-project">
                         <a className="btn-floating btn-large waves-effect waves-light right create-new blue-matecat" href="/"><i className="material-icons">add</i></a>
                     </section>

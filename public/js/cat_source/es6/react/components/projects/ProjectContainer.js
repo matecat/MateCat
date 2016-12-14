@@ -17,13 +17,24 @@ class ProjectContainer extends React.Component {
         };
         this.getProjectHeader = this.getProjectHeader.bind(this);
         this.getActivityLogUrl = this.getActivityLogUrl.bind(this);
+        this.hideAllJobs = this.hideAllJobs.bind(this);
 
     }
 
     showHideAllJobs() {
         var show = this.state.showAllJobs;
+        if (!show) {
+            ManageActions.closeAllJobs();
+        }
         this.setState({
             showAllJobs: !show,
+            visibleJobs: []
+        });
+    }
+
+    hideAllJobs() {
+        this.setState({
+            showAllJobs: false,
             visibleJobs: []
         });
     }
@@ -44,13 +55,12 @@ class ProjectContainer extends React.Component {
 
     componentDidMount() {
         $(this.dropdown).dropdown();
-        console.log("Mounted Segment : " + this.props.project.get('id'));
+        ProjectsStore.addListener(ManageConstants.CLOSE_ALL_JOBS, this.hideAllJobs);
     }
 
     componentWillUnmount() {
+        ProjectsStore.removeListener(ManageConstants.CLOSE_ALL_JOBS, this.hideAllJobs);
     }
-
-    componentWillUpdate() {}
 
     componentDidUpdate() {
         console.log("Updated Segment : " + this.props.project.get('id'));
@@ -174,7 +184,7 @@ class ProjectContainer extends React.Component {
                         <div className="row">
                             <div className="col m2 s4">
                                 <div className="project-id">
-                                    <div id="id-prject"><span>ID:</span>{this.props.project.get('id')}</div>
+                                    <div id="id-project"><span>ID:</span>{this.props.project.get('id')}</div>
                                 </div>
                             </div>
                             <div className="col m5 s4">
@@ -204,9 +214,8 @@ class ProjectContainer extends React.Component {
                                             <i className="material-icons">more_vert</i>
                                         </a>
                                         <ul id={'dropdown' + this.props.project.get('id')} className='dropdown-content'>
-                                            <li><a href="#!">one</a></li>
-                                            <li><a href="#!">two</a></li>
-                                            <li><a href="#!">three</a></li>
+                                            <li><a href={activityLogUrl} target="_blank">Activity Log</a></li>
+                                            <li><a href="#!">Remove from my Dashboard</a></li>
                                         </ul>
                                     </li>
                                 </ul>
@@ -219,9 +228,9 @@ class ProjectContainer extends React.Component {
                         <CSSTransitionGroup
                         transitionName="slide"
                         transitionAppear={true}
-                        transitionAppearTimeout={500}
+                        transitionAppearTimeout={1000}
                         transitionEnterTimeout={300}
-                        transitionLeaveTimeout={500}>
+                        transitionLeaveTimeout={200}>
                         {jobsList}
                         </CSSTransitionGroup>
                     </section>
