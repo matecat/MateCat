@@ -33,7 +33,8 @@ UI = {
         if ( !this.ProjectsContainer ) {
             var mountPoint = $("#main-container")[0];
             this.ProjectsContainer = ReactDOM.render(React.createElement(ProjectsContainer, {
-                filterFunction: this.filterProjectsFromStatus
+                filterFunction: this.filterProjectsFromStatus,
+                getLastActivity: this.getLastProjectActivityLogAction
             }), mountPoint);
             ManageActions.renderProjects(projects);
         }
@@ -289,6 +290,13 @@ UI = {
                     }]
             },
             success : function ( data ) {}
+        });
+    },
+    getLastProjectActivityLogAction: function (id, pass) {
+        return $.ajax({
+            async: true,
+            type: "get",
+            url : "/api/v2/activity/project/'" + id + "/" + pass + "/last",
         });
     },
     scrollDebounceFn: function() {

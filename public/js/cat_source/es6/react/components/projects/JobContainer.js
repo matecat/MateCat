@@ -3,11 +3,12 @@ class JobContainer extends React.Component {
     constructor (props) {
         super(props);
         this.getTranslateUrl = this.getTranslateUrl.bind(this);
+        this.getOutsourceUrl = this.getOutsourceUrl.bind(this);
         this.getAnalysisUrl = this.getAnalysisUrl.bind(this);
     }
 
     componentDidMount () {
-
+        $(this.dropdown).dropdown();
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -20,11 +21,20 @@ class JobContainer extends React.Component {
         return '/translate/'+this.props.projectName+'/'+ this.props.job.get('source') +'-'+this.props.job.get('target')+'/'+ chunk_id +'-'+ this.props.job.get('password')  ;
     }
 
-    getAnalysisUrl() {
+    getOutsourceUrl() {
         return '/analyze/'+ this.props.projectName +'/'+this.props.projectId+'-' + this.props.projectPassword + '?open=analysis&jobid=' + this.props.job.get('id');
     }
+
+    getAnalysisUrl() {
+        return '/jobanalysis/'+this.props.projectId+ '-' + this.props.job.get('id') + '-' + this.props.job.get('password');
+    }
+
     getSplitUrl() {
-        return '/analyze/'+ this.props.projectName +'/'+this.props.projectId+'-' + this.props.projectPassword + '?open=split&jobid=' + this.props.job.get('id');
+        return '/analyze/'+ this.props.projectName +'/'+this.props.projectId+'-' + this.props.projectPassword; // + '?open=split&jobid=' + this.props.job.get('id');
+    }
+
+    getActivityLogUrl() {
+        return '/activityLog/'+ this.props.projectName +'/'+this.props.projectId+'-' + this.props.projectPassword + '?open=split&jobid=' + this.props.job.get('id');
     }
 
     openSettings() {
@@ -33,6 +43,7 @@ class JobContainer extends React.Component {
 
     render () {
         var translateUrl = this.getTranslateUrl();
+        var outsourceUrl = this.getOutsourceUrl();
         var analysisUrl = this.getAnalysisUrl();
         var splitUrl = this.getSplitUrl();
         return <div className="card job z-depth-1">
@@ -54,13 +65,14 @@ class JobContainer extends React.Component {
                             </li>
                             <li>
                                 <a className='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0'
-                                   data-activates='dropdown2'>
+                                   data-activates={'dropdownJob' + this.props.job.get('id')}
+                                   ref={(dropdown) => this.dropdown = dropdown}>
                                     <i className="material-icons">more_vert</i>
                                 </a>
-                                <ul id='dropdown2' className='dropdown-content'>
-                                    <li><a href="#!">one</a></li>
-                                    <li><a href="#!">two</a></li>
-                                    <li><a href="#!">three</a></li>
+                                <ul id={'dropdownJob' + this.props.job.get('id')} className='dropdown-content'>
+                                    <li><a >one</a></li>
+                                    <li><a >two</a></li>
+                                    <li><a >three</a></li>
                                 </ul>
                             </li>
                         </ul>
@@ -86,7 +98,7 @@ class JobContainer extends React.Component {
                             </div>
                             <div className="col s2">
                                 <div className="payable-words">
-                                    <a href="#!"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
+                                    <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
                                 </div>
                             </div>
                         </div>
@@ -98,7 +110,7 @@ class JobContainer extends React.Component {
                                     <a className="btn waves-effect white waves-dark" target="_blank" href={splitUrl}>split
                                         <i className="large material-icons rotate">swap_horiz</i>
                                     </a>
-                                    <a className="btn waves-effect waves-light green" target="_blank" href={analysisUrl}>outsource</a>
+                                    <a className="btn waves-effect waves-light green" target="_blank" href={outsourceUrl}>outsource</a>
                                 </div>
                             </div>
                             <div className="col s2 right">

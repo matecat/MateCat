@@ -16,6 +16,7 @@ class ProjectContainer extends React.Component {
             visibleJobs: [],
         };
         this.getProjectHeader = this.getProjectHeader.bind(this);
+        this.getActivityLogUrl = this.getActivityLogUrl.bind(this);
 
     }
 
@@ -42,6 +43,7 @@ class ProjectContainer extends React.Component {
     }
 
     componentDidMount() {
+        $(this.dropdown).dropdown();
         console.log("Mounted Segment : " + this.props.project.get('id'));
     }
 
@@ -62,6 +64,7 @@ class ProjectContainer extends React.Component {
     getProjectHeader(sourceLang, targetsLangs, payableWords) {
         var jobsLength = this.props.project.get('jobs').size;
         var headerProject = '';
+        var analyzeUrl = this.getAnalyzeUrl();
         if( jobsLength > 1 ) {
             headerProject = <div className="card job z-depth-1">
                 <div className="body-job">
@@ -81,7 +84,7 @@ class ProjectContainer extends React.Component {
                                             {/*</li>*/}
                                             <li>
                                                 <div className="payable-words">
-                                                    <a href="#!">{payableWords} payable words</a>
+                                                    <a href={analyzeUrl} target="_blank">{payableWords} payable words</a>
                                                 </div>
                                             </li>
                                         </ul>
@@ -110,15 +113,29 @@ class ProjectContainer extends React.Component {
 
     }
 
+    getLastAction() {
+        this.props.lastActivityFn(this.props.project.get('id'), this.props.project.get('password')).done()
+    }
+
+    getActivityLogUrl() {
+        return '/activityLog/' +this.props.project.get('id')+ '/' + this.props.project.get('password');
+    }
+
+    getAnalyzeUrl() {
+        return '/analyze/' +this.props.project.get('name')+ '/' +this.props.project.get('id')+ '-' + this.props.project.get('password');
+    }
+
     render() {
         var self = this;
-
+        // var activityLog = this.getLastAction();
         var jobsList = [];
         var sourceLang = this.props.project.get('jobs').first().get('source');
         var targetsLangs = [];
         var jobsLength = this.props.project.get('jobs').size;
         var openProjectClass = '';
         var payableWords = 0;
+        var activityLogUrl = this.getActivityLogUrl();
+
         this.props.project.get('jobs').map(function(job, i){
 
             var index = i+1;
@@ -182,10 +199,11 @@ class ProjectContainer extends React.Component {
                                     {/*</li>*/}
                                     <li>
                                         <a className='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0'
-                                           href='#' data-activates='dropdown1'>
+                                           ref={(dropdown) => this.dropdown = dropdown}
+                                           data-activates={'dropdown' + this.props.project.get('id')}>
                                             <i className="material-icons">more_vert</i>
                                         </a>
-                                        <ul id='dropdown1' className='dropdown-content'>
+                                        <ul id={'dropdown' + this.props.project.get('id')} className='dropdown-content'>
                                             <li><a href="#!">one</a></li>
                                             <li><a href="#!">two</a></li>
                                             <li><a href="#!">three</a></li>
@@ -216,9 +234,8 @@ class ProjectContainer extends React.Component {
                         <div className="row">
                             <div className="col s12">
                                 <div className="activity-log">
-                                    <a href="#" className="right">
-                                        <i><span id="nome-log">Ruben</span> ha <span id="act-log">commentato</span>
-                                            questo <span id="oggetto-log">job</span></i>
+                                    <a href={activityLogUrl} target="_blank" className="right">
+                                        <i><span id="nome-log">Ruben</span> <span id="act-log">commentato</span></i>
                                     </a>
                                 </div>
                             </div>

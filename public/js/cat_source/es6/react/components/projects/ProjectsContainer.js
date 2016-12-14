@@ -46,7 +46,8 @@ class ProjectsContainer extends React.Component {
         var items = this.state.projects.map((project, i) => (
             <Project
                 key={i}
-                project={project}/>
+                project={project}
+                lastActivityFn={this.props.getLastActivity}/>
         ));
         return <section className="content">
                     <section className="add-project">
