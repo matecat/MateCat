@@ -19,7 +19,9 @@ $.extend(APP, {
         //     });
         // });
 
-
+        $('#modal').on('closemodal', function () {
+            APP.ModalWindow.onCloseModal();
+        });
 
         $('#modal').on('opensuccess', function (e, param) {
             APP.ModalWindow.showModalComponent(SuccessModal, param, param.title);

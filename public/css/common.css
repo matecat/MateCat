@@ -2336,18 +2336,42 @@ input.email-export-tmx {
     position: relative;
 }
 
-.btn-confirm-medium:hover {
+.btn-confirm-medium:hover,
+.btn-confirm-small:hover{
     cursor: pointer;
     -webkit-box-shadow: 0 1px 2px #ccc;
     box-shadow: 0 1px 2px #ccc;
     border: 1px solid #000;
 }
 
-.btn-confirm-medium:active {
+.btn-confirm-medium:active,
+.btn-confirm-small:active {
     -moz-box-shadow: inset 0 0 1px 1px #888;
     -webkit-box-shadow: inset 0 0 1px 1px #888;
     box-shadow: inset 0 0 1px 1px #888;
 }
+
+.btn-confirm-small {
+    color: #fff;
+    background: #09beec;
+    border: 1px solid #848689;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 3px 0;
+    border-radius: 2px;
+    font-size: 16px;
+    background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
+    background: -moz-linear-gradient(top, #09beec, #119ec4);
+    background: linear-gradient(top, #09beec, #119ec4);
+    margin: 10px 10px;
+    display: inline-block;
+    text-align: center;
+    position: relative;
+}
+
+
+
+
 
 /*******************/
 td.download-glossary-container .uploadloader {
@@ -4710,12 +4734,17 @@ span.share-popup-item-email {
 /***** Login Footer ****/
 
 #logoutlink,
-.reset-password {
+.reset-password,
+#resendlink{
     margin-bottom: 20px;
     text-decoration: underline;
     float: left;
     cursor: pointer;
     color: #39699a;
+}
+
+#resendlink {
+    float: none;
 }
 
 footer nav ul li {

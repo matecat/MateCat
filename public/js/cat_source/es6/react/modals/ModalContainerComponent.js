@@ -33,7 +33,7 @@ class ModalComponent extends React.Component {
         return <div id="matecat-modal" className="matecat-modal" onClick={(e) => this.closeModal.call(this,e)}>
                 <div className="matecat-modal-content" style={this.props.styleContainer}>
                     <div className="matecat-modal-header">
-                        <span className="close-matecat-modal x-popup" onClick={this.closeModal.bind(this)}></span>
+                        <span className="close-matecat-modal x-popup" onClick={this.closeModal.bind(this)}/>
                         <h2>{this.props.title}</h2>
                     </div>
                     <div className="matecat-modal-body">
