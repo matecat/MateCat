@@ -111,11 +111,11 @@ class PreferencesModal extends React.Component {
         var gdriveMessage = '';
         if (this.props.showGDriveMessage) {
             gdriveMessage = <div className="preference-modal-message">
-                Connect your Google account to translate files in your Google Drive
+                Connect your Google account to translate files in your Drive
             </div>;
         }
 
-        var services_label = 'Connect your Google account to translate files in Google Drive';
+        var services_label = 'Connect your Google account to translate files in Drive';
         if ( this.state.service && !this.state.service.disabled_at) {
             services_label = 'Connected to Google Drive ('+ this.state.service.email+')';
         }
@@ -158,6 +158,7 @@ class PreferencesModal extends React.Component {
         // find if the use has the coupon already. If he has then do not show the input field.
 
         return <div className="preferences-modal">
+
                      <div className="user-info-form">
                         <div className="avatar-user pull-left">{config.userShortName}</div>
                         <div className="user-name pull-left">
@@ -166,10 +167,12 @@ class PreferencesModal extends React.Component {
                         </div>
                     </div>
                     <div className="user-info-attributes">
+
                         <div className="user-reset-password">
                             {gdriveMessage}
 
                         </div>
+
                         <h2>Google Drive</h2>
                         <div className="user-gdrive">
 

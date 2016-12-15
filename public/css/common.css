@@ -1051,7 +1051,7 @@ color:#333;}
     position: absolute;
     left: 80px;
     font-size: 24px;
-    top: 5px;
+    top: 6px;
     line-height: 20px;
 }
 
@@ -4819,6 +4819,11 @@ footer nav ul li {
 }
 
 
+.coupon-container p {
+    line-height: 5px!important;
+}
+
+
 .user-info-form,
 .user-reset-password,
 .user-gdrive {
@@ -4897,20 +4902,28 @@ footer nav ul li {
     -ms-user-select: none;
 }
 
+.preferences-modal .onoffswitch-drive {
+    position: absolute;
+}
+
 .user-info-form .grey-txt {
     color: #666;
 }
 
 .user-gdrive > label {
-    line-height: 32px;
+    line-height: 20px;
     float: left;
-    margin-left: 65px;
-    margin-top: -2px;
+    margin: 4px 10px 10px 65px;
     font-size: 15px;
     max-width: 75%;
     text-align: left;
     word-wrap: break-word;
 }
+
+.preferences-modal .user-gdrive > label {
+    margin: 4px 10px 10px 95px;
+}
+
 .user-menu-flat {
     margin-right: 8px;
     float: right;
@@ -5030,6 +5043,7 @@ footer nav ul li {
     color: #333;
 }
 .coupon-container input#user-coupon {
+
     width: 76%;
     float: left;
     box-sizing: border-box;
@@ -5043,7 +5057,6 @@ footer nav ul li {
     width: 100%;
     margin: 0 auto;
     overflow: hidden;
-    margin-bottom: 30px;
 }
 
 .coupon-container .btn-confirm-medium {
@@ -5094,6 +5107,7 @@ footer nav ul li {
 .preferences-modal input:disabled {
     color: #999;
     cursor: not-allowed;
+    background: #f4f4f4;
 }
 
 .preferences-modal .reset-password {
@@ -5103,7 +5117,7 @@ footer nav ul li {
 .forgot-password-modal {
     background: url(../img/matecat_watch.png) no-repeat 476px 136px;
     background-size: 23%;
-    width: 384px;
+    width: 385px;
     padding: 25px 96px;
 }
 
