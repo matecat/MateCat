@@ -19,6 +19,19 @@
 	background-color: #f1f1f1;
 	padding: 0;
 	cursor: pointer;
+	.dropdown-content {
+		background-color: #fff;
+		margin: 0;
+		display: none;
+		min-width: 260px;
+		max-height: 650px;
+		max-width: 100% !important;
+		overflow-y: auto;
+		opacity: 0;
+		position: absolute;
+		z-index: 999;
+		will-change: width, height;
+	}
 
 	.head-project {
 		background-color: #f1f1f1;
@@ -33,15 +46,23 @@
 			line-height: 2.7rem;
 			color: #ffffff;
 			border-right: 1px solid #f1f1f1;
+			min-width: 120px;
+			@media #{$small-and-down} {
+				padding-left: 15px;
+			}
 		}
 		.project-name {
 			// background-color: orange;
 			cursor: pointer;
+			padding: 0 15px;
 			.input-field {
 				position: relative;
 				margin-top: 0rem;
 				.prefix {
+					position: absolute;
 					font-size: 1.5rem;
+					right: -10px;
+					margin-top: 5px;
 				}
 				.prefix:focus {
 					// color: #0c5e73
@@ -71,12 +92,15 @@
 			// background-color: yellow;
 			margin: 0;
 			padding-right: 30px;
+			@media #{$small-and-down} {
+				padding-right: 15px;
+			}
 			li {
 				float: left;
 				margin-left: 0rem;
 				a{
 
-					margin-left: 10px;
+					margin-left: 0px;
 					i {
 						color: #0c5e73;
 					}
@@ -150,7 +174,7 @@
 		li {
 			float: left;
 			a{
-				margin-left: 10px;
+				margin-left: 0px;
 				i {
 					color: #0c5e73;
 				}
@@ -161,13 +185,18 @@
 		padding: 15px;
 		margin: 0 0 15px 0;
 		.progress-bar {
-			background-color: white;
 			line-height: 20px;
 			padding: 3;
+			max-width: 300px;
 			.progress {
+				background-color: #f1f1f1;
+				content: '';
 				height: 30px;
 				border-radius: 4px;
 				margin: 0;
+				.determinate {
+
+				}
 			}
 		}
 		.payable-words {
@@ -177,19 +206,20 @@
 
 		.combo-language {
 			span {
-				padding: 7px 12px;
+				padding: 7px 8px;
 				border: 1px solid black;
+				font-size: .8rem;
 			}
 			&.single {
+				min-width: 165px;
 				ul {
 					margin: 0;
 					li {
 						display: inline-block;
-						margin-right: 5px;
+
 					}
 				}
 			}
-
 			&.multiple {
 				ul {
 					margin: 0;
@@ -226,8 +256,8 @@
 							transition: .3s ease-out;
 						}
 						&.btn-active-combo {
-							border-left: 4px solid $secondary-color;
-							transition: .3s ease-out;
+							border-left: 3px solid $secondary-color;
+							transition: .1s ease-out;
 						}
 					}
 				}

@@ -9,9 +9,12 @@ UI = {
         this.closeSearchCallback = this.closeSearchCallback.bind(this);
         this.filterProjectsFromStatus = this.filterProjectsFromStatus.bind(this);
         this.openJobSettings = this.openJobSettings.bind(this);
+        this.changeJobsOrProjectStatus = this.changeJobsOrProjectStatus.bind(this);
+        this.changeJobPassword = this.changeJobPassword.bind(this);
 
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_SETTINGS, this.openJobSettings);
     },
+
     render: function () {
         var self = this;
         var headerMountPoint = $("header")[0];
@@ -29,12 +32,15 @@ UI = {
         });
         window.addEventListener('scroll', this.scrollDebounceFn());
     },
+
     renderProjects: function (projects) {
         if ( !this.ProjectsContainer ) {
             var mountPoint = $("#main-container")[0];
             this.ProjectsContainer = ReactDOM.render(React.createElement(ProjectsContainer, {
                 filterFunction: this.filterProjectsFromStatus,
-                getLastActivity: this.getLastProjectActivityLogAction
+                getLastActivity: this.getLastProjectActivityLogAction,
+                changeStatus: this.changeJobsOrProjectStatus,
+                changeJobPasswordFn: this.changeJobPassword
             }), mountPoint);
             ManageActions.renderProjects(projects);
         }
@@ -104,55 +110,50 @@ UI = {
 
     /**
      *
-     * @param res Job or Project: obj, prj
-     * @param ob
+     * @param type Job or Project: obj, prj
+     * @param object
      * @param status
      * @param only_if
      */
-    changeJobsOrProjectStatus: function(res,ob,status,only_if) {
+    changeJobsOrProjectStatus: function(type,object,status,only_if) {
+        // Se Job cancella tutti arJobs = 21-10d78b343b8e:active
+
         if(typeof only_if == 'undefined') only_if = 0;
 
-        if ( res == 'job' ) {
-            UI.lastJobStatus = ob.data( 'status' );
-            id = ob.data( 'jid' );
-            password = ob.data( 'password' );
-            console.log( 'password: ', password );
+        // if ( type == 'job' ) {
+        //     UI.lastJobStatus = object.data( 'status' );
+        // } else {
+        //     var arJobs = '';
+        //     $( "tr.row", object ).each( function () {
+        //         arJobs += $( this ).data( 'jid' ) + "-" + $( this ).data( 'password' ) + ':' + $( this ).data( 'status' ) + ',';
+        //     } );
+        //     arJobs = arJobs.substring( 0, arJobs.length - 1 );
+        //     UI.lastJobStatus = arJobs;
+        //
+        // }
 
-        } else {
-            var arJobs = '';
-            $( "tr.row", ob ).each( function () {
-                arJobs += $( this ).data( 'jid' ) + "-" + $( this ).data( 'password' ) + ':' + $( this ).data( 'status' ) + ',';
-            } );
-            arJobs = arJobs.substring( 0, arJobs.length - 1 );
-            UI.lastJobStatus = arJobs;
-            id = ob.data( 'pid' );
-            password = ob.data('password');
-        }
+        var id = object.id;
+        var password = object.password;
 
-        var d = {
+        var data = {
             action:		"changeJobsStatus",
             new_status: status,
-            res: 		res,            //Project or Job:
-            id:			id,             // Job Id
-            password:   password,
-            page:		UI.Search.currentPage,        //Tha pagination ??
-            step:		UI.pageStep,    //??
-            only_if:	only_if,        // ??
+            res: 		type,            //Project or Job:
+            id:			id,             // Job or Project Id
+            password:   password,          // Job or Project Password
+            page:		UI.Search.currentPage,        //The pagination ??
+            step:		UI.pageStep,    // Number of Projects that returns from getProjects
+            only_if:	only_if,        // State before, for example resume project change to 'active' only_if previous state is archived
             undo:		0               // ??
         };
-        // Vengono passati anche i filtri
-        // EX status: cancelled
-        UI.filters = {};
-        ar = $.extend(d,UI.filters);
 
-        APP.doRequest({
-            data: ar,
-            context: ob,
+        // Filters
+        data = $.extend(data,UI.Search.filter);
+
+        return APP.doRequest({
+            data: data,
             success: function(d){},
-            error: function(d){
-                // ????
-                // document.location = '/';
-            }
+            error: function(d){}
         });
     },
     /**
@@ -187,34 +188,26 @@ UI = {
     },
     /**
      * Change the password for the job
-     * @param ob
-     * @param pwd The job password
+     * @param job
      * @param undo ??
      */
-    changeJobPassword: function(ob,pwd,undo) {
-        var res = 'job'
-        if(typeof pwd == 'undefined') pwd = false;
-        if(res=='job') {
-            id = ob.data('jid');
-            password = (pwd)? pwd : ob.data('password');
-        }
+    changeJobPassword: function(job) {
+        var id = job.id;
+        var password = job.password;
+        var old_password = null;
+        // if( undo ){
+        //     old_password = $(undo).data('old_password');
+        // }
 
-        if( undo ){
-            old_password = $(undo).data('old_password');
-        } else {
-            old_password = null;
-        }
-
-        APP.doRequest({
+        return APP.doRequest({
             data: {
                 action:		    "changePassword",
-                res: 		    res,
+                res: 		    'obj',
                 id: 		    id,
                 password: 	    password,
                 old_password: 	old_password,
-                undo:           ( typeof undo == 'object' )
+                undo:           0
             },
-            context: ob,
             success: function(d){}
         });
     },
@@ -257,6 +250,7 @@ UI = {
             data: data,
             success: function(d){
                 data = $.parseJSON(d.data);
+                UI.pageStep = d.pageStep;
                 if( typeof d.errors != 'undefined' && d.errors.length ){
                     window.location = '/';
                 }
@@ -296,7 +290,7 @@ UI = {
         return $.ajax({
             async: true,
             type: "get",
-            url : "/api/v2/activity/project/'" + id + "/" + pass + "/last",
+            url : "/api/v2/activity/project/" + id + "/" + pass + "/last",
         });
     },
     scrollDebounceFn: function() {

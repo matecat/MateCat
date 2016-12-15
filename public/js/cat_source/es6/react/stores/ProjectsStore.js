@@ -30,6 +30,20 @@ var ProjectsStore = assign({}, EventEmitter.prototype, {
     addProjects: function(projects) {
         this.projects = this.projects.concat(Immutable.fromJS(projects));
     },
+
+    removeProject: function (project) {
+        var index = this.projects.indexOf(project);
+        this.projects = this.projects.delete(index);
+    },
+
+    changeJobPass: function (project, job, password, oldPassword) {
+        var indexProject = this.projects.indexOf(project);
+        var indexJob = project.get('jobs').indexOf(job);
+        
+        this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'password'], password);
+        this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'oldPassword'], oldPassword);
+    },
+
     emitChange: function(event, args) {
         this.emit.apply(this, arguments);
     },
@@ -54,6 +68,14 @@ AppDispatcher.register(function(action) {
             break;
         case ManageConstants.CLOSE_ALL_JOBS:
             ProjectsStore.emitChange(ManageConstants.CLOSE_ALL_JOBS);
+            break;
+        case ManageConstants.REMOVE_PROJECT:
+            ProjectsStore.removeProject(action.project);
+            ProjectsStore.emitChange(ManageConstants.RENDER_PROJECTS, ProjectsStore.projects);
+            break;
+        case ManageConstants.CHANGE_JOB_PASS:
+            ProjectsStore.changeJobPass(action.project, action.job, action.password, action.oldPassword);
+            ProjectsStore.emitChange(ManageConstants.RENDER_PROJECTS, ProjectsStore.projects);
             break;
 
     }

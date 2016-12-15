@@ -14,10 +14,12 @@ class ProjectContainer extends React.Component {
         this.state = {
             showAllJobs: false,
             visibleJobs: [],
+            lastAction: null
         };
         this.getProjectHeader = this.getProjectHeader.bind(this);
         this.getActivityLogUrl = this.getActivityLogUrl.bind(this);
         this.hideAllJobs = this.hideAllJobs.bind(this);
+        this.getLastActivityLogAction = this.getLastActivityLogAction.bind(this);
 
     }
 
@@ -54,7 +56,10 @@ class ProjectContainer extends React.Component {
     }
 
     componentDidMount() {
-        $(this.dropdown).dropdown();
+        $(this.dropdown).dropdown({
+            belowOrigin: true
+        });
+        this.getLastActivityLogAction();
         ProjectsStore.addListener(ManageConstants.CLOSE_ALL_JOBS, this.hideAllJobs);
     }
 
@@ -63,12 +68,24 @@ class ProjectContainer extends React.Component {
     }
 
     componentDidUpdate() {
-        console.log("Updated Segment : " + this.props.project.get('id'));
+        console.log("Updated Project : " + this.props.project.get('id'));
     }
 
-    shouldComponentUpdate(nextProps, nextState){
-         return (nextProps.project !== this.props.project ||
-         nextState.showAllJobs !== this.state.showAllJobs )
+    getLastActivityLogAction() {
+        var self = this;
+        UI.getLastProjectActivityLogAction(this.props.project.get('id'), this.props.project.get('password'))
+            .done(function (data) {
+                var activity = data.activity[0];
+                self.setState({
+                    lastAction: activity
+                });
+            });
+
+    }
+
+    removeProject() {
+        this.props.changeStatusFn('prj', this.props.project.toJS(), 'cancelled');
+        ManageActions.removeProject(this.props.project);
     }
 
     getProjectHeader(sourceLang, targetsLangs, payableWords) {
@@ -76,44 +93,40 @@ class ProjectContainer extends React.Component {
         var headerProject = '';
         var analyzeUrl = this.getAnalyzeUrl();
         if( jobsLength > 1 ) {
-            headerProject = <div className="card job z-depth-1">
+            headerProject = <div className="card job-preview z-depth-1">
                 <div className="body-job">
                     <div className="row">
                         <div className="col s11">
-                            <div className="row">
-                                <div className="col s10">
-                                    <div className="combo-language multiple"
-                                         ref={(combo) => this.combo_languages = combo}>
-                                        <ul>
-                                            <li>
-                                                <span id="source">{sourceLang}</span> <i className="material-icons">play_arrow</i>
-                                            </li>
-                                            {targetsLangs}
-                                            {/*<li>*/}
-                                                {/*<span id="more-combo">+20</span>*/}
-                                            {/*</li>*/}
-                                            <li>
-                                                <div className="payable-words">
-                                                    <a href={analyzeUrl} target="_blank">{payableWords} payable words</a>
-                                                </div>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
+
+                            <div className="combo-language multiple"
+                                 ref={(combo) => this.combo_languages = combo}>
+                                <ul>
+                                    <li>
+                                        <span id="source">{sourceLang}</span> <i className="material-icons">play_arrow</i>
+                                    </li>
+                                    {targetsLangs}
+                                    {/*<li>*/}
+                                        {/*<span id="more-combo">+20</span>*/}
+                                    {/*</li>*/}
+                                    <li>
+                                        <div className="payable-words">
+                                            <a href={analyzeUrl} target="_blank">{payableWords} payable words</a>
+                                        </div>
+                                    </li>
+                                </ul>
                             </div>
+
                         </div>
-                        <div className="col s1">
-                            <div className="row">
-                                <div className="col s12 right">
-                                    <div className="button-list open right">
-                                        <a className="btn waves-effect waves-light btn-flat"
-                                           style={{display: 'none'}}
-                                           onClick={this.showHideAllJobs.bind(this)}>close</a>
-                                        <a className="btn waves-effect waves-light"
-                                           onClick={this.showHideAllJobs.bind(this)}>Open all</a>
-                                    </div>
-                                </div>
+                        <div className="col s1 right">
+
+                            <div className="button-list open right">
+                                <a className="btn waves-effect waves-light btn-flat"
+                                   style={{display: 'none'}}
+                                   onClick={this.showHideAllJobs.bind(this)}>close</a>
+                                <a className="btn waves-effect waves-light"
+                                   onClick={this.showHideAllJobs.bind(this)}>Open</a>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -135,6 +148,11 @@ class ProjectContainer extends React.Component {
         return '/analyze/' +this.props.project.get('name')+ '/' +this.props.project.get('id')+ '-' + this.props.project.get('password');
     }
 
+    shouldComponentUpdate(nextProps, nextState){
+        return (nextProps.project !== this.props.project ||
+        nextState.showAllJobs !== this.state.showAllJobs || nextState.lastAction !==  this.state.lastAction)
+    }
+
     render() {
         var self = this;
         // var activityLog = this.getLastAction();
@@ -152,13 +170,12 @@ class ProjectContainer extends React.Component {
             var openJobClass = '';
             payableWords = payableWords + parseInt(job.get('stats').get('TOTAL_FORMATTED'));
             if (self.state.showAllJobs || self.state.visibleJobs.indexOf(i) > -1 || jobsLength === 1 ) {
-                var item = <Job key={i}
+                var item = <Job key={job.get('id')}
                                 job={job}
                                 index={index}
-                                projectName={self.props.project.get('name')}
-                                projectId={self.props.project.get('id')}
-                                projectPassword={self.props.project.get('password')}
-                                jobsLenght={jobsLength}/>;
+                                project={self.props.project}
+                                jobsLenght={jobsLength}
+                                changeJobPasswordFn={self.props.changeJobPasswordFn}/>;
                 jobsList.push(item);
                 openJobClass = 'btn-active-combo';
                 openProjectClass = (jobsLength === 1) ? '':'open-project';
@@ -178,6 +195,14 @@ class ProjectContainer extends React.Component {
         //The Job Header
         var headerProject = this.getProjectHeader(sourceLang, targetsLangs, payableWords);
 
+        //Last Activity Log Action
+        var lastAction;
+        if (this.state.lastAction) {
+             lastAction = <i><span id="nome-log">{this.state.lastAction.first_name + " - "}</span> <span id="act-log">{this.state.lastAction.action}</span></i>
+        } else {
+             lastAction = <i>Loading....</i>
+        }
+
         return <div className="card-panel project">
 
                     <div className={"head-project " + openProjectClass}>
@@ -187,25 +212,13 @@ class ProjectContainer extends React.Component {
                                     <div id="id-project"><span>ID:</span>{this.props.project.get('id')}</div>
                                 </div>
                             </div>
-                            <div className="col m5 s4">
-                                <div className="project-name">
-                                    <form>
-                                        <div className="row">
-                                            <div className="input-field col s12">
-                                                <input id="icon_prefix" type="text" defaultValue={this.props.project.get('name')}/><i
-                                                    className="material-icons prefix">mode_edit</i>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                            <div className="col m5 s4">
+                            <div className="col m5 push-m5 s8">
                                 <ul className="project-activity-icon right">
 
                                     {/*<li>*/}
-                                        {/*<a href="#!" className="btn-floating btn-flat waves-effect waves-dark z-depth-0">*/}
-                                            {/*<i className="material-icons">settings</i>*/}
-                                        {/*</a>*/}
+                                    {/*<a href="#!" className="btn-floating btn-flat waves-effect waves-dark z-depth-0">*/}
+                                    {/*<i className="material-icons">settings</i>*/}
+                                    {/*</a>*/}
                                     {/*</li>*/}
                                     <li>
                                         <a className='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0'
@@ -215,16 +228,28 @@ class ProjectContainer extends React.Component {
                                         </a>
                                         <ul id={'dropdown' + this.props.project.get('id')} className='dropdown-content'>
                                             <li><a href={activityLogUrl} target="_blank">Activity Log</a></li>
-                                            <li><a href="#!">Remove from my Dashboard</a></li>
+                                            <li><a onClick={this.removeProject.bind(this)}>Remove from my Dashboard</a></li>
                                         </ul>
                                     </li>
                                 </ul>
                             </div>
+                            <div className="col m5 pull-m5 s12">
+                                <div className="project-name">
+                                    <form>
+                                        <div className="row">
+                                            <div className="input-field col s12">
+                                                <input id="icon_prefix" type="text" defaultValue={this.props.project.get('name')}/><i
+                                                    className="material-icons prefix hide-on-small-only">mode_edit</i>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     </div>
-
+                    {headerProject}
                     <section className="jobs">
-                        {headerProject}
+
                         <CSSTransitionGroup
                         transitionName="slide"
                         transitionAppear={true}
@@ -244,7 +269,7 @@ class ProjectContainer extends React.Component {
                             <div className="col s12">
                                 <div className="activity-log">
                                     <a href={activityLogUrl} target="_blank" className="right">
-                                        <i><span id="nome-log">Ruben</span> <span id="act-log">commentato</span></i>
+                                        {lastAction}
                                     </a>
                                 </div>
                             </div>

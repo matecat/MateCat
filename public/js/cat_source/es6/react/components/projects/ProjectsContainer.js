@@ -26,7 +26,6 @@ class ProjectsContainer extends React.Component {
     }
 
     onClickFn(event) {
-        console.log("On Click event", event);
         //Check if the click comes from a Project container
         if ($(event.nativeEvent.target).closest(".card-panel").size() === 0) {
             ManageActions.closeAllJobs();
@@ -41,10 +40,6 @@ class ProjectsContainer extends React.Component {
         ProjectsStore.removeListener(ManageConstants.RENDER_PROJECTS, this.renderProjects);
     }
 
-    componentWillUpdate() {}
-
-    componentDidUpdate() {}
-
     shouldComponentUpdate(nextProps, nextState) {
         return (nextState.projects !== this.state.projects)
     }
@@ -52,13 +47,15 @@ class ProjectsContainer extends React.Component {
     render() {
         var items = this.state.projects.map((project, i) => (
             <Project
-                key={i}
+                key={project.get('id')}
                 project={project}
-                lastActivityFn={this.props.getLastActivity}/>
+                lastActivityFn={this.props.getLastActivity}
+                changeStatusFn={this.props.changeStatus}
+                changeJobPasswordFn={this.props.changeJobPasswordFn}/>
         ));
         return <section className="content" onClick={this.onClickFn.bind(this)}>
                     <section className="add-project">
-                        <a className="btn-floating btn-large waves-effect waves-light right create-new blue-matecat" href="/"><i className="material-icons">add</i></a>
+                        <a className="btn-floating btn-large waves-effect waves-light right create-new blue-matecat" href="/" target="_blank"><i className="material-icons">add</i></a>
                     </section>
                     <FilterProjects
                         filterFunction={this.props.filterFunction}

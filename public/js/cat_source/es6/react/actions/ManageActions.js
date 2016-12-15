@@ -39,6 +39,23 @@ var ManageActions = {
         AppDispatcher.dispatch({
             actionType: ManageConstants.CLOSE_ALL_JOBS
         });
+    },
+
+    removeProject: function (project) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.REMOVE_PROJECT,
+            project: project
+        });
+    },
+
+    changeJobPassword: function (project, job, password, oldPassword) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.CHANGE_JOB_PASS,
+            project: project,
+            job: job,
+            password: password,
+            oldPassword: oldPassword
+        });
     }
 
 

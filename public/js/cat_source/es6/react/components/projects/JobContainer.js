@@ -5,10 +5,13 @@ class JobContainer extends React.Component {
         this.getTranslateUrl = this.getTranslateUrl.bind(this);
         this.getOutsourceUrl = this.getOutsourceUrl.bind(this);
         this.getAnalysisUrl = this.getAnalysisUrl.bind(this);
+        this.changePassword = this.changePassword.bind(this);
     }
 
     componentDidMount () {
-        $(this.dropdown).dropdown();
+        $(this.dropdown).dropdown({
+            belowOrigin: true
+        });
     }
 
     shouldComponentUpdate(nextProps, nextState){
@@ -18,27 +21,41 @@ class JobContainer extends React.Component {
     getTranslateUrl() {
         var use_prefix = ( this.props.jobsLenght > 1 );
         var chunk_id = this.props.job.get('id') + ( ( use_prefix ) ? '-' + this.props.index : '' ) ;
-        return '/translate/'+this.props.projectName+'/'+ this.props.job.get('source') +'-'+this.props.job.get('target')+'/'+ chunk_id +'-'+ this.props.job.get('password')  ;
+        return '/translate/'+this.props.project.get('name')+'/'+ this.props.job.get('source') +'-'+this.props.job.get('target')+'/'+ chunk_id +'-'+ this.props.job.get('password')  ;
+    }
+
+    changePassword() {
+        var self = this;
+        this.props.changeJobPasswordFn(this.props.job.toJS())
+            .done(function (data) {
+                var notification = {
+                    title: 'Change job password',
+                    text: "The password has been changed",
+                    type: 'warning', position: 'tc'
+                };
+                APP.addNotification(notification);
+                ManageActions.changeJobPassword(self.props.project, self.props.job, data.password, data.undo);
+            });
     }
 
     getOutsourceUrl() {
-        return '/analyze/'+ this.props.projectName +'/'+this.props.projectId+'-' + this.props.projectPassword + '?open=analysis&jobid=' + this.props.job.get('id');
+        return '/analyze/'+ this.props.project.get('name') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=analysis&jobid=' + this.props.job.get('id');
     }
 
     getAnalysisUrl() {
-        return '/jobanalysis/'+this.props.projectId+ '-' + this.props.job.get('id') + '-' + this.props.job.get('password');
+        return '/jobanalysis/'+this.props.project.get('id')+ '-' + this.props.job.get('id') + '-' + this.props.job.get('password');
     }
 
     getSplitUrl() {
-        return '/analyze/'+ this.props.projectName +'/'+this.props.projectId+'-' + this.props.projectPassword; // + '?open=split&jobid=' + this.props.job.get('id');
+        return '/analyze/'+ this.props.project.get('name') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password'); // + '?open=split&jobid=' + this.props.job.get('id');
     }
 
     getActivityLogUrl() {
-        return '/activityLog/'+ this.props.projectName +'/'+this.props.projectId+'-' + this.props.projectPassword + '?open=split&jobid=' + this.props.job.get('id');
+        return '/activityLog/'+ this.props.project.get('name') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=split&jobid=' + this.props.job.get('id');
     }
 
     openSettings() {
-        ManageActions.openJobSettings(this.props.job.toJS(), this.props.projectName);
+        ManageActions.openJobSettings(this.props.job.toJS(), this.props.project.get('name'));
     }
 
     render () {
@@ -47,7 +64,7 @@ class JobContainer extends React.Component {
         var analysisUrl = this.getAnalysisUrl();
         var splitUrl = this.getSplitUrl();
         return <div className="card job z-depth-1">
-            <div className="head-job">
+            <div className="head-job open-head-job">
                 <div className="row">
                     <div className="col s2">
                         <div className="job-id">
@@ -70,9 +87,17 @@ class JobContainer extends React.Component {
                                     <i className="material-icons">more_vert</i>
                                 </a>
                                 <ul id={'dropdownJob' + this.props.job.get('id')} className='dropdown-content'>
-                                    <li><a >one</a></li>
-                                    <li><a >two</a></li>
-                                    <li><a >three</a></li>
+                                    <li onClick={this.changePassword.bind(this)}><a >Change Password</a></li>
+                                    <li><a >Split</a></li>
+                                    <li><a >Revise</a></li>
+                                    <li><a >QA Report</a></li>
+                                    <li><a >Editing Log</a></li>
+                                    <li><a >Preview</a></li>
+                                    <li><a >Download</a></li>
+                                    <li><a >Download Original</a></li>
+                                    <li><a >Export XLIFF</a></li>
+                                    <li><a >Export TMX</a></li>
+                                    <li><a >Cancel Job</a></li>
                                 </ul>
                             </li>
                         </ul>
