@@ -4832,6 +4832,10 @@ footer nav ul li {
     float: left;
     position:relative;
 }
+.user-reset-password {
+    width: 100%;
+}
+
 
 .preferences-modal .user-info-form {
     font-size: 18px;
@@ -5146,7 +5150,8 @@ footer nav ul li {
     line-height: 20px;
     padding: 10px 15px;
     background: rgb(195, 224, 195);
-    margin-top: 20px;
+    /*margin-top: 20px;*/
+    margin-bottom: 10px;
 }
 
 .button-loader {
