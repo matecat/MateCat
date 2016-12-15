@@ -5,7 +5,7 @@ namespace API\V2;
 
 use API\V2\Validators\ChunkPasswordValidator;
 
-class ChunkOptionsController extends ProtectedKleinController {
+class ChunkOptionsController extends KleinController {
 
     /**
      * @var Validators\ChunkPasswordValidator

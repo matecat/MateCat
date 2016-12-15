@@ -2629,7 +2629,7 @@ UI = {
         }
     },
     removeFromStorage: function (key) {
-        if(this.isPrivateSafari) {translation_conflicts
+        if(this.isPrivateSafari) {
             foundVal = 0;
             $.each(this.localStorageArray, function (index) {
                 if(this.key == key) foundIndex = index;

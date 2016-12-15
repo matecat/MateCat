@@ -19,8 +19,9 @@ function route($path, $method, $controller, $action) {
 
 Features::loadRoutes( $klein );
 
-$klein->onError(function ($klein, $err_msg, $err_type, $exception) {
-    // TODO still need to catch fatal errors here with 500 code
+$klein->onError(function (\Klein\Klein $klein, $err_msg, $err_type, Exception $exception) {
+    // TODO: still need to catch fatal errors here with 500 code
+    $klein->response()->noCache();
 
     switch( $err_type ) {
         case 'API\V2\AuthenticationError':
@@ -29,6 +30,7 @@ $klein->onError(function ($klein, $err_msg, $err_type, $exception) {
         case 'API\V2\AuthorizationError':
             $klein->response()->code(403);
             break;
+        case 'Exceptions\ValidationError':
         case 'API\V2\ValidationError':
             $klein->response()->code(400);
             $klein->response()->json( array('error' => $err_msg ));

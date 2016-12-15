@@ -31,7 +31,6 @@ RewriteRule ^(analyze)/([^/]*)/([^/]*)-([^/]*)$ index.php?action=analyze&pid=$3&
 RewriteRule ^(jobanalysis)/([^/]*)-([^/]*)-([^/]*)/?$ index.php?action=analyze&pid=$2&jid=$3&password=$4 [L]
 
 RewriteRule ^(login)[/]?$ index.php?action=loginPage [L,QSA]
-RewriteRule ^(ajaxLogout)[/]?$ index.php?action=formLogout [L,QSA]
 
 RewriteRule ^(badConfiguration)[/]?$ index.php?action=badConfiguration [L]
 RewriteRule ^(configMissing)[/]?$ lib/View/configMissing.html [L]

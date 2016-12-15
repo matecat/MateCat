@@ -67,9 +67,6 @@ class EditLogDecorator extends AbstractDecorator {
         }
 
         $this->template->build_number = INIT::$BUILD_NUMBER;
-        $this->template->incomingUrl  = '/login?incomingUrl=' . $controller->getThisUrl();
-        $this->template->authURL      = $controller->getAuthUrl();
-
 
     }
 }

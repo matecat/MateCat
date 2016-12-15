@@ -1,4 +1,6 @@
 $.extend(UI, {
+    populateOutsourceForm : function() {
+    },
     showPopupDetails: '1',
     changeRates: [],
 	outsourceInit: function() {
@@ -82,6 +84,8 @@ $.extend(UI, {
 			$('#continueForm input[name=url_ok]').attr('value', UI.url_ok);
 			$('#continueForm input[name=url_ko]').attr('value', UI.url_ko);
             $('#continueForm input[name=data_key]').attr('value', UI.data_key);
+
+            UI.populateOutsourceForm();
 
             //IMPORTANT post out the quotes
 			$('#continueForm input[name=quoteData]').attr('value', JSON.stringify( UI.quoteResponse ) );

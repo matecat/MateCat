@@ -61,8 +61,8 @@ function prepareTestDatabase() {
   $testDatabase = new SchemaCopy( $test_ini['test'] );
   $devDatabase = new SchemaCopy( $dev_ini[ 'development' ] );
 
-  prepareTestSchema($testDatabase, $devDatabase);
-  loadSeedData($testDatabase);
+  // prepareTestSchema($testDatabase, $devDatabase);
+  // loadSeedData($testDatabase);
 
 }
 
