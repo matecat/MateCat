@@ -4873,7 +4873,7 @@ footer nav ul li {
     font-size: 21px;
     color: #fff;
     padding: 10px 10px 10px 10px;
-    background: #22c4ee;
+    background: #b7b7b7;
     border: 1px solid #ccc;
     -moz-border-radius: 50px;
     -webkit-border-radius: 50px;
@@ -5062,6 +5062,7 @@ footer nav ul li {
     width: 100%;
     margin: 0 auto;
     overflow: hidden;
+    margin-bottom: 20px;
 }
 
 .coupon-container .btn-confirm-medium {
@@ -5268,6 +5269,19 @@ footer nav ul li {
     text-align: left;
 }
 
+.preferences-modal h2 {
+    margin: 0;
+    padding: 0;
+    font-size: 22px;
+}
+.user-link {
+    float: left;
+    clear: both;
+    font-size: 16px;
+    margin-left: 73px;
+    height: 20px;
+    margin-top: 4px;
+}
 /* The Close Button */
 .close-matecat-modal {
     color: #fff;
