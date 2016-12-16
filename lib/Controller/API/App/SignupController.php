@@ -44,6 +44,8 @@ class SignupController extends AbstractStatefulKleinController  {
             } else {
                 $this->response->redirect( $this->__flushWantedURL() ) ;
             }
+
+            FlashMessage::set('popup', 'profile', FlashMessage::SERVICE );
         }
         catch( ValidationError $e ) {
             FlashMessage::set('confirmToken', $e->getMessage(), FlashMessage::ERROR );

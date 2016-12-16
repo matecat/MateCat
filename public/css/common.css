@@ -1051,7 +1051,7 @@ color:#333;}
     position: absolute;
     left: 80px;
     font-size: 24px;
-    top: 5px;
+    top: 6px;
     line-height: 20px;
 }
 
@@ -2336,18 +2336,42 @@ input.email-export-tmx {
     position: relative;
 }
 
-.btn-confirm-medium:hover {
+.btn-confirm-medium:hover,
+.btn-confirm-small:hover{
     cursor: pointer;
     -webkit-box-shadow: 0 1px 2px #ccc;
     box-shadow: 0 1px 2px #ccc;
     border: 1px solid #000;
 }
 
-.btn-confirm-medium:active {
+.btn-confirm-medium:active,
+.btn-confirm-small:active {
     -moz-box-shadow: inset 0 0 1px 1px #888;
     -webkit-box-shadow: inset 0 0 1px 1px #888;
     box-shadow: inset 0 0 1px 1px #888;
 }
+
+.btn-confirm-small {
+    color: #fff;
+    background: #09beec;
+    border: 1px solid #848689;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 3px 0;
+    border-radius: 2px;
+    font-size: 16px;
+    background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
+    background: -moz-linear-gradient(top, #09beec, #119ec4);
+    background: linear-gradient(top, #09beec, #119ec4);
+    margin: 10px 10px;
+    display: inline-block;
+    text-align: center;
+    position: relative;
+}
+
+
+
+
 
 /*******************/
 td.download-glossary-container .uploadloader {
@@ -3489,11 +3513,11 @@ color: #000;
 
 @font-face {
     font-family: 'icomoon';
-    src:  url('fonts/icomoon.eot?dfxy2n');
-    src:  url('fonts/icomoon.eot?dfxy2n#iefix') format('embedded-opentype'),
-    url('fonts/icomoon.ttf?dfxy2n') format('truetype'),
-    url('fonts/icomoon.woff?dfxy2n') format('woff'),
-    url('fonts/icomoon.svg?dfxy2n#icomoon') format('svg');
+    src:  url('fonts/icomoon.eot?7sjwen');
+    src:  url('fonts/icomoon.eot?7sjwen#iefix') format('embedded-opentype'),
+    url('fonts/icomoon.ttf?7sjwen') format('truetype'),
+    url('fonts/icomoon.woff?7sjwen') format('woff'),
+    url('fonts/icomoon.svg?7sjwen#icomoon') format('svg');
     font-weight: normal;
     font-style: normal;
 }
@@ -4301,6 +4325,12 @@ text-align: left;
 .icon-paw:before {
     content: "\f1b0";
 }
+.icon-file-text:before {
+    content: "\e922";
+}
+.icon-file:before {
+    content: "\e904";
+}
 
 
 
@@ -4704,12 +4734,17 @@ span.share-popup-item-email {
 /***** Login Footer ****/
 
 #logoutlink,
-.reset-password {
+.reset-password,
+#resendlink{
     margin-bottom: 20px;
     text-decoration: underline;
     float: left;
     cursor: pointer;
     color: #39699a;
+}
+
+#resendlink {
+    float: none;
 }
 
 footer nav ul li {
@@ -4775,24 +4810,43 @@ footer nav ul li {
 .validation-error {
     text-align: left;
     float: left;
+    color: red;
 }
+
+.coupon-container .validation-success {
+    color: green;
+    margin-top: 2px;
+}
+
+
+.coupon-container p {
+    line-height: 5px!important;
+}
+
 
 .user-info-form,
 .user-reset-password,
 .user-gdrive {
     margin: 0 auto;
-    width: 100%;
+    width: 93%;
     float: left;
     position:relative;
 }
-
-.user-info-form {
-    font-size: 18px;
-    line-height: 30px;
-    margin-bottom: 20px;
+.user-reset-password {
+    width: 100%;
 }
 
-.user-gdrive {
+
+.preferences-modal .user-info-form {
+    font-size: 18px;
+    line-height: 30px;
+    margin-bottom: 30px;
+    background: #f4f4f4;
+    border-bottom: 1px solid #ccc;
+    padding: 20px 20px;
+}
+
+.preferences-modal .user-gdrive {
     border: 1px solid #ccc;
     padding: 10px 0 0 10px;
     border-radius: 4px;
@@ -4803,16 +4857,40 @@ footer nav ul li {
     margin-top: 10px;
 }
 
+.user-name {
+    margin-left: 20px;
+    line-height: 25px;
+}
 
+.preferences-modal .user-name strong {
+    font-size: 24px;
+}
 
+.preferences-modal .avatar-user {
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    font-size: 21px;
+    color: #fff;
+    padding: 10px 10px 10px 10px;
+    background: #22c4ee;
+    border: 1px solid #ccc;
+    -moz-border-radius: 50px;
+    -webkit-border-radius: 50px;
+    border-radius: 50px;
+}
 
-.user-info-form label {
+.preferences-modal .user-info-attributes {
+    padding: 20px;
+}
+
+.preferences-modal .user-info-form label {
     float: left;
     margin-top: 7px;
     font-size: 16px;
 }
 
-.user-reset-password label {
+.preferences-modal .user-reset-password label {
     float: left;
     font-size: 18px;
     margin-top: 25px;
@@ -4828,20 +4906,28 @@ footer nav ul li {
     -ms-user-select: none;
 }
 
+.preferences-modal .onoffswitch-drive {
+    position: absolute;
+}
+
 .user-info-form .grey-txt {
     color: #666;
 }
 
 .user-gdrive > label {
-    line-height: 32px;
+    line-height: 20px;
     float: left;
-    margin-left: 65px;
-    margin-top: -2px;
+    margin: 4px 10px 10px 65px;
     font-size: 15px;
     max-width: 75%;
     text-align: left;
     word-wrap: break-word;
 }
+
+.preferences-modal .user-gdrive > label {
+    margin: 4px 10px 10px 95px;
+}
+
 .user-menu-flat {
     margin-right: 8px;
     float: right;
@@ -4939,13 +5025,14 @@ footer nav ul li {
     color:#39699a;
 }
 
+.preferences-modal input[type=text],
 .login-container-left input,
 .register-form-container input[type=text],
 .register-form-container input[type=password],
 .forgot-password-modal input,
 .reset-password-modal input,
 .user-info-form input {
-        margin-top: 5px;
+    margin-top: 5px;
     font-size: 14px;
     width: 100%;
     padding: .7em .6em;
@@ -4958,6 +5045,29 @@ footer nav ul li {
     box-sizing: border-box;
     font-size: 15px;
     color: #333;
+}
+.coupon-container input#user-coupon {
+
+    width: 76%;
+    float: left;
+    box-sizing: border-box;
+}
+
+.coupon-container.coupon-success input#user-coupon {
+    width: 100%!important;
+    float: none;
+}
+
+.coupon-container {
+    width: 100%;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+.coupon-container .btn-confirm-medium {
+    margin: 6px 0% 0 3%;
+    width: 21%;
+    box-sizing: border-box;
 }
 
 .user-info-form input {
@@ -5002,6 +5112,7 @@ footer nav ul li {
 .preferences-modal input:disabled {
     color: #999;
     cursor: not-allowed;
+    background: #f4f4f4;
 }
 
 .preferences-modal .reset-password {
@@ -5011,7 +5122,7 @@ footer nav ul li {
 .forgot-password-modal {
     background: url(../img/matecat_watch.png) no-repeat 476px 136px;
     background-size: 23%;
-    width: 384px;
+    width: 385px;
     padding: 25px 96px;
 }
 
@@ -5040,7 +5151,8 @@ footer nav ul li {
     line-height: 20px;
     padding: 10px 15px;
     background: rgb(195, 224, 195);
-    margin-top: 20px;
+    /*margin-top: 20px;*/
+    margin-bottom: 10px;
 }
 
 .button-loader {
@@ -5153,7 +5265,6 @@ footer nav ul li {
 }
 
 .preferences-modal {
-    padding: 10px 20px;
     text-align: left;
 }
 

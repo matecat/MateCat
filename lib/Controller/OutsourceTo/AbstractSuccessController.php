@@ -56,6 +56,11 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
     protected $data_key_content;
 
     /**
+     * @var Shop_Cart
+     */
+    protected $shop_cart ;
+
+    /**
      * Class Constructor
      *
      * @throws LogicException
@@ -104,18 +109,11 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
      *
      * @return mixed|void
      */
-    public function doAction() {}
+    public function doAction() {
 
-    /**
-     * Set the template vars to the redirect Page
-     *
-     * @return mixed|void
-     */
-    public function setTemplateVars() {
+        $this->shop_cart = Shop_Cart::getInstance('outsource_to_external');
 
-        $shop_cart = Shop_Cart::getInstance('outsource_to_external');
-
-        if ( !$shop_cart->countItems() ){
+        if ( !$this->shop_cart->countItems() ){
             /**
              * redirectFailurePage is a white page with an error for session expired
              *
@@ -131,10 +129,18 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
              */
             parent::makeTemplate("redirectSuccessPage.html");
         }
+    }
+
+    /**
+     * Set the template vars to the redirect Page
+     *
+     * @return mixed|void
+     */
+    public function setTemplateVars() {
 
         //we need a list not an hashmap
         $item_list = array();
-        foreach( array( $shop_cart->getItem( $this->data_key_content ) ) as $item ){
+        foreach( array( $this->shop_cart->getItem( $this->data_key_content ) ) as $item ){
             $item_list[ ] = $item;
         }
 

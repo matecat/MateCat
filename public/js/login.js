@@ -19,8 +19,8 @@ $.extend(APP, {
         //     });
         // });
 
-        $('.user-menu-preferences').on('click', function () {
-            $('#modal').trigger('openpreferences');
+        $('#modal').on('closemodal', function () {
+            APP.ModalWindow.onCloseModal();
         });
 
         $('#modal').on('opensuccess', function (e, param) {
@@ -38,6 +38,7 @@ $.extend(APP, {
         $('#modal').on('openpreferences', function (e, param) {
             var props = {
                 user: APP.USER.STORE.user,
+                metadata: (APP.USER.STORE.metadata) ? APP.USER.STORE.metadata : {}
             };
             if (APP.USER.STORE.connected_services && APP.USER.STORE.connected_services.length ) {
                 props.service = APP.USER.getDefaultConnectedService();
@@ -95,7 +96,11 @@ $.extend(APP, {
         });
 
         //Link footer
-        $('a.authLink').click(function(e){
+        $('.user-menu-preferences').on('click', function () {
+            $('#modal').trigger('openpreferences');
+        });
+
+        $('#welcomebox:has(.authLink)').click(function(e){
             e.preventDefault();
             $('#modal').trigger('openlogin');
         });
@@ -120,12 +125,16 @@ $.extend(APP, {
         var openFromFlash = APP.lookupFlashServiceParam("popup");
         if ( !openFromFlash ) return ;
         var modal$ = $('#modal');
+
         switch ( openFromFlash[ 0 ].value ) {
             case "passwordReset":
                 modal$.trigger('openresetpassword');
                 break;
-            case "preference":
-                modal$.trigger('openpreferences');
+            case "profile":
+                // TODO: optimized this, establish a list of events to happen after user data is loaded
+                APP.USER.loadUserData().done( function() {
+                    modal$.trigger('openpreferences');
+                });
                 break;
             case "login":
                 modal$.trigger('openlogin');

@@ -238,7 +238,7 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
     }
 
     private static function escapeWithNull( $value ) {
-        $conn = self::getConnection();
+        $conn = \Database::obtain();
         if ( $value !== null ) {
             return " '{$conn->escape( $value )}' ";
         } else {
@@ -253,13 +253,5 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
             return (int)$value;
         }
     }
-
-    private static function getConnection() {
-        // TODO: find connection configuration here, because comments
-        // may reside on a different database
-        //
-        return Database::obtain();
-    }
-
 
 }

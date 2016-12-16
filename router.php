@@ -30,6 +30,7 @@ $klein->onError(function (\Klein\Klein $klein, $err_msg, $err_type, Exception $e
         case 'API\V2\AuthorizationError':
             $klein->response()->code(403);
             break;
+        case 'Exceptions\ValidationError':
         case 'API\V2\ValidationError':
             $klein->response()->code(400);
             $klein->response()->json( array('error' => $err_msg ));

@@ -160,7 +160,8 @@ class analyzeController extends viewController {
         $this->template->build_number               = INIT::$BUILD_NUMBER;
         $this->template->enable_outsource           = $this->features->filter('filter_enable_outsource', INIT::$ENABLE_OUTSOURCE);
 
-        $this->template->outsource_service_login    = $this->_outsource_login_API;
+        $this->template->outsource_service_login    = $this->_outsource_login_API ;
+
         $this->template->support_mail    = INIT::$SUPPORT_MAIL;
 
         $langDomains = Langs_LanguageDomains::getInstance();

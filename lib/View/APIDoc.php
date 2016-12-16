@@ -83,28 +83,28 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
                 },
                 {
                   "name": "project_name",
-                  "in": "query",
+                  "in": "formData",
                   "description": "The name of the project you want create.",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "source_lang",
-                  "in": "query",
+                  "in": "formData",
                   "description": "RFC 5646 language+region Code ( en-US case sensitive ) as specified in W3C standards.",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "target_lang",
-                  "in": "query",
+                  "in": "formData",
                   "description": "RFC 5646 language+region Code ( en-US case sensitive ) as specified in W3C standards. Multiple languages must be comma separated ( it-IT,fr-FR,es-ES case sensitive)",
                   "required": true,
                   "type": "integer"
                 },
                 {
                   "name": "tms_engine",
-                  "in": "query",
+                  "in": "formData",
                   "description": "Identifier for Memory Server 0 means disabled, 1 means MyMemory)",
                   "required": false,
                   "type": "integer",
@@ -112,7 +112,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
                 },
                 {
                   "name": "mt_engine",
-                  "in": "query",
+                  "in": "formData",
                   "description": "Identifier for Machine Translation Service 0 means disabled, 1 means get MT from MyMemory).",
                   "required": false,
                   "type": "integer",
@@ -120,14 +120,14 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
                 },
                 {
                   "name": "private_tm_key",
-                  "in": "query",
+                  "in": "formData",
                   "description": "Private key(s) for MyMemory.  If a TMX file is uploaded and no key is provided, a new key will be created. - Existing MyMemory private keys or new to create a new key. - Multiple keys must be comma separated. Up to 5 keys allowed. (xxx345cvf,new,s342f234fc) - Only available if tms_engine is set to 1 or if is not used",
                   "required": false,
                   "type": "string"
                 },
                 {
                   "name": "subject",
-                  "in": "query",
+                  "in": "formData",
                   "description": "The subject of the project you want to create.",
                   "required": false,
                   "type": "string",
@@ -135,14 +135,14 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
                 },
                 {
                   "name": "segmentation_rule",
-                  "in": "query",
+                  "in": "formData",
                   "description": "The segmentation rule you want to use to parse your file.",
                   "required": false,
                   "type": "string"
                 },
                 {
                   "name": "owner_email",
-                  "in": "query",
+                  "in": "formData",
                   "description": "The email of the owner of the project.",
                   "required": false,
                   "type": "string",
@@ -208,21 +208,21 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
               "parameters": [
                 {
                   "name": "id_project",
-                  "in": "query",
+                  "in": "formData",
                   "description": "The id of the project you want to update.",
                   "required": true,
                   "type": "integer"
                 },
                 {
                   "name": "old_pass",
-                  "in": "query",
+                  "in": "formData",
                   "description": "The OLD password of the project you want to update.",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "new_pass",
-                  "in": "query",
+                  "in": "formData",
                   "description": "The NEW password of the project you want to update.",
                   "required": true,
                   "type": "string"
@@ -323,21 +323,21 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
               "parameters": [
                 {
                   "name": "id_project",
-                  "in": "path",
+                  "in": "formData",
                   "description": "The id of the project",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "password",
-                  "in": "path",
+                  "in": "formData",
                   "description": "The password of the project",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "id_job",
-                  "in": "path",
+                  "in": "formData",
                   "required": true,
                   "type": "string"
                 }
@@ -632,100 +632,100 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
               "parameters": [
                 {
                   "name": "id_job",
-                  "in": "path",
+                  "in": "formData",
                   "description": "The id of the job",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "password",
-                  "in": "path",
+                  "in": "formData",
                   "description": "The password of the job (Translate password)",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "id_segment",
-                  "in": "path",
+                  "in": "formData",
                   "description": "The id of the segment",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "version_number",
-                  "in": "query",
+                  "in": "formData",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "id_segment",
-                  "in": "query",
+                  "in": "formData",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "id_job",
-                  "in": "query",
+                  "in": "formData",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "id_category",
-                  "in": "query",
+                  "in": "formData",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "severity",
-                  "in": "query",
+                  "in": "formData",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "translation_version",
-                  "in": "query",
+                  "in": "formData",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "target_text",
-                  "in": "query",
+                  "in": "formData",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "start_node",
-                  "in": "query",
+                  "in": "formData",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "start_offset",
-                  "in": "query",
+                  "in": "formData",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "end_node",
-                  "in": "query",
+                  "in": "formData",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "end_offset",
-                  "in": "query",
+                  "in": "formData",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "is_full_segment",
-                  "in": "query",
+                  "in": "formData",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "comment",
-                  "in": "query",
+                  "in": "formData",
                   "required": true,
                   "type": "string"
                 }
@@ -754,34 +754,34 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
               "parameters": [
                 {
                   "name": "id_job",
-                  "in": "path",
+                  "in": "formData",
                   "description": "The id of the job",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "password",
-                  "in": "path",
+                  "in": "formData",
                   "description": "The password of the job (Translate password)",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "id_segment",
-                  "in": "path",
+                  "in": "formData",
                   "description": "The id of the segment",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "id_issue",
-                  "in": "path",
+                  "in": "formData",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "rebutted_at",
-                  "in": "query",
+                  "in": "formData",
                   "required": true,
                   "type": "string"
                 }
@@ -856,53 +856,53 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
               "parameters": [
                 {
                   "name": "id_job",
-                  "in": "path",
+                  "in": "formData",
                   "description": "The id of the job",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "password",
-                  "in": "path",
+                  "in": "formData",
                   "description": "The password of the job (Translate password)",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "id_segment",
-                  "in": "path",
+                  "in": "formData",
                   "description": "The id of the segment",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "id_issue",
-                  "in": "path",
+                  "in": "formData",
                   "description": "The id of the issue",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "comment",
-                  "in": "query",
+                  "in": "formData",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "id_qa_entry",
-                  "in": "query",
+                  "in": "formData",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "source_page",
-                  "in": "query",
+                  "in": "formData",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "uid",
-                  "in": "query",
+                  "in": "formData",
                   "required": true,
                   "type": "string"
                 }
@@ -974,35 +974,35 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
               "parameters": [
                 {
                   "name": "id_job",
-                  "in": "path",
+                  "in": "formData",
                   "description": "The id of the job",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "password",
-                  "in": "path",
+                  "in": "formData",
                   "description": "The password of the job (Translate password)",
                   "required": true,
                   "type": "string"
                 },
                 {
                   "name": "speech2text",
-                  "in": "query",
+                  "in": "formData",
                   "description": "To enable Speech To Text option",
                   "required": false,
                   "type": "boolean"
                 },
                 {
                   "name": "tag_projection",
-                  "in": "query",
+                  "in": "formData",
                   "description": "To enable Guess Tags option",
                   "type": "boolean",
                   "required": false
                 },
                 {
                   "name": "lexiqa",
-                  "in": "query",
+                  "in": "formData",
                   "description": "To enable lexiqa option",
                   "type": "boolean",
                   "required": false
@@ -1038,14 +1038,14 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
                 },
                 {
                   "name": "name",
-                  "in": "query",
+                  "in": "formData",
                   "description": "The file name.",
                   "type": "string",
                   "required": false
                 },
                 {
                   "name": "tm_key",
-                  "in": "query",
+                  "in": "formData",
                   "description": "The tm key.",
                   "required": false,
                   "type": "string"

@@ -20,6 +20,8 @@ route( '/api/app/user/login',                   'POST', 'API\App\LoginController
 route( '/api/app/user/logout',                  'POST', 'API\App\LoginController', 'logout' );
 
 route( '/api/app/user',                         'POST', 'API\App\SignupController', 'create' );
+route( '/api/app/user/metadata',                'POST',  'API\App\UserMetadataController', 'update' );
+
 route( '/api/app/user/resend_email_confirm',    'POST', 'API\App\SignupController', 'resendEmailConfirm' );
 route( '/api/app/user/forgot_password',         'POST', 'API\App\SignupController', 'forgotPassword' );
 route( '/api/app/user/password_reset/[:token]', 'GET', 'API\App\SignupController',  'authForPasswordReset' );

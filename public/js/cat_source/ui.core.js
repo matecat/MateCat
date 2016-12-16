@@ -297,8 +297,8 @@ UI = {
 
             $(segment).removeClass("editor waiting_for_check_result opened");
             $('span.locked.mismatch', segment).removeClass('mismatch');
-            
-            
+
+
             if (!this.opening) {
                 this.checkIfFinished(1);
             }
@@ -332,7 +332,7 @@ UI = {
 
         this.highlightEditarea();
 
-        this.currentSegmentQA();        
+        this.segmentQA(UI.currentSegment );
         $(this.currentSegment).trigger('copySourceToTarget');
         if(!config.isReview) {
             var alreadyCopied = false;
@@ -454,7 +454,7 @@ UI = {
 		}, 2000);
 	},
 
-	
+
 	copyToNextIfSame: function(nextUntranslatedSegment) {
 		if ($('.source', this.currentSegment).data('original') == $('.source', nextUntranslatedSegment).data('original')) {
 			if ($('.editarea', nextUntranslatedSegment).hasClass('fromSuggestion')) {
@@ -994,14 +994,14 @@ UI = {
         if (d.errors.length) {
 			this.processErrors(d.errors, 'getSegments');
         }
-        
+
 		var where = d.data.where;
 
         SegmentNotes.enabled() && SegmentNotes.registerSegments ( d.data );
 
 		$.each(d.data.files, function() {
 			startSegmentId = this.segments[0].sid;
-            //Tag Projection: check if is enable the Tag Projection 
+            //Tag Projection: check if is enable the Tag Projection
             UI.setGlobalTagProjection(this);
 		});
 
@@ -1047,7 +1047,7 @@ UI = {
 			}
 		}
 		$('#outer').removeClass('loading loadingBefore');
-        
+
 		this.loadingMore = false;
 		this.setWaypoints();
 		this.markTags();
@@ -1225,7 +1225,7 @@ UI = {
 	registerQACheck: function() {
 		clearTimeout(UI.pendingQACheck);
 		UI.pendingQACheck = setTimeout(function() {
-			UI.currentSegmentQA();            
+			UI.segmentQA(UI.currentSegment);
 		}, config.segmentQACheckInterval);
 	},
 	reloadToSegment: function(segmentId) {
@@ -1868,7 +1868,7 @@ UI = {
 				toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? capStr : d;
 				newStr += toAdd;
 			}
-            else if(this.nodeName == 'LXQWARNING') { 
+            else if(this.nodeName == 'LXQWARNING') {
                 d = this.childNodes[0].data;
                 jump = ((!index)&&(!selection$));
 				capStr = toTitleCase(d);
@@ -1876,7 +1876,7 @@ UI = {
 					capStr = d.charAt(0) + toTitleCase(d).slice(1);
 				}
                 toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? capStr : d;
-				newStr += toAdd;    
+				newStr += toAdd;
             }
             else {
 				newStr += this.outerHTML;
@@ -1960,7 +1960,7 @@ UI = {
 		return errors.substring(0, errors.length - 1);
 	},
 	goToFirstError: function() {
-		location.href = $('#point2seg').attr('href');
+        $("#point2seg").trigger('mousedown');
 	},
 
 
@@ -2013,7 +2013,7 @@ UI = {
         }
 
         var winName ;
-        
+
         var driveUpdateDone = function(data) {
             if( !data.urls || data.urls.length === 0 ) {
                 APP.alert({msg: "MateCat was not able to update project files on Google Drive. Maybe the project owner revoked privileges to access those files. Ask the project owner to login again and grant Google Drive privileges to MateCat."});
@@ -2126,31 +2126,6 @@ UI = {
         iFrameDownload.contents().find("#fileDownload").submit();
 
     },
-	/**
-	 * fill segments with relative errors from polling
-	 *
-	 * @param {type} segment
-	 * @param {type} warnings
-	 * @returns {undefined}
-	 */
-	setNextWarnedSegment: function(sid) {
-		sid = sid || UI.currentSegmentId;
-		idList = UI.globalWarnings;
-		idList.sort();
-		found = false;
-		$.each(idList, function() {
-			if (this > sid) {
-				$('#point2seg').attr('href', '#' + this);
-                $('#point2seg').attr('data-segment', this);
-				found = true;
-				return false;
-			}
-		});
-		if(!found) {
-			$('#point2seg').attr('href', '#' + UI.firstWarnedSegment);
-            $('#point2seg').attr('data-segment', UI.firstWarnedSegment);
-		}
-	},
 	fillWarnings: function(segment, warnings) {
 		//add Warnings to current Segment
 		var parentTag = segment.find('p.warnings').parent();
@@ -2216,60 +2191,54 @@ UI = {
 
         if (UI.logEnabled) dataMix.logs = this.extractLogs();
 
-		APP.doRequest({
-			data: dataMix,
-			error: function() {
-				UI.warningStopped = true;
-				UI.failedConnection(0, 'getWarning');
-			},
-			success: function(data) {//console.log('check warnings success');
-				UI.startWarning();
-				var warningPosition = '';
-				UI.globalWarnings = data.details.sort();
-                //The tags with tag projection enabled doesn't show the tags in the source, so tdont show the warning
-                UI.globalWarnings = UI.filterTagsWithTagProjection(UI.globalWarnings);
-				UI.firstWarnedSegment = UI.globalWarnings[0];
-				UI.translationMismatches = data.translation_mismatches;
+        APP.doRequest({
+            data: dataMix,
+            error: function() {
+                UI.warningStopped = true;
+                UI.failedConnection(0, 'getWarning');
+            },
+            success: function(data) {//console.log('check warnings success');
+                UI.startWarning();
 
-				//check for errors
-				if (UI.globalWarnings.length > 0) {
+                UI.translationMismatches = data.translation_mismatches;
+                UI.globalWarnings = data.details;
+                //The tags with tag projection enabled doesn't show the tags in the source, so dont show the warning
+                UI.globalWarnings.tag_issues = UI.filterTagsWithTagProjection(UI.globalWarnings.tag_issues);
 
-				    UI.renderQAPanel();
+                //check for errors
+                if (UI.globalWarnings) {
 
-					//for now, put only last in the pointer to segment id
-					// warningPosition = '#' + data.details[ Object.keys(data.details).sort().shift() ].id_segment;
+                    UI.renderQAPanel();
 
-                    // data.details = UI.filterTagsWithTagProjection(data.details);
+                    if (openingSegment)
+                        UI.fillCurrentSegmentWarnings(data.details, true);
 
-					if (openingSegment)
-						UI.fillCurrentSegmentWarnings(data.details, true);
+                }
 
-				}
-
-				// check for messages
-				if ( data.messages ) {
-					var msgArray = $.parseJSON(data.messages);
-					if (msgArray.length > 0) {
-						UI.displayMessage(msgArray);
-					}
-				}
-
-
-				// UI.setNextWarnedSegment();
+                // check for messages
+                if ( data.messages ) {
+                    var msgArray = $.parseJSON(data.messages);
+                    if (msgArray.length > 0) {
+                        UI.displayMessage(msgArray);
+                    }
+                }
 
                 $(document).trigger('getWarning:global:success', { resp : data }) ;
-           
-			}
-		});
+
+            }
+        });
 	},
     renderQAPanel: function () {
 	    if ( !this.QAComponent ) {
             var mountPoint = $(".qa-wrapper")[0];
             this.QAComponent = ReactDOM.render(React.createElement(QAComponent, {
             }), mountPoint);
-            this.QAComponent.setIssues(UI.globalWarnings);
-        } else {
-            this.QAComponent.setIssues(UI.globalWarnings);
+        }
+        if ( UI.globalWarnings.tag_issues ) {
+            this.QAComponent.setTagIssues(UI.globalWarnings.tag_issues);
+        }
+        if ( UI.globalWarnings.translation_mismatches ) {
+            this.QAComponent.setTranslationConflitcts(UI.globalWarnings.translation_mismatches);
         }
     },
 	displayMessage: function(messages) {
@@ -2319,23 +2288,13 @@ UI = {
         var id_segment = UI.getSegmentId(UI.currentSegment);
         LXQ.doLexiQA(UI.currentSegment, translation, id_segment,false, function () {}) ;
     },
-	currentSegmentQA: function() {
-        console.warn(
-            'currentSegmentQA is deprecated, use segmentQA and pass a segment as argument',
-            getStackTrace().split("\n")[2]
-        );
-        
-        var that = this;
-        UI.segmentQA.apply( this, UI.currentSegment );
-    },
-
     segmentQA : function( segment ) {
         if ( ! ( segment instanceof UI.Segment) ) {
             segment = new UI.Segment( segment );
         }
 
 		segment.el.addClass('waiting_for_check_result');
-        
+
 		var dd = new Date();
 		ts = dd.getTime();
 		var token = segment.id + '-' + ts.toString();
@@ -2354,11 +2313,6 @@ UI = {
 		}
 
 		this.checkSegmentsArray[token] = trg_content;
-        var glossarySourcesAr = [];
-        $('section.editor .tab.glossary .results .sugg-target .translation').each(function () {
-            glossarySourcesAr.push($(this).text());
-        })
-
 		APP.doRequest({
 			data: {
 				action: 'getWarning',
@@ -2369,7 +2323,6 @@ UI = {
 				src_content: src_content,
 				trg_content: trg_content,
                 segment_status: segment_status,
-                glossaryList: glossarySourcesAr
 			},
 			error: function() {
 				UI.failedConnection(0, 'getWarning');
@@ -3154,11 +3107,13 @@ UI = {
 			this.undoStack.splice(this.undoStack.length - pos, pos);
 			this.undoStackPosition = 0;
 		}
-                
+
         saveSelection();
         // var cursorPos = APP.getCursorPosition(this.editarea.get(0));
         $('.undoCursorPlaceholder').remove();
-        $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
+        if ($('.rangySelectionBoundary').closest('.editarea').length) {
+            $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
+        }
         restoreSelection();
         var htmlToSave = this.editarea.html();
         this.undoStack.push(htmlToSave);
@@ -3206,13 +3161,7 @@ UI = {
     },
     start: function () {
 
-        UI.lexiqaData = {};
-        UI.lexiqaData.lexiqaWarnings = {};
-        UI.lexiqaData.enableHighlighting = true;
-        UI.lexiqaData.lexiqaFetching = false;
-        UI.lexiqaData.segments = [];
-        UI.lexiqaData.segmentsInfo = {}; 
-
+        APP.init();
         // If some icon is added on the top header menu, the file name is resized
         APP.addDomObserver($('.header-menu')[0], function() {
             APP.fitText($('.breadcrumbs'), $('#pname'), 30);
@@ -3221,14 +3170,14 @@ UI = {
         $("article").each(function() {
             APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30);
         });
-        
+
         UI.render({
             firstLoad: true
         }).done( function() {
             // launch segments check on opening
             UI.checkWarnings(true);
         });
-        
+
         $('html').trigger('start');
         if (LXQ.enabled()) {
             $('#lexiqabox').removeAttr("style");
@@ -3281,7 +3230,7 @@ UI = {
             } else {
                 UI.blockOpenSegment = false;
             }
-            
+
             UI.lastOperation = operation;
 
             UI.openSegment(this, operation);
@@ -3395,6 +3344,17 @@ UI = {
         $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
         $.cookie('tmpanel-open', 1, { path: '/' });
     },
+    closeAllMenus: function (e, fromQA) {
+        if ($('.searchbox').is(':visible')) {
+            UI.toggleSearch(e);
+        }
+        $('.mbc-history-balloon-outer').removeClass('mbc-visible');
+
+        var qa_cont = $('.qa-container');
+        if ( qa_cont.hasClass('qa-open') && !fromQA) {
+            QAComponent.togglePanel();
+        }
+    }
 
 
 };

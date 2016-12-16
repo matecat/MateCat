@@ -74,6 +74,8 @@ class FeatureSet {
 
                     try {
                         $filterable = call_user_func_array( array( $obj, $method ), $args );
+                    } catch ( \Exceptions\ValidationError $e ) {
+                        throw $e ;
                     } catch ( Exception $e ) {
                         Log::doLog("Exception running filter " . $method . ": " . $e->getMessage() );
                     }

@@ -16,7 +16,6 @@ export const mustMatch = (field, fieldName) => {
 
 export const minLength = (length) => {
     return (text) => {
-        console.log("Checking for length greater than ", length);
         return text.length >= length ? null : ErrorMessages.minLength(length);
     };
 };
