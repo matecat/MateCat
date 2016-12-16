@@ -36,6 +36,18 @@ var ProjectsStore = assign({}, EventEmitter.prototype, {
         this.projects = this.projects.delete(index);
     },
 
+    removeJob: function (project, job) {
+        var indexProject = this.projects.indexOf(project);
+        //Check jobs length
+        if (this.projects.get(indexProject).get('jobs').size === 1) {
+            this.removeProject(project);
+        } else {
+            var indexJob = project.get('jobs').indexOf(job);
+            this.projects = this.projects.deleteIn([indexProject, 'jobs', indexJob]);
+        }
+
+    },
+
     changeJobPass: function (project, job, password, oldPassword) {
         var indexProject = this.projects.indexOf(project);
         var indexJob = project.get('jobs').indexOf(job);
@@ -71,6 +83,10 @@ AppDispatcher.register(function(action) {
             break;
         case ManageConstants.REMOVE_PROJECT:
             ProjectsStore.removeProject(action.project);
+            ProjectsStore.emitChange(ManageConstants.RENDER_PROJECTS, ProjectsStore.projects);
+            break;
+        case ManageConstants.REMOVE_JOB:
+            ProjectsStore.removeJob(action.project, action.job);
             ProjectsStore.emitChange(ManageConstants.RENDER_PROJECTS, ProjectsStore.projects);
             break;
         case ManageConstants.CHANGE_JOB_PASS:

@@ -88,6 +88,17 @@ class ProjectContainer extends React.Component {
         ManageActions.removeProject(this.props.project);
     }
 
+    archiveProject() {
+        this.props.changeStatusFn('prj', this.props.project.toJS(), 'archived');
+        ManageActions.removeProject(this.props.project);
+    }
+
+    activateProject() {
+        this.props.changeStatusFn('prj', this.props.project.toJS(), 'active');
+        ManageActions.removeProject(this.props.project);
+    }
+
+
     getProjectHeader(sourceLang, targetsLangs, payableWords) {
         var jobsLength = this.props.project.get('jobs').size;
         var headerProject = '';
@@ -136,6 +147,27 @@ class ProjectContainer extends React.Component {
 
     }
 
+    getProjectMenu(activityLogUrl) {
+        var menuHtml = <ul id={'dropdown' + this.props.project.get('id')} className='dropdown-content'>
+                            <li><a href={activityLogUrl} target="_blank">Activity Log</a></li>
+                            <li><a onClick={this.archiveProject.bind(this)}>Archive project</a></li>
+                            <li><a onClick={this.removeProject.bind(this)}>Remove from my Dashboard</a></li>
+                        </ul>;
+        if ( this.props.project.get('has_archived') ) {
+            menuHtml = <ul id={'dropdown' + this.props.project.get('id')} className='dropdown-content'>
+                            <li><a href={activityLogUrl} target="_blank">Activity Log</a></li>
+                            <li><a onClick={this.activateProject.bind(this)}>Unarchive project</a></li>
+                            <li><a onClick={this.removeProject.bind(this)}>Remove from my Dashboard</a></li>
+                        </ul>;
+        } else if ( this.props.project.get('has_cancelled') ) {
+            menuHtml = <ul id={'dropdown' + this.props.project.get('id')} className='dropdown-content'>
+                            <li><a href={activityLogUrl} target="_blank">Activity Log</a></li>
+                            <li><a onClick={this.activateProject.bind(this)}>Resume Project</a></li>
+                        </ul>;
+        }
+        return menuHtml;
+    }
+
     getLastAction() {
         this.props.lastActivityFn(this.props.project.get('id'), this.props.project.get('password')).done()
     }
@@ -164,6 +196,8 @@ class ProjectContainer extends React.Component {
         var payableWords = 0;
         var activityLogUrl = this.getActivityLogUrl();
 
+        var projectMenu = this.getProjectMenu(activityLogUrl);
+
         this.props.project.get('jobs').map(function(job, i){
 
             var index = i+1;
@@ -175,7 +209,8 @@ class ProjectContainer extends React.Component {
                                 index={index}
                                 project={self.props.project}
                                 jobsLenght={jobsLength}
-                                changeJobPasswordFn={self.props.changeJobPasswordFn}/>;
+                                changeJobPasswordFn={self.props.changeJobPasswordFn}
+                                changeStatusFn={self.props.changeStatusFn}/>;
                 jobsList.push(item);
                 openJobClass = 'btn-active-combo';
                 openProjectClass = (jobsLength === 1) ? '':'open-project';
@@ -226,10 +261,7 @@ class ProjectContainer extends React.Component {
                                            data-activates={'dropdown' + this.props.project.get('id')}>
                                             <i className="material-icons">more_vert</i>
                                         </a>
-                                        <ul id={'dropdown' + this.props.project.get('id')} className='dropdown-content'>
-                                            <li><a href={activityLogUrl} target="_blank">Activity Log</a></li>
-                                            <li><a onClick={this.removeProject.bind(this)}>Remove from my Dashboard</a></li>
-                                        </ul>
+                                        {projectMenu}
                                     </li>
                                 </ul>
                             </div>

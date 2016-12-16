@@ -24,6 +24,16 @@ class JobContainer extends React.Component {
         return '/translate/'+this.props.project.get('name')+'/'+ this.props.job.get('source') +'-'+this.props.job.get('target')+'/'+ chunk_id +'-'+ this.props.job.get('password')  ;
     }
 
+    getReviseUrl() {
+        var use_prefix = ( this.props.jobsLenght > 1 );
+        var chunk_id = this.props.job.get('id') + ( ( use_prefix ) ? '-' + this.props.index : '' ) ;
+        return '/revise/'+this.props.project.get('name')+'/'+ this.props.job.get('source') +'-'+this.props.job.get('target')+'/'+ chunk_id +'-'+ this.props.job.get('password')  ;
+    }
+
+    getEditingLogUrl() {
+        return 'editlog/' + this.props.job.get('id') + '-' + this.props.job.get('password');
+    }
+
     changePassword() {
         var self = this;
         this.props.changeJobPasswordFn(this.props.job.toJS())
@@ -36,6 +46,74 @@ class JobContainer extends React.Component {
                 APP.addNotification(notification);
                 ManageActions.changeJobPassword(self.props.project, self.props.job, data.password, data.undo);
             });
+    }
+
+    archiveJob() {
+        this.props.changeStatusFn('job', this.props.job.toJS(), 'archived');
+        ManageActions.removeJob(this.props.project, this.props.job);
+    }
+
+    cancelJob() {
+        this.props.changeStatusFn('job', this.props.job.toJS(), 'cancelled');
+        ManageActions.removeJob(this.props.project, this.props.job);
+    }
+
+    activateJob() {
+        this.props.changeStatusFn('job', this.props.job.toJS(), 'active');
+        ManageActions.removeJob(this.props.project, this.props.job);
+    }
+
+    getJobMenu(splitUrl) {
+        var reviseUrl = this.getReviseUrl();
+        var editLogUrl = this.getEditingLogUrl();
+        var menuHtml = <ul id={'dropdownJob' + this.props.job.get('id')} className='dropdown-content'>
+                <li onClick={this.archiveJob.bind(this)}><a >Archive job</a></li>
+                <li onClick={this.cancelJob.bind(this)}><a >Cancel job</a></li>
+                <li onClick={this.changePassword.bind(this)}><a >Change Password</a></li>
+                <li><a target="_blank" href={splitUrl}>Split</a></li>
+                <li><a target="_blank" href={reviseUrl}>Revise</a></li>
+                <li><a >QA Report</a></li>
+                <li><a target="_blank" href={editLogUrl}>Editing Log</a></li>
+                <li><a >Preview</a></li>
+                <li><a >Download</a></li>
+                <li><a >Download Original</a></li>
+                <li><a >Export XLIFF</a></li>
+                <li><a >Export TMX</a></li>
+                <li><a >Cancel Job</a></li>
+            </ul>;
+        if ( this.props.job.get('status') === 'archived' ) {
+            menuHtml = <ul id={'dropdownJob' + this.props.job.get('id')} className='dropdown-content'>
+                <li onClick={this.activateJob.bind(this)}><a >Unarchive job</a></li>
+                <li onClick={this.cancelJob.bind(this)}><a >Cancel job</a></li>
+                <li onClick={this.changePassword.bind(this)}><a >Change Password</a></li>
+                <li><a target="_blank" href={splitUrl}>Split</a></li>
+                <li><a target="_blank" href={reviseUrl}>Revise</a></li>
+                <li><a >QA Report</a></li>
+                <li><a target="_blank" href={editLogUrl}>Editing Log</a></li>
+                <li><a >Preview</a></li>
+                <li><a >Download</a></li>
+                <li><a >Download Original</a></li>
+                <li><a >Export XLIFF</a></li>
+                <li><a >Export TMX</a></li>
+                <li><a >Cancel Job</a></li>
+            </ul>;
+        } else if ( this.props.job.get('status') === 'cancelled' ) {
+            menuHtml = <ul id={'dropdownJob' + this.props.job.get('id')} className='dropdown-content'>
+                <li onClick={this.activateJob.bind(this)}><a >Resume job</a></li>
+                <li onClick={this.changePassword.bind(this)}><a >Change Password</a></li>
+                <li><a target="_blank" href={splitUrl} >Split</a></li>
+                <li><a target="_blank" href={reviseUrl}>Revise</a></li>
+                <li><a >QA Report</a></li>
+                <li><a target="_blank" href={editLogUrl}>Editing Log</a></li>
+                <li><a >Preview</a></li>
+                <li><a >Download</a></li>
+                <li><a >Download Original</a></li>
+                <li><a >Export XLIFF</a></li>
+                <li><a >Export TMX</a></li>
+                <li><a >Cancel Job</a></li>
+            </ul>;
+        }
+        return menuHtml;
     }
 
     getOutsourceUrl() {
@@ -63,6 +141,7 @@ class JobContainer extends React.Component {
         var outsourceUrl = this.getOutsourceUrl();
         var analysisUrl = this.getAnalysisUrl();
         var splitUrl = this.getSplitUrl();
+        var jobMenu = this.getJobMenu(splitUrl);
         return <div className="card job z-depth-1">
             <div className="head-job open-head-job">
                 <div className="row">
@@ -86,19 +165,7 @@ class JobContainer extends React.Component {
                                    ref={(dropdown) => this.dropdown = dropdown}>
                                     <i className="material-icons">more_vert</i>
                                 </a>
-                                <ul id={'dropdownJob' + this.props.job.get('id')} className='dropdown-content'>
-                                    <li onClick={this.changePassword.bind(this)}><a >Change Password</a></li>
-                                    <li><a >Split</a></li>
-                                    <li><a >Revise</a></li>
-                                    <li><a >QA Report</a></li>
-                                    <li><a >Editing Log</a></li>
-                                    <li><a >Preview</a></li>
-                                    <li><a >Download</a></li>
-                                    <li><a >Download Original</a></li>
-                                    <li><a >Export XLIFF</a></li>
-                                    <li><a >Export TMX</a></li>
-                                    <li><a >Cancel Job</a></li>
-                                </ul>
+                                {jobMenu}
                             </li>
                         </ul>
                     </div>

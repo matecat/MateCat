@@ -48,6 +48,14 @@ var ManageActions = {
         });
     },
 
+    removeJob: function (project, job) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.REMOVE_JOB,
+            project: project,
+            job: job
+        });
+    },
+
     changeJobPassword: function (project, job, password, oldPassword) {
         AppDispatcher.dispatch({
             actionType: ManageConstants.CHANGE_JOB_PASS,
