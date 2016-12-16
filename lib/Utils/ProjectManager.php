@@ -1003,22 +1003,11 @@ class ProjectManager {
         $this->features->run('processJobsCreated', $projectStructure );
     }
 
+    /**
+     *
+     */
     private function insertSegmentNotesForFile() {
-        foreach ( $this->projectStructure[ 'notes' ] as $internal_id => $v ) {
-            $entries  = $v[ 'entries' ];
-            $segments = $v[ 'segment_ids' ];
-
-            // TODO: refactor using bulk insert
-            foreach ( $segments as $segment ) {
-                foreach ( $entries as $note ) {
-                    Segments_SegmentNoteDao::insertRecord( array(
-                            'internal_id' => $internal_id,
-                            'id_segment'  => $segment,
-                            'note'        => $note
-                    ) );
-                }
-            }
-        }
+        Segments_SegmentNoteDao::bulkInsertFromProjectStrucutre( $this->projectStructure['notes'] )  ;
     }
 
     /**
@@ -2134,14 +2123,18 @@ class ProjectManager {
         return CatUtils::generate_password( $length );
     }
 
+
+    /**
+     * addNotesToProjectStructure
+     *
+     * Notes structure is the following:
+     *
+     *  ... ['notes'][ $internal_id ] = array(
+     *      'entries' => array( // one item per comment in the trans unit ),
+     *      'id_segment' => (int) to be populated later for the database insert
+     *
+     */
     private function addNotesToProjectStructure( $trans_unit ) {
-        /**
-         * notes structure is the following:
-         *
-         *  ... ['notes'][ $internal_id ] = array(
-         *      'entries' => array( // one item per comment in the trans unit ),
-         *      'id_segment' => (int) to be populated later for the database insert
-         */
 
         $internal_id = self::sanitizedUnitId( $trans_unit );
         if ( isset( $trans_unit[ 'notes' ] ) ) {
