@@ -423,7 +423,7 @@ class ProjectManager {
 
                     $this->projectStructure[ 'file_id_list' ]->append( $fid );
 
-                    $this->_extractSegments( file_get_contents( $cachedXliffFilePathName ), $fid );
+                    $this->_extractSegments( file_get_contents( $cachedXliffFilePathName ), $fid, $mimeType );
 
                 }
 
@@ -1449,7 +1449,7 @@ class ProjectManager {
      *
      * @throws Exception
      */
-    protected function _extractSegments( $xliff_file_content, $fid ) {
+    protected function _extractSegments( $xliff_file_content, $fid, $mimeType ) {
 
         //create Structure fro multiple files
         $this->projectStructure[ 'segments' ]->offsetSet( $fid, new ArrayObject( array() ) );
@@ -1574,7 +1574,9 @@ class ProjectManager {
 
                         } // end foreach seg-source
 
-                        $this->addNotesToProjectStructure( $xliff_trans_unit );
+                        if ( self::notesAllowedByMimeType( $mimeType ) ) {
+                           $this->addNotesToProjectStructure( $xliff_trans_unit );
+                        }
 
                     }
                     else {
@@ -1613,7 +1615,9 @@ class ProjectManager {
 
                         }
 
-                        $this->addNotesToProjectStructure( $xliff_trans_unit );
+                        if ( self::notesAllowedByMimeType( $mimeType ) ) {
+                            $this->addNotesToProjectStructure( $xliff_trans_unit );
+                        }
 
                         $source = $xliff_trans_unit[ 'source' ][ 'raw-content' ];
 
@@ -1751,7 +1755,7 @@ class ProjectManager {
      * setSegmentIdForNotes
      *
      * Adds notes to segment, taking into account that a same note may be assigned to
-     * more than one MateCat segment, to the <mrk> tags.
+     * more than one MateCat segment, due to the <mrk> tags.
      *
      * Example:
      * ['notes'][ $internal_id] => array( 'xxx' );
@@ -2001,6 +2005,14 @@ class ProjectManager {
         }
 
         return array( 'prec' => $before, 'seg' => $cleanSegment, 'succ' => $after );
+    }
+
+    /**
+     * @param $mimeType
+     * @return bool
+     */
+    public static function notesAllowedByMimeType( $mimeType ) {
+        return in_array( $mimeType, array('sdlxliff', 'xliff') ) ;
     }
 
     public static function getExtensionFromMimeType( $mime_type ) {
