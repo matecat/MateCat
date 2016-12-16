@@ -34,6 +34,10 @@ class JobContainer extends React.Component {
         return 'editlog/' + this.props.job.get('id') + '-' + this.props.job.get('password');
     }
 
+    getQAReport() {
+        return 'revise-summary/' + this.props.job.get('id') + '-' + this.props.job.get('password');
+    }
+
     changePassword() {
         var self = this;
         this.props.changeJobPasswordFn(this.props.job.toJS())
@@ -66,20 +70,25 @@ class JobContainer extends React.Component {
     getJobMenu(splitUrl) {
         var reviseUrl = this.getReviseUrl();
         var editLogUrl = this.getEditingLogUrl();
+        var qaReportUrl = this.getQAReport();
+        var jobTMXUrl = 'TMX/'+ this.props.job.get('id') + '/' + this.props.job.get('password');
+        var exportXliffUrl = '/SDLXLIFF/'+ this.props.job.get('id') + '/' + this.props.job.get('password') +
+            '/' + this.props.project.get('name') + '.zip';
+
+
         var menuHtml = <ul id={'dropdownJob' + this.props.job.get('id')} className='dropdown-content'>
                 <li onClick={this.archiveJob.bind(this)}><a >Archive job</a></li>
                 <li onClick={this.cancelJob.bind(this)}><a >Cancel job</a></li>
                 <li onClick={this.changePassword.bind(this)}><a >Change Password</a></li>
                 <li><a target="_blank" href={splitUrl}>Split</a></li>
                 <li><a target="_blank" href={reviseUrl}>Revise</a></li>
-                <li><a >QA Report</a></li>
+                <li><a target="_blank" href={qaReportUrl}>QA Report</a></li>
                 <li><a target="_blank" href={editLogUrl}>Editing Log</a></li>
                 <li><a >Preview</a></li>
                 <li><a >Download</a></li>
                 <li><a >Download Original</a></li>
-                <li><a >Export XLIFF</a></li>
-                <li><a >Export TMX</a></li>
-                <li><a >Cancel Job</a></li>
+                <li><a target="_blank" href={exportXliffUrl}>Export XLIFF</a></li>
+                <li><a target="_blank" href={jobTMXUrl}>Export TMX</a></li>
             </ul>;
         if ( this.props.job.get('status') === 'archived' ) {
             menuHtml = <ul id={'dropdownJob' + this.props.job.get('id')} className='dropdown-content'>
@@ -88,14 +97,13 @@ class JobContainer extends React.Component {
                 <li onClick={this.changePassword.bind(this)}><a >Change Password</a></li>
                 <li><a target="_blank" href={splitUrl}>Split</a></li>
                 <li><a target="_blank" href={reviseUrl}>Revise</a></li>
-                <li><a >QA Report</a></li>
+                <li><a target="_blank" href={qaReportUrl}>QA Report</a></li>
                 <li><a target="_blank" href={editLogUrl}>Editing Log</a></li>
                 <li><a >Preview</a></li>
                 <li><a >Download</a></li>
                 <li><a >Download Original</a></li>
-                <li><a >Export XLIFF</a></li>
-                <li><a >Export TMX</a></li>
-                <li><a >Cancel Job</a></li>
+                <li><a target="_blank" href={exportXliffUrl}>Export XLIFF</a></li>
+                <li><a target="_blank" href={jobTMXUrl}>Export TMX</a></li>
             </ul>;
         } else if ( this.props.job.get('status') === 'cancelled' ) {
             menuHtml = <ul id={'dropdownJob' + this.props.job.get('id')} className='dropdown-content'>
@@ -103,14 +111,13 @@ class JobContainer extends React.Component {
                 <li onClick={this.changePassword.bind(this)}><a >Change Password</a></li>
                 <li><a target="_blank" href={splitUrl} >Split</a></li>
                 <li><a target="_blank" href={reviseUrl}>Revise</a></li>
-                <li><a >QA Report</a></li>
+                <li><a target="_blank" href={qaReportUrl}>QA Report</a></li>
                 <li><a target="_blank" href={editLogUrl}>Editing Log</a></li>
                 <li><a >Preview</a></li>
                 <li><a >Download</a></li>
                 <li><a >Download Original</a></li>
-                <li><a >Export XLIFF</a></li>
-                <li><a >Export TMX</a></li>
-                <li><a >Cancel Job</a></li>
+                <li><a target="_blank" href={exportXliffUrl}>Export XLIFF</a></li>
+                <li><a target="_blank" href={jobTMXUrl}>Export TMX</a></li>
             </ul>;
         }
         return menuHtml;

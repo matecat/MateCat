@@ -103,7 +103,8 @@ class ProjectContainer extends React.Component {
         var jobsLength = this.props.project.get('jobs').size;
         var headerProject = '';
         var analyzeUrl = this.getAnalyzeUrl();
-        if( jobsLength > 1 ) {
+        var buttonLabel = (this.state.showAllJobs) ? "Close" : "Open";
+        if( jobsLength > 1 && !this.state.showAllJobs) {
             headerProject = <div className="card job-preview z-depth-1">
                 <div className="body-job">
                     <div className="row">
@@ -131,11 +132,8 @@ class ProjectContainer extends React.Component {
                         <div className="col s1 right">
 
                             <div className="button-list open right">
-                                <a className="btn waves-effect waves-light btn-flat"
-                                   style={{display: 'none'}}
-                                   onClick={this.showHideAllJobs.bind(this)}>close</a>
                                 <a className="btn waves-effect waves-light"
-                                   onClick={this.showHideAllJobs.bind(this)}>Open</a>
+                                   onClick={this.showHideAllJobs.bind(this)}>{buttonLabel}</a>
                             </div>
 
                         </div>
