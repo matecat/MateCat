@@ -137,8 +137,8 @@ class PreferencesModal extends React.Component {
                                            onKeyPress={(e) => { (e.key === 'Enter' ? this.submitUserChanges() : this.onKeyPressCopupon) }}
                                            ref={(input) => this.couponInput = input}/>
                                 <a className="btn-confirm-medium" onClick={this.submitUserChanges.bind(this)}>Apply</a>
-                                <div className="validation-error">
-                                        <span style={this.spanStyle} className="text">{this.state.couponError}</span>
+                                <div className="coupon-message">
+                                        <span style={{color: 'red', fontSize: '14px',position: 'absolute', right: '27%', lineHeight: '24px'}} className="text coupon-message">{this.state.couponError}</span>
                                 </div>
                         </div>
         } else {
@@ -146,10 +146,10 @@ class PreferencesModal extends React.Component {
             couponHtml = <div className="coupon-container coupon-success">
 
                     <h2 htmlFor="user-coupon">Coupon</h2>
-                     <div className="validation-success">
-                        <span style={this.spanStyle} className="text">Coupon activated</span>
-                    </div>
                     <input type="text" name="coupon" id="user-coupon" defaultValue={this.state.coupon} disabled /><br/>
+                    <div className="coupon-message">
+                        <span style={{color: 'green', fontSize: '14px', position: 'absolute', right: '42%', lineHeight: '24px'}} className="text ">Coupon activated</span>
+                    </div>
 
 
             </div>

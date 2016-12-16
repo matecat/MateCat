@@ -423,7 +423,7 @@ class ProjectManager {
 
                     $this->projectStructure[ 'file_id_list' ]->append( $fid );
 
-                    $this->_extractSegments( file_get_contents( $cachedXliffFilePathName ), $fid );
+                    $this->_extractSegments( file_get_contents( $cachedXliffFilePathName ), $fid, $mimeType );
 
                 }
 
@@ -1003,22 +1003,11 @@ class ProjectManager {
         $this->features->run('processJobsCreated', $projectStructure );
     }
 
+    /**
+     *
+     */
     private function insertSegmentNotesForFile() {
-        foreach ( $this->projectStructure[ 'notes' ] as $internal_id => $v ) {
-            $entries  = $v[ 'entries' ];
-            $segments = $v[ 'segment_ids' ];
-
-            // TODO: refactor using bulk insert
-            foreach ( $segments as $segment ) {
-                foreach ( $entries as $note ) {
-                    Segments_SegmentNoteDao::insertRecord( array(
-                            'internal_id' => $internal_id,
-                            'id_segment'  => $segment,
-                            'note'        => $note
-                    ) );
-                }
-            }
-        }
+        Segments_SegmentNoteDao::bulkInsertFromProjectStrucutre( $this->projectStructure['notes'] )  ;
     }
 
     /**
@@ -1460,7 +1449,7 @@ class ProjectManager {
      *
      * @throws Exception
      */
-    protected function _extractSegments( $xliff_file_content, $fid ) {
+    protected function _extractSegments( $xliff_file_content, $fid, $mimeType ) {
 
         //create Structure fro multiple files
         $this->projectStructure[ 'segments' ]->offsetSet( $fid, new ArrayObject( array() ) );
@@ -1585,7 +1574,9 @@ class ProjectManager {
 
                         } // end foreach seg-source
 
-                        $this->addNotesToProjectStructure( $xliff_trans_unit );
+                        if ( self::notesAllowedByMimeType( $mimeType ) ) {
+                           $this->addNotesToProjectStructure( $xliff_trans_unit );
+                        }
 
                     }
                     else {
@@ -1624,7 +1615,9 @@ class ProjectManager {
 
                         }
 
-                        $this->addNotesToProjectStructure( $xliff_trans_unit );
+                        if ( self::notesAllowedByMimeType( $mimeType ) ) {
+                            $this->addNotesToProjectStructure( $xliff_trans_unit );
+                        }
 
                         $source = $xliff_trans_unit[ 'source' ][ 'raw-content' ];
 
@@ -1762,7 +1755,7 @@ class ProjectManager {
      * setSegmentIdForNotes
      *
      * Adds notes to segment, taking into account that a same note may be assigned to
-     * more than one MateCat segment, to the <mrk> tags.
+     * more than one MateCat segment, due to the <mrk> tags.
      *
      * Example:
      * ['notes'][ $internal_id] => array( 'xxx' );
@@ -2014,6 +2007,14 @@ class ProjectManager {
         return array( 'prec' => $before, 'seg' => $cleanSegment, 'succ' => $after );
     }
 
+    /**
+     * @param $mimeType
+     * @return bool
+     */
+    public static function notesAllowedByMimeType( $mimeType ) {
+        return in_array( $mimeType, array('sdlxliff', 'xliff') ) ;
+    }
+
     public static function getExtensionFromMimeType( $mime_type ) {
 
         if ( array_key_exists( $mime_type, INIT::$MIME_TYPES ) ) {
@@ -2134,14 +2135,18 @@ class ProjectManager {
         return CatUtils::generate_password( $length );
     }
 
+
+    /**
+     * addNotesToProjectStructure
+     *
+     * Notes structure is the following:
+     *
+     *  ... ['notes'][ $internal_id ] = array(
+     *      'entries' => array( // one item per comment in the trans unit ),
+     *      'id_segment' => (int) to be populated later for the database insert
+     *
+     */
     private function addNotesToProjectStructure( $trans_unit ) {
-        /**
-         * notes structure is the following:
-         *
-         *  ... ['notes'][ $internal_id ] = array(
-         *      'entries' => array( // one item per comment in the trans unit ),
-         *      'id_segment' => (int) to be populated later for the database insert
-         */
 
         $internal_id = self::sanitizedUnitId( $trans_unit );
         if ( isset( $trans_unit[ 'notes' ] ) ) {

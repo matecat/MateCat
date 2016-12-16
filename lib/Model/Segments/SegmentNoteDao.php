@@ -2,6 +2,38 @@
 
 class Segments_SegmentNoteDao extends DataAccess_AbstractDao {
 
+    public static function bulkInsertFromProjectStrucutre( $notes ) {
+
+        Log::doLog( $notes ) ;
+
+        $template = " INSERT INTO segment_notes ( id_segment, internal_id, note ) VALUES " ;
+
+        $insert_values = array();
+        $chunk_size = 30;
+
+        foreach ( $notes as $internal_id => $v ) {
+            $entries  = $v[ 'entries' ];
+            $segments = $v[ 'segment_ids' ];
+
+            foreach ( $segments as $id_segment ) {
+                foreach ( $entries as $note ) {
+                    $insert_values[] = array( $id_segment, $internal_id, $note );
+                }
+            }
+        }
+
+        $chunked = array_chunk( $insert_values, $chunk_size ) ;
+        $conn = Database::obtain()->getConnection();
+
+        foreach( $chunked as $chunk ) {
+            $values_sql_array = array_fill( 0, count($chunk), " ( ?, ?, ?  ) " ) ;
+            $stmt = $conn->prepare( $template . implode( ', ', $values_sql_array )) ;
+            $flattened_values = array_reduce( $chunk, 'array_merge', array() );
+            $stmt->execute( $flattened_values ) ;
+        }
+
+    }
+
     /**
      * @param $id_segment
      *
