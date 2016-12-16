@@ -5055,6 +5055,7 @@ footer nav ul li {
 
 .coupon-container.coupon-success input#user-coupon {
     width: 100%!important;
+    float: none;
 }
 
 .coupon-container {
