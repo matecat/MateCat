@@ -4,20 +4,6 @@ $.extend(APP, {
             React.createElement(ModalWindow),
             $("#modal")[0]
         );
-        // $('#logoutlink').on('click',function(event){
-        //     //stop form submit
-        //     event.preventDefault();
-        //     $.post('/ajaxLogout',{logout:1},function(data){
-        //         if('unlogged'==data){
-        //             //ok, unlogged
-        //             if($('body').hasClass('manage')) {
-        //                 location.href = config.hostpath + config.basepath;
-        //             } else {
-        //                 window.location.reload();
-        //             }
-        //         }
-        //     });
-        // });
 
         $('#modal').on('closemodal', function () {
             APP.ModalWindow.onCloseModal();
@@ -36,6 +22,8 @@ $.extend(APP, {
         });
 
         $('#modal').on('openpreferences', function (e, param) {
+            e.preventDefault();
+            e.stopPropagation();
             var props = {
                 user: APP.USER.STORE.user,
                 metadata: (APP.USER.STORE.metadata) ? APP.USER.STORE.metadata : {}
@@ -96,22 +84,32 @@ $.extend(APP, {
         });
 
         //Link footer
-        $('.user-menu-preferences').on('click', function () {
+        $('.user-menu-preferences').on('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
             $('#modal').trigger('openpreferences');
+            return false;
         });
 
         $('#welcomebox:has(.authLink)').click(function(e){
             e.preventDefault();
+            e.stopPropagation();
             $('#modal').trigger('openlogin');
+            return false;
         });
 
         $( '#sign-in' ).click( function ( e ) {
             e.preventDefault();
+            e.stopPropagation();
             $('#modal').trigger('openlogin');
+            return false;
         } );
 
         $( '#sign-in-o, #sign-in-o-mt' ).click( function ( e ) {
+            e.preventDefault();
+            e.stopPropagation();
             $( '#sign-in' ).trigger( 'click' );
+            return false;
         } );
 
         if (config.showModalBoxLogin == 1) {
