@@ -6,6 +6,7 @@ class JobContainer extends React.Component {
         this.getOutsourceUrl = this.getOutsourceUrl.bind(this);
         this.getAnalysisUrl = this.getAnalysisUrl.bind(this);
         this.changePassword = this.changePassword.bind(this);
+        this.downloadTranslation = this.downloadTranslation.bind(this);
     }
 
     componentDidMount () {
@@ -13,6 +14,28 @@ class JobContainer extends React.Component {
             belowOrigin: true
         });
     }
+
+    /**
+     * Returns the translation status evaluating the job stats
+     */
+
+    getTranslationStatus() {
+        var stats = this.props.job.get('stats').toJS();
+        var t = 'approved';
+        var app = parseFloat(stats.APPROVED);
+        var tra = parseFloat(stats.TRANSLATED);
+        var dra = parseFloat(stats.DRAFT);
+        var rej = parseFloat(stats.REJECTED);
+
+        if (tra) t = 'translated';
+        if (dra) t = 'draft';
+        if (rej) t = 'draft';
+
+        if( !tra && !dra && !rej && !app ){
+            t = 'draft';
+        }
+        return t ;
+}
 
     shouldComponentUpdate(nextProps, nextState){
         return (nextProps.job !== this.props.job )
@@ -67,6 +90,11 @@ class JobContainer extends React.Component {
         ManageActions.removeJob(this.props.project, this.props.job);
     }
 
+    downloadTranslation() {
+        this.props.downloadTranslationFn(this.props.project.toJS(), this.props.job.toJS());
+    }
+
+
     getJobMenu(splitUrl) {
         var reviseUrl = this.getReviseUrl();
         var editLogUrl = this.getEditingLogUrl();
@@ -74,6 +102,12 @@ class JobContainer extends React.Component {
         var jobTMXUrl = 'TMX/'+ this.props.job.get('id') + '/' + this.props.job.get('password');
         var exportXliffUrl = '/SDLXLIFF/'+ this.props.job.get('id') + '/' + this.props.job.get('password') +
             '/' + this.props.project.get('name') + '.zip';
+
+        var originalUrl = '/?action=downloadOriginal&id_job=' + this.props.job.get('id') +' &password=' + this.props.job.get('password') + '&download_type=all'
+
+        var jobStatus = this.getTranslationStatus();
+        var downloadButton = (jobStatus == 'translated' || jobStatus == 'approved') ?
+            <li onClick={this.downloadTranslation}><a >Download</a></li> : <li onClick={this.downloadTranslation}><a >Preview</a></li>;
 
 
         var menuHtml = <ul id={'dropdownJob' + this.props.job.get('id')} className='dropdown-content'>
@@ -84,9 +118,8 @@ class JobContainer extends React.Component {
                 <li><a target="_blank" href={reviseUrl}>Revise</a></li>
                 <li><a target="_blank" href={qaReportUrl}>QA Report</a></li>
                 <li><a target="_blank" href={editLogUrl}>Editing Log</a></li>
-                <li><a >Preview</a></li>
-                <li><a >Download</a></li>
-                <li><a >Download Original</a></li>
+                {downloadButton}
+                <li><a target="_blank" href={originalUrl}>Download Original</a></li>
                 <li><a target="_blank" href={exportXliffUrl}>Export XLIFF</a></li>
                 <li><a target="_blank" href={jobTMXUrl}>Export TMX</a></li>
             </ul>;
@@ -99,9 +132,8 @@ class JobContainer extends React.Component {
                 <li><a target="_blank" href={reviseUrl}>Revise</a></li>
                 <li><a target="_blank" href={qaReportUrl}>QA Report</a></li>
                 <li><a target="_blank" href={editLogUrl}>Editing Log</a></li>
-                <li><a >Preview</a></li>
-                <li><a >Download</a></li>
-                <li><a >Download Original</a></li>
+                {downloadButton}
+                <li><a target="_blank" href={originalUrl}>Download Original</a></li>
                 <li><a target="_blank" href={exportXliffUrl}>Export XLIFF</a></li>
                 <li><a target="_blank" href={jobTMXUrl}>Export TMX</a></li>
             </ul>;
@@ -113,9 +145,8 @@ class JobContainer extends React.Component {
                 <li><a target="_blank" href={reviseUrl}>Revise</a></li>
                 <li><a target="_blank" href={qaReportUrl}>QA Report</a></li>
                 <li><a target="_blank" href={editLogUrl}>Editing Log</a></li>
-                <li><a >Preview</a></li>
-                <li><a >Download</a></li>
-                <li><a >Download Original</a></li>
+                {downloadButton}
+                <li><a target="_blank" href={originalUrl}>Download Original</a></li>
                 <li><a target="_blank" href={exportXliffUrl}>Export XLIFF</a></li>
                 <li><a target="_blank" href={jobTMXUrl}>Export TMX</a></li>
             </ul>;

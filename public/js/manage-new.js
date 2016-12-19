@@ -40,7 +40,8 @@ UI = {
                 filterFunction: this.filterProjectsFromStatus,
                 getLastActivity: this.getLastProjectActivityLogAction,
                 changeStatus: this.changeJobsOrProjectStatus,
-                changeJobPasswordFn: this.changeJobPassword
+                changeJobPasswordFn: this.changeJobPassword,
+                downloadTranslationFn : this.downloadTranslation
             }), mountPoint);
             ManageActions.renderProjects(projects);
         }
@@ -189,7 +190,6 @@ UI = {
     /**
      * Change the password for the job
      * @param job
-     * @param undo ??
      */
     changeJobPassword: function(job) {
         var id = job.id;
@@ -305,7 +305,14 @@ UI = {
             console.log("Scroll end");
             this.renderMoreProjects();
         }
-    }
+    },
+
+    downloadTranslation: function(project, job) {
+        console.log('Download Translation');
+        var url = '/translate/'+project.name +'/'+ job.source +'-'+job.target+'/'+ job.id +'-'+ job.password + "?action=download" ;
+        window.open(url, '_blank');
+
+    },
 };
 
 $(document).ready(function(){

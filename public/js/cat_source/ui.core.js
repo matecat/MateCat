@@ -314,7 +314,7 @@ UI = {
             // end split segment
 		return true;
         }
-	},
+   },
     copySource: function() {
         var source_val = UI.clearMarks($.trim($(".source", this.currentSegment).html()));
 

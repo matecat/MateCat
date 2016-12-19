@@ -208,7 +208,8 @@ class ProjectContainer extends React.Component {
                                 project={self.props.project}
                                 jobsLenght={jobsLength}
                                 changeJobPasswordFn={self.props.changeJobPasswordFn}
-                                changeStatusFn={self.props.changeStatusFn}/>;
+                                changeStatusFn={self.props.changeStatusFn}
+                                downloadTranslationFn={self.props.downloadTranslationFn}/>;
                 jobsList.push(item);
                 openJobClass = 'btn-active-combo';
                 openProjectClass = (jobsLength === 1) ? '':'open-project';

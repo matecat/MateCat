@@ -51,7 +51,8 @@ class ProjectsContainer extends React.Component {
                 project={project}
                 lastActivityFn={this.props.getLastActivity}
                 changeStatusFn={this.props.changeStatus}
-                changeJobPasswordFn={this.props.changeJobPasswordFn}/>
+                changeJobPasswordFn={this.props.changeJobPasswordFn}
+                downloadTranslationFn={this.props.downloadTranslationFn}/>
         ));
         return <section className="content" onClick={this.onClickFn.bind(this)}>
                     <section className="add-project">
