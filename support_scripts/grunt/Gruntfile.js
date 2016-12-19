@@ -402,8 +402,12 @@ module.exports = function(grunt) {
                         to: '../../img/'
                     },
                     {
-                        from: 'fonts/',
-                        to: '../fonts/'
+                        from: '"../../fonts/',
+                        to: '"../fonts/'
+                    },
+                    {
+                        from: '"fonts/',
+                        to: '"../fonts/'
                     }
                 ]
             }

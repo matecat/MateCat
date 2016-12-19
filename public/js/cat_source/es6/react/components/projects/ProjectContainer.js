@@ -108,7 +108,7 @@ class ProjectContainer extends React.Component {
             headerProject = <div className="card job-preview z-depth-1">
                 <div className="body-job">
                     <div className="row">
-                        <div className="col s11">
+                        <div className="col s10">
 
                             <div className="combo-language multiple"
                                  ref={(combo) => this.combo_languages = combo}>
@@ -117,9 +117,6 @@ class ProjectContainer extends React.Component {
                                         <span id="source">{sourceLang}</span> <i className="material-icons">play_arrow</i>
                                     </li>
                                     {targetsLangs}
-                                    {/*<li>*/}
-                                        {/*<span id="more-combo">+20</span>*/}
-                                    {/*</li>*/}
                                     <li>
                                         <div className="payable-words">
                                             <a href={analyzeUrl} target="_blank">{payableWords} payable words</a>
@@ -132,7 +129,7 @@ class ProjectContainer extends React.Component {
                         <div className="col s1 right">
 
                             <div className="button-list open right">
-                                <a className="btn waves-effect waves-light"
+                                <a className="btn waves-effect waves-light btn-flat"
                                    onClick={this.showHideAllJobs.bind(this)}>{buttonLabel}</a>
                             </div>
 
@@ -147,20 +144,20 @@ class ProjectContainer extends React.Component {
 
     getProjectMenu(activityLogUrl) {
         var menuHtml = <ul id={'dropdown' + this.props.project.get('id')} className='dropdown-content'>
-                            <li><a href={activityLogUrl} target="_blank">Activity Log</a></li>
-                            <li><a onClick={this.archiveProject.bind(this)}>Archive project</a></li>
-                            <li><a onClick={this.removeProject.bind(this)}>Remove from my Dashboard</a></li>
+                            <li><a href={activityLogUrl} target="_blank"><i className="material-icons">search</i>Activity Log</a></li>
+                            <li><a onClick={this.archiveProject.bind(this)}><i className="material-icons">search</i>Archive project</a></li>
+                            <li><a onClick={this.removeProject.bind(this)}><i className="material-icons">search</i>Remove from my Dashboard</a></li>
                         </ul>;
         if ( this.props.project.get('has_archived') ) {
             menuHtml = <ul id={'dropdown' + this.props.project.get('id')} className='dropdown-content'>
-                            <li><a href={activityLogUrl} target="_blank">Activity Log</a></li>
-                            <li><a onClick={this.activateProject.bind(this)}>Unarchive project</a></li>
-                            <li><a onClick={this.removeProject.bind(this)}>Remove from my Dashboard</a></li>
+                            <li><a href={activityLogUrl} target="_blank"><i className="material-icons">search</i>Activity Log</a></li>
+                            <li><a onClick={this.activateProject.bind(this)}><i className="material-icons">search</i>Unarchive project</a></li>
+                            <li><a onClick={this.removeProject.bind(this)}><i className="material-icons">search</i>Remove from my Dashboard</a></li>
                         </ul>;
         } else if ( this.props.project.get('has_cancelled') ) {
             menuHtml = <ul id={'dropdown' + this.props.project.get('id')} className='dropdown-content'>
-                            <li><a href={activityLogUrl} target="_blank">Activity Log</a></li>
-                            <li><a onClick={this.activateProject.bind(this)}>Resume Project</a></li>
+                            <li><a href={activityLogUrl} target="_blank"><i className="material-icons">search</i>Activity Log</a></li>
+                            <li><a onClick={this.activateProject.bind(this)}><i className="material-icons">search</i>Resume Project</a></li>
                         </ul>;
         }
         return menuHtml;
@@ -211,7 +208,7 @@ class ProjectContainer extends React.Component {
                                 changeStatusFn={self.props.changeStatusFn}
                                 downloadTranslationFn={self.props.downloadTranslationFn}/>;
                 jobsList.push(item);
-                openJobClass = 'btn-active-combo';
+                openJobClass = 'z-depth-5';
                 openProjectClass = (jobsLength === 1) ? '':'open-project';
             }
 
@@ -219,7 +216,9 @@ class ProjectContainer extends React.Component {
                 <a className={"btn waves-effect waves-dark " + openJobClass}>
                     <badge>{job.get('target')}</badge>
                     <div className="progress">
-                        <div className="determinate" style={{width: '70%'}}></div>
+                        <div className="determinate" title={'Translated '+ job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('TRANSLATED_PERC') + '%' }}></div>
+                        <div className="determinate green" title={'Approved '+ job.get('stats').get('APPROVED_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('APPROVED_PERC')+ '%' }}></div>
+                        <div className="determinate red" title={'Rejected '+ job.get('stats').get('REJECTED_PERC_FORMATTED') +'%'} style={{width: job.get('stats').get('REJECTED_PERC') + '%'}}></div>
                     </div>
                 </a>
             </li>;
@@ -232,7 +231,7 @@ class ProjectContainer extends React.Component {
         //Last Activity Log Action
         var lastAction;
         if (this.state.lastAction) {
-             lastAction = <i><span id="nome-log">{this.state.lastAction.first_name + " - "}</span> <span id="act-log">{this.state.lastAction.action}</span></i>
+             lastAction = <i><span>{this.state.lastAction.first_name + " - "}</span> <span>{this.state.lastAction.action}</span></i>
         } else {
              lastAction = <i>Loading....</i>
         }
@@ -243,7 +242,7 @@ class ProjectContainer extends React.Component {
                         <div className="row">
                             <div className="col m2 s4">
                                 <div className="project-id">
-                                    <div id="id-project"><span>ID:</span>{this.props.project.get('id')}</div>
+                                    <i><div id="id-project"><span>ID:</span>{this.props.project.get('id')}</div></i>
                                 </div>
                             </div>
                             <div className="col m5 push-m5 s8">
@@ -269,8 +268,8 @@ class ProjectContainer extends React.Component {
                                     <form>
                                         <div className="row">
                                             <div className="input-field col s12">
-                                                <input id="icon_prefix" type="text" defaultValue={this.props.project.get('name')}/><i
-                                                    className="material-icons prefix hide-on-small-only">mode_edit</i>
+                                                <input id="icon_prefix" type="text" disabled="disabled" defaultValue={this.props.project.get('name')}/><i
+                                                    className="material-icons prefix hide">mode_edit</i>
                                             </div>
                                         </div>
                                     </form>
@@ -278,7 +277,9 @@ class ProjectContainer extends React.Component {
                             </div>
                         </div>
                     </div>
-                    {headerProject}
+                    <section className="jobs-preview">
+                        {headerProject}
+                    </section>
                     <section className="jobs">
 
                         <CSSTransitionGroup

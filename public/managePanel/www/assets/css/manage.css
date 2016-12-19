@@ -7097,8 +7097,8 @@ button.picker__today:focus, button.picker__clear:focus, button.picker__close:foc
 
 @font-face {
   font-family: 'icomoon';
-  src: url("/assets/fonts/icomoon/icomoon.eot?rec40a");
-  src: url("/assets/fonts/icomoon/icomoon.eot?rec40a#iefix") format("embedded-opentype"), url("/assets/fonts/icomoon/icomoon.ttf?rec40a") format("truetype"), url("/assets/fonts/icomoon/icomoon.woff?rec40a") format("woff"), url("/assets/fonts/icomoon/icomoon.svg?rec40a#icomoon") format("svg");
+  src: url("../fonts/icomoon/icomoon.eot?rec40a");
+  src: url("../fonts/icomoon/icomoon.eot?rec40a#iefix") format("embedded-opentype"), url("../fonts/icomoon/icomoon.ttf?rec40a") format("truetype"), url("../fonts/icomoon/icomoon.woff?rec40a") format("woff"), url("../fonts/icomoon/icomoon.svg?rec40a#icomoon") format("svg");
   font-weight: normal;
   font-style: normal; }
 .liga {

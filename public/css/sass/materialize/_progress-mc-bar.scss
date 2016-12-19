@@ -1,0 +1,85 @@
+
+.progress-bar {
+	// line-height: 20px;
+	// padding: 3;
+
+	.progr {
+		// border: 1px solid #d7d7d7;
+		background-color: inherit;
+		height: 20px;
+		// height: 25px;
+		border-radius: 4px;
+		position: relative;
+				// margin: 5px 0 0 0;
+		// line-height: 20px;
+		.meter {
+		  height: 22px;
+		  width: 100%;
+		  float: left;
+		  margin: 0 15px 5px 0 !important;
+		  border: 1px solid #616160;
+		  background: #fff;
+		  overflow: hidden;
+		 a {
+			display: block;
+		  height: 100%;
+		  max-width: 100%;
+		  float: left;
+		  position: absolute;
+		  overflow: hidden;
+		  -webkit-transition: all 200ms ease-in;
+		  transition: all 200ms ease-in;
+			}
+		  a:after {
+				content: "";
+		    position: absolute;
+		    top: 0;
+		    left: 0;
+		    bottom: 0;
+		    right: 0;
+		    background-image: -webkit-linear-gradient( -45deg, rgba(255, 255, 255, .2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .2) 75%, transparent 75%, transparent );
+		  	z-index: 1;
+		    -webkit-background-size: 50px 50px;
+		    -moz-background-size: 50px 50px;
+		    background-size: 50px 50px;
+		    -webkit-animation: move 2s linear infinite;
+		    overflow: hidden;
+		  }
+		}
+		.translated-bar {
+			background-color: #09beec;
+		}
+		.approved-bar {
+			background-color: #7cc576;
+		}
+		.warning-bar {
+			background-color: red;
+		}
+	}
+}
+
+.multiple {
+	.btn {
+		.progress {
+			margin: -0.5rem 0 1rem 0;
+			background-color: #e2dfdf;
+			// padding: 0 22px;
+			height: 6px;
+			border-radius: 7px;
+			.determinate {
+				border-radius: 7px;
+
+			}
+			&.btn:hover {
+				// border-left: 4px solid $secondary-color;
+				background-color: #f1f1f1;
+				transition: .3s ease-out;
+			}
+			&.btn-active-combo {
+				border-left: 3px solid #09beec;
+				transition: .1s ease-out;
+			}
+		}
+	}
+}
+

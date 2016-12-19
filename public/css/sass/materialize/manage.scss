@@ -1,24 +1,51 @@
 @import "index";
 @import "../components-main";
 
+.container {
+	width: 85%;
+}
+
+a {
+	color: #39699a;
+}
+
+.dropdown-content li > a, .dropdown-content li > span {
+	color: #4d4d4d;
+}
+
+.heading-list-project {
+	.row {
+		margin-bottom: 0;
+	}
+}
+
+
+.project-list {
+	padding-bottom: 100px;
+}
+
 .add-project {
-	margin-top: -28px;
-	padding-bottom: 28px;
-	padding-right: 28px;
+	position: fixed;
+	bottom: 5%;
+	right: 10%;
+	z-index: 3;
 }
 
 .project-list {
 	.row {
-		margin-bottom: 0;
+		margin-bottom: 0
 	}
 	.card-panel {
-		border-radius: 0;
+		border-radius: 0
 	}
 }
 .project {
 	background-color: #f1f1f1;
 	padding: 0;
 	cursor: pointer;
+	.btn {
+		padding: 0 15px
+	}
 	.dropdown-content {
 		background-color: #fff;
 		margin: 0;
@@ -36,28 +63,36 @@
 	.head-project {
 		background-color: #f1f1f1;
 		padding: 15px 0 30px 0;
-		border-top: 3px solid $secondary-color;
+		border-top: 4px solid #9e9e9e;
 		&.open-project {
-			background-color: $secondary-color;
+			background-color: inherit;
+			border-bottom: #ebebeb
 		}
+
 		.project-id {
-			background-color: $secondary-color;
+			background-color: #b7b7b7;
 			padding-left: 30px;
-			line-height: 2.7rem;
 			color: #ffffff;
 			border-right: 1px solid #f1f1f1;
 			min-width: 120px;
+			line-height: 2.55rem;
+			padding-top: 2px;
 			@media #{$small-and-down} {
 				padding-left: 15px;
+			}
+			.id-project {
 			}
 		}
 		.project-name {
 			// background-color: orange;
 			cursor: pointer;
 			padding: 0 15px;
+			text-transform: uppercase;
+			font-weight: 700;
 			.input-field {
 				position: relative;
 				margin-top: 0rem;
+				text-transform: uppercase;
 				.prefix {
 					position: absolute;
 					font-size: 1.5rem;
@@ -78,6 +113,8 @@
 					// font-size: 1rem;
 					margin: 0 0 0 0;
 					padding: 0;
+					font-size: 1.3rem;
+					text-transform: uppercase;
 					// box-shadow: none;
 					// box-sizing: content-box;
 					// transition: all 0.3s;
@@ -86,7 +123,12 @@
 					border-bottom: 1px solid $secondary-color;
 					box-shadow: 0 1px 0 0 #09beec;
 				}
+				input[type=text]:disabled {
+					color: #4d4d4d;
+					border-bottom: 1px solid #4d4d4d;
+				}
 			}
+
 		}
 		.project-activity-icon {
 			// background-color: yellow;
@@ -102,7 +144,7 @@
 
 					margin-left: 0px;
 					i {
-						color: #0c5e73;
+						color: #4D4D4D;
 					}
 				}
 				a:hover {
@@ -119,31 +161,59 @@
 .jobs{
 	margin-top: -15px;
 	.button-list {
-		&.split-outsource {
-			padding-right: 8px;
-			border-right: 1px solid gray;
-		}
-		.btn {
-			padding: 0 15px;
-		}
-		.green {
-			background-color: #4CAF50 !important;
-			&:hover {
-				background-color: #5dbd3d !important;
+		&.open {
+			a {
+				.btn {
+					background-color: gray;
+				}
 			}
 		}
-		.white {
-			background-color: #ffffff !important;
-			color: gray;
+		&.split-outsource {
+			// padding-right: 8px;
+			// border-right: 1px solid gray;
+
+		}
+
+		.split {
+			background-color: inherit !important;
+			color: #6d6d6d;
+			border: 1px solid $secondary-color;
+			line-height: 2.6rem;
+			font-weight: bold;
+			font-size: 20px;
+			border: 1px solid #6d6d6d;
+			text-transform: capitalize;
 			&:hover {
 				background-color: #f1f1f1 !important;
 			}
-			.rotate {
-				-webkit-transform: rotate(135deg);
-				-moz-transform: rotate(135deg);
-				-o-transform: rotate(135deg);
-				-ms-transform: rotate(135deg);
-				transform: rotate(135deg);
+			i {
+				&.right {
+					margin-left: 10px;
+					margin-right: -10px;
+					line-height: 2.4rem;
+				}
+			}
+		}
+		.outsource {
+			background-color: #7eaf3e !important;
+			line-height: 2.6rem;
+			font-weight: bold;
+			font-size: 20px;
+			border: 1px solid #6d6d6d;
+			text-transform: capitalize;
+			&:hover {
+				background-color: #8bc343 !important;
+			}
+		}
+		.translate {
+
+			line-height: 2.6rem;
+			font-weight: bold;
+			font-size: 20px;
+			border: 1px solid #6d6d6d;
+			text-transform: capitalize;
+			&.move-left {
+				margin-left: 5px;
 			}
 		}
 	}
@@ -156,9 +226,7 @@
 	.head-job {
 		padding: 10px 0 0 0;
 		&.open-head-job {
-			border-top: 2px solid $secondary-color;
-			// background-color: yellow;
-			// border-top: 3px solid $secondary-color;
+			// border-top: 4px solid #9e9e9e;
 		}
 		.job-id {
 			padding-left: 15px;
@@ -174,9 +242,9 @@
 		li {
 			float: left;
 			a{
-				margin-left: 0px;
+				margin-left: 8px;
 				i {
-					color: #0c5e73;
+					color: #4D4D4D;
 				}
 			}
 		}
@@ -184,34 +252,42 @@
 	.body-job {
 		padding: 15px;
 		margin: 0 0 15px 0;
-		.progress-bar {
-			line-height: 20px;
-			padding: 3;
-			max-width: 300px;
-			.progress {
-				background-color: #f1f1f1;
-				content: '';
-				height: 30px;
-				border-radius: 4px;
-				margin: 0;
-				.determinate {
-
-				}
-			}
+		text-transform: capitalize;
+		.btn
+		{
+			text-transform: capitalize;
 		}
+		// .progress-bar {
+		// 	line-height: 20px;
+		// 	padding: 3;
+		// 	max-width: 300px;
+		// 	.progress {
+		// 		background-color: #f1f1f1;
+		// 		content: '';
+		// 		height: 30px;
+		// 		border-radius: 4px;
+		// 		margin: 0;
+		// 		.determinate {
+
+		// 		}
+		// 	}
+		// }
 		.payable-words {
 			// background-color: purple;
-			line-height: 2.3rem;
+			line-height: 2.5rem;
+
 		}
 
 		.combo-language {
 			span {
-				padding: 7px 8px;
+				padding: 7px 14px;
 				border: 1px solid black;
-				font-size: .8rem;
+				font-size: 1rem;
+				text-transform: capitalize;
 			}
 			&.single {
 				min-width: 165px;
+				margin-top: 3px;
 				ul {
 					margin: 0;
 					li {
@@ -233,6 +309,9 @@
 						padding: 0 8px;
 						border-right: 0;
 						line-height: 2.2rem;
+						text-transform: capitalize;
+						width: 60px;
+						box-sizing: border-box;
 						// border-left: 4px solid transparent;
 						// &.btn:active {
 						// 	border-left: 3px solid $secondary-color;
@@ -240,23 +319,35 @@
 						// &.btn:focus {
 						// 	border-left: 3px solid $secondary-color;
 						// }
-						.progress {
-							margin: -0.5rem 0 1rem 0;
-							background-color: #e2dfdf;
-							padding: 0 22px;
-							height: 6px;
-							border-radius: 6px;
-							.determinate {
+						// .progress {
+						// 	margin: -0.5rem 0 1rem 0;
+						// 	background-color: #e2dfdf;
+						// 	padding: 0 22px;
+						// 	height: 6px;
+						// 	border-radius: 6px;
+						// 	.determinate {
 
-							}
-						}
+						// 	}
+						// }
 						&.btn:hover {
 							// border-left: 4px solid $secondary-color;
-							background-color: #f1f1f1;
+							background-color: #f5f5f5;
 							transition: .3s ease-out;
 						}
 						&.btn-active-combo {
-							border-left: 3px solid $secondary-color;
+							// border-left: 3px solid $secondary-color;
+
+							transition: .1s ease-out;
+						}
+						.btn-point {
+							position: absolute;
+							width: 6px;
+							height: 6px;
+							background-color: $secondary-color;
+							z-index: 100;
+							border-radius: 12px;
+							top: 2px;
+							left: 3px;
 							transition: .1s ease-out;
 						}
 					}

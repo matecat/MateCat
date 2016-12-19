@@ -34,6 +34,7 @@ class ProjectsContainer extends React.Component {
 
     componentDidMount() {
         ProjectsStore.addListener(ManageConstants.RENDER_PROJECTS, this.renderProjects);
+        $('.tooltipped').tooltip({delay: 50});
     }
 
     componentWillUnmount() {
@@ -54,9 +55,9 @@ class ProjectsContainer extends React.Component {
                 changeJobPasswordFn={this.props.changeJobPasswordFn}
                 downloadTranslationFn={this.props.downloadTranslationFn}/>
         ));
-        return <section className="content" onClick={this.onClickFn.bind(this)}>
+        return <div onClick={this.onClickFn.bind(this)}>
                     <section className="add-project">
-                        <a className="btn-floating btn-large waves-effect waves-light right create-new blue-matecat" href="/" target="_blank"><i className="material-icons">add</i></a>
+                        <a className="btn-floating btn-large waves-effect waves-light right create-new blue-matecat tooltipped" data-position="top" data-delay="50" data-tooltip="Add new project"><i className="material-icons">add</i></a>
                     </section>
                     <FilterProjects
                         filterFunction={this.props.filterFunction}
@@ -64,13 +65,13 @@ class ProjectsContainer extends React.Component {
                     <section className="project-list">
                         <div className="container">
                             <div className="row">
-                                <div className="col s12" ref={(container) => this.container = container}>
+                                <div className="col m12" ref={(container) => this.container = container}>
                                     {items}
                                 </div>
                             </div>
                         </div>
                     </section>
-                </section>;
+                </div>;
     }
 }
 

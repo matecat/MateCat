@@ -20,25 +20,23 @@ class Header extends React.Component {
     render () {
         return <section className="nav-mc-bar">
                     <nav role="navigation">
-                        <div className="nav-wrapper container">
-                            <div className="row">
-                                <div className="col s4">
-                                    <a id="logo-container" href="#">
-                                        <img src="public/img/logo-matecat2.png" className="responsive-img middle-v"/>
-                                    </a>
-                                </div>
-                                <SearchInput
-                                    closeSearchCallback={this.props.closeSearchCallback}
-                                    onChange={this.props.searchFn}/>
-                                <div className="col s4">
-                                    <ul className="right">
-                                        <li>
-                                            <a href="" className="right waves-effect waves-light">
-                                                <span id="nome-cognome">Nome Cognome </span>
-                                                <button className="btn-floating btn-flat waves-effect waves-dark z-depth-0 center hoverable">RS</button>
-                                            </a>
-                                        </li>
-                                    </ul>
+                        <div className="nav-wrapper">
+                            <div className="container-fluid">
+                                <div className="row">
+                                    <a href="/" className="logo"/>
+                                    <SearchInput
+                                        closeSearchCallback={this.props.closeSearchCallback}
+                                        onChange={this.props.searchFn}/>
+                                    <div className="col l2 right">
+                                        <ul className="right">
+                                            <li>
+                                                <a href="" className="right waves-effect waves-light">
+                                                    <span id="nome-cognome" className="hide-on-med-and-down">Nome Cognome </span>
+                                                    <button className="btn-floating btn-flat waves-effect waves-dark z-depth-0 center hoverable">RS</button>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>

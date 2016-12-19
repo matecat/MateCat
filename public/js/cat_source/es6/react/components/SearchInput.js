@@ -18,14 +18,16 @@ class SearchInput extends React.Component {
     render () {
 
         return (
-                <form className="col s4">
+                <form className="col l4 offset-l4">
 
                     <div className="row">
                         <div className="input-field">
                             <i className="material-icons prefix">search</i>
                             <input id="icon_prefix" type="text" className="valid"
+                                   placeholder="Project name"
                                    ref={(input) => this.textInput = input}
                                    onChange={this.filterByName.bind(this)}/>
+                            <i className="material-icons prefix close-x">close</i>
                         </div>
                     </div>
                 </form>
