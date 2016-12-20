@@ -304,7 +304,7 @@ module.exports = function(grunt) {
             },
             cssManage: {
                 files:  cssWatchMaterialize,
-                tasks: ['sass:distManage'],
+                tasks: ['sass:distManage', 'replace'],
                 options: {
                     interrupt: true,
                     livereload : true
