@@ -8,7 +8,7 @@ CREATE TABLE `activity_log` (
   `action` int(10) unsigned NOT NULL,
   `ip` varchar(45) NOT NULL,
   `uid` int(10) unsigned DEFAULT NULL,
-  `event_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `event_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `memory_key` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`ID`,`event_date`),
   KEY `ip_idx` (`ip`) USING BTREE,
@@ -334,6 +334,7 @@ CREATE TABLE `projects` (
   `for_debug` tinyint(4) NOT NULL DEFAULT '0',
   `pretranslate_100` int(1) DEFAULT '0',
   `id_qa_model` int(11) DEFAULT NULL,
+  `id_team` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `id_customer` (`id_customer`),
   KEY `status_analysis` (`status_analysis`),
@@ -525,15 +526,33 @@ CREATE TABLE `segments` (
   `xliff_ext_succ_tags` text,
   `raw_word_count` double(20,2) DEFAULT NULL,
   `show_in_cattool` tinyint(4) DEFAULT '1',
-  PRIMARY KEY (`id`),
+  `id_project` int(11) NOT NULL,
+  PRIMARY KEY (`id`,`id_project`),
+  UNIQUE KEY `id` (`id`),
   KEY `id_file` (`id_file`) USING BTREE,
   KEY `internal_id` (`internal_id`) USING BTREE,
-  KEY `mrk_id` (`xliff_mrk_id`) USING BTREE,
   KEY `show_in_cat` (`show_in_cattool`) USING BTREE,
   KEY `raw_word_count` (`raw_word_count`) USING BTREE,
-  KEY `id_file_part_idx` (`id_file_part`),
-  KEY `segment_hash` (`segment_hash`) USING HASH COMMENT 'MD5 hash of segment content'
+  KEY `segment_hash` (`segment_hash`) USING HASH COMMENT 'MD5 hash of segment content',
+  KEY `id_project` (`id_project`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+
+CREATE TABLE `teams` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `created_by` bigint(20) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `teams_users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_team` int(11) NOT NULL,
+  `uid` bigint(20) NOT NULL,
+  `is_admin` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_team_uid` (`id_team`,`uid`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `translation_warnings` (
   `id_job` bigint(20) NOT NULL,
@@ -666,6 +685,7 @@ INSERT INTO `phinxlog` ( version ) VALUES ( '20161118144241' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161122093431' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161125145959' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161207184244' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20161219160843' );
 
 CREATE SCHEMA `matecat_conversions_log` DEFAULT CHARACTER SET utf8 ;
 USE matecat_conversions_log ;
