@@ -78,6 +78,17 @@
 .icon-drawer:before {
   content: "\e606";
 }
+
+.noticon:after, i.unarchive-project:after, i.resume-project:after {
+    content: "\e607";
+    color: red;
+    font-size: 16px;
+    position: absolute;
+    left: -1px;
+    top: 1px;
+    transform: rotate(-45deg);
+}
+
 .icon-minus:before {
   content: "\e607";
 }

@@ -144,20 +144,22 @@ class ProjectContainer extends React.Component {
 
     getProjectMenu(activityLogUrl) {
         var menuHtml = <ul id={'dropdown' + this.props.project.get('id')} className='dropdown-content'>
-                            <li><a href={activityLogUrl} target="_blank"><i className="material-icons">search</i>Activity Log</a></li>
-                            <li><a onClick={this.archiveProject.bind(this)}><i className="material-icons">search</i>Archive project</a></li>
-                            <li><a onClick={this.removeProject.bind(this)}><i className="material-icons">search</i>Remove from my Dashboard</a></li>
+                            <li><a href={activityLogUrl} target="_blank"><i className="icon-download-logs"></i>Activity Log</a></li>
+                            <li className="divider"></li>
+                            <li><a onClick={this.archiveProject.bind(this)}><i className="icon-drawer"></i>Archive project</a></li>
+                             <li className="divider"></li>
+                            <li><a onClick={this.removeProject.bind(this)}><i className="icon-trash-o"></i>Remove from my Dashboard</a></li>
                         </ul>;
         if ( this.props.project.get('has_archived') ) {
             menuHtml = <ul id={'dropdown' + this.props.project.get('id')} className='dropdown-content'>
-                            <li><a href={activityLogUrl} target="_blank"><i className="material-icons">search</i>Activity Log</a></li>
-                            <li><a onClick={this.activateProject.bind(this)}><i className="material-icons">search</i>Unarchive project</a></li>
-                            <li><a onClick={this.removeProject.bind(this)}><i className="material-icons">search</i>Remove from my Dashboard</a></li>
+                            <li><a href={activityLogUrl} target="_blank"><i className="icon-download-logs"></i>Activity Log</a></li>
+                            <li><a onClick={this.activateProject.bind(this)}><i className="icon-drawer unarchive-project"></i>Unarchive project</a></li>
+                            <li><a onClick={this.removeProject.bind(this)}><i className="icon-trash-o"></i>Remove from my Dashboard</a></li>
                         </ul>;
         } else if ( this.props.project.get('has_cancelled') ) {
             menuHtml = <ul id={'dropdown' + this.props.project.get('id')} className='dropdown-content'>
-                            <li><a href={activityLogUrl} target="_blank"><i className="material-icons">search</i>Activity Log</a></li>
-                            <li><a onClick={this.activateProject.bind(this)}><i className="material-icons">search</i>Resume Project</a></li>
+                            <li><a href={activityLogUrl} target="_blank"><i className="icon-download-logs"></i>Activity Log</a></li>
+                            <li><a onClick={this.activateProject.bind(this)}><i className="material-icons"></i>Resume Project</a></li>
                         </ul>;
         }
         return menuHtml;
