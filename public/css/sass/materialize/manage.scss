@@ -12,6 +12,8 @@ a {
 
 .dropdown-content li > a, .dropdown-content li > span {
 	color: #4d4d4d;
+	border-bottom: 1px solid #ddd;
+    padding: 10px 16px;
 }
 
 .heading-list-project {
@@ -411,7 +413,7 @@ footer nav {
     display: block;
     line-height: 19px;
     box-shadow: none;
-    width: 160px;
+    width: 180px;
     font-size: 15px;
     text-align: right;
 }
@@ -426,6 +428,10 @@ footer nav ul a, #welcomebox {
 
 footer nav ul a:hover {
     background: none!important;
+}
+
+.manage nav ul li a {
+    border-right: 1px solid #fff;
 }
 
 .manage .profile-area {
@@ -452,6 +458,8 @@ footer nav ul a:hover {
     background: #dcdedf!important;
     border: 1px solid #848689;
     line-height: 34px;
+    font-weight:bold;
+    font-size:17px;
     padding: 0px 30px;
 }
 
