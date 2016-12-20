@@ -18,7 +18,7 @@ class SearchInput extends React.Component {
     render () {
 
         return (
-                <form className="col l4 offset-l4">
+                <form className="col l4 offset-l4 s4 offset-s4">
 
                     <div className="row">
                         <div className="input-field">

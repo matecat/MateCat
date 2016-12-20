@@ -27,7 +27,7 @@ class Header extends React.Component {
                                     <SearchInput
                                         closeSearchCallback={this.props.closeSearchCallback}
                                         onChange={this.props.searchFn}/>
-                                    <div className="col l2 right">
+                                    <div className="col l2 right profile-area">
                                         <ul className="right">
                                             <li>
                                                 <a href="" className="right waves-effect waves-light">

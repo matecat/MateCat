@@ -7,6 +7,7 @@
 		// border: 1px solid #d7d7d7;
 		background-color: inherit;
 		height: 20px;
+		min-width: 200px;
 		// height: 25px;
 		border-radius: 4px;
 		position: relative;
@@ -16,10 +17,12 @@
 		  height: 22px;
 		  width: 100%;
 		  float: left;
-		  margin: 0 15px 5px 0 !important;
+		  margin: 9px 15px 0px 0 !important;
 		  border: 1px solid #616160;
-		  background: #fff;
+		  background-color: #d0d1d1;
+		  background-image: -webkit-linear-gradient( -45deg, rgba(255, 255, 255, .2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .2) 75%, transparent 75%, transparent );
 		  overflow: hidden;
+
 		 a {
 			display: block;
 		  height: 100%;
