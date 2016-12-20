@@ -7,7 +7,8 @@ class PreferencesModal extends React.Component {
         this.state = {
             service: this.props.service,
             coupon: this.props.metadata.coupon,
-            couponError: ''
+            couponError: '',
+            validCoupon : false
         };
 
         this.onKeyPressCopupon = this.onKeyPressCopupon.bind( this );
@@ -67,6 +68,9 @@ class PreferencesModal extends React.Component {
 
     submitUserChanges() {
         var self = this;
+        if (!this.state.validCoupon) {
+            return;
+        }
         return $.post('/api/app/user/metadata', { metadata : {
                 coupon : this.couponInput.value
             }
@@ -88,8 +92,19 @@ class PreferencesModal extends React.Component {
         });
     }
 
-    onKeyPressCopupon() {
-        this.setState({ couponError : '' } );
+    onKeyPressCopupon(e) {
+        var length = this.couponInput.value.length;
+        var validCoupon = false;
+        if ( length >= 8 ) {
+            validCoupon = true;
+        }
+        this.setState({
+            couponError : '',
+            validCoupon : validCoupon
+        });
+        if (e.key === 'Enter') {
+            this.submitUserChanges();
+        }
     }
 
     disableGDrive() {
@@ -130,15 +145,15 @@ class PreferencesModal extends React.Component {
 
         var couponHtml = '';
         if ( !this.state.coupon) {
+            var buttonClass = (this.state.validCoupon) ? '' : 'disabled';
             couponHtml = <div className="coupon-container">
-
                                     <h2 htmlFor="user-coupon">Coupon</h2>
-                                    <input type="text" name="coupon" id="user-coupon"
-                                           onKeyPress={(e) => { (e.key === 'Enter' ? this.submitUserChanges() : this.onKeyPressCopupon) }}
+                                    <input type="text" name="coupon" id="user-coupon" placeholder="Insert your code"
+                                           onKeyUp={this.onKeyPressCopupon.bind(this)}
                                            ref={(input) => this.couponInput = input}/>
-                                <a className="btn-confirm-medium" onClick={this.submitUserChanges.bind(this)}>Apply</a>
+                                <a className={"btn-confirm-medium " + buttonClass}  onClick={this.submitUserChanges.bind(this)}>Apply</a>
                                 <div className="coupon-message">
-                                        <span style={{color: 'red', fontSize: '14px',position: 'absolute', right: '27%', lineHeight: '24px'}} className="text coupon-message">{this.state.couponError}</span>
+                                        <span style={{color: 'red', fontSize: '14px',position: 'absolute', right: '27%', lineHeight: '24px'}} className="coupon-message">{this.state.couponError}</span>
                                 </div>
                         </div>
         } else {
@@ -148,7 +163,7 @@ class PreferencesModal extends React.Component {
                     <h2 htmlFor="user-coupon">Coupon</h2>
                     <input type="text" name="coupon" id="user-coupon" defaultValue={this.state.coupon} disabled /><br/>
                     <div className="coupon-message">
-                        <span style={{color: 'green', fontSize: '14px', position: 'absolute', right: '42%', lineHeight: '24px'}} className="text ">Coupon activated</span>
+                        <span style={{color: 'green', fontSize: '14px', position: 'absolute', right: '42%', lineHeight: '24px'}} className="coupon-message">Coupon activated</span>
                     </div>
 
 
@@ -165,6 +180,11 @@ class PreferencesModal extends React.Component {
                             <strong>{this.props.user.first_name} {this.props.user.last_name}</strong><br/>
                         <span className="grey-txt">{this.props.user.email}</span><br/>
                         </div>
+                         <br/>
+                         <div className="user-link">
+                            <div id='logoutlink' className="pull-right" onClick={this.logoutUser.bind(this)}>Logout</div>
+                             {resetPasswordHtml}
+                         </div>
                     </div>
                     <div className="user-info-attributes">
 
@@ -191,9 +211,6 @@ class PreferencesModal extends React.Component {
                             <label>{services_label}</label>
                         </div>
                         {couponHtml}
-                        <br/>
-                         {resetPasswordHtml}
-                        <div id='logoutlink' className="pull-right" onClick={this.logoutUser.bind(this)}>Logout</div>
                     </div>
             </div>;
     }

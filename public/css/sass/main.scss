@@ -1,20 +1,19 @@
-@import 'variables';
-@import 'common';
-@import 'style';
-@import 'mbc-style';
-@import 'jquery.powertip.min';
-@import 'lxq-style';
-@import 'lexiqa';
-@import 'segment-notes';
-@import 'project-completion-feature';
-@import 'editlog';
+@import 'common-main';
+@import '../style';
+@import '../mbc-style';
+@import '../jquery.powertip.min';
+@import '../lxq-style';
+@import '../lexiqa';
+@import '../segment-notes';
+@import '../project-completion-feature';
+@import '../editlog';
 @import 'review_improved' ;
 @import 'segment_filter' ;
+
 
 @import 'cattool';
 
 @import 'speech2text';
-@import 'notifications';
 
 @import 'qa_check_glossary';
 @import 'qa_check_blacklist';

@@ -416,7 +416,8 @@
                     TMKey: keyParam
                 };
                 this.appendNewTmKeyToPanel( keyParams );
-                new UI.DropDown( $(trKey).find( '.wrapper-dropdown-5' ) );
+                new UI.DropDown( $( '#activetm tr.mine' ).last().find( '.wrapper-dropdown-5' ) );
+                UI.checkTMKeysUpdateChecks();
             }
         },
         activateInactiveKey: function (keyParam) {
@@ -428,8 +429,9 @@
             });
             //Check the inputs
             var row = $(trKey).closest("tr");
-            row.find('td.lookup input, td.update input').attr('checked', true);
+            row.find('td.lookup input, td.activate input, td.update input').attr('checked', true);
             UI.useTM(trKey);
+            UI.checkTMKeysUpdateChecks();
         },
         openLanguageResourcesPanel: function(tab, elToClick) {
             if ($(".popup-tm").hasClass('open') ) {
