@@ -703,13 +703,7 @@ body.manage #search-projectname
         #contentBox pre {
            background: #fbfbfb;
 	}
-padding: 5px 10px;
-border: 1px dashed #ccc;
-font-size: 1em;
-line-height:20px;
-margin: 20px 0;
-color: #666;
-        }
+
 
 #contentBox pre.literal-block {word-wrap: break-word;}
 

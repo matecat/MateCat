@@ -18,7 +18,7 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
     <title>API - Matecat</title>
     <link href="/public/css/style.css" rel="stylesheet" type="text/css" />
     <link href="/public/css/manage.css" rel="stylesheet" type="text/css" />
-    <link href="/public/css/common.css" rel="stylesheet" type="text/css" />
+    <link href="/public/css/build/common.css" rel="stylesheet" type="text/css" />
     <script src="/public/js/lib/jquery.js"></script>
       <link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32" />
   <link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16" />
