@@ -1,16 +1,16 @@
 <?php
 
 class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
-    public function create( $obj ) {
+    public function create( OwnerFeatures_OwnerFeatureStruct $obj ) {
         $conn = Database::obtain()->getConnection();
 
         $obj->create_date = date('Y-m-d H:i:s');
         $obj->last_update = date('Y-m-d H:i:s');
 
         $stmt = $conn->prepare( "INSERT INTO owner_features " .
-            " ( uid, feature_code, options, create_date, last_update, enabled )" .
+            " ( uid, feature_code, options, create_date, last_update, enabled, id_team )" .
             " VALUES " .
-            " ( :uid, :feature_code, :options, :create_date, :last_update, :enabled );"
+            " ( :uid, :feature_code, :options, :create_date, :last_update, :enabled, :id_team );"
         );
 
         Log::doLog( $obj->attributes() );
