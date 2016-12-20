@@ -27,7 +27,7 @@ a {
 .add-project {
 	position: fixed;
 	bottom: 5%;
-	right: 10%;
+	right: 2%;
 	z-index: 3;
 }
 
@@ -42,7 +42,8 @@ a {
 .project {
 	background-color: #f1f1f1;
 	padding: 0;
-	cursor: pointer;
+	min-width:950px;
+	// cursor: pointer;
 	.btn {
 		padding: 0 15px
 	}
@@ -62,7 +63,7 @@ a {
 
 	.head-project {
 		background-color: #f1f1f1;
-		padding: 15px 0 30px 0;
+		padding: 10px 0 25px 0;
 		border-top: 4px solid #9e9e9e;
 		&.open-project {
 			background-color: inherit;
@@ -125,7 +126,8 @@ a {
 				}
 				input[type=text]:disabled {
 					color: #4d4d4d;
-					border-bottom: 1px solid #4d4d4d;
+					// border-bottom: 1px solid #4d4d4d;
+					border-bottom: none;
 				}
 			}
 
@@ -154,7 +156,7 @@ a {
 		}
 	}
 	.foot-project {
-		padding: 0px 15px 15px 0;
+		padding: 0px 15px 10px 0;
 	}
 }
 
@@ -178,7 +180,7 @@ a {
 			background-color: inherit !important;
 			color: #6d6d6d;
 			border: 1px solid $secondary-color;
-			line-height: 2.6rem;
+			line-height: 2.3rem;
 			font-weight: bold;
 			font-size: 20px;
 			border: 1px solid #6d6d6d;
@@ -196,18 +198,21 @@ a {
 		}
 		.outsource {
 			background-color: #7eaf3e !important;
-			line-height: 2.6rem;
+			line-height: 2.3rem;
 			font-weight: bold;
 			font-size: 20px;
 			border: 1px solid #6d6d6d;
+			margin-left: 5px;
 			text-transform: capitalize;
 			&:hover {
 				background-color: #8bc343 !important;
 			}
+			
+
 		}
 		.translate {
 
-			line-height: 2.6rem;
+			line-height: 2.3rem;
 			font-weight: bold;
 			font-size: 20px;
 			border: 1px solid #6d6d6d;
@@ -251,7 +256,7 @@ a {
 	}
 	.body-job {
 		padding: 15px;
-		margin: 0 0 15px 0;
+		margin: 0 0 10px 0;
 		text-transform: capitalize;
 		.btn
 		{
@@ -274,17 +279,18 @@ a {
 		// }
 		.payable-words {
 			// background-color: purple;
-			line-height: 2.5rem;
-
+			// line-height: 2.5rem;
+			padding: 8px 0 0 10px;
 		}
 
 		.combo-language {
 			span {
-				padding: 7px 14px;
-				border: 1px solid black;
-				font-size: 1rem;
-				text-transform: capitalize;
-			}
+			    padding: 8px 13px;
+			    border: 1px solid #333;
+			    font-size: 1rem;
+			    border-radius: 2px;
+			    text-transform: capitalize;			
+			    }
 			&.single {
 				min-width: 165px;
 				margin-top: 3px;
@@ -356,10 +362,103 @@ a {
 		}
 	}
 }
+
+
 .job-preview {
 	margin: -15px 15px 30px;
 }
 
 .material-icons {
 	vertical-align: middle;
+}
+
+.progress-bar .progr .meter {
+	margin-top:5px;
+}
+
+.manage footer {
+    background: #6d6e71;
+    height: 27px;
+    text-align: right;
+    border-top: 1px solid #333;
+    color: #fff;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1;
+}
+
+.manage footer .wrapper {
+    margin: 0px auto 0 auto;
+    padding: 3px 0 0 0;
+    width: 83%;
+    font-size: 14px;
+    position: relative;
+    text-align: right;
+}
+
+footer ul {
+    margin: -5px 0 0 0;
+    padding: 0;
+    float: left;
+}
+
+footer nav {
+	background: none;
+    float: right;
+    display: block;
+    line-height: 19px;
+    box-shadow: none;
+    width: 160px;
+    font-size: 15px;
+    text-align: right;
+}
+
+footer nav ul li {
+	padding:5px;
+}
+
+footer nav ul a, #welcomebox {
+	text-decoration: underline;
+}
+
+footer nav ul a:hover {
+    background: none!important;
+}
+
+.manage .profile-area {
+	display:none;
+}
+
+.manage h4 {
+	font-weight:bold;
+}
+
+.multiple .payable-words {
+    margin-bottom: -7px;
+}
+
+.btn-floating {
+	line-height:38px;
+}
+
+.open .btn-flat {
+    border-radius: 2px 0 0 2px;
+    -moz-box-shadow: 0 1px 2px #ccc;
+    -webkit-box-shadow: 0 1px 2px #ccc;
+    box-shadow: 0 1px 2px #ccc;
+    background: #dcdedf!important;
+    border: 1px solid #848689;
+    line-height: 34px;
+    padding: 0px 30px;
+}
+
+li.target-lang {
+    border: 1px solid #f4f4f4;
+}
+
+.combo-language .source-lang-container {
+    margin-top: 11px;
+    float: left;
 }

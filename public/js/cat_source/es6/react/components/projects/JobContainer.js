@@ -211,9 +211,9 @@ class JobContainer extends React.Component {
             </div>
             <div className="body-job">
                 <div className="row">
-                    <div className="col l12 m12 s12">
+                    <div className="col l12">
                         <div className="row">
-                            <div className="col l2 m3 s12">
+                            <div className="col l2">
                                 <div className="combo-language single">
                                     <ul>
                                         <li>
@@ -226,9 +226,9 @@ class JobContainer extends React.Component {
                                 </div>
                             </div>
 
-                            <div className="col l6 m9 s12">
+                            <div className="col l5">
                                 <div className="row">
-                                    <div className="col l5 m9 s12">
+                                    <div className="col l6">
                                         <div className="progress-bar">
                                             <div className="progr">
                                                 <div className="meter">
@@ -239,14 +239,14 @@ class JobContainer extends React.Component {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="col l3 m3 s12">
-                                        <div className="payable-words right">
+                                    <div className="col l3">
+                                        <div className="payable-words">
                                             <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div className="col l4 s12">
+                            <div className="col l5">
                                 <div className="button-list split-outsource right">
                                     <a className="btn waves-effect split waves-dark" target="_blank" href={splitUrl}>
                                         <i className="large icon-expand right"/>Split
