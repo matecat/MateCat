@@ -53,8 +53,9 @@ module.exports = function(grunt) {
         cssBase + 'sass/notifications.scss'
     ];
 
+
     var cssWatchMaterialize = [
-        cssBase + 'sass/materilize/*'
+        cssBase + 'sass/materialize/*'
     ];
 
 
@@ -398,8 +399,8 @@ module.exports = function(grunt) {
                 dest: cssBase + 'build/',
                 replacements: [
                     {
-                        from: '../img/',
-                        to: '../../img/'
+                        from: 'url(../img',
+                        to: 'url(../../img'
                     },
                     {
                         from: '"../../fonts/',
