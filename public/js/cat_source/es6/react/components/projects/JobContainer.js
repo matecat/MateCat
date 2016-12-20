@@ -252,7 +252,7 @@ class JobContainer extends React.Component {
                                         <i className="large icon-expand right"/>Split
                                     </a>
                                     <a className="btn waves-effect waves-light outsource" target="_blank" href={outsourceUrl}>outsource</a>
-                                    <a className="btn waves-effect waves-light translate move-left" target="_blank" href={translateUrl}>Translate</a>
+                                    <a className="btn waves-effect waves-light translate move-left" target="_blank" href={translateUrl}>Open</a>
                                 </div>
                             </div>
                         </div>
