@@ -291,15 +291,17 @@ CREATE TABLE `original_files_map` (
 
 CREATE TABLE `owner_features` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `uid` bigint(20) NOT NULL,
+  `uid` bigint(20) DEFAULT NULL,
+  `id_team` int(11) DEFAULT NULL,
   `feature_code` varchar(45) NOT NULL,
   `options` text,
   `create_date` datetime NOT NULL,
   `last_update` datetime NOT NULL,
   `enabled` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uid_feature` (`uid`,`feature_code`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+  UNIQUE KEY `uid_feature` (`uid`,`feature_code`) USING BTREE,
+  UNIQUE KEY `id_team_feature` (`id_team`,`feature_code`) USING BTREE
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE `phinxlog` (
   `version` bigint(20) NOT NULL,
@@ -322,6 +324,7 @@ CREATE TABLE `projects` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `password` varchar(45) DEFAULT NULL,
   `id_customer` varchar(45) NOT NULL,
+  `id_team` int(11) DEFAULT NULL,
   `name` varchar(200) DEFAULT 'project',
   `create_date` datetime NOT NULL,
   `id_engine_tm` int(11) DEFAULT NULL,
@@ -334,7 +337,6 @@ CREATE TABLE `projects` (
   `for_debug` tinyint(4) NOT NULL DEFAULT '0',
   `pretranslate_100` int(1) DEFAULT '0',
   `id_qa_model` int(11) DEFAULT NULL,
-  `id_team` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `id_customer` (`id_customer`),
   KEY `status_analysis` (`status_analysis`),

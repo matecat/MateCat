@@ -14,8 +14,8 @@ class CreateTablesForTeams extends AbstractMatecatMigration
       )
       ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8
       "
-    ,
-    "CREATE TABLE `teams_users` (
+        ,
+        "CREATE TABLE `teams_users` (
           `id` INT(11) NOT NULL AUTO_INCREMENT,
           `id_team` INT(11) NOT NULL,
           `uid` BIGINT( 20 ) NOT NULL,
@@ -25,9 +25,9 @@ class CreateTablesForTeams extends AbstractMatecatMigration
       ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8
       "
       ,
-      " ALTER TABLE `projects` ADD column `id_team` INT(11) DEFAULT NULL ; ",
+      " ALTER TABLE `projects` ADD column `id_team` INT(11) DEFAULT NULL AFTER `id_customer` ; ",
 
-      " ALTER TABLE `owner_features` ADD column `id_team` INT(11) DEFAULT NULL ; ",
+      " ALTER TABLE `owner_features` ADD column `id_team` INT(11) DEFAULT NULL AFTER `uid` ; ",
 
       " ALTER TABLE `owner_features` MODIFY COLUMN `uid` bigint(20) DEFAULT NULL ",
 
