@@ -108,12 +108,12 @@ class ProjectContainer extends React.Component {
             headerProject = <div className="card job-preview z-depth-1">
                 <div className="body-job">
                     <div className="row">
-                        <div className="col s10">
+                        <div className="col m10">
 
                             <div className="combo-language multiple"
                                  ref={(combo) => this.combo_languages = combo}>
                                 <ul>
-                                    <li>
+                                    <li className="source-lang-container">
                                         <span id="source">{sourceLang}</span> <i className="material-icons">play_arrow</i>
                                     </li>
                                     {targetsLangs}
@@ -212,7 +212,7 @@ class ProjectContainer extends React.Component {
                 openProjectClass = (jobsLength === 1) ? '':'open-project';
             }
 
-            var target = <li key = {i} onClick={self.showSingleJob.bind(self, i, job)}>
+            var target = <li className="target-lang" key = {i} onClick={self.showSingleJob.bind(self, i, job)}>
                 <a className={"btn waves-effect waves-dark " + openJobClass}>
                     <badge>{job.get('target')}</badge>
                     <div className="progress">
@@ -240,12 +240,24 @@ class ProjectContainer extends React.Component {
 
                     <div className={"head-project " + openProjectClass}>
                         <div className="row">
-                            <div className="col m2 s4">
+                            <div className="col m2">
                                 <div className="project-id">
-                                    <i><div id="id-project"><span>ID:</span>{this.props.project.get('id')}</div></i>
+                                    <div id="id-project"><span>ID:</span>{this.props.project.get('id')}</div>
                                 </div>
                             </div>
-                            <div className="col m5 push-m5 s8">
+                            <div className="col m8">
+                                <div className="project-name">
+                                    <form>
+                                        <div className="row">
+                                            <div className="input-field col m12">
+                                                <input id="icon_prefix" type="text" disabled="disabled" defaultValue={this.props.project.get('name')}/><i
+                                                    className="material-icons prefix hide">mode_edit</i>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div className="col m2">
                                 <ul className="project-activity-icon right">
 
                                     {/*<li>*/}
@@ -263,18 +275,7 @@ class ProjectContainer extends React.Component {
                                     </li>
                                 </ul>
                             </div>
-                            <div className="col m5 pull-m5 s12">
-                                <div className="project-name">
-                                    <form>
-                                        <div className="row">
-                                            <div className="input-field col s12">
-                                                <input id="icon_prefix" type="text" disabled="disabled" defaultValue={this.props.project.get('name')}/><i
-                                                    className="material-icons prefix hide">mode_edit</i>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
+
                         </div>
                     </div>
                     <section className="jobs-preview">
@@ -298,7 +299,7 @@ class ProjectContainer extends React.Component {
 
                     <div className="foot-project">
                         <div className="row">
-                            <div className="col s12">
+                            <div className="col m12">
                                 <div className="activity-log">
                                     <a href={activityLogUrl} target="_blank" className="right">
                                         {lastAction}
