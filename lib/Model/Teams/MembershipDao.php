@@ -3,30 +3,27 @@
  * Created by PhpStorm.
  * User: fregini
  * Date: 20/12/2016
- * Time: 10:04
+ * Time: 10:45
  */
 
 namespace Teams;
 
-use PDO;
+use PDO ;
 
-class TeamDao extends \DataAccess_AbstractDao {
+class MembershipDao extends \DataAccess_AbstractDao
+{
 
-    const TABLE = "teams";
-    const STRUCT_TYPE = "TeamStruct";
+    const TABLE = "teams_users";
+    const STRUCT_TYPE = "MembershipStruct";
 
     protected static $auto_increment_fields = array('id');
     protected static $primary_keys = array('id');
 
-    /**
-     * @param $id
-     * @return TeamStruct
-     */
     public function findById( $id ) {
-        $sql = " SELECT * FROM teams WHERE id = ? " ;
+        $sql = " SELECT * FROM " . self::STRUCT_TYPE . " WHERE id = ? " ;
         $stmt = $this->getConnection()->getConnection()->prepare( $sql ) ;
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Teams\TeamStruct' );
-        $stmt->execute(array( $id)) ;
+        $stmt->setFetchMode( PDO::FETCH_CLASS, self::STRUCT_TYPE );
+        $stmt->execute($id);
 
         return $stmt->fetch() ;
     }
@@ -35,5 +32,4 @@ class TeamDao extends \DataAccess_AbstractDao {
     {
         // TODO: Implement _buildResult() method.
     }
-
 }
