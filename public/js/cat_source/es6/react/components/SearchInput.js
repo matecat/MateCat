@@ -27,7 +27,8 @@ class SearchInput extends React.Component {
                                    placeholder="Project name"
                                    ref={(input) => this.textInput = input}
                                    onChange={this.filterByName.bind(this)}/>
-                            <i className="material-icons prefix close-x">close</i>
+                            <i className="material-icons prefix close-x"
+                            onClick={this.closeSearch.bind(this)}>close</i>
                         </div>
                     </div>
                 </form>

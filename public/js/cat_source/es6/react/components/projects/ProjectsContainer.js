@@ -55,6 +55,10 @@ class ProjectsContainer extends React.Component {
                 changeJobPasswordFn={this.props.changeJobPasswordFn}
                 downloadTranslationFn={this.props.downloadTranslationFn}/>
         ));
+        if (!items.size) {
+            items = <div> No Projects found</div>;
+        }
+
         return <div onClick={this.onClickFn.bind(this)}>
                     <section className="add-project">
                         <a className="btn-floating btn-large waves-effect waves-light right create-new blue-matecat tooltipped" data-position="top" data-delay="50" data-tooltip="Add new project"><i className="material-icons">add</i></a>
