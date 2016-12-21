@@ -107,48 +107,58 @@ class JobContainer extends React.Component {
 
         var jobStatus = this.getTranslationStatus();
         var downloadButton = (jobStatus == 'translated' || jobStatus == 'approved') ?
-            <li onClick={this.downloadTranslation}><a >Download</a></li> : <li onClick={this.downloadTranslation}><a >Preview</a></li>;
+            <li onClick={this.downloadTranslation}><a >Download</a></li> : <li onClick={this.downloadTranslation}><a ><i className="icon-pageview"></i>Preview</a></li>;
 
 
         var menuHtml = <ul id={'dropdownJob' + this.props.job.get('id')} className='dropdown-content'>
-                <li onClick={this.archiveJob.bind(this)}><a >Archive job</a></li>
-                <li onClick={this.cancelJob.bind(this)}><a >Cancel job</a></li>
-                <li onClick={this.changePassword.bind(this)}><a >Change Password</a></li>
-                <li><a target="_blank" href={splitUrl}>Split</a></li>
-                <li><a target="_blank" href={reviseUrl}>Revise</a></li>
-                <li><a target="_blank" href={qaReportUrl}>QA Report</a></li>
-                <li><a target="_blank" href={editLogUrl}>Editing Log</a></li>
+                <li onClick={this.changePassword.bind(this)}><a ><i className="icon-refresh"></i> Change Password</a></li>
+                <li><a target="_blank" href={splitUrl}><i className="icon-expand"></i> Split</a></li>
+                <li><a target="_blank" href={reviseUrl}><i className="icon-edit"></i> Revise</a></li> 
+                <li className="divider"></li>                          
+                <li><a target="_blank" href={qaReportUrl}><i className="icon-QR"></i> QA Report</a></li>
+                <li><a target="_blank" href={editLogUrl}><i className="icon-download-logs"></i> Editing Log</a></li>
+                <li className="divider"></li>
                 {downloadButton}
-                <li><a target="_blank" href={originalUrl}>Download Original</a></li>
-                <li><a target="_blank" href={exportXliffUrl}>Export XLIFF</a></li>
-                <li><a target="_blank" href={jobTMXUrl}>Export TMX</a></li>
+                <li><a target="_blank" href={originalUrl}><i className="icon-download"></i> Download Original</a></li>
+                <li><a target="_blank" href={exportXliffUrl}><i className="icon-download"></i> Export XLIFF</a></li>
+                <li><a target="_blank" href={jobTMXUrl}><i className="icon-download"></i> Export TMX</a></li>
+                <li className="divider"></li>
+                <li onClick={this.archiveJob.bind(this)}><a ><i className="icon-drawer"></i> Archive job</a></li>
+                <li onClick={this.cancelJob.bind(this)}><a ><i className="icon-trash-o"></i> Cancel job</a></li>
             </ul>;
         if ( this.props.job.get('status') === 'archived' ) {
             menuHtml = <ul id={'dropdownJob' + this.props.job.get('id')} className='dropdown-content'>
-                <li onClick={this.activateJob.bind(this)}><a >Unarchive job</a></li>
-                <li onClick={this.cancelJob.bind(this)}><a >Cancel job</a></li>
-                <li onClick={this.changePassword.bind(this)}><a >Change Password</a></li>
-                <li><a target="_blank" href={splitUrl}>Split</a></li>
-                <li><a target="_blank" href={reviseUrl}>Revise</a></li>
-                <li><a target="_blank" href={qaReportUrl}>QA Report</a></li>
-                <li><a target="_blank" href={editLogUrl}>Editing Log</a></li>
+
+                <li onClick={this.changePassword.bind(this)}><a ><i className="icon-refresh"></i> Change Password</a></li>
+                <li><a target="_blank" href={splitUrl}><i className="icon-expand"></i>  Split</a></li>
+                <li><a target="_blank" href={reviseUrl}><i className="icon-edit"></i> Revise</a></li>
+                <li className="divider"></li>                          
+                <li><a target="_blank" href={qaReportUrl}><i className="icon-QR"></i> QA Report</a></li>
+                <li><a target="_blank" href={editLogUrl}><i className="icon-download-logs"></i> Editing Log</a></li>
+                <li className="divider"></li>                          
                 {downloadButton}
-                <li><a target="_blank" href={originalUrl}>Download Original</a></li>
-                <li><a target="_blank" href={exportXliffUrl}>Export XLIFF</a></li>
-                <li><a target="_blank" href={jobTMXUrl}>Export TMX</a></li>
+                <li><a target="_blank" href={originalUrl}><i className="icon-download"></i> Download Original</a></li>
+                <li><a target="_blank" href={exportXliffUrl}><i className="icon-download"></i> Export XLIFF</a></li>
+                <li><a target="_blank" href={jobTMXUrl}><i className="icon-download"></i> Export TMX</a></li>
+                <li className="divider"></li>
+                <li onClick={this.activateJob.bind(this)}><a ><i className="icon-drawer unarchive-project"></i> Unarchive job</a></li>
+                <li onClick={this.cancelJob.bind(this)}><a ><i className="icon-trash-o"></i> Cancel job</a></li>
             </ul>;
         } else if ( this.props.job.get('status') === 'cancelled' ) {
             menuHtml = <ul id={'dropdownJob' + this.props.job.get('id')} className='dropdown-content'>
-                <li onClick={this.activateJob.bind(this)}><a >Resume job</a></li>
-                <li onClick={this.changePassword.bind(this)}><a >Change Password</a></li>
-                <li><a target="_blank" href={splitUrl} >Split</a></li>
-                <li><a target="_blank" href={reviseUrl}>Revise</a></li>
-                <li><a target="_blank" href={qaReportUrl}>QA Report</a></li>
-                <li><a target="_blank" href={editLogUrl}>Editing Log</a></li>
+                <li onClick={this.changePassword.bind(this)}><a ><i className="icon-refresh"></i> Change Password</a></li>
+                <li><a target="_blank" href={splitUrl} ><i className="icon-expand"></i>  Split</a></li>
+                <li><a target="_blank" href={reviseUrl}><i className="icon-edit"></i> Revise</a></li>
+                <li className="divider"></li> 
+                <li><a target="_blank" href={qaReportUrl}><i className="icon-QR"></i> QA Report</a></li>
+                <li><a target="_blank" href={editLogUrl}><i className="icon-download-logs"></i> Editing Log</a></li>
+                <li className="divider"></li> 
                 {downloadButton}
-                <li><a target="_blank" href={originalUrl}>Download Original</a></li>
-                <li><a target="_blank" href={exportXliffUrl}>Export XLIFF</a></li>
-                <li><a target="_blank" href={jobTMXUrl}>Export TMX</a></li>
+                <li><a target="_blank" href={originalUrl}><i className="icon-download"></i> Download Original</a></li>
+                <li><a target="_blank" href={exportXliffUrl}><i className="icon-download"></i> Export XLIFF</a></li>
+                <li><a target="_blank" href={jobTMXUrl}><i className="icon-download"></i> Export TMX</a></li>
+                <li className="divider"></li>                 
+                <li onClick={this.activateJob.bind(this)}><a ><i className="icon-drawer unarchive-project"></i> Resume job</a></li>
             </ul>;
         }
         return menuHtml;

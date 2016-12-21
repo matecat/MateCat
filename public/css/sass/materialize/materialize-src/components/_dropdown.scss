@@ -35,10 +35,10 @@
     }
 
     & > a, & > span {
-      font-size: 16px;
+      font-size: 15px;
       color: $dropdown-color;
       display: block;
-      line-height: 22px;
+      line-height: 20px;
       padding: (($dropdown-item-height - 22) / 2) 16px;
     }
 

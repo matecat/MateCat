@@ -1,3 +1,7 @@
+body.side-popup {
+    overflow: hidden !important;
+}
+
 /***********************/
 /***** Login Footer ****/
 
@@ -570,3 +574,184 @@ div#matecat-modal p {
 }
 
 /***********************/
+
+
+/* On-off switch */
+
+.onoffswitch {
+  position: relative;
+  width: 60px;
+  zoom: 0.7;
+  margin-top: 8px;
+  float: left;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none; }
+
+.onoffswitch-checkbox {
+  display: none; }
+
+.onoffswitch-label {
+  display: block!important;
+  overflow: hidden;
+  cursor: pointer!important;
+  border: 2px solid #ccc;
+  border-radius: 20px; 
+  height: 30px!important;
+  padding-left:initial!important;
+}
+
+.onoffswitch-label:before,
+.onoffswitch-label:after {
+  border:none!important;
+}
+
+.onoffswitch-inner {
+  display: block;
+  width: 200%;
+  margin-left: -100%;
+  transition: margin 0.3s ease-in 0s; }
+
+.onoffswitch-inner:before,
+.onoffswitch-inner:after {
+  display: block;
+  float: left;
+  width: 50%;
+  height: 30px;
+  padding: 0;
+  text-align: left;
+  line-height: 30px;
+  font-size: 15px;
+  color: white;
+  font-weight: bold;
+  box-sizing: border-box; }
+
+.onoffswitch-inner:before {
+  content: "";
+  padding-left: 10px;
+  background-color: #22c4ee;
+  color: #FFFFFF; }
+
+.onoffswitch-inner:after {
+  content: "";
+  padding-right: 7px;
+  background-color: #EEEEEE;
+  color: #999999;
+  text-align: right; }
+
+.onoffswitch-switch {
+  display: block;
+  width: 22px;
+  margin: 4px;
+  background: #FFFFFF;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 25px;
+  border: 2px solid #ccc;
+  border-radius: 20px;
+  transition: all 0.3s ease-in 0s; }
+
+.onoffswitch-label-status-active {
+  display: none;
+  font-weight: bold;
+  color: #22c4ee; }
+
+.onoffswitch-label-status-inactive,
+.onoffswitch-label-status-unavailable {
+  display: block;
+  color: #999999; }
+
+.onoffswitch-label:hover {
+  border-color: #A1A1A1; }
+
+.onoffswitch-label-status-active,
+.onoffswitch-label-status-inactive,
+.onoffswitch-label-status-unavailable {
+  position: absolute;
+  left: 80px;
+  font-size: 24px;
+  top: 6px;
+  line-height: 20px; }
+
+.onoffswitch-label-status-unavailable {
+  display: none; }
+
+.option-unavailable .onoffswitch-label-status-unavailable {
+  display: inline; }
+
+.option-unavailable .onoffswitch-label-status-inactive {
+  display: none; }
+
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-label-status-active {
+  display: block; }
+
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-label-status-inactive {
+  display: none; }
+
+.onoffswitch-label-ok {
+  display: block;
+  position: absolute;
+  right: -50px; }
+
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-label-ok {
+  display: none; }
+
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+  margin-left: 0; }
+
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+  right: 0px; }
+
+/* buttons */
+
+.matecat-modal-content .disabled, 
+.matecat-modal-content .disabled:hover, 
+.matecat-modal-content .disabled:active {
+    opacity: 0.5 !important;
+    cursor: default;
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    border: 1px solid #666;
+}
+
+.matecat-modal-content .btn-confirm-medium:hover, 
+.matecat-modal-content .btn-confirm-small:hover {
+    cursor: pointer;
+    -webkit-box-shadow: 0 1px 2px #ccc;
+    box-shadow: 0 1px 2px #ccc;
+    border: 1px solid #000;
+}
+
+.matecat-modal-content .btn-confirm-medium {
+    color: #fff;
+    background: #09beec;
+    border: 1px solid #848689;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 8px 18px;
+    border-radius: 2px;
+    font-size: 18px;
+    background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
+    background: -moz-linear-gradient(top, #09beec, #119ec4);
+    background: linear-gradient(top, #09beec, #119ec4);
+    margin: 16px 0 16px 20px;
+    display: inline-block;
+    text-align: center;
+    position: relative;
+}
+
+.matecat-modal .coupon-container .btn-confirm-medium {
+    margin: 6px 0% 0 3%;
+    width: 21%;
+    box-sizing: border-box;
+}
+
+.matecat-modal-content .disabled, 
+.matecat-modal-content .disabled:hover, 
+.matecat-modal-content .disabled:active {
+    cursor: default;
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    background: #d6d6d6;
+}
