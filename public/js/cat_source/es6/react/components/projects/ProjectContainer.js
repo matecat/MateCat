@@ -103,7 +103,7 @@ class ProjectContainer extends React.Component {
         var jobsLength = this.props.project.get('jobs').size;
         var headerProject = '';
         var analyzeUrl = this.getAnalyzeUrl();
-        var buttonLabel = (this.state.showAllJobs) ? "Close" : "Open";
+        var buttonLabel = (this.state.showAllJobs) ? "Close" : "View all";
         if( jobsLength > 1 && !this.state.showAllJobs) {
             headerProject = <div className="card job-preview z-depth-1">
                 <div className="body-job">
@@ -114,7 +114,7 @@ class ProjectContainer extends React.Component {
                                  ref={(combo) => this.combo_languages = combo}>
                                 <ul>
                                     <li className="source-lang-container">
-                                        <span id="source">{sourceLang}</span> <i className="material-icons">play_arrow</i>
+                                        <span id="source">{sourceLang}</span> <i className="icon-play"></i>
                                     </li>
                                     {targetsLangs}
                                     <li>
@@ -126,7 +126,7 @@ class ProjectContainer extends React.Component {
                             </div>
 
                         </div>
-                        <div className="col s1 right">
+                        <div className="col m2 right">
 
                             <div className="button-list open right">
                                 <a className="btn waves-effect waves-light btn-flat"
@@ -218,7 +218,7 @@ class ProjectContainer extends React.Component {
                                 changeStatusFn={self.props.changeStatusFn}
                                 downloadTranslationFn={self.props.downloadTranslationFn}/>;
                 jobsList.push(item);
-                openJobClass = 'z-depth-5';
+                openJobClass = 'z-depth-3';
                 openProjectClass = (jobsLength === 1) ? '':'open-project';
             }
 
@@ -278,14 +278,14 @@ class ProjectContainer extends React.Component {
 
                                     {/*<li>*/}
                                     {/*<a href="#!" className="btn-floating btn-flat waves-effect waves-dark z-depth-0">*/}
-                                    {/*<i className="material-icons">settings</i>*/}
+                                    {/*<i className="icon-settings"></i>*/}
                                     {/*</a>*/}
                                     {/*</li>*/}
                                     <li>
                                         <a className='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0'
                                            ref={(dropdown) => this.dropdown = dropdown}
                                            data-activates={'dropdown' + this.props.project.get('id')}>
-                                            <i className="material-icons">more_vert</i>
+                                            <i className="icon-more_vert"></i>
                                         </a>
                                         {projectMenu}
                                     </li>

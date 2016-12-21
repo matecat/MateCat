@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'icomoon';
-  src:  url('../../fonts/icomoon.eot?1jjm23');
-  src:  url('../../fonts/icomoon.eot?1jjm23#iefix') format('embedded-opentype'),
-    url('../../fonts/icomoon.ttf?1jjm23') format('truetype'),
-    url('../../fonts/icomoon.woff?1jjm23') format('woff'),
-    url('../../fonts/icomoon.svg?1jjm23#icomoon') format('svg');
+  src:  url('../../fonts/icomoon.eot?uyhs31');
+  src:  url('../../fonts/icomoon.eot?uyhs31#iefix') format('embedded-opentype'),
+    url('../../fonts/icomoon.ttf?uyhs31') format('truetype'),
+    url('../../fonts/icomoon.woff?uyhs31') format('woff'),
+    url('../../fonts/icomoon.svg?uyhs31#icomoon') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -30,16 +30,25 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.noticon:after, i.unarchive-project:after, i.resume-project:after {
+    content: "\e607";
+    color: red;
+    font-size: 23px;
+    position: absolute;
+    left: -3px;
+    top: 1px;
+    transform: rotate(-45deg);
+}
+
 .icon-assignment_turned_in:before {
   content: "\e862";
 }
 .icon-pageview:before {
   content: "\e905";
 }
-.icon-QR:before {
-  content: "\e608";
+.icon-more_vert:before {
+  content: "\e5d4";
 }
-
 .icon-uniE96B:before {
   content: "\e96b";
 }
@@ -79,6 +88,9 @@
 .icon-download:before {
   content: "\e603";
 }
+.icon-QR:before {
+  content: "\e608";
+}
 .icon-stop:before {
   content: "\e604";
 }
@@ -88,17 +100,6 @@
 .icon-drawer:before {
   content: "\e606";
 }
-
-.noticon:after, i.unarchive-project:after, i.resume-project:after {
-    content: "\e607";
-    color: red;
-    font-size: 23px;
-    position: absolute;
-    left: -3px;
-    top: 1px;
-    transform: rotate(-45deg);
-}
-
 .icon-minus:before {
   content: "\e607";
 }
@@ -147,7 +148,7 @@
 .icon-chevron-left:before {
   content: "\f053";
 }
-.icon-eye:before {
+.icon-eye2:before {
   content: "\f06e";
 }
 .icon-navicon:before {
@@ -212,6 +213,9 @@
 }
 .icon-file-text:before {
   content: "\e922";
+}
+.icon-eye:before {
+  content: "\e9ce";
 }
 .icon-search:before {
   content: "\f002";
