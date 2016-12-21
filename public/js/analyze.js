@@ -32,57 +32,10 @@ UI = {
             $(".loadingbar").removeClass('start');
 		});
 
-        function wordCountTotalOrPayable( job ) {
-            var total = 0;
-            if ( $('.stat-payable').length > 0 ) {
-                total = Number( $('.stat-payable', job).first().text().replace(",", "") );
-            }
-
-            if (total == 0) {
-                total = Number( $('.stat-total', job).first().text().replace(",", "") );
-            }
-            return total;
-        }
-
 		$("body").on('click', '.dosplit:not(.disabled)', function(e) {
 
 			e.preventDefault();
-			var jobContainer = $(this).parents('.jobcontainer');
-			var job = jobContainer.find('tbody.tablestats');
-			jid = job.attr('data-jid');
-			total = wordCountTotalOrPayable( job ) ;
-			numsplit = $('.splitselect', jobContainer).first().val();
-			wordsXjob = total / numsplit;
-			wordsXjob = Math.floor(wordsXjob);
-			diff = total - (wordsXjob * numsplit);
-			$('.popup-split .error-message').addClass('none');
-			$('.popup-split .popup-box .jobs').empty();
-			$('.popup-split h1 .jid').attr('data-jid', jid);
-			$('.popup-split h1 .jid').attr('data-pwd', $(job).attr('data-pwd'));
-			$('.popup-split').removeClass('error-number');
-			$('.popup-split #exec-split').removeClass('disabled');
-			$('.popup-split h1 .chunks').text(numsplit);
-			for (var i = 0; i < numsplit; i++) {
-				numw = wordsXjob;
-				if (i < diff)
-					numw++;
-
-				// '<!-- A: la classe Aprox scompare se viene effettuato il calcolo -->' +
-				item = '<li>' +
-						'   <div><h4>Part ' + (i + 1) + '</h4></div>' +
-						'   <div class="job-details">' +
-						'       <div class="job-perc">' +
-						'           <p><span class="aprox">Approx. words:</span><span class="correct none">Words:</span></p>' +
-						'           <input type="text" class="input-small" value="' + numw + '">' +
-						'       </div>' +
-						'   </div>' +
-						'</li>';
-
-				$('.popup-split .popup-box .jobs').append(item);
-			}
-			$('.popup-split .total .total-w').attr('data-val', total).text(APP.addCommas(total));
-
-			$('.popup-split').show();
+			UI.updateSplitPopup(this)
 		}).on('click', '.popup-split .btn-cancel', function(e) {
 			e.preventDefault();
 			$('.popup-split .x-popup').click();
@@ -753,6 +706,52 @@ UI = {
         $('#downloadAnalysisReportForm').submit();
 
     },
+	updateSplitPopup: function (button) {
+		var jobContainer = $(button).parents('.jobcontainer');
+		var job = jobContainer.find('tbody.tablestats');
+		var jid = job.attr('data-jid');
+		var total = wordCountTotalOrPayable( job ) ;
+		var numsplit = $('.splitselect', jobContainer).first().val();
+		var wordsXjob = total / numsplit;
+		wordsXjob = Math.floor(wordsXjob);
+		var diff = total - (wordsXjob * numsplit);
+		$('.popup-split .error-message').addClass('none');
+		$('.popup-split .popup-box .jobs').empty();
+		$('.popup-split .popup-splitselect').val(numsplit);
+		$('.popup-split h1 .jid').attr('data-jid', jid);
+		$('.popup-split h1 .jid').attr('data-pwd', $(job).attr('data-pwd'));
+		$('.popup-split').removeClass('error-number');
+		$('.popup-split #exec-split').removeClass('disabled');
+		$('.popup-split h1 .chunks').text(numsplit);
+		for (var i = 0; i < numsplit; i++) {
+			var numw = wordsXjob;
+			if (i < diff)
+				numw++;
+
+			// '<!-- A: la classe Aprox scompare se viene effettuato il calcolo -->' +
+			var item = '<li>' +
+				'   <div><h4>Part ' + (i + 1) + '</h4></div>' +
+				'   <div class="job-details">' +
+				'       <div class="job-perc">' +
+				'           <p><span class="aprox">Approx. words:</span><span class="correct none">Words:</span></p>' +
+				'           <input type="text" class="input-small" value="' + numw + '">' +
+				'       </div>' +
+				'   </div>' +
+				'</li>';
+
+			$('.popup-split .popup-box .jobs').append(item);
+		}
+		$('.popup-split .total .total-w').attr('data-val', total).text(APP.addCommas(total));
+
+		$('.popup-split').show();
+
+		$('.popup-split .popup-splitselect').off('change');
+		$('.popup-split .popup-splitselect').on('change', function () {
+			var newValue = $(this).val();
+			jobContainer.find('.splitselect').val(newValue);
+			UI.updateSplitPopup(button);
+		})
+	},
 	checkQueryParams: function () {
         var jobId = APP.getParameterByName("jobid");
         var open = APP.getParameterByName("open");
@@ -780,6 +779,18 @@ UI = {
 
 	}
 };
+
+function wordCountTotalOrPayable( job ) {
+	var total = 0;
+	if ( $('.stat-payable').length > 0 ) {
+		total = Number( $('.stat-payable', job).first().text().replace(",", "") );
+	}
+
+	if (total == 0) {
+		total = Number( $('.stat-total', job).first().text().replace(",", "") );
+	}
+	return total;
+}
 
 function fit_text_to_container(container, child) {
 	if (typeof (child) != 'undefined') {

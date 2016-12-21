@@ -163,7 +163,7 @@ class JobContainer extends React.Component {
     }
 
     getSplitUrl() {
-        return '/analyze/'+ this.props.project.get('name') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password'); // + '?open=split&jobid=' + this.props.job.get('id');
+        return '/analyze/'+ this.props.project.get('name') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=split&jobid=' + this.props.job.get('id');
     }
 
     getActivityLogUrl() {
