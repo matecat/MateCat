@@ -50,7 +50,7 @@ class CreateTeamTask extends Command
         $result = TeamDao::insertStruct( $teamStruct  ) ;
 
         if ( $result ) {
-            echo " Team created with ID: " . $result ;
+            $output->write(" Team created with ID: " . $result , TRUE ) ;
         }
 
     }
