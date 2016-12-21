@@ -25,9 +25,9 @@ class ProjectContainer extends React.Component {
 
     showHideAllJobs() {
         var show = this.state.showAllJobs;
-        if (!show) {
-            ManageActions.closeAllJobs();
-        }
+        // if (!show) {
+        //     ManageActions.closeAllJobs();
+        // }
         this.setState({
             showAllJobs: !show,
             visibleJobs: []
