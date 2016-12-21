@@ -31,7 +31,27 @@ a {
 	top: 15px;
 	right: 2%;
 	zoom:0.9;
+	font-size:18px;
 	z-index: 3;
+}
+
+i.close-x:before {
+    font-style: initial;
+    content: "×";
+    font-size: 20px;
+    line-height: 10px;
+    /* text-align: center; */
+}
+
+.close-x {
+	line-height:18px!important;
+}
+
+.add-project i:before {
+	content:"+";
+	font-weight:bold;
+	font-size:24px;
+    font-style: normal;
 }
 
 .project-list {
@@ -296,7 +316,7 @@ a {
 			    border: 1px solid #333;
 			    font-size: 0.8rem;
 			    border-radius: 2px;
-			    text-transform: capitalize;			
+			    text-transform: capitalize;	
 			    }
 			&.single {
 				min-width: 165px;
@@ -424,10 +444,14 @@ footer nav {
     display: block;
     line-height: 19px;
     box-shadow: none;
-    width: 180px;
-    font-size: 15px;
+    width: 165px;
     text-align: right;
 }
+
+footer nav, footer nav a {
+    font-size: 14px;
+}
+
 
 footer nav ul li {
 	padding:5px;
@@ -485,6 +509,7 @@ li.target-lang {
 .combo-language .source-lang-container {
     margin-top: 10px;
     float: left;
+    margin-right: 0!important;
 }
 
  .dropdown-content li {
@@ -526,7 +551,7 @@ li.target-lang {
 
 
 .no-results-found {
-    background: url(public/img/jobnotfound.png) no-repeat;
+    background: url(/public/img/jobnotfound.png) no-repeat;
     background-position: center center;
     height: 400px;
 }
@@ -536,4 +561,13 @@ li.target-lang {
     display: block;
     font-size: 34px;
     margin-top: 20px;
+}
+
+.input-field .prefix {
+	font-size:1.4rem!important;
+}
+
+.job-preview .icon-play,
+.job .icon-play {
+    margin: 0 5px 0 5px;
 }

@@ -107,7 +107,7 @@ class JobContainer extends React.Component {
 
         var jobStatus = this.getTranslationStatus();
         var downloadButton = (jobStatus == 'translated' || jobStatus == 'approved') ?
-            <li onClick={this.downloadTranslation}><a >Download</a></li> : <li onClick={this.downloadTranslation}><a ><i className="icon-pageview"></i>Preview</a></li>;
+            <li onClick={this.downloadTranslation}><a >Download</a></li> : <li onClick={this.downloadTranslation}><a ><i className="icon-eye"></i>Preview</a></li>;
 
 
         var menuHtml = <ul id={'dropdownJob' + this.props.job.get('id')} className='dropdown-content'>
@@ -204,14 +204,14 @@ class JobContainer extends React.Component {
                             <li>
                                 <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0"
                                     onClick={this.openSettings.bind(this)}>
-                                    <i className="material-icons">settings</i>
+                                    <i className="icon-settings"></i>
                                 </a>
                             </li>
                             <li>
                                 <a className='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0'
                                    data-activates={'dropdownJob' + this.props.job.get('id')}
                                    ref={(dropdown) => this.dropdown = dropdown}>
-                                    <i className="material-icons">more_vert</i>
+                                    <i className="icon-more_vert"></i>
                                 </a>
                                 {jobMenu}
                             </li>
@@ -227,7 +227,7 @@ class JobContainer extends React.Component {
                                 <div className="combo-language single">
                                     <ul>
                                         <li>
-                                            <span>{this.props.job.get('source')}</span> <i className="material-icons">play_arrow</i>
+                                            <span>{this.props.job.get('source')}</span> <i className="icon-play"></i>
                                         </li>
                                         <li>
                                             <span>{this.props.job.get('target')}</span>
