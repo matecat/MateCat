@@ -106,7 +106,7 @@ class ProjectOptionsSanitizer {
     }
 
     private function sanitizeSegmentationRule() {
-        $rules = array( 'patent' );
+        $rules = array( 'patent', 'paragraph' );
 
         if (
             array_key_exists('segmentation_rule', $this->options ) &&

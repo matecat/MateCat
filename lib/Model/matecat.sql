@@ -424,7 +424,7 @@ CREATE TABLE `remote_files` (
   `connected_service_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `id_file` (`id_file`) USING BTREE,
-  KEY `id_job` (`id_job`) USING BTREE
+  KEY `id_job` (`id_job`) USING BTREE,
   KEY `connected_service_id` (`connected_service_id`) USING BTREE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
