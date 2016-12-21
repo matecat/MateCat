@@ -29,9 +29,10 @@ class FeatureSet {
     }
 
     /**
+     *
      * @param $id_customer
      */
-    public function loadFromIdCustomer( $id_customer ) {
+    public function loadFromUserEmail($id_customer ) {
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
         $this->features = array_merge( $this->features, $features );
     }

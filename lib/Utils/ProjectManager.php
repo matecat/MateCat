@@ -123,7 +123,7 @@ class ProjectManager {
         $this->features = new FeatureSet();
 
         if ( !empty( $this->projectStructure['id_customer']) ) {
-           $this->features->loadFromIdCustomer( $this->projectStructure['id_customer'] );
+           $this->features->loadFromUserEmail( $this->projectStructure['id_customer'] );
         }
 
         $this->projectStructure['array_files'] = $this->features->filter(
@@ -155,7 +155,7 @@ class ProjectManager {
     }
     private function reloadFeatures() {
         $this->features = new FeatureSet();
-        $this->features->loadFromIdCustomer( $this->project->id_customer );
+        $this->features->loadFromUserEmail( $this->project->id_customer );
     }
 
     public function getProjectStructure() {
