@@ -20,6 +20,11 @@ class newProjectController extends viewController {
 
     private $keyList = array();
 
+    /**
+     * @var FeatureSet
+     */
+    private $featureSet ;
+
     public function __construct() {
 
         parent::__construct( false );
@@ -38,6 +43,8 @@ class newProjectController extends viewController {
         $this->subject_handler = Langs_LanguageDomains::getInstance();
 
         $this->subjectArray = $this->subject_handler->getEnabledDomains();
+
+        $this->featureSet = new FeatureSet() ;
     }
 
     public function doAction() {
@@ -76,6 +83,8 @@ class newProjectController extends viewController {
 
         if ( $this->isLoggedIn() ) {
 
+            $this->__loadFeaturesFromUserOrTeam();
+
             try {
 
                 $_keyList = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
@@ -90,9 +99,26 @@ class newProjectController extends viewController {
             } catch ( Exception $e ) {
                 Log::doLog( $e->getMessage() );
             }
-
         }
+    }
 
+    /**
+     * Here we want to be explicit about the team the user is currently working on.
+     * Even if a user is included in more teams, we'd prefer to have the team bound
+     * to the given session.
+     *
+     */
+    private function __loadFeaturesFromUserOrTeam() {
+        $teamDao = new \Teams\MembershipDao() ;
+        $teams = $teamDao->findTeamsbyUser( $this->logged_user ) ;
+        $team = $teams[0] ;  // Later we will want to have this team be set per session
+
+        if ( $teams ) {
+            $this->featureSet->loadFromUserOrTeam( $this->logged_user, $teams[0] ) ;
+        }
+        else {
+            $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
+        }
     }
 
     private function array_sort_by_column( &$arr, $col, $dir = SORT_ASC ) {
@@ -284,6 +310,8 @@ class newProjectController extends viewController {
         
         $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages ); 
         LexiQADecorator::getInstance( $this->template )->featureEnabled( $this->logged_user, Database::obtain() )->decorateViewLexiQA();
+
+        $this->template->additional_input_params_base_path  = \INIT::$TEMPLATE_ROOT ;
 
     }
 

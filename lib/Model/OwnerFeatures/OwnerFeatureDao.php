@@ -1,6 +1,23 @@
 <?php
 
 class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
+
+    public function findFromUserOrTeam( Users_UserStruct $user, \Teams\TeamStruct $team ) {
+       // TODO:
+    }
+
+    public function getByTeam( \Teams\TeamStruct $team ) {
+        $conn = Database::obtain()->getConnection();
+
+        $stmt = $conn->prepare( "SELECT * FROM owner_features " .
+            " WHERE owner_features.id_team = :id_team " .
+            " AND owner_features.enabled "
+        );
+        $stmt->execute( array( 'id_team' => $team->id) );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, 'OwnerFeatures_OwnerFeatureStruct');
+        return $stmt->fetchAll();
+    }
+
     public function create( OwnerFeatures_OwnerFeatureStruct $obj ) {
         $conn = Database::obtain()->getConnection();
 

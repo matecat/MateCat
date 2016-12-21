@@ -66,7 +66,7 @@ class CreateTeamMembershipTask extends Command
         $membership = MembershipDao::insertStruct( $membershipStruct );
 
         $output->write(
-            "membershipt created with id: " . $membership,  TRUE
+            "membership created with id: " . $membership,  TRUE
         ) ;
 
     }

@@ -32,9 +32,22 @@ class FeatureSet {
      *
      * @param $id_customer
      */
-    public function loadFromUserEmail($id_customer ) {
+    public function loadFromUserEmail( $id_customer ) {
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
         $this->features = array_merge( $this->features, $features );
+    }
+
+    /**
+     * This method is specific to load features for the given user including
+     * any team he's memeber of.
+     *
+     * @param Users_UserStruct $user
+     */
+    public function loadFromUserOrTeam( Users_UserStruct $user, \Teams\TeamStruct $team ) {
+
+        $dao = new OwnerFeatures_OwnerFeatureDao() ;
+        return $dao->findFromUserOrTeam( $user, $team ) ;
+
     }
 
     /**
@@ -42,8 +55,19 @@ class FeatureSet {
      */
     public function loadFeatures( $params = array() ) {
        if ( array_key_exists('id_customer', $params) ) {
-            $this->loadFromIdCustomer( $params['id_customer'] ) ;
+            $this->loadFromUserEmail( $params['id_customer'] ) ;
         }
+    }
+
+    /**
+     * Loads the features starting from a given team.
+     *
+     * @param Users_UserStruct $user
+     */
+    public function loadFromTeam( \Teams\TeamStruct $team ) {
+        $dao = new OwnerFeatures_OwnerFeatureDao() ;
+        $features = $dao->getByTeam( $team ) ;
+        return $features ;
     }
 
     /**
