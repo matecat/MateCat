@@ -278,17 +278,6 @@ CREATE TABLE `notifications` (
   KEY `id_comment` (`id_comment`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
-CREATE TABLE `original_files_map` (
-  `sha1` varchar(100) NOT NULL,
-  `source` varchar(50) NOT NULL,
-  `target` varchar(50) NOT NULL,
-  `deflated_file` longblob,
-  `deflated_xliff` longblob,
-  `creation_date` date DEFAULT NULL,
-  `segmentation_rule` varchar(512) DEFAULT NULL,
-  PRIMARY KEY (`sha1`,`source`,`target`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
-
 CREATE TABLE `owner_features` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `uid` bigint(20) DEFAULT NULL,
