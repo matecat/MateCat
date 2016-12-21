@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'icomoon';
-  src:  url('../../fonts/icomoon.eot?rec40a');
-  src:  url('../../fonts/icomoon.eot?rec40a#iefix') format('embedded-opentype'),
-    url('../../fonts/icomoon.ttf?rec40a') format('truetype'),
-    url('../../fonts/icomoon.woff?rec40a') format('woff'),
-    url('../../fonts/icomoon.svg?rec40a#icomoon') format('svg');
+  src:  url('../../fonts/icomoon.eot?1jjm23');
+  src:  url('../../fonts/icomoon.eot?1jjm23#iefix') format('embedded-opentype'),
+    url('../../fonts/icomoon.ttf?1jjm23') format('truetype'),
+    url('../../fonts/icomoon.woff?1jjm23') format('woff'),
+    url('../../fonts/icomoon.svg?1jjm23#icomoon') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -28,6 +28,16 @@
   /* Better Font Rendering =========== */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-assignment_turned_in:before {
+  content: "\e862";
+}
+.icon-pageview:before {
+  content: "\e905";
+}
+.icon-QR:before {
+  content: "\e608";
 }
 
 .icon-uniE96B:before {
@@ -82,9 +92,9 @@
 .noticon:after, i.unarchive-project:after, i.resume-project:after {
     content: "\e607";
     color: red;
-    font-size: 16px;
+    font-size: 23px;
     position: absolute;
-    left: -1px;
+    left: -3px;
     top: 1px;
     transform: rotate(-45deg);
 }

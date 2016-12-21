@@ -18,12 +18,22 @@ html{
     font-size: 15px;
   }
 
-  font-family: "Calibri", sans-serif;
+  font-family: Calibri, Arial, Helvetica, sans-serif;
   font-weight: normal;
   color: $off-black;
 }
+
+@font-face {
+  font-family: Calibri;
+  src: local(Calibri), url("../fonts/calibri-webfont.woff") format("woff"), url("../fonts/calibri-webfont.ttf") format("truetype"), url("../fonts/calibri-webfont.eot"), url("../fonts/calibri-webfont.eot?#iefix") format("embedded-opentype"); }
+
+@font-face {
+  font-family: Calibri;
+  font-weight: bold;
+  src: local("Calibri Bold"), url("../fonts/calibri_bold-webfont.woff") format("woff"), url("../fonts/calibri_bold-webfont.ttf") format("truetype"), url("../fonts/calibri_bold-webfont.eot"), url("../fonts/calibri_bold-webfont.eot?#iefix") format("embedded-opentype"); }
+
 h1, h2, h3, h4, h5, h6 {
-	font-weight: 400;
+	font-weight: bold;
 	line-height: 1.1;
 }
 
@@ -38,7 +48,6 @@ h6 { font-size: $h6-fontsize; line-height: 110%; margin: ($h6-fontsize / 2) 0 ($
 
 // Text Styles
 em { font-style: italic; }
-strong { font-weight: 500; }
 small { font-size: 75%; }
 .light { font-weight: 300; }
 .thin { font-weight: 200; }
