@@ -25,9 +25,9 @@ class ProjectContainer extends React.Component {
 
     showHideAllJobs() {
         var show = this.state.showAllJobs;
-        if (!show) {
-            ManageActions.closeAllJobs();
-        }
+        // if (!show) {
+        //     ManageActions.closeAllJobs();
+        // }
         this.setState({
             showAllJobs: !show,
             visibleJobs: []
@@ -241,8 +241,13 @@ class ProjectContainer extends React.Component {
         //Last Activity Log Action
         var lastAction;
         if (this.state.lastAction) {
-            var date = this.getLastActionDate();
-            lastAction = <i><span>{this.state.lastAction.first_name }</span> <span>{this.state.lastAction.action.toLowerCase() + ' on ' + date}</span></i>
+            if (this.state.lastAction.length === 0) {
+                lastAction = '';
+            } else {
+                var date = this.getLastActionDate();
+                lastAction = <i><span>{this.state.lastAction.first_name }</span> <span>{this.state.lastAction.action.toLowerCase() + ' on ' + date}</span></i>
+
+            }
         } else {
             lastAction = <i>Loading....</i>
         }

@@ -479,7 +479,8 @@ module.exports = function(grunt) {
     grunt.registerTask('deploy', [
         'bundle:js',
         // 'strip',
-        'sass'
+        'sass',
+        'replace:css'
     ]);
 };
 
