@@ -978,7 +978,6 @@ color:#333;}
 .onoffswitch {
     position: relative; 
     width: 60px;
-    zoom:0.7;
     margin-top:8px;
     float: left;
     -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;

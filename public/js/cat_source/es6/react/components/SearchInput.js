@@ -22,13 +22,13 @@ class SearchInput extends React.Component {
 
                     <div className="row">
                         <div className="input-field">
-                            <i className="material-icons prefix">search</i>
+                            <i className="icon-search prefix"></i>
                             <input id="icon_prefix" type="text" className="valid"
                                    placeholder="Project name"
                                    ref={(input) => this.textInput = input}
                                    onChange={this.filterByName.bind(this)}/>
-                            <i className="material-icons prefix close-x"
-                            onClick={this.closeSearch.bind(this)}>close</i>
+                            <i className="prefix close-x"
+                            onClick={this.closeSearch.bind(this)}></i>
                         </div>
                     </div>
                 </form>
