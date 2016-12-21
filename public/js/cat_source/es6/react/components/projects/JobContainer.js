@@ -173,7 +173,7 @@ class JobContainer extends React.Component {
     }
 
     getSplitUrl() {
-        return '/analyze/'+ this.props.project.get('name') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password'); // + '?open=split&jobid=' + this.props.job.get('id');
+        return '/analyze/'+ this.props.project.get('name') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=split&jobid=' + this.props.job.get('id');
     }
 
     getActivityLogUrl() {
@@ -262,7 +262,7 @@ class JobContainer extends React.Component {
                                         <i className="large icon-expand right"/>Split
                                     </a>
                                     <a className="btn waves-effect waves-light outsource" target="_blank" href={outsourceUrl}>outsource</a>
-                                    <a className="btn waves-effect waves-light translate move-left" target="_blank" href={translateUrl}>Translate</a>
+                                    <a className="btn waves-effect waves-light translate move-left" target="_blank" href={translateUrl}>Open</a>
                                 </div>
                             </div>
                         </div>

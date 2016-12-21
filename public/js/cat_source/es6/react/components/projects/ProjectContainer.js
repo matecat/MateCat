@@ -180,6 +180,11 @@ class ProjectContainer extends React.Component {
         return '/analyze/' +this.props.project.get('name')+ '/' +this.props.project.get('id')+ '-' + this.props.project.get('password');
     }
 
+    getLastActionDate() {
+        var date = new Date(this.state.lastAction.event_date);
+        return date.toDateString();
+    }
+
     shouldComponentUpdate(nextProps, nextState){
         return (nextProps.project !== this.props.project ||
         nextState.showAllJobs !== this.state.showAllJobs || nextState.lastAction !==  this.state.lastAction)
@@ -193,7 +198,7 @@ class ProjectContainer extends React.Component {
         var targetsLangs = [];
         var jobsLength = this.props.project.get('jobs').size;
         var openProjectClass = '';
-        var payableWords = 0;
+        var payableWords = this.props.project.get('tm_analysis');
         var activityLogUrl = this.getActivityLogUrl();
 
         var projectMenu = this.getProjectMenu(activityLogUrl);
@@ -202,7 +207,7 @@ class ProjectContainer extends React.Component {
 
             var index = i+1;
             var openJobClass = '';
-            payableWords = payableWords + parseInt(job.get('stats').get('TOTAL_FORMATTED'));
+            // payableWords = payableWords + parseInt(this.props.project.get('tm_analysis'));
             if (self.state.showAllJobs || self.state.visibleJobs.indexOf(i) > -1 || jobsLength === 1 ) {
                 var item = <Job key={job.get('id')}
                                 job={job}
@@ -236,9 +241,10 @@ class ProjectContainer extends React.Component {
         //Last Activity Log Action
         var lastAction;
         if (this.state.lastAction) {
-             lastAction = <i><span>{this.state.lastAction.first_name + " - "}</span> <span>{this.state.lastAction.action}</span></i>
+            var date = this.getLastActionDate();
+            lastAction = <i><span>{this.state.lastAction.first_name }</span> <span>{this.state.lastAction.action.toLowerCase() + ' on ' + date}</span></i>
         } else {
-             lastAction = <i>Loading....</i>
+            lastAction = <i>Loading....</i>
         }
 
         return <div className="card-panel project">
