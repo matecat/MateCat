@@ -2095,8 +2095,8 @@ UI = {
                     if(parseInt(tokenData.code) < 0) {
                         var notification = {
                             title: 'Error',
-                            text: tokenData.message,
-                            type: 'warning'
+                            text: 'Download failed. Please, fix any tag issues and try again in 5 minutes. If it still fails, please, contactsupport@matecat.com',
+                            type: 'error'
                         };
                         APP.addNotification(notification);
                         // UI.showMessage({msg: tokenData.message})
