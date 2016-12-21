@@ -773,6 +773,7 @@ UI = {
                             clearInterval(interval);
                         }
                     }, 500);
+					window.history.pushState('',document.title,document.location.href.split('?')[0]);
                     break
             }
         }
