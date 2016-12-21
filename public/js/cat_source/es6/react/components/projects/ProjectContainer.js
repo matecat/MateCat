@@ -209,7 +209,7 @@ class ProjectContainer extends React.Component {
             var openJobClass = '';
             // payableWords = payableWords + parseInt(this.props.project.get('tm_analysis'));
             if (self.state.showAllJobs || self.state.visibleJobs.indexOf(i) > -1 || jobsLength === 1 ) {
-                var item = <Job key={job.get('id')}
+                var item = <Job key={job.get('id') + "-" + i}
                                 job={job}
                                 index={index}
                                 project={self.props.project}
