@@ -36,7 +36,7 @@ class MembershipDao extends \DataAccess_AbstractDao
      * @param \Users_UserStruct $user
      */
     public function findTeambyUser( \Users_UserStruct $user ) {
-        $sql = " SELECT * FROM teams JOIN teams_users ON teams_users.id_team = teams.id " .
+        $sql = " SELECT teams.* FROM teams JOIN teams_users ON teams_users.id_team = teams.id " .
             " WHERE teams_users.uid = ? " .
             " LIMIT 1 " ;
 
@@ -44,7 +44,7 @@ class MembershipDao extends \DataAccess_AbstractDao
         $stmt->setFetchMode( PDO::FETCH_CLASS, '\Teams\TeamStruct' );
         $stmt->execute( array( $user->uid ) ) ;
 
-        return $stmt->fetch() ;
+        return static::resultOrNull( $stmt->fetch() );
     }
 
     protected function _buildResult($array_result)

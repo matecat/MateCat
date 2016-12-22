@@ -155,9 +155,7 @@ class ProjectManager {
      * @param Users_UserStruct $user
      */
     public function setUser( Users_UserStruct $user ) {
-        $this->user = $user ;
-        $dao = new \Teams\MembershipDao()  ;
-        $this->team = $dao->findTeambyUser( $user ) ;
+        $this->team = Users_UserDao::findDefaultTeam( $user ) ;
 
         if ( $this->team ) {
             $this->features->loadFromTeam( $this->team ) ;

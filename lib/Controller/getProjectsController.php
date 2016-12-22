@@ -29,11 +29,6 @@ class getProjectsController extends ajaxController {
     private $project_id;
 
     /**
-     * @var bool
-     */
-    private $filter_enabled;
-
-    /**
      * @var string|bool
      */
     private $search_in_pname;
@@ -73,8 +68,6 @@ class getProjectsController extends ajaxController {
                 'page'          => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'step'          => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'project'       => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'filter'        => array( 'filter' => FILTER_VALIDATE_BOOLEAN,
-                                          'options' => array( FILTER_NULL_ON_FAILURE ) ),
                 'pn'            => array( 'filter'  => FILTER_SANITIZE_STRING,
                                           'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
                 ),
@@ -110,7 +103,6 @@ class getProjectsController extends ajaxController {
         $this->page                 = (int) $postInput[ 'page' ];
         $this->step                 = (int) $postInput[ 'step' ];
         $this->project_id           = $postInput[ 'project' ];
-        $this->filter_enabled       = (int) $postInput[ 'filter' ];
         $this->search_in_pname      = (string) $postInput[ 'pn' ];
         $this->search_source        = (string) $postInput[ 'source' ];
         $this->search_target        = (string) $postInput[ 'target' ];
@@ -119,22 +111,27 @@ class getProjectsController extends ajaxController {
     }
 
     public function doAction() {
+        $this->checkLogin( FALSE ) ;
 
-        $start = ( ( $this->page - 1 ) * $this->step );
-
-        if( empty($_SESSION['cid']) ){
+        if (! $this->userIsLogged ) {
             throw new Exception('User not Logged');
         }
 
-        $projects = ManageUtils::queryProjects( $start, $this->step,
+        $team = Users_UserDao::findDefaultTeam( $this->logged_user );
+
+        $start = ( ( $this->page - 1 ) * $this->step );
+
+        $projects = ManageUtils::queryProjects( $this->logged_user, $start, $this->step,
             $this->search_in_pname,
             $this->search_source, $this->search_target, $this->search_status,
-            $this->search_onlycompleted, $this->filter_enabled, $this->project_id );
+            $this->search_onlycompleted, $this->project_id,
+            $team
+        );
 
-        $projnum = getProjectsNumber( $start, $this->step,
+        $projnum = getProjectsNumber( $this->logged_user,
             $this->search_in_pname, $this->search_source,
             $this->search_target, $this->search_status,
-            $this->search_onlycompleted, $this->filter_enabled );
+            $this->search_onlycompleted, $team );
 
         /**
          * pass projects in a filter to find associated reivew_password if needed.
@@ -145,7 +142,7 @@ class getProjectsController extends ajaxController {
          * for each of them in a separate query.
          */
 
-        $featureSet = FeatureSet::fromIdCustomer( $_SESSION['cid'] );
+        $featureSet = FeatureSet::fromIdCustomer( $this->logged_user->email );
 
         $projects = $featureSet->filter('filter_manage_projects_loaded', $projects);
 
