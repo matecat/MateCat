@@ -945,7 +945,9 @@ $.extend(UI, {
 			UI.currentSegment.trigger('modified');
 
 			if (UI.droppingInEditarea) {
-				UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
+				setTimeout(function() {
+					UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
+				}, 100);
 			}
 
 			if ( UI.hasSourceOrTargetTags( e.target ) ) {
