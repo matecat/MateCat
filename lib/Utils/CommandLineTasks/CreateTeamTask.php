@@ -15,6 +15,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Teams\TeamDao;
 use Teams\TeamStruct;
+use Teams\MembershipDao, Teams\MembershipStruct ;
 
 
 class CreateTeamTask extends Command
@@ -47,10 +48,19 @@ class CreateTeamTask extends Command
             'created_at' => \Utils::mysqlTimestamp( time() )
         )) ;
 
-        $result = TeamDao::insertStruct( $teamStruct  ) ;
+        $teamId = TeamDao::insertStruct( $teamStruct  ) ;
 
-        if ( $result ) {
-            $output->write(" Team created with ID: " . $result , TRUE ) ;
+        $membershipStruct = new MembershipStruct(array(
+            'id_team' => $teamId,
+            'uid' => $user->uid,
+            'is_admin' => TRUE
+        ));
+
+        $membershipId = MembershipDao::insertStruct( $membershipStruct );
+
+        if ( $membershipId ) {
+            $output->write(" Team created with ID: " . $teamId , TRUE ) ;
+            $output->write(" Membership created with ID: " . $membershipId , TRUE ) ;
         }
 
     }

@@ -46,14 +46,10 @@ class CreateTeamMembershipTask extends Command
         }
 
         $userDao = new \Users_UserDao() ;
-        $user = $userDao->getByEmail( $input->getArgument('user_email' ));
+        $user = $userDao->getByEmail( $input->getArgument('user_email' ) );
 
         if ( !$user ) {
             throw new \Exception('user is not found' );
-        }
-
-        if ( $team->created_by == $user->uid ) {
-            throw new \Exception('user is already the creator of the team') ;
         }
 
         $membershipDao = new MembershipDao() ;
