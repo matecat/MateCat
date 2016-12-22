@@ -30,17 +30,21 @@ class MembershipDao extends \DataAccess_AbstractDao
 
     /**
      *
+     * Find ONE team for the given user. This is to enforce the temporary requirement to
+     * have just one team per user.
+     *
      * @param \Users_UserStruct $user
      */
-    public function findTeamsbyUser( \Users_UserStruct $user ) {
+    public function findTeambyUser( \Users_UserStruct $user ) {
         $sql = " SELECT * FROM teams JOIN teams_users ON teams_users.id_team = teams.id " .
-            " WHERE teams_users.uid = ? " ;
+            " WHERE teams_users.uid = ? " .
+            " LIMIT 1 " ;
 
         $stmt = $this->getConnection()->getConnection()->prepare( $sql ) ;
         $stmt->setFetchMode( PDO::FETCH_CLASS, '\Teams\TeamStruct' );
         $stmt->execute( array( $user->uid ) ) ;
 
-        return $stmt->fetchAll() ;
+        return $stmt->fetch() ;
     }
 
     protected function _buildResult($array_result)

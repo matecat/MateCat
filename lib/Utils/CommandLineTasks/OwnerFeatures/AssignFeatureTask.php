@@ -21,8 +21,8 @@ class AssignFeatureTask extends Command {
             // the name of the command (the part after "bin/console")
             ->setName('features:assign')
             ->setDescription('Adds feature to a user or a team.')
-            ->addArgument('user_or_team_id', InputArgument::REQUIRED, 'Id of the user ( default ) to assign the feature to')
-            ->addArgument('features', InputArgument::IS_ARRAY | InputArgument::REQUIRED, 'List of features to enable' )
+            ->addArgument('user_or_team_id', InputArgument::REQUIRED, 'Id of the user to assign the feature to. Default is user id.')
+            ->addArgument('features', InputArgument::IS_ARRAY | InputArgument::REQUIRED, 'List of features to enable. Valid features are: ' . implode( ', ',  \Features::$VALID_CODES ) )
             ->addOption('team', 't', null, 'Take the input id as a team id' )
             ->addOption('force', 'f', null, 'Force the name of a feature even if validation fails' )
         ;

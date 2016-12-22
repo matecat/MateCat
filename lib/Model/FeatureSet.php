@@ -34,29 +34,7 @@ class FeatureSet {
      */
     public function loadFromUserEmail( $id_customer ) {
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
-        $this->features = array_merge( $this->features, $features );
-    }
-
-    /**
-     * This method is specific to load features for the given user including
-     * any team he's memeber of.
-     *
-     * @param Users_UserStruct $user
-     */
-    public function loadFromUserOrTeam( Users_UserStruct $user, \Teams\TeamStruct $team ) {
-
-        $dao = new OwnerFeatures_OwnerFeatureDao() ;
-        return $dao->findFromUserOrTeam( $user, $team ) ;
-
-    }
-
-    /**
-     * @param array $params
-     */
-    public function loadFeatures( $params = array() ) {
-       if ( array_key_exists('id_customer', $params) ) {
-            $this->loadFromUserEmail( $params['id_customer'] ) ;
-        }
+        $this->features = static::merge( $this->features, $features );
     }
 
     /**
@@ -67,7 +45,7 @@ class FeatureSet {
     public function loadFromTeam( \Teams\TeamStruct $team ) {
         $dao = new OwnerFeatures_OwnerFeatureDao() ;
         $features = $dao->getByTeam( $team ) ;
-        return $features ;
+        $this->features = static::merge( $this->features, $features ) ;
     }
 
     /**
@@ -150,9 +128,23 @@ class FeatureSet {
                 $obj = new $cls( $controller, $template ) ;
                 $obj->decorate();
             }
+        }
+    }
 
+    public static function merge( $left, $right ) {
+        $returnable = array();
+
+        foreach( $left as $feature ) {
+            $returnable[ $feature->feature_code ] = $feature ;
         }
 
+        foreach( $right as $feature ) {
+            if ( !isset( $returnable[ $feature->feature_code ] ) ) {
+                $returnable[ $feature->feature_code ] = $feature ;
+            }
+        }
+
+        return $returnable ;
     }
 
     /**
@@ -163,7 +155,7 @@ class FeatureSet {
         foreach( INIT::$MANDATORY_PLUGINS as $plugin) {
             $features[] = new BasicFeatureStruct(array('feature_code' => $plugin));
         }
-        $this->features = array_merge($this->features, $features);
+        $this->features = static::merge($this->features, $features);
     }
 
     /**

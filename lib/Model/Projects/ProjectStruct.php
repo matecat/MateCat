@@ -5,6 +5,7 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     public $password ;
     public $name ;
     public $id_customer ;
+    public $id_team ;
     public $create_date ;
     public $id_engine_tm ;
     public $id_engine_mt ;

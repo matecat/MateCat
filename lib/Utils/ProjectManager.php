@@ -52,6 +52,16 @@ class ProjectManager {
 
     const TRANSLATED_USER = 'translated_user';
 
+    /**
+     * @var Users_UserStruct ;
+     */
+    protected $user ;
+
+    /**
+     * @var \Teams\TeamStruct
+     */
+    protected $team ;
+
     public function __construct( ArrayObject $projectStructure = null ) {
 
 
@@ -139,6 +149,22 @@ class ProjectManager {
     }
 
     /**
+     * Set the user who is creating the project. Loads additional features looking up the
+     * the ones activated for the team.
+     *
+     * @param Users_UserStruct $user
+     */
+    public function setUser( Users_UserStruct $user ) {
+        $this->user = $user ;
+        $dao = new \Teams\MembershipDao()  ;
+        $this->team = $dao->findTeambyUser( $user ) ;
+
+        if ( $this->team ) {
+            $this->features->loadFromTeam( $this->team ) ;
+        }
+    }
+
+    /**
      * @param $id
      *
      * @throws Exceptions_RecordNotFound
@@ -212,6 +238,11 @@ class ProjectManager {
     private function createProjectRecord() {
         $this->projectStructure[ 'ppassword' ]  = $this->_generatePassword();
         $this->projectStructure[ 'user_ip' ]    = Utils::getRealIpAddr();
+
+        if ( $this->team ) {
+            $this->projectStructure[ 'id_team' ] = $this->team->id ;
+        }
+
         $this->projectStructure[ 'id_project' ] = insertProject( $this->projectStructure );
         $this->project = Projects_ProjectDao::findById( $this->projectStructure['id_project'] );
     }

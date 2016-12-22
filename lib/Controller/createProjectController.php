@@ -314,6 +314,7 @@ class createProjectController extends ajaxController {
         }
 
         $projectManager = new ProjectManager( $projectStructure );
+        $projectManager->setUser( $this->logged_user ) ;
         $projectManager->createProject();
 
         // Strictly related to the UI ( not API ) interaction, should yet be moved away from controller.

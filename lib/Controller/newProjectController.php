@@ -103,21 +103,30 @@ class newProjectController extends viewController {
     }
 
     /**
+     *
+     */
+    private function __getCurrentTeam() {
+        if ( !$this->isLoggedIn() ) {
+            throw new Exception('user is not logged') ;
+        }
+
+        $teamDao = new \Teams\MembershipDao() ;
+        $team = $teamDao->findTeambyUser( $this->logged_user ) ;
+        return $team ;
+    }
+
+    /**
      * Here we want to be explicit about the team the user is currently working on.
      * Even if a user is included in more teams, we'd prefer to have the team bound
      * to the given session.
      *
      */
     private function __loadFeaturesFromUserOrTeam() {
-        $teamDao = new \Teams\MembershipDao() ;
-        $teams = $teamDao->findTeamsbyUser( $this->logged_user ) ;
-        $team = $teams[0] ;  // Later we will want to have this team be set per session
+        $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
+        $currentTeam = $this->__getCurrentTeam();
 
-        if ( $teams ) {
-            $this->featureSet->loadFromUserOrTeam( $this->logged_user, $teams[0] ) ;
-        }
-        else {
-            $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
+        if ( $currentTeam ) {
+            $this->featureSet->loadFromTeam( $currentTeam ) ;
         }
     }
 
@@ -313,6 +322,8 @@ class newProjectController extends viewController {
 
         $this->template->additional_input_params_base_path  = \INIT::$TEMPLATE_ROOT ;
 
+        $this->featureSet->appendDecorators('NewProjectDecorator', $this, $this->template ) ;
+
     }
 
     private function getCurrentTargetLang() {
@@ -330,10 +341,6 @@ class newProjectController extends viewController {
         }
 
         return Constants::DEFAULT_TARGET_LANG;
-    }
-
-    private function generateGDriveAuthUrl(){
-        $this->gdriveAuthUrl = \GDrive::generateGDriveAuthUrl();
     }
 
     private function evalTragetLangHistory() {
