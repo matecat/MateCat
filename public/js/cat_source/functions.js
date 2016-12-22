@@ -391,7 +391,7 @@ function runDownload() {
             onCancel: 'goToFirstError',
             callback: continueDownloadFunction,
             okTxt: 'Continue',
-            msg: "Potential errors (missing tags, numbers etc.) found in the text. <br>If you continue, part of the content could be untranslated - look for the string \"UNTRANSLATED_CONTENT\" in the downloaded file(s).<br><br>Continue downloading or fix the error in MateCat:"
+            msg: 'Potential errors (e.g. tag mismatches, inconsistencies etc.) found in the text. If you continue, your download may fail or part of the content be untranslated - search the string "UNTRANSLATED_CONTENT" in the downloaded file(s).<br><br>Continue downloading or fix the error in MateCat:'
         });
     } else {
         UI[ continueDownloadFunction ]();
