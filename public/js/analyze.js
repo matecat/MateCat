@@ -717,7 +717,7 @@ UI = {
 		var diff = total - (wordsXjob * numsplit);
 		$('.popup-split .error-message').addClass('none');
 		$('.popup-split .popup-box .jobs').empty();
-		$('.popup-split .popup-splitselect').val(numsplit);
+		$('.popup-split .splitselect').val(numsplit);
 		$('.popup-split h1 .jid').attr('data-jid', jid);
 		$('.popup-split h1 .jid').attr('data-pwd', $(job).attr('data-pwd'));
 		$('.popup-split').removeClass('error-number');
@@ -745,8 +745,8 @@ UI = {
 
 		$('.popup-split').show();
 
-		$('.popup-split .popup-splitselect').off('change');
-		$('.popup-split .popup-splitselect').on('change', function () {
+		$('.popup-split .splitselect').off('change');
+		$('.popup-split .splitselect').on('change', function () {
 			var newValue = $(this).val();
 			jobContainer.find('.splitselect').val(newValue);
 			UI.updateSplitPopup(button);
