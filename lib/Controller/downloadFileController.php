@@ -140,6 +140,8 @@ class downloadFileController extends downloadController {
 
                     $data = getSegmentsDownload( $this->id_job, $this->password, $fileID, $nonew );
 
+                    $transUnits =  array();
+
                     //prepare regexp for nest step
                     $regexpEntity = '/&#x(0[0-8BCEF]|1[0-9A-F]|7F);/u';
                     $regexpAscii  = '/([\x{00}-\x{1F}\x{7F}]{1})/u';
@@ -147,7 +149,11 @@ class downloadFileController extends downloadController {
                     foreach ( $data as $i => $k ) {
                         //create a secondary indexing mechanism on segments' array; this will be useful
                         //prepend a string so non-trans unit id ( ex: numerical ) are not overwritten
-                        $data[ 'matecat|' . $k[ 'internal_id' ] ][] = $i;
+                        $internalId = $k[ 'internal_id' ] ;
+
+                        $transUnits[ $internalId ] [] = $i ;
+
+                        $data[ 'matecat|' . $internalId ] [] = $i;
 
                         //FIXME: temporary patch
                         $data[ $i ][ 'translation' ] = str_replace( '<x id="nbsp"/>', '&#xA0;', $data[ $i ][ 'translation' ] );
@@ -170,7 +176,7 @@ class downloadFileController extends downloadController {
                     }
 
                     //instatiate parser
-                    $xsp = new SdlXliffSAXTranslationReplacer( $file[ 'xliffFilePath' ], $data, Langs_Languages::getInstance()->getLangRegionCode( $jobData[ 'target' ] ), $outputPath );
+                    $xsp = new SdlXliffSAXTranslationReplacer( $file[ 'xliffFilePath' ], $data, $transUnits, Langs_Languages::getInstance()->getLangRegionCode( $jobData[ 'target' ] ), $outputPath );
 
                     if ( $this->download_type == 'omegat' ) {
                         $xsp->setSourceInTarget( true );

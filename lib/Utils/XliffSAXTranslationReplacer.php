@@ -16,16 +16,18 @@ class XliffSAXTranslationReplacer {
     protected $currentBuffer;//the current piece of text it's been parsed
     protected $len;//length of the currentBuffer
     protected $segments; //array of translations
-    protected $lastSegment = [];
+    protected $lastTransUnit = [];
     protected $currentId;//id of current <trans-unit>
 
     protected $target_lang;
 
     protected $sourceInTarget;
 
+    protected $transUnits ;
+
     protected static $INTERNAL_TAG_PLACEHOLDER;
 
-    public function __construct( $originalXliffFilename, $segments, $trg_lang = null, $outputFile = null ) {
+    public function __construct( $originalXliffFilename, $segments, $transUnits, $trg_lang = null, $outputFile = null ) {
 
         self::$INTERNAL_TAG_PLACEHOLDER = "§" .
                 substr(
@@ -50,6 +52,7 @@ class XliffSAXTranslationReplacer {
         $this->segments    = $segments;
         $this->target_lang = $trg_lang;
         $this->sourceInTarget = false;
+        $this->transUnits = $transUnits ;
 
     }
 
@@ -269,10 +272,10 @@ class XliffSAXTranslationReplacer {
             //if it's a source and there is a translation available, append the target to it
             if ( 'target' == $name ) {
 
-                if ( isset( $this->segments[ 'matecat|' . $this->currentId ] ) ) {
-                    //get translation of current segment, by indirect indexing: id -> positional index -> segment
-                    //actually there may be more that one segment to that ID if there are two mrk of the same source segment
-                    $id_list = $this->segments[ 'matecat|' . $this->currentId ];
+                if ( isset( $this->transUnits[ $this->currentId ] ) ) {
+                    // get translation of current segment, by indirect indexing: id -> positional index -> segment
+                    // actually there may be more that one segment to that ID if there are two mrk of the same source segment
+                    $list_of_ids = $this->transUnits[ $this->currentId ] ;
 
                     /*
                      * At the end of every cycle the segment grouping information is lost: unset( 'matecat|' . $this->currentId )
@@ -284,19 +287,21 @@ class XliffSAXTranslationReplacer {
                      * for the next tagOpen ( possible sdl:seg-defs )
                      *
                      */
-                    $this->lastSegment = array_slice(
-                            $this->segments,
-                            reset( $this->segments[ 'matecat|' . $this->currentId ] ),
-                            count( $this->segments[ 'matecat|' . $this->currentId ] )
-                    );
 
-                    //init translation
+                    $this->lastTransUnit = array();
+
+                    for( $i = 0; $i < count( $list_of_ids ) ; $i++ ) {
+                        $id = $list_of_ids[ $i ] ;
+                        $this->lastTransUnit[] = $this->segments[ $id ] ;
+                    }
+
+                    // init translation
                     $translation = '';
 
-                    //we must reset the lastMrkId found because this is a new segment.
+                    // we must reset the lastMrkId found because this is a new segment.
                     $lastMrkId = -1;
 
-                    foreach ( $id_list as $pos => $id ) {
+                    foreach ( $list_of_ids as $pos => $id ) {
 
                         /*
                          * This routine works to respect the positional orders of markers.
@@ -308,7 +313,7 @@ class XliffSAXTranslationReplacer {
                          * pre-assign zero to the new mrk if this is the first one ( in this segment )
                          * If it is null leave it NULL
                          */
-                        if( (int) $this->segments[ $id ][ "mrk_id" ] < 0 && $this->segments[ $id ][ "mrk_id" ] !== null ){
+                        if ( (int) $this->segments[ $id ][ "mrk_id" ] < 0 && $this->segments[ $id ][ "mrk_id" ] !== null ) {
                             $this->segments[ $id ][ "mrk_id" ] = 0;
                         }
 
@@ -333,10 +338,10 @@ class XliffSAXTranslationReplacer {
                         $translation = $this->prepareSegment( $seg, $translation );
 
                         /*
-                         * WARNING: this unset needs to manage the duplicated Trans-unit IDs
+                         * WARNING: this unset is needed to manage the duplicated Trans-unit IDs
                          *
                          */
-                        unset(  $this->segments[ 'matecat|' . $this->currentId ][ $pos ] );
+                        unset(  $this->transUnits[ $this->currentId ] [ $pos ] ) ;
 
                         $lastMrkId = $this->segments[ $id ][ "mrk_id" ];
 
