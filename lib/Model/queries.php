@@ -1665,13 +1665,13 @@ function insertProject( ArrayObject $projectStructure ) {
     $data[ 'password' ]          = $projectStructure[ 'ppassword' ];
     $data[ 'pretranslate_100' ]  = $projectStructure[ 'pretranslate_100' ];
     $data[ 'remote_ip_address' ] = empty( $projectStructure[ 'user_ip' ] ) ? 'UNKNOWN' : $projectStructure[ 'user_ip' ];
-    $query                       = "SELECT LAST_INSERT_ID() FROM projects";
 
     $db = Database::obtain();
-    $db->insert( 'projects', $data );
-    $results = $db->query_first( $query );
-
-    return $results[ 'LAST_INSERT_ID()' ];
+    $db->begin();
+    $projectId = $db->insert( 'projects', $data );
+    $project = Projects_ProjectDao::findById( $projectId );
+    $db->commit();
+    return $project;
 }
 
 function updateTranslatorJob( $id_job, Engines_Results_MyMemory_CreateUserResponse $newUser ) {
@@ -1726,35 +1726,7 @@ function insertTranslator( ArrayObject $projectStructure ) {
     $projectStructure[ 'private_tm_user' ] = $user_id;
 }
 
-//function insertJob( $password, $id_project, $id_translator, $source_language, $target_language, $mt_engine, $tms_engine, $owner ) {
-function insertJob( ArrayObject $projectStructure, $password, $target_language, $job_segments, $owner ) {
-    $data                        = array();
-    $data[ 'password' ]          = $password;
-    $data[ 'id_project' ]        = $projectStructure[ 'id_project' ];
-    $data[ 'id_translator' ]     = is_null($projectStructure[ 'private_tm_user' ]) ?  "" : $projectStructure[ 'private_tm_user' ] ;
-    $data[ 'source' ]            = $projectStructure[ 'source_language' ];
-    $data[ 'target' ]            = $target_language;
-    $data[ 'id_tms' ]            = $projectStructure[ 'tms_engine' ];
-    $data[ 'id_mt_engine' ]      = $projectStructure[ 'mt_engine' ];
-    $data[ 'create_date' ]       = date( "Y-m-d H:i:s" );
-    $data[ 'subject' ]           = $projectStructure[ 'job_subject' ];
-    $data[ 'owner' ]             = $owner;
-    $data[ 'job_first_segment' ] = $job_segments[ 'job_first_segment' ];
-    $data[ 'job_last_segment' ]  = $job_segments[ 'job_last_segment' ];
-    $data[ 'tm_keys' ]           = $projectStructure[ 'tm_keys' ];
-    $data[ 'payable_rates' ]     = json_encode( $projectStructure[ 'payable_rates' ] );
-    $data[ 'dqf_key' ]           = $projectStructure[ 'dqf_key' ];
-
-    $query = "SELECT LAST_INSERT_ID() FROM jobs";
-
-    $db = Database::obtain();
-    $db->insert( 'jobs', $data );
-    $results = $db->query_first( $query );
-
-    return $results[ 'LAST_INSERT_ID()' ];
-}
-
-function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $fileDateSha1Path, $params=array() ) {
+function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $fileDateSha1Path ) {
     $data                         = array();
     $data[ 'id_project' ]         = $projectStructure[ 'id_project' ];
     $data[ 'filename' ]           = $file_name;
@@ -1765,28 +1737,11 @@ function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $fil
     $db = Database::obtain();
 
     try {
-        $db->insert('files', $data);
+        $idFile = $db->insert('files', $data);
+    } catch ( PDOException $e ) {
+        Log::doLog( "Database insert error: {$e->getMessage()} " );
+        throw new Exception( "Database insert file error: {$e->getMessage()} ", - $e->getCode() );
     }
-    catch (PDOException $e) {
-        $errno = $e->getCode();
-        if ( $errno == 1153 ) {
-            Log::doLog( "file too large for mysql packet: increase max_allowed_packed_size" );
-            throw new Exception( "Database insert Large file error: $errno ", -$errno );
-        }
-        else {
-            Log::doLog( "Database insert error: $errno " );
-            throw new Exception( "Database insert file error: $errno ", -$errno );
-        }
-    }
-    $query   = "SELECT LAST_INSERT_ID() FROM files";
-
-    try {
-        $results = $db->query_first($query);
-    } catch( PDOException $e ) {
-        Log::doLog( "Database failure, failed to get last index. {$e->getMessage()}: {$e->getCode()} ", -$e->getCode() );
-        throw new Exception( "Database failure, failed to get last index. {$e->getMessage()}: {$e->getCode()} ", -$e->getCode() );
-    }
-    $idFile = $results[ 'LAST_INSERT_ID()' ];
 
     return $idFile;
 }
