@@ -16,7 +16,7 @@ DB_DATABASE = "matecat"
 DB_USER = "matecat_user"
 DB_PASS = "matecat_user"
 
-REDIS_SERVERS = "tcp://localhost:6379"
+REDIS_SERVERS = "tcp://localhost:6379?database=0"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
 QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
