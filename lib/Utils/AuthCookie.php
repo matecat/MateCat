@@ -20,19 +20,21 @@ class AuthCookie {
 
     //set a cookie with a username
     public static function setCredentials( $username, $uid ) {
+        list( $new_cookie_data, $new_expire_date ) = static::signedAuthCookie($username, $uid);
+        setcookie( INIT::$AUTHCOOKIENAME, $new_cookie_data, $new_expire_date, '/' );
+    }
+
+    public static function signedAuthCookie($username, $uid) {
         $new_expire_date = time() + INIT::$AUTHCOOKIEDURATION;
         $new_cookie_data = array(
-                'uid'         => $uid,
-                'username'    => $username,
-                'expire_date' => $new_expire_date,
-                'hash'        => hash( 'sha256', INIT::$AUTHSECRET . $username . $uid . $new_expire_date )
+            'uid'         => $uid,
+            'username'    => $username,
+            'expire_date' => $new_expire_date,
+            'hash'        => hash( 'sha256', INIT::$AUTHSECRET . $username . $uid . $new_expire_date )
         );
         $new_cookie_data = json_encode( $new_cookie_data );
-        //log::doLog("inserting in ".INIT::$AUTHCOOKIENAME." following data: ".$new_cookie_data);
-        $outcome = setcookie( INIT::$AUTHCOOKIENAME, $new_cookie_data, $new_expire_date, '/' );
-        if ( !$outcome ) {
-            //log::doLog("Failed setting cookie");
-        }
+
+        return array( $new_cookie_data, $new_expire_date );
     }
 
     public static function destroyAuthentication() {

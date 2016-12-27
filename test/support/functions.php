@@ -84,19 +84,45 @@ function prepare_file_in_upload_folder( $path, $upload_session )  {
     copy( $path, $dest ) ; 
 }
 
+function get_sessid_for_user( Users_UserStruct $user ) {
+
+    list( $new_cookie_data, $new_expire_date ) = AuthCookie::signedAuthCookie(
+        $user->email, $user->uid
+    ) ;
+    $cookie = array(
+        INIT::$AUTHCOOKIENAME, $new_cookie_data, $new_expire_date, '/'
+    );
+
+    $sessidCurl = new CurlTest() ;
+    $sessidCurl->cookies = array( $cookie );
+    $sessidCurl->path = '/';
+    $sessidCurl->run();
+    $cookies = $sessidCurl->getCookies();
+
+    return $cookies['PHPSESSID']  ;
+}
+
 function createProjectWithUIParams( $params ) {
-    $upload_session = $params['upload_session'];
-    $files = $params['files'] ; 
-    
-    unset( $params['upload_session'] );
+    $files = $params['files'] ;
+    $cookies = $params['cookies'];
+
+    if ( isset( $params['upload_session'] ) ) {
+        Log::doLog("DEPRECATION: passing upload_session as param is deprecated, pass it inside a `cookies` array instead");
+        $upload_session = $params['upload_session'];
+        unset( $params['upload_session'] );
+
+        $cookies[] = array('upload_session', $upload_session );
+    }
+
     unset( $params['files'] );
+    unset( $params['cookies'] );
 
     $curlTest = new CurlTest();
 
     $curlTest->path = '/index.php?action=createProject' ;
     $curlTest->params = $params ;
 
-    $curlTest->cookies[] = array('upload_session', $upload_session );
+    $curlTest->cookies = $cookies ;
     $curlTest->files = $files ; 
 
     $response = $curlTest->getResponse();
