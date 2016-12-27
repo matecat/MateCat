@@ -150,25 +150,27 @@ abstract class viewController extends controller {
         require_once INIT::$ROOT . '/inc/PHPTAL/PHPTAL.php';
 
         $this->setBrowserSupport();
-
-        //try to get user name from cookie if it is not present and put it in session
-        if ( empty( $_SESSION[ 'cid' ] ) ) {
-
-            //log::doLog(get_class($this)." requires check for login");
-            $username_from_cookie = AuthCookie::getCredentials();
-            if ( $username_from_cookie ) {
-                $_SESSION[ 'cid' ] = $username_from_cookie['username'];
-                $_SESSION[ 'uid' ] = $username_from_cookie['uid'];
-            }
-
-        }
-
+        $this->_setUserFromAuthCookie();
         $this->setUserCredentials();
 
         if( $isAuthRequired  ) {
             $this->doAuth();
         }
 
+    }
+
+    /**
+     *  Try to get user name from cookie if it is not present and put it in session.
+     *
+     */
+    protected function _setUserFromAuthCookie() {
+        if ( empty( $_SESSION[ 'cid' ] ) ) {
+            $username_from_cookie = AuthCookie::getCredentials();
+            if ( $username_from_cookie ) {
+                $_SESSION[ 'cid' ] = $username_from_cookie['username'];
+                $_SESSION[ 'uid' ] = $username_from_cookie['uid'];
+            }
+        }
     }
 
     /**
