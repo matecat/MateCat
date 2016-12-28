@@ -18,6 +18,12 @@ class FeatureSet {
         $this->loadFromMandatory();
     }
 
+    public function getCodes() {
+        return array_map( function( $feature ) {
+            return $feature->feature_code ;
+        }, $this->features);
+    }
+
     /**
      * This method is to be used to load features which should be active for a given project.
      * This looksup features on the user set as id_customer, and the features set for

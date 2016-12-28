@@ -209,7 +209,7 @@ class getSegmentsController extends ajaxController {
 
 
     private function getOptionalQueryFields() {
-        $feature = $this->job->getProject()->getOwnerFeature('translation_versions');
+        $feature = $this->job->getProject()->isFeatureEnabled('translation_versions');
         $options = array();
 
         if ( $feature ) {

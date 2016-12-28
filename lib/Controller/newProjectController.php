@@ -318,7 +318,7 @@ class newProjectController extends viewController {
         $this->template->currentTargetLang = $this->getCurrentTargetLang();
         
         $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages ); 
-        LexiQADecorator::getInstance( $this->template )->featureEnabled( $this->logged_user, Database::obtain() )->decorateViewLexiQA();
+        LexiQADecorator::getInstance( $this->template )->featureEnabled( $this->featureSet )->decorateViewLexiQA();
 
         $this->template->additional_input_params_base_path  = \INIT::$TEMPLATE_ROOT ;
 
