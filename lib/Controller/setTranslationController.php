@@ -189,7 +189,8 @@ class setTranslationController extends ajaxController {
              */
             $this->project = Projects_ProjectDao::findByJobId( $this->id_job );
             $this->chunk = Chunks_ChunkDao::getByIdAndPassword($this->id_job, $this->password );
-            $this->feature_set = FeatureSet::fromIdCustomer($this->project->id_customer);
+            $this->feature_set = new FeatureSet() ;
+            $this->feature_set->loadForProject( $this->project ) ;
         }
 
         //ONE OR MORE ERRORS OCCURRED : EXITING

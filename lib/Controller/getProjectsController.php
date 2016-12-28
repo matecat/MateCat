@@ -142,7 +142,11 @@ class getProjectsController extends ajaxController {
          * for each of them in a separate query.
          */
 
-        $featureSet = FeatureSet::fromIdCustomer( $this->logged_user->email );
+        $featureSet = new FeatureSet();
+        $featureSet->loadFromUserEmail( $this->logged_user->email ) ;
+        if ( $this->logged_user->getDefaultTeam() ) {
+            $featureSet->loadFromTeam( $this->logged_user->getDefaultTeam() ) ;
+        }
 
         $projects = $featureSet->filter('filter_manage_projects_loaded', $projects);
 

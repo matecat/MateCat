@@ -19,13 +19,18 @@ class FeatureSet {
     }
 
     /**
-     * @param $id_customer
+     * This method is to be used to load features which should be active for a given project.
+     * This looksup features on the user set as id_customer, and the features set for
+     * the associated team.
      *
-     * @return FeatureSet
      */
-    public static function fromIdCustomer( $id_customer ) {
-        $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
-        return new FeatureSet($features);
+    public function loadForProject( Projects_ProjectStruct $project ) {
+        if ( $project->id_customer ) {
+            $this->loadFromUserEmail( $project->id_customer ) ;
+        }
+        if ( $project->id_team ) {
+            $this->loadFromTeam( $project->getTeam() ) ;
+        }
     }
 
     /**
@@ -78,6 +83,8 @@ class FeatureSet {
                     try {
                         $filterable = call_user_func_array( array( $obj, $method ), $args );
                     } catch ( \Exceptions\ValidationError $e ) {
+                        throw $e ;
+                    } catch ( Exceptions_RecordNotFound $e ) {
                         throw $e ;
                     } catch ( Exception $e ) {
                         Log::doLog("Exception running filter " . $method . ": " . $e->getMessage() );
