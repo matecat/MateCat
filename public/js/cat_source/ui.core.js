@@ -2974,8 +2974,8 @@ UI = {
         UI.body.removeClass('hideMatches');
     },
     setWaypoints: function() {
-		this.firstSegment.waypoint('remove');
-		this.lastSegment.waypoint('remove');
+        if ( this.firstSegment ) this.firstSegment.waypoint('remove');
+        if ( this.lastSegment ) this.lastSegment.waypoint('remove');
 		this.detectFirstLast();
 		this.lastSegment.waypoint(function(event, direction) {
 			if (direction === 'down') {
