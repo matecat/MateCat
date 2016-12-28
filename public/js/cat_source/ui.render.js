@@ -85,7 +85,10 @@ $.extend(UI, {
 
 		}
 
-		return UI.getSegments(options);
+		return UI.getSegments(options).done(function() {
+			// Force the firstLoad flag to false whenever the segments are fetched
+			UI.firstLoad = false ;
+		});
 
 	},
 });

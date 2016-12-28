@@ -1250,9 +1250,7 @@ UI = {
 		if (segmentId === '') {
 			this.startSegmentId = config.last_opened_segment;
 			$('#outer').empty();
-			this.render({
-				firstLoad: false
-			});
+			this.render();
 		} else {
 			$('#outer').empty();
 			this.render();
@@ -3180,8 +3178,6 @@ UI = {
         }
 
         initialRenderPromise.done(function() {
-            UI.firstLoad = false ;
-        }).done( function() {
             UI.checkWarnings(true);
         });
 
