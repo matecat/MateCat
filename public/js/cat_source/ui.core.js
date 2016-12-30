@@ -1112,13 +1112,11 @@ UI = {
 		var next = $('.editor').nextAll( selector  ).first();
 
 		if (next.is('section')) {
-			UI.scrollSegment(next);
 			$(UI.targetContainerSelector(), next).trigger("click", "moving");
 		} else {
 			next = UI.currentFile.next().find( selector ).first();
 			if (next.length) {
                 $(UI.targetContainerSelector(), next).trigger("click", "moving");
-                UI.scrollSegment(next);
 			} else {
                 UI.closeSegment(UI.currentSegment, 1, 'save');
             }
