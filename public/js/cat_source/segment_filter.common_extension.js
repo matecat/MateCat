@@ -22,7 +22,7 @@ if ( SegmentFilter.enabled() )
         } else if ( nextFiltered ) {
             UI.render({ segmentToOpen: nextFiltered });
         } else {
-            original_gotoPreviousSegment.apply(undefined, arguments);
+            // in this case there is no previous, do nothing, remain on the current segment.
         }
     };
 
@@ -36,7 +36,7 @@ if ( SegmentFilter.enabled() )
         } else if ( nextFiltered ) {
             UI.render({ segmentToOpen: nextFiltered });
         } else {
-            original_gotoNextSegment.apply(undefined, arguments);
+            // in this case there is no next, do nothing, remain on the current segment.
         }
     };
 
