@@ -122,6 +122,18 @@ class MainPanel extends React.Component {
         });
     }
 
+    moveUp(e) {
+        if ( this.state.filtering && this.state.filteredCount > 1 ) {
+            UI.gotoPreviousSegment() ;
+        }
+    }
+
+    moveDown(e) {
+        if ( this.state.filtering && this.state.filteredCount > 1 ) {
+            UI.gotoNextSegment() ;
+        }
+    }
+
     render() {
 
         var searchSettingsClass = classnames({
@@ -134,11 +146,27 @@ class MainPanel extends React.Component {
         });
 
         var fullOptions = [<option key="" value="">All</option>].concat( options );
-
         var submitEnabled = this.submitEnabled();
-
         var filteringInfo;
+        var navigation ;
         var currentSampleSettings ;
+        var buttonArrowsClass = 'qa-arrows-disabled';
+
+        if ( this.state.filtering && this.state.filteredCount > 1 ) {
+            buttonArrowsClass = 'qa-arrows-enabled';
+        }
+
+        navigation = <div className="sf-segment-navigation-arrows">
+            <div className={'qa-arrows ' + buttonArrowsClass}>
+                <div className="qa-move-up" onClick={this.moveUp.bind(this)}>
+                    <span className="icon-qa-left-arrow"/>
+                </div>
+                <div className="qa-move-down" onClick={this.moveDown.bind(this)}>
+                    <span className="icon-qa-right-arrow"/>
+                </div>
+            </div>
+        </div> ;
+
 
         if ( this.state.filtering ) {
             if (this.state.filteredCount > 0) {
@@ -260,6 +288,7 @@ class MainPanel extends React.Component {
 
             </form>
 
+            {navigation}
             {filteringInfo}
 
         </div>; 
