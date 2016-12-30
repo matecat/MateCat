@@ -74,6 +74,12 @@ if (SegmentFilter.enabled())
                     filtering : true
                 });
 
+                // TODO:
+                //      UI.clearStorage('SegmentFilter') is needed to avoid bloating local storage.
+                //      This prevents two filters on different tabs to persist on page reload:
+                //      only the last one applied remains in localStorage.
+                UI.clearStorage('SegmentFilter');
+
                 SegmentFilter.saveState( window.segment_filter_panel.state ) ;
 
                 $('#outer').empty();
