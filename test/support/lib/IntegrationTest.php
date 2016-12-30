@@ -9,16 +9,7 @@ abstract class IntegrationTest extends AbstractTest {
     protected $params = array();
     protected $files = array();
 
-
-
-    protected $test_data ;
-
     protected $conn ;
-
-    public function setUp() {
-
-        $this->test_data = new StdClass();
-    }
 
     function getResponse() {
         // This is deprecated , use curlTest instance in your tests instead

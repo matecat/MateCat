@@ -104,7 +104,8 @@ function get_sessid_for_user( Users_UserStruct $user ) {
 
 function createProjectWithUIParams( $params ) {
     $files = $params['files'] ;
-    $cookies = $params['cookies'];
+
+    $cookies = isset( $params['cookies'] ) ? $params['cookies'] : array();
 
     if ( isset( $params['upload_session'] ) ) {
         Log::doLog("DEPRECATION: passing upload_session as param is deprecated, pass it inside a `cookies` array instead");
