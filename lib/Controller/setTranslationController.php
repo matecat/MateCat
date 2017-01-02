@@ -428,7 +428,9 @@ class setTranslationController extends ajaxController {
 
         //propagate translations
         $TPropagation = array();
-        $propagationTotal = array();
+        $propagationTotal = array(
+            'propagated_ids' => array()
+        );
 
         if ( $this->propagate && in_array( $this->status, array(
             Constants_TranslationStatus::STATUS_TRANSLATED,
@@ -533,8 +535,8 @@ class setTranslationController extends ajaxController {
         $project   = array_pop( $project );
 
         $job_stats[ 'ANALYSIS_COMPLETE' ] = (
-        $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ||
-        $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE
+            $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ||
+            $project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE
                 ? true : false );
 
         $file_stats = array();
@@ -587,6 +589,14 @@ class setTranslationController extends ajaxController {
         }
 
         $this->feature_set->run('setTranslationCommitted', array(
+                'translation'     => $_Translation,
+                'old_translation' => $old_translation,
+                'propagated_ids'  => $propagationTotal['propagated_ids'],
+                'chunk'           => $this->chunk,
+                'segment'         => $this->segment
+                ));
+
+        $this->result = $this->feature_set->filter('filterSetTranslationResult', $this->result, array(
                 'translation'     => $_Translation,
                 'old_translation' => $old_translation,
                 'propagated_ids'  => $propagationTotal['propagated_ids'],
