@@ -30,6 +30,9 @@
 
     <link rel="stylesheet" href="${basepath}public/css/upload-build.css?build=${build_number}"/>
     <link rel="stylesheet" href="${basepath}public/js/lib/colorbox/colorbox.css?build=${build_number}"/>
+    <tal:block  tal:repeat="css_url css_resources">
+        <link rel="stylesheet" tal:attributes="href css_url"/>
+    </tal:block>
 
     <!-- Shim to make HTML5 elements usable in older Internet Explorer versions -->
     <!--[if lt IE 9]>
