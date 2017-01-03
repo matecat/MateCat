@@ -116,7 +116,7 @@ class JobContainer extends React.Component {
                 <li><a target="_blank" href={splitUrl}><i className="icon-expand"/> Split</a></li>
                 <li><a target="_blank" href={reviseUrl}><i className="icon-edit"/> Revise</a></li>
                 <li className="divider"/>
-                <li><a target="_blank" href={qaReportUrl}><i className="icon-QR"/> QA Report</a></li>
+                <li><a target="_blank" href={qaReportUrl}><i className="icon-qr-matecat"/> QA Report</a></li>
                 <li><a target="_blank" href={editLogUrl}><i className="icon-download-logs"/> Editing Log</a></li>
                 <li className="divider"/>
                 {downloadButton}
@@ -134,7 +134,7 @@ class JobContainer extends React.Component {
                 <li><a target="_blank" href={splitUrl}><i className="icon-expand"/>  Split</a></li>
                 <li><a target="_blank" href={reviseUrl}><i className="icon-edit"/> Revise</a></li>
                 <li className="divider"/>
-                <li><a target="_blank" href={qaReportUrl}><i className="icon-QR"/> QA Report</a></li>
+                <li><a target="_blank" href={qaReportUrl}><i className="icon-qr-matecat"/> QA Report</a></li>
                 <li><a target="_blank" href={editLogUrl}><i className="icon-download-logs"/> Editing Log</a></li>
                 <li className="divider"/>
                 {downloadButton}
@@ -151,7 +151,7 @@ class JobContainer extends React.Component {
                 <li><a target="_blank" href={splitUrl} ><i className="icon-expand"/>  Split</a></li>
                 <li><a target="_blank" href={reviseUrl}><i className="icon-edit"/> Revise</a></li>
                 <li className="divider"/>
-                <li><a target="_blank" href={qaReportUrl}><i className="icon-QR"/> QA Report</a></li>
+                <li><a target="_blank" href={qaReportUrl}><i className="icon-qr-matecat"/> QA Report</a></li>
                 <li><a target="_blank" href={editLogUrl}><i className="icon-download-logs"/> Editing Log</a></li>
                 <li className="divider"/>
                 {downloadButton}
@@ -243,6 +243,11 @@ class JobContainer extends React.Component {
                     <div className="col s10">
                         <ul className="job-activity-icon right">
                             {tmIcon}
+                            <li>
+                                <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0">
+                                    <i className="icon-tm-matecat"></i>
+                                </a>
+                            </li>
                             <li>
                                 <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0"
                                     onClick={this.openSettings.bind(this)}>
