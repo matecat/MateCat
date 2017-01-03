@@ -109,7 +109,7 @@ class ProjectContainer extends React.Component {
             headerProject = <div className="card job-preview z-depth-1">
                 <div className="body-job">
                     <div className="row">
-                        <div className="col m10">
+                        <div className="col">
 
                             <div className="combo-language multiple"
                                  ref={(combo) => this.combo_languages = combo}>
@@ -225,7 +225,7 @@ class ProjectContainer extends React.Component {
                                 downloadTranslationFn={self.props.downloadTranslationFn}
                                 isChunk={isChunk}/>;
                 jobsList.push(item);
-                openJobClass = 'z-depth-3';
+                openJobClass = 'open-job';
                 openProjectClass = (jobsLength === 1) ? '':'open-project';
             }
 
@@ -264,7 +264,7 @@ class ProjectContainer extends React.Component {
 
                     <div className={"head-project " + openProjectClass}>
                         <div className="row">
-                            <div className="col m2">
+                            <div className="col">
                                 <div className="project-id">
                                     <div id="id-project"><span>ID:</span>{this.props.project.get('id')}</div>
                                 </div>
@@ -281,7 +281,7 @@ class ProjectContainer extends React.Component {
                                     </form>
                                 </div>
                             </div>
-                            <div className="col m2">
+                            <div className="col right">
                                 <ul className="project-activity-icon right">
 
                                     {/*<li>*/}
@@ -305,17 +305,18 @@ class ProjectContainer extends React.Component {
                     <section className="jobs-preview">
                         {headerProject}
                     </section>
-                    <section className="jobs">
-
-                        <CSSTransitionGroup
-                        transitionName="slide"
-                        transitionAppear={true}
-                        transitionAppearTimeout={1000}
-                        transitionEnterTimeout={300}
-                        transitionLeaveTimeout={200}>
-                        {jobsList}
-                        </CSSTransitionGroup>
-                    </section>
+                    
+                            <section className="jobs">
+                                <CSSTransitionGroup
+                                transitionName="slide"
+                                transitionAppear={true}
+                                transitionAppearTimeout={1000}
+                                transitionEnterTimeout={300}
+                                transitionLeaveTimeout={200}>
+                                {jobsList}
+                                </CSSTransitionGroup>
+                            </section>
+                    
 
 
 
