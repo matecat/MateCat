@@ -23,13 +23,25 @@ var ManageActions = {
             project: projects,
         });
     },
-    /** Open the translate page with the tab open
+    /** Open the translate page with the options tab open
      * @param job
      * @param prName
      */
     openJobSettings: function (job, prName) {
         AppDispatcher.dispatch({
             actionType: ManageConstants.OPEN_JOB_SETTINGS,
+            job: job,
+            prName: prName
+        });
+    },
+
+    /** Open the translate page with the TM tab open
+     * @param job
+     * @param prName
+     */
+    openJobTMPanel: function (job, prName) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.OPEN_JOB_TM_PANEL,
             job: job,
             prName: prName
         });
