@@ -677,6 +677,7 @@ INSERT INTO `phinxlog` ( version ) VALUES ( '20161122093431' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161125145959' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161207184244' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161219160843' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20161230151125' );
 
 CREATE SCHEMA `matecat_conversions_log` DEFAULT CHARACTER SET utf8 ;
 USE matecat_conversions_log ;

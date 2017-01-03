@@ -2,7 +2,7 @@
 
 use Phinx\Migration\AbstractMigration;
 
-class AddJobMetadata extends AbstractMigration {
+class AddJobMetadata extends AbstractMatecatMigration  {
 
     public $sql_up = <<<EOF
 CREATE TABLE `job_metadata` (
