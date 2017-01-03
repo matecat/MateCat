@@ -168,6 +168,7 @@ class JobContainer extends React.Component {
         return '/analyze/'+ this.props.project.get('name') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=analysis&jobid=' + this.props.job.get('id');
     }
 
+
     getAnalysisUrl() {
         return '/jobanalysis/'+this.props.project.get('id')+ '-' + this.props.job.get('id') + '-' + this.props.job.get('password');
     }
@@ -187,6 +188,7 @@ class JobContainer extends React.Component {
     render () {
         var translateUrl = this.getTranslateUrl();
         var outsourceUrl = this.getOutsourceUrl();
+        
         var analysisUrl = this.getAnalysisUrl();
         var splitUrl = this.getSplitUrl();
         var jobMenu = this.getJobMenu(splitUrl);
@@ -208,7 +210,7 @@ class JobContainer extends React.Component {
                                 </a>
                             </li>
                             <li>
-                                <a className='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0'
+                                <a className='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0 class-prova'
                                    data-activates={'dropdownJob' + this.props.job.get('id')}
                                    ref={(dropdown) => this.dropdown = dropdown}>
                                     <i className="icon-more_vert"></i>
@@ -221,7 +223,7 @@ class JobContainer extends React.Component {
             </div>
             <div className="body-job">
                 <div className="row">
-                    <div className="col m2 l2">
+                    <div className="col">
                         <div className="combo-language single">
                             <ul>
                                 <li>
@@ -233,38 +235,36 @@ class JobContainer extends React.Component {
                             </ul>
                         </div>
                     </div>
-                    <div className="col m5 l5">
-                        <div className="row">
-                            <div className="col l6">
-                                <div className="progress-bar">
-                                    <div className="progr">
-                                        <div className="meter">
-                                            <a className="warning-bar" title={'Approved '+this.props.job.get('stats').get('REJECTED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('REJECTED_PERC') + '%'}}/>
-                                            <a className="translated-bar" title={'Translated '+this.props.job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('TRANSLATED_PERC') + '%' }}/>
-                                            <a className="approved-bar" title={'Approved '+this.props.job.get('stats').get('APPROVED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('APPROVED_PERC')+ '%' }}/>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="col l3">
-                                <div className="payable-words">
-                                    <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
+                    <div className="col">
+                        <div className="progress-bar">
+                            <div className="progr">
+                                <div className="meter">
+                                    <a className="warning-bar" title={'Approved '+this.props.job.get('stats').get('REJECTED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('REJECTED_PERC') + '%'}}/>
+                                    <a className="translated-bar" title={'Translated '+this.props.job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('TRANSLATED_PERC') + '%' }}/>
+                                    <a className="approved-bar" title={'Approved '+this.props.job.get('stats').get('APPROVED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('APPROVED_PERC')+ '%' }}/>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div className="col m5 l5">
+                    <div className="col">
+                        <div className="payable-words">
+                            <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
+                        </div>
+                    </div>
+                    <div className="col m4 right">
                         <div className="button-list split-outsource right">
                             <a className="btn waves-effect split waves-dark" target="_blank" href={splitUrl}>
                                 <i className="large icon-expand right"/>Split
                             </a>
                             <a className="btn waves-effect waves-light outsource" target="_blank" href={outsourceUrl}>outsource</a>
+                            {/*<a className="btn waves-effect waves-light outsourced" target="_blank" href={outsourcedUrl}>outsource</a> */}
                             <a className="btn waves-effect waves-light translate move-left" target="_blank" href={translateUrl}>Open</a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
         // <div className="row">
         //         <div className="col s4">
         //             <h6>{'JOB ID: ' + this.props.job.get('id') + '-' + this.props.index }</h6>
