@@ -177,6 +177,10 @@ class JobContainer extends React.Component {
         return '/analyze/'+ this.props.project.get('name') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=split&jobid=' + this.props.job.get('id');
     }
 
+    getMergeUrl() {
+        return '/analyze/'+ this.props.project.get('name') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=merge&jobid=' + this.props.job.get('id');
+    }
+
     getActivityLogUrl() {
         return '/activityLog/'+ this.props.project.get('name') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=split&jobid=' + this.props.job.get('id');
     }
@@ -202,12 +206,28 @@ class JobContainer extends React.Component {
         }
     }
 
+    getSplitOrMergeButton(splitUrl, mergeUrl) {
+
+        if (this.props.isChunk) {
+            return <a className="btn waves-effect split waves-dark" target="_blank" href={mergeUrl}>
+                <i className="large icon-expand right"/>Merge
+            </a>
+        } else {
+            return <a className="btn waves-effect split waves-dark" target="_blank" href={splitUrl}>
+                <i className="large icon-expand right"/>Split
+            </a>
+        }
+    }
+
     render () {
         var translateUrl = this.getTranslateUrl();
         var outsourceUrl = this.getOutsourceUrl();
         var analysisUrl = this.getAnalysisUrl();
         var splitUrl = this.getSplitUrl();
-        var jobMenu = this.getJobMenu(splitUrl);
+        var mergeUrl = this.getMergeUrl();
+        var splitMergeButton = this.getSplitOrMergeButton(splitUrl, mergeUrl);
+
+        var jobMenu = this.getJobMenu(splitUrl, mergeUrl);
         var tmIcon = this.getTMIcon();
 
         return <div className="card job z-depth-1">
@@ -275,9 +295,7 @@ class JobContainer extends React.Component {
                     </div>
                     <div className="col m5 l5">
                         <div className="button-list split-outsource right">
-                            <a className="btn waves-effect split waves-dark" target="_blank" href={splitUrl}>
-                                <i className="large icon-expand right"/>Split
-                            </a>
+                            {splitMergeButton}
                             <a className="btn waves-effect waves-light outsource" target="_blank" href={outsourceUrl}>outsource</a>
                             <a className="btn waves-effect waves-light translate move-left" target="_blank" href={translateUrl}>Open</a>
                         </div>

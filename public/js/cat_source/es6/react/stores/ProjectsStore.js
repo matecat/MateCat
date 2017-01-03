@@ -78,6 +78,9 @@ AppDispatcher.register(function(action) {
         case ManageConstants.OPEN_JOB_SETTINGS:
             ProjectsStore.emitChange(ManageConstants.OPEN_JOB_SETTINGS, action.job, action.prName);
             break;
+        case ManageConstants.OPEN_JOB_TM_PANEL:
+            ProjectsStore.emitChange(ManageConstants.OPEN_JOB_TM_PANEL, action.job, action.prName);
+            break;
         case ManageConstants.CLOSE_ALL_JOBS:
             ProjectsStore.emitChange(ManageConstants.CLOSE_ALL_JOBS);
             break;

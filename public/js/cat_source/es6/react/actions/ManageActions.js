@@ -41,7 +41,7 @@ var ManageActions = {
      */
     openJobTMPanel: function (job, prName) {
         AppDispatcher.dispatch({
-            actionType: ManageConstants.OPEN_JOB_SETTINGS,
+            actionType: ManageConstants.OPEN_JOB_TM_PANEL,
             job: job,
             prName: prName
         });

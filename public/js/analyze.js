@@ -756,6 +756,7 @@ UI = {
         var jobId = APP.getParameterByName("jobid");
         var open = APP.getParameterByName("open");
         var job$ = $('div[data-jid=' + jobId + ']');
+		var interval;
         if (jobId && open && job$ ) {
             switch (open) {
                 case 'analysis':
@@ -767,7 +768,7 @@ UI = {
                     break;
                 case 'split':
                     job$[0].scrollIntoView( true );
-                    var interval = setInterval(function () {
+                    interval = setInterval(function () {
                         if (!$('div[data-jid=' + jobId + '] .dosplit').hasClass('disabled')) {
                             $('div[data-jid=' + jobId + '] .dosplit').trigger('click');
                             clearInterval(interval);
@@ -775,6 +776,16 @@ UI = {
                     }, 500);
 					window.history.pushState('',document.title,document.location.href.split('?')[0]);
                     break
+				case 'merge':
+					job$[0].scrollIntoView( true );
+					interval = setInterval(function () {
+						if (!$('div[data-jid=' + jobId + '] .domerge').hasClass('disabled')) {
+							$('div[data-jid=' + jobId + '] .domerge').trigger('click');
+							clearInterval(interval);
+						}
+					}, 500);
+					window.history.pushState('',document.title,document.location.href.split('?')[0]);
+					break
             }
         }
 

@@ -193,7 +193,6 @@ class ProjectContainer extends React.Component {
 
     render() {
         var self = this;
-        // var activityLog = this.getLastAction();
         var jobsList = [];
         var sourceLang = this.props.project.get('jobs').first().get('source');
         var targetsLangs = [], sourceTxt= '';
@@ -203,13 +202,18 @@ class ProjectContainer extends React.Component {
         var activityLogUrl = this.getActivityLogUrl();
 
         var projectMenu = this.getProjectMenu(activityLogUrl);
+        var tempIdsArray = [];
         var orderedJobs = this.props.project.get('jobs').reverse();
 
         orderedJobs.map(function(job, i){
-
+            //To check if is a chunk (jobs with same id)
+            var isChunk = false;
+            if (tempIdsArray.indexOf(job.get('id')) > -1 || (orderedJobs.get(i+1) && orderedJobs.get(i+1).get('id') === job.get('id') )) {
+                isChunk = true;
+                tempIdsArray.push(job.get('id'));
+            }
             var index = i+1;
             var openJobClass = '';
-            // payableWords = payableWords + parseInt(this.props.project.get('tm_analysis'));
             if (self.state.showAllJobs || self.state.visibleJobs.indexOf(i) > -1 || jobsLength === 1 ) {
                 var item = <Job key={job.get('id') + "-" + i}
                                 job={job}
@@ -218,7 +222,8 @@ class ProjectContainer extends React.Component {
                                 jobsLenght={jobsLength}
                                 changeJobPasswordFn={self.props.changeJobPasswordFn}
                                 changeStatusFn={self.props.changeStatusFn}
-                                downloadTranslationFn={self.props.downloadTranslationFn}/>;
+                                downloadTranslationFn={self.props.downloadTranslationFn}
+                                isChunk={isChunk}/>;
                 jobsList.push(item);
                 openJobClass = 'z-depth-3';
                 openProjectClass = (jobsLength === 1) ? '':'open-project';
