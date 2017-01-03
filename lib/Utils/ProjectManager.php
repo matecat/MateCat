@@ -174,12 +174,13 @@ class ProjectManager {
         }
         $this->projectStructure['id_project'] = $this->project->id ;
         $this->projectStructure['id_customer'] = $this->project->id_customer ;
+
         $this->reloadFeatures();
 
     }
     private function reloadFeatures() {
         $this->features = new FeatureSet();
-        $this->features->loadFromUserEmail( $this->project->id_customer );
+        $this->features->loadForProject( $this->project ) ;
     }
 
     public function getProjectStructure() {

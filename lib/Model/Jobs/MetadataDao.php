@@ -6,6 +6,29 @@ use Database ;
 
 class MetadataDao extends \DataAccess_AbstractDao
 {
+
+    /**
+     * @param $id_job
+     * @param $password
+     * @param $key
+     *
+     * @return MetadataStruct[]
+     */
+    public function getByIdJob( $id_job, $key ) {
+        $stmt = $this->_getStatementForCache(
+            "SELECT * FROM job_metadata WHERE " .
+            " id_job = :id_job " .
+            " AND `key` = :key "
+        );
+
+        $result = $this->_fetchObject( $stmt, new MetadataStruct() , array(
+            'id_job' => $id_job,
+            'key' => $key
+        ) );
+
+        return @$result;
+    }
+
     /**
      * @param $id_job
      * @param $password
