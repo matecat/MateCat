@@ -368,8 +368,8 @@
                         }
                     }
                 });
-                UI.CheckCreateTmKeyFromQueryString();
-
+                UI.checkCreateTmKeyFromQueryString();
+                UI.checkOpenTabFromParameters();
             });
 
             $(".mgmt-table-tm .add-tm").click(function() {
@@ -395,7 +395,21 @@
             });
 
         },
-        CheckCreateTmKeyFromQueryString: function () {
+        checkOpenTabFromParameters: function () {
+            var keyParam = APP.getParameterByName("openTab");
+            if (keyParam) {
+                window.history.pushState('',document.title,document.location.href.split('?')[0]);
+                switch (keyParam) {
+                    case 'options':
+                        this.openLanguageResourcesPanel('opt');
+                        break;
+                    case 'tm':
+                        this.openLanguageResourcesPanel('tm');
+                        break
+                }
+            }
+        },
+        checkCreateTmKeyFromQueryString: function () {
             var keyParam = APP.getParameterByName("private_tm_key");
             if (keyParam) {
                 //Check if present and enable it
@@ -442,6 +456,9 @@
             $('body').addClass('side-popup');
             $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
             $(".outer-tm").show();
+            setTimeout(function () {
+                $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
+            }, 100);
             $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
             if(elToClick) $(elToClick).click();
             $.cookie('tmpanel-open', 1, { path: '/' });

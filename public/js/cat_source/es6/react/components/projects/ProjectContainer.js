@@ -59,6 +59,7 @@ class ProjectContainer extends React.Component {
         $(this.dropdown).dropdown({
             belowOrigin: true
         });
+        $('.tooltipped').tooltip({delay: 50});
         this.getLastActivityLogAction();
         ProjectsStore.addListener(ManageConstants.CLOSE_ALL_JOBS, this.hideAllJobs);
     }
@@ -99,7 +100,7 @@ class ProjectContainer extends React.Component {
     }
 
 
-    getProjectHeader(sourceLang, targetsLangs, payableWords) {
+    getProjectHeader(sourceLang, sourceTxt, targetsLangs, payableWords) {
         var jobsLength = this.props.project.get('jobs').size;
         var headerProject = '';
         var analyzeUrl = this.getAnalyzeUrl();
@@ -113,8 +114,8 @@ class ProjectContainer extends React.Component {
                             <div className="combo-language multiple"
                                  ref={(combo) => this.combo_languages = combo}>
                                 <ul>
-                                    <li className="source-lang-container">
-                                        <span id="source">{sourceLang}</span> <i className="icon-play"></i>
+                                    <li className="source-lang-container tooltiped" data-tooltip={sourceTxt}>
+                                        <span id="source">{sourceLang}</span> <i className="icon-play"/>
                                     </li>
                                     {targetsLangs}
                                     <li>
@@ -144,25 +145,25 @@ class ProjectContainer extends React.Component {
 
     getProjectMenu(activityLogUrl) {
         var menuHtml = <ul id={'dropdown' + this.props.project.get('id')} className='dropdown-content'>
-                            <li><a href={activityLogUrl} target="_blank"><i className="icon-download-logs"></i>Activity Log</a></li>
-                            <li className="divider"></li>
-                            <li><a onClick={this.archiveProject.bind(this)}><i className="icon-drawer"></i>Archive project</a></li>
-                             <li className="divider"></li>
-                            <li><a onClick={this.removeProject.bind(this)}><i className="icon-trash-o"></i>Remove from my Dashboard</a></li>
+                            <li><a href={activityLogUrl} target="_blank"><i className="icon-download-logs"/>Activity Log</a></li>
+                            <li className="divider"/>
+                            <li><a onClick={this.archiveProject.bind(this)}><i className="icon-drawer"/>Archive project</a></li>
+                             <li className="divider"/>
+                            <li><a onClick={this.removeProject.bind(this)}><i className="icon-trash-o"/>Remove from my Dashboard</a></li>
                         </ul>;
         if ( this.props.project.get('has_archived') ) {
             menuHtml = <ul id={'dropdown' + this.props.project.get('id')} className='dropdown-content'>
-                            <li><a href={activityLogUrl} target="_blank"><i className="icon-download-logs"></i>Activity Log</a></li>
-                            <li className="divider"></li>
-                            <li><a onClick={this.activateProject.bind(this)}><i className="icon-drawer unarchive-project"></i>Unarchive project</a></li>
-                            <li className="divider"></li>
-                            <li><a onClick={this.removeProject.bind(this)}><i className="icon-trash-o"></i>Remove from my Dashboard</a></li>
+                            <li><a href={activityLogUrl} target="_blank"><i className="icon-download-logs"/>Activity Log</a></li>
+                            <li className="divider"/>
+                            <li><a onClick={this.activateProject.bind(this)}><i className="icon-drawer unarchive-project"/>Unarchive project</a></li>
+                            <li className="divider"/>
+                            <li><a onClick={this.removeProject.bind(this)}><i className="icon-trash-o"/>Remove from my Dashboard</a></li>
                         </ul>;
         } else if ( this.props.project.get('has_cancelled') ) {
             menuHtml = <ul id={'dropdown' + this.props.project.get('id')} className='dropdown-content'>
-                            <li><a href={activityLogUrl} target="_blank"><i className="icon-download-logs"></i> Activity Log</a></li>
-                            <li className="divider"></li>
-                            <li><a onClick={this.activateProject.bind(this)}><i className="icon-drawer unarchive-project"></i> Resume Project</a></li>
+                            <li><a href={activityLogUrl} target="_blank"><i className="icon-download-logs"/> Activity Log</a></li>
+                            <li className="divider"/>
+                            <li><a onClick={this.activateProject.bind(this)}><i className="icon-drawer unarchive-project"/> Resume Project</a></li>
                         </ul>;
         }
         return menuHtml;
@@ -195,15 +196,16 @@ class ProjectContainer extends React.Component {
         // var activityLog = this.getLastAction();
         var jobsList = [];
         var sourceLang = this.props.project.get('jobs').first().get('source');
-        var targetsLangs = [];
+        var targetsLangs = [], sourceTxt= '';
         var jobsLength = this.props.project.get('jobs').size;
         var openProjectClass = '';
         var payableWords = this.props.project.get('tm_analysis');
         var activityLogUrl = this.getActivityLogUrl();
 
         var projectMenu = this.getProjectMenu(activityLogUrl);
+        var orderedJobs = this.props.project.get('jobs').reverse();
 
-        this.props.project.get('jobs').map(function(job, i){
+        orderedJobs.map(function(job, i){
 
             var index = i+1;
             var openJobClass = '';
@@ -223,7 +225,7 @@ class ProjectContainer extends React.Component {
             }
 
             var target = <li className="target-lang" key = {i} onClick={self.showSingleJob.bind(self, i, job)}>
-                <a className={"btn waves-effect waves-dark " + openJobClass}>
+                <a className={"tooltipped btn waves-effect waves-dark " + openJobClass} data-tooltip={job.get('targetTxt')}>
                     <badge>{job.get('target')}</badge>
                     <div className="progress">
                         <div className="determinate" title={'Translated '+ job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('TRANSLATED_PERC') + '%' }}></div>
@@ -233,10 +235,11 @@ class ProjectContainer extends React.Component {
                 </a>
             </li>;
             targetsLangs.push(target);
+            sourceTxt = job.get('sourceTxt');
         });
 
         //The Job Header
-        var headerProject = this.getProjectHeader(sourceLang, targetsLangs, payableWords);
+        var headerProject = this.getProjectHeader(sourceLang, sourceTxt, targetsLangs, payableWords);
 
         //Last Activity Log Action
         var lastAction;

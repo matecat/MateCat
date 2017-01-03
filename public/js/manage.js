@@ -13,6 +13,7 @@ UI = {
         this.changeJobPassword = this.changeJobPassword.bind(this);
 
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_SETTINGS, this.openJobSettings);
+        ProjectsStore.addListener(ManageConstants.OPEN_JOB_TM_PANEL, this.openJobTMPanel);
     },
 
     render: function () {
@@ -104,9 +105,22 @@ UI = {
      * Open the settings for the job
      */
     openJobSettings: function (job, prName) {
-        $.cookie('tmpanel-open', 1, { path: '/' });
-        var url = '/translate/'+ prName +'/'+ job.source +'-'+ job.target +'/'+ job.id +'-'+ job.password ;
+        var url = '/translate/'+ prName +'/'+ job.source +'-'+ job.target +'/'+ job.id +'-'+ job.password + '&openTab=options' ;
         window.open(url, '_blank');
+        setTimeout(function () {
+            $.cookie('tmpanel-open', 0, { path: '/' });
+        }, 500);
+    },
+    /**
+     * Open the tm panel for the job
+     */
+    openJobTMPanel: function (job, prName) {
+        $.cookie('tmpanel-open', 1, { path: '/' });
+        var url = '/translate/'+ prName +'/'+ job.source +'-'+ job.target +'/'+ job.id +'-'+ job.password + '&openTab=tm' ;
+        window.open(url, '_blank');
+        setTimeout(function () {
+            $.cookie('tmpanel-open', 0, { path: '/' });
+        }, 500);
     },
 
     /**
