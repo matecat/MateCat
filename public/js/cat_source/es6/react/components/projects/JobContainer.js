@@ -115,7 +115,7 @@ class JobContainer extends React.Component {
                 <li><a target="_blank" href={splitUrl}><i className="icon-expand"></i> Split</a></li>
                 <li><a target="_blank" href={reviseUrl}><i className="icon-edit"></i> Revise</a></li> 
                 <li className="divider"></li>                          
-                <li><a target="_blank" href={qaReportUrl}><i className="icon-QR"></i> QA Report</a></li>
+                <li><a target="_blank" href={qaReportUrl}><i className="icon-qr-matecat"></i> QA Report</a></li>
                 <li><a target="_blank" href={editLogUrl}><i className="icon-download-logs"></i> Editing Log</a></li>
                 <li className="divider"></li>
                 {downloadButton}
@@ -203,6 +203,11 @@ class JobContainer extends React.Component {
                     <div className="col s10">
                         <ul className="job-activity-icon right">
 
+                            <li>
+                                <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0">
+                                    <i className="icon-tm-matecat"></i>
+                                </a>
+                            </li>
                             <li>
                                 <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0"
                                     onClick={this.openSettings.bind(this)}>

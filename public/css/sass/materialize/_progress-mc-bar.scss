@@ -24,29 +24,29 @@
 		  overflow: hidden;
 
 		 a {
-			display: block;
-		  height: 80%;
-		  max-width: 100%;
-		  float: left;
-		  position: absolute;
-		  overflow: hidden;
-		  -webkit-transition: all 200ms ease-in;
-		  transition: all 200ms ease-in;
+		    display: block;
+			height: 80%;
+			max-width: 100%;
+			float: left;
+			position: absolute;
+			overflow: hidden;
+			-webkit-transition: all 200ms ease-in;
+			transition: all 200ms ease-in;
 			}
 		  a:after {
 				content: "";
-		    position: absolute;
-		    top: 0;
-		    left: 0;
-		    bottom: 0;
-		    right: 0;
-		    background-image: -webkit-linear-gradient( -45deg, rgba(255, 255, 255, .2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .2) 75%, transparent 75%, transparent );
-		  	z-index: 1;
-		    -webkit-background-size: 50px 50px;
-		    -moz-background-size: 50px 50px;
-		    background-size: 50px 50px;
-		    -webkit-animation: move 2s linear infinite;
-		    overflow: hidden;
+			    position: absolute;
+			    top: 0;
+			    left: 0;
+			    bottom: 0;
+			    right: 0;
+			    background-image: -webkit-linear-gradient( -45deg, rgba(255, 255, 255, .2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .2) 75%, transparent 75%, transparent );
+			  	z-index: 1;
+			    -webkit-background-size: 50px 50px;
+			    -moz-background-size: 50px 50px;
+			    background-size: 50px 50px;
+			    -webkit-animation: move 2s linear infinite;
+			    overflow: hidden;
 		  }
 		}
 		.translated-bar {
