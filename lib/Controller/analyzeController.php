@@ -92,7 +92,7 @@ class analyzeController extends viewController {
         }
 
         $this->features = new FeatureSet();
-        $this->features->loadFromUserEmail( $this->project->id_customer );
+        $this->features->loadForProject( $this->project );
 
     }
 
