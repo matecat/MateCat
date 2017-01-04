@@ -49,6 +49,14 @@ class BlacklistWorker extends AbstractWorker {
 
     protected function _updateWarnings( ) {
         $params = $this->queueElement->params ;
+
+        $dao = new \Projects_MetadataDao() ;
+        $has_blacklist = $dao->get( $params['id_project'],  'has_blacklist' ) ;
+
+        if ( ! $has_blacklist ) {
+            return ;
+        }
+
         $job = \Jobs_JobDao::getById( $params['id_job'] );
 
         $blacklist = new BlacklistFromZip( $job->getProject()->getFirstOriginalZipPath(),  $job->id ) ;

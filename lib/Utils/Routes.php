@@ -99,7 +99,7 @@ class Routes {
      *
      * @return string
      */
-    public static function pluginsBase( $options ) {
+    public static function pluginsBase( $options=array() ) {
         return self::httpHost( $options ) . '/plugins';
     }
 

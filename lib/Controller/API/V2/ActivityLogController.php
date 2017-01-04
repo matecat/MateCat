@@ -25,13 +25,9 @@ class ActivityLogController extends KleinController {
         $validator->validate();
 
         $activityLogDao = new ActivityLogDao();
-        $activityLogDao->epilogueString = " ORDER BY ID DESC LIMIT 1";
-        $this->rawLogContent  = $activityLogDao->read(
-                new ActivityLogStruct(),
-                [ 'id_project' => $validator->getIdProject() ]
-        );
+        $rawContent = $activityLogDao->getLastJobInProject( $validator->getIdProject() ) ;
 
-        $formatted = new Activity( $this->rawLogContent ) ;
+        $formatted = new Activity( $rawContent ) ;
         $this->response->json( array( 'activity' => $formatted->render() ) );
 
     }

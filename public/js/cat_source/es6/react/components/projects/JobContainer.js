@@ -51,7 +51,12 @@ class JobContainer extends React.Component {
     getReviseUrl() {
         var use_prefix = ( this.props.jobsLenght > 1 );
         var chunk_id = this.props.job.get('id') + ( ( use_prefix ) ? '-' + this.props.index : '' ) ;
-        return '/revise/'+this.props.project.get('name')+'/'+ this.props.job.get('source') +'-'+this.props.job.get('target')+'/'+ chunk_id +'-'+ this.props.job.get('password')  ;
+        var possibly_different_review_password = ( this.props.job.has('review_password') ?
+            this.props.job.get('password') :
+            this.props.job.get('review_password')
+        );
+
+        return '/revise/'+this.props.project.get('name')+'/'+ this.props.job.get('source') +'-'+this.props.job.get('target')+'/'+ chunk_id +'-'+  possibly_different_review_password ;
     }
 
     getEditingLogUrl() {
@@ -211,7 +216,7 @@ class JobContainer extends React.Component {
 
         if (this.props.isChunk) {
             return <a className="btn waves-effect split waves-dark" target="_blank" href={mergeUrl}>
-                <i className="large icon-expand right"/>Merge
+                <i className="large icon-compress right"/>Merge
             </a>
         } else {
             return <a className="btn waves-effect split waves-dark" target="_blank" href={splitUrl}>
@@ -231,23 +236,19 @@ class JobContainer extends React.Component {
 
         var jobMenu = this.getJobMenu(splitUrl, mergeUrl);
         var tmIcon = this.getTMIcon();
+        var idJobLabel = ( !this.props.isChunk ) ? this.props.job.get('id') : this.props.job.get('id') + '-' + this.props.index;
 
         return <div className="card job z-depth-1">
             <div className="head-job open-head-job">
                 <div className="row">
                     <div className="col s2">
                         <div className="job-id">
-                            <div id={"id-job-" + this.props.job.get('id')}><span>ID:</span>{this.props.job.get('id') + '-' + this.props.index }</div>
+                            <div id={"id-job-" + this.props.job.get('id')}><span>ID:</span>{ idJobLabel }</div>
                         </div>
                     </div>
                     <div className="col s10">
                         <ul className="job-activity-icon right">
                             {tmIcon}
-                            <li>
-                                <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0">
-                                    <i className="icon-tm-matecat"></i>
-                                </a>
-                            </li>
                             <li>
                                 <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0"
                                     onClick={this.openSettings.bind(this)}>
