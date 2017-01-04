@@ -269,18 +269,15 @@ class ProjectContainer extends React.Component {
             if ( (isChunk && index === 1) || !isChunk) {
                 var target;
                 if (isChunk) {
-                    target = <li className="target-lang" key = {i} onClick={self.showSingleJob.bind(self, i, job)}>
+                    target = <li className="chunk-job" key = {i} onClick={self.showSingleJob.bind(self, i, job)}>
                         <a className={"btn waves-effect waves-dark " + openJobClass}>
                             <badge>{job.get('targetTxt')}</badge>
-                            <div className="progress">
-                                <div className="determinate" title={'Translated '+ job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('TRANSLATED_PERC') + '%' }}></div>
-                                <div className="determinate green" title={'Approved '+ job.get('stats').get('APPROVED_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('APPROVED_PERC')+ '%' }}></div>
-                                <div className="determinate red" title={'Rejected '+ job.get('stats').get('REJECTED_PERC_FORMATTED') +'%'} style={{width: job.get('stats').get('REJECTED_PERC') + '%'}}></div>
-                            </div>
                         </a>
+                        <div className="bottom-chunk-1 z-depth-1"></div>
+                        <div className="bottom-chunk-2 z-depth-1"></div>
                     </li>;
                 } else {
-                    target = <li className="target-lang" key = {i} onClick={self.showSingleJob.bind(self, i, job)}>
+                    target = <li className="" key = {i} onClick={self.showSingleJob.bind(self, i, job)}>
                         <a className={"btn waves-effect waves-dark " + openJobClass} >
                             <badge>{job.get('targetTxt')}</badge>
                             <div className="progress">
