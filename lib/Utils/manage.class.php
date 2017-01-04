@@ -108,7 +108,7 @@ class ManageUtils {
             $project2info[ $job[ 'pid' ] ][ 'mt_engine_name' ] = $job[ 'mt_engine_name' ];
             $project2info[ $job[ 'pid' ] ][ 'id_tms' ]         = $job[ 'id_tms' ];
 
-            $project2jobChunk[ $job[ 'pid' ] ][ $job[ 'id' ] ][ $job[ 'job_first_segment' ] ] = $job;
+            $project2jobChunk[ $job[ 'pid' ] ][] = $job;
 
         }
 

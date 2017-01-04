@@ -99,7 +99,7 @@ class getProjectsController extends ajaxController {
             $postInput[ 'page' ] = 1;
         }
         if ( is_null( $postInput[ 'step' ] ) || empty( $postInput[ 'step' ] ) ) {
-            $postInput[ 'step' ] = 25;
+            $postInput[ 'step' ] = 10;
         }
 
         if ( is_null( $postInput[ 'status' ] ) || empty( $postInput[ 'status' ] ) ) {

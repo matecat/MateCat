@@ -17,7 +17,7 @@ module.exports = function(grunt) {
 	    basePath + '../css/jquery.powertip.min.css',
 	    basePath + '../css/lxq-style.css',
 	    basePath + '../css/lexiqa.css',
-    ]
+    ];
 
     var conf = grunt.file.read( incPath + 'version.ini' );
     var version = conf.match(/version[ ]+=[ ]+.*/gi)[0].replace(/version[ ]+=[ ]+(.*?)/gi, "$1");
@@ -44,14 +44,17 @@ module.exports = function(grunt) {
     var cssWatchFilesUploadPage = [
         cssBase + 'sass/variables.scss',
         cssBase + 'common.css',
-        cssBase + 'upload.css',
+        cssBase + 'upload-page.scss',
         cssBase + 'popup.css',
         cssBase + 'sass/notifications.scss'
     ];
-    var cssWatchComponents = [
-        cssBase + 'sass/variables.scss',
-        cssBase + 'sass/notifications.scss'
+
+
+    var cssWatchMaterialize = [
+        cssBase + 'sass/materialize/*'
     ];
+
+
 
     var es2015Preset = require('babel-preset-es2015');
     var reactPreset = require('babel-preset-react');
@@ -299,9 +302,9 @@ module.exports = function(grunt) {
                     livereload : true
                 }
             },
-            cssComponents: {
-                files:  cssWatchComponents,
-                tasks: ['sass:distComponents'],
+            cssManage: {
+                files:  cssWatchMaterialize,
+                tasks: ['sass:distManage', 'replace'],
                 options: {
                     interrupt: true,
                     livereload : true
@@ -309,6 +312,16 @@ module.exports = function(grunt) {
             },
         },
         sass: {
+            distCommon: {
+                options : {
+                    sourceMap : false,
+                    includePaths: [ cssBase, cssBase + 'libs/' ]
+                },
+                src: [
+                    cssBase + 'sass/common-main.scss'
+                ],
+                dest: cssBase + 'build/common.css'
+            },
             distCattol: {
                 options : {
                     sourceMap : false,
@@ -317,7 +330,7 @@ module.exports = function(grunt) {
                 src: [
                     cssBase + 'sass/main.scss'
                 ],
-                dest: cssBase + 'app.css'
+                dest: cssBase + 'build/app.css'
             },
             distUpload: {
                 options : {
@@ -327,18 +340,18 @@ module.exports = function(grunt) {
                 src: [
                     cssBase + 'sass/upload-main.scss'
                 ],
-                dest: cssBase + 'upload-build.css'
+                dest: cssBase + 'build/upload-build.css'
             },
-            distComponents: {
+            distManage: {
                 options : {
                     sourceMap : false,
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
                 src: [
-                    cssBase + 'sass/components-main.scss'
+                    cssBase + 'sass/materialize/manage.scss'
                 ],
-                dest: cssBase + 'components-build.css'
-            }
+                dest: cssBase + 'build/manage-build.css'
+            },
         },
         jshint: {
             options: {
@@ -357,16 +370,36 @@ module.exports = function(grunt) {
             }
         },
         replace: {
-          version: {
-            src: [
-                buildPath + 'app.js'
-            ],
-            dest: buildPath + 'app.js',
-            replacements: [{
-              from: /this\.version \= \"(.*?)\"/gi,
-              to: 'this.version = "' + version + '"'
-            }]
-          }
+            version: {
+                src: [
+                    buildPath + 'app.js'
+                ],
+                dest: buildPath + 'app.js',
+                replacements: [{
+                    from: /this\.version \= \"(.*?)\"/gi,
+                    to: 'this.version = "' + version + '"'
+                }]
+            },
+            css: {
+                src: [
+                    cssBase + 'build/*'
+                ],
+                dest: cssBase + 'build/',
+                replacements: [
+                    {
+                        from: 'url(../img',
+                        to: 'url(../../img'
+                    },
+                    {
+                        from: '"../../fonts/',
+                        to: '"../fonts/'
+                    },
+                    {
+                        from: '"fonts/',
+                        to: '"../fonts/'
+                    }
+                ]
+            }
         }
     });
 
@@ -438,14 +471,16 @@ module.exports = function(grunt) {
      */
     grunt.registerTask('development', [
         'bundle:js',
-        'sass'
+        'sass',
+        'replace:css'
     ]);
 
 
     grunt.registerTask('deploy', [
         'bundle:js',
         // 'strip',
-        'sass'
+        'sass',
+        'replace:css'
     ]);
 };
 

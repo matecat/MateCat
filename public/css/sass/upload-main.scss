@@ -1,7 +1,6 @@
-@import 'variables';
-@import 'common';
-@import 'popup';
-@import 'upload';
+@import 'common-main';
+@import '../popup';
+@import 'upload-page';
 @import 'notifications';
 @import 'powerTip';
 
