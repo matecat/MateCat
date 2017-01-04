@@ -113,28 +113,27 @@ class ProjectContainer extends React.Component {
                 <div className="body-job">
                     <div className="row">
                         <div className="col">
-
+                            <div className="source-lang-container tooltiped" data-tooltip={sourceTxt}>
+                                <span id="source">{sourceLang}</span> <i className="icon-play" />
+                            </div>
+                        </div>
+                        <div className="col list-language">
                             <div className="combo-language multiple"
                                  ref={(combo) => this.combo_languages = combo}>
                                 <ul>
-                                    <li className="source-lang-container tooltipped" data-tooltip={sourceTxt}>
-                                        <span id="source">{sourceLang}</span> <i className="icon-play"/>
-                                    </li>
                                     {targetsLangs}
-                                    <li>
-                                        <div className="payable-words">
-                                            <a href={analyzeUrl} target="_blank">{payableWords} payable words</a>
-                                        </div>
-                                    </li>
                                 </ul>
                             </div>
-
                         </div>
-                        <div className="col m2 right">
+                        <div className="col">
+                            <div className="payable-words">
+                                <a href={analyzeUrl} target="_blank">{payableWords} payable words</a>
+                            </div>
+                        </div>
+                        <div className="col right">
 
-                            <div className="button-list open right">
-                                <a className="btn waves-effect waves-light btn-flat"
-                                   onClick={this.showHideAllJobs.bind(this)}>{buttonLabel}</a>
+                            <div className="button-list right">
+                                <a className="btn waves-effect waves-light open-all top-2" onClick={this.showHideAllJobs.bind(this)}>{buttonLabel}</a>
                             </div>
 
                         </div>
@@ -352,7 +351,7 @@ class ProjectContainer extends React.Component {
                         <div className="row">
                             <div className="col m12">
                                 <div className="activity-log">
-                                    <a href={activityLogUrl} target="_blank" className="right">
+                                    <a href={activityLogUrl} target="_blank" className="right activity-log">
                                         {lastAction}
                                     </a>
                                 </div>
