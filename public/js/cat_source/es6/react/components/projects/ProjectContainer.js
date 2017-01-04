@@ -101,8 +101,8 @@ class ProjectContainer extends React.Component {
                 <div className="body-job">
                     <div className="row">
                         <div className="col">
-                            <div className="source-lang-container tooltiped" data-tooltip={sourceTxt}>
-                                <span id="source">{sourceLang}</span> <i className="icon-play" />
+                            <div className="source-lang-container" >
+                                <span id="source">{sourceTxt}</span> <i className="icon-play" />
                             </div>
                         </div>
                         <div className="col list-language">
@@ -267,16 +267,30 @@ class ProjectContainer extends React.Component {
                 openProjectClass = (jobsLength === 1) ? '':'open-project';
             }
             if ( (isChunk && index === 1) || !isChunk) {
-                var target = <li className="target-lang" key = {i} onClick={self.showSingleJob.bind(self, i, job)}>
-                    <a className={"tooltipped btn waves-effect waves-dark " + openJobClass} data-tooltip={job.get('targetTxt')}>
-                        <badge>{job.get('target')}</badge>
-                        <div className="progress">
-                            <div className="determinate" title={'Translated '+ job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('TRANSLATED_PERC') + '%' }}></div>
-                            <div className="determinate green" title={'Approved '+ job.get('stats').get('APPROVED_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('APPROVED_PERC')+ '%' }}></div>
-                            <div className="determinate red" title={'Rejected '+ job.get('stats').get('REJECTED_PERC_FORMATTED') +'%'} style={{width: job.get('stats').get('REJECTED_PERC') + '%'}}></div>
-                        </div>
-                    </a>
-                </li>;
+                var target;
+                if (isChunk) {
+                    target = <li className="target-lang" key = {i} onClick={self.showSingleJob.bind(self, i, job)}>
+                        <a className={"btn waves-effect waves-dark " + openJobClass}>
+                            <badge>{job.get('targetTxt')}</badge>
+                            <div className="progress">
+                                <div className="determinate" title={'Translated '+ job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('TRANSLATED_PERC') + '%' }}></div>
+                                <div className="determinate green" title={'Approved '+ job.get('stats').get('APPROVED_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('APPROVED_PERC')+ '%' }}></div>
+                                <div className="determinate red" title={'Rejected '+ job.get('stats').get('REJECTED_PERC_FORMATTED') +'%'} style={{width: job.get('stats').get('REJECTED_PERC') + '%'}}></div>
+                            </div>
+                        </a>
+                    </li>;
+                } else {
+                    target = <li className="target-lang" key = {i} onClick={self.showSingleJob.bind(self, i, job)}>
+                        <a className={"btn waves-effect waves-dark " + openJobClass} >
+                            <badge>{job.get('targetTxt')}</badge>
+                            <div className="progress">
+                                <div className="determinate" title={'Translated '+ job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('TRANSLATED_PERC') + '%' }}></div>
+                                <div className="determinate green" title={'Approved '+ job.get('stats').get('APPROVED_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('APPROVED_PERC')+ '%' }}></div>
+                                <div className="determinate red" title={'Rejected '+ job.get('stats').get('REJECTED_PERC_FORMATTED') +'%'} style={{width: job.get('stats').get('REJECTED_PERC') + '%'}}></div>
+                            </div>
+                        </a>
+                    </li>;
+                }
                 targetsLangs.push(target);
             }
         });
