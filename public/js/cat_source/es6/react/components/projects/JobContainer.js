@@ -296,6 +296,11 @@ class JobContainer extends React.Component {
                             <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
                         </div>
                     </div>
+                    <div className="col">
+                        <div className="action-modified">
+                            <div><span>Modified: </span> <a href="#"> yesterday</a></div>
+                        </div>
+                    </div>
                     <div className="col m4 right">
                         <div className="button-list split-outsource right">
                             {splitMergeButton}
