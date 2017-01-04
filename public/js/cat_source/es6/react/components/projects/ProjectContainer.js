@@ -21,6 +21,7 @@ class ProjectContainer extends React.Component {
         this.getActivityLogUrl = this.getActivityLogUrl.bind(this);
         this.hideAllJobs = this.hideAllJobs.bind(this);
 
+        this.filteredJobsWithoutChunksLength = 0;
     }
 
     showHideAllJobs() {
@@ -43,13 +44,17 @@ class ProjectContainer extends React.Component {
 
     showSingleJob(index, job) {
         var i = this.state.visibleJobs.indexOf(job.get('id'));
+        var showAllJobs = false;
         if (i != -1) {
             this.state.visibleJobs.splice(i,1);
         } else {
             this.state.visibleJobs.push(job.get('id'));
         }
+        if (this.filteredJobsWithoutChunksLength === this.state.visibleJobs.length) {
+            showAllJobs = true;
+        }
         this.setState({
-            showAllJobs: false,
+            showAllJobs: showAllJobs,
             visibleJobs: this.state.visibleJobs
         });
         this.forceUpdate();
@@ -212,6 +217,7 @@ class ProjectContainer extends React.Component {
 
     render() {
         var self = this;
+        this.filteredJobsWithoutChunksLength = 0;
         var sourceLang = this.props.project.get('jobs').first().get('source');
         var payableWords = this.props.project.get('tm_analysis');
         var activityLogUrl = this.getActivityLogUrl();
@@ -252,7 +258,8 @@ class ProjectContainer extends React.Component {
                                 changeStatusFn={self.props.changeStatusFn}
                                 downloadTranslationFn={self.props.downloadTranslationFn}
                                 isChunk={isChunk}
-                                lastAction={lastAction}/>;
+                                lastAction={lastAction}
+                                activityLogUrl =  {self.getActivityLogUrl()}/>;
                 chunks.push(item);
                 if ( job.get('id') !== next_job_id) {
                     let chunkList = <div className="chunk" key = { (i - 1) + job.get('id')}>
@@ -266,7 +273,9 @@ class ProjectContainer extends React.Component {
                 openJobClass = 'open-job';
                 openProjectClass = (jobsLength === 1) ? '':'open-project';
             }
+
             if ( (isChunk && index === 1) || !isChunk) {
+                self.filteredJobsWithoutChunksLength ++;
                 var target;
                 if (isChunk) {
                     target = <li className="target-lang" key = {i} onClick={self.showSingleJob.bind(self, i, job)}>
