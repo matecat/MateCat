@@ -260,18 +260,19 @@ class ProjectContainer extends React.Component {
                 openJobClass = 'open-job';
                 openProjectClass = (jobsLength === 1) ? '':'open-project';
             }
-
-            var target = <li className="target-lang" key = {i} onClick={self.showSingleJob.bind(self, i, job)}>
-                <a className={"tooltipped btn waves-effect waves-dark " + openJobClass} data-tooltip={job.get('targetTxt')}>
-                    <badge>{job.get('target')}</badge>
-                    <div className="progress">
-                        <div className="determinate" title={'Translated '+ job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('TRANSLATED_PERC') + '%' }}></div>
-                        <div className="determinate green" title={'Approved '+ job.get('stats').get('APPROVED_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('APPROVED_PERC')+ '%' }}></div>
-                        <div className="determinate red" title={'Rejected '+ job.get('stats').get('REJECTED_PERC_FORMATTED') +'%'} style={{width: job.get('stats').get('REJECTED_PERC') + '%'}}></div>
-                    </div>
-                </a>
-            </li>;
-            targetsLangs.push(target);
+            if ( (isChunk && index === 1) || !isChunk) {
+                var target = <li className="target-lang" key = {i} onClick={self.showSingleJob.bind(self, i, job)}>
+                    <a className={"tooltipped btn waves-effect waves-dark " + openJobClass} data-tooltip={job.get('targetTxt')}>
+                        <badge>{job.get('target')}</badge>
+                        <div className="progress">
+                            <div className="determinate" title={'Translated '+ job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('TRANSLATED_PERC') + '%' }}></div>
+                            <div className="determinate green" title={'Approved '+ job.get('stats').get('APPROVED_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('APPROVED_PERC')+ '%' }}></div>
+                            <div className="determinate red" title={'Rejected '+ job.get('stats').get('REJECTED_PERC_FORMATTED') +'%'} style={{width: job.get('stats').get('REJECTED_PERC') + '%'}}></div>
+                        </div>
+                    </a>
+                </li>;
+                targetsLangs.push(target);
+            }
         });
 
         //The Job Header
