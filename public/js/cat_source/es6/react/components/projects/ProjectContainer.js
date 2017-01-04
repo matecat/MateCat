@@ -42,11 +42,11 @@ class ProjectContainer extends React.Component {
     }
 
     showSingleJob(index, job) {
-        var i = this.state.visibleJobs.indexOf(index);
+        var i = this.state.visibleJobs.indexOf(job.get('id'));
         if (i != -1) {
             this.state.visibleJobs.splice(i,1);
         } else {
-            this.state.visibleJobs.push(index);
+            this.state.visibleJobs.push(job.get('id'));
         }
         this.setState({
             showAllJobs: false,
@@ -70,6 +70,7 @@ class ProjectContainer extends React.Component {
 
     componentDidUpdate() {
         console.log("Updated Project : " + this.props.project.get('id'));
+        $('.tooltipped').tooltip({delay: 50});
     }
 
     getLastActivityLogAction() {
@@ -100,12 +101,14 @@ class ProjectContainer extends React.Component {
     }
 
 
-    getProjectHeader(sourceLang, sourceTxt, targetsLangs, payableWords) {
+    getProjectHeader(sourceLang, targetsLangs, payableWords) {
+        var sourceTxt = this.props.project.get('jobs').first().get('sourceTxt');
         var jobsLength = this.props.project.get('jobs').size;
         var headerProject = '';
         var analyzeUrl = this.getAnalyzeUrl();
-        var buttonLabel = (this.state.showAllJobs) ? "Close" : "View all";
-        if( jobsLength > 1 && !this.state.showAllJobs) {
+        var buttonLabel = ( this.state.showAllJobs ) ? "Close" : "View all";
+
+        if  ( jobsLength > 1 && !this.state.showAllJobs ) {
             headerProject = <div className="card job-preview z-depth-1">
                 <div className="body-job">
                     <div className="row">
@@ -114,7 +117,7 @@ class ProjectContainer extends React.Component {
                             <div className="combo-language multiple"
                                  ref={(combo) => this.combo_languages = combo}>
                                 <ul>
-                                    <li className="source-lang-container tooltiped" data-tooltip={sourceTxt}>
+                                    <li className="source-lang-container tooltipped" data-tooltip={sourceTxt}>
                                         <span id="source">{sourceLang}</span> <i className="icon-play"/>
                                     </li>
                                     {targetsLangs}
@@ -191,30 +194,50 @@ class ProjectContainer extends React.Component {
         nextState.showAllJobs !== this.state.showAllJobs || nextState.lastAction !==  this.state.lastAction)
     }
 
-    render() {
-        var self = this;
-        var jobsList = [];
-        var sourceLang = this.props.project.get('jobs').first().get('source');
-        var targetsLangs = [], sourceTxt= '';
-        var jobsLength = this.props.project.get('jobs').size;
-        var openProjectClass = '';
-        var payableWords = this.props.project.get('tm_analysis');
-        var activityLogUrl = this.getActivityLogUrl();
-
-        var projectMenu = this.getProjectMenu(activityLogUrl);
-        var tempIdsArray = [];
+    createChunks() {
+        var chunk = '', chunks = [];
         var orderedJobs = this.props.project.get('jobs').reverse();
-
         orderedJobs.map(function(job, i){
-            //To check if is a chunk (jobs with same id)
             var isChunk = false;
             if (tempIdsArray.indexOf(job.get('id')) > -1 || (orderedJobs.get(i+1) && orderedJobs.get(i+1).get('id') === job.get('id') )) {
                 isChunk = true;
                 tempIdsArray.push(job.get('id'));
             }
-            var index = i+1;
+        });
+    }
+
+    render() {
+        var self = this;
+        var sourceLang = this.props.project.get('jobs').first().get('source');
+        var payableWords = this.props.project.get('tm_analysis');
+        var activityLogUrl = this.getActivityLogUrl();
+        var projectMenu = this.getProjectMenu(activityLogUrl);
+
+        var jobsLength = this.props.project.get('jobs').size;
+        var targetsLangs = [], jobsList = [], chunks = [],  index;
+        var tempIdsArray = [];
+        var openProjectClass = '';
+        var orderedJobs = this.props.project.get('jobs').reverse();
+
+        orderedJobs.map(function(job, i){
+
             var openJobClass = '';
-            if (self.state.showAllJobs || self.state.visibleJobs.indexOf(i) > -1 || jobsLength === 1 ) {
+            var next_job_id = (orderedJobs.get(i+1)) ? orderedJobs.get(i+1).get('id') : 0;
+            //To check if is a chunk (jobs with same id)
+            var isChunk = false;
+            if (tempIdsArray.indexOf(job.get('id')) > -1 ) {
+                isChunk = true;
+                index ++;
+            }  else if ((orderedJobs.get(i+1) && orderedJobs.get(i+1).get('id') === job.get('id') )) {  //The first of the Chunk
+                isChunk = true;
+                tempIdsArray.push(job.get('id'));
+                index = 1;
+            }  else {
+                index = 0;
+            }
+
+
+            if (self.state.showAllJobs || self.state.visibleJobs.indexOf(job.get('id')) > -1 || jobsLength === 1 ) {
                 var item = <Job key={job.get('id') + "-" + i}
                                 job={job}
                                 index={index}
@@ -224,7 +247,16 @@ class ProjectContainer extends React.Component {
                                 changeStatusFn={self.props.changeStatusFn}
                                 downloadTranslationFn={self.props.downloadTranslationFn}
                                 isChunk={isChunk}/>;
-                jobsList.push(item);
+                chunks.push(item);
+                if ( job.get('id') !== next_job_id) {
+                    let chunkList = <div className="chunk" key = { (i - 1) + job.get('id')}>
+                        <div className="jobs" >
+                            {chunks}
+                        </div>
+                    </div>;
+                    jobsList.push(chunkList);
+                    chunks = [];
+                }
                 openJobClass = 'open-job';
                 openProjectClass = (jobsLength === 1) ? '':'open-project';
             }
@@ -240,11 +272,10 @@ class ProjectContainer extends React.Component {
                 </a>
             </li>;
             targetsLangs.push(target);
-            sourceTxt = job.get('sourceTxt');
         });
 
         //The Job Header
-        var headerProject = this.getProjectHeader(sourceLang, sourceTxt, targetsLangs, payableWords);
+        var headerProject = this.getProjectHeader(sourceLang, targetsLangs, payableWords);
 
         //Last Activity Log Action
         var lastAction;
@@ -293,7 +324,7 @@ class ProjectContainer extends React.Component {
                                         <a className='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0'
                                            ref={(dropdown) => this.dropdown = dropdown}
                                            data-activates={'dropdown' + this.props.project.get('id')}>
-                                            <i className="icon-more_vert"></i>
+                                            <i className="icon-more_vert"/>
                                         </a>
                                         {projectMenu}
                                     </li>
@@ -305,22 +336,16 @@ class ProjectContainer extends React.Component {
                     <section className="jobs-preview">
                         {headerProject}
                     </section>
-                    
-                            <section className="jobs">
-                                <CSSTransitionGroup
-                                transitionName="slide"
-                                transitionAppear={true}
-                                transitionAppearTimeout={1000}
-                                transitionEnterTimeout={300}
-                                transitionLeaveTimeout={200}>
-                                {jobsList}
-                                </CSSTransitionGroup>
-                            </section>
-                    
-
-
-
-
+                    <section className="chunks">
+                        <CSSTransitionGroup
+                            transitionName="slide"
+                            transitionAppear={true}
+                            transitionAppearTimeout={1000}
+                            transitionEnterTimeout={300}
+                            transitionLeaveTimeout={200}>
+                            {jobsList}
+                        </CSSTransitionGroup>
+                    </section>
 
                     <div className="foot-project">
                         <div className="row">
