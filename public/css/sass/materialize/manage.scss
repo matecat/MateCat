@@ -180,23 +180,27 @@ i.close-x:before {
 	}
 	.foot-project {
 		padding: 0px 15px 5px 0;
+		&:hover {
+			text-decoration: underline;
+		}
 	}
 }
 
 .jobs{
 	margin-top: -15px;
 	.button-list {
-		&.open {
-			a {
-				.btn {
-					background-color: gray;
-				}
+		.open-all {
+			background-color: #f1f1f1;
+			color: #6d6d6d;
+			line-height: 2rem;
+			height: 30px;
+			font-weight: bold;
+			font-size: 17px;
+			border: 1px solid #6d6d6d;
+			text-transform: capitalize;
+			&:hover {
+				background-color: #ffffff;
 			}
-		}
-		&.split-outsource {
-			// padding-right: 8px;
-			// border-right: 1px solid gray;
-
 		}
 
 		.split {
@@ -311,6 +315,19 @@ i.close-x:before {
 		{
 			text-transform: capitalize;
 		}
+		.open-all {
+			background-color: #f1f1f1;
+			color: #6d6d6d;
+			line-height: 2rem;
+			height: 30px;
+			font-weight: bold;
+			font-size: 17px;
+			border: 1px solid #f6f6f6;
+			text-transform: capitalize;
+			&:hover {
+				background-color: #ffffff;
+			}
+		}
 		// .progress-bar {
 		// 	line-height: 20px;
 		// 	padding: 3;
@@ -331,9 +348,17 @@ i.close-x:before {
 			// line-height: 2.5rem;
 			padding: 8px 0 0 10px;
 			min-width: 90px;
+			&:hover {
+				text-decoration: underline;
+			}
 		}
 		.action-modified {
 			padding: 8px 0 0 10px;
+			a {
+				&:hover {
+					text-decoration: underline;
+				}
+			}
 		}
 
 		.combo-language {
@@ -358,9 +383,11 @@ i.close-x:before {
 			&.multiple {
 				ul {
 					margin: 0;
+					max-width: 100%;
 					li {
-						display: inline-block;
 						margin-right: 5px;
+					    margin-bottom: 5px;
+					    float: left;
 					}
 					.btn {
 						background-color: white;
@@ -369,9 +396,9 @@ i.close-x:before {
 						border-right: 0;
 						font-size: 0.9rem;
 						line-height: 1.7rem;
-						height: 30px;
+						height: 33px;
 						text-transform: capitalize;
-						width: 60px;
+						width: 150px;
 						box-sizing: border-box;
 						// border-left: 4px solid transparent;
 						// &.btn:active {
@@ -420,6 +447,10 @@ i.close-x:before {
 			}
 		}
 	}
+}
+
+.list-language {
+	max-width: 53%;
 }
 
 body.manage {
@@ -517,20 +548,20 @@ footer nav ul a:hover {
 	height:30px;
 }
 
-.open .btn-flat {
-    border-radius: 2px 0 0 2px;
-    -moz-box-shadow: 0 1px 2px #ccc;
-    -webkit-box-shadow: 0 1px 2px #ccc;
-    box-shadow: 0 1px 2px #ccc;
-    background: #dcdedf!important;
-    border: 1px solid #848689;
-    line-height: 2rem;
-    height: 30px;
-    font-weight:bold;
-    margin-top: 4px;
-    font-size:17px;
-    padding: 0px 15px;
-}
+// .open .btn-flat {
+//     border-radius: 2px 0 0 2px;
+//     -moz-box-shadow: 0 1px 2px #ccc;
+//     -webkit-box-shadow: 0 1px 2px #ccc;
+//     box-shadow: 0 1px 2px #ccc;
+//     background: #dcdedf!important;
+//     border: 1px solid #848689;
+//     line-height: 2rem;
+//     height: 30px;
+//     font-weight:bold;
+//     margin-top: 4px;
+//     font-size:17px;
+//     padding: 0px 15px;
+// }
 
 li.target-lang {
     border: 1px solid #f4f4f4;
@@ -577,6 +608,9 @@ li.target-lang {
 
 .activity-log {
     font-size: 14px;
+    &:hover {
+		text-decoration: underline;
+	}
 }
 
 
