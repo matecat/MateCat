@@ -39,7 +39,7 @@ class JobContainer extends React.Component {
 }
 
     shouldComponentUpdate(nextProps, nextState){
-        return (nextProps.job !== this.props.job )
+        return (nextProps.job !== this.props.job || nextProps.lastAction !== this.props.lastAction )
     }
 
     getTranslateUrl() {
@@ -220,6 +220,15 @@ class JobContainer extends React.Component {
         }
     }
 
+    getModifyDate() {
+        if ( this.props.lastAction ) {
+            var date = new Date(this.props.lastAction.event_date);
+            return date.toDateString();
+        } else {
+            return 'no actions';
+        }
+    }
+
     render () {
         var translateUrl = this.getTranslateUrl();
         var outsourceUrl = this.getOutsourceUrl();
@@ -228,6 +237,7 @@ class JobContainer extends React.Component {
         var splitUrl = this.getSplitUrl();
         var mergeUrl = this.getMergeUrl();
         var splitMergeButton = this.getSplitOrMergeButton(splitUrl, mergeUrl);
+        var modifyDate = this.getModifyDate();
 
         var jobMenu = this.getJobMenu(splitUrl, mergeUrl);
         var tmIcon = this.getTMIcon();
@@ -294,7 +304,7 @@ class JobContainer extends React.Component {
                     </div>
                     <div className="col">
                         <div className="action-modified">
-                            <div><span>Modified: </span> <a href="#"> yesterday</a></div>
+                            <div><span>Modified: </span> <a href="#"> {modifyDate}</a></div>
                         </div>
                     </div>
                     <div className="col m4 right">

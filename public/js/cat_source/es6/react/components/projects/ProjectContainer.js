@@ -14,12 +14,12 @@ class ProjectContainer extends React.Component {
         this.state = {
             showAllJobs: false,
             visibleJobs: [],
-            lastAction: null
+            lastAction: null,
+            jobsActions: null
         };
         this.getProjectHeader = this.getProjectHeader.bind(this);
         this.getActivityLogUrl = this.getActivityLogUrl.bind(this);
         this.hideAllJobs = this.hideAllJobs.bind(this);
-        this.getLastActivityLogAction = this.getLastActivityLogAction.bind(this);
 
     }
 
@@ -60,7 +60,7 @@ class ProjectContainer extends React.Component {
             belowOrigin: true
         });
         $('.tooltipped').tooltip({delay: 50});
-        this.getLastActivityLogAction();
+        this.getLastAction();
         ProjectsStore.addListener(ManageConstants.CLOSE_ALL_JOBS, this.hideAllJobs);
     }
 
@@ -71,18 +71,6 @@ class ProjectContainer extends React.Component {
     componentDidUpdate() {
         console.log("Updated Project : " + this.props.project.get('id'));
         $('.tooltipped').tooltip({delay: 50});
-    }
-
-    getLastActivityLogAction() {
-        var self = this;
-        UI.getLastProjectActivityLogAction(this.props.project.get('id'), this.props.project.get('password'))
-            .done(function (data) {
-                var activity = data.activity[0];
-                self.setState({
-                    lastAction: activity
-                });
-            });
-
     }
 
     removeProject() {
@@ -108,7 +96,7 @@ class ProjectContainer extends React.Component {
         var analyzeUrl = this.getAnalyzeUrl();
         var buttonLabel = ( this.state.showAllJobs ) ? "Close" : "View all";
 
-        if  ( jobsLength > 1 && !this.state.showAllJobs ) {
+        if  ( jobsLength > 1  ) { //&& !this.state.showAllJobs
             headerProject = <div className="card job-preview z-depth-1">
                 <div className="body-job">
                     <div className="row">
@@ -173,7 +161,24 @@ class ProjectContainer extends React.Component {
     }
 
     getLastAction() {
-        this.props.lastActivityFn(this.props.project.get('id'), this.props.project.get('password')).done()
+        var self = this;
+        this.props.lastActivityFn(this.props.project.get('id'), this.props.project.get('password')).done(function (data) {
+            self.setState({
+                lastAction: data.activity[0],
+                jobsActions: data.activity
+            });
+        });
+    }
+
+    getLastJobAction(idJob) {
+        //Last Activity Log Action
+        var lastAction;
+        if ( this.state.jobsActions && this.state.jobsActions.length > 0 ) {
+            lastAction = this.state.jobsActions.find(function (job) {
+                return job.id_job == idJob;
+            });
+        }
+        return lastAction;
     }
 
     getActivityLogUrl() {
@@ -238,6 +243,7 @@ class ProjectContainer extends React.Component {
 
 
             if (self.state.showAllJobs || self.state.visibleJobs.indexOf(job.get('id')) > -1 || jobsLength === 1 ) {
+                var lastAction = self.getLastJobAction(job.get('id'));
                 var item = <Job key={job.get('id') + "-" + i}
                                 job={job}
                                 index={index}
@@ -246,7 +252,8 @@ class ProjectContainer extends React.Component {
                                 changeJobPasswordFn={self.props.changeJobPasswordFn}
                                 changeStatusFn={self.props.changeStatusFn}
                                 downloadTranslationFn={self.props.downloadTranslationFn}
-                                isChunk={isChunk}/>;
+                                isChunk={isChunk}
+                                lastAction={lastAction}/>;
                 chunks.push(item);
                 if ( job.get('id') !== next_job_id) {
                     let chunkList = <div className="chunk" key = { (i - 1) + job.get('id')}>
