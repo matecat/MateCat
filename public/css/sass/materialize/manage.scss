@@ -296,7 +296,7 @@ i.close-x:before {
 		li {
 			float: left;
 			a{
-				// margin-left: 8px;
+				margin-left: 8px;
 				i {
 					color: #4D4D4D;
 				}
@@ -329,6 +329,10 @@ i.close-x:before {
 		.payable-words {
 			// background-color: purple;
 			// line-height: 2.5rem;
+			padding: 8px 0 0 10px;
+			min-width: 90px;
+		}
+		.action-modified {
 			padding: 8px 0 0 10px;
 		}
 
