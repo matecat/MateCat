@@ -14,7 +14,7 @@ use ActivityLog\ActivityLogStruct;
 
 class Activity {
     /**
-     * @var \Comments_BaseCommentStruct[]
+     * @var \ActivityLog\ActivityLogStruct[]
      */
     private $data;
 
@@ -41,7 +41,21 @@ class Activity {
 
             $record = $featureSet->filter('filterActivityLogEntry', $record );
 
-            $out[] = $record->toArray();
+            $formatted = array(
+                'id'         => $record->ID,
+                'action'     => $record->action,
+                'email'      => $record->email,
+                'event_date' => \Utils::api_timestamp( $record->event_date ),
+                'first_name' => $record->first_name,
+                'id_job'     => $record->id_job,
+                'id_project' => $record->id_project,
+                'ip'         => $record->ip,
+                'last_name'  => $record->last_name,
+                'uid'        => $record->uid
+            );
+
+            $out[] = $formatted ;
+
         }
 
         return $out;
