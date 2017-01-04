@@ -452,6 +452,30 @@ i.close-x:before {
 .list-language {
 	max-width: 53%;
 }
+.bottom-chunk-1{
+	width: 100%;
+    height: 5px;
+    background-color: white;
+    border: 1px solid #dedcdc;
+    border-top: none;
+    border-radius: 2px;
+    margin-top: 0px;
+    position: relative;
+}
+
+.bottom-chunk-2 {
+	width: 100%;
+    height: 6px;
+    background-color: white;
+    border: 1px solid #dedcdc;
+    border-top: none;
+    border-radius: 2px;
+    margin-top: -1px;
+    z-index: 0;
+}
+.chunk-job a{
+	height: 23px !important;
+}
 
 body.manage {
 	min-width: 1040px;
