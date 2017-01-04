@@ -309,7 +309,7 @@ class JobContainer extends React.Component {
                     </div>
                     <div className="col">
                         <div className="action-modified">
-                            <div><span>Modified: </span> <a href="#"> {modifyDate}</a></div>
+                            <div><span>Modified: </span> <a target="_blank" href={this.props.activityLogUrl}> {modifyDate}</a></div>
                         </div>
                     </div>
                     <div className="col m4 right">
