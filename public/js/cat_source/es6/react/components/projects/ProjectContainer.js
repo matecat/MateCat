@@ -310,7 +310,39 @@ class ProjectContainer extends React.Component {
                 chunks.push(item);
                 if ( job.get('id') !== next_job_id) {
                     let chunkList = <div className="chunk" key = { (i - 1) + job.get('id')}>
-                        <div className="row">Header</div>
+                        <div className="card header-chunk">
+                            <div className="row">
+                                <div className="col">
+                                    <div className="job-id">
+                                        <div id={"id-job-" + job.get('id')}><span>ID:</span>{ job.get('id') }</div>
+
+                                    </div>
+                                </div>
+                                <div className="col">
+                                    <div className="">
+                                        {job.get('sourceTxt')}
+                                    </div>
+                                </div>
+                                <div className="col">
+                                    <div className="">
+                                        <i className="icon-play"/>
+                                    </div>
+                                </div>
+                                <div className="col">
+                                    <div className="">
+                                        {job.get('targetTxt')}
+                                    </div>
+                                </div>
+                                        
+                                <div className="col right">
+                                    <div className="button-list">
+                                        <a className="btn waves-effect split waves-dark" target="_blank" >
+                                            <i className="large icon-compress right"/>Merge
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div className="jobs" >
                             {chunks}
                         </div>

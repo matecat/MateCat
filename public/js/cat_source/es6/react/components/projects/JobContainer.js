@@ -300,7 +300,7 @@ class JobContainer extends React.Component {
             </div>
             <div className="body-job">
                 <div className="row">
-                    <div className="col">
+                    {/*<div className="col">
                         <div className="combo-language single">
                             <ul>
                                 <li>
@@ -311,7 +311,7 @@ class JobContainer extends React.Component {
                                 </li>
                             </ul>
                         </div>
-                    </div>
+                    </div>*/}
                     <div className="col">
                         <div className="progress-bar">
                             <div className="progr">

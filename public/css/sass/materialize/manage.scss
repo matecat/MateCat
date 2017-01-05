@@ -186,95 +186,118 @@ i.close-x:before {
 	}
 }
 
-.jobs{
-	margin-top: 0;
-	.button-list {
-		.open-all {
-			background-color: #f1f1f1;
-			color: #6d6d6d;
-			line-height: 2rem;
-			height: 30px;
-			font-weight: bold;
-			font-size: 17px;
-			border: 1px solid #6d6d6d;
-			text-transform: capitalize;
-			&:hover {
-				background-color: #ffffff;
-			}
+.button-list {
+	.open-all {
+		background-color: #f1f1f1;
+		color: #6d6d6d;
+		line-height: 2rem;
+		height: 30px;
+		font-weight: bold;
+		font-size: 17px;
+		border: 1px solid #6d6d6d;
+		text-transform: capitalize;
+		&:hover {
+			background-color: #ffffff;
 		}
+	}
 
-		.split {
-			background-color: inherit !important;
-			color: #6d6d6d;
-			border: 1px solid $secondary-color;
-			line-height: 2rem;
-			height: 30px;
-			font-weight: bold;
-			font-size: 17px;
-			border: 1px solid #6d6d6d;
-			text-transform: capitalize;
-			&:hover {
-				background-color: #f1f1f1 !important;
-			}
-			i {
-				&.right {
-					margin-left: 10px;
-					margin-right: -10px;
-					line-height: 2rem;
-				}
-			}
+	.split {
+		background-color: #FFFFFF !important;
+		color: #6d6d6d;
+		border: 1px solid $secondary-color;
+		line-height: 2rem;
+		height: 30px;
+		font-weight: bold;
+		font-size: 17px;
+		border: 1px solid #6d6d6d;
+		text-transform: capitalize;
+		&:hover {
+			background-color: #f1f1f1 !important;
 		}
-		.outsource {
-			background-color: #7eaf3e !important;
-			line-height: 2rem;
-			height: 30px;
-			font-weight: bold;
-			font-size: 17px;
-			border: 1px solid #6d6d6d;
-			margin-left: 5px;
-			text-transform: capitalize;
-			&:hover {
-				background-color: #8bc343 !important;
-			}
-		}
-		.out_sourced {
-			background-color: #ffffff !important;
-			color: #7eaf3e;
-			line-height: 2rem;
-			height: 30px;
-			font-weight: bold;
-			font-size: 17px;
-			border: 1px solid #6d6d6d;
-			margin-left: 5px;
-			text-transform: capitalize;
-			&:hover {
-				background-color: #f1f1f1 !important;
-			}
-			i {
-				&.right {
-					margin-left: 10px;
-					margin-right: -10px;
-					line-height: 2rem
-				}
-			}
-		}
-		.translate {
-			line-height: 2rem;
-			height: 30px;
-			font-weight: bold;
-			font-size: 17px;
-			border: 1px solid #6d6d6d;
-			text-transform: capitalize;
-			&.move-left {
-				margin-left: 5px;
+		i {
+			&.right {
+				margin-left: 10px;
+				margin-right: -10px;
+				line-height: 2rem;
 			}
 		}
 	}
+	.outsource {
+		background-color: #7eaf3e !important;
+		line-height: 2rem;
+		height: 30px;
+		font-weight: bold;
+		font-size: 17px;
+		border: 1px solid #6d6d6d;
+		margin-left: 5px;
+		text-transform: capitalize;
+		&:hover {
+			background-color: #8bc343 !important;
+		}
+	}
+	.out_sourced {
+		background-color: #ffffff !important;
+		color: #7eaf3e;
+		line-height: 2rem;
+		height: 30px;
+		font-weight: bold;
+		font-size: 17px;
+		border: 1px solid #6d6d6d;
+		margin-left: 5px;
+		text-transform: capitalize;
+		&:hover {
+			background-color: #f1f1f1 !important;
+		}
+		i {
+			&.right {
+				margin-left: 10px;
+				margin-right: -10px;
+				line-height: 2rem
+			}
+		}
+	}
+	.translate {
+		line-height: 2rem;
+		height: 30px;
+		font-weight: bold;
+		font-size: 17px;
+		border: 1px solid #6d6d6d;
+		text-transform: capitalize;
+		&.move-left {
+			margin-left: 5px;
+		}
+	}
+}
+.jobs{
+	margin-top: 0;
 }
 
 .chunk {
 	margin-bottom: 0;
 	padding: 5px 0;
+	.card {
+		position: relative;
+	    margin: 0 15px 1px 15px;
+	    background-color: #fff;
+	    transition: box-shadow .25s;
+	    border-radius: 2px;
+	    padding: 0 0;
+		.job-id {
+			
+		}
+		ul {
+			margin: 0;
+			li {
+				display: inline;
+			}
+		}
+		&.header-chunk {
+			padding: 9px 15px;
+			.button-list {
+				
+			}
+		}
+	}
 }
 
 .job, .job-preview {
