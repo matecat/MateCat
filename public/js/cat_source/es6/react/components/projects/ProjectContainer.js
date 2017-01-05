@@ -124,8 +124,11 @@ class ProjectContainer extends React.Component {
                     <div className="row">
                         <div className="col">
                             <div className="source-lang-container" >
-                                <span id="source">{sourceTxt}</span> <i className="icon-play" />
+                                <span id="source">{sourceTxt}</span>
                             </div>
+                        </div>
+                        <div className="col">
+                            <i className="icon-play" />
                         </div>
                         <div className="col list-language">
                             <div className="combo-language multiple"
