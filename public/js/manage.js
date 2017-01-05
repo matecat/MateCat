@@ -134,18 +134,6 @@ UI = {
 
         if(typeof only_if == 'undefined') only_if = 0;
 
-        // if ( type == 'job' ) {
-        //     UI.lastJobStatus = object.data( 'status' );
-        // } else {
-        //     var arJobs = '';
-        //     $( "tr.row", object ).each( function () {
-        //         arJobs += $( this ).data( 'jid' ) + "-" + $( this ).data( 'password' ) + ':' + $( this ).data( 'status' ) + ',';
-        //     } );
-        //     arJobs = arJobs.substring( 0, arJobs.length - 1 );
-        //     UI.lastJobStatus = arJobs;
-        //
-        // }
-
         var id = object.id;
         var password = object.password;
 
@@ -168,36 +156,6 @@ UI = {
             data: data,
             success: function(d){},
             error: function(d){}
-        });
-    },
-    /**
-     * To undo an action on a Project of change status
-     */
-    applyUndoStatusChange: function() {
-        var undo = $('.message a.undo');
-
-        $('.message').hide();
-        var new_status = $(undo).data('status');
-        var res = $(undo).data('res');
-        var id = $(undo).data('id');
-        var password = $(undo).data('password');
-        var ob = (res=='job')? $('tr.row[data-jid=' + id + ']') : $('.article[data-pid=' + id + ']');
-        var d = {
-            action:		"changeJobsStatus",
-            new_status: new_status,
-            res: 		res,
-            id:			id,
-            password:   password,
-            page:		UI.Search.currentPage,
-            step:		UI.pageStep,
-            undo:		1
-        };
-        ar = $.extend(d,{});
-
-        APP.doRequest({
-            data: ar,
-            context: ob,
-            success: function(d){}
         });
     },
     /**
