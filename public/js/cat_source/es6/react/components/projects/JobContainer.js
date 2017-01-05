@@ -52,8 +52,8 @@ class JobContainer extends React.Component {
         var use_prefix = ( this.props.jobsLenght > 1 );
         var chunk_id = this.props.job.get('id') + ( ( use_prefix ) ? '-' + this.props.index : '' ) ;
         var possibly_different_review_password = ( this.props.job.has('review_password') ?
-            this.props.job.get('password') :
-            this.props.job.get('review_password')
+            this.props.job.get('review_password') :
+            this.props.job.get('password')
         );
 
         return '/revise/'+this.props.project.get('name')+'/'+ this.props.job.get('source') +'-'+this.props.job.get('target')+'/'+ chunk_id +'-'+  possibly_different_review_password ;
