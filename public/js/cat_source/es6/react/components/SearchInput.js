@@ -24,7 +24,7 @@ class SearchInput extends React.Component {
                         <div className="input-field">
                             <i className="icon-search prefix"></i>
                             <input id="icon_prefix" type="text" className="valid"
-                                   placeholder="Project name"
+                                   placeholder="Search by project name"
                                    ref={(input) => this.textInput = input}
                                    onChange={this.filterByName.bind(this)}/>
                             <i className="prefix close-x"
