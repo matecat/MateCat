@@ -1,7 +1,7 @@
 
 .progress-bar {
 	border: 1px solid #828282;
-    height: 19px;
+    height: 20px;
     margin-top: 5px;
 
 	.progr {
@@ -40,6 +40,7 @@
 			    -webkit-animation: move 2s linear infinite;
 			    overflow: hidden;
 			    height: 18px;
+				opacity: 0.3;
 		    }
 		}
 		.translated-bar {
