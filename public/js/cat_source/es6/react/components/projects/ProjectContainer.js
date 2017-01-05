@@ -310,6 +310,7 @@ class ProjectContainer extends React.Component {
                 chunks.push(item);
                 if ( job.get('id') !== next_job_id) {
                     let chunkList = <div className="chunk" key = { (i - 1) + job.get('id')}>
+                        <div className="row">Header</div>
                         <div className="jobs" >
                             {chunks}
                         </div>
