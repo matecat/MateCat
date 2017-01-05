@@ -86,7 +86,7 @@ i.close-x:before {
 
 	.head-project {
 		background-color: #f1f1f1;
-		padding: 8px 0 25px 0;
+		padding: 5px 0 0 0;
 		border-top: 4px solid #9e9e9e;
 		&.open-project {
 			background-color: inherit;
@@ -187,7 +187,7 @@ i.close-x:before {
 }
 
 .jobs{
-	margin-top: -15px;
+	margin-top: 0;
 	.button-list {
 		.open-all {
 			background-color: #f1f1f1;
@@ -273,7 +273,8 @@ i.close-x:before {
 }
 
 .chunk {
-	margin-bottom: 30px;
+	margin-bottom: 0;
+	padding: 5px 0;
 }
 
 .job, .job-preview {
@@ -398,7 +399,7 @@ i.close-x:before {
 						line-height: 1.7rem;
 						height: 33px;
 						text-transform: capitalize;
-						width: 150px;
+						width: 170px;
 						box-sizing: border-box;
 						// border-left: 4px solid transparent;
 						// &.btn:active {
@@ -450,7 +451,7 @@ i.close-x:before {
 }
 
 .list-language {
-	max-width: 53%;
+	max-width: 60%;
 }
 .bottom-chunk-1{
 	width: 100%;
@@ -477,6 +478,10 @@ i.close-x:before {
 	height: 23px !important;
 }
 
+.jobs-preview {
+	margin-top: 20px;
+}
+
 body.manage {
 	min-width: 1040px;
 	font-size: 14px;
@@ -484,7 +489,7 @@ body.manage {
 }
 
 .job-preview {
-	margin: -15px 15px 25px;
+	margin: -15px 15px 5px 15px;
 }
 
 .material-icons {
@@ -591,23 +596,30 @@ li.target-lang {
     border: 1px solid #f4f4f4;
 }
 
-.combo-language .source-lang-container {
-    margin-top: 10px;
+.combo-language  {
     float: left;
     margin-right: 0!important;
 }
 
- .dropdown-content li {
- 	min-height: 30px;
- }
-
- .project-activity-icon li a i {
-    margin-right: 10px;
-    vertical-align: middle;
-    display: block;
+.source-lang-container {
+	border: 1px solid #dcdcdc;
     text-align: center;
-    float: left;
-    position: relative;
+    padding: 5px;
+    width: 90px;
+}
+
+
+.dropdown-content li {
+	min-height: 30px;
+}
+
+.project-activity-icon li a i {
+margin-right: 10px;
+vertical-align: middle;
+display: block;
+text-align: center;
+float: left;
+position: relative;
 }
 
 .dropdown-content .icon-trash-o:before {
