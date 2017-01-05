@@ -22,6 +22,7 @@ class ProjectContainer extends React.Component {
         this.hideAllJobs = this.hideAllJobs.bind(this);
 
         this.filteredJobsWithoutChunksLength = 0;
+        this.openJobsWithTmKeys = false;
     }
 
     showHideAllJobs() {
@@ -102,13 +103,34 @@ class ProjectContainer extends React.Component {
         });
         if (jobWithKey.size > 0 ) {
             return <li>
-                <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0">
+                <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0"
+                    onClick={this.openProjectsWithTmKey.bind(this, jobWithKey)}>
                     <i className="icon-tm-matecat"/>
                 </a>
             </li>;
         } else {
             return '';
         }
+    }
+
+    openProjectsWithTmKey(jobWithKey) {
+        var jobs_id = [];
+        var showAllJobs = false;
+        if ( !this.openJobsWithTmKeys ) {
+            jobWithKey.forEach(function (job) {
+                jobs_id.push(job.get('id'));
+            });
+            if (this.filteredJobsWithoutChunksLength === jobs_id.length) {
+                showAllJobs = true;
+            }
+        }
+        this.setState({
+            showAllJobs: showAllJobs,
+            visibleJobs: jobs_id
+        });
+        this.openJobsWithTmKeys = !this.openJobsWithTmKeys;
+        this.forceUpdate();
+
     }
 
     getProjectHeader(sourceLang, targetsLangs, payableWords) {
@@ -119,40 +141,43 @@ class ProjectContainer extends React.Component {
         var buttonLabel = ( this.state.showAllJobs ) ? "Close" : "View all";
 
         if  ( jobsLength > 1  ) { //&& !this.state.showAllJobs
-            headerProject = <div className="card job-preview z-depth-1">
-                <div className="body-job">
-                    <div className="row">
-                        <div className="col">
-                            <div className="source-lang-container" >
-                                <span id="source">{sourceTxt}</span>
-                            </div>
-                        </div>
-                        <div className="col">
-                            <i className="icon-play" />
-                        </div>
-                        <div className="col list-language">
-                            <div className="combo-language multiple"
-                                 ref={(combo) => this.combo_languages = combo}>
-                                <ul>
-                                    {targetsLangs}
-                                </ul>
-                            </div>
-                        </div>
-                        <div className="col">
-                            <div className="payable-words">
-                                <a href={analyzeUrl} target="_blank">{payableWords} payable words</a>
-                            </div>
-                        </div>
-                        <div className="col right">
+            headerProject =
+                <section className="jobs-preview">
+                    <div className="card job-preview z-depth-1">
+                        <div className="body-job">
+                            <div className="row">
+                                <div className="col">
+                                    <div className="source-lang-container" >
+                                        <span id="source">{sourceTxt}</span>
+                                    </div>
+                                </div>
+                                <div className="col">
+                                    <i className="icon-play" />
+                                </div>
+                                <div className="col list-language">
+                                    <div className="combo-language multiple"
+                                         ref={(combo) => this.combo_languages = combo}>
+                                        <ul>
+                                            {targetsLangs}
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div className="col">
+                                    <div className="payable-words">
+                                        <a href={analyzeUrl} target="_blank">{payableWords} payable words</a>
+                                    </div>
+                                </div>
+                                <div className="col right">
 
-                            <div className="button-list right">
-                                <a className="btn waves-effect waves-light open-all top-2" onClick={this.showHideAllJobs.bind(this)}>{buttonLabel}</a>
-                            </div>
+                                    <div className="button-list right">
+                                        <a className="btn waves-effect waves-light open-all top-2" onClick={this.showHideAllJobs.bind(this)}>{buttonLabel}</a>
+                                    </div>
 
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>;
+                </section>;
         }
         return headerProject;
 
@@ -391,9 +416,9 @@ class ProjectContainer extends React.Component {
 
                         </div>
                     </div>
-                    <section className="jobs-preview">
-                        {headerProject}
-                    </section>
+
+                    {headerProject}
+
                     <section className="chunks">
                         <CSSTransitionGroup
                             transitionName="slide"
