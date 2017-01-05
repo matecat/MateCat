@@ -1,7 +1,7 @@
 
 .progress-bar {
 	border: 1px solid #828282;
-    height: 20px;
+    height: 19px;
     margin-top: 5px;
 
 	.progr {
@@ -28,7 +28,7 @@
 		    a:after {
 				content: "";
 			    position: absolute;
-			    top: 1px;
+			    top: 0px;
 			    left: 0;
 			    bottom: 0;
 			    right: 0;
@@ -39,7 +39,7 @@
 			    background-size: 50px 50px;
 			    -webkit-animation: move 2s linear infinite;
 			    overflow: hidden;
-			    height: 16px;
+			    height: 18px;
 		    }
 		}
 		.translated-bar {
