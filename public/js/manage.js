@@ -109,7 +109,7 @@ UI = {
         window.open(url, '_blank');
         setTimeout(function () {
             $.cookie('tmpanel-open', 0, { path: '/' });
-        }, 1000);
+        }, 2000);
     },
     /**
      * Open the tm panel for the job
@@ -119,7 +119,7 @@ UI = {
         window.open(url, '_blank');
         setTimeout(function () {
             $.cookie('tmpanel-open', 0, { path: '/' });
-        }, 1000);
+        }, 2000);
     },
 
     /**

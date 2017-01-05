@@ -333,13 +333,19 @@ class ProjectContainer extends React.Component {
                         <div className="bottom-chunk-2 z-depth-1"></div>
                     </li>;
                 } else {
-                    target = <li className="" key = {i} onClick={self.showSingleJob.bind(self, i, job)}>
+                    target = <li key = {i} onClick={self.showSingleJob.bind(self, i, job)}>
                         <a className={"btn waves-effect waves-dark " + openJobClass} >
                             <badge>{job.get('targetTxt')}</badge>
-                            <div className="progress">
-                                <div className="determinate" title={'Translated '+ job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('TRANSLATED_PERC') + '%' }}></div>
-                                <div className="determinate green" title={'Approved '+ job.get('stats').get('APPROVED_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('APPROVED_PERC')+ '%' }}></div>
-                                <div className="determinate red" title={'Rejected '+ job.get('stats').get('REJECTED_PERC_FORMATTED') +'%'} style={{width: job.get('stats').get('REJECTED_PERC') + '%'}}></div>
+                            <div className="progress-bar">
+                                <div className="progr">
+                                <div className="meter">
+                                    <a className="warning-bar" title={'Rejected '+ job.get('stats').get('REJECTED_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('REJECTED_PERC') + '%'}}/>
+                                    <a className="approved-bar" title={'Approved '+ job.get('stats').get('APPROVED_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('APPROVED_PERC')+ '%' }}/>
+                                    <a className="translated-bar" title={'Translated '+ job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('TRANSLATED_PERC') + '%' }}/>
+                                    <a className="draft-bar" title={'Translated '+ job.get('stats').get('DRAFT_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('DRAFT_PERC') + '%' }}/>
+
+                                </div>
+                            </div>
                             </div>
                         </a>
                     </li>;
