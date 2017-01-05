@@ -109,18 +109,17 @@ UI = {
         window.open(url, '_blank');
         setTimeout(function () {
             $.cookie('tmpanel-open', 0, { path: '/' });
-        }, 500);
+        }, 1000);
     },
     /**
      * Open the tm panel for the job
      */
     openJobTMPanel: function (job, prName) {
-        $.cookie('tmpanel-open', 1, { path: '/' });
         var url = '/translate/'+ prName +'/'+ job.source +'-'+ job.target +'/'+ job.id +'-'+ job.password + '&openTab=tm' ;
         window.open(url, '_blank');
         setTimeout(function () {
             $.cookie('tmpanel-open', 0, { path: '/' });
-        }, 500);
+        }, 1000);
     },
 
     /**
