@@ -337,7 +337,7 @@ class JobContainer extends React.Component {
                     </div>
                     <div className="col m4 right">
                         <div className="button-list split-outsource right">
-                            {splitMergeButton}
+                            {/*{splitMergeButton}*/}
                             <a className="btn waves-effect waves-light outsource" target="_blank" href={outsourceUrl}>outsource</a>
                             {/*<a className="btn waves-effect waves-light outsourced" target="_blank" href={outsourcedUrl}>outsource</a> */}
                             <a className="btn waves-effect waves-light translate move-left" target="_blank" href={translateUrl}>Open</a>

@@ -239,6 +239,27 @@ class ProjectContainer extends React.Component {
         return '/analyze/' +this.props.project.get('name')+ '/' +this.props.project.get('id')+ '-' + this.props.project.get('password');
     }
 
+    getJobSplitUrl(job) {
+        return '/analyze/'+ job.get('name') +'/'+ this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=split&jobid=' + job.get('id');
+    }
+
+    getJobMergeUrl(job) {
+        return '/analyze/'+ this.props.project.get('name') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=merge&jobid=' + job.get('id');
+    }
+
+    getJobSplitOrMergeButton(isChunk, mergeUrl, splitUrl ) {
+
+        if (isChunk) {
+            return <a className="btn waves-effect split waves-dark" target="_blank" href={mergeUrl}>
+                <i className="large icon-compress right"/>Merge
+            </a>
+        } else {
+            return <a className="btn waves-effect split waves-dark" target="_blank" href={splitUrl}>
+                <i className="large icon-expand right"/>Split
+            </a>
+        }
+    }
+
     getLastActionDate() {
         var date = new Date(this.state.lastAction.event_date);
         return date.toDateString();
@@ -309,6 +330,15 @@ class ProjectContainer extends React.Component {
                                 activityLogUrl =  {self.getActivityLogUrl()}/>;
                 chunks.push(item);
                 if ( job.get('id') !== next_job_id) {
+                    var button;
+                    if ( chunks.length > 1 ) {
+                        var mergeUrl = self.getJobMergeUrl(job);
+                        button = self.getJobSplitOrMergeButton(true, mergeUrl);
+                    } else {
+                        var splitUrl = self.getJobSplitUrl(job);
+                        button = self.getJobSplitOrMergeButton(false, '', splitUrl);
+                    }
+
                     let chunkList = <div className="chunk" key = { (i - 1) + job.get('id')}>
                         <div className="card header-chunk">
                             <div className="row">
@@ -336,9 +366,7 @@ class ProjectContainer extends React.Component {
                                         
                                 <div className="col right">
                                     <div className="button-list">
-                                        <a className="btn waves-effect split waves-dark" target="_blank" >
-                                            <i className="large icon-compress right"/>Merge
-                                        </a>
+                                        {button}
                                     </div>
                                 </div>
                             </div>
