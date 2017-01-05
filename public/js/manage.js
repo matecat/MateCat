@@ -204,14 +204,12 @@ UI = {
     /**
      * Change the password for the job
      * @param job
+     * @param undo
+     * @param old_pass
      */
-    changeJobPassword: function(job) {
+    changeJobPassword: function(job, undo, old_pass) {
         var id = job.id;
         var password = job.password;
-        var old_password = null;
-        // if( undo ){
-        //     old_password = $(undo).data('old_password');
-        // }
 
         return APP.doRequest({
             data: {
@@ -219,8 +217,8 @@ UI = {
                 res: 		    'obj',
                 id: 		    id,
                 password: 	    password,
-                old_password: 	old_password,
-                undo:           0
+                old_password: 	old_pass,
+                undo:           undo
             },
             success: function(d){}
         });

@@ -69,15 +69,36 @@ class JobContainer extends React.Component {
 
     changePassword() {
         var self = this;
+        this.oldPassword = this.props.job.get('password');
         this.props.changeJobPasswordFn(this.props.job.toJS())
             .done(function (data) {
                 var notification = {
                     title: 'Change job password',
-                    text: "The password has been changed",
-                    type: 'warning', position: 'tc'
+                    text: 'The password has been changed. <a class="undo-password">Undo</a>',
+                    type: 'warning',
+                    position: 'tc',
+                    allowHtml: true,
+                    timer: 10000
                 };
-                APP.addNotification(notification);
+                var boxUndo = APP.addNotification(notification);
                 ManageActions.changeJobPassword(self.props.project, self.props.job, data.password, data.undo);
+                $('.undo-password').off('click');
+                $('.undo-password').on('click', function () {
+                    APP.removeNotification(boxUndo);
+                    self.props.changeJobPasswordFn(self.props.job.toJS(), 1, self.oldPassword)
+                        .done(function (data) {
+                            notification = {
+                                title: 'Change job password',
+                                text: 'The previous password has been restored.',
+                                type: 'warning',
+                                position: 'tc',
+                                timer: 7000
+                            };
+                            APP.addNotification(notification);
+                            ManageActions.changeJobPassword(self.props.project, self.props.job, data.password, data.undo);
+                        });
+
+                })
             });
     }
 
@@ -228,9 +249,9 @@ class JobContainer extends React.Component {
     getModifyDate() {
         if ( this.props.lastAction ) {
             var date = new Date(this.props.lastAction.event_date);
-            return date.toDateString();
+            return <div><span>Modified: </span> <a target="_blank" href={this.props.activityLogUrl}> {date.toDateString()}</a></div>;
         } else {
-            return 'no actions';
+            return '';
         }
     }
 
@@ -309,7 +330,7 @@ class JobContainer extends React.Component {
                     </div>
                     <div className="col">
                         <div className="action-modified">
-                            <div><span>Modified: </span> <a target="_blank" href={this.props.activityLogUrl}> {modifyDate}</a></div>
+                            {modifyDate}
                         </div>
                     </div>
                     <div className="col m4 right">

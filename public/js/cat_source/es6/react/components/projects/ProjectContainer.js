@@ -93,6 +93,23 @@ class ProjectContainer extends React.Component {
         ManageActions.removeProject(this.props.project);
     }
 
+    checkTMIcon() {
+        var jobs = this.props.project.get('jobs');
+        var jobWithKey = jobs.filter(function (job, i) {
+            if (JSON.parse(job.get('private_tm_key')).length) {
+                return true;
+            }
+        });
+        if (jobWithKey.size > 0 ) {
+            return <li>
+                <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0">
+                    <i className="icon-tm-matecat"/>
+                </a>
+            </li>;
+        } else {
+            return '';
+        }
+    }
 
     getProjectHeader(sourceLang, targetsLangs, payableWords) {
         var sourceTxt = this.props.project.get('jobs').first().get('sourceTxt');
@@ -167,8 +184,9 @@ class ProjectContainer extends React.Component {
     getLastAction() {
         var self = this;
         this.props.lastActivityFn(this.props.project.get('id'), this.props.project.get('password')).done(function (data) {
+            var lastAction = (data.activity[0])? data.activity[0] : [];
             self.setState({
-                lastAction: data.activity[0],
+                lastAction: lastAction,
                 jobsActions: data.activity
             });
         });
@@ -222,6 +240,7 @@ class ProjectContainer extends React.Component {
         var payableWords = this.props.project.get('tm_analysis');
         var activityLogUrl = this.getActivityLogUrl();
         var projectMenu = this.getProjectMenu(activityLogUrl);
+        var tMIcon = this.checkTMIcon();
 
         var jobsLength = this.props.project.get('jobs').size;
         var targetsLangs = [], jobsList = [], chunks = [],  index;
@@ -311,11 +330,19 @@ class ProjectContainer extends React.Component {
                 lastAction = '';
             } else {
                 var date = this.getLastActionDate();
-                lastAction = <i><span>{this.state.lastAction.first_name }</span> <span>{this.state.lastAction.action.toLowerCase() + ' on ' + date}</span></i>
-
+                lastAction = <div className="activity-log">
+                    <a href={activityLogUrl} target="_blank" className="right activity-log">
+                        <i><span>{this.state.lastAction.first_name }</span> <span>{this.state.lastAction.action.toLowerCase() + ' on ' + date}</span></i>
+                    </a>
+                </div>;
             }
         } else {
-            lastAction = <i>Loading....</i>
+            lastAction = <div className="activity-log">
+                <a href={activityLogUrl} target="_blank" className="right activity-log">
+                    <i>Loading....</i>
+                </a>
+            </div>;
+
         }
 
         return <div className="card-panel project">
@@ -347,6 +374,7 @@ class ProjectContainer extends React.Component {
                                     {/*<i className="icon-settings"></i>*/}
                                     {/*</a>*/}
                                     {/*</li>*/}
+                                    {tMIcon}
                                     <li>
                                         <a className='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0'
                                            ref={(dropdown) => this.dropdown = dropdown}
@@ -377,11 +405,7 @@ class ProjectContainer extends React.Component {
                     <div className="foot-project">
                         <div className="row">
                             <div className="col m12">
-                                <div className="activity-log">
-                                    <a href={activityLogUrl} target="_blank" className="right activity-log">
-                                        {lastAction}
-                                    </a>
-                                </div>
+                                {lastAction}
                             </div>
                         </div>
                     </div>
