@@ -33,56 +33,6 @@ function test_file_path( $file ) {
   return realpath(TEST_DIR . '/support/files/' . $file );
 }
 
-/**
- * Performs a test schema reset
- * @throws Exception
- */
-function prepareTestDatabase() {
-  $dev_ini = parse_ini_file(PROJECT_ROOT . '/inc/config.development.ini', true);
-  $test_ini = parse_ini_file(PROJECT_ROOT . '/inc/config.test.ini', true);
-
-  // TODO: move this TEST_URL_BASE config somewhere else
-  if ( @$test_ini['TEST_URL_BASE'] != null ) {
-      $GLOBALS['TEST_URL_BASE'] = $test_ini['TEST_URL_BASE'];
-  }
-  else {
-      echo "** TEST_URL_BASE is not set, using localhost \n" ;
-      $GLOBALS['TEST_URL_BASE'] = 'localhost';
-  }
-
-  if ( $dev_ini['ENV'] != 'development' ) {
-      throw new Exception('Source config must be development');
-  }
-
-  if ( $test_ini['ENV'] != 'test') {
-      throw new Exception('Destination config must be test');
-  }
-
-  $testDatabase = new SchemaCopy( $test_ini['test'] );
-  $devDatabase = new SchemaCopy( $dev_ini[ 'development' ] );
-
-  // prepareTestSchema($testDatabase, $devDatabase);
-  // loadSeedData($testDatabase);
-
-}
-
-function loadSeedData( $database ) {
-  $seeder = new SeedLoader( $database );
-
-  $seeder->loadEngines();
-}
-
-function prepareTestSchema($testDatabase, $devDatabase) {
-  $testDatabase->dropDatabase();
-  $testDatabase->createDatabase();
-
-  $tables = $devDatabase->getTablesStatements();
-  foreach($tables as $k => $v) {
-    $command = $v[0][1];
-    $testDatabase->execSql($command);
-  }
-}
-
 function integrationSetChunkAsComplete( $options ) {
     $test = new CurlTest();
 
