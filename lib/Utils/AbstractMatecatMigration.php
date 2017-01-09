@@ -1,9 +1,5 @@
 <?php
 
-
-require INIT::$ROOT . '/test/support/SchemaCopy.php';
-require INIT::$ROOT . '/test/support/SeedLoader.php';
-
 class AbstractMatecatMigration extends \Phinx\Migration\AbstractMigration {
 
     public $sql_up;
