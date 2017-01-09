@@ -374,7 +374,7 @@ class ProjectContainer extends React.Component {
                                 </div>
                                 <div className="col">
                                     <div className="">
-                                        {job.get('targetTxt') + " (" + chunks.length + ")" }
+                                        {job.get('targetTxt') }
                                     </div>
                                 </div>
 
