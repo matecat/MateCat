@@ -1294,9 +1294,12 @@ class ProjectManager {
      */
     public function applySplit( ArrayObject $projectStructure ) {
         Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
-        $this->_splitJob( $projectStructure );
 
+        $this->dbHandler->getConnection()->beginTransaction();
+        $this->_splitJob( $projectStructure );
         $this->features->run( 'postJobSplitted', $projectStructure );
+        $this->dbHandler->getConnection()->commit();
+
     }
 
     public function mergeALL( ArrayObject $projectStructure, $renewPassword = false ) {
@@ -1367,6 +1370,7 @@ class ProjectManager {
         //delete all old jobs
         $queries[] = "DELETE FROM jobs WHERE id = {$first_job['id']} AND password != '{$first_job['password']}' "; //use new password
 
+        $this->dbHandler->getConnection()->beginTransaction();
 
         foreach ( $queries as $query ) {
             $res = $this->dbHandler->query( $query );
@@ -1388,6 +1392,9 @@ class ProjectManager {
         $this->features->run('postJobMerged',
             $projectStructure
         );
+
+        $this->dbHandler->getConnection()->commit();
+
     }
 
     /**
