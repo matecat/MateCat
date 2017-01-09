@@ -80,3 +80,10 @@
   background-size: 130px 26px;
   left: 60px;
 }
+header {
+  top: 0;
+  left: 0;
+  width: 100%;
+  position: fixed;
+  z-index: 999999999;
+}
