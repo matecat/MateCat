@@ -23,6 +23,7 @@ class ProjectContainer extends React.Component {
         this.hideAllJobs = this.hideAllJobs.bind(this);
 
         this.filteredJobsWithoutChunksLength = 0;
+        this.getSigleJobWithoutChunks();
         this.openJobsWithTmKeys = false;
     }
 
@@ -281,6 +282,28 @@ class ProjectContainer extends React.Component {
         nextState.showAllJobs !== this.state.showAllJobs || nextState.lastAction !==  this.state.lastAction)
     }
 
+    getSigleJobWithoutChunks() {
+        var self = this;
+        var tempIdsArray = [], index = 0;
+        this.props.project.get('jobs').map(function(job, i){
+            //To check if is a chunk (jobs with same id)
+            var isChunk = false;
+            if (tempIdsArray.indexOf(job.get('id')) > -1 ) {
+                isChunk = true;
+                index ++;
+            }  else if ((self.props.project.get('jobs').get(i+1) && self.props.project.get('jobs').get(i+1).get('id') === job.get('id') )) {  //The first of the Chunk
+                isChunk = true;
+                tempIdsArray.push(job.get('id'));
+                index = 1;
+            }  else {
+                index = 0;
+            }
+            if ( (isChunk && index === 1) || !isChunk) {
+                self.filteredJobsWithoutChunksLength++;
+            }
+        });
+    }
+
     getJobsList(targetsLangs, jobsList, jobsLength) {
         var self = this;
         var chunks = [],  index;
@@ -347,6 +370,7 @@ class ProjectContainer extends React.Component {
                                     <i className="icon-play 2"/>
                                 </div>
                                 <div className="col">
+
                                     <div className="target-box">
                                         {job.get('targetTxt')}
                                     </div>
@@ -371,7 +395,6 @@ class ProjectContainer extends React.Component {
             }
 
             if ( (isChunk && index === 1) || !isChunk) {
-                self.filteredJobsWithoutChunksLength ++;
                 var target;
                 visibleJobsBoxes++;
                 if (isChunk) {
@@ -400,13 +423,13 @@ class ProjectContainer extends React.Component {
                         </div>
                     </li>;
                 }
-                if (visibleJobsBoxes < 8 || jobsLength < 9 || self.state.showAllJobsBoxes ) {
+                if (visibleJobsBoxes < 8 || self.filteredJobsWithoutChunksLength < 9 || self.state.showAllJobsBoxes ) {
                     targetsLangs.push(target);
                 }
             }
         });
 
-        if (!this.state.showAllJobsBoxes && jobsLength > 8) {
+        if (!this.state.showAllJobsBoxes && this.filteredJobsWithoutChunksLength > 8) {
             var item = <li key = {jobsLength + 2} onClick={this.showAllJobsBoxes.bind(this)} >
                 <div className="more-jobs">
                     <a> + other {visibleJobsBoxes - 7 }</a>
@@ -418,7 +441,6 @@ class ProjectContainer extends React.Component {
 
     render() {
         var self = this;
-        this.filteredJobsWithoutChunksLength = 0;
         var sourceLang = this.props.project.get('jobs').first().get('source');
         var payableWords = this.props.project.get('tm_analysis');
         var activityLogUrl = this.getActivityLogUrl();

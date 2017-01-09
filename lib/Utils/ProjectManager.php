@@ -1649,10 +1649,10 @@ class ProjectManager {
         //Update/Initialize the min-max sequences id
         if( !isset( $this->min_max_segments_id[ 'job_first_segment' ] ) ){
             $this->min_max_segments_id[ 'job_first_segment' ] = reset( $sequenceIds );
-        } else {
-            //update the last id, if there is another cycle update this value
-            $this->min_max_segments_id[ 'job_last_segment' ] = end( $sequenceIds );
         }
+
+        //update the last id, if there is another cycle update this value
+        $this->min_max_segments_id[ 'job_last_segment' ] = end( $sequenceIds );
 
         //Prepare a new struct to transport the segments metadata
         $segments_metadata = [];
