@@ -60,12 +60,9 @@ class ProjectsContainer extends React.Component {
         }
 
         return <div onClick={this.onClickFn.bind(this)}>
-                    <section className="add-project">
-                        <a href="/" target="_blank" className="btn-floating btn-large waves-effect waves-light right create-new blue-matecat tooltipped" data-position="bottom" data-delay="50" data-tooltip="Add new project"><i></i></a>
-                    </section>
-                    <FilterProjects
-                        filterFunction={this.props.filterFunction}
-                    />
+                    {/*<section className="add-project">*/}
+                        {/*<a href="/" target="_blank" className="btn-floating btn-large waves-effect waves-light right create-new blue-matecat tooltipped" data-position="bottom" data-delay="50" data-tooltip="Add new project"/>*/}
+                    {/*</section>*/}
                     <section className="project-list">
                         <div className="container">
                             <div className="row">

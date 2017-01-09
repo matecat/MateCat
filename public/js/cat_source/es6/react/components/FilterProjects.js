@@ -12,26 +12,23 @@ class FilterProjects extends React.Component {
     }
 
     render () {
-        return<section className="heading-list-project">
-                <div className="container">
-                    <div className="row">
-                        <div className="col s9">
-                            <h4>Project List</h4>
-                        </div>
+        return <div className="row">
+                        {/*<div className="col s9">*/}
+                            {/*<h4>Project List</h4>*/}
+                        {/*</div>*/}
                         <form>
-                        <div className="input-field col s3 right">
+                        <div className="input-field">
                             <select defaultValue="active"
                                     ref={(select) => this.select = select}>
-                                    <option value="active">Active</option>
-                                    <option value="archived">Archived</option>
-                                    <option value="cancelled">Cancelled</option>
+                                    <option value="active">Active Projects</option>
+                                    <option value="archived">Archived Projects</option>
+                                    <option value="cancelled">Cancelled Projects</option>
 
                             </select>
                         </div>
                         </form>
                     </div>
-                </div>
-            </section>
+
 
 
     }

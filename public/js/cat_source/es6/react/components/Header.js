@@ -1,4 +1,6 @@
 var SearchInput = require("./SearchInput").default;
+var FilterProjects = require("./FilterProjects").default;
+
 class Header extends React.Component {
     constructor (props) {
 
@@ -27,6 +29,11 @@ class Header extends React.Component {
                                     <SearchInput
                                         closeSearchCallback={this.props.closeSearchCallback}
                                         onChange={this.props.searchFn}/>
+                                    <div className="col l2 offset-l1 s2 offset-s1">
+                                        <FilterProjects
+                                            filterFunction={this.props.filterFunction}
+                                        />
+                                    </div>
                                     <div className="col l2 right profile-area">
                                         <ul className="right">
                                             <li>

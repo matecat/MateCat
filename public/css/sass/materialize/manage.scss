@@ -412,6 +412,12 @@ i.close-x:before {
 						margin-right: 5px;
 					    margin-bottom: 5px;
 					    float: left;
+						.more-jobs {
+							padding: 8px 0 0 10px;
+							width: 170px;
+							text-align: center;
+							cursor: pointer;
+						}
 					}
 					.btn {
 						background-color: white;

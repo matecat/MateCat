@@ -24,6 +24,7 @@ UI = {
             searchFn: _.debounce(function(name) {
                             self.filterProjectsFromName(name);
                         }, 300),
+            filterFunction: this.filterProjectsFromStatus,
             closeSearchCallback: this.closeSearchCallback
         }), headerMountPoint);
 
@@ -38,7 +39,6 @@ UI = {
         if ( !this.ProjectsContainer ) {
             var mountPoint = $("#main-container")[0];
             this.ProjectsContainer = ReactDOM.render(React.createElement(ProjectsContainer, {
-                filterFunction: this.filterProjectsFromStatus,
                 getLastActivity: this.getLastProjectActivityLogAction,
                 changeStatus: this.changeJobsOrProjectStatus,
                 changeJobPasswordFn: this.changeJobPassword,

@@ -136,10 +136,11 @@ class JobContainer extends React.Component {
         var downloadButton = (jobStatus == 'translated' || jobStatus == 'approved') ?
             <li onClick={this.downloadTranslation}><a >Download</a></li> : <li onClick={this.downloadTranslation}><a ><i className="icon-eye"/>Preview</a></li>;
 
+        var splitButton = (!this.props.isChunk) ? <li><a target="_blank" href={splitUrl}><i className="icon-expand"/> Split</a></li> : '';
 
-        var menuHtml = <ul id={'dropdownJob' + this.props.job.get('id')} className='dropdown-content'>
+        var menuHtml = <ul id={'dropdownJob' + this.props.job.get('id') + this.props.job.get('password')} className='dropdown-content'>
                 <li onClick={this.changePassword.bind(this)}><a ><i className="icon-refresh"/> Change Password</a></li>
-                <li><a target="_blank" href={splitUrl}><i className="icon-expand"/> Split</a></li>
+                {splitButton}
                 <li><a target="_blank" href={reviseUrl}><i className="icon-edit"/> Revise</a></li>
                 <li className="divider"/>
                 <li><a target="_blank" href={qaReportUrl}><i className="icon-qr-matecat"/> QA Report</a></li>
@@ -154,10 +155,10 @@ class JobContainer extends React.Component {
                 <li onClick={this.cancelJob.bind(this)}><a ><i className="icon-trash-o"/> Cancel job</a></li>
             </ul>;
         if ( this.props.job.get('status') === 'archived' ) {
-            menuHtml = <ul id={'dropdownJob' + this.props.job.get('id')} className='dropdown-content'>
+            menuHtml = <ul id={'dropdownJob' + this.props.job.get('id') + this.props.job.get('password')} className='dropdown-content'>
 
                 <li onClick={this.changePassword.bind(this)}><a ><i className="icon-refresh"/> Change Password</a></li>
-                <li><a target="_blank" href={splitUrl}><i className="icon-expand"/>  Split</a></li>
+                {splitButton}
                 <li><a target="_blank" href={reviseUrl}><i className="icon-edit"/> Revise</a></li>
                 <li className="divider"/>
                 <li><a target="_blank" href={qaReportUrl}><i className="icon-qr-matecat"/> QA Report</a></li>
@@ -172,9 +173,9 @@ class JobContainer extends React.Component {
                 <li onClick={this.cancelJob.bind(this)}><a ><i className="icon-trash-o"/> Cancel job</a></li>
             </ul>;
         } else if ( this.props.job.get('status') === 'cancelled' ) {
-            menuHtml = <ul id={'dropdownJob' + this.props.job.get('id')} className='dropdown-content'>
+            menuHtml = <ul id={'dropdownJob' + this.props.job.get('id') + this.props.job.get('password')} className='dropdown-content'>
                 <li onClick={this.changePassword.bind(this)}><a ><i className="icon-refresh"/> Change Password</a></li>
-                <li><a target="_blank" href={splitUrl} ><i className="icon-expand"/>  Split</a></li>
+                {splitButton}
                 <li><a target="_blank" href={reviseUrl}><i className="icon-edit"/> Revise</a></li>
                 <li className="divider"/>
                 <li><a target="_blank" href={qaReportUrl}><i className="icon-qr-matecat"/> QA Report</a></li>
@@ -288,7 +289,7 @@ class JobContainer extends React.Component {
                             </li>
                             <li>
                                 <a className='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0 class-prova'
-                                   data-activates={'dropdownJob' + this.props.job.get('id')}
+                                   data-activates={'dropdownJob' + this.props.job.get('id') + this.props.job.get('password')}
                                    ref={(dropdown) => this.dropdown = dropdown}>
                                     <i className="icon-more_vert"/>
                                 </a>

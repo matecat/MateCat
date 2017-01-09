@@ -4,9 +4,15 @@ class SearchInput extends React.Component {
     }
 
     filterByName() {
+        if($(this.textInput).val().length) {
+            $(this.closeIcon).show()
+        } else {
+            $(this.closeIcon).hide()
+        }
         if (!this.performingSearch) {
             this.props.onChange($(this.textInput).val());
         }
+
     }
 
     closeSearch() {
@@ -16,10 +22,8 @@ class SearchInput extends React.Component {
 
 
     render () {
-
         return (
-                <div className="col l4 offset-l4 s4 offset-s4">
-
+                <div className="col l3 offset-l3 s3 offset-s3">
                     <div className="row">
                         <div className="input-field">
                             <i className="icon-search prefix"/>
@@ -27,8 +31,9 @@ class SearchInput extends React.Component {
                                    placeholder="Search by project name"
                                    ref={(input) => this.textInput = input}
                                    onChange={this.filterByName.bind(this)}/>
-                            <i className="prefix close-x"
-                            onClick={this.closeSearch.bind(this)}/>
+                            <i className="prefix close-x" style={{display: 'none'}}
+                               ref={(closeIcon) => this.closeIcon = closeIcon}
+                               onClick={this.closeSearch.bind(this)}/>
                         </div>
                     </div>
                 </div>
