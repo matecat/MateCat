@@ -27,17 +27,19 @@ select {
     border: none;
     border-bottom: $input-border;
     outline: none;
-    height: $input-height;
     line-height: $input-height;
     width: 100%;
     font-size: $input-font-size;
     margin: $input-margin;
     padding: 0;
     display: block;
+    height: 100%;
+    padding-top: 15px;
+
   }
 
   span.caret {
-    color: initial;
+    color: #09beec;
     position: absolute;
     right: 0;
     top: 0;

@@ -14,6 +14,7 @@ class ProjectContainer extends React.Component {
         this.state = {
             showAllJobs: false,
             visibleJobs: [],
+            showAllJobsBoxes: false,
             lastAction: null,
             jobsActions: null
         };
@@ -32,6 +33,7 @@ class ProjectContainer extends React.Component {
         // }
         this.setState({
             showAllJobs: !show,
+            showAllJobsBoxes: !show,
             visibleJobs: []
         });
     }
@@ -39,8 +41,10 @@ class ProjectContainer extends React.Component {
     hideAllJobs() {
         this.setState({
             showAllJobs: false,
+            showAllJobsBoxes: false,
             visibleJobs: []
         });
+        this.forceUpdate();
     }
 
     showSingleJob(index, job) {
@@ -57,6 +61,13 @@ class ProjectContainer extends React.Component {
         this.setState({
             showAllJobs: showAllJobs,
             visibleJobs: this.state.visibleJobs
+        });
+        this.forceUpdate();
+    }
+
+    showAllJobsBoxes() {
+        this.setState({
+            showAllJobsBoxes: true
         });
         this.forceUpdate();
     }
@@ -270,33 +281,12 @@ class ProjectContainer extends React.Component {
         nextState.showAllJobs !== this.state.showAllJobs || nextState.lastAction !==  this.state.lastAction)
     }
 
-    createChunks() {
-        var chunk = '', chunks = [];
-        var orderedJobs = this.props.project.get('jobs').reverse();
-        orderedJobs.map(function(job, i){
-            var isChunk = false;
-            if (tempIdsArray.indexOf(job.get('id')) > -1 || (orderedJobs.get(i+1) && orderedJobs.get(i+1).get('id') === job.get('id') )) {
-                isChunk = true;
-                tempIdsArray.push(job.get('id'));
-            }
-        });
-    }
-
-    render() {
+    getJobsList(targetsLangs, jobsList, jobsLength) {
         var self = this;
-        this.filteredJobsWithoutChunksLength = 0;
-        var sourceLang = this.props.project.get('jobs').first().get('source');
-        var payableWords = this.props.project.get('tm_analysis');
-        var activityLogUrl = this.getActivityLogUrl();
-        var projectMenu = this.getProjectMenu(activityLogUrl);
-        var tMIcon = this.checkTMIcon();
-
-        var jobsLength = this.props.project.get('jobs').size;
-        var targetsLangs = [], jobsList = [], chunks = [],  index;
+        var chunks = [],  index;
         var tempIdsArray = [];
-        var openProjectClass = '';
         var orderedJobs = this.props.project.get('jobs').reverse();
-
+        var visibleJobsBoxes = 0;
         orderedJobs.map(function(job, i){
 
             var openJobClass = '';
@@ -314,7 +304,7 @@ class ProjectContainer extends React.Component {
                 index = 0;
             }
 
-
+            //Create the Jobs boxes and, if visibles, the jobs body
             if (self.state.showAllJobs || self.state.visibleJobs.indexOf(job.get('id')) > -1 || jobsLength === 1 ) {
                 var lastAction = self.getLastJobAction(job.get('id'));
                 var item = <Job key={job.get('id') + "-" + i}
@@ -335,8 +325,9 @@ class ProjectContainer extends React.Component {
                         var mergeUrl = self.getJobMergeUrl(job);
                         button = self.getJobSplitOrMergeButton(true, mergeUrl);
                     } else {
-                        var splitUrl = self.getJobSplitUrl(job);
-                        button = self.getJobSplitOrMergeButton(false, '', splitUrl);
+                        /*var splitUrl = self.getJobSplitUrl(job);
+                        button = self.getJobSplitOrMergeButton(false, '', splitUrl);*/
+                        button = '';
                     }
 
                     let chunkList = <div className="chunk" key = { (i - 1) + job.get('id')}>
@@ -360,7 +351,7 @@ class ProjectContainer extends React.Component {
                                         {job.get('targetTxt')}
                                     </div>
                                 </div>
-                                        
+
                                 <div className="col right">
                                     <div className="button-list">
                                         {button}
@@ -376,12 +367,13 @@ class ProjectContainer extends React.Component {
                     chunks = [];
                 }
                 openJobClass = 'open-job';
-                openProjectClass = (jobsLength === 1) ? '':'open-project';
+
             }
 
             if ( (isChunk && index === 1) || !isChunk) {
                 self.filteredJobsWithoutChunksLength ++;
                 var target;
+                visibleJobsBoxes++;
                 if (isChunk) {
                     target = <li className="chunk-job" key = {i} onClick={self.showSingleJob.bind(self, i, job)}>
                         <a className={"btn waves-effect waves-dark " + openJobClass}>
@@ -392,25 +384,54 @@ class ProjectContainer extends React.Component {
                     </li>;
                 } else {
                     target = <li key = {i} onClick={self.showSingleJob.bind(self, i, job)}>
-                        <a className={"btn waves-effect waves-dark " + openJobClass} >
+                        <div className={"btn waves-effect waves-dark " + openJobClass} >
                             <badge>{job.get('targetTxt')}</badge>
                             <div className="progress-bar">
                                 <div className="progr">
-                                <div className="meter">
-                                    <a className="warning-bar" title={'Rejected '+ job.get('stats').get('REJECTED_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('REJECTED_PERC') + '%'}}/>
-                                    <a className="approved-bar" title={'Approved '+ job.get('stats').get('APPROVED_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('APPROVED_PERC')+ '%' }}/>
-                                    <a className="translated-bar" title={'Translated '+ job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('TRANSLATED_PERC') + '%' }}/>
-                                    <a className="draft-bar" title={'Translated '+ job.get('stats').get('DRAFT_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('DRAFT_PERC') + '%' }}/>
+                                    <div className="meter">
+                                        <a className="warning-bar" title={'Rejected '+ job.get('stats').get('REJECTED_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('REJECTED_PERC') + '%'}}/>
+                                        <a className="approved-bar" title={'Approved '+ job.get('stats').get('APPROVED_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('APPROVED_PERC')+ '%' }}/>
+                                        <a className="translated-bar" title={'Translated '+ job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('TRANSLATED_PERC') + '%' }}/>
+                                        <a className="draft-bar" title={'Translated '+ job.get('stats').get('DRAFT_PERC_FORMATTED') +'%'} style={{width:  job.get('stats').get('DRAFT_PERC') + '%' }}/>
 
+                                    </div>
                                 </div>
                             </div>
-                            </div>
-                        </a>
+                        </div>
                     </li>;
                 }
-                targetsLangs.push(target);
+                if (visibleJobsBoxes < 8 || jobsLength < 9 || self.state.showAllJobsBoxes ) {
+                    targetsLangs.push(target);
+                }
             }
         });
+
+        if (!this.state.showAllJobsBoxes && jobsLength > 8) {
+            var item = <li key = {jobsLength + 2} onClick={this.showAllJobsBoxes.bind(this)} >
+                <div className="more-jobs">
+                    <a> + other {visibleJobsBoxes - 7 }</a>
+                </div>
+            </li>;
+            targetsLangs.push(item);
+        }
+    }
+
+    render() {
+        var self = this;
+        this.filteredJobsWithoutChunksLength = 0;
+        var sourceLang = this.props.project.get('jobs').first().get('source');
+        var payableWords = this.props.project.get('tm_analysis');
+        var activityLogUrl = this.getActivityLogUrl();
+        var projectMenu = this.getProjectMenu(activityLogUrl);
+        // var tMIcon = this.checkTMIcon();
+
+        var jobsLength = this.props.project.get('jobs').size;
+
+        var openProjectClass = (jobsLength === 1) ? '':'open-project';
+
+        var targetsLangs = [], jobsList = [];
+        //The list of jobs
+        this.getJobsList(targetsLangs, jobsList, jobsLength);
 
         //The Job Header
         var headerProject = this.getProjectHeader(sourceLang, targetsLangs, payableWords);
@@ -466,7 +487,8 @@ class ProjectContainer extends React.Component {
                                     {/*<i className="icon-settings"></i>*/}
                                     {/*</a>*/}
                                     {/*</li>*/}
-                                    {/*tMIcon*/}
+
+                                    {/*{tMIcon}*/}
                                     <li>
                                         <a className='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0'
                                            ref={(dropdown) => this.dropdown = dropdown}
