@@ -14,7 +14,6 @@
 		    float: left;
 		    margin: 0px 15px 0px 0 !important;
 		    background-color: #d0d1d1;
-		    background-image: -webkit-linear-gradient(-45deg, rgba(255, 255, 255, 0.2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.2) 75%, transparent 75%, transparent);
 		    overflow: hidden;
 			a {
 			    display: block;
@@ -65,26 +64,26 @@
 		    height: 6px;
 		    margin-top: 0px;
 	   
-	.progr {
-		height: 23px;
-		width: 100%;
-		min-width: 1px;
-		.meter {
-		      	height: 8px;
-			    margin: -5px 0 0 0 !important;
-			    border: 0px;
-				border-radius: 8px;
-				 a {
-				    height: 8px;
-				    border-radius: 0px;
+			.progr {
+				height: 23px;
+				width: 100%;
+				min-width: 1px;
+				.meter {
+			      	height: 8px;
+				    margin: -5px 0 0 0 !important;
+				    border: 0px;
+					border-radius: 8px;
+					a {
+					    height: 8px;
+					    border-radius: 0px;
+						&:after {
+						    top: -5px;
+						    height: 8px;	
+						}
 					}
-			  	a:after {
-				    top: -5px;
-				    height: 8px;	
-			  	}
+				}
 			}
 		}
-	}
 		// .progress {
 		// 	margin: -0.25rem 0 1rem 0;
 		// 	background-color: #e2dfdf;
