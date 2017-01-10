@@ -15,7 +15,10 @@ class ProjectOptionsSanitizer {
         'en-GB',
         'fr-FR',
         'de-DE',
-        'it-IT'
+        'it-IT',
+        'pt-PT',
+        'pt-BR',
+        'es-ES'
     );
     /**
      * All combinations of languages for Tag Ptojection
@@ -103,7 +106,7 @@ class ProjectOptionsSanitizer {
     }
 
     private function sanitizeSegmentationRule() {
-        $rules = array( 'patent' );
+        $rules = array( 'patent', 'paragraph' );
 
         if (
             array_key_exists('segmentation_rule', $this->options ) &&

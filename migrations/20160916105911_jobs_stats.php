@@ -15,7 +15,7 @@ total_time_to_edit BIGINT(20) DEFAULT '0' NOT NULL,
 avg_post_editing_effort FLOAT,
 total_raw_wc BIGINT(20) DEFAULT '1',
 CONSTRAINT `PRIMARY` PRIMARY KEY (id_job, password, fuzzy_band)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 CREATE INDEX fuzzybands__index ON jobs_stats (fuzzy_band);
 CREATE INDEX source ON jobs_stats (source);
 CREATE INDEX target ON jobs_stats (target);

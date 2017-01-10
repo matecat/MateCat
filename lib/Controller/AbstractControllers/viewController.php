@@ -48,13 +48,6 @@ abstract class viewController extends controller {
     protected $authURL;
 
     /**
-     * The logged user's object
-     *
-     * @var Users_UserStruct
-     */
-    protected $logged_user;
-
-    /**
      * Try to identify the browser of users
      *
      * @return array
@@ -170,23 +163,9 @@ abstract class viewController extends controller {
 
         }
 
-        //even if no login in required, if user data is present, pull it out
-        $this->logged_user = new Users_UserStruct();
-        if ( !empty( $_SESSION[ 'cid' ] ) ){
-            $this->logged_user->uid = $_SESSION[ 'uid' ];
-            $this->logged_user->email = $_SESSION[ 'cid' ];
-
-            $userDao = new Users_UserDao(Database::obtain());
-            $userObject = $userDao->setCacheTTL( 3600 )->read( $this->logged_user ); // one hour cache
-
-            /**
-             * @var $userObject Users_UserStruct
-             */
-            $this->logged_user = $userObject[0];
-        }
+        $this->setUserCredentials();
 
         if( $isAuthRequired  ) {
-            //if auth is required, stat procedure
             $this->doAuth();
         }
 
@@ -204,19 +183,14 @@ abstract class viewController extends controller {
         //if no login set and login is required
         if ( !$this->isLoggedIn() ) {
             //take note of url we wanted to go after
-            $_SESSION[ 'incomingUrl' ] = $_SERVER[ 'REQUEST_URI' ];
-            parse_str( $_SERVER[ 'QUERY_STRING' ], $queryStringArray );
-            if ( isset( $queryStringArray[ 'new' ] ) ) {
-                $_SESSION[ '_newProject' ] = (bool)$queryStringArray[ 'new' ];
-            }
-
-            //signal redirection
+            $_SESSION[ 'wanted_url' ] = $_SERVER[ 'REQUEST_URI' ];
             $mustRedirectToLogin = true;
         }
 
         if ( $mustRedirectToLogin ) {
-            //redirect to login page
-            header( 'Location: /login' );
+            FlashMessage::set('popup', 'login', FlashMessage::SERVICE );
+
+            header( 'Location: ' . Routes::appRoot() )  ;
             exit;
         }
 
@@ -226,28 +200,25 @@ abstract class viewController extends controller {
 
 
     /**
-     * Check user logged
+     * isLoggedIn
      *
      * @return bool
      */
-    public function isLoggedIn() {        
-        if( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ) {
-            AuthCookie::tryToRefreshToken( $_SESSION[ 'cid' ] );
-        }
-        
-        return (
-                ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ) &&
-                ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) )
-        );
+    public function isLoggedIn() {
+        return $this->userIsLogged;
     }
 
     /**
-     * GatUser Login Info
+     * getLoginUserParams
      *
-     * @return bool
+     * TODO: clarify. We check from session variables and then rely $this->logged_user ??
+     *
+     * @deprecated
+     *
+     * @return array()
      */
     public function getLoginUserParams() {
-        if ( $this->isLoggedIn() ){
+        if ( $this->isLoggedIn() ) {
             return array( $this->logged_user->getUid(), $this->logged_user->getEmail() );
         }
         return array( null, null );
@@ -263,12 +234,7 @@ abstract class viewController extends controller {
         $browser_name = strtolower( $browser_info[ 'name' ] );
         $browser_platform = strtolower( $browser_info[ 'platform' ] );
         $return_value = 0;
- //	    log::doLog ("bname $browser_name");
 
-/*        if (  ($browser_name=="internet explorer" or $browser_name=="mozilla firefox")  and  $_SERVER[ 'REQUEST_URI' ]=="/" ) {
-                return -2;
-         }
-*/
         foreach ( INIT::$ENABLED_BROWSERS as $enabled_browser ) {
             if ( stripos( $browser_name, $enabled_browser ) !== false ) {
                 // Safari supported only on Mac
@@ -338,15 +304,30 @@ abstract class viewController extends controller {
 
 
     /**
+     * @return string
+     * @deprecated use getAuthUrl instead.
+     */
+    public function generateAuthURL() {
+        return $this->getAuthUrl();
+    }
+
+    /**
      * setInitialTemplateVars
      *
      * Initialize template variables that must be initialized to avoid templte errors.
      * These variables are expected to be overridden.
      */
     private function setInitialTemplateVars() {
+
+        if ( is_null( $this->template) ) {
+            throw new Exception('Tempalte is not defined');
+        }
+
         $this->template->footer_js = array();
         $this->template->config_js = array() ;
         $this->template->css_resources = array();
+        $this->template->authURL = $this->getAuthUrl() ;
+        $this->template->gdriveAuthURL = \ConnectedServices\GDrive::generateGDriveAuthUrl();
     }
 
     /**
@@ -361,6 +342,8 @@ abstract class viewController extends controller {
 
         $this->template->isLoggedIn    = $this->isLoggedIn();
         $this->template->userMail      = $this->logged_user->getEmail() ;
+
+        $this->collectFlashMessages();
     }
 
     /**
@@ -392,7 +375,11 @@ abstract class viewController extends controller {
      * @return string
      */
     public function getAuthUrl(){
-        return $this->authURL;
+        if ( is_null($this->authURL ) ) {
+            $this->client  = OauthClient::getInstance()->getClient();
+            $this->authURL = $this->client->createAuthUrl();
+        }
+        return $this->authURL ;
     }
 
     public static function isRevision(){
@@ -400,17 +387,6 @@ abstract class viewController extends controller {
         $_from_url   = parse_url( $_SERVER[ 'REQUEST_URI' ] );
         $is_revision_url = strpos( $_from_url[ 'path' ], "/revise" ) === 0;
         return $is_revision_url;
-    }
-
-    /**
-     * Get Client Instance and retrieve authentication url
-     *
-     */
-    protected function generateAuthURL() {
-
-        $this->client  = OauthClient::getInstance()->getClient();
-        $this->authURL = $this->client->createAuthUrl();
-
     }
 
     /**
@@ -443,5 +419,10 @@ abstract class viewController extends controller {
             echo "</pre>";
             exit;
         }
+    }
+
+    protected function collectFlashMessages() {
+        $messages = FlashMessage::flush() ;
+        $this->template->flashMessages = $messages ;
     }
 }

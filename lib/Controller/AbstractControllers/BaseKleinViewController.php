@@ -6,7 +6,7 @@
  * Date: 06/10/16
  * Time: 10:24
  */
-class BaseKleinViewController extends \API\V2\KleinController
+class BaseKleinViewController extends \API\App\AbstractStatefulKleinController
 {
 
     /**
@@ -28,6 +28,11 @@ class BaseKleinViewController extends \API\V2\KleinController
         $this->view->extended_user = $this->logged_user->fullName() ;
         $this->view->isLoggedIn    = $this->isLoggedIn();
         $this->view->userMail      = $this->logged_user->getEmail() ;
+
+        $oauth_client = OauthClient::getInstance()->getClient();
+        $this->view->authURL = $oauth_client->createAuthUrl();
+        $this->view->gdriveAuthURL = \ConnectedServices\GDrive::generateGDriveAuthUrl();
+
     }
 
     protected function setLoggedUser() {
@@ -44,20 +49,12 @@ class BaseKleinViewController extends \API\V2\KleinController
         }
     }
 
-    protected function afterConstruct() {
-
-    }
-
     public function setView( $template_name ) {
         $this->view = new \PHPTALWithAppend( $template_name );
 
     }
 
     private function isLoggedIn() {
-        if( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ) {
-            AuthCookie::tryToRefreshToken( $_SESSION[ 'cid' ] );
-        }
-
         return (
             ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ) &&
             ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) )

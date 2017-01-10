@@ -15,6 +15,14 @@ abstract class controller {
     protected $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
 
     /**
+     * @var Users_UserStruct
+     */
+    protected $logged_user;
+    protected $uid;
+    protected $userIsLogged = false;
+    protected $userMail;
+
+    /**
      * Controllers Factory
      *
      * Initialize the Controller Instance and route the
@@ -101,6 +109,28 @@ abstract class controller {
     public function getModel()
     {
         return $this->model;
+    }
+
+    public function setUserCredentials(){
+
+        $this->logged_user = new Users_UserStruct();
+        if ( !empty( $_SESSION[ 'cid' ] ) ){
+            $this->logged_user->uid = $_SESSION[ 'uid' ];
+            $this->logged_user->email = $_SESSION[ 'cid' ];
+
+            $userDao = new Users_UserDao(Database::obtain());
+            $userObject = $userDao->setCacheTTL( 3600 )->read( $this->logged_user ); // one hour cache
+
+            /**
+             * @var $userObject Users_UserStruct
+             */
+            $this->logged_user = $userObject[0];
+        }
+
+        $this->userIsLogged = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) );
+        $this->uid          = $this->logged_user->getUid();
+        $this->userMail     = $this->logged_user->getEmail();
+
     }
 
 }

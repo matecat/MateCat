@@ -11,11 +11,7 @@ use Analysis\DqfQueueHandler;
 
 include_once INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
 
-use FeatureSet ;
-
-use GDrive;
-
-use RemoteFiles_RemoteFileDao;
+use ConnectedServices\GDrive as GDrive  ;
 
 class ProjectManager {
     
@@ -52,13 +48,12 @@ class ProjectManager {
      */
     protected $project ;
 
-    protected $gdriveService;
-
-    protected $isGDriveProject = false;
+    protected $gdriveSession ;
 
     const TRANSLATED_USER = 'translated_user';
 
     public function __construct( ArrayObject $projectStructure = null ) {
+
 
         if ( $projectStructure == null ) {
             $projectStructure = new RecursiveArrayObject(
@@ -137,6 +132,9 @@ class ProjectManager {
                 $this->projectStructure
         );
 
+        if ( Utils::userIsLogged() ) {
+            $this->gdriveSession = new GDrive\Session( $_SESSION ) ;
+        }
 
     }
 
@@ -358,11 +356,6 @@ class ProjectManager {
             }
         }
 
-        if ( GDrive::sessionHasFiles( $_SESSION ) ) {
-            $this->gdriveService = GDrive::getService( array( 'uid' => $_SESSION[ 'uid' ] ) );
-            $this->isGDriveProject = true;
-        }
-
         //now, upload dir contains only hash-links
         //we start copying files to "file" dir, inserting metadata in db and extracting segments
         foreach ( $linkFiles[ 'conversionHashes' ][ 'sha' ] as $linkFile ) {
@@ -409,16 +402,16 @@ class ProjectManager {
 
                     $file_insert_params = array();
 
-                    $gdriveFileId = GDrive::findFileIdByName( $originalFileName, $_SESSION );
-                    
+
                     $mimeType = FilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
                     $fid      = insertFile( $this->projectStructure, $originalFileName, $mimeType,
                         $fileDateSha1Path, $file_insert_params  );
 
-                    if($gdriveFileId != null) {
-                        RemoteFiles_RemoteFileDao::insert( $fid, 0, $gdriveFileId, 1 );
-
-                        unset( $_SESSION[ GDrive::SESSION_FILE_LIST ][ $gdriveFileId ] );
+                    if ( $this->gdriveSession )  {
+                        $gdriveFileId = $this->gdriveSession->findFileIdByName( $originalFileName ) ;
+                        if ($gdriveFileId) {
+                            $this->gdriveSession->createRemoteFile( $fid, $gdriveFileId );
+                        }
                     }
 
                     $this->fileStorage->moveFromCacheToFileDir(
@@ -430,7 +423,7 @@ class ProjectManager {
 
                     $this->projectStructure[ 'file_id_list' ]->append( $fid );
 
-                    $this->_extractSegments( file_get_contents( $cachedXliffFilePathName ), $fid );
+                    $this->_extractSegments( file_get_contents( $cachedXliffFilePathName ), $fid, $mimeType );
 
                 }
 
@@ -502,20 +495,6 @@ class ProjectManager {
             return false;
         }
 
-        //Log::doLog( array_pop( array_chunk( $SegmentTranslations[$fid], 25, true ) ) );
-        //create job
-
-        if ( isset( $_SESSION[ 'cid' ] ) and !empty( $_SESSION[ 'cid' ] ) ) {
-            $owner                             = $_SESSION[ 'cid' ];
-            $this->projectStructure[ 'owner' ] = $owner;
-        } else {
-            $_SESSION[ '_anonym_pid' ] = $this->projectStructure[ 'id_project' ];
-
-            //default user
-            $owner = '';
-        }
-
-
         $isEmptyProject = false;
         //Throws exception
         try {
@@ -580,6 +559,7 @@ class ProjectManager {
         }
 
 
+        // TODO: this remapping is for presentation purpose and should be removed from here.
         $this->projectStructure[ 'result' ][ 'code' ]            = 1;
         $this->projectStructure[ 'result' ][ 'data' ]            = "OK";
         $this->projectStructure[ 'result' ][ 'ppassword' ]       = $this->projectStructure[ 'ppassword' ];
@@ -595,9 +575,6 @@ class ProjectManager {
 
         if ( INIT::$VOLUME_ANALYSIS_ENABLED )
             $this->projectStructure[ 'result' ][ 'analyze_url' ]     = $this->analyzeURL();
-
-
-
 
         /*
          * This is the old code.
@@ -1015,31 +992,22 @@ class ProjectManager {
                 }
                 insertFilesJob( $jid, $fid );
 
-                if( $this->isGDriveProject ) {
-                    GDrive::insertRemoteFile( $fid, $jid, $this->gdriveService, $_SESSION );
+                if ( $this->gdriveSession && $this->gdriveSession->hasFiles() ) {
+                    $this->gdriveSession->createRemoteCopiesWhereToSaveTranslation( $fid, $jid ) ;
                 }
             }
         }
+
+        if ( $this->gdriveSession ) $this->gdriveSession->clearFiles();
 
         $this->features->run('processJobsCreated', $projectStructure );
     }
 
+    /**
+     *
+     */
     private function insertSegmentNotesForFile() {
-        foreach ( $this->projectStructure[ 'notes' ] as $internal_id => $v ) {
-            $entries  = $v[ 'entries' ];
-            $segments = $v[ 'segment_ids' ];
-
-            // TODO: refactor using bulk insert
-            foreach ( $segments as $segment ) {
-                foreach ( $entries as $note ) {
-                    Segments_SegmentNoteDao::insertRecord( array(
-                            'internal_id' => $internal_id,
-                            'id_segment'  => $segment,
-                            'note'        => $note
-                    ) );
-                }
-            }
-        }
+        Segments_SegmentNoteDao::bulkInsertFromProjectStrucutre( $this->projectStructure['notes'] )  ;
     }
 
     /**
@@ -1481,7 +1449,7 @@ class ProjectManager {
      *
      * @throws Exception
      */
-    protected function _extractSegments( $xliff_file_content, $fid ) {
+    protected function _extractSegments( $xliff_file_content, $fid, $mimeType ) {
 
         //create Structure fro multiple files
         $this->projectStructure[ 'segments' ]->offsetSet( $fid, new ArrayObject( array() ) );
@@ -1606,7 +1574,9 @@ class ProjectManager {
 
                         } // end foreach seg-source
 
-                        $this->addNotesToProjectStructure( $xliff_trans_unit );
+                        if ( self::notesAllowedByMimeType( $mimeType ) ) {
+                           $this->addNotesToProjectStructure( $xliff_trans_unit );
+                        }
 
                     }
                     else {
@@ -1645,7 +1615,9 @@ class ProjectManager {
 
                         }
 
-                        $this->addNotesToProjectStructure( $xliff_trans_unit );
+                        if ( self::notesAllowedByMimeType( $mimeType ) ) {
+                            $this->addNotesToProjectStructure( $xliff_trans_unit );
+                        }
 
                         $source = $xliff_trans_unit[ 'source' ][ 'raw-content' ];
 
@@ -1783,7 +1755,7 @@ class ProjectManager {
      * setSegmentIdForNotes
      *
      * Adds notes to segment, taking into account that a same note may be assigned to
-     * more than one MateCat segment, to the <mrk> tags.
+     * more than one MateCat segment, due to the <mrk> tags.
      *
      * Example:
      * ['notes'][ $internal_id] => array( 'xxx' );
@@ -1816,16 +1788,17 @@ class ProjectManager {
 
             //array of segmented translations
             foreach ( $struct as $pos => $translation_row ) {
+                $translation = $this->dbHandler->escape(
+                    html_entity_decode( $translation_row[ 2 ] , ENT_QUOTES, 'UTF-8')
+                ) ;
 
                 $this->projectStructure[ 'query_translations' ]->append(
                         "( '{$translation_row[0]}',
                         $jid, '{$translation_row[3]}',
                         '{$status}',
-                        '{$translation_row[2]}', NOW(), 'DONE', 1, 'ICE' )"
+                        '$translation', NOW(), 'DONE', 1, 'ICE' )"
                 );
-
             }
-
         }
 
         // Executing the Query
@@ -2035,6 +2008,14 @@ class ProjectManager {
         return array( 'prec' => $before, 'seg' => $cleanSegment, 'succ' => $after );
     }
 
+    /**
+     * @param $mimeType
+     * @return bool
+     */
+    public static function notesAllowedByMimeType( $mimeType ) {
+        return in_array( $mimeType, array('sdlxliff', 'xliff') ) ;
+    }
+
     public static function getExtensionFromMimeType( $mime_type ) {
 
         if ( array_key_exists( $mime_type, INIT::$MIME_TYPES ) ) {
@@ -2155,14 +2136,18 @@ class ProjectManager {
         return CatUtils::generate_password( $length );
     }
 
+
+    /**
+     * addNotesToProjectStructure
+     *
+     * Notes structure is the following:
+     *
+     *  ... ['notes'][ $internal_id ] = array(
+     *      'entries' => array( // one item per comment in the trans unit ),
+     *      'id_segment' => (int) to be populated later for the database insert
+     *
+     */
     private function addNotesToProjectStructure( $trans_unit ) {
-        /**
-         * notes structure is the following:
-         *
-         *  ... ['notes'][ $internal_id ] = array(
-         *      'entries' => array( // one item per comment in the trans unit ),
-         *      'id_segment' => (int) to be populated later for the database insert
-         */
 
         $internal_id = self::sanitizedUnitId( $trans_unit );
         if ( isset( $trans_unit[ 'notes' ] ) ) {

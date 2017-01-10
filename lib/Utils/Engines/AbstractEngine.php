@@ -193,6 +193,7 @@ abstract class Engines_AbstractEngine {
             $url      = "{$this->engineRecord['base_url']}/" . $this->$function;
             $curl_opt = array(
                     CURLOPT_POSTFIELDS => $parameters,
+                    CURLINFO_HEADER_OUT => true,
                     CURLOPT_TIMEOUT    => 120
             );
         } else {

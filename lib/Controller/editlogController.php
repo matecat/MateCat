@@ -41,9 +41,6 @@ class editlogController extends viewController {
     }
 
     public function doAction() {
-
-        $this->generateAuthURL();
-
         $this->model = new EditLog_EditLogModel( $this->jid, $this->password );
 
         if ( isset( $this->start_id ) && !empty( $this->start_id ) ) {

@@ -642,11 +642,12 @@ $.extend(UI, {
 	toggleSearch: function(e) {
 		if (!this.searchEnabled) return;
 		e.preventDefault();
-        if (LXQ.enabled()) LXQ.hidePopUp();
+        // if (LXQ.enabled()) LXQ.hidePopUp();
 		if ( UI.searchIsOpen() )  {
             UI.closeSearch();
 		} else {
-            UI.openSearch();
+			UI.closeAllMenus(e);
+			UI.openSearch();
 		}
         this.fixHeaderHeightChange();
 	},

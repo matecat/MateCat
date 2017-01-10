@@ -99,8 +99,6 @@ UI = {
 		this.currentFileId       = this.currentFile.attr('id').split('-')[1];
 
         this.evalCurrentSegmentTranslationAndSourceTags( segment.el );
-
-        $(window).trigger('cachedSegmentObjects');
     },
 
     /**
@@ -322,7 +320,7 @@ UI = {
         SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(this.currentSegment), UI.getSegmentFileId(this.currentSegment), source_val);
         SegmentActions.highlightEditarea(UI.currentSegment.find(".editarea").data("sid"));
 
-        this.currentSegmentQA();        
+        this.segmentQA(UI.currentSegment );
         $(this.currentSegment).trigger('copySourceToTarget');
 
         if(!config.isReview) {
@@ -432,7 +430,7 @@ UI = {
         str = str.replace(/<span data-id="[^"]+" class="unusedGlossaryTerm">(.*?)<\/span>/gi, "$1");
         return str;
     },
-	
+
 	copyToNextIfSame: function(nextUntranslatedSegment) {
 		if ($('.source', this.currentSegment).data('original') == $('.source', nextUntranslatedSegment).data('original')) {
 			if ($('.editarea', nextUntranslatedSegment).hasClass('fromSuggestion')) {
@@ -870,14 +868,14 @@ UI = {
         if (d.errors.length) {
 			this.processErrors(d.errors, 'getSegments');
         }
-        
+
 		var where = d.data.where;
 
         SegmentNotes.enabled() && SegmentNotes.registerSegments ( d.data );
 
 		$.each(d.data.files, function() {
 			startSegmentId = this.segments[0].sid;
-            //Tag Projection: check if is enable the Tag Projection 
+            //Tag Projection: check if is enable the Tag Projection
             UI.setGlobalTagProjection(this);
 		});
 
@@ -923,7 +921,7 @@ UI = {
 			}
 		}
 		$('#outer').removeClass('loading loadingBefore');
-        
+
 		this.loadingMore = false;
 		this.setWaypoints();
 		this.checkPendingOperations();
@@ -1001,7 +999,7 @@ UI = {
 	registerQACheck: function() {
 		clearTimeout(UI.pendingQACheck);
 		UI.pendingQACheck = setTimeout(function() {
-			UI.currentSegmentQA();            
+			UI.segmentQA(UI.currentSegment);
 		}, config.segmentQACheckInterval);
 	},
 	reloadToSegment: function(segmentId) {
@@ -1122,9 +1120,11 @@ UI = {
 
             if (LXQ.enabled())
             $.each(this.segments,function(i,seg) {
-                if (!starting)
-                if (UI.hasOwnProperty('lexiqaData') && UI.lexiqaData.hasOwnProperty('lexiqaWarnings') &&
-                                    UI.lexiqaData.lexiqaWarnings.hasOwnProperty(seg.sid)) {
+            if (!starting)
+            if (LXQ.hasOwnProperty('lexiqaData') && LXQ.lexiqaData.hasOwnProperty('lexiqaWarnings') &&
+                LXQ.lexiqaData.lexiqaWarnings.hasOwnProperty(seg.sid)) {
+                    console.log('in loadmore segments, segment: '+seg.sid+' already has qa info...');
+                    //FOTDDD
                     LXQ.redoHighlighting(seg.sid,true);
                     LXQ.redoHighlighting(seg.sid,false);
                 }
@@ -1135,7 +1135,7 @@ UI = {
 
 		if (starting) {
 			this.init();
-            UI.getLexiqaWarnings();
+            LXQ.getLexiqaWarnings();
 		}
 
 	},
@@ -1474,7 +1474,7 @@ UI = {
 				toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? capStr : d;
 				newStr += toAdd;
 			}
-            else if(this.nodeName == 'LXQWARNING') { 
+            else if(this.nodeName == 'LXQWARNING') {
                 d = this.childNodes[0].data;
                 jump = ((!index)&&(!selection$));
 				capStr = toTitleCase(d);
@@ -1482,7 +1482,7 @@ UI = {
 					capStr = d.charAt(0) + toTitleCase(d).slice(1);
 				}
                 toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? capStr : d;
-				newStr += toAdd;    
+				newStr += toAdd;
             }
             else {
 				newStr += this.outerHTML;
@@ -1545,7 +1545,7 @@ UI = {
 		return errors.substring(0, errors.length - 1);
 	},
 	goToFirstError: function() {
-		location.href = $('#point2seg').attr('href');
+        $("#point2seg").trigger('mousedown');
 	},
 
     disableDownloadButtonForDownloadStart : function( openOriginalFiles ) {
@@ -1597,7 +1597,7 @@ UI = {
         }
 
         var winName ;
-        
+
         var driveUpdateDone = function(data) {
             if( !data.urls || data.urls.length === 0 ) {
                 APP.alert({msg: "MateCat was not able to update project files on Google Drive. Maybe the project owner revoked privileges to access those files. Ask the project owner to login again and grant Google Drive privileges to MateCat."});
@@ -1679,8 +1679,8 @@ UI = {
                     if(parseInt(tokenData.code) < 0) {
                         var notification = {
                             title: 'Error',
-                            text: tokenData.message,
-                            type: 'warning'
+                            text: 'Download failed. Please, fix any tag issues and try again in 5 minutes. If it still fails, please, contactsupport@matecat.com',
+                            type: 'error'
                         };
                         APP.addNotification(notification);
                         // UI.showMessage({msg: tokenData.message})
@@ -1710,31 +1710,6 @@ UI = {
         iFrameDownload.contents().find("#fileDownload").submit();
 
     },
-	/**
-	 * fill segments with relative errors from polling
-	 *
-	 * @param {type} segment
-	 * @param {type} warnings
-	 * @returns {undefined}
-	 */
-	setNextWarnedSegment: function(sid) {
-		sid = sid || UI.currentSegmentId;
-		idList = UI.globalWarnings;
-		idList.sort();
-		found = false;
-		$.each(idList, function() {
-			if (this > sid) {
-				$('#point2seg').attr('href', '#' + this);
-                $('#point2seg').attr('data-segment', this);
-				found = true;
-				return false;
-			}
-		});
-		if(!found) {
-			$('#point2seg').attr('href', '#' + UI.firstWarnedSegment);
-            $('#point2seg').attr('data-segment', UI.firstWarnedSegment);
-		}
-	},
 	fillWarnings: function(segment, warnings) {
 		//add Warnings to current Segment
 		var parentTag = segment.find('p.warnings').parent();
@@ -1800,57 +1775,56 @@ UI = {
 
         if (UI.logEnabled) dataMix.logs = this.extractLogs();
 
-		APP.doRequest({
-			data: dataMix,
-			error: function() {
-				UI.warningStopped = true;
-				UI.failedConnection(0, 'getWarning');
-			},
-			success: function(data) {//console.log('check warnings success');
-				UI.startWarning();
-				var warningPosition = '';
-				UI.globalWarnings = data.details.sort();
-                //The tags with tag projection enabled doesn't show the tags in the source, so tdont show the warning
-                UI.globalWarnings = UI.filterTagsWithTagProjection(UI.globalWarnings);
-				UI.firstWarnedSegment = UI.globalWarnings[0];
-				UI.translationMismatches = data.translation_mismatches;
+        APP.doRequest({
+            data: dataMix,
+            error: function() {
+                UI.warningStopped = true;
+                UI.failedConnection(0, 'getWarning');
+            },
+            success: function(data) {//console.log('check warnings success');
+                UI.startWarning();
 
-				//check for errors
-				if (UI.globalWarnings.length > 0) {
-					//for now, put only last in the pointer to segment id
-					// warningPosition = '#' + data.details[ Object.keys(data.details).sort().shift() ].id_segment;
+                UI.translationMismatches = data.translation_mismatches;
+                UI.globalWarnings = data.details;
+                //The tags with tag projection enabled doesn't show the tags in the source, so dont show the warning
+                UI.globalWarnings.tag_issues = UI.filterTagsWithTagProjection(UI.globalWarnings.tag_issues);
 
-                    // data.details = UI.filterTagsWithTagProjection(data.details);
+                //check for errors
+                if (UI.globalWarnings) {
 
-					if (openingSegment)
-						UI.fillCurrentSegmentWarnings(data.details, true);
+                    UI.renderQAPanel();
 
-					//switch to css for warning
-					$('#notifbox').attr('class', 'warningbox').attr("title", "Click to see the segments with potential issues").find('.numbererror').text(UI.globalWarnings.length);
+                    if (openingSegment)
+                        UI.fillCurrentSegmentWarnings(data.details, true);
 
-				} else {
-					//if everything is ok, switch css to ok
-					$('#notifbox').attr('class', 'notific').attr("title", "Well done, no errors found!").find('.numbererror').text('');
-					//reset the pointer to offending segment
-					$('#point2seg').attr('href', '#');
-				}
+                }
 
-				// check for messages
-				if ( data.messages ) {
-					var msgArray = $.parseJSON(data.messages);
-					if (msgArray.length > 0) {
-						UI.displayMessage(msgArray);
-					}
-				}
-
-
-				UI.setNextWarnedSegment();
+                // check for messages
+                if ( data.messages ) {
+                    var msgArray = $.parseJSON(data.messages);
+                    if (msgArray.length > 0) {
+                        UI.displayMessage(msgArray);
+                    }
+                }
 
                 $(document).trigger('getWarning:global:success', { resp : data }) ;
-           
-			}
-		});
+
+            }
+        });
 	},
+    renderQAPanel: function () {
+	    if ( !this.QAComponent ) {
+            var mountPoint = $(".qa-wrapper")[0];
+            this.QAComponent = ReactDOM.render(React.createElement(QAComponent, {
+            }), mountPoint);
+        }
+        if ( UI.globalWarnings.tag_issues ) {
+            this.QAComponent.setTagIssues(UI.globalWarnings.tag_issues);
+        }
+        if ( UI.globalWarnings.translation_mismatches ) {
+            this.QAComponent.setTranslationConflitcts(UI.globalWarnings.translation_mismatches);
+        }
+    },
 	displayMessage: function(messages) {
         var self = this;
 		if($('body').hasClass('incomingMsg')) return false;
@@ -1896,7 +1870,7 @@ UI = {
     currentSegmentLexiQA: function() {
         var translation = $('.editarea', UI.currentSegment ).text().replace(/\uFEFF/g,'');
         var id_segment = UI.getSegmentId(UI.currentSegment);
-        UI.doLexiQA(UI.currentSegment, translation, id_segment,false, function () {}) ;
+        LXQ.doLexiQA(UI.currentSegment, translation, id_segment,false, function () {}) ;
     },
 	currentSegmentQA: function() {
         console.warn(
@@ -1931,11 +1905,6 @@ UI = {
 		}
 
 		this.checkSegmentsArray[token] = trg_content;
-        var glossarySourcesAr = [];
-        $('section.editor .tab.glossary .results .sugg-target .translation').each(function () {
-            glossarySourcesAr.push($(this).text());
-        })
-
 		APP.doRequest({
 			data: {
 				action: 'getWarning',
@@ -1946,7 +1915,6 @@ UI = {
 				src_content: src_content,
 				trg_content: trg_content,
                 segment_status: segment_status,
-                glossaryList: glossarySourcesAr
 			},
 			error: function() {
 				UI.failedConnection(0, 'getWarning');
@@ -2156,7 +2124,7 @@ UI = {
                 $(document).trigger('translation:change', data.translation);
 
                 var translation = $('.editarea', segment ).text().replace(/\uFEFF/g,'');
-                UI.doLexiQA(segment,translation,id_segment,true,null);
+                LXQ.doLexiQA(segment,translation,id_segment,true,null);
                 $(document).trigger('setTranslation:success', data);
 			}
 		});
@@ -2497,7 +2465,8 @@ UI = {
 
                 SegmentActions.setSegmentPropagation(UI.getSegmentId(this), UI.getSegmentFileId(this), true ,UI.getSegmentId(segment));
 
-                UI.doLexiQA(this,translation,UI.getSegmentId(this),true,null);
+                var trans = $('.editarea', this ).text().replace(/\uFEFF/g,'');
+                LXQ.doLexiQA(this,trans,UI.getSegmentId(this),true,null);
             });
 
             //unset actual segment as autoPropagated because now it is translated
@@ -2667,11 +2636,13 @@ UI = {
 			this.undoStack.splice(this.undoStack.length - pos, pos);
 			this.undoStackPosition = 0;
 		}
-                
+
         saveSelection();
         // var cursorPos = APP.getCursorPosition(this.editarea.get(0));
         $('.undoCursorPlaceholder').remove();
-        $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
+        if ($('.rangySelectionBoundary').closest('.editarea').length) {
+            $('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
+        }
         restoreSelection();
         var htmlToSave = this.editarea.html();
         this.undoStack.push(htmlToSave);
@@ -2697,294 +2668,8 @@ UI = {
         var l = config.target_rfc;
         return l == 'ko-KR';
     },
-    doLexiQA: function(segment,translation,id_segment,isSegmentCompleted,callback) {
-        if (!LXQ.enabled()) {
-            if (callback!==undefined && typeof callback === 'function') {
-                callback();
-            }
-            return;
-        }
-        var html = $(segment).find('.source').html();
-        html = html.replace(/<.*?>/g,'');
-        
-        html = html.replace(/\&gt;/g,'>').replace(/\&lt;/g,'<');
-        
-        var sourcetext = $(segment).find('.source').text();
-
-        var returnUrl = window.location.href.split('#')[0]+'#'+id_segment;
-        $.ajax({type: "POST",
-            url: config.lexiqaServer+"/qasegment",
-            data: {
-            qaData:  {
-                    sourcelanguage: config.source_rfc,
-                    targetlanguage: config.target_rfc,
-                    sourcetext: sourcetext+'',
-                    targettext: translation,
-                    returnUrl: returnUrl,
-                    segmentId: id_segment,
-                    partnerId: LXQ.partnerid,
-                    isSegmentCompleted: isSegmentCompleted,
-                    responseMode: "includeQAResults"
-                }
-            },
-            success:function(result){
-                var noVisibleErrorsFound = false, source_val, target_val,ind;
-                //myWindow.location =result.qaurl;
-                if (result.hasOwnProperty('qaData') && result.qaData.length > 0) {
-                    //do something here -- enable qa errors
-                    if ((ind = UI.lexiqaData.segments.indexOf(id_segment))<0) {
-                    UI.lexiqaData.segments.push(id_segment);
-                    $('#lexiqabox').attr('class', 'warningbox').attr("title", "Go to lexiQA for QA analysis")
-                    .find('.numbererror').text(UI.lexiqaData.segments.length);                    
-                    //$('#go2lexiqa').attr('href', result.qaurl);
-                    }
-                    //highlight the segments
-                    //var source_val = UI.clearMarks($.trim($(".source", segment).html()));
-                    source_val =$(".source", segment).html();
-                    var highlights = {
-                            source: {
-                                numbers: [],
-                                punctuation: [],
-                                spaces: [],
-                                urls: [],
-                                spelling: [],
-                                specialchardetect: [],
-                                glossary: [],
-                                blacklist: []
-                            },
-                            target: {
-                                numbers: [],
-                                punctuation: [],
-                                spaces: [],
-                                urls: [],
-                                spelling: [],
-                                specialchardetect: [],
-                                glossary: [],
-                                blacklist: []                              
-                            }
-                    };
-                    var newWarnings = {};
-                    newWarnings[id_segment] = {};
-                    result.qaData.forEach(function (qadata) {
-                        if (UI.lexiqaData.lexiqaWarnings.hasOwnProperty(id_segment) && 
-                            UI.lexiqaData.lexiqaWarnings[id_segment].hasOwnProperty(qadata.errorid)) {
-                            //this error is already here, update it
-                            //basically do thing because each error is unique....
-                            qadata.ignored =  UI.lexiqaData.lexiqaWarnings[id_segment][qadata.errorid].ignored;
-                        }
-                        newWarnings[id_segment][qadata.errorid] = qadata;
-                        if (!qadata.ignored) {
-                        qadata.color = LXQ.colors[qadata.category];
-                        if (qadata.insource) {
-                            highlights.source[qadata.category].push(qadata);
-                        }
-                        else{
-                            highlights.target[qadata.category].push(qadata);                                
-                        }
-                        }
-                    });
-                    //delete UI.lexiqaWarnings[id_segment];
-                    UI.lexiqaData.lexiqaWarnings[id_segment] = newWarnings[id_segment];
-                    var seg = UI.getSegmentById(id_segment);
-                    source_val = LXQ.highLightText(source_val, highlights.source,isSegmentCompleted,true,true,segment);
-                    if (callback!=null)
-                        saveSelection();
-                    //target_val = UI.clearMarks($(".editarea", segment).html());
-                    target_val = $(".editarea", segment).html();
-                    target_val = LXQ.highLightText(target_val,highlights.target,isSegmentCompleted,true,false,segment);
-                    
-                    SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(segment), UI.getSegmentFileId(segment), target_val);
-
-                    if (callback!=null)
-                        restoreSelection();
-                    SegmentActions.replaceSourceText(UI.getSegmentId(segment), UI.getSegmentFileId(segment), source_val)
-                    LXQ.reloadPowertip(segment);
-                                     
-                    //FOTD CHANGE THIS
-                    // $('.lxq-error-seg',segment).attr('numberoferrors',LXQ.getVisibleWarningsCountForSegment(segment)).css("background-color","#efecca").removeClass('lxq-error-changed');
-                    //only reload dropdown menu and link, if there was an error...
-                    if (LXQ.enabled()) LXQ.refreshElements();
-                    //$('.lxq-history-balloon-header-link').attr('href', result.qaurl);
-                    if (!(LXQ.getVisibleWarningsCountForSegment(id_segment)>0)) {
-                        noVisibleErrorsFound = true;
-                    }
-                }
-                else {
-                    //do something else
-                    noVisibleErrorsFound = true;                  
-                    //source_val = UI.clearMarks($.trim($(".source", segment).html()));
-                    source_val = $(".source", segment).html();
-                    source_val = LXQ.cleanUpHighLighting(source_val);
-                    
-                    
-                                        
-                    if (callback!=null)
-                        saveSelection();
-                    //target_val = UI.clearMarks($.trim($(".editarea", segment).html()));
-                    target_val = $(".editarea", segment).html();
-                    target_val = LXQ.cleanUpHighLighting(target_val);
-                    SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(segment), UI.getSegmentFileId(segment), target_val);
-                    if (callback!=null)
-                        restoreSelection();
-                    SegmentActions.replaceSourceText(UI.getSegmentId(segment), UI.getSegmentFileId(segment), source_val)
-                    if (callback!=null)
-                        callback();                    
-                    // $('.lxq-error-seg',segment).attr('numberoferrors','0').css("background-color","#efecca").removeClass('lxq-error-changed');
-                                                                                    
-                } 
-                if (noVisibleErrorsFound) {
-                    UI.lxqRemoveSegmentFromWarningList(id_segment);
-                }                                             
-            }
-            ,error:function(result){
-                if (callback!=null)
-                    callback();                    
-            }
-        });                
-        
-    },
-    lxqRemoveSegmentFromWarningList: function(id_segment){
-        if ((ind = UI.lexiqaData.segments.indexOf(id_segment))>=0) {
-            UI.lexiqaData.segments.splice(ind,1);
-            delete UI.lexiqaData.lexiqaWarnings[id_segment];
-        }
-        if ( UI.lexiqaData.segments.length ==0) {
-            //remove link and warning
-            $('#lexiqabox').attr('class', 'lexnotific').attr("title", "Well done, no errors found!").find('.numbererror').text('');
-        }
-        else {
-                $('#lexiqabox').attr('class', 'warningbox').attr("title", "Go to lexiQA for QA analysis").find('.numbererror').text(UI.lexiqaData.segments.length);                           
-        }                 
-    },
-    getLexiqaWarnings: function() {
-        if (!LXQ.enabled()) {
-            return;
-        }        
-        //FOTD
-        UI.lexiqaData.lexiqaFetching = true;
-        $.ajax({type: "GET",
-            url: config.lexiqaServer+"/matecaterrors",
-            data: {id: LXQ.partnerid+'-'+config.job_id+'-'+config.password },
-            success:function(results){
-                var errorCnt = 0, ind;
-                if (results.errors!=0) {
-                    //only do something if there are errors in lexiqa server
-                    UI.lexiqaData.lexiqaWarnings = {};
-                    
-
-                    results.segments.forEach(function(element) {
-                        if (element.errornum ===0) {
-                            return;
-                        }
-                        UI.lexiqaData.segments.push(element.segid);
-                        
-                        //highlight the respective segments here                        
-                        var highlights = {
-                            source: {
-                                numbers: [],
-                                punctuation: [],
-                                spaces: [],
-                                urls: [],
-                                spelling: [],
-                                specialchardetect: [],
-                                glossary: [],
-                                blacklist: []
-                            },
-                            target: {
-                                numbers: [],
-                                punctuation: [],
-                                spaces: [],
-                                urls: [],
-                                spelling: [],
-                                specialchardetect: [] ,
-                                glossary: [],
-                                blacklist: []                              
-                            }
-                        };
-                        UI.lexiqaData.lexiqaWarnings[element.segid] = {};
-                        var seg = UI.getSegmentById(element.segid);
-                        var translation = $(".editarea", seg).text();
-                        results.results[element.segid].forEach(function (qadata) {
-                            UI.lexiqaData.lexiqaWarnings[element.segid][qadata.errorid] = qadata;
-                            if (!qadata.ignored) {
-                            qadata.color = LXQ.colors[qadata.category];
-                            if (qadata.insource) {
-                                highlights.source[qadata.category].push(qadata);
-                            }
-                            else{
-                                if (qadata.end <= translation.length)
-                                    highlights.target[qadata.category].push(qadata);
-
-                                }
-                            }
-                            
-                        });
-                        if (LXQ.getVisibleWarningsCountForSegment(element.segid)>0) {
-                            errorCnt++;
-                        }
-                        else {
-                            if ((ind = UI.lexiqaData.segments.indexOf(element.segid))>=0) {
-                                UI.lexiqaData.segments.splice(ind,1);
-                                delete UI.lexiqaData.lexiqaWarnings[element.segid];
-                            }
-                        }                        
-                        //if (seg === false)
-                        if (!UI.segmentIsLoaded(element.segid)) 
-                            return; //this segment has not been loaded yet...
-                        LXQ.shouldHighlighWarningsForSegment(element.segid,element.show);
-                        //console.dir (seg);
-                        //var segEdit = UI.getEditAreaBySegmentId(element);
-                        //console.dir(segEdit);
-                        //var source_val = UI.clearMarks($.trim($(".source", seg).html()));
-                        var source_val = $(".source", seg).html();
-                        //console.log('source: '+source_val);
-                                                
-                        source_val = LXQ.highLightText(source_val,highlights.source,true,LXQ.shouldHighlighWarningsForSegment(seg),true,seg);
-                        
-                        //var target_val = UI.clearMarks($.trim($(".editarea", seg).html()));
-                        var target_val = $(".targetarea", seg).html();
-                        target_val = LXQ.highLightText(target_val,highlights.target,true,LXQ.shouldHighlighWarningsForSegment(seg),false,seg);
-                        $(".targetarea", seg).html(target_val);
-                        $(".source", seg).html(source_val);
-                        // $('.lxq-error-seg',seg).attr('numberoferrors',LXQ.getVisibleWarningsCountForSegment(seg));
-                        // if (element.show) {
-                        //     $('.lxq-error-seg',seg).attr('title','Click to hide warning highlighting').css("background-color","#efecca").removeClass('lxq-error-changed');
-                        // }
-                        // else {
-                        //     $('.lxq-error-seg',seg).attr('title','Click to show warning highlighting').css("background-color","#046380").addClass('lxq-error-changed');
-                        // }            
-                        LXQ.buildPowertipDataForSegment(seg);                
-                        
-                    });
-                    //console.log('UI.lexiqaData.lexiqaWarnings');
-                    //console.dir(UI.lexiqaData.lexiqaWarnings);
-                     $('#lexiqabox').attr('class', 'warningbox').attr("title", "Go to lexiQA for QA analysis").find('.numbererror').text(errorCnt);
-                    if( LXQ.enabled() ) {
-                        LXQ.reloadPowertip();
-                    }
-                }
-                else {
-                    $('#lexiqabox').attr('class', 'lexnotific').attr("title", "Well done, no errors found!").find('.numbererror').text('');                    
-                      results.qaurl= "#";  
-                }
-
-                if (LXQ.enabled()){
-                    LXQ.doQAallSegments();
-                    LXQ.refreshElements();
-                }
-                //$('.lxq-history-balloon-header-link').attr('href', results.qaurl);
-                UI.lexiqaData.lexiqaFetching = false;             
-            }});                
-    },
     start: function () {
-        UI.lexiqaData = {};
-        UI.lexiqaData.lexiqaWarnings = {};
-        UI.lexiqaData.enableHighlighting = true;
-        UI.lexiqaData.lexiqaFetching = false;
-        UI.lexiqaData.segments = [];
-        UI.lexiqaData.segmentsInfo = {};
-        UI.setTagLockCustomizeCookie(true);
-        APP.init();
+
         // If some icon is added on the top header menu, the file name is resized
         APP.addDomObserver($('.header-menu')[0], function() {
             APP.fitText($('.breadcrumbs'), $('#pname'), 30);
@@ -2993,14 +2678,14 @@ UI = {
         $("article").each(function() {
             APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30);
         });
-        
+
         UI.render({
             firstLoad: true
         }).done( function() {
             // launch segments check on opening
             UI.checkWarnings(true);
         });
-        
+
         $('html').trigger('start');
         if (LXQ.enabled()) {
             $('#lexiqabox').removeAttr("style");
@@ -3009,6 +2694,71 @@ UI = {
     },
     restart: function () {
         this.start();
+    },
+
+
+    /**
+     * Edit area click
+     *
+     * This function can be extended in order for other modules
+     * to change the behaviour of segment activation.
+     *
+     * TODO: .editarea class is bound to presentation and logic
+     * and should be decoupled in future refactorings.
+     *
+     */
+    editAreaClick : function(e, operation, action) {
+        if (typeof operation == 'undefined') {
+            operation = 'clicking';
+        }
+
+        UI.saveInUndoStack('click');
+        this.onclickEditarea = new Date();
+
+        UI.notYetOpened = false;
+        UI.closeTagAutocompletePanel();
+        UI.removeHighlightCorrespondingTags();
+
+        var segmentNotYetOpened = ($(this).is(UI.editarea) && !$(this).closest('section').hasClass("opened"));
+
+        if ( !$(this).is(UI.editarea) || (UI.editarea === '') || (!UI.body.hasClass('editing')) || segmentNotYetOpened) {
+            if (operation == 'moving') {
+                if ((UI.lastOperation == 'moving') && (UI.recentMoving)) {
+                    UI.segmentToOpen = segment;
+                    UI.blockOpenSegment = true;
+                } else {
+                    UI.blockOpenSegment = false;
+                }
+                UI.recentMoving = true;
+                clearTimeout(UI.recentMovingTimeout);
+                UI.recentMovingTimeout = setTimeout(function() {
+                    UI.recentMoving = false;
+                }, 1000);
+            } else {
+                UI.blockOpenSegment = false;
+            }
+
+            UI.lastOperation = operation;
+
+            UI.openSegment(this, operation);
+            if (action == 'openConcordance')
+                UI.openConcordance();
+
+            if (operation != 'moving') {
+                segment = $('#segment-' + $(this).data('sid'));
+                if(!(config.isReview && (segment.hasClass('status-new') || segment.hasClass('status-draft')))) {
+                    UI.scrollSegment($('#segment-' + $(this).data('sid')));
+                }
+            }
+        }
+
+        if (UI.editarea != '') {
+            UI.lockTags(UI.editarea);
+            UI.checkTagProximity();
+        }
+
+        // if (UI.debug) { console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea)); }
+
     },
     /**
      * After User click on Translated or T+>> Button
@@ -3098,6 +2848,17 @@ UI = {
         $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
         $.cookie('tmpanel-open', 1, { path: '/' });
     },
+    closeAllMenus: function (e, fromQA) {
+        if ($('.searchbox').is(':visible')) {
+            UI.toggleSearch(e);
+        }
+        $('.mbc-history-balloon-outer').removeClass('mbc-visible');
+
+        var qa_cont = $('.qa-container');
+        if ( qa_cont.hasClass('qa-open') && !fromQA) {
+            QAComponent.togglePanel();
+        }
+    }
 
 
 };

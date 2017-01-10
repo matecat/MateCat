@@ -6,7 +6,9 @@
  * Date: 01/04/15
  * Time: 12.54
  */
-class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+
+
+class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct   implements DataAccess_IDaoStruct {
 
     public $uid;
     public $email;
@@ -14,9 +16,22 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
     public $first_name;
     public $last_name;
     public $salt;
-    public $api_key;
     public $pass;
-    public $oauth_access_token ; 
+    public $oauth_access_token ;
+
+    public $email_confirmed_at ;
+    public $confirmation_token ;
+    public $confirmation_token_created_at ;
+
+    public function clearAuthToken() {
+        $this->confirmation_token = null ;
+        $this->confirmation_token_created_at = null ;
+    }
+
+    public function initAuthToken() {
+        $this->confirmation_token = Utils::randomString() ;
+        $this->confirmation_token_created_at = Utils::mysqlTimestamp( time() );
+    }
 
     public static function getStruct() {
         return new Users_UserStruct();
@@ -55,6 +70,58 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
         return $this->last_name;
     }
 
+    public function getMetadataAsKeyValue() {
+        $dao = new \Users\MetadataDao() ;
+        $collection = $dao->allByProjectId($this->uid) ;
+        $data  = array();
+        foreach ($collection as $record ) {
+            $data[ $record->key ] = $record->value;
+        }
+        return $data;
+    }
+
+    /**
+     * Returns true if password matches
+     *
+     * @param $password
+     * @return bool
+     */
+    public function passwordMatch( $password ) {
+        return Utils::encryptPass( $password, $this->salt ) == $this->pass ;
+    }
+
+    // TODO ------- start duplicated code, find a way to remove duplication
+
+    /**
+     * Returns the decoded access token.
+     *
+     * @param null $field
+     *
+     */
+    public function getDecryptedOauthAccessToken() {
+        $oauthTokenEncryption = OauthTokenEncryption::getInstance();
+        return $oauthTokenEncryption->decrypt( $this->oauth_access_token );
+    }
+
+    /**
+     * @param null $field
+     * @return mixed
+     * @throws \Exception
+     */
+    public function getDecodedOauthAccessToken($field=null) {
+        $decoded = json_decode( $this->getDecryptedOauthAccessToken(), TRUE );
+
+        if ( $field ) {
+            if ( array_key_exists( $field, $decoded ) ) {
+                return $decoded[ $field ] ;
+            }
+            else {
+                throw new \Exception('key not found on token: ' . $field ) ;
+            }
+        }
+
+        return $decoded  ;
+    }
 
 
 }

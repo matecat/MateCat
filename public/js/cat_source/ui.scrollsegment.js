@@ -124,7 +124,7 @@
         if ( prev.length ) {
             pos = prev.offset().top - $('.header-menu').height() ;
         } else {
-            pos = segment.offset().top - $('.header-menu').height() ;
+            pos = segment.offset().top - $('.header-menu').height() -  $('.searchbox').height();
         }
 
         scrollAnimation.animate({

@@ -42,8 +42,6 @@ class reviseSummaryController extends viewController {
 
 	public function doAction() {
 
-        $this->generateAuthURL();
-
         //pay a little query to avoid to fetch 5000 rows
         $this->data = $jobData = getJobData( $this->jid, $this->password );
 
@@ -132,9 +130,6 @@ class reviseSummaryController extends viewController {
         $this->template->build_number  = INIT::$BUILD_NUMBER;
         $this->template->extended_user = ($this->logged_user !== false ) ? trim( $this->logged_user->fullName() ) : "";
         $this->template->logged_user   = ($this->logged_user !== false ) ? $this->logged_user->shortName() : "";
-        $this->template->incomingUrl   = '/login?incomingUrl=' . $this->thisUrl;
-        $this->template->authURL       = $this->authURL;
-
 
         //set the labels
         $error_info = array(

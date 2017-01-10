@@ -77,7 +77,7 @@ $.extend(UI, {
             $(".loader", current).removeClass('loader_on');
             if (!next) {
                 this.blockButtons = false;
-                this.currentSegmentQA();
+                this.segmentQA(segment);
             }
             if (this.currentSegmentId == this.nextUntranslatedSegmentId)
                 this.blockButtons = false;

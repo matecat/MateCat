@@ -29,6 +29,17 @@ window.SegmentFilter_MainPanel = require('./components/segment_filter/MainPanel'
 
 window.NotificationBox = require('./components/notificationsComponent/NotificationBox').default;
 
+window.QAComponent = require('./QAComponent').default;
+
+window.ModalWindow = require('./modals/ModalWindowComponent').default;
+window.SuccessModal = require('./modals/SuccessModal').default;
+window.ConfirmRegister = require('./modals/ConfirmRegister').default;
+window.PreferencesModal = require('./modals/PreferencesModal').default;
+window.ResetPasswordModal = require('./modals/ResetPasswordModal').default;
+window.LoginModal = require('./modals/LoginModal').default;
+window.ForgotPasswordModal = require('./modals/ForgotPasswordModal').default;
+window.RegisterModal = require('./modals/RegisterModal').default;
+
 // window.AppDispatcher = require('./dispatcher/AppDispatcher');
 // window.SegmentStore = require('./stores/SegmentStore');
 window.SegmentActions = require('./actions/SegmentActions');

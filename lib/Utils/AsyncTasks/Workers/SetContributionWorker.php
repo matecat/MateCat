@@ -146,8 +146,8 @@ class SetContributionWorker extends AbstractWorker {
 
     protected function _set( Array $config, ContributionStruct $contributionStruct ){
 
-        $config[ 'segment' ]     = CatUtils::view2rawxliff( $contributionStruct->segment );
-        $config[ 'translation' ] = CatUtils::view2rawxliff( $contributionStruct->translation );
+        $config[ 'segment' ]     = $contributionStruct->segment;
+        $config[ 'translation' ] = $contributionStruct->translation;
 
         //get the Props
         $config[ 'prop' ]        = json_encode( $contributionStruct->getProp() );
@@ -163,11 +163,11 @@ class SetContributionWorker extends AbstractWorker {
     protected function _update( Array $config, ContributionStruct $contributionStruct ){
 
         // update the contribution for every key in the job belonging to the user
-        $config[ 'segment' ]     = CatUtils::view2rawxliff( $contributionStruct->oldSegment );
-        $config[ 'translation' ] = CatUtils::view2rawxliff( $contributionStruct->oldTranslation );
+        $config[ 'segment' ]     = $contributionStruct->oldSegment;
+        $config[ 'translation' ] = $contributionStruct->oldTranslation;
 
-        $config[ 'newsegment' ] = CatUtils::view2rawxliff( $contributionStruct->segment );
-        $config[ 'newtranslation' ] = CatUtils::view2rawxliff( $contributionStruct->translation );
+        $config[ 'newsegment' ]     = $contributionStruct->segment;
+        $config[ 'newtranslation' ] = $contributionStruct->translation;
 
         $res = $this->_tms->update( $config );
         if ( !$res ) {

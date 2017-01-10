@@ -57,7 +57,7 @@
             this.currentSegment.attr('data-searchItems', ($('mark.searchMarker', this.editarea).length));
 
             this.fillCurrentSegmentWarnings(this.globalWarnings, true);
-            this.setNextWarnedSegment();
+            // this.setNextWarnedSegment();
 
             this.focusEditarea = setTimeout(function() {
                 UI.editarea.focus();

@@ -227,7 +227,7 @@ $.extend(UI, {
 					   .append(brEnd);
 
 			//lock tags and run again getWarnings
-			UI.currentSegmentQA();
+            UI.segmentQA(UI.currentSegment);
 
 		}).on('click', '.tagLockCustomize', function(e) {
 			e.preventDefault();
@@ -285,7 +285,32 @@ $.extend(UI, {
 			location.reload(true);
 		}).on('click', '.tag-autocomplete li', function(e) {
 			e.preventDefault();
-			UI.autoCompleteTagClick(this);
+
+            UI.editarea.html(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
+
+            UI.editarea.find('.rangySelectionBoundary').before(UI.editarea.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
+
+            UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1'));
+
+            UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+
+            UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+
+            UI.editarea.html(UI.editarea.html().replace(/(<span class="tag-autocomplete-endcursor"\><\/span><span class="undoCursorPlaceholder monad" contenteditable="false"><\/span>)&lt;/gi, '$1'));
+
+			saveSelection();
+			if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
+				setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
+				saveSelection();
+			}
+			var ph = $('.rangySelectionBoundary', UI.editarea)[0].outerHTML;
+			$('.rangySelectionBoundary', UI.editarea).remove();
+			$('.tag-autocomplete-endcursor', UI.editarea).after(ph);
+			$('.tag-autocomplete-endcursor').before(htmlEncode($(this).text()));
+			restoreSelection();
+			UI.closeTagAutocompletePanel();
+			UI.lockTags(UI.editarea);
+			UI.segmentQA(UI.currentSegment);
 		}).on('click', '.modal.survey .x-popup', function() {
 			UI.surveyDisplayed = true;
 			if(typeof $.cookie('surveyedJobs') != 'undefined') {
@@ -342,27 +367,10 @@ $.extend(UI, {
 				UI.writeNewShortcut(c, s, this);
 			}
 			$(s).remove();
-		} ).on('click', '.authLink', function(e){
-            e.preventDefault();
-
-            $(".login-google").show();
-
-            return false;
-        } ).on('click', '#sign-in', function(e){
-            e.preventDefault();
-
-            var url = $(this).data('oauth');
-
-            var newWindow = window.open(url, 'name', 'height=600,width=900');
-            if (window.focus) {
-                newWindow.focus();
-            }
-        });
+		} );
 
 		$(window).on('scroll', function() {
 			UI.browserScrollPositionRestoreCorrection();
-		}).on('cachedSegmentObjects', function() {
-            if(UI.currentSegmentId == UI.firstWarnedSegment) UI.setNextWarnedSegment();
 		}).on('allTranslated', function() {
 			if(config.survey) UI.displaySurvey(config.survey);
 		}).on('mousedown', function(e) {
@@ -775,8 +783,8 @@ $.extend(UI, {
 		$("#point2seg").bind('mousedown', function(e) {
 			e.preventDefault();
             UI.saveSegment(UI.currentSegment);
-			UI.scrollSegment($('#segment-' + $(this).attr('data-segment')));
-            UI.setNextWarnedSegment();
+			UI.closeAllMenus(e, true);
+			QAComponent.togglePanel();
 		});
 
 		$("#navSwitcher").on('click', function(e) {
@@ -784,6 +792,7 @@ $.extend(UI, {
 		});
 
 		$("#pname").on('click', function(e) {
+			UI.closeAllMenus(e);
 			e.preventDefault();
 			UI.toggleFileMenu();
 		});
