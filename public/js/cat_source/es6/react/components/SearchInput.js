@@ -22,23 +22,18 @@ class SearchInput extends React.Component {
 
 
     render () {
-        return (
-                <div className="col l3 offset-l3 s3 offset-s3">
-                    <div className="row">
-                        <div className="input-field">
-                            <i className="icon-search prefix"/>
-                            <input id="icon_prefix" type="text" className="valid"
-                                   placeholder="Search by project name"
-                                   ref={(input) => this.textInput = input}
-                                   onChange={this.filterByName.bind(this)}/>
-                            <i className="prefix close-x" style={{display: 'none'}}
-                               ref={(closeIcon) => this.closeIcon = closeIcon}
-                               onClick={this.closeSearch.bind(this)}/>
-                        </div>
+        return (<div className="row">
+                    <div className="input-field">
+                        <i className="icon-search prefix"/>
+                        <input id="icon_prefix" type="text" className="valid"
+                               placeholder="Search by project name"
+                               ref={(input) => this.textInput = input}
+                               onChange={this.filterByName.bind(this)}/>
+                        <i className="prefix close-x" style={{display: 'none'}}
+                           ref={(closeIcon) => this.closeIcon = closeIcon}
+                           onClick={this.closeSearch.bind(this)}/>
                     </div>
                 </div>
-
-
         );
     }
 }

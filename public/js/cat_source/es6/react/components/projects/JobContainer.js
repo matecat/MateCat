@@ -271,13 +271,9 @@ class JobContainer extends React.Component {
         var idJobLabel = ( !this.props.isChunk ) ? this.props.job.get('id') : this.props.job.get('id') + '-' + this.props.index;
 
         return <div className="card job z-depth-1">
-            <div className="head-job open-head-job">
+            {/*<div className="head-job open-head-job">
                 <div className="row">
-                    <div className="col s2">
-                        <div className="job-id">
-                            <div id={"id-job-" + this.props.job.get('id')}><span>ID:</span>{ idJobLabel }</div>
-                        </div>
-                    </div>
+                    
                     <div className="col s10">
                         <ul className="job-activity-icon right">
                             {tmIcon}
@@ -298,7 +294,7 @@ class JobContainer extends React.Component {
                         </ul>
                     </div>
                 </div>
-            </div>
+            </div>*/}
             <div className="body-job">
                 <div className="row">
                     {/*<div className="col">
@@ -313,6 +309,11 @@ class JobContainer extends React.Component {
                             </ul>
                         </div>
                     </div>*/}
+                    <div className="col">
+                        <div className="job-id">
+                            <div id={"id-job-" + this.props.job.get('id')}><span>ID:</span>{ idJobLabel }</div>
+                        </div>
+                    </div>
                     <div className="col">
                         <div className="progress-bar">
                             <div className="progr">
@@ -336,13 +337,38 @@ class JobContainer extends React.Component {
                             {modifyDate}
                         </div>
                     </div>
-                    <div className="col m4 right">
-                        <div className="button-list split-outsource right">
+                    <div className="col right">
+                        
+                        <ul className="job-activity-icon">
+                            {/*tmIcon*/}
+                            <li>
+                                <a className='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0 class-prova'
+                                   data-activates={'dropdownJob' + this.props.job.get('id') + this.props.job.get('password')}
+                                   ref={(dropdown) => this.dropdown = dropdown}>
+                                    <i className="icon-more_vert"/>
+                                </a>
+                                {jobMenu}
+                            </li>
+                        </ul>
+                    </div>
+                    <div className="col right">
+                        <div className="button-list">
                             {/*{splitMergeButton}*/}
-                            <a className="btn waves-effect waves-light outsource" target="_blank" href={outsourceUrl}>outsource</a>
+                            {/*<a className="btn waves-effect waves-light outsource" target="_blank" href={outsourceUrl}>outsource</a>*/}
                             {/*<a className="btn waves-effect waves-light outsourced" target="_blank" href={outsourcedUrl}>outsource</a> */}
                             <a className="btn waves-effect waves-light translate move-left" target="_blank" href={translateUrl}>Open</a>
                         </div>
+                    </div>
+                    <div className="col right">
+                        <ul className="job-activity-icon">
+                            {tmIcon}
+                            {/*<li>
+                                <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0"
+                                    onClick={this.openSettings.bind(this)}>
+                                    <i className="icon-settings"/>
+                                </a>
+                            </li>*/}
+                        </ul>
                     </div>
                 </div>
             </div>

@@ -159,8 +159,8 @@ class ProjectContainer extends React.Component {
                         <div className="body-job">
                             <div className="row">
                                 <div className="col">
-                                    <div className="source-lang-container" >
-                                        <span id="source">{sourceTxt}</span>
+                                    <div className="source-box" >
+                                        <div id="source">{sourceTxt}</div>
                                     </div>
                                 </div>
                                 <div className="col">
@@ -356,25 +356,23 @@ class ProjectContainer extends React.Component {
                     let chunkList = <div className="chunk" key = { (i - 1) + job.get('id')}>
                         <div className="card header-chunk">
                             <div className="row">
-                                <div className="col">
+                                {/*<div className="col">
                                     <div className="job-id">
                                         <div id={"id-job-" + job.get('id')}><span>ID:</span>{ job.get('id') }</div>
-
                                     </div>
-                                </div>
+                                </div>*/}
                                 <div className="col">
-                                    <div className="">
+                                    <div className="source-box">
                                         {job.get('sourceTxt')}
                                     </div>
                                 </div>
                                 <div className="col">
-                                    <div className="">
-                                        <i className="icon-play"/>
-                                    </div>
+                                    <i className="icon-play 2"/>
                                 </div>
                                 <div className="col">
-                                    <div className="">
-                                        {job.get('targetTxt') }
+
+                                    <div className="target-box">
+                                        {job.get('targetTxt')}
                                     </div>
                                 </div>
 
@@ -511,6 +509,7 @@ class ProjectContainer extends React.Component {
                                     {/*<i className="icon-settings"></i>*/}
                                     {/*</a>*/}
                                     {/*</li>*/}
+
                                     {/*{tMIcon}*/}
                                     <li>
                                         <a className='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0'

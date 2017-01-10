@@ -166,8 +166,7 @@ i.close-x:before {
 				float: left;
 				margin-left: 0rem;
 				a{
-
-					margin-left: 0px;
+					margin-left: 8px;
 					i {
 						color: #4D4D4D;
 					}
@@ -211,14 +210,14 @@ i.close-x:before {
 		font-size: 17px;
 		border: 1px solid #6d6d6d;
 		text-transform: capitalize;
+		width: 125px;
 		&:hover {
 			background-color: #f1f1f1 !important;
 		}
 		i {
 			&.right {
-				margin-left: 10px;
-				margin-right: -10px;
-				line-height: 2rem;
+				margin-left: 0px;
+    			margin-right: 0px;
 			}
 		}
 	}
@@ -264,7 +263,7 @@ i.close-x:before {
 		border: 1px solid #6d6d6d;
 		text-transform: capitalize;
 		&.move-left {
-			margin-left: 5px;
+			margin-left: 0px;
 		}
 	}
 }
@@ -283,7 +282,7 @@ i.close-x:before {
 	    border-radius: 2px;
 	    padding: 0 0;
 		.job-id {
-			
+			min-width: 96px;
 		}
 		ul {
 			margin: 0;
@@ -319,12 +318,11 @@ i.close-x:before {
 	}
 	.job-activity-icon {
 		margin: 0;
-		padding-right: 15px;
 		// background-color: orange;
 		li {
 			float: left;
 			a{
-				margin-left: 8px;
+				margin-left: 0px;
 				i {
 					color: #4D4D4D;
 				}
@@ -346,8 +344,9 @@ i.close-x:before {
 			height: 30px;
 			font-weight: bold;
 			font-size: 17px;
-			border: 1px solid #f6f6f6;
+			border: 1px solid #6d6d6d;
 			text-transform: capitalize;
+			width: 125px;
 			&:hover {
 				background-color: #ffffff;
 			}
@@ -409,7 +408,7 @@ i.close-x:before {
 					margin: 0;
 					max-width: 100%;
 					li {
-						margin-right: 5px;
+						margin-right: 10px;
 					    margin-bottom: 5px;
 					    float: left;
 						.more-jobs {
@@ -484,23 +483,25 @@ i.close-x:before {
 }
 .bottom-chunk-1{
 	width: 100%;
-    height: 5px;
+    height: 23px;
     background-color: white;
     border: 1px solid #dedcdc;
     border-top: none;
     border-radius: 2px;
-    margin-top: 0px;
+    margin-top: -18px;
+    margin-left: 4px;
     position: relative;
 }
 
 .bottom-chunk-2 {
 	width: 100%;
-    height: 6px;
+    height: 23px;
     background-color: white;
     border: 1px solid #dedcdc;
     border-top: none;
     border-radius: 2px;
-    margin-top: -1px;
+    margin-top: -18px;
+    margin-left: 7px;
     z-index: 0;
 }
 .chunk-job a{
@@ -631,11 +632,19 @@ li.target-lang {
     margin-right: 0!important;
 }
 
-.source-lang-container {
-	border: 1px solid #dcdcdc;
-    text-align: center;
-    padding: 5px;
-    width: 90px;
+.source-box {
+	// border: 1px solid #dcdcdc;
+ //    text-align: center;
+ //    padding: 5px;
+    min-width: 134px;
+}
+
+.target-box {
+	// min-width: 147px;
+ //    border: 1px solid #dcdcdc;
+ //    text-align: center;
+    // padding: 5px;
+    min-width: 134px;
 }
 
 
@@ -644,7 +653,6 @@ li.target-lang {
 }
 
 .project-activity-icon li a i {
-margin-right: 10px;
 vertical-align: middle;
 display: block;
 text-align: center;
@@ -699,5 +707,5 @@ position: relative;
 
 .job-preview .icon-play,
 .job .icon-play {
-    margin: 0 5px 0 5px;
+    margin: 0 0px 0 0px;
 }

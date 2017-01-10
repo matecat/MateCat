@@ -25,24 +25,30 @@ class Header extends React.Component {
                         <div className="nav-wrapper">
                             <div className="container-fluid">
                                 <div className="row">
-                                    <a href="/" className="logo"/>
-                                    <SearchInput
-                                        closeSearchCallback={this.props.closeSearchCallback}
-                                        onChange={this.props.searchFn}/>
-                                    <div className="col l2 offset-l1 s2 offset-s1">
-                                        <FilterProjects
-                                            filterFunction={this.props.filterFunction}
-                                        />
+                                    <div className="col m4 l1 offset-l1 logo-col" >
+                                        <a href="/" className="logo"/>
                                     </div>
-                                    <div className="col l2 right profile-area">
-                                        <ul className="right">
-                                            <li>
-                                                <a href="" className="right waves-effect waves-light">
-                                                    <span id="nome-cognome" className="hide-on-med-and-down">Nome Cognome </span>
-                                                    <button className="btn-floating btn-flat waves-effect waves-dark z-depth-0 center hoverable">RS</button>
-                                                </a>
-                                            </li>
-                                        </ul>
+                                    <div className="container">
+                                        <div className="col l4 s3 offset-s3">
+                                            <SearchInput
+                                                closeSearchCallback={this.props.closeSearchCallback}
+                                                onChange={this.props.searchFn}/>
+                                            </div>
+                                        <div className="col l2 right">
+                                            <FilterProjects
+                                                filterFunction={this.props.filterFunction}/>
+                                        </div>
+
+                                        <div className="col l2 right profile-area">
+                                            <ul className="right">
+                                                <li>
+                                                    <a href="" className="right waves-effect waves-light">
+                                                        <span id="nome-cognome" className="hide-on-med-and-down">Nome Cognome </span>
+                                                        <button className="btn-floating btn-flat waves-effect waves-dark z-depth-0 center hoverable">RS</button>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
