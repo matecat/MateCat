@@ -2127,27 +2127,24 @@ function getProjectStatsVolumeAnalysis( $pid ) {
     return $results;
 }
 
-function getProjectForVolumeAnalysis( $type, $limit = 1 ) {
+function getProjectForVolumeAnalysis( $limit = 1 ) {
 
     $query_limit = " limit $limit";
 
-    $type = strtoupper( $type );
-
-    if ( $type == 'FAST' ) {
-        $status_search = Constants_ProjectStatus::STATUS_NEW;
-    } else {
-        $status_search = Constants_ProjectStatus::STATUS_FAST_OK;
-    }
     $query = "select p.id, id_tms, id_mt_engine, tm_keys , p.pretranslate_100, group_concat( distinct j.id ) as jid_list
 		from projects p
 		inner join jobs j on j.id_project=p.id
-		where status_analysis = '$status_search'
+		where status_analysis = '" . Constants_ProjectStatus::STATUS_NEW . "'
 		group by 1
 		order by id $query_limit
 		";
+
     $db    = Database::obtain();
     try {
+        //Needed to address the query to the master database if exists
+        $db->getConnection()->beginTransaction();
         $results = $db->fetch_array($query);
+        $db->getConnection()->commit();
     } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
@@ -2531,7 +2528,10 @@ function getProjectSegmentsTranslationSummary( $pid ) {
         AND st.locked = 0
         GROUP BY id_job WITH ROLLUP";
     try {
-        $results = $db->fetch_array( $query );
+        //Needed to address the query to the master database if exists
+        $db->getConnection()->beginTransaction();
+        $results = $db->fetch_array($query);
+        $db->getConnection()->commit();
     } catch ( PDOException $e ) {
         Log::doLog( $e->getMessage() );
 
