@@ -282,7 +282,7 @@ i.close-x:before {
 	    border-radius: 2px;
 	    padding: 0 0;
 		.job-id {
-			min-width: 122px;
+			min-width: 96px;
 		}
 		ul {
 			margin: 0;
@@ -344,7 +344,7 @@ i.close-x:before {
 			height: 30px;
 			font-weight: bold;
 			font-size: 17px;
-			border: 1px solid #f6f6f6;
+			border: 1px solid #6d6d6d;
 			text-transform: capitalize;
 			width: 125px;
 			&:hover {
@@ -633,15 +633,18 @@ li.target-lang {
 }
 
 .source-box {
-// border: 1px solid #dcdcdc;
-//    text-align: center;
-//    padding: 5px;
-//    width: 90px;
-	min-width: 122px;
+	// border: 1px solid #dcdcdc;
+ //    text-align: center;
+ //    padding: 5px;
+    min-width: 134px;
 }
 
 .target-box {
-	min-width: 140px;
+	// min-width: 147px;
+ //    border: 1px solid #dcdcdc;
+ //    text-align: center;
+    // padding: 5px;
+    min-width: 134px;
 }
 
 

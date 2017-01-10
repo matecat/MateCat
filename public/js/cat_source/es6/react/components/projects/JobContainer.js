@@ -309,7 +309,7 @@ class JobContainer extends React.Component {
                             </ul>
                         </div>
                     </div>*/}
-                    <div className="col s1">
+                    <div className="col">
                         <div className="job-id">
                             <div id={"id-job-" + this.props.job.get('id')}><span>ID:</span>{ idJobLabel }</div>
                         </div>
@@ -343,7 +343,7 @@ class JobContainer extends React.Component {
                             {/*tmIcon*/}
                             <li>
                                 <a className='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0 class-prova'
-                                   data-activates={'dropdownJob' + this.props.job.get('id')}
+                                   data-activates={'dropdownJob' + this.props.job.get('id') + this.props.job.get('password')}
                                    ref={(dropdown) => this.dropdown = dropdown}>
                                     <i className="icon-more_vert"/>
                                 </a>
