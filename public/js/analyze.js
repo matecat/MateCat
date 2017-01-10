@@ -718,11 +718,11 @@ UI = {
 		$('.popup-split .error-message').addClass('none');
 		$('.popup-split .popup-box .jobs').empty();
 		$('.popup-split .splitselect').val(numsplit);
+		$('.popup-split .popup-split-job-title').text(jobContainer.find("h3").text());
 		$('.popup-split h1 .jid').attr('data-jid', jid);
 		$('.popup-split h1 .jid').attr('data-pwd', $(job).attr('data-pwd'));
 		$('.popup-split').removeClass('error-number');
 		$('.popup-split #exec-split').removeClass('disabled');
-		$('.popup-split h1 .chunks').text(numsplit);
 		for (var i = 0; i < numsplit; i++) {
 			var numw = wordsXjob;
 			if (i < diff)

@@ -160,7 +160,7 @@ background: #ccc;
 
 .popup .splitbtn-cont {
     margin-left: 10px;
-    margin-top: 20px;
+    margin-top: 10px;
 }
 
 .splitbtn-cont {
@@ -220,6 +220,14 @@ background: #ccc;
 	border-radius: 2px;
 	text-decoration:none;
 	opacity:0.9;
+}
+
+.popup-split h2 {
+    font-size: 24px !important;
+    font-weight: bold !important;
+    padding: 0;
+    margin: 15px 10px !important;
+    margin-bottom: 21px !important;
 }
 
 .splitbtn, .mergebtn {margin: 0 0 10px 0;
