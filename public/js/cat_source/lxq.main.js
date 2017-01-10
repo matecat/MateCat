@@ -1399,10 +1399,10 @@ LXQ.init  = function () {
                             var target_val = $( ".editarea", segment ).html();
                             target_val = LXQ.highLightText( target_val, highlights.target, isSegmentCompleted, true, false, segment );
 
-                            $( ".editarea", segment ).html( target_val );
+                            SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(segment), UI.getSegmentFileId(segment), target_val);
                             if ( callback != null )
                                 restoreSelection();
-                            $( ".source", segment ).html( source_val );
+                            SegmentActions.replaceSourceText(UI.getSegmentId(segment), UI.getSegmentFileId(segment), source_val)
                             LXQ.reloadPowertip( segment );
 
                             //only reload dropdown menu and link, if there was an error...
@@ -1421,10 +1421,10 @@ LXQ.init  = function () {
                                 saveSelection();
                             target_val = $( ".editarea", segment ).html();
                             target_val = LXQ.cleanUpHighLighting( target_val );
-                            $( ".editarea", segment ).html( target_val );
+                            SegmentActions.replaceEditAreaTextContent(UI.getSegmentId(segment), UI.getSegmentFileId(segment), target_val);
                             if ( callback != null )
                                 restoreSelection();
-                            $( ".source", segment ).html( source_val );
+                            SegmentActions.replaceSourceText(UI.getSegmentId(segment), UI.getSegmentFileId(segment), source_val)
                             if ( callback != null )
                                 callback();
                         }
