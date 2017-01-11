@@ -6,7 +6,7 @@
       margin-bottom: 0px;
       .input-field {
         i {
-          color: #797878;
+          color: #9a9a9a;
           height: 40px;
           line-height: 50px;
           &.active {
@@ -18,7 +18,7 @@
           padding-right: 15px;
           padding-bottom: 5px;
           font-size: 15px;
-          border-bottom: 1px solid #797878;
+          border-bottom: 1px solid #9a9a9a;
           box-shadow: 0 1px 0 0 #4d4d4d;
         }
         input[type=text]:focus {
@@ -46,6 +46,12 @@
         //   top: 3px;
         //   left: 7px;
         // }
+        span {
+          &.caret {
+            line-height: 20px;
+            color: #9a9a9a;
+          }
+        }
       }
     }
     a {
