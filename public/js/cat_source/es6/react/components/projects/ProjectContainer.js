@@ -467,7 +467,7 @@ class ProjectContainer extends React.Component {
                 var date = this.getLastActionDate();
                 lastAction = <div className="activity-log">
                     <a href={activityLogUrl} target="_blank" className="right activity-log">
-                        <i><span>{this.state.lastAction.first_name }</span> <span>{this.state.lastAction.action.toLowerCase() + ' on ' + date}</span></i>
+                        <i> <span>Last action: {this.state.lastAction.action.toLowerCase() + ' on ' + date}</span><span> by {this.state.lastAction.first_name }</span></i>
                     </a>
                 </div>;
             }
@@ -527,17 +527,17 @@ class ProjectContainer extends React.Component {
 
                     {/*{headerProject}*/}
 
-                    <section className="chunks">
-                        <CSSTransitionGroup
-                            transitionName="slide"
-                            transitionAppear={true}
-                            transitionAppearTimeout={1000}
-                            transitionEnterTimeout={300}
-                            transitionLeaveTimeout={200}>
-                            {jobsList}
-                        </CSSTransitionGroup>
-                    </section>
-
+                    {/*<section className="chunks">*/}
+                        {/*<CSSTransitionGroup*/}
+                            {/*transitionName="slide"*/}
+                            {/*transitionAppear={true}*/}
+                            {/*transitionAppearTimeout={1000}*/}
+                            {/*transitionEnterTimeout={300}*/}
+                            {/*transitionLeaveTimeout={200}>*/}
+                            {/**/}
+                        {/*</CSSTransitionGroup>*/}
+                    {/*</section>*/}
+                    {jobsList}
                     <div className="foot-project">
                         <div className="row">
                             <div className="col m12">
