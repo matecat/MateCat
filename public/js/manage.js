@@ -277,7 +277,6 @@ UI = {
     },
 
     downloadTranslation: function(project, job) {
-        console.log('Download Translation');
         var url = '/translate/'+project.name +'/'+ job.source +'-'+job.target+'/'+ job.id +'-'+ job.password + "?action=download" ;
         window.open(url, '_blank');
 

@@ -126,7 +126,7 @@ class JobContainer extends React.Component {
         var reviseUrl = this.getReviseUrl();
         var editLogUrl = this.getEditingLogUrl();
         var qaReportUrl = this.getQAReport();
-        var jobTMXUrl = 'TMX/'+ this.props.job.get('id') + '/' + this.props.job.get('password');
+        var jobTMXUrl = '/TMX/'+ this.props.job.get('id') + '/' + this.props.job.get('password');
         var exportXliffUrl = '/SDLXLIFF/'+ this.props.job.get('id') + '/' + this.props.job.get('password') +
             '/' + this.props.project.get('name') + '.zip';
 
