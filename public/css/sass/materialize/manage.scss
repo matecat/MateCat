@@ -65,7 +65,7 @@ i.close-x:before {
 .project {
 	background-color: #f1f1f1;
 	padding: 0;
-	min-width:950px;
+	min-width:890px;
 	// cursor: pointer;
 	.btn {
 		padding: 0 15px
@@ -273,7 +273,7 @@ i.close-x:before {
 
 .chunk {
 	margin-bottom: 0;
-	padding: 5px 0;
+	padding: 10px 0;
 	.card {
 		position: relative;
 	    margin: 0 15px 1px 15px;
@@ -638,6 +638,7 @@ li.target-lang {
  //    text-align: center;
  //    padding: 5px;
     min-width: 134px;
+    line-height: 30px;
 }
 
 .target-box {
@@ -646,6 +647,7 @@ li.target-lang {
  //    text-align: center;
     // padding: 5px;
     min-width: 134px;
+    line-height: 30px;
 }
 
 
