@@ -102,7 +102,11 @@ CREATE TABLE `connected_services` (
   `is_default` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uid_email_service` (`uid`,`email`,`service`) USING BTREE
+<<<<<<< HEAD
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+=======
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+>>>>>>> parent of ddad643... Refactoring on ProjectManager class
 
 CREATE TABLE `engines` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
