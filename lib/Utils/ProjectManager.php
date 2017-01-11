@@ -1809,17 +1809,16 @@ class ProjectManager {
 
             //array of segmented translations
             foreach ( $struct as $pos => $translation_row ) {
-                $translation = $this->dbHandler->escape(
-                    html_entity_decode( $translation_row[ 2 ] , ENT_QUOTES, 'UTF-8')
-                ) ;
 
                 $this->projectStructure[ 'query_translations' ]->append(
                         "( '{$translation_row[0]}',
                         $jid, '{$translation_row[3]}',
                         '{$status}',
-                        '$translation', NOW(), 'DONE', 1, 'ICE' )"
+                        '{$translation_row[2]}', NOW(), 'DONE', 1, 'ICE' )"
                 );
+
             }
+
         }
 
         // Executing the Query
