@@ -32,7 +32,7 @@ class Header extends React.Component {
                                         <SearchInput
                                             closeSearchCallback={this.props.closeSearchCallback}
                                             onChange={this.props.searchFn}/>
-                                        </div>
+                                    </div>
                                     <div className="col l2 m2 s4 right right-60">
                                         <FilterProjects
                                             filterFunction={this.props.filterFunction}/>
