@@ -311,7 +311,7 @@ class JobContainer extends React.Component {
                     </div>*/}
                     <div className="col">
                         <div className="job-id">
-                            <div id={"id-job-" + this.props.job.get('id')}><span>ID:</span>{ idJobLabel }</div>
+                            <div id={"id-job-" + this.props.job.get('id')}>{ idJobLabel }</div>
                         </div>
                     </div>
                     <div className="col">

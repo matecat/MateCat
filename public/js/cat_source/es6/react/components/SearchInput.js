@@ -7,7 +7,7 @@ class SearchInput extends React.Component {
         if($(this.textInput).val().length) {
             $(this.closeIcon).show()
         } else {
-            $(this.closeIcon).hide()
+            $(this.closeIcon).hide();
         }
         if (!this.performingSearch) {
             this.props.onChange($(this.textInput).val());
@@ -17,7 +17,8 @@ class SearchInput extends React.Component {
 
     closeSearch() {
         $(this.textInput).val('');
-        this.props.closeSearchCallback()
+        this.props.closeSearchCallback();
+        $(this.closeIcon).hide();
     }
 
 

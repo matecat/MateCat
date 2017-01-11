@@ -67,7 +67,6 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
           " ( :id_project, :key, :value ) " .
           " ON DUPLICATE KEY UPDATE value = :value " ;
       $conn = Database::obtain()->getConnection();
-      $conn->beginTransaction();
       $stmt = $conn->prepare(  $sql );
       $stmt->execute( array(
           'id_project' => $id_project,
@@ -75,9 +74,7 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
           'value' => $value
       ) );
 
-      $metadata = $this->get($id_project, $key);
-      $conn->commit();
-      return $metadata;
+      return $this->get($id_project, $key);
   }
 
 
