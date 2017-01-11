@@ -723,6 +723,7 @@ UI = {
 		$('.popup-split h1 .jid').attr('data-pwd', $(job).attr('data-pwd'));
 		$('.popup-split').removeClass('error-number');
 		$('.popup-split #exec-split').removeClass('disabled');
+		$('.popup-split h1 .chunks').text(numsplit);
 		for (var i = 0; i < numsplit; i++) {
 			var numw = wordsXjob;
 			if (i < diff)
