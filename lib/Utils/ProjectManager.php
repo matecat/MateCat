@@ -1324,9 +1324,12 @@ class ProjectManager {
      */
     public function applySplit( ArrayObject $projectStructure ) {
         Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
-        $this->_splitJob( $projectStructure );
 
+        $this->dbHandler->getConnection()->beginTransaction();
+        $this->_splitJob( $projectStructure );
         $this->features->run( 'postJobSplitted', $projectStructure );
+        $this->dbHandler->getConnection()->commit();
+
     }
 
     public function mergeALL( ArrayObject $projectStructure, $renewPassword = false ) {
@@ -1397,6 +1400,7 @@ class ProjectManager {
         //delete all old jobs
         $queries[] = "DELETE FROM jobs WHERE id = {$first_job['id']} AND password != '{$first_job['password']}' "; //use new password
 
+        $this->dbHandler->getConnection()->beginTransaction();
 
         foreach ( $queries as $query ) {
             $res = $this->dbHandler->query( $query );
@@ -1418,6 +1422,9 @@ class ProjectManager {
         $this->features->run('postJobMerged',
             $projectStructure
         );
+
+        $this->dbHandler->getConnection()->commit();
+
     }
 
     /**
@@ -1679,10 +1686,10 @@ class ProjectManager {
         //Update/Initialize the min-max sequences id
         if( !isset( $this->min_max_segments_id[ 'job_first_segment' ] ) ){
             $this->min_max_segments_id[ 'job_first_segment' ] = reset( $sequenceIds );
-        } else {
-            //update the last id, if there is another cycle update this value
-            $this->min_max_segments_id[ 'job_last_segment' ] = end( $sequenceIds );
         }
+
+        //update the last id, if there is another cycle update this value
+        $this->min_max_segments_id[ 'job_last_segment' ] = end( $sequenceIds );
 
         //Prepare a new struct to transport the segments metadata
         $segments_metadata = [];

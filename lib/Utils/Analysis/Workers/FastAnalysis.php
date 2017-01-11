@@ -97,7 +97,7 @@ class FastAnalysis extends AbstractDaemon {
 
         do {
 
-            $projects_list = getProjectForVolumeAnalysis( 'fast', 5 );
+            $projects_list = getProjectForVolumeAnalysis( 5 );
             if ( empty( $projects_list ) ) {
                 self::_TimeStampMsg( "No projects: wait 3 seconds." );
                 sleep( 3 );
