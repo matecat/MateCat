@@ -723,6 +723,7 @@ div#matecat-modal p {
     border: 1px solid #000;
 }
 
+
 .matecat-modal-content .btn-confirm-medium {
     color: #fff;
     background: #09beec;
@@ -741,6 +742,26 @@ div#matecat-modal p {
     position: relative;
 }
 
+.matecat-modal-content .btn-confirm-medium.google-login-button {
+  background: url(../../img/btn_gg_sprite.png) no-repeat ;
+  background-position: 0 0 ;
+  background-size: cover;
+  border: none;
+}
+
+.matecat-modal-content .btn-confirm-medium.google-login-button, .matecat-modal-content .btn-confirm-medium.google-login-button:hover, .matecat-modal-content .btn-confirm-medium.google-login-button:focus {
+  background-size: cover;
+  border: none;
+  height: 30px;
+}
+
+.matecat-modal-content .btn-confirm-medium.google-login-button:hover {
+  background: url(../img/btn_gg_sprite.png) no-repeat;
+  background-position: 0 -101px;
+  background-size: cover;
+  box-shadow: none;
+}
+
 .matecat-modal .coupon-container .btn-confirm-medium {
     margin: 6px 0% 0 3%;
     width: 21%;
@@ -754,4 +775,7 @@ div#matecat-modal p {
     -moz-box-shadow: none;
     -webkit-box-shadow: none;
     background: #d6d6d6;
+}
+.x-popup:before, .x-popup2:before {
+  content: "\f057";
 }

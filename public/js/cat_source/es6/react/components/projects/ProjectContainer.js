@@ -201,7 +201,7 @@ class ProjectContainer extends React.Component {
                             <li className="divider"/>
                             <li><a onClick={this.archiveProject.bind(this)}><i className="icon-drawer"/>Archive project</a></li>
                              <li className="divider"/>
-                            <li><a onClick={this.removeProject.bind(this)}><i className="icon-trash-o"/>Remove from my Dashboard</a></li>
+                            <li><a onClick={this.removeProject.bind(this)}><i className="icon-trash-o"/>Cancel project</a></li>
                         </ul>;
         if ( this.props.project.get('has_archived') ) {
             menuHtml = <ul id={'dropdown' + this.props.project.get('id')} className='dropdown-content'>
@@ -209,7 +209,7 @@ class ProjectContainer extends React.Component {
                             <li className="divider"/>
                             <li><a onClick={this.activateProject.bind(this)}><i className="icon-drawer unarchive-project"/>Unarchive project</a></li>
                             <li className="divider"/>
-                            <li><a onClick={this.removeProject.bind(this)}><i className="icon-trash-o"/>Remove from my Dashboard</a></li>
+                            <li><a onClick={this.removeProject.bind(this)}><i className="icon-trash-o"/>Cancel project</a></li>
                         </ul>;
         } else if ( this.props.project.get('has_cancelled') ) {
             menuHtml = <ul id={'dropdown' + this.props.project.get('id')} className='dropdown-content'>

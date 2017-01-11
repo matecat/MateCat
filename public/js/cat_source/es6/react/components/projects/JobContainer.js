@@ -60,11 +60,11 @@ class JobContainer extends React.Component {
     }
 
     getEditingLogUrl() {
-        return 'editlog/' + this.props.job.get('id') + '-' + this.props.job.get('password');
+        return '/editlog/' + this.props.job.get('id') + '-' + this.props.job.get('password');
     }
 
     getQAReport() {
-        return 'revise-summary/' + this.props.job.get('id') + '-' + this.props.job.get('password');
+        return '/revise-summary/' + this.props.job.get('id') + '-' + this.props.job.get('password');
     }
 
     changePassword() {
@@ -264,7 +264,7 @@ class JobContainer extends React.Component {
         var splitUrl = this.getSplitUrl();
         var mergeUrl = this.getMergeUrl();
         var splitMergeButton = this.getSplitOrMergeButton(splitUrl, mergeUrl);
-        var modifyDate = this.getModifyDate();
+        // var modifyDate = this.getModifyDate();
 
         var jobMenu = this.getJobMenu(splitUrl, mergeUrl);
         var tmIcon = this.getTMIcon();
@@ -332,11 +332,11 @@ class JobContainer extends React.Component {
                             <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
                         </div>
                     </div>
-                    <div className="col">
-                        <div className="action-modified">
-                            {modifyDate}
-                        </div>
-                    </div>
+                    {/*<div className="col">*/}
+                        {/*<div className="action-modified">*/}
+                            {/*{modifyDate}*/}
+                        {/*</div>*/}
+                    {/*</div>*/}
                     <div className="col right">
                         
                         <ul className="job-activity-icon">
