@@ -358,7 +358,7 @@ class ProjectContainer extends React.Component {
                             <div className="row">
                                 {/*<div className="col">
                                     <div className="job-id">
-                                        <div id={"id-job-" + job.get('id')}><span>ID:</span>{ job.get('id') }</div>
+                                        <div id={"id-job-" + job.get('id')}>{ job.get('id') }</div>
                                     </div>
                                 </div>*/}
                                 <div className="col">
@@ -486,7 +486,7 @@ class ProjectContainer extends React.Component {
                         <div className="row">
                             <div className="col">
                                 <div className="project-id">
-                                    <div id="id-project"><span>ID:</span>{this.props.project.get('id')}</div>
+                                    <div id="id-project"><span></span>{this.props.project.get('id')}</div>
                                 </div>
                             </div>
                             <div className="col m8">
