@@ -12,66 +12,66 @@ class ProjectContainer extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            showAllJobs: false,
+            showAllJobs: true,
             visibleJobs: [],
-            showAllJobsBoxes: false,
+            showAllJobsBoxes: true,
             lastAction: null,
             jobsActions: null
         };
-        this.getProjectHeader = this.getProjectHeader.bind(this);
+        // this.getProjectHeader = this.getProjectHeader.bind(this);
         this.getActivityLogUrl = this.getActivityLogUrl.bind(this);
-        this.hideAllJobs = this.hideAllJobs.bind(this);
+        // this.hideAllJobs = this.hideAllJobs.bind(this);
 
-        this.filteredJobsWithoutChunksLength = 0;
-        this.getSigleJobWithoutChunks();
-        this.openJobsWithTmKeys = false;
+        // this.filteredJobsWithoutChunksLength = 0;
+        // this.getSigleJobWithoutChunks();
+        // this.openJobsWithTmKeys = false;
     }
 
-    showHideAllJobs() {
-        var show = this.state.showAllJobs;
-        // if (!show) {
-        //     ManageActions.closeAllJobs();
-        // }
-        this.setState({
-            showAllJobs: !show,
-            showAllJobsBoxes: !show,
-            visibleJobs: []
-        });
-    }
+    // showHideAllJobs() {
+    //     var show = this.state.showAllJobs;
+    //     // if (!show) {
+    //     //     ManageActions.closeAllJobs();
+    //     // }
+    //     this.setState({
+    //         showAllJobs: !show,
+    //         showAllJobsBoxes: !show,
+    //         visibleJobs: []
+    //     });
+    // }
 
-    hideAllJobs() {
-        this.setState({
-            showAllJobs: false,
-            showAllJobsBoxes: false,
-            visibleJobs: []
-        });
-        this.forceUpdate();
-    }
+    // hideAllJobs() {
+    //     this.setState({
+    //         showAllJobs: false,
+    //         showAllJobsBoxes: false,
+    //         visibleJobs: []
+    //     });
+    //     this.forceUpdate();
+    // }
 
-    showSingleJob(index, job) {
-        var i = this.state.visibleJobs.indexOf(job.get('id'));
-        var showAllJobs = false;
-        if (i != -1) {
-            this.state.visibleJobs.splice(i,1);
-        } else {
-            this.state.visibleJobs.push(job.get('id'));
-        }
-        if (this.filteredJobsWithoutChunksLength === this.state.visibleJobs.length) {
-            showAllJobs = true;
-        }
-        this.setState({
-            showAllJobs: showAllJobs,
-            visibleJobs: this.state.visibleJobs
-        });
-        this.forceUpdate();
-    }
+    // showSingleJob(index, job) {
+    //     var i = this.state.visibleJobs.indexOf(job.get('id'));
+    //     var showAllJobs = false;
+    //     if (i != -1) {
+    //         this.state.visibleJobs.splice(i,1);
+    //     } else {
+    //         this.state.visibleJobs.push(job.get('id'));
+    //     }
+    //     if (this.filteredJobsWithoutChunksLength === this.state.visibleJobs.length) {
+    //         showAllJobs = true;
+    //     }
+    //     this.setState({
+    //         showAllJobs: showAllJobs,
+    //         visibleJobs: this.state.visibleJobs
+    //     });
+    //     this.forceUpdate();
+    // }
 
-    showAllJobsBoxes() {
-        this.setState({
-            showAllJobsBoxes: true
-        });
-        this.forceUpdate();
-    }
+    // showAllJobsBoxes() {
+    //     this.setState({
+    //         showAllJobsBoxes: true
+    //     });
+    //     this.forceUpdate();
+    // }
 
     componentDidMount() {
         $(this.dropdown).dropdown({
@@ -79,11 +79,11 @@ class ProjectContainer extends React.Component {
         });
         $('.tooltipped').tooltip({delay: 50});
         this.getLastAction();
-        ProjectsStore.addListener(ManageConstants.CLOSE_ALL_JOBS, this.hideAllJobs);
+        // ProjectsStore.addListener(ManageConstants.CLOSE_ALL_JOBS, this.hideAllJobs);
     }
 
     componentWillUnmount() {
-        ProjectsStore.removeListener(ManageConstants.CLOSE_ALL_JOBS, this.hideAllJobs);
+        // ProjectsStore.removeListener(ManageConstants.CLOSE_ALL_JOBS, this.hideAllJobs);
     }
 
     componentDidUpdate() {
@@ -106,46 +106,46 @@ class ProjectContainer extends React.Component {
         ManageActions.removeProject(this.props.project);
     }
 
-    checkTMIcon() {
-        var jobs = this.props.project.get('jobs');
-        var jobWithKey = jobs.filter(function (job, i) {
-            if (JSON.parse(job.get('private_tm_key')).length) {
-                return true;
-            }
-        });
-        if (jobWithKey.size > 0 ) {
-            return <li>
-                <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0"
-                    onClick={this.openProjectsWithTmKey.bind(this, jobWithKey)}>
-                    <i className="icon-tm-matecat"/>
-                </a>
-            </li>;
-        } else {
-            return '';
-        }
-    }
+    // checkTMIcon() {
+    //     var jobs = this.props.project.get('jobs');
+    //     var jobWithKey = jobs.filter(function (job, i) {
+    //         if (JSON.parse(job.get('private_tm_key')).length) {
+    //             return true;
+    //         }
+    //     });
+    //     if (jobWithKey.size > 0 ) {
+    //         return <li>
+    //             <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0"
+    //                 onClick={this.openProjectsWithTmKey.bind(this, jobWithKey)}>
+    //                 <i className="icon-tm-matecat"/>
+    //             </a>
+    //         </li>;
+    //     } else {
+    //         return '';
+    //     }
+    // }
 
-    openProjectsWithTmKey(jobWithKey) {
-        var jobs_id = [];
-        var showAllJobs = false;
-        if ( !this.openJobsWithTmKeys ) {
-            jobWithKey.forEach(function (job) {
-                jobs_id.push(job.get('id'));
-            });
-            if (this.filteredJobsWithoutChunksLength === jobs_id.length) {
-                showAllJobs = true;
-            }
-        }
-        this.setState({
-            showAllJobs: showAllJobs,
-            visibleJobs: jobs_id
-        });
-        this.openJobsWithTmKeys = !this.openJobsWithTmKeys;
-        this.forceUpdate();
+    // openProjectsWithTmKey(jobWithKey) {
+    //     var jobs_id = [];
+    //     var showAllJobs = false;
+    //     if ( !this.openJobsWithTmKeys ) {
+    //         jobWithKey.forEach(function (job) {
+    //             jobs_id.push(job.get('id'));
+    //         });
+    //         if (this.filteredJobsWithoutChunksLength === jobs_id.length) {
+    //             showAllJobs = true;
+    //         }
+    //     }
+    //     this.setState({
+    //         showAllJobs: showAllJobs,
+    //         visibleJobs: jobs_id
+    //     });
+    //     this.openJobsWithTmKeys = !this.openJobsWithTmKeys;
+    //     this.forceUpdate();
+    //
+    // }
 
-    }
-
-    getProjectHeader(sourceLang, targetsLangs, payableWords) {
+    /*getProjectHeader(sourceLang, targetsLangs, payableWords) {
         var sourceTxt = this.props.project.get('jobs').first().get('sourceTxt');
         var jobsLength = this.props.project.get('jobs').size;
         var headerProject = '';
@@ -193,7 +193,7 @@ class ProjectContainer extends React.Component {
         }
         return headerProject;
 
-    }
+    }*/
 
     getProjectMenu(activityLogUrl) {
         var menuHtml = <ul id={'dropdown' + this.props.project.get('id')} className='dropdown-content'>
@@ -282,27 +282,27 @@ class ProjectContainer extends React.Component {
         nextState.showAllJobs !== this.state.showAllJobs || nextState.lastAction !==  this.state.lastAction)
     }
 
-    getSigleJobWithoutChunks() {
-        var self = this;
-        var tempIdsArray = [], index = 0;
-        this.props.project.get('jobs').map(function(job, i){
-            //To check if is a chunk (jobs with same id)
-            var isChunk = false;
-            if (tempIdsArray.indexOf(job.get('id')) > -1 ) {
-                isChunk = true;
-                index ++;
-            }  else if ((self.props.project.get('jobs').get(i+1) && self.props.project.get('jobs').get(i+1).get('id') === job.get('id') )) {  //The first of the Chunk
-                isChunk = true;
-                tempIdsArray.push(job.get('id'));
-                index = 1;
-            }  else {
-                index = 0;
-            }
-            if ( (isChunk && index === 1) || !isChunk) {
-                self.filteredJobsWithoutChunksLength++;
-            }
-        });
-    }
+    // getSigleJobWithoutChunks() {
+    //     var self = this;
+    //     var tempIdsArray = [], index = 0;
+    //     this.props.project.get('jobs').map(function(job, i){
+    //         //To check if is a chunk (jobs with same id)
+    //         var isChunk = false;
+    //         if (tempIdsArray.indexOf(job.get('id')) > -1 ) {
+    //             isChunk = true;
+    //             index ++;
+    //         }  else if ((self.props.project.get('jobs').get(i+1) && self.props.project.get('jobs').get(i+1).get('id') === job.get('id') )) {  //The first of the Chunk
+    //             isChunk = true;
+    //             tempIdsArray.push(job.get('id'));
+    //             index = 1;
+    //         }  else {
+    //             index = 0;
+    //         }
+    //         if ( (isChunk && index === 1) || !isChunk) {
+    //             self.filteredJobsWithoutChunksLength++;
+    //         }
+    //     });
+    // }
 
     getJobsList(targetsLangs, jobsList, jobsLength) {
         var self = this;
@@ -394,7 +394,7 @@ class ProjectContainer extends React.Component {
 
             }
 
-            if ( (isChunk && index === 1) || !isChunk) {
+            /*if ( (isChunk && index === 1) || !isChunk) {
                 var target;
                 visibleJobsBoxes++;
                 if (isChunk) {
@@ -426,17 +426,17 @@ class ProjectContainer extends React.Component {
                 if (visibleJobsBoxes < 8 || self.filteredJobsWithoutChunksLength < 9 || self.state.showAllJobsBoxes ) {
                     targetsLangs.push(target);
                 }
-            }
+            }*/
         });
 
-        if (!this.state.showAllJobsBoxes && this.filteredJobsWithoutChunksLength > 8) {
-            var item = <li key = {jobsLength + 2} onClick={this.showAllJobsBoxes.bind(this)} >
-                <div className="more-jobs">
-                    <a> + other {visibleJobsBoxes - 7 }</a>
-                </div>
-            </li>;
-            targetsLangs.push(item);
-        }
+        // if (!this.state.showAllJobsBoxes && this.filteredJobsWithoutChunksLength > 8) {
+        //     var item = <li key = {jobsLength + 2} onClick={this.showAllJobsBoxes.bind(this)} >
+        //         <div className="more-jobs">
+        //             <a> + other {visibleJobsBoxes - 7 }</a>
+        //         </div>
+        //     </li>;
+        //     targetsLangs.push(item);
+        // }
     }
 
     render() {
@@ -456,7 +456,7 @@ class ProjectContainer extends React.Component {
         this.getJobsList(targetsLangs, jobsList, jobsLength);
 
         //The Job Header
-        var headerProject = this.getProjectHeader(sourceLang, targetsLangs, payableWords);
+        // var headerProject = this.getProjectHeader(sourceLang, targetsLangs, payableWords);
 
         //Last Activity Log Action
         var lastAction;
@@ -525,7 +525,7 @@ class ProjectContainer extends React.Component {
                         </div>
                     </div>
 
-                    {headerProject}
+                    {/*{headerProject}*/}
 
                     <section className="chunks">
                         <CSSTransitionGroup
