@@ -420,6 +420,10 @@ class FastAnalysis extends AbstractDaemon {
 
         self::_TimeStampMsg( 'Queries: ' . count( $chunks_st ) );
 
+        //USE the MySQL InnoDB isolation Level to protect from thread high concurrency access
+        $db->query( 'SET autocommit=0' );
+        $db->query( 'START TRANSACTION' );
+
         foreach ( $chunks_st as $k => $chunk ) {
 
             $query_st = $segment_translations . implode( ", ", $chunk ) .
@@ -471,10 +475,15 @@ class FastAnalysis extends AbstractDaemon {
         try {
             $db->update( 'projects', $data2, $where );
         } catch ( PDOException $e ) {
+            $db->query( 'ROLLBACK' );
+            $db->query( 'SET autocommit=1' );
             self::_TimeStampMsg( $e->getMessage() );
 
             return $e->getCode() * -1;
         }
+        $db->query( 'COMMIT' );
+        $db->query( 'SET autocommit=1' );
+
 
         /*
          *  $fastResultData[0]['id_mt_engine'] is the index of the MT engine we must use,
@@ -560,8 +569,6 @@ class FastAnalysis extends AbstractDaemon {
 
         //we want segments that we decided to show in cattool
         //and segments that are NOT locked ( already translated )
-
-
 
         $query = "select concat( s.id, '-', group_concat( distinct concat( j.id, ':' , j.password ) ) ) as jsid, s.segment, j.source, s.segment_hash, s.id as id,
 
