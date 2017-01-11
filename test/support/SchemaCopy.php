@@ -70,14 +70,6 @@ class SchemaCopy {
     return $result;
   }
 
-  function truncateAllTables() {
-      $conn = $this->getDbConn($this->config);
-      foreach($this->getTables() as $k => $v) {
-          $table_name = $v[ 0 ] ;
-          $conn->query( "TRUNCATE TABLE $table_name ");
-      }
-  }
-
   function execSql($sql) {
     $this->getDbConn($this->config)->query( $sql );
   }
