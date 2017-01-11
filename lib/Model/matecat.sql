@@ -103,7 +103,11 @@ CREATE TABLE `connected_services` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uid_email_service` (`uid`,`email`,`service`) USING BTREE
 <<<<<<< HEAD
+<<<<<<< HEAD
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+=======
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+>>>>>>> parent of ddad643... Refactoring on ProjectManager class
 =======
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 >>>>>>> parent of ddad643... Refactoring on ProjectManager class
