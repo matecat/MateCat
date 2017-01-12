@@ -262,21 +262,28 @@ class ProjectContainer extends React.Component {
 
         }
 
+        var state = '';
+        if ( this.props.project.get('has_archived') ) {
+            state = <div className="col m1"><span className="new badge blue" style={{marginTop: '5px'}}>archived</span></div>
+        }  else if ( this.props.project.get('has_cancelled') ) {
+            state = <div className="col m1"><span className="new badge grey" style={{marginTop: '5px'}}>cancelled</span></div>
+        }
+
+
         return <div className="card-panel project">
 
                     <div className={"head-project " + openProjectClass}>
                         <div className="row">
                             <div className="col">
                                 <div className="project-id">
-                                    <div id="id-project"><span></span>{this.props.project.get('id')}</div>
+                                    <div id="id-project">{this.props.project.get('id')}</div>
                                 </div>
                             </div>
                             <div className="col m8">
                                 <div className="project-name">
                                     <form>
                                         <div className="row">
-                                            <div className="col m1"><span className="new badge blue">archived</span></div>
-                                        {/*<div className="col m1"><span className="new badge grey">cancelled</span></div>*/}
+                                            {state}
                                             <div className="input-field col m11">
                                                 <input id="icon_prefix" type="text" disabled="disabled" defaultValue={this.props.project.get('name')}/><i
                                                     className="material-icons prefix hide">mode_edit</i>
