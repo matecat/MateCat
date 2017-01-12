@@ -233,7 +233,7 @@ class ProjectContainer extends React.Component {
 
         var jobsLength = this.props.project.get('jobs').size;
 
-        var openProjectClass = (jobsLength === 1) ? '':'open-project';
+        var openProjectClass = 'open-project';
 
         var targetsLangs = [], jobsList = [];
         //The list of jobs
@@ -269,14 +269,13 @@ class ProjectContainer extends React.Component {
             state = <div className="col m1"><span className="new badge grey darken-5" style={{marginTop: '5px'}}>cancelled</span></div>
         }
 
-
         return <div className="card-panel project">
 
                     <div className={"head-project " + openProjectClass}>
                         <div className="row">
                             <div className="col">
                                 <div className="project-id">
-                                    <div id="id-project">{this.props.project.get('id')}</div>
+                                    <div id="id-project"><span></span>{this.props.project.get('id')}</div>
                                 </div>
                             </div>
                             <div className="col m8">
@@ -319,7 +318,9 @@ class ProjectContainer extends React.Component {
                             {/**/}
                         {/*</CSSTransitionGroup>*/}
                     {/*</section>*/}
+                    <section className="chunks">
                     {jobsList}
+                    </section>
                     <div className="foot-project">
                         <div className="row">
                             <div className="col m12">

@@ -88,20 +88,21 @@ i.close-x:before {
 	.head-project {
 		background-color: #f1f1f1;
 		padding: 5px 0 0 0;
-		border-top: 4px solid #9e9e9e;
+		// border-top: 4px solid #9e9e9e;
 		&.open-project {
-			background-color: inherit;
-			border-bottom: #ebebeb
+			background-color: #d6d6d6;
+		    height: 60px;
 		}
 
 		.project-id {
-			background-color: #dedede;
+			background-color: #929292;
 			padding-left: 30px;
-			color: #797979;
-			border-right: 1px solid #f1f1f1;
+			color: #f1f1f1;
+			// border-right: 1px solid #f1f1f1;
 			min-width: 152px;
 			line-height: 1.55rem;
 			padding-top: 2px;
+			margin-top: 2px;
 			@media #{$small-and-down} {
 				padding-left: 15px;
 			}
@@ -270,6 +271,10 @@ i.close-x:before {
 }
 .jobs{
 	margin-top: 0;
+}
+
+.chunks {
+	margin-top: -25px;
 }
 
 .chunk {
