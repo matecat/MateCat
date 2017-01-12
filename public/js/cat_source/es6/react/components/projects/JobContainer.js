@@ -271,44 +271,8 @@ class JobContainer extends React.Component {
         var idJobLabel = ( !this.props.isChunk ) ? this.props.job.get('id') : this.props.job.get('id') + '-' + this.props.index;
 
         return <div className="card job z-depth-1">
-            {/*<div className="head-job open-head-job">
-                <div className="row">
-                    
-                    <div className="col s10">
-                        <ul className="job-activity-icon right">
-                            {tmIcon}
-                            <li>
-                                <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0"
-                                    onClick={this.openSettings.bind(this)}>
-                                    <i className="icon-settings"/>
-                                </a>
-                            </li>
-                            <li>
-                                <a className='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0 class-prova'
-                                   data-activates={'dropdownJob' + this.props.job.get('id') + this.props.job.get('password')}
-                                   ref={(dropdown) => this.dropdown = dropdown}>
-                                    <i className="icon-more_vert"/>
-                                </a>
-                                {jobMenu}
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>*/}
             <div className="body-job">
                 <div className="row">
-                    {/*<div className="col">
-                        <div className="combo-language single">
-                            <ul>
-                                <li>
-                                    <span className="tooltipped" data-tooltip={this.props.job.get('sourceTxt')}>{this.props.job.get('source')}</span> <i className="icon-play"/>
-                                </li>
-                                <li>
-                                    <span className="tooltipped" data-tooltip={this.props.job.get('targetTxt')}>{this.props.job.get('target')}</span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>*/}
                     <div className="col">
                         <div className="job-id">
                             <div id={"id-job-" + this.props.job.get('id')}>{ idJobLabel }</div>
@@ -353,9 +317,6 @@ class JobContainer extends React.Component {
                     </div>
                     <div className="col right">
                         <div className="button-list">
-                            {/*{splitMergeButton}*/}
-                            {/*<a className="btn waves-effect waves-light outsource" target="_blank" href={outsourceUrl}>outsource</a>*/}
-                            {/*<a className="btn waves-effect waves-light outsourced" target="_blank" href={outsourcedUrl}>outsource</a> */}
                             <a className="btn waves-effect waves-light translate move-left" target="_blank" href={translateUrl}>Open</a>
                         </div>
                     </div>

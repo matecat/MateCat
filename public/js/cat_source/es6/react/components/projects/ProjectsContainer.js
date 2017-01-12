@@ -25,13 +25,6 @@ class ProjectsContainer extends React.Component {
         });
     }
 
-    onClickFn(event) {
-        //Check if the click comes from a Project container
-        if ($(event.nativeEvent.target).closest(".card-panel").size() === 0) {
-            ManageActions.closeAllJobs();
-        }
-    }
-
     componentDidMount() {
         ProjectsStore.addListener(ManageConstants.RENDER_PROJECTS, this.renderProjects);
         $('.tooltipped').tooltip({delay: 50});
@@ -59,7 +52,7 @@ class ProjectsContainer extends React.Component {
             items = <div className="no-results-found"><span>No Project Found</span></div>;
         }
 
-        return <div onClick={this.onClickFn.bind(this)}>
+        return <div>
                     {/*<section className="add-project">*/}
                         {/*<a href="/" target="_blank" className="btn-floating btn-large waves-effect waves-light right create-new blue-matecat tooltipped" data-position="bottom" data-delay="50" data-tooltip="Add new project"/>*/}
                     {/*</section>*/}

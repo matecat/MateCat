@@ -47,12 +47,6 @@ var ManageActions = {
         });
     },
 
-    closeAllJobs: function () {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.CLOSE_ALL_JOBS
-        });
-    },
-
     removeProject: function (project) {
         AppDispatcher.dispatch({
             actionType: ManageConstants.REMOVE_PROJECT,
