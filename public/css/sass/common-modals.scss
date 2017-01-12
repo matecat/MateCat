@@ -776,6 +776,19 @@ div#matecat-modal p {
     -webkit-box-shadow: none;
     background: #d6d6d6;
 }
+.x-popup, .x-popup2 {
+  font-family: 'icomoon';
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 .x-popup:before, .x-popup2:before {
   content: "\f057";
 }
