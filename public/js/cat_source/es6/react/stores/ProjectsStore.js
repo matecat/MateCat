@@ -93,6 +93,9 @@ AppDispatcher.register(function(action) {
             ProjectsStore.changeJobPass(action.project, action.job, action.password, action.oldPassword);
             ProjectsStore.emitChange(ManageConstants.RENDER_PROJECTS, ProjectsStore.projects);
             break;
+        case ManageConstants.NO_MORE_PROJECTS:
+            ProjectsStore.emitChange(action.actionType);
+            break;
 
     }
 });

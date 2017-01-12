@@ -14,8 +14,10 @@ class ProjectsContainer extends React.Component {
         super(props);
         this.state = {
             projects : [],
+            more_projects: true
         };
         this.renderProjects = this.renderProjects.bind(this);
+        this.hideSpinner = this.hideSpinner.bind(this);
     }
 
 
@@ -25,17 +27,33 @@ class ProjectsContainer extends React.Component {
         });
     }
 
+    hideSpinner() {
+        this.setState({
+                more_projects: false
+            });
+    }
+
     componentDidMount() {
         ProjectsStore.addListener(ManageConstants.RENDER_PROJECTS, this.renderProjects);
+        ProjectsStore.addListener(ManageConstants.NO_MORE_PROJECTS, this.hideSpinner);
         $('.tooltipped').tooltip({delay: 50});
     }
 
     componentWillUnmount() {
         ProjectsStore.removeListener(ManageConstants.RENDER_PROJECTS, this.renderProjects);
+        ProjectsStore.removeListener(ManageConstants.NO_MORE_PROJECTS, this.hideSpinner);
     }
 
+    componentDidUpdate() {
+        var self = this;
+        if (!this.state.more_projects) {
+            setTimeout(function () {
+                $(self.spinner).fadeOut();
+            }, 3000);
+        }
+    }
     shouldComponentUpdate(nextProps, nextState) {
-        return (nextState.projects !== this.state.projects)
+        return (nextState.projects !== this.state.projects || nextState.more_projects !== this.state.more_projects)
     }
 
     render() {
@@ -52,6 +70,43 @@ class ProjectsContainer extends React.Component {
             items = <div className="no-results-found"><span>No Project Found</span></div>;
         }
 
+        // var spinner = <div className="row" ref={(spinner) => this.spinner = spinner}>
+        //     <div className="col m12 center-align">
+        //         <span>No more projects</span>
+        //     </div>
+        // </div>;
+        var spinner = <div className="row">
+            <div className="manage-spinner" style={{minHeight: '90px'}}>
+                <div className="col m12 center-align">
+                    <span ref={(spinner) => this.spinner = spinner}>No more projects</span>
+                </div>
+            </div>
+        </div>;
+        if (this.state.more_projects) {
+            spinner = <div className="row">
+                        <div className="manage-spinner" style={{minHeigth: '90px'}}>
+                            <div className="col m12 center-align">
+                                <div className="preloader-wrapper big active">
+                                    <div className="spinner-layer spinner-blue-only">
+                                        <div className="circle-clipper left">
+                                            <div className="circle"></div>
+                                        </div>
+                                        <div className="gap-patch">
+                                            <div className="circle"></div>
+                                        </div>
+                                        <div className="circle-clipper right">
+                                            <div className="circle"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="col m12 center-align">
+                            <span>Loading projects</span>
+                        </div>
+                    </div>;
+        }
+
         return <div>
                     {/*<section className="add-project">*/}
                         {/*<a href="/" target="_blank" className="btn-floating btn-large waves-effect waves-light right create-new blue-matecat tooltipped" data-position="bottom" data-delay="50" data-tooltip="Add new project"/>*/}
@@ -64,6 +119,7 @@ class ProjectsContainer extends React.Component {
                                 </div>
                             </div>
                         </div>
+                        {spinner}
                     </section>
                 </div>;
     }

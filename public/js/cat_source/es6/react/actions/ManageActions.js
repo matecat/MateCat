@@ -70,6 +70,12 @@ var ManageActions = {
             password: password,
             oldPassword: oldPassword
         });
+    },
+
+    noMoreProjects: function () {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.NO_MORE_PROJECTS,
+        });
     }
 
 

@@ -11,5 +11,6 @@ module.exports = keyMirror({
     REMOVE_PROJECT: null,
     REMOVE_JOB: null,
     CHANGE_JOB_PASS: null,
-    OPEN_JOB_TM_PANEL: null
+    OPEN_JOB_TM_PANEL: null,
+    NO_MORE_PROJECTS: null
 });

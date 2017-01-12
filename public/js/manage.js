@@ -53,7 +53,11 @@ UI = {
         UI.Search.currentPage = UI.Search.currentPage + 1;
         this.getProjects().done(function (response) {
             var projects = $.parseJSON(response.data);
-            ManageActions.renderMoreProjects(projects);
+            if (projects.length > 0) {
+                ManageActions.renderMoreProjects(projects);
+            } else {
+                ManageActions.noMoreProjects();
+            }
         });
     },
 
