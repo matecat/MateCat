@@ -24,6 +24,7 @@ class ProjectsContainer extends React.Component {
     renderProjects(projects) {
         this.setState({
             projects: projects,
+            more_projects: true
         });
     }
 
@@ -75,14 +76,8 @@ class ProjectsContainer extends React.Component {
         //         <span>No more projects</span>
         //     </div>
         // </div>;
-        var spinner = <div className="row">
-            <div className="manage-spinner" style={{minHeight: '90px'}}>
-                <div className="col m12 center-align">
-                    <span ref={(spinner) => this.spinner = spinner}>No more projects</span>
-                </div>
-            </div>
-        </div>;
-        if (this.state.more_projects) {
+        var spinner = '';
+        if (this.state.more_projects && this.state.projects.size > 9) {
             spinner = <div className="row">
                         <div className="manage-spinner" style={{minHeigth: '90px'}}>
                             <div className="col m12 center-align">
@@ -105,6 +100,19 @@ class ProjectsContainer extends React.Component {
                             <span>Loading projects</span>
                         </div>
                     </div>;
+        } else if (this.state.projects.size > 9) {
+            spinner = <div className="row">
+                <div className="manage-spinner" style={{minHeight: '90px'}}>
+                    <div className="col m12 center-align">
+                        <span ref={(spinner) => this.spinner = spinner}>No more projects</span>
+                    </div>
+                </div>
+            </div>;
+        }
+
+        if (!items.size) {
+            items = <div className="no-results-found"><span>No Project Found</span></div>;
+            spinner = '';
         }
 
         return <div>
