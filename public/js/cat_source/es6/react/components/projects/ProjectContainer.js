@@ -230,7 +230,8 @@ class ProjectContainer extends React.Component {
         var activityLogUrl = this.getActivityLogUrl();
         var projectMenu = this.getProjectMenu(activityLogUrl);
         // var tMIcon = this.checkTMIcon();
-
+        var payableWords = this.props.project.get('tm_analysis');
+        var analyzeUrl = this.getAnalyzeUrl();
         var jobsLength = this.props.project.get('jobs').size;
 
         var openProjectClass = 'open-project';
@@ -275,7 +276,7 @@ class ProjectContainer extends React.Component {
                         <div className="row">
                             <div className="col">
                                 <div className="project-id">
-                                    <div id="id-project"><span></span>{this.props.project.get('id')}</div>
+                                    <div id="id-project">{this.props.project.get('id')}</div>
                                 </div>
                             </div>
                             <div className="col m8">
@@ -283,12 +284,18 @@ class ProjectContainer extends React.Component {
                                     <form>
                                         <div className="row">
                                             {state}
-                                            <div className="input-field col m11">
+                                            <div className="input-field col m10">
                                                 <input id="icon_prefix" type="text" disabled="disabled" defaultValue={this.props.project.get('name')}/><i
                                                     className="material-icons prefix hide">mode_edit</i>
                                             </div>
+
                                         </div>
                                     </form>
+                                </div>
+                            </div>
+                            <div className="col">
+                                <div className="payable-words top-4">
+                                    <a href={analyzeUrl} target="_blank">{payableWords} payable words</a>
                                 </div>
                             </div>
                             <div className="col right">

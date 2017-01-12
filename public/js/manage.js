@@ -14,12 +14,14 @@ UI = {
 
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_SETTINGS, this.openJobSettings);
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_TM_PANEL, this.openJobTMPanel);
+
     },
 
     render: function () {
         var self = this;
         var headerMountPoint = $("header")[0];
         this.Search.currentPage = 1;
+        this.pageLeft = false;
         ReactDOM.render(React.createElement(Header, {
             searchFn: _.debounce(function(name) {
                             self.filterProjectsFromName(name);
@@ -32,7 +34,33 @@ UI = {
             var projects = $.parseJSON(response.data);
             self.renderProjects(projects);
         });
+
         window.addEventListener('scroll', this.scrollDebounceFn());
+
+        // $(window).on("blur focus", function(e) {
+        //     var prevType = $(this).data("prevType");
+        //
+        //     if (prevType != e.type) {   //  reduce double fire issues
+        //         switch (e.type) {
+        //             case "blur":
+        //                 console.log("leave page");
+        //                 self.pageLeft = true;
+        //                 break;
+        //             case "focus":
+        //                 console.log("Enter page");
+        //                 if (self.pageLeft) {
+        //                     console.log("Refresh projects");
+        //                     self.getProjects().done(function (response) {
+        //                         var projects = $.parseJSON(response.data);
+        //                         ManageActions.renderProjects(projects);
+        //                     });
+        //                 }
+        //                 break;
+        //         }
+        //     }
+        //
+        //     $(this).data("prevType", e.type);
+        // })
     },
 
     renderProjects: function (projects) {
