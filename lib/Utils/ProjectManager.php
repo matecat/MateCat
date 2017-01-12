@@ -1685,8 +1685,12 @@ class ProjectManager {
 
             $this->projectStructure[ 'segments' ][ $fid ][ $position ] = "( $id_segment,$tuple_string )";
 
-            //replacement for: SELECT id, internal_id, segment_hash, xliff_mrk_id from segments WHERE id_file = %u
-            $segments_metadata[] = [ $id_segment, $tuple[0], $tuple[4], $tuple[6] ];
+            $segments_metadata[] = array(
+                'id'            => $id_segment,
+                'internal_id'   => $tuple[0],
+                'segment_hash'  => $tuple[4],
+                'xliff_mrk_id'  => $tuple[6]
+            );
 
         }
 
@@ -1810,15 +1814,17 @@ class ProjectManager {
             //array of segmented translations
             foreach ( $struct as $pos => $translation_row ) {
 
-                $this->projectStructure[ 'query_translations' ]->append(
-                        "( '{$translation_row[0]}',
-                        $jid, '{$translation_row[3]}',
-                        '{$status}',
-                        '{$translation_row[2]}', NOW(), 'DONE', 1, 'ICE' )"
+                $sql_values = sprintf(
+                    "( '%s', %s, '%s', '%s', '%s', NOW(), 'DONE', 1, 'ICE' )",
+                    $translation_row [ 0 ],
+                    $jid,
+                    $translation_row [ 3 ],
+                    $status,
+                    $translation_row [ 2 ]
                 );
 
+                $this->projectStructure[ 'query_translations' ]->append( $sql_values ) ;
             }
-
         }
 
         // Executing the Query
