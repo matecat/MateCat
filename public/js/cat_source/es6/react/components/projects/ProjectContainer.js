@@ -264,9 +264,9 @@ class ProjectContainer extends React.Component {
 
         var state = '';
         if ( this.props.project.get('has_archived') ) {
-            state = <div className="col m1"><span className="new badge blue" style={{marginTop: '5px'}}>archived</span></div>
+            state = <div className="col m1"><span className="new badge grey darken-1" style={{marginTop: '5px'}}>archived</span></div>
         }  else if ( this.props.project.get('has_cancelled') ) {
-            state = <div className="col m1"><span className="new badge grey" style={{marginTop: '5px'}}>cancelled</span></div>
+            state = <div className="col m1"><span className="new badge grey darken-5" style={{marginTop: '5px'}}>cancelled</span></div>
         }
 
 
