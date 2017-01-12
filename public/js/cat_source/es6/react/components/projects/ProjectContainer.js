@@ -195,8 +195,8 @@ class ProjectContainer extends React.Component {
                                         {job.get('sourceTxt')}
                                     </div>
                                 </div>
-                                <div className="col">
-                                    <i className="icon-play 2"/>
+                                <div className="col top-6 no-pad">
+                                    <i className="icon-chevron-right"/>
                                 </div>
                                 <div className="col">
 
@@ -275,7 +275,9 @@ class ProjectContainer extends React.Component {
                                 <div className="project-name">
                                     <form>
                                         <div className="row">
-                                            <div className="input-field col m12">
+                                            <div className="col m1"><span className="new badge blue">archived</span></div>
+                                        {/*<div className="col m1"><span className="new badge grey">cancelled</span></div>*/}
+                                            <div className="input-field col m11">
                                                 <input id="icon_prefix" type="text" disabled="disabled" defaultValue={this.props.project.get('name')}/><i
                                                     className="material-icons prefix hide">mode_edit</i>
                                             </div>
@@ -317,9 +319,12 @@ class ProjectContainer extends React.Component {
                                 {lastAction}
                             </div>
                         </div>
+
                     </div>
 
                 </div>;
+
+
     }
 }
 
