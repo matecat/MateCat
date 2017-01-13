@@ -39,9 +39,10 @@ class FastAnalysis extends AbstractDaemon {
 
     protected $_configFile;
 
-    const ERR_NO_SEGMENTS = 127;
-    const ERR_TOO_LARGE   = 128;
-    const ERR_500         = 129 ;
+    const ERR_NO_SEGMENTS    = 127;
+    const ERR_TOO_LARGE      = 128;
+    const ERR_500            = 129;
+    const ERR_EMPTY_RESPONSE = 130;
 
     /**
      * @var ContextList
@@ -139,7 +140,7 @@ class FastAnalysis extends AbstractDaemon {
                         self::_updateProject( $pid, ProjectStatus::STATUS_NOT_TO_ANALYZE );
                         //next project
                         continue;
-                    } elseif ( $e->getCode() == self::ERR_500 ) {
+                    } elseif ( $e->getCode() == self::ERR_500 || $e->getCode() == self::ERR_EMPTY_RESPONSE ) {
                         self::_TimeStampMsg( $e->getMessage() ) ;
                         self::_updateProject( $pid, ProjectStatus::STATUS_NEW );
                         sleep( 3 ) ;
@@ -263,6 +264,8 @@ class FastAnalysis extends AbstractDaemon {
             throw new Exception( "MyMemory Fast Analysis Failed. {$result->error->message}", self::ERR_TOO_LARGE );
         } elseif ( $result->responseStatus == 500 ) {
             throw new Exception("MyMemory Internal Server Error. Pid: " . $pid , self::ERR_500 );
+        } elseif( !empty( $fastSegmentsRequest ) && empty( $result->responseData )) {
+            throw new Exception("MyMemory Fast Analysis Failed. Pid: " . $pid , self::ERR_EMPTY_RESPONSE );
         }
 
         return $result;
