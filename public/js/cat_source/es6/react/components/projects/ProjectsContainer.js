@@ -14,35 +14,50 @@ class ProjectsContainer extends React.Component {
         super(props);
         this.state = {
             projects : [],
-            more_projects: true
+            more_projects: true,
+            reloading_projects: false,
         };
         this.renderProjects = this.renderProjects.bind(this);
         this.hideSpinner = this.hideSpinner.bind(this);
+        this.showProjectsReloadSpinner = this.showProjectsReloadSpinner.bind(this);
     }
 
 
-    renderProjects(projects) {
+    renderProjects(projects, hideSpinner) {
+        var more_projects = true;
+        if (hideSpinner) {
+            more_projects = this.state.more_projects
+        }
         this.setState({
             projects: projects,
-            more_projects: true
+            more_projects: more_projects,
+            reloading_projects: false
         });
     }
 
     hideSpinner() {
         this.setState({
-                more_projects: false
-            });
+            more_projects: false
+        });
+    }
+
+    showProjectsReloadSpinner() {
+        this.setState({
+            reloading_projects: true
+        });
     }
 
     componentDidMount() {
         ProjectsStore.addListener(ManageConstants.RENDER_PROJECTS, this.renderProjects);
         ProjectsStore.addListener(ManageConstants.NO_MORE_PROJECTS, this.hideSpinner);
+        ProjectsStore.addListener(ManageConstants.SHOW_RELOAD_SPINNER, this.showProjectsReloadSpinner);
         $('.tooltipped').tooltip({delay: 50});
     }
 
     componentWillUnmount() {
         ProjectsStore.removeListener(ManageConstants.RENDER_PROJECTS, this.renderProjects);
         ProjectsStore.removeListener(ManageConstants.NO_MORE_PROJECTS, this.hideSpinner);
+        ProjectsStore.removeListener(ManageConstants.SHOW_RELOAD_SPINNER, this.showProjectsReloadSpinner);
     }
 
     componentDidUpdate() {
@@ -54,7 +69,7 @@ class ProjectsContainer extends React.Component {
         }
     }
     shouldComponentUpdate(nextProps, nextState) {
-        return (nextState.projects !== this.state.projects || nextState.more_projects !== this.state.more_projects)
+        return (nextState.projects !== this.state.projects || nextState.more_projects !== this.state.more_projects || nextState.reloading_projects !== this.state.reloading_projects)
     }
 
     render() {
@@ -71,17 +86,13 @@ class ProjectsContainer extends React.Component {
             items = <div className="no-results-found"><span>No Project Found</span></div>;
         }
 
-        // var spinner = <div className="row" ref={(spinner) => this.spinner = spinner}>
-        //     <div className="col m12 center-align">
-        //         <span>No more projects</span>
-        //     </div>
-        // </div>;
+
         var spinner = '';
         if (this.state.more_projects && this.state.projects.size > 9) {
             spinner = <div className="row">
                         <div className="manage-spinner" style={{minHeigth: '90px'}}>
                             <div className="col m12 center-align">
-                                <div className="preloader-wrapper big active">
+                                <div className="preloader-wrapper active">
                                     <div className="spinner-layer spinner-blue-only">
                                         <div className="circle-clipper left">
                                             <div className="circle"></div>
@@ -114,6 +125,51 @@ class ProjectsContainer extends React.Component {
             items = <div className="no-results-found"><span>No Project Found</span></div>;
             spinner = '';
         }
+        var spinnerReloadProjects = '';
+        if (this.state.reloading_projects) {
+            var spinnerContainer = {
+                position: 'absolute',
+                height : '100%',
+                width : '100%',
+                backgroundColor: 'rgba(76, 69, 69, 0.3)',
+                top: $(window).scrollTop(),
+                left: 0,
+                zIndex: 2
+            };
+            var styleSpinner = {
+                position: 'absolute',
+                width : '300px',
+                height : '100px',
+                top: $(window).height() / 2,
+                left: $(window).width() / 2 - 150,
+                zIndex: 2,
+                fontWeight: 600
+            };
+            spinnerReloadProjects =<div style={spinnerContainer}>
+                    <div style={styleSpinner}>
+                        <div className="col m12 center-align">
+                            <div className="preloader-wrapper active">
+                                <div className="spinner-layer spinner-blue-only">
+                                    <div className="circle-clipper left">
+                                        <div className="circle"></div>
+                                    </div>
+                                    <div className="gap-patch">
+                                        <div className="circle"></div>
+                                    </div>
+                                    <div className="circle-clipper right">
+                                        <div className="circle"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="col m12 center-align">
+                            <span>Updating projects</span>
+                        </div>
+                    </div>
+                </div>;
+        }
+
+
 
         return <div>
                     {/*<section className="add-project">*/}
@@ -122,6 +178,7 @@ class ProjectsContainer extends React.Component {
                     <section className="project-list">
                         <div className="container">
                             <div className="row">
+                                {spinnerReloadProjects}
                                 <div className="col m12" ref={(container) => this.container = container}>
                                     {items}
                                 </div>

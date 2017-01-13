@@ -581,7 +581,7 @@ UI = {
 		var d = {
                 action: 'getProjects',
                 page:	UI.page
-			}
+			};
 		ar = $.extend(d,UI.filters);
 
 		APP.doRequest({
