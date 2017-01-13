@@ -248,6 +248,20 @@ class engineController extends ajaxController {
 
                 break;
 
+            case strtolower( Constants_Engines::YANDEX_TRANSLATE ):
+
+                /**
+                 * Create a record of type YandexTranslate
+                 */
+                $newEngine = EnginesModel_YandexTranslateStruct::getStruct();
+
+                $newEngine->name                                = $this->name;
+                $newEngine->uid                                 = $this->uid;
+                $newEngine->type                                = Constants_Engines::MT;
+                $newEngine->extra_parameters[ 'client_secret' ] = $this->engineData[ 'secret' ];
+
+                break;
+
             default:
                 $validEngine = false;
         }
