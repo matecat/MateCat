@@ -7,7 +7,7 @@ use Monolog\Handler\StreamHandler;
 
 use ReflectionClass ;
 
-class BaseFeature {
+abstract class BaseFeature {
 
     protected $feature;
 
@@ -56,4 +56,9 @@ class BaseFeature {
     public static function getTemplatesPath() {
         return static::getClassPath() . '/View' ;
     }
+
+    /**
+     * @return mixed
+     */
+    abstract function getDependencies() ;
 }

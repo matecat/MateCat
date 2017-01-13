@@ -11,4 +11,8 @@ namespace Features;
 
 class SegmentFilter extends BaseFeature {
 
+    public function getDependencies() {
+
+    }
+
 }

@@ -23,6 +23,10 @@ class QaCheckBlacklist extends BaseFeature {
 
     const BLACKLIST_SCOPE = 'blacklist' ;
 
+    public function getDependencies()
+    {
+    }
+
 
     public function postTMSegmentAnalyzed( $params ) {
         $tm_data = $params['tm_data'];
