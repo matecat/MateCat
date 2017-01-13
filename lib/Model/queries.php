@@ -2140,15 +2140,10 @@ function getProjectForVolumeAnalysis( $limit = 1 ) {
 		";
 
     $db    = Database::obtain();
-    try {
-        //Needed to address the query to the master database if exists
-        $db->getConnection()->beginTransaction();
-        $results = $db->fetch_array($query);
-        $db->getConnection()->commit();
-    } catch( PDOException $e ) {
-        Log::doLog( $e->getMessage() );
-        return $e->getCode() * -1;
-    }
+    //Needed to address the query to the master database if exists
+    $db->getConnection()->beginTransaction();
+    $results = $db->fetch_array($query); // this is a select, should never return a transaction exception
+    $db->getConnection()->commit();
     return $results;
 }
 

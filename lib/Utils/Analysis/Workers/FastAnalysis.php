@@ -66,6 +66,21 @@ class FastAnalysis extends AbstractDaemon {
 
     }
 
+    protected function _checkDatabaseConnection(){
+
+        $db = Database::obtain();
+        try {
+            $db->ping();
+//            self::_TimeStampMsg(  "--- Database connection active. " );
+        } catch ( PDOException $e ) {
+            self::_TimeStampMsg( $e->getMessage() . " - Trying to close and reconnect." );
+            $db->close();
+            //reconnect
+            $db->getConnection();
+        }
+
+    }
+
     protected function __construct( $configFile = null ) {
 
         parent::__construct();
@@ -98,7 +113,15 @@ class FastAnalysis extends AbstractDaemon {
 
         do {
 
-            $projects_list = getProjectForVolumeAnalysis( 5 );
+            try {
+                $this->_checkDatabaseConnection();
+                $projects_list = getProjectForVolumeAnalysis( 5 );
+            } catch ( PDOException $e ){
+                self::_TimeStampMsg( $e->getMessage() . " - Error again. Try to reconnect in next cycle." );
+                sleep(3); // wait for reconnection
+                continue; // next cycle, reload projects.
+            }
+
             if ( empty( $projects_list ) ) {
                 self::_TimeStampMsg( "No projects: wait 3 seconds." );
                 sleep( 3 );
