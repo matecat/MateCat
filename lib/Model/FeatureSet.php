@@ -25,17 +25,17 @@ class FeatureSet {
     }
 
     /**
-     * This method is to be used to load features which should be active for a given project.
-     * This looksup features on the user set as id_customer, and the features set for
-     * the associated team.
-     *
+     * Features are attached to project via project_metadata.
      */
     public function loadForProject( Projects_ProjectStruct $project ) {
-        if ( $project->id_customer ) {
-            $this->loadFromUserEmail( $project->id_customer ) ;
-        }
-        if ( $project->id_team ) {
-            $this->loadFromTeam( $project->getTeam() ) ;
+        $feature_codes = $project->getMetadataValue(Projects_MetadataDao::FEATURES_KEY) ;
+        $features = array();
+
+        if ( !empty( $feature_codes ) ) {
+            foreach( $feature_codes as $code ) {
+                $features [] = new BasicFeatureStruct( array( 'feature_code' => $code ) );
+            }
+            $this->features = static::merge($this->features, $features);
         }
     }
 

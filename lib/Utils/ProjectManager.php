@@ -198,16 +198,19 @@ class ProjectManager {
 
 
     /**
-     * 
-     * Save in project metadata. This is where, among other things, we put 
-     * project options. 
+     *  saveMetadata
+     *
+     * This is where, among other things, we put project options.
      * 
      * Project options may need to be sanitized so that we can silently ignore impossible combinations, 
      * and we can apply defaults when those are missing. 
      * 
      */
     private function saveMetadata() {
-        $options = $this->projectStructure['metadata']; 
+        $dao = new Projects_MetadataDao();
+        $dao->set( $this->projectStructure['id_project'], Projects_MetadataDao::FEATURES_KEY,  implode(',', $this->features->getCodes() ) ) ;
+
+        $options = $this->projectStructure['metadata'];
         
         if ( $this->sanitizeProjectOptions ) {
             $options = $this->sanitizeProjectOptions( $options ) ; 
@@ -216,8 +219,7 @@ class ProjectManager {
         if ( empty( $options ) ) {
             return ;
         }
-            
-        $dao = new Projects_MetadataDao( Database::obtain() );
+
         foreach( $options as $key => $value ) {
             $dao->set(
                     $this->projectStructure['id_project'],

@@ -631,6 +631,9 @@ NULL);
 UPDATE engines SET id = 0 WHERE name = 'NONE' ;
 UPDATE engines SET id = 1 WHERE name = 'MyMemory (All Pairs)' ;
 
+-- populate sequences
+INSERT INTO sequences ( id_segment ) VALUES ( IFNULL( (SELECT MAX(id) + 1 FROM segments), 1)  );
+
 #Create the user 'matecat'@'%'
 CREATE USER 'matecat'@'%' IDENTIFIED BY 'matecat01';
 
@@ -676,10 +679,11 @@ INSERT INTO `phinxlog` ( version ) VALUES ( '20161122093431' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161125145959' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161207184244' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161219160843' );
-INSERT INTO `phinxlog` ( version ) VALUES ( '20161230151125' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161223190349' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161223191009' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161223191509' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20161230151125' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20170113150724' );
 
 CREATE SCHEMA `matecat_conversions_log` DEFAULT CHARACTER SET utf8 ;
 USE matecat_conversions_log ;
