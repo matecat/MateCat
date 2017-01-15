@@ -694,39 +694,50 @@ LXQ.init  = function () {
                var errorlist = $(element).data('errors').trim().split(/\s+/);
                //console.dir(errorlist);
                var root = $(tpls.lxqTooltipWrap);
-                    var isSpelling = false, spellingRow = null, count = 0, word, ind;
+               var isSpelling = false, spellingRow = null, count = 0, word, ind;
                $.each(classlist,function(j,cl) {
-                        isSpelling = false;
+                   isSpelling = false;
                    var txt = getWarningForModule(cl,false);
                    if (cl === 'g3g') {
                        //need to modify message with word.
-                            var ind = Math.floor(j / 2); //we aredding the x0 classes after each class..
-                            var word = LXQ.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)][errorlist[ind]].msg;
+                       var ind = Math.floor(j / 2); //we aredding the x0 classes after each class..
+                       var word = LXQ.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)][errorlist[ind]].msg;
                        txt = txt.replace('#xxx#',word);
                    }
 
                    if (txt!==null) {
-                            count++;
-                       var row = $(tpls.lxqTooltipBody);
-                       row.find('.tooltip-error-category').text(txt);
-                       row.find('.tooltip-error-ignore').on('click', function(e) {
-                           e.preventDefault();
-                            LXQ.ignoreError(errorlist[j]);
-                       });
-                            if (cl === 'd1g') {//spelling
-                                isSpelling = true;
-                                //element.text has the text
-                                ind =  Math.floor(j/2); //we aredding the x0 classes after each class..
-                                word = LXQ.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)][errorlist[ind]].msg;
-                                row.find('.tooltip-error-category').addClass('spelling').data('word',word);
+                        var ind = Math.floor(j / 2); //we aredding the x0 classes after each class..
+                        var warningData = LXQ.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)][errorlist[ind]];
+                        var word = warningData.text;
+                        count++;
+                        var row = $(tpls.lxqTooltipBody);
+                        row.find('.tooltip-error-category').text(txt);
+                        row.find('.tooltip-error-ignore').on('click', function(e) {
+                             e.preventDefault();
+                             LXQ.ignoreError(errorlist[j]);
+                        });
+                        if (cl === 'd1g') {//spelling
+                            isSpelling = true;
+                            //element.text has the text
+                            ind =  Math.floor(j/2); //we aredding the x0 classes after each class..
+                            word = LXQ.lexiqaData.lexiqaWarnings[UI.getSegmentId(segment)][errorlist[ind]].msg;
+                            row.find('.tooltip-error-category').addClass('spelling').data('word',word);
+                            spellingRow = row;
+                        }
+                        else
+                            root.append(row);
+                        if (warningData.suggestions && warningData.suggestions.length && word && word.length) {
+                          $.each(warningData.suggestions, function (i, suggest) {
+                              var suggestRow = $(tpls.lxqTooltipSuggestionBody);
+                              suggestRow.find('.tooltip-error-category').text(suggest);
+                              suggestRow.data('word',word);
+                              root.append(suggestRow);
+                          });
+                        }
 
-                                spellingRow = row;
-                            }
-                            else
-                       root.append(row);
                    }
                });
-                if (spellingRow!==null && count == 1 ) //do not show on multiple errors...
+               if (spellingRow!==null && count == 1 ) //do not show on multiple errors...
                     root.append(spellingRow)
                $(element).data('powertipjq', root);
                }
@@ -750,6 +761,17 @@ LXQ.init  = function () {
                 $('.tooltipa',segment).on('powerTipRender', function() {
                     console.log('powerTipRender');
                     //var rows = $('#powerTip').find('tooltip-error-category');
+                    var that = this;
+                    if ($('#powerTip').find('.lxq-suggestion').length) {
+                      $.each($('#powerTip').find('.lxq-suggestion'), function (i, suggestRow) {
+                        var word = $(suggestRow).data('word');
+                        var suggestion  = $(suggestRow).text().trim();
+                        $(suggestRow).find('.tooltip-error-category').on('click', function (e) {
+                            e.preventDefault();
+                            LXQ.replaceWord(word, suggestion,that);
+                        });
+                      });
+                    }
                     if ($(this).hasClass('d1g')) {
                     // make an ajax request
                         var word = $('#powerTip').find('.spelling').data('word');
@@ -799,6 +821,17 @@ LXQ.init  = function () {
                 });
                 $('.tooltipa').on('powerTipRender', function() {
                     //var rows = $('#powerTip').find('tooltip-error-category');
+                    var that = this;
+                    if ($('#powerTip').find('.lxq-suggestion').length) {
+                      $.each($('#powerTip').find('.lxq-suggestion'), function (i, suggestRow) {
+                        var word = $(suggestRow).data('word');
+                        var suggestion  = $(suggestRow).text().trim();
+                        $(suggestRow).find('.tooltip-error-category').on('click', function (e) {
+                            e.preventDefault();
+                            LXQ.replaceWord(word, suggestion,that);
+                        });
+                      });
+                    }
                     if ($(this).hasClass('d1g')) {
                     // make an ajax request
                         var word = $(this).text();
@@ -869,7 +902,7 @@ LXQ.init  = function () {
                 restoreSelection();
                 $(target).addClass('lxq-invisible');
                 UI.saveInUndoStack('lxq-replaceWord');
-                UI.currentSegmentQA();
+                UI.segmentQA(UI.currentSegment);
             }
         };
         var ignoreError = function(errorid) {
