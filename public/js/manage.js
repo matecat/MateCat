@@ -14,12 +14,14 @@ UI = {
 
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_SETTINGS, this.openJobSettings);
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_TM_PANEL, this.openJobTMPanel);
+
     },
 
     render: function () {
         var self = this;
         var headerMountPoint = $("header")[0];
         this.Search.currentPage = 1;
+        this.pageLeft = false;
         ReactDOM.render(React.createElement(Header, {
             searchFn: _.debounce(function(name) {
                             self.filterProjectsFromName(name);
@@ -32,8 +34,65 @@ UI = {
             var projects = $.parseJSON(response.data);
             self.renderProjects(projects);
         });
+
         window.addEventListener('scroll', this.scrollDebounceFn());
+
+        $(window).on("blur focus", function(e) {
+            var prevType = $(this).data("prevType");
+
+            if (prevType != e.type) {   //  reduce double fire issues
+                switch (e.type) {
+                    case "blur":
+                        console.log("leave page");
+                        self.pageLeft = true;
+                        break;
+                    case "focus":
+                        console.log("Enter page");
+                        if (self.pageLeft) {
+                            // alert("Refresf");
+                            console.log("Refresh projects");
+                            self.reloadProjects();
+                        }
+                        break;
+                }
+            }
+
+            $(this).data("prevType", e.type);
+        });
     },
+
+    reloadProjects: function () {
+        var self = this;
+        if ( UI.Search.currentPage === 1) {
+            this.getProjects().done(function (response) {
+                var projects = $.parseJSON(response.data);
+                ManageActions.renderProjects(projects);
+            });
+        } else {
+            ManageActions.showReloadSpinner();
+            var total_projects = [];
+            var requests = [];
+            var onDone = function (response) {
+                        var projects = $.parseJSON(response.data);
+                        $.merge(total_projects, projects);
+                    };
+            for (var i=1; i<= UI.Search.currentPage; i++ ) {
+                requests.push(this.getProjects(i));
+            }
+            $.when.apply(this, requests).done(function() {
+                var results = requests.length > 1 ? arguments : [arguments];
+                for( var i = 0; i < results.length; i++ ){
+                    onDone(results[i][0]);
+                }
+                ManageActions.renderProjects(total_projects, true);
+            });
+
+        }
+    },
+
+
+
+
 
     renderProjects: function (projects) {
         if ( !this.ProjectsContainer ) {
@@ -53,7 +112,11 @@ UI = {
         UI.Search.currentPage = UI.Search.currentPage + 1;
         this.getProjects().done(function (response) {
             var projects = $.parseJSON(response.data);
-            ManageActions.renderMoreProjects(projects);
+            if (projects.length > 0) {
+                ManageActions.renderMoreProjects(projects);
+            } else {
+                ManageActions.noMoreProjects();
+            }
         });
     },
 
@@ -206,10 +269,11 @@ UI = {
     /**
      * Retrieve Projects. Passing filters is possible to retrieve projects
      */
-    getProjects: function() {
+    getProjects: function(page) {
+        var pageNumber = (page) ? page : UI.Search.currentPage;
         var data = {
             action: 'getProjects',
-            page:	UI.Search.currentPage,
+            page:	pageNumber,
             filter: (!$.isEmptyObject(UI.Search.filter)) ? 1 : 0,
         };
         // Filters
@@ -277,7 +341,6 @@ UI = {
     },
 
     downloadTranslation: function(project, job) {
-        console.log('Download Translation');
         var url = '/translate/'+project.name +'/'+ job.source +'-'+job.target+'/'+ job.id +'-'+ job.password + "?action=download" ;
         window.open(url, '_blank');
 

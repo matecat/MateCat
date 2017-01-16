@@ -8,10 +8,11 @@ var ManageActions = {
     /** Render the list of projects
      * @param projects
      */
-    renderProjects: function (projects) {
+    renderProjects: function (projects, hideSpinner) {
         AppDispatcher.dispatch({
             actionType: ManageConstants.RENDER_PROJECTS,
             project: projects,
+            hideSpinner: hideSpinner,
         });
     },
     /** Render the more projects
@@ -47,12 +48,6 @@ var ManageActions = {
         });
     },
 
-    closeAllJobs: function () {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.CLOSE_ALL_JOBS
-        });
-    },
-
     removeProject: function (project) {
         AppDispatcher.dispatch({
             actionType: ManageConstants.REMOVE_PROJECT,
@@ -75,6 +70,18 @@ var ManageActions = {
             job: job,
             password: password,
             oldPassword: oldPassword
+        });
+    },
+
+    noMoreProjects: function () {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.NO_MORE_PROJECTS,
+        });
+    },
+
+    showReloadSpinner: function () {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.SHOW_RELOAD_SPINNER,
         });
     }
 

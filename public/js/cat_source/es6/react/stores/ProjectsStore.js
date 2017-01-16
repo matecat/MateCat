@@ -69,7 +69,7 @@ AppDispatcher.register(function(action) {
     switch(action.actionType) {
         case ManageConstants.RENDER_PROJECTS:
             ProjectsStore.updateAll(action.project);
-            ProjectsStore.emitChange(action.actionType, ProjectsStore.projects);
+            ProjectsStore.emitChange(action.actionType, ProjectsStore.projects, action.hideSpinner);
             break;
         case ManageConstants.RENDER_MORE_PROJECTS:
             ProjectsStore.addProjects(action.project);
@@ -80,9 +80,6 @@ AppDispatcher.register(function(action) {
             break;
         case ManageConstants.OPEN_JOB_TM_PANEL:
             ProjectsStore.emitChange(ManageConstants.OPEN_JOB_TM_PANEL, action.job, action.prName);
-            break;
-        case ManageConstants.CLOSE_ALL_JOBS:
-            ProjectsStore.emitChange(ManageConstants.CLOSE_ALL_JOBS);
             break;
         case ManageConstants.REMOVE_PROJECT:
             ProjectsStore.removeProject(action.project);
@@ -95,6 +92,12 @@ AppDispatcher.register(function(action) {
         case ManageConstants.CHANGE_JOB_PASS:
             ProjectsStore.changeJobPass(action.project, action.job, action.password, action.oldPassword);
             ProjectsStore.emitChange(ManageConstants.RENDER_PROJECTS, ProjectsStore.projects);
+            break;
+        case ManageConstants.NO_MORE_PROJECTS:
+            ProjectsStore.emitChange(action.actionType);
+            break;
+        case ManageConstants.SHOW_RELOAD_SPINNER:
+            ProjectsStore.emitChange(action.actionType);
             break;
 
     }

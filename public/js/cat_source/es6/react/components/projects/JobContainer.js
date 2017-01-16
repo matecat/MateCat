@@ -60,11 +60,11 @@ class JobContainer extends React.Component {
     }
 
     getEditingLogUrl() {
-        return 'editlog/' + this.props.job.get('id') + '-' + this.props.job.get('password');
+        return '/editlog/' + this.props.job.get('id') + '-' + this.props.job.get('password');
     }
 
     getQAReport() {
-        return 'revise-summary/' + this.props.job.get('id') + '-' + this.props.job.get('password');
+        return '/revise-summary/' + this.props.job.get('id') + '-' + this.props.job.get('password');
     }
 
     changePassword() {
@@ -126,7 +126,7 @@ class JobContainer extends React.Component {
         var reviseUrl = this.getReviseUrl();
         var editLogUrl = this.getEditingLogUrl();
         var qaReportUrl = this.getQAReport();
-        var jobTMXUrl = 'TMX/'+ this.props.job.get('id') + '/' + this.props.job.get('password');
+        var jobTMXUrl = '/TMX/'+ this.props.job.get('id') + '/' + this.props.job.get('password');
         var exportXliffUrl = '/SDLXLIFF/'+ this.props.job.get('id') + '/' + this.props.job.get('password') +
             '/' + this.props.project.get('name') + '.zip';
 
@@ -264,54 +264,18 @@ class JobContainer extends React.Component {
         var splitUrl = this.getSplitUrl();
         var mergeUrl = this.getMergeUrl();
         var splitMergeButton = this.getSplitOrMergeButton(splitUrl, mergeUrl);
-        var modifyDate = this.getModifyDate();
+        // var modifyDate = this.getModifyDate();
 
         var jobMenu = this.getJobMenu(splitUrl, mergeUrl);
         var tmIcon = this.getTMIcon();
         var idJobLabel = ( !this.props.isChunk ) ? this.props.job.get('id') : this.props.job.get('id') + '-' + this.props.index;
 
         return <div className="card job z-depth-1">
-            {/*<div className="head-job open-head-job">
-                <div className="row">
-                    
-                    <div className="col s10">
-                        <ul className="job-activity-icon right">
-                            {tmIcon}
-                            <li>
-                                <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0"
-                                    onClick={this.openSettings.bind(this)}>
-                                    <i className="icon-settings"/>
-                                </a>
-                            </li>
-                            <li>
-                                <a className='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0 class-prova'
-                                   data-activates={'dropdownJob' + this.props.job.get('id') + this.props.job.get('password')}
-                                   ref={(dropdown) => this.dropdown = dropdown}>
-                                    <i className="icon-more_vert"/>
-                                </a>
-                                {jobMenu}
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>*/}
             <div className="body-job">
                 <div className="row">
-                    {/*<div className="col">
-                        <div className="combo-language single">
-                            <ul>
-                                <li>
-                                    <span className="tooltipped" data-tooltip={this.props.job.get('sourceTxt')}>{this.props.job.get('source')}</span> <i className="icon-play"/>
-                                </li>
-                                <li>
-                                    <span className="tooltipped" data-tooltip={this.props.job.get('targetTxt')}>{this.props.job.get('target')}</span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>*/}
                     <div className="col">
                         <div className="job-id">
-                            <div id={"id-job-" + this.props.job.get('id')}><span>ID:</span>{ idJobLabel }</div>
+                            <div id={"id-job-" + this.props.job.get('id')}>{ idJobLabel }</div>
                         </div>
                     </div>
                     <div className="col">
@@ -332,11 +296,11 @@ class JobContainer extends React.Component {
                             <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
                         </div>
                     </div>
-                    <div className="col">
-                        <div className="action-modified">
-                            {modifyDate}
-                        </div>
-                    </div>
+                    {/*<div className="col">*/}
+                        {/*<div className="action-modified">*/}
+                            {/*{modifyDate}*/}
+                        {/*</div>*/}
+                    {/*</div>*/}
                     <div className="col right">
                         
                         <ul className="job-activity-icon">
@@ -353,9 +317,6 @@ class JobContainer extends React.Component {
                     </div>
                     <div className="col right">
                         <div className="button-list">
-                            {/*{splitMergeButton}*/}
-                            {/*<a className="btn waves-effect waves-light outsource" target="_blank" href={outsourceUrl}>outsource</a>*/}
-                            {/*<a className="btn waves-effect waves-light outsourced" target="_blank" href={outsourcedUrl}>outsource</a> */}
                             <a className="btn waves-effect waves-light translate move-left" target="_blank" href={translateUrl}>Open</a>
                         </div>
                     </div>

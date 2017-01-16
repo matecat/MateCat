@@ -65,14 +65,15 @@ i.close-x:before {
 .project {
 	background-color: #f1f1f1;
 	padding: 0;
-	min-width:950px;
+	min-width:890px;
+	margin-bottom: 30px;
 	// cursor: pointer;
 	.btn {
 		padding: 0 15px
 	}
 	.dropdown-content {
 		background-color: #fff;
-		margin: 0;
+		margin: 9 0 0 0;
 		display: none;
 		min-width: 260px;
 		max-height: 650px;
@@ -87,20 +88,21 @@ i.close-x:before {
 	.head-project {
 		background-color: #f1f1f1;
 		padding: 5px 0 0 0;
-		border-top: 4px solid #9e9e9e;
+		// border-top: 4px solid #9e9e9e;
 		&.open-project {
-			background-color: inherit;
-			border-bottom: #ebebeb
+			background-color: #d6d6d6;
+		    height: 60px;
 		}
 
 		.project-id {
-			background-color: #dedede;
+			background-color: #929292;
 			padding-left: 30px;
-			color: #797979;
-			border-right: 1px solid #f1f1f1;
+			color: #f1f1f1;
+			// border-right: 1px solid #f1f1f1;
 			min-width: 152px;
 			line-height: 1.55rem;
 			padding-top: 2px;
+			margin-top: 2px;
 			@media #{$small-and-down} {
 				padding-left: 15px;
 			}
@@ -269,6 +271,10 @@ i.close-x:before {
 }
 .jobs{
 	margin-top: 0;
+}
+
+.chunks {
+	margin-top: -25px;
 }
 
 .chunk {
@@ -479,6 +485,34 @@ i.close-x:before {
 	}
 }
 
+.no-pad {
+	padding: 0 !important;
+}
+
+.icon-chevron-right {
+	color: #9e9e9e;
+}
+
+.arch-prj {
+	width: 75px;
+    height: 75px;
+    background: url("../../img/archived-project-4.png");
+    position: relative;
+    bottom: -5px;
+    margin-top: -75px;
+    background-repeat: no-repeat;
+}
+
+.canc-prj {
+	width: 75px;
+    height: 75px;
+    background: url("../../img/cancelled-project-3.png");
+    position: relative;
+    bottom: -5px;
+    margin-top: -75px;
+
+}
+
 .list-language {
 	max-width: 60%;
 }
@@ -637,7 +671,8 @@ li.target-lang {
 	// border: 1px solid #dcdcdc;
  //    text-align: center;
  //    padding: 5px;
-    min-width: 134px;
+    // min-width: 134px;
+    line-height: 30px;
 }
 
 .target-box {
@@ -645,7 +680,8 @@ li.target-lang {
  //    border: 1px solid #dcdcdc;
  //    text-align: center;
     // padding: 5px;
-    min-width: 134px;
+    // min-width: 134px;
+    line-height: 30px;
 }
 
 
@@ -703,10 +739,5 @@ position: relative;
 }
 
 .input-field .prefix {
-	font-size:1.4rem!important;
-}
-
-.job-preview .icon-play,
-.job .icon-play {
-    margin: 0 0px 0 0px;
+	font-size:1.8rem !important;
 }

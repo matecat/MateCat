@@ -7,17 +7,24 @@ class SearchInput extends React.Component {
         if($(this.textInput).val().length) {
             $(this.closeIcon).show()
         } else {
-            $(this.closeIcon).hide()
+            $(this.closeIcon).hide();
         }
         if (!this.performingSearch) {
             this.props.onChange($(this.textInput).val());
         }
-
+        this.onKeyPressEvent = this.onKeyPressEvent.bind(this);
     }
 
     closeSearch() {
         $(this.textInput).val('');
-        this.props.closeSearchCallback()
+        this.props.closeSearchCallback();
+        $(this.closeIcon).hide();
+    }
+
+    onKeyPressEvent(e) {
+        if(e.which == 27) {
+            this.closeSearch();
+        }
     }
 
 
@@ -28,7 +35,8 @@ class SearchInput extends React.Component {
                         <input id="icon_prefix" type="text" className="valid"
                                placeholder="Search by project name"
                                ref={(input) => this.textInput = input}
-                               onChange={this.filterByName.bind(this)}/>
+                               onChange={this.filterByName.bind(this)}
+                                onKeyUp={this.onKeyPressEvent.bind(this)}/>
                         <i className="prefix close-x" style={{display: 'none'}}
                            ref={(closeIcon) => this.closeIcon = closeIcon}
                            onClick={this.closeSearch.bind(this)}/>
