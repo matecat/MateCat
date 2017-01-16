@@ -24,11 +24,8 @@ class FeatureSet {
         }, $this->features);
     }
 
-    /**
-     * Features are attached to project via project_metadata.
-     */
-    public function loadForProject( Projects_ProjectStruct $project ) {
-        $feature_codes = $project->getMetadataValue(Projects_MetadataDao::FEATURES_KEY) ;
+    public function loadFromString( $string ) {
+        $feature_codes = FeatureSet::splitString( $string );
         $features = array();
 
         if ( !empty( $feature_codes ) ) {
@@ -37,6 +34,13 @@ class FeatureSet {
             }
             $this->features = static::merge($this->features, $features);
         }
+    }
+
+    /**
+     * Features are attached to project via project_metadata.
+     */
+    public function loadForProject( Projects_ProjectStruct $project ) {
+        $this->loadFromString( $project->getMetadataValue(Projects_MetadataDao::FEATURES_KEY) ) ;
     }
 
     /**
@@ -160,13 +164,17 @@ class FeatureSet {
         return $returnable ;
     }
 
+    public static function splitString( $string ) {
+        return explode(',', $string);
+    }
+
     /**
      * Loads plugins into the featureset from the list of mandatory plugins.
      */
     private function loadFromMandatory() {
         $features = [] ;
         foreach( INIT::$MANDATORY_PLUGINS as $plugin) {
-            $features[] = new BasicFeatureStruct(array('feature_code' => $plugin));
+            $features[] = new BasicFeatureStruct(array('feature_code' => $plugin) );
         }
         $this->features = static::merge($this->features, $features);
     }

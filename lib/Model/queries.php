@@ -1987,17 +1987,22 @@ function getProjects( Users_UserStruct $user, $start, $step,
 
     $where_query = implode( " AND ", $conditions );
 
+    $features = Projects_MetadataDao::FEATURES_KEY ;
+
     $projectsQuery =
             "SELECT p.id AS pid,
                 p.name,
                 p.password,
-                SUM( draft_words + new_words + translated_words + rejected_words + approved_words ) AS tm_analysis_wc
+                SUM( draft_words + new_words + translated_words + rejected_words + approved_words ) AS tm_analysis_wc,
+                project_metadata.value AS features
 
             FROM projects p
 
             INNER JOIN jobs j ON j.id_project=p.id
 
             INNER JOIN users ON users.email = p.id_customer
+
+            LEFT JOIN project_metadata ON project_metadata.id_project = p.id AND project_metadata.`key` = '$features'
 
             WHERE $where_query
             GROUP BY 1
