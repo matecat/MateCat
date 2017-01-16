@@ -66,7 +66,8 @@ class TMAnalysisWorker extends AbstractWorker {
         $this->_checkDatabaseConnection();
 
         $this->project = \Projects_ProjectDao::findById( $queueElement->params->pid );
-        $this->featureSet = \FeatureSet::fromIdCustomer( $this->project->id_customer );
+        $this->featureSet = new \FeatureSet() ;
+        $this->featureSet->loadForProject( $this->project ) ;
 
         //reset matches vector
         $this->_matches = null;

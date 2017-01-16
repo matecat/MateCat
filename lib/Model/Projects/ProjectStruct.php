@@ -5,6 +5,7 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     public $password ;
     public $name ;
     public $id_customer ;
+    public $id_team ;
     public $create_date ;
     public $id_engine_tm ;
     public $id_engine_mt ;
@@ -24,18 +25,6 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
         return
                 $this->status_analysis == Constants_ProjectStatus::STATUS_DONE ||
                 $this->status_analysis == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE ;
-    }
-    /**
-     * @param $feature_code
-     *
-     * @return OwnerFeatures_OwnerFeatureStruct
-     */
-    public function getOwnerFeature( $feature_code ) {
-        $ret = OwnerFeatures_OwnerFeatureDao::getByOwnerEmailAndCode(
-            $feature_code, $this->id_customer
-        );
-
-        return $ret ;
     }
 
     /**
@@ -89,13 +78,34 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     /**
+     * @return null|\Teams\TeamStruct
+     */
+    public function getTeam() {
+        if ( is_null( $this->id_team ) ) {
+            return null ;
+        }
+        $dao = new \Teams\TeamDao() ;
+        return $dao->findById( $this->id_team ) ;
+    }
+
+    /**
      * @param $feature_code
      *
      * @return bool
      */
     public function isFeatureEnabled( $feature_code ) {
-        $feature = $this->getOwnerFeature( $feature_code );
-        return \Features::enabled($feature, $this);
+        return in_array($feature_code, $this->getFeatures()->getCodes() );
+    }
+
+    /**
+     * @return FeatureSet
+     */
+    public function getFeatures() {
+        return $this->cachable(__METHOD__, $this, function( Projects_ProjectStruct $project ) {
+            $featureSet = new FeatureSet() ;
+            $featureSet->loadForProject( $project );
+            return $featureSet ;
+        });
     }
 
     /**

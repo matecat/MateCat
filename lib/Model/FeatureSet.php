@@ -18,31 +18,45 @@ class FeatureSet {
         $this->loadFromMandatory();
     }
 
+    public function getCodes() {
+        return array_map( function( $feature ) {
+            return $feature->feature_code ;
+        }, $this->features);
+    }
+
     /**
-     * @param $id_customer
+     * This method is to be used to load features which should be active for a given project.
+     * This looksup features on the user set as id_customer, and the features set for
+     * the associated team.
      *
-     * @return FeatureSet
      */
-    public static function fromIdCustomer( $id_customer ) {
-        $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
-        return new FeatureSet($features);
+    public function loadForProject( Projects_ProjectStruct $project ) {
+        if ( $project->id_customer ) {
+            $this->loadFromUserEmail( $project->id_customer ) ;
+        }
+        if ( $project->id_team ) {
+            $this->loadFromTeam( $project->getTeam() ) ;
+        }
     }
 
     /**
+     *
      * @param $id_customer
      */
-    public function loadFromIdCustomer( $id_customer ) {
+    public function loadFromUserEmail( $id_customer ) {
         $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
-        $this->features = array_merge( $this->features, $features );
+        $this->features = static::merge( $this->features, $features );
     }
 
     /**
-     * @param array $params
+     * Loads the features starting from a given team.
+     *
+     * @param Users_UserStruct $user
      */
-    public function loadFeatures( $params = array() ) {
-       if ( array_key_exists('id_customer', $params) ) {
-            $this->loadFromIdCustomer( $params['id_customer'] ) ;
-        }
+    public function loadFromTeam( \Teams\TeamStruct $team ) {
+        $dao = new OwnerFeatures_OwnerFeatureDao() ;
+        $features = $dao->getByTeam( $team ) ;
+        $this->features = static::merge( $this->features, $features ) ;
     }
 
     /**
@@ -75,6 +89,8 @@ class FeatureSet {
                     try {
                         $filterable = call_user_func_array( array( $obj, $method ), $args );
                     } catch ( \Exceptions\ValidationError $e ) {
+                        throw $e ;
+                    } catch ( Exceptions_RecordNotFound $e ) {
                         throw $e ;
                     } catch ( Exception $e ) {
                         Log::doLog("Exception running filter " . $method . ": " . $e->getMessage() );
@@ -125,9 +141,23 @@ class FeatureSet {
                 $obj = new $cls( $controller, $template ) ;
                 $obj->decorate();
             }
+        }
+    }
 
+    public static function merge( $left, $right ) {
+        $returnable = array();
+
+        foreach( $left as $feature ) {
+            $returnable[ $feature->feature_code ] = $feature ;
         }
 
+        foreach( $right as $feature ) {
+            if ( !isset( $returnable[ $feature->feature_code ] ) ) {
+                $returnable[ $feature->feature_code ] = $feature ;
+            }
+        }
+
+        return $returnable ;
     }
 
     /**
@@ -138,7 +168,7 @@ class FeatureSet {
         foreach( INIT::$MANDATORY_PLUGINS as $plugin) {
             $features[] = new BasicFeatureStruct(array('feature_code' => $plugin));
         }
-        $this->features = array_merge($this->features, $features);
+        $this->features = static::merge($this->features, $features);
     }
 
     /**

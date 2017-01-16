@@ -14,6 +14,7 @@ use INIT;
 use OwnerFeatures_OwnerFeatureDao;
 use PHPTAL;
 use ProjectOptionsSanitizer;
+use Features ;
 
 class LexiQADecorator {
 
@@ -81,39 +82,26 @@ class LexiQADecorator {
     }
 
     /**
-     * Check if the feature is enabled in the matecat installation and for the specific user
+     * Check if the feature is enabled in the matecat installation according to the
+     * given preloaded featureSet. In fact, some Features exclude LexiQA.
      *
      * @param \Users_UserStruct $userStruct
-     * @param \IDatabase        $database
      *
      * @return $this
      */
-    public function featureEnabled(
-            \Users_UserStruct $userStruct,
-            \IDatabase $database
-    ) {
+    public function featureEnabled( \FeatureSet $featureSet ) {
 
-        if( !INIT::$LXQ_LICENSE ){
+        if ( !INIT::$LXQ_LICENSE ){
             $this->lexiqa_enabled = false;
             return $this;
         }
 
-        if( $userStruct != null ) {
-
-            $ownerFeatureDao = new OwnerFeatures_OwnerFeatureDao( $database );
-
-            $isQaGlossaryEnabled = $ownerFeatureDao->isFeatureEnabled(
-                    \Features::QACHECK_GLOSSARY, $userStruct->email
-            );
-
-            $isQaGBlacklistEnabled = $ownerFeatureDao->isFeatureEnabled(
-                    \Features::QACHECK_BLACKLIST, $userStruct->email
-            );
-
-            if( $isQaGlossaryEnabled === true || $isQaGBlacklistEnabled === true ) {
+        if  (
+            in_array( Features::QACHECK_GLOSSARY, $featureSet->getCodes() ) ||
+            in_array( Features::QACHECK_BLACKLIST, $featureSet->getCodes() )
+        ) {
                 $this->deny_lexiqa = true;
                 $this->lexiqa_enabled = false;
-            }
         }
 
         return $this;

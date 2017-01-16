@@ -110,12 +110,16 @@ class changeJobsStatusController extends ajaxController {
         }
     }
 
+
     public function doAction() {
 
-        if( empty( $_SESSION['cid'] ) ){
-            //user not logged
+        $this->checkLogin( FALSE ) ;
+
+        if ( ! $this->userIsLogged ) {
             throw new Exception( "User Not Logged." );
         }
+
+        $team = Users_UserDao::findDefaultTeam( $this->logged_user ) ;
 
         if ( $this->res_type == "prj" ) {
             $old_status = getProjectJobData( $this->res_id );
@@ -131,9 +135,18 @@ class changeJobsStatusController extends ajaxController {
 
             $start = ( ( $this->page - 1 ) * $this->step ) + $this->step - 1;
 
-            $projects = ManageUtils::queryProjects( $start, 1, $this->search_in_pname, $this->search_source, $this->search_target, $this->search_status, $this->search_onlycompleted, $this->filter_enabled, null );
+            $projects = ManageUtils::queryProjects( $this->logged_user,
+                $start, 1, $this->search_in_pname, $this->search_source,
+                $this->search_target, $this->search_status, $this->search_onlycompleted, null,
+                $team
+            );
 
-            $projnum = getProjectsNumber( $start, $this->step, $this->search_in_pname, $this->search_source, $this->search_target, $this->search_status, $this->search_onlycompleted, $this->filter_enabled );
+            $projnum = getProjectsNumber(
+                $this->logged_user,
+                $this->search_in_pname, $this->search_source,
+                $this->search_target, $this->search_status, $this->search_onlycompleted,
+                $team
+            );
 
             $this->result[ 'code' ]    = 1;
             $this->result[ 'data' ]    = "OK";

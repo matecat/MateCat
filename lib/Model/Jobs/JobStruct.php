@@ -71,15 +71,6 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     }
 
     /**
-     * @param $feature_code
-     *
-     * @return bool
-     */
-    public function isFeatureEnabled( $feature_code ) {
-        return $this->getProject()->isFeatureEnabled( $feature_code );
-    }
-
-    /**
      * @return Translations_SegmentTranslationStruct
      */
     public function findLatestTranslation() {

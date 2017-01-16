@@ -193,7 +193,6 @@ if ( ReviewImproved.enabled() && config.isReview ) {
 
         renderAfterConfirm: function (nextId) {
             this.render({
-                firstLoad: false,
                 segmentToOpen: nextId
             });
         }

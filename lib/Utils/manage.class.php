@@ -16,9 +16,15 @@ class ManageUtils {
      * @return array
      * @throws Exception
      */
-    public static function queryProjects( $start, $step, $search_in_pname, $search_source, $search_target, $search_status, $search_onlycompleted, $filter_enabled, $project_id ) {
+    public static function queryProjects(
+        Users_UserStruct $user, $start, $step, $search_in_pname,
+        $search_source, $search_target, $search_status, $search_onlycompleted,
+        $project_id, \Teams\TeamStruct $team = null ) {
 
-        $data = getProjects( $start, $step, $search_in_pname, $search_source, $search_target, $search_status, $search_onlycompleted, $filter_enabled, $project_id );
+        $data = getProjects(
+            $user, $start, $step, $search_in_pname, $search_source, $search_target,
+            $search_status, $search_onlycompleted, $project_id, $team
+        );
 
         $projects     = array();
         $projectIDs   = array();

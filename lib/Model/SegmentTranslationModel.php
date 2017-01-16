@@ -41,6 +41,13 @@ class SegmentTranslationModel extends AbstractModelSubject {
         return $this->translation;
     }
 
+    public function getOldTranslation() {
+        if ( is_null( $this->old_translation ) ) {
+            throw new \Exception('Old translation is not set');
+        }
+        return $this->old_translation ;
+    }
+
     public function entersReviewedState() {
         return
             ! $this->old_translation->isReviewedStatus() and

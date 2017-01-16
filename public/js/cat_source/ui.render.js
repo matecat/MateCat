@@ -16,18 +16,11 @@ $.extend(UI, {
 //		console.log('body.scrollTop: ', $('body').scrollTop());
 //		console.log('window.scrollTop: ', $(window).scrollTop());
 		this.isMac = (navigator.platform == 'MacIntel') ? true : false;
-		this.body = $('body');
-		this.firstLoad = (options.firstLoad || false);
-//        if (firstLoad)
-//            this.startRender = true;
+
 		this.initSegNum = 100; // number of segments initially loaded
 		this.moreSegNum = 25;
 		this.numOpenedSegments = 0;
-		this.hasToBeRerendered = false;
-		this.maxMinutesBeforeRerendering = 60;
-		setTimeout(function() {
-			UI.hasToBeRerendered = true;
-		}, this.maxMinutesBeforeRerendering*60000);	
+
 		this.loadingMore = false;
 		this.infiniteScroll = true;
 		this.noMoreSegmentsAfter = false;
@@ -53,7 +46,6 @@ $.extend(UI, {
 		this.closeTagPlaceholder = 'MATECAT-closeTagPlaceholder-MATECAT';
 		this.tempViewPoint = '';
 		this.checkUpdatesEvery = 180000;
-		this.autoUpdateEnabled = true;
 		this.goingToNext = false;
 		this.preCloseTagAutocomplete = false;
         this.hiddenTextEnabled = true;
@@ -79,19 +71,25 @@ $.extend(UI, {
 		this.taglockEnabled = config.taglockEnabled;
 		this.debug = false;
         this.findCommonPartInSegmentIds();
-		UI.detectStartSegment(); 
-		options.openCurrentSegmentAfter = ((!seg) && (!this.firstLoad)) ? true : false;
-		
-		var getSegmentsAjax = UI.getSegments(options);
+		UI.detectStartSegment();
 
-		if (this.firstLoad && this.autoUpdateEnabled) {
+		options.openCurrentSegmentAfter = ( (!seg) && (!UI.firstLoad) ) ? true : false ;
+
+		if ( UI.firstLoad ) {
+
 			this.lastUpdateRequested = new Date();
+
 			setTimeout(function() {
 				UI.getUpdates();
 			}, UI.checkUpdatesEvery);
+
 		}
-		
-		return getSegmentsAjax ; 
+
+		return UI.getSegments(options).done(function() {
+			// Force the firstLoad flag to false whenever the segments are fetched
+			UI.firstLoad = false ;
+		});
+
 	},
 });
 
