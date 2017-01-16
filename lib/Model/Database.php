@@ -75,12 +75,14 @@ class Database implements IDatabase {
     public function getConnection() {
         if ( empty( $this->connection ) || !$this->connection instanceof PDO ) {
             $this->connection = new PDO(
-                    "mysql:host={$this->server};dbname={$this->database};charset=UTF8",
+                    "mysql:host={$this->server};dbname={$this->database}",
                     $this->user,
                     $this->password,
                     array(
-                            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION // Raise exceptions on errors
+                            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, // Raise exceptions on errors
+                            PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
                     ) );
+            $this->connection->exec( "SET names utf8" );
         }
         return $this->connection;
     }
