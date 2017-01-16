@@ -8,7 +8,6 @@ header{background:#4D4D4D;top:0;left:0;text-align:left;width:100%;position:fixed
 .wrapper{width:96%;min-width:1024px;margin:0px auto 0 auto;padding:5px 0 0 0;font-size:14px;position:relative;text-align:left;}
 header .wrapper{width:98%;min-width:960px;margin:0px auto 0 auto;padding:5px 0 0 0;width:92%;font-size:14px;position:relative;text-align:left;}
 h1{font-size:30px;margin:30px 0 0px 0;max-height:80px;overflow:hidden;}
-h2{font-size:28px;margin:-30px 0 0px 0 ;color:#6d6e71;font-weight:normal;display:none}
 .details h2{margin:10px 0 -10px 0 ; }
 .details{position:relative;z-index:999;background:#c5351c url(../img/warning.png) 920px center no-repeat;background-size:20px 20px;border-radius:5px;padding:20px;border:1px solid #9e280e;color:#fff !important;-moz-box-shadow: 0 1px 3px #ccc;-webkit-box-shadow: 0 1px 3px #ccc;width:918px;display:block;margin-bottom:20px;}
 .percentuage{position:absolute;margin:-54px -5px 0 0;right:0;}

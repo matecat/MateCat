@@ -92,7 +92,6 @@ $.extend(UI, {
 	},
 	setEvents: function() {
 		this.bindShortcuts();
-
         var resetTextArea = _.debounce( function () {
             console.debug( 'resetting') ;
             var $this = $(this);
@@ -263,7 +262,7 @@ $.extend(UI, {
 
 			//lock tags and run again getWarnings
 			UI.lockTags(UI.editarea);
-			UI.currentSegmentQA();
+			UI.segmentQA(UI.currentSegment);
 
 		}).on('click', '.tagLockCustomize', function(e) {
 			e.preventDefault();
@@ -348,7 +347,7 @@ $.extend(UI, {
 			restoreSelection();
 			UI.closeTagAutocompletePanel();
 			UI.lockTags(UI.editarea);
-			UI.currentSegmentQA();
+			UI.segmentQA(UI.currentSegment);
 		}).on('click', '.modal.survey .x-popup', function() {
 			UI.surveyDisplayed = true;
 			if(typeof $.cookie('surveyedJobs') != 'undefined') {
@@ -405,22 +404,7 @@ $.extend(UI, {
 				UI.writeNewShortcut(c, s, this);
 			}
 			$(s).remove();
-		} ).on('click', '.authLink', function(e){
-            e.preventDefault();
-
-            $(".login-google").show();
-
-            return false;
-        } ).on('click', '#sign-in', function(e){
-            e.preventDefault();
-
-            var url = $(this).data('oauth');
-
-            var newWindow = window.open(url, 'name', 'height=600,width=900');
-            if (window.focus) {
-                newWindow.focus();
-            }
-        });
+		} );
 
 		$(window).on('scroll', function() {
 			UI.browserScrollPositionRestoreCorrection();
@@ -742,7 +726,7 @@ $.extend(UI, {
 					e.preventDefault();
 					$('.selected', $(this)).remove();
 					UI.saveInUndoStack('cancel');
-					UI.currentSegmentQA();
+					UI.segmentQA(UI.currentSegment);
 				} else {
 					var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
                     var numSpacesBefore = $('.space-marker', UI.editarea).length;
@@ -961,7 +945,9 @@ $.extend(UI, {
 			UI.currentSegment.trigger('modified');
 
 			if (UI.droppingInEditarea) {
-				UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
+				setTimeout(function() {
+					UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
+				}, 100);
 			}
 
 			if ( UI.hasSourceOrTargetTags( e.target ) ) {

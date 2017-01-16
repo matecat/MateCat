@@ -356,7 +356,7 @@ abstract class DataAccess_AbstractDao {
             }
         }
 
-        $sql = "INSERT INTO " . static::$TABLE . "(" .
+        $sql = "INSERT INTO " . static::TABLE . "(" .
                 implode(', ', $first ) . ") VALUES (" .
                 implode(', ', $second) . ");" ;
 
@@ -405,7 +405,6 @@ abstract class DataAccess_AbstractDao {
             if ( in_array( $key, static::$primary_keys )) {
                 $map[] =  " $key = :$key " ;
             }
-
         }
 
         return implode(' AND ', $map);
@@ -448,14 +447,14 @@ abstract class DataAccess_AbstractDao {
      *
      * @return bool
      */
-    public static function updateStruct( $struct, $options=array() ) {
+    public static function updateStruct( DataAccess_IDaoStruct $struct, $options=array() ) {
         $struct->ensureValid();
 
         $attrs = $struct->attributes();
 
         $sql = " UPDATE " . static::TABLE ;
-        $sql .= " SET " . self::buildUpdateSet( $attrs, $options['fields'] );
-        $sql .= " WHERE " . self::buildPkeyCondition( $attrs );
+        $sql .= " SET " . static::buildUpdateSet( $attrs, $options['fields'] );
+        $sql .= " WHERE " . static::buildPkeyCondition( $attrs );
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
@@ -469,6 +468,49 @@ abstract class DataAccess_AbstractDao {
         \Log::doLog("data", $data);
 
         return $stmt->execute( $data );
+    }
+
+    /**
+     * Inserts a struct into database.
+     *
+     * If an `auto_increment_field` is defined for the table, the last inserted is returned.
+     * Otherwise it returns TRUE on success.
+     *
+     * Returns FALSE on failure.
+     *
+     * @param DataAccess_IDaoStruct $struct
+     * @param array $options
+     * @return bool|string
+     */
+    public static function insertStruct( DataAccess_IDaoStruct $struct, $options=array() ) {
+        // TODO: allow the mask to be passed as option.
+        $mask = array_keys( $struct->toArray() );
+        $mask = array_diff($mask, static::$auto_increment_fields) ;
+
+        $sql = self::buildInsertStatement( $struct->toArray(), $mask ) ;
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $data = $struct->toArray( $mask ) ;
+
+        \Log::doLog("insert SQL :", $sql);
+        \Log::doLog("insert data :", $data );
+
+        if ( $stmt->execute( $data ) ) {
+            if ( count( static::$auto_increment_fields ) ) {
+                return $conn->lastInsertId() ;
+            }
+            else {
+                return TRUE;
+            }
+        }
+        else {
+
+            if ( $options['raise'] ) {
+                throw new Exception( $stmt->errorInfo() ) ;
+            }
+
+            return FALSE;
+        }
     }
 
 }

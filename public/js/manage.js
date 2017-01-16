@@ -922,6 +922,7 @@ function setBrowserHistoryBehavior() {
 
 $(document).ready(function(){
     setBrowserHistoryBehavior();
-    UI.render(true);
+	UI.render(true);
     UI.init();
+
 });

@@ -6,7 +6,7 @@ use Features\ReviewImproved;
 use LQA\EntryDao as EntryDao ;
 use Database;
 
-class SegmentTranslationIssueController extends ProtectedKleinController {
+class SegmentTranslationIssueController extends KleinController {
 
     private $chunk ;
     private $project ;

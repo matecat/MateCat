@@ -121,7 +121,6 @@ class ActivityLogDecorator {
         $this->template->logged_user   = ( $this->controller->getLoggedUser() !== false ) ? $this->controller->getLoggedUser()->shortName() : "";
         $this->template->extended_user = ( $this->controller->getLoggedUser() !== false ) ? trim( $this->controller->getLoggedUser()->fullName() ) : "";
         $this->template->outputContent = $outputContent;
-        $this->template->incomingUrl   = '/login?incomingUrl=' . INIT::$HTTPHOST . $_SERVER[ 'REQUEST_URI' ];
         $this->template->projectID     = $this->controller->project_data[ 0 ][ 'pid' ];
         $this->template->projectName   = $this->controller->project_data[ 0 ][ 'pname' ];
 

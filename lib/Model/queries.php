@@ -331,67 +331,7 @@ from language_stats
 }
 
 
-function randomString( $maxlength = 15 ) {
-    //allowed alphabet
-    $possible = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-    //init counter lenght
-    $i = 0;
-    //init string
-    $salt = '';
-
-    //add random characters to $password until $length is reached
-    while ( $i < $maxlength ) {
-        //pick a random character from the possible ones
-        $char = substr( $possible, mt_rand( 0, $maxlength - 1 ), 1 );
-        //have we already used this character in $salt?
-        if ( !strstr( $salt, $char ) ) {
-            //no, so it's OK to add it onto the end of whatever we've already got...
-            $salt .= $char;
-            //... and increase the counter by one
-            $i++;
-        }
-    }
-
-    return $salt;
-}
-
-function encryptPass( $clear_pass, $salt ) {
-    return sha1( $clear_pass . $salt );
-}
-
-function checkLogin( $user, $pass ) {
-    //get link
-    $db = Database::obtain();
-
-    //escape untrusted input
-    $user = $db->escape( $user );
-
-    //query
-    $q_get_credentials = "select pass,salt from users where email='$user'";
-    $result            = $db->query_first( $q_get_credentials );
-
-    //one way transform input pass
-    $enc_string = encryptPass( $pass, $result[ 'salt' ] );
-
-    //check
-    return $enc_string == $result[ 'pass' ];
-}
-
 function insertUser( $data ) {
-    //random, unique to user salt
-    @$data[ 'salt' ] = randomString( 15 );
-
-    //if no pass available, create a random one
-    if ( !isset( $data[ 'pass' ] ) or empty( $data[ 'pass' ] ) ) {
-        @$data[ 'pass' ] = randomString( 15 );
-    }
-    //now encrypt pass
-    $clear_pass     = $data[ 'pass' ];
-    $encrypted_pass = encryptPass( $clear_pass, $data[ 'salt' ] );
-    $data[ 'pass' ] = $encrypted_pass;
-
-    //creation data
     @$data[ 'create_date' ] = date( 'Y-m-d H:i:s' );
 
     //insert into db
@@ -1725,13 +1665,13 @@ function insertProject( ArrayObject $projectStructure ) {
     $data[ 'password' ]          = $projectStructure[ 'ppassword' ];
     $data[ 'pretranslate_100' ]  = $projectStructure[ 'pretranslate_100' ];
     $data[ 'remote_ip_address' ] = empty( $projectStructure[ 'user_ip' ] ) ? 'UNKNOWN' : $projectStructure[ 'user_ip' ];
-    $query                       = "SELECT LAST_INSERT_ID() FROM projects";
 
     $db = Database::obtain();
-    $db->insert( 'projects', $data );
-    $results = $db->query_first( $query );
-
-    return $results[ 'LAST_INSERT_ID()' ];
+    $db->begin();
+    $projectId = $db->insert( 'projects', $data );
+    $project = Projects_ProjectDao::findById( $projectId );
+    $db->commit();
+    return $project;
 }
 
 function updateTranslatorJob( $id_job, Engines_Results_MyMemory_CreateUserResponse $newUser ) {
@@ -1786,35 +1726,7 @@ function insertTranslator( ArrayObject $projectStructure ) {
     $projectStructure[ 'private_tm_user' ] = $user_id;
 }
 
-//function insertJob( $password, $id_project, $id_translator, $source_language, $target_language, $mt_engine, $tms_engine, $owner ) {
-function insertJob( ArrayObject $projectStructure, $password, $target_language, $job_segments, $owner ) {
-    $data                        = array();
-    $data[ 'password' ]          = $password;
-    $data[ 'id_project' ]        = $projectStructure[ 'id_project' ];
-    $data[ 'id_translator' ]     = is_null($projectStructure[ 'private_tm_user' ]) ?  "" : $projectStructure[ 'private_tm_user' ] ;
-    $data[ 'source' ]            = $projectStructure[ 'source_language' ];
-    $data[ 'target' ]            = $target_language;
-    $data[ 'id_tms' ]            = $projectStructure[ 'tms_engine' ];
-    $data[ 'id_mt_engine' ]      = $projectStructure[ 'mt_engine' ];
-    $data[ 'create_date' ]       = date( "Y-m-d H:i:s" );
-    $data[ 'subject' ]           = $projectStructure[ 'job_subject' ];
-    $data[ 'owner' ]             = $owner;
-    $data[ 'job_first_segment' ] = $job_segments[ 'job_first_segment' ];
-    $data[ 'job_last_segment' ]  = $job_segments[ 'job_last_segment' ];
-    $data[ 'tm_keys' ]           = $projectStructure[ 'tm_keys' ];
-    $data[ 'payable_rates' ]     = json_encode( $projectStructure[ 'payable_rates' ] );
-    $data[ 'dqf_key' ]           = $projectStructure[ 'dqf_key' ];
-
-    $query = "SELECT LAST_INSERT_ID() FROM jobs";
-
-    $db = Database::obtain();
-    $db->insert( 'jobs', $data );
-    $results = $db->query_first( $query );
-
-    return $results[ 'LAST_INSERT_ID()' ];
-}
-
-function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $fileDateSha1Path, $params=array() ) {
+function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $fileDateSha1Path ) {
     $data                         = array();
     $data[ 'id_project' ]         = $projectStructure[ 'id_project' ];
     $data[ 'filename' ]           = $file_name;
@@ -1825,28 +1737,11 @@ function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $fil
     $db = Database::obtain();
 
     try {
-        $db->insert('files', $data);
+        $idFile = $db->insert('files', $data);
+    } catch ( PDOException $e ) {
+        Log::doLog( "Database insert error: {$e->getMessage()} " );
+        throw new Exception( "Database insert file error: {$e->getMessage()} ", - $e->getCode() );
     }
-    catch (PDOException $e) {
-        $errno = $e->getCode();
-        if ( $errno == 1153 ) {
-            Log::doLog( "file too large for mysql packet: increase max_allowed_packed_size" );
-            throw new Exception( "Database insert Large file error: $errno ", -$errno );
-        }
-        else {
-            Log::doLog( "Database insert error: $errno " );
-            throw new Exception( "Database insert file error: $errno ", -$errno );
-        }
-    }
-    $query   = "SELECT LAST_INSERT_ID() FROM files";
-
-    try {
-        $results = $db->query_first($query);
-    } catch( PDOException $e ) {
-        Log::doLog( "Database failure, failed to get last index. {$e->getMessage()}: {$e->getCode()} ", -$e->getCode() );
-        throw new Exception( "Database failure, failed to get last index. {$e->getMessage()}: {$e->getCode()} ", -$e->getCode() );
-    }
-    $idFile = $results[ 'LAST_INSERT_ID()' ];
 
     return $idFile;
 }
@@ -2232,31 +2127,23 @@ function getProjectStatsVolumeAnalysis( $pid ) {
     return $results;
 }
 
-function getProjectForVolumeAnalysis( $type, $limit = 1 ) {
+function getProjectForVolumeAnalysis( $limit = 1 ) {
 
     $query_limit = " limit $limit";
 
-    $type = strtoupper( $type );
-
-    if ( $type == 'FAST' ) {
-        $status_search = Constants_ProjectStatus::STATUS_NEW;
-    } else {
-        $status_search = Constants_ProjectStatus::STATUS_FAST_OK;
-    }
     $query = "select p.id, id_tms, id_mt_engine, tm_keys , p.pretranslate_100, group_concat( distinct j.id ) as jid_list
 		from projects p
 		inner join jobs j on j.id_project=p.id
-		where status_analysis = '$status_search'
+		where status_analysis = '" . Constants_ProjectStatus::STATUS_NEW . "'
 		group by 1
 		order by id $query_limit
 		";
+
     $db    = Database::obtain();
-    try {
-        $results = $db->fetch_array($query);
-    } catch( PDOException $e ) {
-        Log::doLog( $e->getMessage() );
-        return $e->getCode() * -1;
-    }
+    //Needed to address the query to the master database if exists
+    $db->getConnection()->beginTransaction();
+    $results = $db->fetch_array($query); // this is a select, should never return a transaction exception
+    $db->getConnection()->commit();
     return $results;
 }
 
@@ -2636,7 +2523,10 @@ function getProjectSegmentsTranslationSummary( $pid ) {
         AND st.locked = 0
         GROUP BY id_job WITH ROLLUP";
     try {
-        $results = $db->fetch_array( $query );
+        //Needed to address the query to the master database if exists
+        $db->getConnection()->beginTransaction();
+        $results = $db->fetch_array($query);
+        $db->getConnection()->commit();
     } catch ( PDOException $e ) {
         Log::doLog( $e->getMessage() );
 

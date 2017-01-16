@@ -126,10 +126,6 @@ if (true)
                 },
                 success: function ( d ) {
 
-                    if ( !$( n ).hasClass( 'glossary-loaded' ) ) {
-                        UI.segmentQA( n );
-                    }
-
                     $( n ).addClass( 'glossary-loaded' );
 
                     if ( typeof d.errors != 'undefined' && d.errors.length ) {
@@ -238,7 +234,7 @@ if (true)
                 //find all glossary matches
                 var match = re.exec(cleanString);
                 //Check if glossary term break a marker EX: &lt;g id="3"&gt;
-                if (glossaryTerm_escaped == 'lt' || glossaryTerm_escaped == 'gt') {
+                if ((glossaryTerm_escaped.toLocaleLowerCase() == 'lt' || glossaryTerm_escaped.toLocaleLowerCase() == 'gt') && UI.hasSourceOrTargetTags(UI.currentSegment)) {
                     return;
                 }
                 while(match) {

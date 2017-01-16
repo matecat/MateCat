@@ -332,7 +332,7 @@ UI = {
 
         this.highlightEditarea();
 
-        this.currentSegmentQA();
+        this.segmentQA(UI.currentSegment );
         $(this.currentSegment).trigger('copySourceToTarget');
         if(!config.isReview) {
             var alreadyCopied = false;
@@ -1225,7 +1225,7 @@ UI = {
 	registerQACheck: function() {
 		clearTimeout(UI.pendingQACheck);
 		UI.pendingQACheck = setTimeout(function() {
-			UI.currentSegmentQA();
+			UI.segmentQA(UI.currentSegment);
 		}, config.segmentQACheckInterval);
 	},
 	reloadToSegment: function(segmentId) {
@@ -2095,8 +2095,8 @@ UI = {
                     if(parseInt(tokenData.code) < 0) {
                         var notification = {
                             title: 'Error',
-                            text: tokenData.message,
-                            type: 'warning'
+                            text: 'Download failed. Please, fix any tag issues and try again in 5 minutes. If it still fails, please, contactsupport@matecat.com',
+                            type: 'error'
                         };
                         APP.addNotification(notification);
                         // UI.showMessage({msg: tokenData.message})
@@ -2283,26 +2283,16 @@ UI = {
             APP.addNotification(notification);
 		}
 	},
-  segmentLexiQA: function(_segment) {
-      var segment = _segment;
-      //new API?
-      if (_segment.raw) {
-        segment = _segment.raw
-      }
-      var translation = $('.editarea', segment ).text().replace(/\uFEFF/g,'');
-      var id_segment = UI.getSegmentId(segment);
-      LXQ.doLexiQA(segment, translation, id_segment,false, function () {}) ;
-  },
-	currentSegmentQA: function() {
-        console.warn(
-            'currentSegmentQA is deprecated, use segmentQA and pass a segment as argument',
-            getStackTrace().split("\n")[2]
-        );
-
-        var that = this;
-        UI.segmentQA.apply( this, UI.currentSegment );
+    segmentLexiQA: function(_segment) {
+        var segment = _segment;
+        //new API?
+        if (_segment.raw) {
+            segment = _segment.raw
+        }
+        var translation = $('.editarea', segment ).text().replace(/\uFEFF/g,'');
+        var id_segment = UI.getSegmentId(segment);
+        LXQ.doLexiQA(segment, translation, id_segment,false, function () {}) ;
     },
-
     segmentQA : function( segment ) {
         if ( ! ( segment instanceof UI.Segment) ) {
             segment = new UI.Segment( segment );
@@ -2328,11 +2318,6 @@ UI = {
 		}
 
 		this.checkSegmentsArray[token] = trg_content;
-        var glossarySourcesAr = [];
-        $('section.editor .tab.glossary .results .sugg-target .translation').each(function () {
-            glossarySourcesAr.push($(this).text());
-        });
-
 		APP.doRequest({
 			data: {
 				action: 'getWarning',
@@ -2343,7 +2328,6 @@ UI = {
 				src_content: src_content,
 				trg_content: trg_content,
                 segment_status: segment_status,
-                glossaryList: glossarySourcesAr
 			},
 			error: function() {
 				UI.failedConnection(0, 'getWarning');
@@ -2651,7 +2635,7 @@ UI = {
         }
     },
     removeFromStorage: function (key) {
-        if(this.isPrivateSafari) {translation_conflicts
+        if(this.isPrivateSafari) {
             foundVal = 0;
             $.each(this.localStorageArray, function (index) {
                 if(this.key == key) foundIndex = index;
@@ -3183,7 +3167,6 @@ UI = {
     },
     start: function () {
 
-        APP.init();
         // If some icon is added on the top header menu, the file name is resized
         APP.addDomObserver($('.header-menu')[0], function() {
             APP.fitText($('.breadcrumbs'), $('#pname'), 30);

@@ -86,7 +86,7 @@ $.extend(UI, {
             if (!next) {
                 this.currentIsLoaded = true;
                 this.blockButtons = false;
-                this.currentSegmentQA();
+                this.segmentQA(segment);
             }
             if (this.currentSegmentId == this.nextUntranslatedSegmentId)
                 this.blockButtons = false;
@@ -160,7 +160,7 @@ $.extend(UI, {
         this.addInStorage('contribution-' + config.id_job + '-' + UI.getSegmentId(segment), JSON.stringify(d), 'contribution');
         this.appendAddTMXButton( segment );
         this.processContributions(d, segment);
-        this.currentSegmentQA();
+        this.segmentQA(segment);
         $(document).trigger('getContribution:complete', segment);
     },
   	processContributions: function(d, segment) {

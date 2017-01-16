@@ -457,10 +457,6 @@ footer nav li:first-child
 	    display: none;
     }
 
-    #popupWrapper
-    {
-	    display: none;
-    }
     .popup-outer
     {
 	    background: #000;

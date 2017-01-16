@@ -29,6 +29,11 @@ class Database implements IDatabase {
     public $affected_rows;
 
 
+    const SEQ_ID_SEGMENT = 'id_segment';
+    protected static $SEQUENCES = [
+            Database::SEQ_ID_SEGMENT
+    ];
+
     /**
      * Instantiate the database (singleton design pattern)
      * @param string $server
@@ -75,12 +80,14 @@ class Database implements IDatabase {
     public function getConnection() {
         if ( empty( $this->connection ) || !$this->connection instanceof PDO ) {
             $this->connection = new PDO(
-                    "mysql:host={$this->server};dbname={$this->database};charset=UTF8",
+                    "mysql:host={$this->server};dbname={$this->database}",
                     $this->user,
                     $this->password,
                     array(
-                            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION // Raise exceptions on errors
+                            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, // Raise exceptions on errors
+                            PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
                     ) );
+            $this->connection->exec( "SET names utf8" );
         }
         return $this->connection;
     }
@@ -235,7 +242,7 @@ class Database implements IDatabase {
         // Execute it
         $preparedStatement->execute($valuesToBind);
         $this->affected_rows = $preparedStatement->rowCount();
-        return $this->getConnection()->lastInsertId();
+        return $this->last_insert();
     }
 
 
@@ -244,9 +251,7 @@ class Database implements IDatabase {
      * {@inheritdoc}
      */
     public function last_insert() {
-        $result = $this->getConnection()->query("SELECT LAST_INSERT_ID() as last");
-        $out = $result->fetch(PDO::FETCH_ASSOC);
-        return $out['last'];
+        return $this->getConnection()->lastInsertId();
     }
 
 
@@ -257,6 +262,34 @@ class Database implements IDatabase {
      */
     public function escape( $string ) {
         return substr( $this->getConnection()->quote( $string ), 1, -1 );
+    }
+
+    /**
+     * @param string $sequence_name
+     * @param int    $seqIncrement
+     *
+     * @return array
+     */
+    public function nextSequence( $sequence_name, $seqIncrement = 1 ){
+
+        if( array_search( $sequence_name, static::$SEQUENCES ) === false ){
+            throw new \PDOException( "Undefined sequence " . $sequence_name );
+        }
+
+        $this->getConnection()->beginTransaction();
+
+        $statement = $this->getConnection()->prepare( "SELECT " . $sequence_name . " FROM sequences FOR UPDATE;" );
+        $statement->execute();
+        $first_id = $statement->fetch( PDO::FETCH_OBJ );
+
+        $statement = $this->getConnection()->prepare( "UPDATE sequences SET " . $sequence_name . " = " . $sequence_name . " + :seqIncrement where 1 limit 1;" );
+        $statement->bindValue( ':seqIncrement', $seqIncrement, PDO::PARAM_INT );
+        $statement->execute();
+
+        $this->getConnection()->commit();
+
+        return range( $first_id->{$sequence_name}, $first_id->{$sequence_name} + $seqIncrement -1 );
+
     }
 
 }

@@ -2,6 +2,8 @@ APP = null;
 
 APP = {
     init: function () {
+        this.setLoginEvents();
+
         this.isCattool = $( 'body' ).hasClass( 'cattool' );
         $( "body" ).on( 'click', '.modal .x-popup', function ( e ) {
             e.preventDefault();
@@ -51,14 +53,7 @@ APP = {
             $( this ).parents( '.modal' ).find( '.x-popup' ).click();
         } );
 
-        $( '#sign-in' ).click( function ( e ) {
-            e.preventDefault();
-            APP.googole_popup( $( this ).data( 'oauth' ) );
-        } );
 
-        $( '#sign-in-o, #sign-in-o-mt' ).click( function ( e ) {
-            $( '#sign-in' ).trigger( 'click' );
-        } );
     },
     alert: function ( options ) {
         //FIXME
@@ -79,14 +74,7 @@ APP = {
             content: content
         } );
     },
-    googole_popup: function ( url ) {
-        //var rid=$('#rid').text();
-        //url=url+'&rid='+rid;
-        var newWindow = window.open( url, 'name', 'height=600,width=900' );
-        if ( window.focus ) {
-            newWindow.focus();
-        }
-    },
+
     confirm: function ( options ) {
         this.waitingConfirm = true;
         this.popup( {
@@ -564,7 +552,7 @@ APP = {
      */
 
     addNotification: function (notification) {
-        if (!APP. notificationBox) {
+        if (!APP.notificationBox) {
             APP.notificationBox = ReactDOM.render(
                 React.createElement(NotificationBox),
                 $(".notifications-wrapper")[0]
@@ -611,8 +599,43 @@ APP = {
             }
         }
         return caretPos;
+    },
+
+    evalFlashMessagesForNotificationBox : function() {
+        if ( config.flash_messages && Object.keys( config.flash_messages ).length ) {
+
+            _.each(['warning', 'notice', 'error'], function( type ) {
+                if ( config.flash_messages[ type ] ) {
+                    _.each(config.flash_messages[ type ],function( obj ) {
+                        APP.addNotification({
+                            autoDismiss: false,
+                            dismissable: true,
+                            position : "bl",
+                            text : obj.value,
+                            title: type,
+                            type : type,
+                            allowHtml : true
+                        });
+                    });
+                }
+            });
+
+        }
+    },
+
+    lookupFlashServiceParam : function( name ) {
+        if ( config.flash_messages && config.flash_messages.service ) {
+            return _.filter( config.flash_messages.service, function( service, index ) {
+                return service.key == name ;
+            });
+        }
     }
+
 };
+
+$(document).ready(function(){
+    APP.init();
+});
 
 $.extend( $.expr[":"], {
     "containsNC": function ( elem, i, match ) {
@@ -632,3 +655,5 @@ var _prum = [['id',
     p.src = '//rum-static.pingdom.net/prum.min.js';
     s.parentNode.insertBefore( p, s );
 })();
+
+

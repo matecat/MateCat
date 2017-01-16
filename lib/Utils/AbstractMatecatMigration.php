@@ -1,21 +1,34 @@
 <?php
 
-
-require INIT::$ROOT . '/test/support/SchemaCopy.php';
-require INIT::$ROOT . '/test/support/SeedLoader.php';
-
 class AbstractMatecatMigration extends \Phinx\Migration\AbstractMigration {
 
     public $sql_up;
     public $sql_down;
 
     public function up() {
-        $this->execute($this->sql_up);
+
+        if ( !is_array( $this->sql_up ) ) {
+            $this->sql_up = array( $this->sql_up ) ;
+        }
+
+        foreach( $this->sql_up as $sql ) {
+            Log::doLog( $sql . "\n" );
+            $this->execute($sql);
+        }
+
         $this->resetSchemaDump('up');
     }
 
     public function down() {
-        $this->execute($this->sql_down);
+
+        if ( !is_array( $this->sql_down ) ) {
+            $this->sql_down = array( $this->sql_down ) ;
+        }
+
+        foreach( $this->sql_down as $sql ) {
+            $this->execute($sql);
+        }
+
         $this->resetSchemaDump('down');
     }
 

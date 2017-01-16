@@ -19,9 +19,8 @@
         </script>
         <script type="text/javascript" src="${basepath}public/js/lib/jquery.js?build=${build_number}"></script>
         <script type="text/javascript" src="${basepath}public/js/lib/jquery.cookie.js?build=${build_number}"></script>
-        <script type="text/javascript" src="${basepath}public/js/common.js?build=${build_number}"></script>
+        <script type="text/javascript" src="${basepath}public/js/build/common.js?build=${build_number}"></script>
         <script type="text/javascript" src="${basepath}public/js/editlog.js?build=${build_number}"></script>
-        <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
 
         <script src="${basepath}public/js/build/react.js?build=${build_number}"></script>
         <script src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
@@ -182,30 +181,14 @@
         <footer>
             <div class="wrapper">
 
-                <nav tal:condition="php: Bootstrap::areOauthKeysPresent()">
+                <nav>
                     <ul>
-                        <tal:block tal:condition="php: !empty(logged_user)">
-                            <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
-                        </tal:block>
-
-                        <tal:block tal:condition="php: empty(logged_user)">
-                            <li><a href="${incomingUrl}" class="authLink">Manage</a></li>
-                        </tal:block>
+                        <li><a tal:attributes="href string:${basepath}manage/">Manage</a></li>
 
                         <li><a href="https://www.matecat.com/support/" target="_blank">Support</a></li>
                     </ul>
 
-                    <tal:block tal:condition="php: empty(logged_user)">
-                        <div id='welcomebox'>
-                            <span>Anonymous</span> (<a id='loginlink' class="authLink" href="${incomingUrl}">Login</a>)
-                        </div>
-                    </tal:block>
-
-                    <tal:block tal:condition="php: !empty(logged_user)">
-                        <div id='welcomebox' tal:attributes="title extended_user">
-                            <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>Logout</a>)
-                        </div>
-                    </tal:block>
+                    <div metal:use-macro="common.html/login_includes" />
                     
                 </nav>
 
@@ -255,7 +238,6 @@
                 </div>
 
                 <div id="statistics" style="${php: job_stats['ANALYSIS_COMPLETE'] ? '' : job_stats['STATUS_BAR_NO_DISPLAY'] }">
-                    <!-- <p class="progress">Progress:</p> -->
                     <div class="meter" style="width:10%">
 
                         <a href="#"  class="approved-bar" tal:attributes="title string:Approved ${job_stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job_stats/APPROVED_PERC_FORMATTED}%"></a>
@@ -270,47 +252,16 @@
                             <a tal:condition="php: !empty(analysis_enabled)" target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">Words</a><tal:block tal:condition="php: empty(analysis_enabled)">Words</tal:block>: <strong id="total-payable" tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
                         </li>
                         <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
-                        <!--
-                        <li id="stat-draft">Draft: <strong tal:content="job_stats/DRAFT_FORMATTED|default">- - -</strong></li>
-                        <li id="stat-rejected">Rejected: <strong tal:content="job_stats/REJECTED_FORMATTED|default">- - -</strong></li>
-                        -->
-                      
-            
-
-                   </ul> 
-                   <!-- ul class="statistics-details">
-
-                     <li id="stat-wph" title="Based on last 10 segments performance">Speed: <strong tal:content="job_stats/WORDS_PER_HOUR|default">1.354</strong> Words/h</li>
-                        <li id="stat-completion">Completed in: <strong tal:content="job_stats/ESTIMATED_COMPLETION|default">36h 58m</strong></li>
-                    </ul -->
-            
+                   </ul>
         </div>
 
             </div> <!-- .wrapper -->
         </footer>
 
 
-        <script type="text/javascript">
-            $( document ).ready(function() {
-                $('a.authLink').click(function(e){
-                    e.preventDefault();
-                    $(".login-google").show();
-                    return false;
-                });
-                $('#sign-in').click(function(e){
-                    e.preventDefault();
-                    APP.googole_popup($(this).data('oauth'));
-                })
-            });
-            $( document ).on('click', '.x-popup', function() {
-                $( '.login-google' ).hide();
-            });
-        </script>
-
         <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/track_codes_upload"/>
 
         <div metal:use-macro="cookiebanner.html/cookieBanner"/>
-        <div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
         <div metal:use-macro="common.html/footer_includes" />
     </body>
 </html>
