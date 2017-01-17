@@ -24,6 +24,7 @@ a {
 
 .project-list {
 	padding-bottom: 100px;
+	padding-top: 100px;
 }
 
 .add-project {
@@ -95,18 +96,18 @@ i.close-x:before {
 		}
 
 		.project-id {
-			background-color: #929292;
-			padding-left: 30px;
-			color: #f1f1f1;
-			// border-right: 1px solid #f1f1f1;
-			min-width: 152px;
-			line-height: 1.55rem;
-			padding-top: 2px;
-			margin-top: 2px;
+		    padding-left: 15px;
+		    color: #f1f1f1;
+		    min-width: 99px;
+		    line-height: 1.55rem;
+		    padding-top: 2px;
+		    margin-top: 2px;
 			@media #{$small-and-down} {
 				padding-left: 15px;
 			}
 			.id-project {
+				background-color: #929292;
+    			padding: 0 15px;
 			}
 		}
 		.project-name {
