@@ -40,15 +40,19 @@ class Header extends React.Component {
                                             filterFunction={this.props.filterFunction}/>
                                     </div>*/}
 
-                                    <div className="input-field col m4">
+                                    <div className="input-field col m2 offset-m8">
                                         <select className="list-member-team">
-                                            <option><input value="Alvin" id="first_name2" type="search" className="validate" /></option>
-                                            <option value="" disabled="disabled" selected="selected">Choose your option</option>
+                                            {/*<option><input value="Alvin" id="first_name2" type="search" className="validate" /></option>*/}
+                                            <option value="" selected="selected">Personal
+                                                <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0 class-prova">
+                                                    <i className="icon-more_vert"></i>
+                                                </a>
+                                            </option>
                                             <option value="1">Option 1</option>
                                             <option value="2">Option 2</option>
                                             <option value="3">Option 3</option>
                                         </select>
-                                        <label>Materialize Select</label>
+                                       
                                     </div>
                          
                                         
