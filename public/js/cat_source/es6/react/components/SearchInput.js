@@ -29,19 +29,25 @@ class SearchInput extends React.Component {
 
 
     render () {
-        return (<div className="row">
-                    <div className="input-field">
-                        <i className="icon-search prefix"/>
-                        <input id="icon_prefix" type="text" className="valid"
-                               placeholder="Search by project name"
-                               ref={(input) => this.textInput = input}
-                               onChange={this.filterByName.bind(this)}
-                                onKeyUp={this.onKeyPressEvent.bind(this)}/>
-                        <i className="prefix close-x" style={{display: 'none'}}
-                           ref={(closeIcon) => this.closeIcon = closeIcon}
-                           onClick={this.closeSearch.bind(this)}/>
-                    </div>
-                </div>
+        return (
+                        <nav>
+                            <div className="nav-wrapper">
+                                <form>
+                                    <div className="input-field">
+                                        <input id="search" type="search" required="required" placeholder="Search by project name"
+                                            placeholder="Search by project name"
+                                            ref={(input) => this.textInput = input}
+                                            onChange={this.filterByName.bind(this)}
+                                            onKeyUp={this.onKeyPressEvent.bind(this)}/>
+                                        <i className="icon-search prefix"></i>
+                                        {/*<i className="prefix close-x" style={{display: 'none'}}
+                                           ref={(closeIcon) => this.closeIcon = closeIcon}
+                                           onClick={this.closeSearch.bind(this)}/>*/}
+                                    </div>
+                                </form>
+                            </div>
+                        </nav>
+                  
         );
     }
 }

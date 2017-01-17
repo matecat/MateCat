@@ -17,15 +17,15 @@ class FilterProjects extends React.Component {
                             {/*<h4>Project List</h4>*/}
                         {/*</div>*/}
                         <form>
-                        <div className="input-field">
-                            <select defaultValue="active"
-                                    ref={(select) => this.select = select}>
-                                    <option value="active">Active Projects</option>
-                                    <option value="archived">Archived Projects</option>
-                                    <option value="cancelled">Cancelled Projects</option>
+                            <div className="input-field">
+                                <select defaultValue="active"
+                                        ref={(select) => this.select = select}>
+                                        <option value="active">Active Projects</option>
+                                        <option value="archived">Archived Projects</option>
+                                        <option value="cancelled">Cancelled Projects</option>
 
-                            </select>
-                        </div>
+                                </select>
+                            </div>
                         </form>
                     </div>
 
