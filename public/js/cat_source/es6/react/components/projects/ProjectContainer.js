@@ -277,7 +277,7 @@ class ProjectContainer extends React.Component {
                                     <div id="id-project">{this.props.project.get('id')}</div>
                                 </div>
                             </div>
-                            <div className="col m8">
+                            <div className="col">
                                 <div className="project-name">
                                     <form>
                                         <div className="row">
