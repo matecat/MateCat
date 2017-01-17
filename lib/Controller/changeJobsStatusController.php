@@ -153,5 +153,3 @@ class changeJobsStatusController extends ajaxController {
     }
 
 }
-
-?>

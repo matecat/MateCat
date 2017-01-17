@@ -69,7 +69,7 @@ AppDispatcher.register(function(action) {
     switch(action.actionType) {
         case ManageConstants.RENDER_PROJECTS:
             ProjectsStore.updateAll(action.project);
-            ProjectsStore.emitChange(action.actionType, ProjectsStore.projects);
+            ProjectsStore.emitChange(action.actionType, ProjectsStore.projects, action.hideSpinner);
             break;
         case ManageConstants.RENDER_MORE_PROJECTS:
             ProjectsStore.addProjects(action.project);
@@ -94,6 +94,9 @@ AppDispatcher.register(function(action) {
             ProjectsStore.emitChange(ManageConstants.RENDER_PROJECTS, ProjectsStore.projects);
             break;
         case ManageConstants.NO_MORE_PROJECTS:
+            ProjectsStore.emitChange(action.actionType);
+            break;
+        case ManageConstants.SHOW_RELOAD_SPINNER:
             ProjectsStore.emitChange(action.actionType);
             break;
 

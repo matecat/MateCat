@@ -37,31 +37,62 @@ UI = {
 
         window.addEventListener('scroll', this.scrollDebounceFn());
 
-        // $(window).on("blur focus", function(e) {
-        //     var prevType = $(this).data("prevType");
-        //
-        //     if (prevType != e.type) {   //  reduce double fire issues
-        //         switch (e.type) {
-        //             case "blur":
-        //                 console.log("leave page");
-        //                 self.pageLeft = true;
-        //                 break;
-        //             case "focus":
-        //                 console.log("Enter page");
-        //                 if (self.pageLeft) {
-        //                     console.log("Refresh projects");
-        //                     self.getProjects().done(function (response) {
-        //                         var projects = $.parseJSON(response.data);
-        //                         ManageActions.renderProjects(projects);
-        //                     });
-        //                 }
-        //                 break;
-        //         }
-        //     }
-        //
-        //     $(this).data("prevType", e.type);
-        // })
+        $(window).on("blur focus", function(e) {
+            var prevType = $(this).data("prevType");
+
+            if (prevType != e.type) {   //  reduce double fire issues
+                switch (e.type) {
+                    case "blur":
+                        console.log("leave page");
+                        self.pageLeft = true;
+                        break;
+                    case "focus":
+                        console.log("Enter page");
+                        if (self.pageLeft) {
+                            // alert("Refresf");
+                            console.log("Refresh projects");
+                            self.reloadProjects();
+                        }
+                        break;
+                }
+            }
+
+            $(this).data("prevType", e.type);
+        });
     },
+
+    reloadProjects: function () {
+        var self = this;
+        if ( UI.Search.currentPage === 1) {
+            this.getProjects().done(function (response) {
+                var projects = $.parseJSON(response.data);
+                ManageActions.renderProjects(projects);
+            });
+        } else {
+            ManageActions.showReloadSpinner();
+            var total_projects = [];
+            var requests = [];
+            var onDone = function (response) {
+                        var projects = $.parseJSON(response.data);
+                        $.merge(total_projects, projects);
+                    };
+            for (var i=1; i<= UI.Search.currentPage; i++ ) {
+                requests.push(this.getProjects(i));
+            }
+            $.when.apply(this, requests).done(function() {
+                var results = requests.length > 1 ? arguments : [arguments];
+                for( var i = 0; i < results.length; i++ ){
+                    onDone(results[i][0]);
+                }
+                ManageActions.renderProjects(total_projects, true);
+            });
+
+        }
+    },
+
+
+
+
 
     renderProjects: function (projects) {
         if ( !this.ProjectsContainer ) {
@@ -238,10 +269,11 @@ UI = {
     /**
      * Retrieve Projects. Passing filters is possible to retrieve projects
      */
-    getProjects: function() {
+    getProjects: function(page) {
+        var pageNumber = (page) ? page : UI.Search.currentPage;
         var data = {
             action: 'getProjects',
-            page:	UI.Search.currentPage,
+            page:	pageNumber,
             filter: (!$.isEmptyObject(UI.Search.filter)) ? 1 : 0,
         };
         // Filters

@@ -60,6 +60,8 @@ class SetContributionWorker extends AbstractWorker {
 
         $contributionStruct = new ContributionStruct( $queueElement->params->toArray() );
 
+        $this->_checkDatabaseConnection();
+
         $this->_execContribution( $contributionStruct );
 
     }

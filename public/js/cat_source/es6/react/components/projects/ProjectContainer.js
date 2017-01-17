@@ -136,8 +136,7 @@ class ProjectContainer extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState){
-        return (nextProps.project !== this.props.project ||
-        nextState.showAllJobs !== this.state.showAllJobs || nextState.lastAction !==  this.state.lastAction)
+        return (nextProps.project !== this.props.project || nextState.lastAction !==  this.state.lastAction)
     }
 
     getJobsList(targetsLangs, jobsList, jobsLength) {
@@ -219,7 +218,6 @@ class ProjectContainer extends React.Component {
                     jobsList.push(chunkList);
                     chunks = [];
                 }
-                openJobClass = 'open-job';
 
             }
 
@@ -315,18 +313,8 @@ class ProjectContainer extends React.Component {
                         </div>
                     </div>
 
-                    {/*<section className="chunks">*/}
-                        {/*<CSSTransitionGroup*/}
-                            {/*transitionName="slide"*/}
-                            {/*transitionAppear={true}*/}
-                            {/*transitionAppearTimeout={1000}*/}
-                            {/*transitionEnterTimeout={300}*/}
-                            {/*transitionLeaveTimeout={200}>*/}
-                            {/**/}
-                        {/*</CSSTransitionGroup>*/}
-                    {/*</section>*/}
                     <section className="chunks">
-                    {jobsList}
+                        {jobsList}
                     </section>
                     <div className="foot-project">
                         <div className="row">
