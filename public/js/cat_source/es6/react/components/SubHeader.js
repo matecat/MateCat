@@ -6,6 +6,9 @@ class SubHeader extends React.Component {
         super(props);
     }
 
+    componentDidMount() {
+        $('.ui.dropdown').dropdown();
+    }
     render () {
 
         return (
@@ -29,19 +32,48 @@ class SubHeader extends React.Component {
                                 <div className="switch">
                                     <label>
                                         <input type="checkbox" />
-                                        <span className="lever"></span>
+                                        <span className="lever"/>
                                     </label>
                                 </div>
                             </div>
                             <div className="list-team">
                                 <div className="input-field col m2">
-                                    <select className="list-member-team">
-                                      <option value="1" defaultValue>Assigned to me</option>
-                                      <option value="2" className="left circle">Alessandro</option>
-                                      <option value="3" className="left circle">Annalisa</option>
-                                      <option value="4" className="left circle">Claudia</option>
-                                    </select>
-                                    
+                                    <span>
+                                      Show me posts by
+                                      <div className="ui inline dropdown">
+                                        <div className="text">
+                                          <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg"/>
+                                          Jenny Hess
+                                        </div>
+                                        <i className="dropdown icon"></i>
+                                        <div className="menu">
+                                          <div className="item">
+                                            <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg"/>
+                                            Jenny Hess
+                                          </div>
+                                          <div className="item">
+                                            <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/elliot.jpg"/>
+                                            Elliot Fu
+                                          </div>
+                                          <div className="item">
+                                            <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/stevie.jpg"/>
+                                            Stevie Feliciano
+                                          </div>
+                                          <div className="item">
+                                            <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/christian.jpg"/>
+                                            Christian
+                                          </div>
+                                          <div className="item">
+                                            <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/matt.jpg"/>
+                                            Matt
+                                          </div>
+                                          <div className="item">
+                                            <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/justen.jpg"/>
+                                            Justen Kitsune
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </span>
                                 </div>
                             </div>
                         </div>
