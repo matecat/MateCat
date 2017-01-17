@@ -1,5 +1,7 @@
-var SearchInput = require("./SearchInput").default;
-var FilterProjects = require("./FilterProjects").default;
+// var SearchInput = require("./SearchInput").default;
+// var FilterProjects = require("./FilterProjects").default;
+
+var SubHeader = require("./SubHeader").default;
 
 class Header extends React.Component {
     constructor (props) {
@@ -28,7 +30,7 @@ class Header extends React.Component {
                                         <a href="/" className="logo logo-col"/>
                                     
                                 
-                                    <div className="col l4 offset-l4 m4 offset-m4">
+                                    {/*<div className="col l4 offset-l4 m4 offset-m4">
                                         <SearchInput
                                             closeSearchCallback={this.props.closeSearchCallback}
                                             onChange={this.props.searchFn}/>
@@ -36,8 +38,20 @@ class Header extends React.Component {
                                     <div className="col l2 m2 s4 right right-60">
                                         <FilterProjects
                                             filterFunction={this.props.filterFunction}/>
+                                    </div>*/}
+
+                                    <div className="input-field col m4">
+                                        <select className="list-member-team">
+                                            <option><input value="Alvin" id="first_name2" type="search" className="validate" /></option>
+                                            <option value="" disabled="disabled" selected="selected">Choose your option</option>
+                                            <option value="1">Option 1</option>
+                                            <option value="2">Option 2</option>
+                                            <option value="3">Option 3</option>
+                                        </select>
+                                        <label>Materialize Select</label>
                                     </div>
-                                    
+                         
+                                        
 
                                     <div className="col l2 right profile-area">
                                         <ul className="right">
@@ -54,6 +68,7 @@ class Header extends React.Component {
                             </div>
                         </div>
                     </nav>
+                    <SubHeader/>
                 </section>;
     }
 }
