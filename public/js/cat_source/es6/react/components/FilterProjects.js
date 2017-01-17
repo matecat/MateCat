@@ -1,45 +1,41 @@
 class FilterProjects extends React.Component {
     constructor (props) {
         super(props);
+
+        this.onChangeFunction = this.onChangeFunction.bind(this);
     }
 
     componentDidMount () {
-        // $(this.select).material_select(this.onChangeFunction.bind(this));
-        $('.ui.dropdown').dropdown();
+        var self = this;
+        this.dropdown = $('.ui.dropdown.projects-state');
+        this.dropdown.dropdown({
+            onChange: function() {
+                self.onChangeFunction();
+            }
+        });
+        this.dropdown.dropdown('set selected', 'active');
     }
 
     onChangeFunction() {
-        this.props.filterFunction(this.select.value)
+        this.props.filterFunction(this.dropdown.dropdown('get value'));
     }
 
     render () {
         return <div className="row">
-                        {/*<div className="col s9">*/}
-                            {/*<h4>Project List</h4>*/}
-                        {/*</div>*/}
-
-                        <div className="ui floating dropdown labeled icon button">
+                        <div className="ui floating projects-state dropdown labeled icon button">
                             <i className="filter icon"></i>
-                            <span className="text">Filter Posts</span>
+                            <span className="text">Filter Projects</span>
                             <div className="menu">
-                                <div className="ui icon search input">
-                                    <input type="text" placeholder="Search tags..."/>
-                                </div>
-                                <div className="divider"></div>
-                                <div className="header">
-                                    <i className="tags icon"></i>
-                                    Tag Label
-                                </div>
                                 <div className="scrolling menu">
-                                    <div className="item">
+                                    <div className="item" data-value="active">
                                         <div className="ui red empty circular label"></div>
                                         Active Projects
                                     </div>
-                                    <div className="item">
+                                    <div className="item" data-value="archived">
                                         <div className="ui blue empty circular label"></div>
                                         Archived Projects
                                     </div>
-                                    <div className="item">
+                                    <div className="item" data-value="cancelled">
                                         <div className="ui black empty circular label"></div>
                                         Cancelled Projects
                                     </div>

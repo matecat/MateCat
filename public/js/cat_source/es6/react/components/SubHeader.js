@@ -7,7 +7,7 @@ class SubHeader extends React.Component {
     }
 
     componentDidMount() {
-        $('.ui.dropdown').dropdown();
+        $('.ui.dropdown.users-projects').dropdown();
     }
     render () {
 
@@ -40,12 +40,12 @@ class SubHeader extends React.Component {
                                 <div className="input-field col m2">
                                     <span>
                                       Show me posts by
-                                      <div className="ui inline dropdown">
+                                      <div className="ui inline dropdown users-projects">
                                         <div className="text">
                                           <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg"/>
                                           Jenny Hess
                                         </div>
-                                        <i className="dropdown icon"></i>
+                                        <i className="dropdown icon"/>
                                         <div className="menu">
                                           <div className="item">
                                             <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg"/>

@@ -23,7 +23,7 @@ class ProjectContainer extends React.Component {
 
     componentDidMount() {
         $(this.dropdown).dropdown({
-            belowOrigin: true
+            direction : 'downward'
         });
         $('.tooltipped').tooltip({delay: 50});
         this.getLastAction();
@@ -54,27 +54,27 @@ class ProjectContainer extends React.Component {
 
 
     getProjectMenu(activityLogUrl) {
-        var menuHtml = <ul id={'dropdown' + this.props.project.get('id')} className='dropdown-content'>
-                            <li><a href={activityLogUrl} target="_blank"><i className="icon-download-logs"/>Activity Log</a></li>
-                            <li className="divider"/>
-                            <li><a onClick={this.archiveProject.bind(this)}><i className="icon-drawer"/>Archive project</a></li>
-                             <li className="divider"/>
-                            <li><a onClick={this.removeProject.bind(this)}><i className="icon-trash-o"/>Cancel project</a></li>
-                        </ul>;
+        var menuHtml = <div className="menu">
+            <div className="item"><a href={activityLogUrl} target="_blank"><i className="icon-download-logs"/>Activity Log</a></div>
+
+            <div className="item"><a onClick={this.archiveProject.bind(this)}><i className="icon-drawer"/>Archive project</a></div>
+
+            <div className="item"><a onClick={this.removeProject.bind(this)}><i className="icon-trash-o"/>Cancel project</a></div>
+                        </div>;
         if ( this.props.project.get('has_archived') ) {
-            menuHtml = <ul id={'dropdown' + this.props.project.get('id')} className='dropdown-content'>
-                            <li><a href={activityLogUrl} target="_blank"><i className="icon-download-logs"/>Activity Log</a></li>
-                            <li className="divider"/>
-                            <li><a onClick={this.activateProject.bind(this)}><i className="icon-drawer unarchive-project"/>Unarchive project</a></li>
-                            <li className="divider"/>
-                            <li><a onClick={this.removeProject.bind(this)}><i className="icon-trash-o"/>Cancel project</a></li>
-                        </ul>;
+            menuHtml = <div className="menu">
+                <div className="item"><a href={activityLogUrl} target="_blank"><i className="icon-download-logs"/>Activity Log</a></div>
+
+                <div className="item"><a onClick={this.activateProject.bind(this)}><i className="icon-drawer unarchive-project"/>Unarchive project</a></div>
+
+                <div className="item"><a onClick={this.removeProject.bind(this)}><i className="icon-trash-o"/>Cancel project</a></div>
+                        </div>;
         } else if ( this.props.project.get('has_cancelled') ) {
-            menuHtml = <ul id={'dropdown' + this.props.project.get('id')} className='dropdown-content'>
-                            <li><a href={activityLogUrl} target="_blank"><i className="icon-download-logs"/> Activity Log</a></li>
-                            <li className="divider"/>
-                            <li><a onClick={this.activateProject.bind(this)}><i className="icon-drawer unarchive-project"/> Resume Project</a></li>
-                        </ul>;
+            menuHtml = <div className="menu">
+                <div className="item"><a href={activityLogUrl} target="_blank"><i className="icon-download-logs"/> Activity Log</a></div>
+
+                <div className="item"><a onClick={this.activateProject.bind(this)}><i className="icon-drawer unarchive-project"/> Resume Project</a></div>
+                        </div>;
         }
         return menuHtml;
     }
@@ -300,12 +300,11 @@ class ProjectContainer extends React.Component {
                                 <ul className="project-activity-icon right">
 
                                     <li>
-                                        <a className='dropdown-button btn-floating btn-flat waves-effect waves-dark z-depth-0'
-                                           ref={(dropdown) => this.dropdown = dropdown}
-                                           data-activates={'dropdown' + this.props.project.get('id')}>
+                                        <div className="ui icon top left pointing dropdown button menu-project"
+                                                 ref={(dropdown) => this.dropdown = dropdown}>
                                             <i className="icon-more_vert"/>
-                                        </a>
-                                        {projectMenu}
+                                            {projectMenu}
+                                        </div>
                                     </li>
                                 </ul>
                             </div>

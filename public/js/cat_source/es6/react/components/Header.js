@@ -70,6 +70,8 @@ class Header extends React.Component {
                     </nav>
                     <SubHeader
                         filterFunction={this.props.filterFunction}
+                        closeSearchCallback={this.props.closeSearchCallback}
+                        searchFn={this.props.searchFn}
                         />
                 </section>;
     }
