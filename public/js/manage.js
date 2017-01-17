@@ -16,6 +16,7 @@ UI = {
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_TM_PANEL, this.openJobTMPanel);
         $(document).ready(function() {
             $('.list-member-team').material_select();
+            $('.modal').modal();
           });
     },
 
