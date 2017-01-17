@@ -2,6 +2,7 @@ module.exports = function(grunt) {
     var mapFilePath;
 
     var basePath = '../../public/js/';
+    var gruntDir = '../../support_scripts/grunt/';
     var buildPath = '../../public/js/build/';
     var buildPathCss = '../../public/css/build/';
     var incPath = '../../inc/';
@@ -52,6 +53,10 @@ module.exports = function(grunt) {
 
     var cssWatchMaterialize = [
         cssBase + 'sass/materialize/*'
+    ];
+
+    var cssWatchSemantic = [
+        gruntDir + 'semantic/dist/semantic.css'
     ];
 
 
@@ -232,7 +237,8 @@ module.exports = function(grunt) {
                     basePath + 'lib/handlebars.runtime-v4.0.5.js',
                     basePath + 'lib/lokijs.min.js',
                     basePath + 'lib/sprintf.min.js',
-					basePath + 'lib/jquery.powertip.min.js'
+					basePath + 'lib/jquery.powertip.min.js',
+                    cssBase  + 'semantic/semantic.min.js'
                 ],
                 dest: buildPath + 'libs.js'
             },
@@ -310,6 +316,14 @@ module.exports = function(grunt) {
                     livereload : true
                 }
             },
+            cssSemantic: {
+                files:  cssWatchSemantic,
+                tasks: ['sass:distSemantic'],
+                options: {
+                    interrupt: true,
+                    livereload : true
+                }
+            }
         },
         sass: {
             distCommon: {
@@ -352,6 +366,16 @@ module.exports = function(grunt) {
                 ],
                 dest: cssBase + 'build/manage-build.css'
             },
+            distSemantic: {
+                options : {
+                    sourceMap : false,
+                    includePaths: [ cssBase, gruntDir + 'semantic/dist/' ]
+                },
+                src: [
+                    cssBase + 'sass/semantic.scss'
+                ],
+                dest: cssBase + 'build/semantic.css'
+            }
         },
         jshint: {
             options: {

@@ -41,13 +41,9 @@ class Header extends React.Component {
                                     </div>*/}
 
                                     <div className="input-field col m2 offset-m8">
-                                        <select className="list-member-team">
+                                        <select className="list-member-team" defaultValue={0}>
                                             {/*<option><input value="Alvin" id="first_name2" type="search" className="validate" /></option>*/}
-                                            <option value="" selected="selected">Personal
-                                                <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0 class-prova">
-                                                    <i className="icon-more_vert"></i>
-                                                </a>
-                                            </option>
+                                            <option value="0">Personal</option>
                                             <option value="1">Option 1</option>
                                             <option value="2">Option 2</option>
                                             <option value="3">Option 3</option>
@@ -72,7 +68,9 @@ class Header extends React.Component {
                             </div>
                         </div>
                     </nav>
-                    <SubHeader/>
+                    <SubHeader
+                        filterFunction={this.props.filterFunction}
+                        />
                 </section>;
     }
 }

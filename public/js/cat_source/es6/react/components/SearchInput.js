@@ -34,7 +34,7 @@ class SearchInput extends React.Component {
                             <div className="nav-wrapper">
                                 <form>
                                     <div className="input-field">
-                                        <input id="search" type="search" required="required" placeholder="Search by project name"
+                                        <input id="search" type="search" required="required"
                                             placeholder="Search by project name"
                                             ref={(input) => this.textInput = input}
                                             onChange={this.filterByName.bind(this)}

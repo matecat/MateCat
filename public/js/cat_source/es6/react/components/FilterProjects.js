@@ -4,7 +4,8 @@ class FilterProjects extends React.Component {
     }
 
     componentDidMount () {
-        $(this.select).material_select(this.onChangeFunction.bind(this));
+        // $(this.select).material_select(this.onChangeFunction.bind(this));
+        $('.ui.dropdown').dropdown();
     }
 
     onChangeFunction() {
@@ -16,18 +17,36 @@ class FilterProjects extends React.Component {
                         {/*<div className="col s9">*/}
                             {/*<h4>Project List</h4>*/}
                         {/*</div>*/}
-                        <form>
-                            <div className="input-field">
-                                <select defaultValue="active"
-                                        ref={(select) => this.select = select}>
-                                        <option value="active">Active Projects</option>
-                                        <option value="archived">Archived Projects</option>
-                                        <option value="cancelled">Cancelled Projects</option>
 
-                                </select>
+                        <div className="ui floating dropdown labeled icon button">
+                            <i className="filter icon"></i>
+                            <span className="text">Filter Posts</span>
+                            <div className="menu">
+                                <div className="ui icon search input">
+                                    <input type="text" placeholder="Search tags..."/>
+                                </div>
+                                <div className="divider"></div>
+                                <div className="header">
+                                    <i className="tags icon"></i>
+                                    Tag Label
+                                </div>
+                                <div className="scrolling menu">
+                                    <div className="item">
+                                        <div className="ui red empty circular label"></div>
+                                        Active Projects
+                                    </div>
+                                    <div className="item">
+                                        <div className="ui blue empty circular label"></div>
+                                        Archived Projects
+                                    </div>
+                                    <div className="item">
+                                        <div className="ui black empty circular label"></div>
+                                        Cancelled Projects
+                                    </div>
+                                </div>
                             </div>
-                        </form>
-                    </div>
+                        </div>
+                    </div>;
 
 
 
