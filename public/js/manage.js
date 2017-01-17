@@ -17,6 +17,7 @@ UI = {
         // $(document).ready(function() {
         //     $('.list-member-team').material_select();
         //   });
+
     },
 
     render: function () {

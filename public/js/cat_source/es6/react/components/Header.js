@@ -40,15 +40,67 @@ class Header extends React.Component {
                                             filterFunction={this.props.filterFunction}/>
                                     </div>*/}
 
-                                    <div className="input-field col m2 offset-m8">
-                                        <select className="list-member-team" defaultValue={0}>
-                                            {/*<option><input value="Alvin" id="first_name2" type="search" className="validate" /></option>*/}
-                                            <option value="0">Personal</option>
-                                            <option value="1">Option 1</option>
-                                            <option value="2">Option 2</option>
-                                            <option value="3">Option 3</option>
-                                        </select>
-                                       
+                                    <div className="col m2 offset-m8">
+                                        <div className="ui floating dropdown labeled icon button">
+                                          <i className="filter icon"></i>
+                                          <span className="text">Personal </span>
+                                          <div className="menu">
+                                            <div className="ui right action input">
+                                              <input type="text" placeholder="Create new Workspace" />
+                                              <div className="ui teal button">
+                                                <i className="add icon"></i>
+                                                Add
+                                              </div>
+                                            </div>
+                                            <div className="divider"></div>
+                                            {/*<div className="header">
+                                              <i className="tags icon"></i>
+                                              Tag Label
+                                            </div>*/}
+                                            <div className="scrolling menu">
+                                              <div className="item active selected">
+                                                <div className="ui red empty circular label"></div>
+                                                Personal
+                                              </div>
+                                              <div className="item">
+                                                <div className="ui red empty circular label"></div>
+                                                Ebay
+                                              </div>
+                                              <div className="item">
+                                                <div className="ui blue empty circular label"></div>
+                                                MSC
+                                              </div>
+                                              <div className="item">
+                                                <div className="ui black empty circular label"></div>
+                                                Translated
+                                              </div>
+                                              <div className="item">
+                                                <div className="ui purple empty circular label"></div>
+                                                Bamboo
+                                              </div>
+                                              <div className="item">
+                                                <div className="ui orange empty circular label"></div>
+                                                YouTube
+                                              </div>
+                                              <div className="item">
+                                                <div className="ui empty circular label"></div>
+                                                MyMemory
+                                              </div>
+                                              <div className="item">
+                                                <div className="ui yellow empty circular label"></div>
+                                                MateCat
+                                              </div>
+                                              <div className="item">
+                                                <div className="ui pink empty circular label"></div>
+                                                Chi ne ha più ne metta
+                                              </div>
+                                              <div className="item">
+                                                <div className="ui green empty circular label"></div>
+                                                Siamo una squadra fortissimi
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
                                     </div>
                          
                                         

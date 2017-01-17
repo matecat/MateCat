@@ -277,7 +277,7 @@ class ProjectContainer extends React.Component {
                                     <div id="id-project">{this.props.project.get('id')}</div>
                                 </div>
                             </div>
-                            <div className="col m8">
+                            <div className="col">
                                 <div className="project-name">
                                     <form>
                                         <div className="row">
@@ -296,9 +296,34 @@ class ProjectContainer extends React.Component {
                                     <a href={analyzeUrl} target="_blank">{payableWords} payable words</a>
                                 </div>
                             </div>
+                            
                             <div className="col right">
                                 <ul className="project-activity-icon right">
-
+                                    <li>
+                                        <a className="chip assigned-team yellow waves-effect waves-dark" href="#modal2">Ebay Team</a>
+                                        <div id="modal2" className="modal">
+                                            <div className="modal-content">
+                                                <h4>Modal Header</h4>
+                                                <p>A bunch of text</p>
+                                            </div>
+                                            <div className="modal-footer">
+                                                <a href="#!" className="modal-action modal-close waves-effect waves-green btn-flat">Agree</a>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <a className="waves-effect waves-light btn-floating green assigned-member center-align" href="#modal1">RS</a>
+                                        
+                                        <div id="modal1" className="modal">
+                                            <div className="modal-content">
+                                                <h4>Modal Header</h4>
+                                                <p>A bunch of text</p>
+                                            </div>
+                                            <div className="modal-footer">
+                                                <a href="#!" className=" modal-action modal-close waves-effect waves-green btn-flat">Agree</a>
+                                            </div>
+                                        </div>
+                                    </li>
                                     <li>
                                         <div className="ui icon top left pointing dropdown button menu-project"
                                                  ref={(dropdown) => this.dropdown = dropdown}>
