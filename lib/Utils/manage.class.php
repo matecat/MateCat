@@ -39,6 +39,9 @@ class ManageUtils {
         $dao = new Comments_CommentDao() ;
         $openThreads = $dao->getOpenThreadsForProjects( $projectIDs ) ;
 
+        $dao = new \Translations\WarningDao() ;
+        $warningsCount = $dao->getWarningsByProjectIds( $projectIDs ) ;
+
         $lang_handler = Langs_Languages::getInstance();
 
         //Prepare job data
@@ -69,6 +72,13 @@ class ManageUtils {
             foreach( $openThreads as $openThread ) {
                 if ( $openThread[ 'id_job' ] == $job[ 'id' ] && $openThread[ 'password' ] == $job[ 'password' ] ) {
                     $job[ 'open_threads_count' ] = (int) $openThread[ 'count' ] ;
+                }
+            }
+
+            $job['warnings_count'] = 0;
+            foreach( $warningsCount as $count ) {
+                if ( $count[ 'id_job' ] == $job[ 'id' ] && $count[ 'password' ] == $job[ 'password' ] ) {
+                    $job[ 'warnings_count' ] = (int) $count[ 'count' ] ;
                 }
             }
 
