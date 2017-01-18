@@ -153,8 +153,7 @@ class ConversionHandler {
             if ( !$ocrCheck->isValid( $file_path ) ) {
                 $this->result[ 'code' ]     = -20; // No Good, Default
                 $this->result[ 'errors' ][] = array( "code" => -20, "message" =>
-                        "Scanned PDF and image conversion for languages not using the latin script is experimental. 
-                        Please, check the conversion of the file and download a Preview before starting the translation."
+                        "File uploaded successfully. Before translating, download the Preview to check the conversion. OCR support for non-latin scripts is experimental."
                 );
             }
 
