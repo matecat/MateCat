@@ -729,7 +729,7 @@ LXQ.init  = function () {
                         if (warningData.suggestions && warningData.suggestions.length && word && word.length) {
                           $.each(warningData.suggestions, function (i, suggest) {
                               var suggestRow = $(tpls.lxqTooltipSuggestionBody);
-                              suggestRow.find('.tooltip-error-category').text(suggest);
+                              suggestRow.find('.tooltip-error-category').text(suggest).css('cursor','pointer');;
                               suggestRow.data('word',word);
                               root.append(suggestRow);
                           });
