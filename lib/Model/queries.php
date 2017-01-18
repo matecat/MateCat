@@ -2012,7 +2012,6 @@ function getJobsFromProjects( array $projectIDs, $search_source, $search_target,
     }
 
     $jobsQuery = "SELECT
-                 cm.open_threads_count,
                  j.id,
 				 j.id_project,
 				 j.source,
@@ -2034,14 +2033,6 @@ function getJobsFromProjects( array $projectIDs, $search_source, $search_target,
             FROM jobs j
 
             LEFT JOIN engines e ON j.id_mt_engine=e.id
-
-            LEFT JOIN (
-              SELECT count(1) as open_threads_count, id_job, id_segment
-              FROM comments
-              WHERE resolve_date IS NULL
-
-              GROUP BY id_segment
-            ) cm ON cm.id_segment > j.job_first_segment AND cm.id_segment < j.job_last_segment
 
             WHERE j.id_project IN (%s) AND %s
 
