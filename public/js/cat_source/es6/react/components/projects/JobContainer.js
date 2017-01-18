@@ -13,7 +13,23 @@ class JobContainer extends React.Component {
         $(this.dropdown).dropdown({
             belowOrigin: true
         });
-        $('.tooltipped').tooltip({delay: 50});
+        $('.tooltipped.tm-keys').tooltip({
+            delay: 50,
+            html: 'true'
+        });
+        // if (JSON.parse(this.props.job.get('private_tm_key')).length) {
+        //     var keys = JSON.parse(this.props.job.get('private_tm_key'));
+        //     var tooltipText = '';
+        //     keys.forEach(function (key, i) {
+        //         var item = '<div>KEY: ' + key.key + ', DESCRIPTION: ' + key.name + '</div>';
+        //         tooltipText =  tooltipText + item;
+        //     });
+        //     $('.tooltipped.tm-keys').tooltip({
+        //         delay: 50,
+        //         html: 'true',
+        //         tooltip: "<div>Ciao</div>"
+        //     });
+        // }
     }
 
     /**
@@ -223,8 +239,16 @@ class JobContainer extends React.Component {
 
     getTMIcon() {
         if (JSON.parse(this.props.job.get('private_tm_key')).length) {
+            var keys = JSON.parse(this.props.job.get('private_tm_key'));
+            var tooltipText = '';
+            keys.forEach(function (key, i) {
+                var descript = (key.name) ? key.name : "Private TM and Glossary";
+                var item = '<div style="text-align: left">DESCRIPTION: <span style="font-weight: bold">' + descript + '</span> KEY: ' + key.key + '</div>';
+                tooltipText =  tooltipText + item;
+            });
             return <li>
-                <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0"
+                <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0 tooltipped tm-keys"
+                   data-position="top" data-tooltip={tooltipText}
                    onClick={this.openTMPanel.bind(this)}>
                     <i className="icon-tm-matecat"/>
                 </a>

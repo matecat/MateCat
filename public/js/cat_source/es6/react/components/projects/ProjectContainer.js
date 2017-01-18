@@ -25,7 +25,7 @@ class ProjectContainer extends React.Component {
         $(this.dropdown).dropdown({
             belowOrigin: true
         });
-        $('.tooltipped').tooltip({delay: 50});
+        // $('.tooltipped').tooltip({delay: 50});
         this.getLastAction();
     }
 
@@ -34,7 +34,7 @@ class ProjectContainer extends React.Component {
 
     componentDidUpdate() {
         console.log("Updated Project : " + this.props.project.get('id'));
-        $('.tooltipped').tooltip({delay: 50});
+        // $('.tooltipped').tooltip({delay: 50});
     }
 
     removeProject() {
@@ -277,17 +277,18 @@ class ProjectContainer extends React.Component {
                                     <div id="id-project">{this.props.project.get('id')}</div>
                                 </div>
                             </div>
-                            <div className="col">
+                            <div className="col m6">
                                 <div className="project-name">
                                     <form>
-                                        <div className="row">
+                                        {/*<div className="row">*/}
                                             {state}
-                                            <div className="input-field col m10">
+                                            {/*<div className="input-field col m10">*/}
+                                            <div className="input-field">
                                                 <input id="icon_prefix" type="text" disabled="disabled" defaultValue={this.props.project.get('name')}/><i
                                                     className="material-icons prefix hide">mode_edit</i>
                                             </div>
 
-                                        </div>
+                                        {/*</div>*/}
                                     </form>
                                 </div>
                             </div>
