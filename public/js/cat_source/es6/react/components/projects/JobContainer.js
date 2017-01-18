@@ -13,23 +13,10 @@ class JobContainer extends React.Component {
         $(this.dropdown).dropdown({
             belowOrigin: true
         });
-        $('.tooltipped.tm-keys').tooltip({
+        $('.tooltipped.tm-keys, .comments-tooltip').tooltip({
             delay: 50,
             html: 'true'
         });
-        // if (JSON.parse(this.props.job.get('private_tm_key')).length) {
-        //     var keys = JSON.parse(this.props.job.get('private_tm_key'));
-        //     var tooltipText = '';
-        //     keys.forEach(function (key, i) {
-        //         var item = '<div>KEY: ' + key.key + ', DESCRIPTION: ' + key.name + '</div>';
-        //         tooltipText =  tooltipText + item;
-        //     });
-        //     $('.tooltipped.tm-keys').tooltip({
-        //         delay: 50,
-        //         html: 'true',
-        //         tooltip: "<div>Ciao</div>"
-        //     });
-        // }
     }
 
     /**
@@ -258,6 +245,28 @@ class JobContainer extends React.Component {
         }
     }
 
+    getCommentsIcon() {
+        var icon = '';
+        var openThreads = this.props.job.get("open_threads_count");
+        if (openThreads > 0) {
+            var tooltipText = "";
+            if (this.props.job.get("open_threads_count") === 1) {
+                tooltipText = 'There is an open thread';
+            } else {
+                tooltipText = 'There are <span style="font-weight: bold">' + openThreads + '</span> open threads';
+            }
+
+            icon = <li>
+                <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0 tooltipped comments-tooltip"
+                   data-position="top" data-tooltip={tooltipText}>
+                    <i className="icon-uniE96B"/>
+                </a>
+            </li>;
+        }
+        return icon;
+
+    }
+
     getSplitOrMergeButton(splitUrl, mergeUrl) {
 
         if (this.props.isChunk) {
@@ -292,6 +301,7 @@ class JobContainer extends React.Component {
 
         var jobMenu = this.getJobMenu(splitUrl, mergeUrl);
         var tmIcon = this.getTMIcon();
+        var commentsIcon = this.getCommentsIcon();
         var idJobLabel = ( !this.props.isChunk ) ? this.props.job.get('id') : this.props.job.get('id') + '-' + this.props.index;
 
         return <div className="card job z-depth-1">
@@ -346,6 +356,7 @@ class JobContainer extends React.Component {
                     </div>
                     <div className="col right">
                         <ul className="job-activity-icon">
+                            {commentsIcon}
                             {tmIcon}
                             {/*<li>
                                 <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0"
