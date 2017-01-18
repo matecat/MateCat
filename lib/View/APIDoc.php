@@ -384,8 +384,8 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
                 "Project",
                 "Comments"
               ],
-              "summary": "Get Comments",
-              "description": "Get Comments",
+              "summary": "Get segment comments",
+              "description": "Gets the list of comments on all job segments.",
               "parameters": [
                 {
                   "name": "id_job",
@@ -400,6 +400,13 @@ $max_file_size_in_MB = INIT::$MAX_UPLOAD_FILE_SIZE / (1024 * 1024);
                   "description": "The password of the job",
                   "required": true,
                   "type": "string"
+                },
+                {
+                    "name": "from_id",
+                    "in": "query",
+                    "description": "Only return records starting from this id included",
+                    "required": false,
+                    "type": "integer"
                 }
               ],
               "responses": {
