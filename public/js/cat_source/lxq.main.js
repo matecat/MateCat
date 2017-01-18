@@ -81,14 +81,14 @@ LXQ.init  = function () {
       $.lexiqaAuthenticator.init(
           {
               licenseKey: config.lxq_license,
-              partnerId: 'matecat',
+              partnerId: config.lxq_partnerid,
               lxqServer: config.lexiqaServer,
               projectId: config.id_job+'-'+config.password
           }
       );
     }
     return (function ($, config, window, LXQ, undefined) {
-        var partnerid = 'matecat';
+        var partnerid = config.lxq_partnerid;
         var colors = {
             numbers: '#D08053',
             punctuation: '#3AB45F',
