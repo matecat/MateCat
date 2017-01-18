@@ -2012,6 +2012,7 @@ function getJobsFromProjects( array $projectIDs, $search_source, $search_target,
     }
 
     $jobsQuery = "SELECT
+                 cm.open_threads_count,
                  j.id,
 				 j.id_project,
 				 j.source,
@@ -2031,20 +2032,27 @@ function getJobsFromProjects( array $projectIDs, $search_source, $search_target,
 				approved_words AS APPROVED,
                 e.name
             FROM jobs j
+
             LEFT JOIN engines e ON j.id_mt_engine=e.id
+
+            LEFT JOIN (
+              SELECT count(1) as open_threads_count, id_job, id_segment
+              FROM comments
+              WHERE resolve_date IS NULL
+
+              GROUP BY id_segment
+            ) cm ON cm.id_segment > j.job_first_segment AND cm.id_segment < j.job_last_segment
+
             WHERE j.id_project IN (%s) AND %s
+
             ORDER BY j.id DESC,
                      j.job_first_segment ASC";
 
     $query = sprintf( $jobsQuery, $ids, $where_query );
 
-    //    Log::doLog( $query );
-
     $db = Database::obtain();
-    //    $results = $db->query( "SET SESSION group_concat_max_len = 10000000;" );
     $results = $db->fetch_array( $query );
 
-    //    Log::doLog( $results );
     return $results;
 }
 

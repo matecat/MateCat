@@ -61,6 +61,8 @@ class ManageUtils {
             $job[ 'mt_engine_name' ]        = $job_array[ 'name' ];
             $job[ 'id_tms' ]                = $job_array[ 'id_tms' ];
 
+            $job[ 'open_threads_count' ]    = $job_array[ 'open_threads_count' ];
+
             //generate and set job stats
             $jobStats = new WordCount_Struct();
             $jobStats->setDraftWords( $job_array[ 'DRAFT' ] );
