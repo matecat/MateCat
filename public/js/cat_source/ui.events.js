@@ -941,9 +941,6 @@ $.extend(UI, {
 
 		}).on('input', '.editarea', function( e ) { //inputineditarea
 			e.preventDefault();
-			if (e.stopPropagation) {
-				e.stopPropagation(); // stops the browser from redirecting.
-			}
 			UI.currentSegment.addClass('modified').removeClass('waiting_for_check_result');
 			UI.currentSegment.data('modified', true);
 			UI.currentSegment.trigger('modified');
