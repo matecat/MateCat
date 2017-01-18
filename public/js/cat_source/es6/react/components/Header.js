@@ -18,6 +18,11 @@ class Header extends React.Component {
         }
     }
     componentDidMount () {
+        $('.team-dropdown').dropdown();
+        $('.team-filter.modal')
+            .modal('setting', 'transition', 'fade')
+            .modal('attach events', '.team-filter.button', 'show')
+        ;
     }
 
 
@@ -41,65 +46,30 @@ class Header extends React.Component {
                                     </div>*/}
 
                                     <div className="col m2 offset-m8">
-                                        <div className="ui floating dropdown labeled icon button">
-                                          <i className="filter icon"></i>
-                                          <span className="text">Personal </span>
-                                          <div className="menu">
-                                            <div className="ui right action input">
-                                              <input type="text" placeholder="Create new Workspace" />
-                                              <div className="ui teal button">
-                                                <i className="add icon"></i>
-                                                Add
-                                              </div>
+                                        <div className="ui fluid selection dropdown team-dropdown top-5">
+                                            <input type="hidden" name="gender" />
+                                            <i className="dropdown icon"></i>
+                                            <div className="default text">Gender</div>
+                                            <div className="menu">
+                                                <div className="header">Create Workspace
+                                                    <a className="team-filter button show" href="#">
+                                                        <i className="icon-plus3 right"></i>
+                                                    </a>
+                                                </div>
+                                                <div className="item" data-value="male" data-text="Personal">Personal
+                                                    <a className="team-filter right button show" href="#">
+                                                        <i className="icon-more_vert "></i>
+                                                    </a>
+                                                </div>    
+                                                <div className="item" data-value="male" data-text="Ebay">Ebay
+                                                    <a className="team-filter button show right" href="#">
+                                                        <i className="icon-more_vert"></i>
+                                                    </a>
+                                                </div>
+                                                <div className="item" data-value="female" data-text="MSC">MSC
+                                                    <a className="team-filter button show right" href="#"><i className="icon-more_vert"></i></a>
+                                                </div>
                                             </div>
-                                            <div className="divider"></div>
-                                            {/*<div className="header">
-                                              <i className="tags icon"></i>
-                                              Tag Label
-                                            </div>*/}
-                                            <div className="scrolling menu">
-                                              <div className="item active selected">
-                                                <div className="ui red empty circular label"></div>
-                                                Personal
-                                              </div>
-                                              <div className="item">
-                                                <div className="ui red empty circular label"></div>
-                                                Ebay
-                                              </div>
-                                              <div className="item">
-                                                <div className="ui blue empty circular label"></div>
-                                                MSC
-                                              </div>
-                                              <div className="item">
-                                                <div className="ui black empty circular label"></div>
-                                                Translated
-                                              </div>
-                                              <div className="item">
-                                                <div className="ui purple empty circular label"></div>
-                                                Bamboo
-                                              </div>
-                                              <div className="item">
-                                                <div className="ui orange empty circular label"></div>
-                                                YouTube
-                                              </div>
-                                              <div className="item">
-                                                <div className="ui empty circular label"></div>
-                                                MyMemory
-                                              </div>
-                                              <div className="item">
-                                                <div className="ui yellow empty circular label"></div>
-                                                MateCat
-                                              </div>
-                                              <div className="item">
-                                                <div className="ui pink empty circular label"></div>
-                                                Chi ne ha più ne metta
-                                              </div>
-                                              <div className="item">
-                                                <div className="ui green empty circular label"></div>
-                                                Siamo una squadra fortissimi
-                                              </div>
-                                            </div>
-                                          </div>
                                         </div>
                                     </div>
                          
@@ -120,10 +90,53 @@ class Header extends React.Component {
                             </div>
                         </div>
                     </nav>
+
+
+                    
+
+                    <div className="ui modal team-filter">
+                        <i className="icon-cancel"></i>
+                        <div className="header">
+                            Create new team
+                        </div>
+                        <div className="image content">
+                            <div className="description">
+                                <form className="ui form">
+                                    <div className="field">
+                                        <label>First Name</label>
+                                        <input type="text" name="Project Name" placeholder="Translated Team es." />
+                                    </div>
+                                    <div className="field">
+                                        <label>Last Name</label>
+                                        <input type="email" name="email" placeholder="example@mail.com" />
+                                    </div>
+                                    <div className="field">
+                                        <div className="ui checkbox">
+                                          <input type="checkbox" tabindex="0" className="hidden" />
+                                          <label>I agree to the Terms and Conditions</label>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div className="actions">
+                            <div className="ui black deny button">
+                                Nope
+                            </div>
+                            <div className="ui positive right labeled icon button">
+                                Yep ;)
+                                <i className="checkmark icon"></i>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+
+
                     <SubHeader
                         filterFunction={this.props.filterFunction}
-                        closeSearchCallback={this.props.closeSearchCallback}
-                        searchFn={this.props.searchFn}
                         />
                 </section>;
     }
