@@ -11,6 +11,8 @@ UI = {
         this.openJobSettings = this.openJobSettings.bind(this);
         this.changeJobsOrProjectStatus = this.changeJobsOrProjectStatus.bind(this);
         this.changeJobPassword = this.changeJobPassword.bind(this);
+        this.createTeam = this.createTeam.bind(this);
+        this.changeTeam = this.changeTeam.bind(this);
 
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_SETTINGS, this.openJobSettings);
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_TM_PANEL, this.openJobTMPanel);
@@ -21,6 +23,7 @@ UI = {
         ProjectsStore.addListener(ManageConstants.OPEN_CHANGE_PROJECT_ASSIGNEE, this.openChangeProjectAssignee);
 
         TeamsStore.addListener(ManageConstants.CREATE_TEAM, this.createTeam);
+        TeamsStore.addListener(ManageConstants.CHANGE_TEAM, this.changeTeam);
 
 
 
@@ -49,35 +52,35 @@ UI = {
 
         window.addEventListener('scroll', this.scrollDebounceFn());
 
-        $(window).on("blur focus", function(e) {
-            var prevType = $(this).data("prevType");
-
-            if (prevType != e.type) {   //  reduce double fire issues
-                switch (e.type) {
-                    case "blur":
-                        console.log("leave page");
-                        self.pageLeft = true;
-                        break;
-                    case "focus":
-                        console.log("Enter page");
-                        if (self.pageLeft) {
-                            // alert("Refresf");
-                            console.log("Refresh projects");
-                            self.reloadProjects();
-                        }
-                        break;
-                }
-            }
-
-            $(this).data("prevType", e.type);
-        });
+        // $(window).on("blur focus", function(e) {
+        //     var prevType = $(this).data("prevType");
+        //
+        //     if (prevType != e.type) {   //  reduce double fire issues
+        //         switch (e.type) {
+        //             case "blur":
+        //                 console.log("leave page");
+        //                 self.pageLeft = true;
+        //                 break;
+        //             case "focus":
+        //                 console.log("Enter page");
+        //                 if (self.pageLeft) {
+        //                     // alert("Refresf");
+        //                     console.log("Refresh projects");
+        //                     self.reloadProjects();
+        //                 }
+        //                 break;
+        //         }
+        //     }
+        //
+        //     $(this).data("prevType", e.type);
+        // });
         this.getAllTeams().done(function (data) {
             ManageActions.renderTeams(data.teams);
         });
 
     },
 
-    reloadProjects: function () {
+    reloadProjects: function (team) {
         var self = this;
         if ( UI.Search.currentPage === 1) {
             this.getProjects().done(function (response) {
@@ -106,10 +109,6 @@ UI = {
         }
     },
 
-
-
-
-
     renderProjects: function (projects) {
         if ( !this.ProjectsContainer ) {
             var mountPoint = $("#main-container")[0];
@@ -119,8 +118,8 @@ UI = {
                 changeJobPasswordFn: this.changeJobPassword,
                 downloadTranslationFn : this.downloadTranslation
             }), mountPoint);
-            ManageActions.renderProjects(projects);
         }
+        ManageActions.renderProjects(projects);
 
     },
 
@@ -434,6 +433,7 @@ UI = {
     },
 
     createTeam: function (teamName) {
+        var self = this;
         var team = {
             id: 300,
             name: teamName,
@@ -457,6 +457,33 @@ UI = {
         setTimeout(function () {
             ManageActions.addTeam(team);
         });
+
+    },
+    changeTeam: function (teamName) {
+        var self = this;
+        if (teamName === "Personal") {
+            this.getProjects().done(function (response) {
+                var projects = $.parseJSON(response.data);
+                self.renderProjects(projects);
+            });
+        } else if (teamName === "Ebay") {
+            setTimeout(function () {
+                ManageActions.renderProjects(EbayProjects);
+            });
+        }else if (teamName === "MSC") {
+            setTimeout(function () {
+                ManageActions.renderProjects(MSCProjects);
+            });
+        }else if (teamName === "Translated") {
+            setTimeout(function () {
+                ManageActions.renderProjects(TranslatedProjects);
+            });
+        } else {
+            setTimeout(function () {
+                ManageActions.renderProjects([]);
+            });
+        }
+
     },
 
     getUsers: function () {
@@ -543,6 +570,130 @@ UI = {
 
     },
 };
+
+var EbayProjects = [
+    {
+        "team": "Ebay",
+        "tm_analysis":"241",
+        "has_archived":false,
+        "name":"Ebay 1",
+        "has_cancelled":false,
+        "mt_engine_name":"MyMemory (All Pairs)",
+        "no_active_jobs":"",
+        "jobs":
+            [
+                {"show_download_xliff":true,"job_first_segment":"326830","open_threads_count":0,"warnings_count":0,"pid":"147","subject":"general","job_last_segment":"326846","formatted_create_date":"Jan 19, 12:18","mt_engine_name":"MyMemory (All Pairs)","create_date":"2017-01-19 12:18:08","target":"ja-JP","status":"active","sourceTxt":"Italian","private_tm_key":"[]","id_tms":"1","source":"it-IT","id":"194","password":"5126c64fee83","disabled":"","stats":{"DRAFT_PERC_FORMATTED":100,"TOTAL_FORMATTED":"241","DRAFT":241.4,"TODO_FORMATTED":"241","REJECTED_PERC_FORMATTED":0,"DRAFT_PERC":100,"TOTAL":241.4,"REJECTED_PERC":0,"DOWNLOAD_STATUS":"draft","PROGRESS_FORMATTED":"0","APPROVED_PERC_FORMATTED":0,"TRANSLATED_PERC_FORMATTED":0,"PROGRESS":0,"APPROVED_PERC":0,"TRANSLATED_PERC":0,"TRANSLATED_FORMATTED":"0","APPROVED_FORMATTED":"0","PROGRESS_PERC_FORMATTED":0,"TRANSLATED":0,"APPROVED":0,"PROGRESS_PERC":0,"id":null,"REJECTED_FORMATTED":"0","REJECTED":0,"DRAFT_FORMATTED":"241"},"targetTxt":"Japanese"}
+            ],
+        "id_tms":"1",
+        "id":"1010",
+        "password":"263d689044f8"
+    },
+    {
+        "team": "Ebay",
+        "tm_analysis":"241",
+        "has_archived":false,
+        "name":"Ebay2",
+        "has_cancelled":false,
+        "mt_engine_name":"MyMemory (All Pairs)",
+        "no_active_jobs":"",
+        "jobs":
+            [
+                {"show_download_xliff":true,"job_first_segment":"326830","open_threads_count":0,"warnings_count":0,"pid":"147","subject":"general","job_last_segment":"326846","formatted_create_date":"Jan 19, 12:18","mt_engine_name":"MyMemory (All Pairs)","create_date":"2017-01-19 12:18:08","target":"ja-JP","status":"active","sourceTxt":"Italian","private_tm_key":"[]","id_tms":"1","source":"it-IT","id":"194","password":"5126c64fee83","disabled":"","stats":{"DRAFT_PERC_FORMATTED":100,"TOTAL_FORMATTED":"241","DRAFT":241.4,"TODO_FORMATTED":"241","REJECTED_PERC_FORMATTED":0,"DRAFT_PERC":100,"TOTAL":241.4,"REJECTED_PERC":0,"DOWNLOAD_STATUS":"draft","PROGRESS_FORMATTED":"0","APPROVED_PERC_FORMATTED":0,"TRANSLATED_PERC_FORMATTED":0,"PROGRESS":0,"APPROVED_PERC":0,"TRANSLATED_PERC":0,"TRANSLATED_FORMATTED":"0","APPROVED_FORMATTED":"0","PROGRESS_PERC_FORMATTED":0,"TRANSLATED":0,"APPROVED":0,"PROGRESS_PERC":0,"id":null,"REJECTED_FORMATTED":"0","REJECTED":0,"DRAFT_FORMATTED":"241"},"targetTxt":"Japanese"}
+            ],
+        "id_tms":"1",
+        "id":"1011",
+        "password":"263d689044f8"
+    }
+
+];
+
+var MSCProjects = [
+    {
+        "team": "MSC",
+        "tm_analysis":"241",
+        "has_archived":false,
+        "name":"MSC 1",
+        "has_cancelled":false,
+        "mt_engine_name":"MyMemory (All Pairs)",
+        "no_active_jobs":"",
+        "jobs":
+            [
+                {"show_download_xliff":true,"job_first_segment":"326830","open_threads_count":0,"warnings_count":0,"pid":"147","subject":"general","job_last_segment":"326846","formatted_create_date":"Jan 19, 12:18","mt_engine_name":"MyMemory (All Pairs)","create_date":"2017-01-19 12:18:08","target":"ja-JP","status":"active","sourceTxt":"Italian","private_tm_key":"[]","id_tms":"1","source":"it-IT","id":"194","password":"5126c64fee83","disabled":"","stats":{"DRAFT_PERC_FORMATTED":100,"TOTAL_FORMATTED":"241","DRAFT":241.4,"TODO_FORMATTED":"241","REJECTED_PERC_FORMATTED":0,"DRAFT_PERC":100,"TOTAL":241.4,"REJECTED_PERC":0,"DOWNLOAD_STATUS":"draft","PROGRESS_FORMATTED":"0","APPROVED_PERC_FORMATTED":0,"TRANSLATED_PERC_FORMATTED":0,"PROGRESS":0,"APPROVED_PERC":0,"TRANSLATED_PERC":0,"TRANSLATED_FORMATTED":"0","APPROVED_FORMATTED":"0","PROGRESS_PERC_FORMATTED":0,"TRANSLATED":0,"APPROVED":0,"PROGRESS_PERC":0,"id":null,"REJECTED_FORMATTED":"0","REJECTED":0,"DRAFT_FORMATTED":"241"},"targetTxt":"Japanese"}
+            ],
+        "id_tms":"1",
+        "id":"2010",
+        "password":"263d689044f8"
+    },
+    {
+        "team": "MSC",
+        "tm_analysis":"241",
+        "has_archived":false,
+        "name":"MSC 2",
+        "has_cancelled":false,
+        "mt_engine_name":"MyMemory (All Pairs)",
+        "no_active_jobs":"",
+        "jobs":
+            [
+                {"show_download_xliff":true,"job_first_segment":"326830","open_threads_count":0,"warnings_count":0,"pid":"147","subject":"general","job_last_segment":"326846","formatted_create_date":"Jan 19, 12:18","mt_engine_name":"MyMemory (All Pairs)","create_date":"2017-01-19 12:18:08","target":"ja-JP","status":"active","sourceTxt":"Italian","private_tm_key":"[]","id_tms":"1","source":"it-IT","id":"194","password":"5126c64fee83","disabled":"","stats":{"DRAFT_PERC_FORMATTED":100,"TOTAL_FORMATTED":"241","DRAFT":241.4,"TODO_FORMATTED":"241","REJECTED_PERC_FORMATTED":0,"DRAFT_PERC":100,"TOTAL":241.4,"REJECTED_PERC":0,"DOWNLOAD_STATUS":"draft","PROGRESS_FORMATTED":"0","APPROVED_PERC_FORMATTED":0,"TRANSLATED_PERC_FORMATTED":0,"PROGRESS":0,"APPROVED_PERC":0,"TRANSLATED_PERC":0,"TRANSLATED_FORMATTED":"0","APPROVED_FORMATTED":"0","PROGRESS_PERC_FORMATTED":0,"TRANSLATED":0,"APPROVED":0,"PROGRESS_PERC":0,"id":null,"REJECTED_FORMATTED":"0","REJECTED":0,"DRAFT_FORMATTED":"241"},"targetTxt":"Japanese"}
+            ],
+        "id_tms":"1",
+        "id":"2011",
+        "password":"263d689044f8"
+    }
+
+];
+
+var TranslatedProjects = [
+    {
+        "team": "Translated",
+        "tm_analysis":"241",
+        "has_archived":false,
+        "name":"Translated 1",
+        "has_cancelled":false,
+        "mt_engine_name":"MyMemory (All Pairs)",
+        "no_active_jobs":"",
+        "jobs":
+            [
+                {"show_download_xliff":true,"job_first_segment":"326830","open_threads_count":0,"warnings_count":0,"pid":"147","subject":"general","job_last_segment":"326846","formatted_create_date":"Jan 19, 12:18","mt_engine_name":"MyMemory (All Pairs)","create_date":"2017-01-19 12:18:08","target":"ja-JP","status":"active","sourceTxt":"Italian","private_tm_key":"[]","id_tms":"1","source":"it-IT","id":"194","password":"5126c64fee83","disabled":"","stats":{"DRAFT_PERC_FORMATTED":100,"TOTAL_FORMATTED":"241","DRAFT":241.4,"TODO_FORMATTED":"241","REJECTED_PERC_FORMATTED":0,"DRAFT_PERC":100,"TOTAL":241.4,"REJECTED_PERC":0,"DOWNLOAD_STATUS":"draft","PROGRESS_FORMATTED":"0","APPROVED_PERC_FORMATTED":0,"TRANSLATED_PERC_FORMATTED":0,"PROGRESS":0,"APPROVED_PERC":0,"TRANSLATED_PERC":0,"TRANSLATED_FORMATTED":"0","APPROVED_FORMATTED":"0","PROGRESS_PERC_FORMATTED":0,"TRANSLATED":0,"APPROVED":0,"PROGRESS_PERC":0,"id":null,"REJECTED_FORMATTED":"0","REJECTED":0,"DRAFT_FORMATTED":"241"},"targetTxt":"Japanese"}
+            ],
+        "id_tms":"1",
+        "id":"3010",
+        "password":"263d689044f8"
+    },
+    {
+        "team": "Translated",
+        "tm_analysis":"241",
+        "has_archived":false,
+        "name":"Translated 2",
+        "has_cancelled":false,
+        "mt_engine_name":"MyMemory (All Pairs)",
+        "no_active_jobs":"",
+        "jobs":
+            [
+                {"show_download_xliff":true,"job_first_segment":"326830","open_threads_count":0,"warnings_count":0,"pid":"147","subject":"general","job_last_segment":"326846","formatted_create_date":"Jan 19, 12:18","mt_engine_name":"MyMemory (All Pairs)","create_date":"2017-01-19 12:18:08","target":"ja-JP","status":"active","sourceTxt":"Italian","private_tm_key":"[]","id_tms":"1","source":"it-IT","id":"194","password":"5126c64fee83","disabled":"","stats":{"DRAFT_PERC_FORMATTED":100,"TOTAL_FORMATTED":"241","DRAFT":241.4,"TODO_FORMATTED":"241","REJECTED_PERC_FORMATTED":0,"DRAFT_PERC":100,"TOTAL":241.4,"REJECTED_PERC":0,"DOWNLOAD_STATUS":"draft","PROGRESS_FORMATTED":"0","APPROVED_PERC_FORMATTED":0,"TRANSLATED_PERC_FORMATTED":0,"PROGRESS":0,"APPROVED_PERC":0,"TRANSLATED_PERC":0,"TRANSLATED_FORMATTED":"0","APPROVED_FORMATTED":"0","PROGRESS_PERC_FORMATTED":0,"TRANSLATED":0,"APPROVED":0,"PROGRESS_PERC":0,"id":null,"REJECTED_FORMATTED":"0","REJECTED":0,"DRAFT_FORMATTED":"241"},"targetTxt":"Japanese"}
+            ],
+        "id_tms":"1",
+        "id":"3011",
+        "password":"263d689044f8"
+    },
+    {
+        "team": "Translated",
+        "tm_analysis":"241",
+        "has_archived":false,
+        "name":"Translated 2",
+        "has_cancelled":false,
+        "mt_engine_name":"MyMemory (All Pairs)",
+        "no_active_jobs":"",
+        "jobs":
+            [
+                {"show_download_xliff":true,"job_first_segment":"326830","open_threads_count":0,"warnings_count":0,"pid":"147","subject":"general","job_last_segment":"326846","formatted_create_date":"Jan 19, 12:18","mt_engine_name":"MyMemory (All Pairs)","create_date":"2017-01-19 12:18:08","target":"ja-JP","status":"active","sourceTxt":"Italian","private_tm_key":"[]","id_tms":"1","source":"it-IT","id":"194","password":"5126c64fee83","disabled":"","stats":{"DRAFT_PERC_FORMATTED":100,"TOTAL_FORMATTED":"241","DRAFT":241.4,"TODO_FORMATTED":"241","REJECTED_PERC_FORMATTED":0,"DRAFT_PERC":100,"TOTAL":241.4,"REJECTED_PERC":0,"DOWNLOAD_STATUS":"draft","PROGRESS_FORMATTED":"0","APPROVED_PERC_FORMATTED":0,"TRANSLATED_PERC_FORMATTED":0,"PROGRESS":0,"APPROVED_PERC":0,"TRANSLATED_PERC":0,"TRANSLATED_FORMATTED":"0","APPROVED_FORMATTED":"0","PROGRESS_PERC_FORMATTED":0,"TRANSLATED":0,"APPROVED":0,"PROGRESS_PERC":0,"id":null,"REJECTED_FORMATTED":"0","REJECTED":0,"DRAFT_FORMATTED":"241"},"targetTxt":"Japanese"}
+            ],
+        "id_tms":"1",
+        "id":"3012",
+        "password":"263d689044f8"
+    }
+
+];
 
 $(document).ready(function(){
     UI.init();

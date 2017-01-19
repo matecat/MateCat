@@ -164,7 +164,7 @@ AppDispatcher.register(function(action) {
             break;
         case ManageConstants.NO_MORE_PROJECTS:
             ProjectsStore.emitChange(action.actionType);
-            break;
+            break;1
         case ManageConstants.SHOW_RELOAD_SPINNER:
             ProjectsStore.emitChange(action.actionType);
             break;
