@@ -14,7 +14,6 @@ class JobContainer extends React.Component {
             belowOrigin: true
         });
         $('.tooltipped.tm-keys, .comments-tooltip').tooltip({
-            delay: 50,
             html: 'true'
         });
     }

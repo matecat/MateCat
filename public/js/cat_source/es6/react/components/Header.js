@@ -20,14 +20,18 @@ class Header extends React.Component {
 
     componentDidUpdate() {
         var self = this;
+        var dropdownTeams = $('.team-dropdown');
         if (!this.selectedTeam) {
-            var dropdownTeams = $('.team-dropdown');
             dropdownTeams.dropdown('set selected', 'Personal');
             dropdownTeams.dropdown({
                 onChange: function(value, text, $selectedItem) {
                     self.changeTeam(value);
                 }
             });
+        } else {
+            setTimeout(function () {
+                dropdownTeams.dropdown('set selected', self.selectedTeam);
+            }, 100);
         }
 
     }
@@ -47,7 +51,8 @@ class Header extends React.Component {
         ManageActions.openModifyTeamModal(team);
     }
 
-    renderTeams(teams) {
+    renderTeams(teams, defaultTeamName) {
+        this.selectedTeam = defaultTeamName;
         this.setState({
             teams : teams
         });
@@ -55,7 +60,18 @@ class Header extends React.Component {
 
     getTeamsSelect() {
         var result = '';
-        if (this.state.teams.length > 0) {
+        if (this.state.teams.size > 0) {
+            var items = this.state.teams.map((team, i) => (
+                <div className="item" data-value={team.get('name')}
+                     data-text={team.get('name')}
+                     key={'team' + team.get('name') + team.get('id')}>
+                        {team.get('name')}
+                    <a className="team-filter button show right"
+                       onClick={this.openModifyTeam.bind(this, team.get('name'))}>
+                        <i className="icon-more_vert"/>
+                    </a>
+                </div>
+            ));
             result = <div className="ui fluid selection dropdown team-dropdown top-5">
                 <input type="hidden" name="gender" />
                 <i className="dropdown icon"/>
@@ -71,24 +87,13 @@ class Header extends React.Component {
                         <div className="ui form">
                             <div className="field">
                                 <input type="text" name="Project Name" placeholder="Translated Team es." />
-
                             </div>
                         </div>
                     </div>
                     <div className="item" data-value="Personal" data-text="Personal">Personal
 
                     </div>
-                    <div className="item" data-value="Ebay" data-text="Ebay">Ebay
-                        <a className="team-filter button show right"
-                           onClick={this.openModifyTeam.bind(this, 'Ebay')}>
-                            <i className="icon-more_vert"/>
-                        </a>
-                    </div>
-                    <div className="item" data-value="MSC" data-text="MSC">MSC
-                        <a className="team-filter button show right"
-                           onClick={this.openModifyTeam.bind(this, 'MSC')}>
-                            <i className="icon-more_vert"/></a>
-                    </div>
+                    {items}
                 </div>
             </div>;
         }
@@ -127,6 +132,8 @@ class Header extends React.Component {
                     </nav>
                     <SubHeader
                         filterFunction={this.props.filterFunction}
+                        searchFn={this.props.searchFn}
+                        closeSearchCallback={this.props.closeSearchCallback}
                         />
                 </section>;
     }

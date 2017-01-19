@@ -12,75 +12,12 @@ EventEmitter.prototype.setMaxListeners(0);
 
 var TeamsStore = assign({}, EventEmitter.prototype, {
     
-    teams : [
-        {
-            name: 'Ebay',
-            users: [{
-                userMail: 'chloe.king@translated.net',
-                userFullName: 'Chloe King',
-                userShortName: 'CK'
-
-            },{
-                userMail: 'owen.james@translated.net',
-                userFullName: 'Owen	James',
-                userShortName: 'OJ'
-
-            },{
-                userMail: 'stephen.powell@translated.net',
-                userFullName: 'Stephen Powell',
-                userShortName: 'SP'
-
-            }]
-        },
-        {
-            name: 'MSC',
-            users: [{
-                userMail: 'lillian.lambert@translated.net',
-                userFullName: 'Lillian	Lambert',
-                userShortName: 'LL'
-
-            },{
-                userMail: 'joe.watson@translated.net',
-                userFullName: 'Joe	Watson',
-                userShortName: 'JW'
-
-            },{
-                userMail: 'rachel.sharp@translated.net',
-                userFullName: 'Rachel	Sharp',
-                userShortName: 'RS'
-
-            },{
-                userMail: 'dan.marshall@translated.net',
-                userFullName: 'Dan	Marshall',
-                userShortName: 'DM'
-
-            }]
-        },
-        {
-            name: 'Translated',
-            users: [{
-                userMail: 'vanessa.simpson@translated.net',
-                userFullName: 'Vanessa	Simpson',
-                userShortName: 'VS'
-
-            },{
-                userMail: 'dan.howard@translated.net',
-                userFullName: 'Dan	Howard',
-                userShortName: 'DH'
-
-            },{
-                userMail: 'keith.kelly@translated.net',
-                userFullName: 'Keith	Kelly',
-                userShortName: 'KC'
-
-            }]
-        }
-    ],
+    teams : [],
 
     users : [],
 
     updateAll: function (teams) {
-        this.projects = Immutable.fromJS(teams);
+        this.teams = Immutable.fromJS(teams);
     },
 
 
@@ -112,9 +49,12 @@ AppDispatcher.register(function(action) {
             TeamsStore.removeTeam(action.team);
             TeamsStore.emitChange(ManageConstants.RENDER_TEAMS, TeamsStore.teams);
             break;
+        case ManageConstants.CREATE_TEAM:
+            TeamsStore.emitChange(ManageConstants.CREATE_TEAM, action.teamName);
+            break;
         case ManageConstants.ADD_TEAM:
             TeamsStore.addTeam(action.team);
-            TeamsStore.emitChange(ManageConstants.RENDER_TEAMS, TeamsStore.teams);
+            TeamsStore.emitChange(ManageConstants.RENDER_TEAMS, TeamsStore.teams, action.team.name);
             break;
 
 
