@@ -42,6 +42,12 @@ class ManageUtils {
         //get job data using job IDs
         $jobData = getJobsFromProjects( $projectIDs, $search_source, $search_target, $search_status, $search_onlycompleted );
 
+        $dao = new Comments_CommentDao() ;
+        $openThreads = $dao->getOpenThreadsForProjects( $projectIDs ) ;
+
+        $dao = new \Translations\WarningDao() ;
+        $warningsCount = $dao->getWarningsByProjectIds( $projectIDs ) ;
+
         $lang_handler = Langs_Languages::getInstance();
 
         //Prepare job data
@@ -67,7 +73,20 @@ class ManageUtils {
             $job[ 'mt_engine_name' ]        = $job_array[ 'name' ];
             $job[ 'id_tms' ]                = $job_array[ 'id_tms' ];
 
-            $job[ 'open_threads_count' ]    = $job_array[ 'open_threads_count' ];
+
+            $job[ 'open_threads_count' ] = 0 ;
+            foreach( $openThreads as $openThread ) {
+                if ( $openThread[ 'id_job' ] == $job[ 'id' ] && $openThread[ 'password' ] == $job[ 'password' ] ) {
+                    $job[ 'open_threads_count' ] = (int) $openThread[ 'count' ] ;
+                }
+            }
+
+            $job['warnings_count'] = 0;
+            foreach( $warningsCount as $count ) {
+                if ( $count[ 'id_job' ] == $job[ 'id' ] && $count[ 'password' ] == $job[ 'password' ] ) {
+                    $job[ 'warnings_count' ] = (int) $count[ 'count' ] ;
+                }
+            }
 
             //generate and set job stats
             $jobStats = new WordCount_Struct();

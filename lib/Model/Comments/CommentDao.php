@@ -11,6 +11,50 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
     const SOURCE_PAGE_REVISE    = 2;
     const SOURCE_PAGE_TRANSLATE = 2;
 
+
+    /**
+     * Returns a structure that lists open threads count
+     *
+     * array(
+     *        'id_project' => 1,
+     *        'id_job' => 2,
+     *        'id_segment' => 3,
+     *        'count' => 42
+     * );
+     *
+     * @param $projectIds
+     */
+    public function getOpenThreadsForProjects( $projectIds ) {
+
+        $ids = implode(',', array_map(function( $id ) {
+            return (int) $id ;
+        }, $projectIds ) );
+
+
+        $sql = "
+        SELECT id_project, jobs.password, id_job, COUNT( DISTINCT id_segment ) AS count
+            FROM projects
+            JOIN jobs ON jobs.id_project = projects.id
+            JOIN comments ON comments.id_job = jobs.id
+              AND comments.id_segment >= jobs.job_first_segment
+              AND comments.id_segment <= jobs.job_last_segment
+              AND comments.resolve_date IS NULL
+
+        WHERE projects.id IN ( $ids )
+
+        GROUP BY id_project, id_job, jobs.password
+ ";
+
+        $con = $this->con->getConnection() ;
+
+        $stmt = $con->prepare( $sql ) ;
+        $stmt->execute() ;
+
+        $result = $stmt->fetchAll() ;
+
+        return $result ;
+    }
+
     public function saveComment( $input ) {
         if ( $input->message_type == null ) {
             $input->message_type = self::TYPE_COMMENT;
