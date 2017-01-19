@@ -67,6 +67,14 @@ class Header extends React.Component {
                             <i className="icon-plus3 right"/>
                         </a>
                     </div>
+                    <div className="header" data-value="aaa" data-text="aaa">
+                        <div className="ui form">
+                            <div className="field">
+                                <input type="text" name="Project Name" placeholder="Translated Team es." />
+
+                            </div>
+                        </div>
+                    </div>
                     <div className="item" data-value="Personal" data-text="Personal">Personal
 
                     </div>
@@ -96,7 +104,7 @@ class Header extends React.Component {
                                 <div className="row">
                                     <a href="/" className="logo logo-col"/>
 
-                                    <div className="col m2 offset-m8">
+                                    <div className="col m2 right">
                                         {teamsSelect}
                                     </div>
                          
