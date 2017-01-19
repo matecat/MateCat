@@ -15,7 +15,16 @@ use ConnectedServices\GDrive as GDrive  ;
 
 class ProjectManager {
     
-    public $sanitizeProjectOptions = true ; 
+    public $sanitizeProjectOptions = true ;
+
+
+    /**
+     * Counter fro the total number of segments in the project with the flag ( show_in_cattool == true )
+     *
+     * @var int
+     */
+    protected $show_in_cattool_segs_counter = 0;
+    protected $min_max_segments_id = [];
 
     /**
      * @var ArrayObject|RecursiveArrayObject
@@ -242,8 +251,8 @@ class ProjectManager {
             $this->projectStructure[ 'id_team' ] = $this->team->id ;
         }
 
-        $this->projectStructure[ 'id_project' ] = insertProject( $this->projectStructure );
-        $this->project = Projects_ProjectDao::findById( $this->projectStructure['id_project'] );
+        $this->project = insertProject( $this->projectStructure );
+        $this->projectStructure[ 'id_project' ] = $this->project->id;
     }
 
 
@@ -430,12 +439,8 @@ class ProjectManager {
                 //
                 foreach ( $_originalFileName as $originalFileName ) {
 
-                    $file_insert_params = array();
-
-
                     $mimeType = FilesStorage::pathinfo_fix( $originalFileName, PATHINFO_EXTENSION );
-                    $fid      = insertFile( $this->projectStructure, $originalFileName, $mimeType,
-                        $fileDateSha1Path, $file_insert_params  );
+                    $fid      = insertFile( $this->projectStructure, $originalFileName, $mimeType, $fileDateSha1Path );
 
                     if ( $this->gdriveSession )  {
                         $gdriveFileId = $this->gdriveSession->findFileIdByName( $originalFileName ) ;
@@ -530,28 +535,15 @@ class ProjectManager {
         try {
             $this->_createJobs( $this->projectStructure );
 
-            //FIXME for project with pre translation this query is not enough,
-            //we need compare the number of segments with translations, but take an eye to the opensource
-
-            $query_visible_segments = "SELECT count(*) as cattool_segments
-				FROM segments USE INDEX(id_file) WHERE id_file IN ( %s ) and show_in_cattool = 1";
-
-            $string_file_list       = implode( ",", $this->projectStructure[ 'file_id_list' ]->getArrayCopy() );
-            $query_visible_segments = sprintf( $query_visible_segments, $string_file_list );
-
-            try {
-                $rows = $this->dbHandler->fetch_array( $query_visible_segments );
-            } catch ( PDOException $e ) {
-                Log::doLog( "Segment Search: Failed Retrieve min_segment/max_segment for files ( $string_file_list ) - DB Error: {$e->getMessage()} - \n" );
-                throw new Exception( "Segment Search: Failed Retrieve min_segment/max_segment for job", -5 );
-            }
-
-            if ( $rows[ 0 ][ 'cattool_segments' ] == 0 ) {
+            //FIXME for project with only pre-translations this condition is not enough, because the translated segments are marked as not to be shown in cattool
+            //we need to compare the number of segments with the number of translations
+            if ( $this->show_in_cattool_segs_counter == 0 ) {
                 Log::doLog( "Segment Search: No segments in this project - \n" );
                 $isEmptyProject = true;
             }
 
         } catch ( Exception $ex ) {
+
             $this->projectStructure[ 'result' ][ 'errors' ][] = array(
                     "code" => -9, "message" => "Fail to create Job. ( {$ex->getMessage()} )"
             );
@@ -605,47 +597,6 @@ class ProjectManager {
 
         if ( INIT::$VOLUME_ANALYSIS_ENABLED )
             $this->projectStructure[ 'result' ][ 'analyze_url' ]     = $this->analyzeURL();
-
-        /*
-         * This is the old code.
-         *
-         * This query is no more needed because the value of raw word count
-         * are calculated and updated inside the TM Analysis
-         *
-         * The only thing needed here is the status Constants_ProjectStatus::STATUS_FAST_OK
-         *
-         * <code>
-         *         $query_project_summary = "
-         *              SELECT
-         *                   COUNT( s.id ) AS project_segments,
-         *                   SUM( IF( IFNULL( st.eq_word_count, -1 ) = -1, s.raw_word_count, st.eq_word_count ) ) AS project_raw_wordcount
-         *              FROM segments s
-         *              INNER JOIN files_job fj ON fj.id_file = s.id_file
-         *              INNER JOIN jobs j ON j.id= fj.id_job
-         *              LEFT JOIN segment_translations st ON s.id = st.id_segment
-         *              WHERE j.id_project = %u
-         *          ";
-         *
-         *          $query_project_summary = sprintf( $query_project_summary, $this->projectStructure[ 'id_project' ] );
-         *
-         *          $project_summary = $this->dbHandler->fetch_array( $query_project_summary );
-         *
-         *          $update_project_count = "
-         *              UPDATE projects
-         *                SET
-         *                  standard_analysis_wc = %.2F,
-         *                  status_analysis = '%s'
-         *              WHERE id = %u
-         *          ";
-         *
-         *          $update_project_count = sprintf(
-         *                  $update_project_count,
-         *                  $project_summary[ 0 ][ 'project_raw_wordcount' ],
-         *                  $this->projectStructure[ 'status' ],
-         *                  $this->projectStructure[ 'id_project' ]
-         *          );
-         * </code>
-         */
 
         $update_project_count = "
             UPDATE projects
@@ -951,26 +902,6 @@ class ProjectManager {
             //get payable rates
             $projectStructure[ 'payable_rates' ] = Analysis_PayableRates::getPayableRates( $shortSourceLang, $shortTargetLang );
 
-            $query_min_max = "SELECT MIN( id ) AS job_first_segment , MAX( id ) AS job_last_segment " .
-                    " FROM segments WHERE id_file IN ( %s )";
-
-            $string_file_list    = implode( ",", $projectStructure[ 'file_id_list' ]->getArrayCopy() );
-            $last_segments_query = sprintf( $query_min_max, $string_file_list );
-
-            try {
-                $rows = $this->dbHandler->fetch_array( $last_segments_query );
-            } catch ( PDOException $e ) {
-                Log::doLog( "Segment Search: Failed Retrieve min_segment/max_segment for files ( $string_file_list ) - DB Error: {$e->getMessage()} - \n" );
-                throw new Exception( "Files not found.", -5 );
-            }
-            if ( !$rows || count( $rows ) == 0 ) {
-                Log::doLog( "Segment Search: Failed Retrieve min_segment/max_segment for files ( $string_file_list ) - DB Error - \n" );
-                throw new Exception( "Files not found.", -5 );
-            }
-
-            //IT IS EVERY TIME ONLY A LINE!! don't worry about a cycle
-            $job_segments = $rows[ 0 ];
-
             $password = $this->_generatePassword();
 
             $tm_key = array();
@@ -999,18 +930,35 @@ class ProjectManager {
 
             $projectStructure[ 'tm_keys' ] = json_encode( $tm_key );
 
-            $jid = insertJob( $projectStructure, $password, $target, $job_segments, $projectStructure[ 'owner' ] );
+            $newJob = new Jobs_JobStruct();
+            $newJob->password          = $password;
+            $newJob->id_project        = $projectStructure[ 'id_project' ];
+            $newJob->id_translator     = is_null($projectStructure[ 'private_tm_user' ]) ?  "" : $projectStructure[ 'private_tm_user' ] ;
+            $newJob->source            = $projectStructure[ 'source_language' ];
+            $newJob->target            = $target;
+            $newJob->id_tms            = $projectStructure[ 'tms_engine' ];
+            $newJob->id_mt_engine      = $projectStructure[ 'mt_engine' ];
+            $newJob->create_date       = date( "Y-m-d H:i:s" );
+            $newJob->subject           = $projectStructure[ 'job_subject' ];
+            $newJob->owner             = $projectStructure[ 'owner' ];
+            $newJob->job_first_segment = $this->min_max_segments_id[ 'job_first_segment' ];
+            $newJob->job_last_segment  = $this->min_max_segments_id[ 'job_last_segment' ];
+            $newJob->tm_keys           = $projectStructure[ 'tm_keys' ];
+            $newJob->payable_rates     = json_encode( $projectStructure[ 'payable_rates' ] );
+            $newJob->dqf_key           = $projectStructure[ 'dqf_key' ];
 
-            $projectStructure[ 'array_jobs' ][ 'job_list' ]->append( $jid );
-            $projectStructure[ 'array_jobs' ][ 'job_pass' ]->append( $password );
-            $projectStructure[ 'array_jobs' ][ 'job_segments' ]->offsetSet( $jid . "-" . $password, $job_segments );
+            $newJob = Jobs_JobDao::createFromStruct( $newJob );
+
+            $projectStructure[ 'array_jobs' ][ 'job_list' ]->append( $newJob->id );
+            $projectStructure[ 'array_jobs' ][ 'job_pass' ]->append( $newJob->password );
+            $projectStructure[ 'array_jobs' ][ 'job_segments' ]->offsetSet( $newJob->id . "-" . $newJob->password, $this->min_max_segments_id );
 
             foreach ( $projectStructure[ 'file_id_list' ] as $fid ) {
 
                 try {
                     //prepare pre-translated segments queries
                     if ( !empty( $projectStructure[ 'translations' ] ) ) {
-                        $this->_insertPreTranslations( $jid );
+                        $this->_insertPreTranslations( $newJob->id );
                     }
                 } catch ( Exception $e ) {
                     $msg = "\n\n Error, pre-translations lost, project should be re-created. \n\n " . var_export( $e->getMessage(), true );
@@ -1020,10 +968,11 @@ class ProjectManager {
                 if ( !empty( $this->projectStructure[ 'notes' ] ) ) {
                     $this->insertSegmentNotesForFile();
                 }
-                insertFilesJob( $jid, $fid );
+
+                insertFilesJob( $newJob->id, $fid );
 
                 if ( $this->gdriveSession && $this->gdriveSession->hasFiles() ) {
-                    $this->gdriveSession->createRemoteCopiesWhereToSaveTranslation( $fid, $jid ) ;
+                    $this->gdriveSession->createRemoteCopiesWhereToSaveTranslation( $fid, $newJob->id ) ;
                 }
             }
         }
@@ -1375,9 +1324,12 @@ class ProjectManager {
      */
     public function applySplit( ArrayObject $projectStructure ) {
         Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
-        $this->_splitJob( $projectStructure );
 
+        $this->dbHandler->getConnection()->beginTransaction();
+        $this->_splitJob( $projectStructure );
         $this->features->run( 'postJobSplitted', $projectStructure );
+        $this->dbHandler->getConnection()->commit();
+
     }
 
     public function mergeALL( ArrayObject $projectStructure, $renewPassword = false ) {
@@ -1448,6 +1400,7 @@ class ProjectManager {
         //delete all old jobs
         $queries[] = "DELETE FROM jobs WHERE id = {$first_job['id']} AND password != '{$first_job['password']}' "; //use new password
 
+        $this->dbHandler->getConnection()->beginTransaction();
 
         foreach ( $queries as $query ) {
             $res = $this->dbHandler->query( $query );
@@ -1469,6 +1422,9 @@ class ProjectManager {
         $this->features->run('postJobMerged',
             $projectStructure
         );
+
+        $this->dbHandler->getConnection()->commit();
+
     }
 
     /**
@@ -1496,7 +1452,7 @@ class ProjectManager {
 
         //needed to check if a file has only one segment
         //for correctness: we could have more tag files in the xliff
-        $fileCounter_Show_In_Cattool = 0;
+        $_fileCounter_Show_In_Cattool = 0;
 
         // Creating the Query
         foreach ( $xliff[ 'files' ] as $xliff_file ) {
@@ -1519,7 +1475,7 @@ class ProjectManager {
 
                 if ( $xliff_trans_unit[ 'attr' ][ 'translate' ] == "no" ) {
                     //No segments to translate
-                    //don't increment global counter '$fileCounter_Show_In_Cattool'
+                    //don't increment global counter '$this->fileCounter_Show_In_Cattool'
                     $show_in_cattool = 0;
                 } else {
 
@@ -1600,7 +1556,20 @@ class ProjectManager {
                                 $file_reference = 'NULL';
                             }
 
-                            $this->projectStructure[ 'segments' ][ $fid ]->append( "('$trans_unit_id',$fid,$file_reference,'$source','$source_hash',$num_words,'$mid','$ext_tags','$ext_succ_tags',$show_in_cattool,'$mrk_ext_prec_tags','$mrk_ext_succ_tags')" );
+                            $this->projectStructure[ 'segments' ][ $fid ]->append( [
+                                    $trans_unit_id,
+                                    $fid,
+                                    $file_reference,
+                                    $source,
+                                    $source_hash,
+                                    $num_words,
+                                    $mid,
+                                    $ext_tags,
+                                    $ext_succ_tags,
+                                    $show_in_cattool,
+                                    $mrk_ext_prec_tags,
+                                    $mrk_ext_succ_tags
+                            ] );
 
                         } // end foreach seg-source
 
@@ -1674,27 +1643,87 @@ class ProjectManager {
                             $file_reference = 'NULL';
                         }
 
-                        $this->projectStructure[ 'segments' ][ $fid ]->append( "('$trans_unit_id',$fid, $file_reference,'$source','$source_hash',$num_words,NULL,'$prec_tags','$succ_tags',$show_in_cattool,NULL,NULL)" );
+                        $this->projectStructure[ 'segments' ][ $fid ]->append( [
+                                $trans_unit_id,
+                                $fid,
+                                $file_reference,
+                                $source,
+                                $source_hash,
+                                $num_words,
+                                null,
+                                $prec_tags,
+                                $succ_tags,
+                                $show_in_cattool,
+                                null,
+                                null
+                        ] );
 
                     }
                 }
 
                 //increment the counter for not empty segments
-                $fileCounter_Show_In_Cattool += $show_in_cattool;
+                $_fileCounter_Show_In_Cattool += $show_in_cattool;
 
             }
         }
 
         // *NOTE*: PHP>=5.3 throws UnexpectedValueException, but PHP 5.2 throws ErrorException
         //use generic
-        if ( empty( $this->projectStructure[ 'segments' ][ $fid ] ) || $fileCounter_Show_In_Cattool == 0 ) {
+        if ( empty( $this->projectStructure[ 'segments' ][ $fid ] ) || $_fileCounter_Show_In_Cattool == 0 ) {
             Log::doLog( "Segment import - no segments found\n" );
             throw new Exception( "Segment import - no segments found", -1 );
+        } else {
+            //increment global counter
+            $this->show_in_cattool_segs_counter = $_fileCounter_Show_In_Cattool;
         }
 
-        $baseQuery = "INSERT INTO segments ( internal_id, id_file, id_file_part, segment, segment_hash, raw_word_count, xliff_mrk_id, xliff_ext_prec_tags, xliff_ext_succ_tags, show_in_cattool,xliff_mrk_ext_prec_tags,xliff_mrk_ext_succ_tags) values ";
+        $baseQuery = "INSERT INTO segments ( id, internal_id, id_file, id_file_part, segment, segment_hash, raw_word_count, xliff_mrk_id, xliff_ext_prec_tags, xliff_ext_succ_tags, show_in_cattool,xliff_mrk_ext_prec_tags,xliff_mrk_ext_succ_tags) values ";
 
         Log::doLog( "Segments: Total Rows to insert: " . count( $this->projectStructure[ 'segments' ][ $fid ] ) );
+        $sequenceIds = $this->dbHandler->nextSequence( Database::SEQ_ID_SEGMENT, count( $this->projectStructure[ 'segments' ][ $fid ] ) );
+        Log::doLog( "Id sequence reserved." );
+
+        //Update/Initialize the min-max sequences id
+        if( !isset( $this->min_max_segments_id[ 'job_first_segment' ] ) ){
+            $this->min_max_segments_id[ 'job_first_segment' ] = reset( $sequenceIds );
+        }
+
+        //update the last id, if there is another cycle update this value
+        $this->min_max_segments_id[ 'job_last_segment' ] = end( $sequenceIds );
+
+        //Prepare a new struct to transport the segments metadata
+        $segments_metadata = [];
+
+        foreach ( $sequenceIds as $position => $id_segment ){
+
+            /**
+             *  $trans_unit_id,
+             *  $fid,
+             *  $file_reference,
+             *  $source,
+             *  $source_hash,
+             *  $num_words,
+             *  $mid,
+             *  $ext_tags,
+             *  $ext_succ_tags,
+             *  $show_in_cattool,
+             *  $mrk_ext_prec_tags,
+             *  $mrk_ext_succ_tags
+             */
+            $tuple = $this->projectStructure[ 'segments' ][ $fid ][ $position ];
+            $tuple_string = "'{$tuple[0]}',{$tuple[1]},{$tuple[2]},'{$tuple[3]}','{$tuple[4]}',{$tuple[5]},'{$tuple[6]}','{$tuple[7]}','{$tuple[8]}',{$tuple[9]},'{$tuple[10]}','{$tuple[11]}'";
+
+            $this->projectStructure[ 'segments' ][ $fid ][ $position ] = "( $id_segment,$tuple_string )";
+
+            $segments_metadata[] = array(
+                'id'            => $id_segment,
+                'internal_id'   => $tuple[0],
+                'segment_hash'  => $tuple[4],
+                'xliff_mrk_id'  => $tuple[6]
+            );
+
+        }
+
         //split the query in to chunks if there are too much segments
         $this->projectStructure[ 'segments' ][ $fid ]->exchangeArray( array_chunk( $this->projectStructure[ 'segments' ][ $fid ]->getArrayCopy(), 100 ) );
 
@@ -1720,15 +1749,11 @@ class ProjectManager {
                 empty( $this->projectStructure[ 'translations' ] )
         )
         ) {
-            //natural order id ASC the same as the translations was inserted in the ArrayObject
-            $last_segments_query = "SELECT id, internal_id, segment_hash, xliff_mrk_id from segments WHERE id_file = %u";
-            $last_segments_query = sprintf( $last_segments_query, $fid );
 
             //internal counter for the segmented translations ( mrk in target )
             $array_internal_segmentation_counter = array();
 
-            $_last_segments = $this->dbHandler->fetch_array( $last_segments_query );
-            foreach ( $_last_segments as $k => $row ) {
+            foreach ( $segments_metadata as $k => $row ) {
 
                 // The following call is to save `id_segment` for notes,
                 // to be used later to insert the record in notes table.
@@ -1818,16 +1843,17 @@ class ProjectManager {
 
             //array of segmented translations
             foreach ( $struct as $pos => $translation_row ) {
-                $translation = $this->dbHandler->escape(
-                    html_entity_decode( $translation_row[ 2 ] , ENT_QUOTES, 'UTF-8')
-                ) ;
 
-                $this->projectStructure[ 'query_translations' ]->append(
-                        "( '{$translation_row[0]}',
-                        $jid, '{$translation_row[3]}',
-                        '{$status}',
-                        '$translation', NOW(), 'DONE', 1, 'ICE' )"
+                $sql_values = sprintf(
+                    "( '%s', %s, '%s', '%s', '%s', NOW(), 'DONE', 1, 'ICE' )",
+                    $translation_row [ 0 ],
+                    $jid,
+                    $translation_row [ 3 ],
+                    $status,
+                    $translation_row [ 2 ]
                 );
+
+                $this->projectStructure[ 'query_translations' ]->append( $sql_values ) ;
             }
         }
 

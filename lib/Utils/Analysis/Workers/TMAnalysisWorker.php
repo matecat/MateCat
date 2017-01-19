@@ -65,9 +65,13 @@ class TMAnalysisWorker extends AbstractWorker {
         
         $this->_checkDatabaseConnection();
 
+        /**
+         * Ensure we have fresh data from master node
+         */
+        Database::obtain()->getConnection()->beginTransaction();
         $this->project = \Projects_ProjectDao::findById( $queueElement->params->pid );
-        $this->featureSet = new \FeatureSet() ;
-        $this->featureSet->loadForProject( $this->project ) ;
+        $this->featureSet = \FeatureSet::fromIdCustomer( $this->project->id_customer );
+        Database::obtain()->getConnection()->commit();
 
         //reset matches vector
         $this->_matches = null;

@@ -2283,10 +2283,15 @@ UI = {
             APP.addNotification(notification);
 		}
 	},
-    currentSegmentLexiQA: function() {
-        var translation = $('.editarea', UI.currentSegment ).text().replace(/\uFEFF/g,'');
-        var id_segment = UI.getSegmentId(UI.currentSegment);
-        LXQ.doLexiQA(UI.currentSegment, translation, id_segment,false, function () {}) ;
+    segmentLexiQA: function(_segment) {
+        var segment = _segment;
+        //new API?
+        if (_segment.raw) {
+            segment = _segment.raw
+        }
+        var translation = $('.editarea', segment ).text().replace(/\uFEFF/g,'');
+        var id_segment = UI.getSegmentId(segment);
+        LXQ.doLexiQA(segment, translation, id_segment,false, function () {}) ;
     },
     segmentQA : function( segment ) {
         if ( ! ( segment instanceof UI.Segment) ) {
@@ -2330,25 +2335,26 @@ UI = {
 			success: function(d) {
 				if (segment.el.hasClass('waiting_for_check_result')) {
 
-                    // TODO: define d.total more explicitly
+          // TODO: define d.total more explicitly
 					if ( !d.total ) {
-						$('p.warnings', segment.el).empty();
-						$('span.locked.mismatch', segment.el).removeClass('mismatch');
-                        $('.editor .editarea .order-error').removeClass('order-error');
+  						$('p.warnings', segment.el).empty();
+  						$('span.locked.mismatch', segment.el).removeClass('mismatch');
+              $('.editor .editarea .order-error').removeClass('order-error');
 
 					}
-                    else {
-                        UI.fillCurrentSegmentWarnings(d.details, false); // update warnings
-                        UI.markTagMismatch(d.details);
-                        delete UI.checkSegmentsArray[d.token]; // delete the token from the tail
-                        segment.el.removeClass('waiting_for_check_result');
-                    }
+          else {
+              UI.fillCurrentSegmentWarnings(d.details, false); // update warnings
+              UI.markTagMismatch(d.details);
+              delete UI.checkSegmentsArray[d.token]; // delete the token from the tail
+              segment.el.removeClass('waiting_for_check_result');
+          }
 				}
 
-                $(document).trigger('getWarning:local:success', { resp : d, segment: segment }) ;
+        $(document).trigger('getWarning:local:success', { resp : d, segment: segment }) ;
+        if (LXQ.enabled()) UI.segmentLexiQA(segment);
 			}
 		}, 'local');
-        if (LXQ.enabled()) UI.currentSegmentLexiQA();
+
 	},
 
     translationIsToSave : function( segment ) {
@@ -3119,7 +3125,7 @@ UI = {
         var htmlToSave = this.editarea.html();
         this.undoStack.push(htmlToSave);
         // $('.undoCursorPlaceholder').remove();
-        
+
 	},
 	clearUndoStack: function() {
 		this.undoStack = [];

@@ -940,6 +940,10 @@ $.extend(UI, {
 			}
 
 		}).on('input', '.editarea', function( e ) { //inputineditarea
+			e.preventDefault();
+			if (e.stopPropagation) {
+				e.stopPropagation(); // stops the browser from redirecting.
+			}
 			UI.currentSegment.addClass('modified').removeClass('waiting_for_check_result');
 			UI.currentSegment.data('modified', true);
 			UI.currentSegment.trigger('modified');
@@ -963,10 +967,11 @@ $.extend(UI, {
 			}
 
 			UI.registerQACheck();
-                if(UI.isKorean && ( (e.which == '60') || (e.which == '62') || (e.which == '32')) ) {
-                } else {
+            if( !(UI.isKorean && ( (e.which == '60') || (e.which == '62') || (e.which == '32')) ) ) {
+                setTimeout(function() {
                     UI.lockTags(UI.editarea);
-                }
+                }, 100);
+            }
         }).on('input', '.editor .cc-search .input', function() {
 			UI.markTagsInSearch($(this));
 		}).on('click', '.editor .source .locked,.editor .editarea .locked', function(e) {
@@ -982,12 +987,6 @@ $.extend(UI, {
 				if(!UI.body.hasClass('tagmode-default-extended')) $('.editor .tagModeToggle').click();
             }
 
-		}).on('mousedown', '.source', function(e) {
-			if (e.button == 2) { // right click
-				// temporarily disabled
-				return true;
-			}
-			return true;
 		}).on('dragstart', '.editor .editarea .locked', function() {
             // To stop the drag in tags elements
             return false;
@@ -997,7 +996,7 @@ $.extend(UI, {
 			}
 			UI.beforeDropEditareaHTML = UI.editarea.html();
 			UI.droppingInEditarea = true;
-			setTimeout(function() {
+            setTimeout(function() {
                 UI.lockTags(UI.editarea);
                 UI.saveInUndoStack('drop');
             }, 100);

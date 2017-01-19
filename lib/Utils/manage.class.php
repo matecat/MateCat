@@ -67,6 +67,8 @@ class ManageUtils {
             $job[ 'mt_engine_name' ]        = $job_array[ 'name' ];
             $job[ 'id_tms' ]                = $job_array[ 'id_tms' ];
 
+            $job[ 'open_threads_count' ]    = $job_array[ 'open_threads_count' ];
+
             //generate and set job stats
             $jobStats = new WordCount_Struct();
             $jobStats->setDraftWords( $job_array[ 'DRAFT' ] );
@@ -96,7 +98,8 @@ class ManageUtils {
                 $tm_keys[ ] = array(
                         "key" => $tm_key_struct->key,
                         "r"   => ( $tm_key_struct->r ) ? 'Lookup' : '&nbsp;',
-                        "w"   => ( $tm_key_struct->w ) ? 'Update' : ''
+                        "w"   => ( $tm_key_struct->w ) ? 'Update' : '',
+                        "name" => $tm_key_struct->name
                 );
             }
 

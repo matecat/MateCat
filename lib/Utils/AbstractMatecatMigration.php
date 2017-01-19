@@ -12,6 +12,7 @@ class AbstractMatecatMigration extends \Phinx\Migration\AbstractMigration {
         }
 
         foreach( $this->sql_up as $sql ) {
+            Log::doLog( $sql . "\n" );
             $this->execute($sql);
         }
 

@@ -151,6 +151,20 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         $columns = array_keys( $jobStructToArray );
         $values = array_values( $jobStructToArray );
 
+        //clean null values
+        foreach( $values as $k => $val ){
+            if( $val == null ){
+                unset( $values[ $k ] );
+                unset( $columns[ $k ] );
+            }
+        }
+
+        //reindex the array
+        $columns = array_values( $columns );
+        $values  = array_values( $values );
+
+        $conn->beginTransaction();
+
         $stmt = $conn->prepare( 'INSERT INTO `jobs` ( ' . implode( ',', $columns ) . ' ) VALUES ( ' . implode( ',' , array_fill( 0, count( $values ), '?' ) ) . ' )' );
 
         foreach( $values as $k => $v ){
@@ -159,7 +173,11 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
         $stmt->execute();
 
-        return static::getById( $conn->lastInsertId() );
+        $job = static::getById( $conn->lastInsertId() );
+
+        $conn->commit();
+
+        return $job;
 
     }
 
