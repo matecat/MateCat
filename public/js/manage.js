@@ -20,6 +20,10 @@ UI = {
         ProjectsStore.addListener(ManageConstants.OPEN_CHANGE_TEAM_MODAL, this.openChangeProjectTeam);
         ProjectsStore.addListener(ManageConstants.OPEN_CHANGE_PROJECT_ASSIGNEE, this.openChangeProjectAssignee);
 
+        TeamsStore.addListener(ManageConstants.CREATE_TEAM, this.createTeam);
+
+
+
 
     },
 
@@ -35,6 +39,8 @@ UI = {
             filterFunction: this.filterProjectsFromStatus,
             closeSearchCallback: this.closeSearchCallback
         }), headerMountPoint);
+
+        this.selectedTeam = "Personal";
 
         this.getProjects().done(function (response) {
             var projects = $.parseJSON(response.data);
@@ -425,6 +431,32 @@ UI = {
         var deferred = $.Deferred().resolve(data);
         return deferred.promise();
 
+    },
+
+    createTeam: function (teamName) {
+        var team = {
+            id: 300,
+            name: teamName,
+            users: [{
+                userMail: 'vanessa.simpson@translated.net',
+                userFullName: 'Vanessa	Simpson',
+                userShortName: 'VS'
+
+            },{
+                userMail: 'dan.howard@translated.net',
+                userFullName: 'Dan	Howard',
+                userShortName: 'DH'
+
+            },{
+                userMail: 'keith.kelly@translated.net',
+                userFullName: 'Keith	Kelly',
+                userShortName: 'KC'
+
+            }]
+        };
+        setTimeout(function () {
+            ManageActions.addTeam(team);
+        });
     },
 
     getUsers: function () {

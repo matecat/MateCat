@@ -17,5 +17,6 @@ module.exports = keyMirror({
     //TEAMS
     RENDER_TEAMS: null,
     REMOVE_TEAM: null,
+    CREATE_TEAM: null,
     ADD_TEAM: null
 });
