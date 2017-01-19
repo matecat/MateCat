@@ -65,6 +65,10 @@ UI = {
 
             $(this).data("prevType", e.type);
         });
+        this.getAllTeams().done(function (data) {
+            ManageActions.renderTeams(data.teams);
+        });
+
     },
 
     reloadProjects: function () {
@@ -346,20 +350,80 @@ UI = {
 
     getAllTeams: function () {
         var teams = [
-            {
-                name: 'Team 1'
-            },
-            {
-                name: 'Team 1'
-            },
-            {
-                name: 'Team 1'
-            },
-            {
-                name: 'Team 1'
-            }
-        ];
-        return Promise.resolve(teams);
+                {
+                    id: 1,
+                    name: 'Ebay',
+                    users: [{
+                        id: 2,
+                        userMail: 'chloe.king@translated.net',
+                        userFullName: 'Chloe King',
+                        userShortName: 'CK'
+
+                    },{
+                        id: 2,
+                        userMail: 'owen.james@translated.net',
+                        userFullName: 'Owen	James',
+                        userShortName: 'OJ'
+
+                    },{
+                        id: 3,
+                        userMail: 'stephen.powell@translated.net',
+                        userFullName: 'Stephen Powell',
+                        userShortName: 'SP'
+
+                    }]
+                },
+                {
+                    id: 2,
+                    name: 'MSC',
+                    users: [{
+                        userMail: 'lillian.lambert@translated.net',
+                        userFullName: 'Lillian	Lambert',
+                        userShortName: 'LL'
+
+                    },{
+                        userMail: 'joe.watson@translated.net',
+                        userFullName: 'Joe	Watson',
+                        userShortName: 'JW'
+
+                    },{
+                        userMail: 'rachel.sharp@translated.net',
+                        userFullName: 'Rachel	Sharp',
+                        userShortName: 'RS'
+
+                    },{
+                        userMail: 'dan.marshall@translated.net',
+                        userFullName: 'Dan	Marshall',
+                        userShortName: 'DM'
+
+                    }]
+                },
+                {
+                    id: 3,
+                    name: 'Translated',
+                    users: [{
+                        userMail: 'vanessa.simpson@translated.net',
+                        userFullName: 'Vanessa	Simpson',
+                        userShortName: 'VS'
+
+                    },{
+                        userMail: 'dan.howard@translated.net',
+                        userFullName: 'Dan	Howard',
+                        userShortName: 'DH'
+
+                    },{
+                        userMail: 'keith.kelly@translated.net',
+                        userFullName: 'Keith	Kelly',
+                        userShortName: 'KC'
+
+                    }]
+                }
+                ];
+        var data = {
+            teams: teams
+        };
+        var deferred = $.Deferred().resolve(data);
+        return deferred.promise();
 
     },
 

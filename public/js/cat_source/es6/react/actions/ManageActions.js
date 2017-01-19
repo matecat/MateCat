@@ -108,7 +108,23 @@ var ManageActions = {
         AppDispatcher.dispatch({
             actionType: ManageConstants.OPEN_CHANGE_PROJECT_ASSIGNEE,
         });
+    },
+
+    renderTeams: function (teams) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.RENDER_TEAMS,
+            teams: teams
+        });
+    },
+
+    addTeam: function (team) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.ADD_TEAM,
+            team: team
+        });
     }
+
+
 
 
 

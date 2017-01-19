@@ -5,9 +5,6 @@ class Navbar extends React.Component {
     }
 
     componentDidMount () {
-        if ($ !== undefined) {
-            $('.button-collapse').sideNav();
-        }
     }
 
     renderSideNav () {

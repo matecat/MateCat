@@ -32,6 +32,7 @@ window.NotificationBox = require('./components/notificationsComponent/Notificati
 window.ManageConstants = require('./constants/ManageConstants');
 window.ManageActions = require('./actions/ManageActions');
 window.ProjectsStore = require('./stores/ProjectsStore');
+window.TeamsStore = require('./stores/TeamsStore');
 window.ProjectsContainer = require('./components/projects/ProjectsContainer').default;
 
 window.Header = require("./components/Header").default;

@@ -13,5 +13,9 @@ module.exports = keyMirror({
     OPEN_CREATE_TEAM_MODAL: null,
     OPEN_MODIFY_TEAM_MODAL: null,
     OPEN_CHANGE_TEAM_MODAL: null,
-    OPEN_CHANGE_PROJECT_ASSIGNEE: null
+    OPEN_CHANGE_PROJECT_ASSIGNEE: null,
+    //TEAMS
+    RENDER_TEAMS: null,
+    REMOVE_TEAM: null,
+    ADD_TEAM: null
 });

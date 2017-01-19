@@ -18,6 +18,75 @@ var ProjectsStore = assign({}, EventEmitter.prototype, {
 
     projects : null,
 
+    teams : [
+        {
+            name: 'Ebay',
+            users: []
+        },
+        {
+            name: 'MSC',
+            users: []
+        },
+        {
+            name: 'Translated',
+            users: []
+        }
+    ],
+
+    users : [
+        {
+            userMail: 'chloe.king@translated.net',
+            userFullName: 'Chloe King',
+            userShortName: 'CK'
+
+        },{
+            userMail: 'owen.james@translated.net',
+            userFullName: 'Owen	James',
+            userShortName: 'OJ'
+
+        },{
+            userMail: 'stephen.powell@translated.net',
+            userFullName: 'Stephen Powell',
+            userShortName: 'SP'
+
+        },{
+            userMail: 'lillian.lambert@translated.net',
+            userFullName: 'Lillian	Lambert',
+            userShortName: 'LL'
+
+        },{
+            userMail: 'joe.watson@translated.net',
+            userFullName: 'Joe	Watson',
+            userShortName: 'JW'
+
+        },{
+            userMail: 'rachel.sharp@translated.net',
+            userFullName: 'Rachel	Sharp',
+            userShortName: 'RS'
+
+        },{
+            userMail: 'dan.marshall@translated.net',
+            userFullName: 'Dan	Marshall',
+            userShortName: 'DM'
+
+        },{
+            userMail: 'vanessa.simpson@translated.net',
+            userFullName: 'Vanessa	Simpson',
+            userShortName: 'VS'
+
+        },{
+            userMail: 'dan.howard@translated.net',
+            userFullName: 'Dan	Howard',
+            userShortName: 'DH'
+
+        },{
+            userMail: 'keith.kelly@translated.net',
+            userFullName: 'Keith	Kelly',
+            userShortName: 'KC'
+
+        }
+    ],
+
     /**
      * Update all
      */

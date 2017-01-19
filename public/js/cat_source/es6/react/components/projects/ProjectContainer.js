@@ -310,7 +310,7 @@ class ProjectContainer extends React.Component {
                                 <ul className="project-activity-icon right">
                                     <li>
                                         <a className="chip assigned-team yellow waves-effect waves-dark"
-                                        onClick={this.openChangeTeamModal}>Ebay Team</a>
+                                        onClick={this.openChangeTeamModal}>Personal</a>
                                     </li>
                                     <li>
                                         <a className="waves-effect waves-light btn-floating green assigned-member center-align"
