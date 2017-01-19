@@ -948,6 +948,7 @@ $.extend(UI, {
 			if (UI.droppingInEditarea) {
 				setTimeout(function() {
 					UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
+					UI.lockTags(UI.editarea);
 				}, 100);
 			}
 
@@ -964,10 +965,8 @@ $.extend(UI, {
 			}
 
 			UI.registerQACheck();
-            if( !(UI.isKorean && ( (e.which == '60') || (e.which == '62') || (e.which == '32')) ) ) {
-                setTimeout(function() {
-                    UI.lockTags(UI.editarea);
-                }, 100);
+            if( !(UI.isKorean && ( (e.which == '60') || (e.which == '62') || (e.which == '32')) ) && !UI.droppingInEditarea ) {
+				UI.lockTags(UI.editarea);
             }
         }).on('input', '.editor .cc-search .input', function() {
 			UI.markTagsInSearch($(this));
