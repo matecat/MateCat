@@ -22,7 +22,7 @@ class FilterProjects extends React.Component {
 
     render () {
         return <div className="row">
-                        <div className="ui floating projects-state dropdown labeled icon button">
+                        <div className="ui floating projects-state fluid dropdown labeled icon button">
                             <i className="filter icon"></i>
                             <span className="text">Filter Projects</span>
                             <div className="menu">
