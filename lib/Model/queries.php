@@ -1900,6 +1900,52 @@ function getJobAnalysisData( $pid, $job_password, $jid = null ) {
 }
 
 /**
+ *
+ * Very bound to the query SQL which is used to retrieve project jobs or just the count
+ * of records for the pagination and other stuff in manage page.
+ *
+ * @param $search_in_pname
+ * @param $search_source
+ * @param $search_target
+ * @param $search_status
+ * @param $search_onlycompleted
+ * @return array
+ */
+function conditionsForProjectsQuery(
+        $search_in_pname, $search_source, $search_target,
+        $search_status, $search_onlycompleted
+) {
+    $conditions = array() ;
+    $data = array() ;
+
+    if ( $search_in_pname ) {
+        $conditions[] = " p.name LIKE :project_name ";
+        $data['project_name'] =  "%$search_in_pname%";
+    }
+
+    if ( $search_source ) {
+        $conditions[] = " j.source = :source ";
+        $data['source'] =  $search_source ;
+    }
+
+    if ( $search_target ) {
+        $conditions[] = " j.target = :target  " ;
+        $data['target'] = $search_target ;
+    }
+
+    if ( $search_status ) {
+        $conditions[] = " j.status_owner = :owner_status " ;
+        $data['owner_status'] = $search_status ;
+    }
+
+    if ( $search_onlycompleted ) {
+        $conditions[]  = " j.completed = 1 ";
+    }
+
+    return array( $conditions, $data )  ;
+}
+
+/**
  * @param $start                int
  * @param $step                 int
  * @param $search_in_pname      string
@@ -1981,35 +2027,21 @@ function getProjects( $start, $step, $search_in_pname, $search_source, $search_t
 }
 
 
-function getJobsFromProjects( array $projectIDs, $search_source, $search_target, $search_status, $search_onlycompleted ) {
+function getJobsFromProjects( array $projectIDs, $search_source, $search_target, $search_status, $search_only_completed ) {
 
-    $jobs_filter_query = array();
-
-    if ( !is_null( $search_source ) && !empty( $search_source ) ) {
-        $jobs_filter_query[ ] = "j.source = '" . $search_source . "'";
+    /**
+     * Do not execute
+     */
+    if( empty( $projectIDs ) ){
+        return [];
     }
 
-    if ( !is_null( $search_target ) && !empty( $search_target ) ) {
-        $jobs_filter_query[ ] = "j.target = '" . $search_target . "'";
-    }
+    list( $conditions, $data ) = conditionsForProjectsQuery(
+            null, $search_source, $search_target,
+            $search_status, $search_only_completed
+    );
 
-    if ( !is_null( $search_status ) && !empty( $search_status ) ) {
-        $jobs_filter_query[ ] = "j.status_owner = '" . $search_status . "'";
-    }
-
-    if ( $search_onlycompleted ) {
-        $jobs_filter_query[ ] = "j.completed = 1";
-    }
-
-    //This will be always set. We don't need to check if array is empty.
-    $jobs_filter_query [ ] = "j.owner = '" . $_SESSION[ 'cid' ] . "'";
-
-    $where_query = implode( " and ", $jobs_filter_query );
-    $ids         = implode( ", ", $projectIDs );
-
-    if ( !count( $ids ) ) {
-        $ids[ ] = 0;
-    }
+    $where_query = implode( " AND ", $conditions );
 
     $jobsQuery = "SELECT
                  j.id,
@@ -2031,20 +2063,15 @@ function getJobsFromProjects( array $projectIDs, $search_source, $search_target,
 				approved_words AS APPROVED,
                 e.name
             FROM jobs j
-
             LEFT JOIN engines e ON j.id_mt_engine=e.id
-
-            WHERE j.id_project IN (%s) AND %s
-
+            WHERE j.id_project IN ( " . implode( ",", $projectIDs ) . " ) AND $where_query
             ORDER BY j.id DESC,
                      j.job_first_segment ASC";
 
-    $query = sprintf( $jobsQuery, $ids, $where_query );
+    $stmt = Database::obtain()->getConnection()->prepare( $jobsQuery );
+    $stmt->execute( $data );
+    return $stmt->fetchAll( PDO::FETCH_ASSOC ) ;
 
-    $db = Database::obtain();
-    $results = $db->fetch_array( $query );
-
-    return $results;
 }
 
 function getProjectsNumber( $start, $step, $search_in_pname, $search_source, $search_target, $search_status, $search_onlycompleted, $filtering ) {

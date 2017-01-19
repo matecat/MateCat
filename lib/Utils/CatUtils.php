@@ -750,7 +750,7 @@ class CatUtils {
         $job_stats = getStatsForJob($jid, $fid, $jPassword);
         $job_stats = $job_stats[0];
 
-        $job_stats = self::_getStatsForJob($job_stats, true); //true set estimation check if present
+        $job_stats = self::_getStatsForJob($job_stats); //true set estimation check if present
         return self::_performanceEstimationTime($job_stats);
 
     }
@@ -778,7 +778,7 @@ class CatUtils {
         //avoid division by zero warning
         $total = $wCount->getTotal();
         $job_stats[ 'TOTAL' ]      = ( $total == 0 ? 1 : $total );
-        $job_stats = self::_getStatsForJob($job_stats, true); //true set estimation check if present
+        $job_stats = self::_getStatsForJob($job_stats); //true set estimation check if present
         return self::_performanceEstimationTime($job_stats);
 
     }
