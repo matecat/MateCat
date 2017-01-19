@@ -11,6 +11,9 @@ class Header extends React.Component {
             .modal('setting', 'transition', 'fade')
             .modal('attach events', '.team-filter.button', 'show')
         ;
+        $('.ui.checkbox')
+            .checkbox()
+        ;
     }
 
     openCreateTeams () {
@@ -44,7 +47,7 @@ class Header extends React.Component {
                                             filterFunction={this.props.filterFunction}/>
                                     </div>*/}
 
-                                    <div className="col m2 offset-m8">
+                                    <div className="col m2 right">
                                         <div className="ui fluid selection dropdown team-dropdown top-5">
                                             <input type="hidden" name="gender" />
                                             <i className="dropdown icon"/>
@@ -55,6 +58,14 @@ class Header extends React.Component {
                                                         onClick={this.openCreateTeams.bind(this)}>
                                                         <i className="icon-plus3 right"/>
                                                     </a>
+                                                </div>
+                                                <div className="header" data-value="aaa" data-text="aaa">
+                                                    <div className="ui form">
+                                                        <div className="field">
+                                                            <input type="text" name="Project Name" placeholder="Translated Team es." />
+                                                            
+                                                        </div>
+                                                    </div>
                                                 </div>
                                                 <div className="item" data-value="male" data-text="Personal">Personal
 

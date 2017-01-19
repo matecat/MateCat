@@ -300,7 +300,7 @@ UI = {
         });
     },
     openCreateTeamModal: function () {
-        APP.ModalWindow.showModalComponent(CreateTeamModal, {}, "Create new Team");
+        APP.ModalWindow.showModalComponent(CreateTeamModal, {}, "Create new team");
     },
 
     openModifyTeamModal: function (team) {
@@ -311,11 +311,11 @@ UI = {
     },
 
     openChangeProjectTeam: function () {
-        APP.ModalWindow.showModalComponent(ModifyTeamModal, {}, "Change Team");
+        APP.ModalWindow.showModalComponent(ModifyTeamModal, {}, "Change team");
     },
 
     openChangeProjectAssignee: function () {
-        APP.ModalWindow.showModalComponent(ChangeProjectAssignee, {}, "Change Assignee");
+        APP.ModalWindow.showModalComponent(ChangeProjectAssignee, {}, "Change assignee");
     },
     /**
      * Mistero!
