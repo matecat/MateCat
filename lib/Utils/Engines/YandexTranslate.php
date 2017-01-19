@@ -33,11 +33,11 @@ class Engines_YandexTranslate extends Engines_AbstractEngine implements Engines_
      * @return array
      */
     protected function _decode( $rawValue ) {
-        $all_args =  func_get_args();
+        $all_args = func_get_args();
 
         if ( is_string( $rawValue ) ) {
             $decoded = json_decode( $rawValue, true );
-            if ($decoded[ "code" ] == 200) {
+            if ( $decoded[ "code" ] == 200 ) {
                 $decoded = array(
                     'data' => array(
                         'translations' => array(
@@ -54,6 +54,11 @@ class Engines_YandexTranslate extends Engines_AbstractEngine implements Engines_
                 );
             }
         } else {
+            $resp = json_decode( $rawValue[ "error" ][ "response" ], true );
+            if ( isset( $resp[ "code" ] ) && isset( $resp[ "message" ] )) {
+                $rawValue[ "error" ][ "code" ] = $resp[ "code" ];
+                $rawValue[ "error" ][ "message" ] = $resp[ "message" ];
+            }
             $decoded = $rawValue; // already decoded in case of error
         }
 
