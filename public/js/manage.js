@@ -14,9 +14,12 @@ UI = {
 
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_SETTINGS, this.openJobSettings);
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_TM_PANEL, this.openJobTMPanel);
-        // $(document).ready(function() {
-        //     $('.list-member-team').material_select();
-        //   });
+
+        ProjectsStore.addListener(ManageConstants.OPEN_CREATE_TEAM_MODAL, this.openCreateTeamModal);
+        ProjectsStore.addListener(ManageConstants.OPEN_MODIFY_TEAM_MODAL, this.openModifyTeamModal);
+        ProjectsStore.addListener(ManageConstants.OPEN_CHANGE_TEAM_MODAL, this.openChangeProjectTeam);
+        ProjectsStore.addListener(ManageConstants.OPEN_CHANGE_PROJECT_ASSIGNEE, this.openChangeProjectAssignee);
+
 
     },
 
@@ -295,6 +298,24 @@ UI = {
                 window.location = '/';
             }
         });
+    },
+    openCreateTeamModal: function () {
+        APP.ModalWindow.showModalComponent(CreateTeamModal, {}, "Create new Team");
+    },
+
+    openModifyTeamModal: function (team) {
+        var props = {
+            team: team
+        };
+        APP.ModalWindow.showModalComponent(ChangeProjectTeamModal, props, "Modify "+ team.name + " Team");
+    },
+
+    openChangeProjectTeam: function () {
+        APP.ModalWindow.showModalComponent(ModifyTeamModal, {}, "Change Team");
+    },
+
+    openChangeProjectAssignee: function () {
+        APP.ModalWindow.showModalComponent(ChangeProjectAssignee, {}, "Change Assignee");
     },
     /**
      * Mistero!

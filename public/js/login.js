@@ -37,7 +37,7 @@ $.extend(APP, {
             APP.ModalWindow.showModalComponent(PreferencesModal, props, 'Profile');
         });
         $('#modal').on('openresetpassword', function () {
-            APP.ModalWindow.showModalComponent(ResetPasswordModal, {}, "Reset Password");
+            APP.ModalWindow.showModalComponent(CreateTeamModal, {}, "Reset Password");
         });
         $('#modal').on('openforgotpassword', function () {
             var props = {};

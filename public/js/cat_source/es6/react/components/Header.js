@@ -1,21 +1,9 @@
-// var SearchInput = require("./SearchInput").default;
-// var FilterProjects = require("./FilterProjects").default;
 
 var SubHeader = require("./SubHeader").default;
 
 class Header extends React.Component {
     constructor (props) {
-
         super(props);
-        this.imgStyle = {
-            float: 'left',
-            border: '0',
-            marginTop: '10px',
-            background: 'url(http://matecat.dev/public/img/logo.png) 0px 2px no-repeat',
-            width: '145px',
-            height: '31px',
-            backgroundSize: '130px 26px',
-        }
     }
     componentDidMount () {
         $('.team-dropdown').dropdown();
@@ -23,6 +11,17 @@ class Header extends React.Component {
             .modal('setting', 'transition', 'fade')
             .modal('attach events', '.team-filter.button', 'show')
         ;
+    }
+
+    openCreateTeams () {
+        ManageActions.openCreateTeamModal();
+    }
+
+    openModifyTeam (name) {
+        var team = {
+            name: name
+        };
+        ManageActions.openModifyTeamModal(team);
     }
 
 
@@ -48,26 +47,28 @@ class Header extends React.Component {
                                     <div className="col m2 offset-m8">
                                         <div className="ui fluid selection dropdown team-dropdown top-5">
                                             <input type="hidden" name="gender" />
-                                            <i className="dropdown icon"></i>
+                                            <i className="dropdown icon"/>
                                             <div className="default text">Gender</div>
                                             <div className="menu">
                                                 <div className="header">Create Workspace
-                                                    <a className="team-filter button show" href="#">
-                                                        <i className="icon-plus3 right"></i>
+                                                    <a className="team-filter button show"
+                                                        onClick={this.openCreateTeams.bind(this)}>
+                                                        <i className="icon-plus3 right"/>
                                                     </a>
                                                 </div>
                                                 <div className="item" data-value="male" data-text="Personal">Personal
-                                                    <a className="team-filter right button show" href="#">
-                                                        <i className="icon-more_vert "></i>
-                                                    </a>
+
                                                 </div>    
                                                 <div className="item" data-value="male" data-text="Ebay">Ebay
-                                                    <a className="team-filter button show right" href="#">
-                                                        <i className="icon-more_vert"></i>
+                                                    <a className="team-filter button show right"
+                                                       onClick={this.openModifyTeam.bind(this, 'Ebay')}>
+                                                        <i className="icon-more_vert"/>
                                                     </a>
                                                 </div>
                                                 <div className="item" data-value="female" data-text="MSC">MSC
-                                                    <a className="team-filter button show right" href="#"><i className="icon-more_vert"></i></a>
+                                                    <a className="team-filter button show right"
+                                                       onClick={this.openModifyTeam.bind(this, 'MSC')}>
+                                                        <i className="icon-more_vert"/></a>
                                                 </div>
                                             </div>
                                         </div>
@@ -90,51 +91,6 @@ class Header extends React.Component {
                             </div>
                         </div>
                     </nav>
-
-
-                    
-
-                    <div className="ui modal team-filter">
-                        <i className="icon-cancel"></i>
-                        <div className="header">
-                            Create new team
-                        </div>
-                        <div className="image content">
-                            <div className="description">
-                                <form className="ui form">
-                                    <div className="field">
-                                        <label>First Name</label>
-                                        <input type="text" name="Project Name" placeholder="Translated Team es." />
-                                    </div>
-                                    <div className="field">
-                                        <label>Last Name</label>
-                                        <input type="email" name="email" placeholder="example@mail.com" />
-                                    </div>
-                                    <div className="field">
-                                        <div className="ui checkbox">
-                                          <input type="checkbox" tabindex="0" className="hidden" />
-                                          <label>I agree to the Terms and Conditions</label>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                        <div className="actions">
-                            <div className="ui black deny button">
-                                Nope
-                            </div>
-                            <div className="ui positive right labeled icon button">
-                                Yep ;)
-                                <i className="checkmark icon"></i>
-                            </div>
-                        </div>
-                    </div>
-
-
-
-
-
-
                     <SubHeader
                         filterFunction={this.props.filterFunction}
                         />

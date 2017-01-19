@@ -1,6 +1,3 @@
-/*
- * TodoConstants
- */
 
 var keyMirror = require('keymirror');
 
@@ -12,5 +9,9 @@ module.exports = keyMirror({
     REMOVE_JOB: null,
     CHANGE_JOB_PASS: null,
     OPEN_JOB_TM_PANEL: null,
-    NO_MORE_PROJECTS: null
+    NO_MORE_PROJECTS: null,
+    OPEN_CREATE_TEAM_MODAL: null,
+    OPEN_MODIFY_TEAM_MODAL: null,
+    OPEN_CHANGE_TEAM_MODAL: null,
+    OPEN_CHANGE_PROJECT_ASSIGNEE: null
 });

@@ -1,7 +1,3 @@
-/**
- * React Component for the editarea.
-
- */
 // var React = require('react');
 var ProjectsStore = require('../../stores/ProjectsStore');
 var Project = require('./ProjectContainer').default;

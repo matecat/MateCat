@@ -99,6 +99,18 @@ AppDispatcher.register(function(action) {
         case ManageConstants.SHOW_RELOAD_SPINNER:
             ProjectsStore.emitChange(action.actionType);
             break;
+        case ManageConstants.OPEN_CREATE_TEAM_MODAL:
+            ProjectsStore.emitChange(action.actionType);
+            break;
+        case ManageConstants.OPEN_MODIFY_TEAM_MODAL:
+            ProjectsStore.emitChange(action.actionType, action.team);
+            break;
+        case ManageConstants.OPEN_CHANGE_TEAM_MODAL:
+            ProjectsStore.emitChange(action.actionType);
+            break;
+        case ManageConstants.OPEN_CHANGE_PROJECT_ASSIGNEE:
+            ProjectsStore.emitChange(action.actionType);
+            break;
 
     }
 });

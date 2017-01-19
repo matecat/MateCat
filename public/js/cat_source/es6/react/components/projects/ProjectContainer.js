@@ -224,6 +224,14 @@ class ProjectContainer extends React.Component {
         });
     }
 
+    openChangeTeamModal() {
+        ManageActions.openChangeProjectTeam();
+    }
+
+    openChangeAssignee() {
+        ManageActions.openChangeProjectAssignee();
+    }
+
     render() {
         var activityLogUrl = this.getActivityLogUrl();
         var projectMenu = this.getProjectMenu(activityLogUrl);
@@ -300,29 +308,12 @@ class ProjectContainer extends React.Component {
                             <div className="col right">
                                 <ul className="project-activity-icon right">
                                     <li>
-                                        <a className="chip assigned-team yellow waves-effect waves-dark" href="#modal2">Ebay Team</a>
-                                        <div id="modal2" className="modal">
-                                            <div className="modal-content">
-                                                <h4>Modal Header</h4>
-                                                <p>A bunch of text</p>
-                                            </div>
-                                            <div className="modal-footer">
-                                                <a href="#!" className="modal-action modal-close waves-effect waves-green btn-flat">Agree</a>
-                                            </div>
-                                        </div>
+                                        <a className="chip assigned-team yellow waves-effect waves-dark"
+                                        onClick={this.openChangeTeamModal}>Ebay Team</a>
                                     </li>
                                     <li>
-                                        <a className="waves-effect waves-light btn-floating green assigned-member center-align" href="#modal1">RS</a>
-                                        
-                                        <div id="modal1" className="modal">
-                                            <div className="modal-content">
-                                                <h4>Modal Header</h4>
-                                                <p>A bunch of text</p>
-                                            </div>
-                                            <div className="modal-footer">
-                                                <a href="#!" className=" modal-action modal-close waves-effect waves-green btn-flat">Agree</a>
-                                            </div>
-                                        </div>
+                                        <a className="waves-effect waves-light btn-floating green assigned-member center-align"
+                                        onClick={this.openChangeAssignee}>RS</a>
                                     </li>
                                     <li>
                                         <div className="ui icon top left pointing dropdown button menu-project"

@@ -95,8 +95,8 @@ class LoginModal extends React.Component {
     }
 
     openRegisterModal() {
-    $('#modal').trigger('openregister');
-}
+        $('#modal').trigger('openregister');
+    }
 
     openForgotPassword() {
         $('#modal').trigger('openforgotpassword');

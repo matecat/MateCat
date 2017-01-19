@@ -83,7 +83,33 @@ var ManageActions = {
         AppDispatcher.dispatch({
             actionType: ManageConstants.SHOW_RELOAD_SPINNER,
         });
+    },
+
+    openCreateTeamModal: function () {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.OPEN_CREATE_TEAM_MODAL,
+        });
+    },
+
+    openModifyTeamModal: function (team) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.OPEN_MODIFY_TEAM_MODAL,
+            team: team
+        });
+    },
+
+    openChangeProjectTeam: function () {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.OPEN_CHANGE_TEAM_MODAL,
+        });
+    },
+
+    openChangeProjectAssignee: function () {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.OPEN_CHANGE_PROJECT_ASSIGNEE,
+        });
     }
+
 
 
 };
