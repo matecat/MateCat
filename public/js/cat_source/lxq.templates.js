@@ -17,23 +17,23 @@
         //     '       <div class="lxq-history-balloon-body lxq-clearfix"> ' +
         //     '            <div class="lxq-history-balloon-row lxq-clearfix"> ' +
         //     '                <span class="lxq-history-balloon-header-segment">Segment</span> ' +
-        //     '                <span class="lxq-history-balloon-header-total">Errors</span>' + 
-        //     '                <span class="lxq-history-balloon-header-ignored">Ignored</span>' + 
-        //     '            </div> ' +   
-        //     '' + //     
+        //     '                <span class="lxq-history-balloon-header-total">Errors</span>' +
+        //     '                <span class="lxq-history-balloon-header-ignored">Ignored</span>' +
+        //     '            </div> ' +
+        //     '' + //
         //     '       </div> ' +
-        //     '   </div> ' +    
-        //     ' ' + 
+        //     '   </div> ' +
+        //     ' ' +
         //     ' </div> ',
-          
+
         //   <img src="http://s29.postimg.org/zdbe56c9v/segment_arrow.png" alt="Go to segment" />
         segmentWarningsRow: '' +
             '            <div class="lxq-history-balloon-row lxq-clearfix"> ' +
             '                <span class="lxq-history-balloon-segment"><a href="#" class="lxq-history-balloon-segment-link"><span class="lxq-history-balloon-segment-number">231</span></a></span> ' +
-            '                <span class="lxq-history-balloon-total">3</span>' + 
+            '                <span class="lxq-history-balloon-total">3</span>' +
             '                <span class="lxq-history-balloon-ignored">2</span>' +
-            '           </div> ',  
-            
+            '           </div> ',
+
         historyNoComments : '' +
             ' <div class="lxq-history-balloon lxq-history-balloon-has-no-comments" style="display: block;">' +
             '    <div class="lxq-thread-wrap"> ' +
@@ -56,7 +56,10 @@
             '</div>',
         lxqTooltipSpellcheckBody: ''+
             '<div class="tooltip-error-container"> '+
-                '<a class="tooltip-error-category">xxxx</a> '                 
+                '<a class="tooltip-error-category">xxxx</a> </div>',
+        lxqTooltipSuggestionBody: ''+
+            '<div class="tooltip-error-container lxq-suggestion"> '+
+                '<a class="tooltip-error-category">xxxx</a> </div>',
 
     };
 

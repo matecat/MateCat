@@ -47,7 +47,7 @@ class ProjectsContainer extends React.Component {
         ProjectsStore.addListener(ManageConstants.RENDER_PROJECTS, this.renderProjects);
         ProjectsStore.addListener(ManageConstants.NO_MORE_PROJECTS, this.hideSpinner);
         ProjectsStore.addListener(ManageConstants.SHOW_RELOAD_SPINNER, this.showProjectsReloadSpinner);
-        $('.tooltipped').tooltip({delay: 50});
+        // $('.tooltipped').tooltip({delay: 50});
     }
 
     componentWillUnmount() {

@@ -39,9 +39,10 @@ class FastAnalysis extends AbstractDaemon {
 
     protected $_configFile;
 
-    const ERR_NO_SEGMENTS = 127;
-    const ERR_TOO_LARGE   = 128;
-    const ERR_500         = 129 ;
+    const ERR_NO_SEGMENTS    = 127;
+    const ERR_TOO_LARGE      = 128;
+    const ERR_500            = 129;
+    const ERR_EMPTY_RESPONSE = 130;
 
     /**
      * @var ContextList
@@ -62,6 +63,21 @@ class FastAnalysis extends AbstractDaemon {
 
         //First Execution, load build object
         $this->_queueContextList = ContextList::get( $config[ 'context_definitions' ] );
+
+    }
+
+    protected function _checkDatabaseConnection(){
+
+        $db = Database::obtain();
+        try {
+            $db->ping();
+//            self::_TimeStampMsg(  "--- Database connection active. " );
+        } catch ( PDOException $e ) {
+            self::_TimeStampMsg( $e->getMessage() . " - Trying to close and reconnect." );
+            $db->close();
+            //reconnect
+            $db->getConnection();
+        }
 
     }
 
@@ -97,7 +113,15 @@ class FastAnalysis extends AbstractDaemon {
 
         do {
 
-            $projects_list = getProjectForVolumeAnalysis( 'fast', 5 );
+            try {
+                $this->_checkDatabaseConnection();
+                $projects_list = getProjectForVolumeAnalysis( 5 );
+            } catch ( PDOException $e ){
+                self::_TimeStampMsg( $e->getMessage() . " - Error again. Try to reconnect in next cycle." );
+                sleep(3); // wait for reconnection
+                continue; // next cycle, reload projects.
+            }
+
             if ( empty( $projects_list ) ) {
                 self::_TimeStampMsg( "No projects: wait 3 seconds." );
                 sleep( 3 );
@@ -139,7 +163,7 @@ class FastAnalysis extends AbstractDaemon {
                         self::_updateProject( $pid, ProjectStatus::STATUS_NOT_TO_ANALYZE );
                         //next project
                         continue;
-                    } elseif ( $e->getCode() == self::ERR_500 ) {
+                    } elseif ( $e->getCode() == self::ERR_500 || $e->getCode() == self::ERR_EMPTY_RESPONSE ) {
                         self::_TimeStampMsg( $e->getMessage() ) ;
                         self::_updateProject( $pid, ProjectStatus::STATUS_NEW );
                         sleep( 3 ) ;
@@ -263,6 +287,8 @@ class FastAnalysis extends AbstractDaemon {
             throw new Exception( "MyMemory Fast Analysis Failed. {$result->error->message}", self::ERR_TOO_LARGE );
         } elseif ( $result->responseStatus == 500 ) {
             throw new Exception("MyMemory Internal Server Error. Pid: " . $pid , self::ERR_500 );
+        } elseif( !empty( $fastSegmentsRequest ) && empty( $result->responseData )) {
+            throw new Exception("MyMemory Fast Analysis Failed. Pid: " . $pid , self::ERR_EMPTY_RESPONSE );
         }
 
         return $result;
@@ -419,10 +445,6 @@ class FastAnalysis extends AbstractDaemon {
 
         self::_TimeStampMsg( 'Queries: ' . count( $chunks_st ) );
 
-        //USE the MySQL InnoDB isolation Level to protect from thread high concurrency access
-        $db->query( 'SET autocommit=0' );
-        $db->query( 'START TRANSACTION' );
-
         foreach ( $chunks_st as $k => $chunk ) {
 
             $query_st = $segment_translations . implode( ", ", $chunk ) .
@@ -474,15 +496,10 @@ class FastAnalysis extends AbstractDaemon {
         try {
             $db->update( 'projects', $data2, $where );
         } catch ( PDOException $e ) {
-            $db->query( 'ROLLBACK' );
-            $db->query( 'SET autocommit=1' );
             self::_TimeStampMsg( $e->getMessage() );
 
             return $e->getCode() * -1;
         }
-        $db->query( 'COMMIT' );
-        $db->query( 'SET autocommit=1' );
-
 
         /*
          *  $fastResultData[0]['id_mt_engine'] is the index of the MT engine we must use,
@@ -568,6 +585,8 @@ class FastAnalysis extends AbstractDaemon {
 
         //we want segments that we decided to show in cattool
         //and segments that are NOT locked ( already translated )
+
+
 
         $query = "select concat( s.id, '-', group_concat( distinct concat( j.id, ':' , j.password ) ) ) as jsid, s.segment, j.source, s.segment_hash, s.id as id,
 
