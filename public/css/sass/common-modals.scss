@@ -79,6 +79,17 @@ footer nav ul li {
   padding: 20px;
 }
 
+.modify-team-modal {
+  padding: 20px;
+}
+
+.fixed-team-modal {
+  max-height: 280px;
+  min-height: 280px;
+  overflow: hidden;
+  overflow-y: scroll;
+}
+
 .validation-error {
   text-align: left;
   float: left;
