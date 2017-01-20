@@ -365,13 +365,13 @@ UI = {
                         userShortName: 'CK'
 
                     },{
-                        id: 2,
+                        id: 3,
                         userMail: 'owen.james@translated.net',
                         userFullName: 'Owen	James',
                         userShortName: 'OJ'
 
                     },{
-                        id: 3,
+                        id: 4,
                         userMail: 'stephen.powell@translated.net',
                         userFullName: 'Stephen Powell',
                         userShortName: 'SP'
@@ -382,21 +382,25 @@ UI = {
                     id: 2,
                     name: 'MSC',
                     users: [{
+                        id: 1,
                         userMail: 'lillian.lambert@translated.net',
                         userFullName: 'Lillian	Lambert',
                         userShortName: 'LL'
 
                     },{
+                        id: 2,
                         userMail: 'joe.watson@translated.net',
                         userFullName: 'Joe	Watson',
                         userShortName: 'JW'
 
                     },{
+                        id: 3,
                         userMail: 'rachel.sharp@translated.net',
                         userFullName: 'Rachel	Sharp',
                         userShortName: 'RS'
 
                     },{
+                        id: 4,
                         userMail: 'dan.marshall@translated.net',
                         userFullName: 'Dan	Marshall',
                         userShortName: 'DM'
@@ -407,16 +411,19 @@ UI = {
                     id: 3,
                     name: 'Translated',
                     users: [{
+                        id: 1,
                         userMail: 'vanessa.simpson@translated.net',
                         userFullName: 'Vanessa	Simpson',
                         userShortName: 'VS'
 
                     },{
+                        id: 2,
                         userMail: 'dan.howard@translated.net',
                         userFullName: 'Dan	Howard',
                         userShortName: 'DH'
 
                     },{
+                        id: 3,
                         userMail: 'keith.kelly@translated.net',
                         userFullName: 'Keith	Kelly',
                         userShortName: 'KC'
@@ -424,10 +431,10 @@ UI = {
                     }]
                 }
                 ];
-        var data = {
+        let data = {
             teams: teams
         };
-        var deferred = $.Deferred().resolve(data);
+        let deferred = $.Deferred().resolve(data);
         return deferred.promise();
 
     },
@@ -459,22 +466,22 @@ UI = {
         });
 
     },
-    changeTeam: function (teamName) {
-        var self = this;
-        if (teamName === "Personal") {
+    changeTeam: function (team) {
+        let self = this;
+        if (team.name === "Personal") {
             this.getProjects().done(function (response) {
-                var projects = $.parseJSON(response.data);
+                let projects = $.parseJSON(response.data);
                 self.renderProjects(projects);
             });
-        } else if (teamName === "Ebay") {
+        } else if (team.name === "Ebay") {
             setTimeout(function () {
                 ManageActions.renderProjects(EbayProjects);
             });
-        }else if (teamName === "MSC") {
+        }else if (team.name === "MSC") {
             setTimeout(function () {
                 ManageActions.renderProjects(MSCProjects);
             });
-        }else if (teamName === "Translated") {
+        }else if (team.name === "Translated") {
             setTimeout(function () {
                 ManageActions.renderProjects(TranslatedProjects);
             });

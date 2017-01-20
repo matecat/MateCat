@@ -5,9 +5,11 @@ class Header extends React.Component {
     constructor (props) {
         super(props);
         this.state = {
-            teams: []
+            teams: [],
+            selectedTeam : null
         };
         this.renderTeams = this.renderTeams.bind(this);
+        this.openModifyTeam = this.openModifyTeam.bind(this);
     }
     componentDidMount () {
         $('.team-dropdown').dropdown();
@@ -19,56 +21,68 @@ class Header extends React.Component {
     }
 
     componentDidUpdate() {
-        var self = this;
-        var dropdownTeams = $('.team-dropdown');
-        if (!this.selectedTeam) {
-            dropdownTeams.dropdown('set selected', 'Personal');
-            dropdownTeams.dropdown({
-                onChange: function(value, text, $selectedItem) {
-                    self.changeTeam(value);
-                }
-            });
-        } else {
-            setTimeout(function () {
-                dropdownTeams.dropdown('set selected', self.selectedTeam);
-            }, 100);
+        let self = this;
+
+        if (this.state.teams.size > 0){
+            let dropdownTeams = $('.team-dropdown');
+            if (!this.state.selectedTeam) {
+                dropdownTeams.dropdown('set selected', 'Personal');
+                dropdownTeams.dropdown({
+                    onChange: function(value, text, $selectedItem) {
+                        self.changeTeam(value);
+                    }
+                });
+            } else {
+                setTimeout(function () {
+                    dropdownTeams.dropdown('set selected', self.state.selectedTeam.get("name"));
+                }, 100);
+            }
         }
+
 
     }
 
     changeTeam(value) {
-        this.selectedTeam = value;
-        ManageActions.changeTeam(value);
+        let selectedTeam = this.state.teams.find(function (team) {
+            if (team.get("name") === value) {
+                return true;
+            }
+        });
+        ManageActions.changeTeam(selectedTeam.toJS());
+        this.setState({
+            selectedTeam: selectedTeam
+        });
     }
 
     openCreateTeams () {
         ManageActions.openCreateTeamModal();
     }
 
-    openModifyTeam (name) {
-        var team = {
+    openModifyTeam (event, name) {
+        e.stopPropagation();
+        let team = {
             name: name
         };
         ManageActions.openModifyTeamModal(team);
     }
 
-    renderTeams(teams, defaultTeamName) {
-        this.selectedTeam = defaultTeamName;
+    renderTeams(teams, defaultTeam) {
         this.setState({
-            teams : teams
+            teams : teams,
+            selectedTeam: defaultTeam
         });
     }
 
     getTeamsSelect() {
-        var result = '';
+        let result = '';
         if (this.state.teams.size > 0) {
-            var items = this.state.teams.map((team, i) => (
+            let items = this.state.teams.map((team, i) => (
                 <div className="item" data-value={team.get('name')}
                      data-text={team.get('name')}
                      key={'team' + team.get('name') + team.get('id')}>
                         {team.get('name')}
                     <a className="team-filter button show right"
-                       onClick={this.openModifyTeam.bind(this, team.get('name'))}>
+                       onClick={(e) => this.openModifyTeam(e, team.get('name'))}>
                         <i className="icon-more_vert"/>
                     </a>
                 </div>
@@ -92,7 +106,6 @@ class Header extends React.Component {
                         </div>
                     </div>
                     <div className="item" data-value="Personal" data-text="Personal">Personal
-
                     </div>
                     {items}
                 </div>
@@ -102,7 +115,7 @@ class Header extends React.Component {
     }
 
     render () {
-        var teamsSelect = this.getTeamsSelect();
+        let teamsSelect = this.getTeamsSelect();
         return <section className="nav-mc-bar">
                     <nav role="navigation">
                         <div className="nav-wrapper">
@@ -135,6 +148,7 @@ class Header extends React.Component {
                         filterFunction={this.props.filterFunction}
                         searchFn={this.props.searchFn}
                         closeSearchCallback={this.props.closeSearchCallback}
+                        selectedTeam={this.state.selectedTeam}
                         />
                 </section>;
     }
