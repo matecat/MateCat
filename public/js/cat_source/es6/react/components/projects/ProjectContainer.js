@@ -333,19 +333,19 @@ class ProjectContainer extends React.Component {
                                                     </div>
                                                 </div>
                                                 <div className="item" data-value="Personal" data-text="Personal">
-                                                    <a className="ui avatar image initials">RS</a>
+                                                    <a className="ui avatar image initials yellow">RS</a>
                                                     Personal
                                                 </div>
                                                 <div className="item">
-                                                    <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg"/>
-                                                    Jenny Hess
+                                                    <a className="ui avatar image initials green">FR</a>
+                                                    Federico Ricciuti
                                                 </div>
                                                 <div className="item">
-                                                    <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/elliot.jpg"/>
-                                                    Elliot Fu
+                                                    <a className="ui avatar image initials purple">EN</a>
+                                                    Elliot Nes
                                                 </div>
                                                 <div className="item">
-                                                    <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/stevie.jpg"/>
+                                                    <a className="ui avatar image initials orange">SF</a>
                                                     Stevie Feliciano
                                                 </div>
                                                 <div className="item">
