@@ -9,11 +9,6 @@ include_once INIT::$UTILS_ROOT . "/manage.class.php";
 class getProjectsController extends ajaxController {
 
     /**
-     * @var Langs_Languages
-     */
-    private $lang_handler;
-
-    /**
      * @var int
      */
     private $page = 1;
@@ -117,14 +112,14 @@ class getProjectsController extends ajaxController {
         $projects = ManageUtils::queryProjects( $this->logged_user, $this->start, $this->step,
             $this->search_in_pname,
             $this->search_source, $this->search_target, $this->search_status,
-            $this->search_onlycompleted, $this->project_id,
+            $this->search_only_completed, $this->project_id,
             $team
         );
 
         $projnum = getProjectsNumber( $this->logged_user,
             $this->search_in_pname, $this->search_source,
             $this->search_target, $this->search_status,
-            $this->search_onlycompleted, $team );
+            $this->search_only_completed, $team );
 
 
         $projects = $this->filterProjectsWithUserFeatures( $projects ) ;
