@@ -7,28 +7,36 @@ class ChangeProjectAssignee extends React.Component {
     }
 
     render() {
-        return <div className="success-modal">
-
-            <div className="image content">
-                <div className="description">
-                    <form className="ui form">
-                        <div className="field">
-                            <label>First Name</label>
-                            <input type="text" name="Project Name" placeholder="Translated Team es." />
+        return  <span>
+                    
+                    <div className="menu">
+                        <div className="item">
+                            <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg"/>
+                            Jenny Hess
                         </div>
-                    </form>
-                </div>
-            </div>
-            <div className="actions">
-                <div className="ui black deny button">
-                    Nope
-                </div>
-                <div className="ui positive right labeled icon button">
-                    Yep ;)
-                    <i className="checkmark icon"/>
-                </div>
-            </div>
-        </div>;
+                        <div className="item">
+                            <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/elliot.jpg"/>
+                            Elliot Fu
+                        </div>
+                        <div className="item">
+                            <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/stevie.jpg"/>
+                            Stevie Feliciano
+                        </div>
+                        <div className="item">
+                            <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/christian.jpg"/>
+                            Christian
+                        </div>
+                        <div className="item">
+                            <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/matt.jpg"/>
+                            Matt
+                        </div>
+                        <div className="item">
+                            <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/justen.jpg"/>
+                            Justen Kitsune
+                        </div>
+                    </div>
+                    
+                </span>;
     }
 }
 
