@@ -1,5 +1,4 @@
 <?php
-include_once INIT::$UTILS_ROOT . "/manage.class.php";
 
 /**
  * Description of manageController
@@ -87,7 +86,7 @@ class getProjectsController extends ajaxController {
 
         $postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        ( !empty( $postInput[ 'status' ] ) ? $this->search_status = $postInput[ 'status' ] : null );
+        ( !empty( $postInput[ 'status' ] ) && Constants_JobStatus::isAllowedStatus( $postInput[ 'status' ] ) ? $this->search_status = $postInput[ 'status' ] : null );
         ( !empty( $postInput[ 'page' ] ) ? $this->page = (int)$postInput[ 'page' ] : null );
         ( !empty( $postInput[ 'step' ] ) ? $this->step = (int)$postInput[ 'step' ] : null );
 

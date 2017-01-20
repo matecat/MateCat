@@ -212,7 +212,7 @@ class catController extends viewController {
             if ( $lastTranslationInJob < $oneMonthAgo ) {
                 $res        = "job";
                 $new_status = Constants_JobStatus::STATUS_ARCHIVED;
-                updateJobsStatus( $res, $this->jid, $new_status, null, null, $this->password );
+                updateJobsStatus( $res, $this->jid, $new_status, null, $this->password );
                 $this->job_archived = true;
             }
 

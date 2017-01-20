@@ -181,6 +181,8 @@ class Database implements IDatabase {
     /**
      * @Override
      * {@inheritdoc}
+     * @deprecated
+     * TODO: Re-implement with prepared statement
      */
     public function fetch_array($query) {
         $result = $this->query($query);

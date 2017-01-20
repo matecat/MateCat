@@ -1909,12 +1909,12 @@ function getJobAnalysisData( $pid, $job_password, $jid = null ) {
  * @param $search_source
  * @param $search_target
  * @param $search_status
- * @param $search_onlycompleted
+ * @param $search_only_completed
  * @return array
  */
 function conditionsForProjectsQuery(
         $search_in_pname, $search_source, $search_target,
-        $search_status, $search_onlycompleted
+        $search_status, $search_only_completed
 ) {
     $conditions = array() ;
     $data = array() ;
@@ -1939,7 +1939,7 @@ function conditionsForProjectsQuery(
         $data['owner_status'] = $search_status ;
     }
 
-    if ( $search_onlycompleted ) {
+    if ( $search_only_completed ) {
         $conditions[]  = " j.completed = 1 ";
     }
 
@@ -1947,14 +1947,17 @@ function conditionsForProjectsQuery(
 }
 
 /**
- * @param $start                int
- * @param $step                 int
- * @param $search_in_pname      string
- * @param $search_source        string
- * @param $search_target        string
- * @param $search_status        string
- * @param $search_onlycompleted bool
- * @param $project_id           int
+ * @param Users_UserStruct  $user
+ * @param                   $start                int
+ * @param                   $step                 int
+ * @param                   $search_in_pname      string
+ * @param                   $search_source        string
+ * @param                   $search_target        string
+ * @param                   $search_status        string
+ * @param                   $search_onlycompleted bool
+ * @param                   $project_id           int
+ *
+ * @param \Teams\TeamStruct $team
  *
  * @return array|int|resource|void
  */
@@ -2399,55 +2402,49 @@ function updateProjectOwner( $ownerEmail, $project_id ) {
     return $result;
 }
 
-function updateJobsStatus( $res, $id, $status, $only_if, $undo, $jPassword = null ) {
+/**
+ * @param      $res
+ * @param      $id
+ * @param      $status
+ * @param      $only_if
+ * @param null $jPassword
+ *
+ * @deprecated
+ * //TODO: Refactoring with prepared statements
+ *
+ */
+function updateJobsStatus( $res, $id, $status, $only_if, $jPassword = null ) {
 
     $db = Database::obtain();
 
     if ( $res == "prj" ) {
+
         $status_filter_query = ( $only_if ) ? " and status_owner='" . $db->escape( $only_if ) . "'" : "";
-        $arStatus            = explode( ',', $status );
 
-        $test = count( explode( ':', $arStatus[ 0 ] ) );
-        if ( ( $test > 1 ) && ( $undo == 1 ) ) {
-            $cases = '';
-            $ids   = '';
+        $query = "UPDATE jobs SET status_owner='" . $db->escape( $status ) . "' WHERE id_project=" . (int)$id . $status_filter_query;
 
-            //help!!!
-            foreach ( $arStatus as $item ) {
-                $ss = explode( ':', $item );
-                $cases .= " when id=" . $db->escape( $ss[ 0 ] ) . " then '" . $db->escape( $ss[ 1 ] ) . "'";
-                $ids .= $db->escape( $ss[ 0 ] ) . ",";
-            }
-            $ids   = trim( $ids, ',' );
-            $query = "update jobs set status_owner= case $cases end where id in ($ids)" . $status_filter_query;
-            $db->query( $query );
+        $db->query( $query );
 
-        } else {
-
-            $query = "update jobs set status_owner='" . $db->escape( $status ) . "' where id_project=" . (int)$id . $status_filter_query;
-
-            $db->query( $query );
-
-            //Works on the basis that MAX( id_segment ) is the same for ALL Jobs in the same Project
-            // furthermore, we need a random ID so, don't worry about MySQL stupidity on random MAX
-            //example: http://dev.mysql.com/doc/refman/5.0/en/example-maximum-column-group-row.html
-            $select_max_id = "
-				SELECT max(id_segment) as id_segment
+        //Works on the basis that MAX( id_segment ) is the same for ALL Jobs in the same Project
+        // furthermore, we need a random ID so, don't worry about MySQL stupidity on random MAX
+        //example: http://dev.mysql.com/doc/refman/5.0/en/example-maximum-column-group-row.html
+        $select_max_id = "
+				SELECT max(id_segment) AS id_segment
 				FROM segment_translations
 				JOIN jobs ON id_job = id
 				WHERE id_project = " . (int)$id;
 
-            $_id_segment = $db->fetch_array( $select_max_id );
-            $_id_segment = array_pop( $_id_segment );
-            $id_segment  = $_id_segment[ 'id_segment' ];
+        $_id_segment = $db->fetch_array( $select_max_id );
+        $_id_segment = array_pop( $_id_segment );
+        $id_segment  = $_id_segment[ 'id_segment' ];
 
-            $query_for_translations = "
+        $query_for_translations = "
 				UPDATE segment_translations
 				SET translation_date = NOW()
 				WHERE id_segment = $id_segment";
 
-            $db->query( $query_for_translations );
-        }
+        $db->query( $query_for_translations );
+
     } else {
 
         $query = "update jobs set status_owner='" . $db->escape( $status ) . "' where id=" . (int)$id . " and password = '" . $db->escape( $jPassword ) . "' ";

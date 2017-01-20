@@ -3,27 +3,29 @@
 class ManageUtils {
 
     /**
-     * @param $start                int
-     * @param $step                 int
-     * @param $search_in_pname      string|null
-     * @param $search_source        string|null
-     * @param $search_target        string|null
-     * @param $search_status        string|null
-     * @param $search_onlycompleted bool
-     * @param $filter_enabled       bool
-     * @param $project_id           int
+     * @param Users_UserStruct  $user
+     * @param                   $start                int
+     * @param                   $step                 int
+     * @param                   $search_in_pname      string|null
+     * @param                   $search_source        string|null
+     * @param                   $search_target        string|null
+     * @param                   $search_status        string|null
+     * @param                   $search_only_completed bool
+     * @param                   $project_id           int
+     *
+     * @param \Teams\TeamStruct $team
      *
      * @return array
-     * @throws Exception
+     * @internal param bool $filter_enabled
      */
     public static function queryProjects(
-        Users_UserStruct $user, $start, $step, $search_in_pname,
-        $search_source, $search_target, $search_status, $search_onlycompleted,
-        $project_id, \Teams\TeamStruct $team = null ) {
+            Users_UserStruct $user, $start, $step, $search_in_pname,
+            $search_source, $search_target, $search_status, $search_only_completed,
+            $project_id, \Teams\TeamStruct $team = null ) {
 
         $data = getProjects(
             $user, $start, $step, $search_in_pname, $search_source, $search_target,
-            $search_status, $search_onlycompleted, $project_id, $team
+            $search_status, $search_only_completed, $project_id, $team
         );
 
         $projects     = array();
@@ -40,7 +42,7 @@ class ManageUtils {
         }
 
         //get job data using job IDs
-        $jobData = getJobsFromProjects( $projectIDs, $search_source, $search_target, $search_status, $search_onlycompleted );
+        $jobData = getJobsFromProjects( $projectIDs, $search_source, $search_target, $search_status, $search_only_completed );
 
         $dao = new Comments_CommentDao() ;
         $openThreads = $dao->getOpenThreadsForProjects( $projectIDs ) ;

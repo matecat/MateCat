@@ -73,7 +73,7 @@ UI = {
             var total_projects = [];
             var requests = [];
             var onDone = function (response) {
-                        var projects = $.parseJSON(response.data);
+                        var projects = response.data;
                         $.merge(total_projects, projects);
                     };
             for (var i=1; i<= UI.Search.currentPage; i++ ) {
@@ -111,7 +111,7 @@ UI = {
     renderMoreProjects: function () {
         UI.Search.currentPage = UI.Search.currentPage + 1;
         this.getProjects().done(function (response) {
-            var projects = $.parseJSON(response.data);
+            var projects = response.data;
             if (projects.length > 0) {
                 ManageActions.renderMoreProjects(projects);
             } else {
@@ -209,7 +209,7 @@ UI = {
             page:		UI.Search.currentPage,        //The pagination ??
             step:		UI.pageStep,    // Number of Projects that returns from getProjects
             only_if:	only_if,        // State before, for example resume project change to 'active' only_if previous state is archived
-            undo:		0               // ??
+            undo:		0               // ?? REMOVED in backend endpoint. If needed, this MUST be re-implemented with sanity....
         };
 
         // Filters
