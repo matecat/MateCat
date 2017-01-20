@@ -8,10 +8,11 @@ var ManageActions = {
     /** Render the list of projects
      * @param projects
      */
-    renderProjects: function (projects, hideSpinner) {
+    renderProjects: function (projects, team, hideSpinner) {
         AppDispatcher.dispatch({
             actionType: ManageConstants.RENDER_PROJECTS,
             project: projects,
+            team: team,
             hideSpinner: hideSpinner,
         });
     },
@@ -101,12 +102,6 @@ var ManageActions = {
     openChangeProjectTeam: function () {
         AppDispatcher.dispatch({
             actionType: ManageConstants.OPEN_CHANGE_TEAM_MODAL,
-        });
-    },
-
-    openChangeProjectAssignee: function () {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.OPEN_CHANGE_PROJECT_ASSIGNEE,
         });
     },
 
