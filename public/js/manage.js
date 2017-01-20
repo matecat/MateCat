@@ -92,7 +92,7 @@ UI = {
             var total_projects = [];
             var requests = [];
             var onDone = function (response) {
-                        var projects = $.parseJSON(response.data);
+                        var projects = response.data;
                         $.merge(total_projects, projects);
                     };
             for (var i=1; i<= UI.Search.currentPage; i++ ) {
@@ -126,7 +126,7 @@ UI = {
     renderMoreProjects: function () {
         UI.Search.currentPage = UI.Search.currentPage + 1;
         this.getProjects().done(function (response) {
-            var projects = $.parseJSON(response.data);
+            var projects = response.data;
             if (projects.length > 0) {
                 ManageActions.renderMoreProjects(projects);
             } else {
@@ -476,7 +476,7 @@ UI = {
         this.selectedTeam = team;
         if (team.name === "My Workspace") {
             this.getProjects().done(function (response) {
-                let projects = $.parseJSON(response.data);
+                let projects = response.data;
                 self.renderProjects(projects);
             });
         } else if (team.name === "Ebay") {

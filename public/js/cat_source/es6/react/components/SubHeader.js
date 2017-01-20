@@ -46,7 +46,7 @@ class SubHeader extends React.Component {
 
             let item = <div className="item" data-value="2000"
                             key={'team' + config.userShortName + 2000}>
-                <a className=" btn-floating green assigned-member center-align">ALL</a>
+                <a className="ui avatar image initials green">ALL</a>
                 {/*<img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg"/>*/}
                 All Members
             </div>;
