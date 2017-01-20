@@ -88,6 +88,10 @@ class ManageUtils {
                 }
             }
 
+
+            $job['quality_overall'] = CatUtils::getQualityOverallFromJobArray( $job_array ) ;
+
+
             //generate and set job stats
             $jobStats = new WordCount_Struct();
             $jobStats->setDraftWords( $job_array[ 'DRAFT' ] );

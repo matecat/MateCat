@@ -739,7 +739,7 @@ function getSegmentsDownload( $jid, $password, $id_file, $no_status_new = 1 ) {
 
 function getSegmentsInfo( $jid, $password ) {
 
-    $query = "select j.id as jid, j.id_project as pid,j.source,j.target,
+    $query = "select j.id as jid, j.password AS jpassword, j.id_project as pid,j.source,j.target,
 		j.id_translator as tid, j.id_tms, j.id_mt_engine,
 		p.id_customer as cid, j.id_translator as tid, j.status_owner as status,
 		j.owner as job_owner, j.create_date, j.last_update, j.tm_keys,
@@ -1991,16 +1991,14 @@ function getProjects( Users_UserStruct $user, $start, $step,
 
     $projectsQuery =
             "SELECT p.id AS pid,
-                p.name,
-                p.password,
-                SUM( draft_words + new_words + translated_words + rejected_words + approved_words ) AS tm_analysis_wc,
-                project_metadata.value AS features
+                            p.name,
+                            p.password,
+                            SUM(draft_words + new_words+translated_words+rejected_words+approved_words) as tm_analysis_wc,
+                            project_metadata.value AS features
 
             FROM projects p
 
             INNER JOIN jobs j ON j.id_project=p.id
-
-            INNER JOIN users ON users.email = p.id_customer
 
             LEFT JOIN project_metadata ON project_metadata.id_project = p.id AND project_metadata.`key` = '$features'
 
@@ -2031,9 +2029,11 @@ function getJobsFromProjects( array $projectIDs, $search_source, $search_target,
     );
 
     $where_query = implode( " AND ", $conditions );
+    $features = Projects_MetadataDao::FEATURES_KEY ;
 
     $jobsQuery = "SELECT
                  j.id,
+
 				 j.id_project,
 				 j.source,
 				 j.target,
@@ -2050,9 +2050,28 @@ function getJobsFromProjects( array $projectIDs, $search_source, $search_target,
 				rejected_words AS REJECT,
 				translated_words AS TRANSLATED,
 				approved_words AS APPROVED,
-                e.name
+                e.name,
+
+
+                -- some fields are repeated with different names to favour the use of the same
+                -- data in CatUtils::getWStructFromJobArray
+                 j.id AS jid,
+                 j.password AS jpassword,
+                 j.draft_words,
+                 j.new_words,
+                 j.translated_words,
+                 j.approved_words,
+                 j.rejected_words,
+                 projects.status_analysis,
+                 project_metadata.value AS features
+
             FROM jobs j
             LEFT JOIN engines e ON j.id_mt_engine=e.id
+
+            JOIN projects ON projects.id = j.id_project
+
+            LEFT JOIN project_metadata ON project_metadata.id_project = projects.id AND project_metadata.`key` = '$features'
+
             WHERE j.id_project IN ( " . implode( ",", $projectIDs ) . " ) AND $where_query
             ORDER BY j.id DESC,
                      j.job_first_segment ASC";

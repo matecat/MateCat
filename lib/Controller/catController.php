@@ -261,7 +261,7 @@ class catController extends viewController {
                 $this->job_owner    = $data[ 0 ][ 'job_owner' ];
             }
 
-            $this->wStruct = $this->__getJobWStruct($job);
+            $this->wStruct = CatUtils::getWStructFromJobArray( $job );
             $this->job_stats = CatUtils::getFastStatsForJob( $this->wStruct );
 
             unset( $job[ 'id_file' ] );
@@ -437,8 +437,10 @@ class catController extends viewController {
         );
 
         $jobQA->retrieveJobErrorTotals();
-        $jobVote          = $jobQA->evalJobVote();
-        $this->qa_data    = json_encode( $jobQA->getQaData() );
+
+        $this->qa_data = json_encode( $jobQA->getQaData() );
+
+        $jobVote = $jobQA->evalJobVote();
         $this->qa_overall = $jobVote[ 'minText' ];
 
 
@@ -696,29 +698,4 @@ class catController extends viewController {
         return \Projects_ProjectDao::isGDriveProject($this->job->id_project);
     }
 
-    /**
-     * @param $job
-     * @return WordCount_Struct
-     */
-    private function __getJobWStruct($job)
-    {
-        $wStruct = new WordCount_Struct();
-
-        $wStruct->setIdJob($this->jid);
-        $wStruct->setJobPassword($this->password);
-        $wStruct->setNewWords($job['new_words']);
-        $wStruct->setDraftWords($job['draft_words']);
-        $wStruct->setTranslatedWords($job['translated_words']);
-        $wStruct->setApprovedWords($job['approved_words']);
-        $wStruct->setRejectedWords($job['rejected_words']);
-
-        // For projects created with No tm analysis enabled
-        if ($wStruct->getTotal() == 0 && ($job['status_analysis'] == Constants_ProjectStatus::STATUS_DONE || $job['status_analysis'] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE)) {
-            $wCounter = new WordCount_Counter();
-            $wStruct = $wCounter->initializeJobWordCount($this->jid, $this->password);
-            Log::doLog("BackWard compatibility set Counter.");
-            return $wStruct;
-        }
-        return $wStruct;
-    }
 }

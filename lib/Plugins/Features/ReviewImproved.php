@@ -82,26 +82,21 @@ class ReviewImproved extends BaseFeature {
         $chunks = array();
 
         foreach( $project['jobs'] as $job ) {
-            foreach( array_values($job) as $chunk ) {
-                $chunks[] = array( $chunk['id'], $chunk['password']);
-            }
+                $chunks[] = array( $job['id'], $job['password'] );
         }
 
         $chunk_reviews = \LQA\ChunkReviewDao::findChunkReviewsByChunkIds( $chunks );
 
         foreach( $project['jobs'] as $kk => $job ) {
-            foreach( $job as $kkk => $chunk ) {
-
-                /**
-                 * Inner cycle to match chunk_reviews records and modify
-                 * the data structure.
-                 */
-                foreach( $chunk_reviews as $chunk_review ) {
-                    if ( $chunk_review->id_job == $chunk['id'] &&
-                        $chunk_review->password == $chunk['password']
-                    ) {
-                        $project['jobs'][$kk][$kkk]['review_password'] = $chunk_review->review_password ;
-                    }
+            /**
+             * Inner cycle to match chunk_reviews records and modify
+             * the data structure.
+             */
+            foreach( $chunk_reviews as $chunk_review ) {
+                if ( $chunk_review->id_job == $job['id'] &&
+                    $chunk_review->password == $job['password']
+                ) {
+                    $project['jobs'][$kk]['review_password'] = $chunk_review->review_password ;
                 }
             }
         }
