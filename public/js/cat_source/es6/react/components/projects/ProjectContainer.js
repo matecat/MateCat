@@ -25,6 +25,7 @@ class ProjectContainer extends React.Component {
         $(this.dropdown).dropdown({
             direction : 'downward'
         });
+        $(this.dropdownUsers).dropdown();
         // $('.tooltipped').tooltip({delay: 50});
         this.getLastAction();
     }
@@ -313,8 +314,55 @@ class ProjectContainer extends React.Component {
                                         onClick={this.openChangeTeamModal}>{(this.props.project.get('team')) ? this.props.project.get('team') : "Personal" }</a>
                                     </li>
                                     <li>
-                                        <a className="waves-effect waves-light btn-floating green assigned-member center-align"
-                                        onClick={this.openChangeAssignee}>RS</a>
+                                        
+                                        <div className="ui inline dropdown users-projects"
+                                        ref={(dropdownUsers) => this.dropdownUsers = dropdownUsers}>
+                                            <div className="text">
+                                                <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg" />
+                                            </div>
+                                            
+                                            <div className="menu">
+                                                <div className="header" data-value="aaa" data-text="aaa">
+                                                    Assign project to:
+                                                </div>
+                                                <div className="header" data-value="aaa" data-text="aaa">
+                                                    <div className="ui form">
+                                                        <div className="field">
+                                                            <input type="text" name="Project Name" placeholder="Namo or email." />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="item" data-value="Personal" data-text="Personal">
+                                                    <a className="ui avatar image initials">RS</a>
+                                                    Personal
+                                                </div>
+                                                <div className="item">
+                                                    <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg"/>
+                                                    Jenny Hess
+                                                </div>
+                                                <div className="item">
+                                                    <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/elliot.jpg"/>
+                                                    Elliot Fu
+                                                </div>
+                                                <div className="item">
+                                                    <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/stevie.jpg"/>
+                                                    Stevie Feliciano
+                                                </div>
+                                                <div className="item">
+                                                    <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/christian.jpg"/>
+                                                    Christian
+                                                </div>
+                                                <div className="item">
+                                                    <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/matt.jpg"/>
+                                                    Matt
+                                                </div>
+                                                <div className="item">
+                                                    <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/justen.jpg"/>
+                                                    Justen Kitsune
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
                                     </li>
                                     <li>
                                         <div className="ui icon top left pointing dropdown button menu-project"
