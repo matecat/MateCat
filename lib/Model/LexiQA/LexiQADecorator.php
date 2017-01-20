@@ -61,6 +61,7 @@ class LexiQADecorator {
         if( INIT::$LXQ_LICENSE ){
             //LEXIQA license key
             $this->template->lxq_license = INIT::$LXQ_LICENSE;
+            $this->template->lxq_partnerid = INIT::$LXQ_PARTNERID;
             $this->template->lexiqa_languages = json_encode( ProjectOptionsSanitizer::$lexiQA_allowed_languages );
         }
 

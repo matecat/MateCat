@@ -129,6 +129,13 @@ var ManageActions = {
             actionType: ManageConstants.CREATE_TEAM,
             teamName: teamName
         });
+    },
+
+    changeTeam: function (teamName) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.CHANGE_TEAM,
+            teamName: teamName
+        });
     }
 
 

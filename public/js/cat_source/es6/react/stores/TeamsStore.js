@@ -52,6 +52,9 @@ AppDispatcher.register(function(action) {
         case ManageConstants.CREATE_TEAM:
             TeamsStore.emitChange(ManageConstants.CREATE_TEAM, action.teamName);
             break;
+        case ManageConstants.CHANGE_TEAM:
+            TeamsStore.emitChange(ManageConstants.CHANGE_TEAM, action.teamName);
+            break;
         case ManageConstants.ADD_TEAM:
             TeamsStore.addTeam(action.team);
             TeamsStore.emitChange(ManageConstants.RENDER_TEAMS, TeamsStore.teams, action.team.name);

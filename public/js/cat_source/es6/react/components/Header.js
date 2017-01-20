@@ -38,6 +38,7 @@ class Header extends React.Component {
 
     changeTeam(value) {
         this.selectedTeam = value;
+        ManageActions.changeTeam(value);
     }
 
     openCreateTeams () {

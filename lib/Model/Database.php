@@ -179,6 +179,7 @@ class Database implements IDatabase {
 
 
     /**
+     * @deprecated
      * @Override
      * {@inheritdoc}
      */
