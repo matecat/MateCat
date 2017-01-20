@@ -19,3 +19,25 @@
 		color: white;
 	}
 }
+
+.ui.inline.dropdown > .text {
+	width: 28px !important;
+    text-align: center;
+    line-height: 2em;
+    &.yellow {
+    	background-color: yellow !important;
+    	color: black;
+    }
+    &.green {
+    	background-color: green !important;
+    	color: white;
+    }
+	&.purple {
+		background-color: purple !important;
+		color: white;
+	}
+	&.orange {
+		background-color: orange !important;
+		color: white;
+	}
+}

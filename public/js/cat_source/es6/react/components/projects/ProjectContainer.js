@@ -322,21 +322,21 @@ class ProjectContainer extends React.Component {
                                             </div>
 
                                             <div className="menu">
-                                                <div className="header" data-value="aaa" data-text="aaa">
+                                                <div className="header">
                                                     Assign project to:
                                                 </div>
-                                                <div className="header" data-value="aaa" data-text="aaa">
+                                                <div className="header">
                                                     <div className="ui form">
                                                         <div className="field">
-                                                            <input type="text" name="Project Name" placeholder="Namo or email." />
+                                                            <input type="text" name="Project Name" placeholder="Name or email." />
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="item" data-value="Personal" data-text="Personal">
+                                                <div className="item" data-value="RS">
                                                     <a className="ui avatar image initials yellow">RS</a>
-                                                    Personal
+                                                    To Me
                                                 </div>
-                                                <div className="item">
+                                                <div className="item" data-value="Federico Ricciuti">
                                                     <a className="ui avatar image initials green">FR</a>
                                                     Federico Ricciuti
                                                 </div>
