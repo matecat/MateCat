@@ -61,7 +61,7 @@ class NewController extends ajaxController {
     private $new_keys = array();
 
     private $owner = "";
-    private $current_user = "";
+    private $current_user;
     private $metadata = array();
 
     const MAX_NUM_KEYS = 5;
@@ -612,7 +612,7 @@ class NewController extends ajaxController {
         $projectStructure[ 'metadata' ]             = $this->metadata ;
         $projectStructure[ 'pretranslate_100']      = $this->pretranslate_100 ;
 
-        if ( $this->current_user != null ) {
+        if ( $this->current_user ) {
             $projectStructure[ 'owner' ]       = $this->current_user->getEmail();
             $projectStructure[ 'id_customer' ] = $this->current_user->getEmail();
         }
@@ -620,7 +620,11 @@ class NewController extends ajaxController {
         $projectManager = new ProjectManager( $projectStructure );
         
         $projectManager->sanitizeProjectOptions = false ; 
-        
+
+        if ( $this->current_user ) {
+            $projectManager->setUser( $this->current_user ) ;
+        }
+
         $projectManager->createProject();
 
         $this->result = $projectStructure[ 'result' ];
@@ -682,7 +686,7 @@ class NewController extends ajaxController {
     }
 
     private function validateAuthHeader() {
-        if ( $_SERVER[ 'HTTP_X_MATECAT_KEY' ] == null ) {
+        if ( !isset( $_SERVER[ 'HTTP_X_MATECAT_KEY' ] ) ) {
             return true;
         }
 

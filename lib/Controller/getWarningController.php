@@ -116,7 +116,7 @@ class getWarningController extends ajaxController {
 
     private function loadFeatures() {
         $this->feature_set = new FeatureSet() ;
-        $this->feature_set->loadFromIdCustomer( $this->project->id_customer ) ;
+        $this->feature_set->loadForProject( $this->project ) ;
     }
 
     /**

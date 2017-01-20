@@ -122,6 +122,16 @@ class CurlTest {
     return $this->result ;
   }
 
+  public function getCookies() {
+      preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $this->response_header, $matches);
+      $cookies = array();
+      foreach($matches[1] as $item) {
+          parse_str($item, $cookie);
+          $cookies = array_merge($cookies, $cookie);
+      }
+      return $cookies ;
+  }
+
   public function getResponse() {
     if ( $this->run() ) {
       // var_dump($this->response_body);

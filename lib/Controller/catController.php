@@ -77,7 +77,7 @@ class catController extends viewController {
     /**
      * @var FeatureSet
      */
-    private $fature_set ;
+    private $feature_set ;
 
     /**
      * @var WordCount_Struct
@@ -129,7 +129,8 @@ class catController extends viewController {
         };
 
         $this->project = Projects_ProjectDao::findByJobId( $this->jid );
-        $this->feature_set = FeatureSet::fromIdCustomer( $this->project->id_customer );
+        $this->feature_set = new FeatureSet();
+        $this->feature_set->loadForProject( $this->project ) ;
 
     }
 

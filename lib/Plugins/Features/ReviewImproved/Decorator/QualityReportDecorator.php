@@ -24,7 +24,7 @@ class QualityReportDecorator extends \AbstractModelViewDecorator {
     private $download_uri ;
 
     public function __construct( QualityReportModel $model ) {
-        $this->model = $model;
+        parent::__construct( $model ) ;
     }
 
     public function setDownloadURI( $uri ) {
@@ -62,6 +62,14 @@ class QualityReportDecorator extends \AbstractModelViewDecorator {
         );
 
         $template->translate_url = $this->getTranslateUrl();
+
+        if ($this->refererIsRevise() ) {
+            $template->back_label = 'Back to Revise' ;
+            $template->back_url = $this->getReviseUrl() ;
+        } else {
+            $template->back_label = 'Back to Translate' ;
+            $template->back_url = $this->getTranslateUrl() ;
+        }
 
         $template->model = $this->model->getStructure();
 
@@ -117,15 +125,43 @@ class QualityReportDecorator extends \AbstractModelViewDecorator {
     }
 
     private function getTranslateUrl() {
-        $chunk   = $this->model->getChunk();
-        $job     = $this->model->getChunk()->getJob();
-        $project = $job->getProject();
+        return \Routes::translate(
+            $this->model->getProject()->name,
+            $this->model->getChunk()->id,
+            $this->model->getChunk()->password,
+            $this->model->getChunk()->source,
+            $this->model->getChunk()->target
+        );
+    }
 
-        $base = INIT::$BASEURL;
+    /**
+     * Compares the referer with the real chunk review password.
+     *
+     * @return bool
+     */
+    private function refererIsRevise() {
+        if ( !isset( $_SERVER['HTTP_REFERER'] ) ) {
+            return FALSE ;
+        }
 
-        return "{$base}translate/{$project->name}/" .
-        "{$job->source}-{$job->target}/{$job->id}-{$chunk->password}";
+        $chunk_review = $this->model->getChunkReview() ;
+        $path = parse_url( $_SERVER['HTTP_REFERER'], PHP_URL_PATH ) ;
+        preg_match_all('/.*\/(.*)/', $path, $matches);
+        if ( count( $matches ) == 2 ) {
+            list( $id, $password ) = explode('-', $matches[1][0] ) ;
+            return $id == $chunk_review->id_job && $password == $chunk_review->review_password  ;
+        }
+        return FALSE ;
+    }
 
+    private function getReviseUrl() {
+        return \Routes::revise(
+            $this->model->getProject()->name,
+            $this->model->getChunk()->id,
+            $this->model->getChunkReview()->review_password,
+            $this->model->getChunk()->source,
+            $this->model->getChunk()->target
+        ) ;
     }
 
 }

@@ -30,10 +30,16 @@ class StatsController extends KleinController {
         $job_stats = \CatUtils::getFastStatsForJob( $wStruct );
 
         $job_stats['ANALYSIS_COMPLETE'] = $job->getProject()->analysisComplete() ;
-        
-        $this->response->json(array(
-            'stats' => $job_stats
-        ));
+
+
+        $response = array( 'stats' => $job_stats );
+
+        $featureSet = new \FeatureSet();
+        $featureSet->loadForProject( $job->getProject() )  ;
+        $response = $featureSet->filter('filterStatsControllerResponse', $response, array(
+            'chunk' => $job ) );
+
+        $this->response->json( $response ) ;
     }
 
     protected function validateRequest() {

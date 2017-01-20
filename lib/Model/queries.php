@@ -1659,6 +1659,7 @@ function fetchStatus( $sid, $results, $status = Constants_TranslationStatus::STA
 function insertProject( ArrayObject $projectStructure ) {
     $data                        = array();
     $data[ 'id_customer' ]       = $projectStructure[ 'id_customer' ];
+    $data[ 'id_team' ]           = $projectStructure[ 'id_team' ];
     $data[ 'name' ]              = $projectStructure[ 'project_name' ];
     $data[ 'create_date' ]       = $projectStructure[ 'create_date' ];
     $data[ 'status_analysis' ]   = $projectStructure[ 'status' ];
@@ -1953,77 +1954,65 @@ function conditionsForProjectsQuery(
  * @param $search_target        string
  * @param $search_status        string
  * @param $search_onlycompleted bool
- * @param $filtering
  * @param $project_id           int
  *
  * @return array|int|resource|void
  */
-function getProjects( $start, $step, $search_in_pname, $search_source, $search_target, $search_status, $search_onlycompleted, $filtering, $project_id ) {
+function getProjects( Users_UserStruct $user, $start, $step,
+                      $search_in_pname, $search_source, $search_target,
+                      $search_status, $search_onlycompleted,
+                      $project_id,
+                      \Teams\TeamStruct $team = null) {
 
-    $jobs_filter_query     = array();
-    $projects_filter_query = array();
+    list( $conditions, $data ) = conditionsForProjectsQuery(
+        $search_in_pname, $search_source, $search_target,
+        $search_status, $search_onlycompleted
+    ) ;
 
-    if ( !is_null( $search_in_pname ) && !empty( $search_in_pname ) ) {
-        $projects_filter_query[ ] = "p.name like '%" . $search_in_pname . "%'";
+    $data['email'] = $user->email ;
+
+    if ( $project_id ) {
+        $conditions[] = " p.id = :project_id " ;
+        $data['project_id'] = $project_id ;
     }
 
-    if ( !is_null( $search_source ) && !empty( $search_source ) ) {
-        $jobs_filter_query[ ]     = "j.source = '" . $search_source . "'";
-        $projects_filter_query[ ] = "j.source = '" . $search_source . "'";
+    $ownership_condition = " ( p.id_customer = :email OR j.owner = :email )" ;
+
+    if ( !is_null( $team ) ) {
+        $ownership_condition .= " OR p.id_team = :id_team " ;
+        $data [ 'id_team' ] = $team->id ;
     }
 
-    if ( !is_null( $search_target ) && !empty( $search_target ) ) {
-        $jobs_filter_query[ ]     = "j.target = '" . $search_target . "'";
-        $projects_filter_query[ ] = "j.target = '" . $search_target . "'";
-    }
+    $conditions[] = " ( $ownership_condition ) " ;
 
-    if ( !is_null( $search_status ) && !empty( $search_status ) ) {
-        $jobs_filter_query[ ]     = "j.status_owner = '" . $search_status . "'";
-        $projects_filter_query[ ] = "j.status_owner = '" . $search_status . "'";
-    }
+    $where_query = implode( " AND ", $conditions );
 
-    if ( $search_onlycompleted ) {
-        $jobs_filter_query[ ]     = "j.completed = 1";
-        $projects_filter_query[ ] = "j.completed = 1";
-    }
-
-    if ( !is_null( $project_id ) && !empty( $project_id ) ) {
-        $jobs_filter_query[ ]     = "j.id_project = " . $project_id;
-        $projects_filter_query[ ] = "j.id_project = " . $project_id;
-    }
-
-    //FIXME: SESSION CALL SHOULD NOT BE THERE!!!
-    $jobs_filter_query [ ]    = "j.owner = '" . $_SESSION[ 'cid' ] . "' and j.id_project in (%s)";
-    $projects_filter_query[ ] = "j.owner = '" . $_SESSION[ 'cid' ] . "'";
+    $features = Projects_MetadataDao::FEATURES_KEY ;
 
     $projectsQuery =
             "SELECT p.id AS pid,
-                            p.name,
-                            p.password,
-                            SUM(draft_words + new_words+translated_words+rejected_words+approved_words) as tm_analysis_wc
+                p.name,
+                p.password,
+                SUM( draft_words + new_words + translated_words + rejected_words + approved_words ) AS tm_analysis_wc,
+                project_metadata.value AS features
+
             FROM projects p
+
             INNER JOIN jobs j ON j.id_project=p.id
-            WHERE %s
+
+            INNER JOIN users ON users.email = p.id_customer
+
+            LEFT JOIN project_metadata ON project_metadata.id_project = p.id AND project_metadata.`key` = '$features'
+
+            WHERE $where_query
             GROUP BY 1
             ORDER BY 1 DESC
-            LIMIT %d, %d";
+            LIMIT $start, $step " ;
 
 
-    $where_query = 1;
-    if ( count( $projects_filter_query ) ) {
-        $where_query = implode( " and ", $projects_filter_query );
-    }
-
-    $query = sprintf( $projectsQuery, $where_query, $start, $step );
-
-    //    Log::doLog( $query );
-
-    $db = Database::obtain();
-    //    $results = $db->query( "SET SESSION group_concat_max_len = 10000000;" );
-    $results = $db->fetch_array( $query );
-
-    //    Log::doLog( $results );
-    return $results;
+    $stmt = Database::obtain()->getConnection()->prepare( $projectsQuery );
+    $stmt->execute( $data );
+    return $stmt->fetchAll() ;
 }
 
 
@@ -2074,36 +2063,43 @@ function getJobsFromProjects( array $projectIDs, $search_source, $search_target,
 
 }
 
-function getProjectsNumber( $start, $step, $search_in_pname, $search_source, $search_target, $search_status, $search_onlycompleted, $filtering ) {
+function getProjectsNumber( Users_UserStruct $user, $search_in_pname, $search_source, $search_target, $search_status, $search_onlycompleted, \Teams\TeamStruct $team = null) {
 
-    //	$pn = ($search_in_pname)? "where p.name like '%$search_in_pname%'" : "";
+    list( $conditions, $data ) = conditionsForProjectsQuery(
+        $search_in_pname, $search_source, $search_target,
+        $search_status, $search_onlycompleted
+    ) ;
 
-    $pn_query    = ( $search_in_pname ) ? " p.name like '%$search_in_pname%' and" : "";
-    $ss_query    = ( $search_source ) ? " j.source='$search_source' and" : "";
-    $st_query    = ( $search_target ) ? " j.target='$search_target' and" : "";
-    $sst_query   = ( $search_status ) ? " j.status_owner='$search_status' and" : "";
-    $oc_query    = ( $search_onlycompleted ) ? " j.completed=1 and" : "";
-    $owner       = $_SESSION[ 'cid' ];
-    $owner_query = " j.owner='$owner' and";
+    $data['email'] = $user->email ;
 
-    $query_tail        = $pn_query . $ss_query . $st_query . $sst_query . $oc_query . $owner_query;
-    $jobs_filter_query = ( $query_tail == '' ) ? '' : 'where ' . $query_tail;
-    $jobs_filter_query = preg_replace( '/( and)$/i', '', $jobs_filter_query );
+    $query  = " SELECT COUNT( distinct id_project ) AS c
+    FROM projects p
+    INNER JOIN jobs j ON j.id_project = p.id
 
-    $query = "select count(distinct id_project) as c
+    INNER JOIN users on users.email = p.id_customer
 
-		from projects p
-		inner join jobs j on j.id_project=p.id
-		left join engines e on j.id_mt_engine=e.id
-		left join translators t on j.id_translator=t.username
-		$jobs_filter_query";
+    WHERE id_customer = :email
+    " ;
 
-    //    Log::doLog($query);
+    // TODO: duplicated code for ownership condition
+    $ownership_condition = " ( p.id_customer = :email OR j.owner = :email )" ;
 
-    $db      = Database::obtain();
-    $results = $db->fetch_array( $query );
+    if ( !is_null( $team ) ) {
+        $ownership_condition .= " OR p.id_team = :id_team " ;
+        $data [ 'id_team' ] = $team->id ;
+    }
 
-    return $results;
+    $conditions[] = " ( $ownership_condition ) " ;
+
+
+    if ( count( $conditions ) ) {
+        $query = $query . " AND " . implode( " AND ", $conditions );
+    }
+
+    $stmt = Database::obtain()->getConnection()->prepare( $query ) ;
+    $stmt->execute( $data ) ;
+
+    return $stmt->fetchAll() ;
 }
 
 function getProjectStatsVolumeAnalysis( $pid ) {

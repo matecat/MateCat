@@ -18,31 +18,49 @@ class FeatureSet {
         $this->loadFromMandatory();
     }
 
-    /**
-     * @param $id_customer
-     *
-     * @return FeatureSet
-     */
-    public static function fromIdCustomer( $id_customer ) {
-        $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
-        return new FeatureSet($features);
+    public function getCodes() {
+        return array_map( function( $feature ) {
+            return $feature->feature_code ;
+        }, $this->features);
     }
 
-    /**
-     * @param $id_customer
-     */
-    public function loadFromIdCustomer( $id_customer ) {
-        $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
-        $this->features = array_merge( $this->features, $features );
-    }
+    public function loadFromString( $string ) {
+        $feature_codes = FeatureSet::splitString( $string );
+        $features = array();
 
-    /**
-     * @param array $params
-     */
-    public function loadFeatures( $params = array() ) {
-       if ( array_key_exists('id_customer', $params) ) {
-            $this->loadFromIdCustomer( $params['id_customer'] ) ;
+        if ( !empty( $feature_codes ) ) {
+            foreach( $feature_codes as $code ) {
+                $features [] = new BasicFeatureStruct( array( 'feature_code' => $code ) );
+            }
+            $this->features = static::merge($this->features, $features);
         }
+    }
+
+    /**
+     * Features are attached to project via project_metadata.
+     */
+    public function loadForProject( Projects_ProjectStruct $project ) {
+        $this->loadFromString( $project->getMetadataValue(Projects_MetadataDao::FEATURES_KEY) ) ;
+    }
+
+    /**
+     *
+     * @param $id_customer
+     */
+    public function loadFromUserEmail( $id_customer ) {
+        $features = OwnerFeatures_OwnerFeatureDao::getByIdCustomer( $id_customer );
+        $this->features = static::merge( $this->features, $features );
+    }
+
+    /**
+     * Loads the features starting from a given team.
+     *
+     * @param Users_UserStruct $user
+     */
+    public function loadFromTeam( \Teams\TeamStruct $team ) {
+        $dao = new OwnerFeatures_OwnerFeatureDao() ;
+        $features = $dao->getByTeam( $team ) ;
+        $this->features = static::merge( $this->features, $features ) ;
     }
 
     /**
@@ -75,6 +93,8 @@ class FeatureSet {
                     try {
                         $filterable = call_user_func_array( array( $obj, $method ), $args );
                     } catch ( \Exceptions\ValidationError $e ) {
+                        throw $e ;
+                    } catch ( Exceptions_RecordNotFound $e ) {
                         throw $e ;
                     } catch ( Exception $e ) {
                         Log::doLog("Exception running filter " . $method . ": " . $e->getMessage() );
@@ -125,9 +145,27 @@ class FeatureSet {
                 $obj = new $cls( $controller, $template ) ;
                 $obj->decorate();
             }
+        }
+    }
 
+    public static function merge( $left, $right ) {
+        $returnable = array();
+
+        foreach( $left as $feature ) {
+            $returnable[ $feature->feature_code ] = $feature ;
         }
 
+        foreach( $right as $feature ) {
+            if ( !isset( $returnable[ $feature->feature_code ] ) ) {
+                $returnable[ $feature->feature_code ] = $feature ;
+            }
+        }
+
+        return $returnable ;
+    }
+
+    public static function splitString( $string ) {
+        return explode(',', $string);
     }
 
     /**
@@ -136,9 +174,9 @@ class FeatureSet {
     private function loadFromMandatory() {
         $features = [] ;
         foreach( INIT::$MANDATORY_PLUGINS as $plugin) {
-            $features[] = new BasicFeatureStruct(array('feature_code' => $plugin));
+            $features[] = new BasicFeatureStruct(array('feature_code' => $plugin) );
         }
-        $this->features = array_merge($this->features, $features);
+        $this->features = static::merge($this->features, $features);
     }
 
     /**

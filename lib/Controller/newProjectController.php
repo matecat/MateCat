@@ -20,6 +20,11 @@ class newProjectController extends viewController {
 
     private $keyList = array();
 
+    /**
+     * @var FeatureSet
+     */
+    private $featureSet ;
+
     public function __construct() {
 
         parent::__construct( false );
@@ -38,6 +43,8 @@ class newProjectController extends viewController {
         $this->subject_handler = Langs_LanguageDomains::getInstance();
 
         $this->subjectArray = $this->subject_handler->getEnabledDomains();
+
+        $this->featureSet = new FeatureSet() ;
     }
 
     public function doAction() {
@@ -76,6 +83,8 @@ class newProjectController extends viewController {
 
         if ( $this->isLoggedIn() ) {
 
+            $this->__loadFeaturesFromUserOrTeam();
+
             try {
 
                 $_keyList = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
@@ -90,9 +99,35 @@ class newProjectController extends viewController {
             } catch ( Exception $e ) {
                 Log::doLog( $e->getMessage() );
             }
+        }
+    }
 
+    /**
+     *
+     */
+    private function __getCurrentTeam() {
+        if ( !$this->isLoggedIn() ) {
+            throw new Exception('user is not logged') ;
         }
 
+        $teamDao = new \Teams\MembershipDao() ;
+        $team = $teamDao->findTeambyUser( $this->logged_user ) ;
+        return $team ;
+    }
+
+    /**
+     * Here we want to be explicit about the team the user is currently working on.
+     * Even if a user is included in more teams, we'd prefer to have the team bound
+     * to the given session.
+     *
+     */
+    private function __loadFeaturesFromUserOrTeam() {
+        $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
+        $currentTeam = $this->__getCurrentTeam();
+
+        if ( $currentTeam ) {
+            $this->featureSet->loadFromTeam( $currentTeam ) ;
+        }
     }
 
     private function array_sort_by_column( &$arr, $col, $dir = SORT_ASC ) {
@@ -283,7 +318,11 @@ class newProjectController extends viewController {
         $this->template->currentTargetLang = $this->getCurrentTargetLang();
         
         $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages ); 
-        LexiQADecorator::getInstance( $this->template )->featureEnabled( $this->logged_user, Database::obtain() )->decorateViewLexiQA();
+        LexiQADecorator::getInstance( $this->template )->featureEnabled( $this->featureSet )->decorateViewLexiQA();
+
+        $this->template->additional_input_params_base_path  = \INIT::$TEMPLATE_ROOT ;
+
+        $this->featureSet->appendDecorators('NewProjectDecorator', $this, $this->template ) ;
 
     }
 
@@ -302,10 +341,6 @@ class newProjectController extends viewController {
         }
 
         return Constants::DEFAULT_TARGET_LANG;
-    }
-
-    private function generateGDriveAuthUrl(){
-        $this->gdriveAuthUrl = \GDrive::generateGDriveAuthUrl();
     }
 
     private function evalTragetLangHistory() {

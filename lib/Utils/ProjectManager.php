@@ -61,6 +61,16 @@ class ProjectManager {
 
     const TRANSLATED_USER = 'translated_user';
 
+    /**
+     * @var Users_UserStruct ;
+     */
+    protected $user ;
+
+    /**
+     * @var \Teams\TeamStruct
+     */
+    protected $team ;
+
     public function __construct( ArrayObject $projectStructure = null ) {
 
 
@@ -132,7 +142,7 @@ class ProjectManager {
         $this->features = new FeatureSet();
 
         if ( !empty( $this->projectStructure['id_customer']) ) {
-           $this->features->loadFromIdCustomer( $this->projectStructure['id_customer'] );
+           $this->features->loadFromUserEmail( $this->projectStructure['id_customer'] );
         }
 
         $this->projectStructure['array_files'] = $this->features->filter(
@@ -148,6 +158,20 @@ class ProjectManager {
     }
 
     /**
+     * Set the user who is creating the project. Loads additional features looking up the
+     * the ones activated for the team.
+     *
+     * @param Users_UserStruct $user
+     */
+    public function setUser( Users_UserStruct $user ) {
+        $this->team = Users_UserDao::findDefaultTeam( $user ) ;
+
+        if ( $this->team ) {
+            $this->features->loadFromTeam( $this->team ) ;
+        }
+    }
+
+    /**
      * @param $id
      *
      * @throws Exceptions_RecordNotFound
@@ -159,12 +183,13 @@ class ProjectManager {
         }
         $this->projectStructure['id_project'] = $this->project->id ;
         $this->projectStructure['id_customer'] = $this->project->id_customer ;
+
         $this->reloadFeatures();
 
     }
     private function reloadFeatures() {
         $this->features = new FeatureSet();
-        $this->features->loadFromIdCustomer( $this->project->id_customer );
+        $this->features->loadForProject( $this->project ) ;
     }
 
     public function getProjectStructure() {
@@ -173,16 +198,19 @@ class ProjectManager {
 
 
     /**
-     * 
-     * Save in project metadata. This is where, among other things, we put 
-     * project options. 
+     *  saveMetadata
+     *
+     * This is where, among other things, we put project options.
      * 
      * Project options may need to be sanitized so that we can silently ignore impossible combinations, 
      * and we can apply defaults when those are missing. 
      * 
      */
     private function saveMetadata() {
-        $options = $this->projectStructure['metadata']; 
+        $dao = new Projects_MetadataDao();
+        $dao->set( $this->projectStructure['id_project'], Projects_MetadataDao::FEATURES_KEY,  implode(',', $this->features->getCodes() ) ) ;
+
+        $options = $this->projectStructure['metadata'];
         
         if ( $this->sanitizeProjectOptions ) {
             $options = $this->sanitizeProjectOptions( $options ) ; 
@@ -191,8 +219,7 @@ class ProjectManager {
         if ( empty( $options ) ) {
             return ;
         }
-            
-        $dao = new Projects_MetadataDao( Database::obtain() );
+
         foreach( $options as $key => $value ) {
             $dao->set(
                     $this->projectStructure['id_project'],
@@ -221,6 +248,11 @@ class ProjectManager {
     private function createProjectRecord() {
         $this->projectStructure[ 'ppassword' ]  = $this->_generatePassword();
         $this->projectStructure[ 'user_ip' ]    = Utils::getRealIpAddr();
+
+        if ( $this->team ) {
+            $this->projectStructure[ 'id_team' ] = $this->team->id ;
+        }
+
         $this->project = insertProject( $this->projectStructure );
         $this->projectStructure[ 'id_project' ] = $this->project->id;
     }

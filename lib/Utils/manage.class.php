@@ -16,9 +16,15 @@ class ManageUtils {
      * @return array
      * @throws Exception
      */
-    public static function queryProjects( $start, $step, $search_in_pname, $search_source, $search_target, $search_status, $search_onlycompleted, $filter_enabled, $project_id ) {
+    public static function queryProjects(
+        Users_UserStruct $user, $start, $step, $search_in_pname,
+        $search_source, $search_target, $search_status, $search_onlycompleted,
+        $project_id, \Teams\TeamStruct $team = null ) {
 
-        $data = getProjects( $start, $step, $search_in_pname, $search_source, $search_target, $search_status, $search_onlycompleted, $filter_enabled, $project_id );
+        $data = getProjects(
+            $user, $start, $step, $search_in_pname, $search_source, $search_target,
+            $search_status, $search_onlycompleted, $project_id, $team
+        );
 
         $projects     = array();
         $projectIDs   = array();
@@ -158,6 +164,8 @@ class ManageUtils {
             $project[ 'has_archived' ]   = ( in_array( Constants_JobStatus::STATUS_ARCHIVED, $project2info[ $project[ 'id' ] ][ 'status' ] ) );
             $project[ 'mt_engine_name' ] = $project2info[ $project[ 'id' ] ][ 'mt_engine_name' ];
             $project[ 'id_tms' ]         = $project2info[ $project[ 'id' ] ][ 'id_tms' ];
+
+            $project[ 'features' ] = $item[ 'features' ] ;
 
             $projects[ ] = $project;
         }
