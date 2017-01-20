@@ -1913,8 +1913,8 @@ function getJobAnalysisData( $pid, $job_password, $jid = null ) {
  * @return array
  */
 function conditionsForProjectsQuery(
-    $search_in_pname, $search_source, $search_target,
-    $search_status, $search_onlycompleted
+        $search_in_pname, $search_source, $search_target,
+        $search_status, $search_onlycompleted
 ) {
     $conditions = array() ;
     $data = array() ;
@@ -2011,33 +2011,21 @@ function getProjects( Users_UserStruct $user, $start, $step,
 }
 
 
-function getJobsFromProjects( array $projectIDs, $search_source, $search_target, $search_status, $search_onlycompleted ) {
+function getJobsFromProjects( array $projectIDs, $search_source, $search_target, $search_status, $search_only_completed ) {
 
-    $jobs_filter_query = array();
-
-    // TODO: reuse function `conditionsForProjectsQuery`
-    if ( !is_null( $search_source ) && !empty( $search_source ) ) {
-        $jobs_filter_query[ ] = "j.source = '" . $search_source . "'";
+    /**
+     * Do not execute
+     */
+    if( empty( $projectIDs ) ){
+        return [];
     }
 
-    if ( !is_null( $search_target ) && !empty( $search_target ) ) {
-        $jobs_filter_query[ ] = "j.target = '" . $search_target . "'";
-    }
+    list( $conditions, $data ) = conditionsForProjectsQuery(
+            null, $search_source, $search_target,
+            $search_status, $search_only_completed
+    );
 
-    if ( !is_null( $search_status ) && !empty( $search_status ) ) {
-        $jobs_filter_query[ ] = "j.status_owner = '" . $search_status . "'";
-    }
-
-    if ( $search_onlycompleted ) {
-        $jobs_filter_query[ ] = "j.completed = 1";
-    }
-
-    $where_query = implode( " AND ", $jobs_filter_query );
-    $ids         = implode( ", ", $projectIDs );
-
-    if ( !count( $ids ) ) {
-        $ids[ ] = 0;
-    }
+    $where_query = implode( " AND ", $conditions );
 
     $jobsQuery = "SELECT
                  j.id,
@@ -2059,20 +2047,15 @@ function getJobsFromProjects( array $projectIDs, $search_source, $search_target,
 				approved_words AS APPROVED,
                 e.name
             FROM jobs j
-
             LEFT JOIN engines e ON j.id_mt_engine=e.id
-
-            WHERE j.id_project IN (%s) AND %s
-
+            WHERE j.id_project IN ( " . implode( ",", $projectIDs ) . " ) AND $where_query
             ORDER BY j.id DESC,
                      j.job_first_segment ASC";
 
-    $query = sprintf( $jobsQuery, $ids, $where_query );
+    $stmt = Database::obtain()->getConnection()->prepare( $jobsQuery );
+    $stmt->execute( $data );
+    return $stmt->fetchAll( PDO::FETCH_ASSOC ) ;
 
-    $db = Database::obtain();
-    $results = $db->fetch_array( $query );
-
-    return $results;
 }
 
 function getProjectsNumber( Users_UserStruct $user, $search_in_pname, $search_source, $search_target, $search_status, $search_onlycompleted, \Teams\TeamStruct $team = null) {

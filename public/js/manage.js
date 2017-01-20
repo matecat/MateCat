@@ -46,7 +46,7 @@ UI = {
         this.selectedTeam = "Personal";
 
         this.getProjects().done(function (response) {
-            var projects = $.parseJSON(response.data);
+            var projects = response.data;
             self.renderProjects(projects);
         });
 
@@ -84,7 +84,7 @@ UI = {
         var self = this;
         if ( UI.Search.currentPage === 1) {
             this.getProjects().done(function (response) {
-                var projects = $.parseJSON(response.data);
+                var projects = response.data;
                 ManageActions.renderProjects(projects);
             });
         } else {
@@ -146,7 +146,7 @@ UI = {
             this.Search.filter = $.extend( this.Search.filter, filter );
             UI.Search.currentPage = 1;
             this.getProjects().done(function (response) {
-                var projects = $.parseJSON(response.data);
+                var projects = response.data;
                 ManageActions.renderProjects(projects);
                 self.performingSearchRequest = false;
             });
@@ -162,7 +162,7 @@ UI = {
         this.Search.filter = $.extend( this.Search.filter, filter );
         UI.Search.currentPage = 1;
         this.getProjects().done(function (response) {
-            var projects = $.parseJSON(response.data);
+            var projects = response.data;
             ManageActions.renderProjects(projects);
         });
 
@@ -175,7 +175,7 @@ UI = {
             delete this.Search.filter.pn;
         }
         this.getProjects().done(function (response) {
-            var projects = $.parseJSON(response.data);
+            var projects = response.data;
             ManageActions.renderProjects(projects);
         });
     },
@@ -297,7 +297,7 @@ UI = {
         return APP.doRequest({
             data: data,
             success: function(d){
-                data = $.parseJSON(d.data);
+                data = d.data;
                 UI.pageStep = d.pageStep;
                 if( typeof d.errors != 'undefined' && d.errors.length ){
                     window.location = '/';
