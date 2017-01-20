@@ -1281,7 +1281,7 @@
             var tr = button.closest('tr');
             var id = tr.data("id");
             $('.mgmt-table-mt .tm-warning-message').html('Do you really want to delete this MT? ' +
-                '<a class="pull-right btn-confirm-small continueDeletingMT confirm-tm-key-delete" style="display: inline;">       <span class="text">Confirm</span>   </a>' +
+                '<a class="pull-right btn-confirm-small continueDeletingMT confirm-tm-key-delete" style="display: inline; margin: 0 10px;padding: 0">       <span class="text">Confirm</span>   </a>' +
                 '<a class="pull-right btn-orange-small cancelDeletingMT cancel-tm-key-delete">      <span class="text"></span>   </a>').show();
             $('.continueDeletingMT, .cancelDeletingMT').off('click');
             $('.continueDeletingMT').on('click', function(e){
@@ -1874,7 +1874,7 @@
         hideAllBoxOnTables: function () {
             $('.mgmt-container .active-tm-container .tm-error-message, .mgmt-container .active-tm-container .tm-warning-message, .mgmt-container .active-tm-container .tm-success-message,' +
                 '.mgmt-container .inactive-tm-container .tm-error-message, .mgmt-container .inactive-tm-container .tm-warning-message, .mgmt-container .inactive-tm-container .tm-success-message,' +
-                '.mgmt-table-mt .tm-error-message').fadeOut(0, function () {
+                '.mgmt-table-mt .tm-error-message, .mgmt-table-mt .tm-warning-message, .mgmt-table-mt .tm-success-message').fadeOut(0, function () {
                 $(this).html("");
             });
             $('.tm-error').removeClass('tm-error');
