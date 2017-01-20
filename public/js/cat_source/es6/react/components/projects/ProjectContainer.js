@@ -2,10 +2,10 @@
  * React Component for the editarea.
 
  */
-var CSSTransitionGroup = React.addons.CSSTransitionGroup;
-var ProjectsStore = require('../../stores/ProjectsStore');
-var ManageConstants = require('../../constants/ManageConstants');
-var Job = require('./JobContainer').default;
+let CSSTransitionGroup = React.addons.CSSTransitionGroup;
+let ProjectsStore = require('../../stores/ProjectsStore');
+let ManageConstants = require('../../constants/ManageConstants');
+let Job = require('./JobContainer').default;
 
 class ProjectContainer extends React.Component {
 
@@ -25,7 +25,9 @@ class ProjectContainer extends React.Component {
         $(this.dropdown).dropdown({
             direction : 'downward'
         });
-        $(this.dropdownUsers).dropdown();
+        if (this.props.project.get('user')) {
+            $(this.dropdownUsers).dropdown('set selected', this.props.project.get('user').get('id'));
+        }
         // $('.tooltipped').tooltip({delay: 50});
         this.getLastAction();
     }
@@ -55,7 +57,7 @@ class ProjectContainer extends React.Component {
 
 
     getProjectMenu(activityLogUrl) {
-        var menuHtml = <div className="menu">
+        let menuHtml = <div className="menu">
             <div className="item"><a href={activityLogUrl} target="_blank"><i className="icon-download-logs"/>Activity Log</a></div>
 
             <div className="item"><a onClick={this.archiveProject.bind(this)}><i className="icon-drawer"/>Archive project</a></div>
@@ -81,9 +83,9 @@ class ProjectContainer extends React.Component {
     }
 
     getLastAction() {
-        var self = this;
+        let self = this;
         this.props.lastActivityFn(this.props.project.get('id'), this.props.project.get('password')).done(function (data) {
-            var lastAction = (data.activity[0])? data.activity[0] : [];
+            let lastAction = (data.activity[0])? data.activity[0] : [];
             self.setState({
                 lastAction: lastAction,
                 jobsActions: data.activity
@@ -93,7 +95,7 @@ class ProjectContainer extends React.Component {
 
     getLastJobAction(idJob) {
         //Last Activity Log Action
-        var lastAction;
+        let lastAction;
         if ( this.state.jobsActions && this.state.jobsActions.length > 0 ) {
             lastAction = this.state.jobsActions.find(function (job) {
                 return job.id_job == idJob;
@@ -132,7 +134,7 @@ class ProjectContainer extends React.Component {
     }
 
     getLastActionDate() {
-        var date = new Date(this.state.lastAction.event_date);
+        let date = new Date(this.state.lastAction.event_date);
         return date.toDateString();
     }
 
@@ -141,17 +143,17 @@ class ProjectContainer extends React.Component {
     }
 
     getJobsList(targetsLangs, jobsList, jobsLength) {
-        var self = this;
-        var chunks = [],  index;
-        var tempIdsArray = [];
-        var orderedJobs = this.props.project.get('jobs').reverse();
-        var visibleJobsBoxes = 0;
+        let self = this;
+        let chunks = [],  index;
+        let tempIdsArray = [];
+        let orderedJobs = this.props.project.get('jobs').reverse();
+        let visibleJobsBoxes = 0;
         orderedJobs.map(function(job, i){
 
-            var openJobClass = '';
-            var next_job_id = (orderedJobs.get(i+1)) ? orderedJobs.get(i+1).get('id') : 0;
+            let openJobClass = '';
+            let next_job_id = (orderedJobs.get(i+1)) ? orderedJobs.get(i+1).get('id') : 0;
             //To check if is a chunk (jobs with same id)
-            var isChunk = false;
+            let isChunk = false;
             if (tempIdsArray.indexOf(job.get('id')) > -1 ) {
                 isChunk = true;
                 index ++;
@@ -165,8 +167,8 @@ class ProjectContainer extends React.Component {
 
             //Create the Jobs boxes and, if visibles, the jobs body
             if (self.state.showAllJobs || self.state.visibleJobs.indexOf(job.get('id')) > -1 || jobsLength === 1 ) {
-                var lastAction = self.getLastJobAction(job.get('id'));
-                var item = <Job key={job.get('id') + "-" + i}
+                let lastAction = self.getLastJobAction(job.get('id'));
+                let item = <Job key={job.get('id') + "-" + i}
                                 job={job}
                                 index={index}
                                 project={self.props.project}
@@ -179,9 +181,9 @@ class ProjectContainer extends React.Component {
                                 activityLogUrl =  {self.getActivityLogUrl()}/>;
                 chunks.push(item);
                 if ( job.get('id') !== next_job_id) {
-                    var button;
+                    let button;
                     if ( chunks.length > 1 ) {
-                        var mergeUrl = self.getJobMergeUrl(job);
+                        let mergeUrl = self.getJobMergeUrl(job);
                         button = self.getJobSplitOrMergeButton(true, mergeUrl);
                     } else {
                         button = '';
@@ -229,32 +231,65 @@ class ProjectContainer extends React.Component {
         ManageActions.openChangeProjectTeam();
     }
 
-    openChangeAssignee() {
-        ManageActions.openChangeProjectAssignee();
+    getDropDownUsers() {
+        let result = '';
+        if (this.props.project.get('team') ) {
+            let users = this.props.team.get('users').map((user, i) => (
+                <div className="item" data-value={user.get('id')}
+                     key={'team' + user.get('userShortName') + user.get('id')}>
+                    <a className=" ui avatar image initials green">{user.get('userShortName')}</a>
+                    {/*<img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg"/>*/}
+                    {(user.get('id') === 0)? 'To me' : user.get('userFullName')}
+                </div>
+
+            ));
+            result = <div className="ui inline dropdown users-projectS"
+                          ref={(dropdownUsers) => this.dropdownUsers = dropdownUsers}>
+                <div className="text">
+                    <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg" />
+                </div>
+
+                <div className="menu">
+                    <div className="header">
+                        Assign project to:
+                    </div>
+                    <div className="header">
+                        <div className="ui form">
+                            <div className="field">
+                                <input type="text" name="Project Name" placeholder="Name or email." />
+                            </div>
+                        </div>
+                    </div>
+                    {users}
+                </div>
+            </div>;
+        }
+        return result;
     }
 
+
     render() {
-        var activityLogUrl = this.getActivityLogUrl();
-        var projectMenu = this.getProjectMenu(activityLogUrl);
-        // var tMIcon = this.checkTMIcon();
-        var payableWords = this.props.project.get('tm_analysis');
-        var analyzeUrl = this.getAnalyzeUrl();
-        var jobsLength = this.props.project.get('jobs').size;
+        let activityLogUrl = this.getActivityLogUrl();
+        let projectMenu = this.getProjectMenu(activityLogUrl);
+        // let tMIcon = this.checkTMIcon();
+        let payableWords = this.props.project.get('tm_analysis');
+        let analyzeUrl = this.getAnalyzeUrl();
+        let jobsLength = this.props.project.get('jobs').size;
 
-        var openProjectClass = 'open-project';
+        let openProjectClass = 'open-project';
 
-        var targetsLangs = [], jobsList = [];
+        let targetsLangs = [], jobsList = [];
         //The list of jobs
         this.getJobsList(targetsLangs, jobsList, jobsLength);
 
 
         //Last Activity Log Action
-        var lastAction;
+        let lastAction;
         if (this.state.lastAction) {
             if (this.state.lastAction.length === 0) {
                 lastAction = '';
             } else {
-                var date = this.getLastActionDate();
+                let date = this.getLastActionDate();
                 lastAction = <div className="activity-log">
                     <a href={activityLogUrl} target="_blank" className="right activity-log">
                         <i> <span>Last action: {this.state.lastAction.action + ' on ' + date}</span><span> by {this.state.lastAction.first_name }</span></i>
@@ -270,12 +305,14 @@ class ProjectContainer extends React.Component {
 
         }
 
-        var state = '';
+        let state = '';
         if ( this.props.project.get('has_archived') ) {
             state = <div className="col m1"><span className="new badge grey darken-1" style={{marginTop: '5px'}}>archived</span></div>
         }  else if ( this.props.project.get('has_cancelled') ) {
             state = <div className="col m1"><span className="new badge grey darken-5" style={{marginTop: '5px'}}>cancelled</span></div>
         }
+
+        let dropDownUsers = this.getDropDownUsers();
 
         return <div className="card-panel project">
 
@@ -314,55 +351,7 @@ class ProjectContainer extends React.Component {
                                         onClick={this.openChangeTeamModal}>{(this.props.project.get('team')) ? this.props.project.get('team') : "Personal" }</a>
                                     </li>
                                     <li>
-
-                                        <div className="ui inline dropdown users-projects"
-                                        ref={(dropdownUsers) => this.dropdownUsers = dropdownUsers}>
-                                            <div className="text">
-                                                <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg" />
-                                            </div>
-
-                                            <div className="menu">
-                                                <div className="header">
-                                                    Assign project to:
-                                                </div>
-                                                <div className="header">
-                                                    <div className="ui form">
-                                                        <div className="field">
-                                                            <input type="text" name="Project Name" placeholder="Name or email." />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div className="item" data-value="RS">
-                                                    <a className="ui avatar image initials yellow">RS</a>
-                                                    To Me
-                                                </div>
-                                                <div className="item" data-value="Federico Ricciuti">
-                                                    <a className="ui avatar image initials green">FR</a>
-                                                    Federico Ricciuti
-                                                </div>
-                                                <div className="item">
-                                                    <a className="ui avatar image initials purple">EN</a>
-                                                    Elliot Nes
-                                                </div>
-                                                <div className="item">
-                                                    <a className="ui avatar image initials orange">SF</a>
-                                                    Stevie Feliciano
-                                                </div>
-                                                <div className="item">
-                                                    <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/christian.jpg"/>
-                                                    Christian
-                                                </div>
-                                                <div className="item">
-                                                    <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/matt.jpg"/>
-                                                    Matt
-                                                </div>
-                                                <div className="item">
-                                                    <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/justen.jpg"/>
-                                                    Justen Kitsune
-                                                </div>
-                                            </div>
-                                        </div>
-
+                                        {dropDownUsers}
                                     </li>
                                     <li>
                                         <div className="ui icon top left pointing dropdown button menu-project"

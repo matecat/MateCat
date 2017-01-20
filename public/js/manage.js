@@ -20,7 +20,6 @@ UI = {
         ProjectsStore.addListener(ManageConstants.OPEN_CREATE_TEAM_MODAL, this.openCreateTeamModal);
         ProjectsStore.addListener(ManageConstants.OPEN_MODIFY_TEAM_MODAL, this.openModifyTeamModal);
         ProjectsStore.addListener(ManageConstants.OPEN_CHANGE_TEAM_MODAL, this.openChangeProjectTeam);
-        ProjectsStore.addListener(ManageConstants.OPEN_CHANGE_PROJECT_ASSIGNEE, this.openChangeProjectAssignee);
 
         TeamsStore.addListener(ManageConstants.CREATE_TEAM, this.createTeam);
         TeamsStore.addListener(ManageConstants.CHANGE_TEAM, this.changeTeam);
@@ -43,12 +42,8 @@ UI = {
             closeSearchCallback: this.closeSearchCallback
         }), headerMountPoint);
 
-        this.selectedTeam = "Personal";
 
-        this.getProjects().done(function (response) {
-            var projects = response.data;
-            self.renderProjects(projects);
-        });
+
 
         window.addEventListener('scroll', this.scrollDebounceFn());
 
@@ -76,6 +71,11 @@ UI = {
         // });
         this.getAllTeams().done(function (data) {
             ManageActions.renderTeams(data.teams);
+            self.selectedTeam = data.teams[0];
+            self.getProjects().done(function (response) {
+                var projects = response.data;
+                self.renderProjects(projects);
+            });
         });
 
     },
@@ -92,7 +92,7 @@ UI = {
             var total_projects = [];
             var requests = [];
             var onDone = function (response) {
-                        var projects = $.parseJSON(response.data);
+                        var projects = response.data;
                         $.merge(total_projects, projects);
                     };
             for (var i=1; i<= UI.Search.currentPage; i++ ) {
@@ -116,17 +116,17 @@ UI = {
                 getLastActivity: this.getLastProjectActivityLogAction,
                 changeStatus: this.changeJobsOrProjectStatus,
                 changeJobPasswordFn: this.changeJobPassword,
-                downloadTranslationFn : this.downloadTranslation
+                downloadTranslationFn : this.downloadTranslation,
             }), mountPoint);
         }
-        ManageActions.renderProjects(projects);
+        ManageActions.renderProjects(projects, this.selectedTeam);
 
     },
 
     renderMoreProjects: function () {
         UI.Search.currentPage = UI.Search.currentPage + 1;
         this.getProjects().done(function (response) {
-            var projects = $.parseJSON(response.data);
+            var projects = response.data;
             if (projects.length > 0) {
                 ManageActions.renderMoreProjects(projects);
             } else {
@@ -323,9 +323,6 @@ UI = {
         APP.ModalWindow.showModalComponent(ModifyTeamModal, {}, "Change team");
     },
 
-    openChangeProjectAssignee: function () {
-        APP.ModalWindow.showModalComponent(ChangeProjectAssignee, {}, "Change assignee");
-    },
     /**
      * Mistero!
      * @param pid
@@ -476,22 +473,23 @@ UI = {
     },
     changeTeam: function (team) {
         let self = this;
+        this.selectedTeam = team;
         if (team.name === "My Workspace") {
             this.getProjects().done(function (response) {
-                let projects = $.parseJSON(response.data);
+                let projects = response.data;
                 self.renderProjects(projects);
             });
         } else if (team.name === "Ebay") {
             setTimeout(function () {
-                ManageActions.renderProjects(EbayProjects);
+                ManageActions.renderProjects(EbayProjects, self.selectedTeam);
             });
         }else if (team.name === "MSC") {
             setTimeout(function () {
-                ManageActions.renderProjects(MSCProjects);
+                ManageActions.renderProjects(MSCProjects, self.selectedTeam);
             });
         }else if (team.name === "Translated") {
             setTimeout(function () {
-                ManageActions.renderProjects(TranslatedProjects);
+                ManageActions.renderProjects(TranslatedProjects, self.selectedTeam);
             });
         } else {
             setTimeout(function () {

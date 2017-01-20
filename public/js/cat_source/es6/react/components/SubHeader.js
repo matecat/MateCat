@@ -1,5 +1,5 @@
-var FilterProjects = require("./FilterProjects").default;
-var SearchInput = require("./SearchInput").default;
+let FilterProjects = require("./FilterProjects").default;
+let SearchInput = require("./SearchInput").default;
 
 class SubHeader extends React.Component {
     constructor (props) {
@@ -37,7 +37,7 @@ class SubHeader extends React.Component {
             let users = this.props.selectedTeam.get('users').map((user, i) => (
                 <div className="item" data-value={user.get('id')}
                      key={'team' + user.get('userShortName') + user.get('id')}>
-                    <a className=" btn-floating green assigned-member center-align">{user.get('userShortName')}</a>
+                    <a className="ui avatar image initials green">{user.get('userShortName')}</a>
                     {/*<img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg"/>*/}
                     {(user.get('id') === 0)? 'My Projects' : user.get('userFullName')}
                 </div>
@@ -46,7 +46,7 @@ class SubHeader extends React.Component {
 
             let item = <div className="item" data-value="2000"
                             key={'team' + config.userShortName + 2000}>
-                <a className=" btn-floating green assigned-member center-align">ALL</a>
+                <a className="ui avatar image initials green">ALL</a>
                 {/*<img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg"/>*/}
                 All Members
             </div>;

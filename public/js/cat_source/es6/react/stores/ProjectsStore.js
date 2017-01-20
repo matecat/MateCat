@@ -138,7 +138,7 @@ AppDispatcher.register(function(action) {
     switch(action.actionType) {
         case ManageConstants.RENDER_PROJECTS:
             ProjectsStore.updateAll(action.project);
-            ProjectsStore.emitChange(action.actionType, ProjectsStore.projects, action.hideSpinner);
+            ProjectsStore.emitChange(action.actionType, ProjectsStore.projects, Immutable.fromJS(action.team), action.hideSpinner);
             break;
         case ManageConstants.RENDER_MORE_PROJECTS:
             ProjectsStore.addProjects(action.project);
@@ -164,7 +164,7 @@ AppDispatcher.register(function(action) {
             break;
         case ManageConstants.NO_MORE_PROJECTS:
             ProjectsStore.emitChange(action.actionType);
-            break;1
+            break;
         case ManageConstants.SHOW_RELOAD_SPINNER:
             ProjectsStore.emitChange(action.actionType);
             break;
@@ -175,9 +175,6 @@ AppDispatcher.register(function(action) {
             ProjectsStore.emitChange(action.actionType, action.team);
             break;
         case ManageConstants.OPEN_CHANGE_TEAM_MODAL:
-            ProjectsStore.emitChange(action.actionType);
-            break;
-        case ManageConstants.OPEN_CHANGE_PROJECT_ASSIGNEE:
             ProjectsStore.emitChange(action.actionType);
             break;
 

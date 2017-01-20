@@ -11,7 +11,8 @@ class ProjectsContainer extends React.Component {
             projects : [],
             more_projects: true,
             reloading_projects: false,
-            user: null
+            user: null,
+            team: null
         };
         this.renderProjects = this.renderProjects.bind(this);
         this.hideSpinner = this.hideSpinner.bind(this);
@@ -20,16 +21,18 @@ class ProjectsContainer extends React.Component {
     }
 
 
-    renderProjects(projects, hideSpinner) {
+    renderProjects(projects, team, hideSpinner) {
         let more_projects = true;
         if (hideSpinner) {
             more_projects = this.state.more_projects
         }
+        let teamState = (team)? team : this.state.team;
         this.setState({
             projects: projects,
             more_projects: more_projects,
             reloading_projects: false,
-            user: null
+            user: null,
+            team: teamState
         });
     }
 
@@ -99,7 +102,8 @@ class ProjectsContainer extends React.Component {
                 lastActivityFn={this.props.getLastActivity}
                 changeStatusFn={this.props.changeStatus}
                 changeJobPasswordFn={this.props.changeJobPasswordFn}
-                downloadTranslationFn={this.props.downloadTranslationFn}/>
+                downloadTranslationFn={this.props.downloadTranslationFn}
+                team={this.state.team}/>
         ));
         if (!items.size) {
             items = <div className="no-results-found"><span>No Project Found</span></div>;
