@@ -29,11 +29,6 @@ class getProjectsController extends ajaxController {
     private $project_id;
 
     /**
-     * @var bool
-     */
-    private $filter_enabled;
-
-    /**
      * @var string|bool
      */
     private $search_in_pname;
@@ -73,10 +68,6 @@ class getProjectsController extends ajaxController {
                 'page'          => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'step'          => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'project'       => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'filter'        => [
-                        'filter'  => FILTER_VALIDATE_BOOLEAN,
-                        'options' => [ FILTER_NULL_ON_FAILURE ]
-                ],
                 'pn'            => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
@@ -107,7 +98,6 @@ class getProjectsController extends ajaxController {
 
         $this->start                 = ( $this->page - 1 ) * $this->step;
         $this->project_id            = $postInput[ 'project' ];
-        $this->filter_enabled        = (bool)$postInput[ 'filter' ];
         $this->search_in_pname       = $postInput[ 'pn' ];
         $this->search_source         = $postInput[ 'source' ];
         $this->search_target         = $postInput[ 'target' ];
@@ -127,14 +117,14 @@ class getProjectsController extends ajaxController {
         $projects = ManageUtils::queryProjects( $this->logged_user, $this->start, $this->step,
                 $this->search_in_pname,
                 $this->search_source, $this->search_target, $this->search_status,
-                $this->search_onlycompleted, $this->project_id,
+                $this->search_only_completed, $this->project_id,
                 $team
         );
 
         $projnum = getProjectsNumber( $this->logged_user,
             $this->search_in_pname, $this->search_source,
             $this->search_target, $this->search_status,
-            $this->search_onlycompleted, $team );
+            $this->search_only_completed, $team );
 
         /**
          * pass projects in a filter to find associated reivew_password if needed.

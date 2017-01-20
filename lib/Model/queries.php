@@ -1947,26 +1947,29 @@ function conditionsForProjectsQuery(
 }
 
 /**
- * @param $start                int
- * @param $step                 int
- * @param $search_in_pname      string
- * @param $search_source        string
- * @param $search_target        string
- * @param $search_status        string
- * @param $search_onlycompleted bool
- * @param $project_id           int
+ * @param Users_UserStruct  $user
+ * @param                   $start                int
+ * @param                   $step                 int
+ * @param                   $search_in_pname      string
+ * @param                   $search_source        string
+ * @param                   $search_target        string
+ * @param                   $search_status        string
+ * @param                   $search_only_completed bool
+ * @param                   $project_id           int
  *
- * @return array|int|resource|void
+ * @param \Teams\TeamStruct $team
+ *
+ * @return array
  */
 function getProjects( Users_UserStruct $user, $start, $step,
                       $search_in_pname, $search_source, $search_target,
-                      $search_status, $search_onlycompleted,
+                      $search_status, $search_only_completed,
                       $project_id,
                       \Teams\TeamStruct $team = null) {
 
     list( $conditions, $data ) = conditionsForProjectsQuery(
         $search_in_pname, $search_source, $search_target,
-        $search_status, $search_onlycompleted
+        $search_status, $search_only_completed
     ) ;
 
     $data['email'] = $user->email ;
@@ -2058,11 +2061,11 @@ function getJobsFromProjects( array $projectIDs, $search_source, $search_target,
 
 }
 
-function getProjectsNumber( Users_UserStruct $user, $search_in_pname, $search_source, $search_target, $search_status, $search_onlycompleted, \Teams\TeamStruct $team = null) {
+function getProjectsNumber( Users_UserStruct $user, $search_in_pname, $search_source, $search_target, $search_status, $search_only_completed, \Teams\TeamStruct $team = null) {
 
     list( $conditions, $data ) = conditionsForProjectsQuery(
         $search_in_pname, $search_source, $search_target,
-        $search_status, $search_onlycompleted
+        $search_status, $search_only_completed
     ) ;
 
     $data['email'] = $user->email ;
