@@ -26,7 +26,7 @@ class Header extends React.Component {
         if (this.state.teams.size > 0){
             let dropdownTeams = $('.team-dropdown');
             if (!this.state.selectedTeam) {
-                dropdownTeams.dropdown('set selected', 'Personal');
+                dropdownTeams.dropdown('set selected', "0");
                 dropdownTeams.dropdown({
                     onChange: function(value, text, $selectedItem) {
                         self.changeTeam(value);
@@ -34,7 +34,7 @@ class Header extends React.Component {
                 });
             } else {
                 setTimeout(function () {
-                    dropdownTeams.dropdown('set selected', self.state.selectedTeam.get("name"));
+                    dropdownTeams.dropdown('set selected', "" + self.state.selectedTeam.get("id"));
                 }, 100);
             }
         }
@@ -44,7 +44,7 @@ class Header extends React.Component {
 
     changeTeam(value) {
         let selectedTeam = this.state.teams.find(function (team) {
-            if (team.get("name") === value) {
+            if (team.get("id") === parseInt(value)) {
                 return true;
             }
         });
@@ -77,7 +77,7 @@ class Header extends React.Component {
         let result = '';
         if (this.state.teams.size > 0) {
             let items = this.state.teams.map((team, i) => (
-                <div className="item" data-value={team.get('name')}
+                <div className="item" data-value={team.get('id')}
                      data-text={team.get('name')}
                      key={'team' + team.get('name') + team.get('id')}>
                         {team.get('name')}
@@ -98,14 +98,12 @@ class Header extends React.Component {
                             <i className="icon-plus3 right"/>
                         </a>
                     </div>
-                    <div className="header" data-value="aaa" data-text="aaa">
+                    <div className="header">
                         <div className="ui form">
                             <div className="field">
                                 <input type="text" name="Project Name" placeholder="Translated Team es." />
                             </div>
                         </div>
-                    </div>
-                    <div className="item" data-value="Personal" data-text="Personal">Personal
                     </div>
                     {items}
                 </div>

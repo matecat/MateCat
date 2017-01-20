@@ -314,7 +314,7 @@ class ProjectContainer extends React.Component {
                                     </li>
                                     <li>
                                         <a className="waves-effect waves-light btn-floating green assigned-member center-align"
-                                        onClick={this.openChangeAssignee}>RS</a>
+                                        onClick={this.openChangeAssignee}>{(this.props.project.get('user'))? this.props.project.get('user').get('userShortName') : config.userShortName}</a>
                                     </li>
                                     <li>
                                         <div className="ui icon top left pointing dropdown button menu-project"

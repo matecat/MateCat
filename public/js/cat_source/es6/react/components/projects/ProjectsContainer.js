@@ -1,7 +1,6 @@
 // var React = require('react');
-var ProjectsStore = require('../../stores/ProjectsStore');
-var Project = require('./ProjectContainer').default;
-var FilterProjects = require("../FilterProjects").default;
+let Project = require('./ProjectContainer').default;
+let FilterProjects = require("../FilterProjects").default;
 
 
 class ProjectsContainer extends React.Component {
@@ -12,22 +11,25 @@ class ProjectsContainer extends React.Component {
             projects : [],
             more_projects: true,
             reloading_projects: false,
+            user: null
         };
         this.renderProjects = this.renderProjects.bind(this);
         this.hideSpinner = this.hideSpinner.bind(this);
         this.showProjectsReloadSpinner = this.showProjectsReloadSpinner.bind(this);
+        this.filterForUser = this.filterForUser.bind(this);
     }
 
 
     renderProjects(projects, hideSpinner) {
-        var more_projects = true;
+        let more_projects = true;
         if (hideSpinner) {
             more_projects = this.state.more_projects
         }
         this.setState({
             projects: projects,
             more_projects: more_projects,
-            reloading_projects: false
+            reloading_projects: false,
+            user: null
         });
     }
 
@@ -43,21 +45,29 @@ class ProjectsContainer extends React.Component {
         });
     }
 
+    filterForUser(user) {
+        this.setState({
+            user: user
+        });
+    }
+
     componentDidMount() {
         ProjectsStore.addListener(ManageConstants.RENDER_PROJECTS, this.renderProjects);
         ProjectsStore.addListener(ManageConstants.NO_MORE_PROJECTS, this.hideSpinner);
         ProjectsStore.addListener(ManageConstants.SHOW_RELOAD_SPINNER, this.showProjectsReloadSpinner);
-        // $('.tooltipped').tooltip({delay: 50});
+        TeamsStore.addListener(ManageConstants.CHANGE_USER, this.filterForUser);
     }
 
     componentWillUnmount() {
         ProjectsStore.removeListener(ManageConstants.RENDER_PROJECTS, this.renderProjects);
         ProjectsStore.removeListener(ManageConstants.NO_MORE_PROJECTS, this.hideSpinner);
         ProjectsStore.removeListener(ManageConstants.SHOW_RELOAD_SPINNER, this.showProjectsReloadSpinner);
+        TeamsStore.removeListener(ManageConstants.CHANGE_USER, this.filterForUser);
+
     }
 
     componentDidUpdate() {
-        var self = this;
+        let self = this;
         if (!this.state.more_projects) {
             setTimeout(function () {
                 $(self.spinner).fadeOut();
@@ -65,11 +75,24 @@ class ProjectsContainer extends React.Component {
         }
     }
     shouldComponentUpdate(nextProps, nextState) {
-        return (nextState.projects !== this.state.projects || nextState.more_projects !== this.state.more_projects || nextState.reloading_projects !== this.state.reloading_projects)
+        return (nextState.projects !== this.state.projects ||
+        nextState.more_projects !== this.state.more_projects ||
+        nextState.reloading_projects !== this.state.reloading_projects ||
+        nextState.user !== this.state.user)
     }
 
     render() {
-        var items = this.state.projects.map((project, i) => (
+        let self = this;
+        let projects = this.state.projects;
+
+        if (this.state.user) {
+            projects = this.state.projects.filter(function (project) {
+                if (project.get('user').get('id') == self.state.user.get('id')) {
+                    return true;
+                }
+            });
+        }
+        let items = projects.map((project, i) => (
             <Project
                 key={project.get('id')}
                 project={project}
@@ -83,8 +106,8 @@ class ProjectsContainer extends React.Component {
         }
 
 
-        var spinner = '';
-        if (this.state.more_projects && this.state.projects.size > 9) {
+        let spinner = '';
+        if (this.state.more_projects && projects.size > 9) {
             spinner = <div className="row">
                         <div className="manage-spinner" style={{minHeigth: '90px'}}>
                             <div className="col m12 center-align">
@@ -107,7 +130,7 @@ class ProjectsContainer extends React.Component {
                             <span>Loading projects</span>
                         </div>
                     </div>;
-        } else if (this.state.projects.size > 9) {
+        } else if (projects > 9) {
             spinner = <div className="row">
                 <div className="manage-spinner" style={{minHeight: '90px'}}>
                     <div className="col m12 center-align">

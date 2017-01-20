@@ -354,83 +354,106 @@ UI = {
     },
 
     getAllTeams: function () {
-        var teams = [
-                {
-                    id: 1,
-                    name: 'Ebay',
-                    users: [{
-                        id: 2,
-                        userMail: 'chloe.king@translated.net',
-                        userFullName: 'Chloe King',
-                        userShortName: 'CK'
+        let teams = [
+            {
+                id: 0,
+                name: 'My Workspace',
+                userWorkspace: true
+            },
+            {
+                id: 1,
+                name: 'Ebay',
+                users: [{
+                    id: 0,
+                    userMail: config.userMail,
+                    userFullName: config.userFullName,
+                    userShortName: config.userShortName
 
-                    },{
-                        id: 3,
-                        userMail: 'owen.james@translated.net',
-                        userFullName: 'Owen	James',
-                        userShortName: 'OJ'
-
-                    },{
-                        id: 4,
-                        userMail: 'stephen.powell@translated.net',
-                        userFullName: 'Stephen Powell',
-                        userShortName: 'SP'
-
-                    }]
-                },
-                {
+                },{
                     id: 2,
-                    name: 'MSC',
-                    users: [{
-                        id: 1,
-                        userMail: 'lillian.lambert@translated.net',
-                        userFullName: 'Lillian	Lambert',
-                        userShortName: 'LL'
+                    userMail: 'chloe.king@translated.net',
+                    userFullName: 'Chloe King',
+                    userShortName: 'CK'
 
-                    },{
-                        id: 2,
-                        userMail: 'joe.watson@translated.net',
-                        userFullName: 'Joe	Watson',
-                        userShortName: 'JW'
-
-                    },{
-                        id: 3,
-                        userMail: 'rachel.sharp@translated.net',
-                        userFullName: 'Rachel	Sharp',
-                        userShortName: 'RS'
-
-                    },{
-                        id: 4,
-                        userMail: 'dan.marshall@translated.net',
-                        userFullName: 'Dan	Marshall',
-                        userShortName: 'DM'
-
-                    }]
-                },
-                {
+                },{
                     id: 3,
-                    name: 'Translated',
-                    users: [{
-                        id: 1,
-                        userMail: 'vanessa.simpson@translated.net',
-                        userFullName: 'Vanessa	Simpson',
-                        userShortName: 'VS'
+                    userMail: 'owen.james@translated.net',
+                    userFullName: 'Owen	James',
+                    userShortName: 'OJ'
 
-                    },{
-                        id: 2,
-                        userMail: 'dan.howard@translated.net',
-                        userFullName: 'Dan	Howard',
-                        userShortName: 'DH'
+                },{
+                    id: 4,
+                    userMail: 'stephen.powell@translated.net',
+                    userFullName: 'Stephen Powell',
+                    userShortName: 'SP'
 
-                    },{
-                        id: 3,
-                        userMail: 'keith.kelly@translated.net',
-                        userFullName: 'Keith	Kelly',
-                        userShortName: 'KC'
+                }]
+            },
+            {
+                id: 2,
+                name: 'MSC',
+                users: [{
+                    id: 0,
+                    userMail: config.userMail,
+                    userFullName: config.userFullName,
+                    userShortName: config.userShortName
 
-                    }]
-                }
-                ];
+                },{
+                    id: 1,
+                    userMail: 'lillian.lambert@translated.net',
+                    userFullName: 'Lillian	Lambert',
+                    userShortName: 'LL'
+
+                },{
+                    id: 2,
+                    userMail: 'joe.watson@translated.net',
+                    userFullName: 'Joe	Watson',
+                    userShortName: 'JW'
+
+                },{
+                    id: 3,
+                    userMail: 'rachel.sharp@translated.net',
+                    userFullName: 'Rachel	Sharp',
+                    userShortName: 'RS'
+
+                },{
+                    id: 4,
+                    userMail: 'dan.marshall@translated.net',
+                    userFullName: 'Dan	Marshall',
+                    userShortName: 'DM'
+
+                }]
+            },
+            {
+                id: 3,
+                name: 'Translated',
+                users: [{
+                    id: 0,
+                    userMail: config.userMail,
+                    userFullName: config.userFullName,
+                    userShortName: config.userShortName
+
+                },{
+                    id: 1,
+                    userMail: 'vanessa.simpson@translated.net',
+                    userFullName: 'Vanessa	Simpson',
+                    userShortName: 'VS'
+
+                },{
+                    id: 2,
+                    userMail: 'dan.howard@translated.net',
+                    userFullName: 'Dan	Howard',
+                    userShortName: 'DH'
+
+                },{
+                    id: 3,
+                    userMail: 'keith.kelly@translated.net',
+                    userFullName: 'Keith	Kelly',
+                    userShortName: 'KC'
+
+                }]
+            }
+        ];
         let data = {
             teams: teams
         };
@@ -444,22 +467,7 @@ UI = {
         var team = {
             id: 300,
             name: teamName,
-            users: [{
-                userMail: 'vanessa.simpson@translated.net',
-                userFullName: 'Vanessa	Simpson',
-                userShortName: 'VS'
-
-            },{
-                userMail: 'dan.howard@translated.net',
-                userFullName: 'Dan	Howard',
-                userShortName: 'DH'
-
-            },{
-                userMail: 'keith.kelly@translated.net',
-                userFullName: 'Keith	Kelly',
-                userShortName: 'KC'
-
-            }]
+            users: []
         };
         setTimeout(function () {
             ManageActions.addTeam(team);
@@ -468,7 +476,7 @@ UI = {
     },
     changeTeam: function (team) {
         let self = this;
-        if (team.name === "Personal") {
+        if (team.name === "My Workspace") {
             this.getProjects().done(function (response) {
                 let projects = $.parseJSON(response.data);
                 self.renderProjects(projects);
@@ -593,7 +601,14 @@ var EbayProjects = [
             ],
         "id_tms":"1",
         "id":"1010",
-        "password":"263d689044f8"
+        "password":"263d689044f8",
+        "user": {
+            id: 2,
+            userMail: 'chloe.king@translated.net',
+            userFullName: 'Chloe King',
+            userShortName: 'CK'
+
+        }
     },
     {
         "team": "Ebay",
@@ -609,7 +624,60 @@ var EbayProjects = [
             ],
         "id_tms":"1",
         "id":"1011",
-        "password":"263d689044f8"
+        "password":"263d689044f8",
+        "user": {
+            id: 2,
+            userMail: 'chloe.king@translated.net',
+            userFullName: 'Chloe King',
+            userShortName: 'CK'
+
+        }
+    },
+    {
+        "team": "Ebay",
+        "tm_analysis":"241",
+        "has_archived":false,
+        "name":"Ebay 3",
+        "has_cancelled":false,
+        "mt_engine_name":"MyMemory (All Pairs)",
+        "no_active_jobs":"",
+        "jobs":
+            [
+                {"show_download_xliff":true,"job_first_segment":"326830","open_threads_count":0,"warnings_count":0,"pid":"147","subject":"general","job_last_segment":"326846","formatted_create_date":"Jan 19, 12:18","mt_engine_name":"MyMemory (All Pairs)","create_date":"2017-01-19 12:18:08","target":"ja-JP","status":"active","sourceTxt":"Italian","private_tm_key":"[]","id_tms":"1","source":"it-IT","id":"194","password":"5126c64fee83","disabled":"","stats":{"DRAFT_PERC_FORMATTED":100,"TOTAL_FORMATTED":"241","DRAFT":241.4,"TODO_FORMATTED":"241","REJECTED_PERC_FORMATTED":0,"DRAFT_PERC":100,"TOTAL":241.4,"REJECTED_PERC":0,"DOWNLOAD_STATUS":"draft","PROGRESS_FORMATTED":"0","APPROVED_PERC_FORMATTED":0,"TRANSLATED_PERC_FORMATTED":0,"PROGRESS":0,"APPROVED_PERC":0,"TRANSLATED_PERC":0,"TRANSLATED_FORMATTED":"0","APPROVED_FORMATTED":"0","PROGRESS_PERC_FORMATTED":0,"TRANSLATED":0,"APPROVED":0,"PROGRESS_PERC":0,"id":null,"REJECTED_FORMATTED":"0","REJECTED":0,"DRAFT_FORMATTED":"241"},"targetTxt":"Japanese"}
+            ],
+        "id_tms":"1",
+        "id":"1012",
+        "password":"263d689044f8",
+        "user": {
+            id: 3,
+            userMail: 'owen.james@translated.net',
+            userFullName: 'Owen	James',
+            userShortName: 'OJ'
+
+        }
+    },
+    {
+        "team": "Ebay",
+        "tm_analysis":"241",
+        "has_archived":false,
+        "name":"Ebay 4",
+        "has_cancelled":false,
+        "mt_engine_name":"MyMemory (All Pairs)",
+        "no_active_jobs":"",
+        "jobs":
+            [
+                {"show_download_xliff":true,"job_first_segment":"326830","open_threads_count":0,"warnings_count":0,"pid":"147","subject":"general","job_last_segment":"326846","formatted_create_date":"Jan 19, 12:18","mt_engine_name":"MyMemory (All Pairs)","create_date":"2017-01-19 12:18:08","target":"ja-JP","status":"active","sourceTxt":"Italian","private_tm_key":"[]","id_tms":"1","source":"it-IT","id":"194","password":"5126c64fee83","disabled":"","stats":{"DRAFT_PERC_FORMATTED":100,"TOTAL_FORMATTED":"241","DRAFT":241.4,"TODO_FORMATTED":"241","REJECTED_PERC_FORMATTED":0,"DRAFT_PERC":100,"TOTAL":241.4,"REJECTED_PERC":0,"DOWNLOAD_STATUS":"draft","PROGRESS_FORMATTED":"0","APPROVED_PERC_FORMATTED":0,"TRANSLATED_PERC_FORMATTED":0,"PROGRESS":0,"APPROVED_PERC":0,"TRANSLATED_PERC":0,"TRANSLATED_FORMATTED":"0","APPROVED_FORMATTED":"0","PROGRESS_PERC_FORMATTED":0,"TRANSLATED":0,"APPROVED":0,"PROGRESS_PERC":0,"id":null,"REJECTED_FORMATTED":"0","REJECTED":0,"DRAFT_FORMATTED":"241"},"targetTxt":"Japanese"}
+            ],
+        "id_tms":"1",
+        "id":"1013",
+        "password":"263d689044f8",
+        "user": {
+            id: 4,
+            userMail: 'stephen.powell@translated.net',
+            userFullName: 'Stephen Powell',
+            userShortName: 'SP'
+
+        }
     }
 
 ];
@@ -629,7 +697,14 @@ var MSCProjects = [
             ],
         "id_tms":"1",
         "id":"2010",
-        "password":"263d689044f8"
+        "password":"263d689044f8",
+        "user": {
+            id: 1,
+            userMail: 'lillian.lambert@translated.net',
+            userFullName: 'Lillian	Lambert',
+            userShortName: 'LL'
+
+        },
     },
     {
         "team": "MSC",
@@ -645,7 +720,107 @@ var MSCProjects = [
             ],
         "id_tms":"1",
         "id":"2011",
-        "password":"263d689044f8"
+        "password":"263d689044f8",
+        "user": {
+            id: 2,
+            userMail: 'joe.watson@translated.net',
+            userFullName: 'Joe	Watson',
+            userShortName: 'JW'
+
+        }
+    },
+    {
+        "team": "MSC",
+        "tm_analysis": "241",
+        "has_archived": false,
+        "name": "MSC 1",
+        "has_cancelled": false,
+        "mt_engine_name": "MyMemory (All Pairs)",
+        "no_active_jobs": "",
+        "jobs": [
+            {
+                "show_download_xliff": true,
+                "job_first_segment": "326830",
+                "open_threads_count": 0,
+                "warnings_count": 0,
+                "pid": "147",
+                "subject": "general",
+                "job_last_segment": "326846",
+                "formatted_create_date": "Jan 19, 12:18",
+                "mt_engine_name": "MyMemory (All Pairs)",
+                "create_date": "2017-01-19 12:18:08",
+                "target": "ja-JP",
+                "status": "active",
+                "sourceTxt": "Italian",
+                "private_tm_key": "[]",
+                "id_tms": "1",
+                "source": "it-IT",
+                "id": "194",
+                "password": "5126c64fee83",
+                "disabled": "",
+                "stats": {
+                    "DRAFT_PERC_FORMATTED": 100,
+                    "TOTAL_FORMATTED": "241",
+                    "DRAFT": 241.4,
+                    "TODO_FORMATTED": "241",
+                    "REJECTED_PERC_FORMATTED": 0,
+                    "DRAFT_PERC": 100,
+                    "TOTAL": 241.4,
+                    "REJECTED_PERC": 0,
+                    "DOWNLOAD_STATUS": "draft",
+                    "PROGRESS_FORMATTED": "0",
+                    "APPROVED_PERC_FORMATTED": 0,
+                    "TRANSLATED_PERC_FORMATTED": 0,
+                    "PROGRESS": 0,
+                    "APPROVED_PERC": 0,
+                    "TRANSLATED_PERC": 0,
+                    "TRANSLATED_FORMATTED": "0",
+                    "APPROVED_FORMATTED": "0",
+                    "PROGRESS_PERC_FORMATTED": 0,
+                    "TRANSLATED": 0,
+                    "APPROVED": 0,
+                    "PROGRESS_PERC": 0,
+                    "id": null,
+                    "REJECTED_FORMATTED": "0",
+                    "REJECTED": 0,
+                    "DRAFT_FORMATTED": "241"
+                },
+                "targetTxt": "Japanese"
+            }
+        ],
+        "id_tms": "1",
+        "id": "2012",
+        "password": "263d689044f8",
+        "user": {
+            id: 3,
+            userMail: 'rachel.sharp@translated.net',
+            userFullName: 'Rachel	Sharp',
+            userShortName: 'RS'
+
+        }
+    },
+    {
+        "team": "MSC",
+        "tm_analysis":"241",
+        "has_archived":false,
+        "name":"MSC 2",
+        "has_cancelled":false,
+        "mt_engine_name":"MyMemory (All Pairs)",
+        "no_active_jobs":"",
+        "jobs":
+            [
+                {"show_download_xliff":true,"job_first_segment":"326830","open_threads_count":0,"warnings_count":0,"pid":"147","subject":"general","job_last_segment":"326846","formatted_create_date":"Jan 19, 12:18","mt_engine_name":"MyMemory (All Pairs)","create_date":"2017-01-19 12:18:08","target":"ja-JP","status":"active","sourceTxt":"Italian","private_tm_key":"[]","id_tms":"1","source":"it-IT","id":"194","password":"5126c64fee83","disabled":"","stats":{"DRAFT_PERC_FORMATTED":100,"TOTAL_FORMATTED":"241","DRAFT":241.4,"TODO_FORMATTED":"241","REJECTED_PERC_FORMATTED":0,"DRAFT_PERC":100,"TOTAL":241.4,"REJECTED_PERC":0,"DOWNLOAD_STATUS":"draft","PROGRESS_FORMATTED":"0","APPROVED_PERC_FORMATTED":0,"TRANSLATED_PERC_FORMATTED":0,"PROGRESS":0,"APPROVED_PERC":0,"TRANSLATED_PERC":0,"TRANSLATED_FORMATTED":"0","APPROVED_FORMATTED":"0","PROGRESS_PERC_FORMATTED":0,"TRANSLATED":0,"APPROVED":0,"PROGRESS_PERC":0,"id":null,"REJECTED_FORMATTED":"0","REJECTED":0,"DRAFT_FORMATTED":"241"},"targetTxt":"Japanese"}
+            ],
+        "id_tms":"1",
+        "id":"2013",
+        "password":"263d689044f8",
+        "user": {
+            id: 3,
+            userMail: 'rachel.sharp@translated.net',
+            userFullName: 'Rachel	Sharp',
+            userShortName: 'RS'
+
+        }
     }
 
 ];
@@ -665,7 +840,14 @@ var TranslatedProjects = [
             ],
         "id_tms":"1",
         "id":"3010",
-        "password":"263d689044f8"
+        "password":"263d689044f8",
+        "user": {
+            id: 1,
+            userMail: 'vanessa.simpson@translated.net',
+            userFullName: 'Vanessa	Simpson',
+            userShortName: 'VS'
+
+        }
     },
     {
         "team": "Translated",
@@ -681,7 +863,14 @@ var TranslatedProjects = [
             ],
         "id_tms":"1",
         "id":"3011",
-        "password":"263d689044f8"
+        "password":"263d689044f8",
+        "user": {
+            id: 1,
+            userMail: 'vanessa.simpson@translated.net',
+            userFullName: 'Vanessa	Simpson',
+            userShortName: 'VS'
+
+        }
     },
     {
         "team": "Translated",
@@ -697,7 +886,14 @@ var TranslatedProjects = [
             ],
         "id_tms":"1",
         "id":"3012",
-        "password":"263d689044f8"
+        "password":"263d689044f8",
+        "user": {
+            id: 3,
+            userMail: 'keith.kelly@translated.net',
+            userFullName: 'Keith	Kelly',
+            userShortName: 'KC'
+
+        }
     }
 
 ];

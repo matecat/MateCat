@@ -136,6 +136,13 @@ var ManageActions = {
             actionType: ManageConstants.CHANGE_TEAM,
             teamName: teamName
         });
+    },
+
+    changeUser: function (user) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.CHANGE_USER,
+            user: user
+        });
     }
 
 

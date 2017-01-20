@@ -6,38 +6,56 @@ class SubHeader extends React.Component {
         super(props);
     }
 
-    componentDidMount() {
-        $('.ui.dropdown.users-projects').dropdown();
-    }
     componentDidUpdate() {
-        $('.ui.dropdown.users-projects').dropdown();
+        let self = this;
+        if (this.props.selectedTeam) {
+
+            $('.ui.dropdown.users-projects').dropdown('set selected', 2000);
+            $('.ui.dropdown.users-projects').dropdown({
+                onChange: function(value, text, $selectedItem) {
+                    self.changeUser(value);
+                }
+            });
+        }
+    }
+
+    changeUser(value) {
+        let selectedUser = this.props.selectedTeam.get('users').find(function (user) {
+            if (user.get("id") === parseInt(value)) {
+                return true;
+            }
+        });
+
+        ManageActions.changeUser(selectedUser);
+
     }
 
     getUserFilter() {
         let result = '';
-        if (this.props.selectedTeam) {
+        if (this.props.selectedTeam && this.props.selectedTeam.get('users')) {
 
             let users = this.props.selectedTeam.get('users').map((user, i) => (
-                <div className="item" key={'team' + user.get('userShortName') + user.get('id')}>>
+                <div className="item" data-value={user.get('id')}
+                     key={'team' + user.get('userShortName') + user.get('id')}>
                     <a className=" btn-floating green assigned-member center-align">{user.get('userShortName')}</a>
                     {/*<img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg"/>*/}
-                    {user.get('userFullName')}
+                    {(user.get('id') === 0)? 'My Projects' : user.get('userFullName')}
                 </div>
 
             ));
 
+            let item = <div className="item" data-value="2000"
+                            key={'team' + config.userShortName + 2000}>
+                <a className=" btn-floating green assigned-member center-align">ALL</a>
+                {/*<img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg"/>*/}
+                All Members
+            </div>;
+            users = users.unshift(item);
+
             result = <div className="row">
                         <div className="col top-12">
                             <div className="assigned-list">
-                                <p>All members</p>
-                            </div>
-                        </div>
-                        <div className="col top-10">
-                            <div className="switch">
-                                <label>
-                                    <input type="checkbox" />
-                                    <span className="lever"/>
-                                </label>
+                                <p>All Projects of: </p>
                             </div>
                         </div>
                         <div className="input-field col top-8">
@@ -45,37 +63,14 @@ class SubHeader extends React.Component {
                                 <span>
                                     <div className="ui inline dropdown users-projects">
                                         <div className="text">
-                                          <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg"/>
-                                          Jenny Hess
+                                            <a className=" btn-floating green assigned-member center-align">{config.userShortName}</a>
+                                          My Projects
                                         </div>
                                         <i className="dropdown icon"/>
                                         <div className="menu">
-                                          <div className="item">
-                                            <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg"/>
-                                            Jenny Hess
-                                          </div>
-                                          <div className="item">
-                                            <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/elliot.jpg"/>
-                                            Elliot Fu
-                                          </div>
-                                          <div className="item">
-                                            <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/stevie.jpg"/>
-                                            Stevie Feliciano
-                                          </div>
-                                          <div className="item">
-                                            <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/christian.jpg"/>
-                                            Christian
-                                          </div>
-                                          <div className="item">
-                                            <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/matt.jpg"/>
-                                            Matt
-                                          </div>
-                                          <div className="item">
-                                            <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/justen.jpg"/>
-                                            Justen Kitsune
-                                          </div>
+                                            {users}
                                         </div>
-                                      </div>
+                                    </div>
                                 </span>
                             </div>
                         </div>

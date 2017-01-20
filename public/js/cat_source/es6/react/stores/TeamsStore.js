@@ -59,6 +59,9 @@ AppDispatcher.register(function(action) {
             TeamsStore.addTeam(action.team);
             TeamsStore.emitChange(ManageConstants.RENDER_TEAMS, TeamsStore.teams, Immutable.fromJS(action.team));
             break;
+        case ManageConstants.CHANGE_USER:
+            TeamsStore.emitChange(ManageConstants.CHANGE_USER, action.user);
+            break;
 
 
     }
