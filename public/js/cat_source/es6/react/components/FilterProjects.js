@@ -13,11 +13,15 @@ class FilterProjects extends React.Component {
                 self.onChangeFunction();
             }
         });
+        this.currentFilter = 'active';
         this.dropdown.dropdown('set selected', 'active');
     }
 
     onChangeFunction() {
-        this.props.filterFunction(this.dropdown.dropdown('get value'));
+        if (this.currentFilter !== this.dropdown.dropdown('get value')) {
+            this.props.filterFunction(this.dropdown.dropdown('get value'));
+            this.currentFilter = this.dropdown.dropdown('get value');
+        }
     }
 
     render () {

@@ -13,6 +13,7 @@ UI = {
         this.changeJobPassword = this.changeJobPassword.bind(this);
         this.createTeam = this.createTeam.bind(this);
         this.changeTeam = this.changeTeam.bind(this);
+        this.changeProjectAssignee = this.changeProjectAssignee.bind(this);
 
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_SETTINGS, this.openJobSettings);
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_TM_PANEL, this.openJobTMPanel);
@@ -21,17 +22,23 @@ UI = {
         ProjectsStore.addListener(ManageConstants.OPEN_MODIFY_TEAM_MODAL, this.openModifyTeamModal);
         ProjectsStore.addListener(ManageConstants.OPEN_CHANGE_TEAM_MODAL, this.openChangeProjectTeam);
 
+        ProjectsStore.addListener(ManageConstants.CHANGE_PROJECT_ASSIGNEE, this.changeProjectAssignee);
+
         TeamsStore.addListener(ManageConstants.CREATE_TEAM, this.createTeam);
         TeamsStore.addListener(ManageConstants.CHANGE_TEAM, this.changeTeam);
 
 
+        //Remove this
+        this.ebayProjects = EbayProjects;
+        this.mscProjects = MSCProjects;
+        this.translatedProjects = TranslatedProjects;
 
 
     },
 
     render: function () {
-        var self = this;
-        var headerMountPoint = $("header")[0];
+        let self = this;
+        let headerMountPoint = $("header")[0];
         this.Search.currentPage = 1;
         this.pageLeft = false;
         ReactDOM.render(React.createElement(Header, {
@@ -48,7 +55,7 @@ UI = {
         window.addEventListener('scroll', this.scrollDebounceFn());
 
         // $(window).on("blur focus", function(e) {
-        //     var prevType = $(this).data("prevType");
+        //     let prevType = $(this).data("prevType");
         //
         //     if (prevType != e.type) {   //  reduce double fire issues
         //         switch (e.type) {
@@ -73,7 +80,7 @@ UI = {
             ManageActions.renderTeams(data.teams);
             self.selectedTeam = data.teams[0];
             self.getProjects().done(function (response) {
-                var projects = response.data;
+                let projects = response.data;
                 self.renderProjects(projects);
             });
         });
@@ -81,26 +88,26 @@ UI = {
     },
 
     reloadProjects: function (team) {
-        var self = this;
+        let self = this;
         if ( UI.Search.currentPage === 1) {
             this.getProjects().done(function (response) {
-                var projects = response.data;
+                let projects = response.data;
                 ManageActions.renderProjects(projects);
             });
         } else {
             ManageActions.showReloadSpinner();
-            var total_projects = [];
-            var requests = [];
-            var onDone = function (response) {
-                        var projects = response.data;
+            let total_projects = [];
+            let requests = [];
+            let onDone = function (response) {
+                        let projects = response.data;
                         $.merge(total_projects, projects);
                     };
-            for (var i=1; i<= UI.Search.currentPage; i++ ) {
+            for (let i=1; i<= UI.Search.currentPage; i++ ) {
                 requests.push(this.getProjects(i));
             }
             $.when.apply(this, requests).done(function() {
-                var results = requests.length > 1 ? arguments : [arguments];
-                for( var i = 0; i < results.length; i++ ){
+                let results = requests.length > 1 ? arguments : [arguments];
+                for( let i = 0; i < results.length; i++ ){
                     onDone(results[i][0]);
                 }
                 ManageActions.renderProjects(total_projects, true);
@@ -111,7 +118,7 @@ UI = {
 
     renderProjects: function (projects) {
         if ( !this.ProjectsContainer ) {
-            var mountPoint = $("#main-container")[0];
+            let mountPoint = $("#main-container")[0];
             this.ProjectsContainer = ReactDOM.render(React.createElement(ProjectsContainer, {
                 getLastActivity: this.getLastProjectActivityLogAction,
                 changeStatus: this.changeJobsOrProjectStatus,
@@ -126,7 +133,7 @@ UI = {
     renderMoreProjects: function () {
         UI.Search.currentPage = UI.Search.currentPage + 1;
         this.getProjects().done(function (response) {
-            var projects = response.data;
+            let projects = response.data;
             if (projects.length > 0) {
                 ManageActions.renderMoreProjects(projects);
             } else {
@@ -138,15 +145,15 @@ UI = {
     filterProjectsFromName: function(name) {
         console.log("Search " + name);
         if (!this.performingSearchRequest) {
-            var self = this;
+            let self = this;
             this.performingSearchRequest = true;
-            var filter = {
+            let filter = {
                 pn: name
             };
             this.Search.filter = $.extend( this.Search.filter, filter );
             UI.Search.currentPage = 1;
             this.getProjects().done(function (response) {
-                var projects = response.data;
+                let projects = response.data;
                 ManageActions.renderProjects(projects);
                 self.performingSearchRequest = false;
             });
@@ -155,14 +162,14 @@ UI = {
     },
 
     filterProjectsFromStatus: function(status) {
-        var self = this;
-        var filter = {
+        let self = this;
+        let filter = {
             status: status
         };
         this.Search.filter = $.extend( this.Search.filter, filter );
         UI.Search.currentPage = 1;
         this.getProjects().done(function (response) {
-            var projects = response.data;
+            let projects = response.data;
             ManageActions.renderProjects(projects);
         });
 
@@ -175,7 +182,7 @@ UI = {
             delete this.Search.filter.pn;
         }
         this.getProjects().done(function (response) {
-            var projects = response.data;
+            let projects = response.data;
             ManageActions.renderProjects(projects);
         });
     },
@@ -183,7 +190,7 @@ UI = {
      * Open the settings for the job
      */
     openJobSettings: function (job, prName) {
-        var url = '/translate/'+ prName +'/'+ job.source +'-'+ job.target +'/'+ job.id +'-'+ job.password + '&openTab=options' ;
+        let url = '/translate/'+ prName +'/'+ job.source +'-'+ job.target +'/'+ job.id +'-'+ job.password + '&openTab=options' ;
         window.open(url, '_blank');
         setTimeout(function () {
             $.cookie('tmpanel-open', 0, { path: '/' });
@@ -193,7 +200,7 @@ UI = {
      * Open the tm panel for the job
      */
     openJobTMPanel: function (job, prName) {
-        var url = '/translate/'+ prName +'/'+ job.source +'-'+ job.target +'/'+ job.id +'-'+ job.password + '&openTab=tm' ;
+        let url = '/translate/'+ prName +'/'+ job.source +'-'+ job.target +'/'+ job.id +'-'+ job.password + '&openTab=tm' ;
         window.open(url, '_blank');
         setTimeout(function () {
             $.cookie('tmpanel-open', 0, { path: '/' });
@@ -212,10 +219,10 @@ UI = {
 
         if(typeof only_if == 'undefined') only_if = 0;
 
-        var id = object.id;
-        var password = object.password;
+        let id = object.id;
+        let password = object.password;
 
-        var data = {
+        let data = {
             action:		"changeJobsStatus",
             new_status: status,
             res: 		type,            //Project or Job:
@@ -243,8 +250,8 @@ UI = {
      * @param old_pass
      */
     changeJobPassword: function(job, undo, old_pass) {
-        var id = job.id;
-        var password = job.password;
+        let id = job.id;
+        let password = job.password;
 
         return APP.doRequest({
             data: {
@@ -263,7 +270,7 @@ UI = {
      * @param id
      */
     getProject: function(id) {
-        var d = {
+        let d = {
             action: 'getProjects',
             project: id,
             page:	UI.Search.currentPage
@@ -285,8 +292,8 @@ UI = {
      * Retrieve Projects. Passing filters is possible to retrieve projects
      */
     getProjects: function(page) {
-        var pageNumber = (page) ? page : UI.Search.currentPage;
-        var data = {
+        let pageNumber = (page) ? page : UI.Search.currentPage;
+        let data = {
             action: 'getProjects',
             page:	pageNumber,
             filter: (!$.isEmptyObject(UI.Search.filter)) ? 1 : 0,
@@ -313,14 +320,14 @@ UI = {
     },
 
     openModifyTeamModal: function (team) {
-        var props = {
+        let props = {
             team: team
         };
-        APP.ModalWindow.showModalComponent(ChangeProjectTeamModal, props, "Modify "+ team.name + " Team");
+        APP.ModalWindow.showModalComponent(ModifyTeamModal, props, "Modify "+ team.name + " Team");
     },
 
     openChangeProjectTeam: function () {
-        APP.ModalWindow.showModalComponent(ModifyTeamModal, {}, "Change team");
+        APP.ModalWindow.showModalComponent(ChangeProjectTeamModal, {}, "Change team");
     },
 
     /**
@@ -460,8 +467,8 @@ UI = {
     },
 
     createTeam: function (teamName) {
-        var self = this;
-        var team = {
+        let self = this;
+        let team = {
             id: 300,
             name: teamName,
             users: []
@@ -481,15 +488,15 @@ UI = {
             });
         } else if (team.name === "Ebay") {
             setTimeout(function () {
-                ManageActions.renderProjects(EbayProjects, self.selectedTeam);
+                ManageActions.renderProjects(self.ebayProjects, self.selectedTeam);
             });
         }else if (team.name === "MSC") {
             setTimeout(function () {
-                ManageActions.renderProjects(MSCProjects, self.selectedTeam);
+                ManageActions.renderProjects(self.mscProjects, self.selectedTeam);
             });
         }else if (team.name === "Translated") {
             setTimeout(function () {
-                ManageActions.renderProjects(TranslatedProjects, self.selectedTeam);
+                ManageActions.renderProjects(self.translatedProjects, self.selectedTeam);
             });
         } else {
             setTimeout(function () {
@@ -499,8 +506,30 @@ UI = {
 
     },
 
+    changeProjectAssignee: function (idProject, user, teamName) {
+        let projectsArray = [];
+        let self = this;
+        if (teamName === "Ebay") {
+            projectsArray = this.ebayProjects;
+        }else if (teamName === "MSC") {
+            projectsArray = this.mscProjects;
+        }else if (teamName === "Translated") {
+            projectsArray = this.translatedProjects;
+        }
+
+        $.each(projectsArray, function() {
+            if (this.id == idProject) {
+                this.user = user;
+            }
+        });
+
+        setTimeout(function () {
+            ManageActions.renderProjects(projectsArray, self.selectedTeam);
+        });
+    },
+
     getUsers: function () {
-        var users = [
+        let users = [
             {
                 userMail: 'chloe.king@translated.net',
                 userFullName: 'Chloe King',
@@ -564,7 +593,7 @@ UI = {
         });
     },
     scrollDebounceFn: function() {
-        var self = this;
+        let self = this;
         return _.debounce(function() {
             self.handleScroll();
         }, 300)
@@ -578,13 +607,13 @@ UI = {
     },
 
     downloadTranslation: function(project, job) {
-        var url = '/translate/'+project.name +'/'+ job.source +'-'+job.target+'/'+ job.id +'-'+ job.password + "?action=download" ;
+        let url = '/translate/'+project.name +'/'+ job.source +'-'+job.target+'/'+ job.id +'-'+ job.password + "?action=download" ;
         window.open(url, '_blank');
 
     },
 };
 
-var EbayProjects = [
+let EbayProjects = [
     {
         "team": "Ebay",
         "tm_analysis":"241",
@@ -680,7 +709,7 @@ var EbayProjects = [
 
 ];
 
-var MSCProjects = [
+let MSCProjects = [
     {
         "team": "MSC",
         "tm_analysis":"241",
@@ -823,7 +852,7 @@ var MSCProjects = [
 
 ];
 
-var TranslatedProjects = [
+let TranslatedProjects = [
     {
         "team": "Translated",
         "tm_analysis":"241",

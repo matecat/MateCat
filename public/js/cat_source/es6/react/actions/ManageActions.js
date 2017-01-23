@@ -138,7 +138,18 @@ var ManageActions = {
             actionType: ManageConstants.CHANGE_USER,
             user: user
         });
+    },
+
+    changeProjectAssignee: function (idProject, user, teamName) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.CHANGE_PROJECT_ASSIGNEE,
+            user: user,
+            idProject: idProject,
+            teamName: teamName
+        });
     }
+
+
 
 
 

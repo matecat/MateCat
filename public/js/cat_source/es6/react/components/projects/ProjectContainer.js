@@ -19,14 +19,21 @@ class ProjectContainer extends React.Component {
             jobsActions: null
         };
         this.getActivityLogUrl = this.getActivityLogUrl.bind(this);
+        this.changeUser = this.changeUser.bind(this);
     }
 
     componentDidMount() {
+        let self = this;
         $(this.dropdown).dropdown({
             direction : 'downward'
         });
         if (this.props.project.get('user')) {
             $(this.dropdownUsers).dropdown('set selected', this.props.project.get('user').get('id'));
+            $(this.dropdownUsers).dropdown({
+                onChange: function(value, text, $selectedItem) {
+                    self.changeUser(value);
+                }
+            });
         }
         // $('.tooltipped').tooltip({delay: 50});
         this.getLastAction();
@@ -53,6 +60,15 @@ class ProjectContainer extends React.Component {
     activateProject() {
         this.props.changeStatusFn('prj', this.props.project.toJS(), 'active');
         ManageActions.removeProject(this.props.project);
+    }
+
+    changeUser(value) {
+        let newUser = this.props.team.get('users').filter(function (user) {
+            if (user.get('id') === parseInt(value)) {
+                return true
+            }
+        });
+        ManageActions.changeProjectAssignee(this.props.project.get('id'), newUser.get(0).toJS(), this.props.project.get('team'));
     }
 
 

@@ -19,5 +19,6 @@ module.exports = keyMirror({
     CREATE_TEAM: null,
     CHANGE_TEAM: null,
     ADD_TEAM: null,
-    CHANGE_USER: null
+    CHANGE_USER: null,
+    CHANGE_PROJECT_ASSIGNEE: null
 });
