@@ -59,7 +59,7 @@ class Header extends React.Component {
     }
 
     openModifyTeam (event, name) {
-        e.stopPropagation();
+        event.stopPropagation();
         let team = {
             name: name
         };

@@ -207,7 +207,7 @@ UI = {
      * @param status
      * @param only_if
      */
-    changeJobsOrProjectStatus: function(type,object,status,only_if) {
+     changeJobsOrProjectStatus: function(type,object,status,only_if) {
         // Se Job cancella tutti arJobs = 21-10d78b343b8e:active
 
         if(typeof only_if == 'undefined') only_if = 0;
