@@ -375,7 +375,6 @@ class ProjectContainer extends React.Component {
                                 {lastAction}
                             </div>
                         </div>
-
                     </div>
 
                 </div>;
