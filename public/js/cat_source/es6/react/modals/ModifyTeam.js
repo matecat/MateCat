@@ -73,7 +73,7 @@ class ModifyTeam extends React.Component {
             <div className="matecat-modal-footer">
                 <div className="actions">
                     <div className="ui positive right labeled icon button">
-                        Si Crea Team
+                        Yes, Move Project
                         <i className="checkmark icon"/>
                     </div>
                 </div>

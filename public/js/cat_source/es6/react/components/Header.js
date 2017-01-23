@@ -87,7 +87,7 @@ class Header extends React.Component {
                     </a>
                 </div>
             ));
-            result = <div className="ui fluid selection dropdown team-dropdown top-5">
+            result = <div className="ui dropdown selection fluid team-dropdown top-5">
                 <input type="hidden" name="gender" />
                 <i className="dropdown icon"/>
                 <div className="default text">Choose Team</div>
@@ -98,6 +98,7 @@ class Header extends React.Component {
                             <i className="icon-plus3 right"/>
                         </a>
                     </div>
+                    <div className="divider"></div>
                     <div className="header">
                         <div className="ui form">
                             <div className="field">
@@ -105,7 +106,10 @@ class Header extends React.Component {
                             </div>
                         </div>
                     </div>
-                    {items}
+                    <div className="divider"></div>
+                    <div className="scrolling menu">
+                        {items}
+                    </div>
                 </div>
             </div>;
         }
