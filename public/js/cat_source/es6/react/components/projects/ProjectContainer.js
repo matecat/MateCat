@@ -361,7 +361,7 @@ class ProjectContainer extends React.Component {
                             <div className="col right">
                                 <ul className="project-activity-icon right">
                                     <li>
-                                        <a className="chip assigned-team yellow waves-effect waves-dark"
+                                        <a className="chip assigned-team purple waves-effect waves-dark"
                                         onClick={this.openChangeTeamModal.bind(this)}>{(this.props.project.get('team')) ? this.props.project.get('team') : "My workspace" }</a>
                                     </li>
                                     <li>
