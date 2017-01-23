@@ -1,21 +1,31 @@
-var AppDispatcher = require('../dispatcher/AppDispatcher');
-var ManageConstants = require('../constants/ManageConstants');
+let AppDispatcher = require('../dispatcher/AppDispatcher');
+let ManageConstants = require('../constants/ManageConstants');
 
 
-var ManageActions = {
+let ManageActions = {
     /********* SEGMENTS *********/
 
     /** Render the list of projects
      * @param projects
-     */
+     * @param team
+     * @param hideSpinner
+     * */
     renderProjects: function (projects, team, hideSpinner) {
         AppDispatcher.dispatch({
             actionType: ManageConstants.RENDER_PROJECTS,
-            project: projects,
+            projects: projects,
             team: team,
             hideSpinner: hideSpinner,
         });
     },
+
+    updateProjects: function (projects) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.UPDATE_PROJECTS,
+            projects: projects,
+        });
+    },
+
     /** Render the more projects
      * @param projects
      */
@@ -86,6 +96,15 @@ var ManageActions = {
         });
     },
 
+    changeProjectTeam: function (oldTeam, team, projectId) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.CHANGE_PROJECT_TEAM,
+            oldTeam: oldTeam,
+            team: team,
+            projectId: projectId
+        });
+    },
+
     openCreateTeamModal: function () {
         AppDispatcher.dispatch({
             actionType: ManageConstants.OPEN_CREATE_TEAM_MODAL,
@@ -99,9 +118,11 @@ var ManageActions = {
         });
     },
 
-    openChangeProjectTeam: function () {
+    openChangeProjectTeam: function (team, projectId) {
         AppDispatcher.dispatch({
             actionType: ManageConstants.OPEN_CHANGE_TEAM_MODAL,
+            team: team,
+            projectId: projectId
         });
     },
 

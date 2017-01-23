@@ -2,11 +2,11 @@
  * Projects Store
  */
 
-var AppDispatcher = require('../dispatcher/AppDispatcher');
-var EventEmitter = require('events').EventEmitter;
-var ManageConstants = require('../constants/ManageConstants');
-var assign = require('object-assign');
-var Immutable = require('immutable');
+let AppDispatcher = require('../dispatcher/AppDispatcher');
+let EventEmitter = require('events').EventEmitter;
+let ManageConstants = require('../constants/ManageConstants');
+let assign = require('object-assign');
+let Immutable = require('immutable');
 
 EventEmitter.prototype.setMaxListeners(0);
 
@@ -14,7 +14,7 @@ EventEmitter.prototype.setMaxListeners(0);
 
 
 
-var ProjectsStore = assign({}, EventEmitter.prototype, {
+let ProjectsStore = assign({}, EventEmitter.prototype, {
 
     projects : null,
 
@@ -101,25 +101,25 @@ var ProjectsStore = assign({}, EventEmitter.prototype, {
     },
 
     removeProject: function (project) {
-        var index = this.projects.indexOf(project);
+        let index = this.projects.indexOf(project);
         this.projects = this.projects.delete(index);
     },
 
     removeJob: function (project, job) {
-        var indexProject = this.projects.indexOf(project);
+        let indexProject = this.projects.indexOf(project);
         //Check jobs length
         if (this.projects.get(indexProject).get('jobs').size === 1) {
             this.removeProject(project);
         } else {
-            var indexJob = project.get('jobs').indexOf(job);
+            let indexJob = project.get('jobs').indexOf(job);
             this.projects = this.projects.deleteIn([indexProject, 'jobs', indexJob]);
         }
 
     },
 
     changeJobPass: function (project, job, password, oldPassword) {
-        var indexProject = this.projects.indexOf(project);
-        var indexJob = project.get('jobs').indexOf(job);
+        let indexProject = this.projects.indexOf(project);
+        let indexJob = project.get('jobs').indexOf(job);
         
         this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'password'], password);
         this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'oldPassword'], oldPassword);
@@ -137,8 +137,12 @@ AppDispatcher.register(function(action) {
 
     switch(action.actionType) {
         case ManageConstants.RENDER_PROJECTS:
-            ProjectsStore.updateAll(action.project);
+            ProjectsStore.updateAll(action.projects);
             ProjectsStore.emitChange(action.actionType, ProjectsStore.projects, Immutable.fromJS(action.team), action.hideSpinner);
+            break;
+        case ManageConstants.UPDATE_PROJECTS:
+            ProjectsStore.updateAll(action.projects);
+            ProjectsStore.emitChange(action.actionType, ProjectsStore.projects);
             break;
         case ManageConstants.RENDER_MORE_PROJECTS:
             ProjectsStore.addProjects(action.project);
@@ -174,11 +178,11 @@ AppDispatcher.register(function(action) {
         case ManageConstants.OPEN_MODIFY_TEAM_MODAL:
             ProjectsStore.emitChange(action.actionType, action.team);
             break;
-        case ManageConstants.OPEN_CHANGE_TEAM_MODAL:
-            ProjectsStore.emitChange(action.actionType);
-            break;
         case ManageConstants.CHANGE_PROJECT_ASSIGNEE:
             ProjectsStore.emitChange(action.actionType, action.idProject, action.user, action.teamName);
+            break;
+        case ManageConstants.CHANGE_PROJECT_TEAM:
+            ProjectsStore.emitChange(action.actionType, action.oldTeam, action.team, action.projectId);
             break;
 
     }

@@ -14,6 +14,7 @@ UI = {
         this.createTeam = this.createTeam.bind(this);
         this.changeTeam = this.changeTeam.bind(this);
         this.changeProjectAssignee = this.changeProjectAssignee.bind(this);
+        this.changeProjectTeam = this.changeProjectTeam.bind(this);
 
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_SETTINGS, this.openJobSettings);
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_TM_PANEL, this.openJobTMPanel);
@@ -23,6 +24,7 @@ UI = {
         ProjectsStore.addListener(ManageConstants.OPEN_CHANGE_TEAM_MODAL, this.openChangeProjectTeam);
 
         ProjectsStore.addListener(ManageConstants.CHANGE_PROJECT_ASSIGNEE, this.changeProjectAssignee);
+        ProjectsStore.addListener(ManageConstants.CHANGE_PROJECT_TEAM, this.changeProjectTeam);
 
         TeamsStore.addListener(ManageConstants.CREATE_TEAM, this.createTeam);
         TeamsStore.addListener(ManageConstants.CHANGE_TEAM, this.changeTeam);
@@ -78,9 +80,13 @@ UI = {
         // });
         this.getAllTeams().done(function (data) {
             ManageActions.renderTeams(data.teams);
+            self.teams = data.teams;
             self.selectedTeam = data.teams[0];
             self.getProjects().done(function (response) {
                 let projects = response.data;
+                //Remove this
+                self.myProjects = projects;
+                self.currentProjects = projects;
                 self.renderProjects(projects);
             });
         });
@@ -265,29 +271,7 @@ UI = {
             success: function(d){}
         });
     },
-    /**
-     * Get Project
-     * @param id
-     */
-    getProject: function(id) {
-        let d = {
-            action: 'getProjects',
-            project: id,
-            page:	UI.Search.currentPage
-        };
-        // Add filters ??
-        ar = $.extend(d,{});
 
-        return APP.doRequest({
-            data: ar,
-            success: function(d){
-                data = $.parseJSON(d.data);
-            },
-            error: function(d){
-                window.location = '/';
-            }
-        });
-    },
     /**
      * Retrieve Projects. Passing filters is possible to retrieve projects
      */
@@ -326,35 +310,14 @@ UI = {
         APP.ModalWindow.showModalComponent(ModifyTeamModal, props, "Modify "+ team.name + " Team");
     },
 
-    openChangeProjectTeam: function () {
-        APP.ModalWindow.showModalComponent(ChangeProjectTeamModal, {}, "Change team");
-    },
+    openChangeProjectTeam: function (team, projectId, teams) {
 
-    /**
-     * Mistero!
-     * @param pid
-     * @param psw
-     * @param jid
-     * @param jpsw
-     */
-    getOutsourceQuotes: function(pid, psw, jid, jpsw) {
-        $.ajax({
-            async: true,
-            type: "POST",
-            url : "/?action=outsourceTo",
-            data:
-            {
-                action: 'outsourceTo',
-                pid: pid,
-                ppassword: psw,
-                jobs:
-                    [{
-                        jid: jid,
-                        jpassword: jpsw
-                    }]
-            },
-            success : function ( data ) {}
-        });
+        let props = {
+            currentTeam: team,
+            projectId: projectId,
+            teams: teams
+        };
+        APP.ModalWindow.showModalComponent(ChangeProjectTeamModal, props, "Change team");
     },
 
     getAllTeams: function () {
@@ -403,25 +366,25 @@ UI = {
                     userShortName: config.userShortName
 
                 },{
-                    id: 1,
+                    id: 5,
                     userMail: 'lillian.lambert@translated.net',
                     userFullName: 'Lillian	Lambert',
                     userShortName: 'LL'
 
                 },{
-                    id: 2,
+                    id: 6,
                     userMail: 'joe.watson@translated.net',
                     userFullName: 'Joe	Watson',
                     userShortName: 'JW'
 
                 },{
-                    id: 3,
+                    id: 7,
                     userMail: 'rachel.sharp@translated.net',
                     userFullName: 'Rachel	Sharp',
                     userShortName: 'RS'
 
                 },{
-                    id: 4,
+                    id: 8,
                     userMail: 'dan.marshall@translated.net',
                     userFullName: 'Dan	Marshall',
                     userShortName: 'DM'
@@ -438,19 +401,19 @@ UI = {
                     userShortName: config.userShortName
 
                 },{
-                    id: 1,
+                    id: 9,
                     userMail: 'vanessa.simpson@translated.net',
                     userFullName: 'Vanessa	Simpson',
                     userShortName: 'VS'
 
                 },{
-                    id: 2,
+                    id: 10,
                     userMail: 'dan.howard@translated.net',
                     userFullName: 'Dan	Howard',
                     userShortName: 'DH'
 
                 },{
-                    id: 3,
+                    id: 11,
                     userMail: 'keith.kelly@translated.net',
                     userFullName: 'Keith	Kelly',
                     userShortName: 'KC'
@@ -478,38 +441,32 @@ UI = {
         });
 
     },
+
     changeTeam: function (team) {
         let self = this;
         this.selectedTeam = team;
         if (team.name === "My Workspace") {
-            this.getProjects().done(function (response) {
-                let projects = response.data;
-                self.renderProjects(projects);
-            });
+            this.currentProjects = this.myProjects;
         } else if (team.name === "Ebay") {
-            setTimeout(function () {
-                ManageActions.renderProjects(self.ebayProjects, self.selectedTeam);
-            });
+            this.currentProjects = this.ebayProjects;
         }else if (team.name === "MSC") {
-            setTimeout(function () {
-                ManageActions.renderProjects(self.mscProjects, self.selectedTeam);
-            });
+            this.currentProjects = this.mscProjects;
         }else if (team.name === "Translated") {
-            setTimeout(function () {
-                ManageActions.renderProjects(self.translatedProjects, self.selectedTeam);
-            });
+            this.currentProjects = this.translatedProjects;
         } else {
-            setTimeout(function () {
-                ManageActions.renderProjects([]);
-            });
+            this.currentProjects = [];
         }
+        setTimeout(function () {
+            ManageActions.renderProjects(self.currentProjects, self.selectedTeam);
+        });
 
     },
 
     changeProjectAssignee: function (idProject, user, teamName) {
         let projectsArray = [];
-        let self = this;
-        if (teamName === "Ebay") {
+        if (teamName === "My Workspace") {
+            projectsArray = this.myProjects;
+        } else if (teamName === "Ebay") {
             projectsArray = this.ebayProjects;
         }else if (teamName === "MSC") {
             projectsArray = this.mscProjects;
@@ -524,8 +481,36 @@ UI = {
         });
 
         setTimeout(function () {
-            ManageActions.renderProjects(projectsArray, self.selectedTeam);
+            ManageActions.updateProjects(projectsArray);
         });
+    },
+
+    changeProjectTeam: function (oldTeamName, team, projectId) {
+        let self = this;
+        $.each(this.currentProjects, function(index) {
+            if (this.id == projectId) {
+                indexToRemove = index;
+                project = this;
+            }
+        });
+        let removedProject = this.currentProjects.splice(indexToRemove, 1)[0];
+        setTimeout(function () {
+            ManageActions.updateProjects(self.currentProjects);
+        });
+
+        let projectsArray = [];
+        if (team.name === "My Workspace") {
+            projectsArray = this.myProjects;
+        } else if (team.name === "Ebay") {
+            projectsArray = this.ebayProjects;
+        }else if (team.name === "MSC") {
+            projectsArray = this.mscProjects;
+        }else if (team.name === "Translated") {
+            projectsArray = this.translatedProjects;
+        }
+        removedProject.team = team.name;
+        projectsArray.unshift(removedProject);
+
     },
 
     getUsers: function () {
@@ -610,6 +595,55 @@ UI = {
         let url = '/translate/'+project.name +'/'+ job.source +'-'+job.target+'/'+ job.id +'-'+ job.password + "?action=download" ;
         window.open(url, '_blank');
 
+    },
+    /**
+     * Get Project
+     * @param id
+     */
+    getProject: function(id) {
+        let d = {
+            action: 'getProjects',
+            project: id,
+            page:	UI.Search.currentPage
+        };
+        // Add filters ??
+        ar = $.extend(d,{});
+
+        return APP.doRequest({
+            data: ar,
+            success: function(d){
+                data = $.parseJSON(d.data);
+            },
+            error: function(d){
+                window.location = '/';
+            }
+        });
+    },
+    /**
+     * Mistero!
+     * @param pid
+     * @param psw
+     * @param jid
+     * @param jpsw
+     */
+    getOutsourceQuotes: function(pid, psw, jid, jpsw) {
+        $.ajax({
+            async: true,
+            type: "POST",
+            url : "/?action=outsourceTo",
+            data:
+                {
+                    action: 'outsourceTo',
+                    pid: pid,
+                    ppassword: psw,
+                    jobs:
+                        [{
+                            jid: jid,
+                            jpassword: jpsw
+                        }]
+                },
+            success : function ( data ) {}
+        });
     },
 };
 
@@ -726,7 +760,7 @@ let MSCProjects = [
         "id":"2010",
         "password":"263d689044f8",
         "user": {
-            id: 1,
+            id: 5,
             userMail: 'lillian.lambert@translated.net',
             userFullName: 'Lillian	Lambert',
             userShortName: 'LL'
@@ -749,7 +783,7 @@ let MSCProjects = [
         "id":"2011",
         "password":"263d689044f8",
         "user": {
-            id: 2,
+            id: 6,
             userMail: 'joe.watson@translated.net',
             userFullName: 'Joe	Watson',
             userShortName: 'JW'
@@ -819,7 +853,7 @@ let MSCProjects = [
         "id": "2012",
         "password": "263d689044f8",
         "user": {
-            id: 3,
+            id: 7,
             userMail: 'rachel.sharp@translated.net',
             userFullName: 'Rachel	Sharp',
             userShortName: 'RS'
@@ -842,7 +876,7 @@ let MSCProjects = [
         "id":"2013",
         "password":"263d689044f8",
         "user": {
-            id: 3,
+            id: 7,
             userMail: 'rachel.sharp@translated.net',
             userFullName: 'Rachel	Sharp',
             userShortName: 'RS'
@@ -869,7 +903,7 @@ let TranslatedProjects = [
         "id":"3010",
         "password":"263d689044f8",
         "user": {
-            id: 1,
+            id: 9,
             userMail: 'vanessa.simpson@translated.net',
             userFullName: 'Vanessa	Simpson',
             userShortName: 'VS'
@@ -892,7 +926,7 @@ let TranslatedProjects = [
         "id":"3011",
         "password":"263d689044f8",
         "user": {
-            id: 1,
+            id: 9,
             userMail: 'vanessa.simpson@translated.net',
             userFullName: 'Vanessa	Simpson',
             userShortName: 'VS'
@@ -915,7 +949,7 @@ let TranslatedProjects = [
         "id":"3012",
         "password":"263d689044f8",
         "user": {
-            id: 3,
+            id: 11,
             userMail: 'keith.kelly@translated.net',
             userFullName: 'Keith	Kelly',
             userShortName: 'KC'
