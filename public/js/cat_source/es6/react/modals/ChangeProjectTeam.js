@@ -123,42 +123,50 @@ class ChangeProjectTeam extends React.Component {
                     
                         <div className="ui tab" data-tab="TeamMembers">
                             {/*Tab Content list member*/}
-                             <div className="ui relaxed horizontal list">
+                            <div className="row">
+                                <form className="ui form">
+                                    <div className="required field">
+                                        <label>Add new Team Member</label>
+                                        <input type="text" name="Project Name" placeholder="es. Accounts, Project Managers, Translators" />
+                                    </div>
+                                </form>
+                            </div>
+                            <div classname="row">
+                                <div className="ui horizontal list">
                                 
                                     <div className="item">
-                                        <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg" />
-                                        <div className="content">
-                                          <a className="header">Stevie Feliciano</a>
-                                        </div>
+                                        <i className="right icon-search"></i>
+                                        <div className=" ui avatar image initials green">RS</div>
+                                        <div className="content"><span className="header"> Ruben Santillàn</span></div>
                                     </div>
                                 
                                     <div className="item">
-                                        <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg" />
-                                        <div className="content">
-                                          <a className="header">Stevie Feliciano</a>
-                                        </div>
+                                        <i className="right icon-search"></i>
+                                        <div className=" ui avatar image initials green">RS</div>
+                                        <div className="content"><span className="header"> Ruben Santillàn</span></div>
                                     </div>
                                 
                                     <div className="item">
-                                        <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg" />
-                                        <div className="content">
-                                          <a className="header">Stevie Feliciano</a>
-                                        </div>
+                                        <i className="right icon-search"></i>
+                                        <div className=" ui avatar image initials green">RS</div>
+                                        <div className="content"><span className="header"> Ruben Santillàn</span></div>
                                     </div>
                                 
                                     <div className="item">
-                                        <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg" />
-                                        <div className="content">
-                                          <a className="header">Stevie Feliciano</a>
-                                        </div>
+                                        <i className="right icon-search"></i>
+                                        <div className=" ui avatar image initials green">RS</div>
+                                        <div className="content"><span className="header"> Ruben Santillàn</span></div>
                                     </div>
-                                
+                                </div>
+                            </div>
+                            <div className="row">
+                                <div className="ui horizontal list">
                                     <div className="item">
-                                        <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg" />
-                                        <div className="content">
-                                          <a className="header">Stevie Feliciano</a>
-                                        </div>
+                                        <i className="right icon-search"></i>
+                                        <div className=" ui avatar image initials green">RS</div>
+                                        <div className="content"><span className="header"> Ruben Santillàn</span></div>
                                     </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -167,7 +175,7 @@ class ChangeProjectTeam extends React.Component {
             <div className="matecat-modal-footer">
                 <div className="actions">
                     <div className="ui positive right labeled icon button" >
-                        Si Crea Team
+                        Salva Cambiamenti Team
                         <i className="checkmark icon"/>
                     </div>
                 </div>

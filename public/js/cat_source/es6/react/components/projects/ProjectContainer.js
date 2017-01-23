@@ -351,9 +351,7 @@ class ProjectContainer extends React.Component {
                                         onClick={this.openChangeTeamModal}>{(this.props.project.get('team')) ? this.props.project.get('team') : "Personal" }</a>
                                     </li>
                                     <li>
-
                                         {dropDownUsers}
-
                                     </li>
                                     <li>
                                         <div className="ui icon top left pointing dropdown button menu-project"
@@ -377,7 +375,6 @@ class ProjectContainer extends React.Component {
                                 {lastAction}
                             </div>
                         </div>
-
                     </div>
 
                 </div>;
