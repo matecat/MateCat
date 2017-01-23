@@ -11,6 +11,8 @@ module.exports = keyMirror({
     CHANGE_JOB_PASS: null,
     OPEN_JOB_TM_PANEL: null,
     NO_MORE_PROJECTS: null,
+    CHANGE_PROJECT_TEAM: null,
+    //MODALS
     OPEN_CREATE_TEAM_MODAL: null,
     OPEN_MODIFY_TEAM_MODAL: null,
     OPEN_CHANGE_TEAM_MODAL: null,

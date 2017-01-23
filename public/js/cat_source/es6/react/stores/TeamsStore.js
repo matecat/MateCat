@@ -2,15 +2,15 @@
  * Projects Store
  */
 
-var AppDispatcher = require('../dispatcher/AppDispatcher');
-var EventEmitter = require('events').EventEmitter;
-var ManageConstants = require('../constants/ManageConstants');
-var assign = require('object-assign');
-var Immutable = require('immutable');
+let AppDispatcher = require('../dispatcher/AppDispatcher');
+let EventEmitter = require('events').EventEmitter;
+let ManageConstants = require('../constants/ManageConstants');
+let assign = require('object-assign');
+let Immutable = require('immutable');
 
 EventEmitter.prototype.setMaxListeners(0);
 
-var TeamsStore = assign({}, EventEmitter.prototype, {
+let TeamsStore = assign({}, EventEmitter.prototype, {
     
     teams : [],
 
@@ -26,7 +26,7 @@ var TeamsStore = assign({}, EventEmitter.prototype, {
     },
 
     removeTeam: function (team) {
-        var index = this.teams.indexOf(team);
+        let index = this.teams.indexOf(team);
         this.teams = this.teams.delete(index);
     },
 
@@ -62,8 +62,9 @@ AppDispatcher.register(function(action) {
         case ManageConstants.CHANGE_USER:
             TeamsStore.emitChange(ManageConstants.CHANGE_USER, action.user);
             break;
-
-
+        case ManageConstants.OPEN_CHANGE_TEAM_MODAL:
+            ProjectsStore.emitChange(action.actionType, action.team, action.projectId, TeamsStore.teams);
+            break;
     }
 });
 

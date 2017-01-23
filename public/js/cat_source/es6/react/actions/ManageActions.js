@@ -96,6 +96,15 @@ let ManageActions = {
         });
     },
 
+    changeProjectTeam: function (oldTeam, team, projectId) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.CHANGE_PROJECT_TEAM,
+            oldTeam: oldTeam,
+            team: team,
+            projectId: projectId
+        });
+    },
+
     openCreateTeamModal: function () {
         AppDispatcher.dispatch({
             actionType: ManageConstants.OPEN_CREATE_TEAM_MODAL,
@@ -109,9 +118,11 @@ let ManageActions = {
         });
     },
 
-    openChangeProjectTeam: function () {
+    openChangeProjectTeam: function (team, projectId) {
         AppDispatcher.dispatch({
             actionType: ManageConstants.OPEN_CHANGE_TEAM_MODAL,
+            team: team,
+            projectId: projectId
         });
     },
 

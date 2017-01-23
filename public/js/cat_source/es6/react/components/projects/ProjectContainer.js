@@ -35,7 +35,6 @@ class ProjectContainer extends React.Component {
                 }
             });
         }
-        // $('.tooltipped').tooltip({delay: 50});
         this.getLastAction();
     }
 
@@ -44,7 +43,6 @@ class ProjectContainer extends React.Component {
 
     componentDidUpdate() {
         console.log("Updated Project : " + this.props.project.get('id'));
-        // $('.tooltipped').tooltip({delay: 50});
     }
 
     removeProject() {
@@ -63,12 +61,12 @@ class ProjectContainer extends React.Component {
     }
 
     changeUser(value) {
-        let newUser = this.props.team.get('users').filter(function (user) {
+        let newUser = this.props.team.get('users').find(function (user) {
             if (user.get('id') === parseInt(value)) {
                 return true
             }
         });
-        ManageActions.changeProjectAssignee(this.props.project.get('id'), newUser.get(0).toJS(), this.props.project.get('team'));
+        ManageActions.changeProjectAssignee(this.props.project.get('id'), newUser.toJS(), this.props.project.get('team'));
     }
 
 
@@ -244,12 +242,12 @@ class ProjectContainer extends React.Component {
     }
 
     openChangeTeamModal() {
-        ManageActions.openChangeProjectTeam();
+        ManageActions.openChangeProjectTeam(this.props.team, this.props.project.get('id'));
     }
 
     getDropDownUsers() {
         let result = '';
-        if (this.props.project.get('team') ) {
+        if (this.props.project.get('team') && this.props.team.get('users')) {
             let users = this.props.team.get('users').map((user, i) => (
                 <div className="item" data-value={user.get('id')}
                      key={'team' + user.get('userShortName') + user.get('id')}>
@@ -364,7 +362,7 @@ class ProjectContainer extends React.Component {
                                 <ul className="project-activity-icon right">
                                     <li>
                                         <a className="chip assigned-team yellow waves-effect waves-dark"
-                                        onClick={this.openChangeTeamModal}>{(this.props.project.get('team')) ? this.props.project.get('team') : "Personal" }</a>
+                                        onClick={this.openChangeTeamModal.bind(this)}>{(this.props.project.get('team')) ? this.props.project.get('team') : "My workspace" }</a>
                                     </li>
                                     <li>
                                         {dropDownUsers}

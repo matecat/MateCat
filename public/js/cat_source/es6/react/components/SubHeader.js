@@ -74,6 +74,7 @@ class SubHeader extends React.Component {
                                 </span>
                             </div>
                         </div>
+
                     </div>;
         }
         return result;
