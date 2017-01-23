@@ -524,7 +524,7 @@ UI = {
         });
 
         setTimeout(function () {
-            ManageActions.renderProjects(projectsArray, self.selectedTeam);
+            ManageActions.updateProjects(projectsArray);
         });
     },
 

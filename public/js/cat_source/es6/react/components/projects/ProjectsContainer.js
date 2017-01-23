@@ -15,6 +15,7 @@ class ProjectsContainer extends React.Component {
             team: null
         };
         this.renderProjects = this.renderProjects.bind(this);
+        this.updateProjects = this.updateProjects.bind(this);
         this.hideSpinner = this.hideSpinner.bind(this);
         this.showProjectsReloadSpinner = this.showProjectsReloadSpinner.bind(this);
         this.filterForUser = this.filterForUser.bind(this);
@@ -33,6 +34,12 @@ class ProjectsContainer extends React.Component {
             reloading_projects: false,
             user: null,
             team: teamState
+        });
+    }
+
+    updateProjects(projects) {
+        this.setState({
+            projects: projects,
         });
     }
 
@@ -56,6 +63,7 @@ class ProjectsContainer extends React.Component {
 
     componentDidMount() {
         ProjectsStore.addListener(ManageConstants.RENDER_PROJECTS, this.renderProjects);
+        ProjectsStore.addListener(ManageConstants.UPDATE_PROJECTS, this.updateProjects);
         ProjectsStore.addListener(ManageConstants.NO_MORE_PROJECTS, this.hideSpinner);
         ProjectsStore.addListener(ManageConstants.SHOW_RELOAD_SPINNER, this.showProjectsReloadSpinner);
         TeamsStore.addListener(ManageConstants.CHANGE_USER, this.filterForUser);
@@ -63,6 +71,7 @@ class ProjectsContainer extends React.Component {
 
     componentWillUnmount() {
         ProjectsStore.removeListener(ManageConstants.RENDER_PROJECTS, this.renderProjects);
+        ProjectsStore.removeListener(ManageConstants.UPDATE_PROJECTS, this.updateProjects);
         ProjectsStore.removeListener(ManageConstants.NO_MORE_PROJECTS, this.hideSpinner);
         ProjectsStore.removeListener(ManageConstants.SHOW_RELOAD_SPINNER, this.showProjectsReloadSpinner);
         TeamsStore.removeListener(ManageConstants.CHANGE_USER, this.filterForUser);
