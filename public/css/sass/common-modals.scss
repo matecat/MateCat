@@ -84,10 +84,13 @@ footer nav ul li {
 }
 
 .fixed-team-modal {
-  max-height: 280px;
-  min-height: 280px;
-  overflow: hidden;
-  overflow-y: scroll;
+    max-height: 280px;
+    min-height: 280px;
+    overflow: hidden;
+    overflow-y: scroll;
+    margin-top: 20px;
+    background-color: #f1f1f1;
+    padding: 15px 15px;
 }
 
 .change-team-modal {

@@ -28,8 +28,16 @@ class ModifyTeam extends React.Component {
                                     <input type="text" name="Project Name" placeholder="es. Accounts, Project Managers, Translators" />
                                 </div>
 
+                                <div className="row">
+                                    <div className="ui form">
+                                        <div className="field">
+                                            <label>Advanced Options</label>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div className="field">
-                                    <label>Advanced Options</label>
+                                    
                                     <div className="ui checkbox">
                                         <input type="checkbox" tabindex="0" className="hidden" />
                                         <label>Impostazioni Ebay</label>
@@ -131,41 +139,52 @@ class ModifyTeam extends React.Component {
                                     </div>
                                 </form>
                             </div>
-                            <div classname="row">
-                                <div className="ui horizontal list">
-
-                                    <div className="item">
-                                        <i className="right icon-search"></i>
-                                        <div className=" ui avatar image initials green">RS</div>
-                                        <div className="content"><span className="header"> Ruben Santillàn</span></div>
-                                    </div>
-
-                                    <div className="item">
-                                        <i className="right icon-search"></i>
-                                        <div className=" ui avatar image initials green">RS</div>
-                                        <div className="content"><span className="header"> Ruben Santillàn</span></div>
-                                    </div>
-
-                                    <div className="item">
-                                        <i className="right icon-search"></i>
-                                        <div className=" ui avatar image initials green">RS</div>
-                                        <div className="content"><span className="header"> Ruben Santillàn</span></div>
-                                    </div>
-
-                                    <div className="item">
-                                        <i className="right icon-search"></i>
-                                        <div className=" ui avatar image initials green">RS</div>
-                                        <div className="content"><span className="header"> Ruben Santillàn</span></div>
+                            <div className="row">
+                                <div className="ui form">
+                                    <div className="field">
+                                        <label>All Team Members</label>
                                     </div>
                                 </div>
                             </div>
-                            <div className="row">
-                                <div className="ui horizontal list">
-                                    <div className="item">
-                                        <i className="right icon-search"></i>
+                            <div classname="row">
+                                <div className="ui horizontal list team-settings">
+
+                                    <a className="item list-member">
+                                        <i className="right icon-cancel3"></i>
                                         <div className=" ui avatar image initials green">RS</div>
                                         <div className="content"><span className="header"> Ruben Santillàn</span></div>
-                                    </div>
+                                    </a>
+
+                                    <a className="item list-member">
+                                        <i className="right icon-cancel3"></i>
+                                        <div className=" ui avatar image initials green">RS</div>
+                                        <div className="content"><span className="header"> Ruben Santillàn</span></div>
+                                    </a>
+
+                                    <a className="item list-member">
+                                        <i className="right icon-cancel3"></i>
+                                        <div className=" ui avatar image initials green">RS</div>
+                                        <div className="content"><span className="header"> Ruben Santillàn</span></div>
+                                    </a>
+
+                                </div>
+                            
+                                <div className="ui horizontal list team-settings">
+                                    <a className="item list-member">
+                                        <i className="right icon-cancel3"></i>
+                                        <div className="ui avatar image initials green">RS</div>
+                                        <div className="content"><span className="header"> Ruben Santillàn</span></div>
+                                    </a>
+                                    <a className="item list-member">
+                                        <i className="right icon-cancel3"></i>
+                                        <div className=" ui avatar image initials green">RS</div>
+                                        <div className="content"><span className="header"> Ruben Santillàn</span></div>
+                                    </a>
+                                    <a className="item list-member">
+                                        <i className="right icon-cancel3"></i>
+                                        <div className=" ui avatar image initials green">RS</div>
+                                        <div className="content"><span className="header"> Ruben Santillàn</span></div>
+                                    </a>
                                 </div>
                             </div>
                         </div>

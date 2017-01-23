@@ -167,7 +167,7 @@ i.close-x:before {
 			}
 			li {
 				float: left;
-				margin-left: 0rem;
+				margin-left: 8px;
 				a{
 					margin-left: 8px;
 					&.chip {
@@ -190,6 +190,11 @@ i.close-x:before {
 				}
 				a:hover {
 					color: black;
+				}
+				.ui.icon.button {
+				    padding: 6px;
+				    border: 1px solid #777575;
+				    transition: all 0.3s;
 				}
 			}
 		}
