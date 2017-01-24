@@ -1,3 +1,10 @@
+.project-activity-icon {
+        .text {
+        background-color: white;
+        padding-right: 15px;
+        border-radius: 20px;
+    }   
+}
 .initials {
     width: 28px !important;
     text-align: center;
@@ -12,14 +19,13 @@
     }
 	&.purple {
 		background-color: purple !important;
-		color: white;
+		color: white !important;
 	}
 	&.orange {
 		background-color: orange !important;
 		color: white;
 	}
 }
-
 .team-settings{
     .list-member {
         background-color: #e4e4e4 !important;

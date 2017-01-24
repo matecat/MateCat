@@ -161,7 +161,7 @@ i.close-x:before {
 		.project-activity-icon {
 			// background-color: yellow;
 			margin: 0;
-			padding-right: 30px;
+			padding-right: 22px;
 			@media #{$small-and-down} {
 				padding-right: 15px;
 			}
@@ -175,14 +175,18 @@ i.close-x:before {
 					    height: 30px;
 					    font-size: 14px;
 					    font-weight: 500;
-					    color: rgba(0, 0, 0, 0.6);
+					    color: white;
 					    line-height: 30px;
 					    padding: 0px 12px;
 					    border-radius: 30px;
-					    background-color: #e4e4e4;
+					    background-color: #ffa500;
 					    margin-bottom: 0px;
 					    margin-right: 0px;
 					    margin-top: 0px;
+					    &:hover {
+					    	color: white;
+					    	background-color: #fbbb46;
+					    }
 					}
 					i {
 						color: #4D4D4D;
@@ -354,6 +358,11 @@ i.close-x:before {
 					color: #4D4D4D;
 				}
 			}
+		}
+		.ui.icon.button {
+		    padding: 6px;
+		    border: 1px solid #777575;
+		    transition: all 0.3s;
 		}
 	}
 	.body-job {
