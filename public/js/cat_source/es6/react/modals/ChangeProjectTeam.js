@@ -70,9 +70,24 @@ class ChangeProjectTeam extends React.Component {
         let teamsSelect = this.getTeamsSelect();
         let buttonClass =  (this.state.buttonEnabled)? '' : 'disabled';
         return <div className="change-team-modal" style={{minHeight: '300px'}}>
+                    <div className="ui form">
+                        <div className="field">
+                            <label>Move this project</label>
+                        </div>
+                    </div>
+                    <div className="row">
+                        <div className="project-referral">
+                             <h4>Project Name <span><a className="chip">ebay</a></span></h4> 
+                        </div>
+                    </div>
+                    <div className="ui form">
+                        <div className="field">
+                            <label>into another team</label>
+                        </div>
+                    </div>
                     <div className="container-fluid">
                         <div className="row">
-                            <div className="col m8">
+                            <div className="col m12">
                                 {teamsSelect}
                             </div>
                         </div>
@@ -81,7 +96,7 @@ class ChangeProjectTeam extends React.Component {
                         <div className="actions">
                             <div className={"ui positive right labeled icon button " + buttonClass}
                                  onClick={this.changeTeam.bind(this)}>
-                                Si Cambia Team
+                                Yes, Change Team
                                 <i className="checkmark icon"/>
                             </div>
                         </div>

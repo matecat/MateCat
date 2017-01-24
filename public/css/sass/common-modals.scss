@@ -89,8 +89,8 @@ footer nav ul li {
     overflow: hidden;
     overflow-y: scroll;
     margin-top: 20px;
-    background-color: #f1f1f1;
-    padding: 15px 15px;
+    // background-color: #f1f1f1;
+    // padding: 15px 15px;
 }
 
 .change-team-modal {
@@ -531,15 +531,15 @@ footer nav ul li {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 40%;
+  width: 38%;
   border-radius: 4px;
   -webkit-animation-name: animatetop;
   -webkit-animation-duration: 0.4s;
   animation-name: animatetop;
   animation-duration: 0.4s;
   text-align: left;  //modified text-align: center;
-  max-width: 680px;
-  min-width: 400px;
+  // max-width: 680px;
+  min-width: 641px;  //modified min-width: 400px;
   -webkit-box-shadow: 0 1px 20px #000;
   box-shadow: 0 1px 14px #565656;
 }

@@ -90,7 +90,7 @@ class Header extends React.Component {
                 <i className="dropdown icon"/>
                 <div className="default text">Choose Team</div>
                 <div className="menu">
-                    <div className="header">Create Workspace
+                    <div className="header">New Team
                         <a className="team-filter button show"
                            onClick={this.openCreateTeams.bind(this)}>
                             <i className="icon-plus3 right"/>

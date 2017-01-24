@@ -325,7 +325,7 @@ class JobContainer extends React.Component {
                             <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
                         </div>
                     </div>
-                    <div className="col">
+                    {/*<div className="col">
                         <div className="due-to">
                             <a href="#"><span id="due-date">12 Jan 2016</span><span id="due-hour">, 14.00</span></a>
                         </div>
@@ -334,7 +334,7 @@ class JobContainer extends React.Component {
                         <div className="translator-mail">
                             <a href="#"><span id="translator-job">alessandro.cattelan@translated.net</span></a>
                         </div>
-                    </div>
+                    </div>*/}
                     {/*<div className="col">*/}
                         {/*<div className="action-modified">*/}
                             {/*{modifyDate}*/}
@@ -345,7 +345,7 @@ class JobContainer extends React.Component {
                         <ul className="job-activity-icon">
                             {/*tmIcon*/}
                             <li>
-                                <div className="ui icon top left pointing dropdown button menu-job"
+                                <div className="ui icon top right pointing dropdown button menu-job"
                                      ref={(dropdown) => this.dropdown = dropdown}>
                                     <i className="icon-more_vert"/>
                                 {jobMenu}

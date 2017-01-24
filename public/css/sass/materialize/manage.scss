@@ -168,33 +168,7 @@ i.close-x:before {
 			li {
 				float: left;
 				margin-left: 8px;
-				a{
-					margin-left: 8px;
-					&.chip {
-						display: inline-block;
-					    height: 30px;
-					    font-size: 14px;
-					    font-weight: 500;
-					    color: white;
-					    line-height: 30px;
-					    padding: 0px 12px;
-					    border-radius: 30px;
-					    background-color: #ffa500;
-					    margin-bottom: 0px;
-					    margin-right: 0px;
-					    margin-top: 0px;
-					    &:hover {
-					    	color: white;
-					    	background-color: #fbbb46;
-					    }
-					}
-					i {
-						color: #4D4D4D;
-					}
-				}
-				a:hover {
-					color: black;
-				}
+				
 				.ui.icon.button {
 				    padding: 6px;
 				    border: 1px solid #777575;
@@ -208,6 +182,51 @@ i.close-x:before {
 		&:hover {
 			text-decoration: underline;
 		}
+	}
+}
+
+a {
+	margin-left: 8px;
+	&.chip {
+		display: inline-block;
+	    height: 30px;
+	    font-size: 14px;
+	    font-weight: 500;
+	    color: white;
+	    line-height: 30px;
+	    padding: 0px 12px;
+	    border-radius: 30px;
+	    background-color: #ffa500;
+	    margin-bottom: 0px;
+	    margin-right: 0px;
+	    margin-top: 0px;
+	    &:hover {
+	    	color: white;
+	    	background-color: #fbbb46;
+	    }
+	}
+	i {
+		color: #4D4D4D;
+	}
+}
+a:hover {
+	color: black;
+}
+
+.project-referral {
+	&.chip {
+		display: inline-block;
+	    height: 30px;
+	    font-size: 14px;
+	    font-weight: 500;
+	    color: white;
+	    line-height: 30px;
+	    padding: 0px 12px;
+	    border-radius: 30px;
+	    background-color: #ffa500;
+	    margin-bottom: 0px;
+	    margin-right: 0px;
+	    margin-top: 0px;
 	}
 }
 
