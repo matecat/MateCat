@@ -137,6 +137,9 @@ UI = {
     },
 
     renderMoreProjects: function () {
+        if (this.selectedTeam.name !== 'My Workspace') {
+            return;
+        }
         UI.Search.currentPage = UI.Search.currentPage + 1;
         this.getProjects().done(function (response) {
             let projects = response.data;
