@@ -313,11 +313,11 @@ UI = {
         APP.ModalWindow.showModalComponent(ModifyTeamModal, props, "Modify "+ team.name + " Team");
     },
 
-    openChangeProjectTeam: function (team, projectId, teams) {
+    openChangeProjectTeam: function (team, project, teams) {
 
         let props = {
             currentTeam: team,
-            projectId: projectId,
+            project: project,
             teams: teams
         };
         APP.ModalWindow.showModalComponent(ChangeProjectTeamModal, props, "Change team");

@@ -243,7 +243,7 @@ class ProjectContainer extends React.Component {
     }
 
     openChangeTeamModal() {
-        ManageActions.openChangeProjectTeam(this.props.team, this.props.project.get('id'));
+        ManageActions.openChangeProjectTeam(this.props.team, this.props.project);
     }
 
     getDropDownUsers() {

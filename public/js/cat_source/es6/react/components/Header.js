@@ -90,9 +90,8 @@ class Header extends React.Component {
                 <i className="dropdown icon"/>
                 <div className="default text">Choose Team</div>
                 <div className="menu">
-                    <div className="header">New Team
-                        <a className="team-filter button show"
-                           onClick={this.openCreateTeams.bind(this)}>
+                    <div className="header" style={{cursor: 'pointer'}} onClick={this.openCreateTeams.bind(this)}>New Team
+                        <a className="team-filter button show">
                             <i className="icon-plus3 right"/>
                         </a>
                     </div>
