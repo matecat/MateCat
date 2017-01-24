@@ -55,7 +55,7 @@ class SubHeader extends React.Component {
             result = <div className="row">
                         <div className="col top-12">
                             <div className="assigned-list">
-                                <p>All Projects of: </p>
+                                <p>Projects of: </p>
                             </div>
                         </div>
                         <div className="input-field col top-8">
@@ -94,7 +94,7 @@ class SubHeader extends React.Component {
                                 </div>
                             </nav>
                         </div>
-                        <div className="col m4 offset-m1">
+                        <div className="col m3 offset-m2">
                             {usersFilter}
                         </div>
                         <div className="col m2 right">
