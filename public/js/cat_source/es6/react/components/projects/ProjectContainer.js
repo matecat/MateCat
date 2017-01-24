@@ -343,7 +343,7 @@ class ProjectContainer extends React.Component {
                                         {/*<div className="row">*/}
                                             {state}
                                             {/*<div className="input-field col m10">*/}
-                                            <div className="input-field">
+                                            <div className="input-field col">
                                                 <input id="icon_prefix" type="text" disabled="disabled" defaultValue={this.props.project.get('name')}/><i
                                                     className="material-icons prefix hide">mode_edit</i>
                                             </div>
@@ -361,7 +361,7 @@ class ProjectContainer extends React.Component {
                             <div className="col right">
                                 <ul className="project-activity-icon right">
                                     <li>
-                                        <a className="chip assigned-team purple waves-effect waves-dark"
+                                        <a className="chip assigned-team waves-effect waves-dark"
                                         onClick={this.openChangeTeamModal.bind(this)}>{(this.props.project.get('team')) ? this.props.project.get('team') : "My workspace" }</a>
                                     </li>
                                     <li>
