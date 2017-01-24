@@ -58,11 +58,9 @@ class Header extends React.Component {
         ManageActions.openCreateTeamModal();
     }
 
-    openModifyTeam (event, name) {
+    openModifyTeam (event, team) {
         event.stopPropagation();
-        let team = {
-            name: name
-        };
+        event.preventDefault();
         ManageActions.openModifyTeamModal(team);
     }
 
@@ -82,7 +80,7 @@ class Header extends React.Component {
                      key={'team' + team.get('name') + team.get('id')}>
                         {team.get('name')}
                     <a className="team-filter button show right"
-                       onClick={(e) => this.openModifyTeam(e, team.get('name'))}>
+                       onClick={(e) => this.openModifyTeam(e, team)}>
                         <i className="icon-more_vert"/>
                     </a>
                 </div>
