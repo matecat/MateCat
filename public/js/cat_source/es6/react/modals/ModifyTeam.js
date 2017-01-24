@@ -8,6 +8,7 @@ class ModifyTeam extends React.Component {
 
     componentDidMount () {
         $('.menu .item').tab();
+        $('.fixed-team-modal .ui.checkbox').checkbox();
     }
 
     render() {
@@ -25,7 +26,7 @@ class ModifyTeam extends React.Component {
                             <form className="ui form">
                                 <div className="required field">
                                     <label>Change team name</label>
-                                    <input type="text" name="Project Name" placeholder="es. Accounts, Project Managers, Translators" />
+                                    <input type="text" name="Project Name" defaultValue={this.props.team.get('name')} />
                                 </div>
 
                                 <div className="row">
@@ -39,89 +40,89 @@ class ModifyTeam extends React.Component {
                                 <div className="field">
                                     
                                     <div className="ui checkbox">
-                                        <input type="checkbox" tabindex="0" className="hidden" />
+                                        <input type="checkbox" tabIndex="0" className="hidden" />
                                         <label>Impostazioni Ebay</label>
                                     </div>
                                     <span>
                                         <a className="ui advanced-popup" data-tooltip="Add users to your feed" data-position="right center">
-                                            <i className="icon-info"></i>
+                                            <i className="icon-info"/>
                                         </a>
                                     </span>
                                 </div>
                                 <div className="field">
                                     <div className="ui checkbox">
-                                        <input type="checkbox" tabindex="0" className="hidden" />
+                                        <input type="checkbox" tabIndex="0" className="hidden" />
                                         <label>Impostazioni DQF</label>
                                     </div>
                                     <span>
                                         <a className="ui advanced-popup" data-tooltip="Add users to your feed" data-position="right center">
-                                            <i className="icon-info"></i>
+                                            <i className="icon-info"/>
                                         </a>
                                     </span>
                                 </div>
                                 <div className="field">
                                     <div className="ui checkbox">
-                                        <input type="checkbox" tabindex="0" className="hidden" />
+                                        <input type="checkbox" tabIndex="0" className="hidden" />
                                         <label>Impostazione tranquilla</label>
                                     </div>
                                     <span>
                                         <a className="ui advanced-popup" data-tooltip="Add users to your feed" data-position="right center">
-                                            <i className="icon-info"></i>
+                                            <i className="icon-info"/>
                                         </a>
                                     </span>
                                 </div>
                                 <div className="field">
                                     <div className="ui checkbox">
-                                        <input type="checkbox" tabindex="0" className="hidden" />
+                                        <input type="checkbox" tabIndex="0" className="hidden" />
                                         <label>Impostazione più facile di così si muore </label>
                                     </div>
                                     <span>
                                         <a className="ui advanced-popup" data-tooltip="Add users to your feed" data-position="right center">
-                                            <i className="icon-info"></i>
+                                            <i className="icon-info"/>
                                         </a>
                                     </span>
                                 </div>
                                 <div className="field">
                                     <div className="ui checkbox">
-                                        <input type="checkbox" tabindex="0" className="hidden" />
+                                        <input type="checkbox" tabIndex="0" className="hidden" />
                                         <label>Impostazione più facile di così si muore </label>
                                     </div>
                                     <span>
                                         <a className="ui advanced-popup" data-tooltip="Add users to your feed" data-position="right center">
-                                            <i className="icon-info"></i>
+                                            <i className="icon-info"/>
                                         </a>
                                     </span>
                                 </div>
                                 <div className="field">
                                     <div className="ui checkbox">
-                                        <input type="checkbox" tabindex="0" className="hidden" />
+                                        <input type="checkbox" tabIndex="0" className="hidden" />
                                         <label>Impostazione più facile di così si muore </label>
                                     </div>
                                     <span>
                                         <a className="ui advanced-popup" data-tooltip="Add users to your feed" data-position="right center">
-                                            <i className="icon-info"></i>
+                                            <i className="icon-info"/>
                                         </a>
                                     </span>
                                 </div>
                                 <div className="field">
                                     <div className="ui checkbox">
-                                        <input type="checkbox" tabindex="0" className="hidden" />
+                                        <input type="checkbox" tabIndex="0" className="hidden" />
                                         <label>Impostazione più facile di così si muore </label>
                                     </div>
                                     <span>
                                         <a className="ui advanced-popup" data-tooltip="Add users to your feed" data-position="right center">
-                                            <i className="icon-info"></i>
+                                            <i className="icon-info"/>
                                         </a>
                                     </span>
                                 </div>
                                 <div className="field">
                                     <div className="ui checkbox">
-                                        <input type="checkbox" tabindex="0" className="hidden" />
+                                        <input type="checkbox" tabIndex="0" className="hidden" />
                                         <label>Impostazione più facile di così si muore </label>
                                     </div>
                                     <span>
                                         <a className="ui advanced-popup" data-tooltip="Add users to your feed" data-position="right center">
-                                            <i className="icon-info"></i>
+                                            <i className="icon-info"/>
                                         </a>
                                     </span>
                                 </div>
@@ -146,7 +147,7 @@ class ModifyTeam extends React.Component {
                                     </div>
                                 </div>
                             </div>
-                            <div classname="row">
+                            <div className="row">
                                 <div className="ui horizontal list team-settings">
 
                                     <a className="item list-member">
