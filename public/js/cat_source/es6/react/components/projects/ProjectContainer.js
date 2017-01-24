@@ -29,12 +29,13 @@ class ProjectContainer extends React.Component {
         });
         if (this.props.project.get('user')) {
             $(this.dropdownUsers).dropdown('set selected', this.props.project.get('user').get('id'));
-            $(this.dropdownUsers).dropdown({
-                onChange: function(value, text, $selectedItem) {
-                    self.changeUser(value);
-                }
-            });
+
         }
+        $(this.dropdownUsers).dropdown({
+            onChange: function(value, text, $selectedItem) {
+                self.changeUser(value);
+            }
+        });
         this.getLastAction();
     }
 
