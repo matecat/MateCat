@@ -368,7 +368,7 @@ class ProjectContainer extends React.Component {
                                         {dropDownUsers}
                                     </li>
                                     <li>
-                                        <div className="ui icon top left pointing dropdown button menu-project"
+                                        <div className="ui icon top right pointing dropdown button menu-project"
                                                  ref={(dropdown) => this.dropdown = dropdown}>
                                             <i className="icon-more_vert"/>
                                             {projectMenu}

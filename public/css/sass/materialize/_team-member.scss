@@ -1,8 +1,11 @@
 .project-activity-icon {
-        .text {
-        background-color: white;
+    .text {
+        background-color: #f1f1f1;
         padding-right: 15px;
         border-radius: 20px;
+        &:hover {
+            background-color: #ffffff;
+        }
     }   
 }
 .initials {
