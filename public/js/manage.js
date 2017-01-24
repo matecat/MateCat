@@ -73,7 +73,7 @@ UI = {
             var total_projects = [];
             var requests = [];
             var onDone = function (response) {
-                        var projects = $.parseJSON(response.data);
+                        var projects = response.data;
                         $.merge(total_projects, projects);
                     };
             for (var i=1; i<= UI.Search.currentPage; i++ ) {
@@ -111,7 +111,7 @@ UI = {
     renderMoreProjects: function () {
         UI.Search.currentPage = UI.Search.currentPage + 1;
         this.getProjects().done(function (response) {
-            var projects = $.parseJSON(response.data);
+            var projects = response.data;
             if (projects.length > 0) {
                 ManageActions.renderMoreProjects(projects);
             } else {
