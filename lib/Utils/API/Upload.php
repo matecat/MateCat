@@ -253,7 +253,7 @@ class Upload {
 
         //Fix Bug: Zip files, file names with contiguous whitespaces ( replaced with only one _ and not found inside the zip on download )
         $string = preg_replace( '/\p{Zs}/u', chr(0x1A), $string ); // substitute whitespaces
-        $string = preg_replace( '/[^\pL0-9\.\-\=_&()\'\"\x1A]/u', '', $string ); //strips odd chars and preserve preceding placeholder
+        $string = preg_replace( '/[^\pL0-9,\.\-\=_&()\'\"\x1A]/u', '', $string ); //strips odd chars and preserve preceding placeholder
         $string = preg_replace( '/' . chr(0x1A) . '/', '_', $string ); //strips whitespace and odd chars
 
         return $string;

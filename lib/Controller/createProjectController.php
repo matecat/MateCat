@@ -27,6 +27,11 @@ class createProjectController extends ajaxController {
 
     private $lang_handler ;
 
+    /**
+     * @var FeatureSet
+     */
+    private $featureSet ;
+
     public function __construct() {
 
         //SESSION ENABLED
@@ -52,12 +57,6 @@ class createProjectController extends ajaxController {
                 'pretranslate_100'   => array( 'filter' => FILTER_VALIDATE_INT ),
                 'dqf_key'            => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'lexiqa'             => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
-                'speech2text'        => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
-                'tag_projection'     => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
-                'segmentation_rule'  => array(
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 )
 
                 //            This will be sanitized inside the TmKeyManagement class
@@ -65,6 +64,11 @@ class createProjectController extends ajaxController {
                 //            'private_keys_list'  => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ),
 
         );
+
+        $this->checkLogin( false );
+        $this->__setupFeatureSet();
+
+        $filterArgs = $this->__addFilterForMetadataInput( $filterArgs ) ;
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
@@ -128,7 +132,7 @@ class createProjectController extends ajaxController {
         $this->pretranslate_100        = $__postInput[ 'pretranslate_100' ];
         $this->dqf_key                 = $__postInput[ 'dqf_key' ];
         
-        $this->setMetadataFromPostInput( $__postInput ) ;
+        $this->__setMetadataFromPostInput( $__postInput ) ;
 
         if ( $this->disable_tms_engine_flag ) {
             $this->tms_engine = 0; //remove default MyMemory
@@ -146,8 +150,6 @@ class createProjectController extends ajaxController {
             $this->result[ 'errors' ][ ] = array( "code" => -6, "message" => "invalid pretranslate_100 value" );
         }
 
-        //if user is logged in, set the uid and the userIsLogged flag
-        $this->checkLogin( false );
 
         $this->lang_handler = Langs_Languages::getInstance();
         $this->__validateSourceLang();
@@ -314,6 +316,7 @@ class createProjectController extends ajaxController {
         }
 
         $projectManager = new ProjectManager( $projectStructure );
+        $projectManager->setUser( $this->logged_user ) ;
         $projectManager->createProject();
 
         // Strictly related to the UI ( not API ) interaction, should yet be moved away from controller.
@@ -323,6 +326,37 @@ class createProjectController extends ajaxController {
         $this->result = $projectStructure[ 'result' ];
 
     }
+
+    private function __setupFeatureSet() {
+        $this->featureSet = new FeatureSet() ;
+
+        if ( $this->userIsLogged ) {
+            $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
+
+            $dao = new \Teams\MembershipDao() ;
+            $team = $dao->findTeambyUser( $this->logged_user ) ;
+
+            if ( $team ) {
+                $this->featureSet->loadFromTeam( $team ) ;
+            }
+        }
+    }
+
+    private function __addFilterForMetadataInput( $filterArgs ) {
+        $filterArgs = array_merge( $filterArgs, array(
+            'lexiqa'             => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
+            'speech2text'        => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
+            'tag_projection'     => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
+            'segmentation_rule'  => array(
+                'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+            )
+        ));
+
+        $filterArgs = $this->featureSet->filter('filterCreateProjectInputFilters', $filterArgs );
+
+        return $filterArgs ;
+    }
+
 
     private function __assignLastCreatedPid( $pid ) {
         $_SESSION['redeem_project'] = FALSE ;
@@ -378,7 +412,7 @@ class createProjectController extends ajaxController {
 
     }
     
-    private function setMetadataFromPostInput( $__postInput ) {
+    private function __setMetadataFromPostInput( $__postInput ) {
         $options = array() ;
 
         if ( isset( $__postInput['lexiqa']) )           $options['lexiqa'] = $__postInput[ 'lexiqa' ];
@@ -386,7 +420,11 @@ class createProjectController extends ajaxController {
         if ( isset( $__postInput['tag_projection']) )   $options['tag_projection'] = $__postInput[ 'tag_projection' ];
         if ( isset( $__postInput['segmentation_rule']) ) $options['segmentation_rule'] = $__postInput[ 'segmentation_rule' ];
 
-        $this->metadata = $options ; 
+        $this->metadata = $options ;
+
+        $this->metadata = $this->featureSet->filter('createProjectAssignInputMetadata', $this->metadata, array(
+            'input' => $__postInput
+        ));
     }
 
     private function __validateUserMTEngine() {

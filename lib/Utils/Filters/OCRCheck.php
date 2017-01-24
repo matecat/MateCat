@@ -87,6 +87,8 @@ class OCRCheck {
             "Slovak",
             "Slovenian",
             "Spanish",
+            "Spanish Latin America",
+            "Spanish Colombia",
             "Swahili",
             "Swedish",
             "Tagalog",

@@ -5,10 +5,9 @@
     <title>Quality Report - MateCat</title>
     <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
     <meta name="viewport" content="width=device-width"/>
-    <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
+    <link href="${basepath}public/css/build/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
     <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
     <link rel="stylesheet" href="${basepath}public/css/manage.css?build=${build_number}"/>
-    <link href="${basepath}public/css/components-build.css?build=${build_number}" rel="stylesheet" type="text/css"/>
 
     <script type="text/javascript">
         var config = {
@@ -31,7 +30,7 @@
         <a href="${basepath}" class="logo"></a>
 
         <a tal:attributes="href download_uri"  class="downloadtr-button backbtn">Download this report</a>
-        <a tal:attributes="href translate_url"  class="downloadtr-button backbtn" >< Back to Translation</a>
+        <a tal:attributes="href back_url"  class="downloadtr-button backbtn" >< ${back_label}</a>
     </div>
 </header>
 

@@ -124,24 +124,33 @@ UI = {
         this.evalCurrentSegmentTranslationAndSourceTags( segment.el );
     },
 
+
+    /**
+     * shouldSegmentAutoPropagate
+     *
+     * Returns whether or not the segment should be propagated. Default is true.
+     *
+     * @returns {boolean}
+     */
+    shouldSegmentAutoPropagate : function( segment ) {
+        return true ;
+    },
+
     /**
      *
      * @param el
      * @param status
      * @param byStatus
-     * @param options
      */
-	changeStatus: function(el, status, byStatus, options) {
-        if ( typeof options == 'undefined') options = {};
-
+	changeStatus: function(el, status, byStatus) {
         var segment = $(el).closest("section");
         var segment_id = this.getSegmentId(segment);
 
         var opts = {
-            segment_id: segment_id,
-            status: status,
-            byStatus: byStatus,
-            noPropagation: options.noPropagation || false
+            segment_id      : segment_id,
+            status          : status,
+            byStatus        : byStatus,
+            noPropagation   : ! UI.shouldSegmentAutoPropagate( segment )
         };
 
         if ( byStatus || opts.noPropagation ) {
@@ -151,7 +160,8 @@ UI = {
 
             // ask if the user wants propagation or this is valid only
             // for this segment
-            if (this.autopropagateConfirmNeeded()) {
+
+            if ( this.autopropagateConfirmNeeded() ) {
 
                 var optionsStr = JSON.stringify(opts);
 
@@ -176,23 +186,23 @@ UI = {
         var segment = UI.currentSegment;
         // TODO: this is relying on a comparison between strings to determine if the segment
         // was modified. There should be a more consistent way to read this state, see UI.setSegmentModified .
-        if (this.currentSegmentTranslation.trim() == this.editarea.text().trim()) { //segment not modified
+        if (UI.currentSegmentTranslation.trim() == UI.editarea.text().trim()) { //segment not modified
             return false;
         }
 
-        if(segment.attr('data-propagable') == 'true') {
-            if(config.isReview) {
-                return true;
-            } else {
-                if(segment.is('.status-translated, .status-approved, .status-rejected')) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        } else {
+        if (segment.attr('data-propagable') != 'true') {
             return false;
         }
+
+        if (config.isReview) {
+            return true;
+        }
+
+        if (segment.is('.status-translated, .status-approved, .status-rejected')) {
+          return true;
+        }
+
+        return false;
     },
     preExecChangeStatus: function (optStr) {
         var opt = $.parseJSON(optStr);
@@ -314,7 +324,7 @@ UI = {
             // end split segment
 		return true;
         }
-	},
+   },
     copySource: function() {
         var source_val = UI.clearMarks($.trim($(".source", this.currentSegment).html()));
 
@@ -409,7 +419,6 @@ UI = {
                     APP.closePopup();
                     $('#outer').empty();
                     UI.render({
-                        firstLoad: false,
                         segmentToOpen: UI.currentSegmentId
                     });
                 }
@@ -799,7 +808,6 @@ UI = {
 		if (where == 'before') {
 			$("section").each(function() {
 				if ($(this).offset().top > $(window).scrollTop()) {
-//				if ($(this).offset().top > $(window).scrollTop()) {
 					UI.segMoving = UI.getSegmentId($(this));
 					return false;
 				}
@@ -1011,14 +1019,16 @@ UI = {
 		this.body.addClass('loaded');
 
 		if (typeof d.data.files != 'undefined') {
-			this.renderFiles(d.data.files, where, this.firstLoad);
+			this.renderFiles(d.data.files, where, UI.firstLoad);
 			if ((options.openCurrentSegmentAfter) && (!options.segmentToScroll) && (!options.segmentToOpen)) {
                 seg = (UI.firstLoad) ? this.currentSegmentId : UI.startSegmentId;
 				this.gotoSegment(seg);
 			}
+
 			if (options.segmentToScroll) {
 				this.scrollSegment($('#segment-' + options.segmentToScroll), options.highlight );
 			}
+
 			if (options.segmentToOpen) {
 				$('#segment-' + options.segmentToOpen + ' ' + UI.targetContainerSelector()).click();
 			}
@@ -1112,13 +1122,11 @@ UI = {
 		var next = $('.editor').nextAll( selector  ).first();
 
 		if (next.is('section')) {
-			UI.scrollSegment(next);
 			$(UI.targetContainerSelector(), next).trigger("click", "moving");
 		} else {
 			next = UI.currentFile.next().find( selector ).first();
 			if (next.length) {
                 $(UI.targetContainerSelector(), next).trigger("click", "moving");
-                UI.scrollSegment(next);
 			} else {
                 UI.closeSegment(UI.currentSegment, 1, 'save');
             }
@@ -1146,7 +1154,6 @@ UI = {
 		} else {
 			$('#outer').empty();
 			this.render({
-				firstLoad: false,
 				segmentToOpen: this.currentSegmentId
 			});
 		}
@@ -1233,18 +1240,14 @@ UI = {
 		config.last_opened_segment = segmentId;
 		window.location.hash = segmentId;
 		$('#outer').empty();
-		this.render({
-			firstLoad: false
-		});
+		this.render();
 	},
 	renderUntranslatedOutOfView: function() {
 		this.infiniteScroll = false;
 		config.last_opened_segment = this.nextUntranslatedSegmentId;
 		window.location.hash = this.nextUntranslatedSegmentId;
 		$('#outer').empty();
-		this.render({
-			firstLoad: false
-		});
+		this.render();
 	},
 	reloadWarning: function() {
 		this.renderUntranslatedOutOfView();
@@ -1255,14 +1258,10 @@ UI = {
 		if (segmentId === '') {
 			this.startSegmentId = config.last_opened_segment;
 			$('#outer').empty();
-			this.render({
-				firstLoad: false
-			});
+			this.render();
 		} else {
 			$('#outer').empty();
-			this.render({
-				firstLoad: false
-			});
+			this.render();
 		}
 	},
 	pointToOpenSegment: function(quick) {
@@ -1495,7 +1494,6 @@ UI = {
 	renderAndScrollToSegment: function(sid) {
 		$('#outer').empty();
 		this.render({
-			firstLoad: false,
 			caller: 'link2file',
 			segmentToScroll: sid,
 			scrollToFile: true
@@ -1836,6 +1834,8 @@ UI = {
 		$('#stat-wph strong').html(wph);
 		$('#stat-completion strong').html(completion);
         $('#total-payable').html(s.TOTAL_FORMATTED);
+
+        $(document).trigger('setProgress:rendered', { stats : stats } );
 
     },
 	chunkedSegmentsLoaded: function() {
@@ -2852,6 +2852,7 @@ UI = {
 		$('#contextMenu .shortcut .alt').html(alt);
 		$('#contextMenu .shortcut .cmd').html(cmd);
 	},
+
 	setTranslation_success: function(d, options) {
         var id_segment = options.id_segment;
         var status = options.status;
@@ -3167,6 +3168,14 @@ UI = {
     },
     start: function () {
 
+        // TODO: the following variables used to be set in UI.init() which is called
+        // very during rendering. Those have been moved here because of the init change
+        // of SegmentFilter, see below.
+        UI.firstLoad = true;
+        UI.body = $('body');
+        UI.checkSegmentsArray = {} ;
+
+        APP.init();
         // If some icon is added on the top header menu, the file name is resized
         APP.addDomObserver($('.header-menu')[0], function() {
             APP.fitText($('.breadcrumbs'), $('#pname'), 30);
@@ -3176,14 +3185,21 @@ UI = {
             APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30);
         });
 
-        UI.render({
-            firstLoad: true
-        }).done( function() {
-            // launch segments check on opening
+        var initialRenderPromise ;
+        if ( SegmentFilter.enabled() && SegmentFilter.getStoredState() ) {
+            SegmentFilter.openFilter();
+            initialRenderPromise = ( new $.Deferred() ).resolve();
+        }
+        else {
+            initialRenderPromise = UI.render();
+        }
+
+        initialRenderPromise.done(function() {
             UI.checkWarnings(true);
         });
 
         $('html').trigger('start');
+
         if (LXQ.enabled()) {
             $('#lexiqabox').removeAttr("style");
             LXQ.initPopup();

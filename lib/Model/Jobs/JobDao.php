@@ -153,7 +153,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
         //clean null values
         foreach( $values as $k => $val ){
-            if( $val == null ){
+            if( is_null( $val ) ){
                 unset( $values[ $k ] );
                 unset( $columns[ $k ] );
             }

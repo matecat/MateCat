@@ -179,7 +179,23 @@ $.extend(UI, {
 		if(this.surveyAlreadyDisplayed()) {
 			this.surveyDisplayed = true;
 		}
+		this.checkQueryParams();
 	},
+
+	checkQueryParams: function () {
+		var action = APP.getParameterByName("action");
+		if (action) {
+			switch (action) {
+				case 'download':
+					var interval = setTimeout(function () {
+						$('#downloadProject').trigger('click');
+					}, 300);
+					APP.removeParam('action');
+					break;
+			}
+		}
+
+	}
 });
 
 /**

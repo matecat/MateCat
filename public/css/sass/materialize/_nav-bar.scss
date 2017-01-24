@@ -1,0 +1,111 @@
+.nav-mc-bar {
+  nav {
+    height: 48px;
+    line-height: 48px;
+    .row {
+      margin-bottom: 0px;
+      .input-field {
+        i {
+          color: #9a9a9a;
+          height: 40px;
+          line-height: 50px;
+          &.active {
+            color: #09beec
+          }
+        }
+        input[type=text] {
+          color: #09beec;
+          padding-right: 15px;
+          padding-bottom: 5px;
+          font-size: 15px;
+          border-bottom: 1px solid #9a9a9a;
+          box-shadow: 0 1px 0 0 #4d4d4d;
+        }
+        input[type=text]:focus {
+          border-bottom: 1px solid #09BEEC;
+          box-shadow: 0 1px 0 0 #4d4d4d;
+        }
+        .close-x {
+          width: 20px;
+          height: 20px;
+          background-color: #848282;
+          border-radius: 45px;
+          font-size: 16px;
+          text-align: center;
+          line-height: 21px;
+          color: white;
+          right: -15px;
+          bottom: 27px;
+          cursor: pointer;
+        }
+        // .input-field .prefix {
+        //   position: absolute;
+        //   width: 3rem;
+        //   font-size: 2.5rem;
+        //   transition: color .2s;
+        //   top: 3px;
+        //   left: 7px;
+        // }
+        span {
+          &.caret {
+            line-height: 20px;
+            color: #9a9a9a;
+            right: -10px;
+          }
+        }
+        .dropdown-content {
+          margin-top: 8px;
+        }
+      }
+    }
+    a {
+      .btn-flat {
+        background-color: white;
+        line-height: 34px;
+        width: 30px;
+        height: 30px;
+      }
+      .btn-flat:focus {
+        background-color: gray;
+        border-radius: 32px;
+      }
+    }
+  }
+  p {
+    margin: 0;
+  }
+}
+.middle-v {
+  vertical-align: middle;
+}
+
+.logo-col {
+  min-width: 200px;
+}
+
+
+
+.logo {
+  position: absolute;
+  float: left;
+  border: 0;
+  margin-top: 10px;
+  background: url(../../img/logo.png) 0px 2px no-repeat;
+  width: 145px;
+  height: 31px;
+  background-size: 130px 26px;
+  left: 67px;
+}
+
+input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
+    background-color: green !important;
+    color: #ffffff !important;
+}
+
+header {
+  top: 0;
+  left: 0;
+  width: 100%;
+  position: fixed;
+  z-index: 999999999;
+}

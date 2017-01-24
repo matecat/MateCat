@@ -199,6 +199,13 @@ class Users_UserDao extends DataAccess_AbstractDao {
         return $input;
     }
 
+    /**
+     * @param $user
+     */
+    public static function findDefaultTeam( Users_UserStruct $user ) {
+        $dao = new \Teams\MembershipDao()  ;
+        return $dao->findTeambyUser( $user ) ;
+    }
 
     /**
      * @param $array_result array

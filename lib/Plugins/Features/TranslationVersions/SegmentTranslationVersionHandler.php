@@ -78,21 +78,18 @@ class SegmentTranslationVersionHandler {
 
     public function saveVersion( $new_translation, $old_translation ) {
 
-        if ( $this->feature_enalbed !== true ) {
-            return false;
-        }
-
-        if ( empty($old_translation ) ) {
-            return false;
-        }
-
         /**
          * This is where we decide if a new translation version is to be generated.
          * This should be moved in a review_improved specific model.
          * TODO: refactor.
+         *
          */
-        if ( $old_translation['translation'] ==
-            $new_translation['translation'] ) {
+
+        if (
+            ! $this->feature_enalbed ||
+            empty( $old_translation ) ||
+            $this->translationIsEqual( $new_translation, $old_translation )
+        ) {
             return false;
         }
 
@@ -101,6 +98,23 @@ class SegmentTranslationVersionHandler {
         $new_translation['version_number'] += 1 ;
 
         return $this->dao->saveVersion( $old_translation );
+    }
+
+    /**
+     * translationIsEqual
+     *
+     * Here we need to handle a special case, the one in which the old translation
+     * is the first version that was popuplated by a pre-translated XLIFF with chars that
+     * can be HTML encoded. In such case the old_translation contains the HTML entity,
+     * while we receive the entity decoded even if the segment was not changed by the translator.
+     *
+     * html_entity_decode($old_translation['translation'], ENT_XML1 | ENT_QUOTES) resolves this issue.
+     *
+     * @param $new_translation
+     * @param $old_translation
+     */
+    private function translationIsEqual( $new_translation, $old_translation ) {
+        return html_entity_decode($old_translation['translation'], ENT_XML1 | ENT_QUOTES)  == $new_translation['translation'] ;
     }
 
     private function prepareDao() {

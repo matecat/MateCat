@@ -280,6 +280,16 @@ function doReplaceAll( Array $queryParams ) {
 
 }
 
+/**
+ * @param      $jid
+ * @param      $jpass
+ * @param      $sid
+ * @param null $binaries
+ *
+ * @return mixed
+ *
+ * @deprecated
+ */
 function getReferenceSegment( $jid, $jpass, $sid, $binaries = null ) {
 
     $db = Database::obtain();
@@ -303,18 +313,6 @@ function getReferenceSegment( $jid, $jpass, $sid, $binaries = null ) {
 		";
 
     return $db->query_first( $query );
-}
-
-function getUserData( $id ) {
-
-    $db = Database::obtain();
-
-    $id    = $db->escape( $id );
-    $query = "select * from users where email = '$id'";
-
-    $results = $db->query_first( $query );
-
-    return $results;
 }
 
 function getLanguageStats() {
@@ -431,28 +429,6 @@ function getJobData( $id_job, $password = null ) {
 }
 
 /**
- * @param $job_id       int The job ID
- * @param $job_password int The job password
- *
- * @return mixed If query was successful, this method returns the encoded tm keys string.<br/>
- *               Otherwise, it returns the query's error code
- */
-function getJobTmKeys( $job_id, $job_password ) {
-    $query = "SELECT tm_keys FROM jobs WHERE id = %d AND password = '%s' ";
-
-    $db      = Database::obtain();
-    try {
-        $results = $db->fetch_array(
-            sprintf($query, $job_id, $job_password)
-        );
-    } catch( PDOException $e ) {
-        Log::doLog( $e->getMessage() );
-        return $e->getCode() * -1;
-    }
-    return $results[ 0 ][ 'tm_keys' ];
-}
-
-/**
  * @param $job_id       int     The job id
  * @param $job_password string  The job password
  * @param $tmKeysString string  A json_encoded array of TmKeyManagement_TmKeyStruct objects
@@ -471,15 +447,6 @@ function setJobTmKeys( $job_id, $job_password, $tmKeysString ) {
         Log::doLog( $e->getMessage() );
         throw new Exception( $e->getMessage(), -$e->getCode() );
     }
-}
-
-function getSegment( $id_segment ) {
-    $db         = Database::obtain();
-    $id_segment = $db->escape( $id_segment );
-    $query      = "select * from segments where id=$id_segment";
-    $results    = $db->query_first( $query );
-
-    return $results;
 }
 
 function getFirstSegmentOfFilesInJob( $jid ) {
@@ -518,56 +485,6 @@ function getWarning( $jid, $jpassword ) {
 		-- following is a condition on bitmask to filter by severity ERROR
 		AND warning & 1 = 1 ";
 
-    $results = $db->fetch_array( $query );
-
-    return $results;
-}
-
-function getTranslatorPass( $id_translator ) {
-
-    $db = Database::obtain();
-
-    $id_translator = $db->escape( $id_translator );
-    $query         = "select password from translators where username='$id_translator'";
-
-    //$db->query_first($query);
-    $results = $db->query_first( $query );
-
-    if ( ( is_array( $results ) ) AND ( array_key_exists( "password", $results ) ) ) {
-        return $results[ 'password' ];
-    }
-
-    return null;
-}
-
-/**
- * @param $id_translator
- *
- * @return null
- *
- * @deprecated
- */
-function getTranslatorKey( $id_translator ) {
-
-    $db = Database::obtain();
-
-    $id_translator = $db->escape( $id_translator );
-    $query         = "select mymemory_api_key from translators where username='$id_translator'";
-
-    $results = $db->query_first( $query );
-
-    $res = null;
-    if ( ( is_array( $results ) ) AND ( array_key_exists( "mymemory_api_key", $results ) ) ) {
-        $res = $results[ 'mymemory_api_key' ];
-    }
-
-    return $res;
-}
-
-function getEngines( $type = "MT" ) {
-    $query = "select id,name from engines where type='$type' and active=1";
-
-    $db      = Database::obtain();
     $results = $db->fetch_array( $query );
 
     return $results;
@@ -739,7 +656,7 @@ function getSegmentsDownload( $jid, $password, $id_file, $no_status_new = 1 ) {
 
 function getSegmentsInfo( $jid, $password ) {
 
-    $query = "select j.id as jid, j.id_project as pid,j.source,j.target,
+    $query = "select j.id as jid, j.password AS jpassword, j.id_project as pid,j.source,j.target,
 		j.id_translator as tid, j.id_tms, j.id_mt_engine,
 		p.id_customer as cid, j.id_translator as tid, j.status_owner as status,
 		j.owner as job_owner, j.create_date, j.last_update, j.tm_keys,
@@ -1037,38 +954,6 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ) {
     $results = $db->fetch_array( $query );
 
     return $results;
-}
-
-function getLastSegmentInNextFetchWindow( $jid, $password, $step = 50, $ref_segment, $where = 'after' ) {
-    switch ( $where ) {
-        case 'after':
-            $ref_point = $ref_segment;
-            break;
-        case 'before':
-            $ref_point = $ref_segment - ( $step + 1 );
-            break;
-        case 'center':
-            $ref_point = ( (float)$ref_segment ) - 100;
-            break;
-    }
-
-    //	$ref_point = ($where == 'center')? ((float) $ref_segment) - 100 : $ref_segment;
-
-    $query = "select max(id) as max_id
-		from (select s.id from  jobs j 
-				inner join projects p on p.id=j.id_project
-				inner join files_job fj on fj.id_job=j.id
-				inner join files f on f.id=fj.id_file
-				inner join segments s on s.id_file=f.id
-				left join segment_translations st on st.id_segment=s.id and st.id_job=j.id
-				where j.id=$jid and j.password='$password' and s.id > $ref_point and s.show_in_cattool=1 
-				limit 0,$step) as id
-		";
-
-    $db      = Database::obtain();
-    $results = $db->query_first( $query );
-
-    return $results[ 'max_id' ];
 }
 
 function addTranslation( array $_Translation ) {
@@ -1484,16 +1369,6 @@ function getEQWLastHour( $id_job, $estimation_seg_ids ) {
     return $results;
 }
 
-function getOriginalFile( $id_file ) {
-
-    $query = "SELECT xliff_file FROM files WHERE id=" . $id_file;
-
-    $db      = Database::obtain();
-    $results = $db->fetch_array( $query );
-
-    return $results;
-}
-
 function getUpdatedTranslations( $timestamp, $first_segment, $last_segment, $id_job ) {
     
     $query = "SELECT id_segment as sid, status,translation from segment_translations
@@ -1659,6 +1534,7 @@ function fetchStatus( $sid, $results, $status = Constants_TranslationStatus::STA
 function insertProject( ArrayObject $projectStructure ) {
     $data                        = array();
     $data[ 'id_customer' ]       = $projectStructure[ 'id_customer' ];
+    $data[ 'id_team' ]           = $projectStructure[ 'id_team' ];
     $data[ 'name' ]              = $projectStructure[ 'project_name' ];
     $data[ 'create_date' ]       = $projectStructure[ 'create_date' ];
     $data[ 'status_analysis' ]   = $projectStructure[ 'status' ];
@@ -1755,15 +1631,6 @@ function insertFilesJob( $id_job, $id_file ) {
     $db->insert( 'files_job', $data );
 }
 
-function updateJobOwner( $jid, $new_owner ) {
-
-    $db = Database::obtain();
-
-    $new_owner = $db->escape( $new_owner );
-    $res       = $db->update( 'jobs', array( 'owner' => $new_owner ), ' id = ' . (int)$jid );
-
-    return $res;
-}
 
 function getProject( $pid ) {
     $db    = Database::obtain();
@@ -1900,119 +1767,142 @@ function getJobAnalysisData( $pid, $job_password, $jid = null ) {
 }
 
 /**
- * @param $start                int
- * @param $step                 int
- * @param $search_in_pname      string
- * @param $search_source        string
- * @param $search_target        string
- * @param $search_status        string
- * @param $search_onlycompleted bool
- * @param $filtering
- * @param $project_id           int
+ *
+ * Very bound to the query SQL which is used to retrieve project jobs or just the count
+ * of records for the pagination and other stuff in manage page.
+ *
+ * @param $search_in_pname
+ * @param $search_source
+ * @param $search_target
+ * @param $search_status
+ * @param $search_only_completed
+ * @return array
+ */
+function conditionsForProjectsQuery(
+        $search_in_pname, $search_source, $search_target,
+        $search_status, $search_only_completed
+) {
+    $conditions = array() ;
+    $data = array() ;
+
+    if ( $search_in_pname ) {
+        $conditions[] = " p.name LIKE :project_name ";
+        $data['project_name'] =  "%$search_in_pname%";
+    }
+
+    if ( $search_source ) {
+        $conditions[] = " j.source = :source ";
+        $data['source'] =  $search_source ;
+    }
+
+    if ( $search_target ) {
+        $conditions[] = " j.target = :target  " ;
+        $data['target'] = $search_target ;
+    }
+
+    if ( $search_status ) {
+        $conditions[] = " j.status_owner = :owner_status " ;
+        $data['owner_status'] = $search_status ;
+    }
+
+    if ( $search_only_completed ) {
+        $conditions[]  = " j.completed = 1 ";
+    }
+
+    return array( $conditions, $data )  ;
+}
+
+/**
+ * @param Users_UserStruct  $user
+ * @param                   $start                int
+ * @param                   $step                 int
+ * @param                   $search_in_pname      string
+ * @param                   $search_source        string
+ * @param                   $search_target        string
+ * @param                   $search_status        string
+ * @param                   $search_onlycompleted bool
+ * @param                   $project_id           int
+ *
+ * @param \Teams\TeamStruct $team
  *
  * @return array|int|resource|void
  */
-function getProjects( $start, $step, $search_in_pname, $search_source, $search_target, $search_status, $search_onlycompleted, $filtering, $project_id ) {
+function getProjects( Users_UserStruct $user, $start, $step,
+                      $search_in_pname, $search_source, $search_target,
+                      $search_status, $search_onlycompleted,
+                      $project_id,
+                      \Teams\TeamStruct $team = null) {
 
-    $jobs_filter_query     = array();
-    $projects_filter_query = array();
+    list( $conditions, $data ) = conditionsForProjectsQuery(
+        $search_in_pname, $search_source, $search_target,
+        $search_status, $search_onlycompleted
+    ) ;
 
-    if ( !is_null( $search_in_pname ) && !empty( $search_in_pname ) ) {
-        $projects_filter_query[ ] = "p.name like '%" . $search_in_pname . "%'";
+    $data['email'] = $user->email ;
+
+    if ( $project_id ) {
+        $conditions[] = " p.id = :project_id " ;
+        $data['project_id'] = $project_id ;
     }
 
-    if ( !is_null( $search_source ) && !empty( $search_source ) ) {
-        $jobs_filter_query[ ]     = "j.source = '" . $search_source . "'";
-        $projects_filter_query[ ] = "j.source = '" . $search_source . "'";
+    $ownership_condition = " ( p.id_customer = :email OR j.owner = :email )" ;
+
+    if ( !is_null( $team ) ) {
+        $ownership_condition .= " OR p.id_team = :id_team " ;
+        $data [ 'id_team' ] = $team->id ;
     }
 
-    if ( !is_null( $search_target ) && !empty( $search_target ) ) {
-        $jobs_filter_query[ ]     = "j.target = '" . $search_target . "'";
-        $projects_filter_query[ ] = "j.target = '" . $search_target . "'";
-    }
+    $conditions[] = " ( $ownership_condition ) " ;
 
-    if ( !is_null( $search_status ) && !empty( $search_status ) ) {
-        $jobs_filter_query[ ]     = "j.status_owner = '" . $search_status . "'";
-        $projects_filter_query[ ] = "j.status_owner = '" . $search_status . "'";
-    }
+    $where_query = implode( " AND ", $conditions );
 
-    if ( $search_onlycompleted ) {
-        $jobs_filter_query[ ]     = "j.completed = 1";
-        $projects_filter_query[ ] = "j.completed = 1";
-    }
-
-    if ( !is_null( $project_id ) && !empty( $project_id ) ) {
-        $jobs_filter_query[ ]     = "j.id_project = " . $project_id;
-        $projects_filter_query[ ] = "j.id_project = " . $project_id;
-    }
-
-    //FIXME: SESSION CALL SHOULD NOT BE THERE!!!
-    $jobs_filter_query [ ]    = "j.owner = '" . $_SESSION[ 'cid' ] . "' and j.id_project in (%s)";
-    $projects_filter_query[ ] = "j.owner = '" . $_SESSION[ 'cid' ] . "'";
+    $features = Projects_MetadataDao::FEATURES_KEY ;
 
     $projectsQuery =
             "SELECT p.id AS pid,
                             p.name,
                             p.password,
-                            SUM(draft_words + new_words+translated_words+rejected_words+approved_words) as tm_analysis_wc
+                            SUM(draft_words + new_words+translated_words+rejected_words+approved_words) as tm_analysis_wc,
+                            project_metadata.value AS features
+
             FROM projects p
+
             INNER JOIN jobs j ON j.id_project=p.id
-            WHERE %s
+
+            LEFT JOIN project_metadata ON project_metadata.id_project = p.id AND project_metadata.`key` = '$features'
+
+            WHERE $where_query
             GROUP BY 1
             ORDER BY 1 DESC
-            LIMIT %d, %d";
+            LIMIT $start, $step " ;
 
 
-    $where_query = 1;
-    if ( count( $projects_filter_query ) ) {
-        $where_query = implode( " and ", $projects_filter_query );
-    }
-
-    $query = sprintf( $projectsQuery, $where_query, $start, $step );
-
-    //    Log::doLog( $query );
-
-    $db = Database::obtain();
-    //    $results = $db->query( "SET SESSION group_concat_max_len = 10000000;" );
-    $results = $db->fetch_array( $query );
-
-    //    Log::doLog( $results );
-    return $results;
+    $stmt = Database::obtain()->getConnection()->prepare( $projectsQuery );
+    $stmt->execute( $data );
+    return $stmt->fetchAll() ;
 }
 
 
-function getJobsFromProjects( array $projectIDs, $search_source, $search_target, $search_status, $search_onlycompleted ) {
+function getJobsFromProjects( array $projectIDs, $search_source, $search_target, $search_status, $search_only_completed ) {
 
-    $jobs_filter_query = array();
-
-    if ( !is_null( $search_source ) && !empty( $search_source ) ) {
-        $jobs_filter_query[ ] = "j.source = '" . $search_source . "'";
+    /**
+     * Do not execute
+     */
+    if( empty( $projectIDs ) ){
+        return [];
     }
 
-    if ( !is_null( $search_target ) && !empty( $search_target ) ) {
-        $jobs_filter_query[ ] = "j.target = '" . $search_target . "'";
-    }
+    list( $conditions, $data ) = conditionsForProjectsQuery(
+            null, $search_source, $search_target,
+            $search_status, $search_only_completed
+    );
 
-    if ( !is_null( $search_status ) && !empty( $search_status ) ) {
-        $jobs_filter_query[ ] = "j.status_owner = '" . $search_status . "'";
-    }
-
-    if ( $search_onlycompleted ) {
-        $jobs_filter_query[ ] = "j.completed = 1";
-    }
-
-    //This will be always set. We don't need to check if array is empty.
-    $jobs_filter_query [ ] = "j.owner = '" . $_SESSION[ 'cid' ] . "'";
-
-    $where_query = implode( " and ", $jobs_filter_query );
-    $ids         = implode( ", ", $projectIDs );
-
-    if ( !count( $ids ) ) {
-        $ids[ ] = 0;
-    }
+    $where_query = implode( " AND ", $conditions );
+    $features = Projects_MetadataDao::FEATURES_KEY ;
 
     $jobsQuery = "SELECT
                  j.id,
+
 				 j.id_project,
 				 j.source,
 				 j.target,
@@ -2029,57 +1919,85 @@ function getJobsFromProjects( array $projectIDs, $search_source, $search_target,
 				rejected_words AS REJECT,
 				translated_words AS TRANSLATED,
 				approved_words AS APPROVED,
-                e.name
+                e.name,
+
+
+                -- some fields are repeated with different names to favour the use of the same
+                -- data in CatUtils::getWStructFromJobArray
+                 j.id AS jid,
+                 j.password AS jpassword,
+                 j.draft_words,
+                 j.new_words,
+                 j.translated_words,
+                 j.approved_words,
+                 j.rejected_words,
+                 projects.status_analysis,
+                 project_metadata.value AS features
+
             FROM jobs j
             LEFT JOIN engines e ON j.id_mt_engine=e.id
-            WHERE j.id_project IN (%s) AND %s
+
+            JOIN projects ON projects.id = j.id_project
+
+            LEFT JOIN project_metadata ON project_metadata.id_project = projects.id AND project_metadata.`key` = '$features'
+
+            WHERE j.id_project IN ( " . implode( ",", $projectIDs ) . " ) AND $where_query
             ORDER BY j.id DESC,
                      j.job_first_segment ASC";
 
-    $query = sprintf( $jobsQuery, $ids, $where_query );
+    $stmt = Database::obtain()->getConnection()->prepare( $jobsQuery );
+    $stmt->execute( $data );
+    return $stmt->fetchAll( PDO::FETCH_ASSOC ) ;
 
-    //    Log::doLog( $query );
-
-    $db = Database::obtain();
-    //    $results = $db->query( "SET SESSION group_concat_max_len = 10000000;" );
-    $results = $db->fetch_array( $query );
-
-    //    Log::doLog( $results );
-    return $results;
 }
 
-function getProjectsNumber( $start, $step, $search_in_pname, $search_source, $search_target, $search_status, $search_onlycompleted, $filtering ) {
+function getProjectsNumber( Users_UserStruct $user, $search_in_pname, $search_source, $search_target, $search_status, $search_onlycompleted, \Teams\TeamStruct $team = null) {
 
-    //	$pn = ($search_in_pname)? "where p.name like '%$search_in_pname%'" : "";
+    list( $conditions, $data ) = conditionsForProjectsQuery(
+        $search_in_pname, $search_source, $search_target,
+        $search_status, $search_onlycompleted
+    ) ;
 
-    $pn_query    = ( $search_in_pname ) ? " p.name like '%$search_in_pname%' and" : "";
-    $ss_query    = ( $search_source ) ? " j.source='$search_source' and" : "";
-    $st_query    = ( $search_target ) ? " j.target='$search_target' and" : "";
-    $sst_query   = ( $search_status ) ? " j.status_owner='$search_status' and" : "";
-    $oc_query    = ( $search_onlycompleted ) ? " j.completed=1 and" : "";
-    $owner       = $_SESSION[ 'cid' ];
-    $owner_query = " j.owner='$owner' and";
+    $data['email'] = $user->email ;
 
-    $query_tail        = $pn_query . $ss_query . $st_query . $sst_query . $oc_query . $owner_query;
-    $jobs_filter_query = ( $query_tail == '' ) ? '' : 'where ' . $query_tail;
-    $jobs_filter_query = preg_replace( '/( and)$/i', '', $jobs_filter_query );
+    $query  = " SELECT COUNT( distinct id_project ) AS c
+    FROM projects p
+    INNER JOIN jobs j ON j.id_project = p.id
 
-    $query = "select count(distinct id_project) as c
+    INNER JOIN users on users.email = p.id_customer
 
-		from projects p
-		inner join jobs j on j.id_project=p.id
-		left join engines e on j.id_mt_engine=e.id
-		left join translators t on j.id_translator=t.username
-		$jobs_filter_query";
+    WHERE id_customer = :email
+    " ;
 
-    //    Log::doLog($query);
+    // TODO: duplicated code for ownership condition
+    $ownership_condition = " ( p.id_customer = :email OR j.owner = :email )" ;
 
-    $db      = Database::obtain();
-    $results = $db->fetch_array( $query );
+    if ( !is_null( $team ) ) {
+        $ownership_condition .= " OR p.id_team = :id_team " ;
+        $data [ 'id_team' ] = $team->id ;
+    }
 
-    return $results;
+    $conditions[] = " ( $ownership_condition ) " ;
+
+
+    if ( count( $conditions ) ) {
+        $query = $query . " AND " . implode( " AND ", $conditions );
+    }
+
+    $stmt = Database::obtain()->getConnection()->prepare( $query ) ;
+    $stmt->execute( $data ) ;
+
+    return $stmt->fetchAll() ;
 }
 
+/**
+ *
+ * REALLY HEAVY
+ *
+ * @param $pid
+ *
+ * @return array|int|mixed
+ */
 function getProjectStatsVolumeAnalysis( $pid ) {
 
     $query = "SELECT
@@ -2304,6 +2222,17 @@ function changeProjectStatus( $pid, $status, $if_status_not = array() ) {
     return $affectedRows;
 }
 
+/**
+ * @param $res
+ * @param $id
+ * @param $password
+ * @param $new_password
+ *
+ * @return int|mixed
+ *
+ * @deprecated
+ * TODO: Refactory with Prepared Statements
+ */
 function changePassword( $res, $id, $password, $new_password ) {
 
     $db = Database::obtain();
@@ -2336,18 +2265,6 @@ function changePassword( $res, $id, $password, $new_password ) {
     return ( $db->affected_rows | $row_exists );
 }
 
-function cancelJob( $res, $id ) {
-
-    if ( $res == "prj" ) {
-        $query = "UPDATE jobs SET status_owner = '" . Constants_JobStatus::STATUS_CANCELLED . "' WHERE id_project=" . (int)$id;
-    } else {
-        $query = "UPDATE jobs SET status_owner = '" . Constants_JobStatus::STATUS_CANCELLED . "' WHERE id=" . (int)$id;
-    }
-
-    $db = Database::obtain();
-    $db->query( $query );
-}
-
 function updateProjectOwner( $ownerEmail, $project_id ) {
     $db              = Database::obtain();
     $data            = array();
@@ -2358,55 +2275,49 @@ function updateProjectOwner( $ownerEmail, $project_id ) {
     return $result;
 }
 
-function updateJobsStatus( $res, $id, $status, $only_if, $undo, $jPassword = null ) {
+/**
+ * @param      $res
+ * @param      $id
+ * @param      $status
+ * @param      $only_if
+ * @param null $jPassword
+ *
+ * @deprecated
+ * //TODO: Refactoring with prepared statements
+ *
+ */
+function updateJobsStatus( $res, $id, $status, $only_if, $jPassword = null ) {
 
     $db = Database::obtain();
 
     if ( $res == "prj" ) {
+
         $status_filter_query = ( $only_if ) ? " and status_owner='" . $db->escape( $only_if ) . "'" : "";
-        $arStatus            = explode( ',', $status );
 
-        $test = count( explode( ':', $arStatus[ 0 ] ) );
-        if ( ( $test > 1 ) && ( $undo == 1 ) ) {
-            $cases = '';
-            $ids   = '';
+        $query = "UPDATE jobs SET status_owner='" . $db->escape( $status ) . "' WHERE id_project=" . (int)$id . $status_filter_query;
 
-            //help!!!
-            foreach ( $arStatus as $item ) {
-                $ss = explode( ':', $item );
-                $cases .= " when id=" . $db->escape( $ss[ 0 ] ) . " then '" . $db->escape( $ss[ 1 ] ) . "'";
-                $ids .= $db->escape( $ss[ 0 ] ) . ",";
-            }
-            $ids   = trim( $ids, ',' );
-            $query = "update jobs set status_owner= case $cases end where id in ($ids)" . $status_filter_query;
-            $db->query( $query );
+        $db->query( $query );
 
-        } else {
-
-            $query = "update jobs set status_owner='" . $db->escape( $status ) . "' where id_project=" . (int)$id . $status_filter_query;
-
-            $db->query( $query );
-
-            //Works on the basis that MAX( id_segment ) is the same for ALL Jobs in the same Project
-            // furthermore, we need a random ID so, don't worry about MySQL stupidity on random MAX
-            //example: http://dev.mysql.com/doc/refman/5.0/en/example-maximum-column-group-row.html
-            $select_max_id = "
-				SELECT max(id_segment) as id_segment
+        //Works on the basis that MAX( id_segment ) is the same for ALL Jobs in the same Project
+        // furthermore, we need a random ID so, don't worry about MySQL stupidity on random MAX
+        //example: http://dev.mysql.com/doc/refman/5.0/en/example-maximum-column-group-row.html
+        $select_max_id = "
+				SELECT max(id_segment) AS id_segment
 				FROM segment_translations
 				JOIN jobs ON id_job = id
 				WHERE id_project = " . (int)$id;
 
-            $_id_segment = $db->fetch_array( $select_max_id );
-            $_id_segment = array_pop( $_id_segment );
-            $id_segment  = $_id_segment[ 'id_segment' ];
+        $_id_segment = $db->fetch_array( $select_max_id );
+        $_id_segment = array_pop( $_id_segment );
+        $id_segment  = $_id_segment[ 'id_segment' ];
 
-            $query_for_translations = "
+        $query_for_translations = "
 				UPDATE segment_translations
 				SET translation_date = NOW()
 				WHERE id_segment = $id_segment";
 
-            $db->query( $query_for_translations );
-        }
+        $db->query( $query_for_translations );
+
     } else {
 
         $query = "update jobs set status_owner='" . $db->escape( $status ) . "' where id=" . (int)$id . " and password = '" . $db->escape( $jPassword ) . "' ";
@@ -2432,65 +2343,12 @@ function updateJobsStatus( $res, $id, $status, $only_if, $undo, $jPassword = nul
     }
 }
 
-function getCurrentJobsStatus( $pid ) {
-
-    $query = "select id,status_owner from jobs where id_project=$pid";
-
-    $db      = Database::obtain();
-    $results = $db->fetch_array( $query );
-
-    return $results;
-}
-
-function setSegmentTranslationError( $sid, $jid ) {
-
-    $data[ 'tm_analysis_status' ] = "DONE"; // DONE . I don't want it remains in an incostistent state
-    $where                        = " id_segment=$sid and id_job=$jid ";
-
-    $db = Database::obtain();
-    try {
-        $affectedRows = $db->update('segment_translations', $data, $where);
-    } catch( PDOException $e ) {
-        Log::doLog( $e->getMessage() );
-        return $e->getCode() * -1;
-    }
-    return $affectedRows;
-}
-
 /**
- * @param $pid
- *
- * @return mixed
- *
- */
-function countSegments( $pid ) {
-    $db = Database::obtain();
-
-    $query = "SELECT  COUNT(s.id) AS num_segments
-		FROM segments s
-		INNER JOIN files_job fj ON fj.id_file=s.id_file
-		INNER JOIN jobs j ON j.id= fj.id_job
-		WHERE id_project = $pid
-		";
-
-    //-- and raw_word_count>0 -- removed, count ALL segments
-    try {
-        $results = $db->query_first($query);
-    } catch( PDOException $e ) {
-        Log::doLog( $e->getMessage() );
-        return $e->getCode() * -1;
-    }
-    return $results[ 'num_segments' ];
-}
-
-/**
- * This function are pretty the same as
- * countSegmentsTranslationAnalyzed, but it is more heavy
- * so use after the preceding but only if it is necessary
+ * This function is heavy, use but only if it is necessary
  *
  * TODO cached
  *
- * ( Used in tmVolumeAnalysisThread with concurrency 100 )
+ * ( Used in TMAnalysisWorker and FastAnalysis )
  *
  * @param $pid
  *
@@ -2536,37 +2394,6 @@ function getProjectSegmentsTranslationSummary( $pid ) {
     return $results;
 }
 
-/**
- *
- * @param $pid
- *
- * @return array
- */
-function countSegmentsTranslationAnalyzed( $pid ) {
-    $db = Database::obtain();
-
-    $query = "SELECT
-            COUNT( s.id ) AS project_segments,
-            SUM(
-                CASE
-                    WHEN ( st.standard_word_count != 0 OR st.standard_word_count IS NULL ) THEN IF( st.tm_analysis_status = 'DONE', 1, 0 )
-                    WHEN st.standard_word_count = 0 THEN 1
-                END
-            ) AS num_analyzed,
-            SUM(eq_word_count) AS eq_wc ,
-            SUM(standard_word_count) AS st_wc
-            FROM segments s
-            JOIN segment_translations st ON s.id = st.id_segment
-            INNER JOIN jobs j ON j.id = st.id_job
-            WHERE j.id_project = $pid";
-    try {
-        $results = $db->query_first($query);
-    } catch( PDOException $e ) {
-        Log::doLog( $e->getMessage() );
-        return $e->getCode() * -1;
-    }
-    return $results;
-}
 
 function setJobCompleteness( $jid, $is_completed ) {
     $db    = Database::obtain();

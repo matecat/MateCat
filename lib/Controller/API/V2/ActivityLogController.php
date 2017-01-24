@@ -9,34 +9,44 @@
 
 namespace API\V2;
 
+use ActivityLog\ActivityLogDao;
+use ActivityLog\ActivityLogStruct;
+use API\V2\Json\Activity;
+
 class ActivityLogController extends KleinController {
 
 
-    public function validateRequest() {
+    protected $rawLogContent;
+    protected $project_data;
 
-        //implement a validator if needed
-        $filterArgs = array(
-                'project_id' => array(
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW
-                ),
-                'password'   => array(
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
+    public function lastOnProject(){
+
+        $validator = new Validators\ProjectPasswordValidator( $this->request );
+        $validator->validate();
+
+        $activityLogDao = new ActivityLogDao();
+        $rawContent = $activityLogDao->getLastJobInProject( $validator->getIdProject() ) ;
+
+        $formatted = new Activity( $rawContent ) ;
+        $this->response->json( array( 'activity' => $formatted->render() ) );
+
+    }
+
+    public function lastOnJob(){
+
+        $validator = new Validators\ChunkPasswordValidator( $this->request );
+        $validator->validate();
+
+        $activityLogDao = new ActivityLogDao();
+        $activityLogDao->whereConditions = ' id_job = :id_job ';
+        $activityLogDao->epilogueString = " ORDER BY ID DESC LIMIT 1";
+        $this->rawLogContent  = $activityLogDao->read(
+                new ActivityLogStruct(),
+                [ 'id_job' =>  $validator->getJobId() ]
         );
 
-        $postInput = (object)filter_var_array( $this->request->params(
-                array(
-                        'project_id',
-                        'password',
-                )
-        ), $filterArgs );
-
-        $this->name          = $postInput->name;
-        $this->tm_key        = $postInput->tm_key;
-        $this->downloadToken = $postInput->downloadToken;
-
-        $this->TMService->setName( $postInput->name );
-        $this->TMService->setTmKey( $postInput->tm_key );
+        $formatted = new Activity( $this->rawLogContent ) ;
+        $this->response->json( array( 'activity' => $formatted->render() ) );
 
     }
 

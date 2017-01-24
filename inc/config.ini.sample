@@ -16,7 +16,7 @@ DB_DATABASE = "matecat"
 DB_USER = "matecat_user"
 DB_PASS = "matecat_user"
 
-REDIS_SERVERS = "tcp://localhost:6379"
+REDIS_SERVERS = "tcp://localhost:6379?database=0"
 QUEUE_BROKER_ADDRESS = "tcp://localhost:61613"
 QUEUE_DQF_ADDRESS = "tcp://localhost:61613"
 QUEUE_JMX_ADDRESS = "http://localhost:8161"
@@ -35,6 +35,9 @@ FILTERS_MASHAPE_KEY = Register to https://market.mashape.com/translated/matecat-
 ; THIS SHOULD BE YOUR LEXIQA LICENSE, Request your license key at
 ; @see http://www.lexiqa.net
 LXQ_LICENSE = false
+LXQ_PARTNERID = false
+
+
 
 ;----------------------------------------
 [staging]
@@ -63,6 +66,9 @@ FILTERS_MASHAPE_KEY = Register to https://market.mashape.com/translated/matecat-
 ; THIS SHOULD BE YOUR LEXIQA LICENSE, Request your license key at
 ; @see http://www.lexiqa.net
 LXQ_LICENSE = false
+LXQ_PARTNERID = false
+
+
 
 ;----------------------------------------
 [production]
@@ -91,3 +97,5 @@ FILTERS_MASHAPE_KEY = Register to https://market.mashape.com/translated/matecat-
 ; THIS SHOULD BE YOUR LEXIQA LICENSE, Request your license key at
 ; @see http://www.lexiqa.net
 LXQ_LICENSE = false
+LXQ_PARTNERID = false
+LXQ_PARTNERID = false

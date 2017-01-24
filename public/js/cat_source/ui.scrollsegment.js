@@ -11,8 +11,7 @@
         var id_segment = segment.selector.split('-')[1];
 
         UI.render({
-            firstLoad: false,
-            segmentToScroll: id_segment, 
+            segmentToScroll: id_segment,
             highlight : highlight 
         });
         

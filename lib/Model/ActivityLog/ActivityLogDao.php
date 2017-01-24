@@ -17,6 +17,23 @@ use PDOStatement;
 
 class ActivityLogDao extends DataAccess_AbstractDao {
 
+    public $epilogueString = "";
+    public $whereConditions = " id_project = :id_project ";
+
+    public function getLastJobInProject($id_project) {
+        $conn = Database::obtain()->getConnection();
+        $sql = "SELECT users.uid, users.email, users.first_name, users.last_name, activity_log.* FROM activity_log
+          JOIN (
+           SELECT MAX(id) AS id FROM activity_log WHERE id_project = :id_project AND id_job IS NOT NULL GROUP BY id_job
+          ) t ON t.id = activity_log.id JOIN users on activity_log.uid = users.uid " ;
+
+        $stmt = $conn->prepare( $sql ) ;
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, '\ActivityLog\ActivityLogStruct' );
+
+        $stmt->execute( array( 'id_project' =>  $id_project ) ) ;
+        return $stmt->fetchAll() ;
+    }
+
     public function create( ActivityLogStruct $activityStruct ) {
 
         $conn = Database::obtain()->getConnection();
@@ -56,18 +73,18 @@ class ActivityLogDao extends DataAccess_AbstractDao {
      * @see      \AsyncTasks\Workers\ActivityLogWorker
      * @see      \ActivityLog\ActivityLogStruct
      *
-     * @param ActivityLogStruct $activityQuery
+     * @param DataAccess_IDaoStruct $activityQuery
+     * @param array $whereKeys
      *
-     * @return ActivityLogStruct[]
+     * @return DataAccess_IDaoStruct[]
      */
-    public function read( ActivityLogStruct $activityQuery ){
+    public function read( DataAccess_IDaoStruct $activityQuery, $whereKeys = [ 'id_project' => 0 ] ) {
 
         $stmt = $this->_getStatementForCache();
+
         return $this->_fetchObject( $stmt,
                 $activityQuery,
-                array(
-                        'id_project' => $activityQuery->id_project
-                )
+                $whereKeys
         );
 
     }
@@ -83,7 +100,8 @@ class ActivityLogDao extends DataAccess_AbstractDao {
                 "SELECT * FROM activity_log " .
                 " LEFT JOIN users USING( uid ) " .
                 " WHERE " .
-                " id_project = :id_project "
+                $this->whereConditions . " " .
+                $this->epilogueString
         );
 
         return $stmt;

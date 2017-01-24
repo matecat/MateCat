@@ -9,7 +9,9 @@ use Symfony\Component\Console\Application;
 
 $app = new Application("Tasks for instantquote", "1.0");
 
-
-
+$app->add( new \CommandLineTasks\CreateTeamTask() ) ;
+$app->add( new \CommandLineTasks\CreateTeamMembershipTask() ) ;
+$app->add( new \CommandLineTasks\OwnerFeatures\AssignFeatureTask() ) ;
 $app->add( new  \CommandLineTasks\Test\PrepareDatabaseTask() ) ;
 $app->run();
+

@@ -2508,20 +2508,20 @@ section.modified.editor .status
 @font-face {
 	font-family: Calibri;
 	src: local(Calibri), 
-		url('calibri-webfont.woff') format('woff'), 
-		url('calibri-webfont.ttf') format('truetype'), 
-		url('calibri-webfont.eot'),
-		url('calibri-webfont.eot?#iefix') format('embedded-opentype'); 
+		url('fonts/calibri-webfont.woff') format('woff'),
+		url('fonts/calibri-webfont.ttf') format('truetype'),
+		url('fonts/calibri-webfont.eot'),
+		url('fonts/calibri-webfont.eot?#iefix') format('embedded-opentype');
 } 		
 
 @font-face {
 	font-family: Calibri; 
 	font-weight: bold;
 	src: local('Calibri Bold'), 
-		url('calibri_bold-webfont.woff') format('woff'), 
-		url('calibri_bold-webfont.ttf') format('truetype'), 
-		url('calibri_bold-webfont.eot'),
-		url('calibri_bold-webfont.eot?#iefix') format('embedded-opentype'); 
+		url('fonts/calibri_bold-webfont.woff') format('woff'),
+		url('fonts/calibri_bold-webfont.ttf') format('truetype'),
+		url('fonts/calibri_bold-webfont.eot'),
+		url('fonts/calibri_bold-webfont.eot?#iefix') format('embedded-opentype');
 } 	
 
 #downloadNotifier {

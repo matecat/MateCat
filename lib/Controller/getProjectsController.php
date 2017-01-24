@@ -1,5 +1,4 @@
 <?php
-include_once INIT::$UTILS_ROOT . "/manage.class.php";
 
 /**
  * Description of manageController
@@ -9,29 +8,19 @@ include_once INIT::$UTILS_ROOT . "/manage.class.php";
 class getProjectsController extends ajaxController {
 
     /**
-     * @var Langs_Languages
+     * @var int
      */
-    private $lang_handler;
+    private $page = 1;
 
     /**
      * @var int
      */
-    private $page;
-
-    /**
-     * @var int
-     */
-    private $step;
+    private $step = 10;
 
     /**
      * @var bool
      */
     private $project_id;
-
-    /**
-     * @var bool
-     */
-    private $filter_enabled;
 
     /**
      * @var string|bool
@@ -51,113 +40,112 @@ class getProjectsController extends ajaxController {
     /**
      * @var string
      */
-    private $search_status;
+    private $search_status = Constants_JobStatus::STATUS_ACTIVE;
 
     /**
      * @var bool
      */
-    private $search_onlycompleted;
+    private $search_only_completed;
 
     /**
      * @var int
      */
-    private $notAllCancelled = 0;
+    private $start;
 
     public function __construct() {
 
         //SESSION ENABLED
-        parent::sessionStart();
         parent::__construct();
+        parent::checkLogin();
 
-        $filterArgs = array(
-                'page'          => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'step'          => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'project'       => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'filter'        => array( 'filter' => FILTER_VALIDATE_BOOLEAN,
-                                          'options' => array( FILTER_NULL_ON_FAILURE ) ),
-                'pn'            => array( 'filter'  => FILTER_SANITIZE_STRING,
-                                          'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
-                ),
-                'source'        => array( 'filter'  => FILTER_SANITIZE_STRING,
-                                          'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
-                ),
-                'target'        => array( 'filter'  => FILTER_SANITIZE_STRING,
-                                          'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
-                ),
-                'status'        => array( 'filter'  => FILTER_SANITIZE_STRING,
-                                          'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
-                ),
-                'onlycompleted' => array( 'filter' => FILTER_VALIDATE_BOOLEAN,
-                                          'options' => array( FILTER_NULL_ON_FAILURE )
-                )
-        );
+        $filterArgs = [
+                'page'          => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'step'          => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'project'       => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'pn'            => [
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
+                ],
+                'source'        => [
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
+                ],
+                'target'        => [
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
+                ],
+                'status'        => [
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW
+                ],
+                'onlycompleted' => [
+                        'filter'  => FILTER_VALIDATE_BOOLEAN,
+                        'options' => [ FILTER_NULL_ON_FAILURE ]
+                ]
+        ];
 
         $postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        // assigning default values
-        if ( is_null( $postInput[ 'page' ] ) || empty( $postInput[ 'page' ] ) ) {
-            $postInput[ 'page' ] = 1;
-        }
-        if ( is_null( $postInput[ 'step' ] ) || empty( $postInput[ 'step' ] ) ) {
-            $postInput[ 'step' ] = 25;
-        }
+        ( !empty( $postInput[ 'status' ] ) && Constants_JobStatus::isAllowedStatus( $postInput[ 'status' ] ) ? $this->search_status = $postInput[ 'status' ] : null );
+        ( !empty( $postInput[ 'page' ] ) ? $this->page = (int)$postInput[ 'page' ] : null );
+        ( !empty( $postInput[ 'step' ] ) ? $this->step = (int)$postInput[ 'step' ] : null );
 
-        if ( is_null( $postInput[ 'status' ] ) || empty( $postInput[ 'status' ] ) ) {
-            $postInput[ 'status' ] = Constants_JobStatus::STATUS_ACTIVE;
-        }
+        $this->start                 = ( $this->page - 1 ) * $this->step;
+        $this->project_id            = $postInput[ 'project' ];
+        $this->search_in_pname       = $postInput[ 'pn' ];
+        $this->search_source         = $postInput[ 'source' ];
+        $this->search_target         = $postInput[ 'target' ];
 
-        $this->lang_handler = Langs_Languages::getInstance();
-        $this->page                 = (int) $postInput[ 'page' ];
-        $this->step                 = (int) $postInput[ 'step' ];
-        $this->project_id           = $postInput[ 'project' ];
-        $this->filter_enabled       = (int) $postInput[ 'filter' ];
-        $this->search_in_pname      = (string) $postInput[ 'pn' ];
-        $this->search_source        = (string) $postInput[ 'source' ];
-        $this->search_target        = (string) $postInput[ 'target' ];
-        $this->search_status        = (string) $postInput[ 'status' ];
-        $this->search_onlycompleted = $postInput[ 'onlycompleted' ];
+        $this->search_only_completed = $postInput[ 'onlycompleted' ];
+
     }
 
     public function doAction() {
 
-        $start = ( ( $this->page - 1 ) * $this->step );
-
-        if( empty($_SESSION['cid']) ){
+        if( !$this->userIsLogged ){
             throw new Exception('User not Logged');
         }
 
-        $projects = ManageUtils::queryProjects( $start, $this->step,
+        $team = Users_UserDao::findDefaultTeam( $this->logged_user );
+
+        $projects = ManageUtils::queryProjects( $this->logged_user, $this->start, $this->step,
             $this->search_in_pname,
             $this->search_source, $this->search_target, $this->search_status,
-            $this->search_onlycompleted, $this->filter_enabled, $this->project_id );
+            $this->search_only_completed, $this->project_id,
+            $team
+        );
 
-        $projnum = getProjectsNumber( $start, $this->step,
+        $projnum = getProjectsNumber( $this->logged_user,
             $this->search_in_pname, $this->search_source,
             $this->search_target, $this->search_status,
-            $this->search_onlycompleted, $this->filter_enabled );
+            $this->search_only_completed, $team );
 
-        /**
-         * pass projects in a filter to find associated reivew_password if needed.
-         * Review password may be needed or not depending on the project. Some
-         * projects may need a separate review password, others not. Even thought
-         * the feature is disable for the given project, the password. Given this
-         * recordset is paginated, it may be feasible to seek for a revision password
-         * for each of them in a separate query.
-         */
 
-        $featureSet = FeatureSet::fromIdCustomer( $_SESSION['cid'] );
+        $projects = $this->filterProjectsWithUserFeatures( $projects ) ;
 
-        $projects = $featureSet->filter('filter_manage_projects_loaded', $projects);
+        $projects = $this->filterProjectsWithProjectFeatures( $projects ) ;
 
-        $this->result[ 'data' ]     = json_encode( $projects );
+        $this->result[ 'data' ]     = $projects;
         $this->result[ 'page' ]     = $this->page;
         $this->result[ 'pnumber' ]  = $projnum[ 0 ][ 'c' ];
         $this->result[ 'pageStep' ] = $this->step;
     }
 
+    private function filterProjectsWithUserFeatures( $projects ) {
+        $featureSet = new FeatureSet() ;
+        $featureSet->loadFromUserEmail( $this->logged_user->email ) ;
+        $projects = $featureSet->filter('filter_manage_projects_loaded', $projects);
+        return $projects ;
+    }
 
-    public function cmp( $a, $b ) {
-        return strcmp( $a[ "id" ], $b[ "id" ] );
+    private function filterProjectsWithProjectFeatures( $projects ) {
+        foreach( $projects as $key => $project ) {
+            $features = new FeatureSet() ;
+            $features->loadFromString( $project['features'] );
+
+            $projects[ $key ] = $features->filter('filter_manage_single_project', $project );
+        }
+        return $projects ;
     }
 
 }

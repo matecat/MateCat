@@ -10,6 +10,29 @@ class WarningDao extends \DataAccess_AbstractDao {
     public static $primary_keys = array();
     const TABLE = 'translation_warnings' ;
 
+    public function getWarningsByProjectIds( $projectIds ) {
+        $ids = implode(',', array_map(function( $id ) {
+            return (int) $id ;
+        }, $projectIds ) );
+
+        $sql = "
+          SELECT count(1) AS count, jobs.id AS id_job, jobs.password
+            FROM jobs
+              JOIN segment_translations st ON st.id_job = jobs.id
+                WHERE st.warning = 1
+                AND id_project IN ( $ids )
+                GROUP BY id_job, password
+        " ;
+
+        $con = $this->con->getConnection() ;
+
+        $stmt = $con->prepare( $sql ) ;
+        $stmt->execute() ;
+        $result = $stmt->fetchAll() ;
+
+        return $result ;
+    }
+
     public static function findByChunkAndScope( \Chunks_ChunkStruct $chunk, $scope ) {
         $sql = "SELECT * FROM translation_warnings " .
                 " WHERE id_job = :id_job " .

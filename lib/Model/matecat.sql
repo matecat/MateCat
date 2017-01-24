@@ -276,28 +276,19 @@ CREATE TABLE `notifications` (
   KEY `id_comment` (`id_comment`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
-CREATE TABLE `original_files_map` (
-  `sha1` varchar(100) NOT NULL,
-  `source` varchar(50) NOT NULL,
-  `target` varchar(50) NOT NULL,
-  `deflated_file` longblob,
-  `deflated_xliff` longblob,
-  `creation_date` date DEFAULT NULL,
-  `segmentation_rule` varchar(512) DEFAULT NULL,
-  PRIMARY KEY (`sha1`,`source`,`target`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
-
 CREATE TABLE `owner_features` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `uid` bigint(20) NOT NULL,
+  `uid` bigint(20) DEFAULT NULL,
+  `id_team` int(11) DEFAULT NULL,
   `feature_code` varchar(45) NOT NULL,
   `options` text,
   `create_date` datetime NOT NULL,
   `last_update` datetime NOT NULL,
   `enabled` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uid_feature` (`uid`,`feature_code`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+  UNIQUE KEY `uid_feature` (`uid`,`feature_code`) USING BTREE,
+  UNIQUE KEY `id_team_feature` (`id_team`,`feature_code`) USING BTREE
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE `phinxlog` (
   `version` bigint(20) NOT NULL,
@@ -320,6 +311,7 @@ CREATE TABLE `projects` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `password` varchar(45) DEFAULT NULL,
   `id_customer` varchar(45) NOT NULL,
+  `id_team` int(11) DEFAULT NULL,
   `name` varchar(200) DEFAULT 'project',
   `create_date` datetime NOT NULL,
   `id_engine_tm` int(11) DEFAULT NULL,
@@ -535,6 +527,23 @@ CREATE TABLE `sequences` (
   `id_segment` int(10) unsigned NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1; 
 
+CREATE TABLE `teams` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `created_by` bigint(20) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `teams_users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_team` int(11) NOT NULL,
+  `uid` bigint(20) NOT NULL,
+  `is_admin` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_team_uid` (`id_team`,`uid`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 CREATE TABLE `translation_warnings` (
   `id_job` bigint(20) NOT NULL,
   `id_segment` bigint(20) NOT NULL,
@@ -622,6 +631,9 @@ NULL);
 UPDATE engines SET id = 0 WHERE name = 'NONE' ;
 UPDATE engines SET id = 1 WHERE name = 'MyMemory (All Pairs)' ;
 
+-- populate sequences
+INSERT INTO sequences ( id_segment ) VALUES ( IFNULL( (SELECT MAX(id) + 1 FROM segments), 1)  );
+
 #Create the user 'matecat'@'%'
 CREATE USER 'matecat'@'%' IDENTIFIED BY 'matecat01';
 
@@ -666,9 +678,12 @@ INSERT INTO `phinxlog` ( version ) VALUES ( '20161118144241' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161122093431' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161125145959' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161207184244' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20161219160843' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161223190349' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161223191009' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161223191509' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20161230151125' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20170113150724' );
 
 CREATE SCHEMA `matecat_conversions_log` DEFAULT CHARACTER SET utf8 ;
 USE matecat_conversions_log ;

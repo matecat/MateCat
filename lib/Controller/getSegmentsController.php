@@ -76,7 +76,8 @@ class getSegmentsController extends ajaxController {
 
         $this->job = Chunks_ChunkDao::getByIdAndPassword( $this->jid, $this->password );
         $this->project = $this->job->getProject();
-        $this->feature_set = FeatureSet::fromIdCustomer($this->project->id_customer);
+        $this->feature_set = new FeatureSet();
+        $this->feature_set->loadForProject( $this->project ) ;
 
 		$lang_handler = Langs_Languages::getInstance();
 
@@ -208,7 +209,7 @@ class getSegmentsController extends ajaxController {
 
 
     private function getOptionalQueryFields() {
-        $feature = $this->job->getProject()->getOwnerFeature('translation_versions');
+        $feature = $this->job->getProject()->isFeatureEnabled('translation_versions');
         $options = array();
 
         if ( $feature ) {

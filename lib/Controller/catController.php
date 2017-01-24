@@ -77,7 +77,12 @@ class catController extends viewController {
     /**
      * @var FeatureSet
      */
-    private $fature_set ;
+    private $feature_set ;
+
+    /**
+     * @var WordCount_Struct
+     */
+    private $wStruct ;
 
     public function __construct() {
         $this->start_time = microtime( 1 ) * 1000;
@@ -124,7 +129,8 @@ class catController extends viewController {
         };
 
         $this->project = Projects_ProjectDao::findByJobId( $this->jid );
-        $this->feature_set = FeatureSet::fromIdCustomer( $this->project->id_customer );
+        $this->feature_set = new FeatureSet();
+        $this->feature_set->loadForProject( $this->project ) ;
 
     }
 
@@ -206,7 +212,7 @@ class catController extends viewController {
             if ( $lastTranslationInJob < $oneMonthAgo ) {
                 $res        = "job";
                 $new_status = Constants_JobStatus::STATUS_ARCHIVED;
-                updateJobsStatus( $res, $this->jid, $new_status, null, null, $this->password );
+                updateJobsStatus( $res, $this->jid, $new_status, null, $this->password );
                 $this->job_archived = true;
             }
 
@@ -255,17 +261,8 @@ class catController extends viewController {
                 $this->job_owner    = $data[ 0 ][ 'job_owner' ];
             }
 
-            $id_file = $job[ 'id_file' ];
-
-            $wStruct = new WordCount_Struct();
-
-            $wStruct->setIdJob( $this->jid );
-            $wStruct->setJobPassword( $this->password );
-            $wStruct->setNewWords( $job[ 'new_words' ] );
-            $wStruct->setDraftWords( $job[ 'draft_words' ] );
-            $wStruct->setTranslatedWords( $job[ 'translated_words' ] );
-            $wStruct->setApprovedWords( $job[ 'approved_words' ] );
-            $wStruct->setRejectedWords( $job[ 'rejected_words' ] );
+            $this->wStruct = CatUtils::getWStructFromJobArray( $job );
+            $this->job_stats = CatUtils::getFastStatsForJob( $this->wStruct );
 
             unset( $job[ 'id_file' ] );
             unset( $job[ 'source' ] );
@@ -286,22 +283,11 @@ class catController extends viewController {
             unset( $job[ 'approved_words' ] );
             unset( $job[ 'rejected_words' ] );
 
-            //For projects created with No tm analysis enabled
-            if ( $wStruct->getTotal() == 0 && ( $job[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE || $job[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE ) ) {
-                $wCounter = new WordCount_Counter();
-                $wStruct  = $wCounter->initializeJobWordCount( $this->jid, $this->password );
-                Log::doLog( "BackWard compatibility set Counter." );
-            }
-
-            $this->job_stats = CatUtils::getFastStatsForJob( $wStruct );
-
         }
 
         $this->last_opened_segment = $this->job->last_opened_segment
             ? $this->job->last_opened_segment
             : getFirstSegmentId( $this->job->id, $this->job->password );
-
-
 
         /**
          * get first segment of every file
@@ -395,7 +381,7 @@ class catController extends viewController {
                             // I'm not the job owner, but i know the key because it is in my keyring
                             // so, i can upload and download TMX, but i don't want it to be removed from job
                             // in tm.html relaxed the control to "key.edit" to enable buttons
-//                            $jobKey = $jobKey->hideKey( $uid ); // enable editing
+                            // $jobKey = $jobKey->hideKey( $uid ); // enable editing
 
                         } else {
                             if ( $jobKey->owner && $this->userRole == TmKeyManagement_Filter::OWNER ) {
@@ -447,12 +433,14 @@ class catController extends viewController {
         $jobQA = new Revise_JobQA(
                 $this->jid,
                 $this->password,
-                $wStruct->getTotal()
+                $this->wStruct->getTotal()
         );
 
         $jobQA->retrieveJobErrorTotals();
-        $jobVote          = $jobQA->evalJobVote();
-        $this->qa_data    = json_encode( $jobQA->getQaData() );
+
+        $this->qa_data = json_encode( $jobQA->getQaData() );
+
+        $jobVote = $jobQA->evalJobVote();
         $this->qa_overall = $jobVote[ 'minText' ];
 
 
@@ -709,4 +697,5 @@ class catController extends viewController {
     public function isCurrentProjectGDrive() {
         return \Projects_ProjectDao::isGDriveProject($this->job->id_project);
     }
+
 }

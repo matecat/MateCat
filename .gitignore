@@ -16,10 +16,11 @@ inc/.globalmessage.ini
 inc/oauth-token-key.txt
 
 # Ignore artifacts
-public/css/app.css
-public/css/app.css.map
-public/css/*-build.css
+public/css/build/app.css
+public/css/build/app.css.map
+public/css/build/*-build.css
 public/js/build
+public/css/build
 
 # NodeJs stuff
 nodejs/*.log

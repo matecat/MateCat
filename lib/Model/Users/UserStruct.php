@@ -70,6 +70,12 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct   implements D
         return $this->last_name;
     }
 
+    public function getDefaultTeam() {
+        return $this->cachable(__METHOD__, $this, function(Users_UserStruct $user) {
+            return Users_UserDao::findDefaultTeam( $user );
+        });
+    }
+
     public function getMetadataAsKeyValue() {
         $dao = new \Users\MetadataDao() ;
         $collection = $dao->allByProjectId($this->uid) ;

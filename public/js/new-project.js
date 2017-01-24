@@ -47,35 +47,12 @@ $(document).ready(function() {
         if(!UI.allTMUploadsCompleted()) {
             return false;
         }
+
 		$('body').addClass('creating');
-		var files = '';
-		$('.upload-table tr:not(.failed) td.name, .gdrive-upload-table tr:not(.failed) td.name').each(function () {
-			files += '@@SEP@@' + $(this).text();
-		});
-
-        tm_data = UI.extractTMdataFromTable();
-
-        var filename = files.substr(7) ;
 
 		APP.doRequest({
-			data: {
-				action						: "createProject",
-				file_name					: filename,
-				project_name				: $('#project-name').val(),
-				source_language				: $('#source-lang').val(),
-				target_language				: $('#target-lang').val(),
-                job_subject         		: $('#subject').val(),
-                disable_tms_engine			: ( $('#disable_tms_engine').prop('checked') ) ? $('#disable_tms_engine').val() : false,
-				mt_engine					: $('.mgmt-mt .activemt').data("id"),
-                private_keys_list			: tm_data,
-				lang_detect_files  			: UI.skipLangDetectArr,
-                pretranslate_100    		: ($("#pretranslate100" ).is(':checked')) ? 1 : 0,
-                dqf_key             		: ($('#dqf_key' ).length == 1) ? $('#dqf_key' ).val() : null,
-				lexiqa				        : !!( $("#lexi_qa").prop("checked") && !$("#lexi_qa").prop("disabled") ),
-				speech2text         		: !!( $("#s2t_check").prop("checked") && !$("#s2t_check").prop("disabled") ),
-				tag_projection			    : !!( $("#tagp_check").prop("checked") && !$("#tagp_check").prop("disabled") ),
-				segmentation_rule			: $( '#segm_rule' ).val()
-			},
+			data: APP.getCreateProjectParams(),
+
 			beforeSend: function (){
 				$('.error-message').hide();
 				$('.uploadbtn').attr('value','Analyzing...').attr('disabled','disabled').addClass('disabled');
@@ -487,6 +464,35 @@ APP.checkForTagProjectionLangs = function(){
 	}
 	$('.options-box #tagp_check').attr('checked', !disableTP);
 };
+
+APP.getCreateProjectParams = function() {
+	return {
+		action						: "createProject",
+		file_name					: APP.getFilenameFromUploadedFiles(),
+		project_name				: $('#project-name').val(),
+		source_language				: $('#source-lang').val(),
+		target_language				: $('#target-lang').val(),
+		job_subject         		: $('#subject').val(),
+		disable_tms_engine			: ( $('#disable_tms_engine').prop('checked') ) ? $('#disable_tms_engine').val() : false,
+		mt_engine					: $('.mgmt-mt .activemt').data("id"),
+		private_keys_list			: UI.extractTMdataFromTable(),
+		lang_detect_files  			: UI.skipLangDetectArr,
+		pretranslate_100    		: ($("#pretranslate100" ).is(':checked')) ? 1 : 0,
+		dqf_key             		: ($('#dqf_key' ).length == 1) ? $('#dqf_key' ).val() : null,
+		lexiqa				        : !!( $("#lexi_qa").prop("checked") && !$("#lexi_qa").prop("disabled") ),
+		speech2text         		: !!( $("#s2t_check").prop("checked") && !$("#s2t_check").prop("disabled") ),
+		tag_projection			    : !!( $("#tagp_check").prop("checked") && !$("#tagp_check").prop("disabled") ),
+		segmentation_rule			: $( '#segm_rule' ).val()
+	} ;
+}
+
+APP.getFilenameFromUploadedFiles = function() {
+	var files = '';
+	$('.upload-table tr:not(.failed) td.name, .gdrive-upload-table tr:not(.failed) td.name').each(function () {
+		files += '@@SEP@@' + $(this).text();
+	});
+	return files.substr(7) ;
+}
 
 /**
  * Disable/Enable SpeechToText

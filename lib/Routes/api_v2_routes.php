@@ -11,6 +11,21 @@ $klein->with('/api/v2/projects/[:id_project]/[:password]', function() {
 
     route( '/urls',                 'GET',  'API\V2\UrlsController',        'urls'      );
     route( '/jobs/[:id_job]/merge', 'POST', 'API\V2\JobMergeController',    'merge'     );
+    route( '/rename', 'POST', 'API\V2\ProjectRenameController',    'rename'     );
+
+});
+
+$klein->with('/api/v2/activity', function() {
+
+    route(
+            '/project/[:id_project]/[:password]/last', 'GET',
+            '\API\V2\ActivityLogController', 'lastOnProject'
+    );
+
+    route(
+            '/job/[:id_job]/[:password]/last', 'GET',
+            'API\V2\ActivityLogController', 'lastOnJob'
+    );
 
 });
 
@@ -110,4 +125,3 @@ route(
     '/api/v2/glossaries/export/[:tm_key].?[:downloadToken]?', 'GET',
     '\API\V2\GlossariesController', 'download'
 );
-
