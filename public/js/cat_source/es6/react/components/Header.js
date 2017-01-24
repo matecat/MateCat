@@ -81,7 +81,7 @@ class Header extends React.Component {
                         {team.get('name')}
                     <a className="team-filter button show right"
                        onClick={(e) => this.openModifyTeam(e, team)}>
-                        <i className="icon-more_vert"/>
+                        <i className="icon-settings"/>
                     </a>
                 </div>
             ));
@@ -90,11 +90,14 @@ class Header extends React.Component {
                 <i className="dropdown icon"/>
                 <div className="default text">Choose Team</div>
                 <div className="menu">
-                    <div className="header">New Team
+                    <div className="item header">Add New Team
                         <a className="team-filter button show"
                            onClick={this.openCreateTeams.bind(this)}>
                             <i className="icon-plus3 right"/>
                         </a>
+                    </div>
+                    <div className="divider"></div>
+                    <div className="item header">All Teams
                     </div>
                     <div className="divider"></div>
                     {/*<div className="header">

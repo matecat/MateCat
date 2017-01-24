@@ -28991,7 +28991,7 @@ body.dimmable > .dimmer {
 ---------------*/
 
 .ui.dropdown .menu > .header {
-  margin: 1rem 0rem 0.75rem;
+  margin: 0rem 0rem; /*margin: 1rem 0rem 0.75rem;*/
   padding: 0em 1.14285714rem;
   color: rgba(0, 0, 0, 0.85);
   font-size: 0.78571429em;

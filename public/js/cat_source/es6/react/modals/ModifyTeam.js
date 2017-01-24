@@ -68,7 +68,32 @@ class ModifyTeam extends React.Component {
                         <div className="item" data-tab="TeamMembers">Members</div>
                     </div>
                     <div className="fixed-team-modal">
-                        <div className="ui tab active" data-tab="TeamSettings">
+                        <div className="ui tab active" data-tab="TeamMembers">
+                            {/*Tab Content list member*/}
+                            <div className="row">
+                                <form className="ui form">
+                                    <div className="required field">
+                                        <label>Add new Team Member</label>
+                                        <input type="text" name="Project Name" placeholder="es. Accounts, Project Managers, Translators"
+                                               onKeyPress={this.handleKeyPress.bind(this)}
+                                               ref={(inputNewUSer) => this.inputNewUSer = inputNewUSer}/>
+                                    </div>
+                                </form>
+                            </div>
+                            <div className="row">
+                                <div className="ui form">
+                                    <div className="field">
+                                        <label>All Team Members</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="row">
+                                <div className="ui horizontal list team-settings">
+                                    {userlist}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="ui tab" data-tab="TeamSettings">
                             {/*Tab Content*/}
                             <form className="ui form">
                                 <div className="required field">
@@ -177,31 +202,7 @@ class ModifyTeam extends React.Component {
                             </form>
                         </div>
 
-                        <div className="ui tab" data-tab="TeamMembers">
-                            {/*Tab Content list member*/}
-                            <div className="row">
-                                <form className="ui form">
-                                    <div className="required field">
-                                        <label>Add new Team Member</label>
-                                        <input type="text" name="Project Name" placeholder="es. Accounts, Project Managers, Translators"
-                                               onKeyPress={this.handleKeyPress.bind(this)}
-                                               ref={(inputNewUSer) => this.inputNewUSer = inputNewUSer}/>
-                                    </div>
-                                </form>
-                            </div>
-                            <div className="row">
-                                <div className="ui form">
-                                    <div className="field">
-                                        <label>All Team Members</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="row">
-                                <div className="ui horizontal list team-settings">
-                                    {userlist}
-                                </div>
-                            </div>
-                        </div>
+                        
                     </div>
                 </div>
             </div>

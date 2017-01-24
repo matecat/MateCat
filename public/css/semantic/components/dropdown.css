@@ -152,7 +152,7 @@
 ---------------*/
 
 .ui.dropdown .menu > .header {
-  margin: 1rem 0rem 0.75rem;
+  margin: 1rem 0rem; /*in: 1rem 0rem 0.75rem;*/
   padding: 0em 1.14285714rem;
   color: rgba(0, 0, 0, 0.85);
   font-size: 0.78571429em;
@@ -431,11 +431,12 @@ select.ui.dropdown {
 @media only screen and (min-width: 768px) {
   .ui.selection.dropdown .menu {
     max-height: 10.68571429rem;
-  }
+  }.ui.dropdown .menu > .header
 }
 @media only screen and (min-width: 992px) {
   .ui.selection.dropdown .menu {
-    max-height: 16.02857143rem;
+    min-height: 17.0287143rem;.ui.dropdown .menu > .header
+    max-height: 19.02857143rem;
   }
 }
 @media only screen and (min-width: 1920px) {
