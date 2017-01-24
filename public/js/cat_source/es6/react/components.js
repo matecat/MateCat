@@ -51,5 +51,6 @@ window.RegisterModal = require('./modals/RegisterModal').default;
 window.CreateTeamModal = require('./modals/CreateTeam').default;
 window.ModifyTeamModal = require('./modals/ModifyTeam').default;
 window.ChangeProjectTeamModal = require('./modals/ChangeProjectTeam').default;
+window.AssignToTranslator = require('./modals/AssignToTranslator').default;
 
 

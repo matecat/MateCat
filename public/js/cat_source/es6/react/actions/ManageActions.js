@@ -126,6 +126,14 @@ let ManageActions = {
         });
     },
 
+    openAssignToTranslator: function (project, job) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.OPEN_ASSIGN_TO_TRANSLATOR_MODAL,
+            project: project,
+            job: job
+        });
+    },
+
     renderTeams: function (teams) {
         AppDispatcher.dispatch({
             actionType: ManageConstants.RENDER_TEAMS,

@@ -123,6 +123,10 @@ class JobContainer extends React.Component {
         this.props.downloadTranslationFn(this.props.project.toJS(), this.props.job.toJS());
     }
 
+    openAssignToTranslatorModal() {
+        ManageActions.openAssignToTranslator(this.props.project, this.props.job);
+    }
+
 
     getJobMenu(splitUrl) {
         let reviseUrl = this.getReviseUrl();
@@ -325,16 +329,19 @@ class JobContainer extends React.Component {
                             <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
                         </div>
                     </div>
-                    {/*<div className="col">
-                        <div className="due-to">
-                            <a href="#"><span id="due-date">12 Jan 2016</span><span id="due-hour">, 14.00</span></a>
+                    <div className="col">
+                        <div className="due-to"
+                        onClick={this.openAssignToTranslatorModal.bind(this)}>
+                            {/*<a href="#"><span id="due-date">12 Jan 2016</span><span id="due-hour">, 14.00</span></a>*/}
+                            <a href="#"><span id="due-date">Choose delivery date</span></a>
                         </div>
                     </div>
                     <div className="col">
-                        <div className="translator-mail">
-                            <a href="#"><span id="translator-job">alessandro.cattelan@translated.net</span></a>
+                        <div className="translator-mail"
+                             onClick={this.openAssignToTranslatorModal.bind(this)}>
+                            <a href="#"><span id="translator-job">Assign to a translator</span></a>
                         </div>
-                    </div>*/}
+                    </div>
                     {/*<div className="col">*/}
                         {/*<div className="action-modified">*/}
                             {/*{modifyDate}*/}

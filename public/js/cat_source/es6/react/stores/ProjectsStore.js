@@ -175,6 +175,9 @@ AppDispatcher.register(function(action) {
         case ManageConstants.OPEN_CREATE_TEAM_MODAL:
             ProjectsStore.emitChange(action.actionType);
             break;
+            case ManageConstants.OPEN_ASSIGN_TO_TRANSLATOR_MODAL:
+            ProjectsStore.emitChange(action.actionType, action.project, action.job);
+            break;
         case ManageConstants.OPEN_MODIFY_TEAM_MODAL:
             ProjectsStore.emitChange(action.actionType, action.team);
             break;
