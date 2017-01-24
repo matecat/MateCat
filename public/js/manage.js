@@ -368,25 +368,25 @@ UI = {
                 },{
                     id: 5,
                     userMail: 'lillian.lambert@translated.net',
-                    userFullName: 'Lillian	Lambert',
+                    userFullName: 'LillianLambert',
                     userShortName: 'LL'
 
                 },{
                     id: 6,
                     userMail: 'joe.watson@translated.net',
-                    userFullName: 'Joe	Watson',
+                    userFullName: 'Joe Watson',
                     userShortName: 'JW'
 
                 },{
                     id: 7,
                     userMail: 'rachel.sharp@translated.net',
-                    userFullName: 'Rachel	Sharp',
+                    userFullName: 'Rachel Sharp',
                     userShortName: 'RS'
 
                 },{
                     id: 8,
                     userMail: 'dan.marshall@translated.net',
-                    userFullName: 'Dan	Marshall',
+                    userFullName: 'Dan Marshall',
                     userShortName: 'DM'
 
                 }]
@@ -403,19 +403,19 @@ UI = {
                 },{
                     id: 9,
                     userMail: 'vanessa.simpson@translated.net',
-                    userFullName: 'Vanessa	Simpson',
+                    userFullName: 'Vanessa Simpson',
                     userShortName: 'VS'
 
                 },{
                     id: 10,
                     userMail: 'dan.howard@translated.net',
-                    userFullName: 'Dan	Howard',
+                    userFullName: 'Dan Howard',
                     userShortName: 'DH'
 
                 },{
                     id: 11,
                     userMail: 'keith.kelly@translated.net',
-                    userFullName: 'Keith	Kelly',
+                    userFullName: 'Keith Kelly',
                     userShortName: 'KC'
 
                 }]

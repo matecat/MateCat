@@ -10,8 +10,8 @@ class SubHeader extends React.Component {
         let self = this;
         if (this.props.selectedTeam) {
 
-            $('.ui.dropdown.users-projects').dropdown('set selected', 2000);
-            $('.ui.dropdown.users-projects').dropdown({
+            $(this.dropdownUsers).dropdown('set selected', 2000);
+            $(this.dropdownUsers).dropdown({
                 onChange: function(value, text, $selectedItem) {
                     self.changeUser(value);
                 }
@@ -25,8 +25,10 @@ class SubHeader extends React.Component {
                 return true;
             }
         });
+        setTimeout(function () {
+            ManageActions.changeUser(selectedUser);
+        });
 
-        ManageActions.changeUser(selectedUser);
 
     }
 
@@ -61,7 +63,8 @@ class SubHeader extends React.Component {
                         <div className="input-field col top-8">
                             <div className="list-team">
                                 <span>
-                                    <div className="ui inline dropdown users-projects">
+                                    <div className="ui inline dropdown users-projects"
+                                         ref={(dropdownUsers) => this.dropdownUsers = dropdownUsers}>
                                         <div className="text">
                                             <a className=" btn-floating green assigned-member center-align">{config.userShortName}</a>
                                           My Projects

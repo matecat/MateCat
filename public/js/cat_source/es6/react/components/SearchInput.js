@@ -39,7 +39,7 @@ class SearchInput extends React.Component {
                                             ref={(input) => this.textInput = input}
                                             onChange={this.filterByName.bind(this)}
                                             onKeyUp={this.onKeyPressEvent.bind(this)}/>
-                                        <i className="icon-search prefix"></i>
+                                        <i className="icon-search prefix"/>
                                         {/*<i className="prefix close-x" style={{display: 'none'}}
                                            ref={(closeIcon) => this.closeIcon = closeIcon}
                                            onClick={this.closeSearch.bind(this)}/>*/}
