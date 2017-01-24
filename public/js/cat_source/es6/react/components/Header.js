@@ -97,14 +97,14 @@ class Header extends React.Component {
                         </a>
                     </div>
                     <div className="divider"></div>
-                    <div className="header">
+                    {/*<div className="header">
                         <div className="ui form">
                             <div className="field">
                                 <input type="text" name="Project Name" placeholder="Translated Team es." />
                             </div>
                         </div>
                     </div>
-                    <div className="divider"></div>
+                    <div className="divider"></div>*/}
                     <div className="scrolling menu">
                         {items}
                     </div>
