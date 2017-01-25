@@ -140,6 +140,10 @@ AppDispatcher.register(function(action) {
             ProjectsStore.updateAll(action.projects);
             ProjectsStore.emitChange(action.actionType, ProjectsStore.projects, Immutable.fromJS(action.team), action.hideSpinner);
             break;
+        case ManageConstants.RENDER_ALL_TEAMS_PROJECTS:
+            ProjectsStore.updateAll(action.projects);
+            ProjectsStore.emitChange(action.actionType, ProjectsStore.projects, Immutable.fromJS(action.teams), action.hideSpinner);
+            break;
         case ManageConstants.UPDATE_PROJECTS:
             ProjectsStore.updateAll(action.projects);
             ProjectsStore.emitChange(action.actionType, ProjectsStore.projects);

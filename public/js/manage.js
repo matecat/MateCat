@@ -117,7 +117,7 @@ UI = {
                 for( let i = 0; i < results.length; i++ ){
                     onDone(results[i][0]);
                 }
-                ManageActions.renderProjects(total_projects, true);
+                ManageActions.renderProjects(total_projects, self.selectedTeam,  true);
             });
 
         }
@@ -458,7 +458,13 @@ UI = {
     changeTeam: function (team) {
         let self = this;
         this.selectedTeam = team;
-        if (team.name === "My Workspace") {
+        if (team.name === "all") {
+            this.currentProjects = this.myProjects.concat(this.ebayProjects, this.mscProjects, this.translatedProjects);
+            setTimeout(function () {
+                ManageActions.renderAllTeamsProjects(self.currentProjects, self.teams);
+            });
+            return;
+        } else if (team.name === "My Workspace") {
             this.currentProjects = this.myProjects;
         } else if (team.name === "Ebay") {
             this.currentProjects = this.ebayProjects;
