@@ -10,7 +10,7 @@ class ChangeProjectTeam extends React.Component {
     }
 
     changeTeam() {
-        ManageActions.changeProjectTeam(this.props.currentTeam.get('name'), this.selectedTeam.toJS(), this.props.projectId);
+        ManageActions.changeProjectTeam(this.props.currentTeam.get('name'), this.selectedTeam.toJS(), this.props.project.get('id'));
         APP.ModalWindow.onCloseModal();
     }
 
@@ -77,7 +77,7 @@ class ChangeProjectTeam extends React.Component {
                     </div>
                     <div className="row">
                         <div className="project-referral">
-                             <h4>Project Name <span><a className="chip">ebay</a></span></h4> 
+                             <h4>{this.props.project.get('name')}<span><a className="chip">{this.props.currentTeam.get('name')}</a></span></h4>
                         </div>
                     </div>
                     <div className="ui form">

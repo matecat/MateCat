@@ -40,6 +40,8 @@ module.exports = function(grunt) {
         cssBase + 'sass/cattool.scss',
         cssBase + 'sass/speech2text.scss',
         cssBase + 'sass/notifications.scss',
+        cssBase + 'sass/commons/*.scss',
+        cssBase + 'sass/vendor/*',
         cssBase + '../holidays/*.css'
     ];
     var cssWatchFilesUploadPage = [
@@ -51,13 +53,10 @@ module.exports = function(grunt) {
     ];
 
 
-    var cssWatchMaterialize = [
-        cssBase + 'sass/materialize/*'
+    var cssWatchManage = [
+        cssBase + 'sass/commons/*'
     ];
 
-    var cssWatchSemantic = [
-        gruntDir + 'semantic/dist/semantic.css'
-    ];
 
 
 
@@ -238,7 +237,7 @@ module.exports = function(grunt) {
                     basePath + 'lib/lokijs.min.js',
                     basePath + 'lib/sprintf.min.js',
 					basePath + 'lib/jquery.powertip.min.js',
-                    cssBase  + 'semantic/semantic.min.js'
+                    gruntDir + 'semantic/dist/semantic.min.js'
                 ],
                 dest: buildPath + 'libs.js'
             },
@@ -307,23 +306,15 @@ module.exports = function(grunt) {
                     interrupt: true,
                     livereload : true
                 }
-            },
-            cssManage: {
-                files:  cssWatchMaterialize,
-                tasks: ['sass:distManage', 'replace'],
-                options: {
-                    interrupt: true,
-                    livereload : true
-                }
-            },
-            cssSemantic: {
-                files:  cssWatchSemantic,
-                tasks: ['sass:distSemantic'],
-                options: {
-                    interrupt: true,
-                    livereload : true
-                }
             }
+            // cssManage: {
+            //     files:  cssWatchManage,
+            //     tasks: ['sass:distManage', 'replace'],
+            //     options: {
+            //         interrupt: true,
+            //         livereload : true
+            //     }
+            // }
         },
         sass: {
             distCommon: {
@@ -362,7 +353,7 @@ module.exports = function(grunt) {
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
                 src: [
-                    cssBase + 'sass/materialize/manage.scss'
+                    cssBase + 'sass/index_manage.scss'
                 ],
                 dest: cssBase + 'build/manage-build.css'
             },
@@ -372,7 +363,7 @@ module.exports = function(grunt) {
                     includePaths: [ cssBase, gruntDir + 'semantic/dist/' ]
                 },
                 src: [
-                    cssBase + 'sass/semantic.scss'
+                    cssBase + 'sass/vendor/semantic/matecat_semantic.scss'
                 ],
                 dest: cssBase + 'build/semantic.css'
             }

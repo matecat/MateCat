@@ -23,12 +23,12 @@ class JobContainer extends React.Component {
      */
 
     getTranslationStatus() {
-        var stats = this.props.job.get('stats').toJS();
-        var t = 'approved';
-        var app = parseFloat(stats.APPROVED);
-        var tra = parseFloat(stats.TRANSLATED);
-        var dra = parseFloat(stats.DRAFT);
-        var rej = parseFloat(stats.REJECTED);
+        let stats = this.props.job.get('stats').toJS();
+        let t = 'approved';
+        let app = parseFloat(stats.APPROVED);
+        let tra = parseFloat(stats.TRANSLATED);
+        let dra = parseFloat(stats.DRAFT);
+        let rej = parseFloat(stats.REJECTED);
 
         if (tra) t = 'translated';
         if (dra) t = 'draft';
@@ -45,15 +45,15 @@ class JobContainer extends React.Component {
     }
 
     getTranslateUrl() {
-        var use_prefix = ( this.props.jobsLenght > 1 );
-        var chunk_id = this.props.job.get('id') + ( ( use_prefix ) ? '-' + this.props.index : '' ) ;
+        let use_prefix = ( this.props.jobsLenght > 1 );
+        let chunk_id = this.props.job.get('id') + ( ( use_prefix ) ? '-' + this.props.index : '' ) ;
         return '/translate/'+this.props.project.get('name')+'/'+ this.props.job.get('source') +'-'+this.props.job.get('target')+'/'+ chunk_id +'-'+ this.props.job.get('password')  ;
     }
 
     getReviseUrl() {
-        var use_prefix = ( this.props.jobsLenght > 1 );
-        var chunk_id = this.props.job.get('id') + ( ( use_prefix ) ? '-' + this.props.index : '' ) ;
-        var possibly_different_review_password = ( this.props.job.has('review_password') ?
+        let use_prefix = ( this.props.jobsLenght > 1 );
+        let chunk_id = this.props.job.get('id') + ( ( use_prefix ) ? '-' + this.props.index : '' ) ;
+        let possibly_different_review_password = ( this.props.job.has('review_password') ?
             this.props.job.get('review_password') :
             this.props.job.get('password')
         );
@@ -70,11 +70,11 @@ class JobContainer extends React.Component {
     }
 
     changePassword() {
-        var self = this;
+        let self = this;
         this.oldPassword = this.props.job.get('password');
         this.props.changeJobPasswordFn(this.props.job.toJS())
             .done(function (data) {
-                var notification = {
+                let notification = {
                     title: 'Change job password',
                     text: 'The password has been changed. <a class="undo-password">Undo</a>',
                     type: 'warning',
@@ -82,7 +82,7 @@ class JobContainer extends React.Component {
                     allowHtml: true,
                     timer: 10000
                 };
-                var boxUndo = APP.addNotification(notification);
+                let boxUndo = APP.addNotification(notification);
                 ManageActions.changeJobPassword(self.props.project, self.props.job, data.password, data.undo);
                 $('.undo-password').off('click');
                 $('.undo-password').on('click', function () {
@@ -123,24 +123,28 @@ class JobContainer extends React.Component {
         this.props.downloadTranslationFn(this.props.project.toJS(), this.props.job.toJS());
     }
 
+    openAssignToTranslatorModal() {
+        ManageActions.openAssignToTranslator(this.props.project, this.props.job);
+    }
+
 
     getJobMenu(splitUrl) {
-        var reviseUrl = this.getReviseUrl();
-        var editLogUrl = this.getEditingLogUrl();
-        var qaReportUrl = this.getQAReport();
-        var jobTMXUrl = '/TMX/'+ this.props.job.get('id') + '/' + this.props.job.get('password');
-        var exportXliffUrl = '/SDLXLIFF/'+ this.props.job.get('id') + '/' + this.props.job.get('password') +
+        let reviseUrl = this.getReviseUrl();
+        let editLogUrl = this.getEditingLogUrl();
+        let qaReportUrl = this.getQAReport();
+        let jobTMXUrl = '/TMX/'+ this.props.job.get('id') + '/' + this.props.job.get('password');
+        let exportXliffUrl = '/SDLXLIFF/'+ this.props.job.get('id') + '/' + this.props.job.get('password') +
             '/' + this.props.project.get('name') + '.zip';
 
-        var originalUrl = '/?action=downloadOriginal&id_job=' + this.props.job.get('id') +' &password=' + this.props.job.get('password') + '&download_type=all';
+        let originalUrl = '/?action=downloadOriginal&id_job=' + this.props.job.get('id') +' &password=' + this.props.job.get('password') + '&download_type=all';
 
-        var jobStatus = this.getTranslationStatus();
-        var downloadButton = (jobStatus == 'translated' || jobStatus == 'approved') ?
+        let jobStatus = this.getTranslationStatus();
+        let downloadButton = (jobStatus == 'translated' || jobStatus == 'approved') ?
             <div className="item" onClick={this.downloadTranslation}><a >Download</a></div> : <div className="item" onClick={this.downloadTranslation}><a ><i className="icon-eye"/>Preview</a></div>;
 
-        var splitButton = (!this.props.isChunk) ? <div className="item"><a target="_blank" href={splitUrl}><i className="icon-expand"/> Split</a></div> : '';
+        let splitButton = (!this.props.isChunk) ? <div className="item"><a target="_blank" href={splitUrl}><i className="icon-expand"/> Split</a></div> : '';
 
-        var menuHtml = <div className="menu">
+        let menuHtml = <div className="menu">
             <div className="item" onClick={this.changePassword.bind(this)}><a ><i className="icon-refresh"/> Change Password</a></div>
                 {splitButton}
             <div className="item"><a target="_blank" href={reviseUrl}><i className="icon-edit"/> Revise</a></div>
@@ -221,11 +225,11 @@ class JobContainer extends React.Component {
 
     getTMIcon() {
         if (JSON.parse(this.props.job.get('private_tm_key')).length) {
-            var keys = JSON.parse(this.props.job.get('private_tm_key'));
-            var tooltipText = '';
+            let keys = JSON.parse(this.props.job.get('private_tm_key'));
+            let tooltipText = '';
             keys.forEach(function (key, i) {
-                var descript = (key.name) ? key.name : "Private TM and Glossary";
-                var item = '<div style="text-align: left">DESCRIPTION: <span style="font-weight: bold">' + descript + '</span> KEY: ' + key.key + '</div>';
+                let descript = (key.name) ? key.name : "Private TM and Glossary";
+                let item = '<div style="text-align: left">DESCRIPTION: <span style="font-weight: bold">' + descript + '</span> KEY: ' + key.key + '</div>';
                 tooltipText =  tooltipText + item;
             });
             return <li>
@@ -241,10 +245,10 @@ class JobContainer extends React.Component {
     }
 
     getCommentsIcon() {
-        var icon = '';
-        var openThreads = this.props.job.get("open_threads_count");
+        let icon = '';
+        let openThreads = this.props.job.get("open_threads_count");
         if (openThreads > 0) {
-            var tooltipText = "";
+            let tooltipText = "";
             if (this.props.job.get("open_threads_count") === 1) {
                 tooltipText = 'There is an open thread';
             } else {
@@ -277,7 +281,7 @@ class JobContainer extends React.Component {
 
     getModifyDate() {
         if ( this.props.lastAction ) {
-            var date = new Date(this.props.lastAction.event_date);
+            let date = new Date(this.props.lastAction.event_date);
             return <div><span>Modified: </span> <a target="_blank" href={this.props.activityLogUrl}> {date.toDateString()}</a></div>;
         } else {
             return '';
@@ -285,19 +289,19 @@ class JobContainer extends React.Component {
     }
 
     render () {
-        var translateUrl = this.getTranslateUrl();
-        var outsourceUrl = this.getOutsourceUrl();
+        let translateUrl = this.getTranslateUrl();
+        let outsourceUrl = this.getOutsourceUrl();
 
-        var analysisUrl = this.getAnalysisUrl();
-        var splitUrl = this.getSplitUrl();
-        var mergeUrl = this.getMergeUrl();
-        var splitMergeButton = this.getSplitOrMergeButton(splitUrl, mergeUrl);
-        // var modifyDate = this.getModifyDate();
+        let analysisUrl = this.getAnalysisUrl();
+        let splitUrl = this.getSplitUrl();
+        let mergeUrl = this.getMergeUrl();
+        let splitMergeButton = this.getSplitOrMergeButton(splitUrl, mergeUrl);
+        // let modifyDate = this.getModifyDate();
 
-        var jobMenu = this.getJobMenu(splitUrl, mergeUrl);
-        var tmIcon = this.getTMIcon();
-        var commentsIcon = this.getCommentsIcon();
-        var idJobLabel = ( !this.props.isChunk ) ? this.props.job.get('id') : this.props.job.get('id') + '-' + this.props.index;
+        let jobMenu = this.getJobMenu(splitUrl, mergeUrl);
+        let tmIcon = this.getTMIcon();
+        let commentsIcon = this.getCommentsIcon();
+        let idJobLabel = ( !this.props.isChunk ) ? this.props.job.get('id') : this.props.job.get('id') + '-' + this.props.index;
 
         return <div className="card job z-depth-1">
             <div className="body-job">
@@ -326,13 +330,16 @@ class JobContainer extends React.Component {
                         </div>
                     </div>
                     <div className="col">
-                        <div className="due-to">
-                            <a href="#"><span id="due-date">12 Jan 2016</span><span id="due-hour">, 14.00</span></a>
+                        <div className="due-to"
+                        onClick={this.openAssignToTranslatorModal.bind(this)}>
+                            {/*<a href="#"><span id="due-date">12 Jan 2016</span><span id="due-hour">, 14.00</span></a>*/}
+                            <a href="#"><span id="due-date">Choose delivery date</span></a>
                         </div>
                     </div>
                     <div className="col">
-                        <div className="translator-mail">
-                            <a href="#"><span id="translator-job">alessandro.cattelan@translated.net</span></a>
+                        <div className="translator-mail"
+                             onClick={this.openAssignToTranslatorModal.bind(this)}>
+                            <a href="#"><span id="translator-job">Assign to a translator</span></a>
                         </div>
                     </div>
                     {/*<div className="col">*/}

@@ -19,6 +19,15 @@ let ManageActions = {
         });
     },
 
+    renderAllTeamsProjects: function (projects, teams, hideSpinner) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.RENDER_ALL_TEAMS_PROJECTS,
+            projects: projects,
+            teams: teams,
+            hideSpinner: hideSpinner,
+        });
+    },
+
     updateProjects: function (projects) {
         AppDispatcher.dispatch({
             actionType: ManageConstants.UPDATE_PROJECTS,
@@ -123,6 +132,14 @@ let ManageActions = {
             actionType: ManageConstants.OPEN_CHANGE_TEAM_MODAL,
             team: team,
             projectId: projectId
+        });
+    },
+
+    openAssignToTranslator: function (project, job) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.OPEN_ASSIGN_TO_TRANSLATOR_MODAL,
+            project: project,
+            job: job
         });
     },
 

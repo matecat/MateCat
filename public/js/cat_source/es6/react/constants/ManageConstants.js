@@ -3,6 +3,7 @@ var keyMirror = require('keymirror');
 
 module.exports = keyMirror({
     RENDER_PROJECTS: null,
+    RENDER_ALL_TEAMS_PROJECTS: null,
     UPDATE_PROJECTS: null,
     RENDER_MORE_PROJECTS: null,
     OPEN_JOB_SETTINGS: null,
@@ -16,6 +17,7 @@ module.exports = keyMirror({
     OPEN_CREATE_TEAM_MODAL: null,
     OPEN_MODIFY_TEAM_MODAL: null,
     OPEN_CHANGE_TEAM_MODAL: null,
+    OPEN_ASSIGN_TO_TRANSLATOR_MODAL: null,
     //TEAMS
     RENDER_TEAMS: null,
     REMOVE_TEAM: null,

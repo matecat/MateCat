@@ -34,7 +34,7 @@ class SubHeader extends React.Component {
 
     getUserFilter() {
         let result = '';
-        if (this.props.selectedTeam && this.props.selectedTeam.get('users')) {
+        if (this.props.selectedTeam && this.props.selectedTeam.name !== 'all' && this.props.selectedTeam.get('users')) {
 
             let users = this.props.selectedTeam.get('users').map((user, i) => (
                 <div className="item" data-value={user.get('id')}

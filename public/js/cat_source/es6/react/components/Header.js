@@ -11,6 +11,7 @@ class Header extends React.Component {
         this.renderTeams = this.renderTeams.bind(this);
         this.openModifyTeam = this.openModifyTeam.bind(this);
     }
+
     componentDidMount () {
         $('.team-dropdown').dropdown();
         TeamsStore.addListener(ManageConstants.RENDER_TEAMS, this.renderTeams);
@@ -32,17 +33,23 @@ class Header extends React.Component {
                         self.changeTeam(value);
                     }
                 });
-            } else {
-                setTimeout(function () {
-                    dropdownTeams.dropdown('set selected', "" + self.state.selectedTeam.get("id"));
-                }, 100);
             }
+            // else {
+            //     setTimeout(function () {
+            //         dropdownTeams.dropdown('set selected', "" + self.state.selectedTeam.get("id"));
+            //     }, 100);
+            // }
         }
-
-
     }
 
     changeTeam(value) {
+        if (value === 'all') {
+            ManageActions.changeTeam({name: value});
+            this.setState({
+                selectedTeam: {name: value, id: value}
+            });
+            return;
+        }
         let selectedTeam = this.state.teams.find(function (team) {
             if (team.get("id") === parseInt(value)) {
                 return true;
@@ -90,9 +97,9 @@ class Header extends React.Component {
                 <i className="dropdown icon"/>
                 <div className="default text">Choose Team</div>
                 <div className="menu">
-                    <div className="item header">Add New Team
-                        <a className="team-filter button show"
-                           onClick={this.openCreateTeams.bind(this)}>
+
+                    <div className="header" style={{cursor: 'pointer'}} onClick={this.openCreateTeams.bind(this)}>New Team
+                        <a className="team-filter button show">
                             <i className="icon-plus3 right"/>
                         </a>
                     </div>
@@ -109,6 +116,10 @@ class Header extends React.Component {
                     </div>
                     <div className="divider"></div>*/}
                     <div className="scrolling menu">
+                        <div className="item" data-value='all'
+                             data-text='All teams'>
+                            All teams
+                        </div>
                         {items}
                     </div>
                 </div>

@@ -12,7 +12,9 @@ class ProjectsContainer extends React.Component {
             more_projects: true,
             reloading_projects: false,
             user: null,
-            team: null
+            team: null,
+            show_all_teams_projects: false,
+            teams: []
         };
         this.renderProjects = this.renderProjects.bind(this);
         this.updateProjects = this.updateProjects.bind(this);
@@ -33,7 +35,25 @@ class ProjectsContainer extends React.Component {
             more_projects: more_projects,
             reloading_projects: false,
             user: null,
-            team: teamState
+            team: teamState,
+            show_all_teams_projects: false,
+            teams: []
+        });
+    }
+
+    renderAllTeamsProjects(projects, teams, hideSpinner) {
+        let more_projects = true;
+        if (hideSpinner) {
+            more_projects = this.state.more_projects
+        }
+        this.setState({
+            projects: projects,
+            more_projects: more_projects,
+            reloading_projects: false,
+            user: null,
+            team: null,
+            show_all_teams_projects: true,
+            teams: teams
         });
     }
 
@@ -63,6 +83,7 @@ class ProjectsContainer extends React.Component {
 
     componentDidMount() {
         ProjectsStore.addListener(ManageConstants.RENDER_PROJECTS, this.renderProjects);
+        ProjectsStore.addListener(ManageConstants.RENDER_ALL_TEAMS_PROJECTS, this.renderAllTeamsProjects);
         ProjectsStore.addListener(ManageConstants.UPDATE_PROJECTS, this.updateProjects);
         ProjectsStore.addListener(ManageConstants.NO_MORE_PROJECTS, this.hideSpinner);
         ProjectsStore.addListener(ManageConstants.SHOW_RELOAD_SPINNER, this.showProjectsReloadSpinner);
@@ -71,6 +92,7 @@ class ProjectsContainer extends React.Component {
 
     componentWillUnmount() {
         ProjectsStore.removeListener(ManageConstants.RENDER_PROJECTS, this.renderProjects);
+        ProjectsStore.removeListener(ManageConstants.RENDER_ALL_TEAMS_PROJECTS, this.renderAllTeamsProjects);
         ProjectsStore.removeListener(ManageConstants.UPDATE_PROJECTS, this.updateProjects);
         ProjectsStore.removeListener(ManageConstants.NO_MORE_PROJECTS, this.hideSpinner);
         ProjectsStore.removeListener(ManageConstants.SHOW_RELOAD_SPINNER, this.showProjectsReloadSpinner);

@@ -22,6 +22,7 @@ UI = {
         ProjectsStore.addListener(ManageConstants.OPEN_CREATE_TEAM_MODAL, this.openCreateTeamModal);
         ProjectsStore.addListener(ManageConstants.OPEN_MODIFY_TEAM_MODAL, this.openModifyTeamModal);
         ProjectsStore.addListener(ManageConstants.OPEN_CHANGE_TEAM_MODAL, this.openChangeProjectTeam);
+        ProjectsStore.addListener(ManageConstants.OPEN_ASSIGN_TO_TRANSLATOR_MODAL, this.openAssignToTranslator);
 
         ProjectsStore.addListener(ManageConstants.CHANGE_PROJECT_ASSIGNEE, this.changeProjectAssignee);
         ProjectsStore.addListener(ManageConstants.CHANGE_PROJECT_TEAM, this.changeProjectTeam);
@@ -116,7 +117,7 @@ UI = {
                 for( let i = 0; i < results.length; i++ ){
                     onDone(results[i][0]);
                 }
-                ManageActions.renderProjects(total_projects, true);
+                ManageActions.renderProjects(total_projects, self.selectedTeam,  true);
             });
 
         }
@@ -137,6 +138,9 @@ UI = {
     },
 
     renderMoreProjects: function () {
+        if (this.selectedTeam.name !== 'My Workspace') {
+            return;
+        }
         UI.Search.currentPage = UI.Search.currentPage + 1;
         this.getProjects().done(function (response) {
             let projects = response.data;
@@ -310,14 +314,23 @@ UI = {
         APP.ModalWindow.showModalComponent(ModifyTeamModal, props, "Modify "+ team.name + " Team");
     },
 
-    openChangeProjectTeam: function (team, projectId, teams) {
+    openChangeProjectTeam: function (team, project, teams) {
 
         let props = {
             currentTeam: team,
-            projectId: projectId,
+            project: project,
             teams: teams
         };
         APP.ModalWindow.showModalComponent(ChangeProjectTeamModal, props, "Change team");
+    },
+
+    openAssignToTranslator: function (project, job) {
+        let props = {
+            project: project,
+            job: job
+        };
+        APP.ModalWindow.showModalComponent(AssignToTranslator, props, "Assign to a translator");
+
     },
 
     getAllTeams: function () {
@@ -445,7 +458,13 @@ UI = {
     changeTeam: function (team) {
         let self = this;
         this.selectedTeam = team;
-        if (team.name === "My Workspace") {
+        if (team.name === "all") {
+            this.currentProjects = this.myProjects.concat(this.ebayProjects, this.mscProjects, this.translatedProjects);
+            setTimeout(function () {
+                ManageActions.renderAllTeamsProjects(self.currentProjects, self.teams);
+            });
+            return;
+        } else if (team.name === "My Workspace") {
             this.currentProjects = this.myProjects;
         } else if (team.name === "Ebay") {
             this.currentProjects = this.ebayProjects;
