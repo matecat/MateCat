@@ -98,9 +98,9 @@ i.close-x:before {
 		    line-height: 1.55rem;
 		    padding-top: 2px;
 		    margin-top: 2px;
-			//@media #{$small-and-down} {
-			//	padding-left: 15px;
-			//}
+			@media #{$small-and-down} {
+				padding-left: 15px;
+			}
 			#id-project {
 				background-color: #929292;
     			padding: 0 15px;
@@ -143,7 +143,7 @@ i.close-x:before {
 					// transition: all 0.3s;
 				}
 				input[type=text]:focus {
-					//border-bottom: 1px solid $secondary-color;
+					border-bottom: 1px solid $secondary-color;
 					box-shadow: 0 1px 0 0 #09beec;
 				}
 				input[type=text]:disabled {
@@ -158,9 +158,9 @@ i.close-x:before {
 			// background-color: yellow;
 			margin: 0;
 			padding-right: 22px;
-			//@media #{$small-and-down} {
-			//	padding-right: 15px;
-			//}
+			@media #{$small-and-down} {
+				padding-right: 15px;
+			}
 			li {
 				float: left;
 				margin-left: 8px;
@@ -243,7 +243,7 @@ a:hover {
 	.split {
 		background-color: #FFFFFF !important;
 		color: #6d6d6d;
-		//border: 1px solid $secondary-color;
+		border: 1px solid $secondary-color;
 		line-height: 2rem;
 		height: 30px;
 		font-weight: bold;
@@ -514,7 +514,7 @@ a:hover {
 							position: absolute;
 							width: 6px;
 							height: 6px;
-							//background-color: $secondary-color;
+							background-color: $secondary-color;
 							z-index: 100;
 							border-radius: 12px;
 							top: 2px;
@@ -736,11 +736,11 @@ li.target-lang {
 }
 
 .project-activity-icon li a i {
-	vertical-align: middle;
-	display: block;
-	text-align: center;
-	float: left;
-	position: relative;
+vertical-align: middle;
+display: block;
+text-align: center;
+float: left;
+position: relative;
 }
 
 .dropdown-content .icon-trash-o:before {
