@@ -3,7 +3,7 @@ var keyMirror = require('keymirror');
 
 module.exports = keyMirror({
     RENDER_PROJECTS: null,
-    RENDER_ALL_TEAMS_PROJECTS: null,
+    RENDER_ALL_ORGANIZATION_PROJECTS: null,
     UPDATE_PROJECTS: null,
     RENDER_MORE_PROJECTS: null,
     OPEN_JOB_SETTINGS: null,
@@ -12,18 +12,18 @@ module.exports = keyMirror({
     CHANGE_JOB_PASS: null,
     OPEN_JOB_TM_PANEL: null,
     NO_MORE_PROJECTS: null,
-    CHANGE_PROJECT_TEAM: null,
+    CHANGE_PROJECT_WORKSPACE: null,
     //MODALS
-    OPEN_CREATE_TEAM_MODAL: null,
-    OPEN_MODIFY_TEAM_MODAL: null,
-    OPEN_CHANGE_TEAM_MODAL: null,
+    OPEN_CREATE_ORGANIZATION_MODAL: null,
+    OPEN_MODIFY_ORGANIZATION_MODAL: null,
+    OPEN_CHANGE_ORGANIZATION_MODAL: null,
     OPEN_ASSIGN_TO_TRANSLATOR_MODAL: null,
-    //TEAMS
-    RENDER_TEAMS: null,
-    REMOVE_TEAM: null,
-    CREATE_TEAM: null,
-    CHANGE_TEAM: null,
-    ADD_TEAM: null,
+    //ORGANIZATIONS
+    RENDER_ORGANIZATIONS: null,
+    REMOVE_ORGANIZATION: null,
+    CREATE_ORGANIZATION: null,
+    CHANGE_ORGANIZATION: null,
+    ADD_ORGANIZATION: null,
     CHANGE_USER: null,
     CHANGE_PROJECT_ASSIGNEE: null
 });

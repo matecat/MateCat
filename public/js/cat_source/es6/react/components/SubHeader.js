@@ -8,7 +8,7 @@ class SubHeader extends React.Component {
 
     componentDidUpdate() {
         let self = this;
-        if (this.props.selectedTeam) {
+        if (this.props.selectedOrganization) {
 
             $(this.dropdownUsers).dropdown('set selected', 2000);
             $(this.dropdownUsers).dropdown({
@@ -20,7 +20,7 @@ class SubHeader extends React.Component {
     }
 
     changeUser(value) {
-        let selectedUser = this.props.selectedTeam.get('users').find(function (user) {
+        let selectedUser = this.props.selectedOrganization.get('users').find(function (user) {
             if (user.get("id") === parseInt(value)) {
                 return true;
             }
@@ -34,11 +34,11 @@ class SubHeader extends React.Component {
 
     getUserFilter() {
         let result = '';
-        if (this.props.selectedTeam && this.props.selectedTeam.name !== 'all' && this.props.selectedTeam.get('users')) {
+        if (this.props.selectedOrganization && this.props.selectedOrganization.name !== 'all' && this.props.selectedOrganization.get('users')) {
 
-            let users = this.props.selectedTeam.get('users').map((user, i) => (
+            let users = this.props.selectedOrganization.get('users').map((user, i) => (
                 <div className="item" data-value={user.get('id')}
-                     key={'team' + user.get('userShortName') + user.get('id')}>
+                     key={'organization' + user.get('userShortName') + user.get('id')}>
                     <a className="ui avatar image initials green">{user.get('userShortName')}</a>
                     {/*<img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg"/>*/}
                     {(user.get('id') === 0)? 'My Projects' : user.get('userFullName')}
@@ -47,7 +47,7 @@ class SubHeader extends React.Component {
             ));
 
             let item = <div className="item" data-value="2000"
-                            key={'team' + config.userShortName + 2000}>
+                            key={'organization' + config.userShortName + 2000}>
                 <a className="ui avatar image initials green">ALL</a>
                 {/*<img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg"/>*/}
                 All Members
@@ -61,7 +61,7 @@ class SubHeader extends React.Component {
                             </div>
                         </div>
                         <div className="input-field col top-8">
-                            <div className="list-team">
+                            <div className="list-organization">
                                 <span>
                                     <div className="ui inline dropdown users-projects"
                                          ref={(dropdownUsers) => this.dropdownUsers = dropdownUsers}>

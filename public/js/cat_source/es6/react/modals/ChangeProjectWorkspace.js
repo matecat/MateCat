@@ -1,5 +1,5 @@
 
-class ChangeProjectTeam extends React.Component {
+class ChangeProjectWorkspace extends React.Component {
 
 
     constructor(props) {
@@ -9,25 +9,25 @@ class ChangeProjectTeam extends React.Component {
         };
     }
 
-    changeTeam() {
-        ManageActions.changeProjectTeam(this.props.currentTeam.get('name'), this.selectedTeam.toJS(), this.props.project.get('id'));
+    changeWorkspace() {
+        ManageActions.changeProjectWorkspace(this.props.currentWorkspace.get('name'), this.selectedWorkspace.toJS(), this.props.project.get('id'));
         APP.ModalWindow.onCloseModal();
     }
 
     componentDidMount () {
         let self = this;
-        $(this.dropdownTeams).dropdown('set selected', ''+ this.props.currentTeam.get('id'));
-        $(this.dropdownTeams).dropdown({
+        $(this.dropdownWorkspaces).dropdown('set selected', ''+ this.props.currentWorkspace.get('id'));
+        $(this.dropdownWorkspaces).dropdown({
             onChange: function(value, text, $selectedItem) {
-                self.changeSelectedTeam(value);
+                self.changeSelectedWorkspace(value);
             }
         });
     }
 
-    changeSelectedTeam(value) {
-        if (this.props.currentTeam.get('id') !== parseInt(value)) {
-            this.selectedTeam = this.props.teams.find(function (team) {
-                if (team.get('id') === parseInt(value)) {
+    changeSelectedWorkspace(value) {
+        if (this.props.currentWorkspace.get('id') !== parseInt(value)) {
+            this.selectedWorkspace = this.props.workspaces.find(function (workspace) {
+                if (workspace.get('id') === parseInt(value)) {
                     return true;
                 }
             });
@@ -41,21 +41,21 @@ class ChangeProjectTeam extends React.Component {
         }
     }
 
-    getTeamsSelect() {
+    getWorkspacesSelect() {
         let result = '';
-        if (this.props.teams.size > 0) {
-            let items = this.props.teams.map((team, i) => (
-                <div className="item" data-value={team.get('id')}
-                     data-text={team.get('name')}
-                     key={'team' + team.get('name') + team.get('id')}>
-                    {team.get('name')}
+        if (this.props.workspaces.size > 0) {
+            let items = this.props.workspaces.map((workspace, i) => (
+                <div className="item" data-value={workspace.get('id')}
+                     data-text={workspace.get('name')}
+                     key={'workspace' + workspace.get('name') + workspace.get('id')}>
+                    {workspace.get('name')}
                 </div>
             ));
-            result = <div className="ui dropdown selection fluid team-dropdown top-5"
-                          ref={(dropdownTeams) => this.dropdownTeams = dropdownTeams}>
+            result = <div className="ui dropdown selection fluid workspace-dropdown top-5"
+                          ref={(dropdownWorkspaces) => this.dropdownWorkspaces = dropdownWorkspaces}>
                 <input type="hidden" name="gender" />
                 <i className="dropdown icon"/>
-                <div className="default text">Choose Team</div>
+                <div className="default text">Choose Workspace</div>
                 <div className="menu">
                     <div className="scrolling menu">
                         {items}
@@ -67,9 +67,9 @@ class ChangeProjectTeam extends React.Component {
     }
 
     render() {
-        let teamsSelect = this.getTeamsSelect();
+        let workspacesSelect = this.getWorkspacesSelect();
         let buttonClass =  (this.state.buttonEnabled)? '' : 'disabled';
-        return <div className="change-team-modal" style={{minHeight: '300px'}}>
+        return <div className="change-workspace-modal" style={{minHeight: '300px'}}>
                     <div className="ui form">
                         <div className="field">
                             <label>Move this project</label>
@@ -77,26 +77,26 @@ class ChangeProjectTeam extends React.Component {
                     </div>
                     <div className="row">
                         <div className="project-referral">
-                             <h4>{this.props.project.get('name')}<span><a className="chip">{this.props.currentTeam.get('name')}</a></span></h4>
+                             <h4>{this.props.project.get('name')}<span><a className="chip">{this.props.currentWorkspace.get('name')}</a></span></h4>
                         </div>
                     </div>
                     <div className="ui form">
                         <div className="field">
-                            <label>into another team</label>
+                            <label>into another workspace</label>
                         </div>
                     </div>
                     <div className="container-fluid">
                         <div className="row">
                             <div className="col m12">
-                                {teamsSelect}
+                                {workspacesSelect}
                             </div>
                         </div>
                     </div>
                     <div className="matecat-modal-footer">
                         <div className="actions">
                             <div className={"ui positive right labeled icon button " + buttonClass}
-                                 onClick={this.changeTeam.bind(this)}>
-                                Yes, Change Team
+                                 onClick={this.changeWorkspace.bind(this)}>
+                                Yes, Change Workspace
                                 <i className="checkmark icon"/>
                             </div>
                         </div>
@@ -106,4 +106,4 @@ class ChangeProjectTeam extends React.Component {
 }
 
 
-export default ChangeProjectTeam ;
+export default ChangeProjectWorkspace ;

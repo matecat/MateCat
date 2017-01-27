@@ -32,7 +32,7 @@ window.NotificationBox = require('./components/notificationsComponent/Notificati
 window.ManageConstants = require('./constants/ManageConstants');
 window.ManageActions = require('./actions/ManageActions');
 window.ProjectsStore = require('./stores/ProjectsStore');
-window.TeamsStore = require('./stores/TeamsStore');
+window.OrganizationsStore = require('./stores/OrganizationsStore');
 window.ProjectsContainer = require('./components/projects/ProjectsContainer').default;
 
 window.Header = require("./components/Header").default;
@@ -48,9 +48,9 @@ window.LoginModal = require('./modals/LoginModal').default;
 window.ForgotPasswordModal = require('./modals/ForgotPasswordModal').default;
 window.RegisterModal = require('./modals/RegisterModal').default;
 
-window.CreateTeamModal = require('./modals/CreateTeam').default;
-window.ModifyTeamModal = require('./modals/ModifyTeam').default;
-window.ChangeProjectTeamModal = require('./modals/ChangeProjectTeam').default;
+window.CreateTeamModal = require('./modals/CreateOrganization').default;
+window.ModifyTeamModal = require('./modals/ModifyOrganization').default;
+window.ChangeProjectTeamModal = require('./modals/ChangeProjectWorkspace').default;
 window.AssignToTranslator = require('./modals/AssignToTranslator').default;
 
 

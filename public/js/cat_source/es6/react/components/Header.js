@@ -5,100 +5,100 @@ class Header extends React.Component {
     constructor (props) {
         super(props);
         this.state = {
-            teams: [],
-            selectedTeam : null
+            organizations: [],
+            selectedOrganization : null
         };
-        this.renderTeams = this.renderTeams.bind(this);
-        this.openModifyTeam = this.openModifyTeam.bind(this);
+        this.renderOrganizations = this.renderOrganizations.bind(this);
+        this.openModifyOrganization = this.openModifyOrganization.bind(this);
     }
 
     componentDidMount () {
-        $('.team-dropdown').dropdown();
-        TeamsStore.addListener(ManageConstants.RENDER_TEAMS, this.renderTeams);
+        $('.organization-dropdown').dropdown();
+        OrganizationsStore.addListener(ManageConstants.RENDER_ORGANIZATIONS, this.renderOrganizations);
     }
 
     componentWillUnmount() {
-        TeamsStore.removeListener(ManageConstants.RENDER_TEAMS, this.renderTeams);
+        OrganizationsStore.removeListener(ManageConstants.RENDER_ORGANIZATIONS, this.renderOrganizations);
     }
 
     componentDidUpdate() {
         let self = this;
 
-        if (this.state.teams.size > 0){
-            let dropdownTeams = $('.team-dropdown');
-            if (!this.state.selectedTeam) {
-                dropdownTeams.dropdown('set selected', "0");
-                dropdownTeams.dropdown({
+        if (this.state.organizations.size > 0){
+            let dropdownOrganizations = $('.organization-dropdown');
+            if (!this.state.selectedOrganization) {
+                dropdownOrganizations.dropdown('set selected', "0");
+                dropdownOrganizations.dropdown({
                     onChange: function(value, text, $selectedItem) {
-                        self.changeTeam(value);
+                        self.changeOrganization(value);
                     }
                 });
             }
             // else {
             //     setTimeout(function () {
-            //         dropdownTeams.dropdown('set selected', "" + self.state.selectedTeam.get("id"));
+            //         dropdownOrganizations.dropdown('set selected', "" + self.state.selectedOrganization.get("id"));
             //     }, 100);
             // }
         }
     }
 
-    changeTeam(value) {
+    changeOrganization(value) {
         if (value === 'all') {
-            ManageActions.changeTeam({name: value});
+            ManageActions.changeOrganization({name: value});
             this.setState({
-                selectedTeam: {name: value, id: value}
+                selectedOrganization: {name: value, id: value}
             });
             return;
         }
-        let selectedTeam = this.state.teams.find(function (team) {
-            if (team.get("id") === parseInt(value)) {
+        let selectedOrganization = this.state.organizations.find(function (organization) {
+            if (organization.get("id") === parseInt(value)) {
                 return true;
             }
         });
-        ManageActions.changeTeam(selectedTeam.toJS());
+        ManageActions.changeOrganization(selectedOrganization.toJS());
         this.setState({
-            selectedTeam: selectedTeam
+            selectedOrganization: selectedOrganization
         });
     }
 
-    openCreateTeams () {
-        ManageActions.openCreateTeamModal();
+    openCreateOrganizations () {
+        ManageActions.openCreateOrganizationModal();
     }
 
-    openModifyTeam (event, team) {
+    openModifyOrganization (event, organization) {
         event.stopPropagation();
         event.preventDefault();
-        ManageActions.openModifyTeamModal(team);
+        ManageActions.openModifyOrganizationModal(organization);
     }
 
-    renderTeams(teams, defaultTeam) {
+    renderOrganizations(organizations, defaultOrganization) {
         this.setState({
-            teams : teams,
-            selectedTeam: defaultTeam
+            organizations : organizations,
+            selectedOrganization: defaultOrganization
         });
     }
 
-    getTeamsSelect() {
+    getOrganizationsSelect() {
         let result = '';
-        if (this.state.teams.size > 0) {
-            let items = this.state.teams.map((team, i) => (
-                <div className="item" data-value={team.get('id')}
-                     data-text={team.get('name')}
-                     key={'team' + team.get('name') + team.get('id')}>
-                        {team.get('name')}
-                    <a className="team-filter button show right"
-                       onClick={(e) => this.openModifyTeam(e, team)}>
+        if (this.state.organizations.size > 0) {
+            let items = this.state.organizations.map((organization, i) => (
+                <div className="item" data-value={organization.get('id')}
+                     data-text={organization.get('name')}
+                     key={'organization' + organization.get('name') + organization.get('id')}>
+                        {organization.get('name')}
+                    <a className="organization-filter button show right"
+                       onClick={(e) => this.openModifyOrganization(e, organization)}>
                         <i className="icon-more_vert"/>
                     </a>
                 </div>
             ));
-            result = <div className="ui dropdown selection fluid team-dropdown top-5">
+            result = <div className="ui dropdown selection fluid organization-dropdown top-5">
                 <input type="hidden" name="gender" />
                 <i className="dropdown icon"/>
-                <div className="default text">Choose Team</div>
+                <div className="default text">Choose Organization</div>
                 <div className="menu">
-                    <div className="header" style={{cursor: 'pointer'}} onClick={this.openCreateTeams.bind(this)}>New Team
-                        <a className="team-filter button show">
+                    <div className="header" style={{cursor: 'pointer'}} onClick={this.openCreateOrganizations.bind(this)}>New Organization
+                        <a className="organization-filter button show">
                             <i className="icon-plus3 right"/>
                         </a>
                     </div>
@@ -106,15 +106,15 @@ class Header extends React.Component {
                     {/*<div className="header">
                         <div className="ui form">
                             <div className="field">
-                                <input type="text" name="Project Name" placeholder="Translated Team es." />
+                                <input type="text" name="Project Name" placeholder="Translated Organization es." />
                             </div>
                         </div>
                     </div>
                     <div className="divider"></div>*/}
                     <div className="scrolling menu">
                         <div className="item" data-value='all'
-                             data-text='All teams'>
-                            All teams
+                             data-text='All organizations'>
+                            All organizations
                         </div>
                         {items}
                     </div>
@@ -125,7 +125,7 @@ class Header extends React.Component {
     }
 
     render () {
-        let teamsSelect = this.getTeamsSelect();
+        let organizationsSelect = this.getOrganizationsSelect();
         return <section className="nav-mc-bar">
                     <nav role="navigation">
                         <div className="nav-wrapper">
@@ -134,7 +134,7 @@ class Header extends React.Component {
                                     <a href="/" className="logo logo-col"/>
 
                                     <div className="col m2 right">
-                                        {teamsSelect}
+                                        {organizationsSelect}
                                     </div>
                          
                                         
@@ -158,7 +158,7 @@ class Header extends React.Component {
                         filterFunction={this.props.filterFunction}
                         searchFn={this.props.searchFn}
                         closeSearchCallback={this.props.closeSearchCallback}
-                        selectedTeam={this.state.selectedTeam}
+                        selectedOrganization={this.state.selectedOrganization}
                         />
                 </section>;
     }

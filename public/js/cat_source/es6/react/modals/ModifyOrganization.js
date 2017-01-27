@@ -1,23 +1,23 @@
 let Immutable = require('immutable');
-class ModifyTeam extends React.Component {
+class ModifyOrganization extends React.Component {
 
 
     constructor(props) {
         super(props);
         this.state = {
-            team: this.props.team
+            organization: this.props.organization
         }
     }
 
     componentDidMount () {
         $('.menu .item').tab();
-        $('.fixed-team-modal .ui.checkbox').checkbox();
+        $('.fixed-organization-modal .ui.checkbox').checkbox();
     }
 
     removeUser(user, index) {
-        let newTeam = this.state.team.set('users', this.state.team.get('users').delete(index));
+        let newOrganization = this.state.organization.set('users', this.state.organization.get('users').delete(index));
         this.setState({
-            team: newTeam
+            organization: newOrganization
         });
     }
 
@@ -35,7 +35,7 @@ class ModifyTeam extends React.Component {
 
                 };
                 this.setState({
-                    team: this.state.team.set('users', this.state.team.get('users').push(Immutable.fromJS(newUser)))
+                    organization: this.state.organization.set('users', this.state.organization.get('users').push(Immutable.fromJS(newUser)))
                 });
 
                 this.inputNewUSer.value = '';
@@ -45,7 +45,7 @@ class ModifyTeam extends React.Component {
     }
 
     getUserList() {
-        return this.state.team.get('users').map((user, i) => (
+        return this.state.organization.get('users').map((user, i) => (
             <a className="item list-member"
                key={'user' + user.get('userShortName') + user.get('id')}>
                 <i className="right icon-cancel3" onClick={this.removeUser.bind(this, user, i)}/>
@@ -59,21 +59,21 @@ class ModifyTeam extends React.Component {
 
     render() {
         let userlist = this.getUserList();
-        return <div className="modify-team-modal">
+        return <div className="modify-organization-modal">
 
             <div className="image content">
                 <div className="description">
                     <div className="ui top attached tabular menu">
-                        <div className="active item" data-tab="TeamSettings">Change Settings</div>
-                        <div className="item" data-tab="TeamMembers">Members</div>
+                        <div className="active item" data-tab="OrganizationSettings">Change Settings</div>
+                        <div className="item" data-tab="OrganizationMembers">Members</div>
                     </div>
-                    <div className="fixed-team-modal">
-                        <div className="ui tab active" data-tab="TeamSettings">
+                    <div className="fixed-organization-modal">
+                        <div className="ui tab active" data-tab="OrganizationSettings">
                             {/*Tab Content*/}
                             <form className="ui form">
                                 <div className="required field">
-                                    <label>Change team name</label>
-                                    <input type="text" name="Project Name" defaultValue={this.props.team.get('name')} />
+                                    <label>Change organization name</label>
+                                    <input type="text" name="Project Name" defaultValue={this.props.organization.get('name')} />
                                 </div>
 
                                 <div className="row">
@@ -177,12 +177,12 @@ class ModifyTeam extends React.Component {
                             </form>
                         </div>
 
-                        <div className="ui tab" data-tab="TeamMembers">
+                        <div className="ui tab" data-tab="OrganizationMembers">
                             {/*Tab Content list member*/}
                             <div className="row">
                                 <form className="ui form">
                                     <div className="required field">
-                                        <label>Add new Team Member</label>
+                                        <label>Add new Organization Member</label>
                                         <input type="text" name="Project Name" placeholder="es. Accounts, Project Managers, Translators"
                                                onKeyPress={this.handleKeyPress.bind(this)}
                                                ref={(inputNewUSer) => this.inputNewUSer = inputNewUSer}/>
@@ -192,12 +192,12 @@ class ModifyTeam extends React.Component {
                             <div className="row">
                                 <div className="ui form">
                                     <div className="field">
-                                        <label>All Team Members</label>
+                                        <label>All Organization Members</label>
                                     </div>
                                 </div>
                             </div>
                             <div className="row">
-                                <div className="ui horizontal list team-settings">
+                                <div className="ui horizontal list organization-settings">
                                     {userlist}
                                 </div>
                             </div>
@@ -208,7 +208,7 @@ class ModifyTeam extends React.Component {
             <div className="matecat-modal-footer">
                 <div className="actions">
                     <div className="ui positive right labeled icon button" >
-                        Salva Cambiamenti Team
+                        Salva Cambiamenti Organization
                         <i className="checkmark icon"/>
                     </div>
                 </div>
@@ -218,4 +218,4 @@ class ModifyTeam extends React.Component {
 }
 
 
-export default ModifyTeam ;
+export default ModifyOrganization ;
