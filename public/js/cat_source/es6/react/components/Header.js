@@ -112,10 +112,10 @@ class Header extends React.Component {
                     </div>
                     <div className="divider"></div>*/}
                     <div className="scrolling menu">
-                        <div className="item" data-value='all'
-                             data-text='All organizations'>
-                            All organizations
-                        </div>
+                        {/*<div className="item" data-value='all'*/}
+                             {/*data-text='All organizations'>*/}
+                            {/*All organizations*/}
+                        {/*</div>*/}
                         {items}
                     </div>
                 </div>

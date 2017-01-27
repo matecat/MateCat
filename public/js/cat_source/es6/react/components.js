@@ -48,9 +48,9 @@ window.LoginModal = require('./modals/LoginModal').default;
 window.ForgotPasswordModal = require('./modals/ForgotPasswordModal').default;
 window.RegisterModal = require('./modals/RegisterModal').default;
 
-window.CreateTeamModal = require('./modals/CreateOrganization').default;
-window.ModifyTeamModal = require('./modals/ModifyOrganization').default;
-window.ChangeProjectTeamModal = require('./modals/ChangeProjectWorkspace').default;
+window.CreateOrganizationModal = require('./modals/CreateOrganization').default;
+window.ModifyOrganizationModal = require('./modals/ModifyOrganization').default;
+window.ChangeProjectWorkspaceModal = require('./modals/ChangeProjectWorkspace').default;
 window.AssignToTranslator = require('./modals/AssignToTranslator').default;
 
 
