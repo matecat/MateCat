@@ -225,16 +225,6 @@ class getWarningController extends ajaxController {
         $this->result['data'] = $data ;
     }
 
-    private static function filterString( $glossaryWord ) {
-        $glossaryWord = (string)$glossaryWord;
-        $glossaryWord = filter_var(
-                $glossaryWord,
-                FILTER_SANITIZE_STRING,
-                array( 'flags' => FILTER_FLAG_STRIP_LOW )
-        );
-
-        return empty( $glossaryWord ) ? '' : $glossaryWord;
-    }
 }
 
 ?>
