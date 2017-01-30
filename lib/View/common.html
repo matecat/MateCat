@@ -23,7 +23,13 @@
         /*<![CDATA[*/
         config.flash_messages = ${structure php: json_encode(flashMessages)} ;
         /*]]>*/
-        </tal:block>
+    </tal:block>
+
+    <tal:block tal:condition="php: !empty(globalMessage)">
+        /*<![CDATA[*/
+        config.global_message = ${structure php: json_encode(globalMessage)} ;
+        /*]]>*/
+    </tal:block>
 
     </script>
 

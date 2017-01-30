@@ -153,7 +153,7 @@ class getWarningController extends ajaxController {
             $item = $item[ 'id_segment' ];
         }
 
-        $this->result[ 'messages' ] = $this->getGlobalMessage();
+        $this->result[ 'messages' ] = Utils::getGlobalMessage()  ;
 
         $this->result[ 'details' ][ 'tag_issues' ] = array_values( $result );
         $tMismatch                 = getTranslationsMismatches( $this->__postInput->id_job, $this->__postInput->password );
@@ -234,19 +234,6 @@ class getWarningController extends ajaxController {
         );
 
         return empty( $glossaryWord ) ? '' : $glossaryWord;
-    }
-
-    private function getGlobalMessage(){
-        if ( file_exists( INIT::$ROOT . "/inc/.globalmessage.ini" ) ) {
-            $globalMessage              = parse_ini_file( INIT::$ROOT . "/inc/.globalmessage.ini" );
-            return sprintf(
-                            '[{"msg":"%s", "token":"%s", "expire":"%s"}]',
-                            $globalMessage[ 'message' ],
-                            md5( $globalMessage[ 'message' ] ),
-                            $globalMessage[ 'expire' ]
-                    );
-        }
-        return null;
     }
 }
 
