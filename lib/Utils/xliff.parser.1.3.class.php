@@ -243,8 +243,13 @@ class Xliff_Parser {
                                         $mark_string = preg_replace( '#^<mrk\s[^>]+>(.*)#', '$1', $originalTransMark );
                                         $mark_content = preg_split( '#</mrk>#si', $mark_string );
 
-                                        $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-target' ][ $k ][ 'raw-content' ]   = $mark_content[0];
-                                        $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-target' ][ $k ][ 'ext-succ-tags' ] = $mark_content[1];
+                                        if( isset( $mark_content[ 1 ] ) ){
+                                            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-target' ][ $k ][ 'raw-content' ]   = $mark_content[0];
+                                            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-target' ][ $k ][ 'ext-succ-tags' ] = $mark_content[1];
+                                        } else {
+                                            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-target' ][ $k ][ 'raw-content' ]   = "";
+                                            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-target' ][ $k ][ 'ext-succ-tags' ] = $mark_content[0];
+                                        }
 
                                     }
 
