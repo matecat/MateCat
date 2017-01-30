@@ -43,7 +43,7 @@ AppDispatcher.register(function(action) {
     switch(action.actionType) {
         case ManageConstants.RENDER_ORGANIZATIONS:
             OrganizationsStore.updateAll(action.organizations);
-            OrganizationsStore.emitChange(action.actionType, OrganizationsStore.organizations);
+            OrganizationsStore.emitChange(action.actionType, OrganizationsStore.organizations, Immutable.fromJS(action.defaultOrganization));
             break;
         case ManageConstants.REMOVE_ORGANIZATION:
             OrganizationsStore.removeOrganization(action.organization);

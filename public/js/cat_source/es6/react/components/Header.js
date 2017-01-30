@@ -13,7 +13,6 @@ class Header extends React.Component {
     }
 
     componentDidMount () {
-        $('.organization-dropdown').dropdown();
         OrganizationsStore.addListener(ManageConstants.RENDER_ORGANIZATIONS, this.renderOrganizations);
     }
 
@@ -25,31 +24,20 @@ class Header extends React.Component {
         let self = this;
 
         if (this.state.organizations.size > 0){
-            let dropdownOrganizations = $('.organization-dropdown');
-            if (!this.state.selectedOrganization) {
-                dropdownOrganizations.dropdown('set selected', "0");
+            let dropdownOrganizations = $(this.dropdownOrganizations);
+            if (this.state.selectedOrganization) {
+                dropdownOrganizations.dropdown('set selected', '' + this.state.selectedOrganization.get('id'));
                 dropdownOrganizations.dropdown({
                     onChange: function(value, text, $selectedItem) {
                         self.changeOrganization(value);
                     }
                 });
             }
-            // else {
-            //     setTimeout(function () {
-            //         dropdownOrganizations.dropdown('set selected', "" + self.state.selectedOrganization.get("id"));
-            //     }, 100);
-            // }
         }
     }
 
     changeOrganization(value) {
-        if (value === 'all') {
-            ManageActions.changeOrganization({name: value});
-            this.setState({
-                selectedOrganization: {name: value, id: value}
-            });
-            return;
-        }
+
         let selectedOrganization = this.state.organizations.find(function (organization) {
             if (organization.get("id") === parseInt(value)) {
                 return true;
@@ -92,7 +80,8 @@ class Header extends React.Component {
                     </a>
                 </div>
             ));
-            result = <div className="ui dropdown selection fluid organization-dropdown top-5">
+            result = <div className="ui dropdown selection fluid organization-dropdown top-5"
+                          ref={(dropdownOrganizations) => this.dropdownOrganizations = dropdownOrganizations}>
                 <input type="hidden" name="gender" />
                 <i className="dropdown icon"/>
                 <div className="default text">Choose Organization</div>
