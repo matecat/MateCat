@@ -324,6 +324,8 @@ class newProjectController extends viewController {
 
         $this->featureSet->appendDecorators('NewProjectDecorator', $this, $this->template ) ;
 
+        $this->template->globalMessage = Utils::getGlobalMessage() ;
+
     }
 
     private function getCurrentTargetLang() {

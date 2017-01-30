@@ -53,6 +53,8 @@ APP = {
             $( this ).parents( '.modal' ).find( '.x-popup' ).click();
         } );
 
+        this.checkGlobalMassages();
+
 
     },
     alert: function ( options ) {
@@ -648,6 +650,32 @@ APP = {
         if ( config.flash_messages && config.flash_messages.service ) {
             return _.filter( config.flash_messages.service, function( service, index ) {
                 return service.key == name ;
+            });
+        }
+    },
+
+    checkGlobalMassages: function () {
+        var self = this;
+        if (config.global_message) {
+            var messages = JSON.parse(config.global_message);
+            $.each(messages, function () {
+                var elem = this;
+                if (typeof $.cookie('msg-' + this.token) == 'undefined' && ( new Date(this.expire) > ( new Date() ) )) {
+                    var notification = {
+                        title: 'Notice',
+                        text: this.msg,
+                        type: 'warning',
+                        autoDismiss: false,
+                        position: "bl",
+                        allowHtml: true,
+                        closeCallback: function () {
+                            var expireDate = new Date(elem.expire);
+                            $.cookie('msg-' + elem.token, '', {expires: expireDate});
+                        }
+                    };
+                    APP.addNotification(notification);
+                    return false;
+                }
             });
         }
     }
