@@ -36,6 +36,8 @@ UI = {
         this.mscProjects = MSCProjects;
         this.adWordsProjects = AdWordsProjects;
         this.youtubeProjects = YoutubeProjects;
+        this.personalProject = PersonalProjects;
+        this.otherWorkspace = WorkspaceProjects
 
 
     },
@@ -81,15 +83,15 @@ UI = {
         //     $(this).data("prevType", e.type);
         // });
         this.getAllOrganizations().done(function (data) {
-            ManageActions.renderOrganizations(data.organizations);
             self.organizations = data.organizations;
             self.selectedOrganization = data.organizations[0];
+            ManageActions.renderOrganizations(data.organizations, self.selectedOrganization);
             self.getProjects().done(function (response) {
                 let projects = response.data;
                 //Remove this
-                self.myProjects = projects;
-                self.currentProjects = projects;
-                self.renderProjects(projects);
+                self.myProjects = projects.concat(self.personalProject, self.otherWorkspace);;
+                self.currentProjects = self.myProjects;
+                self.renderProjects(self.myProjects);
             });
         });
 
@@ -139,7 +141,7 @@ UI = {
     },
 
     renderMoreProjects: function () {
-        if (this.selectedOrganization.name !== 'My Workspace') {
+        if (this.selectedOrganization.name !== 'Personal') {
             return;
         }
         UI.Search.currentPage = UI.Search.currentPage + 1;
@@ -347,7 +349,8 @@ UI = {
         let organization = {
             id: 300,
             name: organizationName,
-            users: []
+            users: [],
+            workspaces: []
         };
         setTimeout(function () {
             ManageActions.addOrganization(organization);
@@ -358,20 +361,12 @@ UI = {
     changeOrganization: function (organization) {
         let self = this;
         this.selectedOrganization = organization;
-        if (organization.name === "all") {
-            this.currentProjects = this.myProjects.concat(this.ebayProjects, this.mscProjects, this.adWordsProjects, this.youtubeProjects);
-            setTimeout(function () {
-                ManageActions.renderAllOrganizationsProjects(self.currentProjects, self.organizations);
-            });
-            return;
-        } else if (organization.name === "My Workspace") {
+        if (organization.id === 0) {
             this.currentProjects = this.myProjects;
-        } else if (organization.name === "Ebay") {
-            this.currentProjects = this.ebayProjects;
-        }else if (organization.name === "MSC") {
-            this.currentProjects = this.mscProjects;
-        }else if (organization.name === "Translated") {
-            this.currentProjects = this.translatedProjects;
+        } else if (organization.id === 1) {
+            this.currentProjects = [].concat(this.ebayProjects, this.mscProjects, this.adWordsProjects, this.youtubeProjects);
+        } else if (organization.id === 2) {
+            this.currentProjects = [];
         } else {
             this.currentProjects = [];
         }
@@ -430,63 +425,6 @@ UI = {
         removedProject.organization = workspace.name;
         projectsArray.unshift(removedProject);
 
-    },
-
-    getUsers: function () {
-        let users = [
-            {
-                userMail: 'chloe.king@translated.net',
-                userFullName: 'Chloe King',
-                userShortName: 'CK'
-
-            },{
-                userMail: 'owen.james@translated.net',
-                userFullName: 'Owen	James',
-                userShortName: 'OJ'
-
-            },{
-                userMail: 'stephen.powell@translated.net',
-                userFullName: 'Stephen Powell',
-                userShortName: 'SP'
-
-            },{
-                userMail: 'lillian.lambert@translated.net',
-                userFullName: 'Lillian	Lambert',
-                userShortName: 'LL'
-
-            },{
-                userMail: 'joe.watson@translated.net',
-                userFullName: 'Joe	Watson',
-                userShortName: 'JW'
-
-            },{
-                userMail: 'rachel.sharp@translated.net',
-                userFullName: 'Rachel	Sharp',
-                userShortName: 'RS'
-
-            },{
-                userMail: 'dan.marshall@translated.net',
-                userFullName: 'Dan	Marshall',
-                userShortName: 'DM'
-
-            },{
-                userMail: 'vanessa.simpson@translated.net',
-                userFullName: 'Vanessa	Simpson',
-                userShortName: 'VS'
-
-            },{
-                userMail: 'dan.howard@translated.net',
-                userFullName: 'Dan	Howard',
-                userShortName: 'DH'
-
-            },{
-                userMail: 'keith.kelly@translated.net',
-                userFullName: 'Keith	Kelly',
-                userShortName: 'KC'
-
-            }
-        ];
-        return Promise.resolve(users);
     },
 
     getLastProjectActivityLogAction: function (id, pass) {
@@ -572,7 +510,18 @@ $(document).ready(function(){
     window.organizations = [
         {
             id: 0,
-            name: 'Personal'
+            name: 'Personal',
+            workspaces: [
+                {
+                    id: 1,
+                    name: "Personali"
+                },
+                {
+                    id: 2,
+                    name: "Tradotti"
+                }
+
+            ]
         },
         {
             id: 1,
@@ -1081,6 +1030,198 @@ $(document).ready(function(){
                 userMail: 'joe.watson@translated.net',
                 userFullName: 'Joe Watson',
                 userShortName: 'JW'
+
+            }
+        }
+
+    ];
+
+    window.PersonalProjects = [
+        {
+            "workspace": "Private",
+            "tm_analysis":"241",
+            "has_archived":false,
+            "name":"Private 1",
+            "has_cancelled":false,
+            "mt_engine_name":"MyMemory (All Pairs)",
+            "no_active_jobs":"",
+            "jobs":
+                [
+                    {"show_download_xliff":true,"job_first_segment":"326830","open_threads_count":0,"warnings_count":0,"pid":"147","subject":"general","job_last_segment":"326846","formatted_create_date":"Jan 19, 12:18","mt_engine_name":"MyMemory (All Pairs)","create_date":"2017-01-19 12:18:08","target":"ja-JP","status":"active","sourceTxt":"Italian","private_tm_key":"[]","id_tms":"1","source":"it-IT","id":"194","password":"5126c64fee83","disabled":"","stats":{"DRAFT_PERC_FORMATTED":100,"TOTAL_FORMATTED":"241","DRAFT":241.4,"TODO_FORMATTED":"241","REJECTED_PERC_FORMATTED":0,"DRAFT_PERC":100,"TOTAL":241.4,"REJECTED_PERC":0,"DOWNLOAD_STATUS":"draft","PROGRESS_FORMATTED":"0","APPROVED_PERC_FORMATTED":0,"TRANSLATED_PERC_FORMATTED":0,"PROGRESS":0,"APPROVED_PERC":0,"TRANSLATED_PERC":0,"TRANSLATED_FORMATTED":"0","APPROVED_FORMATTED":"0","PROGRESS_PERC_FORMATTED":0,"TRANSLATED":0,"APPROVED":0,"PROGRESS_PERC":0,"id":null,"REJECTED_FORMATTED":"0","REJECTED":0,"DRAFT_FORMATTED":"241"},"targetTxt":"Japanese"}
+                ],
+            "id_tms":"1",
+            "id":"6010",
+            "password":"263d689044f8",
+            "user": {
+                id: 0,
+                userMail: config.userMail,
+                userFullName: config.userFullName,
+                userShortName: config.userShortName
+
+            }
+        },
+        {
+            "workspace": "Private",
+            "tm_analysis":"241",
+            "has_archived":false,
+            "name":"Private 2",
+            "has_cancelled":false,
+            "mt_engine_name":"MyMemory (All Pairs)",
+            "no_active_jobs":"",
+            "jobs":
+                [
+                    {"show_download_xliff":true,"job_first_segment":"326830","open_threads_count":0,"warnings_count":0,"pid":"147","subject":"general","job_last_segment":"326846","formatted_create_date":"Jan 19, 12:18","mt_engine_name":"MyMemory (All Pairs)","create_date":"2017-01-19 12:18:08","target":"ja-JP","status":"active","sourceTxt":"Italian","private_tm_key":"[]","id_tms":"1","source":"it-IT","id":"194","password":"5126c64fee83","disabled":"","stats":{"DRAFT_PERC_FORMATTED":100,"TOTAL_FORMATTED":"241","DRAFT":241.4,"TODO_FORMATTED":"241","REJECTED_PERC_FORMATTED":0,"DRAFT_PERC":100,"TOTAL":241.4,"REJECTED_PERC":0,"DOWNLOAD_STATUS":"draft","PROGRESS_FORMATTED":"0","APPROVED_PERC_FORMATTED":0,"TRANSLATED_PERC_FORMATTED":0,"PROGRESS":0,"APPROVED_PERC":0,"TRANSLATED_PERC":0,"TRANSLATED_FORMATTED":"0","APPROVED_FORMATTED":"0","PROGRESS_PERC_FORMATTED":0,"TRANSLATED":0,"APPROVED":0,"PROGRESS_PERC":0,"id":null,"REJECTED_FORMATTED":"0","REJECTED":0,"DRAFT_FORMATTED":"241"},"targetTxt":"Japanese"}
+                ],
+            "id_tms":"1",
+            "id":"6011",
+            "password":"263d689044f8",
+            "user": {
+                id: 0,
+                userMail: config.userMail,
+                userFullName: config.userFullName,
+                userShortName: config.userShortName
+
+            }
+        },
+        {
+            "workspace": "Private",
+            "tm_analysis":"241",
+            "has_archived":false,
+            "name":"Private 2",
+            "has_cancelled":false,
+            "mt_engine_name":"MyMemory (All Pairs)",
+            "no_active_jobs":"",
+            "jobs":
+                [
+                    {"show_download_xliff":true,"job_first_segment":"326830","open_threads_count":0,"warnings_count":0,"pid":"147","subject":"general","job_last_segment":"326846","formatted_create_date":"Jan 19, 12:18","mt_engine_name":"MyMemory (All Pairs)","create_date":"2017-01-19 12:18:08","target":"ja-JP","status":"active","sourceTxt":"Italian","private_tm_key":"[]","id_tms":"1","source":"it-IT","id":"194","password":"5126c64fee83","disabled":"","stats":{"DRAFT_PERC_FORMATTED":100,"TOTAL_FORMATTED":"241","DRAFT":241.4,"TODO_FORMATTED":"241","REJECTED_PERC_FORMATTED":0,"DRAFT_PERC":100,"TOTAL":241.4,"REJECTED_PERC":0,"DOWNLOAD_STATUS":"draft","PROGRESS_FORMATTED":"0","APPROVED_PERC_FORMATTED":0,"TRANSLATED_PERC_FORMATTED":0,"PROGRESS":0,"APPROVED_PERC":0,"TRANSLATED_PERC":0,"TRANSLATED_FORMATTED":"0","APPROVED_FORMATTED":"0","PROGRESS_PERC_FORMATTED":0,"TRANSLATED":0,"APPROVED":0,"PROGRESS_PERC":0,"id":null,"REJECTED_FORMATTED":"0","REJECTED":0,"DRAFT_FORMATTED":"241"},"targetTxt":"Japanese"}
+                ],
+            "id_tms":"1",
+            "id":"6012",
+            "password":"263d689044f8",
+            "user": {
+                id: 0,
+                userMail: config.userMail,
+                userFullName: config.userFullName,
+                userShortName: config.userShortName
+
+            }
+        },
+        {
+            "workspace": "Private",
+            "tm_analysis":"241",
+            "has_archived":false,
+            "name":"Private 3",
+            "has_cancelled":false,
+            "mt_engine_name":"MyMemory (All Pairs)",
+            "no_active_jobs":"",
+            "jobs":
+                [
+                    {"show_download_xliff":true,"job_first_segment":"326830","open_threads_count":0,"warnings_count":0,"pid":"147","subject":"general","job_last_segment":"326846","formatted_create_date":"Jan 19, 12:18","mt_engine_name":"MyMemory (All Pairs)","create_date":"2017-01-19 12:18:08","target":"ja-JP","status":"active","sourceTxt":"Italian","private_tm_key":"[]","id_tms":"1","source":"it-IT","id":"194","password":"5126c64fee83","disabled":"","stats":{"DRAFT_PERC_FORMATTED":100,"TOTAL_FORMATTED":"241","DRAFT":241.4,"TODO_FORMATTED":"241","REJECTED_PERC_FORMATTED":0,"DRAFT_PERC":100,"TOTAL":241.4,"REJECTED_PERC":0,"DOWNLOAD_STATUS":"draft","PROGRESS_FORMATTED":"0","APPROVED_PERC_FORMATTED":0,"TRANSLATED_PERC_FORMATTED":0,"PROGRESS":0,"APPROVED_PERC":0,"TRANSLATED_PERC":0,"TRANSLATED_FORMATTED":"0","APPROVED_FORMATTED":"0","PROGRESS_PERC_FORMATTED":0,"TRANSLATED":0,"APPROVED":0,"PROGRESS_PERC":0,"id":null,"REJECTED_FORMATTED":"0","REJECTED":0,"DRAFT_FORMATTED":"241"},"targetTxt":"Japanese"}
+                ],
+            "id_tms":"1",
+            "id":"6013",
+            "password":"263d689044f8",
+            "user": {
+                id: 0,
+                userMail: config.userMail,
+                userFullName: config.userFullName,
+                userShortName: config.userShortName
+
+            }
+        }
+
+    ];
+
+    window.WorkspaceProjects = [
+        {
+            "workspace": "Workspace",
+            "tm_analysis":"241",
+            "has_archived":false,
+            "name":"Workspace 1",
+            "has_cancelled":false,
+            "mt_engine_name":"MyMemory (All Pairs)",
+            "no_active_jobs":"",
+            "jobs":
+                [
+                    {"show_download_xliff":true,"job_first_segment":"326830","open_threads_count":0,"warnings_count":0,"pid":"147","subject":"general","job_last_segment":"326846","formatted_create_date":"Jan 19, 12:18","mt_engine_name":"MyMemory (All Pairs)","create_date":"2017-01-19 12:18:08","target":"ja-JP","status":"active","sourceTxt":"Italian","private_tm_key":"[]","id_tms":"1","source":"it-IT","id":"194","password":"5126c64fee83","disabled":"","stats":{"DRAFT_PERC_FORMATTED":100,"TOTAL_FORMATTED":"241","DRAFT":241.4,"TODO_FORMATTED":"241","REJECTED_PERC_FORMATTED":0,"DRAFT_PERC":100,"TOTAL":241.4,"REJECTED_PERC":0,"DOWNLOAD_STATUS":"draft","PROGRESS_FORMATTED":"0","APPROVED_PERC_FORMATTED":0,"TRANSLATED_PERC_FORMATTED":0,"PROGRESS":0,"APPROVED_PERC":0,"TRANSLATED_PERC":0,"TRANSLATED_FORMATTED":"0","APPROVED_FORMATTED":"0","PROGRESS_PERC_FORMATTED":0,"TRANSLATED":0,"APPROVED":0,"PROGRESS_PERC":0,"id":null,"REJECTED_FORMATTED":"0","REJECTED":0,"DRAFT_FORMATTED":"241"},"targetTxt":"Japanese"}
+                ],
+            "id_tms":"1",
+            "id":"7010",
+            "password":"263d689044f8",
+            "user": {
+                id: 0,
+                userMail: config.userMail,
+                userFullName: config.userFullName,
+                userShortName: config.userShortName
+
+            }
+        },
+        {
+            "workspace": "Workspace",
+            "tm_analysis":"241",
+            "has_archived":false,
+            "name":"Workspace 2",
+            "has_cancelled":false,
+            "mt_engine_name":"MyMemory (All Pairs)",
+            "no_active_jobs":"",
+            "jobs":
+                [
+                    {"show_download_xliff":true,"job_first_segment":"326830","open_threads_count":0,"warnings_count":0,"pid":"147","subject":"general","job_last_segment":"326846","formatted_create_date":"Jan 19, 12:18","mt_engine_name":"MyMemory (All Pairs)","create_date":"2017-01-19 12:18:08","target":"ja-JP","status":"active","sourceTxt":"Italian","private_tm_key":"[]","id_tms":"1","source":"it-IT","id":"194","password":"5126c64fee83","disabled":"","stats":{"DRAFT_PERC_FORMATTED":100,"TOTAL_FORMATTED":"241","DRAFT":241.4,"TODO_FORMATTED":"241","REJECTED_PERC_FORMATTED":0,"DRAFT_PERC":100,"TOTAL":241.4,"REJECTED_PERC":0,"DOWNLOAD_STATUS":"draft","PROGRESS_FORMATTED":"0","APPROVED_PERC_FORMATTED":0,"TRANSLATED_PERC_FORMATTED":0,"PROGRESS":0,"APPROVED_PERC":0,"TRANSLATED_PERC":0,"TRANSLATED_FORMATTED":"0","APPROVED_FORMATTED":"0","PROGRESS_PERC_FORMATTED":0,"TRANSLATED":0,"APPROVED":0,"PROGRESS_PERC":0,"id":null,"REJECTED_FORMATTED":"0","REJECTED":0,"DRAFT_FORMATTED":"241"},"targetTxt":"Japanese"}
+                ],
+            "id_tms":"1",
+            "id":"7011",
+            "password":"263d689044f8",
+            "user": {
+                id: 0,
+                userMail: config.userMail,
+                userFullName: config.userFullName,
+                userShortName: config.userShortName
+
+            }
+        },
+        {
+            "workspace": "Workspace",
+            "tm_analysis":"241",
+            "has_archived":false,
+            "name":"Workspace 2",
+            "has_cancelled":false,
+            "mt_engine_name":"MyMemory (All Pairs)",
+            "no_active_jobs":"",
+            "jobs":
+                [
+                    {"show_download_xliff":true,"job_first_segment":"326830","open_threads_count":0,"warnings_count":0,"pid":"147","subject":"general","job_last_segment":"326846","formatted_create_date":"Jan 19, 12:18","mt_engine_name":"MyMemory (All Pairs)","create_date":"2017-01-19 12:18:08","target":"ja-JP","status":"active","sourceTxt":"Italian","private_tm_key":"[]","id_tms":"1","source":"it-IT","id":"194","password":"5126c64fee83","disabled":"","stats":{"DRAFT_PERC_FORMATTED":100,"TOTAL_FORMATTED":"241","DRAFT":241.4,"TODO_FORMATTED":"241","REJECTED_PERC_FORMATTED":0,"DRAFT_PERC":100,"TOTAL":241.4,"REJECTED_PERC":0,"DOWNLOAD_STATUS":"draft","PROGRESS_FORMATTED":"0","APPROVED_PERC_FORMATTED":0,"TRANSLATED_PERC_FORMATTED":0,"PROGRESS":0,"APPROVED_PERC":0,"TRANSLATED_PERC":0,"TRANSLATED_FORMATTED":"0","APPROVED_FORMATTED":"0","PROGRESS_PERC_FORMATTED":0,"TRANSLATED":0,"APPROVED":0,"PROGRESS_PERC":0,"id":null,"REJECTED_FORMATTED":"0","REJECTED":0,"DRAFT_FORMATTED":"241"},"targetTxt":"Japanese"}
+                ],
+            "id_tms":"1",
+            "id":"7012",
+            "password":"263d689044f8",
+            "user": {
+                id: 0,
+                userMail: config.userMail,
+                userFullName: config.userFullName,
+                userShortName: config.userShortName
+
+            }
+        },
+        {
+            "workspace": "Workspace",
+            "tm_analysis":"241",
+            "has_archived":false,
+            "name":"Workspace 3",
+            "has_cancelled":false,
+            "mt_engine_name":"MyMemory (All Pairs)",
+            "no_active_jobs":"",
+            "jobs":
+                [
+                    {"show_download_xliff":true,"job_first_segment":"326830","open_threads_count":0,"warnings_count":0,"pid":"147","subject":"general","job_last_segment":"326846","formatted_create_date":"Jan 19, 12:18","mt_engine_name":"MyMemory (All Pairs)","create_date":"2017-01-19 12:18:08","target":"ja-JP","status":"active","sourceTxt":"Italian","private_tm_key":"[]","id_tms":"1","source":"it-IT","id":"194","password":"5126c64fee83","disabled":"","stats":{"DRAFT_PERC_FORMATTED":100,"TOTAL_FORMATTED":"241","DRAFT":241.4,"TODO_FORMATTED":"241","REJECTED_PERC_FORMATTED":0,"DRAFT_PERC":100,"TOTAL":241.4,"REJECTED_PERC":0,"DOWNLOAD_STATUS":"draft","PROGRESS_FORMATTED":"0","APPROVED_PERC_FORMATTED":0,"TRANSLATED_PERC_FORMATTED":0,"PROGRESS":0,"APPROVED_PERC":0,"TRANSLATED_PERC":0,"TRANSLATED_FORMATTED":"0","APPROVED_FORMATTED":"0","PROGRESS_PERC_FORMATTED":0,"TRANSLATED":0,"APPROVED":0,"PROGRESS_PERC":0,"id":null,"REJECTED_FORMATTED":"0","REJECTED":0,"DRAFT_FORMATTED":"241"},"targetTxt":"Japanese"}
+                ],
+            "id_tms":"1",
+            "id":"7013",
+            "password":"263d689044f8",
+            "user": {
+                id: 0,
+                userMail: config.userMail,
+                userFullName: config.userFullName,
+                userShortName: config.userShortName
 
             }
         }

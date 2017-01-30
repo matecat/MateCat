@@ -143,10 +143,11 @@ let ManageActions = {
         });
     },
 
-    renderOrganizations: function (organizations) {
+    renderOrganizations: function (organizations, defaultOrganization) {
         AppDispatcher.dispatch({
             actionType: ManageConstants.RENDER_ORGANIZATIONS,
-            organizations: organizations
+            organizations: organizations,
+            defaultOrganization: defaultOrganization
         });
     },
 

@@ -16,6 +16,8 @@ class SubHeader extends React.Component {
                     self.changeUser(value);
                 }
             });
+
+            $(this.dropdownWorkspaces).dropdown('set selected', 'all');
         }
     }
 
@@ -32,9 +34,17 @@ class SubHeader extends React.Component {
 
     }
 
+    changeWorkspace() {
+
+    }
+
+    openCreateWorkspace() {
+
+    }
+
     getUserFilter() {
         let result = '';
-        if (this.props.selectedOrganization && this.props.selectedOrganization.name !== 'all' && this.props.selectedOrganization.get('users')) {
+        if (this.props.selectedOrganization && this.props.selectedOrganization.get('users')) {
 
             let users = this.props.selectedOrganization.get('users').map((user, i) => (
                 <div className="item" data-value={user.get('id')}
@@ -82,12 +92,66 @@ class SubHeader extends React.Component {
         }
         return result;
     }
+    getWorkspacesSelect() {
+        let result = '';
+        if (this.props.selectedOrganization) {
+            let items = this.props.selectedOrganization.get("workspaces").map((workspace, i) => (
+                <div className="item" data-value={workspace.get('id')}
+                     data-text={workspace.get('name')}
+                     key={'organization' + workspace.get('name') + workspace.get('id')}>
+                    {workspace.get('name')}
+                    <a className="organization-filter button show right"
+                       onClick={(e) => this.changeWorkspace.bind(e, workspace)}>
+                        <i className="icon-more_vert"/>
+                    </a>
+                </div>
+            ));
+            result = <div className="ui dropdown selection fluid organization-dropdown top-5"
+                          ref={(dropdownWorkspaces) => this.dropdownWorkspaces = dropdownWorkspaces}>
+                <input type="hidden" name="gender" />
+                <i className="dropdown icon"/>
+                <div className="default text">Choose Workspace</div>
+                <div className="menu">
+                    <div className="header" style={{cursor: 'pointer'}} onClick={this.openCreateWorkspace.bind(this)}>New Workspace
+                        <a className="organization-filter button show">
+                            <i className="icon-plus3 right"/>
+                        </a>
+                    </div>
+                    <div className="divider"></div>
+                    {/*<div className="header">
+                     <div className="ui form">
+                     <div className="field">
+                     <input type="text" name="Project Name" placeholder="Translated Organization es." />
+                     </div>
+                     </div>
+                     </div>
+                     <div className="divider"></div>*/}
+                    <div className="scrolling menu">
+                        <div className="item" data-value='all'
+                        data-text='General'>
+                        General
+                        </div>
+                        {items}
+                    </div>
+                </div>
+            </div>;
+        }
+        return result;
+    }
     render () {
         let usersFilter = this.getUserFilter();
+        let workspaceDropDown = this.getWorkspacesSelect();
+
         return (
             <section className="sub-head z-depth-1">
                 <div className="container-fluid">
                     <div className="row">
+                        <div className="col m2">
+                            {workspaceDropDown}
+                        </div>
+                        <div className="col m3 offset-m2">
+                            {usersFilter}
+                        </div>
                         <div className="col m3">
                             <nav>
                                 <div className="nav-wrapper">
@@ -96,9 +160,6 @@ class SubHeader extends React.Component {
                                         onChange={this.props.searchFn}/>
                                 </div>
                             </nav>
-                        </div>
-                        <div className="col m3 offset-m2">
-                            {usersFilter}
                         </div>
                         <div className="col m2 right">
                             <FilterProjects
