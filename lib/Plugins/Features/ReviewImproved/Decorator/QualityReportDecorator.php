@@ -28,7 +28,7 @@ class QualityReportDecorator extends \AbstractModelViewDecorator {
     }
 
     public function setDownloadURI( $uri ) {
-        $this->download_uri = $uri ;
+        $this->download_uri = $uri;
     }
 
     /**
