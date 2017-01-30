@@ -7,23 +7,23 @@ let ManageActions = {
 
     /** Render the list of projects
      * @param projects
-     * @param team
+     * @param organization
      * @param hideSpinner
      * */
-    renderProjects: function (projects, team, hideSpinner) {
+    renderProjects: function (projects, organization, hideSpinner) {
         AppDispatcher.dispatch({
             actionType: ManageConstants.RENDER_PROJECTS,
             projects: projects,
-            team: team,
+            organization: organization,
             hideSpinner: hideSpinner,
         });
     },
 
-    renderAllTeamsProjects: function (projects, teams, hideSpinner) {
+    renderAllOrganizationsProjects: function (projects, organizations, hideSpinner) {
         AppDispatcher.dispatch({
-            actionType: ManageConstants.RENDER_ALL_TEAMS_PROJECTS,
+            actionType: ManageConstants.RENDER_ALL_ORGANIZATION_PROJECTS,
             projects: projects,
-            teams: teams,
+            organizations: organizations,
             hideSpinner: hideSpinner,
         });
     },
@@ -105,32 +105,32 @@ let ManageActions = {
         });
     },
 
-    changeProjectTeam: function (oldTeam, team, projectId) {
+    changeProjectWorkspace: function (oldWorkspace, newWorkspace, projectId) {
         AppDispatcher.dispatch({
-            actionType: ManageConstants.CHANGE_PROJECT_TEAM,
-            oldTeam: oldTeam,
-            team: team,
+            actionType: ManageConstants.CHANGE_PROJECT_WORKSPACE,
+            oldOrganization: oldWorkspace,
+            workspace: newWorkspace,
             projectId: projectId
         });
     },
 
-    openCreateTeamModal: function () {
+    openCreateOrganizationModal: function () {
         AppDispatcher.dispatch({
-            actionType: ManageConstants.OPEN_CREATE_TEAM_MODAL,
+            actionType: ManageConstants.OPEN_CREATE_ORGANIZATION_MODAL,
         });
     },
 
-    openModifyTeamModal: function (team) {
+    openModifyOrganizationModal: function (organization) {
         AppDispatcher.dispatch({
-            actionType: ManageConstants.OPEN_MODIFY_TEAM_MODAL,
-            team: team
+            actionType: ManageConstants.OPEN_MODIFY_ORGANIZATION_MODAL,
+            organization: organization
         });
     },
 
-    openChangeProjectTeam: function (team, projectId) {
+    openChangeProjectWorkspace: function (organization, projectId) {
         AppDispatcher.dispatch({
-            actionType: ManageConstants.OPEN_CHANGE_TEAM_MODAL,
-            team: team,
+            actionType: ManageConstants.OPEN_CHANGE_ORGANIZATION_MODAL,
+            organization: organization,
             projectId: projectId
         });
     },
@@ -143,31 +143,31 @@ let ManageActions = {
         });
     },
 
-    renderTeams: function (teams) {
+    renderOrganizations: function (organizations) {
         AppDispatcher.dispatch({
-            actionType: ManageConstants.RENDER_TEAMS,
-            teams: teams
+            actionType: ManageConstants.RENDER_ORGANIZATIONS,
+            organizations: organizations
         });
     },
 
-    addTeam: function (team) {
+    addOrganization: function (organization) {
         AppDispatcher.dispatch({
-            actionType: ManageConstants.ADD_TEAM,
-            team: team
+            actionType: ManageConstants.ADD_ORGANIZATION,
+            organization: organization
         });
     },
 
-    createTeam: function (teamName) {
+    createOrganization: function (organizationName) {
         AppDispatcher.dispatch({
-            actionType: ManageConstants.CREATE_TEAM,
-            teamName: teamName
+            actionType: ManageConstants.CREATE_ORGANIZATION,
+            organizationName: organizationName
         });
     },
 
-    changeTeam: function (teamName) {
+    changeOrganization: function (organizationName) {
         AppDispatcher.dispatch({
-            actionType: ManageConstants.CHANGE_TEAM,
-            teamName: teamName
+            actionType: ManageConstants.CHANGE_ORGANIZATION,
+            organizationName: organizationName
         });
     },
 
@@ -178,12 +178,12 @@ let ManageActions = {
         });
     },
 
-    changeProjectAssignee: function (idProject, user, teamName) {
+    changeProjectAssignee: function (idProject, user, organizationName) {
         AppDispatcher.dispatch({
             actionType: ManageConstants.CHANGE_PROJECT_ASSIGNEE,
             user: user,
             idProject: idProject,
-            teamName: teamName
+            organizationName: organizationName
         });
     }
 

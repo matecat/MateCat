@@ -1,5 +1,5 @@
 
-class CreateTeam extends React.Component {
+class CreateOrganization extends React.Component {
 
 
     constructor(props) {
@@ -10,9 +10,9 @@ class CreateTeam extends React.Component {
         $('.advanced-popup').popup();
     }
 
-    createTeam() {
-        $(this.teamInput).val();
-        ManageActions.createTeam($(this.teamInput).val());
+    createOrganization() {
+        $(this.organizationInput).val();
+        ManageActions.createOrganization($(this.organizationInput).val());
         APP.ModalWindow.onCloseModal();
     }
 
@@ -23,12 +23,12 @@ class CreateTeam extends React.Component {
                         <div className="description">
                             <form className="ui form">
                                 <div className="required field">
-                                    <label>Team Name</label>
+                                    <label>Organization Name</label>
                                     <input type="text" name="Project Name" placeholder="es. Accounts, Project Managers, Translators"
-                                           ref={(teamInput) => this.teamInput = teamInput}/>
+                                           ref={(organizationInput) => this.organizationInput = organizationInput}/>
                                 </div>
                                 <div className="field">
-                                    <label>Add People to team</label>
+                                    <label>Add People to organization</label>
                                     <input type="email" name="email" placeholder="Name or Email/s separated by commas ',' " />
                                 </div>
                                 <div className="field">
@@ -83,8 +83,8 @@ class CreateTeam extends React.Component {
                     <div className="matecat-modal-footer">
                         <div className="actions">
                             <div className="ui positive right labeled icon button"
-                            onClick={this.createTeam.bind(this)}>
-                                Si Crea Team
+                            onClick={this.createOrganization.bind(this)}>
+                                Si Crea Organization
                                 <i className="checkmark icon"/>
                             </div>
                         </div>
@@ -94,4 +94,4 @@ class CreateTeam extends React.Component {
 }
 
 
-export default CreateTeam ;
+export default CreateOrganization ;

@@ -62,12 +62,12 @@ class ProjectContainer extends React.Component {
     }
 
     changeUser(value) {
-        let newUser = this.props.team.get('users').find(function (user) {
+        let newUser = this.props.organization.get('users').find(function (user) {
             if (user.get('id') === parseInt(value)) {
                 return true
             }
         });
-        ManageActions.changeProjectAssignee(this.props.project.get('id'), newUser.toJS(), this.props.project.get('team'));
+        ManageActions.changeProjectAssignee(this.props.project.get('id'), newUser.toJS(), this.props.project.get('organization'));
     }
 
 
@@ -242,16 +242,16 @@ class ProjectContainer extends React.Component {
         });
     }
 
-    openChangeTeamModal() {
-        ManageActions.openChangeProjectTeam(this.props.team, this.props.project);
+    openChangeOrganizationModal() {
+        ManageActions.openChangeProjectWorkspace(this.props.organization, this.props.project);
     }
 
     getDropDownUsers() {
         let result = '';
-        if (this.props.project.get('team') && this.props.team.get('users')) {
-            let users = this.props.team.get('users').map((user, i) => (
+        if (this.props.project.get('organization') && this.props.organization.get('users')) {
+            let users = this.props.organization.get('users').map((user, i) => (
                 <div className="item" data-value={user.get('id')}
-                     key={'team' + user.get('userShortName') + user.get('id')}>
+                     key={'organization' + user.get('userShortName') + user.get('id')}>
                     <a className=" ui avatar image initials green">{user.get('userShortName')}</a>
                     {/*<img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg"/>*/}
                     {(user.get('id') === 0)? 'To me' : user.get('userFullName')}
@@ -362,8 +362,8 @@ class ProjectContainer extends React.Component {
                             <div className="col right">
                                 <ul className="project-activity-icon right">
                                     <li>
-                                        <a className="chip assigned-team waves-effect waves-dark"
-                                        onClick={this.openChangeTeamModal.bind(this)}>{(this.props.project.get('team')) ? this.props.project.get('team') : "My workspace" }</a>
+                                        <a className="chip assigned-organization waves-effect waves-dark"
+                                        onClick={this.openChangeOrganizationModal.bind(this)}>{(this.props.project.get('organization')) ? this.props.project.get('organization') : "My workspace" }</a>
                                     </li>
                                     <li>
                                         {dropDownUsers}

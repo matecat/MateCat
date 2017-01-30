@@ -12,9 +12,9 @@ class ProjectsContainer extends React.Component {
             more_projects: true,
             reloading_projects: false,
             user: null,
-            team: null,
-            show_all_teams_projects: false,
-            teams: []
+            organization: null,
+            show_all_organizations_projects: false,
+            organizations: []
         };
         this.renderProjects = this.renderProjects.bind(this);
         this.updateProjects = this.updateProjects.bind(this);
@@ -24,24 +24,24 @@ class ProjectsContainer extends React.Component {
     }
 
 
-    renderProjects(projects, team, hideSpinner) {
+    renderProjects(projects, organization, hideSpinner) {
         let more_projects = true;
         if (hideSpinner) {
             more_projects = this.state.more_projects
         }
-        let teamState = (team)? team : this.state.team;
+        let organizationState = (organization)? organization : this.state.organization;
         this.setState({
             projects: projects,
             more_projects: more_projects,
             reloading_projects: false,
             user: null,
-            team: teamState,
-            show_all_teams_projects: false,
-            teams: []
+            organization: organizationState,
+            show_all_organizations_projects: false,
+            organizations: []
         });
     }
 
-    renderAllTeamsProjects(projects, teams, hideSpinner) {
+    renderAllOrganizationsProjects(projects, organizations, hideSpinner) {
         let more_projects = true;
         if (hideSpinner) {
             more_projects = this.state.more_projects
@@ -51,9 +51,9 @@ class ProjectsContainer extends React.Component {
             more_projects: more_projects,
             reloading_projects: false,
             user: null,
-            team: null,
-            show_all_teams_projects: true,
-            teams: teams
+            organization: null,
+            show_all_organizations_projects: true,
+            organizations: organizations
         });
     }
 
@@ -83,20 +83,20 @@ class ProjectsContainer extends React.Component {
 
     componentDidMount() {
         ProjectsStore.addListener(ManageConstants.RENDER_PROJECTS, this.renderProjects);
-        ProjectsStore.addListener(ManageConstants.RENDER_ALL_TEAMS_PROJECTS, this.renderAllTeamsProjects);
+        ProjectsStore.addListener(ManageConstants.RENDER_ALL_ORGANIZATION_PROJECTS, this.renderAllOrganizationsProjects);
         ProjectsStore.addListener(ManageConstants.UPDATE_PROJECTS, this.updateProjects);
         ProjectsStore.addListener(ManageConstants.NO_MORE_PROJECTS, this.hideSpinner);
         ProjectsStore.addListener(ManageConstants.SHOW_RELOAD_SPINNER, this.showProjectsReloadSpinner);
-        TeamsStore.addListener(ManageConstants.CHANGE_USER, this.filterForUser);
+        OrganizationsStore.addListener(ManageConstants.CHANGE_USER, this.filterForUser);
     }
 
     componentWillUnmount() {
         ProjectsStore.removeListener(ManageConstants.RENDER_PROJECTS, this.renderProjects);
-        ProjectsStore.removeListener(ManageConstants.RENDER_ALL_TEAMS_PROJECTS, this.renderAllTeamsProjects);
+        ProjectsStore.removeListener(ManageConstants.RENDER_ALL_ORGANIZATION_PROJECTS, this.renderAllOrganizationsProjects);
         ProjectsStore.removeListener(ManageConstants.UPDATE_PROJECTS, this.updateProjects);
         ProjectsStore.removeListener(ManageConstants.NO_MORE_PROJECTS, this.hideSpinner);
         ProjectsStore.removeListener(ManageConstants.SHOW_RELOAD_SPINNER, this.showProjectsReloadSpinner);
-        TeamsStore.removeListener(ManageConstants.CHANGE_USER, this.filterForUser);
+        OrganizationsStore.removeListener(ManageConstants.CHANGE_USER, this.filterForUser);
 
     }
 
@@ -134,7 +134,7 @@ class ProjectsContainer extends React.Component {
                 changeStatusFn={this.props.changeStatus}
                 changeJobPasswordFn={this.props.changeJobPasswordFn}
                 downloadTranslationFn={this.props.downloadTranslationFn}
-                team={this.state.team}/>
+                organization={this.state.organization}/>
         ));
         if (!items.size) {
             items = <div className="no-results-found"><span>No Project Found</span></div>;
