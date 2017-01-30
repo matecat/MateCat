@@ -285,6 +285,8 @@ class newProjectController extends viewController {
         $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages ); 
         LexiQADecorator::getInstance( $this->template )->featureEnabled( $this->logged_user, Database::obtain() )->decorateViewLexiQA();
 
+        $this->template->globalMessage = Utils::getGlobalMessage() ;
+
     }
 
     private function getCurrentTargetLang() {
