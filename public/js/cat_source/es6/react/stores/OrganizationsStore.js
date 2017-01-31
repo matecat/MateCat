@@ -59,9 +59,6 @@ AppDispatcher.register(function(action) {
             OrganizationsStore.addOrganization(action.organization);
             OrganizationsStore.emitChange(ManageConstants.RENDER_ORGANIZATIONS, OrganizationsStore.organizations, Immutable.fromJS(action.organization));
             break;
-        case ManageConstants.CHANGE_USER:
-            OrganizationsStore.emitChange(ManageConstants.CHANGE_USER, action.user);
-            break;
         case ManageConstants.OPEN_CHANGE_ORGANIZATION_MODAL:
             ProjectsStore.emitChange(action.actionType, action.organization, action.projectId, OrganizationsStore.organizations);
             break;

@@ -56,6 +56,14 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
         this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'oldPassword'], oldPassword);
     },
 
+    unwrapImmutableObject(object) {
+        if (object && typeof object.toJS === "function") {
+            return object.toJS();
+        } else {
+            return object
+        }
+    },
+
     emitChange: function(event, args) {
         this.emit.apply(this, arguments);
     },
@@ -82,6 +90,9 @@ AppDispatcher.register(function(action) {
         case ManageConstants.RENDER_MORE_PROJECTS:
             ProjectsStore.addProjects(action.project);
             ProjectsStore.emitChange(ManageConstants.RENDER_PROJECTS, ProjectsStore.projects);
+            break;
+        case ManageConstants.FILTER_PROJECTS:
+            ProjectsStore.emitChange(ManageConstants.FILTER_PROJECTS, ProjectsStore.unwrapImmutableObject(action.user), ProjectsStore.unwrapImmutableObject(action.workspace), action.name, action.status);
             break;
         case ManageConstants.OPEN_JOB_SETTINGS:
             ProjectsStore.emitChange(ManageConstants.OPEN_JOB_SETTINGS, action.job, action.prName);

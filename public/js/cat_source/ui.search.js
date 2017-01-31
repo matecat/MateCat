@@ -9,7 +9,7 @@ $.extend(UI, {
 				where: 'no'
 			});
 	},
-	resetSearch: function() {console.log('reset search');
+	resetSearch: function() {
 		this.body.removeClass('searchActive');
 		this.clearSearchMarkers();
 		this.setFindFunction('find');
@@ -104,7 +104,6 @@ $.extend(UI, {
 
 	},
 	execFind_success: function(d) {
-        console.log('execFind_success');
 		this.numSearchResultsItem = d.total;
 		this.searchResultsSegments = d.segments;
 		this.numSearchResultsSegments = (d.segments) ? d.segments.length : 0;
@@ -285,7 +284,6 @@ $.extend(UI, {
 		if (this.searchMode == 'onlyStatus') { // search mode: onlyStatus
 
 		} else if (this.searchMode == 'source&target') { // search mode: source&target
-			console.log('source & target');
 			status = (p.status == 'all') ? '' : '.status-' + p.status;
 			q = (singleSegment) ? '#' + $(singleSegment).attr('id') : "section" + status + ':not(.status-new)';
             var psource = p.source.replace(/(\W)/gi, "\\$1");
@@ -461,14 +459,14 @@ $.extend(UI, {
 			var m = $(".targetarea mark.currSearchItem");
 
 			if ($(m).nextAll('mark.searchMarker').length) { // there are other subsequent results in the segment
-				console.log('altri item nel segmento');
+
 				$(m).removeClass('currSearchItem');
 				$(m).nextAll('mark.searchMarker').first().addClass('currSearchItem');
 				if (unmark)
 					$(m).replaceWith($(m).text());
 				UI.goingToNext = false;
 			} else { // jump to results in subsequents segments
-				console.log('m.length: ' + m.length);
+
 				var seg = (m.length) ? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
 				if (seg.length) {
 					skipCurrent = $(seg).has("mark.currSearchItem").length;
@@ -488,7 +486,7 @@ $.extend(UI, {
 			var m = $("mark.currSearchItem");
 
 			if ($(m).nextAll('mark.searchMarker').length) { // there are other subsequent results in the segment
-				console.log('altri item nel segmento');
+
 				$(m).removeClass('currSearchItem');
 				$(m).nextAll('mark.searchMarker').first().addClass('currSearchItem');
 				if (unmark)
@@ -512,7 +510,7 @@ $.extend(UI, {
 		}
 	},
 	gotoSearchResultAfter: function(options) {
-		console.log('options: ', options);
+
 		var el = options.el;
 		var skipCurrent = (options.skipCurrent || false);
 		var unmark = (options.unmark || false);

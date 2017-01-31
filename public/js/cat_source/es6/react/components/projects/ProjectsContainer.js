@@ -11,7 +11,6 @@ class ProjectsContainer extends React.Component {
             projects : [],
             more_projects: true,
             reloading_projects: false,
-            user: null,
             organization: null,
             show_all_organizations_projects: false,
             organizations: []
@@ -20,7 +19,6 @@ class ProjectsContainer extends React.Component {
         this.updateProjects = this.updateProjects.bind(this);
         this.hideSpinner = this.hideSpinner.bind(this);
         this.showProjectsReloadSpinner = this.showProjectsReloadSpinner.bind(this);
-        this.filterForUser = this.filterForUser.bind(this);
     }
 
 
@@ -34,7 +32,6 @@ class ProjectsContainer extends React.Component {
             projects: projects,
             more_projects: more_projects,
             reloading_projects: false,
-            user: null,
             organization: organizationState,
             show_all_organizations_projects: false,
             organizations: []
@@ -50,7 +47,6 @@ class ProjectsContainer extends React.Component {
             projects: projects,
             more_projects: more_projects,
             reloading_projects: false,
-            user: null,
             organization: null,
             show_all_organizations_projects: true,
             organizations: organizations
@@ -75,19 +71,12 @@ class ProjectsContainer extends React.Component {
         });
     }
 
-    filterForUser(user) {
-        this.setState({
-            user: user
-        });
-    }
-
     componentDidMount() {
         ProjectsStore.addListener(ManageConstants.RENDER_PROJECTS, this.renderProjects);
         ProjectsStore.addListener(ManageConstants.RENDER_ALL_ORGANIZATION_PROJECTS, this.renderAllOrganizationsProjects);
         ProjectsStore.addListener(ManageConstants.UPDATE_PROJECTS, this.updateProjects);
         ProjectsStore.addListener(ManageConstants.NO_MORE_PROJECTS, this.hideSpinner);
         ProjectsStore.addListener(ManageConstants.SHOW_RELOAD_SPINNER, this.showProjectsReloadSpinner);
-        OrganizationsStore.addListener(ManageConstants.CHANGE_USER, this.filterForUser);
     }
 
     componentWillUnmount() {
@@ -96,8 +85,6 @@ class ProjectsContainer extends React.Component {
         ProjectsStore.removeListener(ManageConstants.UPDATE_PROJECTS, this.updateProjects);
         ProjectsStore.removeListener(ManageConstants.NO_MORE_PROJECTS, this.hideSpinner);
         ProjectsStore.removeListener(ManageConstants.SHOW_RELOAD_SPINNER, this.showProjectsReloadSpinner);
-        OrganizationsStore.removeListener(ManageConstants.CHANGE_USER, this.filterForUser);
-
     }
 
     componentDidUpdate() {
@@ -111,21 +98,13 @@ class ProjectsContainer extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
         return (nextState.projects !== this.state.projects ||
         nextState.more_projects !== this.state.more_projects ||
-        nextState.reloading_projects !== this.state.reloading_projects ||
-        nextState.user !== this.state.user)
+        nextState.reloading_projects !== this.state.reloading_projects )
     }
 
     render() {
         let self = this;
         let projects = this.state.projects;
 
-        if (this.state.user) {
-            projects = this.state.projects.filter(function (project) {
-                if (project.get('user').get('id') == self.state.user.get('id')) {
-                    return true;
-                }
-            });
-        }
         let items = projects.map((project, i) => (
             <Project
                 key={project.get('id')}

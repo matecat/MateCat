@@ -172,10 +172,13 @@ let ManageActions = {
         });
     },
 
-    changeUser: function (user) {
+    filterProjects: function (user, workspace,  name, status) {
         AppDispatcher.dispatch({
-            actionType: ManageConstants.CHANGE_USER,
-            user: user
+            actionType: ManageConstants.FILTER_PROJECTS,
+            user: user,
+            workspace: workspace,
+            name: name,
+            status: status
         });
     },
 

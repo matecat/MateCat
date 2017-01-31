@@ -4,10 +4,7 @@ UI = {
         this.Search = {};
         this.Search.filter = {};
         this.performingSearchRequest = false;
-        this.filterProjectsFromName = this.filterProjectsFromName.bind(this);
         this.renderMoreProjects = this.renderMoreProjects.bind(this);
-        this.closeSearchCallback = this.closeSearchCallback.bind(this);
-        this.filterProjectsFromStatus = this.filterProjectsFromStatus.bind(this);
         this.openJobSettings = this.openJobSettings.bind(this);
         this.changeJobsOrProjectStatus = this.changeJobsOrProjectStatus.bind(this);
         this.changeJobPassword = this.changeJobPassword.bind(this);
@@ -23,6 +20,7 @@ UI = {
         ProjectsStore.addListener(ManageConstants.OPEN_MODIFY_ORGANIZATION_MODAL, this.openModifyOrganizationModal);
         ProjectsStore.addListener(ManageConstants.OPEN_CHANGE_ORGANIZATION_MODAL, this.openChangeProjectWorkspace);
         ProjectsStore.addListener(ManageConstants.OPEN_ASSIGN_TO_TRANSLATOR_MODAL, this.openAssignToTranslator);
+        ProjectsStore.addListener(ManageConstants.FILTER_PROJECTS, this.filterProjects.bind(this));
 
         ProjectsStore.addListener(ManageConstants.CHANGE_PROJECT_ASSIGNEE, this.changeProjectAssignee);
         ProjectsStore.addListener(ManageConstants.CHANGE_PROJECT_WORKSPACE, this.changeProjectWorkspace);
@@ -47,13 +45,7 @@ UI = {
         let headerMountPoint = $("header")[0];
         this.Search.currentPage = 1;
         this.pageLeft = false;
-        ReactDOM.render(React.createElement(Header, {
-            searchFn: _.debounce(function(name) {
-                            self.filterProjectsFromName(name);
-                        }, 300),
-            filterFunction: this.filterProjectsFromStatus,
-            closeSearchCallback: this.closeSearchCallback
-        }), headerMountPoint);
+        ReactDOM.render(React.createElement(Header, {}), headerMountPoint);
 
 
 
@@ -85,11 +77,16 @@ UI = {
         this.getAllOrganizations().done(function (data) {
             self.organizations = data.organizations;
             self.selectedOrganization = data.organizations[0];
+            self.selectedWorkspace = {
+                id: 0,
+                name: 'General'
+            };
+
             ManageActions.renderOrganizations(data.organizations, self.selectedOrganization);
             self.getProjects().done(function (response) {
                 let projects = response.data;
                 //Remove this
-                self.myProjects = projects.concat(self.personalProject, self.otherWorkspace);;
+                self.myProjects = projects.concat(self.personalProject, self.otherWorkspace);
                 self.currentProjects = self.myProjects;
                 self.renderProjects(self.myProjects);
             });
@@ -155,29 +152,29 @@ UI = {
         });
     },
 
-    filterProjectsFromName: function(name) {
-        console.log("Search " + name);
-        if (!this.performingSearchRequest) {
-            let self = this;
-            this.performingSearchRequest = true;
-            let filter = {
-                pn: name
-            };
-            this.Search.filter = $.extend( this.Search.filter, filter );
-            UI.Search.currentPage = 1;
-            this.getProjects().done(function (response) {
-                let projects = response.data;
-                ManageActions.renderProjects(projects);
-                self.performingSearchRequest = false;
-            });
-
-        }
-    },
+    // filterProjectsFromName: function(name) {
+    //     console.log("Search " + name);
+    //     if (!this.performingSearchRequest) {
+    //         let self = this;
+    //         this.performingSearchRequest = true;
+    //         let filter = {
+    //             pn: name
+    //         };
+    //         this.Search.filter = $.extend( this.Search.filter, filter );
+    //         UI.Search.currentPage = 1;
+    //         this.getProjects().done(function (response) {
+    //             let projects = response.data;
+    //             ManageActions.renderProjects(projects);
+    //             self.performingSearchRequest = false;
+    //         });
+    //
+    //     }
+    // },
 
     filterProjectsFromStatus: function(status) {
         let self = this;
         let filter = {
-            status: status
+            status: status,
         };
         this.Search.filter = $.extend( this.Search.filter, filter );
         UI.Search.currentPage = 1;
@@ -189,16 +186,31 @@ UI = {
 
     },
 
-    closeSearchCallback: function () {
+    filterProjects: function(user, workspace, name, status) {
+        let self = this;
+        this.currentWorkspace = (typeof workspace !== "undefined") ? workspace : this.currentWorkspace;
+        this.currentUser = (typeof user != "undefined") ? user : this.currentUser;
+        let filter = {
+            status: status,
+            pn: name
+        };
+        this.Search.filter = $.extend( this.Search.filter, filter );
         UI.Search.currentPage = 1;
-        if ( this.Search.filter.pn ) {
-            delete this.Search.filter.pn;
-        }
         this.getProjects().done(function (response) {
             let projects = response.data;
             ManageActions.renderProjects(projects);
         });
+
+        console.log('Filter for:' );
+        console.log('Name : ' + (name) ? name : '' );
+        console.log('Status : ' + (status) ? status : '' );
+        console.log('User:' + this.currentUser);
+        console.log('Workspace:' + this.currentWorkspace.name);
+
+
+
     },
+
     /**
      * Open the settings for the job
      */

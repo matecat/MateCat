@@ -4,6 +4,8 @@ let SearchInput = require("./SearchInput").default;
 class SubHeader extends React.Component {
     constructor (props) {
         super(props);
+        this.selectedUser = {};
+        this.selectedWorkSpace = {};
     }
 
     componentDidUpdate() {
@@ -17,29 +19,64 @@ class SubHeader extends React.Component {
                 }
             });
 
-            $(this.dropdownWorkspaces).dropdown('set selected', 'all');
+            $(this.dropdownWorkspaces).dropdown('set selected', '0');
+            $(this.dropdownWorkspaces).dropdown({
+                onChange: function(value, text, $selectedItem) {
+                    self.changeWorkspace(value);
+                }
+            });
         }
     }
 
     changeUser(value) {
-        let selectedUser = this.props.selectedOrganization.get('users').find(function (user) {
+        let self = this;
+        this.selectedUser = this.props.selectedOrganization.get('users').find(function (user) {
             if (user.get("id") === parseInt(value)) {
                 return true;
             }
         });
         setTimeout(function () {
-            ManageActions.changeUser(selectedUser);
+            ManageActions.filterProjects(self.selectedUser, self.selectedWorkspace, self.currentText, self.currentStatus);
         });
-
-
     }
 
-    changeWorkspace() {
-
+    changeWorkspace(value) {
+        let self = this;
+        if (value === 'all') {
+            this.selectedWorkSpace =  {
+                id: -1,
+                name: 'all'
+            };
+        } else if (value === '0') {
+            this.selectedWorkSpace =  {
+                id: 0,
+                name: 'General'
+            };
+        } else {
+            this.selectedWorkSpace = this.props.selectedOrganization.get('workspaces').find(function (workspace) {
+                if (workspace.get("id") === parseInt(value)) {
+                    return true;
+                }
+            });
+        }
+        setTimeout(function () {
+            ManageActions.filterProjects(self.selectedUser, self.selectedWorkSpace, self.currentText, self.currentStatus);
+        });
     }
 
     openCreateWorkspace() {
 
+    }
+
+
+    onChangeSearchInput(value) {
+        this.currentText = value;
+        ManageActions.filterProjects(this.selectedUser, this.selectedWorkSpace, this.currentText, this.currentStatus);
+    }
+
+    filterByStatus(status) {
+        this.currentStatus = status;
+        ManageActions.filterProjects(this.selectedUser, this.selectedWorkSpace, this.currentText, this.currentStatus);
     }
 
     getUserFilter() {
@@ -100,10 +137,6 @@ class SubHeader extends React.Component {
                      data-text={workspace.get('name')}
                      key={'organization' + workspace.get('name') + workspace.get('id')}>
                     {workspace.get('name')}
-                    <a className="organization-filter button show right"
-                       onClick={(e) => this.changeWorkspace.bind(e, workspace)}>
-                        <i className="icon-more_vert"/>
-                    </a>
                 </div>
             ));
             result = <div className="ui dropdown selection fluid organization-dropdown top-5"
@@ -127,9 +160,13 @@ class SubHeader extends React.Component {
                      </div>
                      <div className="divider"></div>*/}
                     <div className="scrolling menu">
-                        <div className="item" data-value='all'
+                        <div className="item" data-value='0'
                         data-text='General'>
                         General
+                        </div>
+                        <div className="item" data-value='-1'
+                             data-text='All'>
+                             All
                         </div>
                         {items}
                     </div>
@@ -156,14 +193,13 @@ class SubHeader extends React.Component {
                             <nav>
                                 <div className="nav-wrapper">
                                     <SearchInput
-                                        closeSearchCallback={this.props.closeSearchCallback}
-                                        onChange={this.props.searchFn}/>
+                                        onChange={this.onChangeSearchInput.bind(this)}/>
                                 </div>
                             </nav>
                         </div>
                         <div className="col m2 right">
                             <FilterProjects
-                                filterFunction={this.props.filterFunction}/>
+                                filterFunction={this.filterByStatus.bind(this)}/>
                         </div>
                     </div>
                 </div>
