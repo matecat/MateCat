@@ -280,6 +280,16 @@ function doReplaceAll( Array $queryParams ) {
 
 }
 
+/**
+ * @param      $jid
+ * @param      $jpass
+ * @param      $sid
+ * @param null $binaries
+ *
+ * @return mixed
+ *
+ * @deprecated
+ */
 function getReferenceSegment( $jid, $jpass, $sid, $binaries = null ) {
 
     $db = Database::obtain();
@@ -303,18 +313,6 @@ function getReferenceSegment( $jid, $jpass, $sid, $binaries = null ) {
 		";
 
     return $db->query_first( $query );
-}
-
-function getUserData( $id ) {
-
-    $db = Database::obtain();
-
-    $id    = $db->escape( $id );
-    $query = "select * from users where email = '$id'";
-
-    $results = $db->query_first( $query );
-
-    return $results;
 }
 
 function getLanguageStats() {
@@ -431,28 +429,6 @@ function getJobData( $id_job, $password = null ) {
 }
 
 /**
- * @param $job_id       int The job ID
- * @param $job_password int The job password
- *
- * @return mixed If query was successful, this method returns the encoded tm keys string.<br/>
- *               Otherwise, it returns the query's error code
- */
-function getJobTmKeys( $job_id, $job_password ) {
-    $query = "SELECT tm_keys FROM jobs WHERE id = %d AND password = '%s' ";
-
-    $db      = Database::obtain();
-    try {
-        $results = $db->fetch_array(
-            sprintf($query, $job_id, $job_password)
-        );
-    } catch( PDOException $e ) {
-        Log::doLog( $e->getMessage() );
-        return $e->getCode() * -1;
-    }
-    return $results[ 0 ][ 'tm_keys' ];
-}
-
-/**
  * @param $job_id       int     The job id
  * @param $job_password string  The job password
  * @param $tmKeysString string  A json_encoded array of TmKeyManagement_TmKeyStruct objects
@@ -471,15 +447,6 @@ function setJobTmKeys( $job_id, $job_password, $tmKeysString ) {
         Log::doLog( $e->getMessage() );
         throw new Exception( $e->getMessage(), -$e->getCode() );
     }
-}
-
-function getSegment( $id_segment ) {
-    $db         = Database::obtain();
-    $id_segment = $db->escape( $id_segment );
-    $query      = "select * from segments where id=$id_segment";
-    $results    = $db->query_first( $query );
-
-    return $results;
 }
 
 function getFirstSegmentOfFilesInJob( $jid ) {
@@ -518,56 +485,6 @@ function getWarning( $jid, $jpassword ) {
 		-- following is a condition on bitmask to filter by severity ERROR
 		AND warning & 1 = 1 ";
 
-    $results = $db->fetch_array( $query );
-
-    return $results;
-}
-
-function getTranslatorPass( $id_translator ) {
-
-    $db = Database::obtain();
-
-    $id_translator = $db->escape( $id_translator );
-    $query         = "select password from translators where username='$id_translator'";
-
-    //$db->query_first($query);
-    $results = $db->query_first( $query );
-
-    if ( ( is_array( $results ) ) AND ( array_key_exists( "password", $results ) ) ) {
-        return $results[ 'password' ];
-    }
-
-    return null;
-}
-
-/**
- * @param $id_translator
- *
- * @return null
- *
- * @deprecated
- */
-function getTranslatorKey( $id_translator ) {
-
-    $db = Database::obtain();
-
-    $id_translator = $db->escape( $id_translator );
-    $query         = "select mymemory_api_key from translators where username='$id_translator'";
-
-    $results = $db->query_first( $query );
-
-    $res = null;
-    if ( ( is_array( $results ) ) AND ( array_key_exists( "mymemory_api_key", $results ) ) ) {
-        $res = $results[ 'mymemory_api_key' ];
-    }
-
-    return $res;
-}
-
-function getEngines( $type = "MT" ) {
-    $query = "select id,name from engines where type='$type' and active=1";
-
-    $db      = Database::obtain();
     $results = $db->fetch_array( $query );
 
     return $results;
@@ -739,7 +656,7 @@ function getSegmentsDownload( $jid, $password, $id_file, $no_status_new = 1 ) {
 
 function getSegmentsInfo( $jid, $password ) {
 
-    $query = "select j.id as jid, j.id_project as pid,j.source,j.target,
+    $query = "select j.id as jid, j.password AS jpassword, j.id_project as pid,j.source,j.target,
 		j.id_translator as tid, j.id_tms, j.id_mt_engine,
 		p.id_customer as cid, j.id_translator as tid, j.status_owner as status,
 		j.owner as job_owner, j.create_date, j.last_update, j.tm_keys,
@@ -1037,38 +954,6 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ) {
     $results = $db->fetch_array( $query );
 
     return $results;
-}
-
-function getLastSegmentInNextFetchWindow( $jid, $password, $step = 50, $ref_segment, $where = 'after' ) {
-    switch ( $where ) {
-        case 'after':
-            $ref_point = $ref_segment;
-            break;
-        case 'before':
-            $ref_point = $ref_segment - ( $step + 1 );
-            break;
-        case 'center':
-            $ref_point = ( (float)$ref_segment ) - 100;
-            break;
-    }
-
-    //	$ref_point = ($where == 'center')? ((float) $ref_segment) - 100 : $ref_segment;
-
-    $query = "select max(id) as max_id
-		from (select s.id from  jobs j 
-				inner join projects p on p.id=j.id_project
-				inner join files_job fj on fj.id_job=j.id
-				inner join files f on f.id=fj.id_file
-				inner join segments s on s.id_file=f.id
-				left join segment_translations st on st.id_segment=s.id and st.id_job=j.id
-				where j.id=$jid and j.password='$password' and s.id > $ref_point and s.show_in_cattool=1 
-				limit 0,$step) as id
-		";
-
-    $db      = Database::obtain();
-    $results = $db->query_first( $query );
-
-    return $results[ 'max_id' ];
 }
 
 function addTranslation( array $_Translation ) {
@@ -1484,16 +1369,6 @@ function getEQWLastHour( $id_job, $estimation_seg_ids ) {
     return $results;
 }
 
-function getOriginalFile( $id_file ) {
-
-    $query = "SELECT xliff_file FROM files WHERE id=" . $id_file;
-
-    $db      = Database::obtain();
-    $results = $db->fetch_array( $query );
-
-    return $results;
-}
-
 function getUpdatedTranslations( $timestamp, $first_segment, $last_segment, $id_job ) {
     
     $query = "SELECT id_segment as sid, status,translation from segment_translations
@@ -1756,15 +1631,6 @@ function insertFilesJob( $id_job, $id_file ) {
     $db->insert( 'files_job', $data );
 }
 
-function updateJobOwner( $jid, $new_owner ) {
-
-    $db = Database::obtain();
-
-    $new_owner = $db->escape( $new_owner );
-    $res       = $db->update( 'jobs', array( 'owner' => $new_owner ), ' id = ' . (int)$jid );
-
-    return $res;
-}
 
 function getProject( $pid ) {
     $db    = Database::obtain();
@@ -1909,12 +1775,12 @@ function getJobAnalysisData( $pid, $job_password, $jid = null ) {
  * @param $search_source
  * @param $search_target
  * @param $search_status
- * @param $search_onlycompleted
+ * @param $search_only_completed
  * @return array
  */
 function conditionsForProjectsQuery(
         $search_in_pname, $search_source, $search_target,
-        $search_status, $search_onlycompleted
+        $search_status, $search_only_completed
 ) {
     $conditions = array() ;
     $data = array() ;
@@ -1939,7 +1805,7 @@ function conditionsForProjectsQuery(
         $data['owner_status'] = $search_status ;
     }
 
-    if ( $search_onlycompleted ) {
+    if ( $search_only_completed ) {
         $conditions[]  = " j.completed = 1 ";
     }
 
@@ -1954,12 +1820,12 @@ function conditionsForProjectsQuery(
  * @param                   $search_source        string
  * @param                   $search_target        string
  * @param                   $search_status        string
- * @param                   $search_only_completed bool
+ * @param                   $search_onlycompleted bool
  * @param                   $project_id           int
  *
  * @param \Teams\TeamStruct $team
  *
- * @return array
+ * @return array|int|resource|void
  */
 function getProjects( Users_UserStruct $user, $start, $step,
                       $search_in_pname, $search_source, $search_target,
@@ -1990,17 +1856,20 @@ function getProjects( Users_UserStruct $user, $start, $step,
 
     $where_query = implode( " AND ", $conditions );
 
+    $features = Projects_MetadataDao::FEATURES_KEY ;
+
     $projectsQuery =
             "SELECT p.id AS pid,
-                p.name,
-                p.password,
-                SUM( draft_words + new_words + translated_words + rejected_words + approved_words ) AS tm_analysis_wc
+                            p.name,
+                            p.password,
+                            SUM(draft_words + new_words+translated_words+rejected_words+approved_words) as tm_analysis_wc,
+                            project_metadata.value AS features
 
             FROM projects p
 
             INNER JOIN jobs j ON j.id_project=p.id
 
-            INNER JOIN users ON users.email = p.id_customer
+            LEFT JOIN project_metadata ON project_metadata.id_project = p.id AND project_metadata.`key` = '$features'
 
             WHERE $where_query
             GROUP BY 1
@@ -2029,9 +1898,11 @@ function getJobsFromProjects( array $projectIDs, $search_source, $search_target,
     );
 
     $where_query = implode( " AND ", $conditions );
+    $features = Projects_MetadataDao::FEATURES_KEY ;
 
     $jobsQuery = "SELECT
                  j.id,
+
 				 j.id_project,
 				 j.source,
 				 j.target,
@@ -2048,9 +1919,28 @@ function getJobsFromProjects( array $projectIDs, $search_source, $search_target,
 				rejected_words AS REJECT,
 				translated_words AS TRANSLATED,
 				approved_words AS APPROVED,
-                e.name
+                e.name,
+
+
+                -- some fields are repeated with different names to favour the use of the same
+                -- data in CatUtils::getWStructFromJobArray
+                 j.id AS jid,
+                 j.password AS jpassword,
+                 j.draft_words,
+                 j.new_words,
+                 j.translated_words,
+                 j.approved_words,
+                 j.rejected_words,
+                 projects.status_analysis,
+                 project_metadata.value AS features
+
             FROM jobs j
             LEFT JOIN engines e ON j.id_mt_engine=e.id
+
+            JOIN projects ON projects.id = j.id_project
+
+            LEFT JOIN project_metadata ON project_metadata.id_project = projects.id AND project_metadata.`key` = '$features'
+
             WHERE j.id_project IN ( " . implode( ",", $projectIDs ) . " ) AND $where_query
             ORDER BY j.id DESC,
                      j.job_first_segment ASC";
@@ -2100,6 +1990,14 @@ function getProjectsNumber( Users_UserStruct $user, $search_in_pname, $search_so
     return $stmt->fetchAll() ;
 }
 
+/**
+ *
+ * REALLY HEAVY
+ *
+ * @param $pid
+ *
+ * @return array|int|mixed
+ */
 function getProjectStatsVolumeAnalysis( $pid ) {
 
     $query = "SELECT
@@ -2324,6 +2222,17 @@ function changeProjectStatus( $pid, $status, $if_status_not = array() ) {
     return $affectedRows;
 }
 
+/**
+ * @param $res
+ * @param $id
+ * @param $password
+ * @param $new_password
+ *
+ * @return int|mixed
+ *
+ * @deprecated
+ * TODO: Refactory with Prepared Statements
+ */
 function changePassword( $res, $id, $password, $new_password ) {
 
     $db = Database::obtain();
@@ -2356,18 +2265,6 @@ function changePassword( $res, $id, $password, $new_password ) {
     return ( $db->affected_rows | $row_exists );
 }
 
-function cancelJob( $res, $id ) {
-
-    if ( $res == "prj" ) {
-        $query = "UPDATE jobs SET status_owner = '" . Constants_JobStatus::STATUS_CANCELLED . "' WHERE id_project=" . (int)$id;
-    } else {
-        $query = "UPDATE jobs SET status_owner = '" . Constants_JobStatus::STATUS_CANCELLED . "' WHERE id=" . (int)$id;
-    }
-
-    $db = Database::obtain();
-    $db->query( $query );
-}
-
 function updateProjectOwner( $ownerEmail, $project_id ) {
     $db              = Database::obtain();
     $data            = array();
@@ -2378,55 +2275,49 @@ function updateProjectOwner( $ownerEmail, $project_id ) {
     return $result;
 }
 
-function updateJobsStatus( $res, $id, $status, $only_if, $undo, $jPassword = null ) {
+/**
+ * @param      $res
+ * @param      $id
+ * @param      $status
+ * @param      $only_if
+ * @param null $jPassword
+ *
+ * @deprecated
+ * //TODO: Refactoring with prepared statements
+ *
+ */
+function updateJobsStatus( $res, $id, $status, $only_if, $jPassword = null ) {
 
     $db = Database::obtain();
 
     if ( $res == "prj" ) {
+
         $status_filter_query = ( $only_if ) ? " and status_owner='" . $db->escape( $only_if ) . "'" : "";
-        $arStatus            = explode( ',', $status );
 
-        $test = count( explode( ':', $arStatus[ 0 ] ) );
-        if ( ( $test > 1 ) && ( $undo == 1 ) ) {
-            $cases = '';
-            $ids   = '';
+        $query = "UPDATE jobs SET status_owner='" . $db->escape( $status ) . "' WHERE id_project=" . (int)$id . $status_filter_query;
 
-            //help!!!
-            foreach ( $arStatus as $item ) {
-                $ss = explode( ':', $item );
-                $cases .= " when id=" . $db->escape( $ss[ 0 ] ) . " then '" . $db->escape( $ss[ 1 ] ) . "'";
-                $ids .= $db->escape( $ss[ 0 ] ) . ",";
-            }
-            $ids   = trim( $ids, ',' );
-            $query = "update jobs set status_owner= case $cases end where id in ($ids)" . $status_filter_query;
-            $db->query( $query );
+        $db->query( $query );
 
-        } else {
-
-            $query = "update jobs set status_owner='" . $db->escape( $status ) . "' where id_project=" . (int)$id . $status_filter_query;
-
-            $db->query( $query );
-
-            //Works on the basis that MAX( id_segment ) is the same for ALL Jobs in the same Project
-            // furthermore, we need a random ID so, don't worry about MySQL stupidity on random MAX
-            //example: http://dev.mysql.com/doc/refman/5.0/en/example-maximum-column-group-row.html
-            $select_max_id = "
-				SELECT max(id_segment) as id_segment
+        //Works on the basis that MAX( id_segment ) is the same for ALL Jobs in the same Project
+        // furthermore, we need a random ID so, don't worry about MySQL stupidity on random MAX
+        //example: http://dev.mysql.com/doc/refman/5.0/en/example-maximum-column-group-row.html
+        $select_max_id = "
+				SELECT max(id_segment) AS id_segment
 				FROM segment_translations
 				JOIN jobs ON id_job = id
 				WHERE id_project = " . (int)$id;
 
-            $_id_segment = $db->fetch_array( $select_max_id );
-            $_id_segment = array_pop( $_id_segment );
-            $id_segment  = $_id_segment[ 'id_segment' ];
+        $_id_segment = $db->fetch_array( $select_max_id );
+        $_id_segment = array_pop( $_id_segment );
+        $id_segment  = $_id_segment[ 'id_segment' ];
 
-            $query_for_translations = "
+        $query_for_translations = "
 				UPDATE segment_translations
 				SET translation_date = NOW()
 				WHERE id_segment = $id_segment";
 
-            $db->query( $query_for_translations );
-        }
+        $db->query( $query_for_translations );
+
     } else {
 
         $query = "update jobs set status_owner='" . $db->escape( $status ) . "' where id=" . (int)$id . " and password = '" . $db->escape( $jPassword ) . "' ";
@@ -2452,65 +2343,12 @@ function updateJobsStatus( $res, $id, $status, $only_if, $undo, $jPassword = nul
     }
 }
 
-function getCurrentJobsStatus( $pid ) {
-
-    $query = "select id,status_owner from jobs where id_project=$pid";
-
-    $db      = Database::obtain();
-    $results = $db->fetch_array( $query );
-
-    return $results;
-}
-
-function setSegmentTranslationError( $sid, $jid ) {
-
-    $data[ 'tm_analysis_status' ] = "DONE"; // DONE . I don't want it remains in an incostistent state
-    $where                        = " id_segment=$sid and id_job=$jid ";
-
-    $db = Database::obtain();
-    try {
-        $affectedRows = $db->update('segment_translations', $data, $where);
-    } catch( PDOException $e ) {
-        Log::doLog( $e->getMessage() );
-        return $e->getCode() * -1;
-    }
-    return $affectedRows;
-}
-
 /**
- * @param $pid
- *
- * @return mixed
- *
- */
-function countSegments( $pid ) {
-    $db = Database::obtain();
-
-    $query = "SELECT  COUNT(s.id) AS num_segments
-		FROM segments s
-		INNER JOIN files_job fj ON fj.id_file=s.id_file
-		INNER JOIN jobs j ON j.id= fj.id_job
-		WHERE id_project = $pid
-		";
-
-    //-- and raw_word_count>0 -- removed, count ALL segments
-    try {
-        $results = $db->query_first($query);
-    } catch( PDOException $e ) {
-        Log::doLog( $e->getMessage() );
-        return $e->getCode() * -1;
-    }
-    return $results[ 'num_segments' ];
-}
-
-/**
- * This function are pretty the same as
- * countSegmentsTranslationAnalyzed, but it is more heavy
- * so use after the preceding but only if it is necessary
+ * This function is heavy, use but only if it is necessary
  *
  * TODO cached
  *
- * ( Used in tmVolumeAnalysisThread with concurrency 100 )
+ * ( Used in TMAnalysisWorker and FastAnalysis )
  *
  * @param $pid
  *
@@ -2556,37 +2394,6 @@ function getProjectSegmentsTranslationSummary( $pid ) {
     return $results;
 }
 
-/**
- *
- * @param $pid
- *
- * @return array
- */
-function countSegmentsTranslationAnalyzed( $pid ) {
-    $db = Database::obtain();
-
-    $query = "SELECT
-            COUNT( s.id ) AS project_segments,
-            SUM(
-                CASE
-                    WHEN ( st.standard_word_count != 0 OR st.standard_word_count IS NULL ) THEN IF( st.tm_analysis_status = 'DONE', 1, 0 )
-                    WHEN st.standard_word_count = 0 THEN 1
-                END
-            ) AS num_analyzed,
-            SUM(eq_word_count) AS eq_wc ,
-            SUM(standard_word_count) AS st_wc
-            FROM segments s
-            JOIN segment_translations st ON s.id = st.id_segment
-            INNER JOIN jobs j ON j.id = st.id_job
-            WHERE j.id_project = $pid";
-    try {
-        $results = $db->query_first($query);
-    } catch( PDOException $e ) {
-        Log::doLog( $e->getMessage() );
-        return $e->getCode() * -1;
-    }
-    return $results;
-}
 
 function setJobCompleteness( $jid, $is_completed ) {
     $db    = Database::obtain();

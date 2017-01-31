@@ -28,7 +28,7 @@ CREATE TABLE `api_keys` (
   `enabled` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `api_key` (`api_key`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `chunk_completion_events` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -46,7 +46,7 @@ CREATE TABLE `chunk_completion_events` (
   KEY `id_project` (`id_project`) USING BTREE,
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `create_date` (`create_date`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `chunk_completion_updates` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -67,7 +67,7 @@ CREATE TABLE `chunk_completion_updates` (
   KEY `id_project` (`id_project`) USING BTREE,
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `create_date` (`create_date`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `comments` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -85,7 +85,7 @@ CREATE TABLE `comments` (
   PRIMARY KEY (`id`),
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `id_segment` (`id_job`) USING BTREE
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `connected_services` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -102,7 +102,7 @@ CREATE TABLE `connected_services` (
   `is_default` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uid_email_service` (`uid`,`email`,`service`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `engines` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -145,6 +145,7 @@ CREATE TABLE `files` (
   `source_language` varchar(45) NOT NULL,
   `mime_type` varchar(45) DEFAULT NULL,
   `sha1_original_file` varchar(100) DEFAULT NULL,
+  `segmentation_rule` varchar(512) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `id_project` (`id_project`),
   KEY `sha1` (`sha1_original_file`) USING HASH,
@@ -173,7 +174,7 @@ CREATE TABLE `job_metadata` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_job_password_key` (`id_job`,`password`,`key`) USING BTREE,
   KEY `id_job_password` (`id_job`,`password`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `jobs` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -187,6 +188,7 @@ CREATE TABLE `jobs` (
   `source` varchar(45) DEFAULT NULL,
   `target` varchar(45) DEFAULT NULL,
   `total_time_to_edit` bigint(20) DEFAULT '0',
+  `avg_post_editing_effort` float DEFAULT '0',
   `id_job_to_revise` int(11) DEFAULT NULL,
   `last_opened_segment` int(11) DEFAULT NULL,
   `id_tms` int(11) DEFAULT '1',
@@ -229,9 +231,9 @@ CREATE TABLE `jobs` (
   KEY `password` (`password`),
   KEY `source` (`source`),
   KEY `target` (`target`),
-  KEY `status_owner_idx` (`status_owner`),
-  KEY `status_idx` (`status`),
-  KEY `create_date_idx` (`create_date`)
+  KEY `status_owner_idx` (`status_owner`) USING BTREE,
+  KEY `status_idx` (`status`) USING BTREE,
+  KEY `create_date_idx` (`create_date`) USING BTREE
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `jobs_stats` (
@@ -247,7 +249,7 @@ CREATE TABLE `jobs_stats` (
   KEY `fuzzybands__index` (`fuzzy_band`),
   KEY `source` (`source`),
   KEY `target` (`target`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `language_stats` (
   `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -276,7 +278,7 @@ CREATE TABLE `memory_keys` (
   PRIMARY KEY (`uid`,`key_value`),
   KEY `uid_idx` (`uid`),
   KEY `key_value_idx` (`key_value`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `notifications` (
   `id` int(11) NOT NULL,
@@ -285,17 +287,6 @@ CREATE TABLE `notifications` (
   `status` varchar(45) CHARACTER SET latin1 DEFAULT 'UNREAD',
   PRIMARY KEY (`id`),
   KEY `id_comment` (`id_comment`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
-
-CREATE TABLE `original_files_map` (
-  `sha1` varchar(100) NOT NULL,
-  `source` varchar(50) NOT NULL,
-  `target` varchar(50) NOT NULL,
-  `deflated_file` longblob,
-  `deflated_xliff` longblob,
-  `creation_date` date DEFAULT NULL,
-  `segmentation_rule` varchar(512) DEFAULT NULL,
-  PRIMARY KEY (`sha1`,`source`,`target`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
 
 CREATE TABLE `owner_features` (
@@ -310,7 +301,7 @@ CREATE TABLE `owner_features` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uid_feature` (`uid`,`feature_code`) USING BTREE,
   UNIQUE KEY `id_team_feature` (`id_team`,`feature_code`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 CREATE TABLE `phinxlog` (
   `version` bigint(20) NOT NULL,
@@ -362,7 +353,7 @@ CREATE TABLE `qa_categories` (
   `severities` text COMMENT 'json field',
   PRIMARY KEY (`id`),
   KEY `id_model` (`id_model`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `qa_chunk_reviews` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -380,7 +371,7 @@ CREATE TABLE `qa_chunk_reviews` (
   KEY `id_project` (`id_project`),
   KEY `review_password` (`review_password`),
   KEY `id_job` (`id_job`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `qa_entries` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -403,7 +394,7 @@ CREATE TABLE `qa_entries` (
   `rebutted_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `job_and_segment` (`id_job`,`id_segment`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `qa_entry_comments` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -425,7 +416,7 @@ CREATE TABLE `qa_models` (
   `pass_type` varchar(255) DEFAULT NULL,
   `pass_options` text,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `remote_files` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -438,7 +429,7 @@ CREATE TABLE `remote_files` (
   KEY `id_file` (`id_file`) USING BTREE,
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `connected_service_id` (`connected_service_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `segment_notes` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -447,7 +438,7 @@ CREATE TABLE `segment_notes` (
   `note` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `id_segment` (`id_segment`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `segment_revisions` (
   `id_job` bigint(20) NOT NULL,
@@ -474,7 +465,7 @@ CREATE TABLE `segment_translation_versions` (
   KEY `id_segment` (`id_segment`) USING BTREE,
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `creation_date` (`creation_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `segment_translations` (
   `id_segment` bigint(20) NOT NULL,
@@ -547,7 +538,7 @@ CREATE TABLE `segments` (
 
 CREATE TABLE `sequences` (
   `id_segment` bigint(20) unsigned NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1; 
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE `teams` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -555,7 +546,7 @@ CREATE TABLE `teams` (
   `created_by` bigint(20) NOT NULL,
   `created_at` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `teams_users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -564,7 +555,7 @@ CREATE TABLE `teams_users` (
   `is_admin` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_team_uid` (`id_team`,`uid`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `translation_warnings` (
   `id_job` bigint(20) NOT NULL,
@@ -653,6 +644,9 @@ NULL);
 UPDATE engines SET id = 0 WHERE name = 'NONE' ;
 UPDATE engines SET id = 1 WHERE name = 'MyMemory (All Pairs)' ;
 
+-- populate sequences
+INSERT INTO sequences ( id_segment ) VALUES ( IFNULL( (SELECT MAX(id) + 1 FROM segments), 1)  );
+
 #Create the user 'matecat'@'%'
 CREATE USER 'matecat'@'%' IDENTIFIED BY 'matecat01';
 
@@ -702,6 +696,7 @@ INSERT INTO `phinxlog` ( version ) VALUES ( '20161223190349' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161223191009' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161223191509' );
 INSERT INTO `phinxlog` ( version ) VALUES ( '20161230151125' );
+INSERT INTO `phinxlog` ( version ) VALUES ( '20170113150724' );
 
 CREATE SCHEMA `matecat_conversions_log` DEFAULT CHARACTER SET utf8 ;
 USE matecat_conversions_log ;

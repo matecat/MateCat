@@ -198,16 +198,19 @@ class ProjectManager {
 
 
     /**
-     * 
-     * Save in project metadata. This is where, among other things, we put 
-     * project options. 
+     *  saveMetadata
+     *
+     * This is where, among other things, we put project options.
      * 
      * Project options may need to be sanitized so that we can silently ignore impossible combinations, 
      * and we can apply defaults when those are missing. 
      * 
      */
     private function saveMetadata() {
-        $options = $this->projectStructure['metadata']; 
+        $dao = new Projects_MetadataDao();
+        $dao->set( $this->projectStructure['id_project'], Projects_MetadataDao::FEATURES_KEY,  implode(',', $this->features->getCodes() ) ) ;
+
+        $options = $this->projectStructure['metadata'];
         
         if ( $this->sanitizeProjectOptions ) {
             $options = $this->sanitizeProjectOptions( $options ) ; 
@@ -216,8 +219,7 @@ class ProjectManager {
         if ( empty( $options ) ) {
             return ;
         }
-            
-        $dao = new Projects_MetadataDao( Database::obtain() );
+
         foreach( $options as $key => $value ) {
             $dao->set(
                     $this->projectStructure['id_project'],
@@ -1510,10 +1512,10 @@ class ProjectManager {
                                     //AND IF IT IS ONLY A CHAR? like "*" ?
                                     //we can't distinguish if it is translated or not
                                     //this means that we lose the tags id inside the target if different from source
-                                    $src = strip_tags( html_entity_decode( $extract_external[ 'seg' ], ENT_QUOTES, 'UTF-8' ) );
-                                    $trg = strip_tags( html_entity_decode( $target_extract_external[ 'seg' ], ENT_QUOTES, 'UTF-8' ) );
+                                    $src = trim( strip_tags( html_entity_decode( $extract_external[ 'seg' ], ENT_QUOTES, 'UTF-8' ) ) );
+                                    $trg = trim( strip_tags( html_entity_decode( $target_extract_external[ 'seg' ], ENT_QUOTES, 'UTF-8' ) ) );
 
-                                    if ( $src != $trg && !is_numeric( $src ) ) { //treat 0,1,2.. as translated content!
+                                    if ( $src != $trg && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
 
                                         $target_extract_external[ 'seg' ] = CatUtils::raw2DatabaseXliff( $target_extract_external[ 'seg' ] );
                                         $target                           = $this->dbHandler->escape( $target_extract_external[ 'seg' ] );
@@ -1855,6 +1857,7 @@ class ProjectManager {
 
                 $this->projectStructure[ 'query_translations' ]->append( $sql_values ) ;
             }
+
         }
 
         // Executing the Query

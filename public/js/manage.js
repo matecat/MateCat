@@ -256,7 +256,7 @@ UI = {
             page:		UI.Search.currentPage,        //The pagination ??
             step:		UI.pageStep,    // Number of Projects that returns from getProjects
             only_if:	only_if,        // State before, for example resume project change to 'active' only_if previous state is archived
-            undo:		0               // ??
+            undo:		0               // ?? REMOVED in backend endpoint. If needed, this MUST be re-implemented with sanity....
         };
 
         // Filters

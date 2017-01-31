@@ -4,20 +4,30 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
     const TABLE = "projects";
 
     /**
+     * @param $project
+     * @param $field
+     * @param $value
      *
+     * @return bool
      */
-
     public function updateField( $project, $field, $value ) {
-        $sql = "UPDATE projects SET $field = :value " .
-            " WHERE id = :id ";
+
+        $sql = "UPDATE projects SET {$field} = :value WHERE id = :id ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
-        return $stmt->execute( array(
+        $success = $stmt->execute( array(
             'value' => $value,
             'id' => $project->id
         ));
+
+        if( $success ){
+            $project->$field = $value;
+        }
+
+        return $project;
+
     }
 
     /**

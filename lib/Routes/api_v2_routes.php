@@ -11,6 +11,7 @@ $klein->with('/api/v2/projects/[:id_project]/[:password]', function() {
 
     route( '/urls',                 'GET',  'API\V2\UrlsController',        'urls'      );
     route( '/jobs/[:id_job]/merge', 'POST', 'API\V2\JobMergeController',    'merge'     );
+    route( '/rename', 'POST', 'API\V2\ProjectRenameController',    'rename'     );
 
 });
 

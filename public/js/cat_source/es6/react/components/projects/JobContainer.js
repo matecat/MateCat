@@ -229,7 +229,7 @@ class JobContainer extends React.Component {
             let tooltipText = '';
             keys.forEach(function (key, i) {
                 let descript = (key.name) ? key.name : "Private TM and Glossary";
-                let item = '<div style="text-align: left">DESCRIPTION: <span style="font-weight: bold">' + descript + '</span> KEY: ' + key.key + '</div>';
+                let item = '<div style="text-align: left"><span style="font-weight: bold">' + descript + '</span> KEY: ' + key.key + '</div>';
                 tooltipText =  tooltipText + item;
             });
             return <li>
@@ -254,16 +254,46 @@ class JobContainer extends React.Component {
             } else {
                 tooltipText = 'There are <span style="font-weight: bold">' + openThreads + '</span> open threads';
             }
-
+            var translatedUrl = this.getTranslateUrl() + '?action=openComments';
             icon = <li>
                 <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0 tooltipped comments-tooltip"
-                   data-position="top" data-tooltip={tooltipText}>
+                   data-position="top" data-tooltip={tooltipText} href={translatedUrl} target="_blank">
                     <i className="icon-uniE96B"/>
                 </a>
             </li>;
         }
         return icon;
 
+    }
+
+    getQRIcon() {
+        var icon = '';
+        var quality = this.props.job.get('quality_overall');
+        if ( quality === "poor" || quality === "fail" ) {
+            var url = this.getQAReport();
+            icon = <li>
+                <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0"
+                   href={url} target="_blank">
+                    <i className={"icon-qr-matecat " + quality}/>
+                </a>
+            </li>;
+        }
+        return icon;
+    }
+
+    getWarningsIcon() {
+        var icon = '';
+        var warnings = this.props.job.get('warnings_count');
+        if ( warnings > 0 ) {
+            var url = this.getTranslateUrl() + '?action=warnings';
+            icon = <li>
+                <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0"
+                   href={url} target="_blank">
+                    <i className="icon-notice"/>
+                </a>
+            </li>;
+        }
+        return icon;
     }
 
     getSplitOrMergeButton(splitUrl, mergeUrl) {
@@ -300,7 +330,9 @@ class JobContainer extends React.Component {
 
         let jobMenu = this.getJobMenu(splitUrl, mergeUrl);
         let tmIcon = this.getTMIcon();
+        let QRIcon = this.getQRIcon();
         let commentsIcon = this.getCommentsIcon();
+        let warningsIcon = this.getWarningsIcon();
         let idJobLabel = ( !this.props.isChunk ) ? this.props.job.get('id') : this.props.job.get('id') + '-' + this.props.index;
 
         return <div className="card job z-depth-1">
@@ -367,6 +399,8 @@ class JobContainer extends React.Component {
                     </div>
                     <div className="col right">
                         <ul className="job-activity-icon">
+                            {QRIcon}
+                            {warningsIcon}
                             {commentsIcon}
                             {tmIcon}
                             {/*<li>

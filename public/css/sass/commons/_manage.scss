@@ -366,10 +366,16 @@ a:hover {
 		// background-color: orange;
 		li {
 			float: left;
-			a{
+			a {
 				margin-left: 0px;
 				i {
 					color: #4D4D4D;
+				}
+				i.icon-qr-matecat.poor {
+					color: #FFA935;
+				}
+				i.icon-qr-matecat.fail {
+					color: #E7504D;
 				}
 			}
 		}
