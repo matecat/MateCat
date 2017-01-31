@@ -142,7 +142,7 @@ $(document).ready(function() {
 							$('.uploadbtn').attr('value','Analyze').removeAttr('disabled').removeClass('disabled');
 
 						} else {
-                            location.href = d.analyze_url ;
+							setTimeout( function(){ location.href = d.analyze_url; }, 2000 );
 						}
 
 					} else {
