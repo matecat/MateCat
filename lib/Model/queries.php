@@ -712,7 +712,8 @@ function getFirstSegmentId( $jid, $password ) {
  */
 function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'after', $options=array() ) {
 
-    if ( $options['optional_fields'] ) {
+    $optional_fields = null;
+    if ( isset( $options['optional_fields'] ) ) {
         $optional_fields = ', ';
         $optional_fields .= implode(', ', $options['optional_fields']);
     }

@@ -96,6 +96,7 @@ class ManageUtils {
 
             //generate and set job stats
             $jobStats = new WordCount_Struct();
+            $jobStats->setIdJob( $job_array[ 'id' ] );
             $jobStats->setDraftWords( $job_array[ 'DRAFT' ] );
             $jobStats->setRejectedWords( $job_array[ 'REJECT' ] );
             $jobStats->setTranslatedWords( $job_array[ 'TRANSLATED' ] );
