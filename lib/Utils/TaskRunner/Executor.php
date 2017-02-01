@@ -9,6 +9,7 @@
 
 namespace TaskRunner;
 
+use Database;
 use TaskRunner\Commons\Context;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
