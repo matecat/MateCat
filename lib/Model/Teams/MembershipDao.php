@@ -13,7 +13,7 @@ use PDO ;
 class MembershipDao extends \DataAccess_AbstractDao
 {
 
-    const TABLE = "teams_users";
+    const TABLE = "organizations_users";
     const STRUCT_TYPE = "\\Teams\\MembershipStruct";
 
     protected static $auto_increment_fields = array('id');
@@ -36,8 +36,8 @@ class MembershipDao extends \DataAccess_AbstractDao
      * @param \Users_UserStruct $user
      */
     public function findTeambyUser( \Users_UserStruct $user ) {
-        $sql = " SELECT teams.* FROM teams JOIN teams_users ON teams_users.id_team = teams.id " .
-            " WHERE teams_users.uid = ? " .
+        $sql = " SELECT organizations.* FROM organizations JOIN organizations_users ON organizations_users.id_organization = organizations.id " .
+            " WHERE organizations_users.uid = ? " .
             " LIMIT 1 " ;
 
         $stmt = $this->getConnection()->getConnection()->prepare( $sql ) ;

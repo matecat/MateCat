@@ -12,7 +12,7 @@ use PDO;
 
 class TeamDao extends \DataAccess_AbstractDao {
 
-    const TABLE = "teams";
+    const TABLE = "organizations";
     const STRUCT_TYPE = "TeamStruct";
 
     protected static $auto_increment_fields = array('id');
@@ -23,7 +23,7 @@ class TeamDao extends \DataAccess_AbstractDao {
      * @return TeamStruct
      */
     public function findById( $id ) {
-        $sql = " SELECT * FROM teams WHERE id = ? " ;
+        $sql = " SELECT * FROM organizations WHERE id = ? " ;
         $stmt = $this->getConnection()->getConnection()->prepare( $sql ) ;
         $stmt->setFetchMode( PDO::FETCH_CLASS, 'Teams\TeamStruct' );
         $stmt->execute(array( $id)) ;

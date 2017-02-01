@@ -14,7 +14,7 @@ use DataAccess_IDaoStruct ;
 class MembershipStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
 
     public $id ;
-    public $id_team;
+    public $id_organization;
     public $uid ;
     public $is_admin ;
 
