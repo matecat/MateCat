@@ -6,7 +6,7 @@ class FilterProjects extends React.Component {
     }
 
     componentDidMount () {
-        var self = this;
+        let self = this;
         this.dropdown = $('.ui.dropdown.projects-state');
         this.dropdown.dropdown({
             onChange: function() {
@@ -25,31 +25,25 @@ class FilterProjects extends React.Component {
     }
 
     render () {
-        return <div className="row">
-                        <div className="ui floating projects-state fluid dropdown labeled icon button">
-                            <i className="filter icon"></i>
-                            <span className="text">Filter Projects</span>
-                            <div className="menu">
-                                <div className="scrolling menu">
-                                    <div className="item" data-value="active">
-                                        <div className="ui red empty circular label"></div>
-                                        Active Projects
-                                    </div>
-                                    <div className="item" data-value="archived">
-                                        <div className="ui blue empty circular label"></div>
-                                        Archived Projects
-                                    </div>
-                                    <div className="item" data-value="cancelled">
-                                        <div className="ui black empty circular label"></div>
-                                        Cancelled Projects
-                                    </div>
-                                </div>
+        return <div className="ui projects-state dropdown icon button">
+                    <i className="filter icon"/>
+                    <div className="menu">
+                        <div className="scrolling menu">
+                            <div className="item" data-value="active">
+                                <div className="ui red empty circular label"></div>
+                                Active Projects
+                            </div>
+                            <div className="item" data-value="archived">
+                                <div className="ui blue empty circular label"></div>
+                                Archived Projects
+                            </div>
+                            <div className="item" data-value="cancelled">
+                                <div className="ui black empty circular label"></div>
+                                Cancelled Projects
                             </div>
                         </div>
-                    </div>;
-
-
-
+                    </div>
+                </div>;
     }
 }
 

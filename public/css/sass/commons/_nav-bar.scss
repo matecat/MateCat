@@ -1,36 +1,43 @@
 .nav-mc-bar {
-  nav {
-    height: 48px;
-    line-height: 48px;
-    .row {
-      margin-bottom: 0px;
+    margin: 0 !important;
+    nav {
+        height: 48px;
+        line-height: 48px;
+        color: white;
+        background-color: #4d4d4d;
+        width: 100%;
+        padding-bottom: 0 !important;
+        padding-top: 0 !important;
+        .organization-dropdown  {
+            max-width: 300px;
+            float: right;
+        }
     }
-  }
 }
 .middle-v {
-  vertical-align: middle;
+    vertical-align: middle;
 }
 
 .logo-col {
-  min-width: 200px;
+    min-width: 200px;
 }
 
 .logo {
-  position: absolute;
-  float: left;
-  border: 0;
-  margin-top: 10px;
-  background: url(../../img/logo.png) 0px 2px no-repeat;
-  width: 145px;
-  height: 31px;
-  background-size: 130px 26px;
-  left: 67px;
+    position: absolute;
+    float: left;
+    border: 0;
+    margin-top: 10px;
+    background: url(../../img/logo.png) 0px 2px no-repeat;
+    width: 145px;
+    height: 31px;
+    background-size: 130px 26px;
+    left: 67px;
 }
 
 header {
-  top: 0;
-  left: 0;
-  width: 100%;
-  position: fixed;
-  z-index: 999999999;
+    top: 0;
+    left: 0;
+    width: 100%;
+    position: fixed;
+    z-index: 999999999;
 }

@@ -92,19 +92,7 @@ class Header extends React.Component {
                         </a>
                     </div>
                     <div className="divider"></div>
-                    {/*<div className="header">
-                        <div className="ui form">
-                            <div className="field">
-                                <input type="text" name="Project Name" placeholder="Translated Organization es." />
-                            </div>
-                        </div>
-                    </div>
-                    <div className="divider"></div>*/}
                     <div className="scrolling menu">
-                        {/*<div className="item" data-value='all'*/}
-                             {/*data-text='All organizations'>*/}
-                            {/*All organizations*/}
-                        {/*</div>*/}
                         {items}
                     </div>
                 </div>
@@ -115,32 +103,15 @@ class Header extends React.Component {
 
     render () {
         let organizationsSelect = this.getOrganizationsSelect();
-        return <section className="nav-mc-bar">
-                    <nav role="navigation">
-                        <div className="nav-wrapper">
-                            <div className="container-fluid">
-                                <div className="row">
-                                    <a href="/" className="logo logo-col"/>
+        return <section className="ui grid nav-mc-bar">
 
-                                    <div className="col m2 right">
-                                        {organizationsSelect}
-                                    </div>
-                         
-                                        
+                    <nav className="four column row">
+                        <div className="left floated column">
+                            <a href="/" className="logo logo-col"/>
+                        </div>
+                        <div className="right floated column">
 
-                                    <div className="col l2 right profile-area">
-                                        <ul className="right">
-                                            <li>
-                                                <a href="" className="right waves-effect waves-light">
-                                                    <span id="nome-cognome" className="hide-on-med-and-down">Nome Cognome </span>
-                                                    <button className="btn-floating btn-flat waves-effect waves-dark z-depth-0 center hoverable">RS</button>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    
-                                </div>
-                            </div>
+                            {organizationsSelect}
                         </div>
                     </nav>
                     <SubHeader

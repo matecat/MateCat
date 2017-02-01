@@ -11,8 +11,8 @@ class CreateOrganization extends React.Component {
     }
 
     createOrganization() {
-        $(this.organizationInput).val();
-        ManageActions.createOrganization($(this.organizationInput).val());
+        $(this.workspaceInput).val();
+        ManageActions.createOrganization($(this.workspaceInput).val());
         APP.ModalWindow.onCloseModal();
     }
 
@@ -25,7 +25,7 @@ class CreateOrganization extends React.Component {
                                 <div className="required field">
                                     <label>Organization Name</label>
                                     <input type="text" name="Project Name" placeholder="es. Accounts, Project Managers, Translators"
-                                           ref={(organizationInput) => this.organizationInput = organizationInput}/>
+                                           ref={(organizationInput) => this.workspaceInput = organizationInput}/>
                                 </div>
                                 <div className="field">
                                     <label>Add People to organization</label>

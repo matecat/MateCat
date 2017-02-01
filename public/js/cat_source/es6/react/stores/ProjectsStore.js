@@ -56,6 +56,16 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
         this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'oldPassword'], oldPassword);
     },
 
+    changeProjectName: function (project, newName) {
+        let indexProject = this.projects.indexOf(project);
+        this.projects = this.projects.setIn([indexProject,'name'], newName);
+    },
+
+    changeProjectAssignee: function (project, user) {
+        let indexProject = this.projects.indexOf(project);
+        this.projects = this.projects.setIn([indexProject,'user'], user);
+    },
+
     unwrapImmutableObject(object) {
         if (object && typeof object.toJS === "function") {
             return object.toJS();
@@ -118,20 +128,32 @@ AppDispatcher.register(function(action) {
         case ManageConstants.SHOW_RELOAD_SPINNER:
             ProjectsStore.emitChange(action.actionType);
             break;
+        case ManageConstants.CHANGE_PROJECT_NAME:
+            ProjectsStore.changeProjectName(action.project, action.newName);
+            ProjectsStore.emitChange(ManageConstants.UPDATE_PROJECTS, ProjectsStore.projects);
+            break;
+        case ManageConstants.CHANGE_PROJECT_ASSIGNEE:
+            ProjectsStore.changeProjectAssignee(action.project, action.user);
+            ProjectsStore.emitChange(ManageConstants.UPDATE_PROJECTS, ProjectsStore.projects);
+            break;
+        case ManageConstants.CHANGE_PROJECT_WORKSPACE:
+            ProjectsStore.emitChange(ManageConstants.UPDATE_PROJECTS, ProjectsStore.projects);
+            break;
+        // Move this actions
         case ManageConstants.OPEN_CREATE_ORGANIZATION_MODAL:
             ProjectsStore.emitChange(action.actionType);
             break;
-            case ManageConstants.OPEN_ASSIGN_TO_TRANSLATOR_MODAL:
+        case ManageConstants.OPEN_ASSIGN_TO_TRANSLATOR_MODAL:
             ProjectsStore.emitChange(action.actionType, action.project, action.job);
             break;
         case ManageConstants.OPEN_MODIFY_ORGANIZATION_MODAL:
             ProjectsStore.emitChange(action.actionType, action.organization);
             break;
-        case ManageConstants.CHANGE_PROJECT_ASSIGNEE:
-            ProjectsStore.emitChange(action.actionType, action.idProject, action.user, action.organizationName);
+        case ManageConstants.OPEN_CREATE_WORKSPACE_MODAL:
+            ProjectsStore.emitChange(action.actionType);
             break;
-        case ManageConstants.CHANGE_PROJECT_WORKSPACE:
-            ProjectsStore.emitChange(action.actionType, action.oldOrganization, action.organization, action.projectId);
+        case ManageConstants.OPEN_MODIFY_WORKSPACE_MODAL:
+            ProjectsStore.emitChange(action.actionType);
             break;
 
     }

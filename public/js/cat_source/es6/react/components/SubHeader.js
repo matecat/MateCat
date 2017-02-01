@@ -47,11 +47,6 @@ class SubHeader extends React.Component {
                 id: -1,
                 name: 'all'
             };
-        } else if (value === '0') {
-            this.selectedWorkSpace =  {
-                id: 0,
-                name: 'General'
-            };
         } else {
             this.selectedWorkSpace = this.props.selectedOrganization.get('workspaces').find(function (workspace) {
                 if (workspace.get("id") === parseInt(value)) {
@@ -65,7 +60,7 @@ class SubHeader extends React.Component {
     }
 
     openCreateWorkspace() {
-
+        ManageActions.openCreateWorkspaceModal();
     }
 
 
@@ -87,7 +82,6 @@ class SubHeader extends React.Component {
                 <div className="item" data-value={user.get('id')}
                      key={'organization' + user.get('userShortName') + user.get('id')}>
                     <a className="ui avatar image initials green">{user.get('userShortName')}</a>
-                    {/*<img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg"/>*/}
                     {(user.get('id') === 0)? 'My Projects' : user.get('userFullName')}
                 </div>
 
@@ -96,18 +90,17 @@ class SubHeader extends React.Component {
             let item = <div className="item" data-value="2000"
                             key={'organization' + config.userShortName + 2000}>
                 <a className="ui avatar image initials green">ALL</a>
-                {/*<img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg"/>*/}
                 All Members
             </div>;
             users = users.unshift(item);
 
-            result = <div className="row">
-                        <div className="col top-12">
-                            <div className="assigned-list">
-                                <p>Projects of: </p>
-                            </div>
+            result = <div className="users-filter">
+
+                        <div className="assigned-list">
+                            <p>Projects of: </p>
                         </div>
-                        <div className="input-field col top-8">
+
+                        <div className="input-field">
                             <div className="list-organization">
                                 <span>
                                     <div className="ui inline dropdown users-projects"
@@ -160,10 +153,6 @@ class SubHeader extends React.Component {
                      </div>
                      <div className="divider"></div>*/}
                     <div className="scrolling menu">
-                        <div className="item" data-value='0'
-                        data-text='General'>
-                        General
-                        </div>
                         <div className="item" data-value='-1'
                              data-text='All'>
                              All
@@ -180,28 +169,23 @@ class SubHeader extends React.Component {
         let workspaceDropDown = this.getWorkspacesSelect();
 
         return (
-            <section className="sub-head z-depth-1">
-                <div className="container-fluid">
-                    <div className="row">
-                        <div className="col m2">
-                            {workspaceDropDown}
-                        </div>
-                        <div className="col m3 offset-m2">
-                            {usersFilter}
-                        </div>
-                        <div className="col m3">
-                            <nav>
-                                <div className="nav-wrapper">
-                                    <SearchInput
-                                        onChange={this.onChangeSearchInput.bind(this)}/>
-                                </div>
-                            </nav>
-                        </div>
-                        <div className="col m2 right">
+            <section className="row sub-head">
+                <div className="ui container equal width grid">
+                    <div className="column">
+                        {workspaceDropDown}
+                    </div>
+                    <div className="center aligned column">
+                        {usersFilter}
+                    </div>
+                    <div className="column">
+                        <div className="search-state-filters">
+                            <SearchInput
+                                onChange={this.onChangeSearchInput.bind(this)}/>
                             <FilterProjects
                                 filterFunction={this.filterByStatus.bind(this)}/>
                         </div>
                     </div>
+
                 </div>
             </section>
         );

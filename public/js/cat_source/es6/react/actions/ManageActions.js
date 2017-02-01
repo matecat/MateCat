@@ -3,7 +3,7 @@ let ManageConstants = require('../constants/ManageConstants');
 
 
 let ManageActions = {
-    /********* SEGMENTS *********/
+    /********* Projects *********/
 
     /** Render the list of projects
      * @param projects
@@ -68,19 +68,28 @@ let ManageActions = {
         });
     },
 
-    removeProject: function (project) {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.REMOVE_PROJECT,
-            project: project
-        });
+    updateStatusProject: function (project, status) {
+        UI.changeJobsOrProjectStatus('prj', project.toJS(), status).done(
+            function () {
+                AppDispatcher.dispatch({
+                    actionType: ManageConstants.REMOVE_PROJECT,
+                    project: project
+                });
+            }
+        );
     },
 
-    removeJob: function (project, job) {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.REMOVE_JOB,
-            project: project,
-            job: job
-        });
+    changeJobStatus: function (project, job, status) {
+        UI.changeJobsOrProjectStatus('job', job.toJS(), status).done(
+            function () {
+                AppDispatcher.dispatch({
+                    actionType: ManageConstants.REMOVE_JOB,
+                    project: project,
+                    job: job
+                });
+            }
+        );
+
     },
 
     changeJobPassword: function (project, job, password, oldPassword) {
@@ -105,14 +114,56 @@ let ManageActions = {
         });
     },
 
-    changeProjectWorkspace: function (oldWorkspace, newWorkspace, projectId) {
+    filterProjects: function (user, workspace,  name, status) {
         AppDispatcher.dispatch({
-            actionType: ManageConstants.CHANGE_PROJECT_WORKSPACE,
-            oldOrganization: oldWorkspace,
-            workspace: newWorkspace,
-            projectId: projectId
+            actionType: ManageConstants.FILTER_PROJECTS,
+            user: user,
+            workspace: workspace,
+            name: name,
+            status: status
         });
     },
+
+    changeProjectAssignee: function (project, user) {
+        UI.changeProjectAssignee(project, user).done(
+            function () {
+                AppDispatcher.dispatch({
+                    actionType: ManageConstants.CHANGE_PROJECT_ASSIGNEE,
+                    project: project,
+                    user: user
+                });
+            }
+        );
+
+    },
+
+    changeProjectWorkspace: function () {
+        UI.changeProjectWorkspace(oldWorkspace, newWorkspace, projectId).done(function () {
+            AppDispatcher.dispatch({
+                actionType: ManageConstants.CHANGE_PROJECT_WORKSPACE,
+                oldOrganization: oldWorkspace,
+                workspace: newWorkspace,
+                projectId: projectId
+            });
+        });
+
+    },
+
+    changeProjectName: function (project, newName) {
+        UI.changeProjectName(project.get('id'), project.get('password'), newName).done(
+            function () {
+                AppDispatcher.dispatch({
+                    actionType: ManageConstants.CHANGE_PROJECT_NAME,
+                    project: project,
+                    newName: newName
+                });
+            }
+        );
+
+    },
+
+
+    /********* Modals *********/
 
     openCreateOrganizationModal: function () {
         AppDispatcher.dispatch({
@@ -124,6 +175,18 @@ let ManageActions = {
         AppDispatcher.dispatch({
             actionType: ManageConstants.OPEN_MODIFY_ORGANIZATION_MODAL,
             organization: organization
+        });
+    },
+    openCreateWorkspaceModal: function () {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.OPEN_CREATE_WORKSPACE_MODAL,
+        });
+    },
+
+    openModifyWorkspaceModal: function (workspace) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.OPEN_MODIFY_WORKSPACE_MODAL,
+            workspace: workspace
         });
     },
 
@@ -142,6 +205,8 @@ let ManageActions = {
             job: job
         });
     },
+
+    /********* Organizations *********/
 
     renderOrganizations: function (organizations, defaultOrganization) {
         AppDispatcher.dispatch({
@@ -170,31 +235,7 @@ let ManageActions = {
             actionType: ManageConstants.CHANGE_ORGANIZATION,
             organizationName: organizationName
         });
-    },
-
-    filterProjects: function (user, workspace,  name, status) {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.FILTER_PROJECTS,
-            user: user,
-            workspace: workspace,
-            name: name,
-            status: status
-        });
-    },
-
-    changeProjectAssignee: function (idProject, user, organizationName) {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.CHANGE_PROJECT_ASSIGNEE,
-            user: user,
-            idProject: idProject,
-            organizationName: organizationName
-        });
     }
-
-
-
-
-
 
 
 };

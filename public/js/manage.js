@@ -13,21 +13,28 @@ UI = {
         this.changeProjectAssignee = this.changeProjectAssignee.bind(this);
         this.changeProjectWorkspace = this.changeProjectWorkspace.bind(this);
 
+        //Job Actions
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_SETTINGS, this.openJobSettings);
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_TM_PANEL, this.openJobTMPanel);
 
+        //Projects actions
+        ProjectsStore.addListener(ManageConstants.FILTER_PROJECTS, this.filterProjects.bind(this));
+
+        //Organizations actions
+        OrganizationsStore.addListener(ManageConstants.CREATE_ORGANIZATION, this.createOrganization);
+        OrganizationsStore.addListener(ManageConstants.CHANGE_ORGANIZATION, this.changeOrganization);
+
+        //Workspaces Actions
+        // OrganizationsStore.addListener(ManageConstants.CREATE_WORKSPACE, this.createWorkspace);
+        // OrganizationsStore.addListener(ManageConstants.CHANGE_WORKSPACE, this.changeWorkspace);
+
+        //Modals
         ProjectsStore.addListener(ManageConstants.OPEN_CREATE_ORGANIZATION_MODAL, this.openCreateOrganizationModal);
         ProjectsStore.addListener(ManageConstants.OPEN_MODIFY_ORGANIZATION_MODAL, this.openModifyOrganizationModal);
         ProjectsStore.addListener(ManageConstants.OPEN_CHANGE_ORGANIZATION_MODAL, this.openChangeProjectWorkspace);
         ProjectsStore.addListener(ManageConstants.OPEN_ASSIGN_TO_TRANSLATOR_MODAL, this.openAssignToTranslator);
-        ProjectsStore.addListener(ManageConstants.FILTER_PROJECTS, this.filterProjects.bind(this));
-
-        ProjectsStore.addListener(ManageConstants.CHANGE_PROJECT_ASSIGNEE, this.changeProjectAssignee);
-        ProjectsStore.addListener(ManageConstants.CHANGE_PROJECT_WORKSPACE, this.changeProjectWorkspace);
-
-        OrganizationsStore.addListener(ManageConstants.CREATE_ORGANIZATION, this.createOrganization);
-        OrganizationsStore.addListener(ManageConstants.CHANGE_ORGANIZATION, this.changeOrganization);
-
+        ProjectsStore.addListener(ManageConstants.OPEN_CREATE_WORKSPACE_MODAL, this.openCreateWorkspace);
+        ProjectsStore.addListener(ManageConstants.OPEN_MODIFY_WORKSPACE_MODAL, this.openModifyWorkspace);
 
         //Remove this
         this.ebayProjects = EbayProjects;
@@ -45,7 +52,7 @@ UI = {
         let headerMountPoint = $("header")[0];
         this.Search.currentPage = 1;
         this.pageLeft = false;
-        ReactDOM.render(React.createElement(Header, {}), headerMountPoint);
+        ReactDOM.render(React.createElement(Header), headerMountPoint);
 
 
 
@@ -75,12 +82,15 @@ UI = {
         //     $(this).data("prevType", e.type);
         // });
         this.getAllOrganizations().done(function (data) {
+
             self.organizations = data.organizations;
             self.selectedOrganization = data.organizations[0];
             self.selectedWorkspace = {
                 id: 0,
                 name: 'General'
             };
+            self.selectedUser = {};
+
 
             ManageActions.renderOrganizations(data.organizations, self.selectedOrganization);
             self.getProjects().done(function (response) {
@@ -88,7 +98,7 @@ UI = {
                 //Remove this
                 self.myProjects = projects.concat(self.personalProject, self.otherWorkspace);
                 self.currentProjects = self.myProjects;
-                self.renderProjects(self.myProjects);
+                self.renderProjects(self.myProjects, self.selectedOrganization);
             });
         });
 
@@ -128,7 +138,6 @@ UI = {
             let mountPoint = $("#main-container")[0];
             this.ProjectsContainer = ReactDOM.render(React.createElement(ProjectsContainer, {
                 getLastActivity: this.getLastProjectActivityLogAction,
-                changeStatus: this.changeJobsOrProjectStatus,
                 changeJobPasswordFn: this.changeJobPassword,
                 downloadTranslationFn : this.downloadTranslation,
             }), mountPoint);
@@ -150,65 +159,6 @@ UI = {
                 ManageActions.noMoreProjects();
             }
         });
-    },
-
-    // filterProjectsFromName: function(name) {
-    //     console.log("Search " + name);
-    //     if (!this.performingSearchRequest) {
-    //         let self = this;
-    //         this.performingSearchRequest = true;
-    //         let filter = {
-    //             pn: name
-    //         };
-    //         this.Search.filter = $.extend( this.Search.filter, filter );
-    //         UI.Search.currentPage = 1;
-    //         this.getProjects().done(function (response) {
-    //             let projects = response.data;
-    //             ManageActions.renderProjects(projects);
-    //             self.performingSearchRequest = false;
-    //         });
-    //
-    //     }
-    // },
-
-    filterProjectsFromStatus: function(status) {
-        let self = this;
-        let filter = {
-            status: status,
-        };
-        this.Search.filter = $.extend( this.Search.filter, filter );
-        UI.Search.currentPage = 1;
-        this.getProjects().done(function (response) {
-            let projects = response.data;
-            ManageActions.renderProjects(projects);
-        });
-
-
-    },
-
-    filterProjects: function(user, workspace, name, status) {
-        let self = this;
-        this.currentWorkspace = (typeof workspace !== "undefined") ? workspace : this.currentWorkspace;
-        this.currentUser = (typeof user != "undefined") ? user : this.currentUser;
-        let filter = {
-            status: status,
-            pn: name
-        };
-        this.Search.filter = $.extend( this.Search.filter, filter );
-        UI.Search.currentPage = 1;
-        this.getProjects().done(function (response) {
-            let projects = response.data;
-            ManageActions.renderProjects(projects);
-        });
-
-        console.log('Filter for:' );
-        console.log('Name : ' + (name) ? name : '' );
-        console.log('Status : ' + (status) ? status : '' );
-        console.log('User:' + this.currentUser);
-        console.log('Workspace:' + this.currentWorkspace.name);
-
-
-
     },
 
     /**
@@ -318,35 +268,6 @@ UI = {
             }
         });
     },
-    openCreateOrganizationModal: function () {
-        APP.ModalWindow.showModalComponent(CreateOrganizationModal, {}, "Create new organization");
-    },
-
-    openModifyOrganizationModal: function (organization) {
-        let props = {
-            organization: organization
-        };
-        APP.ModalWindow.showModalComponent(ModifyOrganizationModal, props, "Modify "+ organization.name + " Organization");
-    },
-
-    openChangeProjectWorkspace: function (workspace, project, workspaces) {
-
-        let props = {
-            currentWorkspace: workspace,
-            project: project,
-            workspaces: workspaces
-        };
-        APP.ModalWindow.showModalComponent(ChangeProjectWorkspaceModal, props, "Change Workspace");
-    },
-
-    openAssignToTranslator: function (project, job) {
-        let props = {
-            project: project,
-            job: job
-        };
-        APP.ModalWindow.showModalComponent(AssignToTranslator, props, "Assign to a translator");
-
-    },
 
     getAllOrganizations: function () {
         let data = {
@@ -388,55 +309,92 @@ UI = {
 
     },
 
-    changeProjectAssignee: function (idProject, user, organizationName) {
-        let projectsArray = [];
-        if (organizationName === "My Workspace") {
-            projectsArray = this.myProjects;
-        } else if (organizationName === "Ebay") {
-            projectsArray = this.ebayProjects;
-        }else if (organizationName === "MSC") {
-            projectsArray = this.mscProjects;
-        }else if (organizationName === "Translated") {
-            projectsArray = this.translatedProjects;
+    filterProjects: function(user, workspace, name, status) {
+        let self = this;
+        if ((typeof workspace !== "undefined") ) {
+            this.selectedWorkspace = workspace;
         }
-
-        $.each(projectsArray, function() {
-            if (this.id == idProject) {
-                this.user = user;
-            }
-        });
-
-        setTimeout(function () {
-            ManageActions.updateProjects(projectsArray);
+        if (typeof user != "undefined") {
+            this.selectedUser =  user;
+        }
+        let filter = {
+            status: status,
+            pn: name,
+            workspace: this.selectedWorkspace.name,
+            user: this.selectedUser.name,
+            organization: this.selectedOrganization.id
+        };
+        this.Search.filter = $.extend( this.Search.filter, filter );
+        UI.Search.currentPage = 1;
+        this.getProjects().done(function (response) {
+            let projects = response.data;
+            $.each(projects, function() {
+                if (self.selectedUser.id) {
+                    this.user = self.selectedUser;
+                }
+                if (self.selectedWorkspace.id  >= 0) {
+                    this.workspace = self.selectedWorkspace;
+                }
+            });
+            ManageActions.renderProjects(projects);
         });
     },
 
-    changeProjectWorkspace: function (oldWorkspaceName, workspace, projectId) {
-        let self = this;
-        $.each(this.currentProjects, function(index) {
-            if (this.id == projectId) {
-                indexToRemove = index;
-                project = this;
-            }
-        });
-        let removedProject = this.currentProjects.splice(indexToRemove, 1)[0];
-        setTimeout(function () {
-            ManageActions.updateProjects(self.currentProjects);
-        });
+    changeProjectAssignee: function (project, user) {
+        // let projectsArray = [];
+        // if (organizationName === "My Workspace") {
+        //     projectsArray = this.myProjects;
+        // } else if (organizationName === "Ebay") {
+        //     projectsArray = this.ebayProjects;
+        // }else if (organizationName === "MSC") {
+        //     projectsArray = this.mscProjects;
+        // }else if (organizationName === "Translated") {
+        //     projectsArray = this.translatedProjects;
+        // }
+        //
+        // $.each(projectsArray, function() {
+        //     if (this.id == idProject) {
+        //         this.user = user;
+        //     }
+        // });
+        //
+        // setTimeout(function () {
+        //     ManageActions.updateProjects(projectsArray);
+        // });
 
-        let projectsArray = [];
-        if (workspace.name === "My Workspace") {
-            projectsArray = this.myProjects;
-        } else if (workspace.name === "Ebay") {
-            projectsArray = this.ebayProjects;
-        }else if (workspace.name === "MSC") {
-            projectsArray = this.mscProjects;
-        }else if (workspace.name === "Translated") {
-            projectsArray = this.translatedProjects;
-        }
-        removedProject.organization = workspace.name;
-        projectsArray.unshift(removedProject);
+        let data = {};
+        let deferred = $.Deferred().resolve(data);
+        return deferred.promise();
+    },
 
+    changeProjectWorkspace: function (project, workspace) {
+        // let self = this;
+        // $.each(this.currentProjects, function(index) {
+        //     if (this.id == projectId) {
+        //         indexToRemove = index;
+        //         project = this;
+        //     }
+        // });
+        // let removedProject = this.currentProjects.splice(indexToRemove, 1)[0];
+        // setTimeout(function () {
+        //     ManageActions.updateProjects(self.currentProjects);
+        // });
+        //
+        // let projectsArray = [];
+        // if (workspace.name === "My Workspace") {
+        //     projectsArray = this.myProjects;
+        // } else if (workspace.name === "Ebay") {
+        //     projectsArray = this.ebayProjects;
+        // }else if (workspace.name === "MSC") {
+        //     projectsArray = this.mscProjects;
+        // }else if (workspace.name === "Translated") {
+        //     projectsArray = this.translatedProjects;
+        // }
+        // removedProject.organization = workspace.name;
+        // projectsArray.unshift(removedProject);
+        let data = {};
+        let deferred = $.Deferred().resolve(data);
+        return deferred.promise();
     },
 
     getLastProjectActivityLogAction: function (id, pass) {
@@ -488,6 +446,58 @@ UI = {
             }
         });
     },
+
+    changeProjectName: function (idProject, password, newName) {
+        let data = {
+            name: newName
+        };
+        return $.ajax({
+            data: data,
+            type: "post",
+            url : "/api/v2/projects/" + idProject + "/" + password + "/rename",
+        });
+    },
+
+    openCreateOrganizationModal: function () {
+        APP.ModalWindow.showModalComponent(CreateOrganizationModal, {}, "Create new organization");
+    },
+
+    openModifyOrganizationModal: function (organization) {
+        let props = {
+            organization: organization
+        };
+        APP.ModalWindow.showModalComponent(ModifyOrganizationModal, props, "Modify "+ organization.name + " Organization");
+    },
+
+    openChangeProjectWorkspace: function (workspace, project, workspaces) {
+
+        let props = {
+            currentWorkspace: workspace,
+            project: project,
+            workspaces: workspaces
+        };
+        APP.ModalWindow.showModalComponent(ChangeProjectWorkspaceModal, props, "Change Workspace");
+    },
+
+    openAssignToTranslator: function (project, job) {
+        let props = {
+            project: project,
+            job: job
+        };
+        APP.ModalWindow.showModalComponent(AssignToTranslator, props, "Assign to a translator");
+
+    },
+
+    openCreateWorkspace: function () {
+        APP.ModalWindow.showModalComponent(CreateWorkspaceModal, {}, "Create new workspace");
+    },
+
+    openModifyWorkspace: function () {
+        let props = {
+            workspace: this.selectedWorkspace
+        };
+        APP.ModalWindow.showModalComponent(ModifyWorkspaceModal, props, "Modify "+ this.selectedWorkspace.name + " Workspace");
+    },
     /**
      * Mistero!
      * @param pid
@@ -524,6 +534,10 @@ $(document).ready(function(){
             id: 0,
             name: 'Personal',
             workspaces: [
+                {
+                    id: 0,
+                    name: "General"
+                },
                 {
                     id: 1,
                     name: "Personali"
@@ -589,6 +603,10 @@ $(document).ready(function(){
             }],
             workspaces: [
                 {
+                    id: 0,
+                    name: "General"
+                },
+                {
                     id: 1,
                     name: "Ebay"
                 },
@@ -642,7 +660,6 @@ $(document).ready(function(){
 
     window.EbayProjects = [
         {
-            "workspace": "Ebay",
             "tm_analysis":"241",
             "has_archived":false,
             "name":"Ebay 1",
@@ -665,7 +682,6 @@ $(document).ready(function(){
             }
         },
         {
-            "workspace": "Ebay",
             "tm_analysis":"241",
             "has_archived":false,
             "name":"Ebay2",
@@ -688,7 +704,6 @@ $(document).ready(function(){
             }
         },
         {
-            "workspace": "Ebay",
             "tm_analysis":"241",
             "has_archived":false,
             "name":"Ebay 3",
@@ -711,7 +726,6 @@ $(document).ready(function(){
             }
         },
         {
-            "workspace": "Ebay",
             "tm_analysis":"241",
             "has_archived":false,
             "name":"Ebay 4",
@@ -738,7 +752,6 @@ $(document).ready(function(){
 
     window.MSCProjects = [
         {
-            "workspace": "MSC",
             "tm_analysis":"241",
             "has_archived":false,
             "name":"MSC 1",
@@ -761,7 +774,6 @@ $(document).ready(function(){
             },
         },
         {
-            "workspace": "MSC",
             "tm_analysis":"241",
             "has_archived":false,
             "name":"MSC 2",
@@ -784,7 +796,6 @@ $(document).ready(function(){
             }
         },
         {
-            "workspace": "MSC",
             "tm_analysis": "241",
             "has_archived": false,
             "name": "MSC 1",
@@ -854,7 +865,6 @@ $(document).ready(function(){
             }
         },
         {
-            "workspace": "MSC",
             "tm_analysis":"241",
             "has_archived":false,
             "name":"MSC 2",
@@ -881,7 +891,6 @@ $(document).ready(function(){
 
     window.AdWordsProjects = [
         {
-            "workspace": "AdWords",
             "tm_analysis":"241",
             "has_archived":false,
             "name":"AdWords 1",
@@ -904,7 +913,6 @@ $(document).ready(function(){
             }
         },
         {
-            "workspace": "AdWords",
             "tm_analysis":"241",
             "has_archived":false,
             "name":"AdWords 2",
@@ -927,7 +935,6 @@ $(document).ready(function(){
             }
         },
         {
-            "workspace": "AdWords",
             "tm_analysis":"241",
             "has_archived":false,
             "name":"AdWords 2",
@@ -954,7 +961,6 @@ $(document).ready(function(){
 
     window.YoutubeProjects = [
         {
-            "workspace": "Youtube",
             "tm_analysis":"241",
             "has_archived":false,
             "name":"Youtube 1",
@@ -977,7 +983,6 @@ $(document).ready(function(){
             }
         },
         {
-            "workspace": "Youtube",
             "tm_analysis":"241",
             "has_archived":false,
             "name":"Youtube 2",
@@ -1000,7 +1005,6 @@ $(document).ready(function(){
             }
         },
         {
-            "workspace": "Youtube",
             "tm_analysis":"241",
             "has_archived":false,
             "name":"Youtube 2",
@@ -1023,7 +1027,6 @@ $(document).ready(function(){
             }
         },
         {
-            "workspace": "Youtube",
             "tm_analysis":"241",
             "has_archived":false,
             "name":"Youtube 3",
@@ -1050,7 +1053,6 @@ $(document).ready(function(){
 
     window.PersonalProjects = [
         {
-            "workspace": "Private",
             "tm_analysis":"241",
             "has_archived":false,
             "name":"Private 1",
@@ -1073,7 +1075,6 @@ $(document).ready(function(){
             }
         },
         {
-            "workspace": "Private",
             "tm_analysis":"241",
             "has_archived":false,
             "name":"Private 2",
@@ -1096,7 +1097,6 @@ $(document).ready(function(){
             }
         },
         {
-            "workspace": "Private",
             "tm_analysis":"241",
             "has_archived":false,
             "name":"Private 2",
@@ -1119,7 +1119,6 @@ $(document).ready(function(){
             }
         },
         {
-            "workspace": "Private",
             "tm_analysis":"241",
             "has_archived":false,
             "name":"Private 3",
@@ -1146,7 +1145,6 @@ $(document).ready(function(){
 
     window.WorkspaceProjects = [
         {
-            "workspace": "Workspace",
             "tm_analysis":"241",
             "has_archived":false,
             "name":"Workspace 1",
@@ -1169,7 +1167,6 @@ $(document).ready(function(){
             }
         },
         {
-            "workspace": "Workspace",
             "tm_analysis":"241",
             "has_archived":false,
             "name":"Workspace 2",
@@ -1192,7 +1189,6 @@ $(document).ready(function(){
             }
         },
         {
-            "workspace": "Workspace",
             "tm_analysis":"241",
             "has_archived":false,
             "name":"Workspace 2",
@@ -1215,7 +1211,6 @@ $(document).ready(function(){
             }
         },
         {
-            "workspace": "Workspace",
             "tm_analysis":"241",
             "has_archived":false,
             "name":"Workspace 3",

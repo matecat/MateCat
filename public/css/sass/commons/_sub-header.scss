@@ -1,59 +1,53 @@
 .sub-head {
 	background-color: #ffffff;
-	padding: 10px 0 5px 0;
-	.row {
-		margin-bottom: 0;
-		nav {
-		    background-color: #f1f1f1;
-		    line-height: 44px;
-		    height: 44px;
-		    color: gray;
-		    box-shadow: none;
-		    border-radius: 4px;
-			.input-field {
-				margin: 0;
-				#search {
-					margin-bottom: 0;
-					width: 100%;
-				}
-				i.prefix {
-					top: 0px;
-					line-height: 44px;
-					height: 44px;
-					text-align: center;
-				}
+	padding: 5px 0 5px 0 !important;
+	box-shadow: rgba(0, 0, 0, 0.137255) 0px 2px 2px 0px, rgba(0, 0, 0, 0.117647) 0px 1px 5px 0px, rgba(0, 0, 0, 0.2) 0px 3px 1px -2px;
+	.projects-state {
+		width: 40px !important;
+	}
+
+	.assigned-list {
+		.switch {
+			margin-top: 12px;
+		}
+		.list-organization {
+			.select-dropdown {
+				margin-bottom: 0px;
 			}
-			.input-field input[type=search]:focus {
-				border-radius: 4px;
-			    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+			.caret {
+				line-height: 10px;
+				height: 0px;
+			}
+			.list-member-organization {
 
 			}
 		}
 	}
-}
 
-.assigned-list {
-	p {
-		margin: 0;
+	.workspace-dropdown {
+		max-width: 300px;
 	}
-	.switch {
-		margin-top: 12px;
-	}
-	.list-organization {
-		.select-dropdown {
-			margin-bottom: 0px;
-		}
-		.caret {
-			line-height: 10px;
-			height: 0px;
-		}
-		.list-member-organization {
-			
+
+	.users-filter {
+		display: flex;
+		margin-top: 10px;
+		justify-content: center;
+		.input-field {
+			margin-left: 10px;
+			margin-top: -2px;
 		}
 	}
+	.search-state-filters {
+		display: flex;
+		justify-content: center;
+		width: 100%;
+		.projects-state {
+			margin-left: 10px !important;
+		}
+		.input-field {
+			width: 100%;
+		}
+	}
+
 }
 
-.input-field {
-	margin: 0;
-
-}

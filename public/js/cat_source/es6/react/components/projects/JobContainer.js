@@ -105,18 +105,15 @@ class JobContainer extends React.Component {
     }
 
     archiveJob() {
-        this.props.changeStatusFn('job', this.props.job.toJS(), 'archived');
-        ManageActions.removeJob(this.props.project, this.props.job);
+        ManageActions.changeJobStatus(this.props.project, this.props.job, 'archived');
     }
 
     cancelJob() {
-        this.props.changeStatusFn('job', this.props.job.toJS(), 'cancelled');
-        ManageActions.removeJob(this.props.project, this.props.job);
+        ManageActions.changeJobStatus(this.props.project, this.props.job, 'cancelled');
     }
 
     activateJob() {
-        this.props.changeStatusFn('job', this.props.job.toJS(), 'active');
-        ManageActions.removeJob(this.props.project, this.props.job);
+        ManageActions.changeJobStatus(this.props.project, this.props.job, 'active');
     }
 
     downloadTranslation() {

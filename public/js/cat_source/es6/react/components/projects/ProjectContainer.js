@@ -47,18 +47,15 @@ class ProjectContainer extends React.Component {
     }
 
     removeProject() {
-        this.props.changeStatusFn('prj', this.props.project.toJS(), 'cancelled');
-        ManageActions.removeProject(this.props.project);
+        ManageActions.updateStatusProject(this.props.project, 'cancelled');
     }
 
     archiveProject() {
-        this.props.changeStatusFn('prj', this.props.project.toJS(), 'archived');
-        ManageActions.removeProject(this.props.project);
+        ManageActions.updateStatusProject(this.props.project, 'archived');
     }
 
     activateProject() {
-        this.props.changeStatusFn('prj', this.props.project.toJS(), 'active');
-        ManageActions.removeProject(this.props.project);
+        ManageActions.updateStatusProject(this.props.project, 'active');
     }
 
     changeUser(value) {
@@ -67,7 +64,17 @@ class ProjectContainer extends React.Component {
                 return true
             }
         });
-        ManageActions.changeProjectAssignee(this.props.project.get('id'), newUser.toJS(), this.props.project.get('organization'));
+        ManageActions.changeProjectAssignee(this.props.project, newUser.toJS());
+    }
+
+    onKeyPressEvent(e) {
+        if(e.which == 27) {
+            this.closeSearch();
+        } else if (e.which == 13 || e.keyCode == 13) {
+            ManageActions.changeProjectName(this.props.project, $(this.projectNameInput).val());
+            e.preventDefault();
+            return false;
+        }
     }
 
 
@@ -248,7 +255,7 @@ class ProjectContainer extends React.Component {
 
     getDropDownUsers() {
         let result = '';
-        if (this.props.project.get('organization') && this.props.organization.get('users')) {
+        if (this.props.organization.get('users')) {
             let users = this.props.organization.get('users').map((user, i) => (
                 <div className="item" data-value={user.get('id')}
                      key={'organization' + user.get('userShortName') + user.get('id')}>
@@ -339,19 +346,19 @@ class ProjectContainer extends React.Component {
                                 </div>
                             </div>
                             <div className="col m4">
-                                <div className="project-name">
-                                    <form>
-                                        {/*<div className="row">*/}
-                                            {state}
-                                            {/*<div className="input-field col m10">*/}
-                                            <div className="input-field col">
-                                                <input id="icon_prefix" type="text" disabled="disabled" defaultValue={this.props.project.get('name')}/><i
-                                                    className="material-icons prefix hide">mode_edit</i>
+                                    <div className="project-name">
+                                        {state}
+                                        <div className="ui form">
+                                            <div className="field">
+                                                <div className="ui icon input">
+                                                    <input type="text" defaultValue={this.props.project.get('name')}
+                                                           ref={(input) => this.projectNameInput = input}
+                                                           onKeyPress={this.onKeyPressEvent.bind(this)}/>
+                                                    <i className="icon-search icon"/>
+                                                </div>
                                             </div>
-
-                                        {/*</div>*/}
-                                    </form>
-                                </div>
+                                        </div>
+                                    </div>
                             </div>
                             <div className="col">
                                 <div className="payable-words top-4">
@@ -363,7 +370,7 @@ class ProjectContainer extends React.Component {
                                 <ul className="project-activity-icon right">
                                     <li>
                                         <a className="chip assigned-organization waves-effect waves-dark"
-                                        onClick={this.openChangeOrganizationModal.bind(this)}>{(this.props.project.get('organization')) ? this.props.project.get('organization') : "My workspace" }</a>
+                                        onClick={this.openChangeOrganizationModal.bind(this)}>{(typeof this.props.project.get('workspace') !== 'undefined') ? this.props.project.get('workspace').get('name') : "??" }</a>
                                     </li>
                                     <li>
                                         {dropDownUsers}

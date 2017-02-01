@@ -40,7 +40,113 @@
 <!--metal:use-macro="header.html/main_header"-->
 
 <header>
-
+<div class="ui grid nav-mc-bar">
+    <nav class="four column row">
+        <div class="left floated column">
+            <a href="/" class="logo logo-col"/>
+        </div>
+        <div class="right floated column">
+            <div class="ui dropdown selection fluid organization-dropdown top-5" tabindex="0">
+                <input type="hidden" name="gender" value="0"/><i class="dropdown icon"></i>
+                <div class="text">Personal</div>
+                <div class="menu" tabindex="-1">
+                    <div class="header" style="cursor: pointer;"><!-- react-text: 50 -->New Organization
+                        <!-- /react-text --><a class="organization-filter button show"><i class="icon-plus3 right"></i></a>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="scrolling menu">
+                        <div class="item active selected" data-value="0" data-text="Personal"><!-- react-text: 56 -->
+                            Personal<!-- /react-text --><a class="organization-filter button show right"><i
+                                    class="icon-more_vert"></i></a></div>
+                        <div class="item" data-value="1" data-text="Translated"><!-- react-text: 60 -->Translated
+                            <!-- /react-text --><a class="organization-filter button show right"><i
+                                    class="icon-more_vert"></i></a></div>
+                        <div class="item" data-value="3" data-text="Other Organization"><!-- react-text: 64 -->Other
+                            Organization<!-- /react-text --><a class="organization-filter button show right"><i
+                                    class="icon-more_vert"></i></a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="row sub-head">
+        <div class="ui container equal width grid">
+            <div class="column">
+                <div class="ui dropdown selection fluid workspace-dropdown top-5" tabindex="0">
+                    <input type="hidden" name="gender" value="0"/><i class="dropdown icon"></i>
+                    <div class="text">General</div>
+                    <div class="menu" tabindex="-1">
+                        <div class="header" style="cursor: pointer;"><!-- react-text: 73 -->New Workspace
+                            <!-- /react-text --><a class="organization-filter button show"><i class="icon-plus3 right"></i></a>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="scrolling menu">
+                            <div class="item" data-value="-1" data-text="All">All</div>
+                            <div class="item active selected" data-value="0" data-text="General">General</div>
+                            <div class="item" data-value="1" data-text="Personali">Personali</div>
+                            <div class="item" data-value="2" data-text="Tradotti">Tradotti</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="center aligned column">
+                <div class="users-filter">
+                    <div class="assigned-list"><p>Projects of: </p></div>
+                    <div class="input-field">
+                        <div class="list-organization"><span><div class="ui inline dropdown users-projects" tabindex="0"><div
+                                class="text"><a class="ui avatar image initials green">ALL</a><!-- react-text: 101 -->All Members
+                            <!-- /react-text --></div><i class="dropdown icon"></i><div class="menu" tabindex="-1"><div
+                                class="item active selected" data-value="2000"><a
+                                class="ui avatar image initials green">ALL</a><!-- react-text: 101 -->All Members
+                            <!-- /react-text --></div><div class="item" data-value="0"><a
+                                class="ui avatar image initials green">FR</a><!-- react-text: 104 -->My Projects
+                            <!-- /react-text --></div><div class="item" data-value="2"><a
+                                class="ui avatar image initials green">CK</a><!-- react-text: 107 -->Chloe King
+                            <!-- /react-text --></div><div class="item" data-value="3"><a
+                                class="ui avatar image initials green">OJ</a><!-- react-text: 110 -->Owen	James
+                            <!-- /react-text --></div><div class="item" data-value="4"><a
+                                class="ui avatar image initials green">SP</a><!-- react-text: 113 -->Stephen Powell
+                            <!-- /react-text --></div><div class="item" data-value="5"><a
+                                class="ui avatar image initials green">LL</a><!-- react-text: 116 -->LillianLambert
+                            <!-- /react-text --></div><div class="item" data-value="6"><a
+                                class="ui avatar image initials green">JW</a><!-- react-text: 119 -->Joe Watson
+                            <!-- /react-text --></div><div class="item" data-value="7"><a
+                                class="ui avatar image initials green">RS</a><!-- react-text: 122 -->Rachel Sharp
+                            <!-- /react-text --></div><div class="item" data-value="8"><a
+                                class="ui avatar image initials green">DM</a><!-- react-text: 125 -->Dan Marshall
+                            <!-- /react-text --></div></div></div></span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="column">
+                <div class="search-state-filters">
+                    <div class="input-field">
+                        <div class="ui large fluid icon input">
+                            <input type="text" placeholder="Search..."/>
+                            <i class="search icon"></i>
+                        </div>
+                    </div>
+                    <div class="ui projects-state dropdown icon button" tabindex="0">
+                        <i class="filter icon"></i>
+                        <div class="menu" tabindex="-1">
+                            <div class="scrolling menu">
+                                <div class="item active selected" data-value="active">
+                                    <div class="ui red empty circular label"></div><!-- react-text: 37 -->Active Projects
+                                    <!-- /react-text --></div>
+                                <div class="item" data-value="archived">
+                                    <div class="ui blue empty circular label"></div><!-- react-text: 40 -->Archived Projects
+                                    <!-- /react-text --></div>
+                                <div class="item" data-value="cancelled">
+                                    <div class="ui black empty circular label"></div><!-- react-text: 43 -->Cancelled Projects
+                                    <!-- /react-text --></div>
+                            </div>
+                        </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </header>
 
 
