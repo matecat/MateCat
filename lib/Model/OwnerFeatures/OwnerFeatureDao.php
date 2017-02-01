@@ -21,6 +21,8 @@ class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
     public function create( OwnerFeatures_OwnerFeatureStruct $obj ) {
         $conn = Database::obtain()->getConnection();
 
+        $conn->beginTransaction();
+
         $obj->create_date = date('Y-m-d H:i:s');
         $obj->last_update = date('Y-m-d H:i:s');
 
@@ -35,7 +37,10 @@ class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
         $values = array_diff_key( $obj->attributes(), array('id' => null) );
 
         $stmt->execute( $values );
-        return $this->getById( $conn->lastInsertId() );
+        $record = $this->getById( $conn->lastInsertId() );
+        $conn->commit() ;
+
+        return $record ;
     }
 
     /**

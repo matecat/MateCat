@@ -22,6 +22,8 @@ class ModelDao extends \DataAccess_AbstractDao {
      * @param $data
      * @return ModelStruct
      * @throws \Exceptions\ValidationError
+     *
+     * @deprecated remove the need for insert and select
      */
     public static function createRecord( $data ) {
         $sql = "INSERT INTO qa_models ( label, pass_type, pass_options ) " .
@@ -35,13 +37,17 @@ class ModelDao extends \DataAccess_AbstractDao {
         $struct->ensureValid();
 
         $conn = \Database::obtain()->getConnection();
+        $conn->beginTransaction() ;
+
         $stmt = $conn->prepare( $sql );
         $stmt->execute( $struct->attributes(
             array('label', 'pass_type', 'pass_options')
         ));
         $lastId = $conn->lastInsertId();
 
-        return self::findById( $lastId );
+        $record = self::findById( $lastId );
+        $conn->commit() ;
+        return $record ;
     }
 
     /**
