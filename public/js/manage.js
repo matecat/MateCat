@@ -61,28 +61,28 @@ UI = {
 
         window.addEventListener('scroll', this.scrollDebounceFn());
 
-        // $(window).on("blur focus", function(e) {
-        //     let prevType = $(this).data("prevType");
-        //
-        //     if (prevType != e.type) {   //  reduce double fire issues
-        //         switch (e.type) {
-        //             case "blur":
-        //                 console.log("leave page");
-        //                 self.pageLeft = true;
-        //                 break;
-        //             case "focus":
-        //                 console.log("Enter page");
-        //                 if (self.pageLeft) {
-        //                     // alert("Refresf");
-        //                     console.log("Refresh projects");
-        //                     self.reloadProjects();
-        //                 }
-        //                 break;
-        //         }
-        //     }
-        //
-        //     $(this).data("prevType", e.type);
-        // });
+        $(window).on("blur focus", function(e) {
+            let prevType = $(this).data("prevType");
+
+            if (prevType != e.type) {   //  reduce double fire issues
+                switch (e.type) {
+                    case "blur":
+                        console.log("leave page");
+                        self.pageLeft = true;
+                        break;
+                    case "focus":
+                        console.log("Enter page");
+                        if (self.pageLeft) {
+                            // alert("Refresf");
+                            console.log("Refresh projects");
+                            self.reloadProjects();
+                        }
+                        break;
+                }
+            }
+
+            $(this).data("prevType", e.type);
+        });
         this.getAllOrganizations().done(function (data) {
 
             self.organizations = data.organizations;
