@@ -6,15 +6,15 @@
  * Time: 10:45
  */
 
-namespace Teams;
+namespace Organizations;
 
 use PDO ;
 
 class MembershipDao extends \DataAccess_AbstractDao
 {
 
-    const TABLE = "teams_users";
-    const STRUCT_TYPE = "\\Teams\\MembershipStruct";
+    const TABLE = "organizations_users";
+    const STRUCT_TYPE = "\\Organizations\\MembershipStruct";
 
     protected static $auto_increment_fields = array('id');
     protected static $primary_keys = array('id');
@@ -34,21 +34,18 @@ class MembershipDao extends \DataAccess_AbstractDao
      * have just one team per user.
      *
      * @param \Users_UserStruct $user
+     *
+     * @return null
      */
     public function findTeambyUser( \Users_UserStruct $user ) {
-        $sql = " SELECT teams.* FROM teams JOIN teams_users ON teams_users.id_team = teams.id " .
-            " WHERE teams_users.uid = ? " .
-            " LIMIT 1 " ;
+        $sql = " SELECT organizations.* FROM organizations JOIN organizations_users ON organizations_users.id_organization = organizations.id " .
+            " WHERE organizations_users.uid = ? " ;
 
         $stmt = $this->getConnection()->getConnection()->prepare( $sql ) ;
-        $stmt->setFetchMode( PDO::FETCH_CLASS, '\Teams\TeamStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, '\Organizations\OrganizationStruct' );
         $stmt->execute( array( $user->uid ) ) ;
 
-        return static::resultOrNull( $stmt->fetch() );
+        return static::resultOrNull( $stmt->fetchAll() );
     }
 
-    protected function _buildResult($array_result)
-    {
-        // TODO: Implement _buildResult() method.
-    }
 }

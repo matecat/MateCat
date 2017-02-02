@@ -5,7 +5,7 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     public $password ;
     public $name ;
     public $id_customer ;
-    public $id_team ;
+    public $id_organization ;
     public $create_date ;
     public $id_engine_tm ;
     public $id_engine_mt ;
@@ -78,13 +78,13 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     /**
-     * @return null|\Teams\TeamStruct
+     * @return null|\Organizations\OrganizationStruct
      */
     public function getTeam() {
         if ( is_null( $this->id_team ) ) {
             return null ;
         }
-        $dao = new \Teams\TeamDao() ;
+        $dao = new \Organizations\OrganizationDao() ;
         return $dao->findById( $this->id_team ) ;
     }
 

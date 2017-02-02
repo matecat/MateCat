@@ -28,12 +28,13 @@ route( '/api/app/user/password_reset/[:token]', 'GET', 'API\App\SignupController
 route( '/api/app/user/confirm/[:token]',        'GET', 'API\App\SignupController', 'confirm' );
 route( '/api/app/user/redeem_project',          'POST', 'API\App\SignupController', 'redeemProject' );
 
-route(
-    '/api/app/connected_services/[:id_service]/verify', 'GET',
-    'ConnectedServices\ConnectedServicesController', 'verify'
-);
 
-route(
-    '/api/app/connected_services/[:id_service]', 'POST',
-    'ConnectedServices\ConnectedServicesController', 'update'
-);
+route( '/api/app/teams',                       'GET', 'API\App\TeamsCollectionController', 'list' );
+route( '/api/app/teams',                       'POST', 'API\App\TeamsCollectionController', 'create' );
+
+route( '/api/app/teams/[:id_team]',            'PUT', 'API\App\TeamResourceController', 'update' );
+route( '/api/app/teams/[:id_team]/invitation', 'POST', 'API\App\TeamInvitationResourceController', 'create' );
+
+route( '/api/app/projects/[:id_project]',            'PUT', 'API\App\ProjectController', 'update' );
+route( '/api/app/connected_services/[:id_service]/verify', 'GET', 'ConnectedServices\ConnectedServicesController', 'verify' );
+route( '/api/app/connected_services/[:id_service]', 'POST', 'ConnectedServices\ConnectedServicesController', 'update' );

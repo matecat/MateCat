@@ -67,7 +67,7 @@ class ProjectManager {
     protected $user ;
 
     /**
-     * @var \Teams\TeamStruct
+     * @var \Organizations\OrganizationStruct
      */
     protected $team ;
 
