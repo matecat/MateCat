@@ -39,6 +39,8 @@ UI = {
         this.personalProject = PersonalProjects;
         this.otherWorkspace = WorkspaceProjects
 
+        $(".dropdown").dropdown();
+
 
     },
 

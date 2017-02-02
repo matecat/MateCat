@@ -41,7 +41,7 @@ module.exports = function(grunt) {
         cssBase + 'sass/speech2text.scss',
         cssBase + 'sass/notifications.scss',
         cssBase + 'sass/commons/*.scss',
-        cssBase + 'sass/vendor/*',
+        cssBase + 'sass/vendor_mc/*',
         cssBase + '../holidays/*.css'
     ];
     var cssWatchFilesUploadPage = [
@@ -363,7 +363,7 @@ module.exports = function(grunt) {
                     includePaths: [ cssBase, gruntDir + 'semantic/dist/' ]
                 },
                 src: [
-                    cssBase + 'sass/vendor/semantic/matecat_semantic.scss'
+                    cssBase + 'sass/vendor_mc/semantic/matecat_semantic.scss'
                 ],
                 dest: cssBase + 'build/semantic.css'
             }

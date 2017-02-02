@@ -10,12 +10,6 @@
 }
 
 
-
-
-.liga {
-  width: 80%;
-  width: calc(100% - 2.5em);
-}
 [class^="icon-"], [class*=" icon-"] {
   /* use !important to prevent issues with browser extensions that change fonts */
   font-family: 'icomoon' !important;
@@ -31,15 +25,6 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-// .noticon:after, i.unarchive-project:after, i.resume-project:after {
-//     content: "\e607";
-//     color: red;
-//     font-size: 23px;
-//     position: absolute;
-//     left: -3px;
-//     top: 1px;
-//     transform: rotate(-45deg);
-// }
 
 .icon-qr-matecat:before {
   content: "\e90a";
@@ -139,8 +124,6 @@
 }
 .icon-play:before {
   content: "\f04b";
-  line-height: 28px;
-  color: #7b7b7b;
 }
 .icon-chevron-left:before {
   content: "\f053";
