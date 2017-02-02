@@ -12,7 +12,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Teams\TeamDao;
+use Organizations\OrganizationDao;
 
 class AssignFeatureTask extends Command {
 
@@ -56,7 +56,7 @@ class AssignFeatureTask extends Command {
 
     private function __getReference( InputInterface $input ) {
         if ( $input->getOption('team') ) {
-            $dao = new TeamDao();
+            $dao = new OrganizationDao();
             $team = $dao->findById( $input->getArgument('user_or_team_id') );
 
             if ( !$team ) {

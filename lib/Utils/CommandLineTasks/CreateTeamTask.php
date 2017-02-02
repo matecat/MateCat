@@ -13,9 +13,9 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Teams\TeamDao;
-use Teams\TeamStruct;
-use Teams\MembershipDao, Teams\MembershipStruct ;
+use Organizations\OrganizationDao;
+use Organizations\OrganizationStruct;
+use Organizations\MembershipDao, Organizations\MembershipStruct ;
 
 
 class CreateTeamTask extends Command
@@ -40,15 +40,15 @@ class CreateTeamTask extends Command
         $userDao = new \Users_UserDao() ;
         $user  = $userDao->getByEmail( $input->getArgument('user_email') ) ;
 
-        $teamDao = new TeamDao() ;
+        $teamDao = new OrganizationDao() ;
 
-        $teamStruct = new TeamStruct(array(
+        $teamStruct = new OrganizationStruct(array(
             'name' => $input->getArgument('name'),
             'created_by' =>  $user->uid ,
             'created_at' => \Utils::mysqlTimestamp( time() )
         )) ;
 
-        $teamId = TeamDao::insertStruct( $teamStruct  ) ;
+        $teamId = OrganizationDao::insertStruct( $teamStruct  ) ;
 
         $membershipStruct = new MembershipStruct(array(
             'id_team' => $teamId,

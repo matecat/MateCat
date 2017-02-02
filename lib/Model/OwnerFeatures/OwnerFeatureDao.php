@@ -2,11 +2,11 @@
 
 class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
 
-    public function findFromUserOrTeam( Users_UserStruct $user, \Teams\TeamStruct $team ) {
+    public function findFromUserOrTeam( Users_UserStruct $user, \Organizations\OrganizationStruct $team ) {
        // TODO:
     }
 
-    public function getByTeam( \Teams\TeamStruct $team ) {
+    public function getByTeam( \Organizations\OrganizationStruct $team ) {
         $conn = Database::obtain()->getConnection();
 
         $stmt = $conn->prepare( "SELECT * FROM owner_features " .

@@ -13,10 +13,10 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Teams\MembershipDao;
-use Teams\MembershipStruct;
-use Teams\TeamDao;
-use Teams\TeamStruct;
+use Organizations\MembershipDao;
+use Organizations\MembershipStruct;
+use Organizations\OrganizationDao;
+use Organizations\OrganizationStruct;
 
 class CreateTeamMembershipTask extends Command
 {
@@ -38,7 +38,7 @@ class CreateTeamMembershipTask extends Command
 
     protected function execute( InputInterface $input, OutputInterface $output ) {
         // find the team, ensure the user is not already a member or the
-        $teamDao = new TeamDao();
+        $teamDao = new OrganizationDao();
         $team = $teamDao->findById( $input->getArgument('team_id') );
 
         if ( !$team ) {

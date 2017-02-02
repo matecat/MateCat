@@ -6,7 +6,7 @@
  * Time: 10:45
  */
 
-namespace Teams;
+namespace Organizations;
 
 use DataAccess_AbstractDaoSilentStruct ;
 use DataAccess_IDaoStruct ;

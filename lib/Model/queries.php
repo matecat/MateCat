@@ -1821,7 +1821,7 @@ function conditionsForProjectsQuery(
 }
 
 /**
- * @param Users_UserStruct  $user
+ * @param Users_UserStruct                  $user
  * @param                   $start                int
  * @param                   $step                 int
  * @param                   $search_in_pname      string
@@ -1831,7 +1831,7 @@ function conditionsForProjectsQuery(
  * @param                   $search_onlycompleted bool
  * @param                   $project_id           int
  *
- * @param \Teams\TeamStruct $team
+ * @param \Organizations\OrganizationStruct $team
  *
  * @return array|int|resource|void
  */
@@ -1839,7 +1839,7 @@ function getProjects( Users_UserStruct $user, $start, $step,
                       $search_in_pname, $search_source, $search_target,
                       $search_status, $search_onlycompleted,
                       $project_id,
-                      \Teams\TeamStruct $team = null) {
+                      \Organizations\OrganizationStruct $team = null) {
 
     list( $conditions, $data ) = conditionsForProjectsQuery(
         $search_in_pname, $search_source, $search_target,
@@ -1959,7 +1959,7 @@ function getJobsFromProjects( array $projectIDs, $search_source, $search_target,
 
 }
 
-function getProjectsNumber( Users_UserStruct $user, $search_in_pname, $search_source, $search_target, $search_status, $search_onlycompleted, \Teams\TeamStruct $team = null) {
+function getProjectsNumber( Users_UserStruct $user, $search_in_pname, $search_source, $search_target, $search_status, $search_onlycompleted, \Organizations\OrganizationStruct $team = null) {
 
     list( $conditions, $data ) = conditionsForProjectsQuery(
         $search_in_pname, $search_source, $search_target,
