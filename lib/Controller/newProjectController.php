@@ -108,9 +108,9 @@ class newProjectController extends viewController {
             throw new Exception('user is not logged') ;
         }
 
-        $teamDao = new \Organizations\MembershipDao() ;
-        $team = $teamDao->findTeambyUser( $this->logged_user ) ;
-        return $team ;
+        $orgDao = new \Organizations\MembershipDao() ;
+        $teams = $orgDao->findTeambyUser( $this->logged_user ) ;
+        return $teams[0] ;
     }
 
     /**

@@ -334,10 +334,10 @@ class createProjectController extends ajaxController {
             $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
 
             $dao = new \Organizations\MembershipDao() ;
-            $team = $dao->findTeambyUser( $this->logged_user ) ;
+            $teams = $dao->findTeambyUser( $this->logged_user ) ;
 
-            if ( $team ) {
-                $this->featureSet->loadFromTeam( $team ) ;
+            if ( $teams[0] ) {
+                $this->featureSet->loadFromTeam( $teams[0] ) ;
             }
         }
     }

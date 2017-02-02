@@ -39,14 +39,13 @@ class MembershipDao extends \DataAccess_AbstractDao
      */
     public function findTeambyUser( \Users_UserStruct $user ) {
         $sql = " SELECT organizations.* FROM organizations JOIN organizations_users ON organizations_users.id_organization = organizations.id " .
-            " WHERE organizations_users.uid = ? " .
-            " LIMIT 1 " ;
+            " WHERE organizations_users.uid = ? " ;
 
         $stmt = $this->getConnection()->getConnection()->prepare( $sql ) ;
         $stmt->setFetchMode( PDO::FETCH_CLASS, '\Organizations\OrganizationStruct' );
         $stmt->execute( array( $user->uid ) ) ;
 
-        return static::resultOrNull( $stmt->fetch() );
+        return static::resultOrNull( $stmt->fetchAll() );
     }
 
 }
