@@ -201,7 +201,7 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
             " ( :id_project, :id_job, :password, :review_password ) ";
 
         $conn = \Database::obtain()->getConnection();
-        $conn->beginTransaction() ;
+        \Database::obtain()->begin() ;
         $stmt = $conn->prepare( $sql );
         $stmt->execute( $attrs );
 

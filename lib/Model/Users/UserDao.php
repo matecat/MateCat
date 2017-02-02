@@ -28,7 +28,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
 
     public function createUser( Users_UserStruct $obj ){
         $conn = $this->con->getConnection();
-        $conn->beginTransaction() ;
+        \Database::obtain()->begin();
 
         $obj->create_date = date('Y-m-d H:i:s');
 

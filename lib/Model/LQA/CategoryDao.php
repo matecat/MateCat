@@ -28,7 +28,8 @@ class CategoryDao extends \DataAccess_AbstractDao {
             " ( :id_model, :label, :id_parent, :severities )" ;
 
         $conn = \Database::obtain()->getConnection();
-        $conn->beginTransaction();
+        \Database::obtain()->begin();
+
         $stmt = $conn->prepare( $sql );
         $stmt->execute(
             array(
