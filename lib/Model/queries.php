@@ -712,7 +712,8 @@ function getFirstSegmentId( $jid, $password ) {
  */
 function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'after', $options=array() ) {
 
-    if ( $options['optional_fields'] ) {
+    $optional_fields = null;
+    if ( isset( $options['optional_fields'] ) ) {
         $optional_fields = ', ';
         $optional_fields .= implode(', ', $options['optional_fields']);
     }
@@ -2066,7 +2067,8 @@ function getProjectForVolumeAnalysis( $limit = 1 ) {
 
     $db    = Database::obtain();
     //Needed to address the query to the master database if exists
-    $db->getConnection()->beginTransaction();
+    \Database::obtain()->begin();
+
     $results = $db->fetch_array($query); // this is a select, should never return a transaction exception
     $db->getConnection()->commit();
     return $results;
@@ -2389,7 +2391,8 @@ function getProjectSegmentsTranslationSummary( $pid ) {
         GROUP BY id_job WITH ROLLUP";
     try {
         //Needed to address the query to the master database if exists
-        $db->getConnection()->beginTransaction();
+        \Database::obtain()->begin();
+
         $results = $db->fetch_array($query);
         $db->getConnection()->commit();
     } catch ( PDOException $e ) {

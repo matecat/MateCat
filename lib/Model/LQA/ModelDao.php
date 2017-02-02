@@ -37,7 +37,7 @@ class ModelDao extends \DataAccess_AbstractDao {
         $struct->ensureValid();
 
         $conn = \Database::obtain()->getConnection();
-        $conn->beginTransaction() ;
+        \Database::obtain()->begin();
 
         $stmt = $conn->prepare( $sql );
         $stmt->execute( $struct->attributes(

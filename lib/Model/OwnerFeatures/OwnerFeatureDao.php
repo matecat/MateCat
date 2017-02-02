@@ -21,7 +21,7 @@ class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
     public function create( OwnerFeatures_OwnerFeatureStruct $obj ) {
         $conn = Database::obtain()->getConnection();
 
-        $conn->beginTransaction();
+        \Database::obtain()->begin();
 
         $obj->create_date = date('Y-m-d H:i:s');
         $obj->last_update = date('Y-m-d H:i:s');

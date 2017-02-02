@@ -20,7 +20,7 @@ class EditLog_EditLogModel {
 
     private $jid = "";
     private $password = "";
-    private $project_status = "";
+    private $project_info = [];
     private $job_archived = false;
 
     private $job_owner_email;
@@ -29,9 +29,20 @@ class EditLog_EditLogModel {
     private $jobEmpty = false;
     private $stats;
     private $data;
-    private $pagination;
     private $languageStatsData;
     private $db;
+
+    private $pagination = [
+                    'first'        => PHP_INT_MAX,
+                    'prev'         => -1,
+                    'current'      => -1,
+                    'next'         => 0,
+                    'last'         => -2147483648,  //PHP_INT_MIN
+                    'page_index'   => null,
+                    'current_page' => 1,
+                    'last_page'    => -1
+    ];
+
 
     public function __construct( $jid, $password ) {
         $this->db       = Database::obtain();
@@ -73,18 +84,10 @@ class EditLog_EditLogModel {
 
             $this->stats = $tmp[ 1 ];
 
-            $this->project_status = $proj[ 0 ];
+            $this->project_info = $proj[ 0 ];
 
-            $__langStatsDao = new LanguageStats_LanguageStatsDAO( Database::obtain() );
-            $maxDate        = $__langStatsDao->getLastDate();
+            $this->loadLanguageStats();
 
-            $languageSearchObj         = new LanguageStats_LanguageStatsStruct();
-            $languageSearchObj->date   = $maxDate;
-            $languageSearchObj->source = $this->data[ 0 ][ 'job_source' ];
-            $languageSearchObj->target = $this->data[ 0 ][ 'job_target' ];
-
-            $this->languageStatsData = $__langStatsDao->read( $languageSearchObj );
-            $this->languageStatsData = $this->languageStatsData[ 0 ];
         } catch ( Exception $exn ) {
             if ( $exn->getCode() == -1 ) {
                 $this->jobEmpty = true;
@@ -341,7 +344,11 @@ class EditLog_EditLogModel {
         // $stats['avg-secs-per-word'] = round(array_sum($stat_spw)/count($stat_spw),1);
         // Weighted
         $stats[ 'avg-secs-per-word' ] = round( $globalStats[ 'secs_per_word' ] / 1000, 1 );
-        $stats[ 'est-words-per-day' ] = number_format( round( 3600 * 8 / $stats[ 'avg-secs-per-word' ] ), 0, '.', ',' );
+
+        $stats[ 'est-words-per-day' ] = 0;
+        if( !empty( $stats[ 'avg-secs-per-word' ] ) ) {
+            $stats[ 'est-words-per-day' ] = number_format( round( 3600 * 8 / $stats[ 'avg-secs-per-word' ] ), 0, '.', ',' );
+        }
 
         // Last minute formatting (after calculations)
         $temp                       = CatUtils::parse_time_to_edit( round( $stats[ 'total-valid-tte' ] ) );
@@ -358,16 +365,10 @@ class EditLog_EditLogModel {
     private function evaluatePagination( $prev_id, $next_id ) {
         $editLogDao = new EditLog_EditLogDao( Database::obtain() );
         $editLogDao->setCacheTTL( self::CACHETIME );
-        $pagination = array(
-                'first'        => PHP_INT_MAX,
-                'prev'         => $prev_id,
-                'current'      => self::$start_id,
-                'next'         => $next_id,
-                'last'         => -2147483648,  //PHP_INT_MIN
-                'page_index'   => null,
-                'current_page' => 1,
-                'last_page'    => -1
-        );
+        $pagination = $this->pagination;
+        $pagination[ 'prev' ]    = $prev_id;
+        $pagination[ 'next' ]    = $next_id;
+        $pagination[ 'current' ] = self::$start_id;
 
         $pagination[ 'last' ]  = $editLogDao->getLastPage_firstID( $this->getJid(), $this->getPassword() );
         $pagination[ 'first' ] = $editLogDao->getFirstPage_firstID( $this->getJid(), $this->getPassword() );
@@ -442,7 +443,7 @@ class EditLog_EditLogModel {
      */
     public function evaluateOverallTTE() {
         $this->loadLanguageStats();
-
+        if( empty( $this->languageStatsData ) ) return 0;
         return round(
                 $this->languageStatsData->total_time_to_edit / ( 1000 * $this->languageStatsData->total_word_count ),
                 2
@@ -454,7 +455,7 @@ class EditLog_EditLogModel {
      */
     public function evaluateOverallPEE() {
         $this->loadLanguageStats();
-
+        if( empty( $this->languageStatsData ) ) return 0;
         return round(
                 $this->languageStatsData->total_post_editing_effort / ( $this->languageStatsData->job_count ),
                 2
@@ -480,7 +481,7 @@ class EditLog_EditLogModel {
             $languageSearchObj->target = $this->jobData[ 'target' ];
 
             $this->languageStatsData = $__langStatsDao->read( $languageSearchObj );
-            $this->languageStatsData = $this->languageStatsData[ 0 ];
+            $this->languageStatsData = @$this->languageStatsData[ 0 ];
         }
     }
 
@@ -555,8 +556,8 @@ class EditLog_EditLogModel {
     /**
      * @return string
      */
-    public function getProjectStatus() {
-        return $this->project_status;
+    public function getProjectInfo() {
+        return $this->project_info;
     }
 
     /**

@@ -302,12 +302,9 @@ class catController extends viewController {
         $this->firstSegmentOfFiles = json_encode( $fileInfo );
         $this->fileCounter         = json_encode( $TotalPayable );
 
-
-        list( $uid, $user_email ) = $this->getLoginUserParams();
-
         if ( self::isRevision() ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
-        } elseif ( $user_email == $data[ 0 ][ 'job_owner' ] ) {
+        } elseif ( $this->logged_user->email == $data[ 0 ][ 'job_owner' ] ) {
             $this->userRole = TmKeyManagement_Filter::OWNER;
         } else {
             $this->userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
@@ -318,7 +315,7 @@ class catController extends viewController {
          */
         try {
             $_keyDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-            $dh      = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $uid ) );
+            $dh      = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $this->logged_user->uid ) );
             $keyList = $_keyDao->read( $dh );
 
         } catch ( Exception $e ) {
@@ -450,7 +447,7 @@ class catController extends viewController {
         if ( $this->isLoggedIn() ) {
             $engineQuery         = new EnginesModel_EngineStruct();
             $engineQuery->type   = 'MT';
-            $engineQuery->uid    = $uid;
+            $engineQuery->uid    = $this->logged_user->uid;
             $engineQuery->active = 1;
             $mt_engines          = $engine->read( $engineQuery );
         } else {
@@ -489,17 +486,12 @@ class catController extends viewController {
             $action = ActivityLogStruct::ACCESS_TRANSLATE_PAGE;
         }
 
-        /**
-         * Retrieve user information
-         */
-        list( $uid, $email ) = $this->getLoginUserParams();
-
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $this->jid;
         $activity->id_project = $this->pid;
         $activity->action     = $action;
         $activity->ip         = Utils::getRealIpAddr();
-        $activity->uid        = $uid;
+        $activity->uid        = $this->logged_user->uid;
         $activity->event_date = date( 'Y-m-d H:i:s' );
         Activity::save( $activity );
 
@@ -555,7 +547,6 @@ class catController extends viewController {
         $this->template->cid         = $this->cid;
         $this->template->create_date = $this->create_date;
         $this->template->pname       = $this->project->name;
-        $this->template->tid         = var_export( $this->tid, true );
         $this->template->source      = $this->source;
         $this->template->source_rtl  = $this->source_rtl;
         $this->template->target_rtl  = $this->target_rtl;

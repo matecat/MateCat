@@ -104,14 +104,12 @@ class analyzeController extends viewController {
         $this->model = new Analysis_AnalysisModel( $this->project, $this->chunk );
         $this->model->loadData();
 
-        list( $uid, $email ) = $this->getLoginUserParams();
-
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $this->jid;
         $activity->id_project = $this->pid;
         $activity->action     = ActivityLogStruct::ACCESS_ANALYZE_PAGE;
         $activity->ip         = Utils::getRealIpAddr();
-        $activity->uid        = $uid;
+        $activity->uid        = $this->logged_user->uid;
         $activity->event_date = date( 'Y-m-d H:i:s' );
         Activity::save( $activity );
         
