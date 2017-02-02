@@ -9,7 +9,6 @@ class newProjectController extends viewController {
 
     private $guid = '';
     private $mt_engines;
-    private $tms_engines;
     private $lang_handler;
 
     private $sourceLangArray = array();
@@ -67,7 +66,6 @@ class newProjectController extends viewController {
 
         $this->initUploadDir();
 
-        list( $uid, $cid ) = $this->getLoginUserParams();
         $engine = new EnginesModel_EngineDAO( Database::obtain() );
         $engineQuery         = new EnginesModel_EngineStruct();
         $engineQuery->type   = 'MT';
@@ -75,7 +73,7 @@ class newProjectController extends viewController {
         if ( @(bool)$_GET[ 'amt' ] == true ) {
             $engineQuery->uid    = 'all';
         } else {
-            $engineQuery->uid    = ( $uid == null ? -1 : $uid );
+            $engineQuery->uid    = ( $this->logged_user->uid == null ? -1 : $this->logged_user->uid );
         }
 
         $engineQuery->active = 1;
@@ -88,7 +86,7 @@ class newProjectController extends viewController {
             try {
 
                 $_keyList = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-                $dh       = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => @$_SESSION[ 'uid' ] ) );
+                $dh       = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $this->logged_user->uid ) );
 
                 $keyList = $_keyList->read( $dh );
                 foreach ( $keyList as $memKey ) {
@@ -163,7 +161,7 @@ class newProjectController extends viewController {
                             $ar[ 'name' ]     = $this->lang_handler->getLocalizedName( $lang );
                             $ar[ 'code' ]     = $lang;
                             $ar[ 'selected' ] = ( $key == '0' ) ? 1 : 0;
-                            $ar[ 'direction' ]    = ( $this->lang_handler->isRTL( strtolower( ( $lang ) ) ) ? 'rtl' : 'ltr' );
+                            $ar[ 'direction' ]    = ( $this->lang_handler->isRTL( $lang ) ? 'rtl' : 'ltr' );
                             array_push( $tmpSourceArAs, $ar );
                         }
                     }
