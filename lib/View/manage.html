@@ -17,7 +17,6 @@
     <script src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
 
     <link href="${basepath}public/css/build/manage-build.css?build=${build_number}" rel="stylesheet" type="text/css"/>
-    <link href="${basepath}public/css/build/semantic.css" rel="stylesheet" type="text/css"/>
 
 
 
@@ -30,6 +29,7 @@
         };
     </script>
 
+
 </head>
 
 <body tal:condition="not:supportedBrowser">
@@ -39,33 +39,603 @@
 <body tal:condition="supportedBrowser" tal:attributes="class php:(filtered_class EQ ' open')? 'manage filterOpen':'manage'">
 <!--metal:use-macro="header.html/main_header"-->
 
-<header>
+<!--<header>
 
-</header>
+</header>-->
 
 
 
-<div id="main-container">
 
-    <!--    <h1>Field test - 1</h1> -->
+<div class="new-container">
+    <div class="project-list">
+        <div class="ui container">
+
+
+            <div class="ui one column shadow-1 grid">
+
+                <div class="one column project-header">
+                    <div class="ui three column grid">
+                        <div class="one wide column">
+                            <div class="project-id">532432</div>
+                        </div>
+                        <div class="nine wide column">
+                            <div class="ui one column grid">
+                                <div class="twelve wide column">
+                                    <div class="project-name">
+                                        <div class="ui form">
+                                            <div class="field">
+                                                <div class="ui icon input">
+                                                    <input type="text" value="PROJECT NAME"  />
+                                                    <i class="icon-pencil icon"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="four wide column">
+                                    <div class="project-payable">
+                                        <a href="#">3234234 <span>words</span></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="four wide right floated right aligned column">
+                            <div class="project-activity-icon">
+
+                                <a class="ui orange circular label">ebay</a>
+                                <a class="project-assignee ui inline dropdown">
+                                    <div class="text">
+                                        <p class="ui avatar image initials green">CK</p>Chloe King
+                                    </div>
+                                    <div class="menu" tabindex="0">
+                                        <div class="header">
+                                            Assign project to:
+                                        </div>
+                                        <div class="header">
+                                            <div class="ui form">
+                                                <div class="field">
+                                                    <input name="Project Name" placeholder="Name or email." type="text" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="item" data-value="0">
+                                            <p class=" ui avatar image initials green">RS</p>To me
+                                        </div>
+                                        <div class="item active selected" data-value="2">
+                                            <p class=" ui avatar image initials green">CK</p>Chloe King
+                                        </div>
+                                        <div class="item" data-value="3">
+                                            <p class=" ui avatar image initials green">OJ</p>Owen James
+                                        </div>
+                                        <div class="item" data-value="4">
+                                            <p class=" ui avatar image initials green">SP</p>Stephen Powell
+                                        </div>
+                                    </div>
+                                </a>
+
+
+                                <button class="project-menu circular ui icon top right pointing dropdown button" tabindex="0">
+                                    <i class="icon-more_vert icon"></i>
+                                    <div class="menu" tabindex="-1">
+                                        <div class="header">Project Menu</div>
+                                        <div class="ui divider"></div>
+                                        <div class="item">
+                                            <a href="#"><i class="icon-forward icon"></i>Move project</a>
+                                        </div>
+                                        <div class="ui divider"></div>
+                                        <div class="item">
+                                            <a href="#"><i class="icon-download-logs icon"></i>Activity log</a>
+                                        </div>
+                                        <div class="item">
+                                            <a href="#"><i class="icon-drawer icon"></i>Archive project</a>
+                                        </div>
+                                        <div class="item">
+                                            <a href="#"><i class="icon-trash-o icon"></i>Cancel project</a>
+                                        </div>
+                                    </div>
+                                </button>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="one column project-body">
+                    <div class="jobs">
+                        <div class="ui one column grid job">
+
+                                <div class="four column row job-header shadow-1">
+                                    <div class="source-target left floated column ">
+                                        <span class="source-box">Italian</span>
+                                        <i class="icon-chevron-right icon"></i>
+                                        <span class="target-box">Japanese</span>
+                                    </div>
+                                    <div class="split-merge right floated right aligned column">
+                                        <button class="ui basic button"><i class="icon-compress icon"></i> Merge </button>
+                                    </div>
+                                </div>
+                                <div class="column job-body">
+                                    <div class="ui one column grid chunks">
+                                        <div class="column chunk shadow-1">
+                                            <div class="ui one column grid">
+                                                <div class="five wide column">
+                                                    <div class="ui grid one column">
+                                                        <div class="four wide column">
+                                                            <div class="job-id">243523-1</div>
+                                                        </div>
+                                                        <div class="six wide column">
+                                                            progressbar
+                                                        </div>
+                                                        <div class="six wide column">
+                                                            <div class="job-payable">
+                                                                <a href="#">234</a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="seven wide column">
+                                                    <div class="ui grid one column">
+                                                        <div class="eight wide column">
+                                                            <div class="send-translator">
+                                                                <a href="#">translator not setted</a>
+                                                            </div>
+                                                        </div>
+                                                        <div class="eight wide column ">
+                                                            <div class="due-to">
+                                                                <a href="#">due to: mm/dd/yyyy</a>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                                <div class="four wide right floated right aligned column">
+                                                    <div class="job-activity-icon">
+                                                        <button class="open-translate circular ui icon primary button">
+                                                            <i class="icon-arrow-right2 icon"></i>
+                                                        </button>
+                                                        <button class="job-menu circular ui icon top right pointing dropdown button" tabindex="0">
+                                                            <i class="icon-more_vert icon"></i>
+                                                            <div class="menu" tabindex="-1">
+                                                                <div class="header">Project Menu</div>
+                                                                <div class="ui divider"></div>
+                                                                <div class="item">
+                                                                    <a href="#"><i class="icon-forward icon"></i>Move project</a>
+                                                                </div>
+                                                                <div class="ui divider"></div>
+                                                                <div class="item">
+                                                                    <a href="#"><i class="icon-download-logs icon"></i>Activity log</a>
+                                                                </div>
+                                                                <div class="item">
+                                                                    <a href="#"><i class="icon-drawer icon"></i>Archive project</a>
+                                                                </div>
+                                                                <div class="item">
+                                                                    <a href="#"><i class="icon-trash-o icon"></i>Cancel project</a>
+                                                                </div>
+                                                            </div>
+                                                        </button>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="column chunk shadow-1">
+                                            <div class="ui one column grid">
+                                                <div class="five wide column">
+                                                    <div class="ui grid one column">
+                                                        <div class="four wide column">
+                                                            <div class="job-id">243523-1</div>
+                                                        </div>
+                                                        <div class="six wide column">
+                                                            progressbar
+                                                        </div>
+                                                        <div class="six wide column">
+                                                            <div class="job-payable">
+                                                                <a href="#">234</a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="seven wide column">
+                                                    <div class="ui grid one column">
+                                                        <div class="eight wide column">
+                                                            <div class="send-translator">
+                                                                <a href="#">translator not setted</a>
+                                                            </div>
+                                                        </div>
+                                                        <div class="eight wide column ">
+                                                            <div class="due-to">
+                                                                <a href="#">due to: mm/dd/yyyy</a>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                                <div class="four wide right floated right aligned column">
+                                                    <div class="job-activity-icon">
+                                                        <button class="open-translate circular ui icon primary button">
+                                                            <i class="icon-arrow-right2 icon"></i>
+                                                        </button>
+                                                        <button class="job-menu circular ui icon top right pointing dropdown button" tabindex="0">
+                                                            <i class="icon-more_vert icon"></i>
+                                                            <div class="menu" tabindex="-1">
+                                                                <div class="header">Project Menu</div>
+                                                                <div class="ui divider"></div>
+                                                                <div class="item">
+                                                                    <a href="#"><i class="icon-forward icon"></i>Move project</a>
+                                                                </div>
+                                                                <div class="ui divider"></div>
+                                                                <div class="item">
+                                                                    <a href="#"><i class="icon-download-logs icon"></i>Activity log</a>
+                                                                </div>
+                                                                <div class="item">
+                                                                    <a href="#"><i class="icon-drawer icon"></i>Archive project</a>
+                                                                </div>
+                                                                <div class="item">
+                                                                    <a href="#"><i class="icon-trash-o icon"></i>Cancel project</a>
+                                                                </div>
+                                                            </div>
+                                                        </button>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="column chunk shadow-1">
+                                            <div class="ui one column grid">
+                                                <div class="five wide column">
+                                                    <div class="ui grid one column">
+                                                        <div class="four wide column">
+                                                            <div class="job-id">243523-1</div>
+                                                        </div>
+                                                        <div class="six wide column">
+                                                            progressbar
+                                                        </div>
+                                                        <div class="six wide column">
+                                                            <div class="job-payable">
+                                                                <a href="#">234</a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="seven wide column">
+                                                    <div class="ui grid one column">
+                                                        <div class="eight wide column">
+                                                            <div class="send-translator">
+                                                                <a href="#">translator not setted</a>
+                                                            </div>
+                                                        </div>
+                                                        <div class="eight wide column ">
+                                                            <div class="due-to">
+                                                                <a href="#">due to: mm/dd/yyyy</a>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                                <div class="four wide right floated right aligned column">
+                                                    <div class="job-activity-icon">
+                                                        <button class="open-translate circular ui icon primary button">
+                                                            <i class="icon-arrow-right2 icon"></i>
+                                                        </button>
+                                                        <button class="job-menu circular ui icon top right pointing dropdown button" tabindex="0">
+                                                            <i class="icon-more_vert icon"></i>
+                                                            <div class="menu" tabindex="-1">
+                                                                <div class="header">Project Menu</div>
+                                                                <div class="ui divider"></div>
+                                                                <div class="item">
+                                                                    <a href="#"><i class="icon-forward icon"></i>Move project</a>
+                                                                </div>
+                                                                <div class="ui divider"></div>
+                                                                <div class="item">
+                                                                    <a href="#"><i class="icon-download-logs icon"></i>Activity log</a>
+                                                                </div>
+                                                                <div class="item">
+                                                                    <a href="#"><i class="icon-drawer icon"></i>Archive project</a>
+                                                                </div>
+                                                                <div class="item">
+                                                                    <a href="#"><i class="icon-trash-o icon"></i>Cancel project</a>
+                                                                </div>
+                                                            </div>
+                                                        </button>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="column chunk shadow-1">
+                                            <div class="ui one column grid">
+                                                <div class="five wide column">
+                                                    <div class="ui grid one column">
+                                                        <div class="four wide column">
+                                                            <div class="job-id">243523-1</div>
+                                                        </div>
+                                                        <div class="six wide column">
+                                                            progressbar
+                                                        </div>
+                                                        <div class="six wide column">
+                                                            <div class="job-payable">
+                                                                <a href="#">234</a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="seven wide column">
+                                                    <div class="ui grid one column">
+                                                        <div class="eight wide column">
+                                                            <div class="send-translator">
+                                                                <a href="#">translator not setted</a>
+                                                            </div>
+                                                        </div>
+                                                        <div class="eight wide column ">
+                                                            <div class="due-to">
+                                                                <a href="#">due to: mm/dd/yyyy</a>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                                <div class="four wide right floated right aligned column">
+                                                    <div class="job-activity-icon">
+                                                        <button class="open-translate circular ui icon primary button">
+                                                            <i class="icon-arrow-right2 icon"></i>
+                                                        </button>
+                                                        <button class="job-menu circular ui icon top right pointing dropdown button" tabindex="0">
+                                                            <i class="icon-more_vert icon"></i>
+                                                            <div class="menu" tabindex="-1">
+                                                                <div class="header">Project Menu</div>
+                                                                <div class="ui divider"></div>
+                                                                <div class="item">
+                                                                    <a href="#"><i class="icon-forward icon"></i>Move project</a>
+                                                                </div>
+                                                                <div class="ui divider"></div>
+                                                                <div class="item">
+                                                                    <a href="#"><i class="icon-download-logs icon"></i>Activity log</a>
+                                                                </div>
+                                                                <div class="item">
+                                                                    <a href="#"><i class="icon-drawer icon"></i>Archive project</a>
+                                                                </div>
+                                                                <div class="item">
+                                                                    <a href="#"><i class="icon-trash-o icon"></i>Cancel project</a>
+                                                                </div>
+                                                            </div>
+                                                        </button>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                        </div>
+                        <div class="ui one column grid job">
+
+                            <div class="four column row job-header shadow-1">
+                                <div class="source-target left floated column ">
+                                    <span class="source-box">Italian</span>
+                                    <i class="icon-chevron-right icon"></i>
+                                    <span class="target-box">Japanese</span>
+                                </div>
+                                <div class="split-merge right floated right aligned column">
+                                    <button class="ui basic button"><i class="icon-compress icon"></i> Merge </button>
+                                </div>
+                            </div>
+                            <div class="column job-body">
+                                <div class="ui one column grid chunks">
+                                    <div class="column chunk shadow-1">
+                                        <div class="ui one column grid">
+                                            <div class="five wide column">
+                                                <div class="ui grid one column">
+                                                    <div class="four wide column">
+                                                        <div class="job-id">243523-1</div>
+                                                    </div>
+                                                    <div class="six wide column">
+                                                        progressbar
+                                                    </div>
+                                                    <div class="six wide column">
+                                                        <div class="job-payable">
+                                                            <a href="#">234</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="seven wide column">
+                                                <div class="ui grid one column">
+                                                    <div class="eight wide column">
+                                                        <div class="send-translator">
+                                                            <a href="#">translator not setted</a>
+                                                        </div>
+                                                    </div>
+                                                    <div class="eight wide column ">
+                                                        <div class="due-to">
+                                                            <a href="#">due to: mm/dd/yyyy</a>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div class="four wide right floated right aligned column">
+                                                <div class="job-activity-icon">
+                                                    <button class="open-translate circular ui icon primary button">
+                                                        <i class="icon-arrow-right2 icon"></i>
+                                                    </button>
+                                                    <button class="job-menu circular ui icon top right pointing dropdown button" tabindex="0">
+                                                        <i class="icon-more_vert icon"></i>
+                                                        <div class="menu" tabindex="-1">
+                                                            <div class="header">Project Menu</div>
+                                                            <div class="ui divider"></div>
+                                                            <div class="item">
+                                                                <a href="#"><i class="icon-forward icon"></i>Move project</a>
+                                                            </div>
+                                                            <div class="ui divider"></div>
+                                                            <div class="item">
+                                                                <a href="#"><i class="icon-download-logs icon"></i>Activity log</a>
+                                                            </div>
+                                                            <div class="item">
+                                                                <a href="#"><i class="icon-drawer icon"></i>Archive project</a>
+                                                            </div>
+                                                            <div class="item">
+                                                                <a href="#"><i class="icon-trash-o icon"></i>Cancel project</a>
+                                                            </div>
+                                                        </div>
+                                                    </button>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="column chunk shadow-1">
+                                        <div class="ui one column grid">
+                                            <div class="five wide column">
+                                                <div class="ui grid one column">
+                                                    <div class="four wide column">
+                                                        <div class="job-id">243523-1</div>
+                                                    </div>
+                                                    <div class="six wide column">
+                                                        progressbar
+                                                    </div>
+                                                    <div class="six wide column">
+                                                        <div class="job-payable">
+                                                            <a href="#">234</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="seven wide column">
+                                                <div class="ui grid one column">
+                                                    <div class="eight wide column">
+                                                        <div class="send-translator">
+                                                            <a href="#">translator not setted</a>
+                                                        </div>
+                                                    </div>
+                                                    <div class="eight wide column ">
+                                                        <div class="due-to">
+                                                            <a href="#">due to: mm/dd/yyyy</a>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div class="four wide right floated right aligned column">
+                                                <div class="job-activity-icon">
+                                                    <button class="open-translate circular ui icon primary button">
+                                                        <i class="icon-arrow-right2 icon"></i>
+                                                    </button>
+                                                    <button class="job-menu circular ui icon top right pointing dropdown button" tabindex="0">
+                                                        <i class="icon-more_vert icon"></i>
+                                                        <div class="menu" tabindex="-1">
+                                                            <div class="header">Project Menu</div>
+                                                            <div class="ui divider"></div>
+                                                            <div class="item">
+                                                                <a href="#"><i class="icon-forward icon"></i>Move project</a>
+                                                            </div>
+                                                            <div class="ui divider"></div>
+                                                            <div class="item">
+                                                                <a href="#"><i class="icon-download-logs icon"></i>Activity log</a>
+                                                            </div>
+                                                            <div class="item">
+                                                                <a href="#"><i class="icon-drawer icon"></i>Archive project</a>
+                                                            </div>
+                                                            <div class="item">
+                                                                <a href="#"><i class="icon-trash-o icon"></i>Cancel project</a>
+                                                            </div>
+                                                        </div>
+                                                    </button>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="column chunk shadow-1">
+                                        <div class="ui one column grid">
+                                            <div class="five wide column">
+                                                <div class="ui grid one column">
+                                                    <div class="four wide column">
+                                                        <div class="job-id">243523-1</div>
+                                                    </div>
+                                                    <div class="six wide column">
+                                                        progressbar
+                                                    </div>
+                                                    <div class="six wide column">
+                                                        <div class="job-payable">
+                                                            <a href="#">234</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="seven wide column">
+                                                <div class="ui grid one column">
+                                                    <div class="eight wide column">
+                                                        <div class="send-translator">
+                                                            <a href="#">translator not setted</a>
+                                                        </div>
+                                                    </div>
+                                                    <div class="eight wide column ">
+                                                        <div class="due-to">
+                                                            <a href="#">due to: mm/dd/yyyy</a>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                            <div class="four wide right floated right aligned column">
+                                                <div class="job-activity-icon">
+                                                    <button class="open-translate circular ui icon primary button">
+                                                        <i class="icon-arrow-right2 icon"></i>
+                                                    </button>
+                                                    <button class="job-menu circular ui icon top right pointing dropdown button" tabindex="0">
+                                                        <i class="icon-more_vert icon"></i>
+                                                        <div class="menu" tabindex="-1">
+                                                            <div class="header">Project Menu</div>
+                                                            <div class="ui divider"></div>
+                                                            <div class="item">
+                                                                <a href="#"><i class="icon-forward icon"></i>Move project</a>
+                                                            </div>
+                                                            <div class="ui divider"></div>
+                                                            <div class="item">
+                                                                <a href="#"><i class="icon-download-logs icon"></i>Activity log</a>
+                                                            </div>
+                                                            <div class="item">
+                                                                <a href="#"><i class="icon-drawer icon"></i>Archive project</a>
+                                                            </div>
+                                                            <div class="item">
+                                                                <a href="#"><i class="icon-trash-o icon"></i>Cancel project</a>
+                                                            </div>
+                                                        </div>
+                                                    </button>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="one column footer-body">
+                    activity log
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+
+<!--<div id="main-container">
     <div style="width: 40%; margin: 0 auto; margin-top: 15%;">
         <h3>Loading projects</h3>
         <div class="progress" style="margin: 0 auto; ">
             <div class="indeterminate"></div>
         </div>
-        <!--<div class="preloader-wrapper big active" >-->
-            <!--<div class="spinner-layer spinner-blue-only">-->
-                <!--<div class="circle-clipper left">-->
-                    <!--<div class="circle"></div>-->
-                <!--</div><div class="gap-patch">-->
-                <!--<div class="circle"></div>-->
-            <!--</div><div class="circle-clipper right">-->
-                <!--<div class="circle"></div>-->
-            <!--</div>-->
-            <!--</div>-->
-        <!--</div>-->
     </div>
-</div>
+</div>-->
 
 
 

@@ -1,13 +1,19 @@
-@import "vendor_mc/materialize-src/materialize";
+//@import "vendor_mc/materialize-src/materialize";
+@import "vendor_mc/semantic/matecat_semantic";
+
 @import "commons/filter-organizations";
 @import "commons/matecat_fonts";
+@import "commons/icons";
 @import "commons/progress-mc-bar";
 @import "commons/nav-bar";
-@import "commons/sub-header";
 @import "commons/divider";
-@import "commons/icons";
-@import "commons/organization-member";
+@import "commons/shadows";
 
 @import 'common-modals';
 @import "notifications";
-@import "commons/_manage";
+
+@import "commons/sub-header";
+@import "commons/organization-member";
+@import "commons/manage";
+
+
