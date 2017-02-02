@@ -124,3 +124,8 @@ route(
     '/api/v2/glossaries/export/[:tm_key].?[:downloadToken]?', 'GET',
     '\API\V2\GlossariesController', 'download'
 );
+
+
+route(
+    '/api/v2/ping', 'HEAD', '\API\V2\KeyCheckController', 'ping'
+);

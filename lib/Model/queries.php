@@ -2167,7 +2167,8 @@ function getProjectForVolumeAnalysis( $limit = 1 ) {
 
     $db    = Database::obtain();
     //Needed to address the query to the master database if exists
-    $db->getConnection()->beginTransaction();
+    \Database::obtain()->begin();
+
     $results = $db->fetch_array($query); // this is a select, should never return a transaction exception
     $db->getConnection()->commit();
     return $results;
@@ -2550,7 +2551,8 @@ function getProjectSegmentsTranslationSummary( $pid ) {
         GROUP BY id_job WITH ROLLUP";
     try {
         //Needed to address the query to the master database if exists
-        $db->getConnection()->beginTransaction();
+        \Database::obtain()->begin();
+
         $results = $db->fetch_array($query);
         $db->getConnection()->commit();
     } catch ( PDOException $e ) {

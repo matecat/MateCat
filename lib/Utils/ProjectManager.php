@@ -1295,7 +1295,7 @@ class ProjectManager {
     public function applySplit( ArrayObject $projectStructure ) {
         Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
 
-        $this->dbHandler->getConnection()->beginTransaction();
+        \Database::obtain()->begin();
         $this->_splitJob( $projectStructure );
         $this->features->run( 'postJobSplitted', $projectStructure );
         $this->dbHandler->getConnection()->commit();
@@ -1370,7 +1370,7 @@ class ProjectManager {
         //delete all old jobs
         $queries[] = "DELETE FROM jobs WHERE id = {$first_job['id']} AND password != '{$first_job['password']}' "; //use new password
 
-        $this->dbHandler->getConnection()->beginTransaction();
+        \Database::obtain()->begin();
 
         foreach ( $queries as $query ) {
             $res = $this->dbHandler->query( $query );
