@@ -163,7 +163,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         $columns = array_values( $columns );
         $values  = array_values( $values );
 
-        $conn->beginTransaction();
+        \Database::obtain()->begin();
 
         $stmt = $conn->prepare( 'INSERT INTO `jobs` ( ' . implode( ',', $columns ) . ' ) VALUES ( ' . implode( ',' , array_fill( 0, count( $values ), '?' ) ) . ' )' );
 
