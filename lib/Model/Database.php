@@ -134,7 +134,9 @@ class Database implements IDatabase {
      * {@inheritdoc}
      */
     public function begin() {
-        $this->getConnection()->beginTransaction();
+        if ( ! $this->getConnection()->inTransaction() ) {
+            $this->getConnection()->beginTransaction();
+        }
     }
 
 
