@@ -76,7 +76,7 @@ class JobContainer extends React.Component {
             .done(function (data) {
                 let notification = {
                     title: 'Change job password',
-                    text: 'The password has been changed. <a class="undo-password">Undo</a>',
+                    text: 'The password has been changed. <a className="undo-password">Undo</a>',
                     type: 'warning',
                     position: 'tc',
                     allowHtml: true,
@@ -137,55 +137,60 @@ class JobContainer extends React.Component {
 
         let jobStatus = this.getTranslationStatus();
         let downloadButton = (jobStatus == 'translated' || jobStatus == 'approved') ?
-            <div className="item" onClick={this.downloadTranslation}><a >Download</a></div> : <div className="item" onClick={this.downloadTranslation}><a ><i className="icon-eye"/>Preview</a></div>;
+            <div className="item" onClick={this.downloadTranslation}><a >Download</a></div> : <div className="item" onClick={this.downloadTranslation}><a ><i className="icon-eye icon"/>Preview</a></div>;
 
-        let splitButton = (!this.props.isChunk) ? <div className="item"><a target="_blank" href={splitUrl}><i className="icon-expand"/> Split</a></div> : '';
+        let splitButton = (!this.props.isChunk) ? <div className="item"><a target="_blank" href={splitUrl}><i className="icon-expand icon"/> Split</a></div> : '';
 
         let menuHtml = <div className="menu">
-            <div className="item" onClick={this.changePassword.bind(this)}><a ><i className="icon-refresh"/> Change Password</a></div>
+            <div className="header">Project Menu</div>
+            <div className="ui divider"></div>
+            <div className="item" onClick={this.changePassword.bind(this)}><a ><i className="icon-refresh icon"/> Change Password</a></div>
                 {splitButton}
-            <div className="item"><a target="_blank" href={reviseUrl}><i className="icon-edit"/> Revise</a></div>
+            <div className="item"><a target="_blank" href={reviseUrl}><i className="icon-edit icon"/> Revise</a></div>
             <div className="divider"/>
-            <div className="item"><a target="_blank" href={qaReportUrl}><i className="icon-qr-matecat"/> QA Report</a></div>
-            <div className="item"><a target="_blank" href={editLogUrl}><i className="icon-download-logs"/> Editing Log</a></div>
+            <div className="item"><a target="_blank" href={qaReportUrl}><i className="icon-qr-matecat icon"/> QA Report</a></div>
+            <div className="item"><a target="_blank" href={editLogUrl}><i className="icon-download-logs icon"/> Editing Log</a></div>
                 {downloadButton}
             <div className="divider"/>
-            <div className="item"><a target="_blank" href={originalUrl}><i className="icon-download"/> Download Original</a></div>
-            <div className="item"><a target="_blank" href={exportXliffUrl}><i className="icon-download"/> Export XLIFF</a></div>
-            <div className="item"><a target="_blank" href={jobTMXUrl}><i className="icon-download"/> Export TMX</a></div>
-            <div className="item" onClick={this.archiveJob.bind(this)}><a ><i className="icon-drawer"/> Archive job</a></div>
-            <div className="item" onClick={this.cancelJob.bind(this)}><a ><i className="icon-trash-o"/> Cancel job</a></div>
+            <div className="item"><a target="_blank" href={originalUrl}><i className="icon-download icon"/> Download Original</a></div>
+            <div className="item"><a target="_blank" href={exportXliffUrl}><i className="icon-download icon"/> Export XLIFF</a></div>
+            <div className="item"><a target="_blank" href={jobTMXUrl}><i className="icon-download icon"/> Export TMX</a></div>
+            <div className="item" onClick={this.archiveJob.bind(this)}><a ><i className="icon-drawer icon"/> Archive job</a></div>
+            <div className="item" onClick={this.cancelJob.bind(this)}><a ><i className="icon-trash-o icon"/> Cancel job</a></div>
             </div>;
         if ( this.props.job.get('status') === 'archived' ) {
             menuHtml = <div className="menu">
-
-                <div className="item" onClick={this.changePassword.bind(this)}><a ><i className="icon-refresh"/> Change Password</a></div>
+                <div className="header">Project Menu</div>
+                <div className="ui divider"></div>
+                <div className="item" onClick={this.changePassword.bind(this)}><a ><i className="icon-refresh icon"/> Change Password</a></div>
                 {splitButton}
-                <div className="item"><a target="_blank" href={reviseUrl}><i className="icon-edit"/> Revise</a></div>
-                <div className="item"><a target="_blank" href={qaReportUrl}><i className="icon-qr-matecat"/> QA Report</a></div>
-                <div className="item"><a target="_blank" href={editLogUrl}><i className="icon-download-logs"/> Editing Log</a></div>
+                <div className="item"><a target="_blank" href={reviseUrl}><i className="icon-edit icon"/> Revise</a></div>
+                <div className="item"><a target="_blank" href={qaReportUrl}><i className="icon-qr-matecat icon"/> QA Report</a></div>
+                <div className="item"><a target="_blank" href={editLogUrl}><i className="icon-download-logs icon"/> Editing Log</a></div>
 
                     {downloadButton}
                 <div className="divider"/>
-                <div className="item"><a target="_blank" href={originalUrl}><i className="icon-download"/> Download Original</a></div>
-                <div className="item"><a target="_blank" href={exportXliffUrl}><i className="icon-download"/> Export XLIFF</a></div>
-                <div className="item"><a target="_blank" href={jobTMXUrl}><i className="icon-download"/> Export TMX</a></div>
-                <div className="item" onClick={this.activateJob.bind(this)}><a ><i className="icon-drawer unarchive-project"/> Unarchive job</a></div>
-                <div className="item" onClick={this.cancelJob.bind(this)}><a ><i className="icon-trash-o"/> Cancel job</a></div>
+                <div className="item"><a target="_blank" href={originalUrl}><i className="icon-download icon"/> Download Original</a></div>
+                <div className="item"><a target="_blank" href={exportXliffUrl}><i className="icon-download icon"/> Export XLIFF</a></div>
+                <div className="item"><a target="_blank" href={jobTMXUrl}><i className="icon-download icon"/> Export TMX</a></div>
+                <div className="item" onClick={this.activateJob.bind(this)}><a ><i className="icon-drawer unarchive-project icon"/> Unarchive job</a></div>
+                <div className="item" onClick={this.cancelJob.bind(this)}><a ><i className="icon-trash-o icon"/> Cancel job</a></div>
             </div>;
         } else if ( this.props.job.get('status') === 'cancelled' ) {
             menuHtml = <div className="menu">
-                    <div className="item" onClick={this.changePassword.bind(this)}><a ><i className="icon-refresh"/> Change Password</a></div>
+                    <div className="header">Project Menu</div>
+                    <div className="ui divider"></div>
+                    <div className="item" onClick={this.changePassword.bind(this)}><a ><i className="icon-refresh icon"/> Change Password</a></div>
                     {splitButton}
-                    <div className="item"><a target="_blank" href={reviseUrl}><i className="icon-edit"/> Revise</a></div>
-                    <div className="item"><a target="_blank" href={qaReportUrl}><i className="icon-qr-matecat"/> QA Report</a></div>
-                    <div className="item"><a target="_blank" href={editLogUrl}><i className="icon-download-logs"/> Editing Log</a></div>
+                    <div className="item"><a target="_blank" href={reviseUrl}><i className="icon-edit icon"/> Revise</a></div>
+                    <div className="item"><a target="_blank" href={qaReportUrl}><i className="icon-qr-matecat icon"/> QA Report</a></div>
+                    <div className="item"><a target="_blank" href={editLogUrl}><i className="icon-download-logs icon"/> Editing Log</a></div>
                     {downloadButton}
                     <div className="divider"/>
-                    <div className="item"><a target="_blank" href={originalUrl}><i className="icon-download"/> Download Original</a></div>
-                    <div className="item"><a target="_blank" href={exportXliffUrl}><i className="icon-download"/> Export XLIFF</a></div>
-                    <div className="item"><a target="_blank" href={jobTMXUrl}><i className="icon-download"/> Export TMX</a></div>
-                    <div className="item" onClick={this.activateJob.bind(this)}><a><i className="icon-drawer unarchive-project"/> Resume job</a></div>
+                    <div className="item"><a target="_blank" href={originalUrl}><i className="icon-download icon"/> Download Original</a></div>
+                    <div className="item"><a target="_blank" href={exportXliffUrl}><i className="icon-download icon"/> Export XLIFF</a></div>
+                    <div className="item"><a target="_blank" href={jobTMXUrl}><i className="icon-download icon"/> Export TMX</a></div>
+                    <div className="item" onClick={this.activateJob.bind(this)}><a><i className="icon-drawer unarchive-project icon"/> Resume job</a></div>
                 </div>;
         }
         return menuHtml;
@@ -229,13 +234,11 @@ class JobContainer extends React.Component {
                 let item = '<div style="text-align: left"><span style="font-weight: bold">' + descript + '</span> KEY: ' + key.key + '</div>';
                 tooltipText =  tooltipText + item;
             });
-            return <li>
-                <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0 tooltipped tm-keys"
+            return <a className="circular ui icon button tm-keys"
                    data-position="top" data-tooltip={tooltipText}
                    onClick={this.openTMPanel.bind(this)}>
-                    <i className="icon-tm-matecat"/>
-                </a>
-            </li>;
+                    <i className="icon-tm-matecat icon"/>
+                </a>;
         } else {
             return '';
         }
@@ -252,12 +255,10 @@ class JobContainer extends React.Component {
                 tooltipText = 'There are <span style="font-weight: bold">' + openThreads + '</span> open threads';
             }
             var translatedUrl = this.getTranslateUrl() + '?action=openComments';
-            icon = <li>
-                <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0 tooltipped comments-tooltip"
+            icon = <a className="circular ui icon button comments-tooltip"
                    data-position="top" data-tooltip={tooltipText} href={translatedUrl} target="_blank">
-                    <i className="icon-uniE96B"/>
-                </a>
-            </li>;
+                    <i className="icon-uniE96B icon"/>
+                </a>;
         }
         return icon;
 
@@ -268,12 +269,11 @@ class JobContainer extends React.Component {
         var quality = this.props.job.get('quality_overall');
         if ( quality === "poor" || quality === "fail" ) {
             var url = this.getQAReport();
-            icon = <li>
-                <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0"
+            icon = <a className="circular ui icon button"
                    href={url} target="_blank">
-                    <i className={"icon-qr-matecat " + quality}/>
+                    <i className={"icon-qr-matecat icon " + quality}/>
                 </a>
-            </li>;
+            ;
         }
         return icon;
     }
@@ -283,12 +283,10 @@ class JobContainer extends React.Component {
         var warnings = this.props.job.get('warnings_count');
         if ( warnings > 0 ) {
             var url = this.getTranslateUrl() + '?action=warnings';
-            icon = <li>
-                <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0"
+            icon = <a className="circular ui icon button"
                    href={url} target="_blank">
-                    <i className="icon-notice"/>
-                </a>
-            </li>;
+                    <i className="icon-notice icon"/>
+                </a>;
         }
         return icon;
     }
@@ -332,85 +330,70 @@ class JobContainer extends React.Component {
         let warningsIcon = this.getWarningsIcon();
         let idJobLabel = ( !this.props.isChunk ) ? this.props.job.get('id') : this.props.job.get('id') + '-' + this.props.index;
 
-        return <div className="card job z-depth-1">
-            <div className="body-job">
-                <div className="row">
-                    <div className="col">
-                        <div className="job-id">
-                            <div id={"id-job-" + this.props.job.get('id')}>{ idJobLabel }</div>
-                        </div>
-                    </div>
-                    <div className="col">
-                        <div className="progress-bar">
-                            <div className="progr">
-                                <div className="meter">
-                                    <a className="warning-bar" title={'Rejected '+this.props.job.get('stats').get('REJECTED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('REJECTED_PERC') + '%'}}/>
-                                    <a className="approved-bar" title={'Approved '+this.props.job.get('stats').get('APPROVED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('APPROVED_PERC')+ '%' }}/>
-                                    <a className="translated-bar" title={'Translated '+this.props.job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('TRANSLATED_PERC') + '%' }}/>
-                                    <a className="draft-bar" title={'Draft '+this.props.job.get('stats').get('DRAFT_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('DRAFT_PERC') + '%' }}/>
-                                    
+        return <div className="column chunk shadow-1">
+                    <div className="ui one column grid">
+                        <div className="five wide column">
+                            <div className="ui grid one column">
+                                <div className="four wide column">
+                                    <div className="job-id">
+                                        { idJobLabel }
+                                    </div>
+                                </div>
+                                <div className="six wide column">
+                                    <div className="progress-bar">
+                                        <div className="progr">
+                                            <div className="meter">
+                                                <a className="warning-bar" title={'Rejected '+this.props.job.get('stats').get('REJECTED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('REJECTED_PERC') + '%'}}/>
+                                                <a className="approved-bar" title={'Approved '+this.props.job.get('stats').get('APPROVED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('APPROVED_PERC')+ '%' }}/>
+                                                <a className="translated-bar" title={'Translated '+this.props.job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('TRANSLATED_PERC') + '%' }}/>
+                                                <a className="draft-bar" title={'Draft '+this.props.job.get('stats').get('DRAFT_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('DRAFT_PERC') + '%' }}/>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="six wide column">
+                                    <div className="job-payable">
+                                        <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div className="col">
-                        <div className="payable-words">
-                            <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
-                        </div>
-                    </div>
-                    <div className="col">
-                        <div className="due-to"
-                        onClick={this.openAssignToTranslatorModal.bind(this)}>
-                            {/*<a href="#"><span id="due-date">12 Jan 2016</span><span id="due-hour">, 14.00</span></a>*/}
-                            <a href="#"><span id="due-date">Choose delivery date</span></a>
-                        </div>
-                    </div>
-                    <div className="col">
-                        <div className="translator-mail"
-                             onClick={this.openAssignToTranslatorModal.bind(this)}>
-                            <a href="#"><span id="translator-job">Assign to a translator</span></a>
-                        </div>
-                    </div>
-                    {/*<div className="col">*/}
-                        {/*<div className="action-modified">*/}
-                            {/*{modifyDate}*/}
-                        {/*</div>*/}
-                    {/*</div>*/}
-                    <div className="col right">
-                        
-                        <ul className="job-activity-icon">
-                            {/*tmIcon*/}
-                            <li>
-                                <div className="ui icon top right pointing dropdown button menu-job"
-                                     ref={(dropdown) => this.dropdown = dropdown}>
-                                    <i className="icon-more_vert"/>
-                                {jobMenu}
+                        <div className="seven wide column">
+                            <div className="ui grid one column">
+                                <div className="eight wide column">
+                                    <div className="send-translator"
+                                         onClick={this.openAssignToTranslatorModal.bind(this)}>
+                                        <a href="#"><span id="translator-job">Assign to a translator</span></a>
+                                    </div>
                                 </div>
-                            </li>
-                        </ul>
-                    </div>
-                    <div className="col right">
-                        <div className="button-list">
-                            <a className="btn waves-effect waves-light translate move-left" target="_blank" href={translateUrl}>Open</a>
+                                <div className="eight wide column ">
+                                    <div className="due-to"
+                                         onClick={this.openAssignToTranslatorModal.bind(this)}>
+                                        <a href="#"><span id="due-date">Choose delivery date</span></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="four wide right floated right aligned column">
+                            <div className="job-activity-icon">
+                                <a className="open-translate circular ui icon primary button" target="_blank" href={translateUrl}>
+                                    <i className="icon-arrow-right2 icon"/>
+                                </a>
+                                <button className="job-menu circular ui icon top right pointing dropdown button"
+                                        ref={(dropdown) => this.dropdown = dropdown}>
+                                    <i className="icon-more_vert icon"/>
+                                    {jobMenu}
+                                </button>
+                                {QRIcon}
+                                {warningsIcon}
+                                {commentsIcon}
+                                {tmIcon}
+                            </div>
                         </div>
                     </div>
-                    <div className="col right">
-                        <ul className="job-activity-icon">
-                            {QRIcon}
-                            {warningsIcon}
-                            {commentsIcon}
-                            {tmIcon}
-                            {/*<li>
-                                <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0"
-                                    onClick={this.openSettings.bind(this)}>
-                                    <i className="icon-settings"/>
-                                </a>
-                            </li>*/}
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>;
+                </div>;
     }
 }
 export default JobContainer ;

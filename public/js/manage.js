@@ -44,6 +44,8 @@ UI = {
         this.personalProject = PersonalProjects;
         this.otherWorkspace = WorkspaceProjects
 
+        $(".dropdown").dropdown();
+
 
     },
 
@@ -135,7 +137,7 @@ UI = {
 
     renderProjects: function (projects) {
         if ( !this.ProjectsContainer ) {
-            let mountPoint = $("#main-container")[0];
+            let mountPoint = $("#manage-container")[0];
             this.ProjectsContainer = ReactDOM.render(React.createElement(ProjectsContainer, {
                 getLastActivity: this.getLastProjectActivityLogAction,
                 changeJobPasswordFn: this.changeJobPassword,

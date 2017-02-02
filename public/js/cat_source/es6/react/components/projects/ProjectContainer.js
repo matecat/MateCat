@@ -80,25 +80,34 @@ class ProjectContainer extends React.Component {
 
     getProjectMenu(activityLogUrl) {
         let menuHtml = <div className="menu">
-            <div className="item"><a href={activityLogUrl} target="_blank"><i className="icon-download-logs"/>Activity Log</a></div>
+            <div className="header">Project Menu</div>
+            <div className="ui divider"></div>
+            <div className="item">
+                <a href="#"><i className="icon-forward icon"/>Move project</a>
+            </div>
+            <div className="item"><a href={activityLogUrl} target="_blank"><i className="icon-download-logs icon"/>Activity Log</a></div>
 
-            <div className="item"><a onClick={this.archiveProject.bind(this)}><i className="icon-drawer"/>Archive project</a></div>
+            <div className="item"><a onClick={this.archiveProject.bind(this)}><i className="icon-drawer icon"/>Archive project</a></div>
 
-            <div className="item"><a onClick={this.removeProject.bind(this)}><i className="icon-trash-o"/>Cancel project</a></div>
+            <div className="item"><a onClick={this.removeProject.bind(this)}><i className="icon-trash-o icon"/>Cancel project</a></div>
                         </div>;
         if ( this.props.project.get('has_archived') ) {
             menuHtml = <div className="menu">
-                <div className="item"><a href={activityLogUrl} target="_blank"><i className="icon-download-logs"/>Activity Log</a></div>
+                <div className="header">Project Menu</div>
+                <div className="ui divider"></div>
+                <div className="item"><a href={activityLogUrl} target="_blank"><i className="icon-download-logs icon"/>Activity Log</a></div>
 
-                <div className="item"><a onClick={this.activateProject.bind(this)}><i className="icon-drawer unarchive-project"/>Unarchive project</a></div>
+                <div className="item"><a onClick={this.activateProject.bind(this)}><i className="icon-drawer unarchive-project icon"/>Unarchive project</a></div>
 
                 <div className="item"><a onClick={this.removeProject.bind(this)}><i className="icon-trash-o"/>Cancel project</a></div>
                         </div>;
         } else if ( this.props.project.get('has_cancelled') ) {
             menuHtml = <div className="menu">
-                <div className="item"><a href={activityLogUrl} target="_blank"><i className="icon-download-logs"/> Activity Log</a></div>
+                <div className="header">Project Menu</div>
+                <div className="ui divider"></div>
+                <div className="item"><a href={activityLogUrl} target="_blank"><i className="icon-download-logs icon"/> Activity Log</a></div>
 
-                <div className="item"><a onClick={this.activateProject.bind(this)}><i className="icon-drawer unarchive-project"/> Resume Project</a></div>
+                <div className="item"><a onClick={this.activateProject.bind(this)}><i className="icon-drawer unarchive-project icon"/> Resume Project</a></div>
                         </div>;
         }
         return menuHtml;
@@ -145,13 +154,11 @@ class ProjectContainer extends React.Component {
     getJobSplitOrMergeButton(isChunk, mergeUrl, splitUrl ) {
 
         if (isChunk) {
-            return <a className="btn waves-effect split waves-dark" target="_blank" href={mergeUrl}>
-                <i className="large icon-compress right"/>Merge
+            return <a className="ui basic button" target="_blank" href={mergeUrl}>
+                <i className="icon-compress icon"/> Merge
             </a>
         } else {
-            return <a className="btn waves-effect split waves-dark" target="_blank" href={splitUrl}>
-                <i className="large icon-expand right"/>Split
-            </a>
+            return '';
         }
     }
 
@@ -211,36 +218,28 @@ class ProjectContainer extends React.Component {
                         button = '';
                     }
 
-                    let chunkList = <div className="chunk" key = { (i - 1) + job.get('id')}>
-                        <div className="card header-chunk">
-                            <div className="row">
-                                <div className="col">
-                                    <div className="source-box">
-                                        {job.get('sourceTxt')}
+                    let jobList = <div className="ui one column grid job" key = { (i - 1) + job.get('id')}>
+                            <div className="four column row job-header shadow-1">
+                                    <div className="source-target left floated column ">
+                                        <span className="source-box">
+                                            {job.get('sourceTxt')}
+                                        </span>
+                                        <i className="icon-chevron-right icon"/>
+                                        <span className="target-box">
+                                            {job.get('targetTxt')}
+                                        </span>
                                     </div>
-                                </div>
-                                <div className="col top-6 no-pad">
-                                    <i className="icon-chevron-right"/>
-                                </div>
-                                <div className="col">
-
-                                    <div className="target-box">
-                                        {job.get('targetTxt')}
-                                    </div>
-                                </div>
-
-                                <div className="col right">
-                                    <div className="button-list">
+                                    <div className="split-merge right floated right aligned column">
                                         {button}
                                     </div>
+                            </div>
+                            <div className="column job-body">
+                                <div className="ui one column grid chunks">
+                                {chunks}
                                 </div>
                             </div>
-                        </div>
-                        <div className="jobs" >
-                            {chunks}
-                        </div>
-                    </div>;
-                    jobsList.push(chunkList);
+                        </div>;
+                    jobsList.push(jobList);
                     chunks = [];
                 }
 
@@ -259,16 +258,15 @@ class ProjectContainer extends React.Component {
             let users = this.props.organization.get('users').map((user, i) => (
                 <div className="item" data-value={user.get('id')}
                      key={'organization' + user.get('userShortName') + user.get('id')}>
-                    <a className=" ui avatar image initials green">{user.get('userShortName')}</a>
-                    {/*<img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg"/>*/}
+                    <p className=" ui avatar image initials green">{user.get('userShortName')}</p>
                     {(user.get('id') === 0)? 'To me' : user.get('userFullName')}
                 </div>
 
             ));
-            result = <div className="ui inline dropdown users-projectS"
+            result = <a className="project-assignee ui inline dropdown"
                           ref={(dropdownUsers) => this.dropdownUsers = dropdownUsers}>
                 <div className="text">
-                    <img className="ui avatar image" src="http://semantic-ui.com/images/avatar/small/jenny.jpg" />
+                    <p className="ui avatar image initials green">??</p>???
                 </div>
 
                 <div className="menu">
@@ -278,13 +276,13 @@ class ProjectContainer extends React.Component {
                     <div className="header">
                         <div className="ui form">
                             <div className="field">
-                                <input type="text" name="Project Name" placeholder="Name or email." />
+                                <input type="text" name="ProjectName" placeholder="Name or email." />
                             </div>
                         </div>
                     </div>
                     {users}
                 </div>
-            </div>;
+            </a>;
         }
         return result;
     }
@@ -297,8 +295,6 @@ class ProjectContainer extends React.Component {
         let payableWords = this.props.project.get('tm_analysis');
         let analyzeUrl = this.getAnalyzeUrl();
         let jobsLength = this.props.project.get('jobs').size;
-
-        let openProjectClass = 'open-project';
 
         let targetsLangs = [], jobsList = [];
         //The list of jobs
@@ -336,67 +332,64 @@ class ProjectContainer extends React.Component {
 
         let dropDownUsers = this.getDropDownUsers();
 
-        return <div className="card-panel project">
+        return <div className="ui one column shadow-1 grid">
 
-                    <div className={"head-project " + openProjectClass}>
-                        <div className="row">
-                            <div className="col">
+                    <div className="one column project-header">
+                        <div className="ui three column grid">
+                            <div className="one wide column">
                                 <div className="project-id">
-                                    <div id="id-project">{this.props.project.get('id')}</div>
+                                    {this.props.project.get('id')}
                                 </div>
                             </div>
-                            <div className="col m4">
-                                    <div className="project-name">
-                                        {state}
-                                        <div className="ui form">
-                                            <div className="field">
-                                                <div className="ui icon input">
-                                                    <input type="text" defaultValue={this.props.project.get('name')}
-                                                           ref={(input) => this.projectNameInput = input}
-                                                           onKeyPress={this.onKeyPressEvent.bind(this)}/>
-                                                    <i className="icon-search icon"/>
+                            <div className="nine wide column">
+                                <div className="ui one column grid">
+                                    <div className="twelve wide column">
+                                        <div className="project-name">
+                                            {state}
+                                            <div className="ui form">
+                                                <div className="field">
+                                                    <div className="ui icon input">
+                                                        <input type="text" defaultValue={this.props.project.get('name')}
+                                                               ref={(input) => this.projectNameInput = input}
+                                                               onKeyPress={this.onKeyPressEvent.bind(this)}/>
+                                                        <i className="icon-pencil icon"/>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                            </div>
-                            <div className="col">
-                                <div className="payable-words top-4">
-                                    <a href={analyzeUrl} target="_blank">{payableWords} payable words</a>
+                                    <div className="four wide column">
+                                        <div className="project-payable">
+                                            <a href={analyzeUrl} target="_blank">{payableWords} <span>payable words</span></a>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+                            
 
-                            <div className="col right">
-                                <ul className="project-activity-icon right">
-                                    <li>
-                                        <a className="chip assigned-organization waves-effect waves-dark"
-                                        onClick={this.openChangeOrganizationModal.bind(this)}>{(typeof this.props.project.get('workspace') !== 'undefined') ? this.props.project.get('workspace').get('name') : "??" }</a>
-                                    </li>
-                                    <li>
-                                        {dropDownUsers}
-                                    </li>
-                                    <li>
-                                        <div className="ui icon top right pointing dropdown button menu-project"
-                                                 ref={(dropdown) => this.dropdown = dropdown}>
-                                            <i className="icon-more_vert"/>
-                                            {projectMenu}
-                                        </div>
-                                    </li>
-                                </ul>
+                            <div className="four wide right floated right aligned column">
+                                <div className="project-activity-icon">
+                                    <a className="ui orange circular label"
+                                    onClick={this.openChangeOrganizationModal.bind(this)}>{(typeof this.props.project.get('workspace') !== 'undefined') ? this.props.project.get('workspace').get('name') : "??" }</a>
+                                    {dropDownUsers}
+                                    <div className="project-menu circular ui icon top right pointing dropdown button"
+                                             ref={(dropdown) => this.dropdown = dropdown}>
+                                        <i className="icon-more_vert icon"/>
+                                        {projectMenu}
+                                    </div>
+                                </div>
                             </div>
 
                         </div>
                     </div>
 
-                    <section className="chunks">
-                        {jobsList}
-                    </section>
-                    <div className="foot-project">
-                        <div className="row">
-                            <div className="col m12">
-                                {lastAction}
-                            </div>
+                    <div className="one column project-body">
+                        <div className="jobs">
+                            {jobsList}
                         </div>
+                    </div>
+                    <div className="one column project-footer">
+                        {lastAction}
                     </div>
 
                 </div>;

@@ -449,7 +449,7 @@ class XliffSAXTranslationReplacer {
 
         }
 
-        if ( $seg['mrk_id'] !== null ) {
+        if ( $seg['mrk_id'] !== null && $seg['mrk_id'] != '' ) {
             $translation = "<mrk mid=\"" . $seg['mrk_id'] . "\" mtype=\"seg\">" . $seg['mrk_prev_tags'] . $translation . $seg['mrk_succ_tags'] . "</mrk>";
         }
 

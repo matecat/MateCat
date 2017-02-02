@@ -207,17 +207,13 @@ class ProjectsContainer extends React.Component {
                     {/*<section className="add-project">*/}
                         {/*<a href="/" target="_blank" className="btn-floating btn-large waves-effect waves-light right create-new blue-matecat tooltipped" data-position="bottom" data-delay="50" data-tooltip="Add new project"/>*/}
                     {/*</section>*/}
-                    <section className="project-list">
-                        <div className="container">
-                            <div className="row">
-                                {spinnerReloadProjects}
-                                <div className="col m12" ref={(container) => this.container = container}>
-                                    {items}
-                                </div>
-                            </div>
+                    <div className="project-list">
+                        <div className="ui container">
+                            {spinnerReloadProjects}
+                            {items}
                         </div>
                         {spinner}
-                    </section>
+                    </div>
                 </div>;
     }
 }

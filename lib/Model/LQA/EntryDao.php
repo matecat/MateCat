@@ -128,10 +128,16 @@ class EntryDao extends \DataAccess_AbstractDao {
                 'penalty_points', 'comment', 'target_text', 'uid')
         );
 
+        $conn->beginTransaction();
         $stmt->execute( $values );
         $lastId = $conn->lastInsertId();
+        /**
+         * @deprecated do not use insert and find.
+         */
+        $record = self::findById( $lastId );
+        $conn->commit() ;
 
-        return self::findById( $lastId );
+        return $record ;
     }
 
     /**

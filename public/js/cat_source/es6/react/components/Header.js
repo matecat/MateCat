@@ -68,6 +68,7 @@ class Header extends React.Component {
 
     getOrganizationsSelect() {
         let result = '';
+
         if (this.state.organizations.size > 0) {
             let items = this.state.organizations.map((organization, i) => (
                 <div className="item" data-value={organization.get('id')}
@@ -90,6 +91,9 @@ class Header extends React.Component {
                         <a className="organization-filter button show">
                             <i className="icon-plus3 right"/>
                         </a>
+                    </div>
+                    <div className="divider"></div>
+                    <div className="item header">All Teams
                     </div>
                     <div className="divider"></div>
                     <div className="scrolling menu">
