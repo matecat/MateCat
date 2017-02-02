@@ -10,6 +10,7 @@ namespace CommandLineTasks;
 
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -32,6 +33,7 @@ class CreateTeamTask extends Command
             ->setHelp("This command allows you to create organizations...")
             ->addArgument('user_email', InputArgument::REQUIRED)
             ->addArgument('name', InputArgument::REQUIRED)
+            ->addArgument('type', InputArgument::OPTIONAL)
         ;
 
     }
@@ -39,13 +41,24 @@ class CreateTeamTask extends Command
     protected function execute( InputInterface $input, OutputInterface $output ) {
         $userDao = new \Users_UserDao() ;
         $user  = $userDao->getByEmail( $input->getArgument('user_email') ) ;
+        $type = $input->getArgument( 'type' );
 
         $teamDao = new OrganizationDao() ;
+
+        if( ! \Constants_Organizations::isAllowedType( $type ) ){
+            $type = \Constants_Organizations::PERSONAL;
+            if( $teamDao->getPersonalByUid( $user->uid ) ){
+                throw new InvalidArgumentException( "User already has the personal organization" );
+            }
+        } else {
+            $type = strtolower( $type );
+        }
 
         $teamStruct = new OrganizationStruct(array(
             'name' => $input->getArgument('name'),
             'created_by' =>  $user->uid ,
-            'created_at' => \Utils::mysqlTimestamp( time() )
+            'created_at' => \Utils::mysqlTimestamp( time() ),
+            'type' => $type
         )) ;
 
         $teamId = OrganizationDao::insertStruct( $teamStruct  ) ;

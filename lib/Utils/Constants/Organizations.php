@@ -11,9 +11,11 @@
 class Constants_Organizations {
 
     const PERSONAL = 'personal';
+    const GENERAL  = 'general';
 
     protected static $TYPES = [
-            self::PERSONAL
+            self::PERSONAL,
+            self::GENERAL
     ];
 
 

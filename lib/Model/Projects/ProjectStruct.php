@@ -80,12 +80,12 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     /**
      * @return null|\Organizations\OrganizationStruct
      */
-    public function getTeam() {
-        if ( is_null( $this->id_team ) ) {
+    public function getOrganization() {
+        if ( is_null( $this->id_organization ) ) {
             return null ;
         }
         $dao = new \Organizations\OrganizationDao() ;
-        return $dao->findById( $this->id_team ) ;
+        return $dao->findById( $this->id_organization ) ;
     }
 
     /**
