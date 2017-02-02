@@ -83,7 +83,7 @@ class ProjectContainer extends React.Component {
             <div className="header">Project Menu</div>
             <div className="ui divider"></div>
             <div className="item">
-                <a href="#"><i className="icon-forward icon"/>Move project</a>
+                <a onClick={this.openChangeOrganizationModal.bind(this)}><i className="icon-forward icon"/>Move project</a>
             </div>
             <div className="item"><a href={activityLogUrl} target="_blank"><i className="icon-download-logs icon"/>Activity Log</a></div>
 
@@ -369,8 +369,7 @@ class ProjectContainer extends React.Component {
 
                             <div className="four wide right floated right aligned column">
                                 <div className="project-activity-icon">
-                                    <a className="ui orange circular label"
-                                    onClick={this.openChangeOrganizationModal.bind(this)}>{(typeof this.props.project.get('workspace') !== 'undefined') ? this.props.project.get('workspace').get('name') : "??" }</a>
+                                    <a className="ui orange circular label">{(typeof this.props.project.get('workspace') !== 'undefined') ? this.props.project.get('workspace').get('name') : "??" }</a>
                                     {dropDownUsers}
                                     <div className="project-menu circular ui icon top right pointing dropdown button"
                                              ref={(dropdown) => this.dropdown = dropdown}>

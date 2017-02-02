@@ -183,13 +183,6 @@ let ManageActions = {
         });
     },
 
-    openModifyWorkspaceModal: function (workspace) {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.OPEN_MODIFY_WORKSPACE_MODAL,
-            workspace: workspace
-        });
-    },
-
     openChangeProjectWorkspace: function (organization, projectId) {
         AppDispatcher.dispatch({
             actionType: ManageConstants.OPEN_CHANGE_ORGANIZATION_MODAL,
