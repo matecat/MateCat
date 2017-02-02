@@ -1542,7 +1542,7 @@ function fetchStatus( $sid, $results, $status = Constants_TranslationStatus::STA
 function insertProject( ArrayObject $projectStructure ) {
     $data                        = array();
     $data[ 'id_customer' ]       = $projectStructure[ 'id_customer' ];
-    $data[ 'id_team' ]           = $projectStructure[ 'id_team' ];
+    $data[ 'id_organization' ]   = $projectStructure[ 'id_team' ];
     $data[ 'name' ]              = $projectStructure[ 'project_name' ];
     $data[ 'create_date' ]       = $projectStructure[ 'create_date' ];
     $data[ 'status_analysis' ]   = $projectStructure[ 'status' ];
@@ -1821,7 +1821,7 @@ function conditionsForProjectsQuery(
 }
 
 /**
- * @param Users_UserStruct  $user
+ * @param Users_UserStruct                  $user
  * @param                   $start                int
  * @param                   $step                 int
  * @param                   $search_in_pname      string
@@ -1831,7 +1831,7 @@ function conditionsForProjectsQuery(
  * @param                   $search_onlycompleted bool
  * @param                   $project_id           int
  *
- * @param \Teams\TeamStruct $team
+ * @param \Organizations\OrganizationStruct $team
  *
  * @return array|int|resource|void
  */
@@ -1839,7 +1839,7 @@ function getProjects( Users_UserStruct $user, $start, $step,
                       $search_in_pname, $search_source, $search_target,
                       $search_status, $search_only_completed,
                       $project_id,
-                      \Teams\TeamStruct $team = null) {
+                      \Organizations\OrganizationStruct $team = null) {
 
     list( $conditions, $data ) = conditionsForProjectsQuery(
         $search_in_pname, $search_source, $search_target,
@@ -1856,8 +1856,8 @@ function getProjects( Users_UserStruct $user, $start, $step,
     $ownership_condition = " ( p.id_customer = :email OR j.owner = :email )" ;
 
     if ( !is_null( $team ) ) {
-        $ownership_condition .= " OR p.id_team = :id_team " ;
-        $data [ 'id_team' ] = $team->id ;
+        $ownership_condition .= " OR p.id_organization = :id_organization " ;
+        $data [ 'id_organization' ] = $team->id ;
     }
 
     $conditions[] = " ( $ownership_condition ) " ;
@@ -1959,7 +1959,7 @@ function getJobsFromProjects( array $projectIDs, $search_source, $search_target,
 
 }
 
-function getProjectsNumber( Users_UserStruct $user, $search_in_pname, $search_source, $search_target, $search_status, $search_only_completed, \Teams\TeamStruct $team = null) {
+function getProjectsNumber( Users_UserStruct $user, $search_in_pname, $search_source, $search_target, $search_status, $search_only_completed, \Organizations\OrganizationStruct $team = null) {
 
     list( $conditions, $data ) = conditionsForProjectsQuery(
         $search_in_pname, $search_source, $search_target,
@@ -1981,8 +1981,8 @@ function getProjectsNumber( Users_UserStruct $user, $search_in_pname, $search_so
     $ownership_condition = " ( p.id_customer = :email OR j.owner = :email )" ;
 
     if ( !is_null( $team ) ) {
-        $ownership_condition .= " OR p.id_team = :id_team " ;
-        $data [ 'id_team' ] = $team->id ;
+        $ownership_condition .= " OR p.id_organization = :id_organization " ;
+        $data [ 'id_organization' ] = $team->id ;
     }
 
     $conditions[] = " ( $ownership_condition ) " ;

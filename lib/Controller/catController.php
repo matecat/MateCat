@@ -447,7 +447,7 @@ class catController extends viewController {
         if ( $this->isLoggedIn() ) {
             $engineQuery         = new EnginesModel_EngineStruct();
             $engineQuery->type   = 'MT';
-            $engineQuery->uid    = $uid;
+            $engineQuery->uid    = $this->logged_user->uid;
             $engineQuery->active = 1;
             $mt_engines          = $engine->read( $engineQuery );
         } else {
