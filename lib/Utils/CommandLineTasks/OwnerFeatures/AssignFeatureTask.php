@@ -21,9 +21,9 @@ class AssignFeatureTask extends Command {
             // the name of the command (the part after "bin/console")
             ->setName('features:assign')
             ->setDescription('Adds feature to a user or a team.')
-            ->addArgument('user_or_team_id', InputArgument::REQUIRED, 'Id of the user to assign the feature to. Default is user id.')
+            ->addArgument('user_or_organization_id', InputArgument::REQUIRED, 'Id of the user to assign the feature to. Default is user id.')
             ->addArgument('features', InputArgument::IS_ARRAY | InputArgument::REQUIRED, 'List of features to enable. Valid features are: ' . implode( ', ',  \Features::$VALID_CODES ) )
-            ->addOption('team', 't', null, 'Take the input id as a team id' )
+            ->addOption('org', 'o', null, 'Take the input id as a organization id' )
             ->addOption('force', 'f', null, 'Force the name of a feature even if validation fails' )
         ;
     }
@@ -42,11 +42,11 @@ class AssignFeatureTask extends Command {
 
         foreach ( $valid_features as $feature ) {
             $values = array(
-                'uid'          => $reference['uid'],
-                'id_team'      => $reference['id_team'],
-                'feature_code' => $feature,
-                'options'      => '{}',
-                'enabled'      => TRUE
+                    'uid'             => $reference[ 'uid' ],
+                    'id_organization' => $reference[ 'id_organization' ],
+                    'feature_code'    => $feature,
+                    'options'         => '{}',
+                    'enabled'         => true
             );
 
             $insert = $featureDao->create( new \OwnerFeatures_OwnerFeatureStruct( $values ) );
@@ -55,26 +55,26 @@ class AssignFeatureTask extends Command {
     }
 
     private function __getReference( InputInterface $input ) {
-        if ( $input->getOption('team') ) {
+        if ( $input->getOption('org') ) {
             $dao = new OrganizationDao();
-            $team = $dao->findById( $input->getArgument('user_or_team_id') );
+            $team = $dao->findById( $input->getArgument('user_or_organization_id') );
 
             if ( !$team ) {
                 throw  new \Exception('team not found');
             }
-            return array( 'uid' => NULL, 'id_team' => $team->id ) ;
+            return array( 'uid' => NULL, 'id_organization' => $team->id ) ;
         }
 
         else {
 
             $dao = new \Users_UserDao() ;
-            $user = $dao->getByUid( $input->getArgument('user_or_team_id')) ;
+            $user = $dao->getByUid( $input->getArgument('user_or_organization_id')) ;
 
             if ( !$user ) {
                 throw new \Exception('user not found' );
             }
 
-            return array( 'uid' => $user->uid, 'id_team' => NULL ) ;
+            return array( 'uid' => $user->uid, 'id_organization' => NULL ) ;
         }
     }
 
