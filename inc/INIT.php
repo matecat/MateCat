@@ -119,7 +119,7 @@ class INIT {
      */
     public static $LXQ_LICENSE = false;
 
-    public static $LXQ_SERVER  = "https://backend.lexiqa.net";
+    public static $LXQ_SERVER  = "http://localhost:8181";
 
     /**
      * Time zone string that should match the one set in the database.
