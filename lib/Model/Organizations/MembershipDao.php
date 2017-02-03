@@ -19,6 +19,12 @@ class MembershipDao extends \DataAccess_AbstractDao
     protected static $auto_increment_fields = array('id');
     protected static $primary_keys = array('id');
 
+    protected static $_query_user_organizations = " 
+          SELECT organizations.* FROM organizations
+              JOIN organizations_users ON organizations_users.id_organization = organizations.id
+            WHERE organizations_users.uid = :uid 
+    ";
+
     public function findById( $id ) {
         $sql = " SELECT * FROM " . self::TABLE . " WHERE id = ? " ;
         $stmt = $this->getConnection()->getConnection()->prepare( $sql ) ;
@@ -36,16 +42,26 @@ class MembershipDao extends \DataAccess_AbstractDao
      *
      * @return null|OrganizationStruct[]
      */
-    public function findUserOrganizations(\Users_UserStruct $user ) {
-        $sql = " SELECT organizations.* FROM organizations
-              JOIN organizations_users ON organizations_users.id_organization = organizations.id
-            WHERE organizations_users.uid = ? " ;
+    public function findUserOrganizations( \Users_UserStruct $user ) {
 
-        $stmt = $this->getConnection()->getConnection()->prepare( $sql ) ;
-        $stmt->setFetchMode( PDO::FETCH_CLASS, '\Organizations\OrganizationStruct' );
-        $stmt->execute( array( $user->uid ) ) ;
+        $stmt = $this->_getStatementForCache( self::$_query_user_organizations );
+        $organizationQuery = new OrganizationStruct();
+        return static::resultOrNull( $this->_fetchObject( $stmt,
+                $organizationQuery,
+                array(
+                        'uid' => $user->uid,
+                )
+        ) );
 
-        return static::resultOrNull( $stmt->fetchAll() );
+    }
+
+    public function destroyCacheUserOrganizations( \Users_UserStruct $user ){
+        $stmt = $this->_getStatementForCache( self::$_query_user_organizations );
+        return $this->_destroyObjectCache( $stmt,
+                array(
+                        'uid' => $user->uid,
+                )
+        );
     }
 
     /**
@@ -64,22 +80,6 @@ class MembershipDao extends \DataAccess_AbstractDao
         $stmt = $this->getConnection()->getConnection()->prepare( $sql ) ;
         $stmt->setFetchMode( PDO::FETCH_CLASS, '\Organizations\OrganizationStruct' );
         $stmt->execute( array( $user->uid, $id ) ) ;
-
-        return static::resultOrNull( $stmt->fetch() );
-    }
-
-    /**
-     * @param \Users_UserStruct $user
-     * @return null|OrganizationStruct
-     */
-    public function findPersonalOrganization( \Users_UserStruct $user ) {
-        $sql = " SELECT organizations.* FROM organizations
-              JOIN organizations_users ON organizations_users.id_organization = organizations.id
-            WHERE organizations_users.uid = ? AND type = 'personal' ";
-
-        $stmt = $this->getConnection()->getConnection()->prepare( $sql ) ;
-        $stmt->setFetchMode( PDO::FETCH_CLASS, '\Organizations\OrganizationStruct' );
-        $stmt->execute( array( $user->uid ) ) ;
 
         return static::resultOrNull( $stmt->fetch() );
     }

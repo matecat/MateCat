@@ -52,6 +52,11 @@ abstract class DataAccess_AbstractDao {
         return $this->con;
     }
 
+    /**
+     * @param DataAccess_IDaoStruct $obj
+     *
+     * @throws Exception
+     */
     public function create( DataAccess_IDaoStruct $obj ) {
         throw new Exception( "Abstract method " . __METHOD__ . " must be overridden " );
     }
@@ -516,6 +521,8 @@ abstract class DataAccess_AbstractDao {
     /**
      *  Use this function whenever you want to make an empty result
      * returned as null instead of PDO's default FALSE.
+     *
+     * @return mixed|null
      *
      */
     public static function resultOrNull( $result ) {

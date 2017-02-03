@@ -1,12 +1,14 @@
 <?php
 
+use Organizations\OrganizationStruct;
+
 class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
 
     public function findFromUserOrTeam( Users_UserStruct $user, \Organizations\OrganizationStruct $team ) {
        // TODO:
     }
 
-    public function getByTeam( \Organizations\OrganizationStruct $team ) {
+    public function getByOrganization( OrganizationStruct $team ) {
         $conn = Database::obtain()->getConnection();
 
         $stmt = $conn->prepare( "SELECT * FROM owner_features " .
@@ -18,6 +20,11 @@ class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
         return $stmt->fetchAll();
     }
 
+    /**
+     * @param OwnerFeatures_OwnerFeatureStruct $obj
+     *
+     * @return mixed
+     */
     public function create( OwnerFeatures_OwnerFeatureStruct $obj ) {
         $conn = Database::obtain()->getConnection();
 

@@ -77,7 +77,13 @@ class createProjectController extends ajaxController {
          * some feature may be attached to the organization. This has to be
          * done right after login.
          */
-        $this->__validateOrganization() ;
+        $this->__validateOrganization(
+                @array_pop(
+                        filter_input_array( INPUT_POST, [
+                            'id_organization' => [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR ]
+                        ] )
+                )
+        );
 
         $this->__setupFeatureSet();
 
@@ -436,17 +442,22 @@ class createProjectController extends ajaxController {
         ));
     }
 
-    private function __validateOrganization() {
+    /**
+     * @param null $id_organization
+     *
+     * @throws Exception
+     */
+    private function __validateOrganization( $id_organization = null  ) {
         /*
          * if organization param is provided then
          */
-        if ( $this->userIsLogged && is_null( $_POST['id_organization'] ) ) {
+        if ( $this->userIsLogged && is_null( $id_organization ) ) {
             $this->organization = $this->logged_user->getPersonalOrganization() ;
         }
-        else if ( $this->userIsLogged && !is_null( $_POST['id_organization'] ) ) {
+        else if ( $this->userIsLogged && !is_null( $id_organization ) ) {
             // check for the organization to be allowed
             $dao = new \Organizations\MembershipDao() ;
-            $organization = $dao->findOrganizationByIdAndUser($_POST['id_organization'], $this->logged_user) ;
+            $organization = $dao->findOrganizationByIdAndUser($id_organization, $this->logged_user) ;
 
             if ( !$organization ) {
                 throw new Exception('Organization and user memberships do not match') ;

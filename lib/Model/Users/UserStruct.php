@@ -1,4 +1,5 @@
 <?php
+use Organizations\MembershipDao;
 
 /**
  * Created by PhpStorm.
@@ -74,8 +75,17 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct   implements D
      * @return null|\Organizations\OrganizationStruct
      */
     public function getPersonalOrganization() {
-        $dao = new \Organizations\MembershipDao() ;
-        return $dao->findPersonalOrganization( $this ) ;
+        $oDao = new \Organizations\OrganizationDao();
+        $oDao->setCacheTTL( 60 * 60 * 24 );
+        return $oDao->getPersonalByUser( $this );
+    }
+
+    /**
+     * @return \Organizations\OrganizationStruct[]|null
+     */
+    public function getUserOrganizations(){
+        $mDao = new MembershipDao();
+        return $mDao->findUserOrganizations( $this );
     }
 
     public function getMetadataAsKeyValue() {

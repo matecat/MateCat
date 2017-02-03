@@ -10,6 +10,7 @@ namespace Organizations;
 
 use Database;
 use PDO;
+use Users_UserStruct;
 
 class OrganizationDao extends \DataAccess_AbstractDao {
 
@@ -21,6 +22,7 @@ class OrganizationDao extends \DataAccess_AbstractDao {
 
     protected static $_query_find_by_id = " SELECT * FROM organizations WHERE id = :id " ;
     protected static $_query_get_personal_by_id = " SELECT * FROM organizations WHERE created_by = :created_by AND `type` = :type " ;
+    protected static $_query_get_user_organizations = " SELECT * FROM organizations WHERE created_by = :created_by " ;
     protected static $_update_organization_by_id = " UPDATE organizations SET name = :name WHERE id = :id " ;
 
     /**
@@ -65,6 +67,10 @@ class OrganizationDao extends \DataAccess_AbstractDao {
         );
     }
 
+    public function getPersonalByUser( Users_UserStruct $user ){
+        return $this->getPersonalByUid( $user->uid );
+    }
+
     public function getPersonalByUid( $uid ){
         $stmt = $this->_getStatementForCache( self::$_query_get_personal_by_id );
         $organizationQuery = new OrganizationStruct();
@@ -75,7 +81,7 @@ class OrganizationDao extends \DataAccess_AbstractDao {
                         'created_by' => $organizationQuery->created_by,
                         'type' => \Constants_Organizations::PERSONAL
                 )
-        );
+        )[ 0 ];
     }
 
     public function destroyCachePersonalByUid( $uid ){
@@ -86,6 +92,33 @@ class OrganizationDao extends \DataAccess_AbstractDao {
                 array(
                         'created_by' => $organizationQuery->created_by,
                         'type' => \Constants_Organizations::PERSONAL
+                )
+        );
+    }
+
+    public function findUserCreatedOrganizations( \Users_UserStruct $user ) {
+
+        $stmt = $this->_getStatementForCache( self::$_query_get_user_organizations );
+
+        $organizationQuery = new OrganizationStruct();
+        $organizationQuery->created_by = $user->uid;
+        return static::resultOrNull( $this->_fetchObject( $stmt,
+                $organizationQuery,
+                array(
+                        'created_by' => $organizationQuery->created_by,
+                )
+        )[ 0 ] );
+
+    }
+
+    public function destroyCacheUserCreatedOrganizations( \Users_UserStruct $user ){
+        $stmt = $this->_getStatementForCache( self::$_query_get_user_organizations );
+
+        $organizationQuery = new OrganizationStruct();
+        $organizationQuery->created_by = $user->uid;
+        return $this->_destroyObjectCache( $stmt,
+                array(
+                        'created_by' => $organizationQuery->created_by,
                 )
         );
     }

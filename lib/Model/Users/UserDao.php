@@ -203,25 +203,6 @@ class Users_UserDao extends DataAccess_AbstractDao {
         return $input;
     }
 
-
-    /**
-     * @param Users_UserStruct $user
-     * @return mixed
-     * @throws Exceptions_RecordNotFound
-     *
-     * @deprecated  use membershipdao directly
-     */
-    public static function findPersonalOrganization(Users_UserStruct $user ) {
-        $dao = new \Organizations\MembershipDao()  ;
-        $teams =  $dao->findTeambyUser( $user ) ;
-
-        if ( !$teams ) {
-            throw new Exceptions_RecordNotFound() ;
-        }
-
-        return $teams[0] ;
-    }
-
     /**
      * @param $array_result array
      *

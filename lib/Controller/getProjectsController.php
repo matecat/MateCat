@@ -1,4 +1,5 @@
 <?php
+use Organizations\OrganizationDao;
 
 /**
  * Description of manageController
@@ -106,19 +107,19 @@ class getProjectsController extends ajaxController {
             throw new Exception('User not Logged');
         }
 
-        $team = Users_UserDao::findPersonalOrganization( $this->logged_user );
+        $organization = $this->logged_user->getPersonalOrganization();
 
         $projects = ManageUtils::queryProjects( $this->logged_user, $this->start, $this->step,
             $this->search_in_pname,
             $this->search_source, $this->search_target, $this->search_status,
             $this->search_only_completed, $this->project_id,
-            $team
+            $organization
         );
 
         $projnum = getProjectsNumber( $this->logged_user,
             $this->search_in_pname, $this->search_source,
             $this->search_target, $this->search_status,
-            $this->search_only_completed, $team );
+            $this->search_only_completed, $organization );
 
 
         $projects = $this->filterProjectsWithUserFeatures( $projects ) ;

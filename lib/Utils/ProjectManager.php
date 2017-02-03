@@ -12,6 +12,7 @@ use Analysis\DqfQueueHandler;
 include_once INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
 
 use ConnectedServices\GDrive as GDrive  ;
+use Organizations\OrganizationStruct;
 
 class ProjectManager {
     
@@ -117,7 +118,6 @@ class ProjectManager {
                             'owner'                => '',
                             'word_count_type'      => '',
                             'metadata'             => array(),
-                            'id_organization'      => null
                     ) );
 
 
@@ -156,7 +156,7 @@ class ProjectManager {
     /**
      * @param \Organizations\OrganizationStruct $organization
      */
-    public function setOrganization( \Organizations\OrganizationStruct $organization ) {
+    public function setOrganization( OrganizationStruct $organization ) {
         $this->features->loadFromOrganization( $organization ) ;
         $this->projectStructure['id_organization'] = $organization->id ;
     }
@@ -238,6 +238,10 @@ class ProjectManager {
     private function createProjectRecord() {
         $this->projectStructure[ 'ppassword' ]  = $this->_generatePassword();
         $this->projectStructure[ 'user_ip' ]    = Utils::getRealIpAddr();
+
+        if ( $this->team ) {
+            $this->projectStructure[ 'id_team' ] = $this->team->id ;
+        }
 
         $this->project = insertProject( $this->projectStructure );
         $this->projectStructure[ 'id_project' ] = $this->project->id;
