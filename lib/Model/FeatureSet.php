@@ -57,7 +57,7 @@ class FeatureSet {
      *
      * @param Users_UserStruct $user
      */
-    public function loadFromTeam( \Organizations\OrganizationStruct $team ) {
+    public function loadFromOrganization(\Organizations\OrganizationStruct $team ) {
         $dao = new OwnerFeatures_OwnerFeatureDao() ;
         $features = $dao->getByTeam( $team ) ;
         $this->features = static::merge( $this->features, $features ) ;

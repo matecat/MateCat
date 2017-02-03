@@ -70,10 +70,12 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct   implements D
         return $this->last_name;
     }
 
-    public function getDefaultTeam() {
-        return $this->cachable(__METHOD__, $this, function(Users_UserStruct $user) {
-            return Users_UserDao::findDefaultTeam( $user );
-        });
+    /**
+     * @return null|\Organizations\OrganizationStruct
+     */
+    public function getPersonalOrganization() {
+        $dao = new \Organizations\MembershipDao() ;
+        return $dao->findPersonalOrganization( $this ) ;
     }
 
     public function getMetadataAsKeyValue() {

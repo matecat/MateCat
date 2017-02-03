@@ -44,9 +44,13 @@ class newProjectController extends viewController {
         $this->subjectArray = $this->subject_handler->getEnabledDomains();
 
         $this->featureSet = new FeatureSet() ;
+
     }
 
     public function doAction() {
+
+        $this->_checkOrganization();
+
 
         $this->setOrGetGuid();
 
@@ -80,8 +84,7 @@ class newProjectController extends viewController {
         $this->mt_engines = $engine->read( $engineQuery );
 
         if ( $this->isLoggedIn() ) {
-
-            $this->__loadFeaturesFromUserOrTeam();
+            $this->__loadFeatures();
 
             try {
 
@@ -100,32 +103,9 @@ class newProjectController extends viewController {
         }
     }
 
-    /**
-     *
-     */
-    private function __getCurrentTeam() {
-        if ( !$this->isLoggedIn() ) {
-            throw new Exception('user is not logged') ;
-        }
-
-        $orgDao = new \Organizations\MembershipDao() ;
-        $teams = $orgDao->findTeambyUser( $this->logged_user ) ;
-        return $teams[0] ;
-    }
-
-    /**
-     * Here we want to be explicit about the team the user is currently working on.
-     * Even if a user is included in more teams, we'd prefer to have the team bound
-     * to the given session.
-     *
-     */
-    private function __loadFeaturesFromUserOrTeam() {
+    private function __loadFeatures() {
         $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
-        $currentTeam = $this->__getCurrentTeam();
-
-        if ( $currentTeam ) {
-            $this->featureSet->loadFromTeam( $currentTeam ) ;
-        }
+        $this->featureSet->loadFromOrganization( $this->organization  );
     }
 
     private function array_sort_by_column( &$arr, $col, $dir = SORT_ASC ) {
