@@ -332,7 +332,7 @@ class ProjectContainer extends React.Component {
 
         let dropDownUsers = this.getDropDownUsers();
 
-        return <div className="ui one column shadow-1 grid">
+        return <div className="ui one column shadow-1 grid project">
 
                     <div className="one column project-header">
                         <div className="ui three column grid">
