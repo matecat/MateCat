@@ -8,6 +8,9 @@
 
 namespace Organizations;
 
+use Database;
+use PDO;
+
 class OrganizationDao extends \DataAccess_AbstractDao {
 
     const TABLE = "organizations";
@@ -18,6 +21,7 @@ class OrganizationDao extends \DataAccess_AbstractDao {
 
     protected static $_query_find_by_id = " SELECT * FROM organizations WHERE id = :id " ;
     protected static $_query_get_personal_by_id = " SELECT * FROM organizations WHERE created_by = :created_by AND `type` = :type " ;
+    protected static $_update_organization_by_id = " UPDATE organizations SET name = :name WHERE id = :id " ;
 
     /**
      * @param $id
@@ -62,7 +66,6 @@ class OrganizationDao extends \DataAccess_AbstractDao {
     }
 
     public function getPersonalByUid( $uid ){
-        $this->setCacheTTL( 60 * 60 * 24 * 30 );
         $stmt = $this->_getStatementForCache( self::$_query_get_personal_by_id );
         $organizationQuery = new OrganizationStruct();
         $organizationQuery->created_by = $uid;
@@ -85,6 +88,22 @@ class OrganizationDao extends \DataAccess_AbstractDao {
                         'type' => \Constants_Organizations::PERSONAL
                 )
         );
+    }
+
+    public function updateOrganizationName( OrganizationStruct $org ){
+
+        Database::obtain()->begin();
+        $conn = Database::obtain()->getConnection();
+
+        $stmt = $conn->prepare( self::$_update_organization_by_id );
+        $stmt->bindValue(':id', $org->id, PDO::PARAM_INT);
+        $stmt->bindValue(':name', $org->name, PDO::PARAM_STR);
+
+        $stmt->execute();
+        $org = $this->findById( $org->id );
+        $conn->commit();
+
+        return $org;
     }
 
 }
