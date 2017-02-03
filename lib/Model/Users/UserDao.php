@@ -205,10 +205,18 @@ class Users_UserDao extends DataAccess_AbstractDao {
 
     /**
      * @param $user
+     *
+     * @deprecated  This will go away because default organizaiton doesn't meean anything
      */
     public static function findDefaultTeam( Users_UserStruct $user ) {
-        $dao = new \Teams\MembershipDao()  ;
-        return $dao->findTeambyUser( $user ) ;
+        $dao = new \Organizations\MembershipDao()  ;
+        $teams =  $dao->findTeambyUser( $user ) ;
+
+        if ( !$teams ) {
+            throw new Exceptions_RecordNotFound() ;
+        }
+
+        return $teams[0] ;
     }
 
     /**

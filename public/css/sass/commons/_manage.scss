@@ -14,6 +14,9 @@ body.manage {
     .ui.container {
         width: 1280px;
     }
+    .ui.grid.container {
+        width: 1280px !important;
+    }
 }
 
 // Shadow - Transitions for buttons

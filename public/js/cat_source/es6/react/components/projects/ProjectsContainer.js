@@ -91,7 +91,7 @@ class ProjectsContainer extends React.Component {
         let self = this;
         if (!this.state.more_projects) {
             setTimeout(function () {
-                $(self.spinner).fadeOut();
+                $(self.spinner).css("visibility", "hidden");
             }, 3000);
         }
     }
@@ -121,34 +121,17 @@ class ProjectsContainer extends React.Component {
 
         let spinner = '';
         if (this.state.more_projects && projects.size > 9) {
-            spinner = <div className="row">
-                        <div className="manage-spinner" style={{minHeigth: '90px'}}>
-                            <div className="col m12 center-align">
-                                <div className="preloader-wrapper active">
-                                    <div className="spinner-layer spinner-blue-only">
-                                        <div className="circle-clipper left">
-                                            <div className="circle"></div>
-                                        </div>
-                                        <div className="gap-patch">
-                                            <div className="circle"></div>
-                                        </div>
-                                        <div className="circle-clipper right">
-                                            <div className="circle"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="col m12 center-align">
-                            <span>Loading projects</span>
-                        </div>
-                    </div>;
-        } else if (projects > 9) {
-            spinner = <div className="row">
-                <div className="manage-spinner" style={{minHeight: '90px'}}>
-                    <div className="col m12 center-align">
-                        <span ref={(spinner) => this.spinner = spinner}>No more projects</span>
+            spinner = <div className="ui one column shadow-1 grid">
+                <div className="one column spinner" style={{height: "100px"}}>
+                    <div className="ui active inverted dimmer">
+                        <div className="ui medium text loader">Loading more projects</div>
                     </div>
+                </div>
+            </div>;
+        } else if (projects.size > 9) {
+            spinner = <div className="ui one column shadow-1 grid" ref={(spinner) => this.spinner = spinner}>
+                <div className="one column spinner center aligned" style={{height: "100px"}}>
+                        <div className="ui medium header" style={{ marginTop: "20px"}}>No more projects</div>
                 </div>
             </div>;
         }
@@ -168,35 +151,9 @@ class ProjectsContainer extends React.Component {
                 left: 0,
                 zIndex: 2
             };
-            var styleSpinner = {
-                position: 'absolute',
-                width : '300px',
-                height : '100px',
-                top: $(window).height() / 2,
-                left: $(window).width() / 2 - 150,
-                zIndex: 2,
-                fontWeight: 600
-            };
             spinnerReloadProjects =<div style={spinnerContainer}>
-                    <div style={styleSpinner}>
-                        <div className="col m12 center-align">
-                            <div className="preloader-wrapper active">
-                                <div className="spinner-layer spinner-blue-only">
-                                    <div className="circle-clipper left">
-                                        <div className="circle"></div>
-                                    </div>
-                                    <div className="gap-patch">
-                                        <div className="circle"></div>
-                                    </div>
-                                    <div className="circle-clipper right">
-                                        <div className="circle"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="col m12 center-align">
-                            <span>Updating projects</span>
-                        </div>
+                    <div className="ui active inverted dimmer">
+                        <div className="ui massive text loader">Updating Projects</div>
                     </div>
                 </div>;
         }
@@ -204,15 +161,13 @@ class ProjectsContainer extends React.Component {
 
 
         return <div>
-                    {/*<section className="add-project">*/}
-                        {/*<a href="/" target="_blank" className="btn-floating btn-large waves-effect waves-light right create-new blue-matecat tooltipped" data-position="bottom" data-delay="50" data-tooltip="Add new project"/>*/}
-                    {/*</section>*/}
                     <div className="project-list">
                         <div className="ui container">
                             {spinnerReloadProjects}
                             {items}
+                            {spinner}
                         </div>
-                        {spinner}
+
                     </div>
                 </div>;
     }

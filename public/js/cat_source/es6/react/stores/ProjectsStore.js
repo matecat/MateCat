@@ -152,10 +152,6 @@ AppDispatcher.register(function(action) {
         case ManageConstants.OPEN_CREATE_WORKSPACE_MODAL:
             ProjectsStore.emitChange(action.actionType);
             break;
-        case ManageConstants.OPEN_MODIFY_WORKSPACE_MODAL:
-            ProjectsStore.emitChange(action.actionType);
-            break;
-
     }
 });
 

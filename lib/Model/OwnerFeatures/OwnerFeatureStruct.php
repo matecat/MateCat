@@ -4,7 +4,7 @@ class OwnerFeatures_OwnerFeatureStruct extends BasicFeatureStruct {
 
     public $id;
     public $uid ;
-    public $id_team ;
+    public $id_organization ;
     public $options ;
     public $last_update ;
     public $create_date ;

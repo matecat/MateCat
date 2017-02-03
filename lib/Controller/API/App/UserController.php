@@ -4,12 +4,15 @@ namespace API\App;
 
 use API\App\Json\ConnectedService;
 use API\V2\AuthorizationError;
+use API\V2\Json\Organization;
 use API\V2\KleinController;
 
 use ConnectedServices\ConnectedServiceDao ;
 use ConnectedServices\ConnectedServiceStruct;
 use Exceptions\NotFoundError;
 use Exceptions\ValidationError;
+use Organizations\MembershipDao;
+use Organizations\OrganizationDao;
 use Users_UserDao ;
 use Utils ;
 
@@ -36,7 +39,12 @@ class UserController extends AbstractStatefulKleinController  {
             'connected_services' => ( new ConnectedService( $this->connectedServices ))->render(),
 
             // TODO: this is likely to be unsafe to be passed here without a whitelist.
-            'metadata' =>  ( empty( $metadata ) ? NULL : $metadata )
+            'metadata' =>  ( empty( $metadata ) ? NULL : $metadata ),
+
+            'organizations' => ( new Organization() )->render(
+                (new MembershipDao() )->findTeambyUser( $this->user )
+            )
+
         ));
     }
 

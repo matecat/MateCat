@@ -51,7 +51,6 @@ window.RegisterModal = require('./modals/RegisterModal').default;
 window.CreateOrganizationModal = require('./modals/CreateOrganization').default;
 window.ModifyOrganizationModal = require('./modals/ModifyOrganization').default;
 window.CreateWorkspaceModal = require('./modals/CreateWorkspace').default;
-window.ModifyWorkspaceModal = require('./modals/ModifyWorkspace').default;
 window.ChangeProjectWorkspaceModal = require('./modals/ChangeProjectWorkspace').default;
 window.AssignToTranslator = require('./modals/AssignToTranslator').default;
 

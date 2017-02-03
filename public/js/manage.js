@@ -34,7 +34,6 @@ UI = {
         ProjectsStore.addListener(ManageConstants.OPEN_CHANGE_ORGANIZATION_MODAL, this.openChangeProjectWorkspace);
         ProjectsStore.addListener(ManageConstants.OPEN_ASSIGN_TO_TRANSLATOR_MODAL, this.openAssignToTranslator);
         ProjectsStore.addListener(ManageConstants.OPEN_CREATE_WORKSPACE_MODAL, this.openCreateWorkspace);
-        ProjectsStore.addListener(ManageConstants.OPEN_MODIFY_WORKSPACE_MODAL, this.openModifyWorkspace);
 
         //Remove this
         this.ebayProjects = EbayProjects;
@@ -42,7 +41,7 @@ UI = {
         this.adWordsProjects = AdWordsProjects;
         this.youtubeProjects = YoutubeProjects;
         this.personalProject = PersonalProjects;
-        this.otherWorkspace = WorkspaceProjects
+        this.otherWorkspace = WorkspaceProjects;
 
         $(".dropdown").dropdown();
 
@@ -61,28 +60,29 @@ UI = {
 
         window.addEventListener('scroll', this.scrollDebounceFn());
 
-        // $(window).on("blur focus", function(e) {
-        //     let prevType = $(this).data("prevType");
-        //
-        //     if (prevType != e.type) {   //  reduce double fire issues
-        //         switch (e.type) {
-        //             case "blur":
-        //                 console.log("leave page");
-        //                 self.pageLeft = true;
-        //                 break;
-        //             case "focus":
-        //                 console.log("Enter page");
-        //                 if (self.pageLeft) {
-        //                     // alert("Refresf");
-        //                     console.log("Refresh projects");
-        //                     self.reloadProjects();
-        //                 }
-        //                 break;
-        //         }
-        //     }
-        //
-        //     $(this).data("prevType", e.type);
-        // });
+        $(window).on("blur focus", function(e) {
+            let prevType = $(this).data("prevType");
+
+            if (prevType != e.type) {   //  reduce double fire issues
+                switch (e.type) {
+                    case "blur":
+                        console.log("leave page");
+                        self.pageLeft = true;
+                        break;
+                    case "focus":
+                        console.log("Enter page");
+                        if (self.pageLeft) {
+                            // alert("Refresf");
+                            console.log("Refresh projects");
+                            self.reloadProjects();
+                        }
+                        break;
+                }
+            }
+
+            $(this).data("prevType", e.type);
+        });
+
         this.getAllOrganizations().done(function (data) {
 
             self.organizations = data.organizations;
@@ -494,12 +494,6 @@ UI = {
         APP.ModalWindow.showModalComponent(CreateWorkspaceModal, {}, "Create new workspace");
     },
 
-    openModifyWorkspace: function () {
-        let props = {
-            workspace: this.selectedWorkspace
-        };
-        APP.ModalWindow.showModalComponent(ModifyWorkspaceModal, props, "Modify "+ this.selectedWorkspace.name + " Workspace");
-    },
     /**
      * Mistero!
      * @param pid

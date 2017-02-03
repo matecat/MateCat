@@ -69,35 +69,65 @@ class ChangeProjectWorkspace extends React.Component {
     render() {
         let workspacesSelect = this.getWorkspacesSelect();
         let buttonClass =  (this.state.buttonEnabled)? '' : 'disabled';
-        return <div className="change-workspace-modal" style={{minHeight: '300px'}}>
-                    <div className="ui form">
-                        <div className="field">
-                            <label>Move this project</label>
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div className="project-referral">
-                             <h4>{this.props.project.get('name')}<span><a className="chip">{this.props.currentWorkspace.get('name')}</a></span></h4>
-                        </div>
-                    </div>
-                    <div className="ui form">
-                        <div className="field">
-                            <label>into another workspace</label>
-                        </div>
-                    </div>
-                    <div className="container-fluid">
-                        <div className="row">
-                            <div className="col m12">
-                                {workspacesSelect}
+        return <div className="change-workspace-modal">
+                    <div className="matecat-modal-top">
+                        <div className="ui one column grid left aligned">
+                            <div className="column">
+                                <h3>Create New Workspace into ORGANIZATION </h3>
+                                <div className="ui large fluid icon input">
+                                    <input type="text" defaultValue={this.props.currentWorkspace.get('name')} disabled/>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div className="matecat-modal-footer">
-                        <div className="actions">
-                            <div className={"ui positive right labeled icon button " + buttonClass}
-                                 onClick={this.changeWorkspace.bind(this)}>
-                                Yes, Change Workspace
-                                <i className="checkmark icon"/>
+                    <div className="matecat-modal-middle">
+                        <div className="ui one column grid left aligned">
+                            <div className="column">
+                                <h3>ORGANIZATION Workspaces</h3>
+                                <div className="column">
+                                    <div className="ui segment members-list">
+                                        <div className="ui middle aligned divided list">
+                                            <div className="item">
+                                                <div className="content">
+                                                    Workspace 1
+                                                </div>
+                                            </div>
+                                            <div className="item">
+                                                <div className="content">
+                                                    Workspace 2
+                                                </div>
+                                            </div>
+                                            <div className="item">
+                                                <div className="content">
+                                                    Workspace 3
+                                                </div>
+                                            </div>
+                                            <div className="item">
+                                                <div className="content">
+                                                    Workspace 4
+                                                </div>
+                                            </div>
+                                            <div className="item">
+                                                <div className="content">
+                                                    Workspace 5
+                                                </div>
+                                            </div>
+                                            <div className="item">
+                                                <div className="content">
+                                                    Workspace 6
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="matecat-modal-bottom">
+                            <div className="ui one column grid right aligned">
+                                <div className="column">
+                                    <button className="ui button green"
+                                            onClick={this.changeWorkspace.bind(this)}>Move</button>
+                                </div>
                             </div>
                         </div>
                     </div>
