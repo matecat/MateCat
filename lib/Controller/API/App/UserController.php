@@ -42,7 +42,7 @@ class UserController extends AbstractStatefulKleinController  {
             'metadata' =>  ( empty( $metadata ) ? NULL : $metadata ),
 
             'organizations' => ( new Organization() )->render(
-                (new MembershipDao() )->findTeambyUser( $this->user )
+                (new MembershipDao() )->findUserOrganizations( $this->user )
             )
 
         ));
@@ -60,13 +60,8 @@ class UserController extends AbstractStatefulKleinController  {
     }
 
     protected function afterConstruct() {
-        if ( !isset( $_SESSION['uid'] ) ) {
-            throw new NotFoundError('user session not found');
-        }
-
         $this->__findUser();
         $this->__findConnectedServices();
-
     }
 
     private function __findUser() {
