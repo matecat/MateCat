@@ -60,28 +60,28 @@ UI = {
 
         window.addEventListener('scroll', this.scrollDebounceFn());
 
-        $(window).on("blur focus", function(e) {
-            let prevType = $(this).data("prevType");
-
-            if (prevType != e.type) {   //  reduce double fire issues
-                switch (e.type) {
-                    case "blur":
-                        console.log("leave page");
-                        self.pageLeft = true;
-                        break;
-                    case "focus":
-                        console.log("Enter page");
-                        if (self.pageLeft) {
-                            // alert("Refresf");
-                            console.log("Refresh projects");
-                            self.reloadProjects();
-                        }
-                        break;
-                }
-            }
-
-            $(this).data("prevType", e.type);
-        });
+        // $(window).on("blur focus", function(e) {
+        //     let prevType = $(this).data("prevType");
+        //
+        //     if (prevType != e.type) {   //  reduce double fire issues
+        //         switch (e.type) {
+        //             case "blur":
+        //                 console.log("leave page");
+        //                 self.pageLeft = true;
+        //                 break;
+        //             case "focus":
+        //                 console.log("Enter page");
+        //                 if (self.pageLeft) {
+        //                     // alert("Refresf");
+        //                     console.log("Refresh projects");
+        //                     self.reloadProjects();
+        //                 }
+        //                 break;
+        //         }
+        //     }
+        //
+        //     $(this).data("prevType", e.type);
+        // });
 
         this.getAllOrganizations().done(function (data) {
 
@@ -247,28 +247,35 @@ UI = {
      * Retrieve Projects. Passing filters is possible to retrieve projects
      */
     getProjects: function(page) {
-        let pageNumber = (page) ? page : UI.Search.currentPage;
-        let data = {
-            action: 'getProjects',
-            page:	pageNumber,
-            filter: (!$.isEmptyObject(UI.Search.filter)) ? 1 : 0,
-        };
-        // Filters
-        data = $.extend(data,UI.Search.filter);
+        // let pageNumber = (page) ? page : UI.Search.currentPage;
+        // let data = {
+        //     action: 'getProjects',
+        //     page:	pageNumber,
+        //     filter: (!$.isEmptyObject(UI.Search.filter)) ? 1 : 0,
+        // };
+        // // Filters
+        // data = $.extend(data,UI.Search.filter);
+        //
+        // return APP.doRequest({
+        //     data: data,
+        //     success: function(d){
+        //         data = d.data;
+        //         UI.pageStep = d.pageStep;
+        //         if( typeof d.errors != 'undefined' && d.errors.length ){
+        //             window.location = '/';
+        //         }
+        //     },
+        //     error: function(d){
+        //         window.location = '/';
+        //     }
+        // });
 
-        return APP.doRequest({
-            data: data,
-            success: function(d){
-                data = d.data;
-                UI.pageStep = d.pageStep;
-                if( typeof d.errors != 'undefined' && d.errors.length ){
-                    window.location = '/';
-                }
-            },
-            error: function(d){
-                window.location = '/';
-            }
-        });
+        let data = {
+            data: []
+        };
+        let deferred = $.Deferred().resolve(data);
+        return deferred.promise();
+
     },
 
     getAllOrganizations: function () {

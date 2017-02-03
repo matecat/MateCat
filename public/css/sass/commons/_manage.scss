@@ -153,6 +153,9 @@ body.manage {
         padding: 0 30px 5px !important;
         text-align: right;
         background-color: #f9f9f9;
+        .activity-log {
+            margin-top: -10px;
+        }
     }
 }
 // closing rewrite semantic CSS
