@@ -81,7 +81,7 @@ class Header extends React.Component {
                     </a>
                 </div>
             ));
-            result = <div className="ui dropdown selection fluid organization-dropdown top-5"
+            result = <div className="ui dropdown selection organization-dropdown top-5"
                           ref={(dropdownOrganizations) => this.dropdownOrganizations = dropdownOrganizations}>
                 <input type="hidden" name="gender" />
                 <i className="dropdown icon"/>
@@ -91,9 +91,6 @@ class Header extends React.Component {
                         <a className="organization-filter button show">
                             <i className="icon-plus3 right"/>
                         </a>
-                    </div>
-                    <div className="divider"></div>
-                    <div className="item header">All Teams
                     </div>
                     <div className="divider"></div>
                     <div className="scrolling menu">

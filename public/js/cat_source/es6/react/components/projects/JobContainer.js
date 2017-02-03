@@ -13,9 +13,7 @@ class JobContainer extends React.Component {
         $(this.dropdown).dropdown({
             belowOrigin: true
         });
-        $('.tooltipped.tm-keys, .comments-tooltip').tooltip({
-            html: 'true'
-        });
+        $('.button.tm-keys, .button.comments-tooltip').popup();
     }
 
     /**
@@ -234,8 +232,7 @@ class JobContainer extends React.Component {
                 let item = '<div style="text-align: left"><span style="font-weight: bold">' + descript + '</span> KEY: ' + key.key + '</div>';
                 tooltipText =  tooltipText + item;
             });
-            return <a className="circular ui icon button tm-keys"
-                   data-position="top" data-tooltip={tooltipText}
+            return <a className="circular ui icon button tm-keys" data-html={tooltipText}
                    onClick={this.openTMPanel.bind(this)}>
                     <i className="icon-tm-matecat icon"/>
                 </a>;
@@ -339,7 +336,7 @@ class JobContainer extends React.Component {
                                         { idJobLabel }
                                     </div>
                                 </div>
-                                <div className="six wide column">
+                                <div className="seven wide column">
                                     <div className="progress-bar">
                                         <div className="progr">
                                             <div className="meter">
@@ -352,7 +349,7 @@ class JobContainer extends React.Component {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="six wide column">
+                                <div className="five wide column">
                                     <div className="job-payable">
                                         <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
                                     </div>
@@ -364,12 +361,14 @@ class JobContainer extends React.Component {
                                 <div className="eight wide column">
                                     <div className="send-translator"
                                          onClick={this.openAssignToTranslatorModal.bind(this)}>
+                                        <i className="icon-forward icon"></i>
                                         <a href="#"><span id="translator-job">Assign to a translator</span></a>
                                     </div>
                                 </div>
                                 <div className="eight wide column ">
                                     <div className="due-to"
                                          onClick={this.openAssignToTranslatorModal.bind(this)}>
+                                        <i className="icon-calendar icon"></i>
                                         <a href="#"><span id="due-date">Choose delivery date</span></a>
                                     </div>
                                 </div>
@@ -378,6 +377,10 @@ class JobContainer extends React.Component {
 
                         <div className="four wide right floated right aligned column">
                             <div className="job-activity-icon">
+                                {QRIcon}
+                                {warningsIcon}
+                                {commentsIcon}
+                                {tmIcon}
                                 <a className="open-translate circular ui icon primary button" target="_blank" href={translateUrl}>
                                     <i className="icon-arrow-right2 icon"/>
                                 </a>
@@ -386,10 +389,6 @@ class JobContainer extends React.Component {
                                     <i className="icon-more_vert icon"/>
                                     {jobMenu}
                                 </button>
-                                {QRIcon}
-                                {warningsIcon}
-                                {commentsIcon}
-                                {tmIcon}
                             </div>
                         </div>
                     </div>
