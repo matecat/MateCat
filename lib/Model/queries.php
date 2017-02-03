@@ -1542,7 +1542,7 @@ function fetchStatus( $sid, $results, $status = Constants_TranslationStatus::STA
 function insertProject( ArrayObject $projectStructure ) {
     $data                        = array();
     $data[ 'id_customer' ]       = $projectStructure[ 'id_customer' ];
-    $data[ 'id_organization' ]   = $projectStructure[ 'id_team' ];
+    $data[ 'id_organization' ]   = $projectStructure[ 'id_organization' ];
     $data[ 'name' ]              = $projectStructure[ 'project_name' ];
     $data[ 'create_date' ]       = $projectStructure[ 'create_date' ];
     $data[ 'status_analysis' ]   = $projectStructure[ 'status' ];

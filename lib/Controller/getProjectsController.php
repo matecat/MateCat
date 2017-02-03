@@ -106,7 +106,7 @@ class getProjectsController extends ajaxController {
             throw new Exception('User not Logged');
         }
 
-        $team = Users_UserDao::findDefaultTeam( $this->logged_user );
+        $team = Users_UserDao::findPersonalOrganization( $this->logged_user );
 
         $projects = ManageUtils::queryProjects( $this->logged_user, $this->start, $this->step,
             $this->search_in_pname,

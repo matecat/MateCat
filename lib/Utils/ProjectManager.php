@@ -66,11 +66,6 @@ class ProjectManager {
      */
     protected $user ;
 
-    /**
-     * @var \Organizations\OrganizationStruct
-     */
-    protected $team ;
-
     public function __construct( ArrayObject $projectStructure = null ) {
 
 
@@ -122,6 +117,7 @@ class ProjectManager {
                             'owner'                => '',
                             'word_count_type'      => '',
                             'metadata'             => array(),
+                            'id_organization'      => null
                     ) );
 
 
@@ -158,17 +154,11 @@ class ProjectManager {
     }
 
     /**
-     * Set the user who is creating the project. Loads additional features looking up the
-     * the ones activated for the team.
-     *
-     * @param Users_UserStruct $user
+     * @param \Organizations\OrganizationStruct $organization
      */
-    public function setUser( Users_UserStruct $user ) {
-        $this->team = Users_UserDao::findDefaultTeam( $user ) ;
-
-        if ( $this->team ) {
-            $this->features->loadFromTeam( $this->team ) ;
-        }
+    public function setOrganization( \Organizations\OrganizationStruct $organization ) {
+        $this->features->loadFromOrganization( $organization ) ;
+        $this->projectStructure['id_organization'] = $organization->id ;
     }
 
     /**
@@ -248,10 +238,6 @@ class ProjectManager {
     private function createProjectRecord() {
         $this->projectStructure[ 'ppassword' ]  = $this->_generatePassword();
         $this->projectStructure[ 'user_ip' ]    = Utils::getRealIpAddr();
-
-        if ( $this->team ) {
-            $this->projectStructure[ 'id_team' ] = $this->team->id ;
-        }
 
         $this->project = insertProject( $this->projectStructure );
         $this->projectStructure[ 'id_project' ] = $this->project->id;

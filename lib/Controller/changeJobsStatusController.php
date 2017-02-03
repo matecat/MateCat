@@ -62,7 +62,7 @@ class changeJobsStatusController extends ajaxController {
             throw new Exception( "User Not Logged." );
         }
 
-        $team = Users_UserDao::findDefaultTeam( $this->logged_user ) ;
+        $team = Users_UserDao::findPersonalOrganization( $this->logged_user ) ;
 
         if ( $this->res_type == "prj" ) {
 
