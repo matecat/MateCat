@@ -119,8 +119,13 @@ class INIT {
      */
     public static $LXQ_LICENSE = false;
 
-    public static $LXQ_SERVER  = "http://localhost:8181";
-
+    public static $LXQ_SERVER  = "https://backend.lexiqa.net";
+    /**
+     * Your partnerid will be provided along with your license key
+     * @see http://www.lexiqa.net
+     *
+     */
+    public static $LXQ_PARTNERID  = false;
     /**
      * Time zone string that should match the one set in the database.
      * @var string

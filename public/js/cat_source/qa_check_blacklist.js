@@ -26,7 +26,24 @@ if (QaCheckBlacklist.enabled() )
         });
         $('.blacklistItem', editarea).data({ 'powertipjq' : $('<div class="blacklistTooltip">Blacklisted term</div>') });
     }
-
+    /*
+    * Can be called externaly (by LexiQA) to reload powerip
+    * and add the click handler - which have been removed after the HTML was replaced
+    */
+    function reloadPowertip(editarea) {
+        $('.blacklistItem', editarea).powerTip({
+            placement : 's'
+        });
+        $('.blacklistItem', editarea).data({ 'powertipjq' : $('<div class="blacklistTooltip">Blacklisted term</div>') });
+        $('.blacklistItem', editarea).on('click', blacklistItemClick);
+    }
+    /*
+    * Can be called externaly (by LexiQA) to destroy powtip and prevent
+    * memory leak when HTML is replaced
+    */
+    function destroyPowertip(editarea) {
+        $.powerTip.destroy($('.blacklistItem', editarea));
+    }
     /**
      *
      * @param editarea
@@ -43,7 +60,7 @@ if (QaCheckBlacklist.enabled() )
             editarea[0].normalize() ;
 
             var newHTML = editarea.html() ;
-
+            newHTML = LXQ.cleanUpHighLighting(newHTML);
             $(matched_words).each(function(index, value) {
                 value = escapeRegExp( value );
                 var re = new RegExp('\\b(' + value + ')\\b',"g");
@@ -89,6 +106,7 @@ if (QaCheckBlacklist.enabled() )
 
     $( window ).on( 'segmentsAdded', function ( e ) {
         globalReceived = false ;
+        console.log('[QACHECKBLACKLIST] got segmentsAdded');
         renderGlobalWarnings() ;
     });
 
@@ -98,11 +116,12 @@ if (QaCheckBlacklist.enabled() )
         }
 
         globalWarnings = data.resp.data.blacklist ;
-
+        console.log('[QACHECKBLACKLIST] got getWarning:GLOBAL:success');
         renderGlobalWarnings() ;
     });
 
     $(document).on('getWarning:local:success', function(e, data) {
+      console.log('[QACHECKBLACKLIST] got getWarning:local:success');
         if ( !data.resp.data.blacklist || data.segment.isReadonly() ) {
             // No blacklist data contained in response, skip it
             // or segment is readonly, skip
@@ -115,8 +134,9 @@ if (QaCheckBlacklist.enabled() )
         updateBlacklistItemsInSegment( editarea, matched_words );
     });
 
+    $.extend(QaCheckBlacklist, {
+        reloadPowertip : reloadPowertip,
+        destroyPowertip: destroyPowertip
+    });
+
 })(jQuery, UI );
-
-
-
-
