@@ -77,8 +77,6 @@ var LXQ = {
 
 LXQ.init  = function () {
     LXQ.initialized = true;
-    //TODO: merge the rest of lxq partnerId stuff
-    config.lxq_partnerid = 'matecat';
     var globalReceived = false;
     if (config.lxq_license) {
       $.lexiqaAuthenticator.init(
