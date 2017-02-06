@@ -490,6 +490,7 @@ abstract class DataAccess_AbstractDao {
      * @throws Exception
      */
     public static function insertStruct( DataAccess_IDaoStruct $struct, $options = array() ) {
+
         // TODO: allow the mask to be passed as option.
         $mask = array_keys( $struct->toArray() );
         $mask = array_diff( $mask, static::$auto_increment_fields );

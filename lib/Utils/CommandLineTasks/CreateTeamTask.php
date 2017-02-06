@@ -54,7 +54,7 @@ class CreateTeamTask extends Command
             $type = strtolower( $type );
         }
 
-        $organizationStruct = $teamDao->createUserOrganization( $user, array('type' => $type)) ;
+        $organizationStruct = $teamDao->createUserOrganization( $user, array( 'type' => $type, 'name' => $input->getArgument('name') )) ;
 
         if ( $organizationStruct ) {
             $output->write(" Organization created with ID: " . $organizationStruct->id , TRUE ) ;

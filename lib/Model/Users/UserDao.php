@@ -14,6 +14,8 @@ class Users_UserDao extends DataAccess_AbstractDao {
     protected static $auto_increment_fields = array('uid');
     protected static $primary_keys = array('uid');
 
+    protected static $_query_user_by_uid = " SELECT * FROM users WHERE uid = :uid ";
+
     /**
      * @param $token
      * @return Users_UserStruct
@@ -61,11 +63,26 @@ class Users_UserDao extends DataAccess_AbstractDao {
      * @return Users_UserStruct
      */
     public function getByUid( $id ) {
-        $conn = $this->con->getConnection();
-        $stmt = $conn->prepare( " SELECT * FROM users WHERE uid = ?");
-        $stmt->execute( array($id )) ;
-        $stmt->setFetchMode(PDO::FETCH_CLASS, '\Users_UserStruct');
-        return $stmt->fetch();
+        $stmt = $this->_getStatementForCache( self::$_query_user_by_uid );
+        $userQuery = new Users_UserStruct();
+        $userQuery->uid = $id;
+        return $this->_fetchObject( $stmt,
+                $userQuery,
+                array(
+                        'uid' => $userQuery->uid,
+                )
+        )[ 0 ];
+    }
+
+    public function destroyCacheByUid( $id ){
+        $stmt = $this->_getStatementForCache( self::$_query_user_by_uid );
+        $userQuery = new Users_UserStruct();
+        $userQuery->uid = $id;
+        return $this->_destroyObjectCache( $stmt,
+                array(
+                        'uid' => $userQuery->uid = $id,
+                )
+        );
     }
 
     /**

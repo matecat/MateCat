@@ -13,26 +13,35 @@ use Organizations\OrganizationStruct;
 
 class Organization {
 
-    public function render( $data ) {
+    private $data;
+
+    public function __construct( $data ) {
+        $this->data = $data;
+    }
+
+    public function render( $data = null ) {
         $out = array();
 
-        foreach($data as $organization) {
+        if ( empty( $data ) ) {
+            $data = $this->data;
+        }
+
+        foreach ( $data as $organization ) {
             /**
              * @var $organization OrganizationStruct
              */
-            $row = array(
-                'id'        => (int)$organization->id,
-                'name'      => $organization->name,
-                'type'      => $organization->type,
-                'created_at'  => \Utils::api_timestamp( $organization->created_at),
-                'created_by' => $organization->created_by
+            $row   = array(
+                    'id'         => (int)$organization->id,
+                    'name'       => $organization->name,
+                    'type'       => $organization->type,
+                    'created_at' => \Utils::api_timestamp( $organization->created_at ),
+                    'created_by' => $organization->created_by
             );
-            $out[] = $row ;
+            $out[] = $row;
         }
 
         return $out;
     }
-
 
 
 }

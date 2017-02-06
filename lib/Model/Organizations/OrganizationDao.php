@@ -46,11 +46,13 @@ class OrganizationDao extends \DataAccess_AbstractDao {
     }
 
     /**
+     * @param Users_UserStruct $user
+     * @param array            $params
      *
-     * @param \Users_UserStruct $user
-     * @param array $params
+     * @return OrganizationStruct
      */
     public function createUserOrganization( \Users_UserStruct $user, $params = array() ) {
+
         $organizationStruct = new OrganizationStruct(array(
             'name' => $params['name'],
             'created_by' =>  $user->uid,
@@ -152,8 +154,7 @@ class OrganizationDao extends \DataAccess_AbstractDao {
 
     public function updateOrganizationName( OrganizationStruct $org ){
 
-        Database::obtain()->begin();
-        $conn = Database::obtain()->getConnection();
+        $conn = Database::obtain()->begin();
 
         $stmt = $conn->prepare( self::$_update_organization_by_id );
         $stmt->bindValue(':id', $org->id, PDO::PARAM_INT);

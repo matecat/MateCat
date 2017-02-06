@@ -9,6 +9,8 @@
 namespace API\V2;
 
 
+use API\V2\Exceptions\AuthenticationError;
+
 class KeyCheckController extends KleinController {
 
     public function ping() {
