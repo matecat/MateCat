@@ -217,18 +217,16 @@ let ManageActions = {
         });
     },
 
-    addOrganization: function (organization) {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.ADD_ORGANIZATION,
-            organization: organization
-        });
-    },
-
     createOrganization: function (organizationName) {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.CREATE_ORGANIZATION,
-            organizationName: organizationName
-        });
+        UI.createOrganization(organizationName).done(
+            function (response) {
+                AppDispatcher.dispatch({
+                    actionType: ManageConstants.ADD_ORGANIZATION,
+                    // organization: organization
+                });
+            }
+        );
+
     },
 
     changeOrganization: function (organization) {

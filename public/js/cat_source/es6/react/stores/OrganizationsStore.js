@@ -49,9 +49,6 @@ AppDispatcher.register(function(action) {
             OrganizationsStore.removeOrganization(action.organization);
             OrganizationsStore.emitChange(ManageConstants.RENDER_ORGANIZATIONS, OrganizationsStore.organizations);
             break;
-        case ManageConstants.CREATE_ORGANIZATION:
-            OrganizationsStore.emitChange(ManageConstants.CREATE_ORGANIZATION, action.organizationName);
-            break;
         case ManageConstants.ADD_ORGANIZATION:
             OrganizationsStore.addOrganization(action.organization);
             OrganizationsStore.emitChange(ManageConstants.RENDER_ORGANIZATIONS, OrganizationsStore.organizations, Immutable.fromJS(action.organization));

@@ -9,7 +9,6 @@ UI = {
         this.openJobSettings = this.openJobSettings.bind(this);
         this.changeJobsOrProjectStatus = this.changeJobsOrProjectStatus.bind(this);
         this.changeJobPassword = this.changeJobPassword.bind(this);
-        this.createOrganization = this.createOrganization.bind(this);
         this.changeOrganization = this.changeOrganization.bind(this);
         this.changeProjectAssignee = this.changeProjectAssignee.bind(this);
         this.changeProjectWorkspace = this.changeProjectWorkspace.bind(this);
@@ -18,9 +17,6 @@ UI = {
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_SETTINGS, this.openJobSettings);
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_TM_PANEL, this.openJobTMPanel);
 
-
-        //Organizations actions
-        OrganizationsStore.addListener(ManageConstants.CREATE_ORGANIZATION, this.createOrganization);
 
         //Workspaces Actions
         // OrganizationsStore.addListener(ManageConstants.CREATE_WORKSPACE, this.createWorkspace);
@@ -304,14 +300,19 @@ UI = {
     },
 
     createOrganization: function (organizationName) {
-        let organization = {
-            id: 300,
-            name: organizationName,
-            users: [],
-            workspaces: []
+
+        // setTimeout(function () {
+        //     ManageActions.addOrganization(organization);
+        // });
+        let data = {
+            type: 'general',
+            name: organizationName
         };
-        setTimeout(function () {
-            ManageActions.addOrganization(organization);
+        return $.ajax({
+            async: true,
+            data: data,
+            type: "POST",
+            url : "/api/v2/orgs"
         });
 
     },

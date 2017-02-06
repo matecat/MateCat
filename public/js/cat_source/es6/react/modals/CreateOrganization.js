@@ -10,14 +10,17 @@ class CreateOrganization extends React.Component {
         $('.advanced-popup').popup();
     }
 
-    createOrganization() {
-        $(this.workspaceInput).val();
-        ManageActions.createOrganization($(this.workspaceInput).val());
-        APP.ModalWindow.onCloseModal();
-    }
-
-    handleKeyPress() {
-
+    handleKeyPress(e) {
+        e.stopPropagation();
+        if (e.key === 'Enter' ) {
+            e.preventDefault();
+            if (this.inputNewOrg.value.length > 0) {
+                ManageActions.createOrganization(this.inputNewOrg.value );
+                APP.ModalWindow.onCloseModal();
+                this.inputNewOrg.value = '';
+            }
+        }
+        return false;
     }
 
     render() {
@@ -27,7 +30,9 @@ class CreateOrganization extends React.Component {
                             <div className="column">
                                 <h3>Organization Name</h3>
                                 <div className="ui large fluid icon input">
-                                    <input type="text" placeholder="Organization Name"/>
+                                    <input type="text" placeholder="Organization Name"
+                                           onKeyPress={this.handleKeyPress.bind(this)}
+                                           ref={(inputNewOrg) => this.inputNewOrg = inputNewOrg}/>
                                     <i className="icon-pencil icon"></i>
                                 </div>
                             </div>
@@ -38,9 +43,7 @@ class CreateOrganization extends React.Component {
                             <div className="column">
                                 <h3>Add member</h3>
                                 <div className="ui large fluid icon input">
-                                    <input type="text" defaultValue="emails"
-                                           onKeyPress={this.handleKeyPress.bind(this)}
-                                           ref={(inputNewUSer) => this.inputNewUSer = inputNewUSer}/>
+                                    <input type="text" defaultValue="emails"/>
                                 </div>
                             </div>
                         </div>
