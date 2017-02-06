@@ -435,16 +435,7 @@ abstract class viewController extends controller {
     }
 
     protected function _checkOrganization() {
-
-        /**
-         * read the URL
-         * if the URL contains an org id then
-         * 1
-         */
-
         if ( $this->isLoggedIn() && $this->organizationInURL() ) {
-            // check the organization to be accessible to the user
-            // otherwise redirect with notice to personal...
             $dao = new \Organizations\MembershipDao() ;
             $organization = $dao->findOrganizationByIdAndUser($this->organizationInURL(), $this->logged_user ) ;
 
@@ -477,9 +468,7 @@ abstract class viewController extends controller {
     }
 
     protected function _redirectToPersonalOrganization() {
-        header(
-            "Location: " . Routes::organizationUploadUrl( $this->logged_user->getPersonalOrganization())
-        );
+        header( "Location: " . Routes::organizationUploadUrl( $this->logged_user->getPersonalOrganization()) );
         die();
     }
 

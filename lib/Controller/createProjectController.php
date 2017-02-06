@@ -28,6 +28,11 @@ class createProjectController extends ajaxController {
     private $lang_handler ;
 
     /**
+     * @var \Organizations\OrganizationStruct
+     */
+    private $organization ;
+
+    /**
      * @var FeatureSet
      */
     private $featureSet ;
@@ -66,6 +71,20 @@ class createProjectController extends ajaxController {
         );
 
         $this->checkLogin( false );
+
+        /**
+         * We need to discover the current organization very early because
+         * some feature may be attached to the organization. This has to be
+         * done right after login.
+         */
+        $this->__validateOrganization(
+                @array_pop(
+                        filter_input_array( INPUT_POST, [
+                            'id_organization' => [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR ]
+                        ] )
+                )
+        );
+
         $this->__setupFeatureSet();
 
         $filterArgs = $this->__addFilterForMetadataInput( $filterArgs ) ;
@@ -316,7 +335,9 @@ class createProjectController extends ajaxController {
         }
 
         $projectManager = new ProjectManager( $projectStructure );
-        $projectManager->setUser( $this->logged_user ) ;
+
+        $projectManager->setOrganization( $this->organization );
+
         $projectManager->createProject();
 
         // Strictly related to the UI ( not API ) interaction, should yet be moved away from controller.
@@ -332,13 +353,7 @@ class createProjectController extends ajaxController {
 
         if ( $this->userIsLogged ) {
             $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
-
-            $dao = new \Organizations\MembershipDao() ;
-            $teams = $dao->findTeambyUser( $this->logged_user ) ;
-
-            if ( $teams[0] ) {
-                $this->featureSet->loadFromTeam( $teams[0] ) ;
-            }
+            $this->featureSet->loadFromOrganization( $this->organization ) ;
         }
     }
 
@@ -425,6 +440,32 @@ class createProjectController extends ajaxController {
         $this->metadata = $this->featureSet->filter('createProjectAssignInputMetadata', $this->metadata, array(
             'input' => $__postInput
         ));
+    }
+
+    /**
+     * @param null $id_organization
+     *
+     * @throws Exception
+     */
+    private function __validateOrganization( $id_organization = null  ) {
+        /*
+         * if organization param is provided then
+         */
+        if ( $this->userIsLogged && is_null( $id_organization ) ) {
+            $this->organization = $this->logged_user->getPersonalOrganization() ;
+        }
+        else if ( $this->userIsLogged && !is_null( $id_organization ) ) {
+            // check for the organization to be allowed
+            $dao = new \Organizations\MembershipDao() ;
+            $organization = $dao->findOrganizationByIdAndUser($id_organization, $this->logged_user) ;
+
+            if ( !$organization ) {
+                throw new Exception('Organization and user memberships do not match') ;
+            }
+            else {
+                $this->organization = $organization ;
+            }
+        }
     }
 
     private function __validateUserMTEngine() {

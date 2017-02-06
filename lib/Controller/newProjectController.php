@@ -36,8 +36,6 @@ class newProjectController extends viewController {
         $__postInput = filter_input_array( INPUT_GET, $filterArgs );
         $this->project_name      = $__postInput[ "project_name" ];
 
-        $this->guid = Utils::create_guid();
-
         $this->lang_handler    = Langs_Languages::getInstance();
         $this->subject_handler = Langs_LanguageDomains::getInstance();
 
@@ -50,7 +48,6 @@ class newProjectController extends viewController {
     public function doAction() {
 
         $this->_checkOrganization();
-
 
         $this->setOrGetGuid();
 
@@ -157,12 +154,15 @@ class newProjectController extends viewController {
     }
 
     private function setOrGetGuid() {
-        //Get the guid from the guid if it exists, otherwise set the guid into the cookie
+        // Get the guid from the guid if it exists, otherwise set the guid into the cookie
         if ( !isset( $_COOKIE[ 'upload_session' ] ) ) {
-            setcookie( "upload_session", $this->guid, time() + 86400 );
-        } else {
-            $this->guid = $_COOKIE[ 'upload_session' ];
+            $this->guid = Utils::create_guid();
+            setcookie( "upload_session", $this->guid, time() + 86400, '/' );
         }
+        else {
+            $this->guid = $_COOKIE['upload_session'] ;
+        }
+
     }
 
     private function isUploadTMXAllowed( $default = false ) {
@@ -172,16 +172,11 @@ class newProjectController extends viewController {
         foreach ( INIT::$SUPPORTED_FILE_TYPES as $k => $v ) {
             foreach ( $v as $kk => $vv ) {
                 if ( $kk == 'tmx' ) {
-                    //	echo "true";
-                    //	exit;
                     return true;
                 }
             }
         }
-
-        //echo "false";exit;
         return false;
-
     }
 
     private function getExtensions( $default = false ) {
