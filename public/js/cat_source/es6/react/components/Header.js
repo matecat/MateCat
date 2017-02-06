@@ -44,9 +44,6 @@ class Header extends React.Component {
             }
         });
         ManageActions.changeOrganization(selectedOrganization.toJS());
-        this.setState({
-            selectedOrganization: selectedOrganization
-        });
     }
 
     openCreateOrganizations () {
@@ -81,7 +78,7 @@ class Header extends React.Component {
                     </a>
                 </div>
             ));
-            result = <div className="ui dropdown selection organization-dropdown top-5"
+            result = <div className="ui fluid dropdown selection organization-dropdown top-5"
                           ref={(dropdownOrganizations) => this.dropdownOrganizations = dropdownOrganizations}>
                 <input type="hidden" name="gender" />
                 <i className="dropdown icon"/>

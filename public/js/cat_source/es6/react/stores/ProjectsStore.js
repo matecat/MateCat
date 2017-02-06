@@ -101,9 +101,6 @@ AppDispatcher.register(function(action) {
             ProjectsStore.addProjects(action.project);
             ProjectsStore.emitChange(ManageConstants.RENDER_PROJECTS, ProjectsStore.projects);
             break;
-        case ManageConstants.FILTER_PROJECTS:
-            ProjectsStore.emitChange(ManageConstants.FILTER_PROJECTS, ProjectsStore.unwrapImmutableObject(action.user), ProjectsStore.unwrapImmutableObject(action.workspace), action.name, action.status);
-            break;
         case ManageConstants.OPEN_JOB_SETTINGS:
             ProjectsStore.emitChange(ManageConstants.OPEN_JOB_SETTINGS, action.job, action.prName);
             break;

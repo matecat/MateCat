@@ -21,7 +21,7 @@ class Organization {
              * @var $organization OrganizationStruct
              */
             $row = array(
-                'id'        => $organization->id,
+                'id'        => (int)$organization->id,
                 'name'      => $organization->name,
                 'type'      => $organization->type,
                 'created_at'  => \Utils::api_timestamp( $organization->created_at),
