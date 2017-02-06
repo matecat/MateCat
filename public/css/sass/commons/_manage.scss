@@ -6,16 +6,15 @@ body.manage {
     //font-size: 14px;
     //box-sizing: content-box;
     //margin-top: 55px;
-    //background-color: #f1f1f1;
+    background-color: #f1f1f1;
     font-family: Calibri;
-}
-
-@media only screen and (min-width: 1200px) {
-    .ui.container {
-        width: 1280px;
-    }
-    .ui.grid.container {
-        width: 1280px !important;
+    @media only screen and (min-width: 1200px) {
+        .ui.container {
+            width: 1280px;
+        }
+        .ui.grid.container {
+            width: 1280px !important;
+        }
     }
 }
 
@@ -26,14 +25,14 @@ body.manage {
 }
 
 .ui.icon.button {
-    padding: 8px;
-
+    padding: 6px;
+    font-size: 18px;
 }
 
 // Closing Shadow - Transitions for buttons
 
 // Initials - Assiggnee
-.initials {
+/*.initials {
     width: 30px !important;
     text-align: center;
     line-height: 30px;
@@ -42,7 +41,7 @@ body.manage {
         color: black;
     }
     &.green {
-        background-color: green !important;
+        background-color: #0ab89b !important;
         color: white;
     }
     &.purple {
@@ -53,14 +52,15 @@ body.manage {
         background-color: orange !important;
         color: white;
     }
-}
+}*/
 
 // Closing Initials - Assignee
 .project {
     margin-bottom: 30px !important;
     .project-header {
         background-color: #e8e8e8;
-        padding-bottom: 25px !important;
+        padding-bottom: 22px !important;
+        padding-top: 12px !important;
         .project-id {
             padding: 10px 0 10px 15px;
         }
@@ -85,17 +85,39 @@ body.manage {
             padding: 10px 0;
         }
         .project-activity-icon {
-            padding-right: 15px;
-            .ui.icon.button {
-
+            padding: 0 15px !important;
+            .ui.circular.label, .ui.dropdown {
+                text-align: center;
+                border-radius: 30px;
                 &.project-menu {
-
+                    border-radius: 4px;
+                    padding: 0px;
+                    font-size: 18px;
+                    vertical-align: top;
+                    width: 30px;
+                    height: 30px;
+                    line-height: 30px;
+                    text-align: center;
                 }
                 &.project-assignee {
-
+                    margin-right: 8px;
+                    .text {
+                        background-color: white !important;
+                        border-radius: 15px;
+                        padding: 3px 15px 3px 3px;
+                        ui.circular.label {
+                            background-color: lightseagreen !important;
+                            color: #ffffff !important;
+                        }
+                    }
                 }
                 &.project-workspace {
-
+                    vertical-align: middle;
+                    width: 30px;
+                    height: 30px;
+                    text-align: center;
+                    line-height: 20px;
+                    margin-right: 8px;
                 }
             }
         }
