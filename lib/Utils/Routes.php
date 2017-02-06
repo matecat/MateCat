@@ -3,6 +3,11 @@
 
 class Routes {
 
+    public static function organizationUploadUrl( \Organizations\OrganizationStruct $org, $options = array() ) {
+        $host = self::httpHost( $options );
+        return "$host/orgs/" . $org->id  ;
+    }
+
     public static function passwordReset( $confirmation_token, $options = array() ) {
         $host = self::httpHost( $options );
         return "$host/api/app/user/password_reset/$confirmation_token";

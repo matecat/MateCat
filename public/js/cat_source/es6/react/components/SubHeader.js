@@ -35,9 +35,7 @@ class SubHeader extends React.Component {
                 return true;
             }
         });
-        setTimeout(function () {
-            ManageActions.filterProjects(self.selectedUser, self.selectedWorkspace, self.currentText, self.currentStatus);
-        });
+        ManageActions.filterProjects(self.selectedUser.toJS(), self.selectedWorkspace.toJS(), self.currentText, self.currentStatus);
     }
 
     changeWorkspace(value) {
@@ -55,7 +53,7 @@ class SubHeader extends React.Component {
             });
         }
         setTimeout(function () {
-            ManageActions.filterProjects(self.selectedUser, self.selectedWorkSpace, self.currentText, self.currentStatus);
+            ManageActions.filterProjects(self.selectedUser, self.selectedWorkSpace.toJS(), self.currentText, self.currentStatus);
         });
     }
 

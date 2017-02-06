@@ -24,7 +24,6 @@ module.exports = keyMirror({
     RENDER_ORGANIZATIONS: null,
     REMOVE_ORGANIZATION: null,
     CREATE_ORGANIZATION: null,
-    CHANGE_ORGANIZATION: null,
     ADD_ORGANIZATION: null,
     FILTER_PROJECTS: null,
     CHANGE_PROJECT_ASSIGNEE: null

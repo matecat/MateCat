@@ -114,14 +114,22 @@ let ManageActions = {
         });
     },
 
-    filterProjects: function (user, workspace,  name, status) {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.FILTER_PROJECTS,
-            user: user,
-            workspace: workspace,
-            name: name,
-            status: status
+    filterProjects: function (user, workspace, name, status) {
+        UI.filterProjects(user, workspace, name, status).then(function (response) {
+            AppDispatcher.dispatch({
+                actionType: ManageConstants.RENDER_PROJECTS,
+                projects: response.projects,
+                organization: UI.selectedOrganization,
+                hideSpinner: false,
+            });
         });
+        // AppDispatcher.dispatch({
+        //     actionType: ManageConstants.FILTER_PROJECTS,
+        //     user: user,
+        //     workspace: workspace,
+        //     name: name,
+        //     status: status
+        // });
     },
 
     changeProjectAssignee: function (project, user) {
@@ -223,11 +231,19 @@ let ManageActions = {
         });
     },
 
-    changeOrganization: function (organizationName) {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.CHANGE_ORGANIZATION,
-            organizationName: organizationName
+    changeOrganization: function (organization) {
+        UI.changeOrganization(organization).then(function (response) {
+            AppDispatcher.dispatch({
+                actionType: ManageConstants.RENDER_PROJECTS,
+                projects: response.projects,
+                organization: organization,
+                hideSpinner: false,
+            });
         });
+        // AppDispatcher.dispatch({
+        //     actionType: ManageConstants.CHANGE_ORGANIZATION,
+        //     organizationName: organizationName
+        // });
     }
 
 

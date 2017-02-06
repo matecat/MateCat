@@ -12,6 +12,7 @@ use Analysis\DqfQueueHandler;
 include_once INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
 
 use ConnectedServices\GDrive as GDrive  ;
+use Organizations\OrganizationStruct;
 
 class ProjectManager {
     
@@ -65,11 +66,6 @@ class ProjectManager {
      * @var Users_UserStruct ;
      */
     protected $user ;
-
-    /**
-     * @var \Organizations\OrganizationStruct
-     */
-    protected $team ;
 
     public function __construct( ArrayObject $projectStructure = null ) {
 
@@ -158,17 +154,11 @@ class ProjectManager {
     }
 
     /**
-     * Set the user who is creating the project. Loads additional features looking up the
-     * the ones activated for the team.
-     *
-     * @param Users_UserStruct $user
+     * @param \Organizations\OrganizationStruct $organization
      */
-    public function setUser( Users_UserStruct $user ) {
-        $this->team = Users_UserDao::findDefaultTeam( $user ) ;
-
-        if ( $this->team ) {
-            $this->features->loadFromTeam( $this->team ) ;
-        }
+    public function setOrganization( OrganizationStruct $organization ) {
+        $this->features->loadFromOrganization( $organization ) ;
+        $this->projectStructure['id_organization'] = $organization->id ;
     }
 
     /**

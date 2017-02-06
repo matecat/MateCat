@@ -20,6 +20,7 @@ RewriteCond %{QUERY_STRING} submit=Search
 RewriteRule ^$ /support [QSA,L]
 
 RewriteRule ^$ index.php?action=newProject [QSA,L]
+RewriteRule ^orgs/[0-9]*$  index.php?action=newProject [L]
 
 RewriteRule ^(translate)[/]?$ index.php?action=cat [L]
 RewriteRule ^(translate)/([^/]*)/([^/]*)/([^/\-]*)-(?:[0-9]*-)?([^/]*)[/]*([^/]*)[/]*$ index.php?action=cat&jid=$4&password=$5&page=$6 [L]

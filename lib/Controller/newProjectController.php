@@ -36,17 +36,18 @@ class newProjectController extends viewController {
         $__postInput = filter_input_array( INPUT_GET, $filterArgs );
         $this->project_name      = $__postInput[ "project_name" ];
 
-        $this->guid = Utils::create_guid();
-
         $this->lang_handler    = Langs_Languages::getInstance();
         $this->subject_handler = Langs_LanguageDomains::getInstance();
 
         $this->subjectArray = $this->subject_handler->getEnabledDomains();
 
         $this->featureSet = new FeatureSet() ;
+
     }
 
     public function doAction() {
+
+        $this->_checkOrganization();
 
         $this->setOrGetGuid();
 
@@ -80,8 +81,7 @@ class newProjectController extends viewController {
         $this->mt_engines = $engine->read( $engineQuery );
 
         if ( $this->isLoggedIn() ) {
-
-            $this->__loadFeaturesFromUserOrTeam();
+            $this->__loadFeatures();
 
             try {
 
@@ -100,32 +100,9 @@ class newProjectController extends viewController {
         }
     }
 
-    /**
-     *
-     */
-    private function __getCurrentTeam() {
-        if ( !$this->isLoggedIn() ) {
-            throw new Exception('user is not logged') ;
-        }
-
-        $orgDao = new \Organizations\MembershipDao() ;
-        $teams = $orgDao->findTeambyUser( $this->logged_user ) ;
-        return $teams[0] ;
-    }
-
-    /**
-     * Here we want to be explicit about the team the user is currently working on.
-     * Even if a user is included in more teams, we'd prefer to have the team bound
-     * to the given session.
-     *
-     */
-    private function __loadFeaturesFromUserOrTeam() {
+    private function __loadFeatures() {
         $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
-        $currentTeam = $this->__getCurrentTeam();
-
-        if ( $currentTeam ) {
-            $this->featureSet->loadFromTeam( $currentTeam ) ;
-        }
+        $this->featureSet->loadFromOrganization( $this->organization  );
     }
 
     private function array_sort_by_column( &$arr, $col, $dir = SORT_ASC ) {
@@ -177,12 +154,15 @@ class newProjectController extends viewController {
     }
 
     private function setOrGetGuid() {
-        //Get the guid from the guid if it exists, otherwise set the guid into the cookie
+        // Get the guid from the guid if it exists, otherwise set the guid into the cookie
         if ( !isset( $_COOKIE[ 'upload_session' ] ) ) {
-            setcookie( "upload_session", $this->guid, time() + 86400 );
-        } else {
-            $this->guid = $_COOKIE[ 'upload_session' ];
+            $this->guid = Utils::create_guid();
+            setcookie( "upload_session", $this->guid, time() + 86400, '/' );
         }
+        else {
+            $this->guid = $_COOKIE['upload_session'] ;
+        }
+
     }
 
     private function isUploadTMXAllowed( $default = false ) {
@@ -192,16 +172,11 @@ class newProjectController extends viewController {
         foreach ( INIT::$SUPPORTED_FILE_TYPES as $k => $v ) {
             foreach ( $v as $kk => $vv ) {
                 if ( $kk == 'tmx' ) {
-                    //	echo "true";
-                    //	exit;
                     return true;
                 }
             }
         }
-
-        //echo "false";exit;
         return false;
-
     }
 
     private function getExtensions( $default = false ) {

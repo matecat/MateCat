@@ -61,6 +61,9 @@ class NewController extends ajaxController {
     private $new_keys = array();
 
     private $owner = "";
+    /**
+     * @var Users_UserStruct
+     */
     private $current_user;
     private $metadata = array();
 
@@ -75,6 +78,12 @@ class NewController extends ajaxController {
             'message' => 'Untraceable error (sorry, not mapped)'
     );
 
+    /**
+     * @var \Organizations\OrganizationStruct
+     */
+    protected $organization;
+
+    protected $id_organization ;
 
     public function __construct() {
 
@@ -113,8 +122,8 @@ class NewController extends ajaxController {
                 ),
                 'pretranslate_100' => array(
                         'filter' => array( 'filter' => FILTER_VALIDATE_INT )
-                )
-
+                ),
+                'id_organization' => array( 'filter' => FILTER_VALIDATE_INT )
         );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -144,6 +153,7 @@ class NewController extends ajaxController {
         $this->seg_rule         = ( !empty( $__postInput[ 'segmentation_rule' ] ) ) ? $__postInput[ 'segmentation_rule' ] : '';
         $this->subject          = ( !empty( $__postInput[ 'subject' ] ) ) ? $__postInput[ 'subject' ] : 'general';
         $this->owner            = $__postInput[ 'owner_email' ];
+        $this->id_organization  = $__postInput[ 'id_organization' ];
 
         // Force pretranslate_100 to be 0 or 1
         $this->pretranslate_100 = (int) !!$__postInput[ 'pretranslate_100' ];
@@ -340,6 +350,16 @@ class NewController extends ajaxController {
         if ( !$this->validateAuthHeader() ) {
             header( 'HTTP/1.0 401 Unauthorized' );
             $this->api_output[ 'message' ] = 'Authentication failed';
+
+            return -1;
+        }
+
+        try {
+            $this->__validateOrganization();
+        }
+        catch( Exception $ex ) {
+            $this->api_output[ 'message' ] = $ex->getMessage();
+            Log::doLog( $ex->getMessage() );
 
             return -1;
         }
@@ -621,8 +641,8 @@ class NewController extends ajaxController {
         
         $projectManager->sanitizeProjectOptions = false ; 
 
-        if ( $this->current_user ) {
-            $projectManager->setUser( $this->current_user ) ;
+        if ( $this->organization ) {
+            $projectManager->setOrganization( $this->organization ) ;
         }
 
         $projectManager->createProject();
@@ -776,5 +796,23 @@ class NewController extends ajaxController {
                 'r'   => $read,
                 'w'   => $write,
         );
+    }
+
+    private function __validateOrganization() {
+        if ( $this->current_user && !empty( $this->id_organization ) ) {
+            $dao = new \Organizations\MembershipDao();
+            $org = $dao->findOrganizationByIdAndUser( $this->id_organization, $this->current_user ) ;
+
+            if ( !$org ) {
+                throw new Exception('Organization and user membership does not match');
+            }
+            else {
+                $this->organization = $org  ;
+            }
+        }
+
+        else if ( $this->current_user ) {
+            $this->organization = $this->current_user->getPersonalOrganization();
+        }
     }
 }

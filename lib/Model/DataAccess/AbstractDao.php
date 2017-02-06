@@ -52,6 +52,11 @@ abstract class DataAccess_AbstractDao {
         return $this->con;
     }
 
+    /**
+     * @param DataAccess_IDaoStruct $obj
+     *
+     * @throws Exception
+     */
     public function create( DataAccess_IDaoStruct $obj ) {
         throw new Exception( "Abstract method " . __METHOD__ . " must be overridden " );
     }
@@ -479,43 +484,45 @@ abstract class DataAccess_AbstractDao {
      * Returns FALSE on failure.
      *
      * @param DataAccess_IDaoStruct $struct
-     * @param array $options
+     * @param array                 $options
+     *
      * @return bool|string
+     * @throws Exception
      */
-    public static function insertStruct( DataAccess_IDaoStruct $struct, $options=array() ) {
+    public static function insertStruct( DataAccess_IDaoStruct $struct, $options = array() ) {
         // TODO: allow the mask to be passed as option.
         $mask = array_keys( $struct->toArray() );
-        $mask = array_diff($mask, static::$auto_increment_fields) ;
+        $mask = array_diff( $mask, static::$auto_increment_fields );
 
-        $sql = self::buildInsertStatement( $struct->toArray(), $mask ) ;
+        $sql  = self::buildInsertStatement( $struct->toArray(), $mask );
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $data = $struct->toArray( $mask ) ;
+        $data = $struct->toArray( $mask );
 
-        \Log::doLog("insert SQL :", $sql);
-        \Log::doLog("insert data :", $data );
+        \Log::doLog( "insert SQL :", $sql );
+        \Log::doLog( "insert data :", $data );
 
         if ( $stmt->execute( $data ) ) {
             if ( count( static::$auto_increment_fields ) ) {
-                return $conn->lastInsertId() ;
+                return $conn->lastInsertId();
+            } else {
+                return true;
             }
-            else {
-                return TRUE;
-            }
-        }
-        else {
+        } else {
 
-            if ( $options['raise'] ) {
-                throw new Exception( $stmt->errorInfo() ) ;
+            if ( $options[ 'raise' ] ) {
+                throw new Exception( $stmt->errorInfo() );
             }
 
-            return FALSE;
+            return false;
         }
     }
 
     /**
      *  Use this function whenever you want to make an empty result
      * returned as null instead of PDO's default FALSE.
+     *
+     * @return mixed|null
      *
      */
     public static function resultOrNull( $result ) {

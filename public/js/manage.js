@@ -1,4 +1,5 @@
 UI = null;
+
 UI = {
     init: function () {
         this.Search = {};
@@ -17,16 +18,13 @@ UI = {
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_SETTINGS, this.openJobSettings);
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_TM_PANEL, this.openJobTMPanel);
 
-        //Projects actions
-        ProjectsStore.addListener(ManageConstants.FILTER_PROJECTS, this.filterProjects.bind(this));
 
         //Organizations actions
         OrganizationsStore.addListener(ManageConstants.CREATE_ORGANIZATION, this.createOrganization);
-        OrganizationsStore.addListener(ManageConstants.CHANGE_ORGANIZATION, this.changeOrganization);
 
         //Workspaces Actions
         // OrganizationsStore.addListener(ManageConstants.CREATE_WORKSPACE, this.createWorkspace);
-        // OrganizationsStore.addListener(ManageConstants.CHANGE_WORKSPACE, this.changeWorkspace);
+        // OrganizationsStore.addListener(ManageConstants.CHANGE_WORKSPACE, this.filterProjects);
 
         //Modals
         ProjectsStore.addListener(ManageConstants.OPEN_CREATE_ORGANIZATION_MODAL, this.openCreateOrganizationModal);
@@ -42,10 +40,6 @@ UI = {
         this.youtubeProjects = YoutubeProjects;
         this.personalProject = PersonalProjects;
         this.otherWorkspace = WorkspaceProjects;
-
-        $(".dropdown").dropdown();
-
-
     },
 
     render: function () {
@@ -85,22 +79,21 @@ UI = {
 
         this.getAllOrganizations().done(function (data) {
 
-            self.organizations = data.organizations;
-            self.selectedOrganization = data.organizations[0];
+            // self.organizations = APP.USER.STORE.organizations;
+            // self.selectedOrganization = APP.USER.STORE.organizations[0];
+            self.organizations = organizations;
+            self.selectedOrganization = organizations[0];
             self.selectedWorkspace = {
                 id: 0,
                 name: 'General'
             };
             self.selectedUser = {};
-
-
-            ManageActions.renderOrganizations(data.organizations, self.selectedOrganization);
-            self.getProjects().done(function (response) {
-                let projects = response.data;
-                //Remove this
-                self.myProjects = projects.concat(self.personalProject, self.otherWorkspace);
-                self.currentProjects = self.myProjects;
-                self.renderProjects(self.myProjects, self.selectedOrganization);
+            self.getWorkspaces(self.selectedOrganization).done(function (data) {
+                self.selectedOrganization.workspaces = data.workspaces;
+                ManageActions.renderOrganizations(self.organizations, self.selectedOrganization);
+                self.getProjects(self.selectedOrganization).done(function (response) {
+                    self.renderProjects(response.projects, self.selectedOrganization);
+                });
             });
         });
 
@@ -246,7 +239,7 @@ UI = {
     /**
      * Retrieve Projects. Passing filters is possible to retrieve projects
      */
-    getProjects: function(page) {
+    getProjects: function(organization, workspace) {
         // let pageNumber = (page) ? page : UI.Search.currentPage;
         // let data = {
         //     action: 'getProjects',
@@ -269,9 +262,30 @@ UI = {
         //         window.location = '/';
         //     }
         // });
+        var projects;
+        var self = this;
+        if (organization.id === 1) {
+            projects = [].concat(this.personalProject, this.otherWorkspace);
+        } else if (organization.id === 2) {
+            projects = [].concat(this.ebayProjects, this.mscProjects, this.adWordsProjects, this.youtubeProjects);
+        } else if (organization.id === 3) {
+            projects = [];
+        } else {
+            projects = [];
+        }
+        if (UI.Search.filter) {
+            $.each(projects, function() {
+                if (self.selectedUser.id) {
+                    this.user = self.selectedUser;
+                }
+                if (self.selectedWorkspace.id  >= 0) {
+                    this.workspace = self.selectedWorkspace;
+                }
+            });
+        }
 
         let data = {
-            data: []
+            projects: projects
         };
         let deferred = $.Deferred().resolve(data);
         return deferred.promise();
@@ -279,11 +293,13 @@ UI = {
     },
 
     getAllOrganizations: function () {
-        let data = {
-            organizations: organizations
-        };
-        let deferred = $.Deferred().resolve(data);
-        return deferred.promise();
+        if ( APP.USER.STORE.organizations ) {
+            let data = {};
+            let deferred = $.Deferred().resolve(data);
+            return deferred.promise();
+        } else {
+            return APP.USER.loadUserData();
+        }
 
     },
 
@@ -300,21 +316,36 @@ UI = {
 
     },
 
+    getWorkspaces: function (organization) {
+        let data;
+        if (organization.id == 1) {
+            data = {
+                workspaces : organizations[0].workspaces
+            }
+        } else if (organization.id == 2) {
+            data = {
+                workspaces : organizations[1].workspaces
+            }
+        }
+        let deferred = $.Deferred().resolve(data);
+        return deferred.promise();
+    },
+
     changeOrganization: function (organization) {
+
         let self = this;
         this.selectedOrganization = organization;
-        if (organization.id === 0) {
-            this.currentProjects = this.myProjects;
-        } else if (organization.id === 1) {
-            this.currentProjects = [].concat(this.ebayProjects, this.mscProjects, this.adWordsProjects, this.youtubeProjects);
-        } else if (organization.id === 2) {
-            this.currentProjects = [];
-        } else {
-            this.currentProjects = [];
-        }
-        setTimeout(function () {
-            ManageActions.renderProjects(self.currentProjects, self.selectedOrganization);
+
+        this.getWorkspaces(organization).done(function (data) {
+            self.selectedOrganization.workspaces = data.workspaces;
+            ManageActions.renderOrganizations(self.organizations, self.selectedOrganization);
         });
+        return self.getProjects(self.selectedOrganization, "all");
+
+
+        // setTimeout(function () {
+        //     ManageActions.renderProjects(self.currentProjects, self.selectedOrganization);
+        // });
 
     },
 
@@ -335,18 +366,7 @@ UI = {
         };
         this.Search.filter = $.extend( this.Search.filter, filter );
         UI.Search.currentPage = 1;
-        this.getProjects().done(function (response) {
-            let projects = response.data;
-            $.each(projects, function() {
-                if (self.selectedUser.id) {
-                    this.user = self.selectedUser;
-                }
-                if (self.selectedWorkspace.id  >= 0) {
-                    this.workspace = self.selectedWorkspace;
-                }
-            });
-            ManageActions.renderProjects(projects);
-        });
+        return this.getProjects(this.selectedOrganization);
     },
 
     changeProjectAssignee: function (project, user) {
@@ -534,7 +554,7 @@ UI = {
 $(document).ready(function(){
     window.organizations = [
         {
-            id: 0,
+            id: 1,
             name: 'Personal',
             workspaces: [
                 {
@@ -553,7 +573,7 @@ $(document).ready(function(){
             ]
         },
         {
-            id: 1,
+            id: 2,
             name: 'Translated',
             users: [{
                 id: 0,

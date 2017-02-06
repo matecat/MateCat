@@ -1,4 +1,5 @@
 <?php
+use Organizations\OrganizationStruct;
 
 /**
  * Created by PhpStorm.
@@ -55,11 +56,11 @@ class FeatureSet {
     /**
      * Loads the features starting from a given team.
      *
-     * @param Users_UserStruct $user
+     * @param OrganizationStruct $organization
      */
-    public function loadFromTeam( \Organizations\OrganizationStruct $team ) {
+    public function loadFromOrganization( OrganizationStruct $organization ) {
         $dao = new OwnerFeatures_OwnerFeatureDao() ;
-        $features = $dao->getByTeam( $team ) ;
+        $features = $dao->getByOrganization( $organization ) ;
         $this->features = static::merge( $this->features, $features ) ;
     }
 

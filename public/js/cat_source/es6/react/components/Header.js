@@ -44,9 +44,6 @@ class Header extends React.Component {
             }
         });
         ManageActions.changeOrganization(selectedOrganization.toJS());
-        this.setState({
-            selectedOrganization: selectedOrganization
-        });
     }
 
     openCreateOrganizations () {

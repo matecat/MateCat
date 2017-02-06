@@ -48,6 +48,12 @@ abstract class viewController extends controller {
     protected $authURL;
 
     /**
+     * @var \Organizations\OrganizationStruct
+     */
+    protected $organization ;
+
+
+    /**
      * Try to identify the browser of users
      *
      * @return array
@@ -427,4 +433,48 @@ abstract class viewController extends controller {
         $messages = FlashMessage::flush() ;
         $this->template->flashMessages = $messages ;
     }
+
+    protected function _checkOrganization() {
+        if ( $this->isLoggedIn() && $this->organizationInURL() ) {
+            $dao = new \Organizations\MembershipDao() ;
+            $organization = $dao->findOrganizationByIdAndUser($this->organizationInURL(), $this->logged_user ) ;
+
+            if ( !$organization ) {
+                $this->_redirectToPersonalOrganization();
+            }
+            else {
+                $this->organization = $organization ;
+            }
+        }
+        else if ( $this->isLoggedIn() && !$this->organizationInURL() ) {
+            $this->_redirectToPersonalOrganization();
+        }
+        else if ( !$this->isLoggedIn() && $this->organizationInURL() ) {
+            $this->_redirectToHomePage();
+        }
+        else {
+            // user is not logged and organization is not set: do nothing
+        }
+    }
+
+    protected function organizationInURL() {
+        preg_match( '#^/orgs/(\d+)#', $_SERVER['REQUEST_URI'], $matches) ;
+        if ( count( $matches ) > 1 ) {
+            return $matches[1];
+        }
+        else {
+            return false;
+        }
+    }
+
+    protected function _redirectToPersonalOrganization() {
+        header( "Location: " . Routes::organizationUploadUrl( $this->logged_user->getPersonalOrganization()) );
+        die();
+    }
+
+    protected function _redirectToHomePage() {
+        header( "Location: " . Routes::appRoot() );
+        die();
+    }
+
 }

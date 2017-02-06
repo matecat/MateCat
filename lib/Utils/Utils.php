@@ -444,13 +444,17 @@ class Utils {
     /**
      * uploadDirFromSessionCookie 
      *
-     * @param $file_name optional file name to append to the upload path
+     * @oaram $guid string
+     * @param $file_name string optional file name to append to the upload path
+     *
+     * @return string
      */
     public static function uploadDirFromSessionCookie($guid, $file_name = null) {
         return INIT::$UPLOAD_REPOSITORY . "/" . 
             $guid . '/' . 
             $file_name ; 
     }
+
 	/**
 	 * @param      $match
 	 * @param      $job_tm_keys

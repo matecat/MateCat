@@ -353,7 +353,7 @@ module.exports = function(grunt) {
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
                 src: [
-                    cssBase + 'sass/index_manage.scss'
+                    cssBase + 'sass/manage_main.scss'
                 ],
                 dest: cssBase + 'build/manage-build.css'
             },
