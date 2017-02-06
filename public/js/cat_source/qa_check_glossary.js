@@ -16,7 +16,6 @@ if ( QaCheckGlossary.enabled() )
      * so to provide a consistent feelint go the user.
      */
     $(document).on('getWarning:local:success', function( e, data ) {
-        console.log('[GLOSSARY] getWarning:local:success');
         startLocalUnusedGlossaryHighlight( data.segment );
     });
 
