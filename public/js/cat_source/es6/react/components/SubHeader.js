@@ -132,7 +132,7 @@ class SubHeader extends React.Component {
                     {workspace.get('name')}
                 </div>
             ));
-            result = <div className="ui dropdown selection fluid organization-dropdown top-5"
+            result = <div className="ui dropdown selection workspace-dropdown"
                           ref={(dropdownWorkspaces) => this.dropdownWorkspaces = dropdownWorkspaces}>
                 <input type="hidden" name="gender" />
                 <i className="dropdown icon"/>
@@ -145,11 +145,11 @@ class SubHeader extends React.Component {
                     </div>
                     <div className="divider"></div>
                     {/*<div className="header">
-                     <div className="ui form">
-                     <div className="field">
-                     <input type="text" name="Project Name" placeholder="Translated Organization es." />
-                     </div>
-                     </div>
+                         <div className="ui form">
+                             <div className="field">
+                                 <input type="text" name="Project Name" placeholder="Translated Organization es." />
+                             </div>
+                         </div>
                      </div>
                      <div className="divider"></div>*/}
                     <div className="scrolling menu">

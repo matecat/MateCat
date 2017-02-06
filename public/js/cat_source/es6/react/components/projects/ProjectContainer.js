@@ -252,40 +252,39 @@ class ProjectContainer extends React.Component {
         ManageActions.openChangeProjectWorkspace(this.props.organization, this.props.project);
     }
 
+
     getDropDownUsers() {
-        let result = '';
-        if (this.props.organization.get('users')) {
-            let users = this.props.organization.get('users').map((user, i) => (
-                <div className="item" data-value={user.get('id')}
-                     key={'organization' + user.get('userShortName') + user.get('id')}>
-                    <p className=" ui avatar image initials green">{user.get('userShortName')}</p>
-                    {(user.get('id') === 0)? 'To me' : user.get('userFullName')}
-                </div>
+       let result = '';
+       if (this.props.organization.get('users')) {
+           let users = this.props.organization.get('users').map((user, i) => (
+               <div className="item " data-value={user.get('id')}
+                    key={'organization' + user.get('userShortName') + user.get('id')}>
+                   <div className="ui circular label">{user.get('userShortName')}</div>
+                   {(user.get('id') === 0)? 'To me' : user.get('userFullName')}
+               </div>
+           ));
+           result = <div className="ui dropdown top right pointing project-assignee"
+                         ref={(dropdownUsers) => this.dropdownUsers = dropdownUsers}>
+               <span className="text">
+                   <div className="ui circular label">??</div>????????
+               </span>
 
-            ));
-            result = <a className="project-assignee ui inline dropdown"
-                          ref={(dropdownUsers) => this.dropdownUsers = dropdownUsers}>
-                <div className="text">
-                    <p className="ui avatar image initials green">??</p>???
-                </div>
-
-                <div className="menu">
-                    <div className="header">
-                        Assign project to:
-                    </div>
-                    <div className="header">
-                        <div className="ui form">
-                            <div className="field">
-                                <input type="text" name="ProjectName" placeholder="Name or email." />
-                            </div>
-                        </div>
-                    </div>
-                    {users}
-                </div>
-            </a>;
-        }
-        return result;
-    }
+               <div className="menu">
+                   <div className="ui icon search input">
+                       <i className="icon-search icon"></i>
+                       <input type="text" name="ProjectName" placeholder="Name or email." />
+                   </div>
+                   <div className="header">
+                       Assign project to:
+                   </div>
+                   <div className="scrolling menu">
+                   {users}
+                   </div>
+               </div>
+           </div>;
+       }
+       return result;
+   }
 
 
     render() {
