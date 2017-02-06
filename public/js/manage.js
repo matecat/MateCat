@@ -79,8 +79,10 @@ UI = {
 
         this.getAllOrganizations().done(function (data) {
 
-            self.organizations = APP.USER.STORE.organizations;
-            self.selectedOrganization = APP.USER.STORE.organizations[0];
+            // self.organizations = APP.USER.STORE.organizations;
+            // self.selectedOrganization = APP.USER.STORE.organizations[0];
+            self.organizations = organizations;
+            self.selectedOrganization = organizations[0];
             self.selectedWorkspace = {
                 id: 0,
                 name: 'General'
@@ -552,7 +554,7 @@ UI = {
 $(document).ready(function(){
     window.organizations = [
         {
-            id: 0,
+            id: 1,
             name: 'Personal',
             workspaces: [
                 {
@@ -571,7 +573,7 @@ $(document).ready(function(){
             ]
         },
         {
-            id: 1,
+            id: 2,
             name: 'Translated',
             users: [{
                 id: 0,
