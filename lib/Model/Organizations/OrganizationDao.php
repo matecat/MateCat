@@ -46,6 +46,33 @@ class OrganizationDao extends \DataAccess_AbstractDao {
     }
 
     /**
+     *
+     * @param \Users_UserStruct $user
+     * @param array $params
+     */
+    public function createUserOrganization( \Users_UserStruct $user, $params = array() ) {
+        $organizationStruct = new OrganizationStruct(array(
+            'name' => $params['name'],
+            'created_by' =>  $user->uid,
+            'created_at' => \Utils::mysqlTimestamp( time() ),
+            'type' => $params['type']
+        )) ;
+
+        $orgId = OrganizationDao::insertStruct( $organizationStruct  ) ;
+        $organizationStruct->id = $orgId ;
+
+        $membershipStruct = new MembershipStruct(array(
+            'id_organization' => $orgId,
+            'uid' => $user->uid,
+            'is_admin' => TRUE
+        ));
+
+        $membershipId = MembershipDao::insertStruct( $membershipStruct );
+
+        return $organizationStruct ;
+    }
+
+    /**
      * @param string $sql
      *
      * @return \PDOStatement
