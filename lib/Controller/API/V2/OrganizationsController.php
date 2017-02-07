@@ -21,11 +21,6 @@ use Organizations\OrganizationStruct;
 
 class OrganizationsController extends KleinController {
 
-    /**
-     * @var \Projects_ProjectStruct
-     */
-    protected $project;
-
     public function create() {
 
         $teamDao = new OrganizationDao();

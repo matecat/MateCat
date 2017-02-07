@@ -17,5 +17,8 @@ class MembershipStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
     public $id_organization;
     public $uid ;
     public $is_admin ;
+    public $email;
+    public $first_name;
+    public $last_name;
 
 }
