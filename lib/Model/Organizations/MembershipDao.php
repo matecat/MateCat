@@ -26,6 +26,12 @@ class MembershipDao extends \DataAccess_AbstractDao
             WHERE organizations_users.uid = :uid 
     ";
 
+    protected static $_query_member_list = "
+          SELECT ou.id, ou.id_organization, ou.uid, ou.is_admin, email, first_name, last_name FROM organizations_users ou
+              JOIN users USING ( uid )
+            WHERE ou.id_organization = :id_organization
+    ";
+
     public function findById( $id ) {
         $sql = " SELECT * FROM " . self::TABLE . " WHERE id = ? " ;
         $stmt = $this->getConnection()->getConnection()->prepare( $sql ) ;
@@ -86,6 +92,22 @@ class MembershipDao extends \DataAccess_AbstractDao
     }
 
     /**
+     * @param $id_organization
+     *
+     * @return \DataAccess_IDaoStruct|\DataAccess_IDaoStruct[]|MembershipStruct[]
+     */
+    public function getMemberListByOrganizationId( $id_organization ){
+        $stmt = $this->_getStatementForCache( self::$_query_member_list );
+        $membershipStruct = new MembershipStruct();
+        return $this->_fetchObject( $stmt,
+                $membershipStruct,
+                array(
+                        'id_organization' => $id_organization,
+                )
+        );
+    }
+
+    /**
      * @param [
      *            'organization' => organizationStruct,
      *            'members'      => emails[]
@@ -99,15 +121,16 @@ class MembershipDao extends \DataAccess_AbstractDao
         $organizationStruct = $obj_arr[ 'organization' ];
 
         $membersList = [];
-        foreach( $members as $member ){
-            $email = $member->email ;
-            $_member = ( new MembershipStruct( [
+        foreach ( $members as $member ) {
+            $_member             = ( new MembershipStruct( [
                     'id_organization' => $organizationStruct->id,
                     'uid'             => $member->uid,
                     'is_admin'        => ( $organizationStruct->created_by == $member->uid ? true : false )
-            ] ) )->toArray();
-            $_member[ 'email' ] = $email;
-            $membersList[] = $_member;
+            ] ) );
+            $_member->email      = $member->email;
+            $_member->first_name = $member->first_name;
+            $_member->last_name  = $member->last_name;
+            $membersList[]       = $_member;
         }
 
         $arrayCount = count( $membersList );
@@ -128,9 +151,9 @@ class MembershipDao extends \DataAccess_AbstractDao
 
         $stmt->execute( $values );
 
-        $i = 0;
-        foreach( $membersList as &$membershipStruct ){
-            $membershipStruct[ 'id' ] = (int)$conn->lastInsertId() + $i;
+        $i = 0; //emulate MySQL auto_increment
+        foreach( $membersList as $membershipStruct ){
+            $membershipStruct->id = (int)$conn->lastInsertId() + $i;
             $i++;
         }
 
