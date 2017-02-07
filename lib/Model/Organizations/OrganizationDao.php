@@ -10,6 +10,7 @@ namespace Organizations;
 
 use Database;
 use PDO;
+use Users_UserDao;
 use Users_UserStruct;
 
 class OrganizationDao extends \DataAccess_AbstractDao {
@@ -46,16 +47,16 @@ class OrganizationDao extends \DataAccess_AbstractDao {
     }
 
     /**
-     * @param Users_UserStruct $user
+     * @param Users_UserStruct $orgCreatorUser
      * @param array            $params
      *
-     * @return OrganizationStruct
+     * @return mixed
      */
-    public function createUserOrganization( \Users_UserStruct $user, $params = array() ) {
+    public function createUserOrganization( \Users_UserStruct $orgCreatorUser, $params = array() ) {
 
         $organizationStruct = new OrganizationStruct(array(
             'name' => $params['name'],
-            'created_by' =>  $user->uid,
+            'created_by' =>  $orgCreatorUser->uid,
             'created_at' => \Utils::mysqlTimestamp( time() ),
             'type' => $params['type']
         )) ;
@@ -63,15 +64,25 @@ class OrganizationDao extends \DataAccess_AbstractDao {
         $orgId = OrganizationDao::insertStruct( $organizationStruct  ) ;
         $organizationStruct->id = $orgId ;
 
-        $membershipStruct = new MembershipStruct(array(
-            'id_organization' => $orgId,
-            'uid' => $user->uid,
-            'is_admin' => TRUE
-        ));
+        $members = ( new Users_UserDao )->getByEmails( $params[ 'members' ] );
 
-        $membershipId = MembershipDao::insertStruct( $membershipStruct );
+        $membersList = [];
+        foreach( $members as $member ){
+            $email = $member->email ;
+            $_member = ( new MembershipStruct( [
+                    'id_organization' => $organizationStruct->id,
+                    'uid'             => $member->uid,
+                    'is_admin'        => ( $orgCreatorUser->uid == $member->uid ? true : false )
+            ] ) )->toArray();
+            $_member[ 'email' ] = $email;
+            $membersList[] = $_member;
+        }
 
-        return $organizationStruct ;
+        $membersList = ( new MembershipDao )->createList( $membersList );
+        $organization = (object)$organizationStruct->toArray();
+        $organization->members = $membersList;
+        return $organization;
+
     }
 
     /**

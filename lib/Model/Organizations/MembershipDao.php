@@ -84,4 +84,40 @@ class MembershipDao extends \DataAccess_AbstractDao
         return static::resultOrNull( $stmt->fetch() );
     }
 
+    /**
+     * @param MembershipStruct[] $obj_arr
+     *
+     * @return array
+     */
+    public function createList( Array $obj_arr ) {
+
+        $arrayCount = count( $obj_arr );
+        $rowCount = ( $arrayCount  ? $arrayCount - 1 : 0);
+
+        $placeholders = sprintf( "(?,?,?)%s", str_repeat(",(?,?,?)", $rowCount ));
+        $sql = "INSERT IGNORE INTO " . self::TABLE . " ( id_organization , uid, is_admin ) VALUES " . $placeholders;
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+
+        $values = [];
+        foreach( $obj_arr as $membershipStruct ){
+            $values[] = $membershipStruct->id_organization;
+            $values[] = $membershipStruct->uid;
+            $values[] = $membershipStruct->is_admin;
+        }
+
+        $stmt->execute( $values );
+
+        $i = 0;
+        foreach( $obj_arr as &$membershipStruct ){
+            $membershipStruct[ 'id' ] = (int)$conn->lastInsertId() + $i;
+            $i++;
+        }
+
+        return $obj_arr;
+
+
+    }
+
 }
