@@ -185,9 +185,10 @@ let ManageActions = {
             organization: organization
         });
     },
-    openCreateWorkspaceModal: function () {
+    openCreateWorkspaceModal: function (organization) {
         AppDispatcher.dispatch({
             actionType: ManageConstants.OPEN_CREATE_WORKSPACE_MODAL,
+            organization: organization
         });
     },
 
@@ -217,16 +218,20 @@ let ManageActions = {
         });
     },
 
-    createOrganization: function (organizationName) {
-        UI.createOrganization(organizationName).done(
+    createOrganization: function (organizationName, members) {
+        var organization;
+        UI.createOrganization(organizationName, members).then(
             function (response) {
-                AppDispatcher.dispatch({
-                    actionType: ManageConstants.ADD_ORGANIZATION,
-                    // organization: organization
+                organization = response.organization[0];
+                UI.getWorkspaces(organization).then(function (data) {
+                    organization.workspaces = data.workspaces;
+                    AppDispatcher.dispatch({
+                        actionType: ManageConstants.ADD_ORGANIZATION,
+                        organization: response.organization[0]
+                    });
                 });
             }
         );
-
     },
 
     changeOrganization: function (organization) {
@@ -238,12 +243,17 @@ let ManageActions = {
                 hideSpinner: false,
             });
         });
-        // AppDispatcher.dispatch({
-        //     actionType: ManageConstants.CHANGE_ORGANIZATION,
-        //     organizationName: organizationName
-        // });
-    }
+    },
 
+    createWorkspace: function (organization, wsName) {
+        UI.createWorkspace(organization,wsName).done(function (response) {
+            AppDispatcher.dispatch({
+                actionType: ManageConstants.CREATE_WORKSPACE,
+                organization: organization,
+                workspace: response.workspace,
+            });
+        });
+    }
 
 };
 

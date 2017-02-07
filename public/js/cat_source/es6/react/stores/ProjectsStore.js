@@ -147,7 +147,7 @@ AppDispatcher.register(function(action) {
             ProjectsStore.emitChange(action.actionType, action.organization);
             break;
         case ManageConstants.OPEN_CREATE_WORKSPACE_MODAL:
-            ProjectsStore.emitChange(action.actionType);
+            ProjectsStore.emitChange(action.actionType, action.organization);
             break;
     }
 });

@@ -11,7 +11,7 @@ let Immutable = require('immutable');
 EventEmitter.prototype.setMaxListeners(0);
 
 let OrganizationsStore = assign({}, EventEmitter.prototype, {
-    
+
     organizations : [],
 
     users : [],
@@ -23,6 +23,12 @@ let OrganizationsStore = assign({}, EventEmitter.prototype, {
 
     addOrganization: function(organization) {
         this.organizations = this.organizations.concat(Immutable.fromJS([organization]));
+    },
+
+    updateOrganization: function (organization, workspace) {
+        let index = this.organizations.indexOf(organization);
+        let workspaces = organization.get('workspaces').push(workspace);
+        this.organizations = this.organizations.setIn([index,'workspaces'], workspaces);
     },
 
     removeOrganization: function (organization) {
@@ -39,7 +45,6 @@ let OrganizationsStore = assign({}, EventEmitter.prototype, {
 
 // Register callback to handle all updates
 AppDispatcher.register(function(action) {
-
     switch(action.actionType) {
         case ManageConstants.RENDER_ORGANIZATIONS:
             OrganizationsStore.updateAll(action.organizations);
@@ -49,14 +54,18 @@ AppDispatcher.register(function(action) {
             OrganizationsStore.removeOrganization(action.organization);
             OrganizationsStore.emitChange(ManageConstants.RENDER_ORGANIZATIONS, OrganizationsStore.organizations);
             break;
+        case ManageConstants.OPEN_CHANGE_ORGANIZATION_MODAL:
+            ProjectsStore.emitChange(action.actionType, action.organization, action.projectId, OrganizationsStore.organizations);
+            break;
         case ManageConstants.ADD_ORGANIZATION:
             OrganizationsStore.addOrganization(action.organization);
             OrganizationsStore.emitChange(ManageConstants.RENDER_ORGANIZATIONS, OrganizationsStore.organizations, Immutable.fromJS(action.organization));
             break;
-        case ManageConstants.OPEN_CHANGE_ORGANIZATION_MODAL:
-            ProjectsStore.emitChange(action.actionType, action.organization, action.projectId, OrganizationsStore.organizations);
+        case ManageConstants.CREATE_WORKSPACE:
+            OrganizationsStore.updateOrganization(action.organization, action.workspace);
             break;
     }
 });
-
 module.exports = OrganizationsStore;
+
+
