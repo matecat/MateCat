@@ -2,13 +2,14 @@ class MainPanel extends React.Component {
     constructor(props) {
         super(props);
 
-
         this.state = this.defaultState();
     }
 
     defaultState() {
-        if ( SegmentFilter.getStoredState() ) {
-            return SegmentFilter.getStoredState() ;
+        var storedState = SegmentFilter.getStoredState() ;
+
+        if ( storedState.reactState ) {
+            return storedState.reactState ;
         }
         else {
             return {
@@ -24,7 +25,7 @@ class MainPanel extends React.Component {
     }
 
     componentDidMount() {
-        if ( SegmentFilter.getStoredState() )  {
+        if ( SegmentFilter.getStoredState().reactState ) {
             this.makeCall();
         }
     }
@@ -46,10 +47,12 @@ class MainPanel extends React.Component {
     clearClick(e) {
         e.preventDefault();
 
-        SegmentFilter.closeFilter();
-        // TODO
+        SegmentFilter.clearFilter();
+    }
 
-        $('body').removeClass('sampling-enabled');
+    closeClick(e) {
+        e.preventDefault();
+        SegmentFilter.closeFilter();
     }
 
     submitClick(e) {
@@ -66,7 +69,6 @@ class MainPanel extends React.Component {
                 size : this.state.samplingSize,
             }
 
-            $('body').addClass('sampling-enabled');
         }
 
         SegmentFilter.filterSubmit({
@@ -274,6 +276,13 @@ class MainPanel extends React.Component {
                 {controlsForSampling}
 
                 <div className="block right">
+
+                    <input id="clear-filter"
+                           type="button"
+                           onClick={this.closeClick.bind(this)}
+                           className={classnames({btn: true})}
+                           value="CLOSE" />
+
                     <input id="clear-filter"
                         type="button"
                         onClick={this.clearClick.bind(this)}

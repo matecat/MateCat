@@ -8,79 +8,101 @@ SegmentFilter.enabled = function() {
 if (SegmentFilter.enabled())
 (function($, UI, SF, undefined) {
 
-    var lastFilterData = null ;
+    var cachedStoredState = null ;
 
     var keyForLocalStorage = function() {
         var page = ( config.isReview ? 'revise' : 'translate' );
-        return 'SegmentFilter-' + page + '-' + config.id_job + '-' + config.password ;
+        return 'SegmentFilter-v2-' + page + '-' + config.id_job + '-' + config.password ;
     } ;
 
     $.extend(SF, {
         getLastFilterData : function() {
-            return lastFilterData;
+            return this.getStoredState().serverData ;
         },
 
         filterPanelOpen : function() {
             return UI.body.hasClass('filtering');
         },
 
+        /**
+         * This function return true if the user is in a filtered session with zoomed segments.
+         *
+         * @returns {*}
+         */
         filtering : function() {
-            // TODO change this, more specific when filter is submitted.
-            return lastFilterData != null;
+            return UI.body.hasClass('sampling-enabled');
         },
 
+        /**
+         * @returns {{reactState: null, serverData: null, lastSegmentId: null}}
+         */
         getStoredState : function() {
+            if ( null != cachedStoredState ) {
+                return cachedStoredState ;
+            }
+
             var data = localStorage.getItem( keyForLocalStorage() ) ;
+
             if ( data ) {
                 try {
-                    return JSON.parse( data ) ;
+                    cachedStoredState = JSON.parse( data ) ;
                 }
                 catch( e ) {
                     this.clearStoredData();
                     console.error( e.message );
                 }
             }
+            else {
+                cachedStoredState = {
+                    reactState: null,
+                    serverData : null,
+                    lastSegmentId : null
+                }  ;
+            }
+
+            return cachedStoredState ;
+        },
+
+        setStoredState : function( data ) {
+           cachedStoredState = $.extend( this.getStoredState(), data );
+           localStorage.setItem(keyForLocalStorage(), JSON.stringify( cachedStoredState ) ) ;
         },
 
         clearStoredData : function() {
+            cachedStoredState = null ;
             return localStorage.removeItem( keyForLocalStorage() ) ;
         },
 
-        saveState : function( data ) {
-            localStorage.setItem(keyForLocalStorage(), JSON.stringify(
-                window.segment_filter_panel.state
-            ) ) ;
-        },
-
         restore : function( data ) {
-            window.segment_filter_panel.setState( this.getStoredState() ) ;
+            debugger  // TODO, find who calls this
+            window.segment_filter_panel.setState( this.getStoredState().reactState ) ;
             $(document).trigger('segment-filter-submit');
         },
 
         filterSubmit : function( data ) {
+            $('body').addClass('sampling-enabled');
+
             data = { filter: data } ;
 
             var path = sprintf('/api/v2/jobs/%s/%s/segments-filter?%s',
-                              config.id_job, config.password, $.param( data )
-                              );
+                              config.id_job, config.password, $.param( data ) );
 
             return $.getJSON(path).pipe(function( data ) {
                 $(document).trigger('segment-filter:filter-data:load', { data: data });
 
-                lastFilterData = data;
-
-                window.segment_filter_panel.setState({
+                var reactState = {
                     filteredCount : data.count,
                     filtering : true
-                });
+                } ;
 
-                // TODO:
-                //      UI.clearStorage('SegmentFilter') is needed to avoid bloating local storage.
-                //      This prevents two filters on different tabs to persist on page reload:
-                //      only the last one applied remains in localStorage.
+                window.segment_filter_panel.setState( reactState );
+
                 UI.clearStorage('SegmentFilter');
 
-                SegmentFilter.saveState( window.segment_filter_panel.state ) ;
+                SegmentFilter.setStoredState({
+                    serverData : data ,
+                    reactState : window.segment_filter_panel.state
+                }) ;
 
                 $('#outer').empty();
                 return UI.render({
@@ -89,18 +111,71 @@ if (SegmentFilter.enabled())
             })
         },
 
+        /**
+         * This function gets called when segments are still to be rendered
+         * and sometimes when the segments are rendered ( click on filter icon ).
+         *
+         *
+         */
         openFilter : function() {
-            UI.body.addClass('filtering');
+            UI.body.addClass('filtering'); // filtering makes sense if we have serverData
+
+            if ( this.getStoredState().serverData ) {
+                var ids = $.map( this.getStoredState().serverData.segment_ids, function(i) {
+                    return '#segment-' + i ;
+                });
+                var selector = 'section:not( ' + ids + ')';
+
+                UI.body.addClass('sampling-enabled');
+                $( selector ).addClass('muted');
+
+                setTimeout( function() {
+                    tryToFocusLastSegment();
+                }, 600 );
+            }
+
             $(document).trigger('header-tool:open', { name: 'filter' });
         },
 
-        closeFilter : function() {
+        clearFilter : function() {
             this.clearStoredData();
-
-            UI.body.removeClass('filtering');
-            $('.muted').removeClass('muted');
-            lastFilterData = null;
             window.segment_filter_panel.resetState();
+
+            this.closeFilter() ;
+        },
+
+        closeFilter : function() {
+            UI.body.removeClass('filtering');
+            UI.body.removeClass('sampling-enabled');
+            $('.muted').removeClass('muted');
+
+            setTimeout( function() {
+                UI.scrollSegment( UI.currentSegment ) ;
+            }, 600 );
+        }
+    });
+
+    $(document).on('segmentsAdded', function(e) {
+        if ( SegmentFilter.filtering() ) {
+            tryToFocusLastSegment();
+        }
+    });
+
+    function tryToFocusLastSegment() {
+        var segment = UI.Segment.find( SegmentFilter.getStoredState().lastSegmentId ) ;
+        if ( SegmentFilter.getStoredState().lastSegmentId && segment ) {
+            if ( segment.el.is( UI.currentSegment ) ) {
+                UI.scrollSegment( segment.el ) ;
+            }
+            else {
+                segment.el.find( UI.targetContainerSelector() ).click();
+            }
+        }
+    }
+
+    $(document).on('segment:activate', function( event, data ) {
+        if ( SegmentFilter.filtering() ) {
+            SegmentFilter.setStoredState({ lastSegmentId : data.segment.absId }) ;
         }
     });
 

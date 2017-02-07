@@ -90,6 +90,8 @@ UI = {
 		this.createFooter(segment.el, isNotSimilar);
 		this.createButtons(segment);
 		this.createHeader(segment.el);
+
+        $(document).trigger('segment:activate', { segment: segment } );
 	},
     evalCurrentSegmentTranslationAndSourceTags : function( segment ) {
         if ( segment.length == 0 ) return ;
@@ -3186,7 +3188,7 @@ UI = {
         });
 
         var initialRenderPromise ;
-        if ( SegmentFilter.enabled() && SegmentFilter.getStoredState() ) {
+        if ( SegmentFilter.enabled() && SegmentFilter.getStoredState().reactState ) {
             SegmentFilter.openFilter();
             initialRenderPromise = ( new $.Deferred() ).resolve();
         }
