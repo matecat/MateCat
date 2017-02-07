@@ -20,6 +20,11 @@ class MembershipDao extends \DataAccess_AbstractDao
     protected static $auto_increment_fields = array('id');
     protected static $primary_keys = array('id');
 
+    protected static $_query_organization_from_uid_and_id = " SELECT organizations.* FROM organizations
+              JOIN organizations_users ON organizations_users.id_organization = organizations.id
+            WHERE organizations_users.uid = ? AND organizations.id = ?
+            " ;
+
     protected static $_query_user_organizations = " 
           SELECT organizations.* FROM organizations
               JOIN organizations_users ON organizations_users.id_organization = organizations.id
@@ -30,6 +35,10 @@ class MembershipDao extends \DataAccess_AbstractDao
           SELECT ou.id, ou.id_organization, ou.uid, ou.is_admin, email, first_name, last_name FROM organizations_users ou
               JOIN users USING ( uid )
             WHERE ou.id_organization = :id_organization
+    ";
+
+    protected static $_delete_member = "
+        DELETE FROM organizations_users WHERE uid = :uid AND id_organization = :id_organization
     ";
 
     public function findById( $id ) {
@@ -79,12 +88,8 @@ class MembershipDao extends \DataAccess_AbstractDao
      * @return null|OrganizationStruct
      */
     public function findOrganizationByIdAndUser( $id, \Users_UserStruct $user ) {
-        $sql = " SELECT organizations.* FROM organizations
-              JOIN organizations_users ON organizations_users.id_organization = organizations.id
-            WHERE organizations_users.uid = ? AND organizations.id = ?
-            " ;
 
-        $stmt = $this->getConnection()->getConnection()->prepare( $sql ) ;
+        $stmt = $this->getConnection()->getConnection()->prepare( self::$_query_organization_from_uid_and_id ) ;
         $stmt->setFetchMode( PDO::FETCH_CLASS, '\Organizations\OrganizationStruct' );
         $stmt->execute( array( $user->uid, $id ) ) ;
 
@@ -105,6 +110,24 @@ class MembershipDao extends \DataAccess_AbstractDao
                         'id_organization' => $id_organization,
                 )
         );
+    }
+
+    /**
+     * @param $uid
+     * @param $organizationId
+     *
+     * @return int
+     */
+    public function deleteUserFromOrganization( $uid, $organizationId ){
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( self::$_delete_member );
+        $stmt->execute( [
+                'uid' => $uid,
+                'id_organization' => $organizationId
+        ] );
+        return $stmt->rowCount();
+
     }
 
     /**

@@ -51,6 +51,9 @@ class OrganizationsController extends KleinController {
             \Database::obtain()->rollback();
             $this->response->code( 400 );
             $this->response->json( ( new Error( [ $e ] ) )->render() );
+        } catch( InvalidArgumentException $e ){
+            $this->response->code( 400 );
+            $this->response->json( ( new Error( [ $e ] ) )->render() );
         }
 
     }
@@ -66,9 +69,7 @@ class OrganizationsController extends KleinController {
         $org = $membershipDao->findOrganizationByIdAndUser( $org->id, $this->user );
 
         if( empty( $org ) ){
-            $this->response->code( 401 );
-            $this->response->json( ( new Error( [ new AuthorizationError( "Not Authorized", 401 ) ] ) )->render() );
-            return;
+            throw new AuthorizationError( "Not Authorized", 401 );
         }
 
         $org->name = $requestContent->name;
@@ -80,6 +81,9 @@ class OrganizationsController extends KleinController {
             $this->response->json( [ 'organization' => $formatted->render() ] );
         } catch ( \PDOException $e ){
             $this->response->code( 503 );
+            $this->response->json( ( new Error( [ $e ] ) )->render() );
+        } catch( AuthorizationError $e ){
+            $this->response->code( 401 );
             $this->response->json( ( new Error( [ $e ] ) )->render() );
         }
 
