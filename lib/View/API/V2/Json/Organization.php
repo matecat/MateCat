@@ -26,17 +26,22 @@ class Organization {
             $data = $this->data;
         }
 
-        foreach ( $data as $organization ) {
+        foreach ( $data as $k => $organization ) {
             /**
              * @var $organization OrganizationStruct
              */
-            $row   = array(
+            $row   = [
                     'id'         => (int)$organization->id,
                     'name'       => $organization->name,
                     'type'       => $organization->type,
                     'created_at' => \Utils::api_timestamp( $organization->created_at ),
                     'created_by' => $organization->created_by
-            );
+            ];
+
+            if( isset( $data[ $k ]->members ) ){
+                $row[ 'members' ] = $data[ $k ]->members;
+            }
+
             $out[] = $row;
         }
 

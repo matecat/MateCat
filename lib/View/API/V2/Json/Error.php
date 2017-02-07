@@ -14,7 +14,7 @@ class Error {
 
     private $data;
 
-    public function __construct( $data ) {
+    public function __construct( $data = [] ) {
         $this->data = $data;
     }
 
@@ -32,13 +32,15 @@ class Error {
         foreach ( $data as $error ) {
 
             if ( $error instanceof \Exception ) {
+                $code   = $error->getCode();
                 $output = $error->getMessage();
             } else {
+                $code   = -1000;
                 $output = $error;
             }
 
             $row[ 'errors' ] = [
-                    "code" => -1000,
+                    "code"    => $code,
                     "message" => $output
             ];
 
@@ -46,6 +48,5 @@ class Error {
 
         return $row;
     }
-
 
 }

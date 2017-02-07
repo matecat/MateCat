@@ -202,6 +202,24 @@ class Users_UserDao extends DataAccess_AbstractDao {
     }
 
     /**
+     * @param string[] $email_list
+     *
+     * @return Users_UserStruct[]
+     */
+    public function getByEmails( $email_list ) {
+        $conn = $this->con->getConnection();
+        $stmt = $conn->prepare( " SELECT * FROM users WHERE email IN ( " . str_repeat( '?,', count( $email_list ) - 1) . '?' . " ) ");
+        $stmt->execute( $email_list ) ;
+        $stmt->setFetchMode( PDO::FETCH_CLASS, '\Users_UserStruct' );
+        $res = $stmt->fetchAll();
+        $userMap = [];
+        foreach ( $res as $user ){
+            $userMap[ $user->email ] = $user;
+        }
+        return $userMap;
+    }
+
+    /**
      * @param Users_UserStruct $input
      *
      * @return Users_UserStruct
