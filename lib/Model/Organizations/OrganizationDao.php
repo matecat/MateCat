@@ -64,21 +64,13 @@ class OrganizationDao extends \DataAccess_AbstractDao {
         $orgId = OrganizationDao::insertStruct( $organizationStruct  ) ;
         $organizationStruct->id = $orgId ;
 
-        $members = ( new Users_UserDao )->getByEmails( $params[ 'members' ] );
+        //TODO sent an email to the $params[ 'members' ] ( warning, not all members are registered users )
 
-        $membersList = [];
-        foreach( $members as $member ){
-            $email = $member->email ;
-            $_member = ( new MembershipStruct( [
-                    'id_organization' => $organizationStruct->id,
-                    'uid'             => $member->uid,
-                    'is_admin'        => ( $orgCreatorUser->uid == $member->uid ? true : false )
-            ] ) )->toArray();
-            $_member[ 'email' ] = $email;
-            $membersList[] = $_member;
-        }
+        $membersList = ( new MembershipDao )->createList( [
+                'organization' => $organizationStruct,
+                'members' => $params[ 'members' ]
+        ] );
 
-        $membersList = ( new MembershipDao )->createList( $membersList );
         $organization = (object)$organizationStruct->toArray();
         $organization->members = $membersList;
         return $organization;

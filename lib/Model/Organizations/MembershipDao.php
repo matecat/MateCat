@@ -9,6 +9,7 @@
 namespace Organizations;
 
 use PDO ;
+use Users_UserDao;
 
 class MembershipDao extends \DataAccess_AbstractDao
 {
@@ -85,13 +86,31 @@ class MembershipDao extends \DataAccess_AbstractDao
     }
 
     /**
-     * @param MembershipStruct[] $obj_arr
+     * @param [
+     *            'organization' => organizationStruct,
+     *            'members'      => emails[]
+     *        ] $obj_arr
      *
      * @return array
      */
     public function createList( Array $obj_arr ) {
 
-        $arrayCount = count( $obj_arr );
+        $members = ( new Users_UserDao )->getByEmails( $obj_arr[ 'members' ] );
+        $organizationStruct = $obj_arr[ 'organization' ];
+
+        $membersList = [];
+        foreach( $members as $member ){
+            $email = $member->email ;
+            $_member = ( new MembershipStruct( [
+                    'id_organization' => $organizationStruct->id,
+                    'uid'             => $member->uid,
+                    'is_admin'        => ( $organizationStruct->created_by == $member->uid ? true : false )
+            ] ) )->toArray();
+            $_member[ 'email' ] = $email;
+            $membersList[] = $_member;
+        }
+
+        $arrayCount = count( $membersList );
         $rowCount = ( $arrayCount  ? $arrayCount - 1 : 0);
 
         $placeholders = sprintf( "(?,?,?)%s", str_repeat(",(?,?,?)", $rowCount ));
@@ -101,7 +120,7 @@ class MembershipDao extends \DataAccess_AbstractDao
         $stmt = $conn->prepare( $sql );
 
         $values = [];
-        foreach( $obj_arr as $membershipStruct ){
+        foreach( $membersList as $membershipStruct ){
             $values[] = $membershipStruct->id_organization;
             $values[] = $membershipStruct->uid;
             $values[] = $membershipStruct->is_admin;
@@ -110,12 +129,12 @@ class MembershipDao extends \DataAccess_AbstractDao
         $stmt->execute( $values );
 
         $i = 0;
-        foreach( $obj_arr as &$membershipStruct ){
+        foreach( $membersList as &$membershipStruct ){
             $membershipStruct[ 'id' ] = (int)$conn->lastInsertId() + $i;
             $i++;
         }
 
-        return $obj_arr;
+        return $membersList;
 
 
     }
