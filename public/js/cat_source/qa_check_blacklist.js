@@ -60,7 +60,8 @@ if (QaCheckBlacklist.enabled() )
             editarea[0].normalize() ;
 
             var newHTML = editarea.html() ;
-            newHTML = LXQ.cleanUpHighLighting(newHTML);
+            if (LXQ.enabled())
+              newHTML = LXQ.cleanUpHighLighting(newHTML);
             $(matched_words).each(function(index, value) {
                 value = escapeRegExp( value );
                 var re = new RegExp('\\b(' + value + ')\\b',"g");

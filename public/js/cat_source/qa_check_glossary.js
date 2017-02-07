@@ -116,7 +116,9 @@ if ( QaCheckGlossary.enabled() )
         removeUnusedGlossaryMarks( container ) ;
 
         var newHTML = container.html();
-
+        //clean up lexiqa highlighting - if enabled
+        if (LXQ.enabled())
+          newHTML = LXQ.cleanUpHighLighting(newHTML);
         $.each(unusedMatches, function( index ) {
             var value = this.raw_segment ;
             value = escapeRegExp( value );
