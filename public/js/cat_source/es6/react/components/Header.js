@@ -27,19 +27,18 @@ class Header extends React.Component {
             let dropdownOrganizations = $(this.dropdownOrganizations);
             if (this.state.selectedOrganization) {
                 dropdownOrganizations.dropdown('set selected', '' + this.state.selectedOrganization.get('id'));
-                dropdownOrganizations.dropdown({
-                    onChange: function(value, text, $selectedItem) {
-                        self.changeOrganization(value);
-                    }
-                });
+                // dropdownOrganizations.dropdown({
+                //     onChange: function(value, text, $selectedItem) {
+                //         self.changeOrganization(value);
+                //     }
+                // });
             }
         }
     }
 
-    changeOrganization(value) {
-
-        let selectedOrganization = this.state.organizations.find(function (organization) {
-            if (organization.get("id") === parseInt(value)) {
+    changeOrganization(event, organization) {
+        let selectedOrganization = this.state.organizations.find(function (org) {
+            if (org.get("id") === organization.get("id")) {
                 return true;
             }
         });
@@ -53,7 +52,8 @@ class Header extends React.Component {
     openModifyOrganization (event, organization) {
         event.stopPropagation();
         event.preventDefault();
-        ManageActions.openModifyOrganizationModal(organization);
+        $(this.dropdownOrganizations).dropdown('set selected', '' + this.state.selectedOrganization.get('id'));
+        ManageActions.openModifyOrganizationModal(organization.toJS());
     }
 
     renderOrganizations(organizations, defaultOrganization) {
@@ -70,7 +70,8 @@ class Header extends React.Component {
             let items = this.state.organizations.map((organization, i) => (
                 <div className="item" data-value={organization.get('id')}
                      data-text={organization.get('name')}
-                     key={'organization' + organization.get('name') + organization.get('id')}>
+                     key={'organization' + organization.get('name') + organization.get('id')}
+                     onClick={(e) => this.changeOrganization(e, organization)}>
                         {organization.get('name')}
                     <a className="organization-filter button show right"
                        onClick={(e) => this.openModifyOrganization(e, organization)}>

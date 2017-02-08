@@ -24,7 +24,7 @@ class OrganizationMembersController extends KleinController {
         try{
 
             $membersList = ( new MembershipDao )->getMemberListByOrganizationId( $this->request->id_organization );
-            $this->response->json( array( 'members_list' => $membersList ) );
+            $this->response->json( array( 'members' => $membersList ) );
 
         } catch ( \PDOException $e ){
             $this->response->code( 503 );
@@ -52,7 +52,7 @@ class OrganizationMembersController extends KleinController {
             $membersList = ( new MembershipDao )->getMemberListByOrganizationId( $organizationStruct->id );
             \Database::obtain()->commit();
 
-            $this->response->json( array( 'members_list' => $membersList ) );
+            $this->response->json( array( 'members' => $membersList ) );
 
         } catch ( \PDOException $e ){
             $this->response->code( 503 );
@@ -80,7 +80,7 @@ class OrganizationMembersController extends KleinController {
             $membersList = $membershipDao->getMemberListByOrganizationId( $this->request->id_organization );
             \Database::obtain()->commit();
 
-            $this->response->json( array( 'members_list' => $membersList ) );
+            $this->response->json( array( 'members' => $membersList ) );
 
         } catch ( \PDOException $e ){
             $this->response->code( 503 );

@@ -180,9 +180,12 @@ let ManageActions = {
     },
 
     openModifyOrganizationModal: function (organization) {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.OPEN_MODIFY_ORGANIZATION_MODAL,
-            organization: organization
+        UI.getOrganizationMembers(organization).then(function (data) {
+            organization.members = data.members;
+            AppDispatcher.dispatch({
+                actionType: ManageConstants.OPEN_MODIFY_ORGANIZATION_MODAL,
+                organization: organization
+            });
         });
     },
     openCreateWorkspaceModal: function (organization) {
@@ -219,9 +222,8 @@ let ManageActions = {
     },
 
     createOrganization: function (organizationName, members) {
-        var organization;
-        UI.createOrganization(organizationName, members).then(
-            function (response) {
+        let organization;
+        UI.createOrganization(organizationName, members).then(function (response) {
                 organization = response.organization[0];
                 UI.getWorkspaces(organization).then(function (data) {
                     organization.workspaces = data.workspaces;
@@ -251,6 +253,26 @@ let ManageActions = {
                 actionType: ManageConstants.CREATE_WORKSPACE,
                 organization: organization,
                 workspace: response.workspace,
+            });
+        });
+    },
+
+    addUserToOrganization: function (organization, userEmail) {
+        UI.addUserToOrganization(organization, userEmail).done(function (data) {
+            AppDispatcher.dispatch({
+                actionType: ManageConstants.UPDATE_ORGANIZATION_MEMBERS,
+                organization: organization,
+                members: data.members
+            });
+        });
+    },
+
+    removeUserFromOrganization: function (organization, userId) {
+        UI.removeUserFromOrganization(organization, userId).done(function (data) {
+            AppDispatcher.dispatch({
+                actionType: ManageConstants.UPDATE_ORGANIZATION_MEMBERS,
+                organization: organization,
+                members: data.members
             });
         });
     }
