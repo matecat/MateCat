@@ -31,30 +31,7 @@ body.manage {
 
 // Closing Shadow - Transitions for buttons
 
-// Initials - Assiggnee
-/*.initials {
-    width: 30px !important;
-    text-align: center;
-    line-height: 30px;
-    &.yellow {
-        background-color: yellow !important;
-        color: black;
-    }
-    &.green {
-        background-color: #0ab89b !important;
-        color: white;
-    }
-    &.purple {
-        background-color: purple !important;
-        color: white !important;
-    }
-    &.orange {
-        background-color: orange !important;
-        color: white;
-    }
-}*/
 
-// Closing Initials - Assignee
 .project {
     margin-bottom: 30px !important;
     .project-header {
@@ -102,22 +79,35 @@ body.manage {
                 &.project-assignee {
                     margin-right: 8px;
                     .text {
-                        background-color: white !important;
+                        background-color: #10ccce !important;
                         border-radius: 15px;
                         padding: 3px 15px 3px 3px;
-                        ui.circular.label {
-                            background-color: lightseagreen !important;
-                            color: #ffffff !important;
+                        color: #ffffff;
+                        transition: background 0.3s ease;
+                        &:hover {
+                            background-color: #14bbbd !important;
+                        }
+                    }
+                    .menu {
+                        .header {
+                            font-size: 14px;
+                            i {
+                                float: right;
+                                font-size: 18px;
+                            }
                         }
                     }
                 }
                 &.project-workspace {
                     vertical-align: middle;
-                    width: 30px;
                     height: 30px;
                     text-align: center;
-                    line-height: 20px;
+                    line-height: 30px;
                     margin-right: 8px;
+                    transition: background 0.3s ease;
+                    padding: 0 15px !important;
+                    font-size: 12px;
+                    font-weight: 100;
                 }
             }
         }

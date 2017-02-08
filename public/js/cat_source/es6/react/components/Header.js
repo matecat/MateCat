@@ -74,7 +74,7 @@ class Header extends React.Component {
                         {organization.get('name')}
                     <a className="organization-filter button show right"
                        onClick={(e) => this.openModifyOrganization(e, organization)}>
-                        <i className="icon-more_vert"/>
+                        <i className="icon-more_vert icon"/>
                     </a>
                 </div>
             ));
@@ -86,7 +86,7 @@ class Header extends React.Component {
                 <div className="menu">
                     <div className="header" style={{cursor: 'pointer'}} onClick={this.openCreateOrganizations.bind(this)}>New Organization
                         <a className="organization-filter button show">
-                            <i className="icon-plus3 right"/>
+                            <i className="icon-plus3 icon"/>
                         </a>
                     </div>
                     <div className="divider"></div>

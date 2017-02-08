@@ -263,19 +263,20 @@ class ProjectContainer extends React.Component {
                    {(user.get('id') === 0)? 'To me' : user.get('userFullName')}
                </div>
            ));
-           result = <div className="ui dropdown top right pointing project-assignee"
+           result = <div className="ui dropdown top right pointing project-assignee shadow-1"
                          ref={(dropdownUsers) => this.dropdownUsers = dropdownUsers}>
                <span className="text">
                    <div className="ui circular label">??</div>????????
                </span>
 
                <div className="menu">
+                   <div className="header">
+                       <a href="#">New Member <i className="icon-plus3 icon right"></i></a>
+                   </div>
+                   <div className="divider"></div>
                    <div className="ui icon search input">
                        <i className="icon-search icon"></i>
                        <input type="text" name="ProjectName" placeholder="Name or email." />
-                   </div>
-                   <div className="header">
-                       Assign project to:
                    </div>
                    <div className="scrolling menu">
                    {members}
@@ -368,9 +369,9 @@ class ProjectContainer extends React.Component {
 
                             <div className="four wide right floated right aligned column">
                                 <div className="project-activity-icon">
-                                    <a className="ui orange circular label project-workspace">{(typeof this.props.project.get('workspace') !== 'undefined') ? this.props.project.get('workspace').get('name') : "??" }</a>
+                                    <a className="ui orange circular label project-workspace shadow-1">{(typeof this.props.project.get('workspace') !== 'undefined') ? this.props.project.get('workspace').get('name') : "??" }</a>
                                     {dropDownUsers}
-                                    <div className="project-menu circular ui icon top right pointing dropdown button"
+                                    <div className="project-menu circular ui icon top right pointing dropdown button shadow-1"
                                              ref={(dropdown) => this.dropdown = dropdown}>
                                         <i className="icon-more_vert icon"/>
                                         {projectMenu}
