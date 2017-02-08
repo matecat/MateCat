@@ -23,14 +23,44 @@
             font-weight: 600;
             color: #ffffff;
             border-radius: 0;
+            i {
+                float: right;
+            }
+            .menu {
+                .header {
+                    font-size: 14px;
+                    i {
+                        float: right;
+                        font-size: 18px;
+                    }
+                }
+            }
+            .scrolling {
+                .item.item.item {
+                    padding-right: 15px !important;
+                }
+            }
+        }
+        .ui.selection.visible.dropdown > .text:not(.default) {
+            font-weight: 600;
+            color: white;
         }
     }
     .sub-head {
         .ui.selection.dropdown {
             background: #e8e8e8;
             border: none;
-            .header {
-                color: #09beec;
+            i {
+                float: right;
+            }
+            .menu {
+                .header {
+                    font-size: 14px;
+                    i {
+                        float: right;
+                        font-size: 18px;
+                    }
+                }
             }
         }
         .ui.input input {
@@ -42,15 +72,10 @@
             left: 0px;
         }
         .projects-state {
-            background-color: yellow;
+            //background-color: yellow;
         }
     }
-    .ui.selection.dropdown .menu {
-        margin: -36px -1px;
-        .header {
-            color: #09beec;
-        }
-    }
+
 }
 
 .logo-col {
