@@ -79,17 +79,17 @@ class SubHeader extends React.Component {
             let users = this.props.selectedOrganization.get('users').map((user, i) => (
                 <div className="item" data-value={user.get('id')}
                      key={'organization' + user.get('userShortName') + user.get('id')}>
-                    <a className="ui avatar image initials green">{user.get('userShortName')}</a>
+                    <a className="ui circular label">{user.get('userShortName')}</a>
                     {(user.get('id') === 0)? 'My Projects' : user.get('userFullName')}
                 </div>
 
             ));
 
-            let item = <div className="item" data-value="2000"
+            let item = <div className="header"> <div className="item" data-value="2000"
                             key={'organization' + config.userShortName + 2000}>
-                <a className="ui avatar image initials green">ALL</a>
+                <a className="ui circular label">AM</a>
                 All Members
-            </div>;
+            </div></div>;
             users = users.unshift(item);
 
             result = <div className="users-filter">
@@ -100,19 +100,19 @@ class SubHeader extends React.Component {
 
                         <div className="input-field">
                             <div className="list-organization">
-                                <span>
-                                    <div className="ui inline dropdown users-projects"
+
+                                    <div className="ui dropdown top right pointing users-projects"
                                          ref={(dropdownUsers) => this.dropdownUsers = dropdownUsers}>
-                                        <div className="text">
-                                            <a className=" btn-floating green assigned-member center-align">{config.userShortName}</a>
+                                        <span className="text">
+                                            <div className="ui circlar label">{config.userShortName}</div>
                                           My Projects
-                                        </div>
+                                        </span>
                                         <i className="dropdown icon"/>
                                         <div className="menu">
                                             {users}
                                         </div>
                                     </div>
-                                </span>
+
                             </div>
                         </div>
 
@@ -138,7 +138,7 @@ class SubHeader extends React.Component {
                 <div className="menu">
                     <div className="header" style={{cursor: 'pointer'}} onClick={this.openCreateWorkspace.bind(this)}>New Workspace
                         <a className="organization-filter button show">
-                            <i className="icon-plus3 right"/>
+                            <i className="icon-plus3 icon"/>
                         </a>
                     </div>
                     <div className="divider"></div>
@@ -152,7 +152,7 @@ class SubHeader extends React.Component {
                      <div className="divider"></div>*/}
                     <div className="scrolling menu">
                         <div className="item" data-value='-1'
-                             data-text='All'>
+                             data-text='AM'>
                              All
                         </div>
                         {items}
