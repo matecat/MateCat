@@ -6,7 +6,8 @@ class ModifyOrganization extends React.Component {
         super(props);
         this.state = {
             organization: this.props.organization,
-            inputUserError: false
+            inputUserError: false,
+            showRemoveMessageUserID: null
         };
         this.updateOrganization = this.updateOrganization.bind(this);
     }
@@ -19,8 +20,20 @@ class ModifyOrganization extends React.Component {
 
 
 
+    showRemoveUser(userId) {
+        this.setState({
+            showRemoveMessageUserID: userId
+        });
+    }
+
     removeUser(userId) {
         ManageActions.removeUserFromOrganization(this.state.organization.toJS(), userId);
+    }
+
+    undoRemoveAction() {
+        this.setState({
+            showRemoveMessageUserID: null
+        });
     }
 
     handleKeyPress(e) {
@@ -42,19 +55,35 @@ class ModifyOrganization extends React.Component {
     }
 
     getUserList() {
+        let self = this;
+        return this.state.organization.get('members').map(function(user, i) {
+            if (self.state.showRemoveMessageUserID == user.get('uid')) {
+                return <div className="item"
+                            key={'user' + user.get('uid')}>
+                    <div className="right floated content">
+                        <div className="ui button green" onClick={self.removeUser.bind(self, user.get('uid'))}>YES</div>
+                    </div>
+                    <div className="right floated content">
+                        <div className="ui button red" onClick={self.undoRemoveAction.bind(self)}>NO</div>
+                    </div>
+                    <div className="content">
+                        Are you sure you want to remove this user?
+                    </div>
+                </div>
+            } else {
+                return <div className="item"
+                            key={'user' + user.get('uid')}>
+                    <div className="right floated content">
+                        <div className="ui button" onClick={self.showRemoveUser.bind(self, user.get('uid'))}>Remove</div>
+                    </div>
+                    <div className="ui avatar image initials green">??</div>
+                    <div className="content">
+                        {user.get('first_name') + ' ' + user.get('last_name')}
+                    </div>
+                </div>
+            }
 
-        return this.state.organization.get('members').map((user, i) => (
-            <div className="item"
-               key={'user' +  user.get('uid')}>
-                <div className="right floated content">
-                    <div className="ui button" onClick={this.removeUser.bind(this, user.get('uid'))}>Remove</div>
-                </div>
-                <div className="ui avatar image initials green">??</div>
-                <div className="content">
-                    {user.get('first_name') + ' ' + user.get('last_name')}
-                </div>
-            </div>
-        ));
+        });
 
     }
 
@@ -69,7 +98,9 @@ class ModifyOrganization extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        return (nextState.organization !== this.state.organization)
+        return (nextState.organization !== this.state.organization ||
+                nextState.inputUserError !== this.state.inputUserError ||
+                nextState.showRemoveMessageUserID !== this.state.showRemoveMessageUserID)
     }
 
     render() {
