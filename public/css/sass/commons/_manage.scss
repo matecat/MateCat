@@ -129,6 +129,18 @@ body.manage {
                 padding: 0 0 !important;
                 .source-target {
                     padding: 15px 15px !important;
+                    .source-box {
+                        float: left;
+                    }
+                    .in-to {
+                        float: left;
+                        margin-left: 0.25em;
+                        margin-top: 2px;
+                        color: #5a5a5a;
+                    }
+                    .target-box {
+                        float: left;
+                    }
                 }
                 .split-merge {
                     padding: 10px 15px;
