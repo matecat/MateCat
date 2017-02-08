@@ -18,8 +18,15 @@ class Factory_User extends Factory_Base {
 
         $dao = new Users_UserDao( Database::obtain() );
         $userStruct = new Users_UserStruct( $values );
+        $user = $dao->createUser( $userStruct );
 
-        return $dao->createUser( $userStruct );
+        $orgDao = new \Organizations\OrganizationDao() ;
+        $org = $orgDao->createUserOrganization( $user, array(
+            'type' => Constants_Organizations::PERSONAL,
+            'name' => 'personal'
+        ));
+
+        return $user ;
     }
 
 }

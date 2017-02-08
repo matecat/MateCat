@@ -5,17 +5,16 @@ class ModifyOrganization extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            organization: this.props.organization
+            organization: this.props.organization,
+            inputUserError: false
         }
     }
 
     componentDidMount () {
-        $('.menu .item').tab();
-        $('.fixed-organization-modal .ui.checkbox').checkbox();
     }
 
     removeUser(user, index) {
-        let newOrganization = this.state.organization.set('users', this.state.organization.get('users').delete(index));
+        let newOrganization = this.state.organization.set('members', this.state.organization.get('members').delete(index));
         this.setState({
             organization: newOrganization
         });
@@ -25,27 +24,33 @@ class ModifyOrganization extends React.Component {
         e.stopPropagation();
         if (e.key === 'Enter' ) {
             e.preventDefault();
-            if (this.inputNewUSer.value.length > 4) {
+            if ( APP.checkEmail(this.inputNewUSer.value)) {
 
                 let newUser = {
                     id: Math.floor((Math.random() * 100) + 1),
                     userMail: '@translated.net',
                     userFullName: this.inputNewUSer.value,
-                    userShortName: 'XX'
+                    userShortName: ''
 
                 };
                 this.setState({
-                    organization: this.state.organization.set('users', this.state.organization.get('users').push(Immutable.fromJS(newUser)))
+                    organization: this.state.organization.set('members', this.state.organization.get('members').insert(0, Immutable.fromJS(newUser))),
+                    inputUserError: false
                 });
 
                 this.inputNewUSer.value = '';
+            } else {
+                this.setState({
+                    inputUserError: true
+                });
             }
         }
         return false;
     }
 
     getUserList() {
-        return this.state.organization.get('users').map((user, i) => (
+
+        return this.state.organization.get('members').map((user, i) => (
             <div className="item"
                key={'user' + user.get('userShortName') + user.get('id')}>
                 <div className="right floated content">
@@ -62,6 +67,7 @@ class ModifyOrganization extends React.Component {
     }
 
     render() {
+        var usersError = (this.state.inputUserError) ? 'error' : '';
         let userlist = this.getUserList();
         return <div className="modify-organization-modal">
             <div className="matecat-modal-top">
@@ -69,7 +75,7 @@ class ModifyOrganization extends React.Component {
                     <div className="column">
                         <h3>Change Organization Name</h3>
                         <div className="ui large fluid icon input">
-                            <input type="text" value="Organization Name"/>
+                            <input type="text" defaultValue={this.state.organization.get('name')}/>
                             <i className="icon-pencil icon"></i>
                         </div>
                     </div>
@@ -79,8 +85,8 @@ class ModifyOrganization extends React.Component {
                 <div className="ui one column grid left aligned">
                     <div className="column">
                         <h3>Add member</h3>
-                        <div className="ui large fluid icon input">
-                            <input type="text" defaultValue="emails"
+                        <div className={"ui large fluid icon input " + usersError }>
+                            <input type="text" placeholder="Ex: joe@email.com"
                                    onKeyPress={this.handleKeyPress.bind(this)}
                                    ref={(inputNewUSer) => this.inputNewUSer = inputNewUSer}/>
                         </div>

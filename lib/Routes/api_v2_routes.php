@@ -135,7 +135,7 @@ $klein->with('/api/v2/orgs', function() {
 
     route( '/[:id_organization]/members', 'POST', '\API\V2\OrganizationMembersController', 'update') ;
     route( '/[:id_organization]/members', 'GET',  '\API\V2\OrganizationMembersController', 'index' ) ;
-    route( '/[:id_organization]/members/[:id_member]', 'DELETE' , '\API\V2\OrganizationMembersController', 'delete' );
+    route( '/[:id_organization]/members/[:uid_member]', 'DELETE' , '\API\V2\OrganizationMembersController', 'delete' );
 
     route( '/[:id_organization]/workspaces', 'POST', '\API\V2\WorkspacesController', 'create' ) ;
     route( '/[:id_organization]/workspaces', 'GET',  '\API\V2\WorkspacesController', 'show' ) ;

@@ -58,7 +58,7 @@ class SubHeader extends React.Component {
     }
 
     openCreateWorkspace() {
-        ManageActions.openCreateWorkspaceModal();
+        ManageActions.openCreateWorkspaceModal(this.props.selectedOrganization);
     }
 
 

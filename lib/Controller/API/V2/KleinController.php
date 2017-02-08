@@ -2,6 +2,12 @@
 
 namespace API\V2;
 
+use API\V2\Exceptions\AuthenticationError;
+use ApiKeys_ApiKeyStruct;
+use AuthCookie;
+use Users_UserDao;
+use Users_UserStruct;
+
 abstract class KleinController {
 
     /**
@@ -20,6 +26,16 @@ abstract class KleinController {
 
     protected $api_key;
     protected $api_secret;
+
+
+    /**
+     * @var \Users_UserStruct
+     */
+    protected $user;
+
+    /**
+     * @var ApiKeys_ApiKeyStruct
+     */
     protected $api_record;
 
     public function __construct( $request, $response, $service, $app ) {
@@ -29,11 +45,12 @@ abstract class KleinController {
         $this->app      = $app;
 
         $this->afterConstruct();
+
     }
 
     public function respond( $method ) {
         $this->validateAuth();
-
+        $this->identifyUser();
         if ( !$this->response->isLocked() ) {
             $this->$method();
         }
@@ -50,6 +67,36 @@ abstract class KleinController {
         }
 
         $this->validateRequest();
+
+    }
+
+
+    /**
+     * @return \Users_UserStruct
+     */
+    protected function identifyUser(){
+
+        if( !empty( $this->api_record ) ){
+            $this->user = $this->api_record->getUser();
+        } else { //check if there is an opened cookie
+
+            $user_credentials = [];
+            if( isset( $_SESSION[ 'uid' ] ) ){
+                $user_credentials[ 'uid' ] = $_SESSION[ 'uid' ];
+            } else {
+                $user_credentials = AuthCookie::getCredentials(); //validated cookie
+            }
+
+            $dao = new Users_UserDao();
+            $dao->setCacheTTL( 3600 );
+
+            if( !( $this->user = $dao->getByUid( $user_credentials[ 'uid' ] ) ) ){
+                $this->user = new \Users_UserStruct(); //Anonymous
+            }
+
+        }
+
+        return $this->user;
     }
 
     /**

@@ -4,31 +4,79 @@ class CreateOrganization extends React.Component {
 
     constructor(props) {
         super(props);
+        this.state = {
+            errorInput: false,
+            errorDropdown: false,
+            textDropdown: 'Ex: joe@email.net',
+        };
+        this.onLabelCreate = this.onLabelCreate.bind(this);
     }
     componentDidMount () {
-        $('.ui.checkbox').checkbox();
-        $('.advanced-popup').popup();
+        $(this.usersInput)
+            .dropdown({
+                allowAdditions: true,
+                action: this.onLabelCreate,
+                onChange: this.onChange
+            })
+        ;
     }
 
-    createOrganization() {
-        $(this.workspaceInput).val();
-        ManageActions.createOrganization($(this.workspaceInput).val());
-        APP.ModalWindow.onCloseModal();
+    onLabelCreate(value, text){
+        var self = this;
+        if ( APP.checkEmail(text)) {
+            $(this.usersInput)
+                .dropdown('set selected', value);
+            this.setState({
+                errorDropdown: false
+            });
+        } else {
+
+            this.setState({
+                errorDropdown: true
+            });
+            setTimeout(function () {
+                $(self.usersInput).find("input.search").val(text);
+            });
+        }
+        return true;
     }
 
-    handleKeyPress() {
+    onInputFocus() {
+        this.setState({
+            errorInput: false,
+            errorDropdown: false,
+        });
+    }
 
+    onClick(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (this.inputNewOrg.value.length > 0 && !this.state.errorDropdown) {
+            var members = ($(this.usersInput).dropdown('get value').length > 0) ? $(this.usersInput).dropdown('get value').split(",") : [];
+            ManageActions.createOrganization(this.inputNewOrg.value,  members);
+            APP.ModalWindow.onCloseModal();
+            this.inputNewOrg.value = '';
+        } else if (this.inputNewOrg.value.length == 0 ) {
+            this.setState({
+                errorInput: true
+            });
+        }
+        return false;
     }
 
     render() {
+        var inputError = (this.state.errorInput) ? 'error' : '';
+        var inputDropdown = (this.state.errorDropdown) ? 'error' : '';
         return  <div className="create-organization-modal">
                     <div className="matecat-modal-top">
                         <div className="ui one column grid left aligned">
                             <div className="column">
                                 <h3>Organization Name</h3>
-                                <div className="ui large fluid icon input">
-                                    <input type="text" placeholder="Organization Name"/>
-                                    <i className="icon-pencil icon"></i>
+                                <div className={"ui large fluid icon input " + inputError}>
+                                    <input type="text" placeholder="Organization Name"
+                                           onFocus={this.onInputFocus.bind(this)}
+                                           ref={(inputNewOrg) => this.inputNewOrg = inputNewOrg}/>
+                                    <i className="icon-pencil icon"/>
                                 </div>
                             </div>
                         </div>
@@ -37,10 +85,10 @@ class CreateOrganization extends React.Component {
                         <div className="ui one column grid left aligned">
                             <div className="column">
                                 <h3>Add member</h3>
-                                <div className="ui large fluid icon input">
-                                    <input type="text" defaultValue="emails"
-                                           onKeyPress={this.handleKeyPress.bind(this)}
-                                           ref={(inputNewUSer) => this.inputNewUSer = inputNewUSer}/>
+                                <div className={"ui fluid multiple search selection dropdown " + inputDropdown}
+                                     ref={(usersInput) => this.usersInput = usersInput}>
+                                    <input name="tags" type="hidden"/>
+                                        <div className="default text"></div>
                                 </div>
                             </div>
                         </div>
@@ -48,7 +96,8 @@ class CreateOrganization extends React.Component {
                     <div className="matecat-modal-bottom">
                         <div className="ui one column grid right aligned">
                             <div className="column">
-                                <button className="ui button green">Create</button>
+                                <button className="ui button green"
+                                        onClick={this.onClick.bind(this)}>Create</button>
                             </div>
                         </div>
                     </div>

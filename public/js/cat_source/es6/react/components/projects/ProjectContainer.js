@@ -59,7 +59,7 @@ class ProjectContainer extends React.Component {
     }
 
     changeUser(value) {
-        let newUser = this.props.organization.get('users').find(function (user) {
+        let newUser = this.props.organization.get('members').find(function (user) {
             if (user.get('id') === parseInt(value)) {
                 return true
             }
@@ -255,8 +255,8 @@ class ProjectContainer extends React.Component {
 
     getDropDownUsers() {
        let result = '';
-       if (this.props.organization.get('users')) {
-           let users = this.props.organization.get('users').map((user, i) => (
+       if (this.props.organization.get('members')) {
+           let members = this.props.organization.get('members').map((user, i) => (
                <div className="item " data-value={user.get('id')}
                     key={'organization' + user.get('userShortName') + user.get('id')}>
                    <div className="ui circular label">{user.get('userShortName')}</div>
@@ -279,7 +279,7 @@ class ProjectContainer extends React.Component {
                        <input type="text" name="ProjectName" placeholder="Name or email." />
                    </div>
                    <div className="scrolling menu">
-                   {users}
+                   {members}
                    </div>
                </div>
            </div>;

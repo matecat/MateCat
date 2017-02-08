@@ -9,7 +9,6 @@ UI = {
         this.openJobSettings = this.openJobSettings.bind(this);
         this.changeJobsOrProjectStatus = this.changeJobsOrProjectStatus.bind(this);
         this.changeJobPassword = this.changeJobPassword.bind(this);
-        this.createOrganization = this.createOrganization.bind(this);
         this.changeOrganization = this.changeOrganization.bind(this);
         this.changeProjectAssignee = this.changeProjectAssignee.bind(this);
         this.changeProjectWorkspace = this.changeProjectWorkspace.bind(this);
@@ -17,14 +16,6 @@ UI = {
         //Job Actions
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_SETTINGS, this.openJobSettings);
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_TM_PANEL, this.openJobTMPanel);
-
-
-        //Organizations actions
-        OrganizationsStore.addListener(ManageConstants.CREATE_ORGANIZATION, this.createOrganization);
-
-        //Workspaces Actions
-        // OrganizationsStore.addListener(ManageConstants.CREATE_WORKSPACE, this.createWorkspace);
-        // OrganizationsStore.addListener(ManageConstants.CHANGE_WORKSPACE, this.filterProjects);
 
         //Modals
         ProjectsStore.addListener(ManageConstants.OPEN_CREATE_ORGANIZATION_MODAL, this.openCreateOrganizationModal);
@@ -276,7 +267,7 @@ UI = {
         if (UI.Search.filter) {
             $.each(projects, function() {
                 if (self.selectedUser.id) {
-                    this.user = self.selectedUser;
+                    this.member = self.selectedUser;
                 }
                 if (self.selectedWorkspace.id  >= 0) {
                     this.workspace = self.selectedWorkspace;
@@ -303,16 +294,34 @@ UI = {
 
     },
 
-    createOrganization: function (organizationName) {
-        let organization = {
-            id: 300,
+    createOrganization: function (organizationName, members) {
+
+        // setTimeout(function () {
+        //     ManageActions.addOrganization(organization);
+        // });
+        let data = {
+            type: 'general',
             name: organizationName,
-            users: [],
-            workspaces: []
+            members: members
         };
-        setTimeout(function () {
-            ManageActions.addOrganization(organization);
+        return $.ajax({
+            async: true,
+            data: data,
+            type: "POST",
+            url : "/api/v2/orgs"
         });
+
+    },
+
+    createWorkspace: function (organization, wsName) {
+        let data = {
+            workspace: {
+                id: Math.floor((Math.random() * 100) + 1),
+                name: wsName,
+            }
+        };
+        let deferred = $.Deferred().resolve(data);
+        return deferred.promise();
 
     },
 
@@ -325,6 +334,10 @@ UI = {
         } else if (organization.id == 2) {
             data = {
                 workspaces : organizations[1].workspaces
+            }
+        } else {
+            data = {
+                workspaces : [{id: 0, name: "General" }]
             }
         }
         let deferred = $.Deferred().resolve(data);
@@ -349,19 +362,19 @@ UI = {
 
     },
 
-    filterProjects: function(user, workspace, name, status) {
+    filterProjects: function(member, workspace, name, status) {
         let self = this;
         if ((typeof workspace !== "undefined") ) {
             this.selectedWorkspace = workspace;
         }
-        if (typeof user != "undefined") {
-            this.selectedUser =  user;
+        if (typeof member != "undefined") {
+            this.selectedUser =  member;
         }
         let filter = {
             status: status,
             pn: name,
             workspace: this.selectedWorkspace.name,
-            user: this.selectedUser.name,
+            member: this.selectedUser.name,
             organization: this.selectedOrganization.id
         };
         this.Search.filter = $.extend( this.Search.filter, filter );
@@ -369,7 +382,7 @@ UI = {
         return this.getProjects(this.selectedOrganization);
     },
 
-    changeProjectAssignee: function (project, user) {
+    changeProjectAssignee: function (project, member) {
         // let projectsArray = [];
         // if (organizationName === "My Workspace") {
         //     projectsArray = this.myProjects;
@@ -383,7 +396,7 @@ UI = {
         //
         // $.each(projectsArray, function() {
         //     if (this.id == idProject) {
-        //         this.user = user;
+        //         this.member = member;
         //     }
         // });
         //
@@ -517,8 +530,11 @@ UI = {
 
     },
 
-    openCreateWorkspace: function () {
-        APP.ModalWindow.showModalComponent(CreateWorkspaceModal, {}, "Create new workspace");
+    openCreateWorkspace: function (organization) {
+        let props = {
+            organization: organization
+        };
+        APP.ModalWindow.showModalComponent(CreateWorkspaceModal, props, "Create new workspace");
     },
 
     /**
@@ -575,7 +591,7 @@ $(document).ready(function(){
         {
             id: 2,
             name: 'Translated',
-            users: [{
+            members: [{
                 id: 0,
                 userMail: config.userMail,
                 userFullName: config.userFullName,
@@ -652,7 +668,7 @@ $(document).ready(function(){
         {
             id: 3,
             name: 'Other Organization',
-            users: [{
+            members: [{
                 id: 0,
                 userMail: config.userMail,
                 userFullName: config.userFullName,
@@ -696,7 +712,7 @@ $(document).ready(function(){
             "id_tms":"1",
             "id":"1010",
             "password":"263d689044f8",
-            "user": {
+            "member": {
                 id: 2,
                 userMail: 'chloe.king@translated.net',
                 userFullName: 'Chloe King',
@@ -718,7 +734,7 @@ $(document).ready(function(){
             "id_tms":"1",
             "id":"1011",
             "password":"263d689044f8",
-            "user": {
+            "member": {
                 id: 2,
                 userMail: 'chloe.king@translated.net',
                 userFullName: 'Chloe King',
@@ -740,7 +756,7 @@ $(document).ready(function(){
             "id_tms":"1",
             "id":"1012",
             "password":"263d689044f8",
-            "user": {
+            "member": {
                 id: 3,
                 userMail: 'owen.james@translated.net',
                 userFullName: 'Owen	James',
@@ -762,7 +778,7 @@ $(document).ready(function(){
             "id_tms":"1",
             "id":"1013",
             "password":"263d689044f8",
-            "user": {
+            "member": {
                 id: 4,
                 userMail: 'stephen.powell@translated.net',
                 userFullName: 'Stephen Powell',
@@ -788,7 +804,7 @@ $(document).ready(function(){
             "id_tms":"1",
             "id":"2010",
             "password":"263d689044f8",
-            "user": {
+            "member": {
                 id: 5,
                 userMail: 'lillian.lambert@translated.net',
                 userFullName: 'Lillian	Lambert',
@@ -810,7 +826,7 @@ $(document).ready(function(){
             "id_tms":"1",
             "id":"2011",
             "password":"263d689044f8",
-            "user": {
+            "member": {
                 id: 6,
                 userMail: 'joe.watson@translated.net',
                 userFullName: 'Joe	Watson',
@@ -879,7 +895,7 @@ $(document).ready(function(){
             "id_tms": "1",
             "id": "2012",
             "password": "263d689044f8",
-            "user": {
+            "member": {
                 id: 7,
                 userMail: 'rachel.sharp@translated.net',
                 userFullName: 'Rachel	Sharp',
@@ -901,7 +917,7 @@ $(document).ready(function(){
             "id_tms":"1",
             "id":"2013",
             "password":"263d689044f8",
-            "user": {
+            "member": {
                 id: 7,
                 userMail: 'rachel.sharp@translated.net',
                 userFullName: 'Rachel	Sharp',
@@ -927,7 +943,7 @@ $(document).ready(function(){
             "id_tms":"1",
             "id":"3010",
             "password":"263d689044f8",
-            "user": {
+            "member": {
                 id: 8,
                 userMail: 'dan.marshall@translated.net',
                 userFullName: 'Dan Marshall',
@@ -949,7 +965,7 @@ $(document).ready(function(){
             "id_tms":"1",
             "id":"3011",
             "password":"263d689044f8",
-            "user": {
+            "member": {
                 id: 8,
                 userMail: 'dan.marshall@translated.net',
                 userFullName: 'Dan Marshall',
@@ -971,7 +987,7 @@ $(document).ready(function(){
             "id_tms":"1",
             "id":"3012",
             "password":"263d689044f8",
-            "user": {
+            "member": {
                 id: 6,
                 userMail: 'joe.watson@translated.net',
                 userFullName: 'Joe Watson',
@@ -997,7 +1013,7 @@ $(document).ready(function(){
             "id_tms":"1",
             "id":"4010",
             "password":"263d689044f8",
-            "user": {
+            "member": {
                 id: 8,
                 userMail: 'dan.marshall@translated.net',
                 userFullName: 'Dan Marshall',
@@ -1019,7 +1035,7 @@ $(document).ready(function(){
             "id_tms":"1",
             "id":"4011",
             "password":"263d689044f8",
-            "user": {
+            "member": {
                 id: 8,
                 userMail: 'dan.marshall@translated.net',
                 userFullName: 'Dan Marshall',
@@ -1041,7 +1057,7 @@ $(document).ready(function(){
             "id_tms":"1",
             "id":"4012",
             "password":"263d689044f8",
-            "user": {
+            "member": {
                 id: 11,
                 userMail: 'keith.kelly@translated.net',
                 userFullName: 'Keith	Kelly',
@@ -1063,7 +1079,7 @@ $(document).ready(function(){
             "id_tms":"1",
             "id":"4013",
             "password":"263d689044f8",
-            "user": {
+            "member": {
                 id: 6,
                 userMail: 'joe.watson@translated.net',
                 userFullName: 'Joe Watson',
@@ -1089,7 +1105,7 @@ $(document).ready(function(){
             "id_tms":"1",
             "id":"6010",
             "password":"263d689044f8",
-            "user": {
+            "member": {
                 id: 0,
                 userMail: config.userMail,
                 userFullName: config.userFullName,
@@ -1111,7 +1127,7 @@ $(document).ready(function(){
             "id_tms":"1",
             "id":"6011",
             "password":"263d689044f8",
-            "user": {
+            "member": {
                 id: 0,
                 userMail: config.userMail,
                 userFullName: config.userFullName,
@@ -1133,7 +1149,7 @@ $(document).ready(function(){
             "id_tms":"1",
             "id":"6012",
             "password":"263d689044f8",
-            "user": {
+            "member": {
                 id: 0,
                 userMail: config.userMail,
                 userFullName: config.userFullName,
@@ -1155,7 +1171,7 @@ $(document).ready(function(){
             "id_tms":"1",
             "id":"6013",
             "password":"263d689044f8",
-            "user": {
+            "member": {
                 id: 0,
                 userMail: config.userMail,
                 userFullName: config.userFullName,
@@ -1181,7 +1197,7 @@ $(document).ready(function(){
             "id_tms":"1",
             "id":"7010",
             "password":"263d689044f8",
-            "user": {
+            "member": {
                 id: 0,
                 userMail: config.userMail,
                 userFullName: config.userFullName,
@@ -1203,7 +1219,7 @@ $(document).ready(function(){
             "id_tms":"1",
             "id":"7011",
             "password":"263d689044f8",
-            "user": {
+            "member": {
                 id: 0,
                 userMail: config.userMail,
                 userFullName: config.userFullName,
@@ -1225,7 +1241,7 @@ $(document).ready(function(){
             "id_tms":"1",
             "id":"7012",
             "password":"263d689044f8",
-            "user": {
+            "member": {
                 id: 0,
                 userMail: config.userMail,
                 userFullName: config.userFullName,
@@ -1247,7 +1263,7 @@ $(document).ready(function(){
             "id_tms":"1",
             "id":"7013",
             "password":"263d689044f8",
-            "user": {
+            "member": {
                 id: 0,
                 userMail: config.userMail,
                 userFullName: config.userFullName,

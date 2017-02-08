@@ -137,6 +137,7 @@ class Database implements IDatabase {
         if ( ! $this->getConnection()->inTransaction() ) {
             $this->getConnection()->beginTransaction();
         }
+        return $this->getConnection();
     }
 
 

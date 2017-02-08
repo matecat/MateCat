@@ -10,6 +10,7 @@ namespace Organizations;
 
 use Database;
 use PDO;
+use Users_UserDao;
 use Users_UserStruct;
 
 class OrganizationDao extends \DataAccess_AbstractDao {
@@ -41,7 +42,41 @@ class OrganizationDao extends \DataAccess_AbstractDao {
                 array(
                         'id' => $organizationQuery->id,
                 )
-        );
+        )[ 0 ];
+
+    }
+
+    /**
+     * @param Users_UserStruct $orgCreatorUser
+     * @param array            $params
+     *
+     * @return mixed
+     */
+    public function createUserOrganization( \Users_UserStruct $orgCreatorUser, $params = array() ) {
+
+        $organizationStruct = new OrganizationStruct(array(
+            'name' => $params['name'],
+            'created_by' =>  $orgCreatorUser->uid,
+            'created_at' => \Utils::mysqlTimestamp( time() ),
+            'type' => $params['type']
+        )) ;
+
+        $orgId = OrganizationDao::insertStruct( $organizationStruct  ) ;
+        $organizationStruct->id = $orgId ;
+
+        //TODO sent an email to the $params[ 'members' ] ( warning, not all members are registered users )
+
+        //add the creator to the list of members
+        $params[ 'members' ][] = $orgCreatorUser->email;
+
+        $membersList = ( new MembershipDao )->createList( [
+                'organization' => $organizationStruct,
+                'members' => $params[ 'members' ]
+        ] );
+
+        $organization = (object)$organizationStruct->toArray();
+        $organization->members = $membersList;
+        return $organization;
 
     }
 
@@ -125,8 +160,7 @@ class OrganizationDao extends \DataAccess_AbstractDao {
 
     public function updateOrganizationName( OrganizationStruct $org ){
 
-        Database::obtain()->begin();
-        $conn = Database::obtain()->getConnection();
+        $conn = Database::obtain()->begin();
 
         $stmt = $conn->prepare( self::$_update_organization_by_id );
         $stmt->bindValue(':id', $org->id, PDO::PARAM_INT);

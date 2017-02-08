@@ -54,26 +54,10 @@ class CreateTeamTask extends Command
             $type = strtolower( $type );
         }
 
-        $teamStruct = new OrganizationStruct(array(
-            'name' => $input->getArgument('name'),
-            'created_by' =>  $user->uid ,
-            'created_at' => \Utils::mysqlTimestamp( time() ),
-            'type' => $type
-        )) ;
+        $organizationStruct = $teamDao->createUserOrganization( $user, array( 'type' => $type, 'name' => $input->getArgument('name') )) ;
 
-        $teamId = OrganizationDao::insertStruct( $teamStruct  ) ;
-
-        $membershipStruct = new MembershipStruct(array(
-            'id_organization' => $teamId,
-            'uid' => $user->uid,
-            'is_admin' => TRUE
-        ));
-
-        $membershipId = MembershipDao::insertStruct( $membershipStruct );
-
-        if ( $membershipId ) {
-            $output->write(" Organization created with ID: " . $teamId , TRUE ) ;
-            $output->write(" Membership created with ID: " . $membershipId , TRUE ) ;
+        if ( $organizationStruct ) {
+            $output->write(" Organization created with ID: " . $organizationStruct->id , TRUE ) ;
         }
 
     }
