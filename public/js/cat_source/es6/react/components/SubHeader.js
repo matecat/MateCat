@@ -79,15 +79,15 @@ class SubHeader extends React.Component {
             let users = this.props.selectedOrganization.get('users').map((user, i) => (
                 <div className="item" data-value={user.get('id')}
                      key={'organization' + user.get('userShortName') + user.get('id')}>
-                    <a className="ui circular label">{user.get('userShortName')}</a>
+                    <div className="ui circular label">{user.get('userShortName')}</div>
                     {(user.get('id') === 0)? 'My Projects' : user.get('userFullName')}
                 </div>
 
             ));
 
-            let item = <div className="header"> <div className="item" data-value="2000"
+            let item = <div className="item"> <div className="item" data-value="2000"
                             key={'organization' + config.userShortName + 2000}>
-                <a className="ui circular label">AM</a>
+                <div className="ui circular label">ALL</div>
                 All Members
             </div></div>;
             users = users.unshift(item);
@@ -109,7 +109,13 @@ class SubHeader extends React.Component {
                                         </span>
                                         <i className="dropdown icon"/>
                                         <div className="menu">
+                                            <div className="ui icon search input">
+                                                <i className="icon-search icon"></i>
+                                                <input type="text" name="ProjectName" placeholder="Name or email." />
+                                            </div>
+                                            <div className="scrolling menu">
                                             {users}
+                                            </div>
                                         </div>
                                     </div>
 
