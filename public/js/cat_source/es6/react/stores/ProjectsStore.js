@@ -144,7 +144,7 @@ AppDispatcher.register(function(action) {
             ProjectsStore.emitChange(action.actionType, action.project, action.job);
             break;
         case ManageConstants.OPEN_MODIFY_ORGANIZATION_MODAL:
-            ProjectsStore.emitChange(action.actionType, action.organization);
+            ProjectsStore.emitChange(action.actionType, Immutable.fromJS(action.organization));
             break;
         case ManageConstants.OPEN_CREATE_WORKSPACE_MODAL:
             ProjectsStore.emitChange(action.actionType, action.organization);

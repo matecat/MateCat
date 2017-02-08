@@ -12,7 +12,7 @@ class SubHeader extends React.Component {
         let self = this;
         if (this.props.selectedOrganization) {
 
-            $(this.dropdownUsers).dropdown('set selected', 2000);
+            // $(this.dropdownUsers).dropdown('set selected', 2000);
             $(this.dropdownUsers).dropdown({
                 onChange: function(value, text, $selectedItem) {
                     self.changeUser(value);
@@ -30,8 +30,8 @@ class SubHeader extends React.Component {
 
     changeUser(value) {
         let self = this;
-        this.selectedUser = this.props.selectedOrganization.get('users').find(function (user) {
-            if (user.get("id") === parseInt(value)) {
+        this.selectedUser = this.props.selectedOrganization.get('members').find(function (member) {
+            if (member.get("id") === parseInt(value)) {
                 return true;
             }
         });
@@ -74,23 +74,24 @@ class SubHeader extends React.Component {
 
     getUserFilter() {
         let result = '';
-        if (this.props.selectedOrganization && this.props.selectedOrganization.get('users')) {
+        if (this.props.selectedOrganization && this.props.selectedOrganization.get('type') === "general" && this.props.selectedOrganization.get('members')) {
 
-            let users = this.props.selectedOrganization.get('users').map((user, i) => (
-                <div className="item" data-value={user.get('id')}
-                     key={'organization' + user.get('userShortName') + user.get('id')}>
-                    <div className="ui circular label">{user.get('userShortName')}</div>
-                    {(user.get('id') === 0)? 'My Projects' : user.get('userFullName')}
+            let members = this.props.selectedOrganization.get('members').map((member, i) => (
+                <div className="item" data-value={member.get('id')}
+                     key={'organization' + member.get('uid') + member.get('id')}>
+                    <a className="ui circular label">??</a>
+                    {(member.get('uid') === APP.USER.STORE.user.uid)? 'My Projects' : member.get('first_name') + ' ' + member.get('last_name')}
                 </div>
 
             ));
 
-            let item = <div className="item"> <div className="item" data-value="2000"
+            let item = <div className="header"
                             key={'organization' + config.userShortName + 2000}>
-                <div className="ui circular label">ALL</div>
-                All Members
-            </div></div>;
-            users = users.unshift(item);
+                            <div className="item" data-value="2000">
+                            <a className="ui circular label">AM</a>
+                            All Members
+                        </div></div>;
+            members = members.unshift(item);
 
             result = <div className="users-filter">
 
@@ -114,7 +115,7 @@ class SubHeader extends React.Component {
                                                 <input type="text" name="ProjectName" placeholder="Name or email." />
                                             </div>
                                             <div className="scrolling menu">
-                                            {users}
+                                            {members}
                                             </div>
                                         </div>
                                     </div>
@@ -169,7 +170,7 @@ class SubHeader extends React.Component {
         return result;
     }
     render () {
-        let usersFilter = this.getUserFilter();
+        let membersFilter = this.getUserFilter();
         let workspaceDropDown = this.getWorkspacesSelect();
 
         return (
@@ -179,7 +180,7 @@ class SubHeader extends React.Component {
                         {workspaceDropDown}
                     </div>
                     <div className="center aligned column">
-                        {usersFilter}
+                        {membersFilter}
                     </div>
                     <div className="column">
                         <div className="search-state-filters">

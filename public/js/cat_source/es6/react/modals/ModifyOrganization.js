@@ -6,17 +6,33 @@ class ModifyOrganization extends React.Component {
         super(props);
         this.state = {
             organization: this.props.organization,
-            inputUserError: false
-        }
+            inputUserError: false,
+            showRemoveMessageUserID: null
+        };
+        this.updateOrganization = this.updateOrganization.bind(this);
     }
 
-    componentDidMount () {
-    }
-
-    removeUser(user, index) {
-        let newOrganization = this.state.organization.set('members', this.state.organization.get('members').delete(index));
+    updateOrganization(organization) {
         this.setState({
-            organization: newOrganization
+            organization: organization
+        });
+    }
+
+
+
+    showRemoveUser(userId) {
+        this.setState({
+            showRemoveMessageUserID: userId
+        });
+    }
+
+    removeUser(userId) {
+        ManageActions.removeUserFromOrganization(this.state.organization.toJS(), userId);
+    }
+
+    undoRemoveAction() {
+        this.setState({
+            showRemoveMessageUserID: null
         });
     }
 
@@ -26,17 +42,7 @@ class ModifyOrganization extends React.Component {
             e.preventDefault();
             if ( APP.checkEmail(this.inputNewUSer.value)) {
 
-                let newUser = {
-                    id: Math.floor((Math.random() * 100) + 1),
-                    userMail: '@translated.net',
-                    userFullName: this.inputNewUSer.value,
-                    userShortName: ''
-
-                };
-                this.setState({
-                    organization: this.state.organization.set('members', this.state.organization.get('members').insert(0, Immutable.fromJS(newUser))),
-                    inputUserError: false
-                });
+                ManageActions.addUserToOrganization(this.state.organization.toJS(), this.inputNewUSer.value);
 
                 this.inputNewUSer.value = '';
             } else {
@@ -49,21 +55,52 @@ class ModifyOrganization extends React.Component {
     }
 
     getUserList() {
-
-        return this.state.organization.get('members').map((user, i) => (
-            <div className="item"
-               key={'user' + user.get('userShortName') + user.get('id')}>
-                <div className="right floated content">
-                    <div className="ui button" onClick={this.removeUser.bind(this, user, i)}>Remove</div>
+        let self = this;
+        return this.state.organization.get('members').map(function(user, i) {
+            if (self.state.showRemoveMessageUserID == user.get('uid')) {
+                return <div className="item"
+                            key={'user' + user.get('uid')}>
+                    <div className="right floated content">
+                        <div className="ui button green" onClick={self.removeUser.bind(self, user.get('uid'))}>YES</div>
+                    </div>
+                    <div className="right floated content">
+                        <div className="ui button red" onClick={self.undoRemoveAction.bind(self)}>NO</div>
+                    </div>
+                    <div className="content">
+                        Are you sure you want to remove this user?
+                    </div>
                 </div>
-                <div className="ui avatar image initials green">{user.get('userShortName')}</div>
-                <div className="content">
-                    {user.get('userFullName')}
+            } else {
+                return <div className="item"
+                            key={'user' + user.get('uid')}>
+                    <div className="right floated content">
+                        <div className="ui button" onClick={self.showRemoveUser.bind(self, user.get('uid'))}>Remove</div>
+                    </div>
+                    <div className="ui avatar image initials green">??</div>
+                    <div className="content">
+                        {user.get('first_name') + ' ' + user.get('last_name')}
+                    </div>
                 </div>
-            </div>
+            }
 
-        ));
+        });
 
+    }
+
+    componentDidMount() {
+        OrganizationsStore.addListener(ManageConstants.UPDATE_ORGANIZATION, this.updateOrganization);
+
+    }
+
+    componentWillUnmount() {
+        OrganizationsStore.removeListener(ManageConstants.UPDATE_ORGANIZATION, this.updateOrganization);
+
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        return (nextState.organization !== this.state.organization ||
+                nextState.inputUserError !== this.state.inputUserError ||
+                nextState.showRemoveMessageUserID !== this.state.showRemoveMessageUserID)
     }
 
     render() {
@@ -76,7 +113,7 @@ class ModifyOrganization extends React.Component {
                         <h3>Change Organization Name</h3>
                         <div className="ui large fluid icon input">
                             <input type="text" defaultValue={this.state.organization.get('name')}/>
-                            <i className="icon-pencil icon"></i>
+                            <i className="icon-pencil icon"/>
                         </div>
                     </div>
                 </div>
