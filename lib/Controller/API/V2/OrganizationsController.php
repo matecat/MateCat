@@ -25,16 +25,16 @@ class OrganizationsController extends KleinController {
 
         $teamDao = new OrganizationDao();
 
-        if ( !Constants_Organizations::isAllowedType( $this->request->type ) ) {
-            $type = Constants_Organizations::PERSONAL;
-            if ( $teamDao->getPersonalByUid( $this->user->uid ) ) {
-                throw new InvalidArgumentException( "User already has the personal organization" );
-            }
-        } else {
-            $type = strtolower( $this->request->type );
-        }
-
         try{
+
+            if ( !Constants_Organizations::isAllowedType( $this->request->type ) ) {
+                $type = Constants_Organizations::PERSONAL;
+                if ( $teamDao->getPersonalByUid( $this->user->uid ) ) {
+                    throw new InvalidArgumentException( "User already has the personal organization" );
+                }
+            } else {
+                $type = strtolower( $this->request->type );
+            }
 
             \Database::obtain()->begin();
             $organization = $teamDao->createUserOrganization( $this->user, [
@@ -68,14 +68,20 @@ class OrganizationsController extends KleinController {
         $membershipDao = new MembershipDao();
         $org = $membershipDao->findOrganizationByIdAndUser( $org->id, $this->user );
 
-        if( empty( $org ) ){
-            throw new AuthorizationError( "Not Authorized", 401 );
-        }
 
-        $org->name = $requestContent->name;
-
-        $teamDao = new OrganizationDao();
         try {
+
+            if( empty( $org ) ){
+                throw new AuthorizationError( "Not Authorized", 401 );
+            }
+
+            $org->name = $requestContent->name;
+            if( empty( $org->name ) ){
+                throw new InvalidArgumentException( "Wrong parameter :name ", 400 );
+            }
+
+            $teamDao = new OrganizationDao();
+
             $teamDao->updateOrganizationName( $org );
             $formatted = new Organization( [ $org ] ) ;
             $this->response->json( [ 'organization' => $formatted->render() ] );
@@ -85,7 +91,11 @@ class OrganizationsController extends KleinController {
         } catch( AuthorizationError $e ){
             $this->response->code( 401 );
             $this->response->json( ( new Error( [ $e ] ) )->render() );
+        } catch( InvalidArgumentException $e ){
+            $this->response->code( 400 );
+            $this->response->json( ( new Error( [ $e ] ) )->render() );
         }
+
 
     }
 
