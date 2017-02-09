@@ -109,53 +109,21 @@ i.close-x:before {
 			.id-project {
 			}
 		}
+
 		.project-name {
-			// background-color: orange;
-			cursor: pointer;
 			padding: 0 15px;
 			text-transform: uppercase;
-			font-weight: 700;
-			.input-field {
-				position: relative;
-				margin-top: 0rem;
-				text-transform: uppercase;
-				.prefix {
-					position: absolute;
-					font-size: 1.5rem;
-					right: -10px;
-					margin-top: 5px;
-				}
-				.prefix:focus {
-					// color: #0c5e73
-				}
-				input[type=text] {
-					// background-color: transparent;
-					// border: none;
-					// border-bottom: 1px solid #4d4d4d;
-					// border-radius: 0;
-					// outline: none;
-					height: 1.8rem;
-					// width: 100%;
-					// font-size: 1rem;
-					margin: 0 0 0 0;
-					padding: 0;
-					font-size: 1.3rem;
-					text-transform: uppercase;
-					// box-shadow: none;
-					// box-sizing: content-box;
-					// transition: all 0.3s;
-				}
-				input[type=text]:focus {
-					border-bottom: 1px solid $secondary-color;
-					box-shadow: 0 1px 0 0 #09beec;
-				}
-				input[type=text]:disabled {
-					color: #4d4d4d;
-					// border-bottom: 1px solid #4d4d4d;
-					border-bottom: none;
-				}
+			max-width: 680px;
+			overflow: hidden;
+			padding: 0 15px;
+			text-transform: uppercase;
+			top: 0px;
+			.project-name-text {
+				font-weight: 700;
+				font-size: 1.3rem;
+				color: #4d4d4d;
+				max-height: 33px;
 			}
-
 		}
 		.payable-words {
 			&:hover {
