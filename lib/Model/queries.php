@@ -329,50 +329,6 @@ from language_stats
 }
 
 
-function insertUser( $data ) {
-    @$data[ 'create_date' ] = date( 'Y-m-d H:i:s' );
-
-    //insert into db
-    $db      = Database::obtain();
-    $results = $db->insert( 'users', $data );
-
-    return $results;
-}
-
-function tryInsertUserFromOAuth( $data ) {
-    //check if user exists
-    $db = Database::obtain();
-
-    //avoid injection
-    $data[ 'email' ] = $db->escape( $data[ 'email' ] );
-
-    $query   = "SELECT uid, email FROM users WHERE email='" . $data[ 'email' ] . "'";
-    $results = $db->query_first( $query );
-
-    if ( 0 == count( $results ) or false == $results ) {
-        //new client
-        $results = insertUser( $data );
-        //check outcome
-        if ( $results ) {
-            $cid[ 'email' ] = $data[ 'email' ];
-            $cid[ 'uid' ]   = $results;
-        } else {
-            $cid = false;
-        }
-    } else {
-        $cid[ 'email' ] = $data[ 'email' ];
-        $cid[ 'uid' ]   = $results[ 'uid' ];
-
-        // TODO: migrate this to an insert on duplicate key update
-        $sql_update = "UPDATE users set oauth_access_token = ? WHERE uid = ?" ; 
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql_update ); 
-        $stmt->execute( array( $data['oauth_access_token'], $cid['uid'] ) ); 
-    }
-    
-    return $cid;
-}
-
 function getArrayOfSuggestionsJSON( $id_segment ) {
     $query   = "select suggestions_array from segment_translations where id_segment=$id_segment";
     $db      = Database::obtain();
