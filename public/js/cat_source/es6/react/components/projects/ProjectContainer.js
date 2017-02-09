@@ -278,7 +278,7 @@ class ProjectContainer extends React.Component {
                                 </div>
                             </div>
                             {state}
-                            <div className="col m6">
+                            <div className="col">
                                 <div className="project-name">
                                     <form>
                                         {/*<div className="row">*/}

@@ -327,7 +327,10 @@ class JobContainer extends React.Component {
                     </div>
                     <div className="col">
                         <div className="payable-words">
+                            {/*
                             <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
+                            */}
+                            <span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span>
                         </div>
                     </div>
                     {/*<div className="col">*/}
