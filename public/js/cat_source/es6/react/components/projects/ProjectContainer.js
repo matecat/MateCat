@@ -218,23 +218,23 @@ class ProjectContainer extends React.Component {
                         button = '';
                     }
 
-                    let jobList = <div className="ui one column grid job" key = { (i - 1) + job.get('id')}>
-                            <div className="two column row job-header shadow-1">
-                                    <div className="source-target left floated column ">
-                                        <div className="source-box">
-                                            {job.get('sourceTxt')}
-                                        </div>
-                                        <div className="in-to"><i className="icon-chevron-right icon"/></div>
-                                        <div className="target-box">
-                                            {job.get('targetTxt')}
-                                        </div>
+                    let jobList = <div className="job ui grid" key = { (i - 1) + job.get('id')}>
+                            <div className="job-header sixteen wide column shadow-1">
+                                <div className="source-target left floated column ">
+                                    <div className="source-box">
+                                        {job.get('sourceTxt')}
                                     </div>
-                                    <div className="split-merge right floated right aligned column">
-                                        {button}
+                                    <div className="in-to"><i className="icon-chevron-right icon"/></div>
+                                    <div className="target-box">
+                                        {job.get('targetTxt')}
                                     </div>
+                                </div>
+                                <div className="split-merge right floated right aligned column">
+                                    {button}
+                                </div>
                             </div>
-                            <div className="column job-body">
-                                <div className="ui one column grid chunks">
+                            <div className="job-body sixteen wide column">
+                                <div className="ui grid chunks">
                                 {chunks}
                                 </div>
                             </div>
@@ -413,11 +413,12 @@ class ProjectContainer extends React.Component {
 
                         </div>
 
-                        <div className="one column project-body">
-                            <div className="jobs">
+                        <div className="project-body ui grid">
+                            <div className="jobs sixteen wide column">
                                 {jobsList}
                             </div>
                         </div>
+
                         <div className="one column project-footer">
                             {lastAction}
                         </div>
