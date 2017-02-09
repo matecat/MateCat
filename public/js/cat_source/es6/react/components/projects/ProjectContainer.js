@@ -271,11 +271,11 @@ class ProjectContainer extends React.Component {
 
                <div className="menu">
                    <div className="header">
-                       <a href="#">New Member <i className="icon-plus3 icon right"></i></a>
+                       <a href="#">New Member <i className="icon-plus3 icon right"/></a>
                    </div>
                    <div className="divider"></div>
                    <div className="ui icon search input">
-                       <i className="icon-search icon"></i>
+                       <i className="icon-search icon"/>
                        <input type="text" name="ProjectName" placeholder="Name or email." />
                    </div>
                    <div className="scrolling menu">

@@ -173,6 +173,8 @@ class FeatureSet {
      * Loads plugins into the featureset from the list of mandatory plugins.
      */
     private function loadFromMandatory() {
+        if ( empty( INIT::$MANDATORY_PLUGINS ) ) return ;
+
         $features = [] ;
         foreach( INIT::$MANDATORY_PLUGINS as $plugin) {
             $features[] = new BasicFeatureStruct(array('feature_code' => $plugin) );

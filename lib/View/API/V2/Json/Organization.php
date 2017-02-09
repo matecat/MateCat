@@ -15,7 +15,7 @@ class Organization {
 
     private $data;
 
-    public function __construct( $data ) {
+    public function __construct( $data = null ) {
         $this->data = $data;
     }
 
@@ -26,20 +26,21 @@ class Organization {
             $data = $this->data;
         }
 
+        /**
+         * @var $data OrganizationStruct[]
+         */
         foreach ( $data as $k => $organization ) {
-            /**
-             * @var $organization OrganizationStruct
-             */
             $row   = [
-                    'id'         => (int)$organization->id,
+                    'id'         => (int) $organization->id,
                     'name'       => $organization->name,
                     'type'       => $organization->type,
                     'created_at' => \Utils::api_timestamp( $organization->created_at ),
-                    'created_by' => $organization->created_by
+                    'created_by' => (int) $organization->created_by
             ];
 
-            if( isset( $data[ $k ]->members ) ){
-                $row[ 'members' ] = $data[ $k ]->members;
+            $members = $data[$k]->getMembers() ;
+            if( !empty( $members ) ){
+                $row[ 'members' ] = $members ;
             }
 
             $out[] = $row;

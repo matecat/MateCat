@@ -47,10 +47,21 @@ class OrganizationDao extends \DataAccess_AbstractDao {
     }
 
     /**
+     * @param Users_UserStruct $user
+     * @return OrganizationStruct
+     */
+    public function createPersonalOrganization( Users_UserStruct $user ) {
+        return $this->createUserOrganization( $user, array(
+            'name' => 'Personal',
+            'type' => \Constants_Organizations::PERSONAL
+            ) ) ;
+    }
+
+    /**
      * @param Users_UserStruct $orgCreatorUser
      * @param array            $params
      *
-     * @return mixed
+     * @return  OrganizationStruct
      */
     public function createUserOrganization( \Users_UserStruct $orgCreatorUser, $params = array() ) {
 
@@ -61,7 +72,7 @@ class OrganizationDao extends \DataAccess_AbstractDao {
             'type' => $params['type']
         )) ;
 
-        $orgId = OrganizationDao::insertStruct( $organizationStruct  ) ;
+        $orgId = OrganizationDao::insertStruct( $organizationStruct ) ;
         $organizationStruct->id = $orgId ;
 
         //TODO sent an email to the $params[ 'members' ] ( warning, not all members are registered users )
@@ -74,9 +85,8 @@ class OrganizationDao extends \DataAccess_AbstractDao {
                 'members' => $params[ 'members' ]
         ] );
 
-        $organization = (object)$organizationStruct->toArray();
-        $organization->members = $membersList;
-        return $organization;
+        $organizationStruct->setMembers($membersList) ;
+        return $organizationStruct;
 
     }
 

@@ -25,10 +25,16 @@ let OrganizationsStore = assign({}, EventEmitter.prototype, {
         this.organizations = this.organizations.concat(Immutable.fromJS([organization]));
     },
 
-    updateOrganization: function (organization, workspace) {
+    updateOrganizationWorkspace: function (organization, workspace) {
         let index = this.organizations.indexOf(organization);
         let workspaces = organization.get('workspaces').push(workspace);
         this.organizations = this.organizations.setIn([index,'workspaces'], workspaces);
+    },
+
+    updateOrganizationMembers: function (organization, members) {
+        let index = this.organizations.indexOf(organization);
+        this.organizations = this.organizations.setIn([index,'members'], Immutable.fromJS(members));
+        return this.organizations.get(index);
     },
 
     removeOrganization: function (organization) {
@@ -50,6 +56,10 @@ AppDispatcher.register(function(action) {
             OrganizationsStore.updateAll(action.organizations);
             OrganizationsStore.emitChange(action.actionType, OrganizationsStore.organizations, Immutable.fromJS(action.defaultOrganization));
             break;
+        case ManageConstants.UPDATE_ORGANIZATION_MEMBERS:
+            let org = OrganizationsStore.updateOrganizationMembers(action.organization, action.members);
+            OrganizationsStore.emitChange(ManageConstants.UPDATE_ORGANIZATION, org);
+            break;
         case ManageConstants.REMOVE_ORGANIZATION:
             OrganizationsStore.removeOrganization(action.organization);
             OrganizationsStore.emitChange(ManageConstants.RENDER_ORGANIZATIONS, OrganizationsStore.organizations);
@@ -62,7 +72,7 @@ AppDispatcher.register(function(action) {
             OrganizationsStore.emitChange(ManageConstants.RENDER_ORGANIZATIONS, OrganizationsStore.organizations, Immutable.fromJS(action.organization));
             break;
         case ManageConstants.CREATE_WORKSPACE:
-            OrganizationsStore.updateOrganization(action.organization, action.workspace);
+            OrganizationsStore.updateOrganizationWorkspace(Immutable.fromJS(action.organization), Immutable.fromJS(action.workspace));
             break;
     }
 });

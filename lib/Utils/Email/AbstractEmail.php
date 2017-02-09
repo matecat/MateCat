@@ -112,7 +112,8 @@ abstract class AbstractEmail
         return array(
             'title' => 'MateCat',
             'messageBody' => $this->_buildMessageContent(),
-            'closingLine' => "Kind regards, "
+            'closingLine' => "Kind regards, ",
+            'showTitle' => false
         );
     }
 

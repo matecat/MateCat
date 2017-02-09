@@ -136,7 +136,7 @@ class MembershipDao extends \DataAccess_AbstractDao
      *            'members'      => emails[]
      *        ] $obj_arr
      *
-     * @return array
+     * @return MembershipStruct[]
      */
     public function createList( Array $obj_arr ) {
 

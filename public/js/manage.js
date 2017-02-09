@@ -72,14 +72,14 @@ UI = {
 
             // self.organizations = APP.USER.STORE.organizations;
             // self.selectedOrganization = APP.USER.STORE.organizations[0];
-            self.organizations = organizations;
-            self.selectedOrganization = organizations[0];
-            self.selectedWorkspace = {
-                id: 0,
-                name: 'General'
-            };
+            self.organizations = data.organizations;
+            self.selectedOrganization = data.organizations[0];
             self.selectedUser = {};
             self.getWorkspaces(self.selectedOrganization).done(function (data) {
+                self.selectedWorkspace = {
+                    id: 0,
+                    name: 'General'
+                };
                 self.selectedOrganization.workspaces = data.workspaces;
                 ManageActions.renderOrganizations(self.organizations, self.selectedOrganization);
                 self.getProjects(self.selectedOrganization).done(function (response) {
@@ -285,7 +285,9 @@ UI = {
 
     getAllOrganizations: function () {
         if ( APP.USER.STORE.organizations ) {
-            let data = {};
+            let data = {
+                organizations: APP.USER.STORE.organizations
+            };
             let deferred = $.Deferred().resolve(data);
             return deferred.promise();
         } else {
@@ -295,10 +297,6 @@ UI = {
     },
 
     createOrganization: function (organizationName, members) {
-
-        // setTimeout(function () {
-        //     ManageActions.addOrganization(organization);
-        // });
         let data = {
             type: 'general',
             name: organizationName,
@@ -344,22 +342,33 @@ UI = {
         return deferred.promise();
     },
 
+    getOrganizationMembers: function (organization) {
+        return $.ajax({
+            async: true,
+            type: "get",
+            url : "/api/v2/orgs/" + organization.id + "/members"
+        });
+    },
+
     changeOrganization: function (organization) {
 
         let self = this;
         this.selectedOrganization = organization;
+        return this.getOrganizationStructure(organization).then(function () {
+                ManageActions.renderOrganizations(self.organizations, self.selectedOrganization);
+                return self.getProjects(self.selectedOrganization, "all");
+            }
+        );
+    },
 
-        this.getWorkspaces(organization).done(function (data) {
-            self.selectedOrganization.workspaces = data.workspaces;
-            ManageActions.renderOrganizations(self.organizations, self.selectedOrganization);
+    getOrganizationStructure: function (organization) {
+        let self = this;
+        return this.getOrganizationMembers(organization).then(function (data) {
+            self.selectedOrganization.members = data.members;
+            return self.getWorkspaces(organization).then(function (data) {
+                self.selectedOrganization.workspaces = data.workspaces;
+            });
         });
-        return self.getProjects(self.selectedOrganization, "all");
-
-
-        // setTimeout(function () {
-        //     ManageActions.renderProjects(self.currentProjects, self.selectedOrganization);
-        // });
-
     },
 
     filterProjects: function(member, workspace, name, status) {
@@ -465,29 +474,6 @@ UI = {
         window.open(url, '_blank');
 
     },
-    /**
-     * Get Project
-     * @param id
-     */
-    getProject: function(id) {
-        let d = {
-            action: 'getProjects',
-            project: id,
-            page:	UI.Search.currentPage
-        };
-        // Add filters ??
-        ar = $.extend(d,{});
-
-        return APP.doRequest({
-            data: ar,
-            success: function(d){
-                data = $.parseJSON(d.data);
-            },
-            error: function(d){
-                window.location = '/';
-            }
-        });
-    },
 
     changeProjectName: function (idProject, password, newName) {
         let data = {
@@ -500,6 +486,24 @@ UI = {
         });
     },
 
+    addUserToOrganization: function (organization, userEmail) {
+        let data = {
+            members: [userEmail]
+        };
+        return $.ajax({
+            data: data,
+            type: "post",
+            url : "/api/v2/orgs/"+ organization.id +"/members",
+        });
+    },
+
+    removeUserFromOrganization: function (organization, userId) {
+        return $.ajax({
+            type: "delete",
+            url : "/api/v2/orgs/"+ organization.id +"/members/" + userId,
+        });
+    },
+
     openCreateOrganizationModal: function () {
         APP.ModalWindow.showModalComponent(CreateOrganizationModal, {}, "Create new organization");
     },
@@ -508,7 +512,7 @@ UI = {
         let props = {
             organization: organization
         };
-        APP.ModalWindow.showModalComponent(ModifyOrganizationModal, props, "Modify "+ organization.name + " Organization");
+        APP.ModalWindow.showModalComponent(ModifyOrganizationModal, props, "Modify "+ organization.get('name') + " Organization");
     },
 
     openChangeProjectWorkspace: function (workspace, project, workspaces) {
@@ -535,6 +539,31 @@ UI = {
             organization: organization
         };
         APP.ModalWindow.showModalComponent(CreateWorkspaceModal, props, "Create new workspace");
+    },
+
+
+    /**
+     * Get Project
+     * @param id
+     */
+    getProject: function(id) {
+        let d = {
+            action: 'getProjects',
+            project: id,
+            page:	UI.Search.currentPage
+        };
+        // Add filters ??
+        ar = $.extend(d,{});
+
+        return APP.doRequest({
+            data: ar,
+            success: function(d){
+                data = $.parseJSON(d.data);
+            },
+            error: function(d){
+                window.location = '/';
+            }
+        });
     },
 
     /**
