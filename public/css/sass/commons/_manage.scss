@@ -37,7 +37,6 @@ body.manage {
     .project-header {
         background-color: #e8e8e8;
         padding-bottom: 22px !important;
-        padding-top: 12px !important;
         .project-id {
             padding: 10px 0 10px 15px;
         }
@@ -63,6 +62,9 @@ body.manage {
         }
         .project-activity-icon {
             padding: 0 15px !important;
+            @media only screen and (max-width: 767px) {
+                    padding: 0px !important;
+            }
             .ui.circular.label, .ui.dropdown {
                 text-align: center;
                 border-radius: 30px;
@@ -127,6 +129,18 @@ body.manage {
                 padding: 0 0 !important;
                 .source-target {
                     padding: 15px 15px !important;
+                    .source-box {
+                        float: left;
+                    }
+                    .in-to {
+                        float: left;
+                        margin-left: 0.25em;
+                        margin-top: 2px;
+                        color: #5a5a5a;
+                    }
+                    .target-box {
+                        float: left;
+                    }
                 }
                 .split-merge {
                     padding: 10px 15px;

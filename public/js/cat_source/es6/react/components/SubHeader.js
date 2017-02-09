@@ -110,7 +110,13 @@ class SubHeader extends React.Component {
                                         </span>
                                         <i className="dropdown icon"/>
                                         <div className="menu">
+                                            <div className="ui icon search input">
+                                                <i className="icon-search icon"></i>
+                                                <input type="text" name="ProjectName" placeholder="Name or email." />
+                                            </div>
+                                            <div className="scrolling menu">
                                             {members}
+                                            </div>
                                         </div>
                                     </div>
 

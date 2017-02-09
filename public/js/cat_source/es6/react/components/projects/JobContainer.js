@@ -327,16 +327,80 @@ class JobContainer extends React.Component {
         let warningsIcon = this.getWarningsIcon();
         let idJobLabel = ( !this.props.isChunk ) ? this.props.job.get('id') : this.props.job.get('id') + '-' + this.props.index;
 
-        return <div className="column chunk shadow-1">
-                    <div className="ui one column grid">
-                        <div className="five wide column">
-                            <div className="ui grid one column">
-                                <div className="four wide column">
-                                    <div className="job-id">
-                                        { idJobLabel }
+        return <div className="chunk sixteen wide column shadow-1">
+                    <div className="ui grid">
+                        <div className="two wide computer two wide tablet three wide mobile column">
+                            <div className="job-id">
+                                { idJobLabel }
+                            </div>
+                        </div>
+                        <div className="fourteen wide computer fourteen wide tablet thirteen wide mobile column pad-left-0">
+                            <div className="ui mobile reversed stackable grid">
+                                <div className="thirteen wide computer only tablet only column">
+                                    <div className="ui grid">
+                                        <div className="three wide column">
+                                            <div className="progress-bar">
+                                                <div className="progr">
+                                                    <div className="meter">
+                                                        <a className="warning-bar" title={'Rejected '+this.props.job.get('stats').get('REJECTED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('REJECTED_PERC') + '%'}}/>
+                                                        <a className="approved-bar" title={'Approved '+this.props.job.get('stats').get('APPROVED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('APPROVED_PERC')+ '%' }}/>
+                                                        <a className="translated-bar" title={'Translated '+this.props.job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('TRANSLATED_PERC') + '%' }}/>
+                                                        <a className="draft-bar" title={'Draft '+this.props.job.get('stats').get('DRAFT_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('DRAFT_PERC') + '%' }}/>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="three wide column">
+                                            <div className="job-payable">
+                                                <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
+                                            </div>
+                                        </div>
+
+                                        <div className="ten wide column">
+                                            <div className="ui grid one column">
+                                                <div className="eight wide column">
+                                                    <div className="send-translator"
+                                                         onClick={this.openAssignToTranslatorModal.bind(this)}>
+                                                        <i className="icon-forward icon"></i>
+                                                        <a href="#"><span id="translator-job">Assign to a translator</span></a>
+                                                    </div>
+                                                </div>
+                                                <div className="eight wide column ">
+                                                    <div className="due-to"
+                                                         onClick={this.openAssignToTranslatorModal.bind(this)}>
+                                                        <i className="icon-calendar icon"></i>
+                                                        <a href="#"><span id="due-date">Choose delivery date</span></a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="seven wide column">
+                                <div className="three wide right floated right aligned column">
+                                    <div className="job-activity-icon">
+                                        {QRIcon}
+                                        {warningsIcon}
+                                        {commentsIcon}
+                                        {tmIcon}
+                                        <a className="open-translate circular ui icon primary button" target="_blank" href={translateUrl}>
+                                            <i className="icon-arrow-right2 icon"/>
+                                        </a>
+                                        <button className="job-menu circular ui icon top right pointing dropdown button"
+                                                ref={(dropdown) => this.dropdown = dropdown}>
+                                            <i className="icon-more_vert icon"/>
+                                            {jobMenu}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="sixteen wide mobile only column ">
+                            <div className="ui stackable grid">
+
+                                <div className="three wide column">
                                     <div className="progress-bar">
                                         <div className="progr">
                                             <div className="meter">
@@ -349,48 +413,34 @@ class JobContainer extends React.Component {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="five wide column">
+
+                                <div className="three wide column">
                                     <div className="job-payable">
                                         <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div className="seven wide column">
-                            <div className="ui grid one column">
-                                <div className="eight wide column">
-                                    <div className="send-translator"
-                                         onClick={this.openAssignToTranslatorModal.bind(this)}>
-                                        <i className="icon-forward icon"></i>
-                                        <a href="#"><span id="translator-job">Assign to a translator</span></a>
-                                    </div>
-                                </div>
-                                <div className="eight wide column ">
-                                    <div className="due-to"
-                                         onClick={this.openAssignToTranslatorModal.bind(this)}>
-                                        <i className="icon-calendar icon"></i>
-                                        <a href="#"><span id="due-date">Choose delivery date</span></a>
+
+                                <div className="ten wide column">
+                                    <div className="ui grid one column">
+                                        <div className="eight wide column">
+                                            <div className="send-translator"
+                                                 onClick={this.openAssignToTranslatorModal.bind(this)}>
+                                                <i className="icon-forward icon"></i>
+                                                <a href="#"><span id="translator-job">Assign to a translator</span></a>
+                                            </div>
+                                        </div>
+                                        <div className="eight wide column ">
+                                            <div className="due-to"
+                                                 onClick={this.openAssignToTranslatorModal.bind(this)}>
+                                                <i className="icon-calendar icon"></i>
+                                                <a href="#"><span id="due-date">Choose delivery date</span></a>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="four wide right floated right aligned column">
-                            <div className="job-activity-icon">
-                                {QRIcon}
-                                {warningsIcon}
-                                {commentsIcon}
-                                {tmIcon}
-                                <a className="open-translate circular ui icon primary button" target="_blank" href={translateUrl}>
-                                    <i className="icon-arrow-right2 icon"/>
-                                </a>
-                                <button className="job-menu circular ui icon top right pointing dropdown button"
-                                        ref={(dropdown) => this.dropdown = dropdown}>
-                                    <i className="icon-more_vert icon"/>
-                                    {jobMenu}
-                                </button>
-                            </div>
-                        </div>
                     </div>
                 </div>;
     }
