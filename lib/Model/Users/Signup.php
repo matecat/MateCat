@@ -6,6 +6,7 @@ use Email\ForgotPasswordEmail;
 use Email\SignupEmail;
 use Email\WelcomeEmail;
 use Exceptions\ValidationError;
+use Organizations\OrganizationDao;
 use Users_UserStruct ;
 use Utils ;
 use Users_UserDao;
@@ -65,7 +66,9 @@ class Signup {
             \Users_UserDao::updateStruct( $this->user, array('raise' => TRUE ) );
         } else {
             $this->__prepareNewUser() ;
-            \Users_UserDao::insertStruct( $this->user, array('raise' => TRUE ) );
+            $this->user->uid = \Users_UserDao::insertStruct( $this->user, array('raise' => TRUE ) );
+
+            ( new OrganizationDao() )->createPersonalOrganization($this->user) ;
         }
 
         $this->__saveWantedUrl();

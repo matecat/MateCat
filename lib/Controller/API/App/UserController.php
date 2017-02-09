@@ -66,7 +66,11 @@ class UserController extends AbstractStatefulKleinController  {
 
     private function __findUser() {
         $dao = new Users_UserDao();
-        $this->user = $dao->getByUid( $_SESSION['uid'] ) ;
+
+        if ( isset( $_SESSION['uid'] ) ) {
+            $this->user = $dao->getByUid( $_SESSION['uid'] ) ;
+        }
+
         if (!$this->user) {
             throw new NotFoundError('user not found');
         }
