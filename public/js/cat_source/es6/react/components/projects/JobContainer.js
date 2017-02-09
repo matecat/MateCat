@@ -230,7 +230,7 @@ class JobContainer extends React.Component {
             var tooltipText = '';
             keys.forEach(function (key, i) {
                 var descript = (key.name) ? key.name : "Private TM and Glossary";
-                var item = '<div style="text-align: left">DESCRIPTION: <span style="font-weight: bold">' + descript + '</span> KEY: ' + key.key + '</div>';
+                var item = '<div style="text-align: left"> <span style="font-weight: bold">' + descript + '</span> KEY: ' + key.key + '</div>';
                 tooltipText =  tooltipText + item;
             });
             return <li>
@@ -258,7 +258,7 @@ class JobContainer extends React.Component {
 
             icon = <li>
                 <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0 tooltipped comments-tooltip"
-                   data-position="top" data-tooltip={tooltipText}>
+                   data-position="top" data-tooltip={tooltipText} style={{cursor: 'default;'}}>
                     <i className="icon-uniE96B"/>
                 </a>
             </li>;
