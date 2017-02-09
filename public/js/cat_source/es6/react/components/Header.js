@@ -6,18 +6,24 @@ class Header extends React.Component {
         super(props);
         this.state = {
             organizations: [],
-            selectedOrganization : null
+            selectedOrganizationId : null
         };
         this.renderOrganizations = this.renderOrganizations.bind(this);
+        this.updateOrganizations = this.updateOrganizations.bind(this);
+        this.chooseOrganizations = this.chooseOrganizations.bind(this);
         this.openModifyOrganization = this.openModifyOrganization.bind(this);
     }
 
     componentDidMount () {
         OrganizationsStore.addListener(ManageConstants.RENDER_ORGANIZATIONS, this.renderOrganizations);
+        OrganizationsStore.addListener(ManageConstants.UPDATE_ORGANIZATIONS, this.updateOrganizations);
+        OrganizationsStore.addListener(ManageConstants.CHOOSE_ORGANIZATION, this.chooseOrganizations);
     }
 
     componentWillUnmount() {
         OrganizationsStore.removeListener(ManageConstants.RENDER_ORGANIZATIONS, this.renderOrganizations);
+        OrganizationsStore.removeListener(ManageConstants.UPDATE_ORGANIZATIONS, this.updateOrganizations);
+        OrganizationsStore.removeListener(ManageConstants.CHOOSE_ORGANIZATION, this.chooseOrganizations);
     }
 
     componentDidUpdate() {
@@ -25,8 +31,8 @@ class Header extends React.Component {
 
         if (this.state.organizations.size > 0){
             let dropdownOrganizations = $(this.dropdownOrganizations);
-            if (this.state.selectedOrganization) {
-                dropdownOrganizations.dropdown('set selected', '' + this.state.selectedOrganization.get('id'));
+            if (this.state.selectedOrganizationId) {
+                dropdownOrganizations.dropdown('set selected', '' + this.state.selectedOrganizationId);
                 // dropdownOrganizations.dropdown({
                 //     onChange: function(value, text, $selectedItem) {
                 //         self.changeOrganization(value);
@@ -52,20 +58,30 @@ class Header extends React.Component {
     openModifyOrganization (event, organization) {
         event.stopPropagation();
         event.preventDefault();
-        $(this.dropdownOrganizations).dropdown('set selected', '' + this.state.selectedOrganization.get('id'));
+        $(this.dropdownOrganizations).dropdown('set selected', '' + this.state.selectedOrganizationId);
         ManageActions.openModifyOrganizationModal(organization.toJS());
     }
 
-    renderOrganizations(organizations, defaultOrganization) {
+    renderOrganizations(organizations) {
+        this.setState({
+            organizations : organizations
+        });
+    }
+
+    updateOrganizations(organizations) {
         this.setState({
             organizations : organizations,
-            selectedOrganization: defaultOrganization
+        });
+    }
+
+    chooseOrganizations(id) {
+        this.setState({
+            selectedOrganizationId : id,
         });
     }
 
     getOrganizationsSelect() {
         let result = '';
-
         if (this.state.organizations.size > 0) {
             let items = this.state.organizations.map((organization, i) => (
                 <div className="item" data-value={organization.get('id')}
@@ -101,7 +117,11 @@ class Header extends React.Component {
     }
 
     render () {
+        var self = this;
         let organizationsSelect = this.getOrganizationsSelect();
+        var selectedOrganization =  this.state.organizations.find(function (org) {
+            return org.get('id') == self.state.selectedOrganizationId;
+        });
         return <section className="ui grid nav-mc-bar">
 
                     <nav className="four column row">
@@ -117,7 +137,7 @@ class Header extends React.Component {
                         filterFunction={this.props.filterFunction}
                         searchFn={this.props.searchFn}
                         closeSearchCallback={this.props.closeSearchCallback}
-                        selectedOrganization={this.state.selectedOrganization}
+                        selectedOrganization={selectedOrganization}
                         />
                 </section>;
     }

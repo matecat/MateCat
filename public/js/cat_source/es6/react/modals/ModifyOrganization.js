@@ -7,6 +7,7 @@ class ModifyOrganization extends React.Component {
         this.state = {
             organization: this.props.organization,
             inputUserError: false,
+            inputNameError: false,
             showRemoveMessageUserID: null
         };
         this.updateOrganization = this.updateOrganization.bind(this);
@@ -41,23 +42,53 @@ class ModifyOrganization extends React.Component {
         if (e.key === 'Enter' ) {
             e.preventDefault();
             if ( APP.checkEmail(this.inputNewUSer.value)) {
-
                 ManageActions.addUserToOrganization(this.state.organization.toJS(), this.inputNewUSer.value);
-
                 this.inputNewUSer.value = '';
             } else {
                 this.setState({
                     inputUserError: true
                 });
             }
+        } else {
+            this.setState({
+                inputUserError: false
+            });
         }
         return false;
     }
 
+
+    onKeyPressEvent(e) {
+       if (e.key === 'Enter' ) {
+            if (this.inputName.value.length > 0) {
+                ManageActions.changeOrganizationName(this.state.organization.toJS(), this.inputName.value);
+                $(this.inputName).blur();
+            } else {
+                this.setState({
+                    inputNameError: true
+                });
+            }
+            return false;
+        } else {
+           this.setState({
+               inputNameError: false
+           });
+       }
+    }
+
+
     getUserList() {
         let self = this;
         return this.state.organization.get('members').map(function(user, i) {
-            if (self.state.showRemoveMessageUserID == user.get('uid')) {
+            if (user.get('uid') == APP.USER.STORE.user.uid) {
+                return <div className="item"
+                            key={'user' + user.get('uid')}>
+                    <div className="ui avatar image initials green">??</div>
+                    <div className="content">
+                        {user.get('first_name') + ' ' + user.get('last_name')}
+                    </div>
+                </div>
+            }else if (self.state.showRemoveMessageUserID == user.get('uid')) {
                 return <div className="item"
                             key={'user' + user.get('uid')}>
                     <div className="right floated content">
@@ -100,19 +131,23 @@ class ModifyOrganization extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
         return (nextState.organization !== this.state.organization ||
                 nextState.inputUserError !== this.state.inputUserError ||
+                nextState.inputNameError !== this.state.inputNameError ||
                 nextState.showRemoveMessageUserID !== this.state.showRemoveMessageUserID)
     }
 
     render() {
-        var usersError = (this.state.inputUserError) ? 'error' : '';
+        let usersError = (this.state.inputUserError) ? 'error' : '';
+        let orgNameError = (this.state.inputNameError) ? 'error' : '';
         let userlist = this.getUserList();
         return <div className="modify-organization-modal">
             <div className="matecat-modal-top">
                 <div className="ui one column grid left aligned">
                     <div className="column">
                         <h3>Change Organization Name</h3>
-                        <div className="ui large fluid icon input">
-                            <input type="text" defaultValue={this.state.organization.get('name')}/>
+                        <div className={"ui large fluid icon input " + orgNameError}>
+                            <input type="text" defaultValue={this.state.organization.get('name')}
+                            onKeyPress={this.onKeyPressEvent.bind(this)}
+                            ref={(inputName) => this.inputName = inputName}/>
                             <i className="icon-pencil icon"/>
                         </div>
                     </div>
