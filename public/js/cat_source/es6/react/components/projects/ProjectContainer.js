@@ -280,17 +280,18 @@ class ProjectContainer extends React.Component {
                             {state}
                             <div className="col">
                                 <div className="project-name">
-                                    <form>
+
                                         {/*<div className="row">*/}
 
                                             {/*<div className="input-field col m10">*/}
-                                            <div className="input-field">
-                                                <input id="icon_prefix" type="text" disabled="disabled" defaultValue={this.props.project.get('name')}/><i
-                                                    className="material-icons prefix hide">mode_edit</i>
+                                            <div className="box-project-name">
+                                                {/*<input id="icon_prefix" type="text" disabled="disabled" defaultValue={this.props.project.get('name')}/>*/}
+                                                <div className="project-name-text">{this.props.project.get('name')}</div>
+                                                <i className="material-icons prefix hide">mode_edit</i>
                                             </div>
 
                                         {/*</div>*/}
-                                    </form>
+
                                 </div>
                             </div>
                             <div className="col">
