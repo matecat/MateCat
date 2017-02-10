@@ -20,7 +20,7 @@ body.manage {
 
 // Shadow - Transitions for buttons
 .ui.button {
-    transition: all 0.3s !important;
+    transition: 0.3s ease !important;
     padding: 8px 10px 8px 15px;
 }
 
@@ -45,7 +45,7 @@ body.manage {
                 background: #d0d0d0;
                 border: none;
                 font-weight: 600;
-                transition: all 0.3s !important;
+                transition: 0.3s ease !important;
                 &:hover {
                     background: #d8d8d8;
                 }
@@ -85,7 +85,7 @@ body.manage {
                         border-radius: 15px;
                         padding: 3px 15px 3px 3px;
                         color: #ffffff;
-                        transition: background 0.3s ease;
+                        transition: 0.3s ease;
                         &:hover {
                             background-color: #14bbbd !important;
                         }
@@ -100,16 +100,56 @@ body.manage {
                         }
                     }
                 }
+                &.project-not-assigned {
+                    border: 1px dashed #868686;
+                    padding: 0px 15px 0px 3px;
+                    transition: 0.3s ease;
+                    color: rgba(0, 0, 0, 0.6);
+                    margin-right: 8px;
+                    i {
+                        transition: 0.3s ease;
+                    }
+                    &:hover {
+                        border: .1em dashed deepskyblue;
+                        color: deepskyblue;
+                        i {
+                            color: deepskyblue;
+                        }
+                    }
+                    .not-assigned {
+                        line-height: 13px;
+                        margin-right: 0px;
+                        padding-left: 10px;
+                        background-color: transparent;
+                    }
+                }
                 &.project-workspace {
-                    vertical-align: middle;
+                    vertical-align: top;
                     height: 30px;
                     text-align: center;
                     line-height: 30px;
                     margin-right: 8px;
-                    transition: background 0.3s ease;
+                    transition: 0.3s ease;
                     padding: 0 15px !important;
                     font-size: 12px;
                     font-weight: 100;
+                }
+                &.no-workspace {
+                    border: .1em dashed #868686;
+                    vertical-align: top;
+                    height: 30px;
+                    text-align: center;
+                    line-height: 30px;
+                    margin-right: 8px;
+                    transition: 0.3s ease;
+                    padding: 0 15px !important;
+                    font-size: 12px;
+                    font-weight: 100;
+                    &:hover {
+                        border: .1em dashed deepskyblue;
+                        color: deepskyblue;
+                        background-color: transparent;
+                    }
                 }
             }
         }
