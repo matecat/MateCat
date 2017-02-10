@@ -75,8 +75,6 @@ class OrganizationDao extends \DataAccess_AbstractDao {
         $orgId = OrganizationDao::insertStruct( $organizationStruct ) ;
         $organizationStruct->id = $orgId ;
 
-        //TODO sent an email to the $params[ 'members' ] ( warning, not all members are registered users )
-
         //add the creator to the list of members
         $params[ 'members' ][] = $orgCreatorUser->email;
 

@@ -53,6 +53,8 @@ class OrganizationMembersController extends KleinController {
             $membersList = ( new MembershipDao )->setCacheTTL( 60 * 60 * 24 )->getMemberListByOrganizationId( $organizationStruct->id );
             \Database::obtain()->commit();
 
+            //TODO sent an email to the $params[ 'members' ] ( warning, not all members are registered users )
+
             $this->response->json( array( 'members' => $membersList ) );
 
         } catch ( \PDOException $e ){
