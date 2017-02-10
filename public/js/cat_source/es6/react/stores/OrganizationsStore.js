@@ -43,9 +43,10 @@ let OrganizationsStore = assign({}, EventEmitter.prototype, {
     },
 
     updateOrganizationWorkspace: function (organization, workspace) {
-        let index = this.organizations.indexOf(organization);
-        let workspaces = organization.get('workspaces').push(workspace);
+        let index = this.organizations.indexOf(Immutable.fromJS(organization));
+        let workspaces = organization.get('workspaces').push(Immutable.fromJS(workspace));
         this.organizations = this.organizations.setIn([index,'workspaces'], workspaces);
+        return this.organizations.get(index);
     },
 
     updateOrganizationMembers: function (organization, members) {
@@ -102,7 +103,9 @@ AppDispatcher.register(function(action) {
             OrganizationsStore.emitChange(ManageConstants.RENDER_ORGANIZATIONS, OrganizationsStore.organizations);
             break;
         case ManageConstants.CREATE_WORKSPACE:
-            OrganizationsStore.updateOrganizationWorkspace(Immutable.fromJS(action.organization), Immutable.fromJS(action.workspace));
+            let updated_ws =OrganizationsStore.updateOrganizationWorkspace(Immutable.fromJS(action.organization), Immutable.fromJS(action.workspace));
+            OrganizationsStore.emitChange(ManageConstants.UPDATE_ORGANIZATION, updated_ws);
+            OrganizationsStore.emitChange(ManageConstants.UPDATE_ORGANIZATIONS, OrganizationsStore.organizations);
             break;
     }
 });

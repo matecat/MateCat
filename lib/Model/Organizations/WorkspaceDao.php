@@ -10,7 +10,7 @@
 namespace Organizations;
 
 
-class WorkspaceDao {
+class WorkspaceDao extends \DataAccess_AbstractDao {
 
     const TABLE       = "workspaces";
     const STRUCT_TYPE = "WorkspaceStruct";
@@ -22,6 +22,9 @@ class WorkspaceDao {
             INSERT INTO workspaces ( name, id_organization, options ) VALUES ( :name, :id_organization, :options );
         ";
 
+    protected static $_query_organization_workspaces = "
+            SELECT * FROM workspaces WHERE id_organization = :id_organization
+    ";
 
     public function create( WorkspaceStruct $workSpace ) {
 
@@ -49,6 +52,32 @@ class WorkspaceDao {
 
     public function delete() {
 
+    }
+
+    public function getByOrganizationId( $orgId ){
+
+        $stmt = $this->_getStatementForCache( self::$_query_organization_workspaces );
+        $workSpaceQuery = new WorkspaceStruct();
+        return ( $this->_fetchObject( $stmt,
+                $workSpaceQuery,
+                array(
+                        'id_organization' => $orgId,
+                )
+        ) );
+
+    }
+
+    public function destroyCacheForOrganizationId( $orgId ){
+        $stmt = $this->_getStatementForCache( self::$_query_organization_workspaces );
+        return $this->_destroyObjectCache( $stmt,
+                array(
+                        'id_organization' => $orgId,
+                )
+        );
+    }
+
+    public function getById(){
+        
     }
 
 }

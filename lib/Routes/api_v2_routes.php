@@ -139,6 +139,8 @@ $klein->with('/api/v2/orgs', function() {
 
     route( '/[:id_organization]/workspaces', 'POST', '\API\V2\WorkspacesController', 'create' ) ;
     route( '/[:id_organization]/workspaces', 'GET',  '\API\V2\WorkspacesController', 'show' ) ;
+    route( '/[:id_organization]/workspaces/[:id_workspace]', 'PUT',  '\API\V2\WorkspacesController', 'update' ) ;
+    route( '/[:id_organization]/workspaces/[:id_workspace]', 'DELETE',  '\API\V2\WorkspacesController', 'delete' ) ;
 
     route( '/[:id_organization]/projects/[:id_project]', 'PUT', 'API\V2\ProjectsController', 'update' ) ;
 }) ;

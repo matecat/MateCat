@@ -120,12 +120,10 @@ class ModifyOrganization extends React.Component {
 
     componentDidMount() {
         OrganizationsStore.addListener(ManageConstants.UPDATE_ORGANIZATION, this.updateOrganization);
-
     }
 
     componentWillUnmount() {
         OrganizationsStore.removeListener(ManageConstants.UPDATE_ORGANIZATION, this.updateOrganization);
-
     }
 
     shouldComponentUpdate(nextProps, nextState) {

@@ -45,7 +45,7 @@ class WorkspacesController extends KleinController {
 
             $wSpaceDao->create( $wSpaceStruct );
 
-            $this->response->json( [ 'organization' => $wSpaceStruct ] );
+            $this->response->json( [ 'workspace' => $wSpaceStruct ] );
 
         } catch ( \PDOException $e ){
             $this->response->code( 503 );
@@ -58,6 +58,37 @@ class WorkspacesController extends KleinController {
             $this->response->json( ( new Error( [ $e ] ) )->render() );
         }
 
+
+    }
+
+    public function show(){
+
+        $wSpaceDao = new WorkspaceDao();
+
+        try {
+
+            $membershipDao = new MembershipDao();
+            $org = $membershipDao->findOrganizationByIdAndUser( $this->request->id_organization, $this->user );
+            if ( empty( $org ) ) {
+                throw new AuthorizationError( "Not Authorized", 401 );
+            }
+
+            $workSpacesList = $wSpaceDao->getByOrganizationId( $this->request->id_organization );
+            $this->response->json( [ 'workspaces' => $workSpacesList ] );
+
+        } catch( AuthorizationError $e ){
+            $this->response->code( 401 );
+            $this->response->json( ( new Error( [ $e ] ) )->render() );
+        }
+        
+
+    }
+
+    public function update(){
+
+    }
+
+    public function delete(){
 
     }
 
