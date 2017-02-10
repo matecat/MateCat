@@ -267,9 +267,9 @@ UI = {
         }
         if (UI.Search.filter) {
             $.each(projects, function() {
-                if (self.selectedUser.id) {
-                    this.member = self.selectedUser;
-                }
+                // if (self.selectedUser.id) {
+                //     this.user = self.selectedUser;
+                // }
                 if (self.selectedWorkspace.id  >= 0) {
                     this.workspace = self.selectedWorkspace;
                 }

@@ -57,13 +57,19 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
     },
 
     changeProjectName: function (project, newName) {
-        let indexProject = this.projects.indexOf(project);
+        let projectOld = this.projects.find(function (prj) {
+            return prj.get('id') == project.id;
+        });
+        let indexProject = this.projects.indexOf(projectOld);
         this.projects = this.projects.setIn([indexProject,'name'], newName);
     },
 
     changeProjectAssignee: function (project, user) {
-        let indexProject = this.projects.indexOf(project);
-        this.projects = this.projects.setIn([indexProject,'user'], user);
+        let projectOld = this.projects.find(function (prj) {
+            return prj.get('id') == project.id;
+        });
+        let indexProject = this.projects.indexOf(projectOld);
+        this.projects = this.projects.setIn([indexProject,'user'], Immutable.fromJS(user));
     },
 
     unwrapImmutableObject(object) {

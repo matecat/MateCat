@@ -179,12 +179,5 @@ class ProjectsContainer extends React.Component {
     }
 }
 
-ProjectsContainer.propTypes = {
-    projects: React.PropTypes.array,
-};
-
-ProjectsContainer.defaultProps = {
-    projects: [],
-};
 
 export default ProjectsContainer ;
