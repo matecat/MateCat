@@ -223,17 +223,23 @@ class ProjectContainer extends React.Component {
 
                     let jobList = <div className="job ui grid" key = { (i - 1) + job.get('id')}>
                             <div className="job-header sixteen wide column shadow-1">
-                                <div className="source-target left floated column ">
-                                    <div className="source-box">
-                                        {job.get('sourceTxt')}
+                                <div className="ui grid">
+                                    <div className="ten wide column">
+                                        <div className="source-target">
+                                            <div className="source-box">
+                                                {job.get('sourceTxt')}
+                                            </div>
+                                            <div className="in-to"><i className="icon-chevron-right icon"/></div>
+                                            <div className="target-box">
+                                                {job.get('targetTxt')}
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="in-to"><i className="icon-chevron-right icon"/></div>
-                                    <div className="target-box">
-                                        {job.get('targetTxt')}
+                                    <div className="six wide column right aligned">
+                                        <div className="split-merge">
+                                            {button}
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="split-merge right floated right aligned column">
-                                    {button}
                                 </div>
                             </div>
                             <div className="job-body sixteen wide column">

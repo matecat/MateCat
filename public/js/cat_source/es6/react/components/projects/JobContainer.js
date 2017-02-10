@@ -364,7 +364,7 @@ class JobContainer extends React.Component {
                                                     <div className="send-translator"
                                                          onClick={this.openAssignToTranslatorModal.bind(this)}>
                                                         <i className="icon-forward icon"></i>
-                                                        <a href="#"><span id="translator-job">Assign to a translator</span></a>
+                                                        <a href="#"><span id="translator-job">Send to translator</span></a>
                                                     </div>
                                                 </div>
                                                 <div className="eight wide column ">
@@ -397,10 +397,10 @@ class JobContainer extends React.Component {
                             </div>
                         </div>
 
-                        <div className="sixteen wide mobile only column ">
+                        <div className="sixteen wide mobile only column pad-top-0">
                             <div className="ui stackable grid">
 
-                                <div className="three wide column">
+                                <div className="three wide column pad-top-0 pad-bottom-0">
                                     <div className="progress-bar">
                                         <div className="progr">
                                             <div className="meter">
@@ -414,26 +414,26 @@ class JobContainer extends React.Component {
                                     </div>
                                 </div>
 
-                                <div className="three wide column">
-                                    <div className="job-payable">
+                                <div className="job-payable three wide right aligned column pad-top-0 pad-bottom-0">
+                                    <div className="">
                                         <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
                                     </div>
                                 </div>
 
                                 <div className="ten wide column">
                                     <div className="ui grid one column">
-                                        <div className="eight wide column">
+                                        <div className="nine wide column">
                                             <div className="send-translator"
                                                  onClick={this.openAssignToTranslatorModal.bind(this)}>
                                                 <i className="icon-forward icon"></i>
-                                                <a href="#"><span id="translator-job">Assign to a translator</span></a>
+                                                <a href="#"><span id="translator-job">Send to translator</span></a>
                                             </div>
                                         </div>
-                                        <div className="eight wide column ">
+                                        <div className="seven wide column right aligned">
                                             <div className="due-to"
                                                  onClick={this.openAssignToTranslatorModal.bind(this)}>
                                                 <i className="icon-calendar icon"></i>
-                                                <a href="#"><span id="due-date">Choose delivery date</span></a>
+                                                <a href="#"><span id="due-date">Delivery date</span></a>
                                             </div>
                                         </div>
                                     </div>
