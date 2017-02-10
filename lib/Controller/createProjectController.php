@@ -24,7 +24,6 @@ class createProjectController extends ajaxController {
 
     private $dqf_key;
     private $metadata;
-    private $id_organization ;
 
     private $lang_handler ;
 
@@ -140,8 +139,7 @@ class createProjectController extends ajaxController {
         $this->lang_detect_files       = $__postInput[ 'lang_detect_files' ];
         $this->pretranslate_100        = $__postInput[ 'pretranslate_100' ];
         $this->dqf_key                 = $__postInput[ 'dqf_key' ];
-        $this->id_organization         = $__postInput[ 'id_organization' ];
-        
+
         $this->__setMetadataFromPostInput( $__postInput ) ;
 
         if ( $this->disable_tms_engine_flag ) {
@@ -165,7 +163,10 @@ class createProjectController extends ajaxController {
         $this->__validateSourceLang();
         $this->__validateTargetLangs();
         $this->__validateUserMTEngine();
-        $this->__validateOrganization();
+
+        if ( $this->userIsLogged ) {
+            $this->__setOrganization( $__postInput['id_organization'] );
+        }
 
     }
 
@@ -320,16 +321,13 @@ class createProjectController extends ajaxController {
         }
 
         if ( $this->userIsLogged ) {
-            $projectStructure[ 'userIsLogged' ] = true;
-            $projectStructure[ 'uid' ]          = $this->uid;
-            $projectStructure[ 'id_customer' ]  = $this->userMail;
-            $projectStructure[ 'owner' ]        = $this->userMail ;
+            $projectStructure[ 'userIsLogged' ]  = true;
+            $projectStructure[ 'uid' ]           = $this->uid;
+            $projectStructure[ 'id_customer' ]   = $this->userMail;
+            $projectStructure[ 'owner' ]         = $this->userMail ;
         }
 
         $projectManager = new ProjectManager( $projectStructure );
-
-        $projectManager->setOrganization( $this->organization );
-
         $projectManager->createProject();
 
         // Strictly related to the UI ( not API ) interaction, should yet be moved away from controller.
@@ -434,18 +432,17 @@ class createProjectController extends ajaxController {
     }
 
     /**
+     * TODO: this should be moved to a model that.
+     *
      * @param null $id_organization
      *
      * @throws Exception
      */
-    private function __validateOrganization( $id_organization = null  ) {
-        /*
-         * if organization param is provided then
-         */
-        if ( $this->userIsLogged && is_null( $id_organization ) ) {
+    private function __setOrganization($id_organization = null) {
+        if ( is_null( $id_organization ) ) {
             $this->organization = $this->logged_user->getPersonalOrganization() ;
         }
-        else if ( $this->userIsLogged && !is_null( $id_organization ) ) {
+        else {
             // check for the organization to be allowed
             $dao = new \Organizations\MembershipDao() ;
             $organization = $dao->findOrganizationByIdAndUser($id_organization, $this->logged_user) ;
