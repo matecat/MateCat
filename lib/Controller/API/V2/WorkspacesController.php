@@ -63,7 +63,9 @@ class WorkspacesController extends KleinController {
 
     public function show(){
 
-
+        $wSpaceDao = new WorkspaceDao();
+        $workSpacesList = $wSpaceDao->getByOrganizationId( $this->request->id_organization );
+        $this->response->json( [ 'workspaces' => $workSpacesList ] );
 
     }
 
