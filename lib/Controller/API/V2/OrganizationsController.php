@@ -45,6 +45,8 @@ class OrganizationsController extends KleinController {
             \Database::obtain()->commit();
             ( new MembershipDao() )->destroyCacheUserOrganizations( $this->user ); // clean the cache
 
+            //TODO sent an email to the $params[ 'members' ] ( warning, not all members are registered users )
+
             $formatted = new Organization( [ $organization ] ) ;
             $this->response->json( array( 'organization' => $formatted->render() ) );
 
