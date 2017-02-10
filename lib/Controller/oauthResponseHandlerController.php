@@ -5,28 +5,18 @@ header("Pragma: no-cache");
 
 class oauthResponseHandlerController extends viewController{
 
-	private $redirectUrl;
-	private $userData=array();
+    private $code ;
+    private $error ;
 
-	private $user_logged;
-
-	private $oauthTokenEncryption;
+    /**
+     * @var Users_UserStruct
+     */
+    private $user ;
 
 	public function __construct(){
-
-        //SESSION ENABLED
         parent::sessionStart();
 		parent::__construct();
 		parent::makeTemplate("oauth_response_handler.html");
-
-		$this->user_logged = true;
-
-		$this->client = OauthClient::getInstance()->getClient();
-        $this->client->setAccessType( "offline" );
-
-		$oauthTokenEncryption = OauthTokenEncryption::getInstance();
-
-		$plus = new Google_Service_Oauth2($this->client);
 
 		$filterArgs = array(
 			'code'          => array( 'filter' => FILTER_SANITIZE_STRING),
@@ -35,75 +25,92 @@ class oauthResponseHandlerController extends viewController{
 
 		$__postInput = filter_input_array( INPUT_GET, $filterArgs );
 
-		$code         = $__postInput[ 'code' ];
-		$error        = $__postInput[ 'error' ];
-
-		if (isset($code) && $code) {
-			$this->client->authenticate($code);
-
-			$user = $plus->userinfo->get();
-
-			//get response from third-party
-			$this->userData['email']              = $user['email'];
-			$this->userData['first_name']         = $user['givenName'];
-			$this->userData['last_name']          = $user['familyName'];
-			$this->userData['oauth_access_token'] = $oauthTokenEncryption->encrypt(
-				$this->client->getAccessToken()
-			);
-		}
-		else if (isset($error)){
-			$this->user_logged = false;
-		}
+		$this->code  = $__postInput[ 'code' ];
+		$this->error = $__postInput[ 'error' ];
 	}
 
-	public function doAction(){
+    public function doAction() {
+        if (isset($this->code) && $this->code) {
+            $this->_processSuccessfulOAuth() ;
+        }
+        elseif ( $this->error ) {
+            $this->_respondWithError();
+        }
+    }
 
-        // TODO: this should be refactored. tryInsertUserFromOAuth has no longer reason to exist
-        // we have now way to check if the result is a new insert or an update.
-
-		if ( $this->user_logged && !empty($this->userData) ) {
-			//user has been validated, data was by Google
-			//check if user exists in db; if not, create
-
-            $userDao = new Users_UserDao() ;
-            $existingUser = $userDao->getByEmail( $this->userData['email'] ) ;
-
-            if ( $existingUser && !is_null($existingUser->email_confirmed_at) ) {
-                $newUser = FALSE ;
-            } else {
-                $newUser = TRUE ;
-            }
-
-            \Log::doLog( $this->userData );
-
-			$result = tryInsertUserFromOAuth($this->userData);
-
-			if(false==$result){
-				die("error in insert");
-			}
-
-			AuthCookie::setCredentials($this->userData['email'], $result['uid']);
-
-            $_SESSION[ 'cid' ]  = $this->userData['email'];
-            $_SESSION[ 'uid' ]  = $result[ 'uid' ];
-
-            $user = $userDao->getByUid( $result['uid'] ) ;
-
-            $project = new \Users\RedeemableProject($user, $_SESSION)  ;
-            $project->tryToRedeem()  ;
-
-            if ( $newUser ) {
-                $email = new \Email\WelcomeEmail($user) ;
-                $email->send() ;
-                FlashMessage::set('popup', 'profile', FlashMessage::SERVICE);
-            }
-		}
-	}
-
-	public function setTemplateVars()
+    public function setTemplateVars()
     {
         // TODO: Implement setTemplateVars() method.
     }
+
+    protected function _processSuccessfulOAuth() {
+        $this->_prepareUser();
+
+        $userDao = new Users_UserDao() ;
+        $existingUser = $userDao->getByEmail( $this->user->email ) ;
+
+        if ( $existingUser ) {
+            $this->_updateExistingUser($existingUser) ;
+
+        } else {
+            $this->_createNewUser();
+            $this->_welcomeNewUser();
+        }
+
+        $this->_authenticateUser();
+
+        $project = new \Users\RedeemableProject($this->user, $_SESSION)  ;
+        $project->tryToRedeem()  ;
+    }
+
+	protected function _prepareUser() {
+        $this->client = OauthClient::getInstance()->getClient();
+        $this->client->setAccessType( "offline" );
+
+        $plus = new Google_Service_Oauth2($this->client);
+        $this->client->authenticate($this->code);
+        $remoteUser = $plus->userinfo->get();
+
+        $this->user = new Users_UserStruct() ;
+        $this->user->email  = $remoteUser['email'] ;
+        $this->user->first_name = $remoteUser['givenName'];
+        $this->user->last_name = $remoteUser['familyName'];
+        $this->user->oauth_access_token = OauthTokenEncryption::getInstance()->encrypt(
+            $this->client->getAccessToken()
+        );
+    }
+
+    protected function _respondWithError() {
+        // TODO
+    }
+
+    protected function _createNewUser() {
+        $this->user->create_date = Utils::mysqlTimestamp(time() ) ;
+        $this->user->uid = Users_UserDao::insertStruct($this->user);
+
+        $dao = new \Organizations\OrganizationDao();
+        $dao->createPersonalOrganization($this->user);
+    }
+
+    protected function _updateExistingUser(Users_UserStruct $existing_user) {
+        $this->user->uid = $existing_user->uid ;
+        Users_UserDao::updateStruct( $this->user, array('fields' =>
+            array('oauth_access_token')
+        ) ) ;
+    }
+
+    protected function _authenticateUser() {
+        AuthCookie::setCredentials($this->user->email, $this->user->uid );
+        $_SESSION[ 'cid' ]  = $this->user->email ;
+        $_SESSION[ 'uid' ]  = $this->user->uid ;
+    }
+
+    protected function _welcomeNewUser() {
+        $email = new \Email\WelcomeEmail($this->user) ;
+        $email->send() ;
+        FlashMessage::set('popup', 'profile', FlashMessage::SERVICE);
+    }
+
 
     protected function collectFlashMessages()
     {

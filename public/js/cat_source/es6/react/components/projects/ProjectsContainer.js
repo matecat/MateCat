@@ -12,11 +12,10 @@ class ProjectsContainer extends React.Component {
             more_projects: true,
             reloading_projects: false,
             organization: null,
-            show_all_organizations_projects: false,
-            organizations: []
         };
         this.renderProjects = this.renderProjects.bind(this);
         this.updateProjects = this.updateProjects.bind(this);
+        this.updateOrganization = this.updateOrganization.bind(this);
         this.hideSpinner = this.hideSpinner.bind(this);
         this.showProjectsReloadSpinner = this.showProjectsReloadSpinner.bind(this);
     }
@@ -33,24 +32,28 @@ class ProjectsContainer extends React.Component {
             more_projects: more_projects,
             reloading_projects: false,
             organization: organizationState,
-            show_all_organizations_projects: false,
-            organizations: []
         });
     }
 
-    renderAllOrganizationsProjects(projects, organizations, hideSpinner) {
-        let more_projects = true;
-        if (hideSpinner) {
-            more_projects = this.state.more_projects
+    // renderAllOrganizationsProjects(projects, organizations, hideSpinner) {
+    //     let more_projects = true;
+    //     if (hideSpinner) {
+    //         more_projects = this.state.more_projects
+    //     }
+    //     this.setState({
+    //         projects: projects,
+    //         more_projects: more_projects,
+    //         reloading_projects: false,
+    //         organization: null,
+    //     });
+    // }
+
+    updateOrganization(organization) {
+        if (organization.get('id') === this.state.organization.get('id')) {
+            this.setState({
+                organization: organization,
+            });
         }
-        this.setState({
-            projects: projects,
-            more_projects: more_projects,
-            reloading_projects: false,
-            organization: null,
-            show_all_organizations_projects: true,
-            organizations: organizations
-        });
     }
 
     updateProjects(projects) {
@@ -73,18 +76,20 @@ class ProjectsContainer extends React.Component {
 
     componentDidMount() {
         ProjectsStore.addListener(ManageConstants.RENDER_PROJECTS, this.renderProjects);
-        ProjectsStore.addListener(ManageConstants.RENDER_ALL_ORGANIZATION_PROJECTS, this.renderAllOrganizationsProjects);
+        // ProjectsStore.addListener(ManageConstants.RENDER_ALL_ORGANIZATION_PROJECTS, this.renderAllOrganizationsProjects);
         ProjectsStore.addListener(ManageConstants.UPDATE_PROJECTS, this.updateProjects);
         ProjectsStore.addListener(ManageConstants.NO_MORE_PROJECTS, this.hideSpinner);
         ProjectsStore.addListener(ManageConstants.SHOW_RELOAD_SPINNER, this.showProjectsReloadSpinner);
+        OrganizationsStore.addListener(ManageConstants.UPDATE_ORGANIZATION, this.updateOrganization);
     }
 
     componentWillUnmount() {
         ProjectsStore.removeListener(ManageConstants.RENDER_PROJECTS, this.renderProjects);
-        ProjectsStore.removeListener(ManageConstants.RENDER_ALL_ORGANIZATION_PROJECTS, this.renderAllOrganizationsProjects);
+        // ProjectsStore.removeListener(ManageConstants.RENDER_ALL_ORGANIZATION_PROJECTS, this.renderAllOrganizationsProjects);
         ProjectsStore.removeListener(ManageConstants.UPDATE_PROJECTS, this.updateProjects);
         ProjectsStore.removeListener(ManageConstants.NO_MORE_PROJECTS, this.hideSpinner);
         ProjectsStore.removeListener(ManageConstants.SHOW_RELOAD_SPINNER, this.showProjectsReloadSpinner);
+        OrganizationsStore.removeListener(ManageConstants.UPDATE_ORGANIZATION, this.updateOrganization);
     }
 
     componentDidUpdate() {
@@ -98,7 +103,8 @@ class ProjectsContainer extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
         return (nextState.projects !== this.state.projects ||
         nextState.more_projects !== this.state.more_projects ||
-        nextState.reloading_projects !== this.state.reloading_projects )
+        nextState.reloading_projects !== this.state.reloading_projects ||
+        nextState.organization !== this.state.organization)
     }
 
     render() {

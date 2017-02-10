@@ -19,14 +19,14 @@ let ManageActions = {
         });
     },
 
-    renderAllOrganizationsProjects: function (projects, organizations, hideSpinner) {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.RENDER_ALL_ORGANIZATION_PROJECTS,
-            projects: projects,
-            organizations: organizations,
-            hideSpinner: hideSpinner,
-        });
-    },
+    // renderAllOrganizationsProjects: function (projects, organizations, hideSpinner) {
+    //     AppDispatcher.dispatch({
+    //         actionType: ManageConstants.RENDER_ALL_ORGANIZATION_PROJECTS,
+    //         projects: projects,
+    //         organizations: organizations,
+    //         hideSpinner: hideSpinner,
+    //     });
+    // },
 
     updateProjects: function (projects) {
         AppDispatcher.dispatch({
@@ -236,14 +236,41 @@ let ManageActions = {
         );
     },
 
+    updateOrganization: function (organization) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.UPDATE_ORGANIZATION,
+            organization: organization
+        });
+    },
+
+    selectOrganization: function (organization) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.UPDATE_ORGANIZATION,
+            organization: organization
+        });
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.CHOOSE_ORGANIZATION,
+            organizationId: organization.id
+        });
+    },
+
     changeOrganization: function (organization) {
         UI.changeOrganization(organization).then(function (response) {
+            AppDispatcher.dispatch({
+                actionType: ManageConstants.UPDATE_ORGANIZATION,
+                organization: UI.selectedOrganization
+            });
+            AppDispatcher.dispatch({
+                actionType: ManageConstants.CHOOSE_ORGANIZATION,
+                organizationId: UI.selectedOrganization.id
+            });
             AppDispatcher.dispatch({
                 actionType: ManageConstants.RENDER_PROJECTS,
                 projects: response.projects,
                 organization: organization,
                 hideSpinner: false,
             });
+
         });
     },
 
@@ -273,6 +300,15 @@ let ManageActions = {
                 actionType: ManageConstants.UPDATE_ORGANIZATION_MEMBERS,
                 organization: organization,
                 members: data.members
+            });
+        });
+    },
+    changeOrganizationName: function(organization, newName) {
+        UI.changeOrganizationName(organization, newName).done(function (data) {
+            AppDispatcher.dispatch({
+                actionType: ManageConstants.UPDATE_ORGANIZATION_NAME,
+                oldOrganization: organization,
+                organization: data.organization[0],
             });
         });
     }

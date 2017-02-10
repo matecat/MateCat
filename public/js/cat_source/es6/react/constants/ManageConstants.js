@@ -3,7 +3,7 @@ var keyMirror = require('keymirror');
 
 module.exports = keyMirror({
     RENDER_PROJECTS: null,
-    RENDER_ALL_ORGANIZATION_PROJECTS: null,
+    // RENDER_ALL_ORGANIZATION_PROJECTS: null,
     UPDATE_PROJECTS: null,
     RENDER_MORE_PROJECTS: null,
     OPEN_JOB_SETTINGS: null,
@@ -24,7 +24,10 @@ module.exports = keyMirror({
     RENDER_ORGANIZATIONS: null,
     REMOVE_ORGANIZATION: null,
     UPDATE_ORGANIZATION: null,
+    UPDATE_ORGANIZATIONS: null,
+    UPDATE_ORGANIZATION_NAME: null,
     UPDATE_ORGANIZATION_MEMBERS: null,
+    CHOOSE_ORGANIZATION: null,
     ADD_ORGANIZATION: null,
     FILTER_PROJECTS: null,
     CHANGE_PROJECT_ASSIGNEE: null,

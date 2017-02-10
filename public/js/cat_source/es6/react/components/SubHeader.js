@@ -14,6 +14,7 @@ class SubHeader extends React.Component {
 
             // $(this.dropdownUsers).dropdown('set selected', 2000);
             $(this.dropdownUsers).dropdown({
+                fullTextSearch: 'exact',
                 onChange: function(value, text, $selectedItem) {
                     self.changeUser(value);
                 }
@@ -77,20 +78,19 @@ class SubHeader extends React.Component {
         if (this.props.selectedOrganization && this.props.selectedOrganization.get('type') === "general" && this.props.selectedOrganization.get('members')) {
 
             let members = this.props.selectedOrganization.get('members').map((member, i) => (
-                <div className="item" data-value={member.get('id')}
-                     key={'organization' + member.get('uid') + member.get('id')}>
-                    <a className="ui circular label">??</a>
+                <div className="item" data-value={member.get('uid')}
+                     key={'user' + member.get('uid')}>
+                    <a className="ui circular label">{APP.getUserShortName(member.toJS())}</a>
                     {(member.get('uid') === APP.USER.STORE.user.uid)? 'My Projects' : member.get('first_name') + ' ' + member.get('last_name')}
                 </div>
 
             ));
 
-            let item = <div className="header"
-                            key={'organization' + config.userShortName + 2000}>
-                            <div className="item" data-value="2000">
-                            <a className="ui circular label">AM</a>
+            let item = <div className="item" data-value="0"
+                            key={'user' + 0}>
+                            <a className="ui circular label">ALL</a>
                             All Members
-                        </div></div>;
+                        </div>;
             members = members.unshift(item);
 
             result = <div className="users-filter">
@@ -99,28 +99,29 @@ class SubHeader extends React.Component {
                             <p>Projects of: </p>
                         </div>
 
-                        <div className="input-field">
-                            <div className="list-organization">
-
-                                    <div className="ui dropdown top right pointing users-projects"
-                                         ref={(dropdownUsers) => this.dropdownUsers = dropdownUsers}>
-                                        <span className="text">
-                                            <div className="ui circlar label">{config.userShortName}</div>
-                                          My Projects
-                                        </span>
-                                        <i className="dropdown icon"/>
-                                        <div className="menu">
-                                            <div className="ui icon search input">
-                                                <i className="icon-search icon"></i>
-                                                <input type="text" name="ProjectName" placeholder="Name or email." />
-                                            </div>
-                                            <div className="scrolling menu">
-                                            {members}
-                                            </div>
-                                        </div>
+                        <div className="list-organization">
+                            <div className="ui dropdown top right pointing users-projects shadow-1"
+                                 ref={(dropdownUsers) => this.dropdownUsers = dropdownUsers}>
+                                <span className="text">
+                                    <div className="ui circlar label">ALL</div>
+                                  All Members
+                                </span>
+                                <i className="dropdown icon"/>
+                                <div className="menu">
+                                    <div className="header">
+                                        <a href="#">New Member <i className="icon-plus3 icon right"/></a>
                                     </div>
-
+                                    <div className="divider"></div>
+                                    <div className="ui icon search input">
+                                        <i className="icon-search icon"/>
+                                        <input type="text" name="UserName" placeholder="Name or email." />
+                                    </div>
+                                    <div className="scrolling menu">
+                                    {members}
+                                    </div>
+                                </div>
                             </div>
+
                         </div>
 
                     </div>;

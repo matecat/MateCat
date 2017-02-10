@@ -20,4 +20,20 @@ class OrganizationStruct extends DataAccess_AbstractDaoSilentStruct implements D
     public $created_at ;
     public $type = Constants_Organizations::PERSONAL;
 
+    protected $members ;
+
+    /**
+     * @param MembershipStruct[] $list
+     */
+    public function setMembers($list) {
+        $this->members = $list ;
+    }
+
+    /**
+     * @return null|MembershipStruct[]
+     */
+    public function getMembers() {
+        return $this->members ;
+    }
+
 }

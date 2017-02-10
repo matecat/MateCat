@@ -73,6 +73,7 @@ UI = {
             // self.organizations = APP.USER.STORE.organizations;
             // self.selectedOrganization = APP.USER.STORE.organizations[0];
             self.organizations = data.organizations;
+            ManageActions.renderOrganizations(self.organizations);
             self.selectedOrganization = data.organizations[0];
             self.selectedUser = {};
             self.getWorkspaces(self.selectedOrganization).done(function (data) {
@@ -81,7 +82,7 @@ UI = {
                     name: 'General'
                 };
                 self.selectedOrganization.workspaces = data.workspaces;
-                ManageActions.renderOrganizations(self.organizations, self.selectedOrganization);
+                ManageActions.selectOrganization(self.selectedOrganization);
                 self.getProjects(self.selectedOrganization).done(function (response) {
                     self.renderProjects(response.projects, self.selectedOrganization);
                 });
@@ -355,7 +356,6 @@ UI = {
         let self = this;
         this.selectedOrganization = organization;
         return this.getOrganizationStructure(organization).then(function () {
-                ManageActions.renderOrganizations(self.organizations, self.selectedOrganization);
                 return self.getProjects(self.selectedOrganization, "all");
             }
         );
@@ -504,6 +504,19 @@ UI = {
         });
     },
 
+    changeOrganizationName: function (organization, newName) {
+        let data = {
+            name: newName
+        };
+        return $.ajax({
+            data: JSON.stringify(data),
+            type: "PUT",
+            url : "/api/v2/orgs/" + organization.id,
+        });
+    },
+
+    //********* Modals **************//
+
     openCreateOrganizationModal: function () {
         APP.ModalWindow.showModalComponent(CreateOrganizationModal, {}, "Create new organization");
     },
@@ -540,6 +553,8 @@ UI = {
         };
         APP.ModalWindow.showModalComponent(CreateWorkspaceModal, props, "Create new workspace");
     },
+
+    //***********************//
 
 
     /**
