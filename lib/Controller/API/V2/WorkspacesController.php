@@ -64,8 +64,23 @@ class WorkspacesController extends KleinController {
     public function show(){
 
         $wSpaceDao = new WorkspaceDao();
-        $workSpacesList = $wSpaceDao->getByOrganizationId( $this->request->id_organization );
-        $this->response->json( [ 'workspaces' => $workSpacesList ] );
+
+        try {
+
+            $membershipDao = new MembershipDao();
+            $org = $membershipDao->findOrganizationByIdAndUser( $this->request->id_organization, $this->user );
+            if ( empty( $org ) ) {
+                throw new AuthorizationError( "Not Authorized", 401 );
+            }
+
+            $workSpacesList = $wSpaceDao->getByOrganizationId( $this->request->id_organization );
+            $this->response->json( [ 'workspaces' => $workSpacesList ] );
+
+        } catch( AuthorizationError $e ){
+            $this->response->code( 401 );
+            $this->response->json( ( new Error( [ $e ] ) )->render() );
+        }
+        
 
     }
 
