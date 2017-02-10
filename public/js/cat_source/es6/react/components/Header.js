@@ -103,6 +103,7 @@ class Header extends React.Component {
                 <i className="dropdown icon"/>
                 <div className="default text">Choose Organization</div>
                 <div className="menu">
+                    <div className="divider"></div>
                     <div className="header" style={{cursor: 'pointer'}} onClick={this.openCreateOrganizations.bind(this)}>New Organization
                         <a className="organization-filter button show">
                             <i className="icon-plus3 icon"/>
@@ -131,7 +132,6 @@ class Header extends React.Component {
                             <a href="/" className="logo logo-col"/>
                         </div>
                         <div className="right floated column">
-
                             {organizationsSelect}
                         </div>
                     </nav>

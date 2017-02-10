@@ -343,17 +343,21 @@ class ProjectContainer extends React.Component {
                 lastAction = '';
             } else {
                 let date = this.getLastActionDate();
-                lastAction = <div className="activity-log">
-                    <a href={activityLogUrl} target="_blank" className="right activity-log">
-                        <i> <span>Last action: {this.state.lastAction.action + ' on ' + date}</span><span> by {this.state.lastAction.first_name }</span></i>
-                    </a>
+                lastAction = <div className="sixteen wide right aligned column">
+                    <div className="activity-log">
+                        <a href={activityLogUrl} target="_blank" className="right activity-log">
+                            <i> <span>Last action: {this.state.lastAction.action + ' on ' + date}</span><span> by {this.state.lastAction.first_name }</span></i>
+                        </a>
+                    </div>
                 </div>;
             }
         } else {
-            lastAction = <div className="activity-log">
-                <a href={activityLogUrl} target="_blank" className="right activity-log">
-                    <i>Loading....</i>
-                </a>
+            lastAction = <div className="sixteen wide right aligned column pad-top-0 pad-bottom-0">
+                <div className="activity-log">
+                    <a href={activityLogUrl} target="_blank" className="right activity-log">
+                        <i>Loading....</i>
+                    </a>
+                </div>
             </div>;
 
         }
@@ -450,12 +454,12 @@ class ProjectContainer extends React.Component {
                         </div>
 
                         <div className="project-body ui grid">
-                            <div className="jobs sixteen wide column">
+                            <div className="jobs sixteen wide column pad-bottom-0">
                                 {jobsList}
                             </div>
                         </div>
 
-                        <div className="one column project-footer">
+                        <div className="project-footer ui grid">
                             {lastAction}
                         </div>
 

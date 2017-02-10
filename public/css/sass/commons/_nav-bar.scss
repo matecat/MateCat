@@ -18,11 +18,11 @@
         padding-top: 0 !important;
         padding-bottom: 1rem !important;
         .ui.selection.dropdown {
-            background: #636363;
+            //background: #636363;
             text-transform: uppercase;
             font-weight: 600;
-            color: #ffffff;
-            border-radius: 0;
+            //color: #ffffff;
+            //border-radius: 0;
             i {
                 float: right;
             }
@@ -43,13 +43,13 @@
         }
         .ui.selection.visible.dropdown > .text:not(.default) {
             font-weight: 600;
-            color: white;
+            //color: white;
         }
     }
     .sub-head {
         .ui.selection.dropdown {
-            background: #e8e8e8;
-            border: none;
+            //background: #e8e8e8;
+            //border: none;
             i {
                 float: right;
             }
