@@ -42,7 +42,7 @@ class UserController extends AbstractStatefulKleinController  {
             'metadata' =>  ( empty( $metadata ) ? NULL : $metadata ),
 
             'organizations' => ( new Organization() )->render(
-                (new MembershipDao() )->findUserOrganizations( $this->user )
+                (new MembershipDao() )->setCacheTTL( 60 * 60 * 24 )->findUserOrganizations( $this->user )
             )
 
         ));

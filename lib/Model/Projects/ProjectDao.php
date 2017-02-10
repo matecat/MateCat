@@ -3,6 +3,9 @@
 class Projects_ProjectDao extends DataAccess_AbstractDao {
     const TABLE = "projects";
 
+    protected static $auto_increment_fields = array('id');
+    protected static $primary_keys = array('id');
+
     /**
      * @param $project
      * @param $field
