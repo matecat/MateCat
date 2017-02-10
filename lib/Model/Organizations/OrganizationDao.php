@@ -176,14 +176,13 @@ class OrganizationDao extends \DataAccess_AbstractDao {
 
     public function updateOrganizationName( OrganizationStruct $org ) {
 
-        $conn = Database::obtain()->begin();
+        $conn = Database::obtain()->getConnection();
 
         $stmt = $conn->prepare( self::$_update_organization_by_id );
         $stmt->bindValue( ':id', $org->id, PDO::PARAM_INT );
         $stmt->bindValue( ':name', $org->name, PDO::PARAM_STR );
 
         $stmt->execute();
-        $org = $this->findById( $org->id );
         $conn->commit();
 
         return $org;

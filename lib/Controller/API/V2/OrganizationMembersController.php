@@ -23,7 +23,7 @@ class OrganizationMembersController extends KleinController {
 
         try{
 
-            $membersList = ( new MembershipDao )->getMemberListByOrganizationId( $this->request->id_organization );
+            $membersList = ( new MembershipDao )->setCacheTTL( 60 * 60 * 24 )->getMemberListByOrganizationId( $this->request->id_organization );
             $this->response->json( array( 'members' => $membersList ) );
 
         } catch ( \PDOException $e ){
@@ -49,7 +49,8 @@ class OrganizationMembersController extends KleinController {
                     'organization' => $organizationStruct,
                     'members' => $this->request->members
             ] );
-            $membersList = ( new MembershipDao )->getMemberListByOrganizationId( $organizationStruct->id );
+            ( new MembershipDao )->destroyCacheForListByOrganizationId( $organizationStruct->id );
+            $membersList = ( new MembershipDao )->setCacheTTL( 60 * 60 * 24 )->getMemberListByOrganizationId( $organizationStruct->id );
             \Database::obtain()->commit();
 
             $this->response->json( array( 'members' => $membersList ) );
@@ -77,7 +78,8 @@ class OrganizationMembersController extends KleinController {
 
             \Database::obtain()->begin();
             $membershipDao->deleteUserFromOrganization( $this->request->uid_member, $this->request->id_organization );
-            $membersList = $membershipDao->getMemberListByOrganizationId( $this->request->id_organization );
+            $membershipDao->destroyCacheForListByOrganizationId( $this->request->id_organization );
+            $membersList = $membershipDao->setCacheTTL( 60 * 60 * 24 )->getMemberListByOrganizationId( $this->request->id_organization );
             \Database::obtain()->commit();
 
             $this->response->json( array( 'members' => $membersList ) );
