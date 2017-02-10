@@ -51,4 +51,12 @@ class WorkspaceDao {
 
     }
 
+    public function getByOrganizationId(){
+
+    }
+
+    public function getById(){
+        
+    }
+
 }
