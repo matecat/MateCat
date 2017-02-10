@@ -27,20 +27,20 @@ class ProjectContainer extends React.Component {
         $(this.dropdown).dropdown({
             direction : 'downward'
         });
-        if (this.props.project.get('user')) {
-            $(this.dropdownUsers).dropdown('set selected', this.props.project.get('user').get('id'));
-
+        if (this.props.organization.get('type') != "personal") {
+            // $(this.dropdownUsers).dropdown('set selected', this.props.project.get('member').get('uid'));
+            $(this.dropdownUsers).dropdown('set selected', this.props.organization.get('members').first().get('uid'));
+            $(this.dropdownUsers).dropdown({
+                onChange: function(value, text, $selectedItem) {
+                    self.changeUser(value);
+                }
+            });
         }
-        $(this.dropdownUsers).dropdown({
-            onChange: function(value, text, $selectedItem) {
-                self.changeUser(value);
-            }
-        });
+
         this.getLastAction();
     }
 
-    componentWillUnmount() {
-    }
+    componentWillUnmount() {}
 
     componentDidUpdate() {
         console.log("Updated Project : " + this.props.project.get('id'));
@@ -168,7 +168,9 @@ class ProjectContainer extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState){
-        return (nextProps.project !== this.props.project || nextState.lastAction !==  this.state.lastAction)
+        return (nextProps.project !== this.props.project ||
+                nextState.lastAction !==  this.state.lastAction ||
+                nextProps.organization !==  this.props.organization)
     }
 
     getJobsList(targetsLangs, jobsList, jobsLength) {
@@ -257,10 +259,10 @@ class ProjectContainer extends React.Component {
        let result = '';
        if (this.props.organization.get('members')) {
            let members = this.props.organization.get('members').map((user, i) => (
-               <div className="item " data-value={user.get('id')}
-                    key={'organization' + user.get('userShortName') + user.get('id')}>
-                   <div className="ui circular label">{user.get('userShortName')}</div>
-                   {(user.get('id') === 0)? 'To me' : user.get('userFullName')}
+               <div className="item " data-value={user.get('uid')}
+                    key={'user' + user.get('uid')}>
+                   <div className="ui circular label">{APP.getUserShortName(user.toJS())}</div>
+                   {(user.get('uid') === APP.USER.STORE.user.uid) ? 'To me' : user.get('first_name') + " " + user.get('last_name')}
                </div>
            ));
            result = <div className="ui dropdown top right pointing project-assignee shadow-1"

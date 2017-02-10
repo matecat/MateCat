@@ -688,6 +688,10 @@ APP = {
         return true;
     },
 
+    getUserShortName: function (user) {
+        return (user.first_name[0] + user.last_name[0]).toUpperCase();
+    }
+
 };
 
 $(document).ready(function(){

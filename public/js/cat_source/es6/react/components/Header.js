@@ -43,12 +43,14 @@ class Header extends React.Component {
     }
 
     changeOrganization(event, organization) {
-        let selectedOrganization = this.state.organizations.find(function (org) {
-            if (org.get("id") === organization.get("id")) {
-                return true;
-            }
-        });
-        ManageActions.changeOrganization(selectedOrganization.toJS());
+        if (organization.get('id')  !== this.state.selectedOrganizationId) {
+            let selectedOrganization = this.state.organizations.find(function (org) {
+                if (org.get("id") === organization.get("id")) {
+                    return true;
+                }
+            });
+            ManageActions.changeOrganization(selectedOrganization.toJS());
+        }
     }
 
     openCreateOrganizations () {

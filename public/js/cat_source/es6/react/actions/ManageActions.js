@@ -19,14 +19,14 @@ let ManageActions = {
         });
     },
 
-    renderAllOrganizationsProjects: function (projects, organizations, hideSpinner) {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.RENDER_ALL_ORGANIZATION_PROJECTS,
-            projects: projects,
-            organizations: organizations,
-            hideSpinner: hideSpinner,
-        });
-    },
+    // renderAllOrganizationsProjects: function (projects, organizations, hideSpinner) {
+    //     AppDispatcher.dispatch({
+    //         actionType: ManageConstants.RENDER_ALL_ORGANIZATION_PROJECTS,
+    //         projects: projects,
+    //         organizations: organizations,
+    //         hideSpinner: hideSpinner,
+    //     });
+    // },
 
     updateProjects: function (projects) {
         AppDispatcher.dispatch({
