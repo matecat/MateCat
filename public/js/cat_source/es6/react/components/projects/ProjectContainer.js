@@ -31,6 +31,7 @@ class ProjectContainer extends React.Component {
             // $(this.dropdownUsers).dropdown('set selected', this.props.project.get('member').get('uid'));
             $(this.dropdownUsers).dropdown('set selected', this.props.organization.get('members').first().get('uid'));
             $(this.dropdownUsers).dropdown({
+                fullTextSearch: 'exact',
                 onChange: function(value, text, $selectedItem) {
                     self.changeUser(value);
                 }
@@ -278,7 +279,7 @@ class ProjectContainer extends React.Component {
                    <div className="divider"></div>
                    <div className="ui icon search input">
                        <i className="icon-search icon"/>
-                       <input type="text" name="ProjectName" placeholder="Name or email." />
+                       <input type="text" name="UserName" placeholder="Name or email." />
                    </div>
                    <div className="scrolling menu">
                    {members}
