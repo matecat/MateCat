@@ -163,13 +163,21 @@ if (SegmentFilter.enabled())
 
     function tryToFocusLastSegment() {
         var segment = UI.Segment.find( SegmentFilter.getStoredState().lastSegmentId ) ;
-        if ( SegmentFilter.getStoredState().lastSegmentId && segment ) {
-            if ( segment.el.is( UI.currentSegment ) ) {
+
+        if ( ! (SegmentFilter.getStoredState().lastSegmentId && segment ) ) {
+            return ; // the stored lastSegmentId is not in the DOM, this should never happen
+        }
+
+        if ( segment.el.is( UI.currentSegment ) ) {
+            if ( UI.body.hasClass( 'editing' ) ) {
                 UI.scrollSegment( segment.el ) ;
             }
             else {
                 segment.el.find( UI.targetContainerSelector() ).click();
             }
+        }
+        else {
+            segment.el.find( UI.targetContainerSelector() ).click();
         }
     }
 
