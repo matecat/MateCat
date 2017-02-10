@@ -52,6 +52,7 @@ class ProjectContainer extends React.Component {
     }
 
     archiveProject() {
+
         ManageActions.updateStatusProject(this.props.project, 'archived');
     }
 

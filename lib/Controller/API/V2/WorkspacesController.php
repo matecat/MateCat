@@ -45,7 +45,7 @@ class WorkspacesController extends KleinController {
 
             $wSpaceDao->create( $wSpaceStruct );
 
-            $this->response->json( [ 'organization' => $wSpaceStruct ] );
+            $this->response->json( [ 'workspace' => $wSpaceStruct ] );
 
         } catch ( \PDOException $e ){
             $this->response->code( 503 );

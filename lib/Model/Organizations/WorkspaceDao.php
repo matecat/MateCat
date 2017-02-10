@@ -58,7 +58,7 @@ class WorkspaceDao extends \DataAccess_AbstractDao {
 
         $stmt = $this->_getStatementForCache( self::$_query_organization_workspaces );
         $workSpaceQuery = new WorkspaceStruct();
-        return static::resultOrNull( $this->_fetchObject( $stmt,
+        return ( $this->_fetchObject( $stmt,
                 $workSpaceQuery,
                 array(
                         'id_organization' => $orgId,

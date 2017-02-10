@@ -20,7 +20,7 @@ class SubHeader extends React.Component {
                 }
             });
 
-            $(this.dropdownWorkspaces).dropdown('set selected', '0');
+            $(this.dropdownWorkspaces).dropdown('set selected', '-1');
             $(this.dropdownWorkspaces).dropdown({
                 onChange: function(value, text, $selectedItem) {
                     self.changeWorkspace(value);
@@ -108,10 +108,6 @@ class SubHeader extends React.Component {
                                 </span>
                                 <i className="dropdown icon"/>
                                 <div className="menu">
-                                    <div className="header">
-                                        <a href="#">New Member <i className="icon-plus3 icon right"/></a>
-                                    </div>
-                                    <div className="divider"></div>
                                     <div className="ui icon search input">
                                         <i className="icon-search icon"/>
                                         <input type="text" name="UserName" placeholder="Name or email." />
@@ -130,44 +126,49 @@ class SubHeader extends React.Component {
     }
     getWorkspacesSelect() {
         let result = '';
-        if (this.props.selectedOrganization) {
-            let items = this.props.selectedOrganization.get("workspaces").map((workspace, i) => (
+        let items
+        if (this.props.selectedOrganization && this.props.selectedOrganization.get("workspaces")) {
+            items = this.props.selectedOrganization.get("workspaces").map((workspace, i) => (
                 <div className="item" data-value={workspace.get('id')}
                      data-text={workspace.get('name')}
                      key={'organization' + workspace.get('name') + workspace.get('id')}>
                     {workspace.get('name')}
                 </div>
             ));
-            result = <div className="ui dropdown selection workspace-dropdown"
-                          ref={(dropdownWorkspaces) => this.dropdownWorkspaces = dropdownWorkspaces}>
-                <input type="hidden" name="gender" />
-                <i className="dropdown icon"/>
-                <div className="default text">Choose Workspace</div>
-                <div className="menu">
-                    <div className="header" style={{cursor: 'pointer'}} onClick={this.openCreateWorkspace.bind(this)}>New Workspace
-                        <a className="organization-filter button show">
-                            <i className="icon-plus3 icon"/>
-                        </a>
-                    </div>
-                    <div className="divider"></div>
-                    {/*<div className="header">
-                         <div className="ui form">
-                             <div className="field">
-                                 <input type="text" name="Project Name" placeholder="Translated Organization es." />
-                             </div>
-                         </div>
-                     </div>
-                     <div className="divider"></div>*/}
-                    <div className="scrolling menu">
-                        <div className="item" data-value='-1'
-                             data-text='AM'>
-                             All
-                        </div>
-                        {items}
-                    </div>
-                </div>
-            </div>;
         }
+        result = <div className="ui dropdown selection workspace-dropdown"
+                      ref={(dropdownWorkspaces) => this.dropdownWorkspaces = dropdownWorkspaces}>
+            <input type="hidden" name="gender" />
+            <i className="dropdown icon"/>
+            <div className="default text">Choose Workspace</div>
+            <div className="menu">
+                <div className="header" style={{cursor: 'pointer'}} onClick={this.openCreateWorkspace.bind(this)}>New Workspace
+                    <a className="organization-filter button show">
+                        <i className="icon-plus3 icon"/>
+                    </a>
+                </div>
+                <div className="divider"></div>
+                {/*<div className="header">
+                 <div className="ui form">
+                 <div className="field">
+                 <input type="text" name="Project Name" placeholder="Translated Organization es." />
+                 </div>
+                 </div>
+                 </div>
+                 <div className="divider"></div>*/}
+                <div className="scrolling menu">
+                    <div className="item" data-value='-1'
+                         data-text='All Projects'>
+                        All
+                    </div>
+                    <div className="item" data-value='0'
+                         data-text='No Workspace'>
+                        No Workspace
+                    </div>
+                    {items}
+                </div>
+            </div>
+        </div>;
         return result;
     }
     render () {

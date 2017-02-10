@@ -261,9 +261,9 @@ UI = {
         } else if (organization.id === 2) {
             projects = [].concat(this.ebayProjects, this.mscProjects, this.adWordsProjects, this.youtubeProjects);
         } else if (organization.id === 3) {
-            projects = [];
+            projects = [].concat(this.ebayProjects);
         } else {
-            projects = [];
+            projects = [].concat(this.ebayProjects);
         }
         if (UI.Search.filter) {
             $.each(projects, function() {
@@ -313,34 +313,24 @@ UI = {
     },
 
     createWorkspace: function (organization, wsName) {
-        let data = {
-            workspace: {
-                id: Math.floor((Math.random() * 100) + 1),
-                name: wsName,
-            }
+        var data = {
+            name : wsName
         };
-        let deferred = $.Deferred().resolve(data);
-        return deferred.promise();
+        return $.ajax({
+            async: true,
+            data: data,
+            type: "POST",
+            url : "/api/v2/orgs/" + organization.id + "/workspaces"
+        });
 
     },
 
     getWorkspaces: function (organization) {
-        let data;
-        if (organization.id == 1) {
-            data = {
-                workspaces : organizations[0].workspaces
-            }
-        } else if (organization.id == 2) {
-            data = {
-                workspaces : organizations[1].workspaces
-            }
-        } else {
-            data = {
-                workspaces : [{id: 0, name: "General" }]
-            }
-        }
-        let deferred = $.Deferred().resolve(data);
-        return deferred.promise();
+        return $.ajax({
+            async: true,
+            type: "GET",
+            url : "/api/v2/orgs/" + organization.id + "/workspaces"
+        });
     },
 
     getOrganizationMembers: function (organization) {
