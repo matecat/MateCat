@@ -43,6 +43,7 @@ class OrganizationsController extends KleinController {
                     'members' => $this->request->members
             ] );
             \Database::obtain()->commit();
+            ( new MembershipDao() )->destroyCacheUserOrganizations( $this->user ); // clean the cache
 
             $formatted = new Organization( [ $organization ] ) ;
             $this->response->json( array( 'organization' => $formatted->render() ) );
@@ -62,27 +63,29 @@ class OrganizationsController extends KleinController {
 
         $requestContent = json_decode( file_get_contents( 'php://input' ) );
 
-        $org = new OrganizationStruct();
-        $org->id = $this->request->id_organization;
-
-        $membershipDao = new MembershipDao();
-        $org = $membershipDao->findOrganizationByIdAndUser( $org->id, $this->user );
-
 
         try {
 
-            if( empty( $org ) ){
-                throw new AuthorizationError( "Not Authorized", 401 );
-            }
+            $org = new OrganizationStruct();
+            $org->id = $this->request->id_organization;
 
             $org->name = $requestContent->name;
             if( empty( $org->name ) ){
                 throw new InvalidArgumentException( "Wrong parameter :name ", 400 );
             }
 
+            $membershipDao = new MembershipDao();
+            $org = $membershipDao->findOrganizationByIdAndUser( $org->id, $this->user );
+
+            if( empty( $org ) ){
+                throw new AuthorizationError( "Not Authorized", 401 );
+            }
+
             $teamDao = new OrganizationDao();
 
             $teamDao->updateOrganizationName( $org );
+            ( new MembershipDao() )->destroyCacheUserOrganizations( $this->user ); // clean the cache
+
             $formatted = new Organization( [ $org ] ) ;
             $this->response->json( [ 'organization' => $formatted->render() ] );
         } catch ( \PDOException $e ){

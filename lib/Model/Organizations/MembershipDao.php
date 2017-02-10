@@ -71,6 +71,13 @@ class MembershipDao extends \DataAccess_AbstractDao
 
     }
 
+    /**
+     * Cache deletion for @see MembershipDao::findUserOrganizations
+     *
+     * @param \Users_UserStruct $user
+     *
+     * @return bool|int
+     */
     public function destroyCacheUserOrganizations( \Users_UserStruct $user ){
         $stmt = $this->_getStatementForCache( self::$_query_user_organizations );
         return $this->_destroyObjectCache( $stmt,
@@ -106,6 +113,23 @@ class MembershipDao extends \DataAccess_AbstractDao
         $membershipStruct = new MembershipStruct();
         return $this->_fetchObject( $stmt,
                 $membershipStruct,
+                array(
+                        'id_organization' => $id_organization,
+                )
+        );
+    }
+
+
+    /**
+     * Destroy cache for @see MembershipDao::getMemberListByOrganizationId()
+     *
+     * @param $id_organization
+     *
+     * @return bool|int
+     */
+    public function destroyCacheForListByOrganizationId( $id_organization ){
+        $stmt = $this->_getStatementForCache( self::$_query_member_list );
+        return $this->_destroyObjectCache( $stmt,
                 array(
                         'id_organization' => $id_organization,
                 )
