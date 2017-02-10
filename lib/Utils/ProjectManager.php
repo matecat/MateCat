@@ -157,7 +157,6 @@ class ProjectManager {
      * @param \Organizations\OrganizationStruct $organization
      */
     public function setOrganization( OrganizationStruct $organization ) {
-        $this->features->loadFromOrganization( $organization ) ;
         $this->projectStructure['id_organization'] = $organization->id ;
     }
 

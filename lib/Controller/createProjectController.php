@@ -24,6 +24,7 @@ class createProjectController extends ajaxController {
 
     private $dqf_key;
     private $metadata;
+    private $id_organization ;
 
     private $lang_handler ;
 
@@ -62,7 +63,8 @@ class createProjectController extends ajaxController {
                 'pretranslate_100'   => array( 'filter' => FILTER_VALIDATE_INT ),
                 'dqf_key'            => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                )
+                ),
+                'id_organization' => array( 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR  )
 
                 //            This will be sanitized inside the TmKeyManagement class
                 //            SKIP
@@ -72,18 +74,6 @@ class createProjectController extends ajaxController {
 
         $this->checkLogin( false );
 
-        /**
-         * We need to discover the current organization very early because
-         * some feature may be attached to the organization. This has to be
-         * done right after login.
-         */
-        $this->__validateOrganization(
-                @array_pop(
-                        filter_input_array( INPUT_POST, [
-                            'id_organization' => [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR ]
-                        ] )
-                )
-        );
 
         $this->__setupFeatureSet();
 
@@ -150,6 +140,7 @@ class createProjectController extends ajaxController {
         $this->lang_detect_files       = $__postInput[ 'lang_detect_files' ];
         $this->pretranslate_100        = $__postInput[ 'pretranslate_100' ];
         $this->dqf_key                 = $__postInput[ 'dqf_key' ];
+        $this->id_organization         = $__postInput[ 'id_organization' ];
         
         $this->__setMetadataFromPostInput( $__postInput ) ;
 
@@ -174,6 +165,7 @@ class createProjectController extends ajaxController {
         $this->__validateSourceLang();
         $this->__validateTargetLangs();
         $this->__validateUserMTEngine();
+        $this->__validateOrganization();
 
     }
 
@@ -353,7 +345,6 @@ class createProjectController extends ajaxController {
 
         if ( $this->userIsLogged ) {
             $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
-            $this->featureSet->loadFromOrganization( $this->organization ) ;
         }
     }
 

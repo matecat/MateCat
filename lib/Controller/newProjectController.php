@@ -47,8 +47,6 @@ class newProjectController extends viewController {
 
     public function doAction() {
 
-        $this->_checkOrganization();
-
         $this->setOrGetGuid();
 
         try {
@@ -102,7 +100,6 @@ class newProjectController extends viewController {
 
     private function __loadFeatures() {
         $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
-        $this->featureSet->loadFromOrganization( $this->organization  );
     }
 
     private function array_sort_by_column( &$arr, $col, $dir = SORT_ASC ) {
