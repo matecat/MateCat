@@ -34,7 +34,7 @@ class WorkspaceDao extends \DataAccess_AbstractDao {
     ";
 
     protected static $_query_update_workspace = "
-        UPDATE workspace SET name = :name , options = :options where id = :id
+        UPDATE workspaces SET name = :name , options = :options WHERE id = :id
     ";
 
     protected static $_query_delete_workspace = "
@@ -78,7 +78,6 @@ class WorkspaceDao extends \DataAccess_AbstractDao {
         $stmt->bindValue( ':name', $wSpace->name, PDO::PARAM_STR );
         $stmt->bindValue( ':options', $wSpace->options, PDO::PARAM_STR );
         $stmt->execute();
-        $conn->commit();
 
         return $wSpace;
 
@@ -143,15 +142,17 @@ class WorkspaceDao extends \DataAccess_AbstractDao {
                 array(
                         'id' => $wId,
                 )
-        ) );
+        )[ 0 ] );
     }
 
     /**
+     * Destroy cache for @see WorkspaceDao::getById()
+     *
      * @param $wId
      *
      * @return bool|int
      */
-    public function destroyCachebyId( $wId ){
+    public function destroyCacheById( $wId ){
         $stmt = $this->_getStatementForCache( self::$_query_workspace_by_id );
         return $this->_destroyObjectCache( $stmt,
                 array(
