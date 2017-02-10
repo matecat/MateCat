@@ -230,7 +230,7 @@ class JobContainer extends React.Component {
             var tooltipText = '';
             keys.forEach(function (key, i) {
                 var descript = (key.name) ? key.name : "Private TM and Glossary";
-                var item = '<div style="text-align: left"> <span style="font-weight: bold">' + descript + '</span> KEY: ' + key.key + '</div>';
+                var item = '<div style="text-align: left"> <span style="font-weight: bold">' + descript + '</span> (' + key.key + ')</div>';
                 tooltipText =  tooltipText + item;
             });
             return <li>
