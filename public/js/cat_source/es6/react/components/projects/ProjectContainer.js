@@ -307,8 +307,6 @@ class ProjectContainer extends React.Component {
                    {(user.get('uid') === APP.USER.STORE.user.uid) ? 'To me' : user.get('first_name') + " " + user.get('last_name')}
                </div>
            ));
-           // let dropDownClass = !this.props.project.get('user') ? "project-not-assigned" : "project-assignee shadow-1"
-           let dropDownClass = "project-assignee shadow-1";
 
            result = <div className={"ui dropdown top right pointing"}
                          ref={(dropdownUsers) => this.dropdownUsers = dropdownUsers}>
@@ -380,6 +378,13 @@ class ProjectContainer extends React.Component {
             state = <div className="col m1"><span className="new badge grey darken-5" style={{marginTop: '5px'}}>cancelled</span></div>
         }
 
+        let workspace = '';
+        if (this.props.project.get('workspace') ) {
+            workspace = <a className="ui orange circular label project-workspace shadow-1">
+                {this.props.project.get('workspace').get('name') }
+                </a>
+        }
+
         let dropDownUsers = this.getDropDownUsers();
 
         return <div className="project ui column grid shadow-1">
@@ -423,8 +428,7 @@ class ProjectContainer extends React.Component {
                                     </div>
                                     <div className="six wide computer eight wide tablet right aligned column">
                                         <div className="project-activity-icon">
-                                            <a className="ui orange circular label project-workspace shadow-1">{(typeof this.props.project.get('workspace') !== 'undefined') ? this.props.project.get('workspace').get('name') : "??" }</a>
-                                            <a className="ui circular no-workspace label">{(typeof this.props.project.get('workspace') !== 'undefined') ? this.props.project.get('workspace').get('name') : "??" }</a>
+                                            {workspace}
                                             {dropDownUsers}
                                             <div className="project-menu circular ui icon top right pointing dropdown button shadow-1"
                                                     ref={(dropdown) => this.dropdown = dropdown}>

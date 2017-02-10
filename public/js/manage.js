@@ -265,16 +265,16 @@ UI = {
         } else {
             projects = [].concat(this.ebayProjects);
         }
-        if (UI.Search.filter) {
-            $.each(projects, function() {
-                // if (self.selectedUser.id) {
-                //     this.user = self.selectedUser;
-                // }
-                if (self.selectedWorkspace.id  >= 0) {
-                    this.workspace = self.selectedWorkspace;
-                }
-            });
-        }
+        // if (UI.Search.filter) {
+        //     $.each(projects, function() {
+        //         // if (self.selectedUser.id) {
+        //         //     this.user = self.selectedUser;
+        //         // }
+        //         if (self.selectedWorkspace.id  >= 0) {
+        //             this.workspace = self.selectedWorkspace;
+        //         }
+        //     });
+        // }
 
         let data = {
             projects: projects
@@ -602,134 +602,7 @@ UI = {
 
 
 $(document).ready(function(){
-    window.organizations = [
-        {
-            id: 1,
-            name: 'Personal',
-            workspaces: [
-                {
-                    id: 0,
-                    name: "General"
-                },
-                {
-                    id: 1,
-                    name: "Personali"
-                },
-                {
-                    id: 2,
-                    name: "Tradotti"
-                }
 
-            ]
-        },
-        {
-            id: 2,
-            name: 'Translated',
-            members: [{
-                id: 0,
-                userMail: config.userMail,
-                userFullName: config.userFullName,
-                userShortName: config.userShortName
-
-            },{
-                id: 2,
-                userMail: 'chloe.king@translated.net',
-                userFullName: 'Chloe King',
-                userShortName: 'CK'
-
-            },{
-                id: 3,
-                userMail: 'owen.james@translated.net',
-                userFullName: 'Owen	James',
-                userShortName: 'OJ'
-
-            },{
-                id: 4,
-                userMail: 'stephen.powell@translated.net',
-                userFullName: 'Stephen Powell',
-                userShortName: 'SP'
-
-            },{
-                id: 5,
-                userMail: 'lillian.lambert@translated.net',
-                userFullName: 'LillianLambert',
-                userShortName: 'LL'
-
-            },{
-                id: 6,
-                userMail: 'joe.watson@translated.net',
-                userFullName: 'Joe Watson',
-                userShortName: 'JW'
-
-            },{
-                id: 7,
-                userMail: 'rachel.sharp@translated.net',
-                userFullName: 'Rachel Sharp',
-                userShortName: 'RS'
-
-            },{
-                id: 8,
-                userMail: 'dan.marshall@translated.net',
-                userFullName: 'Dan Marshall',
-                userShortName: 'DM'
-
-            }],
-            workspaces: [
-                {
-                    id: 0,
-                    name: "General"
-                },
-                {
-                    id: 1,
-                    name: "Ebay"
-                },
-                {
-                    id: 2,
-                    name: "AdWords"
-                },
-                {
-                    id: 3,
-                    name: "MSC"
-                },
-                {
-                    id: 4,
-                    name: "YouTube"
-                }
-
-            ]
-
-        },
-        {
-            id: 3,
-            name: 'Other Organization',
-            members: [{
-                id: 0,
-                userMail: config.userMail,
-                userFullName: config.userFullName,
-                userShortName: config.userShortName
-
-            },{
-                id: 9,
-                userMail: 'vanessa.simpson@translated.net',
-                userFullName: 'Vanessa Simpson',
-                userShortName: 'VS'
-
-            },{
-                id: 10,
-                userMail: 'dan.howard@translated.net',
-                userFullName: 'Dan Howard',
-                userShortName: 'DH'
-
-            },{
-                id: 11,
-                userMail: 'keith.kelly@translated.net',
-                userFullName: 'Keith Kelly',
-                userShortName: 'KC'
-
-            }],
-            workspaces: []
-        }
-    ];
 
     window.EbayProjects = [
         {
@@ -822,6 +695,7 @@ $(document).ready(function(){
         }
 
     ];
+
 
     window.MSCProjects = [
         {
