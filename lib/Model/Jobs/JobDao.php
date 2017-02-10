@@ -181,4 +181,18 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
     }
 
+    /**
+     * @param Projects_ProjectStruct $project
+     * @param Users_UserStruct $user
+     * @return int the number of rows affected by the statement
+     */
+    public function updateOwner( Projects_ProjectStruct $project, Users_UserStruct $user ) {
+        $sql = " UPDATE jobs SET owner = :email WHERE id_project = :id_project ";
+
+        $stmt = $this->con->getConnection()->prepare( $sql ) ;
+        $stmt->execute(array('email' => $user->email, 'id_project' => $project->id ) ) ;
+
+        return $stmt->rowCount();
+    }
+
 }

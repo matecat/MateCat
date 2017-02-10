@@ -10,10 +10,19 @@ namespace Users;
 
 use Routes ;
 
+use Projects_ProjectDao, Jobs_JobDao ;
+
 class RedeemableProject
 {
+    /**
+     * @var \Users_UserStruct
+     */
     protected $user ;
     protected $session ;
+
+    /**
+     * @var \Projects_ProjectStruct
+     */
     protected $project ;
 
     public function __construct( $user, $session ) {
@@ -28,7 +37,7 @@ class RedeemableProject
     public function __getProject() {
         if ( !isset( $this->project ) ) {
             if ( isset( $this->session['last_created_pid'] ) ) {
-                $this->project = \Projects_ProjectDao::findById( $this->session['last_created_pid'] ) ;
+                $this->project = Projects_ProjectDao::findById( $this->session['last_created_pid'] ) ;
             }
         }
         return $this->project ;
@@ -40,8 +49,17 @@ class RedeemableProject
 
     public function redeem() {
         if ( $this->isPresent() && $this->isRedeemable() ) {
-            $update = updateProjectOwner( $this->user->email, $this->project->id );
+
+            $this->project->id_customer = $this->user->email ;
+            $this->project->id_organization = $this->user->getPersonalOrganization()->id ;
+
+            Projects_ProjectDao::updateStruct( $this->project, array(
+                'fields' => array( 'id_organization', 'id_customer' )
+            ) ) ;
+
+            ( new Jobs_JobDao() )->updateOwner( $this->project, $this->user );
         }
+
 
         $this->clear();
     }
