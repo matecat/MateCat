@@ -22,6 +22,11 @@ class ProjectsController extends KleinController {
      */
     private $validator;
 
+    public function index() {
+
+
+    }
+
     public function update() {
         $acceptedFields = array('id_assignee', 'name');
         $projectModel = new \ProjectModel( $this->validator->project ) ;

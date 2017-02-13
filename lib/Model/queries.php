@@ -1787,7 +1787,7 @@ function conditionsForProjectsQuery(
  * @param                   $search_onlycompleted bool
  * @param                   $project_id           int
  *
- * @param \Organizations\OrganizationStruct $team
+ * @param \Organizations\OrganizationStruct $organization
  *
  * @return array|int|resource|void
  */
@@ -1795,7 +1795,7 @@ function getProjects( Users_UserStruct $user, $start, $step,
                       $search_in_pname, $search_source, $search_target,
                       $search_status, $search_only_completed,
                       $project_id,
-                      \Organizations\OrganizationStruct $team = null) {
+                      \Organizations\OrganizationStruct $organization = null) {
 
     list( $conditions, $data ) = conditionsForProjectsQuery(
         $search_in_pname, $search_source, $search_target,
@@ -1811,9 +1811,9 @@ function getProjects( Users_UserStruct $user, $start, $step,
 
     $ownership_condition = " ( p.id_customer = :email OR j.owner = :email )" ;
 
-    if ( !is_null( $team ) ) {
+    if ( !is_null( $organization ) ) {
         $ownership_condition .= " OR p.id_organization = :id_organization " ;
-        $data [ 'id_organization' ] = $team->id ;
+        $data [ 'id_organization' ] = $organization->id ;
     }
 
     $conditions[] = " ( $ownership_condition ) " ;
