@@ -118,6 +118,7 @@ class ProjectManager {
                             'owner'                => '',
                             'word_count_type'      => '',
                             'metadata'             => array(),
+                            'id_assignee'          => null
                     ) );
 
 
@@ -157,6 +158,7 @@ class ProjectManager {
      * @param \Organizations\OrganizationStruct $organization
      */
     public function setOrganization( OrganizationStruct $organization ) {
+        $this->projectStructure['id_organization'] = $organization->id ;
     }
 
     /**

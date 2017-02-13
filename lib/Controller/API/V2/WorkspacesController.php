@@ -33,11 +33,15 @@ class WorkspacesController extends KleinController {
 
         try {
 
+            $this->requireIdentifiedUser();
+
             if( empty( $wSpaceStruct->name ) ){
                 throw new InvalidArgumentException( "Wrong parameter :name ", 400 );
             }
 
-            $org = ( new MembershipDao() )->findOrganizationByIdAndUser( $wSpaceStruct->id_organization, $this->user );
+            $org = ( new MembershipDao() )->findOrganizationByIdAndUser( $wSpaceStruct->id_organization,
+                $this->user
+            );
             if ( empty( $org ) ) {
                 throw new AuthorizationError( "Not Authorized", 401 );
             }
@@ -82,7 +86,7 @@ class WorkspacesController extends KleinController {
 
     }
 
-    public function update(){
+    public function update() {
 
         $requestContent = json_decode( file_get_contents( 'php://input' ) );
 
