@@ -325,6 +325,25 @@ UI = {
 
     },
 
+    removeWorkspace:function (organization, ws) {
+        return $.ajax({
+            async: true,
+            type: "DELETE",
+            url : "/api/v2/orgs/" + organization.id + "/workspaces/" + ws.id
+        });
+    },
+
+    renameWorkspace:function (organization, ws) {
+        let data = {
+            name: ws.name
+        };
+        return $.ajax({
+            data: JSON.stringify(data),
+            type: "PUT",
+            url : "/api/v2/orgs/" + organization.id + "/workspaces/" + ws.id
+        });
+    },
+
     getWorkspaces: function (organization) {
         return $.ajax({
             async: true,

@@ -5,7 +5,9 @@ class CreateWorkspace extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            organization: this.props.organization
+            organization: this.props.organization,
+            showRemoveMessageWSId: null,
+            showModifyMessageWSId: null,
         };
         this.updateOrganization = this.updateOrganization.bind(this);
     }
@@ -19,8 +21,33 @@ class CreateWorkspace extends React.Component {
     }
 
     createWorkspace() {
-        ManageActions.createWorkspace(this.state.organization.toJS(), this.inputNewWS.value);
-        this.inputNewWS.value = "";
+        if ( this.inputNewWS.value.length > 0) {
+            ManageActions.createWorkspace(this.state.organization.toJS(), this.inputNewWS.value);
+            this.inputNewWS.value = "";
+        }
+    }
+
+    showRemoveWS(WSId) {
+        this.setState({
+            showRemoveMessageWSId: WSId
+        });
+    }
+
+    showModifyWS(WSId) {
+        this.setState({
+            showModifyMessageWSId: WSId
+        });
+    }
+
+    removeWS(ws) {
+        ManageActions.removeWorkspace(this.state.organization.toJS(), ws.toJS());
+    }
+
+    undoRemoveAction() {
+        this.setState({
+            showRemoveMessageWSId: null,
+            showModifyMessageWSId: null
+        });
     }
 
     updateOrganization(organization) {
@@ -31,24 +58,83 @@ class CreateWorkspace extends React.Component {
         }
     }
 
-    getWorkspacesList() {
-        if (this.state.organization.get('workspaces')) {
-            return this.state.organization.get('workspaces').map((ws, i) => (
-                <div className="item"
-                     key={'user' + ws.get('id')}>
-                    <div className="right floated content">
-                        <div className="ui button">Modify Name</div>
-                        <div className="ui button">Remove</div>
-                    </div>
-                    <div className="content">
-                        {ws.get('name')}
-                    </div>
-                </div>
+    modifyWSName(ws) {
+        if (this.wsName.value != "" && this.wsName.value !== this.state.organization.get('name')) {
+            ws = ws.set("name", this.wsName.value);
+            ManageActions.renameWorkspace(this.state.organization.toJS(), ws.toJS());
+        }
+    }
 
-            ));
+    handleKeyPressInModify(ws, event) {
+        if(event.key == 'Enter'){
+            this.modifyWSName(ws);
+        }
+    }
+
+    handleKeyPressInCreate(event) {
+        if(event.key == 'Enter'){
+            this.createWorkspace();
+        }
+    }
+
+    getWorkspacesList() {
+        let self = this;
+        if (this.state.organization.get('workspaces')) {
+            return this.state.organization.get('workspaces').map(function(ws, i) {
+                if (self.state.showRemoveMessageWSId == ws.get('id')) {
+                    return <div className="item"
+                                key={'WS' + ws.get('id')}>
+                        <div className="right floated content">
+                            <div className="ui button green" onClick={self.removeWS.bind(self, ws)}>YES
+                            </div>
+                        </div>
+                        <div className="right floated content">
+                            <div className="ui button red" onClick={self.undoRemoveAction.bind(self)}>NO</div>
+                        </div>
+                        <div className="content">
+                            Are you sure you want to remove this workspace?
+                        </div>
+                    </div>
+                } if (self.state.showModifyMessageWSId == ws.get('id')) {
+                    return <div className="item"
+                                key={'WS' + ws.get('id')}>
+                        <div className="right floated content">
+                            <div className="ui button green" onClick={self.modifyWSName.bind(self, ws)}>OK</div>
+                        </div>
+                        <div className="right floated content">
+                            <div className="ui button red" onClick={self.undoRemoveAction.bind(self)}>CANCEL</div>
+                        </div>
+                        <div className="content">
+                            <div className="ui input focus">
+                                <input type="text" defaultValue={ws.get('name')}
+                                onKeyPress={self.handleKeyPressInModify.bind(self, ws)}
+                                       ref={(wsName) => self.wsName = wsName}/>
+                            </div>
+                        </div>
+                    </div>;
+                } else {
+                    return <div className="item"
+                                key={'user' + ws.get('id')}>
+                        <div className="right floated content">
+                            <div className="ui button" onClick={self.showModifyWS.bind(self, ws.get('id'))}>Modify Name</div>
+                            <div className="ui button" onClick={self.showRemoveWS.bind(self, ws.get('id'))}>Remove</div>
+                        </div>
+                        <div className="content">
+                            {ws.get('name')}
+                        </div>
+                    </div>;
+                }
+            });
+
         } else {
             return '';
         }
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        return (nextState.organization !== this.state.organization ||
+        nextState.showRemoveMessageWSId !== this.state.showRemoveMessageWSId ||
+        nextState.showModifyMessageWSId !== this.state.showModifyMessageWSId)
     }
 
     render() {
@@ -77,7 +163,8 @@ class CreateWorkspace extends React.Component {
                                 <h3>Create New Workspace into ORGANIZATION </h3>
                                 <div className="ui large fluid icon input">
                                     <input type="text" placeholder="Workspace Name"
-                                           ref={(inputNewWS) => this.inputNewWS = inputNewWS}/>
+                                           ref={(inputNewWS) => this.inputNewWS = inputNewWS}
+                                           onKeyPress={this.handleKeyPressInCreate.bind(this)}/>
                                     <i className="icon-pencil icon"/>
                                 </div>
                             </div>

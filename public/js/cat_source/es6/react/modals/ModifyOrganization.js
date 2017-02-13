@@ -14,12 +14,12 @@ class ModifyOrganization extends React.Component {
     }
 
     updateOrganization(organization) {
-        this.setState({
-            organization: organization
-        });
+        if (this.state.organization.get('id') == organization.get('id')) {
+            this.setState({
+                organization: organization
+            });
+        }
     }
-
-
 
     showRemoveUser(userId) {
         this.setState({

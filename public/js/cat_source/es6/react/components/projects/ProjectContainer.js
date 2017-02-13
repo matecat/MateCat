@@ -299,7 +299,7 @@ class ProjectContainer extends React.Component {
 
     getDropDownUsers() {
        let result = '';
-       if (this.props.organization.get('members')) {
+       if (this.props.organization.get('members') && this.props.organization.get("type") !== 'personal') {
            let members = this.props.organization.get('members').map((user, i) => (
                <div className="item " data-value={user.get('uid')}
                     key={'user' + user.get('uid')}>
@@ -331,7 +331,7 @@ class ProjectContainer extends React.Component {
                            </div>
                        </div>
                    </div>;
-          }
+       }
        return result;
    }
 

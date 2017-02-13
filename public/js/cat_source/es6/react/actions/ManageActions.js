@@ -284,6 +284,26 @@ let ManageActions = {
         });
     },
 
+    removeWorkspace: function (organization, ws) {
+        UI.removeWorkspace(organization,ws).done(function (response) {
+            AppDispatcher.dispatch({
+                actionType: ManageConstants.UPDATE_WORKSPACES,
+                organization: organization,
+                workspaces: response.workspaces,
+            });
+        });
+    },
+
+    renameWorkspace: function (organization, ws) {
+        UI.renameWorkspace(organization,ws).done(function (response) {
+            AppDispatcher.dispatch({
+                actionType: ManageConstants.UPDATE_WORKSPACES,
+                organization: organization,
+                workspaces: response.workspaces,
+            });
+        });
+    },
+
     addUserToOrganization: function (organization, userEmail) {
         UI.addUserToOrganization(organization, userEmail).done(function (data) {
             AppDispatcher.dispatch({
