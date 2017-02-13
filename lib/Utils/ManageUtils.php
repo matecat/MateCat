@@ -22,12 +22,15 @@ class ManageUtils {
             Users_UserStruct $user, $start, $step, $search_in_pname,
             $search_source, $search_target, $search_status, $search_only_completed,
             $project_id,
-            \Organizations\OrganizationStruct $organization = null
+            \Organizations\OrganizationStruct $organization = null,
+            \Organizations\WorkspaceStruct $workspace = null,
+            Users_UserStruct $assignee = null
     ) {
 
         $data = getProjects(
             $user, $start, $step, $search_in_pname, $search_source, $search_target,
-            $search_status, $search_only_completed, $project_id, $organization
+            $search_status, $search_only_completed, $project_id, $organization,
+            $workspace, $assignee
         );
 
         $projects     = array();
