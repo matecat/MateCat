@@ -35,7 +35,7 @@ class ProjectsController extends KleinController {
 
         $updatedStruct = $projectModel->update();
         $formatted = new Project() ;
-        $this->response->json( $formatted->renderItem( $updatedStruct ) ) ;
+        $this->response->json( array( 'project' => $formatted->renderItem( $updatedStruct ) ) ) ;
 
     }
 
