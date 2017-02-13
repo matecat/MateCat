@@ -123,18 +123,11 @@ let ManageActions = {
                 hideSpinner: false,
             });
         });
-        // AppDispatcher.dispatch({
-        //     actionType: ManageConstants.FILTER_PROJECTS,
-        //     user: user,
-        //     workspace: workspace,
-        //     name: name,
-        //     status: status
-        // });
     },
 
-    changeProjectAssignee: function (project, user) {
-        UI.changeProjectAssignee(project, user).done(
-            function () {
+    changeProjectAssignee: function (organization, project, user) {
+        UI.changeProjectAssignee(organization.get("id"), project.get("id"), user.get("id")).done(
+            function (response) {
                 AppDispatcher.dispatch({
                     actionType: ManageConstants.CHANGE_PROJECT_ASSIGNEE,
                     project: project,
@@ -157,8 +150,8 @@ let ManageActions = {
 
     },
 
-    changeProjectName: function (project, newName) {
-        UI.changeProjectName(project.get('id'), project.get('password'), newName).done(
+    changeProjectName: function (organization, project, newName) {
+        UI.changeProjectName(organization.get("id"), project.get("id"), newName).done(
             function () {
                 AppDispatcher.dispatch({
                     actionType: ManageConstants.CHANGE_PROJECT_NAME,
@@ -266,7 +259,7 @@ let ManageActions = {
             });
             AppDispatcher.dispatch({
                 actionType: ManageConstants.RENDER_PROJECTS,
-                projects: response.projects,
+                projects: response.data,
                 organization: organization,
                 hideSpinner: false,
             });

@@ -84,7 +84,6 @@ class ProjectContainer extends React.Component {
     }
 
     archiveProject() {
-
         ManageActions.updateStatusProject(this.props.project, 'archived');
     }
 
@@ -99,20 +98,17 @@ class ProjectContainer extends React.Component {
             }
         });
         if ( !this.props.project.get('user') || newUser.get("id") != this.props.project.get('user').get('id')) {
-            ManageActions.changeProjectAssignee(this.props.project.toJS(), newUser.toJS());
+            ManageActions.changeProjectAssignee(this.props.organization, this.props.project, newUser);
         }
     }
 
-    onKeyPressEvent(e) {
-        if(e.which == 27) {
-            this.closeSearch();
-        } else if (e.which == 13 || e.keyCode == 13) {
-            ManageActions.changeProjectName(this.props.project, $(this.projectNameInput).val());
+    onKeyPressEvent(event) {
+        if(event.key == 'Enter'){
+            ManageActions.changeProjectName(this.props.organization, this.props.project, this.projectNameInput.value);
             e.preventDefault();
             return false;
         }
     }
-
 
     getProjectMenu(activityLogUrl) {
         let menuHtml = <div className="menu">
@@ -410,9 +406,10 @@ class ProjectContainer extends React.Component {
                                                     <div className="ui form">
                                                         <div className="field">
                                                             <div className="ui icon input">
-                                                                <input type="text" defaultValue={this.props.project.get('name')}
+                                                                <input type="text"
                                                                        ref={(input) => this.projectNameInput = input}
-                                                                       onKeyPress={this.onKeyPressEvent.bind(this)}/>
+                                                                       onKeyUp={this.onKeyPressEvent.bind(this)}
+                                                                        defaultValue={this.props.project.get('name')}/>
                                                                 <i className="icon-pencil icon" />
                                                             </div>
                                                         </div>
