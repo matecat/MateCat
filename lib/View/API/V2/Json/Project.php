@@ -14,16 +14,37 @@ use Projects_ProjectStruct;
 
 class Project {
 
-    public function __construct( Projects_ProjectStruct $data ) {
+    /**
+     * @var Projects_ProjectStruct[]
+     */
+    protected $data ;
+
+    public function __construct( Projects_ProjectStruct $data = null ) {
         $this->data = $data;
     }
 
+    /**
+     * @param $data Projects_ProjectStruct
+     * @return array
+     */
+    public function renderItem( $data ) {
+        return array(
+            'id'              => (int) $data->id ,
+            'id_assignee'     => (int) $data->id_assignee,
+            'name'            => $data->name,
+            'id_workspace'    => (int) $data->id_workspace,
+            'id_organization' => (int) $data->id_organization,
+        );
+    }
+
     public function render() {
-        unset( $this->data->id_engine_mt );
-        unset( $this->data->id_engine_tm );
-        unset( $this->data->for_debug );
-        unset( $this->data->pretranslate_100 );
-        return $this->data;
+        $out = [] ;
+
+        foreach( $this->data as $project ) {
+            $out[] = $this->renderItem( $project ) ;
+        }
+
+        return $out ;
     }
 
 }

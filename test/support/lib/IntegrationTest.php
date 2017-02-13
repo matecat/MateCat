@@ -11,6 +11,18 @@ abstract class IntegrationTest extends AbstractTest {
 
     protected $conn ;
 
+    protected function prepareUserAndApiKey() {
+        $this->test_data->user    = Factory_User::create();
+        $this->test_data->api_key = Factory_ApiKey::create( array(
+            'uid' => $this->test_data->user->uid,
+        ) );
+
+        $this->test_data->headers = array(
+            "X-MATECAT-KEY: {$this->test_data->api_key->api_key}",
+            "X-MATECAT-SECRET: {$this->test_data->api_key->api_secret}"
+        );
+    }
+
     function getResponse() {
         // This is deprecated , use curlTest instance in your tests instead
         return $this->makeRequest();
