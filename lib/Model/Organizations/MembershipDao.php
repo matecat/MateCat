@@ -8,6 +8,7 @@
 
 namespace Organizations;
 
+use API\V2\Json\User;
 use PDO ;
 use Users_UserDao;
 
@@ -32,9 +33,10 @@ class MembershipDao extends \DataAccess_AbstractDao
     ";
 
     protected static $_query_member_list = "
-          SELECT ou.id, ou.id_organization, ou.uid, ou.is_admin, email, first_name, last_name FROM organizations_users ou
-              JOIN users USING ( uid )
-            WHERE ou.id_organization = :id_organization
+          SELECT ou.id, ou.id_organization, ou.uid, ou.is_admin
+          FROM organizations_users ou
+          JOIN users USING ( uid )
+          WHERE ou.id_organization = :id_organization
     ";
 
     protected static $_delete_member = "
@@ -111,12 +113,22 @@ class MembershipDao extends \DataAccess_AbstractDao
     public function getMemberListByOrganizationId( $id_organization ){
         $stmt = $this->_getStatementForCache( self::$_query_member_list );
         $membershipStruct = new MembershipStruct();
-        return $this->_fetchObject( $stmt,
+
+        /**
+         * @var $members MembershipStruct[]
+         */
+        $members = $this->_fetchObject( $stmt,
                 $membershipStruct,
                 array(
                         'id_organization' => $id_organization,
                 )
         );
+
+        foreach( $members as $member ) {
+            $member->setUser( ( new Users_UserDao())->setCacheTTL( 60 * 10 )->getByUid( $member->uid ) );
+        }
+
+        return $members ;
     }
 
 

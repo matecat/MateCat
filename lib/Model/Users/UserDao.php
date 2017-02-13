@@ -16,6 +16,17 @@ class Users_UserDao extends DataAccess_AbstractDao {
 
     protected static $_query_user_by_uid = " SELECT * FROM users WHERE uid = :uid ";
 
+    public function getByUids($uids) {
+        $stmt = $this->_getStatementForCache( self::$_query_user_by_uid );
+        $userQuery = new Users_UserStruct();
+        $userQuery->uids = $uids;
+        return $this->_fetchObject( $stmt,
+            $userQuery,
+            array(
+                'uids' => $userQuery->uids,
+            )
+        ) ;
+    }
     /**
      * @param $token
      * @return Users_UserStruct
@@ -171,34 +182,6 @@ class Users_UserDao extends DataAccess_AbstractDao {
         $arr_result = $this->_fetch_array( $query );
 
         return $this->_buildResult( $arr_result );
-    }
-
-    public function getByUids( $uids_array ) {
-
-        $sanitized_array = array();
-        foreach ( $uids_array as $k => $v ) {
-            if ( !is_numeric( $v ) ) {
-                array_push( $sanitized_array, ( (int)$v[ 'uid' ] ) );
-            } else {
-                array_push( $sanitized_array, ( (int)$v ) );
-            }
-        }
-
-        if ( empty( $sanitized_array ) ) {
-            return array();
-        }
-
-        $query = "SELECT * FROM " . self::TABLE .
-                " WHERE uid IN ( " . str_repeat( '?,', count( $sanitized_array ) - 1) . '?' . " ) ";
-
-        $stmt = $this->setCacheTTL( 60 * 10 )->_getStatementForCache( $query );
-
-        return $this->_fetchObject(
-                $stmt,
-                new Users_UserStruct(),
-                $sanitized_array
-        );
-
     }
 
     /**

@@ -5,6 +5,7 @@ namespace API\App;
 use API\App\Json\ConnectedService;
 use API\V2\AuthorizationError;
 use API\V2\Json\Organization;
+use API\V2\Json\User;
 use API\V2\KleinController;
 
 use ConnectedServices\ConnectedServiceDao ;
@@ -29,13 +30,7 @@ class UserController extends AbstractStatefulKleinController  {
 
         // TODO: move this into a formatter class
         $this->response->json( array(
-            'user' => array(
-                'uid' => $this->user->uid,
-                'first_name' => $this->user->first_name,
-                'last_name' => $this->user->last_name,
-                'email' => $this->user->email,
-                'has_password' => !is_null($this->user->pass)
-            ),
+            'user' => User::renderItem( $this->user ),
             'connected_services' => ( new ConnectedService( $this->connectedServices ))->render(),
 
             // TODO: this is likely to be unsafe to be passed here without a whitelist.
