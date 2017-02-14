@@ -53,7 +53,9 @@ class CreateWorkspace extends React.Component {
     updateOrganization(organization) {
         if (this.state.organization.get('id') == organization.get('id')) {
             this.setState({
-                organization: organization
+                organization: organization,
+                showRemoveMessageWSId: null,
+                showModifyMessageWSId: null
             });
         }
     }
@@ -61,7 +63,7 @@ class CreateWorkspace extends React.Component {
     modifyWSName(ws) {
         if (this.wsName.value != "" && this.wsName.value !== this.state.organization.get('name')) {
             ws = ws.set("name", this.wsName.value);
-            ManageActions.renameWorkspace(this.state.organization.toJS(), ws.toJS());
+            ManageActions.renameWorkspace(this.state.organization, ws);
         }
     }
 

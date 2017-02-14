@@ -288,17 +288,17 @@ let ManageActions = {
     },
 
     renameWorkspace: function (organization, ws) {
-        UI.renameWorkspace(organization,ws).done(function (response) {
+        UI.renameWorkspace(organization.toJS(), ws.toJS()).done(function (response) {
             AppDispatcher.dispatch({
-                actionType: ManageConstants.UPDATE_WORKSPACES,
+                actionType: ManageConstants.UPDATE_WORKSPACE,
                 organization: organization,
-                workspaces: response.workspaces,
+                workspace: response.workspace,
             });
         });
     },
 
     addUserToOrganization: function (organization, userEmail) {
-        UI.addUserToOrganization(organization, userEmail).done(function (data) {
+        UI.addUserToOrganization(organization.toJS(), userEmail).done(function (data) {
             AppDispatcher.dispatch({
                 actionType: ManageConstants.UPDATE_ORGANIZATION_MEMBERS,
                 organization: organization,
@@ -308,7 +308,7 @@ let ManageActions = {
     },
 
     removeUserFromOrganization: function (organization, userId) {
-        UI.removeUserFromOrganization(organization, userId).done(function (data) {
+        UI.removeUserFromOrganization(organization.toJS(), userId).done(function (data) {
             AppDispatcher.dispatch({
                 actionType: ManageConstants.UPDATE_ORGANIZATION_MEMBERS,
                 organization: organization,

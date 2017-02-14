@@ -137,7 +137,7 @@ UI = {
             return;
         }
         UI.Search.currentPage = UI.Search.currentPage + 1;
-        this.getProjects().done(function (response) {
+        this.tempGetProjects().done(function (response) {
             let projects = response.data;
             if (projects.length > 0) {
                 ManageActions.renderMoreProjects(projects);
@@ -283,7 +283,8 @@ UI = {
         if (organization.type === "personal") {
             return this.tempGetProjects();
         } else if (organization.id === 2) {
-            projects = [].concat(this.ebayProjects, this.mscProjects, this.adWordsProjects, this.youtubeProjects);
+            return this.tempGetProjects();
+            // projects = [].concat(this.ebayProjects, this.mscProjects, this.adWordsProjects, this.youtubeProjects);
         } else if (organization.id === 3) {
             projects = [].concat(this.ebayProjects);
         } else {
@@ -436,7 +437,7 @@ UI = {
         };
         return $.ajax({
             data: JSON.stringify(data),
-            type: "put",
+            type: "PUT",
             url : "/api/v2/orgs/" + idOrg + "/projects/" + idProject,
         });
     },
