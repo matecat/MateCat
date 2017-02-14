@@ -37,7 +37,7 @@ class ProjectContainer extends React.Component {
         this.getLastAction();
 
         if (this.dropdownUsers) {
-            if (this.props.project.get('user') ) {
+            if (this.props.project.get('id_assignee') ) {
                 this.dropdownUsers.classList.remove("project-not-assigned");
                 this.dropdownUsers.classList.add("shadow-1");
                 this.dropdownUsers.classList.add("project-assignee");

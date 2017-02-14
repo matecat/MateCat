@@ -15,6 +15,9 @@ class Header extends React.Component {
     }
 
     componentDidMount () {
+        if (this.state.selectedOrganizationId) {
+            dropdownOrganizations.dropdown('set selected',  this.state.selectedOrganizationId);
+        }
         OrganizationsStore.addListener(ManageConstants.RENDER_ORGANIZATIONS, this.renderOrganizations);
         OrganizationsStore.addListener(ManageConstants.UPDATE_ORGANIZATIONS, this.updateOrganizations);
         OrganizationsStore.addListener(ManageConstants.CHOOSE_ORGANIZATION, this.chooseOrganizations);
@@ -28,16 +31,12 @@ class Header extends React.Component {
 
     componentDidUpdate() {
         let self = this;
-
         if (this.state.organizations.size > 0){
             let dropdownOrganizations = $(this.dropdownOrganizations);
-            if (this.state.selectedOrganizationId) {
-                dropdownOrganizations.dropdown('set selected', '' + this.state.selectedOrganizationId);
-                // dropdownOrganizations.dropdown({
-                //     onChange: function(value, text, $selectedItem) {
-                //         self.changeOrganization(value);
-                //     }
-                // });
+            if (this.state.selectedOrganizationId ) {
+                setTimeout(function () {
+                    dropdownOrganizations.dropdown('set selected', self.state.selectedOrganizationId);
+                });
             }
         }
     }
@@ -84,6 +83,7 @@ class Header extends React.Component {
 
     getOrganizationsSelect() {
         let result = '';
+        var self = this;
         if (this.state.organizations.size > 0) {
             let items = this.state.organizations.map((organization, i) => (
                 <div className="item" data-value={organization.get('id')}
@@ -97,11 +97,12 @@ class Header extends React.Component {
                     </a>
                 </div>
             ));
+
             result = <div className="ui dropdown fluid selection organization-dropdown top-5"
                           ref={(dropdownOrganizations) => this.dropdownOrganizations = dropdownOrganizations}>
                 <input type="hidden" name="gender" />
                 <i className="dropdown icon"/>
-                <div className="default text">Choose Organization</div>
+                <div className="default text">Choose organization</div>
                 <div className="menu">
                     <div className="header" style={{cursor: 'pointer'}} onClick={this.openCreateOrganizations.bind(this)}>New Organization
                         <a className="organization-filter button show">

@@ -76,10 +76,6 @@ UI = {
             self.selectedOrganization = data.organizations[0];
             self.selectedUser = {};
             self.getWorkspaces(self.selectedOrganization).done(function (data) {
-                self.selectedWorkspace = {
-                    id: 0,
-                    name: 'General'
-                };
                 self.selectedOrganization.workspaces = data.workspaces;
                 ManageActions.selectOrganization(self.selectedOrganization);
                 self.getProjects(self.selectedOrganization).done(function (response) {
