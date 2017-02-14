@@ -12,6 +12,7 @@ namespace API\V2;
 
 use API\V2\Exceptions\AuthorizationError;
 use API\V2\Json\Error;
+use API\V2\Json\Workspace;
 use InvalidArgumentException;
 use Organizations\MembershipDao;
 use Organizations\WorkspaceDao;
@@ -49,7 +50,7 @@ class WorkspacesController extends KleinController {
             $wSpaceDao->create( $wSpaceStruct );
             $wSpaceDao->destroyCacheForOrganizationId( $this->request->id_organization ); //clean the cache
 
-            $this->response->json( [ 'workspace' => $wSpaceStruct ] );
+            $this->response->json( [ 'workspace' => Workspace::renderItem( $wSpaceStruct ) ] );
 
         } catch ( \PDOException $e ){
             $this->response->code( 503 );
@@ -77,7 +78,9 @@ class WorkspacesController extends KleinController {
             }
 
             $workSpacesList = $wSpaceDao->setCacheTTL( 60 * 60 * 24 )->getByOrganizationId( $this->request->id_organization );
-            $this->response->json( [ 'workspaces' => $workSpacesList ] );
+            $formatter = new Workspace();
+
+            $this->response->json( [ 'workspaces' => $formatter->render( $workSpacesList ) ] );
 
         } catch( AuthorizationError $e ){
             $this->response->code( 401 );
@@ -108,7 +111,7 @@ class WorkspacesController extends KleinController {
             $wSpaceDao->update( $wStruct );
             $wSpaceDao->destroyCacheForOrganizationId( $this->request->id_organization ); //clean the cache
 
-            $this->response->json( [ 'workspace' => $wStruct ] );
+            $this->response->json( [ 'workspace' => Workspace::renderItem($wStruct) ] );
 
         } catch ( \PDOException $e ){
             $this->response->code( 503 );
