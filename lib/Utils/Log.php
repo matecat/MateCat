@@ -21,6 +21,11 @@ use Monolog\Formatter\LogstashFormatter;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 
+/**
+ * Class Log
+ *
+ * @deprecated
+ */
 class Log {
 
     protected static $fileNamePath;

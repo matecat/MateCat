@@ -223,7 +223,9 @@ abstract class DataAccess_AbstractDao {
         if ( isset( $this->cache_con ) && !empty( $this->cache_con ) ) {
             $cacheQuery = md5( $query );
             Log::doLog( "Fetching from cache $cacheQuery - query: \"" . $query . "\"" );
+            Logger::sqlCache()->info("fetching", [ $cacheQuery, $query ] );
             $_existingResult = unserialize( $this->cache_con->get( $cacheQuery ) );
+            Logger::sqlCache()->info("fetched result", [$_existingResult ] );
         }
 
         return $_existingResult;
@@ -240,6 +242,7 @@ abstract class DataAccess_AbstractDao {
 
         if ( isset( $this->cache_con ) && !empty( $this->cache_con ) ) {
             $this->cache_con->setex( md5( $query ), $this->cacheTTL, serialize( $value ) );
+            Logger::sqlCache()->info("setting", [ md5( $query ), serialize( $value ) ] );
         }
     }
 
