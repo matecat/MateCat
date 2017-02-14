@@ -90,10 +90,10 @@ UI = {
 
     },
 
-    reloadProjects: function (organization) {
+    reloadProjects: function () {
         let self = this;
         if ( UI.Search.currentPage === 1) {
-            this.getProjects().done(function (response) {
+            this.getProjects(self.selectedOrganization).done(function (response) {
                 let projects = response.data;
                 ManageActions.renderProjects(projects);
             });
@@ -106,7 +106,7 @@ UI = {
                         $.merge(total_projects, projects);
                     };
             for (let i=1; i<= UI.Search.currentPage; i++ ) {
-                requests.push(this.getProjects(i));
+                requests.push(this.getProjects(self.selectedOrganization, i));
             }
             $.when.apply(this, requests).done(function() {
                 let results = requests.length > 1 ? arguments : [arguments];
@@ -137,7 +137,7 @@ UI = {
             return;
         }
         UI.Search.currentPage = UI.Search.currentPage + 1;
-        this.tempGetProjects().done(function (response) {
+        this.getProjects(this.selectedOrganization).done(function (response) {
             let projects = response.data;
             if (projects.length > 0) {
                 ManageActions.renderMoreProjects(projects);
@@ -190,7 +190,6 @@ UI = {
             id:			id,             // Job or Project Id
             password:   password,          // Job or Project Password
             page:		UI.Search.currentPage,        //The pagination ??
-            step:		UI.pageStep,    // Number of Projects that returns from getProjects
             only_if:	only_if,        // State before, for example resume project change to 'active' only_if previous state is archived
             undo:		0               // ?? REMOVED in backend endpoint. If needed, this MUST be re-implemented with sanity....
         };
@@ -222,8 +221,10 @@ UI = {
 
         let self = this;
         this.selectedOrganization = organization;
+        this.Search.filter = {};
+        UI.Search.currentPage = 1;
         return this.getOrganizationStructure(organization).then(function () {
-                return self.getProjects(self.selectedOrganization, "all");
+                return self.getProjects(self.selectedOrganization);
             }
         );
     },
@@ -277,32 +278,11 @@ UI = {
     /**
      * Retrieve Projects. Passing filters is possible to retrieve projects
      */
-    getProjects: function(organization, workspace) {
-        var projects;
-        var self = this;
-        if (organization.type === "personal") {
-            return this.tempGetProjects();
-        } else if (organization.id === 2) {
-            return this.tempGetProjects();
-            // projects = [].concat(this.ebayProjects, this.mscProjects, this.adWordsProjects, this.youtubeProjects);
-        } else if (organization.id === 3) {
-            projects = [].concat(this.ebayProjects);
-        } else {
-            projects = [].concat(this.ebayProjects);
-        }
-
-        let response = {
-            data: projects
-        };
-        let deferred = $.Deferred().resolve(response);
-        return deferred.promise();
-
-    },
-
-    tempGetProjects: function (page) {
+    getProjects: function(organization, page) {
         let pageNumber = (page) ? page : UI.Search.currentPage;
         let data = {
             action: 'getProjects',
+            id_organization: organization.id,
             page:	pageNumber,
             filter: (!$.isEmptyObject(UI.Search.filter)) ? 1 : 0,
         };
@@ -312,8 +292,6 @@ UI = {
         return APP.doRequest({
             data: data,
             success: function(d){
-                data = d.data;
-                UI.pageStep = d.pageStep;
                 if( typeof d.errors != 'undefined' && d.errors.length ){
                     window.location = '/';
                 }

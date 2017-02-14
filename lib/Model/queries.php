@@ -1806,17 +1806,13 @@ function getProjects( Users_UserStruct $user, $start, $step,
         $search_status, $search_only_completed
     ) ;
 
-    $data['email'] = $user->email ;
-
     if ( $project_id ) {
         $conditions[] = " p.id = :project_id " ;
         $data['project_id'] = $project_id ;
     }
 
-    $ownership_condition = " ( p.id_customer = :email OR j.owner = :email )" ;
-
     if ( !is_null( $organization ) ) {
-        $ownership_condition .= " OR p.id_organization = :id_organization " ;
+        $conditions[] = " p.id_organization = :id_organization " ;
         $data [ 'id_organization' ] = $organization->id ;
     }
 
@@ -1829,9 +1825,6 @@ function getProjects( Users_UserStruct $user, $start, $step,
         $conditions[] = " p.id_assignee = :id_assignee " ;
         $data ['id_assignee'] = $assignee->id ;
     }
-
-
-    $conditions[] = " ( $ownership_condition ) " ;
 
     $where_query = implode( " AND ", $conditions );
 
@@ -1945,22 +1938,16 @@ function getProjectsNumber( Users_UserStruct $user, $search_in_pname, $search_so
         $search_status, $search_only_completed
     ) ;
 
-    $data['email'] = $user->email ;
 
     $query  = " SELECT COUNT( distinct id_project ) AS c
     FROM projects p
     INNER JOIN jobs j ON j.id_project = p.id
 
-    INNER JOIN users on users.email = p.id_customer
-
-    WHERE id_customer = :email
     " ;
 
-    // TODO: duplicated code for ownership condition
-    $ownership_condition = " ( p.id_customer = :email OR j.owner = :email )" ;
 
     if ( !is_null( $organization ) ) {
-        $ownership_condition .= " OR p.id_organization = :id_organization " ;
+        $conditions[] = " p.id_organization = :id_organization " ;
         $data [ 'id_organization' ] = $organization->id ;
     }
 
@@ -1973,7 +1960,6 @@ function getProjectsNumber( Users_UserStruct $user, $search_in_pname, $search_so
         $conditions[] = " id_assignee = :id_assignee " ;
         $data ['id_assignee'] = $assignee->id ;
     }
-    $conditions[] = " ( $ownership_condition ) " ;
 
 
     if ( count( $conditions ) ) {

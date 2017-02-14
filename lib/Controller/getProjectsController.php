@@ -190,7 +190,7 @@ class getProjectsController extends ajaxController {
      * @throws Exception
      */
     private function filterWorkspace($organization) {
-        if ( is_null($this->id_organization ) ) return ;
+        if ( is_null($this->id_workspace ) ) return ;
 
         $dao = new \Organizations\WorkspaceDao() ;
         $workspaces = $dao->getByOrganizationId($organization->id) ;

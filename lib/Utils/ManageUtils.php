@@ -178,6 +178,8 @@ class ManageUtils {
             $project[ 'id_tms' ]         = $project2info[ $project[ 'id' ] ][ 'id_tms' ];
 
             $project[ 'features' ] = $item[ 'features' ] ;
+            $project[ 'id_assignee' ] = $item[ 'id_assignee' ] ;
+            $project[ 'id_workspace' ] = $item[ 'id_workspace' ] ;
 
             $projects[ ] = $project;
         }

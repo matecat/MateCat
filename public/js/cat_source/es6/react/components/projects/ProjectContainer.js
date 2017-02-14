@@ -30,8 +30,8 @@ class ProjectContainer extends React.Component {
         });
         this.initUsersDropdown();
         //Select the assigee
-        if ( this.props.project.get('assignee_id') ) {
-            $(this.dropdownUsers).dropdown('set selected', this.props.project.get('assignee_id'));
+        if ( this.props.project.get('id_assignee') ) {
+            $(this.dropdownUsers).dropdown('set selected', this.props.project.get('id_assignee'));
         }
 
         this.getLastAction();
@@ -57,7 +57,7 @@ class ProjectContainer extends React.Component {
         console.log("Updated Project : " + this.props.project.get('id'));
 
         if (this.dropdownUsers) {
-            if (this.props.project.get('user') ) {
+            if (this.props.project.get('id_assignee') ) {
                 this.dropdownUsers.classList.remove("project-not-assigned");
                 this.dropdownUsers.classList.add("project-assignee");
             } else {
@@ -99,8 +99,8 @@ class ProjectContainer extends React.Component {
                 return true;
             }
         });
-        if ( !this.props.project.get('user') || newUser.get("id") != this.props.project.get('user').get('id')) {
-            ManageActions.changeProjectAssignee(this.props.organization, this.props.project, newUser);
+        if ( !this.props.project.get('id_assignee') || newUser.get('user').get("uid") != this.props.project.get('id_assignee')) {
+            ManageActions.changeProjectAssignee(this.props.organization, this.props.project, newUser.get('user'));
         }
     }
 

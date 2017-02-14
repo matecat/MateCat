@@ -126,7 +126,7 @@ let ManageActions = {
     },
 
     changeProjectAssignee: function (organization, project, user) {
-        UI.changeProjectAssignee(organization.get("id"), project.get("id"), user.get("id")).done(
+        UI.changeProjectAssignee(organization.get("id"), project.get("id"), user.get("uid")).done(
             function (response) {
                 AppDispatcher.dispatch({
                     actionType: ManageConstants.CHANGE_PROJECT_ASSIGNEE,
