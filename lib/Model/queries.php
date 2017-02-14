@@ -1773,6 +1773,7 @@ function conditionsForProjectsQuery(
         $conditions[]  = " j.completed = 1 ";
     }
 
+
     return array( $conditions, $data )  ;
 }
 
@@ -1787,7 +1788,7 @@ function conditionsForProjectsQuery(
  * @param                   $search_onlycompleted bool
  * @param                   $project_id           int
  *
- * @param \Organizations\OrganizationStruct $team
+ * @param \Organizations\OrganizationStruct $organization
  *
  * @return array|int|resource|void
  */
@@ -1795,7 +1796,10 @@ function getProjects( Users_UserStruct $user, $start, $step,
                       $search_in_pname, $search_source, $search_target,
                       $search_status, $search_only_completed,
                       $project_id,
-                      \Organizations\OrganizationStruct $team = null) {
+                      \Organizations\OrganizationStruct $organization = null,
+                      \Organizations\WorkspaceStruct $workspace = null,
+                      Users_UserStruct $assignee = null
+) {
 
     list( $conditions, $data ) = conditionsForProjectsQuery(
         $search_in_pname, $search_source, $search_target,
@@ -1811,10 +1815,21 @@ function getProjects( Users_UserStruct $user, $start, $step,
 
     $ownership_condition = " ( p.id_customer = :email OR j.owner = :email )" ;
 
-    if ( !is_null( $team ) ) {
+    if ( !is_null( $organization ) ) {
         $ownership_condition .= " OR p.id_organization = :id_organization " ;
-        $data [ 'id_organization' ] = $team->id ;
+        $data [ 'id_organization' ] = $organization->id ;
     }
+
+    if ( !is_null( $workspace ) ) {
+        $conditions[] = " p.id_workspace = :id_workspace " ;
+        $data ['id_workspace'] = $workspace->id ;
+    }
+
+    if ( !is_null( $assignee ) ) {
+        $conditions[] = " p.id_assignee = :id_assignee " ;
+        $data ['id_assignee'] = $assignee->id ;
+    }
+
 
     $conditions[] = " ( $ownership_condition ) " ;
 
@@ -1824,6 +1839,9 @@ function getProjects( Users_UserStruct $user, $start, $step,
 
     $projectsQuery =
             "SELECT p.id AS pid,
+                            p.id_organization AS id_organization,
+                            p.id_workspace AS id_workspace,
+                            p.id_assignee AS id_assignee,
                             p.name,
                             p.password,
                             SUM(draft_words + new_words+translated_words+rejected_words+approved_words) as tm_analysis_wc,
@@ -1915,7 +1933,12 @@ function getJobsFromProjects( array $projectIDs, $search_source, $search_target,
 
 }
 
-function getProjectsNumber( Users_UserStruct $user, $search_in_pname, $search_source, $search_target, $search_status, $search_only_completed, \Organizations\OrganizationStruct $team = null) {
+function getProjectsNumber( Users_UserStruct $user, $search_in_pname, $search_source, $search_target, $search_status,
+                            $search_only_completed,
+                            \Organizations\OrganizationStruct $organization = null,
+                            \Organizations\WorkspaceStruct $workspace = null,
+                            Users_UserStruct $assignee = null
+) {
 
     list( $conditions, $data ) = conditionsForProjectsQuery(
         $search_in_pname, $search_source, $search_target,
@@ -1936,11 +1959,20 @@ function getProjectsNumber( Users_UserStruct $user, $search_in_pname, $search_so
     // TODO: duplicated code for ownership condition
     $ownership_condition = " ( p.id_customer = :email OR j.owner = :email )" ;
 
-    if ( !is_null( $team ) ) {
+    if ( !is_null( $organization ) ) {
         $ownership_condition .= " OR p.id_organization = :id_organization " ;
-        $data [ 'id_organization' ] = $team->id ;
+        $data [ 'id_organization' ] = $organization->id ;
     }
 
+    if ( !is_null( $workspace ) ) {
+        $conditions[] = " id_workspace = :id_workspace " ;
+        $data ['id_workspace'] = $workspace->id ;
+    }
+
+    if ( !is_null( $assignee ) ) {
+        $conditions[] = " id_assignee = :id_assignee " ;
+        $data ['id_assignee'] = $assignee->id ;
+    }
     $conditions[] = " ( $ownership_condition ) " ;
 
 

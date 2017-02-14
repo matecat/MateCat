@@ -13,7 +13,7 @@ class ManageUtils {
      * @param                   $search_only_completed bool
      * @param                   $project_id           int
      *
-     * @param \Organizations\OrganizationStruct $team
+     * @param \Organizations\OrganizationStruct $organization
      *
      * @return array
      * @internal param bool $filter_enabled
@@ -21,11 +21,16 @@ class ManageUtils {
     public static function queryProjects(
             Users_UserStruct $user, $start, $step, $search_in_pname,
             $search_source, $search_target, $search_status, $search_only_completed,
-            $project_id, \Organizations\OrganizationStruct $team = null ) {
+            $project_id,
+            \Organizations\OrganizationStruct $organization = null,
+            \Organizations\WorkspaceStruct $workspace = null,
+            Users_UserStruct $assignee = null
+    ) {
 
         $data = getProjects(
             $user, $start, $step, $search_in_pname, $search_source, $search_target,
-            $search_status, $search_only_completed, $project_id, $team
+            $search_status, $search_only_completed, $project_id, $organization,
+            $workspace, $assignee
         );
 
         $projects     = array();
