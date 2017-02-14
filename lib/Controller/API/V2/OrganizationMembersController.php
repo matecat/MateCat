@@ -26,7 +26,7 @@ class OrganizationMembersController extends KleinController {
 
             $membersList = ( new MembershipDao )
                 ->setCacheTTL( 60 * 60 * 24 )
-                ->getMemberListByOrganizationId( (int) $this->request->id_organization );
+                ->getMemberListByOrganizationId( $this->request->id_organization );
 
             $formatter = new Membership( $membersList ) ;
             $this->response->json( array( 'members' => $formatter->render() ) );
