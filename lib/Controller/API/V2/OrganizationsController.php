@@ -83,6 +83,8 @@ class OrganizationsController extends KleinController {
                 throw new AuthorizationError( "Not Authorized", 401 );
             }
 
+            $org->name = $requestContent->name;
+
             $teamDao = new OrganizationDao();
 
             $teamDao->updateOrganizationName( $org );

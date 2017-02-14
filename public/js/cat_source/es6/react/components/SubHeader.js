@@ -32,7 +32,7 @@ class SubHeader extends React.Component {
     changeUser(value) {
         let self = this;
         this.selectedUser = this.props.selectedOrganization.get('members').find(function (member) {
-            if (member.get("id") === parseInt(value)) {
+            if (member.get('user').get("id") === parseInt(value)) {
                 return true;
             }
         });
@@ -79,9 +79,9 @@ class SubHeader extends React.Component {
 
             let members = this.props.selectedOrganization.get('members').map((member, i) => (
                 <div className="item" data-value={member.get('uid')}
-                     key={'user' + member.get('uid')}>
-                    <a className="ui circular label">{APP.getUserShortName(member.toJS())}</a>
-                    {(member.get('uid') === APP.USER.STORE.user.uid)? 'My Projects' : member.get('first_name') + ' ' + member.get('last_name')}
+                     key={'user' + member.get('user').get('uid')}>
+                    <a className="ui circular label">{APP.getUserShortName(member.get('user').toJS())}</a>
+                    {(member.get('user').get('uid') === APP.USER.STORE.user.uid)? 'My Projects' : member.get('user').get('first_name') + ' ' + member.get('user').get('last_name')}
                 </div>
 
             ));
@@ -126,7 +126,7 @@ class SubHeader extends React.Component {
     }
     getWorkspacesSelect() {
         let result = '';
-        let items
+        let items;
         if (this.props.selectedOrganization && this.props.selectedOrganization.get("workspaces")) {
             items = this.props.selectedOrganization.get("workspaces").map((workspace, i) => (
                 <div className="item" data-value={workspace.get('id')}

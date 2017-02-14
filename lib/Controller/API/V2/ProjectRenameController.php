@@ -18,7 +18,10 @@ class ProjectRenameController extends KleinController {
 
     public function rename() {
 
-        $this->project = Projects_ProjectDao::findByIdAndPassword( $this->request->paramsNamed()->id_project, $this->request->paramsNamed()->password );
+        $this->project = Projects_ProjectDao::findByIdAndPassword(
+            $this->request->paramsNamed()->id_project,
+            $this->request->paramsNamed()->password
+        );
 
         $pDao = new Projects_ProjectDao();
         $this->project = $pDao->updateField( $this->project, 'name', $this->request->param( 'name' ) );

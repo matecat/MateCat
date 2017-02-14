@@ -7,6 +7,7 @@ use ApiKeys_ApiKeyStruct;
 use AuthCookie;
 use Users_UserDao;
 use Users_UserStruct;
+use API\V2\Exceptions\AuthorizationError ;
 
 abstract class KleinController {
 
@@ -51,9 +52,14 @@ abstract class KleinController {
     public function respond( $method ) {
         $this->validateAuth();
         $this->identifyUser();
+        $this->validateRequest();
         if ( !$this->response->isLocked() ) {
             $this->$method();
         }
+    }
+
+    public function getRequest() {
+        return $this->request  ;
     }
 
     protected function validateAuth() {
@@ -66,10 +72,11 @@ abstract class KleinController {
             throw new AuthenticationError();
         }
 
-        $this->validateRequest();
-
     }
 
+    public function getPutParams() {
+        return json_decode( file_get_contents( 'php://input' ), true ) ;
+    }
 
     /**
      * @return \Users_UserStruct
@@ -89,11 +96,7 @@ abstract class KleinController {
 
             $dao = new Users_UserDao();
             $dao->setCacheTTL( 3600 );
-
-            if( !( $this->user = $dao->getByUid( $user_credentials[ 'uid' ] ) ) ){
-                $this->user = new \Users_UserStruct(); //Anonymous
-            }
-
+            $this->user = $dao->getByUid( $user_credentials[ 'uid' ] ) ;
         }
 
         return $this->user;
@@ -153,6 +156,12 @@ abstract class KleinController {
         );
 
         $this->downloadToken = null;
+    }
+
+    protected function requireIdentifiedUser() {
+        if ( !$this->user ) {
+            throw new AuthorizationError('Not Authorized', 401);
+        }
     }
 
     protected function afterConstruct() {

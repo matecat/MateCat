@@ -11,6 +11,7 @@ namespace API\V2;
 
 use API\V2\Exceptions\AuthorizationError;
 use API\V2\Json\Error;
+use API\V2\Json\Membership;
 use Organizations\MembershipDao;
 use Organizations\OrganizationDao;
 
@@ -23,8 +24,12 @@ class OrganizationMembersController extends KleinController {
 
         try{
 
-            $membersList = ( new MembershipDao )->setCacheTTL( 60 * 60 * 24 )->getMemberListByOrganizationId( $this->request->id_organization );
-            $this->response->json( array( 'members' => $membersList ) );
+            $membersList = ( new MembershipDao )
+                ->setCacheTTL( 60 * 60 * 24 )
+                ->getMemberListByOrganizationId( (int) $this->request->id_organization );
+
+            $formatter = new Membership( $membersList ) ;
+            $this->response->json( array( 'members' => $formatter->render() ) );
 
         } catch ( \PDOException $e ){
             $this->response->code( 503 );
@@ -50,12 +55,14 @@ class OrganizationMembersController extends KleinController {
                     'members' => $this->request->members
             ] );
             ( new MembershipDao )->destroyCacheForListByOrganizationId( $organizationStruct->id );
-            $membersList = ( new MembershipDao )->setCacheTTL( 60 * 60 * 24 )->getMemberListByOrganizationId( $organizationStruct->id );
+            $membersList = ( new MembershipDao )->setCacheTTL( 60 * 60 * 24 )->getMemberListByOrganizationId(
+                $organizationStruct->id );
+
             \Database::obtain()->commit();
 
             //TODO sent an email to the $params[ 'members' ] ( warning, not all members are registered users )
-
-            $this->response->json( array( 'members' => $membersList ) );
+            $formatter = new Membership( $membersList ) ;
+            $this->response->json( array( 'members' => $formatter->render() ) );
 
         } catch ( \PDOException $e ){
             $this->response->code( 503 );
@@ -84,7 +91,8 @@ class OrganizationMembersController extends KleinController {
             $membersList = $membershipDao->setCacheTTL( 60 * 60 * 24 )->getMemberListByOrganizationId( $this->request->id_organization );
             \Database::obtain()->commit();
 
-            $this->response->json( array( 'members' => $membersList ) );
+            $formatter = new Membership( $membersList ) ;
+            $this->response->json( array( 'members' => $formatter->render() ) );
 
         } catch ( \PDOException $e ){
             $this->response->code( 503 );

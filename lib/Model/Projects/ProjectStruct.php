@@ -16,6 +16,8 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     public $for_debug ;
     public $pretranslate_100 ;
     public $id_qa_model ;
+    public $id_assignee ;
+    public $id_workspace ;
 
 
     /**
