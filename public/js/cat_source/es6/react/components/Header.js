@@ -97,11 +97,11 @@ class Header extends React.Component {
                     </a>
                 </div>
             ));
-            result = <div className="ui dropdown fluid selection organization-dropdown top-5"
+            result = <div className="ui dropdown selection top-5"
                           ref={(dropdownOrganizations) => this.dropdownOrganizations = dropdownOrganizations}>
-                <input type="hidden" name="gender" />
+               {/* <input type="hidden" name="gender" />*/}
                 <i className="dropdown icon"/>
-                <div className="default text">Choose Organization</div>
+                <span className="text">Choose Organization</span>
                 <div className="menu">
                     <div className="divider"></div>
                     <div className="header" style={{cursor: 'pointer'}} onClick={this.openCreateOrganizations.bind(this)}>New Organization
@@ -125,14 +125,16 @@ class Header extends React.Component {
         var selectedOrganization =  this.state.organizations.find(function (org) {
             return org.get('id') == self.state.selectedOrganizationId;
         });
-        return <section className="ui grid nav-mc-bar">
+        return <section className="nav-mc-bar ui grid">
 
-                    <nav className="four column row">
-                        <div className="left floated column">
-                            <a href="/" className="logo logo-col"/>
-                        </div>
-                        <div className="right floated column">
-                            {organizationsSelect}
+                    <nav className="sixteen wide column">
+                        <div className="ui grid">
+                            <div className="eight wide column">
+                                <a href="/" className="logo"/>
+                            </div>
+                            <div className="eight wide right aligned wide column">
+                                {organizationsSelect}
+                            </div>
                         </div>
                     </nav>
                     <SubHeader

@@ -37,7 +37,7 @@ class SearchInput extends React.Component {
 
     render () {
         return (<div className="input-field">
-                    <div className="ui large fluid icon input">
+                    <div className="ui fluid icon input">
                         <input id="search" type="search" required="required"
                                placeholder="Search by project name"
                                ref={(input) => this.textInput = input}

@@ -1,85 +1,49 @@
-@media only screen and (min-width: 1200px) {
-    .ui.container {
-        width: 1280px;
-    }
-    .ui.grid.container {
-        width: 1280px !important;
-    }
-}
-
 .nav-mc-bar {
-    margin: 0 !important;
     nav {
         font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-        height: 48px;
-        line-height: 48px;
+        height: 62px;
+        padding-right: 20px !important;
         color: white;
         background-color: #4d4d4d;
-        padding-top: 0 !important;
-        padding-bottom: 1rem !important;
-        .ui.selection.dropdown {
-            //background: #636363;
-            text-transform: uppercase;
-            font-weight: 600;
-            //color: #ffffff;
-            //border-radius: 0;
-            i {
-                float: right;
-            }
-            .menu {
-                .header {
-                    font-size: 14px;
-                    i {
-                        float: right;
-                        font-size: 18px;
-                    }
+    }
+    .ui.selection.dropdown {
+        font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+        text-transform: uppercase;
+        font-weight: 600;
+
+        i {
+            float: right;
+        }
+        .menu {
+            .header {
+                font-size: 14px;
+                margin: 0px;
+                padding: 15px;
+                &:hover {
+                    background-color: darkgrey;
+                }
+                i {
+                    float: right;
+                    font-size: 18px;
+                    margin-right: 0px;
+                    margin-top: 0px;
                 }
             }
-            .scrolling {
-                .item.item.item {
-                    padding-right: 15px !important;
-                }
+            .divider {
+                margin: 0;
             }
         }
-        .ui.selection.visible.dropdown > .text:not(.default) {
-            font-weight: 600;
-            //color: white;
+        .scrolling {
+            .item.item.item {
+                padding-right: 15px !important;
+            }
         }
     }
-    .sub-head {
-        .ui.selection.dropdown {
-            //background: #e8e8e8;
-            //border: none;
-            i {
-                float: right;
-            }
-            .menu {
-                .header {
-                    font-size: 14px;
-                    i {
-                        float: right;
-                        font-size: 18px;
-                    }
-                }
-            }
-        }
-        .ui.input input {
-            padding: 0.67861429em 3em;
-            background: #e8e8e8;
-            border: none;
-        }
-        .ui.icon.input > i.icon {
-            left: 0px;
-        }
-        .projects-state {
-            //background-color: yellow;
-        }
+    .ui.selection.visible.dropdown > .text:not(.default) {
+        font-weight: 600;
+        //color: white;
     }
 
-}
-
-.logo-col {
-    min-width: 200px;
 }
 
 .logo {
@@ -91,7 +55,7 @@
     width: 145px;
     height: 31px;
     background-size: 130px 26px;
-    left: 67px;
+    left: 81px;
 }
 
 .middle-v {
