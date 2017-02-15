@@ -10,7 +10,6 @@ UI = {
         this.changeJobsOrProjectStatus = this.changeJobsOrProjectStatus.bind(this);
         this.changeJobPassword = this.changeJobPassword.bind(this);
         this.changeOrganization = this.changeOrganization.bind(this);
-        this.changeProjectAssignee = this.changeProjectAssignee.bind(this);
         this.changeProjectWorkspace = this.changeProjectWorkspace.bind(this);
 
         //Job Actions
@@ -77,24 +76,20 @@ UI = {
             self.selectedOrganization = data.organizations[0];
             self.selectedUser = {};
             self.getWorkspaces(self.selectedOrganization).done(function (data) {
-                self.selectedWorkspace = {
-                    id: 0,
-                    name: 'General'
-                };
                 self.selectedOrganization.workspaces = data.workspaces;
                 ManageActions.selectOrganization(self.selectedOrganization);
                 self.getProjects(self.selectedOrganization).done(function (response) {
-                    self.renderProjects(response.projects, self.selectedOrganization);
+                    self.renderProjects(response.data, self.selectedOrganization);
                 });
             });
         });
 
     },
 
-    reloadProjects: function (organization) {
+    reloadProjects: function () {
         let self = this;
         if ( UI.Search.currentPage === 1) {
-            this.getProjects().done(function (response) {
+            this.getProjects(self.selectedOrganization).done(function (response) {
                 let projects = response.data;
                 ManageActions.renderProjects(projects);
             });
@@ -107,7 +102,7 @@ UI = {
                         $.merge(total_projects, projects);
                     };
             for (let i=1; i<= UI.Search.currentPage; i++ ) {
-                requests.push(this.getProjects(i));
+                requests.push(this.getProjects(self.selectedOrganization, i));
             }
             $.when.apply(this, requests).done(function() {
                 let results = requests.length > 1 ? arguments : [arguments];
@@ -134,11 +129,11 @@ UI = {
     },
 
     renderMoreProjects: function () {
-        if (this.selectedOrganization.name !== 'Personal') {
+        if (this.selectedOrganization.type !== 'personal') {
             return;
         }
         UI.Search.currentPage = UI.Search.currentPage + 1;
-        this.getProjects().done(function (response) {
+        this.getProjects(this.selectedOrganization).done(function (response) {
             let projects = response.data;
             if (projects.length > 0) {
                 ManageActions.renderMoreProjects(projects);
@@ -191,7 +186,6 @@ UI = {
             id:			id,             // Job or Project Id
             password:   password,          // Job or Project Password
             page:		UI.Search.currentPage,        //The pagination ??
-            step:		UI.pageStep,    // Number of Projects that returns from getProjects
             only_if:	only_if,        // State before, for example resume project change to 'active' only_if previous state is archived
             undo:		0               // ?? REMOVED in backend endpoint. If needed, this MUST be re-implemented with sanity....
         };
@@ -205,84 +199,6 @@ UI = {
             error: function(d){}
         });
     },
-    /**
-     * Change the password for the job
-     * @param job
-     * @param undo
-     * @param old_pass
-     */
-    changeJobPassword: function(job, undo, old_pass) {
-        let id = job.id;
-        let password = job.password;
-
-        return APP.doRequest({
-            data: {
-                action:		    "changePassword",
-                res: 		    'obj',
-                id: 		    id,
-                password: 	    password,
-                old_password: 	old_pass,
-                undo:           undo
-            },
-            success: function(d){}
-        });
-    },
-
-    /**
-     * Retrieve Projects. Passing filters is possible to retrieve projects
-     */
-    getProjects: function(organization, workspace) {
-        // let pageNumber = (page) ? page : UI.Search.currentPage;
-        // let data = {
-        //     action: 'getProjects',
-        //     page:	pageNumber,
-        //     filter: (!$.isEmptyObject(UI.Search.filter)) ? 1 : 0,
-        // };
-        // // Filters
-        // data = $.extend(data,UI.Search.filter);
-        //
-        // return APP.doRequest({
-        //     data: data,
-        //     success: function(d){
-        //         data = d.data;
-        //         UI.pageStep = d.pageStep;
-        //         if( typeof d.errors != 'undefined' && d.errors.length ){
-        //             window.location = '/';
-        //         }
-        //     },
-        //     error: function(d){
-        //         window.location = '/';
-        //     }
-        // });
-        var projects;
-        var self = this;
-        if (organization.id === 1) {
-            projects = [].concat(this.personalProject, this.otherWorkspace);
-        } else if (organization.id === 2) {
-            projects = [].concat(this.ebayProjects, this.mscProjects, this.adWordsProjects, this.youtubeProjects);
-        } else if (organization.id === 3) {
-            projects = [].concat(this.ebayProjects);
-        } else {
-            projects = [].concat(this.ebayProjects);
-        }
-        // if (UI.Search.filter) {
-        //     $.each(projects, function() {
-        //         // if (self.selectedUser.id) {
-        //         //     this.user = self.selectedUser;
-        //         // }
-        //         if (self.selectedWorkspace.id  >= 0) {
-        //             this.workspace = self.selectedWorkspace;
-        //         }
-        //     });
-        // }
-
-        let data = {
-            projects: projects
-        };
-        let deferred = $.Deferred().resolve(data);
-        return deferred.promise();
-
-    },
 
     getAllOrganizations: function () {
         if ( APP.USER.STORE.organizations ) {
@@ -295,6 +211,93 @@ UI = {
             return APP.USER.loadUserData();
         }
 
+    },
+
+    changeOrganization: function (organization) {
+
+        let self = this;
+        this.selectedOrganization = organization;
+        this.Search.filter = {};
+        UI.Search.currentPage = 1;
+        return this.getOrganizationStructure(organization).then(function () {
+                return self.getProjects(self.selectedOrganization);
+            }
+        );
+    },
+
+    getOrganizationStructure: function (organization) {
+        let self = this;
+        return this.getOrganizationMembers(organization).then(function (data) {
+            self.selectedOrganization.members = data.members;
+            return self.getWorkspaces(organization).then(function (data) {
+                self.selectedOrganization.workspaces = data.workspaces;
+            });
+        });
+    },
+
+    filterProjects: function(user, workspace, name, status) {
+        let self = this;
+        let filter = {};
+        if (typeof user != "undefined") {
+            this.selectedUser =  user;
+            filter.id_assignee = this.selectedUser.user.uid;
+        }
+        if ((typeof workspace !== "undefined") ) {
+            this.selectedWorkspace = workspace;
+            filter.id_workspace = this.selectedWorkspace.id;
+        }
+        if ((typeof name !== "undefined") ) {
+            filter.pn = name;
+        }
+        if ((typeof status !== "undefined") ) {
+            filter.status = status;
+        }
+        this.Search.filter = $.extend( this.Search.filter, filter );
+        UI.Search.currentPage = 1;
+        return this.getProjects(this.selectedOrganization);
+    },
+
+    scrollDebounceFn: function() {
+        let self = this;
+        return _.debounce(function() {
+            self.handleScroll();
+        }, 300)
+    },
+
+    handleScroll: function() {
+        if($(window).scrollTop() + $(window).height() > $(document).height() - 200) {
+            console.log("Scroll end");
+            this.renderMoreProjects();
+        }
+    },
+
+    //********** REQUESTS *********************//
+
+    /**
+     * Retrieve Projects. Passing filters is possible to retrieve projects
+     */
+    getProjects: function(organization, page) {
+        let pageNumber = (page) ? page : UI.Search.currentPage;
+        let data = {
+            action: 'getProjects',
+            id_organization: organization.id,
+            page:	pageNumber,
+            filter: (!$.isEmptyObject(UI.Search.filter)) ? 1 : 0,
+        };
+        // Filters
+        data = $.extend(data,UI.Search.filter);
+
+        return APP.doRequest({
+            data: data,
+            success: function(d){
+                if( typeof d.errors != 'undefined' && d.errors.length ){
+                    window.location = '/';
+                }
+            },
+            error: function(d){
+                window.location = '/';
+            }
+        });
     },
 
     createOrganization: function (organizationName, members) {
@@ -313,7 +316,7 @@ UI = {
     },
 
     createWorkspace: function (organization, wsName) {
-        var data = {
+        let data = {
             name : wsName
         };
         return $.ajax({
@@ -323,6 +326,25 @@ UI = {
             url : "/api/v2/orgs/" + organization.id + "/workspaces"
         });
 
+    },
+
+    removeWorkspace:function (organization, ws) {
+        return $.ajax({
+            async: true,
+            type: "DELETE",
+            url : "/api/v2/orgs/" + organization.id + "/workspaces/" + ws.id
+        });
+    },
+
+    renameWorkspace:function (organization, ws) {
+        let data = {
+            name: ws.name
+        };
+        return $.ajax({
+            data: JSON.stringify(data),
+            type: "PUT",
+            url : "/api/v2/orgs/" + organization.id + "/workspaces/" + ws.id
+        });
     },
 
     getWorkspaces: function (organization) {
@@ -341,71 +363,18 @@ UI = {
         });
     },
 
-    changeOrganization: function (organization) {
+    downloadTranslation: function(project, job) {
+        let url = '/translate/'+project.name +'/'+ job.source +'-'+job.target+'/'+ job.id +'-'+ job.password + "?action=download" ;
+        window.open(url, '_blank');
 
-        let self = this;
-        this.selectedOrganization = organization;
-        return this.getOrganizationStructure(organization).then(function () {
-                return self.getProjects(self.selectedOrganization, "all");
-            }
-        );
     },
 
-    getOrganizationStructure: function (organization) {
-        let self = this;
-        return this.getOrganizationMembers(organization).then(function (data) {
-            self.selectedOrganization.members = data.members;
-            return self.getWorkspaces(organization).then(function (data) {
-                self.selectedOrganization.workspaces = data.workspaces;
-            });
+    getLastProjectActivityLogAction: function (id, pass) {
+        return $.ajax({
+            async: true,
+            type: "get",
+            url : "/api/v2/activity/project/" + id + "/" + pass + "/last",
         });
-    },
-
-    filterProjects: function(member, workspace, name, status) {
-        let self = this;
-        if ((typeof workspace !== "undefined") ) {
-            this.selectedWorkspace = workspace;
-        }
-        if (typeof member != "undefined") {
-            this.selectedUser =  member;
-        }
-        let filter = {
-            status: status,
-            pn: name,
-            workspace: this.selectedWorkspace.name,
-            member: this.selectedUser.name,
-            organization: this.selectedOrganization.id
-        };
-        this.Search.filter = $.extend( this.Search.filter, filter );
-        UI.Search.currentPage = 1;
-        return this.getProjects(this.selectedOrganization);
-    },
-
-    changeProjectAssignee: function (project, member) {
-        // let projectsArray = [];
-        // if (organizationName === "My Workspace") {
-        //     projectsArray = this.myProjects;
-        // } else if (organizationName === "Ebay") {
-        //     projectsArray = this.ebayProjects;
-        // }else if (organizationName === "MSC") {
-        //     projectsArray = this.mscProjects;
-        // }else if (organizationName === "Translated") {
-        //     projectsArray = this.translatedProjects;
-        // }
-        //
-        // $.each(projectsArray, function() {
-        //     if (this.id == idProject) {
-        //         this.member = member;
-        //     }
-        // });
-        //
-        // setTimeout(function () {
-        //     ManageActions.updateProjects(projectsArray);
-        // });
-
-        let data = {};
-        let deferred = $.Deferred().resolve(data);
-        return deferred.promise();
     },
 
     changeProjectWorkspace: function (project, workspace) {
@@ -438,41 +407,48 @@ UI = {
         return deferred.promise();
     },
 
-    getLastProjectActivityLogAction: function (id, pass) {
-        return $.ajax({
-            async: true,
-            type: "get",
-            url : "/api/v2/activity/project/" + id + "/" + pass + "/last",
-        });
-    },
-    scrollDebounceFn: function() {
-        let self = this;
-        return _.debounce(function() {
-            self.handleScroll();
-        }, 300)
-    },
-
-    handleScroll: function() {
-        if($(window).scrollTop() + $(window).height() > $(document).height() - 200) {
-            console.log("Scroll end");
-            this.renderMoreProjects();
-        }
-    },
-
-    downloadTranslation: function(project, job) {
-        let url = '/translate/'+project.name +'/'+ job.source +'-'+job.target+'/'+ job.id +'-'+ job.password + "?action=download" ;
-        window.open(url, '_blank');
-
-    },
-
-    changeProjectName: function (idProject, password, newName) {
+    changeProjectName: function (idOrg, idProject, newName) {
         let data = {
             name: newName
         };
         return $.ajax({
-            data: data,
-            type: "post",
-            url : "/api/v2/projects/" + idProject + "/" + password + "/rename",
+            data: JSON.stringify(data),
+            type: "PUT",
+            url : "/api/v2/orgs/" + idOrg + "/projects/" + idProject,
+        });
+    },
+
+    changeProjectAssignee: function (idOrg, idProject, newUserId) {
+        let data = {
+            id_assignee: newUserId
+        };
+        return $.ajax({
+            data: JSON.stringify(data),
+            type: "put",
+            url : "/api/v2/orgs/" + idOrg + "/projects/" + idProject,
+        });
+    },
+
+    /**
+     * Change the password for the job
+     * @param job
+     * @param undo
+     * @param old_pass
+     */
+    changeJobPassword: function(job, undo, old_pass) {
+        let id = job.id;
+        let password = job.password;
+
+        return APP.doRequest({
+            data: {
+                action:		    "changePassword",
+                res: 		    'obj',
+                id: 		    id,
+                password: 	    password,
+                old_password: 	old_pass,
+                undo:           undo
+            },
+            success: function(d){}
         });
     },
 
@@ -504,6 +480,8 @@ UI = {
             url : "/api/v2/orgs/" + organization.id,
         });
     },
+
+    //*******************************//
 
     //********* Modals **************//
 

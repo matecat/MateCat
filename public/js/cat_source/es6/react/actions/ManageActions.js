@@ -115,26 +115,21 @@ let ManageActions = {
     },
 
     filterProjects: function (user, workspace, name, status) {
+        user = (user) ? user.toJS() : user ;
+        workspace = (workspace) ? workspace.toJS() : workspace ;
         UI.filterProjects(user, workspace, name, status).then(function (response) {
             AppDispatcher.dispatch({
                 actionType: ManageConstants.RENDER_PROJECTS,
-                projects: response.projects,
+                projects: response.data,
                 organization: UI.selectedOrganization,
                 hideSpinner: false,
             });
         });
-        // AppDispatcher.dispatch({
-        //     actionType: ManageConstants.FILTER_PROJECTS,
-        //     user: user,
-        //     workspace: workspace,
-        //     name: name,
-        //     status: status
-        // });
     },
 
-    changeProjectAssignee: function (project, user) {
-        UI.changeProjectAssignee(project, user).done(
-            function () {
+    changeProjectAssignee: function (organization, project, user) {
+        UI.changeProjectAssignee(organization.get("id"), project.get("id"), user.get("uid")).done(
+            function (response) {
                 AppDispatcher.dispatch({
                     actionType: ManageConstants.CHANGE_PROJECT_ASSIGNEE,
                     project: project,
@@ -157,8 +152,8 @@ let ManageActions = {
 
     },
 
-    changeProjectName: function (project, newName) {
-        UI.changeProjectName(project.get('id'), project.get('password'), newName).done(
+    changeProjectName: function (organization, project, newName) {
+        UI.changeProjectName(organization.get("id"), project.get("id"), newName).done(
             function () {
                 AppDispatcher.dispatch({
                     actionType: ManageConstants.CHANGE_PROJECT_NAME,
@@ -266,7 +261,7 @@ let ManageActions = {
             });
             AppDispatcher.dispatch({
                 actionType: ManageConstants.RENDER_PROJECTS,
-                projects: response.projects,
+                projects: response.data,
                 organization: organization,
                 hideSpinner: false,
             });
@@ -284,8 +279,28 @@ let ManageActions = {
         });
     },
 
+    removeWorkspace: function (organization, ws) {
+        UI.removeWorkspace(organization,ws).done(function (response) {
+            AppDispatcher.dispatch({
+                actionType: ManageConstants.UPDATE_WORKSPACES,
+                organization: organization,
+                workspaces: response.workspaces,
+            });
+        });
+    },
+
+    renameWorkspace: function (organization, ws) {
+        UI.renameWorkspace(organization.toJS(), ws.toJS()).done(function (response) {
+            AppDispatcher.dispatch({
+                actionType: ManageConstants.UPDATE_WORKSPACE,
+                organization: organization,
+                workspace: response.workspace,
+            });
+        });
+    },
+
     addUserToOrganization: function (organization, userEmail) {
-        UI.addUserToOrganization(organization, userEmail).done(function (data) {
+        UI.addUserToOrganization(organization.toJS(), userEmail).done(function (data) {
             AppDispatcher.dispatch({
                 actionType: ManageConstants.UPDATE_ORGANIZATION_MEMBERS,
                 organization: organization,
@@ -295,7 +310,7 @@ let ManageActions = {
     },
 
     removeUserFromOrganization: function (organization, userId) {
-        UI.removeUserFromOrganization(organization, userId).done(function (data) {
+        UI.removeUserFromOrganization(organization.toJS(), userId).done(function (data) {
             AppDispatcher.dispatch({
                 actionType: ManageConstants.UPDATE_ORGANIZATION_MEMBERS,
                 organization: organization,

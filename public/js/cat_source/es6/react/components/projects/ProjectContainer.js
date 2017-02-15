@@ -15,7 +15,8 @@ class ProjectContainer extends React.Component {
             visibleJobs: [],
             showAllJobsBoxes: true,
             lastAction: null,
-            jobsActions: null
+            jobsActions: null,
+            projectName: this.props.project.get('name')
         };
         this.getActivityLogUrl = this.getActivityLogUrl.bind(this);
         this.changeUser = this.changeUser.bind(this);
@@ -29,14 +30,14 @@ class ProjectContainer extends React.Component {
         });
         this.initUsersDropdown();
         //Select the assigee
-        if ( this.props.project.get('user') ) {
-            $(this.dropdownUsers).dropdown('set selected', this.props.project.get('member').get('uid'));
+        if ( this.props.project.get('id_assignee') ) {
+            $(this.dropdownUsers).dropdown('set selected', this.props.project.get('id_assignee'));
         }
 
         this.getLastAction();
 
         if (this.dropdownUsers) {
-            if (this.props.project.get('user') ) {
+            if (this.props.project.get('id_assignee') ) {
                 this.dropdownUsers.classList.remove("project-not-assigned");
                 this.dropdownUsers.classList.add("shadow-1");
                 this.dropdownUsers.classList.add("project-assignee");
@@ -56,7 +57,7 @@ class ProjectContainer extends React.Component {
         console.log("Updated Project : " + this.props.project.get('id'));
 
         if (this.dropdownUsers) {
-            if (this.props.project.get('user') ) {
+            if (this.props.project.get('id_assignee') ) {
                 this.dropdownUsers.classList.remove("project-not-assigned");
                 this.dropdownUsers.classList.add("project-assignee");
             } else {
@@ -84,7 +85,6 @@ class ProjectContainer extends React.Component {
     }
 
     archiveProject() {
-
         ManageActions.updateStatusProject(this.props.project, 'archived');
     }
 
@@ -93,26 +93,27 @@ class ProjectContainer extends React.Component {
     }
 
     changeUser(value) {
-        let newUser = this.props.organization.get('members').find(function (user) {
-            if (user.get('uid') === value) {
-                return true
+        let newUser = this.props.organization.get('members').find(function (member) {
+            let user = member.get('user');
+            if (user.get('uid') === parseInt(value) ) {
+                return true;
             }
         });
-        if ( !this.props.project.get('user') || newUser.get("id") != this.props.project.get('user').get('id')) {
-            ManageActions.changeProjectAssignee(this.props.project.toJS(), newUser.toJS());
+        if ( !this.props.project.get('id_assignee') || newUser.get('user').get("uid") != this.props.project.get('id_assignee')) {
+            ManageActions.changeProjectAssignee(this.props.organization, this.props.project, newUser.get('user'));
         }
     }
 
-    onKeyPressEvent(e) {
-        if(e.which == 27) {
-            this.closeSearch();
-        } else if (e.which == 13 || e.keyCode == 13) {
-            ManageActions.changeProjectName(this.props.project, $(this.projectNameInput).val());
-            e.preventDefault();
+    onKeyPressEvent(event) {
+        if(event.key == 'Enter'){
+            ManageActions.changeProjectName(this.props.organization, this.props.project, this.state.projectName);
             return false;
+        } else {
+            this.setState({
+                projectName: event.target.value
+            });
         }
     }
-
 
     getProjectMenu(activityLogUrl) {
         let menuHtml = <div className="menu">
@@ -299,14 +300,15 @@ class ProjectContainer extends React.Component {
 
     getDropDownUsers() {
        let result = '';
-       if (this.props.organization.get('members')) {
-           let members = this.props.organization.get('members').map((user, i) => (
-               <div className="item " data-value={user.get('uid')}
-                    key={'user' + user.get('uid')}>
+       if (this.props.organization.get('members') && this.props.organization.get("type") !== 'personal') {
+           let members = this.props.organization.get('members').map(function(member, i) {
+               let user = member.get('user');
+               return <div className="item " data-value={user.get('uid')}
+                           key={'user' + user.get('uid')}>
                    <div className="ui circular label">{APP.getUserShortName(user.toJS())}</div>
                    {(user.get('uid') === APP.USER.STORE.user.uid) ? 'To me' : user.get('first_name') + " " + user.get('last_name')}
                </div>
-           ));
+           });
 
            result = <div className={"ui dropdown top right pointing"}
                          ref={(dropdownUsers) => this.dropdownUsers = dropdownUsers}>
@@ -331,7 +333,7 @@ class ProjectContainer extends React.Component {
                            </div>
                        </div>
                    </div>;
-          }
+       }
        return result;
    }
 
@@ -410,9 +412,9 @@ class ProjectContainer extends React.Component {
                                                     <div className="ui form">
                                                         <div className="field">
                                                             <div className="ui icon input">
-                                                                <input type="text" defaultValue={this.props.project.get('name')}
-                                                                       ref={(input) => this.projectNameInput = input}
-                                                                       onKeyPress={this.onKeyPressEvent.bind(this)}/>
+                                                                <input type="text"
+                                                                       onKeyPress={this.onKeyPressEvent.bind(this, )}
+                                                                        defaultValue={this.state.projectName}/>
                                                                 <i className="icon-pencil icon" />
                                                             </div>
                                                         </div>
@@ -447,8 +449,7 @@ class ProjectContainer extends React.Component {
                                     <div className="ui form">
                                         <div className="field">
                                             <div className="ui icon input">
-                                                <input type="text" defaultValue={this.props.project.get('name')}
-                                                       ref={(input) => this.projectNameInput = input}
+                                                <input type="text" defaultValue={this.state.projectName}
                                                        onKeyPress={this.onKeyPressEvent.bind(this)}/>
                                                 <i className="icon-pencil icon" />
                                             </div>

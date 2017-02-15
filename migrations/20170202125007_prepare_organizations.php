@@ -19,10 +19,10 @@ class PrepareOrganizations extends AbstractMigration {
         " );
         $this->execute( "
             ALTER TABLE `projects`
-            ADD COLUMN `assegnee_uid` INT UNSIGNED NULL DEFAULT NULL,
-            ADD COLUMN `workspace_id` INT UNSIGNED NULL DEFAULT NULL,
-            ADD INDEX `assegnee_uid_idx` (`assegnee_uid` ASC), 
-            ADD INDEX `workspace_id_idx` (`assegnee_uid` ASC), 
+            ADD COLUMN `id_assignee` INT UNSIGNED NULL DEFAULT NULL,
+            ADD COLUMN `id_workspace` INT UNSIGNED NULL DEFAULT NULL,
+            ADD INDEX `id_assignee_idx` (`id_assignee` ASC),
+            ADD INDEX `id_workspace_idx` (`id_assignee` ASC),
             algorithm=INPLACE, lock=NONE
         " );
 
@@ -35,10 +35,10 @@ class PrepareOrganizations extends AbstractMigration {
         $this->execute( " DROP TABLE `workspaces` " );
         $this->execute( " 
               ALTER TABLE `projects` 
-              DROP COLUMN `assegnee_uid`, 
-              DROP INDEX `assegnee_uid_idx`, 
-              DROP COLUMN `workspace_id`, 
-              DROP INDEX `workspace_id_idx` 
+              DROP COLUMN `id_assignee`,
+              DROP INDEX `id_assignee_idx`,
+              DROP COLUMN `id_workspace`,
+              DROP INDEX `id_workspace_idx`
         " );
 
     }

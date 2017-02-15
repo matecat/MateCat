@@ -53,6 +53,10 @@ class getProjectsController extends ajaxController {
      */
     private $start;
 
+    private $id_organization ;
+    private $id_assignee ;
+    private $id_workspace ;
+
     public function __construct() {
 
         //SESSION ENABLED
@@ -82,7 +86,10 @@ class getProjectsController extends ajaxController {
                 'onlycompleted' => [
                         'filter'  => FILTER_VALIDATE_BOOLEAN,
                         'options' => [ FILTER_NULL_ON_FAILURE ]
-                ]
+                ],
+                'id_organization' => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'id_assignee' => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'id_workspace' => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
         ];
 
         $postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -96,6 +103,9 @@ class getProjectsController extends ajaxController {
         $this->search_in_pname       = $postInput[ 'pn' ];
         $this->search_source         = $postInput[ 'source' ];
         $this->search_target         = $postInput[ 'target' ];
+        $this->id_organization       = $postInput[ 'id_organization' ];
+        $this->id_assignee           = $postInput[ 'id_assignee' ];
+        $this->id_workspace          = $postInput[ 'id_workspace' ];
 
         $this->search_only_completed = $postInput[ 'onlycompleted' ];
 
@@ -107,20 +117,21 @@ class getProjectsController extends ajaxController {
             throw new Exception('User not Logged');
         }
 
-        $organization = $this->logged_user->getPersonalOrganization();
+        $organization = $this->filterOrganization();
+        $workspace = $this->filterWorkspace($organization);
+        $assignee = $this->filterAssignee($organization);
 
         $projects = ManageUtils::queryProjects( $this->logged_user, $this->start, $this->step,
             $this->search_in_pname,
             $this->search_source, $this->search_target, $this->search_status,
             $this->search_only_completed, $this->project_id,
-            $organization
+            $organization, $workspace, $assignee
         );
 
         $projnum = getProjectsNumber( $this->logged_user,
             $this->search_in_pname, $this->search_source,
             $this->search_target, $this->search_status,
             $this->search_only_completed, $organization );
-
 
         $projects = $this->filterProjectsWithUserFeatures( $projects ) ;
 
@@ -149,4 +160,62 @@ class getProjectsController extends ajaxController {
         return $projects ;
     }
 
+    /**
+     * @param $organization
+     * @return Users_UserStruct
+     * @throws Exception
+     */
+
+    private function filterAssignee($organization) {
+        if ( is_null($this->id_assignee ) ) return ;
+
+        $dao = new \Organizations\MembershipDao();
+        $memberships = $dao->getMemberListByOrganizationId($organization->id);
+        $id_assignee = $this->id_assignee ;
+        /**
+         * @var $users \Organizations\MembershipStruct[]
+         */
+        $users = array_values(array_filter($memberships, function( \Organizations\MembershipStruct $membership ) use ( $id_assignee ) {
+            return $membership->getUser()->uid == $id_assignee ;
+        } ));
+
+        if ( empty( $users ) ) {
+            throw new Exception('Assignee not found in organization') ;
+        }
+
+        return $users[0]->getUser();
+    }
+
+    /**
+     * @param $organization
+     * @return \Organizations\WorkspaceStruct
+     * @throws Exception
+     */
+    private function filterWorkspace($organization) {
+        if ( is_null($this->id_workspace ) ) return ;
+
+        $dao = new \Organizations\WorkspaceDao() ;
+        $workspaces = $dao->getByOrganizationId($organization->id) ;
+        $id_workspace = $this->id_workspace ;
+        $wp = array_values( array_filter($workspaces, function($workspace) use ( $id_workspace ) {
+            return $id_workspace == $workspace->id ;
+        }));
+
+        if ( empty( $wp ) ) {
+            throw new Exception('Workspace not found in organization') ;
+        }
+
+        return $wp[0];
+    }
+
+    private function filterOrganization() {
+        $dao = new \Organizations\MembershipDao() ;
+        $organization = $dao->findOrganizationByIdAndUser($this->id_organization, $this->logged_user ) ;
+        if ( !$organization ) {
+            throw  new Exception('Organization not found in user memberships') ;
+        }
+        else {
+            return $organization ;
+        }
+    }
 }

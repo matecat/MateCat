@@ -12,6 +12,7 @@ namespace API\V2;
 
 use API\V2\Exceptions\AuthorizationError;
 use API\V2\Json\Error;
+use API\V2\Json\Workspace;
 use InvalidArgumentException;
 use Organizations\MembershipDao;
 use Organizations\WorkspaceDao;
@@ -33,11 +34,15 @@ class WorkspacesController extends KleinController {
 
         try {
 
+            $this->requireIdentifiedUser();
+
             if( empty( $wSpaceStruct->name ) ){
                 throw new InvalidArgumentException( "Wrong parameter :name ", 400 );
             }
 
-            $org = ( new MembershipDao() )->findOrganizationByIdAndUser( $wSpaceStruct->id_organization, $this->user );
+            $org = ( new MembershipDao() )->findOrganizationByIdAndUser( $wSpaceStruct->id_organization,
+                $this->user
+            );
             if ( empty( $org ) ) {
                 throw new AuthorizationError( "Not Authorized", 401 );
             }
@@ -45,7 +50,7 @@ class WorkspacesController extends KleinController {
             $wSpaceDao->create( $wSpaceStruct );
             $wSpaceDao->destroyCacheForOrganizationId( $this->request->id_organization ); //clean the cache
 
-            $this->response->json( [ 'workspace' => $wSpaceStruct ] );
+            $this->response->json( [ 'workspace' => Workspace::renderItem( $wSpaceStruct ) ] );
 
         } catch ( \PDOException $e ){
             $this->response->code( 503 );
@@ -73,7 +78,9 @@ class WorkspacesController extends KleinController {
             }
 
             $workSpacesList = $wSpaceDao->setCacheTTL( 60 * 60 * 24 )->getByOrganizationId( $this->request->id_organization );
-            $this->response->json( [ 'workspaces' => $workSpacesList ] );
+            $formatter = new Workspace();
+
+            $this->response->json( [ 'workspaces' => $formatter->render( $workSpacesList ) ] );
 
         } catch( AuthorizationError $e ){
             $this->response->code( 401 );
@@ -82,7 +89,7 @@ class WorkspacesController extends KleinController {
 
     }
 
-    public function update(){
+    public function update() {
 
         $requestContent = json_decode( file_get_contents( 'php://input' ) );
 
@@ -104,7 +111,7 @@ class WorkspacesController extends KleinController {
             $wSpaceDao->update( $wStruct );
             $wSpaceDao->destroyCacheForOrganizationId( $this->request->id_organization ); //clean the cache
 
-            $this->response->json( [ 'workspace' => $wStruct ] );
+            $this->response->json( [ 'workspace' => Workspace::renderItem($wStruct) ] );
 
         } catch ( \PDOException $e ){
             $this->response->code( 503 );

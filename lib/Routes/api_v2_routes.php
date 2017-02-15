@@ -11,7 +11,6 @@ $klein->with('/api/v2/projects/[:id_project]/[:password]', function() {
 
     route( '/urls',                 'GET',  'API\V2\UrlsController',        'urls'      );
     route( '/jobs/[:id_job]/merge', 'POST', 'API\V2\JobMergeController',    'merge'     );
-    route( '/rename', 'POST', 'API\V2\ProjectRenameController',    'rename'     ); // TODO: consider removing
 
 });
 
@@ -131,17 +130,17 @@ route( '/api/v2/ping', 'HEAD', '\API\V2\KeyCheckController', 'ping' );
 $klein->with('/api/v2/orgs', function() {
 
     route( '',                    'POST', '\API\V2\OrganizationsController', 'create') ;
-    route( '/[:id_organization]', 'PUT',  '\API\V2\OrganizationsController', 'update' ) ;
+    route( '/[i:id_organization]', 'PUT',  '\API\V2\OrganizationsController', 'update' ) ;
 
-    route( '/[:id_organization]/members', 'POST', '\API\V2\OrganizationMembersController', 'update') ;
-    route( '/[:id_organization]/members', 'GET',  '\API\V2\OrganizationMembersController', 'index' ) ;
-    route( '/[:id_organization]/members/[:uid_member]', 'DELETE' , '\API\V2\OrganizationMembersController', 'delete' );
+    route( '/[i:id_organization]/members', 'POST', '\API\V2\OrganizationMembersController', 'update') ;
+    route( '/[i:id_organization]/members', 'GET',  '\API\V2\OrganizationMembersController', 'index' ) ;
+    route( '/[i:id_organization]/members/[i:uid_member]', 'DELETE' , '\API\V2\OrganizationMembersController', 'delete' );
 
-    route( '/[:id_organization]/workspaces', 'POST', '\API\V2\WorkspacesController', 'create' ) ;
-    route( '/[:id_organization]/workspaces', 'GET',  '\API\V2\WorkspacesController', 'show' ) ;
-    route( '/[:id_organization]/workspaces/[:id_workspace]', 'PUT',  '\API\V2\WorkspacesController', 'update' ) ;
-    route( '/[:id_organization]/workspaces/[:id_workspace]', 'DELETE',  '\API\V2\WorkspacesController', 'delete' ) ;
+    route( '/[i:id_organization]/workspaces', 'POST', '\API\V2\WorkspacesController', 'create' ) ;
+    route( '/[i:id_organization]/workspaces', 'GET',  '\API\V2\WorkspacesController', 'show' ) ;
+    route( '/[i:id_organization]/workspaces/[i:id_workspace]', 'PUT',  '\API\V2\WorkspacesController', 'update' ) ;
+    route( '/[i:id_organization]/workspaces/[i:id_workspace]', 'DELETE',  '\API\V2\WorkspacesController', 'delete' ) ;
 
-    route( '/[:id_organization]/projects/[:id_project]', 'PUT', 'API\V2\ProjectsController', 'update' ) ;
+    route( '/[i:id_organization]/projects/[i:id_project]', 'PUT', 'API\V2\ProjectsController', 'update' ) ;
 }) ;
 

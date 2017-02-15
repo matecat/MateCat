@@ -173,7 +173,7 @@ class OrganizationDao extends \DataAccess_AbstractDao {
     }
 
     public function updateOrganizationName( OrganizationStruct $org ) {
-
+        Database::obtain()->begin();
         $conn = Database::obtain()->getConnection();
 
         $stmt = $conn->prepare( self::$_update_organization_by_id );

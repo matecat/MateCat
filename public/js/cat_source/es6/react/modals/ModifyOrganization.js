@@ -14,12 +14,12 @@ class ModifyOrganization extends React.Component {
     }
 
     updateOrganization(organization) {
-        this.setState({
-            organization: organization
-        });
+        if (this.state.organization.get('id') == organization.get('id')) {
+            this.setState({
+                organization: organization
+            });
+        }
     }
-
-
 
     showRemoveUser(userId) {
         this.setState({
@@ -28,7 +28,7 @@ class ModifyOrganization extends React.Component {
     }
 
     removeUser(userId) {
-        ManageActions.removeUserFromOrganization(this.state.organization.toJS(), userId);
+        ManageActions.removeUserFromOrganization(this.state.organization, userId);
     }
 
     undoRemoveAction() {
@@ -42,7 +42,7 @@ class ModifyOrganization extends React.Component {
         if (e.key === 'Enter' ) {
             e.preventDefault();
             if ( APP.checkEmail(this.inputNewUSer.value)) {
-                ManageActions.addUserToOrganization(this.state.organization.toJS(), this.inputNewUSer.value);
+                ManageActions.addUserToOrganization(this.state.organization, this.inputNewUSer.value);
                 this.inputNewUSer.value = '';
             } else {
                 this.setState({
@@ -79,11 +79,12 @@ class ModifyOrganization extends React.Component {
 
     getUserList() {
         let self = this;
-        return this.state.organization.get('members').map(function(user, i) {
+        return this.state.organization.get('members').map(function(member, i) {
+            let user = member.get('user');
             if (user.get('uid') == APP.USER.STORE.user.uid) {
                 return <div className="item"
                             key={'user' + user.get('uid')}>
-                    <div className="ui avatar image initials green">??</div>
+                    <div className="ui avatar image initials green">{APP.getUserShortName(user.toJS())}</div>
                     <div className="content">
                         {user.get('first_name') + ' ' + user.get('last_name')}
                     </div>
@@ -107,7 +108,7 @@ class ModifyOrganization extends React.Component {
                     <div className="right floated content">
                         <div className="ui button" onClick={self.showRemoveUser.bind(self, user.get('uid'))}>Remove</div>
                     </div>
-                    <div className="ui avatar image initials green">??</div>
+                    <div className="ui avatar image initials green">{APP.getUserShortName(user.toJS())}</div>
                     <div className="content">
                         {user.get('first_name') + ' ' + user.get('last_name')}
                     </div>

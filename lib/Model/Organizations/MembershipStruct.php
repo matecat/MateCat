@@ -17,8 +17,21 @@ class MembershipStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
     public $id_organization;
     public $uid ;
     public $is_admin ;
-    public $email;
-    public $first_name;
-    public $last_name;
+
+    /**
+     * @var \Users_UserStruct
+     */
+    private $user ;
+
+    public function setUser( \Users_UserStruct $user ) {
+        $this->user = $user ;
+    }
+
+    /**
+     * @return \Users_UserStruct|null
+     */
+    public function getUser( ) {
+        return $this->user ;
+    }
 
 }
