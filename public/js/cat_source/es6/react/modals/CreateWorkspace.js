@@ -148,7 +148,7 @@ class CreateWorkspace extends React.Component {
                     <div className="column">
                         <h3>ORGANIZATION Workspaces</h3>
                         <div className="column">
-                            <div className="ui segment members-list">
+                            <div className="ui segment">
                                 <div className="ui middle aligned divided list">
                                     {workspacesList}
                                 </div>
