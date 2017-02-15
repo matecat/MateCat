@@ -12,6 +12,7 @@ namespace API\V2;
 use API\App\AbstractStatefulKleinController;
 
 use API\V2\Json\Project;
+use API\V2\Validators\OrganizationAccessValidator;
 use API\V2\Validators\OrganizationProjectValidator;
 
 class ProjectsController extends KleinController {
@@ -45,18 +46,10 @@ class ProjectsController extends KleinController {
 
     }
 
-    public function validateRequest() {
-        parent::validateRequest();
-        $this->requireIdentifiedUser();
-
-        $this->validator->validate( $this->user );
-    }
-
     protected function afterConstruct() {
         parent::afterConstruct();
-
-        $this->validator = new OrganizationProjectValidator( $this );
-
+        $this->appendValidator( new OrganizationAccessValidator( $this ) );
+        $this->appendValidator( new OrganizationProjectValidator( $this ) );
     }
 
 }

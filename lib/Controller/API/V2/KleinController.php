@@ -3,6 +3,7 @@
 namespace API\V2;
 
 use API\V2\Exceptions\AuthenticationError;
+use API\V2\Validators\Base;
 use ApiKeys_ApiKeyStruct;
 use AuthCookie;
 use Users_UserDao;
@@ -28,6 +29,10 @@ abstract class KleinController {
     protected $api_key;
     protected $api_secret;
 
+    /**
+     * @var Base[]
+     */
+    protected $validators = [];
 
     /**
      * @var \Users_UserStruct
@@ -102,6 +107,10 @@ abstract class KleinController {
         return $this->user;
     }
 
+    public function getUser(){
+        return $this->user;
+    }
+
     /**
      * validKeys
      *
@@ -127,6 +136,13 @@ abstract class KleinController {
     }
 
     protected function validateRequest() {
+        foreach( $this->validators as $validator ){
+            $validator->validate();
+        }
+    }
+
+    protected function appendValidator( Base $validator ){
+        $this->validators[] = $validator;
     }
 
     /**
@@ -158,13 +174,6 @@ abstract class KleinController {
         $this->downloadToken = null;
     }
 
-    protected function requireIdentifiedUser() {
-        if ( !$this->user ) {
-            throw new AuthorizationError('Not Authorized', 401);
-        }
-    }
-
-    protected function afterConstruct() {
-    }
+    protected function afterConstruct() {}
 
 }

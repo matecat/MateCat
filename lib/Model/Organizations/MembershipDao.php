@@ -98,7 +98,7 @@ class MembershipDao extends \DataAccess_AbstractDao
     public function findOrganizationByIdAndUser( $id, \Users_UserStruct $user ) {
 
         $stmt = $this->getConnection()->getConnection()->prepare( self::$_query_organization_from_uid_and_id ) ;
-        $stmt->setFetchMode( PDO::FETCH_CLASS, '\Organizations\OrganizationStruct' );
+        $stmt->setFetchMode( PDO::FETCH_CLASS, get_class( new OrganizationStruct() ) );
         $stmt->execute( array( $user->uid, $id ) ) ;
 
         return static::resultOrNull( $stmt->fetch() );
