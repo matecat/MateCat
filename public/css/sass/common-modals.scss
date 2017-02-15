@@ -97,7 +97,7 @@ footer nav ul li {
 .user-reset-password,
 .user-gdrive {
     margin: 0 auto;
-    width: 93%;
+    width: 100%;
     float: left;
     position: relative;
 }
@@ -136,12 +136,13 @@ footer nav ul li {
 }
 
 .preferences-modal .avatar-user {
-    width: 30px;
-    height: 30px;
+    width: 50px;
+    height: 50px;
+    line-height: 50px;
     text-align: center;
     font-size: 21px;
     color: #fff;
-    padding: 10px 10px 10px 10px;
+    padding: 0;
     background: #b7b7b7;
     border: 1px solid #ccc;
     -moz-border-radius: 50px;
@@ -483,6 +484,7 @@ footer nav ul li {
     font-size: 24px;
     width: auto !important;
     float: none !important;
+    font-family: Calibri, Arial, Helvetica, sans-serif;
 }
 
 /* Modal Body */
@@ -512,7 +514,7 @@ footer nav ul li {
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: 40%;
+    width: 60%;
     border-radius: 4px;
     -webkit-animation-name: animatetop;
     -webkit-animation-duration: 0.4s;
@@ -835,3 +837,6 @@ div#matecat-modal p {
 
 }
 
+.pull-left {
+    float: left;
+}

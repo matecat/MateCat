@@ -84,18 +84,16 @@ class ModifyOrganization extends React.Component {
             if (user.get('uid') == APP.USER.STORE.user.uid) {
                 return <div className="item"
                             key={'user' + user.get('uid')}>
-                    <div className="ui avatar image initials green">{APP.getUserShortName(user.toJS())}</div>
-                    <div className="content">
-                        {user.get('first_name') + ' ' + user.get('last_name')}
-                    </div>
+                    <div className="ui circular label">{APP.getUserShortName(user.toJS())}</div>
+                    <span className="content">
+                        {' ' + user.get('first_name') + ' ' + user.get('last_name')}
+                    </span>
                 </div>
             }else if (self.state.showRemoveMessageUserID == user.get('uid')) {
                 return <div className="item"
                             key={'user' + user.get('uid')}>
                     <div className="right floated content">
                         <div className="ui button green" onClick={self.removeUser.bind(self, user.get('uid'))}>YES</div>
-                    </div>
-                    <div className="right floated content">
                         <div className="ui button red" onClick={self.undoRemoveAction.bind(self)}>NO</div>
                     </div>
                     <div className="content">
@@ -108,10 +106,10 @@ class ModifyOrganization extends React.Component {
                     <div className="right floated content">
                         <div className="ui button" onClick={self.showRemoveUser.bind(self, user.get('uid'))}>Remove</div>
                     </div>
-                    <div className="ui avatar image initials green">{APP.getUserShortName(user.toJS())}</div>
-                    <div className="content">
-                        {user.get('first_name') + ' ' + user.get('last_name')}
-                    </div>
+                    <div className="ui circular label">{APP.getUserShortName(user.toJS())}</div>
+                    <span className="content">
+                        {' ' + user.get('first_name') + ' ' + user.get('last_name')}
+                    </span>
                 </div>
             }
 
@@ -143,28 +141,29 @@ class ModifyOrganization extends React.Component {
                 <div className="ui one column grid left aligned">
                     <div className="column">
                         <h3>Change Organization Name</h3>
-                        <div className={"ui large fluid icon input " + orgNameError}>
+                        <div className={"ui fluid icon input " + orgNameError}>
                             <input type="text" defaultValue={this.state.organization.get('name')}
                             onKeyPress={this.onKeyPressEvent.bind(this)}
                             ref={(inputName) => this.inputName = inputName}/>
                             <i className="icon-pencil icon"/>
+                            {/*<i class="icon-checkmark green icon"></i>*/}
                         </div>
                     </div>
                 </div>
             </div>
             <div className="matecat-modal-middle">
-                <div className="ui one column grid left aligned">
-                    <div className="column">
-                        <h3>Add member</h3>
-                        <div className={"ui large fluid icon input " + usersError }>
-                            <input type="text" placeholder="Ex: joe@email.com"
+                <div className="ui grid left aligned">
+                    <div className="sixteen wide column">
+                        <h3>Add members</h3>
+                        <div className={"ui fluid icon input " + usersError }>
+                            <input type="text" placeholder="joe@email.com"
                                    onKeyPress={this.handleKeyPress.bind(this)}
                                    ref={(inputNewUSer) => this.inputNewUSer = inputNewUSer}/>
                         </div>
                     </div>
-                    <div className="column">
+                    <div className="sixteen wide column">
                         <div className="ui segment members-list">
-                            <div className="ui middle aligned divided list">
+                            <div className="ui divided list">
                                 {userlist}
                             </div>
                         </div>
