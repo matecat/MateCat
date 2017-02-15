@@ -19,6 +19,23 @@ class Organization {
         $this->data = $data;
     }
 
+    public function renderItem( OrganizationStruct $organization ) {
+        $row  = [
+            'id'         => (int) $organization->id,
+            'name'       => $organization->name,
+            'type'       => $organization->type,
+            'created_at' => \Utils::api_timestamp( $organization->created_at ),
+            'created_by' => (int) $organization->created_by
+        ];
+
+        $members = $organization->getMembers();
+        if( !empty( $members ) ){
+            $row[ 'members' ] = $members ;
+        }
+
+        return $row ;
+    }
+
     public function render( $data = null ) {
         $out = array();
 
@@ -30,20 +47,7 @@ class Organization {
          * @var $data OrganizationStruct[]
          */
         foreach ( $data as $k => $organization ) {
-            $row   = [
-                    'id'         => (int) $organization->id,
-                    'name'       => $organization->name,
-                    'type'       => $organization->type,
-                    'created_at' => \Utils::api_timestamp( $organization->created_at ),
-                    'created_by' => (int) $organization->created_by
-            ];
-
-            $members = $data[$k]->getMembers() ;
-            if( !empty( $members ) ){
-                $row[ 'members' ] = $members ;
-            }
-
-            $out[] = $row;
+            $out[] = $this->render( $organization ) ;
         }
 
         return $out;

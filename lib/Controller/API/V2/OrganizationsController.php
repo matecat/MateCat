@@ -28,12 +28,13 @@ class OrganizationsController extends KleinController {
         try{
 
             if ( !Constants_Organizations::isAllowedType( $this->request->type ) ) {
-                $type = Constants_Organizations::PERSONAL;
-                if ( $teamDao->getPersonalByUid( $this->user->uid ) ) {
-                    throw new InvalidArgumentException( "User already has the personal organization" );
-                }
-            } else {
-                $type = strtolower( $this->request->type );
+                throw new InvalidArgumentException( "User already has the personal organization" );
+            }
+
+            $type = strtolower( $this->request->type ) ;
+
+            if ( $type == Constants_Organizations::PERSONAL && $teamDao->getPersonalByUid( $this->user->uid ) ) {
+                throw new InvalidArgumentException( "User already has the personal organization" );
             }
 
             \Database::obtain()->begin();
@@ -47,8 +48,8 @@ class OrganizationsController extends KleinController {
 
             //TODO sent an email to the $params[ 'members' ] ( warning, not all members are registered users )
 
-            $formatted = new Organization( [ $organization ] ) ;
-            $this->response->json( array( 'organization' => $formatted->render() ) );
+            $formatted = new Organization() ;
+            $this->response->json( array( 'organization' => $formatted->renderItem($organization) ) );
 
         } catch ( \PDOException $e ){
             \Database::obtain()->rollback();

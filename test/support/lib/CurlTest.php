@@ -136,9 +136,6 @@ class CurlTest {
 
   public function getResponse() {
     if ( $this->run() ) {
-      // var_dump($this->response_body);
-      // var_dump($this->response_header);
-      // var_dump("Response code: " . $this->response_code);
 
       return array(
         'header' => $this->response_header,

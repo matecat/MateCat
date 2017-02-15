@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Class DataAccess_AbstractValidator
+ *
+ * @deprecated Validation at Struct level is deprecated. Should be moved on top at Domain Model level.
+ */
+
 abstract class DataAccess_AbstractValidator {
     /**
      * The errors array should be structured like this:
