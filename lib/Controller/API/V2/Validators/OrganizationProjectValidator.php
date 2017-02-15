@@ -22,25 +22,18 @@ class OrganizationProjectValidator extends Base {
     /**
      * @var \Projects_ProjectStruct
      */
-    public $project;
-
-    /**
-     * @var OrganizationStruct
-     */
-    public $organization;
+    public $controller;
 
     public function __construct( KleinController $controller ) {
+        $this->controller = $controller;
         parent::__construct( $controller->getRequest() );
     }
 
     public function validate() {
 
-        $this->project = \Projects_ProjectDao::findById( $this->request->id_project );
-
-        if ( empty( $this->project ) ) {
+        if ( empty( $this->controller->project ) ) {
             throw new NotFoundError( "Not Found", 404 );
         }
-
 
     }
 
