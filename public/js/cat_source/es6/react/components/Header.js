@@ -113,12 +113,13 @@ class Header extends React.Component {
                                 </a>
                             </div>
             }
-            result = <div className="ui dropdown fluid selection organization-dropdown top-5"
+            result = <div className="ui dropdown selection top-5"
                           ref={(dropdownOrganizations) => this.dropdownOrganizations = dropdownOrganizations}>
                 <input type="hidden" name="organization" className="organization-dd" />
                 <i className="dropdown icon"/>
-                <div className="default text">Choose organization</div>
+                <span className="text">Choose Organization</span>
                 <div className="menu">
+                    <div className="divider"></div>
                     {addOrg}
                     { self.props.showModals ? (
                             <div className="divider"></div>
@@ -147,15 +148,14 @@ class Header extends React.Component {
             />;
         }
 
-        return <section className="ui grid nav-mc-bar">
+        return <section className="nav-mc-bar ui grid">
 
-                    <nav className="four column row">
-                        <div className="left floated column">
-                            <a href="/" className="logo logo-col"/>
-                        </div>
-                        {this.props.showLinks ? (
-                                <div className="right floated column">
-                                    <ul className="pull-right" id="menu-site">
+                    <nav className="sixteen wide column">
+                        <div className="ui stackable grid">
+                            <div className="eight wide column logo-menu">
+                                <a href="/" className="logo logo-home"/>
+                                {this.props.showLinks ? (
+                                    <ul id="menu-site">
                                         <li><a href="https://www.matecat.com/benefits/">Benefits</a></li>
                                         <li><a href="https://www.matecat.com/outsourcing/">Outsource</a></li>
                                         <li><a href="https://www.matecat.com/support-plans/">Plans</a></li>
@@ -164,19 +164,20 @@ class Header extends React.Component {
                                         <li><a href="https://www.matecat.com/support/">Support</a></li>
                                         <li><a className="bigred" href="https://www.matecat.com/webinar" target="_blank">Webinar</a></li>
                                     </ul>
-                                </div>
-                            ) : ('')}
 
-                        { this.props.loggedUser ? (
-                                <div className="right floated column">
-                                    {organizationsSelect}
-                                </div>
-                            ) :(
-                                ''
-                            )}
+                                    ) : ('')}
+                            </div>
 
+                            { this.props.loggedUser ? (
+                                    <div className="eight wide right aligned wide column">
+                                        {organizationsSelect}
+                                    </div>
+                                ) :(
+                                    ''
+                                )}
+                        </div>
                     </nav>
-                    {subHeader}
+                {subHeader}
                 </section>;
     }
 }

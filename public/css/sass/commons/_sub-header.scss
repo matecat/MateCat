@@ -12,6 +12,7 @@
 	}
 
 	.assigned-list {
+		margin-right: 8px;
 		.switch {
 			margin-top: 12px;
 		}
@@ -40,6 +41,20 @@
 		.input-field {
 			margin-left: 10px;
 			margin-top: -2px;
+		}
+		.list-organization{
+			.ui.dropdown {
+				.all {
+					padding: 0px;
+					width: 24px;
+					height: 24px;
+					line-height: 24px;
+					border-radius: 50%;
+					text-align: center;
+					font-size: 12px;
+					font-weight: 600;
+				}
+			}
 		}
 	}
 	.search-state-filters {

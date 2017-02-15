@@ -229,7 +229,7 @@ class JobContainer extends React.Component {
             let tooltipText = '';
             keys.forEach(function (key, i) {
                 let descript = (key.name) ? key.name : "Private TM and Glossary";
-                let item = '<div style="text-align: left"><span style="font-weight: bold">' + descript + '</span> KEY: ' + key.key + '</div>';
+                let item = '<div style="text-align: left"><span style="font-weight: bold">' + descript + '</span> ( ' + key.key + ' )</div>';
                 tooltipText =  tooltipText + item;
             });
             return <a className="circular ui icon button tm-keys" data-html={tooltipText}

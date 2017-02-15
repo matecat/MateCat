@@ -39,11 +39,11 @@ class ProjectContainer extends React.Component {
         if (this.dropdownUsers) {
             if (this.props.project.get('id_assignee') ) {
                 this.dropdownUsers.classList.remove("project-not-assigned");
-                this.dropdownUsers.classList.add("shadow-1");
+                this.dropdownUsers.classList.remove("shadow-1");
                 this.dropdownUsers.classList.add("project-assignee");
             } else {
                 this.dropdownUsers.classList.remove("project-assignee");
-                this.dropdownUsers.classList.remove("shadow-1");
+                this.dropdownUsers.classList.add("shadow-1");
                 this.dropdownUsers.classList.add("project-not-assigned");
             }
 
@@ -60,8 +60,10 @@ class ProjectContainer extends React.Component {
             if (this.props.project.get('id_assignee') ) {
                 this.dropdownUsers.classList.remove("project-not-assigned");
                 this.dropdownUsers.classList.add("project-assignee");
+                this.dropdownUsers.classList.add("shadow-1");
             } else {
                 this.dropdownUsers.classList.remove("project-assignee");
+                this.dropdownUsers.classList.remove("shadow-1");
                 this.dropdownUsers.classList.add("project-not-assigned");
             }
 
@@ -259,8 +261,9 @@ class ProjectContainer extends React.Component {
 
                     let jobList = <div className="job ui grid" key = { (i - 1) + job.get('id')}>
                             <div className="job-header sixteen wide column shadow-1">
+
                                 <div className="ui grid">
-                                    <div className="ten wide column">
+                                    <div className="nine wide column">
                                         <div className="source-target">
                                             <div className="source-box">
                                                 {job.get('sourceTxt')}
@@ -271,7 +274,7 @@ class ProjectContainer extends React.Component {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="six wide column right aligned">
+                                    <div className="seven wide column right aligned">
                                         <div className="split-merge">
                                             {button}
                                         </div>
@@ -359,26 +362,30 @@ class ProjectContainer extends React.Component {
                 lastAction = '';
             } else {
                 let date = this.getLastActionDate();
-                lastAction = <div className="activity-log">
-                    <a href={activityLogUrl} target="_blank" className="right activity-log">
-                        <i> <span>Last action: {this.state.lastAction.action + ' on ' + date}</span><span> by {this.state.lastAction.first_name }</span></i>
-                    </a>
+                lastAction = <div className="sixteen wide right aligned column">
+                    <div className="activity-log">
+                        <a href={activityLogUrl} target="_blank" className="right activity-log">
+                            <i> <span>Last action: {this.state.lastAction.action + ' on ' + date}</span><span> by {this.state.lastAction.first_name }</span></i>
+                        </a>
+                    </div>
                 </div>;
             }
         } else {
-            lastAction = <div className="activity-log">
-                <a href={activityLogUrl} target="_blank" className="right activity-log">
-                    <i>Loading....</i>
-                </a>
+            lastAction = <div className="sixteen wide right aligned column pad-top-0 pad-bottom-0">
+                <div className="activity-log">
+                    <a href={activityLogUrl} target="_blank" className="right activity-log">
+                        <i>Loading....</i>
+                    </a>
+                </div>
             </div>;
 
         }
 
         let state = '';
         if ( this.props.project.get('has_archived') ) {
-            state = <div className="col m1"><span className="new badge grey darken-1" style={{marginTop: '5px'}}>archived</span></div>
+            state = <span>(archived)</span>;
         }  else if ( this.props.project.get('has_cancelled') ) {
-            state = <div className="col m1"><span className="new badge grey darken-5" style={{marginTop: '5px'}}>cancelled</span></div>
+            state = <span>(archived)</span>;
         }
 
         let workspace = '';
@@ -394,18 +401,23 @@ class ProjectContainer extends React.Component {
         let dropDownUsers = this.getDropDownUsers();
 
         return <div className="project ui column grid shadow-1">
-                    <div className="sixteen wide column">
 
+                    <div className="sixteen wide column">
                         <div className="project-header ui grid">
+
                             <div className="two wide computer two wide tablet three wide mobile column">
                                 <div className="ui stackable grid">
                                     <div className="sixteen wide column">
-                                        <div className="project-id">
-                                            {this.props.project.get('id')}
+                                        <div className="ui teal ribbon label">
+                                            <span className="project-id">
+                                                {this.props.project.get('id')}
+                                            </span>
+                                            {state}
                                         </div>
                                     </div>
                                 </div>
                             </div>
+
                             <div className="fourteen wide computer fourteen wide tablet thirteen wide mobile column">
                                 <div className="ui mobile reversed stackable grid">
                                     <div className="ten wide computer eight wide tablet only reverse tablet column tablet only">
@@ -415,7 +427,7 @@ class ProjectContainer extends React.Component {
                                                     {state}
                                                     <div className="ui form">
                                                         <div className="field">
-                                                            <div className="ui icon input">
+                                                            <div className="ui icon input selected">
                                                                 <input type="text"
                                                                        onKeyPress={this.onKeyPressEvent.bind(this, )}
                                                                         defaultValue={this.state.projectName}/>
@@ -445,8 +457,6 @@ class ProjectContainer extends React.Component {
                                     </div>
                                 </div>
                             </div>
-
-
                             <div className="sixteen wide column mobile only pad-top-0 pad-bottom-0">
                                 <div className="project-name">
                                     {state}
@@ -467,19 +477,15 @@ class ProjectContainer extends React.Component {
                                 </div>
                             </div>
 
-
-
-
-
                         </div>
 
                         <div className="project-body ui grid">
-                            <div className="jobs sixteen wide column">
+                            <div className="jobs sixteen wide column pad-bottom-0">
                                 {jobsList}
                             </div>
                         </div>
 
-                        <div className="one column project-footer">
+                        <div className="project-footer ui grid">
                             {lastAction}
                         </div>
 

@@ -168,6 +168,7 @@ class CreateWorkspace extends React.Component {
                                            ref={(inputNewWS) => this.inputNewWS = inputNewWS}
                                            onKeyPress={this.handleKeyPressInCreate.bind(this)}/>
                                     <i className="icon-pencil icon"/>
+                                    {/*<i class="icon-checkmark green icon"></i>*/}
                                 </div>
                             </div>
                             <div className="column right aligned">

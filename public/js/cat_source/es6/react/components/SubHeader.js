@@ -111,7 +111,7 @@ class SubHeader extends React.Component {
 
             let item = <div className="item" data-value="-1"
                             key={'user' + -1}>
-                            <a className="ui circular label">ALL</a>
+                            <a className="ui all label">ALL</a>
                             All Members
                         </div>;
             members = members.unshift(item);
@@ -124,10 +124,10 @@ class SubHeader extends React.Component {
                         </div>
 
                         <div className="list-organization">
-                            <div className="ui dropdown top right pointing users-projects shadow-1"
+                            <div className="ui dropdown top right pointing users-projects"
                                  ref={(dropdownUsers) => this.dropdownUsers = dropdownUsers}>
                                 <span className="text">
-                                    <div className="ui circlar label">ALL</div>
+                                    <div className="ui all label">ALL</div>
                                   All Members
                                 </span>
                                 <i className="dropdown icon"/>
@@ -166,6 +166,7 @@ class SubHeader extends React.Component {
             <i className="dropdown icon"/>
             <div className="default text">Choose Workspace</div>
             <div className="menu">
+                <div className="divider"></div>
                 <div className="header" style={{cursor: 'pointer'}} onClick={this.openCreateWorkspace.bind(this)}>New Workspace
                     <a className="organization-filter button show">
                         <i className="icon-plus3 icon"/>

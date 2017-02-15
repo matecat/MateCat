@@ -21,7 +21,7 @@ body.manage {
 // Shadow - Transitions for buttons
 .ui.button {
     transition: 0.3s ease !important;
-    padding: 8px 10px 8px 15px;
+    padding: 8px 15px 8px 15px;
 }
 
 .ui.icon.button {
@@ -34,6 +34,12 @@ body.manage {
 
 .project {
     margin-bottom: 30px !important;
+    .ui.ribbon.label {
+        position: absolute;
+        top: 15px;
+        z-index: 2;
+        left: -15px;
+    }
     .project-header {
         background-color: #e8e8e8;
         padding-bottom: 22px !important;
@@ -41,6 +47,12 @@ body.manage {
             padding: 10px 0 10px 15px;
         }
         .project-name {
+            .ui.icon.input.selected {
+                &:active {
+                    width: 700px;
+                    z-index: 3;
+                }
+            }
             .ui.form input[type="text"] {
                 background: #d0d0d0;
                 border: none;
@@ -51,6 +63,7 @@ body.manage {
                 }
                 &:focus {
                     background: #ffffff;
+                    width: 700px;
                     box-shadow: 0 -1px 0 #e0e0e0,
                     0 0 2px rgba(0, 0, 0, .12),
                     0 2px 4px rgba(0, 0, 0, .24) !important;
@@ -62,6 +75,7 @@ body.manage {
         }
         .project-activity-icon {
             padding: 0 15px !important;
+            font-family: Calibri, Arial, Helvetica, sans-serif;
             @media only screen and (max-width: 767px) {
                     padding: 0px !important;
             }
@@ -121,6 +135,15 @@ body.manage {
                         margin-right: 0px;
                         padding-left: 10px;
                         background-color: transparent;
+                    }
+                    .menu {
+                        .header {
+                            font-size: 14px;
+                            i {
+                                float: right;
+                                font-size: 18px;
+                            }
+                        }
                     }
                 }
                 &.project-workspace {

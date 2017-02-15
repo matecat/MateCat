@@ -77,6 +77,7 @@ class CreateOrganization extends React.Component {
                                            onFocus={this.onInputFocus.bind(this)}
                                            ref={(inputNewOrg) => this.inputNewOrg = inputNewOrg}/>
                                     <i className="icon-pencil icon"/>
+                                    {/*<i class="icon-checkmark green icon"></i>*/}
                                 </div>
                             </div>
                         </div>
@@ -84,11 +85,11 @@ class CreateOrganization extends React.Component {
                     <div className="matecat-modal-middle">
                         <div className="ui one column grid left aligned">
                             <div className="column">
-                                <h3>Add member</h3>
+                                <h3>Add members</h3>
                                 <div className={"ui fluid multiple search selection dropdown " + inputDropdown}
                                      ref={(usersInput) => this.usersInput = usersInput}>
-                                    <input name="tags" type="hidden"/>
-                                        <div className="default text"></div>
+                                    <input name="tags" type="hidden" />
+                                        <div className="default text">insert email or emails</div>
                                 </div>
                             </div>
                         </div>
