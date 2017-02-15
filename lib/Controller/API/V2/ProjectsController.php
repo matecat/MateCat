@@ -28,32 +28,31 @@ class ProjectsController extends KleinController {
     }
 
     public function update() {
-        $acceptedFields = array('id_assignee', 'name');
-        $projectModel = new \ProjectModel( $this->validator->project ) ;
 
-        $putParams = $this->getPutParams() ;
-        foreach( $acceptedFields as $field ) {
+        $acceptedFields = array( 'id_assignee', 'name', 'id_workspace' );
+        $projectModel   = new \ProjectModel( $this->validator->project );
+
+        $putParams = $this->getPutParams();
+        foreach ( $acceptedFields as $field ) {
             if ( isset( $putParams[ $field ] ) ) {
-                $projectModel->prepareUpdate( $field,  $putParams[ $field ] ) ;
+                $projectModel->prepareUpdate( $field, $putParams[ $field ] );
             }
         }
 
         $updatedStruct = $projectModel->update();
-        $formatted = new Project() ;
-        $this->response->json( array( 'project' => $formatted->renderItem( $updatedStruct ) ) ) ;
+        $formatted     = new Project();
+        $this->response->json( array( 'project' => $formatted->renderItem( $updatedStruct ) ) );
 
     }
 
-    public function validateRequest()
-    {
+    public function validateRequest() {
         parent::validateRequest();
         $this->requireIdentifiedUser();
 
-        $this->validator->validate($this->user);
+        $this->validator->validate( $this->user );
     }
 
-    protected function afterConstruct()
-    {
+    protected function afterConstruct() {
         parent::afterConstruct();
 
         $this->validator = new OrganizationProjectValidator( $this );
