@@ -65,7 +65,6 @@ UI = {
             self.organizations = data.organizations;
             ManageActions.renderOrganizations(self.organizations);
             self.selectedOrganization = data.organizations[0];
-            self.selectedUser = {};
             self.getWorkspaces(self.selectedOrganization).done(function (data) {
                 self.selectedOrganization.workspaces = data.workspaces;
                 ManageActions.selectOrganization(self.selectedOrganization);
@@ -226,16 +225,23 @@ UI = {
         });
     },
 
-    filterProjects: function(user, workspace, name, status) {
+    filterProjects: function(userUid, workspaceId, name, status) {
         let self = this;
+        this.Search.filter = {};
         let filter = {};
-        if (typeof user != "undefined") {
-            this.selectedUser =  user;
-            filter.id_assignee = this.selectedUser.user.uid;
+        if (typeof userUid != "undefined") {
+             if (userUid === ManageConstants.NOT_ASSIGNED_FILTER) {
+                filter.no_assignee = true;
+            } else if (userUid !== ManageConstants.ALL_MEMBERS_FILTER) {
+                filter.id_assignee = userUid;
+            }
         }
-        if ((typeof workspace !== "undefined") ) {
-            this.selectedWorkspace = workspace;
-            filter.id_workspace = this.selectedWorkspace.id;
+        if ((typeof workspaceId !== "undefined") ) {
+            if (workspaceId === ManageConstants.NO_WORKSPACE_FILTER) {
+                filter.no_workspace = true;
+            } else if (workspaceId !== ManageConstants.ALL_WORKSPACES_FILTER) {
+                filter.id_workspace = workspaceId;
+            }
         }
         if ((typeof name !== "undefined") ) {
             filter.pn = name;
@@ -244,7 +250,9 @@ UI = {
             filter.status = status;
         }
         this.Search.filter = $.extend( this.Search.filter, filter );
-        UI.Search.currentPage = 1;
+        if (!_.isEmpty(this.Search.filter)) {
+            UI.Search.currentPage = 1;
+        }
         return this.getProjects(this.selectedOrganization);
     },
 
@@ -281,12 +289,12 @@ UI = {
         return APP.doRequest({
             data: data,
             success: function(d){
-                if( typeof d.errors != 'undefined' && d.errors.length ){
-                    window.location = '/';
-                }
+                // if( typeof d.errors != 'undefined' && d.errors.length ){
+                //     window.location = '/';
+                // }
             },
             error: function(d){
-                window.location = '/';
+                // window.location = '/';
             }
         });
     },

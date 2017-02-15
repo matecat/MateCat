@@ -8,7 +8,7 @@
 
 namespace Features\ReviewImproved\Controller\API;
 
-use API\V2\JobPasswordValidator;
+use API\V2\Validators\JobPasswordValidator;
 use API\V2\KleinController;
 use LQA\ChunkReviewDao;
 use Features\ReviewImproved\Model\QualityReportModel ;

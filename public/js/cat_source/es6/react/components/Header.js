@@ -136,17 +136,14 @@ class Header extends React.Component {
     }
 
     render () {
-        var self = this;
+        let self = this;
         let organizationsSelect = this.getOrganizationsSelect();
-        var selectedOrganization =  this.state.organizations.find(function (org) {
+        let selectedOrganization =  this.state.organizations.find(function (org) {
             return org.get('id') == self.state.selectedOrganizationId;
         });
         let subHeader = '';
         if (this.props.showSubHeader) {
             subHeader = <SubHeader
-                filterFunction={this.props.filterFunction}
-                searchFn={this.props.searchFn}
-                closeSearchCallback={this.props.closeSearchCallback}
                 selectedOrganization={selectedOrganization}
             />;
         }

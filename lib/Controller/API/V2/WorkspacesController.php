@@ -13,13 +13,17 @@ namespace API\V2;
 use API\V2\Exceptions\AuthorizationError;
 use API\V2\Json\Error;
 use API\V2\Json\Workspace;
+use API\V2\Validators\OrganizationAccessValidator;
 use InvalidArgumentException;
-use Organizations\MembershipDao;
 use Organizations\WorkspaceDao;
 use Organizations\WorkspaceOptionsStruct;
 use Organizations\WorkspaceStruct;
 
 class WorkspacesController extends KleinController {
+
+    public function afterConstruct() {
+        $this->appendValidator( new OrganizationAccessValidator( $this ) );
+    }
 
     public function create() {
 
@@ -34,17 +38,8 @@ class WorkspacesController extends KleinController {
 
         try {
 
-            $this->requireIdentifiedUser();
-
             if( empty( $wSpaceStruct->name ) ){
                 throw new InvalidArgumentException( "Wrong parameter :name ", 400 );
-            }
-
-            $org = ( new MembershipDao() )->findOrganizationByIdAndUser( $wSpaceStruct->id_organization,
-                $this->user
-            );
-            if ( empty( $org ) ) {
-                throw new AuthorizationError( "Not Authorized", 401 );
             }
 
             $wSpaceDao->create( $wSpaceStruct );
@@ -55,14 +50,10 @@ class WorkspacesController extends KleinController {
         } catch ( \PDOException $e ){
             $this->response->code( 503 );
             $this->response->json( ( new Error( [ $e ] ) )->render() );
-        } catch( AuthorizationError $e ){
-            $this->response->code( 401 );
-            $this->response->json( ( new Error( [ $e ] ) )->render() );
         } catch( InvalidArgumentException $e ){
             $this->response->code( 400 );
             $this->response->json( ( new Error( [ $e ] ) )->render() );
         }
-
 
     }
 
@@ -71,11 +62,6 @@ class WorkspacesController extends KleinController {
         $wSpaceDao = new WorkspaceDao();
 
         try {
-
-            $org = ( new MembershipDao() )->findOrganizationByIdAndUser( $this->request->id_organization, $this->user );
-            if ( empty( $org ) ) {
-                throw new AuthorizationError( "Not Authorized", 401 );
-            }
 
             $workSpacesList = $wSpaceDao->setCacheTTL( 60 * 60 * 24 )->getByOrganizationId( $this->request->id_organization );
             $formatter = new Workspace();
@@ -99,11 +85,6 @@ class WorkspacesController extends KleinController {
                 throw new InvalidArgumentException( "Wrong parameter :name ", 400 );
             }
 
-            $org = ( new MembershipDao() )->findOrganizationByIdAndUser( $this->request->id_organization, $this->user );
-            if( empty( $org ) ){
-                throw new AuthorizationError( "Not Authorized", 401 );
-            }
-
             $wSpaceDao = new WorkspaceDao();
             $wStruct = $wSpaceDao->getById( $this->request->id_workspace );
             $wStruct->name = $requestContent->name;
@@ -115,9 +96,6 @@ class WorkspacesController extends KleinController {
 
         } catch ( \PDOException $e ){
             $this->response->code( 503 );
-            $this->response->json( ( new Error( [ $e ] ) )->render() );
-        } catch( AuthorizationError $e ){
-            $this->response->code( 401 );
             $this->response->json( ( new Error( [ $e ] ) )->render() );
         } catch( InvalidArgumentException $e ){
             $this->response->code( 400 );
@@ -133,12 +111,6 @@ class WorkspacesController extends KleinController {
 
         try{
 
-            $membershipDao = new MembershipDao();
-            $org = $membershipDao->findOrganizationByIdAndUser( $this->request->id_organization, $this->user );
-            if( empty( $org ) ){
-                throw new AuthorizationError( "Not Authorized", 401 );
-            }
-
             $workspaceDao = new WorkspaceDao();
             $wStructQuery = new WorkspaceStruct();
             $wStructQuery->id = $this->request->id_workspace;
@@ -152,9 +124,6 @@ class WorkspacesController extends KleinController {
 
         } catch ( \PDOException $e ){
             $this->response->code( 503 );
-            $this->response->json( ( new Error( [ $e ] ) )->render() );
-        } catch( AuthorizationError $e ){
-            $this->response->code( 401 );
             $this->response->json( ( new Error( [ $e ] ) )->render() );
         }
 
