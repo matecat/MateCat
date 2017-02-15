@@ -10,6 +10,7 @@ namespace API\V2\Validators;
 
 
 use API\V2\KleinController;
+use Exceptions\NotFoundError;
 use Klein\Request;
 use Organizations\OrganizationStruct;
 use Organizations\MembershipDao;
@@ -32,16 +33,12 @@ class OrganizationProjectValidator extends Base {
         parent::__construct( $controller->getRequest() );
     }
 
-    public function validate( $user ) {
+    public function validate() {
 
         $this->project = \Projects_ProjectDao::findById( $this->request->id_project );
 
-        $this->organization = ( new MembershipDao() )->findOrganizationByIdAndUser(
-                $this->project->id_organization, $user
-        );
-
-        if ( empty( $this->organization ) ) {
-            throw new AuthorizationError( "Not Authorized", 401 );
+        if ( empty( $this->project ) ) {
+            throw new NotFoundError( "Not Found", 404 );
         }
 
 

@@ -1,7 +1,7 @@
 <?php
 
 require 'lib/Controller/API/V2/SegmentVersion.php';
-require 'lib/Controller/API/V2/JobPasswordValidator.php';
+require 'lib/Controller/API/V2/Validators/JobPasswordValidator.php';
 
 
 

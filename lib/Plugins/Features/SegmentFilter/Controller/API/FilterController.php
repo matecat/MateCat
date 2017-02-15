@@ -3,8 +3,8 @@
 
 namespace Features\SegmentFilter\Controller\API;
 
-use API\V2\JobPasswordValidator;
-use API\V2\ValidationError;
+use API\V2\Validators\JobPasswordValidator;
+use API\V2\Exceptions\ValidationError;
 use Features\SegmentFilter\Model\SegmentFilterModel;
 
 use Features\SegmentFilter\Model\FilterDefinition ;
