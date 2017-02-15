@@ -125,7 +125,7 @@ class getProjectsController extends ajaxController {
             $this->search_in_pname,
             $this->search_source, $this->search_target, $this->search_status,
             $this->search_only_completed, $this->project_id,
-            $organization, $workspace, $assignee->get
+            $organization, $workspace, $assignee
         );
 
         $projnum = getProjectsNumber( $this->logged_user,
@@ -197,9 +197,9 @@ class getProjectsController extends ajaxController {
         $dao = new \Organizations\WorkspaceDao() ;
         $workspaces = $dao->getByOrganizationId($organization->id) ;
         $id_workspace = $this->id_workspace ;
-        $wp = array_filter($workspaces, function($workspace) use ( $id_workspace ) {
+        $wp = array_values( array_filter($workspaces, function($workspace) use ( $id_workspace ) {
             return $id_workspace == $workspace->id ;
-        });
+        }));
 
         if ( empty( $wp ) ) {
             throw new Exception('Workspace not found in organization') ;

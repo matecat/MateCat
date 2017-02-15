@@ -1823,7 +1823,7 @@ function getProjects( Users_UserStruct $user, $start, $step,
 
     if ( !is_null( $assignee ) ) {
         $conditions[] = " p.id_assignee = :id_assignee " ;
-        $data ['id_assignee'] = $assignee->id ;
+        $data ['id_assignee'] = $assignee->uid ;
     }
 
     $where_query = implode( " AND ", $conditions );
@@ -1958,7 +1958,7 @@ function getProjectsNumber( Users_UserStruct $user, $search_in_pname, $search_so
 
     if ( !is_null( $assignee ) ) {
         $conditions[] = " id_assignee = :id_assignee " ;
-        $data ['id_assignee'] = $assignee->id ;
+        $data ['id_assignee'] = $assignee->uid ;
     }
 
 
