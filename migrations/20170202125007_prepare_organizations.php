@@ -22,7 +22,7 @@ class PrepareOrganizations extends AbstractMigration {
             ADD COLUMN `id_assignee` INT UNSIGNED NULL DEFAULT NULL,
             ADD COLUMN `id_workspace` INT UNSIGNED NULL DEFAULT NULL,
             ADD INDEX `id_assignee_idx` (`id_assignee` ASC),
-            ADD INDEX `id_workspace_idx` (`id_assignee` ASC),
+            ADD INDEX `id_workspace_idx` (`id_workspace` ASC),
             algorithm=INPLACE, lock=NONE
         " );
 

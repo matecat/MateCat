@@ -425,14 +425,14 @@ class JobContainer extends React.Component {
                                         <div className="nine wide column">
                                             <div className="send-translator"
                                                  onClick={this.openAssignToTranslatorModal.bind(this)}>
-                                                <i className="icon-forward icon"></i>
+                                                <i className="icon-forward icon"/>
                                                 <a href="#"><span id="translator-job">Send to translator</span></a>
                                             </div>
                                         </div>
                                         <div className="seven wide column right aligned">
                                             <div className="due-to"
                                                  onClick={this.openAssignToTranslatorModal.bind(this)}>
-                                                <i className="icon-calendar icon"></i>
+                                                <i className="icon-calendar icon"/>
                                                 <a href="#"><span id="due-date">Delivery date</span></a>
                                             </div>
                                         </div>

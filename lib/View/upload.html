@@ -38,13 +38,24 @@
     <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 
-    <script src="${basepath}public/js/lib/jquery.js"></script>
-    <script src="${basepath}public/js/build/common.js"></script>
-    <script src="${basepath}public/js/lib/jquery.powertip.min.js"></script>
-    <script src="${basepath}public/js/gdrive.upload.js"></script>
-    <script src="${basepath}public/js/gdrive.picker.js"></script>
-    <script src="${basepath}public/js/upload.js"></script>
-    <script src="${basepath}public/js/lib/jquery.tablesorter-fork-mottie.js"></script>
+
+    <script type="text/javascript" src="${basepath}public/js/lib/jquery.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/lib/jquery-ui-1.8.20.custom.min.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/lib/jquery.tablesorter-fork-mottie.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/lib/jquery.powertip.min.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/lib/jquery.cookie.js?build=${build_number}"></script>
+
+    <script type="text/javascript" src="${basepath}public/js/lib/jquery.colorbox-min.js?build=${build_number}"></script>
+
+    <script type="text/javascript" src="${basepath}public/js/build/semantic.js?build=${build_number}"></script>
+
+    <script type="text/javascript" src="${basepath}public/js/build/common.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/gdrive.upload.js"></script>
+    <script type="text/javascript" src="${basepath}public/js/gdrive.picker.js"></script>
+    <script type="text/javascript" src="${basepath}public/js/upload.js"></script>
+    <script type="text/javascript" src="${basepath}public/js/build/react.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
+
 
     <script type="text/javascript">
         /*<![CDATA[*/
@@ -87,19 +98,19 @@
 <body tal:condition="php:supportedBrowser EQ 1" class="started">
 
 <header>
-    <div class="wrapper">
-        <a href="${basepath}" class="logo"></a>
-        <ul class="pull-right" id="menu-site">
-            <li><a href="https://www.matecat.com/benefits/">Benefits</a></li>
-            <li><a href="https://www.matecat.com/outsourcing/">Outsource</a></li>
-            <li><a href="https://www.matecat.com/support-plans/">Plans</a></li>
-            <li><a href="https://www.matecat.com/about/">About</a></li>
-            <li><a href="https://www.matecat.com/faq/">FAQ</a></li>
-            <li><a href="https://www.matecat.com/support/">Support</a></li>
-            <li><a class="bigred" href="https://www.matecat.com/webinar" target="_blank">Webinar</a></li>
-        </ul>
-    </div>
-    <div class="cl"></div>
+    <!--<div class="wrapper">-->
+        <!--<a href="${basepath}" class="logo"></a>-->
+        <!--<ul class="pull-right" id="menu-site">-->
+            <!--<li><a href="https://www.matecat.com/benefits/">Benefits</a></li>-->
+            <!--<li><a href="https://www.matecat.com/outsourcing/">Outsource</a></li>-->
+            <!--<li><a href="https://www.matecat.com/support-plans/">Plans</a></li>-->
+            <!--<li><a href="https://www.matecat.com/about/">About</a></li>-->
+            <!--<li><a href="https://www.matecat.com/faq/">FAQ</a></li>-->
+            <!--<li><a href="https://www.matecat.com/support/">Support</a></li>-->
+            <!--<li><a class="bigred" href="https://www.matecat.com/webinar" target="_blank">Webinar</a></li>-->
+        <!--</ul>-->
+    <!--</div>-->
+    <!--<div class="cl"></div>-->
 </header>
 
 
@@ -761,8 +772,6 @@
     {% } %}
 </script>
 
-<script src="${basepath}public/js/lib/jquery-ui-1.8.20.custom.min.js"></script>
-
 <!-- The Templates plugin is included to render the upload/download listings -->
 <script src="${basepath}public/js/lib/fileupload/tmpl.min.js"></script>
 
@@ -789,14 +798,6 @@
 <script src="${basepath}public/js/lib/fileupload/locale.js"></script>
 <!-- The main application script -->
 <script src="${basepath}public/js/lib/fileupload/main.js"></script>
-<!-- The XDomainRequest Transport is included for cross-domain file deletion for IE8+ -->
-<!--[if gte IE 8]>
-<script src="js/cors/jquery.xdr-transport.js"></script><![endif]-->
-<script src="${basepath}public/js/build/react.js"></script>
-<script src="${basepath}public/js/build/cat-react.js"></script>
-
-<script src="${basepath}public/js/lib/jquery.cookie.js"></script>
-<script src="${basepath}public/js/lib/jquery.colorbox-min.js"></script>
 
 <script src="${basepath}public/js/new-project.js"></script>
 <script src="${basepath}public/js/tm.js"></script>

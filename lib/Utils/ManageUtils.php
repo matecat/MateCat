@@ -3,20 +3,21 @@
 class ManageUtils {
 
     /**
-     * @param Users_UserStruct  $user
-     * @param                   $start                int
-     * @param                   $step                 int
-     * @param                   $search_in_pname      string|null
-     * @param                   $search_source        string|null
-     * @param                   $search_target        string|null
-     * @param                   $search_status        string|null
-     * @param                   $search_only_completed bool
-     * @param                   $project_id           int
-     *
-     * @param \Organizations\OrganizationStruct $organization
-     *
+     * @param Users_UserStruct $user
+     * @param $start
+     * @param $step
+     * @param $search_in_pname
+     * @param $search_source
+     * @param $search_target
+     * @param $search_status
+     * @param $search_only_completed
+     * @param $project_id
+     * @param \Organizations\OrganizationStruct|null $organization
+     * @param \Organizations\WorkspaceStruct|null $workspace
+     * @param Users_UserStruct|null $assignee
+     * @param bool $no_workspace
+     * @param bool $no_assignee
      * @return array
-     * @internal param bool $filter_enabled
      */
     public static function queryProjects(
             Users_UserStruct $user, $start, $step, $search_in_pname,
@@ -24,13 +25,15 @@ class ManageUtils {
             $project_id,
             \Organizations\OrganizationStruct $organization = null,
             \Organizations\WorkspaceStruct $workspace = null,
-            Users_UserStruct $assignee = null
+            Users_UserStruct $assignee = null,
+            $no_workspace = false,
+            $no_assignee = false
     ) {
 
         $data = getProjects(
             $user, $start, $step, $search_in_pname, $search_source, $search_target,
             $search_status, $search_only_completed, $project_id, $organization,
-            $workspace, $assignee
+            $workspace, $assignee, $no_workspace, $no_assignee
         );
 
         $projects     = array();

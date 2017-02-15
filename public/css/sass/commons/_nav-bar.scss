@@ -68,3 +68,29 @@
 .middle-v {
     vertical-align: middle;
 }
+#menu-site {
+    margin-top: 5px !important;
+    margin-left: 180px !important;
+}
+
+.home-header {
+    height: 60px;
+    background-color: #4d4d4d;
+    .logo-menu {
+        .logo.logo-home {
+            border: 0;
+            background: url(../../img/logo.png) 0px 2px no-repeat;
+            width: 145px;
+            height: 31px;
+            background-size: 130px 26px;
+            position: initial;
+            margin-left: 67px;
+            margin-top: 10px;
+        }
+    }
+
+    .organization-home {
+        padding-top: 18px;
+        padding-right: 30px;
+    }
+}

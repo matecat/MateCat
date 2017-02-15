@@ -146,11 +146,13 @@ class WorkspaceDao extends \DataAccess_AbstractDao {
     }
 
     /**
+     * Destroy cache for @see WorkspaceDao::getById()
+     *
      * @param $wId
      *
      * @return bool|int
      */
-    public function destroyCachebyId( $wId ){
+    public function destroyCacheById( $wId ){
         $stmt = $this->_getStatementForCache( self::$_query_workspace_by_id );
         return $this->_destroyObjectCache( $stmt,
                 array(

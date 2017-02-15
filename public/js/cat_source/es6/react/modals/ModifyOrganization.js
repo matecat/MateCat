@@ -84,7 +84,7 @@ class ModifyOrganization extends React.Component {
             if (user.get('uid') == APP.USER.STORE.user.uid) {
                 return <div className="item"
                             key={'user' + user.get('uid')}>
-                    <div className="ui circular label">{APP.getUserShortName(user.toJS())}</div>
+                    <div className="ui circular label top-3 bottom-3">{APP.getUserShortName(user.toJS())}</div>
                     <span className="content">
                         {' ' + user.get('first_name') + ' ' + user.get('last_name')}
                     </span>
@@ -92,7 +92,7 @@ class ModifyOrganization extends React.Component {
             }else if (self.state.showRemoveMessageUserID == user.get('uid')) {
                 return <div className="item"
                             key={'user' + user.get('uid')}>
-                    <div className="right floated content">
+                    <div className="right floated content top-7">
                         <div className="ui button green" onClick={self.removeUser.bind(self, user.get('uid'))}>YES</div>
                         <div className="ui button red" onClick={self.undoRemoveAction.bind(self)}>NO</div>
                     </div>
@@ -103,13 +103,13 @@ class ModifyOrganization extends React.Component {
             } else {
                 return <div className="item"
                             key={'user' + user.get('uid')}>
-                    <div className="right floated content">
-                        <div className="ui button" onClick={self.showRemoveUser.bind(self, user.get('uid'))}>Remove</div>
-                    </div>
-                    <div className="ui circular label">{APP.getUserShortName(user.toJS())}</div>
+                    <div className="ui circular label top-3">{APP.getUserShortName(user.toJS())}</div>
                     <span className="content">
                         {' ' + user.get('first_name') + ' ' + user.get('last_name')}
                     </span>
+                    <div className="right floated content">
+                        <div className="ui button" onClick={self.showRemoveUser.bind(self, user.get('uid'))}>Remove</div>
+                    </div>
                 </div>
             }
 

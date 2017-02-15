@@ -465,7 +465,7 @@ abstract class DataAccess_AbstractDao {
         $stmt = $conn->prepare( $sql );
 
         $data = array_merge(
-            $struct->attributes( $options['fields'] ),
+            $struct->toArray( $options['fields'] ),
             self::structKeys( $struct )
         );
 

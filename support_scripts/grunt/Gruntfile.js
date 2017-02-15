@@ -221,14 +221,15 @@ module.exports = function(grunt) {
 
             libs: {
                 src: [
-                    basePath + 'lib/handlebars.runtime-v4.0.5.js',
                     basePath + 'lib/jquery-1.11.0.min.js',
-                    basePath + 'lib/waypoints.min.js',
                     basePath + 'lib/jquery-ui.js',
                     basePath + 'lib/jquery.hotkeys.min.js',
                     basePath + 'lib/jquery.cookie.js',
                     basePath + 'lib/jquery.tablesorter-fork-mottie.js',
                     basePath + 'lib/jquery.tooltipster.min.js',
+                    basePath + 'lib/jquery.powertip.min.js',
+                    basePath + 'lib/handlebars.runtime-v4.0.5.js',
+                    basePath + 'lib/waypoints.min.js',
                     basePath + 'lib/diff_match_patch.js',
                     basePath + 'lib/rangy-core.js',
                     basePath + 'lib/rangy-selectionsaverestore.js',
@@ -236,10 +237,16 @@ module.exports = function(grunt) {
                     basePath + 'lib/handlebars.runtime-v4.0.5.js',
                     basePath + 'lib/lokijs.min.js',
                     basePath + 'lib/sprintf.min.js',
-					basePath + 'lib/jquery.powertip.min.js',
                     gruntDir + 'semantic/dist/semantic.min.js'
                 ],
                 dest: buildPath + 'libs.js'
+            },
+
+            semantic: {
+                src: [
+                    gruntDir + 'semantic/dist/semantic.min.js'
+                ],
+                dest: buildPath + 'semantic.js'
             },
 
             common: {
@@ -443,6 +450,7 @@ module.exports = function(grunt) {
         'browserify:libs',
         'browserify:components',
         'concat:libs',
+        'concat:semantic',
         'concat:app',
         'concat:common',
         'replace:version'

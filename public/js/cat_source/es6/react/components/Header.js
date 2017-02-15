@@ -15,6 +15,9 @@ class Header extends React.Component {
     }
 
     componentDidMount () {
+        if (this.state.selectedOrganizationId) {
+            dropdownOrganizations.dropdown('set selected',  this.state.selectedOrganizationId);
+        }
         OrganizationsStore.addListener(ManageConstants.RENDER_ORGANIZATIONS, this.renderOrganizations);
         OrganizationsStore.addListener(ManageConstants.UPDATE_ORGANIZATIONS, this.updateOrganizations);
         OrganizationsStore.addListener(ManageConstants.CHOOSE_ORGANIZATION, this.chooseOrganizations);
@@ -28,28 +31,28 @@ class Header extends React.Component {
 
     componentDidUpdate() {
         let self = this;
-
         if (this.state.organizations.size > 0){
             let dropdownOrganizations = $(this.dropdownOrganizations);
-            if (this.state.selectedOrganizationId) {
-                dropdownOrganizations.dropdown('set selected', '' + this.state.selectedOrganizationId);
-                // dropdownOrganizations.dropdown({
-                //     onChange: function(value, text, $selectedItem) {
-                //         self.changeOrganization(value);
-                //     }
-                // });
+            if (this.state.selectedOrganizationId ) {
+                setTimeout(function () {
+                    dropdownOrganizations.dropdown('set selected', self.state.selectedOrganizationId);
+                });
+            } else {
+                dropdownOrganizations.dropdown();
             }
         }
     }
 
     changeOrganization(event, organization) {
-        if (organization.get('id')  !== this.state.selectedOrganizationId) {
-            let selectedOrganization = this.state.organizations.find(function (org) {
-                if (org.get("id") === organization.get("id")) {
-                    return true;
-                }
-            });
-            ManageActions.changeOrganization(selectedOrganization.toJS());
+        if (this.props.showSubHeader) {
+            if (organization.get('id')  !== this.state.selectedOrganizationId) {
+                let selectedOrganization = this.state.organizations.find(function (org) {
+                    if (org.get("id") === organization.get("id")) {
+                        return true;
+                    }
+                });
+                ManageActions.changeOrganization(selectedOrganization.toJS());
+            }
         }
     }
 
@@ -84,32 +87,45 @@ class Header extends React.Component {
 
     getOrganizationsSelect() {
         let result = '';
+        var self = this;
         if (this.state.organizations.size > 0) {
-            let items = this.state.organizations.map((organization, i) => (
-                <div className="item" data-value={organization.get('id')}
-                     data-text={organization.get('name')}
-                     key={'organization' + organization.get('name') + organization.get('id')}
-                     onClick={(e) => this.changeOrganization(e, organization)}>
-                        {organization.get('name')}
-                    <a className="organization-filter button show right"
-                       onClick={(e) => this.openModifyOrganization(e, organization)}>
+            let items = this.state.organizations.map(function(organization, i) {
+                let iconModal = '';
+                if (self.props.showModals) {
+                    iconModal = <a className="organization-filter button show right"
+                                   onClick={(e) => self.openModifyOrganization(e, organization)}>
                         <i className="icon-more_vert icon"/>
                     </a>
+                }
+                return <div className="item" data-value={organization.get('id')}
+                     data-text={organization.get('name')}
+                     key={'organization' + organization.get('name') + organization.get('id')}
+                     onClick={(e) => self.changeOrganization(e, organization)}>
+                    {organization.get('name')}
+                    {iconModal}
                 </div>
-            ));
+            });
+            let addOrg = '';
+            if (self.props.showModals) {
+                addOrg = <div className="header" style={{cursor: 'pointer'}} onClick={this.openCreateOrganizations.bind(this)}>New Organization
+                                <a className="organization-filter button show">
+                                    <i className="icon-plus3 icon"/>
+                                </a>
+                            </div>
+            }
             result = <div className="ui dropdown selection top-5"
                           ref={(dropdownOrganizations) => this.dropdownOrganizations = dropdownOrganizations}>
-               {/* <input type="hidden" name="gender" />*/}
+                <input type="hidden" name="organization" className="organization-dd" />
                 <i className="dropdown icon"/>
                 <span className="text">Choose Organization</span>
                 <div className="menu">
                     <div className="divider"></div>
-                    <div className="header" style={{cursor: 'pointer'}} onClick={this.openCreateOrganizations.bind(this)}>New Organization
-                        <a className="organization-filter button show">
-                            <i className="icon-plus3 icon"/>
-                        </a>
-                    </div>
-                    <div className="divider"></div>
+                    {addOrg}
+                    { self.props.showModals ? (
+                            <div className="divider"></div>
+                        ): (
+                            ''
+                        )}
                     <div className="scrolling menu">
                         {items}
                     </div>
@@ -125,25 +141,55 @@ class Header extends React.Component {
         var selectedOrganization =  this.state.organizations.find(function (org) {
             return org.get('id') == self.state.selectedOrganizationId;
         });
+        let subHeader = '';
+        if (this.props.showSubHeader) {
+            subHeader = <SubHeader
+                filterFunction={this.props.filterFunction}
+                searchFn={this.props.searchFn}
+                closeSearchCallback={this.props.closeSearchCallback}
+                selectedOrganization={selectedOrganization}
+            />;
+        }
+
         return <section className="nav-mc-bar ui grid">
 
                     <nav className="sixteen wide column">
-                        <div className="ui grid">
-                            <div className="eight wide column">
-                                <a href="/" className="logo"/>
+                        <div className="ui stackable grid">
+                            <div className="eight wide column logo-menu">
+                                <a href="/" className="logo logo-home"/>
+                                {this.props.showLinks ? (
+                                    <ul id="menu-site">
+                                        <li><a href="https://www.matecat.com/benefits/">Benefits</a></li>
+                                        <li><a href="https://www.matecat.com/outsourcing/">Outsource</a></li>
+                                        <li><a href="https://www.matecat.com/support-plans/">Plans</a></li>
+                                        <li><a href="https://www.matecat.com/about/">About</a></li>
+                                        <li><a href="https://www.matecat.com/faq/">FAQ</a></li>
+                                        <li><a href="https://www.matecat.com/support/">Support</a></li>
+                                        <li><a className="bigred" href="https://www.matecat.com/webinar" target="_blank">Webinar</a></li>
+                                    </ul>
+
+                                    ) : ('')}
                             </div>
-                            <div className="eight wide right aligned wide column">
-                                {organizationsSelect}
-                            </div>
+
+                            { this.props.loggedUser ? (
+                                    <div className="eight wide right aligned wide column">
+                                        {organizationsSelect}
+                                    </div>
+                                ) :(
+                                    ''
+                                )}
                         </div>
                     </nav>
-                    <SubHeader
-                        filterFunction={this.props.filterFunction}
-                        searchFn={this.props.searchFn}
-                        closeSearchCallback={this.props.closeSearchCallback}
-                        selectedOrganization={selectedOrganization}
-                        />
+                {subHeader}
                 </section>;
     }
 }
+
+Header.defaultProps = {
+    showSubHeader: true,
+    showModals: true,
+    showLinks: false,
+    loggedUser: true
+};
+
 export default Header ;

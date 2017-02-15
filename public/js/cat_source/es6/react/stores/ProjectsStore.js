@@ -66,10 +66,10 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
 
     changeProjectAssignee: function (project, user) {
         let projectOld = this.projects.find(function (prj) {
-            return prj.get('id') == project.id;
+            return prj.get('id') == project.get('id');
         });
         let indexProject = this.projects.indexOf(projectOld);
-        this.projects = this.projects.setIn([indexProject,'user'], Immutable.fromJS(user));
+        this.projects = this.projects.setIn([indexProject,'id_assignee'], user.get('uid'));
     },
 
     unwrapImmutableObject(object) {
