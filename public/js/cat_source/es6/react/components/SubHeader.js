@@ -4,8 +4,8 @@ let SearchInput = require("./SearchInput").default;
 class SubHeader extends React.Component {
     constructor (props) {
         super(props);
-        this.selectedUser = {};
-        this.selectedWorkSpace = {};
+        this.ALL_MEMBERS = "-1";
+        this.NOT_ASSIGNED = "0";
     }
 
     componentDidUpdate() {
@@ -31,21 +31,24 @@ class SubHeader extends React.Component {
 
     changeUser(value) {
         let self = this;
-        this.selectedUser = this.props.selectedOrganization.get('members').find(function (member) {
-            if (member.get('user').get("id") === parseInt(value)) {
-                return true;
-            }
-        });
-        ManageActions.filterProjects(self.selectedUser.toJS(), self.selectedWorkspace.toJS(), self.currentText, self.currentStatus);
+        if (value === this.ALL_MEMBERS) {
+            //All
+        } else if ( value === this.NOT_ASSIGNED ) {
+            //Not assigned
+        } else {
+            this.selectedUser = this.props.selectedOrganization.get('members').find(function (member) {
+                if (member.get('user').get("uid") === parseInt(value)) {
+                    return true;
+                }
+            });
+        }
+        ManageActions.filterProjects(self.selectedUser, self.selectedWorkspace, self.currentText, self.currentStatus);
     }
 
     changeWorkspace(value) {
         let self = this;
-        if (value === 'all') {
-            this.selectedWorkSpace =  {
-                id: -1,
-                name: 'all'
-            };
+        if (value === '-1') {
+           //all
         } else {
             this.selectedWorkSpace = this.props.selectedOrganization.get('workspaces').find(function (workspace) {
                 if (workspace.get("id") === parseInt(value)) {
@@ -54,7 +57,7 @@ class SubHeader extends React.Component {
             });
         }
         setTimeout(function () {
-            ManageActions.filterProjects(self.selectedUser, self.selectedWorkSpace.toJS(), self.currentText, self.currentStatus);
+            ManageActions.filterProjects(self.selectedUser, self.selectedWorkSpace, self.currentText, self.currentStatus);
         });
     }
 
@@ -65,7 +68,8 @@ class SubHeader extends React.Component {
 
     onChangeSearchInput(value) {
         this.currentText = value;
-        ManageActions.filterProjects(this.selectedUser, this.selectedWorkSpace, this.currentText, this.currentStatus);
+        let self = this;
+        ManageActions.filterProjects(self.selectedUser, self.selectedWorkSpace, self.currentText, self.currentStatus);
     }
 
     filterByStatus(status) {
@@ -78,7 +82,7 @@ class SubHeader extends React.Component {
         if (this.props.selectedOrganization && this.props.selectedOrganization.get('type') === "general" && this.props.selectedOrganization.get('members')) {
 
             let members = this.props.selectedOrganization.get('members').map((member, i) => (
-                <div className="item" data-value={member.get('uid')}
+                <div className="item" data-value={member.get('user').get('uid')}
                      key={'user' + member.get('user').get('uid')}>
                     <a className="ui circular label">{APP.getUserShortName(member.get('user').toJS())}</a>
                     {(member.get('user').get('uid') === APP.USER.STORE.user.uid)? 'My Projects' : member.get('user').get('first_name') + ' ' + member.get('user').get('last_name')}
@@ -86,12 +90,13 @@ class SubHeader extends React.Component {
 
             ));
 
-            let item = <div className="item" data-value="0"
-                            key={'user' + 0}>
+            let item = <div className="item" data-value="-1"
+                            key={'user' + -1}>
                             <a className="ui circular label">ALL</a>
                             All Members
                         </div>;
             members = members.unshift(item);
+
 
             result = <div className="users-filter">
 

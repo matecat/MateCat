@@ -115,10 +115,12 @@ let ManageActions = {
     },
 
     filterProjects: function (user, workspace, name, status) {
+        user = (user) ? user.toJS() : user ;
+        workspace = (workspace) ? workspace.toJS() : workspace ;
         UI.filterProjects(user, workspace, name, status).then(function (response) {
             AppDispatcher.dispatch({
                 actionType: ManageConstants.RENDER_PROJECTS,
-                projects: response.projects,
+                projects: response.data,
                 organization: UI.selectedOrganization,
                 hideSpinner: false,
             });

@@ -235,21 +235,23 @@ UI = {
         });
     },
 
-    filterProjects: function(member, workspace, name, status) {
+    filterProjects: function(user, workspace, name, status) {
         let self = this;
+        let filter = {};
+        if (typeof user != "undefined") {
+            this.selectedUser =  user;
+            filter.id_assignee = this.selectedUser.user.uid;
+        }
         if ((typeof workspace !== "undefined") ) {
             this.selectedWorkspace = workspace;
+            filter.id_workspace = this.selectedWorkspace.id;
         }
-        if (typeof member != "undefined") {
-            this.selectedUser =  member;
+        if ((typeof name !== "undefined") ) {
+            filter.pn = name;
         }
-        let filter = {
-            status: status,
-            pn: name,
-            workspace: this.selectedWorkspace.name,
-            member: this.selectedUser.name,
-            organization: this.selectedOrganization.id
-        };
+        if ((typeof status !== "undefined") ) {
+            filter.status = status;
+        }
         this.Search.filter = $.extend( this.Search.filter, filter );
         UI.Search.currentPage = 1;
         return this.getProjects(this.selectedOrganization);

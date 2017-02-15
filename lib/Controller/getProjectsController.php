@@ -125,7 +125,7 @@ class getProjectsController extends ajaxController {
             $this->search_in_pname,
             $this->search_source, $this->search_target, $this->search_status,
             $this->search_only_completed, $this->project_id,
-            $organization, $workspace, $assignee
+            $organization, $workspace, $assignee->get
         );
 
         $projnum = getProjectsNumber( $this->logged_user,
@@ -170,18 +170,20 @@ class getProjectsController extends ajaxController {
         if ( is_null($this->id_assignee ) ) return ;
 
         $dao = new \Organizations\MembershipDao();
-        $memberships = $dao->getMemberListByOrganizationId($organization);
+        $memberships = $dao->getMemberListByOrganizationId($organization->id);
         $id_assignee = $this->id_assignee ;
-
-        $users = array_filter($memberships, function( \Organizations\MembershipStruct $membership ) use ( $id_assignee ) {
+        /**
+         * @var $users \Organizations\MembershipStruct[]
+         */
+        $users = array_values(array_filter($memberships, function( \Organizations\MembershipStruct $membership ) use ( $id_assignee ) {
             return $membership->getUser()->uid == $id_assignee ;
-        } );
+        } ));
 
         if ( empty( $users ) ) {
             throw new Exception('Assignee not found in organization') ;
         }
 
-        return $users[0] ;
+        return $users[0]->getUser();
     }
 
     /**
