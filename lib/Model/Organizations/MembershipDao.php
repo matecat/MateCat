@@ -35,7 +35,6 @@ class MembershipDao extends \DataAccess_AbstractDao
     protected static $_query_member_list = "
           SELECT ou.id, ou.id_organization, ou.uid, ou.is_admin
           FROM organizations_users ou
-          JOIN users USING ( uid )
           WHERE ou.id_organization = :id_organization
     ";
 

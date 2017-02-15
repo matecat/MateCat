@@ -1798,7 +1798,9 @@ function getProjects( Users_UserStruct $user, $start, $step,
                       $project_id,
                       \Organizations\OrganizationStruct $organization = null,
                       \Organizations\WorkspaceStruct $workspace = null,
-                      Users_UserStruct $assignee = null
+                      Users_UserStruct $assignee = null,
+                      $no_workspace, $no_assignee
+
 ) {
 
     list( $conditions, $data ) = conditionsForProjectsQuery(
@@ -1816,12 +1818,18 @@ function getProjects( Users_UserStruct $user, $start, $step,
         $data [ 'id_organization' ] = $organization->id ;
     }
 
-    if ( !is_null( $workspace ) ) {
+    if ( $no_workspace ) {
+        $conditions[] = " p.id_workspace IS NULL " ;
+    }
+    elseif ( !is_null( $workspace ) ) {
         $conditions[] = " p.id_workspace = :id_workspace " ;
         $data ['id_workspace'] = $workspace->id ;
     }
 
-    if ( !is_null( $assignee ) ) {
+    if ( $no_assignee ) {
+        $conditions[] = " p.id_assignee IS NULL " ;
+    }
+    elseif ( !is_null( $assignee ) ) {
         $conditions[] = " p.id_assignee = :id_assignee " ;
         $data ['id_assignee'] = $assignee->uid ;
     }
@@ -1930,7 +1938,9 @@ function getProjectsNumber( Users_UserStruct $user, $search_in_pname, $search_so
                             $search_only_completed,
                             \Organizations\OrganizationStruct $organization = null,
                             \Organizations\WorkspaceStruct $workspace = null,
-                            Users_UserStruct $assignee = null
+                            Users_UserStruct $assignee = null,
+                            $no_workspace = false,
+                            $no_assignee = false
 ) {
 
     list( $conditions, $data ) = conditionsForProjectsQuery(
@@ -1951,16 +1961,21 @@ function getProjectsNumber( Users_UserStruct $user, $search_in_pname, $search_so
         $data [ 'id_organization' ] = $organization->id ;
     }
 
-    if ( !is_null( $workspace ) ) {
-        $conditions[] = " id_workspace = :id_workspace " ;
+    if ( $no_workspace ) {
+        $conditions[] = " p.id_workspace IS NULL " ;
+    }
+    elseif ( !is_null( $workspace ) ) {
+        $conditions[] = " p.id_workspace = :id_workspace " ;
         $data ['id_workspace'] = $workspace->id ;
     }
 
-    if ( !is_null( $assignee ) ) {
-        $conditions[] = " id_assignee = :id_assignee " ;
+    if ( $no_assignee ) {
+        $conditions[] = " p.id_assignee IS NULL " ;
+    }
+    elseif ( !is_null( $assignee ) ) {
+        $conditions[] = " p.id_assignee = :id_assignee " ;
         $data ['id_assignee'] = $assignee->uid ;
     }
-
 
     if ( count( $conditions ) ) {
         $query = $query . " AND " . implode( " AND ", $conditions );

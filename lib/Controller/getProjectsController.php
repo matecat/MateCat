@@ -57,6 +57,10 @@ class getProjectsController extends ajaxController {
     private $id_assignee ;
     private $id_workspace ;
 
+    private $no_assignee ;
+    private $no_workspace ;
+
+
     public function __construct() {
 
         //SESSION ENABLED
@@ -90,6 +94,10 @@ class getProjectsController extends ajaxController {
                 'id_organization' => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'id_assignee' => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'id_workspace' => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+
+                'no_assignee' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'no_workspace' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ]
+
         ];
 
         $postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -106,6 +114,9 @@ class getProjectsController extends ajaxController {
         $this->id_organization       = $postInput[ 'id_organization' ];
         $this->id_assignee           = $postInput[ 'id_assignee' ];
         $this->id_workspace          = $postInput[ 'id_workspace' ];
+
+        $this->no_assignee           = $postInput[ 'no_assignee' ];
+        $this->no_workspace          = $postInput[ 'no_workspace' ];
 
         $this->search_only_completed = $postInput[ 'onlycompleted' ];
 
@@ -125,13 +136,17 @@ class getProjectsController extends ajaxController {
             $this->search_in_pname,
             $this->search_source, $this->search_target, $this->search_status,
             $this->search_only_completed, $this->project_id,
-            $organization, $workspace, $assignee
+            $organization, $workspace, $assignee,
+            $this->no_workspace, $this->no_assignee
         );
 
         $projnum = getProjectsNumber( $this->logged_user,
             $this->search_in_pname, $this->search_source,
             $this->search_target, $this->search_status,
-            $this->search_only_completed, $organization );
+            $this->search_only_completed,
+            $organization, $workspace, $assignee,
+            $this->no_workspace, $this->no_assignee
+            );
 
         $projects = $this->filterProjectsWithUserFeatures( $projects ) ;
 
