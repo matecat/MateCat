@@ -47,7 +47,9 @@ class CreateWorkspaceTask extends Command {
         $wSpace                  = new WorkspaceStruct();
         $wSpace->id_organization = $input->getArgument( 'id_organization' );
         $wSpace->name            = $input->getArgument( 'name' );
-        $wSpace->options         = new WorkspaceOptionsStruct( json_decode( $input->getArgument( 'options' ), true ) );
+
+        $options                 = json_decode( $input->getArgument( 'options' ), true );
+        $wSpace->options         = new WorkspaceOptionsStruct( ( is_null( $options ) ? [] : $options ) );
 
         $organization = ( new MembershipDao() )->findOrganizationByIdAndUser( $wSpace->id_organization, $user );
         if( empty( $organization ) ){
