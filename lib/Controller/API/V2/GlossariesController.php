@@ -72,8 +72,6 @@ class GlossariesController extends KleinController {
         $this->TMService->setName( $postInput->name );
         $this->TMService->setTmKey( $postInput->tm_key );
 
-        parent::validateRequest();
-
     }
 
     public function import() {
