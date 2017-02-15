@@ -6,35 +6,49 @@ class SubHeader extends React.Component {
         super(props);
         this.ALL_MEMBERS = "-1";
         this.NOT_ASSIGNED = "0";
+        this.ALL_WORKSPACES = "-1";
+        this.NO_WORKSPACES = "0";
+
+        this.organizazionChanged = false;
     }
 
     componentDidUpdate() {
         let self = this;
         if (this.props.selectedOrganization) {
+            if (this.organizazionChanged) {
+                $(this.dropdownWorkspaces).dropdown('set selected', '-1');
+                $(this.dropdownUsers).dropdown('set selected', '-1');
+                this.organizazionChanged = false;
+                $(this.dropdownUsers).dropdown({
+                    fullTextSearch: 'exact',
+                    onChange: function(value, text, $selectedItem) {
+                        self.changeUser(value);
+                    }
+                });
+                $(this.dropdownWorkspaces).dropdown({
+                    onChange: function(value, text, $selectedItem) {
+                        self.changeWorkspace(value);
+                    }
+                });
+            }
+        }
+    }
 
-            // $(this.dropdownUsers).dropdown('set selected', 2000);
-            $(this.dropdownUsers).dropdown({
-                fullTextSearch: 'exact',
-                onChange: function(value, text, $selectedItem) {
-                    self.changeUser(value);
-                }
-            });
-
-            $(this.dropdownWorkspaces).dropdown('set selected', '-1');
-            $(this.dropdownWorkspaces).dropdown({
-                onChange: function(value, text, $selectedItem) {
-                    self.changeWorkspace(value);
-                }
-            });
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.selectedOrganization !== this.props.selectedOrganization) {
+            this.organizazionChanged = true;
         }
     }
 
     changeUser(value) {
+        if ( this.organizazionChanged ) {
+            return;
+        }
         let self = this;
         if (value === this.ALL_MEMBERS) {
-            //All
+            this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
         } else if ( value === this.NOT_ASSIGNED ) {
-            //Not assigned
+            this.selectedUser = ManageConstants.NOT_ASSIGNED_FILTER;
         } else {
             this.selectedUser = this.props.selectedOrganization.get('members').find(function (member) {
                 if (member.get('user').get("uid") === parseInt(value)) {
@@ -46,9 +60,14 @@ class SubHeader extends React.Component {
     }
 
     changeWorkspace(value) {
+        if ( this.organizazionChanged ) {
+            return;
+        }
         let self = this;
-        if (value === '-1') {
-           //all
+        if (value === this.ALL_WORKSPACES) {
+            this.selectedWorkSpace = ManageConstants.ALL_WORKSPACES_FILTER;
+        } else if ( value === this.NO_WORKSPACES ) {
+            this.selectedWorkSpace = ManageConstants.NO_WORKSPACE_FILTER;
         } else {
             this.selectedWorkSpace = this.props.selectedOrganization.get('workspaces').find(function (workspace) {
                 if (workspace.get("id") === parseInt(value)) {

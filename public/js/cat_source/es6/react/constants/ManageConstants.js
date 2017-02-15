@@ -33,5 +33,12 @@ module.exports = keyMirror({
     CHANGE_PROJECT_ASSIGNEE: null,
     CREATE_WORKSPACE: null,
     UPDATE_WORKSPACE: null,
-    UPDATE_WORKSPACES: null
+    UPDATE_WORKSPACES: null,
+
+
+    ALL_MEMBERS_FILTER : null,
+    NOT_ASSIGNED_FILTER: null,
+    NO_WORKSPACE_FILTER: null,
+    ALL_WORKSPACES_FILTER: null
+
 });
