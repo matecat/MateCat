@@ -48,15 +48,12 @@ class ProjectsController extends KleinController {
     public function validateRequest() {
         parent::validateRequest();
         $this->requireIdentifiedUser();
-
         $this->validator->validate( $this->user );
     }
 
     protected function afterConstruct() {
         parent::afterConstruct();
-
         $this->validator = new OrganizationProjectValidator( $this );
-
     }
 
 }

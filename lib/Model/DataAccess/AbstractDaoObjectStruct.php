@@ -82,6 +82,9 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass {
      * @param $mask array
      * @return array
      * @see toArray
+     *
+     * @deprecates
+     *
      */
     public function attributes( $mask = null ) {
         return $this->toArray( $mask );
