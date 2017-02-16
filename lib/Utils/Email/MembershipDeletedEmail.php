@@ -37,12 +37,12 @@ class MembershipDeletedEmail extends AbstractEmail {
      */
     public function __construct( \Users_UserStruct $sender, \Users_UserStruct $removed_user , OrganizationStruct $organization) {
         $this->user = $removed_user ;
-        $this->_setLayout('skeleton.html');
-        $this->_setTemplate('Organization/membership_deleted_content.html');
-
         $this->sender = $sender ;
         $this->title = "You've been removed from organization " . $organization->name ;
         $this->organization = $organization ;
+
+        $this->_setLayout('skeleton.html');
+        $this->_setTemplate('Organization/membership_deleted_content.html');
     }
 
     protected function _getTemplateVariables()

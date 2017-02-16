@@ -24,8 +24,10 @@ class ProjectsController extends KleinController {
         $acceptedFields = array( 'id_assignee', 'name', 'id_workspace' );
 
         $projectModel   = new \ProjectModel( $this->project );
+        $projectModel->setUser( $this->user ) ;
 
         $putParams = $this->getPutParams();
+
         foreach ( $acceptedFields as $field ) {
             if ( isset( $putParams[ $field ] ) ) {
                 $projectModel->prepareUpdate( $field, $putParams[ $field ] );

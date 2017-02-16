@@ -6,6 +6,9 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
     protected static $auto_increment_fields = array('id');
     protected static $primary_keys = array('id');
 
+    /**
+     * @var string
+     */
     protected static $_sql_for_project_unassignment = "
         UPDATE projects SET id_assignee = NULL WHERE id_assignee = :id_assignee
     ";
@@ -38,6 +41,10 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
     }
 
     /**
+     *
+     * This update can easily become massive in case of long lived organizations.
+     * TODO: make this update chunked.
+     *
      * @param Users_UserStruct $user
      * @return int
      */
