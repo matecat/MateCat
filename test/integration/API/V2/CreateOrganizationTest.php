@@ -18,6 +18,7 @@ class CreateOrganizationTest extends IntegrationTest {
         // create an organization for the user
 
         $organizationRequest = new CurlTest();
+        $organizationRequest->headers = $this->test_data->headers ;
         $organizationRequest->path = '/api/v2/orgs' ;
         $organizationRequest->method = 'POST' ;
         $organizationRequest->params = [
@@ -26,10 +27,12 @@ class CreateOrganizationTest extends IntegrationTest {
             'members' => [ $new_member->email, 'bar@example.org']
         ];
 
-        $organizationRequest->headers = $this->test_data->headers ;
         $response = json_decode( $organizationRequest->getResponse()['body'], true );
         $members = ( new \Organizations\MembershipDao() )->getMemberListByOrganizationId( $response['organization']['id'] ) ;
 
+        /**
+         * Ensure new_member is among organization's members
+         */
         $found = array_values( array_filter($members, function(\Organizations\MembershipStruct $member) use ( $new_member ) {
             return $new_member->uid == $member->getUser()->uid;
         }));

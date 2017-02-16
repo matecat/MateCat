@@ -47,7 +47,7 @@ class Organization {
          * @var $data OrganizationStruct[]
          */
         foreach ( $data as $k => $organization ) {
-            $out[] = $this->render( $organization ) ;
+            $out[] = $this->renderItem( $organization ) ;
         }
 
         return $out;
