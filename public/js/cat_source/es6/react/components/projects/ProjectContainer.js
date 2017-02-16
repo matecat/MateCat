@@ -342,6 +342,7 @@ class ProjectContainer extends React.Component {
 
 
     render() {
+        var self = this;
         let activityLogUrl = this.getActivityLogUrl();
         let projectMenu = this.getProjectMenu(activityLogUrl);
         // let tMIcon = this.checkTMIcon();
@@ -388,9 +389,12 @@ class ProjectContainer extends React.Component {
         }
 
         let workspace = '';
-        if (this.props.project.get('workspace') ) {
+        if (this.props.project.get('id_workspace') ) {
+            let ws = this.props.organization.get('workspaces').find(function (ws) {
+                return ws.get('id') == self.props.project.get('id_workspace');
+            });
             workspace = <a className="ui orange circular label project-workspace shadow-1">
-                {this.props.project.get('workspace').get('name') }
+                {ws.get('name') }
                 </a>
         }
 
