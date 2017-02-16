@@ -23,6 +23,11 @@ class MembershipStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
      */
     private $user ;
 
+    /**
+     * @var OrganizationStruct
+     */
+    private $organization ;
+
     public function setUser( \Users_UserStruct $user ) {
         $this->user = $user ;
     }
@@ -31,7 +36,20 @@ class MembershipStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
      * @return \Users_UserStruct|null
      */
     public function getUser( ) {
+        if ( is_null($this->user) ) {
+            $this->user = ( new \Users_UserDao() )->getByUid( $this->uid );
+        }
         return $this->user ;
+    }
+
+    /**
+     * @return OrganizationStruct
+     */
+    public function getOrganization() {
+        if ( is_null( $this->organization ) ) {
+            $this->organization = ( new OrganizationDao() )->findById( $this->id_organization ) ;
+        }
+        return $this->organization;
     }
 
 }
