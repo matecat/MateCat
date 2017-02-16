@@ -14,6 +14,7 @@ module.exports = keyMirror({
     NO_MORE_PROJECTS: null,
     CHANGE_PROJECT_WORKSPACE: null,
     CHANGE_PROJECT_NAME: null,
+    HIDE_PROJECT: null,
     //MODALS
     OPEN_CREATE_ORGANIZATION_MODAL: null,
     OPEN_MODIFY_ORGANIZATION_MODAL: null,

@@ -376,34 +376,16 @@ UI = {
         });
     },
 
-    changeProjectWorkspace: function (project, workspace) {
-        // let self = this;
-        // $.each(this.currentProjects, function(index) {
-        //     if (this.id == projectId) {
-        //         indexToRemove = index;
-        //         project = this;
-        //     }
-        // });
-        // let removedProject = this.currentProjects.splice(indexToRemove, 1)[0];
-        // setTimeout(function () {
-        //     ManageActions.updateProjects(self.currentProjects);
-        // });
-        //
-        // let projectsArray = [];
-        // if (workspace.name === "My Workspace") {
-        //     projectsArray = this.myProjects;
-        // } else if (workspace.name === "Ebay") {
-        //     projectsArray = this.ebayProjects;
-        // }else if (workspace.name === "MSC") {
-        //     projectsArray = this.mscProjects;
-        // }else if (workspace.name === "Translated") {
-        //     projectsArray = this.translatedProjects;
-        // }
-        // removedProject.organization = workspace.name;
-        // projectsArray.unshift(removedProject);
-        let data = {};
-        let deferred = $.Deferred().resolve(data);
-        return deferred.promise();
+    changeProjectWorkspace: function (wsId, projectId) {
+        let data = {
+            id_workspace: wsId
+        };
+        let idOrg = UI.selectedOrganization.id;
+        return $.ajax({
+            data: JSON.stringify(data),
+            type: "put",
+            url : "/api/v2/orgs/" + idOrg + "/projects/" + projectId,
+        });
     },
 
     changeProjectName: function (idOrg, idProject, newName) {
@@ -495,10 +477,9 @@ UI = {
         APP.ModalWindow.showModalComponent(ModifyOrganizationModal, props, "Modify "+ organization.get('name') + " Organization");
     },
 
-    openChangeProjectWorkspace: function (workspace, project, workspaces) {
+    openChangeProjectWorkspace: function (workspaces, project) {
 
         let props = {
-            currentWorkspace: workspace,
             project: project,
             workspaces: workspaces
         };

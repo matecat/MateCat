@@ -20,6 +20,7 @@ class ProjectContainer extends React.Component {
         };
         this.getActivityLogUrl = this.getActivityLogUrl.bind(this);
         this.changeUser = this.changeUser.bind(this);
+        this.hideProject = this.hideProject.bind(this);
     }
 
     componentDidMount() {
@@ -46,11 +47,21 @@ class ProjectContainer extends React.Component {
                 this.dropdownUsers.classList.add("shadow-1");
                 this.dropdownUsers.classList.add("project-not-assigned");
             }
-
         }
+        ProjectsStore.addListener(ManageConstants.HIDE_PROJECT, this.hideProject);
+
     }
 
-    componentWillUnmount() {}
+    componentWillUnmount() {
+        ProjectsStore.removeListener(ManageConstants.HIDE_PROJECT, this.hideProject);
+        $(this.project).transition('fly right');
+    }
+
+    hideProject(project) {
+        if ( this.props.project.get('id') === project.get('id') ) {
+            $(this.project).transition('fly right');
+        }
+    }
 
     componentDidUpdate() {
         this.initUsersDropdown();
@@ -385,7 +396,7 @@ class ProjectContainer extends React.Component {
         if ( this.props.project.get('has_archived') ) {
             state = <span>(archived)</span>;
         }  else if ( this.props.project.get('has_cancelled') ) {
-            state = <span>(archived)</span>;
+            state = <span>(cancelled)</span>;
         }
 
         let workspace = '';
@@ -400,7 +411,8 @@ class ProjectContainer extends React.Component {
 
         let dropDownUsers = this.getDropDownUsers();
 
-        return <div className="project ui column grid shadow-1">
+        return <div className="project ui column grid shadow-1"
+                    ref={(project) => this.project = project}>
 
                     <div className="sixteen wide column">
                         <div className="project-header ui grid">
@@ -424,7 +436,6 @@ class ProjectContainer extends React.Component {
                                         <div className="ui grid">
                                             <div className="nine wide column">
                                                 <div className="project-name">
-                                                    {state}
                                                     <div className="ui form">
                                                         <div className="field">
                                                             <div className="ui icon input selected">
@@ -459,7 +470,6 @@ class ProjectContainer extends React.Component {
                             </div>
                             <div className="sixteen wide column mobile only pad-top-0 pad-bottom-0">
                                 <div className="project-name">
-                                    {state}
                                     <div className="ui form">
                                         <div className="field">
                                             <div className="ui icon input">
