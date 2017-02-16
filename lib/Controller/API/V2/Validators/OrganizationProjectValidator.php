@@ -19,22 +19,40 @@ use API\V2\Exceptions\AuthorizationError;
 
 class OrganizationProjectValidator extends Base {
 
+
+    /**
+     * @var KleinController
+     */
+    protected $controller;
+
     /**
      * @var \Projects_ProjectStruct
      */
-    public $controller;
+    protected $project;
 
     public function __construct( KleinController $controller ) {
-        $this->controller = $controller;
         parent::__construct( $controller->getRequest() );
     }
 
+    /**
+     * @throws NotFoundError
+     */
     public function validate() {
 
-        if ( empty( $this->controller->project ) ) {
+        if ( empty( $this->project ) ) {
             throw new NotFoundError( "Not Found", 404 );
         }
 
+    }
+
+    /**
+     * @param \Projects_ProjectStruct $project
+     *
+     * @return OrganizationProjectValidator
+     */
+    public function setProject( \Projects_ProjectStruct $project ){
+        $this->project = $project;
+        return $this;
     }
 
 }

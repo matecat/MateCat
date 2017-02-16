@@ -17,7 +17,7 @@ use API\V2\Validators\OrganizationProjectValidator;
 
 class ProjectsController extends KleinController {
 
-    public $project;
+    protected $project;
 
     public function update() {
 
@@ -42,7 +42,7 @@ class ProjectsController extends KleinController {
         parent::afterConstruct();
         $this->project = \Projects_ProjectDao::findById( $this->request->id_project );
         $this->appendValidator( new OrganizationAccessValidator( $this ) );
-        $this->appendValidator( new OrganizationProjectValidator( $this ) );
+        $this->appendValidator( ( new OrganizationProjectValidator( $this ) )->setProject( $this->project ) );
     }
 
 }
