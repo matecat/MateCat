@@ -12,6 +12,7 @@ namespace API\V2;
 
 use API\V2\Exceptions\AuthorizationError;
 use API\V2\Json\Organization;
+use API\V2\Validators\OrganizationAccessValidator;
 use InvalidArgumentException;
 use Organizations\MembershipDao;
 use Organizations\OrganizationDao;
@@ -49,6 +50,12 @@ class OrganizationsController extends KleinController {
         $formatted = new Organization() ;
 
         $this->response->json( array( 'organization' => $formatted->renderItem($organization) ) );
+    }
+
+    protected function afterConstruct()
+    {
+        parent::afterConstruct();
+        $this->appendValidator( new OrganizationAccessValidator($this) ) ;
     }
 
     public function update() {

@@ -48,13 +48,13 @@ class OrganizationModel {
      */
     public function updateMembers() {
         \Database::obtain()->begin();
-        $this->new_memberships = ( new MembershipDao )->createList( [
+
+        $membershipDao = new MembershipDao();
+
+        $this->new_memberships = $membershipDao->createList( [
             'organization' => $this->struct,
             'members' => $this->member_emails
         ] );
-
-        ( new MembershipDao )
-            ->destroyCacheForListByOrganizationId( $this->struct->id );
 
         $full_list = ( new MembershipDao )
             ->setCacheTTL(3600)

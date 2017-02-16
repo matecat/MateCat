@@ -57,13 +57,13 @@ class OrganizationMembersController extends KleinController {
     }
 
     public function delete(){
-
+        \Database::obtain()->begin();
         $membershipDao = new MembershipDao();
 
-        \Database::obtain()->begin();
         $membershipDao->deleteUserFromOrganization( $this->request->uid_member, $this->request->id_organization );
-        $membershipDao->destroyCacheForListByOrganizationId( $this->request->id_organization );
-        $membersList = $membershipDao->setCacheTTL( 60 * 60 * 24 )->getMemberListByOrganizationId( $this->request->id_organization );
+
+        $membersList = $membershipDao->setCacheTTL( 60 * 60 * 24 )
+            ->getMemberListByOrganizationId( $this->request->id_organization );
         \Database::obtain()->commit();
 
         $formatter = new Membership( $membersList ) ;

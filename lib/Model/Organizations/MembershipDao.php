@@ -138,7 +138,7 @@ class MembershipDao extends \DataAccess_AbstractDao
      *
      * @return bool|int
      */
-    public function destroyCacheForListByOrganizationId( $id_organization ){
+    public function destroyCacheForListByOrganizationId( $id_organization ) {
         $stmt = $this->_getStatementForCache( self::$_query_member_list );
         return $this->_destroyObjectCache( $stmt,
                 array(
@@ -161,6 +161,10 @@ class MembershipDao extends \DataAccess_AbstractDao
                 'uid' => $uid,
                 'id_organization' => $organizationId
         ] );
+
+        $this->destroyCacheForListByOrganizationId( $organizationId );
+        $this->destroyCacheUserOrganizations( ( new Users_UserDao()) ->getByUid( $uid ));
+
         return $stmt->rowCount();
 
     }
@@ -215,8 +219,13 @@ class MembershipDao extends \DataAccess_AbstractDao
             $i++;
         }
 
-        return $membersList;
+        // Invalidate related caches
+        foreach ( $membersList as $member ) {
+            $this->destroyCacheUserOrganizations( $member->getUser() ) ;
+        }
+        $this->destroyCacheForListByOrganizationId( $organizationStruct->id ) ;
 
+        return $membersList;
 
     }
 
