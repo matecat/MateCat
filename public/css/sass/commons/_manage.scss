@@ -8,10 +8,7 @@ body.manage {
     //margin-top: 55px;
     background-color: #f1f1f1;
     font-family: Calibri;
-    @media only screen and (min-width: 1200px) {
-        .ui.container {
-            width: 1280px;
-        }
+    @media only screen and (min-width: 1300px) {
         .ui.grid.container {
             width: 1280px !important;
         }
