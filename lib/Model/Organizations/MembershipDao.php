@@ -154,7 +154,7 @@ class MembershipDao extends \DataAccess_AbstractDao
      * @return \Users_UserStruct|null
      */
     public function deleteUserFromOrganization( $uid, $organizationId ) {
-        $user = ( new Users_UserDao()) ->getByUid( $uid ) ;
+        $user = ( new Users_UserDao()) ->setCacheTTL(3600)->getByUid( $uid ) ;
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( self::$_delete_member );
