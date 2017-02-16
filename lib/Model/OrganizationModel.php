@@ -75,10 +75,14 @@ class OrganizationModel {
         }
 
         if ( !empty( $this->uids_to_remove ) ) {
+            $projectDao = new Projects_ProjectDao() ;
+
             foreach( $this->uids_to_remove as $uid ) {
                 $user = $membershipDao->deleteUserFromOrganization( $uid, $this->struct->id );
+
                 if ( $user ) {
                     $this->removed_users[] = $user ;
+                    $projectDao->unassignProjects( $user );
                 }
             }
         }

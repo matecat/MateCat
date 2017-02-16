@@ -6,6 +6,10 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
     protected static $auto_increment_fields = array('id');
     protected static $primary_keys = array('id');
 
+    protected static $_sql_for_project_unassignment = "
+        UPDATE projects SET id_assignee = NULL WHERE id_assignee = :id_assignee
+    ";
+
     /**
      * @param $project
      * @param $field
@@ -31,6 +35,18 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
 
         return $project;
 
+    }
+
+    /**
+     * @param Users_UserStruct $user
+     * @return int
+     */
+    public function unassignProjects(Users_UserStruct $user) {
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( static::$_sql_for_project_unassignment ) ;
+        $stmt->execute( ['id_assignee' => $user->uid ] ) ;
+
+        return $stmt->rowCount();
     }
 
     /**
