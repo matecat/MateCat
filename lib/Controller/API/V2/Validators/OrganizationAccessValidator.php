@@ -38,6 +38,10 @@ class OrganizationAccessValidator extends Base {
             throw new AuthorizationError( "Not Authorized", 401 );
         }
 
+        if ( method_exists($this->controller, 'setOrganization') ) {
+            $this->controller->setOrganization( $this->organization );
+        }
+
     }
 
 }

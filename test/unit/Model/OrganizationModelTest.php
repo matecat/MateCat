@@ -9,6 +9,11 @@
 class OrganizationModelTest extends PHPUnit_Framework_TestCase
 {
 
+    /**
+     * TODO: remove this test once we are able to test email
+     * delivery at higher level.
+     *
+     */
     function test_notify_list_for_new_membership_is_correct() {
         $user = Factory_User::create() ;
         $other_user = Factory_User::create() ;

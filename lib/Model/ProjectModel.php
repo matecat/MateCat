@@ -13,6 +13,12 @@ class ProjectModel {
     protected $blacklist;
 
     protected $willChange = array();
+    protected $changedFields = array();
+
+    /**
+     * @var Users_UserStruct
+     */
+    protected $user;
 
     public function __construct( Projects_ProjectStruct $project ) {
         $this->project_struct = $project;
@@ -42,11 +48,16 @@ class ProjectModel {
         $this->willChange[ $field ] = $value;
     }
 
+    public function setUser( $user ) {
+        $this->user = $user ;
+    }
     /**
      *  prepare a new struct
      *
      */
     public function update() {
+        $this->changedFields = array();
+
         $newStruct = new Projects_ProjectStruct( $this->project_struct->toArray() );
 
         if ( isset( $this->willChange[ 'name' ] ) ) {
@@ -65,13 +76,34 @@ class ProjectModel {
             $newStruct->$field = $value;
         }
 
-        Projects_ProjectDao::updateStruct( $newStruct, array(
+        $result = Projects_ProjectDao::updateStruct( $newStruct, array(
                 'fields' => array_keys( $this->willChange )
         ) );
+
+        if ( $result ) {
+            $this->changedFields = $this->willChange ;
+            $this->willChange = array();
+
+            $this->_sendNotificationEmails();
+        }
+
+        // TODO: handle case of update failure
 
         $this->project_struct = $newStruct;
 
         return $this->project_struct;
+    }
+
+    protected function _sendNotificationEmails() {
+        if (
+            $this->changedFields['id_assignee'] &&
+            !is_null($this->changedFields['id_assignee']) &&
+            $this->user->uid != $this->changedFields['id_assignee']
+        ) {
+            $assignee = ( new Users_UserDao )->getByUid($this->changedFields['id_assignee']) ;
+            $email = new \Email\ProjectAssignedEmail($this->user, $this->project_struct, $assignee );
+            $email->send();
+        }
     }
 
     private function checkName() {
