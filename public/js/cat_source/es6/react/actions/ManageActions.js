@@ -219,12 +219,12 @@ let ManageActions = {
     createOrganization: function (organizationName, members) {
         let organization;
         UI.createOrganization(organizationName, members).then(function (response) {
-                organization = response.organization[0];
+                organization = response.organization;
                 UI.getWorkspaces(organization).then(function (data) {
                     organization.workspaces = data.workspaces;
                     AppDispatcher.dispatch({
                         actionType: ManageConstants.ADD_ORGANIZATION,
-                        organization: response.organization[0]
+                        organization: organization
                     });
                 });
             }
