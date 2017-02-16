@@ -35,8 +35,38 @@ class OrganizationModel {
         $this->user = $user ;
     }
 
-    public function create() {
+    public function addMemberEmails( $emails ) {
+        foreach ($emails as $email ) {
+            $this->addMemberEmail( $email ) ;
+        }
+    }
 
+    /**
+     * Updated member list.
+     *
+     * @return \Organizations\MembershipStruct[] the full list of members after the update.
+     */
+    public function updateMembers() {
+        \Database::obtain()->begin();
+        $this->new_memberships = ( new MembershipDao )->createList( [
+            'organization' => $this->struct,
+            'members' => $this->member_emails
+        ] );
+
+        ( new MembershipDao )
+            ->destroyCacheForListByOrganizationId( $this->struct->id );
+
+        $full_list = ( new MembershipDao )
+            ->setCacheTTL(3600)
+            ->getMemberListByOrganizationId( $this->struct->id ) ;
+
+        \Database::obtain()->commit();
+        $this->_sendEmailsToNewMemberships();
+
+        return $full_list ;
+    }
+
+    public function create() {
         if ( !$this->user ) {
             throw new Exception('User is not set' ) ;
         }
@@ -54,6 +84,22 @@ class OrganizationModel {
 
         return $organization ;
     }
+
+
+    /**
+     * @return \Organizations\MembershipStruct[]
+     */
+    public function getNewMembershipEmailList() {
+        $notify_list = [] ;
+        foreach( $this->new_memberships as $membership ) {
+            if ( $membership->getUser()->uid != $this->user->uid ) {
+                $notify_list[] = $membership ;
+            }
+        }
+        return $notify_list ;
+    }
+
+
 
     protected function _checkType() {
         if ( !Constants_Organizations::isAllowedType( $this->struct->type ) ) {
@@ -91,19 +137,5 @@ class OrganizationModel {
             $email->send() ;
         }
     }
-
-    /**
-     * @return \Organizations\MembershipStruct[]
-     */
-    protected function getNewMembershipEmailList() {
-        $notify_list = [] ;
-        foreach( $this->new_memberships as $membership ) {
-            if ( $membership->getUser()->uid != $this->user->uid ) {
-                $notify_list[] = $membership ;
-            }
-        }
-        return $notify_list ;
-    }
-
 
 }
