@@ -151,9 +151,10 @@ class MembershipDao extends \DataAccess_AbstractDao
      * @param $uid
      * @param $organizationId
      *
-     * @return int
+     * @return \Users_UserStruct|null
      */
-    public function deleteUserFromOrganization( $uid, $organizationId ){
+    public function deleteUserFromOrganization( $uid, $organizationId ) {
+        $user = ( new Users_UserDao()) ->getByUid( $uid ) ;
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( self::$_delete_member );
@@ -163,10 +164,13 @@ class MembershipDao extends \DataAccess_AbstractDao
         ] );
 
         $this->destroyCacheForListByOrganizationId( $organizationId );
-        $this->destroyCacheUserOrganizations( ( new Users_UserDao()) ->getByUid( $uid ));
-
-        return $stmt->rowCount();
-
+        $this->destroyCacheUserOrganizations( $user );
+        if ( $stmt->rowCount() ) {
+            return $user ;
+        }
+        else {
+            return null ;
+        }
     }
 
     /**

@@ -12,6 +12,7 @@ namespace API\V2;
 use API\V2\Json\Error;
 use API\V2\Json\Membership;
 use API\V2\Validators\OrganizationAccessValidator;
+use LQA\ModelDao;
 use Organizations\MembershipDao;
 use Organizations\OrganizationDao;
 
@@ -58,17 +59,20 @@ class OrganizationMembersController extends KleinController {
 
     public function delete(){
         \Database::obtain()->begin();
-        $membershipDao = new MembershipDao();
 
-        $membershipDao->deleteUserFromOrganization( $this->request->uid_member, $this->request->id_organization );
+        $organizationStruct = ( new OrganizationDao() )
+            ->findById( $this->request->id_organization );
 
-        $membersList = $membershipDao->setCacheTTL( 60 * 60 * 24 )
-            ->getMemberListByOrganizationId( $this->request->id_organization );
-        \Database::obtain()->commit();
+        $model = new \OrganizationModel( $organizationStruct ) ;
+        $model->removeMemberUids( array( $this->request->uid_member ) );
+        $model->setUser( $this->user ) ;
+        $membersList = $model->updateMembers();
 
         $formatter = new Membership( $membersList ) ;
         $this->response->json( array( 'members' => $formatter->render() ) );
 
     }
+
+
 
 }

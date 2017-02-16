@@ -21,6 +21,16 @@ class OrganizationModel {
      */
     protected $new_memberships;
 
+    /**
+     * @var array
+     */
+    protected $uids_to_remove = array() ;
+
+    /**
+     * @var Users_UserStruct[]
+     */
+    protected $removed_users = array();
+
     protected $emails_to_invite ;
 
     public function __construct( \Organizations\OrganizationStruct $struct ) {
@@ -41,27 +51,46 @@ class OrganizationModel {
         }
     }
 
+    public function removeMemberUids( $uids ) {
+        $this->uids_to_remove = array_merge($this->uids_to_remove, $uids ) ;
+    }
+
     /**
      * Updated member list.
      *
      * @return \Organizations\MembershipStruct[] the full list of members after the update.
      */
     public function updateMembers() {
+        $this->removed_users = array();
+
         \Database::obtain()->begin();
 
         $membershipDao = new MembershipDao();
 
-        $this->new_memberships = $membershipDao->createList( [
-            'organization' => $this->struct,
-            'members' => $this->member_emails
-        ] );
+        if ( !empty( $this->member_emails ) ) {
+            $this->new_memberships = $membershipDao->createList( [
+                'organization' => $this->struct,
+                'members' => $this->member_emails
+            ] );
+        }
+
+        if ( !empty( $this->uids_to_remove ) ) {
+            foreach( $this->uids_to_remove as $uid ) {
+                $user = $membershipDao->deleteUserFromOrganization( $uid, $this->struct->id );
+                if ( $user ) {
+                    $this->removed_users[] = $user ;
+                }
+            }
+        }
 
         $full_list = ( new MembershipDao )
             ->setCacheTTL(3600)
             ->getMemberListByOrganizationId( $this->struct->id ) ;
 
         \Database::obtain()->commit();
+
         $this->_sendEmailsToNewMemberships();
+        $this->_sendEmailsForRemovedMemberships();
 
         return $full_list ;
     }
@@ -94,6 +123,17 @@ class OrganizationModel {
         foreach( $this->new_memberships as $membership ) {
             if ( $membership->getUser()->uid != $this->user->uid ) {
                 $notify_list[] = $membership ;
+            }
+        }
+        return $notify_list ;
+    }
+
+    public function getRemovedMembersEmailList() {
+        $notify_list = [] ;
+
+        foreach( $this->removed_users as $user ) {
+            if ( $user->uid != $this->user->uid ) {
+                $notify_list[] = $user ;
             }
         }
         return $notify_list ;
@@ -134,6 +174,13 @@ class OrganizationModel {
     protected function _sendEmailsToNewMemberships() {
         foreach( $this->getNewMembershipEmailList() as $membership ) {
             $email = new \Email\MembershipCreatedEmail($this->user, $membership ) ;
+            $email->send() ;
+        }
+    }
+
+    protected function _sendEmailsForRemovedMemberships() {
+        foreach( $this->getRemovedMembersEmailList() as $user ) {
+            $email = new \Email\MembershipDeletedEmail($this->user, $user, $this->struct ) ;
             $email->send() ;
         }
     }
