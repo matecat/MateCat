@@ -23,32 +23,33 @@ class OrganizationsController extends KleinController {
 
     public function create() {
 
-        $teamDao = new OrganizationDao();
+        $params = $this->request->paramsPost()->getIterator()->getArrayCopy();
 
-        try{
+        $params = filter_var_array($params, [
+            'name' => ['filter' => FILTER_SANITIZE_STRING ],
+            'type' => ['filter' => FILTER_SANITIZE_STRING ],
+            'members' => [
+                'filter' => FILTER_SANITIZE_EMAIL,
+                'flags' => FILTER_REQUIRE_ARRAY
+            ]
+        ], true ) ;
 
-            if ( !Constants_Organizations::isAllowedType( $this->request->type ) ) {
-                $type = Constants_Organizations::PERSONAL;
-                if ( $teamDao->getPersonalByUid( $this->user->uid ) ) {
-                    throw new InvalidArgumentException( "User already has the personal organization" );
-                }
-            } else {
-                $type = strtolower( $this->request->type );
+        try {
+
+            $organizationStruct = new OrganizationStruct() ;
+            $organizationStruct->created_by = $this->user->uid ;
+            $organizationStruct->name = $this->request->name ;
+            $organizationStruct->type = $this->request->type ;
+
+            $model = new \OrganizationModel( $organizationStruct );
+            foreach( $params['members'] as $email ) {
+                $model->addMemberEmail( $email ) ;
             }
+            $model->setUser($this->user) ;
 
-            \Database::obtain()->begin();
-            $organization = $teamDao->createUserOrganization( $this->user, [
-                    'type'    => $type,
-                    'name'    => $this->request->name,  //name can not be null, PDOException
-                    'members' => $this->request->members
-            ] );
-            \Database::obtain()->commit();
-            ( new MembershipDao() )->destroyCacheUserOrganizations( $this->user ); // clean the cache
-
-            //TODO sent an email to the $params[ 'members' ] ( warning, not all members are registered users )
-
-            $formatted = new Organization( [ $organization ] ) ;
-            $this->response->json( array( 'organization' => $formatted->render() ) );
+            $organization = $model->create();
+            $formatted = new Organization() ;
+            $this->response->json( array( 'organization' => $formatted->renderItem($organization) ) );
 
         } catch ( \PDOException $e ){
             \Database::obtain()->rollback();
