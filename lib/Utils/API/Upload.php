@@ -114,8 +114,8 @@ class Upload {
         $fileName    = $fileUp[ 'name' ];
         $fileTmpName = $fileUp[ 'tmp_name' ];
         $fileType    = $fileUp[ 'type' ];
-        $fileError = $fileUp[ 'error' ];
-        $fileSize  = $fileUp[ 'size' ];
+        $fileError   = $fileUp[ 'error' ];
+        $fileSize    = $fileUp[ 'size' ];
 
         $fileUp = (object)$fileUp;
 

@@ -10,15 +10,17 @@ class ActivityLogDecorator {
 
     protected $featureSet;
 
-    public function __construct( activityLogController $controller, PHPTAL $template ) {
+    public function __construct(activityLogController $controller, PHPTAL $template)
+    {
 
-        $this->controller     = $controller;
-        $this->template       = $template;
-        $this->featureSet     = new FeatureSet();
+        $this->controller = $controller;
+        $this->template = $template;
+        $this->featureSet = new FeatureSet();
 
     }
 
-    public function decorate() {
+    public function decorate()
+    {
 
         if( $this->controller->download ){
             $this->downloadZip( $this->controller->jobLanguageDefinition, $this->controller->rawLogContent );
@@ -124,11 +126,11 @@ class ActivityLogDecorator {
         $this->template->projectID     = $this->controller->project_data[ 0 ][ 'pid' ];
         $this->template->projectName   = $this->controller->project_data[ 0 ][ 'pname' ];
 
-        $this->template->projectUrl =
-                INIT::$HTTPHOST . "/analyze/" .
-                $this->controller->project_data[ 0 ][ 'pname' ] . "/" .
-                $this->controller->project_data[ 0 ][ 'pid' ] . "-" .
-                $this->controller->project_data[ 0 ][ 'ppassword' ];
+        $this->template->projectUrl = Routes::analyze( array(
+            'project_name' => $this->controller->project_data[0][ 'pname' ],
+            'id_project' => $this->controller->project_data[ 0 ][ 'pid' ],
+            'password' => $this->controller->project_data[ 0 ][ 'ppassword' ]
+        ));
 
     }
 
