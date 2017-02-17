@@ -23,7 +23,7 @@ class ProjectAssignedEmail extends AbstractEmail {
         $this->title = "You've been assigned a project" ;
 
         $this->_setLayout('skeleton.html');
-        $this->_setTemplate('Organization/project_assigned_content.html');
+        $this->_setTemplate('Project/project_assigned_content.html');
     }
 
     protected function _getTemplateVariables()
@@ -38,11 +38,6 @@ class ProjectAssignedEmail extends AbstractEmail {
                 'password'     => $this->project->password
             ])
         );
-    }
-
-    protected function _getDefaultMailConf()
-    {
-        return parent::_getDefaultMailConf();
     }
 
     protected function _getLayoutVariables()

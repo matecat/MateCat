@@ -2,21 +2,20 @@
 
 use Phinx\Migration\AbstractMigration;
 
-class UsersMigration extends AbstractMigration {
-    public function up() {
-        $this->execute( " LOCK TABLES `organizations` WRITE, `organizations_users` WRITE, `users` READ " );
-        $this->execute( " BEGIN " );
-        $this->execute( " INSERT INTO organizations ( name, created_by, type ) SELECT 'Personal', uid, 'personal' FROM users " );
-        $this->execute( " INSERT INTO organizations_users ( id_organization, uid, is_admin ) SELECT id, created_by, 1 FROM organizations " );
-        $this->execute( " COMMIT " );
-        $this->execute( " UNLOCK TABLES " );
-    }
+class UsersMigration extends AbstractMatecatMigration  {
 
-    public function down(){
+    public $sql_up = array(
+        " LOCK TABLES `organizations` WRITE, `organizations_users` WRITE, `users` READ ",
+        " BEGIN ",
+        " INSERT INTO organizations ( name, created_by, type ) SELECT 'Personal', uid, 'personal' FROM users ",
+        " INSERT INTO organizations_users ( id_organization, uid, is_admin ) SELECT id, created_by, 1 FROM organizations ",
+        " COMMIT ",
+        " UNLOCK TABLES ",
+    );
 
-        $this->execute( " TRUNCATE TABLE organizations " );
-        $this->execute( " TRUNCATE TABLE organizations_users " );
-
-    }
+    public $sql_down = array(
+        " TRUNCATE TABLE organizations ",
+        " TRUNCATE TABLE organizations_users "
+    );
 
 }

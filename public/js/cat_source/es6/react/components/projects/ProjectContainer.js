@@ -407,14 +407,15 @@ class ProjectContainer extends React.Component {
             let ws = this.props.organization.get('workspaces').find(function (ws) {
                 return ws.get('id') == self.props.project.get('id_workspace');
             });
-            workspace = <a className="ui orange circular label project-workspace shadow-1">
+            workspace = <a className="ui orange circular label project-workspace shadow-1"
+                           onClick={this.openChangeOrganizationModal.bind(this)}>
                 {ws.get('name') }
                 </a>
         }
 
         let dropDownUsers = this.getDropDownUsers();
 
-        return <div className="project ui column grid shadow-1"
+        return <div className="project ui column grid shadow-1" id={"project-" + this.props.project.get('id')}
                     ref={(project) => this.project = project}>
 
                     <div className="sixteen wide column">
