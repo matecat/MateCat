@@ -33,13 +33,14 @@ class SimpleJWT implements ArrayAccess, JsonSerializable {
     /**
      * @return array
      */
-    public function encrypt() {
-        $expire_date = time() + $this->timeToLive;
+    public function sign() {
+        $now = time();
+        $expire_date = $now + $this->timeToLive;
         $_storage = $this->storage;
         $_storage[ 'header' ] = [ "alg" => "HS256", "typ" => "JWT" ];
         $_storage[ 'payload' ][ 'exp' ] = $expire_date;
         $_storage[ 'payload' ][ 'iss' ] = INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER;
-        $_storage[ 'payload' ][ 'iat' ] = time();
+        $_storage[ 'payload' ][ 'iat' ] = $now;
         $_hash = hash_hmac( 'sha256', self::base64url_encode( json_encode( $_storage[ 'header' ] ) ) . "." . self::base64url_encode( json_encode( $_storage[ 'payload' ] ) ), $this->secretKey, true );
         $_storage[ 'signature' ] = self::base64url_encode( $_hash );
         return $_storage;
@@ -122,11 +123,15 @@ class SimpleJWT implements ArrayAccess, JsonSerializable {
     }
 
     public function __toString() {
-        $data = $this->encrypt();
+        $data = $this->sign();
         return self::base64url_encode( json_encode( $data[ 'header' ] ) ) . "." . self::base64url_encode( json_encode( $data[ 'payload' ] ) ) . "." . $data[ 'signature' ];
     }
 
-    function jsonSerialize() {
+    public function jsonSerialize() {
+        return $this->__toString();
+    }
+
+    public function encode(){
         return $this->__toString();
     }
 

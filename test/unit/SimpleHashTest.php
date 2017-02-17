@@ -8,12 +8,12 @@
  */
 
 
-class SimpleHashTest extends PHPUnit_Framework_TestCase
+class SimpleHashTest extends AbstractTest
 {
     public function testWrongInitialization(){
         $invited_by_uid   = 166;
-        $email            = "domenico.1234455@translated.net";
-        $request_info     = json_encode( [ "organization_id" => 1 ] );
+        $email            = "domenico@translated.net";
+        $request_info     = [ "organization_id" => 1 ];
         $this->setExpectedException( '\UnexpectedValueException' );
         new SimpleJWT( [
                 $invited_by_uid,
@@ -24,8 +24,8 @@ class SimpleHashTest extends PHPUnit_Framework_TestCase
 
     public function testEncryption(){
         $invited_by_uid   = 166;
-        $email            = "domenico.1234455@translated.net";
-        $request_info     = json_encode( [ "organization_id" => 1 ] );
+        $email            = "domenico@translated.net";
+        $request_info     = [ "organization_id" => 1 ];
 
         $x = new SimpleJWT( [
                 'invited_by_uid' => $invited_by_uid,
@@ -33,7 +33,7 @@ class SimpleHashTest extends PHPUnit_Framework_TestCase
                 'request_info'   => $request_info,
         ] );
 
-        $result = $x->encrypt();
+        $result = $x->sign();
         $this->assertTrue( is_array( $result ) );
         $this->assertArrayHasKey( 'signature', $result );
         $this->assertArrayHasKey( 'payload', $result );
@@ -46,8 +46,8 @@ class SimpleHashTest extends PHPUnit_Framework_TestCase
 
     public function testValidateTokenEncryption(){
         $invited_by_uid   = 166;
-        $email            = "domenico.1234455@translated.net";
-        $request_info     = json_encode( [ "organization_id" => 1 ] );
+        $email            = "domenico@translated.net";
+        $request_info     = [ "organization_id" => 1 ];
 
         $x = new SimpleJWT( [
                 'invited_by_uid' => $invited_by_uid,
@@ -55,14 +55,14 @@ class SimpleHashTest extends PHPUnit_Framework_TestCase
                 'request_info'   => $request_info,
         ] );
 
-        $result = $x->encrypt();
+        $result = $x->sign();
         $this->assertTrue( $x->validate( $result ) );
     }
 
     public function testValidateTokenEncryptionByJWT(){
         $invited_by_uid   = 166;
-        $email            = "domenico.1234455@translated.net";
-        $request_info     = json_encode( [ "organization_id" => 1 ] );
+        $email            = "domenico@translated.net";
+        $request_info     = [ "organization_id" => 1 ];
 
         $x = new SimpleJWT( [
                 'invited_by_uid' => $invited_by_uid,
@@ -70,14 +70,14 @@ class SimpleHashTest extends PHPUnit_Framework_TestCase
                 'request_info'   => $request_info,
         ] );
 
-        $this->assertTrue( $x->validate( (string)$x ) );
+        $this->assertTrue( $x->validate( $x->encode() ) );
     }
 
 
     public function testInvalidToken_tamper_field(){
         $invited_by_uid   = 166;
-        $email            = "domenico.1234455@translated.net";
-        $request_info     = json_encode( [ "organization_id" => 1 ] );
+        $email            = "domenico@translated.net";
+        $request_info     = [ "organization_id" => 1 ];
 
         $x = new SimpleJWT( [
                 'invited_by_uid' => $invited_by_uid,
@@ -85,10 +85,10 @@ class SimpleHashTest extends PHPUnit_Framework_TestCase
                 'request_info'   => $request_info,
         ] );
 
-        $result = $x->encrypt();
+        $result = $x->sign();
 
         //change a value param
-        $result[ 'payload' ][ 'invited_by_uid' ] = 123;
+        $result[ 'payload' ][ 'context' ][ 'invited_by_uid' ] = 123;
 
         //assert false
         $this->assertFalse( $x->validate( $result ) );
@@ -96,8 +96,8 @@ class SimpleHashTest extends PHPUnit_Framework_TestCase
 
     public function testInvalidToken_tamper_hash(){
         $invited_by_uid   = 166;
-        $email            = "domenico.1234455@translated.net";
-        $request_info     = json_encode( [ "organization_id" => 1 ] );
+        $email            = "domenico@translated.net";
+        $request_info     = [ "organization_id" => 1 ];
 
         $x = new SimpleJWT( [
                 'invited_by_uid' => $invited_by_uid,
@@ -105,7 +105,7 @@ class SimpleHashTest extends PHPUnit_Framework_TestCase
                 'request_info'   => $request_info,
         ] );
 
-        $result = $x->encrypt();
+        $result = $x->sign();
 
         //change a value param
         $result[ 'signature' ] = "376715df7403f293a019fab9d048e2a904216108fc85190dc824d35375f94bc9";
@@ -116,8 +116,8 @@ class SimpleHashTest extends PHPUnit_Framework_TestCase
 
     public function testArrayAccess(){
         $invited_by_uid   = 166;
-        $email            = "domenico.1234455@translated.net";
-        $request_info     = json_encode( [ "organization_id" => 1 ] );
+        $email            = "domenico@translated.net";
+        $request_info     = [ "organization_id" => 1 ];
 
         $x = new SimpleJWT( [
                 'invited_by_uid' => $invited_by_uid,
@@ -125,13 +125,13 @@ class SimpleHashTest extends PHPUnit_Framework_TestCase
                 'request_info'   => $request_info,
         ] );
 
-        $newEmail = "domenico@translated.net";
+        $newEmail = "alex655321@a-clockwork-orange.net";
 
         //TEST ArrayAccess
         $x[ 'email' ] = $newEmail;
         $x[ 'testAccess' ] = "a new key/value pair";
 
-        $result = $x->encrypt();
+        $result = $x->sign();
         $this->assertTrue( is_array( $result ) );
         $this->assertTrue( $result[ 'payload' ][ 'context' ][ 'invited_by_uid' ] == $invited_by_uid );
         $this->assertTrue( $result[ 'payload' ][ 'context' ][ 'request_info' ] == $request_info );
@@ -149,7 +149,7 @@ class SimpleHashTest extends PHPUnit_Framework_TestCase
 
     public function testAssignmentRuntime(){
         $invited_by_uid   = 166;
-        $email            = "domenico.1234455@translated.net";
+        $email            = "domenico@translated.net";
         $request_info     = [ "organization_id" => 1 ];
 
         $x = new SimpleJWT();
@@ -160,7 +160,7 @@ class SimpleHashTest extends PHPUnit_Framework_TestCase
         $x[ 'request_info' ] = $request_info;
         $x[ 'testAccess' ] = "a new key/value pair";
 
-        $result = $x->encrypt();
+        $result = $x->sign();
         $this->assertTrue( is_array( $result ) );
         $this->assertTrue( $result[ 'payload' ][ 'context' ][ 'invited_by_uid' ] == $invited_by_uid );
         $this->assertTrue( $result[ 'payload' ][ 'context' ][ 'request_info' ] == $request_info );
@@ -171,9 +171,33 @@ class SimpleHashTest extends PHPUnit_Framework_TestCase
         $this->assertArrayHasKey( 'testAccess', $result[ 'payload' ][ 'context' ] );
         $this->assertEquals( "a new key/value pair", $result[ 'payload' ][ 'context' ][ 'testAccess' ] );
 
-        $this->assertTrue( $x->validate( (string)$x ) );
+        $this->assertTrue( $x->validate( $x->encode() ) );
         $this->assertTrue( $x->validate( $result ) );
 
+    }
+
+    public function testTimeToLive(){
+
+        $invited_by_uid   = 166;
+        $email            = "domenico@translated.net";
+        $request_info     = [ "organization_id" => 1 ];
+
+        $x = new SimpleJWT( [
+                'invited_by_uid' => $invited_by_uid,
+                'email'          => $email,
+                'request_info'   => $request_info,
+        ] );
+
+        $x->setTimeToLive( 1 );
+
+        $result = $x->encode();
+        $this->assertTrue( $x->validate( $result ) );
+
+        //wait 1.001 second for token expire
+        usleep(1001000);
+
+        $this->assertFalse( $x->validate( $result ) );
+        
     }
 
 }
