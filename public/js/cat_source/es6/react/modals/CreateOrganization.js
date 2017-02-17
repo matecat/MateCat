@@ -8,6 +8,7 @@ class CreateOrganization extends React.Component {
             errorInput: false,
             errorDropdown: false,
             textDropdown: 'Ex: joe@email.net',
+            readyToSend: false
         };
         this.onLabelCreate = this.onLabelCreate.bind(this);
     }
@@ -48,6 +49,18 @@ class CreateOrganization extends React.Component {
         });
     }
 
+    handleKeyPress(e) {
+        if (this.inputNewOrg.value.length > 0 ) {
+            this.setState({
+                readyToSend: true,
+            });
+        } else {
+            this.setState({
+                readyToSend: false,
+            });
+        }
+    }
+
     onClick(e) {
         e.stopPropagation();
         e.preventDefault();
@@ -67,6 +80,7 @@ class CreateOrganization extends React.Component {
     render() {
         var inputError = (this.state.errorInput) ? 'error' : '';
         var inputDropdown = (this.state.errorDropdown) ? 'error' : '';
+        var buttonClass = (this.state.readyToSend && !this.state.errorInput && !this.state.errorDropdown ) ? '' : 'disabled';
         return  <div className="create-organization-modal">
                     <div className="matecat-modal-top">
                         <div className="ui one column grid left aligned">
@@ -75,9 +89,9 @@ class CreateOrganization extends React.Component {
                                 <div className={"ui large fluid icon input " + inputError}>
                                     <input type="text" placeholder="Organization Name"
                                            onFocus={this.onInputFocus.bind(this)}
+                                           onKeyUp={this.handleKeyPress.bind(this)}
                                            ref={(inputNewOrg) => this.inputNewOrg = inputNewOrg}/>
                                     <i className="icon-pencil icon"/>
-                                    {/*<i class="icon-checkmark green icon"></i>*/}
                                 </div>
                             </div>
                         </div>
@@ -97,7 +111,7 @@ class CreateOrganization extends React.Component {
                     <div className="matecat-modal-bottom">
                         <div className="ui one column grid right aligned">
                             <div className="column">
-                                <button className="ui button green"
+                                <button className={"ui button green " + buttonClass }
                                         onClick={this.onClick.bind(this)}>Create</button>
                             </div>
                         </div>

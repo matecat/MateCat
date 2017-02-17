@@ -8,7 +8,8 @@ class ModifyOrganization extends React.Component {
             organization: this.props.organization,
             inputUserError: false,
             inputNameError: false,
-            showRemoveMessageUserID: null
+            showRemoveMessageUserID: null,
+            readyToSend: false
         };
         this.updateOrganization = this.updateOrganization.bind(this);
     }
@@ -40,7 +41,7 @@ class ModifyOrganization extends React.Component {
         });
     }
 
-    handleKeyPress(e) {
+    handleKeyPressUserInput(e) {
         e.stopPropagation();
         if (e.key === 'Enter' ) {
             e.preventDefault();
@@ -63,9 +64,12 @@ class ModifyOrganization extends React.Component {
 
     onKeyPressEvent(e) {
        if (e.key === 'Enter' ) {
-            if (this.inputName.value.length > 0) {
+            if (this.inputName.value.length > 0 && this.inputName.value != this.state.organization.get('name')) {
                 ManageActions.changeOrganizationName(this.state.organization.toJS(), this.inputName.value);
                 $(this.inputName).blur();
+                this.setState({
+                    readyToSend: true
+                });
             } else {
                 this.setState({
                     inputNameError: true
@@ -135,13 +139,18 @@ class ModifyOrganization extends React.Component {
         return (nextState.organization !== this.state.organization ||
                 nextState.inputUserError !== this.state.inputUserError ||
                 nextState.inputNameError !== this.state.inputNameError ||
-                nextState.showRemoveMessageUserID !== this.state.showRemoveMessageUserID)
+                nextState.showRemoveMessageUserID !== this.state.showRemoveMessageUserID ||
+                nextState.readyToSend !== this.state.readyToSend
+
+        )
     }
 
     render() {
         let usersError = (this.state.inputUserError) ? 'error' : '';
         let orgNameError = (this.state.inputNameError) ? 'error' : '';
         let userlist = this.getUserList();
+        var icon = (this.state.readyToSend && !this.state.inputNameError ) ?<i className="icon-checkmark green icon"/> : <i className="icon-pencil icon"/>;
+
         return <div className="modify-organization-modal">
             <div className="matecat-modal-top">
                 <div className="ui one column grid left aligned">
@@ -149,10 +158,9 @@ class ModifyOrganization extends React.Component {
                         <h3>Change Organization Name</h3>
                         <div className={"ui fluid icon input " + orgNameError}>
                             <input type="text" defaultValue={this.state.organization.get('name')}
-                            onKeyPress={this.onKeyPressEvent.bind(this)}
+                            onKeyUp={this.onKeyPressEvent.bind(this)}
                             ref={(inputName) => this.inputName = inputName}/>
-                            <i className="icon-pencil icon"/>
-                            {/*<i class="icon-checkmark green icon"></i>*/}
+                            {icon}
                         </div>
                     </div>
                 </div>
@@ -163,7 +171,7 @@ class ModifyOrganization extends React.Component {
                         <h3>Add members</h3>
                         <div className={"ui fluid icon input " + usersError }>
                             <input type="text" placeholder="joe@email.com"
-                                   onKeyPress={this.handleKeyPress.bind(this)}
+                                   onKeyUp={this.handleKeyPressUserInput.bind(this)}
                                    ref={(inputNewUSer) => this.inputNewUSer = inputNewUSer}/>
                         </div>
                     </div>
