@@ -56,7 +56,7 @@ class SimpleHashTest extends AbstractTest
         ] );
 
         $result = $x->sign();
-        $this->assertTrue( $x->validate( $result ) );
+        $this->assertTrue( $x->isValid( $result ) );
     }
 
     public function testValidateTokenEncryptionByJWT(){
@@ -70,7 +70,7 @@ class SimpleHashTest extends AbstractTest
                 'request_info'   => $request_info,
         ] );
 
-        $this->assertTrue( $x->validate( $x->encode() ) );
+        $this->assertTrue( $x->isValid( $x->encode() ) );
     }
 
 
@@ -90,8 +90,10 @@ class SimpleHashTest extends AbstractTest
         //change a value param
         $result[ 'payload' ][ 'context' ][ 'invited_by_uid' ] = 123;
 
-        //assert false
-        $this->assertFalse( $x->validate( $result ) );
+        //assert exception
+        $this->setExpectedException( '\DomainException' );
+        $x->isValid( $result );
+
     }
 
     public function testInvalidToken_tamper_hash(){
@@ -110,8 +112,10 @@ class SimpleHashTest extends AbstractTest
         //change a value param
         $result[ 'signature' ] = "376715df7403f293a019fab9d048e2a904216108fc85190dc824d35375f94bc9";
 
-        //assert false
-        $this->assertFalse( $x->validate( $result ) );
+        //assert exception
+        $this->setExpectedException( '\DomainException' );
+        $x->isValid( $result );
+
     }
 
     public function testArrayAccess(){
@@ -144,7 +148,7 @@ class SimpleHashTest extends AbstractTest
         $this->assertEquals( "a new key/value pair", $result[ 'payload' ][ 'context' ][ 'testAccess' ] );
 
 
-        $this->assertTrue( $x->validate( $result ) );
+        $this->assertTrue( $x->isValid( $result ) );
     }
 
     public function testAssignmentRuntime(){
@@ -171,8 +175,8 @@ class SimpleHashTest extends AbstractTest
         $this->assertArrayHasKey( 'testAccess', $result[ 'payload' ][ 'context' ] );
         $this->assertEquals( "a new key/value pair", $result[ 'payload' ][ 'context' ][ 'testAccess' ] );
 
-        $this->assertTrue( $x->validate( $x->encode() ) );
-        $this->assertTrue( $x->validate( $result ) );
+        $this->assertTrue( $x->isValid( $x->encode() ) );
+        $this->assertTrue( $x->isValid( $result ) );
 
     }
 
@@ -191,12 +195,14 @@ class SimpleHashTest extends AbstractTest
         $x->setTimeToLive( 1 );
 
         $result = $x->encode();
-        $this->assertTrue( $x->validate( $result ) );
+        $this->assertTrue( $x->isValid( $result ) );
 
-        //wait 1.001 second for token expire
-        usleep(1001000);
+        //wait 2 seconds for token expire
+        sleep(2);
 
-        $this->assertFalse( $x->validate( $result ) );
+        //assert exception
+        $this->setExpectedException( '\DomainException' );
+        $x->isValid( $result );
         
     }
 

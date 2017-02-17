@@ -86,7 +86,7 @@ function prepare_file_in_upload_folder( $path, $upload_session )  {
 
 function get_sessid_for_user( Users_UserStruct $user ) {
 
-    list( $new_cookie_data, $new_expire_date ) = AuthCookie::signedAuthCookie(
+    list( $new_cookie_data, $new_expire_date ) = AuthCookie::generateSignedAuthCookie(
         $user->email, $user->uid
     ) ;
     $cookie = array(
