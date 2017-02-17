@@ -150,7 +150,7 @@ class Header extends React.Component {
 
         return <section className="nav-mc-bar ui grid">
 
-                    <nav className="sixteen wide column">
+                    <nav className="sixteen wide column navigation">
                         <div className="ui stackable grid">
                             <div className="eleven wide column logo-menu">
                                 <a href="/" className="logo logo-home"/>
