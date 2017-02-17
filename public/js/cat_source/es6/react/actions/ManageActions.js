@@ -139,6 +139,20 @@ let ManageActions = {
                     project: project,
                     user: user
                 });
+                if (user.get("uid") !== UI.selectedUser && UI.selectedUser !== ManageConstants.ALL_MEMBERS_FILTER) {
+                    setTimeout(function () {
+                        AppDispatcher.dispatch({
+                            actionType: ManageConstants.HIDE_PROJECT,
+                            project: project
+                        });
+                    }, 500);
+                    setTimeout(function () {
+                        AppDispatcher.dispatch({
+                            actionType: ManageConstants.REMOVE_PROJECT,
+                            project: project
+                        });
+                    }, 1000);
+                }
             }
         );
 

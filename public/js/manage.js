@@ -11,6 +11,7 @@ UI = {
         this.changeOrganization = this.changeOrganization.bind(this);
         this.changeProjectWorkspace = this.changeProjectWorkspace.bind(this);
         this.selectedWorkspace = ManageConstants.ALL_WORKSPACES_FILTER;
+        this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
 
         //Job Actions
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_SETTINGS, this.openJobSettings);
@@ -209,6 +210,7 @@ UI = {
         let self = this;
         this.selectedOrganization = organization;
         this.selectedWorkspace = ManageConstants.ALL_WORKSPACES_FILTER;
+        this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
         this.Search.filter = {};
         UI.Search.currentPage = 1;
         return this.getOrganizationStructure(organization).then(function () {
@@ -237,6 +239,7 @@ UI = {
             } else if (userUid !== ManageConstants.ALL_MEMBERS_FILTER) {
                 filter.id_assignee = userUid;
             }
+            this.selectedUser = userUid;
         }
         if ((typeof workspaceId !== "undefined") ) {
             if (workspaceId === ManageConstants.NO_WORKSPACE_FILTER) {

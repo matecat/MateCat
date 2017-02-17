@@ -9,6 +9,9 @@ body.manage {
     background-color: #f1f1f1;
     font-family: Calibri;
     @media only screen and (min-width: 1300px) {
+        .ui.container {
+            width: 1280px;
+        }
         .ui.grid.container {
             width: 1280px !important;
         }
