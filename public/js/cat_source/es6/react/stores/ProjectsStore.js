@@ -64,6 +64,14 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
         this.projects = this.projects.setIn([indexProject,'name'], newName);
     },
 
+    changeProjectWorkspace: function (project, workspaceId) {
+        let projectOld = this.projects.find(function (prj) {
+            return prj.get('id') == project.id;
+        });
+        let indexProject = this.projects.indexOf(projectOld);
+        this.projects = this.projects.setIn([indexProject,'id_workspace'], workspaceId);
+    },
+
     changeProjectAssignee: function (project, user) {
         let projectOld = this.projects.find(function (prj) {
             return prj.get('id') == project.get('id');
@@ -140,6 +148,7 @@ AppDispatcher.register(function(action) {
             ProjectsStore.emitChange(ManageConstants.UPDATE_PROJECTS, ProjectsStore.projects);
             break;
         case ManageConstants.CHANGE_PROJECT_WORKSPACE:
+            ProjectsStore.changeProjectWorkspace(action.project, action.workspaceId);
             ProjectsStore.emitChange(ManageConstants.UPDATE_PROJECTS, ProjectsStore.projects);
             break;
         // Move this actions
@@ -154,6 +163,9 @@ AppDispatcher.register(function(action) {
             break;
         case ManageConstants.OPEN_CREATE_WORKSPACE_MODAL:
             ProjectsStore.emitChange(action.actionType, action.organization);
+            break;
+        case ManageConstants.HIDE_PROJECT:
+            ProjectsStore.emitChange(action.actionType, Immutable.fromJS(action.project));
             break;
     }
 });

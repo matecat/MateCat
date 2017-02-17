@@ -75,9 +75,15 @@ abstract class AbstractEmail
         $mailConf[ 'port' ]       = INIT::$SMTP_PORT;
         $mailConf[ 'sender' ]     = INIT::$SMTP_SENDER;
         $mailConf[ 'hostname' ]   = INIT::$SMTP_HOSTNAME;
+
         $mailConf[ 'from' ]       = INIT::$SMTP_SENDER;
         $mailConf[ 'fromName' ]   = INIT::$MAILER_FROM_NAME;
         $mailConf[ 'returnPath' ] = INIT::$MAILER_RETURN_PATH;
+
+        // TODO: move this into config
+        $mailconf[ 'from' ]       = 'noreply@matecat.com';
+        $mailconf[ 'sender' ]     = 'noreply@matecat.com';
+        $mailconf[ 'returnpath' ] = 'noreply@matecat.com';
 
         return $mailConf ;
     }

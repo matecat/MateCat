@@ -4,24 +4,34 @@ class ChangeProjectWorkspace extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state ={};
+        this.state ={
+            selectWorkspace: -1
+        };
     }
 
     changeWorkspace() {
-        // ManageActions.changeProjectWorkspace(this.props.currentWorkspace.get('name'), this.selectedWorkspace.toJS(), this.props.project.get('id'));
+        ManageActions.changeProjectWorkspace(this.state.selectedWs,  this.props.project);
         APP.ModalWindow.onCloseModal();
     }
 
     componentDidMount () {
     }
 
+    selectWorkspace(wsId) {
+        this.setState({
+            selectedWs: wsId
+        })
+    }
+
     getWorkspacesList() {
         let self = this;
         if (this.props.workspaces) {
             return this.props.workspaces.map(function (ws, i) {
-                return <div className="item"
-                            key={'user' + ws.get('id')}>
-                            <div className="content">
+                let selectedClass = (self.state.selectedWs == ws.get('id')) ? 'selected' : '';
+                return <div className="item workspace-item"
+                            key={'ws' + ws.get('id')}
+                            onClick={self.selectWorkspace.bind(self, ws.get('id'))}>
+                            <div className={"content " + selectedClass}>
                                 {ws.get('name')}
                             </div>
                         </div>;

@@ -22,8 +22,8 @@ class Membership {
 
     public function renderItem(MembershipStruct $membership ) {
         $out = array(
-            'id' => $membership->id,
-            'id_organization' => $membership->id_organization,
+            'id' => (int) $membership->id,
+            'id_organization' => (int) $membership->id_organization,
         );
 
         if ( !is_null( $membership->getUser() ) ) {

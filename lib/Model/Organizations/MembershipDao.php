@@ -138,7 +138,7 @@ class MembershipDao extends \DataAccess_AbstractDao
      *
      * @return bool|int
      */
-    public function destroyCacheForListByOrganizationId( $id_organization ){
+    public function destroyCacheForListByOrganizationId( $id_organization ) {
         $stmt = $this->_getStatementForCache( self::$_query_member_list );
         return $this->_destroyObjectCache( $stmt,
                 array(
@@ -151,9 +151,10 @@ class MembershipDao extends \DataAccess_AbstractDao
      * @param $uid
      * @param $organizationId
      *
-     * @return int
+     * @return \Users_UserStruct|null
      */
-    public function deleteUserFromOrganization( $uid, $organizationId ){
+    public function deleteUserFromOrganization( $uid, $organizationId ) {
+        $user = ( new Users_UserDao()) ->setCacheTTL(3600)->getByUid( $uid ) ;
 
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( self::$_delete_member );
@@ -161,8 +162,15 @@ class MembershipDao extends \DataAccess_AbstractDao
                 'uid' => $uid,
                 'id_organization' => $organizationId
         ] );
-        return $stmt->rowCount();
 
+        $this->destroyCacheForListByOrganizationId( $organizationId );
+        $this->destroyCacheUserOrganizations( $user );
+        if ( $stmt->rowCount() ) {
+            return $user ;
+        }
+        else {
+            return null ;
+        }
     }
 
     /**
@@ -215,8 +223,13 @@ class MembershipDao extends \DataAccess_AbstractDao
             $i++;
         }
 
-        return $membersList;
+        // Invalidate related caches
+        foreach ( $membersList as $member ) {
+            $this->destroyCacheUserOrganizations( $member->getUser() ) ;
+        }
+        $this->destroyCacheForListByOrganizationId( $organizationStruct->id ) ;
 
+        return $membersList;
 
     }
 

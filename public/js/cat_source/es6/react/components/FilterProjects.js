@@ -25,7 +25,7 @@ class FilterProjects extends React.Component {
     }
 
     render () {
-        return <div className="ui projects-state dropdown icon button">
+        return <div className="projects-state ui dropdown icon button">
                     <i className="filter icon"/>
                     <div className="menu">
                         <div className="scrolling menu">

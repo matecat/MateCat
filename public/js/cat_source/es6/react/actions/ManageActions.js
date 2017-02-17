@@ -72,9 +72,15 @@ let ManageActions = {
         UI.changeJobsOrProjectStatus('prj', project.toJS(), status).done(
             function () {
                 AppDispatcher.dispatch({
-                    actionType: ManageConstants.REMOVE_PROJECT,
+                    actionType: ManageConstants.HIDE_PROJECT,
                     project: project
                 });
+                setTimeout(function () {
+                    AppDispatcher.dispatch({
+                        actionType: ManageConstants.REMOVE_PROJECT,
+                        project: project
+                    });
+                }, 500);
             }
         );
     },
@@ -140,14 +146,14 @@ let ManageActions = {
 
     },
 
-    changeProjectWorkspace: function () {
-        UI.changeProjectWorkspace(oldWorkspace, newWorkspace, projectId).done(function () {
+    changeProjectWorkspace: function (workspaceId, project) {
+        UI.changeProjectWorkspace(workspaceId, project.get('id')).done(function () {
             AppDispatcher.dispatch({
                 actionType: ManageConstants.CHANGE_PROJECT_WORKSPACE,
-                oldOrganization: oldWorkspace,
-                workspace: newWorkspace,
-                projectId: projectId
+                project: project,
+                workspaceId: workspaceId
             });
+
         });
 
     },
@@ -190,11 +196,11 @@ let ManageActions = {
         });
     },
 
-    openChangeProjectWorkspace: function (organization, projectId) {
+    openChangeProjectWorkspace: function (organization, project) {
         AppDispatcher.dispatch({
             actionType: ManageConstants.OPEN_CHANGE_ORGANIZATION_MODAL,
-            organization: organization,
-            projectId: projectId
+            workspaces: organization.get('workspaces'),
+            project: project
         });
     },
 
@@ -219,12 +225,12 @@ let ManageActions = {
     createOrganization: function (organizationName, members) {
         let organization;
         UI.createOrganization(organizationName, members).then(function (response) {
-                organization = response.organization[0];
+                organization = response.organization;
                 UI.getWorkspaces(organization).then(function (data) {
                     organization.workspaces = data.workspaces;
                     AppDispatcher.dispatch({
                         actionType: ManageConstants.ADD_ORGANIZATION,
-                        organization: response.organization[0]
+                        organization: organization
                     });
                 });
             }

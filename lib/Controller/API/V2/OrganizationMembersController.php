@@ -9,10 +9,10 @@
 
 namespace API\V2;
 
-use API\V2\Exceptions\AuthorizationError;
 use API\V2\Json\Error;
 use API\V2\Json\Membership;
 use API\V2\Validators\OrganizationAccessValidator;
+use LQA\ModelDao;
 use Organizations\MembershipDao;
 use Organizations\OrganizationDao;
 
@@ -26,69 +26,53 @@ class OrganizationMembersController extends KleinController {
      * Get organization members list
      */
     public function index(){
+        $membersList = ( new MembershipDao )
+            ->setCacheTTL( 60 * 60 * 24 )
+            ->getMemberListByOrganizationId( $this->request->id_organization );
 
-        try{
-
-            $membersList = ( new MembershipDao )
-                ->setCacheTTL( 60 * 60 * 24 )
-                ->getMemberListByOrganizationId( $this->request->id_organization );
-
-            $formatter = new Membership( $membersList ) ;
-            $this->response->json( array( 'members' => $formatter->render() ) );
-
-        } catch ( \PDOException $e ){
-            $this->response->code( 503 );
-            $this->response->json( ( new Error( [ $e ] ) )->render() );
-        }
-
+        $formatter = new Membership( $membersList ) ;
+        $this->response->json( array( 'members' => $formatter->render() ) );
     }
 
-    public function update(){
-        try{
+    public function update() {
+        $params = $this->request->paramsPost()->getIterator()->getArrayCopy();
 
-            \Database::obtain()->begin();
-            $organizationStruct = ( new OrganizationDao() )->findById( $this->request->id_organization );
-            ( new MembershipDao )->createList( [
-                    'organization' => $organizationStruct,
-                    'members' => $this->request->members
-            ] );
-            ( new MembershipDao )->destroyCacheForListByOrganizationId( $organizationStruct->id );
-            $membersList = ( new MembershipDao )->setCacheTTL( 60 * 60 * 24 )->getMemberListByOrganizationId(
-                $organizationStruct->id );
+        $params = filter_var_array($params, [
+            'members' => [
+                'filter' => FILTER_SANITIZE_EMAIL,
+                'flags' => FILTER_REQUIRE_ARRAY
+            ]
+        ], true ) ;
 
-            \Database::obtain()->commit();
+        $organizationStruct = ( new OrganizationDao() )
+            ->findById( $this->request->id_organization );
 
-            //TODO sent an email to the $params[ 'members' ] ( warning, not all members are registered users )
-            $formatter = new Membership( $membersList ) ;
-            $this->response->json( array( 'members' => $formatter->render() ) );
+        $model = new \OrganizationModel( $organizationStruct ) ;
+        $model->setUser( $this->user ) ;
+        $model->addMemberEmails( $params['members'] ) ;
+        $full_members_list = $model->updateMembers();
 
-        } catch ( \PDOException $e ){
-            $this->response->code( 503 );
-            $this->response->json( ( new Error( [ $e ] ) )->render() );
-        }
+        $formatter = new Membership( $full_members_list ) ;
+        $this->response->json( array( 'members' => $formatter->render() ) );
 
     }
 
     public function delete(){
+        \Database::obtain()->begin();
 
-        try{
+        $organizationStruct = ( new OrganizationDao() )
+            ->findById( $this->request->id_organization );
 
-            $membershipDao = new MembershipDao();
+        $model = new \OrganizationModel( $organizationStruct ) ;
+        $model->removeMemberUids( array( $this->request->uid_member ) );
+        $model->setUser( $this->user ) ;
+        $membersList = $model->updateMembers();
 
-            \Database::obtain()->begin();
-            $membershipDao->deleteUserFromOrganization( $this->request->uid_member, $this->request->id_organization );
-            $membershipDao->destroyCacheForListByOrganizationId( $this->request->id_organization );
-            $membersList = $membershipDao->setCacheTTL( 60 * 60 * 24 )->getMemberListByOrganizationId( $this->request->id_organization );
-            \Database::obtain()->commit();
-
-            $formatter = new Membership( $membersList ) ;
-            $this->response->json( array( 'members' => $formatter->render() ) );
-
-        } catch ( \PDOException $e ){
-            $this->response->code( 503 );
-            $this->response->json( ( new Error( [ $e ] ) )->render() );
-        }
+        $formatter = new Membership( $membersList ) ;
+        $this->response->json( array( 'members' => $formatter->render() ) );
 
     }
+
+
 
 }

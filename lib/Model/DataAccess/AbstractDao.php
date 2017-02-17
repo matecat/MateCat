@@ -288,6 +288,19 @@ abstract class DataAccess_AbstractDao {
     }
 
     /**
+     * Serialize params, ensuring values are always treated as strings.
+     *
+     * @param array $params
+     * @return string
+     */
+    protected function _serializeForCacheKey( Array $params ) {
+        foreach($params as $key => $value ) {
+            $params[ $key ] = (string) $value ;
+        }
+        return serialize( $params ) ;
+    }
+
+    /**
      * @param PDOStatement          $stmt
      * @param DataAccess_IDaoStruct $fetchClass
      * @param array                 $bindParams
@@ -296,7 +309,7 @@ abstract class DataAccess_AbstractDao {
      */
     protected function _fetchObject( PDOStatement $stmt, DataAccess_IDaoStruct $fetchClass, Array $bindParams ){
 
-        $_cacheResult = $this->_getFromCache( $stmt->queryString . serialize( $bindParams ) );
+        $_cacheResult = $this->_getFromCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) );
 
         if ( $_cacheResult !== false && $_cacheResult !== null ) {
             return $_cacheResult;
@@ -307,7 +320,7 @@ abstract class DataAccess_AbstractDao {
         $stmt->execute( $bindParams );
         $result = $stmt->fetchAll();
         
-        $this->_setInCache( $stmt->queryString . serialize( $bindParams ), $result );
+        $this->_setInCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ), $result );
 
         return $result;
 
@@ -322,7 +335,7 @@ abstract class DataAccess_AbstractDao {
     protected function _destroyObjectCache( PDOStatement $stmt, Array $bindParams ){
         $this->_cacheSetConnection();
         if ( isset( $this->cache_con ) && !empty( $this->cache_con ) ) {
-            return $this->cache_con->del( md5 ( $stmt->queryString . serialize( $bindParams ) ) );
+            return $this->cache_con->del( md5 ( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) ) );
         }
 
         return false;

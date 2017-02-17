@@ -12,7 +12,7 @@ namespace API\V2;
 
 use API\V2\Exceptions\AuthorizationError;
 use API\V2\Json\Organization;
-use Constants_Organizations;
+use API\V2\Validators\OrganizationAccessValidator;
 use InvalidArgumentException;
 use Organizations\MembershipDao;
 use Organizations\OrganizationDao;
@@ -23,42 +23,39 @@ class OrganizationsController extends KleinController {
 
     public function create() {
 
-        $teamDao = new OrganizationDao();
+        $params = $this->request->paramsPost()->getIterator()->getArrayCopy();
 
-        try{
+        $params = filter_var_array($params, [
+            'name' => ['filter' => FILTER_SANITIZE_STRING ],
+            'type' => ['filter' => FILTER_SANITIZE_STRING ],
+            'members' => [
+                'filter' => FILTER_SANITIZE_EMAIL,
+                'flags' => FILTER_REQUIRE_ARRAY
+            ]
+        ], true ) ;
 
-            if ( !Constants_Organizations::isAllowedType( $this->request->type ) ) {
-                $type = Constants_Organizations::PERSONAL;
-                if ( $teamDao->getPersonalByUid( $this->user->uid ) ) {
-                    throw new InvalidArgumentException( "User already has the personal organization" );
-                }
-            } else {
-                $type = strtolower( $this->request->type );
-            }
+        $organizationStruct = new OrganizationStruct(array(
+            'created_by' => $this->user->uid,
+            'name' => $params['name'],
+            'type' => $params['type']
+        ) );
 
-            \Database::obtain()->begin();
-            $organization = $teamDao->createUserOrganization( $this->user, [
-                    'type'    => $type,
-                    'name'    => $this->request->name,  //name can not be null, PDOException
-                    'members' => $this->request->members
-            ] );
-            \Database::obtain()->commit();
-            ( new MembershipDao() )->destroyCacheUserOrganizations( $this->user ); // clean the cache
-
-            //TODO sent an email to the $params[ 'members' ] ( warning, not all members are registered users )
-
-            $formatted = new Organization( [ $organization ] ) ;
-            $this->response->json( array( 'organization' => $formatted->render() ) );
-
-        } catch ( \PDOException $e ){
-            \Database::obtain()->rollback();
-            $this->response->code( 400 );
-            $this->response->json( ( new Error( [ $e ] ) )->render() );
-        } catch( InvalidArgumentException $e ){
-            $this->response->code( 400 );
-            $this->response->json( ( new Error( [ $e ] ) )->render() );
+        $model = new \OrganizationModel( $organizationStruct );
+        foreach( $params['members'] as $email ) {
+            $model->addMemberEmail( $email ) ;
         }
+        $model->setUser($this->user) ;
 
+        $organization = $model->create();
+        $formatted = new Organization() ;
+
+        $this->response->json( array( 'organization' => $formatted->renderItem($organization) ) );
+    }
+
+    protected function afterConstruct()
+    {
+        parent::afterConstruct();
+        $this->appendValidator( new OrganizationAccessValidator($this) ) ;
     }
 
     public function update() {

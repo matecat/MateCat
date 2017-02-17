@@ -17,15 +17,17 @@ use API\V2\Validators\OrganizationProjectValidator;
 
 class ProjectsController extends KleinController {
 
-    public $project;
+    protected $project;
 
     public function update() {
 
         $acceptedFields = array( 'id_assignee', 'name', 'id_workspace' );
 
         $projectModel   = new \ProjectModel( $this->project );
+        $projectModel->setUser( $this->user ) ;
 
         $putParams = $this->getPutParams();
+
         foreach ( $acceptedFields as $field ) {
             if ( isset( $putParams[ $field ] ) ) {
                 $projectModel->prepareUpdate( $field, $putParams[ $field ] );
@@ -42,7 +44,7 @@ class ProjectsController extends KleinController {
         parent::afterConstruct();
         $this->project = \Projects_ProjectDao::findById( $this->request->id_project );
         $this->appendValidator( new OrganizationAccessValidator( $this ) );
-        $this->appendValidator( new OrganizationProjectValidator( $this ) );
+        $this->appendValidator( ( new OrganizationProjectValidator( $this ) )->setProject( $this->project ) );
     }
 
 }
