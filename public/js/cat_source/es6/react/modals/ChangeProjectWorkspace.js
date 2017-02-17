@@ -27,12 +27,12 @@ class ChangeProjectWorkspace extends React.Component {
         let self = this;
         if (this.props.workspaces) {
             return this.props.workspaces.map(function (ws, i) {
-                let selectedClass = (self.state.selectedWs == ws.get('id')) ? 'selected' : '';
-                return <div className="item workspace-item"
+                let selectedClass = (self.state.selectedWs == ws.get('id')) ? 'active' : '';
+                return <div className={"item " + selectedClass}
                             key={'ws' + ws.get('id')}
                             onClick={self.selectWorkspace.bind(self, ws.get('id'))}>
-                            <div className={"content " + selectedClass}>
-                                {ws.get('name')}
+                            <div className="content" >
+                                <div className="header">{ws.get('name')}</div>
                             </div>
                         </div>;
             });
@@ -45,29 +45,37 @@ class ChangeProjectWorkspace extends React.Component {
     render() {
         let workspacesList = this.getWorkspacesList();
         return <div className="change-workspace-modal">
-                    <div className="matecat-modal-middle">
-                        <div className="ui one column grid left aligned">
-                            <div className="column">
-                                <h3>Choose new Workspace</h3>
-                                <div className="column">
-                                    <div className="ui segment">
-                                        <div className="ui middle aligned divided list">
-                                            {workspacesList}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+            <div className="matecat-modal-top">
+                <div className="ui one column grid left aligned">
+                    <div className="column">
+                        <h3>Send this project:</h3>
+                        <div className="ui teal label">
+                            <span className="project-id">929830</span> (archived)
                         </div>
-                        <div className="matecat-modal-bottom">
-                            <div className="ui one column grid right aligned">
-                                <div className="column">
-                                    <button className="ui button green"
-                                            onClick={this.changeWorkspace.bind(this)}>Move</button>
-                                </div>
+                        <span className="project-name">NOME_PROGETTO.TXT</span>
+                    </div>
+                </div>
+            </div>
+            <div className="matecat-modal-middle">
+                <div className="ui one column grid left aligned">
+                    <div className="column">
+                        <h3>Choose new Workspace</h3>
+                        <div className="column">
+                            <div className="ui middle aligned selection divided list">
+                                {workspacesList}
                             </div>
                         </div>
                     </div>
-                </div>;
+                    <div className="column right aligned">
+                        <div className="column">
+                            <button className="ui button green right aligned"
+                            onClick={this.changeWorkspace.bind(this)}>Move</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>;
     }
 }
 

@@ -87,24 +87,19 @@ class CreateWorkspace extends React.Component {
                     return <div className="item"
                                 key={'WS' + ws.get('id')}>
                         <div className="right floated content">
-                            <div className="ui button green" onClick={self.removeWS.bind(self, ws)}>YES
-                            </div>
+                            <div className="mini ui button green" onClick={self.removeWS.bind(self, ws)}>YES</div>
+                            <div className="mini ui button red" onClick={self.undoRemoveAction.bind(self)}>NO</div>
                         </div>
-                        <div className="right floated content">
-                            <div className="ui button red" onClick={self.undoRemoveAction.bind(self)}>NO</div>
-                        </div>
-                        <div className="content">
+                        <div className="content pad-top-6 pad-bottom-6">
                             Are you sure you want to remove this workspace?
                         </div>
                     </div>
                 } if (self.state.showModifyMessageWSId == ws.get('id')) {
                     return <div className="item"
                                 key={'WS' + ws.get('id')}>
-                        <div className="right floated content">
-                            <div className="ui button green" onClick={self.modifyWSName.bind(self, ws)}>OK</div>
-                        </div>
-                        <div className="right floated content">
-                            <div className="ui button red" onClick={self.undoRemoveAction.bind(self)}>CANCEL</div>
+                        <div className="right floated content pad-top-5">
+                            <div className="mini ui button red" onClick={self.undoRemoveAction.bind(self)}>CANCEL</div>
+                            <div className="mini ui button green" onClick={self.modifyWSName.bind(self, ws)}>OK</div>
                         </div>
                         <div className="content">
                             <div className="ui input focus">
@@ -118,10 +113,10 @@ class CreateWorkspace extends React.Component {
                     return <div className="item"
                                 key={'user' + ws.get('id')}>
                         <div className="right floated content">
-                            <div className="ui button" onClick={self.showModifyWS.bind(self, ws.get('id'))}>Modify Name</div>
-                            <div className="ui button" onClick={self.showRemoveWS.bind(self, ws.get('id'))}>Remove</div>
+                            <div className="mini ui button" onClick={self.showModifyWS.bind(self, ws.get('id'))}>Modify Name</div>
+                            <div className="mini ui button" onClick={self.showRemoveWS.bind(self, ws.get('id'))}>Remove</div>
                         </div>
-                        <div className="content">
+                        <div className="content pad-top-6 pad-bottom-6">
                             {ws.get('name')}
                         </div>
                     </div>;
@@ -148,7 +143,7 @@ class CreateWorkspace extends React.Component {
                     <div className="column">
                         <h3>ORGANIZATION Workspaces</h3>
                         <div className="column">
-                            <div className="ui segment">
+                            <div className="ui workspace-list">
                                 <div className="ui middle aligned divided list">
                                     {workspacesList}
                                 </div>

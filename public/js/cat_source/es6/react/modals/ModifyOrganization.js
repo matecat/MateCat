@@ -95,23 +95,23 @@ class ModifyOrganization extends React.Component {
             }else if (self.state.showRemoveMessageUserID == user.get('uid')) {
                 return <div className="item"
                             key={'user' + user.get('uid')}>
-                    <div className="right floated content top-7">
-                        <div className="ui button green" onClick={self.removeUser.bind(self, user.get('uid'))}>YES</div>
-                        <div className="ui button red" onClick={self.undoRemoveAction.bind(self)}>NO</div>
+                    <div className="right floated content top-1 bottom-1">
+                        <div className="mini ui button green" onClick={self.removeUser.bind(self, user.get('uid'))}>YES</div>
+                        <div className="mini ui button red" onClick={self.undoRemoveAction.bind(self)}>NO</div>
                     </div>
-                    <div className="content">
+                    <div className="content pad-top-6 pad-bottom-8">
                         Are you sure you want to remove this user?
                     </div>
                 </div>
             } else {
                 return <div className="item"
                             key={'user' + user.get('uid')}>
-                    <div className="ui circular label top-3">{APP.getUserShortName(user.toJS())}</div>
+                    <div className="ui circular label top-3 bottom-3">{APP.getUserShortName(user.toJS())}</div>
                     <span className="content">
                         {' ' + user.get('first_name') + ' ' + user.get('last_name')}
                     </span>
-                    <div className="right floated content">
-                        <div className="ui button" onClick={self.showRemoveUser.bind(self, user.get('uid'))}>Remove</div>
+                    <div className="right floated content top-2">
+                        <div className="mini ui button" onClick={self.showRemoveUser.bind(self, user.get('uid'))}>Remove</div>
                     </div>
                 </div>
             }
@@ -165,7 +165,7 @@ class ModifyOrganization extends React.Component {
                         </div>
                     </div>
                     <div className="sixteen wide column">
-                        <div className="ui segment members-list">
+                        <div className="ui members-list">
                             <div className="ui divided list">
                                 {userlist}
                             </div>
