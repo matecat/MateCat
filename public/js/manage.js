@@ -62,8 +62,6 @@ UI = {
 
         this.getAllOrganizations().done(function (data) {
 
-            // self.organizations = APP.USER.STORE.organizations;
-            // self.selectedOrganization = APP.USER.STORE.organizations[0];
             self.organizations = data.organizations;
             ManageActions.renderOrganizations(self.organizations);
             self.selectedOrganization = data.organizations[0];
@@ -192,8 +190,8 @@ UI = {
         });
     },
 
-    getAllOrganizations: function () {
-        if ( APP.USER.STORE.organizations ) {
+    getAllOrganizations: function (force) {
+        if ( APP.USER.STORE.organizations && !force) {
             let data = {
                 organizations: APP.USER.STORE.organizations
             };

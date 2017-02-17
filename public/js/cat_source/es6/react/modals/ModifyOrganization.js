@@ -29,6 +29,9 @@ class ModifyOrganization extends React.Component {
 
     removeUser(userId) {
         ManageActions.removeUserFromOrganization(this.state.organization, userId);
+        if (userId === APP.USER.STORE.user.uid) {
+            APP.ModalWindow.onCloseModal();
+        }
     }
 
     undoRemoveAction() {
@@ -84,11 +87,11 @@ class ModifyOrganization extends React.Component {
             if (user.get('uid') == APP.USER.STORE.user.uid && self.state.showRemoveMessageUserID == user.get('uid')) {
                 return <div className="item"
                             key={'user' + user.get('uid')}>
-                    <div className="right floated content top-7">
+                    <div className="right floated content top-1 bottom-1">
                         <div className="ui button green" onClick={self.removeUser.bind(self, user.get('uid'))}>YES</div>
                         <div className="ui button red" onClick={self.undoRemoveAction.bind(self)}>NO</div>
                     </div>
-                    <div className="content">
+                    <div className="content pad-top-6 pad-bottom-8">
                         Are you sure you want to leave this organization?
                     </div>
                 </div>
