@@ -7,7 +7,7 @@
  * Time: 20.12
  *
  */
-class SimpleJWT implements ArrayAccess {
+class SimpleJWT implements ArrayAccess, JsonSerializable {
 
     protected $storage    = [ 'header' => null, 'payload' => [ 'exp' => null, 'context' => null ], 'signature' => null ];
     protected $secretKey;
@@ -124,6 +124,10 @@ class SimpleJWT implements ArrayAccess {
     public function __toString() {
         $data = $this->encrypt();
         return self::base64url_encode( json_encode( $data[ 'header' ] ) ) . "." . self::base64url_encode( json_encode( $data[ 'payload' ] ) ) . "." . $data[ 'signature' ];
+    }
+
+    function jsonSerialize() {
+        return $this->__toString();
     }
 
     private static function base64url_encode( $data ) {
