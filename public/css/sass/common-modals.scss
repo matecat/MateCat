@@ -846,17 +846,3 @@ div#matecat-modal p {
 .pull-left {
     float: left;
 }
-
-.item.workspace-item {
-    height: 30px;
-    cursor: pointer;
-    .content {
-        line-height: 30px !important;
-    }
-    .content:hover {
-        background-color: grey;
-    }
-    .content.selected {
-        background-color: green;
-    }
-}

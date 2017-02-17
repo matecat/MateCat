@@ -27,12 +27,12 @@ class ChangeProjectWorkspace extends React.Component {
         let self = this;
         if (this.props.workspaces) {
             return this.props.workspaces.map(function (ws, i) {
-                let selectedClass = (self.state.selectedWs == ws.get('id')) ? 'selected' : '';
-                return <div className="item workspace-item"
+                let selectedClass = (self.state.selectedWs == ws.get('id')) ? 'active' : '';
+                return <div className={"item " + selectedClass}
                             key={'ws' + ws.get('id')}
                             onClick={self.selectWorkspace.bind(self, ws.get('id'))}>
-                            <div className={"content " + selectedClass}>
-                                {ws.get('name')}
+                            <div className="content" >
+                                <div className="header">{ws.get('name')}</div>
                             </div>
                         </div>;
             });
@@ -62,26 +62,7 @@ class ChangeProjectWorkspace extends React.Component {
                         <h3>Choose new Workspace</h3>
                         <div className="column">
                             <div className="ui middle aligned selection divided list">
-                                <div className="item">
-                                    <div className="content">
-                                        <div className="header">Workspace 1</div>
-                                    </div>
-                                </div>
-                                <div className="item active">
-                                    <div className="content">
-                                        <div className="header">Workspace 2</div>
-                                    </div>
-                                </div>
-                                <div className="item">
-                                    <div className="content">
-                                        <div className="header">Workspace 3</div>
-                                    </div>
-                                </div>
-                                <div className="item">
-                                    <div className="content">
-                                        <div className="header">Workspace 4</div>
-                                    </div>
-                                </div>
+                                {workspacesList}
                             </div>
                         </div>
                     </div>

@@ -266,9 +266,10 @@ class JobContainer extends React.Component {
         var quality = this.props.job.get('quality_overall');
         if ( quality === "poor" || quality === "fail" ) {
             var url = this.getQAReport();
-            icon = <a className="circular ui icon basic button"
+            var classQuality = (quality === "poor") ? 'orange' : 'red';
+            icon = <a className={"circular ui icon basic button " + classQuality}
                    href={url} target="_blank">
-                    <i className={"icon-qr-matecat icon " + quality}/>
+                    <i className="icon-qr-matecat icon"/>
                 </a>
             ;
         }
