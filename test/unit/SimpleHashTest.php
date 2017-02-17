@@ -173,7 +173,7 @@ class SimpleHashTest extends PHPUnit_Framework_TestCase
 
         $this->assertTrue( $x->validate( (string)$x ) );
         $this->assertTrue( $x->validate( $result ) );
-        
+
     }
 
 }

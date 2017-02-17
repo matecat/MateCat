@@ -37,18 +37,18 @@ else {
     $GLOBALS['TEST_URL_BASE'] = 'localhost';
 }
 
-//$schemaHelper = new SchemaCopy($test_ini['test']) ;
-//$schemaHelper->truncateAllTables() ;
-//
-//$seeder = new SeedLoader( $schemaHelper );
-//$seeder->loadEngines();
-//
-//function startConnection() {
-//    $conn = Database::obtain (
-//        INIT::$DB_SERVER, INIT::$DB_USER,
-//        INIT::$DB_PASS, INIT::$DB_DATABASE
-//    );
-//    $conn->getConnection();
-//}
-//
-//startConnection();
+$schemaHelper = new SchemaCopy($test_ini['test']) ;
+$schemaHelper->truncateAllTables() ;
+
+$seeder = new SeedLoader( $schemaHelper );
+$seeder->loadEngines();
+
+function startConnection() {
+    $conn = Database::obtain (
+        INIT::$DB_SERVER, INIT::$DB_USER,
+        INIT::$DB_PASS, INIT::$DB_DATABASE
+    );
+    $conn->getConnection();
+}
+
+startConnection();
