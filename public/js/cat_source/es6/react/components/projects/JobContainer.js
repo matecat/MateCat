@@ -232,7 +232,7 @@ class JobContainer extends React.Component {
                 let item = '<div style="text-align: left"><span style="font-weight: bold">' + descript + '</span> ( ' + key.key + ' )</div>';
                 tooltipText =  tooltipText + item;
             });
-            return <a className="circular ui icon button tm-keys" data-html={tooltipText}
+            return <a className="circular ui icon basic button tm-keys" data-html={tooltipText}
                    onClick={this.openTMPanel.bind(this)}>
                     <i className="icon-tm-matecat icon"/>
                 </a>;
@@ -266,7 +266,7 @@ class JobContainer extends React.Component {
         var quality = this.props.job.get('quality_overall');
         if ( quality === "poor" || quality === "fail" ) {
             var url = this.getQAReport();
-            icon = <a className="circular ui icon button"
+            icon = <a className="circular ui icon basic button"
                    href={url} target="_blank">
                     <i className={"icon-qr-matecat icon " + quality}/>
                 </a>
@@ -280,7 +280,7 @@ class JobContainer extends React.Component {
         var warnings = this.props.job.get('warnings_count');
         if ( warnings > 0 ) {
             var url = this.getTranslateUrl() + '?action=warnings';
-            icon = <a className="circular ui icon button"
+            icon = <a className="circular ui icon basic button"
                    href={url} target="_blank">
                     <i className="icon-notice icon"/>
                 </a>;
@@ -358,7 +358,7 @@ class JobContainer extends React.Component {
                                             </div>
                                         </div>
 
-                                        <div className="ten wide column">
+                                        {/*<div className="ten wide column">
                                             <div className="ui grid one column">
                                                 <div className="eight wide column">
                                                     <div className="send-translator"
@@ -375,7 +375,7 @@ class JobContainer extends React.Component {
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </div>*/}
                                     </div>
                                 </div>
                                 <div className="three wide right floated right aligned column">
@@ -384,10 +384,10 @@ class JobContainer extends React.Component {
                                         {warningsIcon}
                                         {commentsIcon}
                                         {tmIcon}
-                                        <a className="open-translate circular ui icon primary button" target="_blank" href={translateUrl}>
+                                        <a className="open-translate circular ui icon primary basic button" target="_blank" href={translateUrl}>
                                             <i className="icon-arrow-right2 icon"/>
                                         </a>
-                                        <button className="job-menu circular ui icon top right pointing dropdown button"
+                                        <button className="job-menu circular ui icon top right pointing dropdown  basic button"
                                                 ref={(dropdown) => this.dropdown = dropdown}>
                                             <i className="icon-more_vert icon"/>
                                             {jobMenu}

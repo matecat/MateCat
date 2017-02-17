@@ -152,7 +152,7 @@ class Header extends React.Component {
 
                     <nav className="sixteen wide column">
                         <div className="ui stackable grid">
-                            <div className="eight wide column logo-menu">
+                            <div className="eleven wide column logo-menu">
                                 <a href="/" className="logo logo-home"/>
                                 {this.props.showLinks ? (
                                     <ul id="menu-site">
@@ -169,7 +169,7 @@ class Header extends React.Component {
                             </div>
 
                             { this.props.loggedUser ? (
-                                    <div className="eight wide right aligned wide column">
+                                    <div className="five wide right aligned wide column">
                                         {organizationsSelect}
                                     </div>
                                 ) :(

@@ -26,7 +26,19 @@
                     float: right;
                     font-size: 18px;
                     margin-right: 0px;
-                    margin-top: 0px;
+                    margin-top: -2px;
+                }
+            }
+            .item > a > .icon-more_vert {
+                width: 24px;
+                height: 24px;
+                background-color: transparent;
+                margin-top: -5px;
+                line-height: 24px;
+                border-radius: 50%;
+                transition: 0.3s ease;
+                &:hover {
+                    background-color: #dededc;
                 }
             }
             .divider {
@@ -35,7 +47,7 @@
         }
         .scrolling {
             .item.item.item {
-                padding-right: 15px !important;
+                padding-right: 10px !important;
             }
         }
     }
@@ -86,6 +98,9 @@
             position: initial;
             margin-left: 67px;
             margin-top: 10px;
+        }
+        .logo-home {
+            margin-top: 5px;
         }
     }
 

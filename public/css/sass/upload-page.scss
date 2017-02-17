@@ -436,6 +436,7 @@ float: left;
     width: 50% !important;
     overflow: hidden;
 	text-overflow: ellipsis;
+      font-size: 16px;
   }
 
 
@@ -551,7 +552,7 @@ float: left;
 	}
 
 	#swaplang {
-		    margin: 51px 12px 0 0px!important;
+		    margin: 56px 12px 0 0px!important;
 	}
 }
 
@@ -595,6 +596,7 @@ float: left;
 
 .wrapper-upload{text-align:left;margin:0 auto;width:92%;min-width:960px;position:relative;}
 .wrapper-upload h1{margin:0;padding:0;font-size:40px}
+.wrapper-upload .translate-box h2 {font-family: Calibri, Arial, Helvetica, sans-serif}
 .wrapper-claim {color: #fff;
 margin: -3px 0 10px 0;
 height: 123px;
@@ -602,16 +604,18 @@ background-color: #1f7ead;background-image:url('data:image/svg+xml;base64,PHN2Zy
 background-size: cover;
 }
 .wrapper-claim h1 {
-font-size: 3em;
-padding: 12px;
-margin: 0px;
+    font-size: 48px;
+    padding: 8px 0 6px;
+    margin: 0px;
+    font-family: Calibri, Arial, Helvetica, sans-serif;
 }
 h2{margin:0;padding:0;font-size:22px}
 h2.payoff
 	{
-	color:#fff !important;
-	font-weight:normal !important;
-	font-size: 24px;
+    color: #fff !important;
+    font-weight: normal !important;
+    font-size: 24px;
+    font-family: Calibri, Arial, Helvetica, sans-serif;
 	}
 
 /*button*/
@@ -641,11 +645,12 @@ h2.payoff
 .btncontinue .fileinput-button{float:left ;margin:7px 0 0 10px !important;width:auto;padding:8px 10px 0px 30px}
 
 #add-files, #clear-all-files, #clear-all-gdrive {
-	padding: 8px 10px 0px 10px!important;
+    padding: 8px 10px 0px 10px !important;
+    height: 36px;
 }
 
 
-.preview {border-right:none !important; width:30px;}
+.preview {border-right:none !important; width:30px; padding: 8px;}
 .preview img{margin:5px 0 0 10px}
 
 .delete, .cancel{border-right:none !important;}
@@ -686,7 +691,7 @@ body{font-family:Calibri, Arial, Helvetica, sans-serif}
 	{
 	margin: 0;
 	}
-.translate-box select, .mgmt-table-mt select{width:257px;height:37px;padding:5px;font-size:18px;border:1px solid #ccc;margin:0 0 5px 0}
+.translate-box select, .mgmt-table-mt select{width:257px;height:37px;padding:5px;font-size:18px;border:1px solid #ccc;margin:0 0 5px 0;font-family: system-ui}
 .mgmt-table-mt select {font-size:14px;}
 .upload-input{width:95%;padding:4px 5px 3px 5px;font-size:22px !important; -moz-border-radius: 2px;border-radius: 2px;border:1px solid #ccc}
 #private-tm-key
@@ -753,7 +758,7 @@ a{color:#39699a}
 .upload-analysis th{padding:10px;border-bottom:1px solid #ccc;text-align:left;background:#e2e4e5}
 .upload-analysis td{padding:10px;border-bottom:1px solid #ccc;text-align:left;background:#efefef}
 
-.supported-files{float:left;font-weight:bold;font-size:16px;color:#666}
+.supported-files{float:left;font-weight:bold;font-size:16px;color:#666; margin-top: 1em;}
 
 /*upload table*/
 
@@ -923,7 +928,7 @@ tr.ready .size span{visibility: visible;}
 	
 	
 }
-.btn{height:26px;display:block;border:1px solid #848689;text-decoration:none;-moz-border-radius: 2px;border-radius: 2px;}
+.btn{height:44px;display:block;border:1px solid #848689;text-decoration:none;-moz-border-radius: 2px;border-radius: 2px;}
 
 .tm-button{width: 20px; display:none; float: left; margin-left: -10px; margin-top: 35px;}
 
@@ -959,6 +964,23 @@ left: 3% !important;
 top: 5%;
 }
 
+.fileformat span {
+    padding: 10px 0px 10px 40px;
+    margin: 5px 0 0 0;
+    width: 60px;
+    height: 35px;
+    float: left;
+    background-size: 25px !important;
+}
+
+.fileformat.popup-box h3 {
+    padding: 5px 17px 5px 18px !important;
+}
+
+.fileformat.popup-box span {
+    line-height: 15px;
+}
+
 .fileformat.popup-box ul li {
 	  margin: 0;
   padding: 0 5px;
@@ -980,6 +1002,9 @@ top: 5%;
 	width: 120px;
 }
 
+.popup-tm h1 {
+    height: 50px;
+}
 
 .popup h3
 	{
@@ -1202,7 +1227,7 @@ margin-top: 7px;
 .newProject{right:20px;float:right;}
 .tablestats a.url{font-size: 14px;}
 .disabledLink{color:gray;text-decoration:none;background:none;cursor: default;}
-.name {padding: 5px!important;}
+.name {padding: 8px 0px 5px 20px !important;}
 /* file extensions */
 
 .preview span {height: 30px;width: 30px;display: block;background-size: 25px!important;}
@@ -1369,4 +1394,31 @@ div.continue-gdrive {
 
 #gdrive-files-list {
     display: none;
+}
+
+td.action .btn {
+    height: 29px;
+    width: 116px !important;
+}
+
+.wrapper-dropdown-5 {
+    padding: 4px 16px !important;
+}
+
+.filter-box input {
+    width: 170px;
+}
+.popup-languages.slide h1 {
+    height: 60px;
+}
+
+.btn.pull-left.addtmx {
+    width: 117px !important;
+}
+
+.popup-tm .btn-ok.right {
+    font-family: calibri;
+    font-weight: bold;
+    font-size: 18px;
+    padding: 0px 18px;
 }
