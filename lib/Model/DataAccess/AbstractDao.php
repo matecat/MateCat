@@ -355,13 +355,18 @@ abstract class DataAccess_AbstractDao {
      *
      * @param $attrs array of full attributes to update
      * @param $mask array of attributes to include in the update
+     * @param $options array of options for the SQL statement
+     *
      * @return string
      */
 
-    protected static function buildInsertStatement( $attrs, $mask ) {
+    protected static function buildInsertStatement( $attrs, $mask, $ignore=false ) {
+
         $first = array()  ;
         $second = array() ;
         $pks = static::$primary_keys;
+
+        $sql_ignore = $ignore ? " IGNORE " : "" ;
 
         if ( empty($mask) ) {
             $mask = array_keys( $attrs );
@@ -374,7 +379,7 @@ abstract class DataAccess_AbstractDao {
             }
         }
 
-        $sql = "INSERT INTO " . static::TABLE . "(" .
+        $sql = "INSERT $sql_ignore INTO " . static::TABLE . "(" .
                 implode(', ', $first ) . ") VALUES (" .
                 implode(', ', $second) . ");" ;
 
@@ -503,12 +508,13 @@ abstract class DataAccess_AbstractDao {
      * @throws Exception
      */
     public static function insertStruct( DataAccess_IDaoStruct $struct, $options = array() ) {
+        $ignore = isset( $options['ignore'] ) && $options['ignore'] == true  ;
 
         // TODO: allow the mask to be passed as option.
         $mask = array_keys( $struct->toArray() );
         $mask = array_diff( $mask, static::$auto_increment_fields );
 
-        $sql  = self::buildInsertStatement( $struct->toArray(), $mask );
+        $sql  = self::buildInsertStatement( $struct->toArray(), $mask, $ignore );
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $data = $struct->toArray( $mask );

@@ -3,10 +3,6 @@
 /**
  * Class AbstractMatecatMigration
  *
- * @deprecated this class is deprecated because there's no longer need to
- * regenerate the SQL schema at each migration. Extend \Phinx\Migration\AbstractMigration
- * and up and down methods.
- *
  */
 class AbstractMatecatMigration extends \Phinx\Migration\AbstractMigration {
 
