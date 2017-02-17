@@ -119,6 +119,7 @@ let ManageActions = {
     },
 
     filterProjects: function (member, workspace, name, status) {
+        this.showReloadSpinner();
         let memberUid = (member && member.toJS) ? member.get('user').get('uid') : member ;
         let workspaceId = (workspace && workspace.toJS) ? workspace.get('id') : workspace ;
         UI.filterProjects(memberUid, workspaceId, name, status).then(function (response) {
@@ -126,7 +127,7 @@ let ManageActions = {
                 actionType: ManageConstants.RENDER_PROJECTS,
                 projects: response.data,
                 organization: UI.selectedOrganization,
-                hideSpinner: false,
+                hideSpinner: true,
             });
         });
     },
