@@ -69,20 +69,18 @@ let ManageActions = {
     },
 
     updateStatusProject: function (project, status) {
-        UI.changeJobsOrProjectStatus('prj', project.toJS(), status).done(
-            function () {
+        UI.changeJobsOrProjectStatus('prj', project.toJS(), status).done(function () {
+            AppDispatcher.dispatch({
+                actionType: ManageConstants.HIDE_PROJECT,
+                project: project
+            });
+            setTimeout(function () {
                 AppDispatcher.dispatch({
-                    actionType: ManageConstants.HIDE_PROJECT,
+                    actionType: ManageConstants.REMOVE_PROJECT,
                     project: project
                 });
-                setTimeout(function () {
-                    AppDispatcher.dispatch({
-                        actionType: ManageConstants.REMOVE_PROJECT,
-                        project: project
-                    });
-                }, 500);
-            }
-        );
+            }, 1000);
+        });
     },
 
     changeJobStatus: function (project, job, status) {
@@ -153,6 +151,20 @@ let ManageActions = {
                 project: project,
                 workspaceId: workspaceId
             });
+            if (workspaceId !== UI.selectedWorkspace && UI.selectedWorkspace !== ManageConstants.ALL_WORKSPACES_FILTER) {
+                setTimeout(function () {
+                    AppDispatcher.dispatch({
+                        actionType: ManageConstants.HIDE_PROJECT,
+                        project: project
+                    });
+                }, 500);
+                setTimeout(function () {
+                    AppDispatcher.dispatch({
+                        actionType: ManageConstants.REMOVE_PROJECT,
+                        project: project
+                    });
+                }, 1000);
+            }
 
         });
 
