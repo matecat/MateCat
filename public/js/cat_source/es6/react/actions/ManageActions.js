@@ -282,6 +282,7 @@ let ManageActions = {
     },
 
     changeOrganization: function (organization) {
+        this.showReloadSpinner();
         UI.changeOrganization(organization).then(function (response) {
             AppDispatcher.dispatch({
                 actionType: ManageConstants.UPDATE_ORGANIZATION,
@@ -295,7 +296,7 @@ let ManageActions = {
                 actionType: ManageConstants.RENDER_PROJECTS,
                 projects: response.data,
                 organization: organization,
-                hideSpinner: false,
+                hideSpinner: true,
             });
 
         });
