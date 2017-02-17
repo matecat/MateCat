@@ -115,8 +115,15 @@ abstract class AbstractEmail
     }
 
     protected function _getLayoutVariables() {
+
+        if ( isset( $this->title ) ) {
+            $title = $this->title ;
+        } else {
+            $title = 'MateCat' ;
+        }
+
         return array(
-            'title' => 'MateCat',
+            'title' => $title,
             'messageBody' => $this->_buildMessageContent(),
             'closingLine' => "Kind regards, ",
             'showTitle' => false

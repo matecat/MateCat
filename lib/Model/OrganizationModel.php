@@ -33,6 +33,11 @@ class OrganizationModel {
 
     protected $emails_to_invite ;
 
+    /**
+     * @var \Organizations\MembershipStruct[]
+     */
+    protected $all_memberships;
+
     public function __construct( \Organizations\OrganizationStruct $struct ) {
         $this->struct = $struct ;
     }
@@ -87,16 +92,17 @@ class OrganizationModel {
             }
         }
 
-        $full_list = ( new MembershipDao )
+        $this->all_memberships = ( new MembershipDao )
             ->setCacheTTL(3600)
             ->getMemberListByOrganizationId( $this->struct->id ) ;
 
         \Database::obtain()->commit();
 
         $this->_sendEmailsToNewMemberships();
+        $this->_sendEmailsToInvited();
         $this->_sendEmailsForRemovedMemberships();
 
-        return $full_list ;
+        return $this->all_memberships ;
     }
 
     public function create() {
@@ -118,6 +124,19 @@ class OrganizationModel {
         return $organization ;
     }
 
+    public function _sendEmailsToInvited() {
+
+        $emails_of_existing_members = array_map(function( \Organizations\MembershipStruct $membership ) {
+            return $membership->getUser()->email ;
+        }, $this->all_memberships );
+
+        $emails_to_invite = array_diff($this->member_emails, $emails_of_existing_members);
+
+        foreach( $emails_to_invite as $email ) {
+            $email = new \Email\EmailInvitedToOrganization($this->user, $email, $this->struct);
+            $email->send();
+        }
+    }
 
     /**
      * @return \Organizations\MembershipStruct[]

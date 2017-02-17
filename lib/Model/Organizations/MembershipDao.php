@@ -173,7 +173,11 @@ class MembershipDao extends \DataAccess_AbstractDao
         }
     }
 
+
     /**
+     * This method takes a list of email addresses as argument.
+     * If email corresponds to existing users, a membership is created into the organization.
+     *
      * @param [
      *            'organization' => organizationStruct,
      *            'members'      => emails[]
@@ -182,55 +186,39 @@ class MembershipDao extends \DataAccess_AbstractDao
      * @return MembershipStruct[]
      */
     public function createList( Array $obj_arr ) {
+        $obj_arr = \Utils::ensure_keys($obj_arr, array('members', 'organization') );
 
-        $members = ( new Users_UserDao )->getByEmails( $obj_arr[ 'members' ] );
+        $users = ( new Users_UserDao )->getByEmails( $obj_arr[ 'members' ] );
+        if ( empty( $users ) ) return array();
+
         $organizationStruct = $obj_arr[ 'organization' ];
 
         $membersList = [];
-        foreach ( $members as $member ) {
-            $_member             = ( new MembershipStruct( [
+
+        foreach ( $users as $user ) {
+            // try to make an insert and ignore pkey errors
+            $membershipStruct = ( new MembershipStruct( [
                     'id_organization' => $organizationStruct->id,
-                    'uid'             => $member->uid,
-                    'is_admin'        => ( $organizationStruct->created_by == $member->uid ? true : false )
-            ] ) );
-            $_member->email      = $member->email;
-            $_member->first_name = $member->first_name;
-            $_member->last_name  = $member->last_name;
-            $membersList[]       = $_member;
+                    'uid'             => $user->uid,
+                    'is_admin'        => ( $organizationStruct->created_by == $user->uid ? true : false )
+            ] ) ) ;
+
+            $lastId = self::insertStruct( $membershipStruct, ['ignore' => true ] )  ;
+
+            if ( $lastId ) {
+                $membershipStruct->id = $lastId ;
+                $membershipStruct->setUser( $user ) ;
+                $membersList[] = $membershipStruct ;
+
+                $this->destroyCacheUserOrganizations( $user ) ;
+            }
         }
 
-        $arrayCount = count( $membersList );
-        $rowCount = ( $arrayCount  ? $arrayCount - 1 : 0);
-
-        $placeholders = sprintf( "(?,?,?)%s", str_repeat(",(?,?,?)", $rowCount ));
-        $sql = "INSERT IGNORE INTO " . self::TABLE . " ( id_organization , uid, is_admin ) VALUES " . $placeholders;
-
-        $conn = \Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
-
-        $values = [];
-        foreach( $membersList as $membershipStruct ){
-            $values[] = $membershipStruct->id_organization;
-            $values[] = $membershipStruct->uid;
-            $values[] = $membershipStruct->is_admin;
+        if ( count( $membersList ) ) {
+            $this->destroyCacheForListByOrganizationId( $organizationStruct->id ) ;
         }
-
-        $stmt->execute( $values );
-
-        $i = 0; //emulate MySQL auto_increment
-        foreach( $membersList as $membershipStruct ){
-            $membershipStruct->id = (int)$conn->lastInsertId() + $i;
-            $i++;
-        }
-
-        // Invalidate related caches
-        foreach ( $membersList as $member ) {
-            $this->destroyCacheUserOrganizations( $member->getUser() ) ;
-        }
-        $this->destroyCacheForListByOrganizationId( $organizationStruct->id ) ;
 
         return $membersList;
-
     }
 
 }
