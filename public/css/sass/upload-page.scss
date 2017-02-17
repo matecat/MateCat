@@ -682,7 +682,7 @@ h2.payoff
 
 a{text-decoration:underline}
 a:hover{text-decoration:none}
-.translate-box a{display:block;}
+.translate-box a{display:block; font-size: 16px;}
 .translate-box label {
   margin-left: 5px;
 }
@@ -933,8 +933,7 @@ tr.ready .size span{visibility: visible;}
 .tm-button{width: 20px; display:none; float: left; margin-left: -10px; margin-top: 35px;}
 
 .disabled, .disabled:hover, .disabled:active{opacity:0.5 !important;cursor:default;-moz-box-shadow: none;-webkit-box-shadow: none;border:1px solid #666}
-header{border-bottom: 1px solid #5C5C5C;
-background-color: #4D4D4D;padding:0px 0 2px 0;margin-bottom:20px;height:45px;}
+header{position: relative;}
 
 .wrapper{width:98%;min-width:960px;margin:0px auto 0 auto;padding:5px 0 0 0;width:92%;font-size:14px;position:relative;text-align:left;}
 .logo{float:left;margin-top:5px;border:0;background:url(../../img/logo.png) 0px 2px no-repeat;width:145px;height:31px; background-size: 130px 26px;}

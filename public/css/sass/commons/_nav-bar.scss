@@ -1,62 +1,68 @@
-.nav-mc-bar {
-    nav {
-        font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-        height: 62px;
-        padding-right: 20px !important;
-        color: white;
-        background-color: #4d4d4d;
-    }
-    .ui.selection.dropdown {
-        font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-        text-transform: uppercase;
-        font-weight: 600;
+header {
+    position: fixed;
+    width: 100%;
+    z-index: 3;
+    margin: 0;
+    .nav-mc-bar {
+        margin: 0px !important;
+        .navigation {
+            font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+            padding-right: 20px !important;
+            color: white;
+            background-color: #4d4d4d;
+        }
+        .ui.selection.dropdown {
+            font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+            text-transform: uppercase;
+            font-weight: 600;
 
-        i {
-            float: right;
+            i {
+                float: right;
+            }
+            .menu {
+                .header {
+                    font-size: 14px;
+                    margin: 0px;
+                    padding: 15px;
+                    &:hover {
+                        background-color: darkgrey;
+                    }
+                    i {
+                        float: right;
+                        font-size: 18px;
+                        margin-right: 0px;
+                        margin-top: -2px;
+                    }
+                }
+                .item > a > .icon-more_vert {
+                    width: 24px;
+                    height: 24px;
+                    background-color: transparent;
+                    margin-top: -5px;
+                    line-height: 24px;
+                    border-radius: 50%;
+                    transition: 0.3s ease;
+                    &:hover {
+                        background-color: #dededc;
+                    }
+                }
+                .divider {
+                    margin: 0;
+                }
+            }
+            .scrolling {
+                .item.item.item {
+                    padding-right: 10px !important;
+                }
+            }
         }
-        .menu {
-            .header {
-                font-size: 14px;
-                margin: 0px;
-                padding: 15px;
-                &:hover {
-                    background-color: darkgrey;
-                }
-                i {
-                    float: right;
-                    font-size: 18px;
-                    margin-right: 0px;
-                    margin-top: -2px;
-                }
-            }
-            .item > a > .icon-more_vert {
-                width: 24px;
-                height: 24px;
-                background-color: transparent;
-                margin-top: -5px;
-                line-height: 24px;
-                border-radius: 50%;
-                transition: 0.3s ease;
-                &:hover {
-                    background-color: #dededc;
-                }
-            }
-            .divider {
-                margin: 0;
-            }
-        }
-        .scrolling {
-            .item.item.item {
-                padding-right: 10px !important;
-            }
+        .ui.selection.visible.dropdown > .text:not(.default) {
+            font-weight: 600;
+            //color: white;
         }
     }
-    .ui.selection.visible.dropdown > .text:not(.default) {
-        font-weight: 600;
-        //color: white;
-    }
-
 }
+
 
 .logo {
     position: absolute;
@@ -70,42 +76,7 @@
     left: 81px;
 }
 
-.logo-2 {
-    //margin-top: 10px;
-    background: url(../../img/logo.png) 0px 2px no-repeat;
-    width: 145px;
-    background-size: 130px 26px;
-}
-
-.middle-v {
-    vertical-align: middle;
-}
 #menu-site {
     margin-top: 5px !important;
     margin-left: 180px !important;
-}
-
-.home-header {
-    height: 60px;
-    background-color: #4d4d4d;
-    .logo-menu {
-        .logo.logo-home {
-            border: 0;
-            background: url(../../img/logo.png) 0px 2px no-repeat;
-            width: 145px;
-            height: 31px;
-            background-size: 130px 26px;
-            position: initial;
-            margin-left: 67px;
-            margin-top: 10px;
-        }
-        .logo-home {
-            margin-top: 5px;
-        }
-    }
-
-    .organization-home {
-        padding-top: 18px;
-        padding-right: 30px;
-    }
 }
