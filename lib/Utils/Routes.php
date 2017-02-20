@@ -15,14 +15,8 @@ class Routes {
 
         $jwt = $jwtHandler->jsonSerialize();
 
-        return "$host/organizations/invite/$jwt";
+        return "$host/api/app/orgs/members/invite/$jwt";
 
-    }
-
-    public static function organizationUploadUrl( \Organizations\OrganizationStruct $org, $options = array() ) {
-        $host = self::httpHost( $options );
-
-        return "$host/orgs/" . $org->id;
     }
 
     public static function passwordReset( $confirmation_token, $options = array() ) {
