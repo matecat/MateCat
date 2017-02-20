@@ -21,6 +21,10 @@ use Organizations\OrganizationStruct;
 
 class OrganizationsController extends KleinController {
 
+    protected function addValidatorAccess(){
+        $this->appendValidator( new OrganizationAccessValidator($this) ) ;
+    }
+
     public function create() {
 
         $params = $this->request->paramsPost()->getIterator()->getArrayCopy();
@@ -52,16 +56,12 @@ class OrganizationsController extends KleinController {
         $this->response->json( array( 'organization' => $formatted->renderItem($organization) ) );
     }
 
-    protected function afterConstruct()
-    {
-        parent::afterConstruct();
-        $this->appendValidator( new OrganizationAccessValidator($this) ) ;
-    }
-
     public function update() {
 
-        $requestContent = json_decode( file_get_contents( 'php://input' ) );
+        $requestContent = $this->getPutParams();
 
+        $this->addValidatorAccess();
+        $this->validateRequest();
 
         try {
 

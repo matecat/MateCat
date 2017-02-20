@@ -149,7 +149,7 @@ class ModifyOrganization extends React.Component {
         let usersError = (this.state.inputUserError) ? 'error' : '';
         let orgNameError = (this.state.inputNameError) ? 'error' : '';
         let userlist = this.getUserList();
-        var icon = (this.state.readyToSend && !this.state.inputNameError ) ?<i className="icon-checkmark green icon"/> : <i className="icon-pencil icon"/>;
+        let icon = (this.state.readyToSend && !this.state.inputNameError ) ?<i className="icon-checkmark green icon"/> : <i className="icon-pencil icon"/>;
 
         return <div className="modify-organization-modal">
             <div className="matecat-modal-top">
@@ -165,25 +165,28 @@ class ModifyOrganization extends React.Component {
                     </div>
                 </div>
             </div>
-            <div className="matecat-modal-middle">
-                <div className="ui grid left aligned">
-                    <div className="sixteen wide column">
-                        <h3>Add members</h3>
-                        <div className={"ui fluid icon input " + usersError }>
-                            <input type="text" placeholder="joe@email.com"
-                                   onKeyUp={this.handleKeyPressUserInput.bind(this)}
-                                   ref={(inputNewUSer) => this.inputNewUSer = inputNewUSer}/>
-                        </div>
-                    </div>
-                    <div className="sixteen wide column">
-                        <div className="ui members-list">
-                            <div className="ui divided list">
-                                {userlist}
+            { this.state.organization.get('type') !== "personal" ? (
+                    <div className="matecat-modal-middle">
+                        <div className="ui grid left aligned">
+                            <div className="sixteen wide column">
+                                <h3>Add members</h3>
+                                <div className={"ui fluid icon input " + usersError }>
+                                    <input type="text" placeholder="joe@email.com"
+                                           onKeyUp={this.handleKeyPressUserInput.bind(this)}
+                                           ref={(inputNewUSer) => this.inputNewUSer = inputNewUSer}/>
+                                </div>
+                            </div>
+                            <div className="sixteen wide column">
+                                <div className="ui members-list">
+                                    <div className="ui divided list">
+                                        {userlist}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                ) : ('')}
+
         </div>;
     }
 }

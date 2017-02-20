@@ -13,7 +13,7 @@ class JobContainer extends React.Component {
         $(this.dropdown).dropdown({
             belowOrigin: true
         });
-        $('.button.tm-keys, .button.comments-tooltip').popup();
+        $('.button.tm-keys, .button.comments-tooltip, .warning-tooltip, .qr-tooltip, .translate-tooltip').popup();
     }
 
     /**
@@ -258,8 +258,8 @@ class JobContainer extends React.Component {
                 tooltipText = 'There are <span style="font-weight: bold">' + openThreads + '</span> open threads';
             }
             var translatedUrl = this.getTranslateUrl() + '?action=openComments';
-            icon = <a className="circular ui icon button comments-tooltip"
-                   data-position="top" data-tooltip={tooltipText} href={translatedUrl} target="_blank">
+            icon = <a className="circular ui icon basic button comments-tooltip"
+                      data-html={tooltipText} href={translatedUrl} target="_blank">
                     <i className="icon-uniE96B icon"/>
                 </a>;
         }
@@ -272,9 +272,10 @@ class JobContainer extends React.Component {
         var quality = this.props.job.get('quality_overall');
         if ( quality === "poor" || quality === "fail" ) {
             var url = this.getQAReport();
+            let tooltipText = "Overall quality: " + quality.toUpperCase();
             var classQuality = (quality === "poor") ? 'orange' : 'red';
-            icon = <a className={"circular ui icon basic button " + classQuality}
-                   href={url} target="_blank">
+            icon = <a className={"circular ui icon basic button qr-tooltip " + classQuality}
+                      data-html={tooltipText} href={url} target="_blank">
                     <i className="icon-qr-matecat icon"/>
                 </a>
             ;
@@ -287,8 +288,9 @@ class JobContainer extends React.Component {
         var warnings = this.props.job.get('warnings_count');
         if ( warnings > 0 ) {
             var url = this.getTranslateUrl() + '?action=warnings';
-            icon = <a className="circular ui icon basic button"
-                   href={url} target="_blank">
+            let tooltipText = "Click to see issues";
+            icon = <a className="circular ui icon basic button warning-tooltip"
+                      data-html={tooltipText} href={url} target="_blank">
                     <i className="icon-notice icon"/>
                 </a>;
         }
@@ -391,7 +393,8 @@ class JobContainer extends React.Component {
                                         {warningsIcon}
                                         {commentsIcon}
                                         {tmIcon}
-                                        <a className="open-translate circular ui icon primary basic button" target="_blank" href={translateUrl}>
+                                        <a className="open-translate circular ui icon primary basic button translate-tooltip" target="_blank"
+                                           data-html={"Open Translate Page"} href={translateUrl}>
                                             <i className="icon-arrow-right2 icon"/>
                                         </a>
                                         <button className="job-menu circular ui icon top right pointing dropdown  basic button"

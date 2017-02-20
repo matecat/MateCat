@@ -118,6 +118,8 @@ class WorkspacesController extends KleinController {
             $workspaceDao->delete( $wStructQuery );
             $workspaceDao->destroyCacheForOrganizationId( $this->request->id_organization );
             $workspacesList = $workspaceDao->setCacheTTL( 60 * 60 * 24 )->getByOrganizationId( $this->request->id_organization );
+            $projectsDao = new \Projects_ProjectDao();
+            $projectsDao->unsetWorkspaceId( $wStructQuery->id );
             \Database::obtain()->commit();
 
             $this->response->json( array( 'workspaces' => $workspacesList ) );
