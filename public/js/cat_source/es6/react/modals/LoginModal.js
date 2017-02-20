@@ -128,7 +128,7 @@ class LoginModal extends React.Component {
                     <li>Monitor the activity for increased security</li>
                     <li>Manage TMs, MT and glossaries</li>
                 </ul>
-                <a className="register-button btn-confirm-medium" onClick={this.openRegisterModal}>Sign up</a>
+                <a className="register-button btn-confirm-medium sing-up" onClick={this.openRegisterModal}>Sign up</a>
             </div>
         }
         return <div className="login-modal">
@@ -142,7 +142,7 @@ class LoginModal extends React.Component {
                             <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password")}
                                        placeholder="Password" name="password" errorText={this.errorFor("password")} tabindex={2}
                                        onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
-                            <a className="login-button btn-confirm-medium"
+                            <a className="login-button btn-confirm-medium sing-in"
                                onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}
                                onClick={this.handleSubmitClicked.bind()} tabIndex={3}><span className={"button-loader " + loaderClass}/> Sign in </a>
                             {generalErrorHtml}

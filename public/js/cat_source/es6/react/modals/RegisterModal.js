@@ -144,8 +144,8 @@ class RegisterModal extends React.Component {
                            onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
 
                 <br /><input type="checkbox" id="check-conditions" name="terms" ref={(input) => this.textInput = input} onChange={this.changeCheckbox.bind(this)} tabIndex={5}/>
-                <label htmlFor="check-conditions" style={this.checkStyle}>Accept <a href="/terms" style={this.checkStyle} target="_blank">terms and conditions</a></label><br/>
-                <a className="register-submit btn-confirm-medium"
+                <label className="check-conditions" htmlFor="check-conditions" style={this.checkStyle}>Accept <a href="/terms" style={this.checkStyle} target="_blank">terms and conditions</a></label><br/>
+                <a className="register-submit btn-confirm-medium register-now"
                    onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}
                    onClick={this.handleSubmitClicked} tabIndex={6}><span className={"button-loader " + loaderClass}/> Register Now </a>
                 {generalErrorHtml}

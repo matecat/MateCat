@@ -1,14 +1,14 @@
 header {
+    font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
     position: fixed;
     width: 100%;
     z-index: 3;
     margin: 0;
     .nav-mc-bar {
         margin: 0px !important;
+        height: 48px !important;
         .navigation {
-            font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
-            padding-right: 20px !important;
-            color: white;
+            padding: 5px 15px 5px 0px !important;
             background-color: #4d4d4d;
         }
         .ui.selection.dropdown {
@@ -68,7 +68,7 @@ header {
     position: absolute;
     float: left;
     border: 0;
-    margin-top: 10px;
+    margin-top: 6px;
     background: url(../../img/logo.png) 0px 2px no-repeat;
     width: 145px;
     height: 31px;
@@ -77,6 +77,16 @@ header {
 }
 
 #menu-site {
-    margin-top: 5px !important;
+    margin-top: 0px !important;
     margin-left: 180px !important;
+    @media only screen and (min-width: 1208px) {
+        ul {
+            li {
+                a {
+                    font-size: 14px;
+                }
+            }
+        }
+
+    }
 }

@@ -1,69 +1,15 @@
-/* http://meyerweb.com/eric/tools/css/reset/
-   v2.0 | 20110126
-   License: none (public domain)
-*/
-
-html, body, div, span, applet, object, iframe,
-h1, h2, h3, h4, h5, h6, p, blockquote, pre,
-a, abbr, acronym, address, big, cite, code,
-del, dfn, em, img, ins, kbd, q, s, samp,
-small, strike, strong, sub, sup, tt, var,
-b, u, i, center,
-dl, dt, dd, ol, ul, li,
-fieldset, form, label, legend,
-table, caption, tbody, tfoot, thead, tr, th, td,
-article, aside, canvas, details, embed,
-figure, figcaption, footer, header, hgroup,
-menu, nav, output, ruby, section, summary,
-time, mark, audio, video {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    font-size: 100%;
-    font: inherit;
-    vertical-align: baseline;
-}
-/* HTML5 display-role reset for older browsers */
-article, aside, details, figcaption, figure,
-footer, header, hgroup, menu, nav, section {
-    display: block;
-}
-body {
-    line-height: 1;
-    background-color: #f1f1f1;
-    font-family: Calibri;
-}
-ol, ul {
-    list-style: none;
-}
-blockquote, q {
-    quotes: none;
-}
-blockquote:before, blockquote:after,
-q:before, q:after {
-    content: '';
-    content: none;
-}
-table {
-    border-collapse: collapse;
-    border-spacing: 0;
-}
-
-
-
 // rewrite semantic CSS
-
 
 body.manage {
     //min-width: 1040px;
     //font-size: 14px;
     //box-sizing: content-box;
     //margin-top: 55px;
+    font-family: Calibri, Arial, Helvetica, sans-serif;
     @media only screen and (min-width: 1380px) {
         .ui.container {
             width: 1280px;
         }
-
         .ui.grid.container {
             width: 1280px !important;
         }
@@ -84,7 +30,7 @@ body.manage {
 // Closing Shadow - Transitions for buttons
 
 .project-list {
-    padding-top: 200px;
+    padding-top: 160px;
     .project {
         margin-bottom: 30px !important;
         .ui.ribbon.label {
@@ -298,17 +244,12 @@ body.manage {
             background-color: #f9f9f9;
             .activity-log {
                 margin-top: -10px;
+                margin-right: -15px;
             }
         }
     }
 }
 // closing rewrite semantic CSS
-
-/*.new-container {
-    margin-top: 14px;
-}*/
-
-
 
 .no-results-found {
     background: url(/public/img/jobnotfound.png) no-repeat;

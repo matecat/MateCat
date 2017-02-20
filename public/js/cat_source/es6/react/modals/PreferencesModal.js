@@ -6,12 +6,7 @@ class PreferencesModal extends React.Component {
 
         this.state = {
             service: this.props.service,
-            coupon: this.props.metadata.coupon,
-            couponError: '',
-            validCoupon : false
         };
-
-        this.onKeyPressCopupon = this.onKeyPressCopupon.bind( this );
     }
 
     openResetPassword() {
@@ -64,47 +59,6 @@ class PreferencesModal extends React.Component {
 
     }
 
-    submitUserChanges() {
-        var self = this;
-        if (!this.state.validCoupon) {
-            return;
-        }
-        return $.post('/api/app/user/metadata', { metadata : {
-                coupon : this.couponInput.value
-            }
-        }).done( function( data ) {
-            if (data) {
-                APP.USER.STORE.metadata = data;
-                self.setState({
-                    coupon: APP.USER.STORE.metadata.coupon
-                });
-            } else {
-                self.setState({
-                    couponError: 'Invalid Coupon'
-                });
-            }
-        }).fail(function () {
-            self.setState({
-                couponError: 'Invalid Coupon'
-            });
-        });
-    }
-
-    onKeyPressCopupon(e) {
-        var length = this.couponInput.value.length;
-        var validCoupon = false;
-        if ( length >= 8 ) {
-            validCoupon = true;
-        }
-        this.setState({
-            couponError : '',
-            validCoupon : validCoupon
-        });
-        if (e.key === 'Enter') {
-            this.submitUserChanges();
-        }
-    }
-
     disableGDrive() {
         return $.post('/api/app/connected_services/' + this.state.service.id, { disabled: true } );
 
@@ -138,38 +92,6 @@ class PreferencesModal extends React.Component {
                                    onClick={this.openResetPassword.bind(this)}>Reset Password</a>;
 
         }
-
-
-
-        var couponHtml = '';
-        if ( !this.state.coupon) {
-            var buttonClass = (this.state.validCoupon) ? '' : 'disabled';
-            couponHtml = <div className="coupon-container">
-                                    <h2 htmlFor="user-coupon">Coupon</h2>
-                                    <input type="text" name="coupon" id="user-coupon" placeholder="Insert your code"
-                                           onKeyUp={this.onKeyPressCopupon.bind(this)}
-                                           ref={(input) => this.couponInput = input}/>
-                                <a className={"btn-confirm-medium " + buttonClass}  onClick={this.submitUserChanges.bind(this)}>Apply</a>
-                                <div className="coupon-message">
-                                        <span style={{color: 'red', fontSize: '14px',position: 'absolute', right: '27%', lineHeight: '24px'}} className="coupon-message">{this.state.couponError}</span>
-                                </div>
-                        </div>
-        } else {
-
-            couponHtml = <div className="coupon-container coupon-success">
-
-                    <h2 htmlFor="user-coupon">Coupon</h2>
-                    <input type="text" name="coupon" id="user-coupon" defaultValue={this.state.coupon} disabled /><br/>
-                    <div className="coupon-message">
-                        <span style={{color: 'green', fontSize: '14px', position: 'absolute', right: '42%', lineHeight: '24px'}} className="coupon-message">Coupon activated</span>
-                    </div>
-
-
-            </div>
-        }
-
-        // find if the use has the coupon already. If he has then do not show the input field.
-
         return <div className="preferences-modal">
 
                      <div className="user-info-form">
@@ -208,7 +130,6 @@ class PreferencesModal extends React.Component {
                             </div>
                             <label>{services_label}</label>
                         </div>
-                        {couponHtml}
                     </div>
             </div>;
     }

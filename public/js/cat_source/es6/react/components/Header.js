@@ -113,7 +113,7 @@ class Header extends React.Component {
                                 </a>
                             </div>
             }
-            result = <div className="ui dropdown selection top-5"
+            result = <div className="ui dropdown selection"
                           ref={(dropdownOrganizations) => this.dropdownOrganizations = dropdownOrganizations}>
                 <input type="hidden" name="organization" className="organization-dd" />
                 <i className="dropdown icon"/>
@@ -152,8 +152,8 @@ class Header extends React.Component {
 
                     <nav className="sixteen wide column navigation">
                         <div className="ui stackable grid">
-                            <div className="eleven wide column logo-menu">
-                                <a href="/" className="logo logo-home"/>
+                            <div className="eleven wide column">
+                                <a href="/" className="logo"/>
                                 {this.props.showLinks ? (
                                     <ul id="menu-site">
                                         <li><a href="https://www.matecat.com/benefits/">Benefits</a></li>

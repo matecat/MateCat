@@ -1,5 +1,6 @@
 body.side-popup {
     overflow: hidden !important;
+    font-family: Calibri, Arial, Helvetica, sans-serif;
 }
 
 /***********************/
@@ -405,7 +406,7 @@ footer nav ul li {
 
 .register-modal {
     padding: 10px 15%;
-    width: 70%;
+    width: 100%;
 }
 
 .register-modal h2 {
@@ -775,7 +776,9 @@ div#matecat-modal p {
 .matecat-modal-content .btn-confirm-medium.google-login-button, .matecat-modal-content .btn-confirm-medium.google-login-button:hover, .matecat-modal-content .btn-confirm-medium.google-login-button:focus {
     background-size: cover;
     border: none;
-    height: 30px;
+    height: 45px;
+    width: 196px;
+    margin-left: 0;
 }
 
 .matecat-modal-content .btn-confirm-medium.google-login-button:hover {
@@ -789,6 +792,18 @@ div#matecat-modal p {
     margin: 6px 0% 0 3%;
     width: 21%;
     box-sizing: border-box;
+}
+
+.matecat-modal-content .btn-confirm-medium.sing-in {
+    margin-left: 0px;
+}
+
+.matecat-modal-content .btn-confirm-medium.sing-up {
+    //margin-left: 0px;
+}
+
+.matecat-modal-content .btn-confirm-medium.register-now {
+    margin-left: 0px;
 }
 
 .matecat-modal-content .disabled,
@@ -818,7 +833,11 @@ div#matecat-modal p {
     content: "\f057";
 }
 .matecat-modal-content {
-
+    font-size: 16px;
+    font-family: Calibri, Arial, Helvetica, sans-serif;
+    .matecat-modal-header {
+        min-height: 40px;
+    }
     .matecat-modal-top {
         background-color: #e8e8e8;
     }
@@ -841,8 +860,12 @@ div#matecat-modal p {
         }
     }
 
+    .check-conditions {
+        margin-left: 5px;
+    }
 }
 
 .pull-left {
     float: left;
 }
+

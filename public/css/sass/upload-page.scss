@@ -691,7 +691,7 @@ body{font-family:Calibri, Arial, Helvetica, sans-serif}
 	{
 	margin: 0;
 	}
-.translate-box select, .mgmt-table-mt select{width:257px;height:37px;padding:5px;font-size:18px;border:1px solid #ccc;margin:0 0 5px 0;font-family: system-ui}
+.translate-box select, .mgmt-table-mt select{width:257px;height:37px;padding:5px;font-size:18px;border:1px solid #ccc;margin:0 0 5px 0;font-family: system-ui, Calibri, Arial, Helvetica, sans-serif}
 .mgmt-table-mt select {font-size:14px;}
 .upload-input{width:95%;padding:4px 5px 3px 5px;font-size:22px !important; -moz-border-radius: 2px;border-radius: 2px;border:1px solid #ccc}
 #private-tm-key
@@ -936,7 +936,7 @@ tr.ready .size span{visibility: visible;}
 header{position: relative;}
 
 .wrapper{width:98%;min-width:960px;margin:0px auto 0 auto;padding:5px 0 0 0;width:92%;font-size:14px;position:relative;text-align:left;}
-.logo{float:left;margin-top:5px;border:0;background:url(../../img/logo.png) 0px 2px no-repeat;width:145px;height:31px; background-size: 130px 26px;}
+.logo{}
 .popup-tm .popup-box {
 width: 100%;
 margin: 0;
