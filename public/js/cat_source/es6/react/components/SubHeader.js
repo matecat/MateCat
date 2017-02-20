@@ -51,7 +51,7 @@ class SubHeader extends React.Component {
     }
 
     removeWorkspace(ws) {
-        let currentWsId = (this.selectedWorkSpace && this.selectedWorkSpace.toJS ) ? this.selectedWorkSpace.get('id') : -1;
+        let currentWsId = (this.selectedWorkspace && this.selectedWorkspace.toJS ) ? this.selectedWorkspace.get('id') : -1;
         if(currentWsId == ws.get('id')) {
             $(this.dropdownWorkspaces).dropdown('set selected', '-1');
         }
@@ -83,18 +83,18 @@ class SubHeader extends React.Component {
         }
         let self = this;
         if (value === this.ALL_WORKSPACES) {
-            this.selectedWorkSpace = ManageConstants.ALL_WORKSPACES_FILTER;
+            this.selectedWorkspace = ManageConstants.ALL_WORKSPACES_FILTER;
         } else if ( value === this.NO_WORKSPACES ) {
-            this.selectedWorkSpace = ManageConstants.NO_WORKSPACE_FILTER;
+            this.selectedWorkspace = ManageConstants.NO_WORKSPACE_FILTER;
         } else {
-            this.selectedWorkSpace = this.props.selectedOrganization.get('workspaces').find(function (workspace) {
+            this.selectedWorkspace = this.props.selectedOrganization.get('workspaces').find(function (workspace) {
                 if (workspace.get("id") === parseInt(value)) {
                     return true;
                 }
             });
         }
         setTimeout(function () {
-            ManageActions.filterProjects(self.selectedUser, self.selectedWorkSpace, self.currentText, self.currentStatus);
+            ManageActions.filterProjects(self.selectedUser, self.selectedWorkspace, self.currentText, self.currentStatus);
         });
     }
 
@@ -106,12 +106,12 @@ class SubHeader extends React.Component {
     onChangeSearchInput(value) {
         this.currentText = value;
         let self = this;
-        ManageActions.filterProjects(self.selectedUser, self.selectedWorkSpace, self.currentText, self.currentStatus);
+        ManageActions.filterProjects(self.selectedUser, self.selectedWorkspace, self.currentText, self.currentStatus);
     }
 
     filterByStatus(status) {
         this.currentStatus = status;
-        ManageActions.filterProjects(this.selectedUser, this.selectedWorkSpace, this.currentText, this.currentStatus);
+        ManageActions.filterProjects(this.selectedUser, this.selectedWorkspace, this.currentText, this.currentStatus);
     }
 
     getUserFilter() {
