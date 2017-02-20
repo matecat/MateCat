@@ -82,10 +82,9 @@ class Routes {
 
         $host = self::httpHost( $options );
 
-        return $host . "/analyze/" .
-        $params[ 'project_name' ] . "/" .
-        $params[ 'id_project' ] . "-" .
-        $params[ 'password' ];
+        $project_name = Utils::friendly_slug( $params[ 'project_name' ] );
+
+        return $host . "/analyze/" . $project_name . "/" . $params[ 'id_project' ] . "-" . $params[ 'password' ];
     }
 
     public static function appRoot( $options = array() ) {

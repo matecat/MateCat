@@ -119,6 +119,7 @@ let ManageActions = {
     },
 
     filterProjects: function (member, workspace, name, status) {
+        this.showReloadSpinner();
         let memberUid = (member && member.toJS) ? member.get('user').get('uid') : member ;
         let workspaceId = (workspace && workspace.toJS) ? workspace.get('id') : workspace ;
         UI.filterProjects(memberUid, workspaceId, name, status).then(function (response) {
@@ -126,7 +127,7 @@ let ManageActions = {
                 actionType: ManageConstants.RENDER_PROJECTS,
                 projects: response.data,
                 organization: UI.selectedOrganization,
-                hideSpinner: false,
+                hideSpinner: true,
             });
         });
     },
@@ -282,6 +283,7 @@ let ManageActions = {
     },
 
     changeOrganization: function (organization) {
+        this.showReloadSpinner();
         UI.changeOrganization(organization).then(function (response) {
             AppDispatcher.dispatch({
                 actionType: ManageConstants.UPDATE_ORGANIZATION,
@@ -295,7 +297,7 @@ let ManageActions = {
                 actionType: ManageConstants.RENDER_PROJECTS,
                 projects: response.data,
                 organization: organization,
-                hideSpinner: false,
+                hideSpinner: true,
             });
 
         });
@@ -342,12 +344,24 @@ let ManageActions = {
     },
 
     removeUserFromOrganization: function (organization, userId) {
+        var self = this;
         UI.removeUserFromOrganization(organization.toJS(), userId).done(function (data) {
             AppDispatcher.dispatch({
                 actionType: ManageConstants.UPDATE_ORGANIZATION_MEMBERS,
                 organization: organization,
                 members: data.members
             });
+            if (userId === APP.USER.STORE.user.uid) {
+                UI.getAllOrganizations(true).done(function (data) {
+                    UI.selectedOrganization = data.organizations[0];
+                    AppDispatcher.dispatch({
+                        actionType: ManageConstants.RENDER_ORGANIZATIONS,
+                        organizations: data.organizations,
+                        defaultOrganization: data.organizations[0]
+                    });
+                    self.changeOrganization(data.organizations[0]);
+                });
+            }
         });
     },
     changeOrganizationName: function(organization, newName) {

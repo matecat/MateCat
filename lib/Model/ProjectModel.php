@@ -51,10 +51,7 @@ class ProjectModel {
     public function setUser( $user ) {
         $this->user = $user ;
     }
-    /**
-     *  prepare a new struct
-     *
-     */
+
     public function update() {
         $this->changedFields = array();
 
@@ -77,7 +74,7 @@ class ProjectModel {
         }
 
         $result = Projects_ProjectDao::updateStruct( $newStruct, array(
-                'fields' => array_keys( $this->willChange )
+            'fields' => array_keys( $this->willChange )
         ) );
 
         if ( $result ) {

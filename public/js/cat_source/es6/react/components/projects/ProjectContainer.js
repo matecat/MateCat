@@ -131,8 +131,8 @@ class ProjectContainer extends React.Component {
     getProjectMenu(activityLogUrl) {
         let menuHtml = <div className="menu">
             <div className="scrolling menu">
-                <div className="item">
-                    <a onClick={this.openChangeOrganizationModal.bind(this)}><i className="icon-forward icon"/>Move project</a>
+                <div className="item" onClick={this.openChangeOrganizationModal.bind(this)}>
+                    <a><i className="icon-forward icon"/>Move project</a>
                 </div>
                 <div className="item"><a href={activityLogUrl} target="_blank"><i className="icon-download-logs icon"/>Activity Log</a></div>
 

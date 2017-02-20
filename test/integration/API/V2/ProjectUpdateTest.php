@@ -65,28 +65,15 @@ class ProjectUpdateTest extends IntegrationTest  {
         $this->assertEquals($project->id_assignee, $other_user->uid ) ;
 
     }
-      public function test_project_name_can_be_changed() {
+
+    public function test_project_name_can_be_changed() {
         $this->prepareUserAndApiKey();
 
         $project_body = integrationCreateTestProject(array(
             'headers' => $this->test_data->headers
-            ) );
+        ) );
 
         $project = Projects_ProjectDao::findById( $project_body->id_project);
-
-        $other_user = Factory_User::create() ;
-        ( new \Organizations\MembershipDao() )->createList(array(
-            'organization' => $this->test_data->user->getPersonalOrganization(),
-            'members' => array( $other_user->email )
-        ) ) ;
-
-        /**
-         * @var $user Users_UserStruct
-         */
-        $user = $this->test_data->user ;
-
-        $this->assertEquals($project->id_customer, $user->email ) ;
-        $this->assertEquals( $user->getPersonalOrganization()->id, $project->id_organization  );
 
         $test = new CurlTest(array(
             'headers' => $this->test_data->headers,
@@ -96,6 +83,14 @@ class ProjectUpdateTest extends IntegrationTest  {
         ) ) ;
 
         $response = $test->getResponse() ;
+
+        $json = json_decode( $response['body'] );
+
+        $this->assertContains(
+            Utils::friendly_slug('My new project name'),
+            $json->project->analyze_url
+        );
+        $this->assertEquals('My new project name', $json->project->name ) ;
 
         $project = Projects_ProjectDao::findById( $project->id ) ;
         $this->assertEquals('My new project name', $project->name ) ;

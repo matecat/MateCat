@@ -46,7 +46,12 @@ class Analysis_APIStatus extends Analysis_AbstractStatus {
                 break;
         }
 
-        $this->result[ 'analyze' ] = "/analyze/" . $this->_project_data[ 0 ][ 'pname' ] . "/" . $this->_project_data[ 0 ][ 'pid' ] . "-" . $this->_project_data[ 0 ][ 'ppassword' ];
+        $this->result['analyze'] = Routes::analyze(array(
+            'project_name' => $this->_project_data[0]['pname'],
+            'id_project' => $this->_project_data[0]['pid'],
+            'password' => $this->_project_data[0]['ppassword']
+        ));
+
         $this->result[ 'jobs' ]    = array();
 
         foreach ( $this->_project_data as $job ) {

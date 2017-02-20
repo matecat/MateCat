@@ -155,7 +155,7 @@ class ProjectsContainer extends React.Component {
                 backgroundColor: 'rgba(76, 69, 69, 0.3)',
                 top: $(window).scrollTop(),
                 left: 0,
-                zIndex: 2
+                zIndex: 3
             };
             spinnerReloadProjects =<div style={spinnerContainer}>
                     <div className="ui active inverted dimmer">
