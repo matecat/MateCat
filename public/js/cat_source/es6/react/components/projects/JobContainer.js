@@ -45,7 +45,7 @@ class JobContainer extends React.Component {
     getTranslateUrl() {
         let use_prefix = ( this.props.jobsLenght > 1 );
         let chunk_id = this.props.job.get('id') + ( ( use_prefix ) ? '-' + this.props.index : '' ) ;
-        return '/translate/'+this.props.project.get('name')+'/'+ this.props.job.get('source') +'-'+this.props.job.get('target')+'/'+ chunk_id +'-'+ this.props.job.get('password')  ;
+        return '/translate/'+this.props.project.get('project_slug')+'/'+ this.props.job.get('source') +'-'+this.props.job.get('target')+'/'+ chunk_id +'-'+ this.props.job.get('password')  ;
     }
 
     getReviseUrl() {
@@ -56,7 +56,7 @@ class JobContainer extends React.Component {
             this.props.job.get('password')
         );
 
-        return '/revise/'+this.props.project.get('name')+'/'+ this.props.job.get('source') +'-'+this.props.job.get('target')+'/'+ chunk_id +'-'+  possibly_different_review_password ;
+        return '/revise/'+this.props.project.get('project_slug')+'/'+ this.props.job.get('source') +'-'+this.props.job.get('target')+'/'+ chunk_id +'-'+  possibly_different_review_password ;
     }
 
     getEditingLogUrl() {
@@ -129,13 +129,13 @@ class JobContainer extends React.Component {
         let qaReportUrl = this.getQAReport();
         let jobTMXUrl = '/TMX/'+ this.props.job.get('id') + '/' + this.props.job.get('password');
         let exportXliffUrl = '/SDLXLIFF/'+ this.props.job.get('id') + '/' + this.props.job.get('password') +
-            '/' + this.props.project.get('name') + '.zip';
+            '/' + this.props.project.get('project_slug') + '.zip';
 
         let originalUrl = '/?action=downloadOriginal&id_job=' + this.props.job.get('id') +' &password=' + this.props.job.get('password') + '&download_type=all';
 
         let jobStatus = this.getTranslationStatus();
         let downloadButton = (jobStatus == 'translated' || jobStatus == 'approved') ?
-            <div className="item" onClick={this.downloadTranslation}><a >Download</a></div> : <div className="item" onClick={this.downloadTranslation}><a ><i className="icon-eye icon"/>Preview</a></div>;
+            <div className="item" onClick={this.downloadTranslation}><a><i className="icon-download icon"/>Download Translation</a></div> : <div className="item" onClick={this.downloadTranslation}><a ><i className="icon-eye icon"/>Preview</a></div>;
 
         let splitButton = (!this.props.isChunk) ? <div className="item"><a target="_blank" href={splitUrl}><i className="icon-expand icon"/> Split</a></div> : '';
 
@@ -201,7 +201,7 @@ class JobContainer extends React.Component {
     }
 
     getOutsourceUrl() {
-        return '/analyze/'+ this.props.project.get('name') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=analysis&jobid=' + this.props.job.get('id');
+        return '/analyze/'+ this.props.project.get('project_slug') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=analysis&jobid=' + this.props.job.get('id');
     }
 
 
@@ -210,23 +210,23 @@ class JobContainer extends React.Component {
     }
 
     getSplitUrl() {
-        return '/analyze/'+ this.props.project.get('name') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=split&jobid=' + this.props.job.get('id');
+        return '/analyze/'+ this.props.project.get('project_slug') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=split&jobid=' + this.props.job.get('id');
     }
 
     getMergeUrl() {
-        return '/analyze/'+ this.props.project.get('name') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=merge&jobid=' + this.props.job.get('id');
+        return '/analyze/'+ this.props.project.get('project_slug') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=merge&jobid=' + this.props.job.get('id');
     }
 
     getActivityLogUrl() {
-        return '/activityLog/'+ this.props.project.get('name') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=split&jobid=' + this.props.job.get('id');
+        return '/activityLog/'+ this.props.project.get('project_slug') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=split&jobid=' + this.props.job.get('id');
     }
 
     openSettings() {
-        ManageActions.openJobSettings(this.props.job.toJS(), this.props.project.get('name'));
+        ManageActions.openJobSettings(this.props.job.toJS(), this.props.project.get('project_slug'));
     }
 
     openTMPanel() {
-        ManageActions.openJobTMPanel(this.props.job.toJS(), this.props.project.get('name'));
+        ManageActions.openJobTMPanel(this.props.job.toJS(), this.props.project.get('project_slug'));
     }
 
     getTMIcon() {

@@ -8,6 +8,7 @@ class CreateWorkspace extends React.Component {
             organization: this.props.organization,
             showRemoveMessageWSId: null,
             showModifyMessageWSId: null,
+            buttonCreateEnabled: false
         };
         this.updateOrganization = this.updateOrganization.bind(this);
     }
@@ -76,6 +77,13 @@ class CreateWorkspace extends React.Component {
     handleKeyPressInCreate(event) {
         if(event.key == 'Enter'){
             this.createWorkspace();
+        } else {
+            if (this.inputNewWS.value.length > 0)  {
+                this.setState({
+                    buttonCreateEnabled: true
+                });
+            }
+
         }
     }
 
@@ -131,28 +139,15 @@ class CreateWorkspace extends React.Component {
     shouldComponentUpdate(nextProps, nextState) {
         return (nextState.organization !== this.state.organization ||
         nextState.showRemoveMessageWSId !== this.state.showRemoveMessageWSId ||
-        nextState.showModifyMessageWSId !== this.state.showModifyMessageWSId)
+        nextState.showModifyMessageWSId !== this.state.showModifyMessageWSId ||
+        nextState.buttonCreateEnabled !== this.state.buttonCreateEnabled
+        )
     }
 
     render() {
         let workspacesList = this.getWorkspacesList();
-        let body = '';
-        if (workspacesList.size > 0){
-            body = <div className="matecat-modal-middle">
-                <div className="ui one column grid left aligned">
-                    <div className="column">
-                        <h3>ORGANIZATION Workspaces</h3>
-                        <div className="column">
-                            <div className="ui workspace-list">
-                                <div className="ui middle aligned divided list">
-                                    {workspacesList}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>;
-        }
+        //Button create enable/disable
+        let buttonClass = (this.state.buttonCreateEnabled) ? '' : 'disabled';
         return <div className="create-workspace-modal">
                     <div className="matecat-modal-top">
                         <div className="ui one column grid left aligned">
@@ -161,18 +156,41 @@ class CreateWorkspace extends React.Component {
                                 <div className="ui large fluid icon input">
                                     <input type="text" placeholder="Workspace Name"
                                            ref={(inputNewWS) => this.inputNewWS = inputNewWS}
-                                           onKeyPress={this.handleKeyPressInCreate.bind(this)}/>
+                                           onKeyUp={this.handleKeyPressInCreate.bind(this)}/>
                                     <i className="icon-pencil icon"/>
                                     {/*<i class="icon-checkmark green icon"></i>*/}
                                 </div>
                             </div>
                             <div className="column right aligned">
-                                <button className="ui button green right aligned"
+                                <button className={"ui button green right aligned " + buttonClass}
                                 onClick={this.createWorkspace.bind(this)}>Create</button>
                             </div>
                         </div>
                     </div>
-                    {body}
+                    <div className="matecat-modal-middle">
+                        <div className="ui one column grid left aligned">
+                            <div className="column">
+                                <h3>ORGANIZATION Workspaces</h3>
+                                <div className="column">
+                                    <div className="ui workspace-list">
+                                        {workspacesList.size > 0 ? (
+                                        <div className="ui middle aligned divided list">
+                                            {workspacesList}
+                                        </div>
+                                            ) : (
+                                        <div className="ui middle aligned divided list">
+                                            <div className="item">
+                                                <div className="content pad-top-6 pad-bottom-6">
+                                                    No Workspaces
+                                                </div>
+                                            </div>
+                                        </div>
+                                            )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>;
     }
 }

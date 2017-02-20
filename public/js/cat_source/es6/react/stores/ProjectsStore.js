@@ -62,12 +62,13 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
         this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'oldPassword'], oldPassword);
     },
 
-    changeProjectName: function (project, newName) {
+    changeProjectName: function (project, newProject) {
         let projectOld = this.projects.find(function (prj) {
-            return prj.get('id') == project.id;
+            return prj.get('id') == project.get('id');
         });
         let indexProject = this.projects.indexOf(projectOld);
-        this.projects = this.projects.setIn([indexProject,'name'], newName);
+        this.projects = this.projects.setIn([indexProject,'name'], newProject.name);
+        this.projects = this.projects.setIn([indexProject,'project_slug'], newProject.project_slug);
     },
 
     changeProjectWorkspace: function (project, workspaceId) {
@@ -146,7 +147,7 @@ AppDispatcher.register(function(action) {
             ProjectsStore.emitChange(action.actionType);
             break;
         case ManageConstants.CHANGE_PROJECT_NAME:
-            ProjectsStore.changeProjectName(action.project, action.newName);
+            ProjectsStore.changeProjectName(action.project, action.newProject);
             ProjectsStore.emitChange(ManageConstants.UPDATE_PROJECTS, ProjectsStore.projects);
             break;
         case ManageConstants.CHANGE_PROJECT_ASSIGNEE:
