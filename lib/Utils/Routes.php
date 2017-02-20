@@ -3,75 +3,98 @@
 
 class Routes {
 
+    public static function inviteToOrganizationConfirm( $requestInfo, Array $options = [] ) {
+
+        $host = self::httpHost( $options );
+
+        $jwtHandler = new SimpleJWT( [
+                'invited_by_uid'  => $requestInfo[ 'invited_by_uid' ],
+                'email'           => $requestInfo[ 'email' ],
+                'organization_id' => $requestInfo[ 'organization_id' ],
+        ] );
+
+        $jwt = $jwtHandler->jsonSerialize();
+
+        return "$host/organizations/invite/$jwt";
+
+    }
+
     public static function organizationUploadUrl( \Organizations\OrganizationStruct $org, $options = array() ) {
         $host = self::httpHost( $options );
-        return "$host/orgs/" . $org->id  ;
+
+        return "$host/orgs/" . $org->id;
     }
 
     public static function passwordReset( $confirmation_token, $options = array() ) {
         $host = self::httpHost( $options );
+
         return "$host/api/app/user/password_reset/$confirmation_token";
     }
 
     public static function signupConfirmation( $confirmation_token, $options = array() ) {
         $host = self::httpHost( $options );
+
         return "$host/api/app/user/confirm/$confirmation_token";
     }
 
     /**
-     * @param $id_job
-     * @param $password
+     * @param       $id_job
+     * @param       $password
      * @param array $options
+     *
      * @return string
      */
-    public static function downloadXliff($id_job, $password, $options = array() ) {
+    public static function downloadXliff( $id_job, $password, $options = array() ) {
         $host = self::httpHost( $options );
+
         // TODO: pass in a filename here as last param?
         return "$host/SDLXLIFF/$id_job/$password/$id_job.zip";
     }
 
 
-    public static function downloadOriginal($id_job, $password, $filename = null, $download_type = 'all', $options = array() ) {
+    public static function downloadOriginal( $id_job, $password, $filename = null, $download_type = 'all', $options = array() ) {
         $host = self::httpHost( $options );
 
         $params = array(
-            'id_job'        => $id_job,
-            'password'      => $password,
-            'download_type' => $download_type
+                'id_job'        => $id_job,
+                'password'      => $password,
+                'download_type' => $download_type
         );
 
-        if ( !empty($filename) ) {
-            $params['filename'] = $filename  ;
+        if ( !empty( $filename ) ) {
+            $params[ 'filename' ] = $filename;
         }
 
-        return "$host/?action=downloadOriginal&" .  Utils::buildQueryString( $params );
+        return "$host/?action=downloadOriginal&" . Utils::buildQueryString( $params );
     }
 
 
-    public static function downloadTranslation($id_job, $password, $id_file, $filename = null, $download_type = 'all', $options = array() ) {
+    public static function downloadTranslation( $id_job, $password, $id_file, $filename = null, $download_type = 'all', $options = array() ) {
         $host = self::httpHost( $options );
 
         $params = array(
-            'id_job'        => $id_job,
-            'id_file'       => $id_file,
-            'password'      => $password,
-            'download_type' => $download_type
+                'id_job'        => $id_job,
+                'id_file'       => $id_file,
+                'password'      => $password,
+                'download_type' => $download_type
         );
 
-        if ( !empty($filename) ) {
-            $params['filename'] = $filename  ;
+        if ( !empty( $filename ) ) {
+            $params[ 'filename' ] = $filename;
         }
 
-        return "$host/?action=downloadFile&" .  Utils::buildQueryString( $params );
+        return "$host/?action=downloadFile&" . Utils::buildQueryString( $params );
     }
 
     public static function revise( $project_name, $id_job, $password, $source, $target, $options = array() ) {
         $host = self::httpHost( $options );
+
         return "$host/revise/$project_name/$source-$target/$id_job-$password";
     }
 
     public static function translate( $project_name, $id_job, $password, $source, $target, $options = array() ) {
         $host = self::httpHost( $options );
+
         return "$host/translate/$project_name/$source-$target/$id_job-$password";
     }
 
@@ -88,14 +111,15 @@ class Routes {
     }
 
     public static function appRoot( $options = array() ) {
-        $query = isset( $options['query'] ) ? $options['query'] : null ;
+        $query = isset( $options[ 'query' ] ) ? $options[ 'query' ] : null;
 
-        $url = self::httpHost( $options ) . \INIT::$BASEURL ;
+        $url = self::httpHost( $options ) . \INIT::$BASEURL;
 
         if ( $query ) {
-            $url .= '?' . http_build_query( $query ) ;
+            $url .= '?' . http_build_query( $query );
         }
-        return $url ;
+
+        return $url;
     }
 
     /**
@@ -103,7 +127,7 @@ class Routes {
      *
      * @return string
      */
-    public static function pluginsBase( $options=array() ) {
+    public static function pluginsBase( $options = array() ) {
         return self::httpHost( $options ) . '/plugins';
     }
 
