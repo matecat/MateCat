@@ -187,11 +187,11 @@ let ManageActions = {
 
     changeProjectName: function (organization, project, newName) {
         UI.changeProjectName(organization.get("id"), project.get("id"), newName).done(
-            function () {
+            function (response) {
                 AppDispatcher.dispatch({
                     actionType: ManageConstants.CHANGE_PROJECT_NAME,
                     project: project,
-                    newName: newName
+                    newProject: response.project
                 });
             }
         );

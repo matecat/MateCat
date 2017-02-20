@@ -16,7 +16,9 @@ class ProjectContainer extends React.Component {
             showAllJobsBoxes: true,
             lastAction: null,
             jobsActions: null,
-            projectName: this.props.project.get('name')
+            projectName: this.props.project.get('name'),
+            inputSelected: false,
+            inputNameChanged: false
         };
         this.getActivityLogUrl = this.getActivityLogUrl.bind(this);
         this.changeUser = this.changeUser.bind(this);
@@ -64,9 +66,10 @@ class ProjectContainer extends React.Component {
     }
 
     componentDidUpdate() {
+        let self = this;
         this.initUsersDropdown();
         console.log("Updated Project : " + this.props.project.get('id'));
-
+        this.inputTimeout;
         if (this.dropdownUsers) {
             if (this.props.project.get('id_assignee') ) {
                 this.dropdownUsers.classList.remove("project-not-assigned");
@@ -78,6 +81,14 @@ class ProjectContainer extends React.Component {
                 this.dropdownUsers.classList.add("project-not-assigned");
             }
 
+        }
+        clearTimeout(this.inputTimeout);
+        if (this.state.inputNameChanged) {
+            this.inputTimeout = setTimeout(function () {
+               self.setState({
+                   inputNameChanged: false
+               })
+            }, 3000);
         }
     }
 
@@ -117,13 +128,36 @@ class ProjectContainer extends React.Component {
         }
     }
 
-    onKeyPressEvent(event) {
+    onKeyUpEvent(event) {
         if(event.key == 'Enter'){
-            ManageActions.changeProjectName(this.props.organization, this.props.project, this.state.projectName);
-            return false;
+            this.changeProjectName(event);
+            this.inputName.blur();
+        }
+    }
+
+    inputNameClick() {
+        this.setState({
+            inputSelected: true,
+            inputNameChanged: false
+        });
+    }
+
+    inputNameOnBlur(event) {
+        this.changeProjectName(event);
+    }
+
+    changeProjectName(event) {
+        if (event.target.value !== this.props.project.get('name')) {
+            ManageActions.changeProjectName(this.props.organization, this.props.project, event.target.value);
+            this.setState({
+                projectName: event.target.value,
+                inputNameChanged: true,
+                inputSelected: false
+            });
         } else {
             this.setState({
-                projectName: event.target.value
+                inputNameChanged: false,
+                inputSelected: false
             });
         }
     }
@@ -193,15 +227,15 @@ class ProjectContainer extends React.Component {
     }
 
     getAnalyzeUrl() {
-        return '/analyze/' +this.props.project.get('name')+ '/' +this.props.project.get('id')+ '-' + this.props.project.get('password');
+        return '/analyze/' + this.props.project.get('project_slug') + '/' +this.props.project.get('id')+ '-' + this.props.project.get('password');
     }
 
     getJobSplitUrl(job) {
-        return '/analyze/'+ job.get('name') +'/'+ this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=split&jobid=' + job.get('id');
+        return '/analyze/'+ this.props.project.get('project_slug') +'/'+ this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=split&jobid=' + job.get('id');
     }
 
     getJobMergeUrl(job) {
-        return '/analyze/'+ this.props.project.get('name') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=merge&jobid=' + job.get('id');
+        return '/analyze/'+ this.props.project.get('project_slug') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=merge&jobid=' + job.get('id');
     }
 
     getJobSplitOrMergeButton(isChunk, mergeUrl, splitUrl ) {
@@ -218,12 +252,6 @@ class ProjectContainer extends React.Component {
     getLastActionDate() {
         let date = new Date(this.state.lastAction.event_date);
         return date.toDateString();
-    }
-
-    shouldComponentUpdate(nextProps, nextState){
-        return (nextProps.project !== this.props.project ||
-                nextState.lastAction !==  this.state.lastAction ||
-                nextProps.organization !==  this.props.organization)
     }
 
     getJobsList(targetsLangs, jobsList, jobsLength) {
@@ -352,11 +380,19 @@ class ProjectContainer extends React.Component {
                    </div>;
        }
        return result;
-   }
+    }
 
+    shouldComponentUpdate(nextProps, nextState){
+        return (nextProps.project !== this.props.project ||
+        nextState.lastAction !==  this.state.lastAction ||
+        nextProps.organization !==  this.props.organization ||
+        nextState.inputSelected !==  this.state.inputSelected ||
+        nextState.inputNameChanged !==  this.state.inputNameChanged
+        )
+    }
 
     render() {
-        var self = this;
+        let self = this;
         let activityLogUrl = this.getActivityLogUrl();
         let projectMenu = this.getProjectMenu(activityLogUrl);
         // let tMIcon = this.checkTMIcon();
@@ -395,6 +431,7 @@ class ProjectContainer extends React.Component {
 
         }
 
+        // Project State (Archived or Cancelled)
         let state = '';
         if ( this.props.project.get('has_archived') ) {
             state = <span>(archived)</span>;
@@ -402,6 +439,7 @@ class ProjectContainer extends React.Component {
             state = <span>(cancelled)</span>;
         }
 
+        // Workspace label
         let workspace = '';
         if (this.props.project.get('id_workspace') ) {
             let ws = this.props.organization.get('workspaces').find(function (ws) {
@@ -413,7 +451,12 @@ class ProjectContainer extends React.Component {
                 </a>
         }
 
+        // Users dropdown
         let dropDownUsers = this.getDropDownUsers();
+
+        //Input Class
+        let inputClass = (this.state.inputSelected) ? 'selected' : '';
+        let inputIcon = (this.state.inputNameChanged) ? <i className="icon-checkmark green icon" /> : <i className="icon-pencil icon" />;
 
         return <div className="project ui column grid shadow-1" id={"project-" + this.props.project.get('id')}
                     ref={(project) => this.project = project}>
@@ -442,11 +485,14 @@ class ProjectContainer extends React.Component {
                                                 <div className="project-name">
                                                     <div className="ui form">
                                                         <div className="field">
-                                                            <div className="ui icon input selected">
+                                                            <div className={"ui icon input " + inputClass}>
                                                                 <input type="text"
-                                                                       onKeyPress={this.onKeyPressEvent.bind(this, )}
+                                                                       onKeyUp={this.onKeyUpEvent.bind(this)}
+                                                                       onClick={this.inputNameClick.bind(this)}
+                                                                       onBlur={this.inputNameOnBlur.bind(this)}
+                                                                       ref={(inputName) => this.inputName = inputName}
                                                                         defaultValue={this.state.projectName}/>
-                                                                <i className="icon-pencil icon" />
+                                                                {inputIcon}
                                                             </div>
                                                         </div>
                                                     </div>
@@ -478,8 +524,11 @@ class ProjectContainer extends React.Component {
                                         <div className="field">
                                             <div className="ui icon input">
                                                 <input type="text" defaultValue={this.state.projectName}
-                                                       onKeyPress={this.onKeyPressEvent.bind(this)}/>
-                                                <i className="icon-pencil icon" />
+                                                       onKeyUp={this.onKeyUpEvent.bind(this)}
+                                                       onClick={this.inputNameClick.bind(this)}
+                                                       onBlur={this.inputNameOnBlur.bind(this)}
+                                                />
+                                                {inputIcon}
                                             </div>
                                         </div>
                                     </div>
