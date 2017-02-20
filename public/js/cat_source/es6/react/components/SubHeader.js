@@ -10,6 +10,7 @@ class SubHeader extends React.Component {
         this.NO_WORKSPACES = "0";
 
         this.organizazionChanged = false;
+        this.removeWorkspace = this.removeWorkspace.bind(this);
     }
 
     componentDidUpdate() {
@@ -34,11 +35,28 @@ class SubHeader extends React.Component {
         }
     }
 
+    componentDidMount () {
+        ProjectsStore.addListener(ManageConstants.REMOVE_WORKSPACE, this.removeWorkspace);
+    }
+
+    componentWillUnmount() {
+        ProjectsStore.removeListener(ManageConstants.REMOVE_WORKSPACE, this.removeWorkspace);
+    }
+
     componentWillReceiveProps(nextProps) {
-        if (nextProps.selectedOrganization !== this.props.selectedOrganization) {
+        if ( (_.isUndefined(this.props.selectedOrganization)) ||
+            (nextProps.selectedOrganization.get('id') !== this.props.selectedOrganization.get('id'))) {
             this.organizazionChanged = true;
         }
     }
+
+    removeWorkspace(ws) {
+        let currentWsId = (this.selectedWorkSpace && this.selectedWorkSpace.toJS ) ? this.selectedWorkSpace.get('id') : -1;
+        if(currentWsId == ws.get('id')) {
+            $(this.dropdownWorkspaces).dropdown('set selected', '-1');
+        }
+    }
+
 
     changeUser(value) {
         if ( this.organizazionChanged ) {
@@ -51,7 +69,7 @@ class SubHeader extends React.Component {
             this.selectedUser = ManageConstants.NOT_ASSIGNED_FILTER;
         } else {
             this.selectedUser = this.props.selectedOrganization.get('members').find(function (member) {
-                if (member.get('user').get("uid") === parseInt(value)) {
+                if (parseInt(member.get('user').get("uid")) === parseInt(value)) {
                     return true;
                 }
             });

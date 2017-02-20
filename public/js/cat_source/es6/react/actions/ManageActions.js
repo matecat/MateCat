@@ -126,7 +126,6 @@ let ManageActions = {
             AppDispatcher.dispatch({
                 actionType: ManageConstants.RENDER_PROJECTS,
                 projects: response.data,
-                organization: UI.selectedOrganization,
                 hideSpinner: true,
             });
         });
@@ -314,7 +313,11 @@ let ManageActions = {
     },
 
     removeWorkspace: function (organization, ws) {
-        UI.removeWorkspace(organization,ws).done(function (response) {
+        UI.removeWorkspace(organization.toJS(), ws.toJS()).done(function (response) {
+            AppDispatcher.dispatch({
+                actionType: ManageConstants.REMOVE_WORKSPACE,
+                workspace: ws,
+            });
             AppDispatcher.dispatch({
                 actionType: ManageConstants.UPDATE_WORKSPACES,
                 organization: organization,
