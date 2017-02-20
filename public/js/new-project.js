@@ -284,7 +284,7 @@ $.extend(UI.UPLOAD_PAGE, {
     getSelectedOrganization: function () {
         let selectedOrganizationId;
         if (config.isLoggedIn) {
-            selectedOrganizationId = $('.organization-dd').val();
+            selectedOrganizationId = $('#organization').val();
         }
         return selectedOrganizationId;
     },
