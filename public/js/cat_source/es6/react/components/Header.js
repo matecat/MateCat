@@ -152,9 +152,10 @@ class Header extends React.Component {
 
                     <nav className="sixteen wide column navigation">
                         <div className="ui stackable grid">
-                            <div className="eleven wide column">
+                            {this.props.showLinks ? (
+                            <div className="sixteen wide column">
                                 <a href="/" className="logo"/>
-                                {this.props.showLinks ? (
+
                                     <ul id="menu-site">
                                         <li><a href="https://www.matecat.com/benefits/">Benefits</a></li>
                                         <li><a href="https://www.matecat.com/outsourcing/">Outsource</a></li>
@@ -165,10 +166,9 @@ class Header extends React.Component {
                                         <li><a className="bigred" href="https://www.matecat.com/webinar" target="_blank">Webinar</a></li>
                                     </ul>
 
-                                    ) : ('')}
-                            </div>
 
-                            { this.props.loggedUser ? (
+                            </div> ) : ('')}
+                            { this.props.loggedUser && !this.props.showLinks ? (
                                     <div className="five wide right aligned wide column">
                                         {organizationsSelect}
                                     </div>
