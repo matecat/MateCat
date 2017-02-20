@@ -376,7 +376,7 @@ class ProjectContainer extends React.Component {
                 lastAction = '';
             } else {
                 let date = this.getLastActionDate();
-                lastAction = <div className="sixteen wide right aligned column">
+                lastAction = <div className="sixteen wide right aligned column pad-top-0 pad-bottom-0">
                     <div className="activity-log">
                         <a href={activityLogUrl} target="_blank" className="right activity-log">
                             <i> <span>Last action: {this.state.lastAction.action + ' on ' + date}</span><span> by {this.state.lastAction.first_name }</span></i>
@@ -385,7 +385,7 @@ class ProjectContainer extends React.Component {
                 </div>;
             }
         } else {
-            lastAction = <div className="sixteen wide right aligned column pad-top-0 pad-bottom-0">
+            lastAction = <div className="sixteen wide right aligned column">
                 <div className="activity-log">
                     <a href={activityLogUrl} target="_blank" className="right activity-log">
                         <i>Loading....</i>

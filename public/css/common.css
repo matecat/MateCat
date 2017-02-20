@@ -65,7 +65,7 @@ ul
 	    text-align: left;
     }
 
-    .logo
+    /*.logo
     {
 	    float: left;
 	    border: 0;
@@ -74,7 +74,7 @@ ul
 	    width: 145px;
 	    height: 31px;
 	    background-size: 130px 26px;
-    }
+    }*/
 
 
     footer
@@ -3263,7 +3263,7 @@ background: #6d6e71;
 border-bottom: 1px solid #333;
 padding: 0px 0 2px 0;
 margin-bottom: 20px;
-height: 45px;
+/*height: 45px;*/
 }
 
 .offline h1 {font-size:40px;}
