@@ -13,6 +13,10 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
         UPDATE projects SET id_assignee = NULL WHERE id_assignee = :id_assignee
     ";
 
+    protected static $_sql_unset_workspace_id = "
+        UPDATE projects SET id_workspace = NULL where id_workspace = :id_workspace
+    ";
+
     /**
      * @param $project
      * @param $field
@@ -52,6 +56,14 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( static::$_sql_for_project_unassignment ) ;
         $stmt->execute( ['id_assignee' => $user->uid ] ) ;
+
+        return $stmt->rowCount();
+    }
+
+    public function unsetWorkspaceId( $id_workspace ){
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( static::$_sql_unset_workspace_id ) ;
+        $stmt->execute( ['id_workspace' => $id_workspace ] ) ;
 
         return $stmt->rowCount();
     }
