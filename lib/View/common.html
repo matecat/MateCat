@@ -50,7 +50,7 @@
 
     <tal:block tal:condition="php: !empty(logged_user)">
         <div id='welcomebox' tal:attributes="title extended_user">
-            <a class="user-menu-preferences" >Profile (${logged_user})</a>
+            <span class="user-menu-preferences" >Profile (${logged_user})</span>
         </div>
     </tal:block>
 </div>

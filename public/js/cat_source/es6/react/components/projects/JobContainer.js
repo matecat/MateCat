@@ -140,8 +140,7 @@ class JobContainer extends React.Component {
         let splitButton = (!this.props.isChunk) ? <div className="item"><a target="_blank" href={splitUrl}><i className="icon-expand icon"/> Split</a></div> : '';
 
         let menuHtml = <div className="menu">
-                <div className="header">Project Menu</div>
-                <div className="ui divider"></div>
+
                 <div className="scrolling menu">
                     <div className="item" onClick={this.changePassword.bind(this)}><a ><i className="icon-refresh icon"/> Change Password</a></div>
                         {splitButton}
@@ -160,8 +159,7 @@ class JobContainer extends React.Component {
             </div>;
         if ( this.props.job.get('status') === 'archived' ) {
             menuHtml = <div className="menu">
-                <div className="header">Project Menu</div>
-                <div className="ui divider"></div>
+
                 <div className="scrolling menu">
                     <div className="item" onClick={this.changePassword.bind(this)}><a ><i className="icon-refresh icon"/> Change Password</a></div>
                     {splitButton}
@@ -180,8 +178,7 @@ class JobContainer extends React.Component {
             </div>;
         } else if ( this.props.job.get('status') === 'cancelled' ) {
             menuHtml = <div className="menu">
-                    <div className="header">Project Menu</div>
-                    <div className="ui divider"></div>
+
                     <div className="scrolling menu">
                         <div className="item" onClick={this.changePassword.bind(this)}><a ><i className="icon-refresh icon"/> Change Password</a></div>
                         {splitButton}
@@ -273,7 +270,7 @@ class JobContainer extends React.Component {
         if ( quality === "poor" || quality === "fail" ) {
             var url = this.getQAReport();
             let tooltipText = "Overall quality: " + quality.toUpperCase();
-            var classQuality = (quality === "poor") ? 'orange' : 'red';
+            var classQuality = (quality === "poor") ? 'yellow' : 'red';
             icon = <a className={"circular ui icon basic button qr-tooltip " + classQuality}
                       data-html={tooltipText} href={url} target="_blank">
                     <i className="icon-qr-matecat icon"/>
@@ -418,7 +415,6 @@ class JobContainer extends React.Component {
                                                 <a className="approved-bar" title={'Approved '+this.props.job.get('stats').get('APPROVED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('APPROVED_PERC')+ '%' }}/>
                                                 <a className="translated-bar" title={'Translated '+this.props.job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('TRANSLATED_PERC') + '%' }}/>
                                                 <a className="draft-bar" title={'Draft '+this.props.job.get('stats').get('DRAFT_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('DRAFT_PERC') + '%' }}/>
-
                                             </div>
                                         </div>
                                     </div>

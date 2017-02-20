@@ -467,8 +467,8 @@ float: left;
   top: -70px;
 }
 
-  .cancel-btn, #clear-all-files, #clear-all-gdrive {background:#f26522;}
-  .cancel-btn:hover, #clear-all-files:hover, #clear-all-gdrive:hover {background:#d1581c;}
+  .cancel-btn, #clear-all-files, #clear-all-gdrive, #delete-failed-conversions {background:#f26522;}
+  .cancel-btn:hover, #clear-all-files:hover, #clear-all-gdrive:hover, #delete-failed-conversions:hover {background:#d1581c;}
 
 
 
@@ -642,7 +642,8 @@ h2.payoff
 
 .uploaded .btncontinue{display:block;}
 .btncontinue p{float:left !important;font-size:14px !important;margin:0px 0 0 0 !important;padding:0;}
-.btncontinue .fileinput-button{float:left ;margin:7px 0 0 10px !important;width:auto;padding:8px 10px 0px 30px}
+.btncontinue .fileinput-button{float:left ;margin:7px 0 0 10px !important;width:auto;padding:8px 10px 0px 10px !important;
+    height: 36px;}
 
 #add-files, #clear-all-files, #clear-all-gdrive {
     padding: 8px 10px 0px 10px !important;

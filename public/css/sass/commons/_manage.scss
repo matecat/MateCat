@@ -32,6 +32,7 @@ body.manage {
 
 .project-list {
     padding-top: 160px;
+    padding-bottom: 160px;
     .project {
         margin-bottom: 30px !important;
         .ui.ribbon.label {
@@ -47,9 +48,13 @@ body.manage {
                 padding: 10px 0 10px 15px;
             }
             .project-name {
+                .ui.icon.input {
+                    transition: 0.3s ease !important;
+                }
                 .ui.icon.input.selected {
                         width: 627px;
                         z-index: 3;
+                        transition: 0.3s ease !important;
                 }
                 .ui.form input[type="text"] {
                     background: #d0d0d0;
@@ -70,6 +75,7 @@ body.manage {
             }
             .project-payable {
                 padding: 10px 0;
+                float: left;
             }
             .project-activity-icon {
                 padding: 0 15px !important;
