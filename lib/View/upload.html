@@ -225,9 +225,24 @@
             <option value="telecommunications">Telecommunications</option>
             <option value="travel_tourism">Travel &amp; Tourism</option>
         </select>
+
+    </div>
+
+    <div class="translate-box organization" tal:condition="php: !empty(organizations) && count(organizations) > 1" >
+        <h2>Organization</h2>
+        <select name="organization" id="organization">
+            <option tal:repeat="organization organizations"
+                    tal:attributes="value organization/id; selected php: repeat.organization.index == 0 "
+                    tal:content="organization/name"></option>
+        </select>
+    </div>
+
+
+    <div class="translate-box settings">
         <a href="#" class="more-options"><span>Settings</span></a>
         <h2 class="resources" style="display:none;"><span class="numResources">4</span> Resources selected</h2>
     </div>
+
 
     <div metal:use-macro="${additional_input_params_base_path}/upload_partials.html/additional_input_params" />
 

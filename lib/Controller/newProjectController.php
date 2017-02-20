@@ -296,6 +296,10 @@ class newProjectController extends viewController {
 
         $this->template->globalMessage = Utils::getGlobalMessage() ;
 
+        if ( $this->isLoggedIn() ) {
+            $this->template->organizations = ( new \Organizations\MembershipDao())->findUserOrganizations($this->logged_user) ;
+        }
+
     }
 
     private function getCurrentTargetLang() {
