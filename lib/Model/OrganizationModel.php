@@ -92,6 +92,8 @@ class OrganizationModel {
             }
         }
 
+        ( new MembershipDao() )->destroyCacheForListByOrganizationId( $this->struct->id );
+
         $this->all_memberships = ( new MembershipDao )
             ->setCacheTTL(3600)
             ->getMemberListByOrganizationId( $this->struct->id ) ;

@@ -67,6 +67,8 @@ class RedeemableProject
     public function clear() {
         unset( $this->session['redeem_project'] );
         unset( $this->session['last_created_pid'] );
+        unset( $_SESSION['redeem_project'] );
+        unset( $_SESSION['last_created_pid'] );
     }
 
     public function getProject() {

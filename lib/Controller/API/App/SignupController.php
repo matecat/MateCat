@@ -5,6 +5,7 @@ namespace API\App;
 use API\V2\KleinController;
 use Exceptions\ValidationError;
 use Monolog\Handler\Curl\Util;
+use Organizations\OrganizationInvitedUser;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Users\PasswordReset;
 use Users\Signup ;
@@ -36,7 +37,9 @@ class SignupController extends AbstractStatefulKleinController  {
         try {
             $user = Signup::confirm( $this->request->param('token') ) ;
 
-            $project = new RedeemableProject($user, $_SESSION );
+            OrganizationInvitedUser::completeOrganizationSignUp( $user, $_SESSION );
+
+            $project = new RedeemableProject( $user, $_SESSION );
             $project->tryToRedeem() ;
 
             if ( $project->getDestinationURL() ) {

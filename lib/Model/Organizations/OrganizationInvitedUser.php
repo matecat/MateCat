@@ -38,16 +38,24 @@ class OrganizationInvitedUser {
     public function prepareUserInvitedSignUp() {
 
         $_SESSION[ 'invited_to_organization' ] = $this->jwt;
-
-        $this->response->cookie(
-                'signup_email',
-                $value = $this->jwt[ 'email' ],
-                $expiry = strtotime( '+1 hour' ),
-                $path = '/'
-        );
-
         FlashMessage::set( 'popup', 'signup', FlashMessage::SERVICE );
         FlashMessage::set( 'signup_email', $this->jwt[ 'email' ], FlashMessage::SERVICE );
+
+    }
+
+    public static function completeOrganizationSignUp( $user, $session ){
+
+        $invitation = $session[ 'invited_to_organization' ];
+
+        $organizationStruct = ( new OrganizationDao )->findById( $invitation[ 'organization_id' ] );
+
+        $organizationModel = new \OrganizationModel( $organizationStruct );
+        $organizationModel->setUser( $user );
+        $organizationModel->addMemberEmail( $invitation[ 'email' ] );
+        $organizationModel->updateMembers();
+
+        unset( $session[ 'invited_to_organization' ] );
+        unset( $_SESSION[ 'invited_to_organization' ] );
 
     }
 
