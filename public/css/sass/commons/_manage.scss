@@ -275,13 +275,13 @@ body.manage {
     bottom: 0;
     left: 0;
     width: 100%;
-    z-index: 1;
+    z-index: 4;
 }
 
 .manage footer .wrapper {
     margin: 0px auto 0 auto;
     padding: 3px 0 0 0;
-    width: 83%;
+    width: 92%;
     font-size: 14px;
     position: relative;
     text-align: right;
@@ -293,6 +293,7 @@ footer ul {
     margin: -5px 0 0 0;
     padding: 0;
     float: left;
+    list-style: none;
 }
 
 footer nav {
@@ -307,6 +308,11 @@ footer nav {
 
 footer nav, footer nav a {
     font-size: 14px;
+    color: #ffffff !important;
+    text-decoration: underline;
+    &:hover {
+        text-decoration: none;
+    }
 }
 
 
@@ -316,8 +322,14 @@ footer nav ul li {
 
 footer nav ul a, #welcomebox {
     text-decoration: underline;
+    &:hover {
+        text-decoration: none;
+    }
 }
 
 footer nav ul a:hover {
     background: none!important;
+    color: #ffffff;
 }
+
+

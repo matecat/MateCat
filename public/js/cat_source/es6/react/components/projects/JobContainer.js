@@ -343,9 +343,9 @@ class JobContainer extends React.Component {
                         </div>
                         <div className="fourteen wide computer fourteen wide tablet thirteen wide mobile column pad-left-0">
                             <div className="ui mobile reversed stackable grid">
-                                <div className="thirteen wide computer only tablet only column">
+                                <div className="twelve wide computer only eleven wide tablet only column">
                                     <div className="ui grid">
-                                        <div className="three wide column">
+                                        <div className="three wide computer six wide tablet column">
                                             <div className="progress-bar">
                                                 <div className="progr">
                                                     <div className="meter">
@@ -359,7 +359,7 @@ class JobContainer extends React.Component {
                                             </div>
                                         </div>
 
-                                        <div className="three wide column">
+                                        <div className="four wide computer six wide tablet column">
                                             <div className="job-payable">
                                                 <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
                                             </div>
@@ -385,7 +385,7 @@ class JobContainer extends React.Component {
                                         </div>*/}
                                     </div>
                                 </div>
-                                <div className="three wide right floated right aligned column">
+                                <div className="four wide computer five wide tablet right floated right aligned column">
                                     <div className="job-activity-icon">
                                         {QRIcon}
                                         {warningsIcon}
@@ -422,29 +422,29 @@ class JobContainer extends React.Component {
                                 </div>
 
                                 <div className="job-payable three wide right aligned column pad-top-0 pad-bottom-0">
-                                    <div className="">
+                                    <div className="pad-bottom-15">
                                         <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
                                     </div>
                                 </div>
 
-                                {/*<div className="ten wide column">*/}
-                                    {/*<div className="ui grid one column">*/}
-                                        {/*<div className="nine wide column">*/}
-                                            {/*<div className="send-translator"*/}
-                                                 {/*onClick={this.openAssignToTranslatorModal.bind(this)}>*/}
-                                                {/*<i className="icon-forward icon"/>*/}
-                                                {/*<a href="#"><span id="translator-job">Send to translator</span></a>*/}
-                                            {/*</div>*/}
-                                        {/*</div>*/}
-                                        {/*<div className="seven wide column right aligned">*/}
-                                            {/*<div className="due-to"*/}
-                                                 {/*onClick={this.openAssignToTranslatorModal.bind(this)}>*/}
-                                                {/*<i className="icon-calendar icon"/>*/}
-                                                {/*<a href="#"><span id="due-date">Delivery date</span></a>*/}
-                                            {/*</div>*/}
-                                        {/*</div>*/}
-                                    {/*</div>*/}
-                                {/*</div>*/}
+                                {/*/!*<div className="ten wide column">*!/
+                                    /!*<div className="ui grid one column">*!/
+                                        /!*<div className="nine wide column">*!/
+                                            /!*<div className="send-translator"*!/
+                                                 /!*onClick={this.openAssignToTranslatorModal.bind(this)}>*!/
+                                                /!*<i className="icon-forward icon"/>*!/
+                                                /!*<a href="#"><span id="translator-job">Send to translator</span></a>*!/
+                                            /!*</div>*!/
+                                        /!*</div>*!/
+                                        /!*<div className="seven wide column right aligned">*!/
+                                            /!*<div className="due-to"*!/
+                                                 /!*onClick={this.openAssignToTranslatorModal.bind(this)}>*!/
+                                                /!*<i className="icon-calendar icon"/>*!/
+                                                /!*<a href="#"><span id="due-date">Delivery date</span></a>*!/
+                                            /!*</div>*!/
+                                        /!*</div>*!/
+                                    /!*</div>*!/
+                                /!*</div>*!/*/}
                             </div>
                         </div>
 

@@ -113,7 +113,7 @@ class Header extends React.Component {
                                 </a>
                             </div>
             }
-            result = <div className="ui dropdown selection"
+            result = <div className="ui dropdown selection org"
                           ref={(dropdownOrganizations) => this.dropdownOrganizations = dropdownOrganizations}>
                 <input type="hidden" name="organization" className="organization-dd" />
                 <i className="dropdown icon"/>
@@ -137,7 +137,7 @@ class Header extends React.Component {
 
     render () {
         let self = this;
-        let organizationsSelect = this.getOrganizationsSelect();
+        let organizationsSelect = (this.props.loggedUser) ? this.getOrganizationsSelect() : '';
         let selectedOrganization =  this.state.organizations.find(function (org) {
             return org.get('id') == self.state.selectedOrganizationId;
         });
@@ -151,9 +151,14 @@ class Header extends React.Component {
         return <section className="nav-mc-bar ui grid">
 
                     <nav className="sixteen wide column navigation">
-                        <div className="ui stackable grid">
-                            <div className="eleven wide column">
+                        <div className="ui grid">
+                            <div className="three wide column">
                                 <a href="/" className="logo"/>
+
+                            </div>
+                            <div className="thirteen wide right aligned wide column">
+                                {organizationsSelect}
+
                                 {this.props.showLinks ? (
                                     <ul id="menu-site">
                                         <li><a href="https://www.matecat.com/benefits/">Benefits</a></li>
@@ -167,14 +172,6 @@ class Header extends React.Component {
 
                                     ) : ('')}
                             </div>
-
-                            { this.props.loggedUser ? (
-                                    <div className="five wide right aligned wide column">
-                                        {organizationsSelect}
-                                    </div>
-                                ) :(
-                                    ''
-                                )}
                         </div>
                     </nav>
                 {subHeader}

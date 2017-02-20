@@ -1169,9 +1169,47 @@ ul.test li
 	background: yellow;
 	}
 
-footer{background:#6d6e71;height:27px;text-align:right;border-top:1px solid #333;color:#fff;position:fixed;bottom:0;left:0;width:100%;z-index:999999999999;}
-footer a {color:#fff;text-shadow:none;}
-footer a:hover{text-decoration:none}
+//footer{background:#6d6e71;height:27px;text-align:right;border-top:1px solid #333;color:#fff;position:fixed;bottom:0;left:0;width:100%;z-index:999999999999;}
+//footer a {color:#fff;text-shadow:none;}
+//footer a:hover{text-decoration:none}
+
+
+footer {
+    height: 28px;
+    z-index: 4;
+    .wrapper {
+        margin: 0px auto 0 auto;
+        padding: 5px 0 0 0;
+
+        ul {
+            margin: 0px 0 0 0;
+            padding: 0;
+            li {
+                height: 18px;
+                padding-top: 0px;
+                border-right: 1px solid #fff;
+                margin-top: 0px;
+                a {
+                    &:hover {
+                        color: #ffffff;
+                    }
+                }
+            }
+        }
+        #welcomebox {
+            color: #ffffff;
+            &:hover {
+                color: #ffffff;
+                text-decoration: none;
+            }
+            a {
+                color: #fff;
+            }
+
+        }
+
+    }
+}
 
 .fb-like.fb_iframe_widget {
     float: left;
