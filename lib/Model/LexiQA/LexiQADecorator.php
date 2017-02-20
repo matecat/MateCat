@@ -61,6 +61,7 @@ class LexiQADecorator {
         if( INIT::$LXQ_LICENSE ){
             //LEXIQA license key
             $this->template->lxq_license = INIT::$LXQ_LICENSE;
+            $this->template->lxq_partnerid = INIT::$LXQ_PARTNERID;
             $this->template->lexiqa_languages = json_encode( ProjectOptionsSanitizer::$lexiQA_allowed_languages );
         }
 
@@ -95,14 +96,14 @@ class LexiQADecorator {
             $this->lexiqa_enabled = false;
             return $this;
         }
-
-        if  (
-            in_array( Features::QACHECK_GLOSSARY, $featureSet->getCodes() ) ||
-            in_array( Features::QACHECK_BLACKLIST, $featureSet->getCodes() )
-        ) {
-                $this->deny_lexiqa = true;
-                $this->lexiqa_enabled = false;
-        }
+        $this->lexiqa_enabled = true;
+        // if  (
+        //     in_array( Features::QACHECK_GLOSSARY, $featureSet->getCodes() ) ||
+        //     in_array( Features::QACHECK_BLACKLIST, $featureSet->getCodes() )
+        // ) {
+        //         $this->deny_lexiqa = true;
+        //         $this->lexiqa_enabled = false;
+        // }
 
         return $this;
 

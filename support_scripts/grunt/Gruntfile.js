@@ -193,6 +193,8 @@ module.exports = function(grunt) {
                     basePath + 'cat_source/db.js',
                     basePath + 'cat_source/mbc.main.js',
                     basePath + 'cat_source/mbc.templates.js',
+                    //WARNING: lxq.main.js: this should always be below qa_check_glossary and
+                    //qa_check_blacklist, in order for its event handlers to be excecuted last
                     basePath + 'cat_source/lxq.main.js',
                     basePath + 'cat_source/lxq.templates.js',
                     basePath + 'cat_source/project_completion.*.js',
@@ -448,5 +450,3 @@ module.exports = function(grunt) {
         'sass'
     ]);
 };
-
-

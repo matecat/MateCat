@@ -35,6 +35,7 @@ FILTERS_MASHAPE_KEY = Register to https://market.mashape.com/translated/matecat-
 ; THIS SHOULD BE YOUR LEXIQA LICENSE, Request your license key at
 ; @see http://www.lexiqa.net
 LXQ_LICENSE = false
+LXQ_PARTNERID = false
 
 ;----------------------------------------
 [staging]
@@ -63,6 +64,7 @@ FILTERS_MASHAPE_KEY = Register to https://market.mashape.com/translated/matecat-
 ; THIS SHOULD BE YOUR LEXIQA LICENSE, Request your license key at
 ; @see http://www.lexiqa.net
 LXQ_LICENSE = false
+LXQ_PARTNERID = false
 
 ;----------------------------------------
 [production]
@@ -91,3 +93,4 @@ FILTERS_MASHAPE_KEY = Register to https://market.mashape.com/translated/matecat-
 ; THIS SHOULD BE YOUR LEXIQA LICENSE, Request your license key at
 ; @see http://www.lexiqa.net
 LXQ_LICENSE = false
+LXQ_PARTNERID = false
