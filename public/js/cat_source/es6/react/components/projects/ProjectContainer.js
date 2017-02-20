@@ -177,8 +177,6 @@ class ProjectContainer extends React.Component {
                         </div>;
         if ( this.props.project.get('has_archived') ) {
             menuHtml = <div className="menu">
-                <div className="header">Project Menu</div>
-                <div className="ui divider"></div>
                 <div className="scrolling menu">
                     <div className="item"><a href={activityLogUrl} target="_blank"><i className="icon-download-logs icon"/>Activity Log</a></div>
 
@@ -446,7 +444,7 @@ class ProjectContainer extends React.Component {
                 return ws.get('id') == self.props.project.get('id_workspace');
             });
             if (ws) {
-                workspace = <a className="ui orange circular label project-workspace shadow-1"
+                workspace = <a className="ui olive circular label project-workspace shadow-1"
                                onClick={this.openChangeOrganizationModal.bind(this)}>
                     {ws.get('name') }
                 </a>
@@ -469,7 +467,7 @@ class ProjectContainer extends React.Component {
                             <div className="two wide computer two wide tablet three wide mobile column">
                                 <div className="ui stackable grid">
                                     <div className="sixteen wide column">
-                                        <div className="ui teal ribbon label">
+                                        <div className="ui blue ribbon label">
                                             <span className="project-id">
                                                 {this.props.project.get('id')}
                                             </span>
@@ -481,9 +479,9 @@ class ProjectContainer extends React.Component {
 
                             <div className="fourteen wide computer fourteen wide tablet thirteen wide mobile column">
                                 <div className="ui mobile reversed stackable grid">
-                                    <div className="ten wide computer eight wide tablet only reverse tablet column tablet only">
+                                    <div className="five wide computer four wide tablet only reverse tablet only column">
                                         <div className="ui grid">
-                                            <div className="nine wide column">
+                                            <div className="sixteen wide column">
                                                 <div className="project-name">
                                                     <div className="ui form">
                                                         <div className="field">
@@ -500,14 +498,12 @@ class ProjectContainer extends React.Component {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="seven wide column">
-                                                <div className="project-payable">
-                                                    <a href={analyzeUrl} target="_blank">{payableWords} <span>payable words</span></a>
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
-                                    <div className="six wide computer eight wide tablet right aligned column">
+                                    <div className="eleven wide computer twelve wide tablet right aligned column">
+                                        <div className="project-payable">
+                                            <a href={analyzeUrl} target="_blank">{payableWords} <span>payable words</span></a>
+                                        </div>
                                         <div className="project-activity-icon">
                                             {workspace}
                                             {dropDownUsers}

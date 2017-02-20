@@ -15,7 +15,9 @@ header {
             font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
             text-transform: uppercase;
             font-weight: 600;
-
+            &.org {
+                float: right;
+            }
             i {
                 float: right;
             }
@@ -68,7 +70,7 @@ header {
     position: absolute;
     float: left;
     border: 0;
-    margin-top: 6px;
+    margin-top: 5px;
     background: url(../../img/logo.png) 0px 2px no-repeat;
     width: 145px;
     height: 31px;
@@ -79,7 +81,7 @@ header {
 #menu-site {
     margin-top: 0px !important;
     margin-left: 180px !important;
-    float: right;
+    float: right !important;
     @media only screen and (min-width: 1208px) {
         ul {
             li {
@@ -90,4 +92,8 @@ header {
         }
 
     }
+}
+
+.menu-site-right {
+    float: right !important;
 }

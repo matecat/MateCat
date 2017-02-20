@@ -467,8 +467,8 @@ float: left;
   top: -70px;
 }
 
-  .cancel-btn, #clear-all-files, #clear-all-gdrive {background:#f26522;}
-  .cancel-btn:hover, #clear-all-files:hover, #clear-all-gdrive:hover {background:#d1581c;}
+  .cancel-btn, #clear-all-files, #clear-all-gdrive, #delete-failed-conversions {background:#f26522;}
+  .cancel-btn:hover, #clear-all-files:hover, #clear-all-gdrive:hover, #delete-failed-conversions:hover {background:#d1581c;}
 
 
 
@@ -652,7 +652,8 @@ h2.payoff
 
 .uploaded .btncontinue{display:block;}
 .btncontinue p{float:left !important;font-size:14px !important;margin:0px 0 0 0 !important;padding:0;}
-.btncontinue .fileinput-button{float:left ;margin:7px 0 0 10px !important;width:auto;padding:8px 10px 0px 30px}
+.btncontinue .fileinput-button{float:left ;margin:7px 0 0 10px !important;width:auto;padding:8px 10px 0px 10px !important;
+    height: 36px;}
 
 #add-files, #clear-all-files, #clear-all-gdrive {
     padding: 8px 10px 0px 10px !important;
@@ -1179,9 +1180,47 @@ ul.test li
 	background: yellow;
 	}
 
-footer{background:#6d6e71;height:27px;text-align:right;border-top:1px solid #333;color:#fff;position:fixed;bottom:0;left:0;width:100%;z-index:999999999999;}
-footer a {color:#fff;text-shadow:none;}
-footer a:hover{text-decoration:none}
+//footer{background:#6d6e71;height:27px;text-align:right;border-top:1px solid #333;color:#fff;position:fixed;bottom:0;left:0;width:100%;z-index:999999999999;}
+//footer a {color:#fff;text-shadow:none;}
+//footer a:hover{text-decoration:none}
+
+
+footer {
+    height: 28px;
+    z-index: 4;
+    .wrapper {
+        margin: 0px auto 0 auto;
+        padding: 5px 0 0 0;
+
+        ul {
+            margin: 0px 0 0 0;
+            padding: 0;
+            li {
+                height: 18px;
+                padding-top: 0px;
+                border-right: 1px solid #fff;
+                margin-top: 0px;
+                a {
+                    &:hover {
+                        color: #ffffff;
+                    }
+                }
+            }
+        }
+        #welcomebox {
+            color: #ffffff;
+            &:hover {
+                color: #ffffff;
+                text-decoration: none;
+            }
+            a {
+                color: #fff;
+            }
+
+        }
+
+    }
+}
 
 .fb-like.fb_iframe_widget {
     float: left;

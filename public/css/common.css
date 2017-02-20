@@ -77,7 +77,7 @@ ul
     }*/
 
 
-    footer
+footer
     {
 	    background: #6d6e71;
 	    height: 27px;
@@ -3858,8 +3858,6 @@ float: left;
   display: inline-block;
   margin-right: 10px;
 }
-
-
 
 .more:before,
 .more.minus:before,
