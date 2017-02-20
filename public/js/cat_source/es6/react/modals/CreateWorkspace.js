@@ -41,7 +41,7 @@ class CreateWorkspace extends React.Component {
     }
 
     removeWS(ws) {
-        ManageActions.removeWorkspace(this.state.organization.toJS(), ws.toJS());
+        ManageActions.removeWorkspace(this.state.organization, ws);
     }
 
     undoRemoveAction() {

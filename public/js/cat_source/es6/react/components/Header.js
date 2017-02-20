@@ -137,7 +137,7 @@ class Header extends React.Component {
 
     render () {
         let self = this;
-        let organizationsSelect = (this.props.loggedUser) ? this.getOrganizationsSelect() : '';
+        let organizationsSelect = (this.props.loggedUser && !this.props.showLinks) ? this.getOrganizationsSelect() : '';
         let selectedOrganization =  this.state.organizations.find(function (org) {
             return org.get('id') == self.state.selectedOrganizationId;
         });

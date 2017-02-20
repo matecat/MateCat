@@ -35,19 +35,6 @@ class ProjectsContainer extends React.Component {
         });
     }
 
-    // renderAllOrganizationsProjects(projects, organizations, hideSpinner) {
-    //     let more_projects = true;
-    //     if (hideSpinner) {
-    //         more_projects = this.state.more_projects
-    //     }
-    //     this.setState({
-    //         projects: projects,
-    //         more_projects: more_projects,
-    //         reloading_projects: false,
-    //         organization: null,
-    //     });
-    // }
-
     updateOrganization(organization) {
         if (organization.get('id') === this.state.organization.get('id')) {
             this.setState({

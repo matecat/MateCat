@@ -95,6 +95,17 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
         }
     },
 
+    removeWorkspace(workspace) {
+        let idWS = workspace.get('id');
+        this.projects = this.projects.map(function (prj) {
+            if (prj.get('id_workspace') === idWS) {
+                return prj.set('id_workspace', null);
+            } else {
+                return prj;
+            }
+        });
+    },
+
     emitChange: function(event, args) {
         this.emit.apply(this, arguments);
     },
@@ -173,6 +184,11 @@ AppDispatcher.register(function(action) {
             break;
         case ManageConstants.HIDE_PROJECT:
             ProjectsStore.emitChange(action.actionType, Immutable.fromJS(action.project));
+            break;
+        case ManageConstants.REMOVE_WORKSPACE:
+            ProjectsStore.removeWorkspace(action.workspace);
+            ProjectsStore.emitChange(ManageConstants.REMOVE_WORKSPACE, action.workspace);
+            ProjectsStore.emitChange(ManageConstants.UPDATE_PROJECTS, ProjectsStore.projects);
             break;
     }
 });

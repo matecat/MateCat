@@ -443,10 +443,12 @@ class ProjectContainer extends React.Component {
             let ws = this.props.organization.get('workspaces').find(function (ws) {
                 return ws.get('id') == self.props.project.get('id_workspace');
             });
-            workspace = <a className="ui olive circular label project-workspace shadow-1"
-                           onClick={this.openChangeOrganizationModal.bind(this)}>
-                {ws.get('name') }
+            if (ws) {
+                workspace = <a className="ui olive circular label project-workspace shadow-1"
+                               onClick={this.openChangeOrganizationModal.bind(this)}>
+                    {ws.get('name') }
                 </a>
+            }
         }
 
         // Users dropdown

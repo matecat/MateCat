@@ -124,7 +124,7 @@ AppDispatcher.register(function(action) {
             OrganizationsStore.emitChange(ManageConstants.UPDATE_ORGANIZATIONS, OrganizationsStore.organizations);
             break;
         case ManageConstants.UPDATE_WORKSPACES:
-            var updatedOrg = OrganizationsStore.updateOrganizationWorkspaces(Immutable.fromJS(action.organization), Immutable.fromJS(action.workspaces));
+            var updatedOrg = OrganizationsStore.updateOrganizationWorkspaces(action.organization, Immutable.fromJS(action.workspaces));
             OrganizationsStore.emitChange(ManageConstants.UPDATE_ORGANIZATION, updatedOrg);
             OrganizationsStore.emitChange(ManageConstants.UPDATE_ORGANIZATIONS, OrganizationsStore.organizations);
             break;
