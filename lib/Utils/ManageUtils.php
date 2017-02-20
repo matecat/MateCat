@@ -183,9 +183,7 @@ class ManageUtils {
             $project[ 'features' ] = $item[ 'features' ] ;
             $project[ 'id_assignee' ] = $item[ 'id_assignee' ] ;
             $project[ 'id_workspace' ] = $item[ 'id_workspace' ] ;
-            $project[ 'analyze_url' ] = Routes::analyze( [
-                'project_name' => $project['name'], 'id_project' => $project['id'], 'password' => $project['password']
-            ]) ;
+            $project[ 'project_slug' ] = Utils::friendly_slug( $project['name'] ) ;
 
             $projects[ ] = $project;
         }

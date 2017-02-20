@@ -9,8 +9,8 @@
 
 namespace API\V2\Json;
 
-
 use Projects_ProjectStruct;
+use Utils ;
 
 class Project {
 
@@ -34,9 +34,7 @@ class Project {
             'name'            => $data->name,
             'id_workspace'    => (int) $data->id_workspace,
             'id_organization' => (int) $data->id_organization,
-            'analyze_url'     => \Routes::analyze(
-                array('id_project' => $data->id, 'project_name' => $data->name, 'password' => $data->password )
-            )
+            'project_slug' => Utils::friendly_slug($data->name)
         );
     }
 
