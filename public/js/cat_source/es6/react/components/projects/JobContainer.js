@@ -74,7 +74,7 @@ class JobContainer extends React.Component {
             .done(function (data) {
                 let notification = {
                     title: 'Change job password',
-                    text: 'The password has been changed. <a className="undo-password">Undo</a>',
+                    text: 'The password has been changed. <a class="undo-password">Undo</a>',
                     type: 'warning',
                     position: 'tc',
                     allowHtml: true,
@@ -82,23 +82,26 @@ class JobContainer extends React.Component {
                 };
                 let boxUndo = APP.addNotification(notification);
                 ManageActions.changeJobPassword(self.props.project, self.props.job, data.password, data.undo);
-                $('.undo-password').off('click');
-                $('.undo-password').on('click', function () {
-                    APP.removeNotification(boxUndo);
-                    self.props.changeJobPasswordFn(self.props.job.toJS(), 1, self.oldPassword)
-                        .done(function (data) {
-                            notification = {
-                                title: 'Change job password',
-                                text: 'The previous password has been restored.',
-                                type: 'warning',
-                                position: 'tc',
-                                timer: 7000
-                            };
-                            APP.addNotification(notification);
-                            ManageActions.changeJobPassword(self.props.project, self.props.job, data.password, data.undo);
-                        });
+                setTimeout(function () {
+                    $('.undo-password').off('click');
+                    $('.undo-password').on('click', function () {
+                        APP.removeNotification(boxUndo);
+                        self.props.changeJobPasswordFn(self.props.job.toJS(), 1, self.oldPassword)
+                            .done(function (data) {
+                                notification = {
+                                    title: 'Change job password',
+                                    text: 'The previous password has been restored.',
+                                    type: 'warning',
+                                    position: 'tc',
+                                    timer: 7000
+                                };
+                                APP.addNotification(notification);
+                                ManageActions.changeJobPassword(self.props.project, self.props.job, data.password, data.undo);
+                            });
 
-                })
+                    })
+                });
+
             });
     }
 

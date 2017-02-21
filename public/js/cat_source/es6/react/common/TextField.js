@@ -33,7 +33,7 @@ export default class TextField extends React.Component {
                         marginBottom: '17px'
                         } }>
                 <input type={type} placeholder={this.props.placeholder}
-                       value={this.props.text} name={this.props.name} onChange={this.props.onFieldChanged} className={this.props.classes}  tabIndex={this.props.tabindex}
+                       defaultValue={this.props.text} name={this.props.name} onChange={this.props.onFieldChanged} className={this.props.classes}  tabIndex={this.props.tabindex}
                        onKeyPress={this.props.onKeyPress}/>
                 {errorHtml}
             </div>
