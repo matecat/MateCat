@@ -92,6 +92,8 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
      * @param $feature_code
      *
      * @return bool
+     *
+     * @deprecated feature enabled for a created project should be decided based on project metadata
      */
     public function isFeatureEnabled( $feature_code ) {
         $feature = $this->getOwnerFeature( $feature_code );
