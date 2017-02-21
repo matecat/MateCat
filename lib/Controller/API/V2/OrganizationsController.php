@@ -68,7 +68,7 @@ class OrganizationsController extends KleinController {
             $org = new OrganizationStruct();
             $org->id = $this->request->id_organization;
 
-            $org->name = $requestContent->name;
+            $org->name = $requestContent['name'];
             if( empty( $org->name ) ){
                 throw new InvalidArgumentException( "Wrong parameter :name ", 400 );
             }
@@ -80,7 +80,7 @@ class OrganizationsController extends KleinController {
                 throw new AuthorizationError( "Not Authorized", 401 );
             }
 
-            $org->name = $requestContent->name;
+            $org->name = $requestContent['name'];
 
             $teamDao = new OrganizationDao();
 
