@@ -32,7 +32,7 @@ class ChangeProjectWorkspace extends React.Component {
                             key={'ws' + ws.get('id')}
                             onClick={self.selectWorkspace.bind(self, ws.get('id'))}>
                             <div className="content" >
-                                <div className="header">{ws.get('name')}</div>
+                                {ws.get('name')}
                             </div>
                         </div>;
             });

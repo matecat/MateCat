@@ -105,15 +105,15 @@ class ProjectContainer extends React.Component {
     }
 
     removeProject() {
-        ManageActions.updateStatusProject(this.props.project, 'cancelled');
+        ManageActions.updateStatusProject(this.props.project, ' cancelled ');
     }
 
     archiveProject() {
-        ManageActions.updateStatusProject(this.props.project, 'archived');
+        ManageActions.updateStatusProject(this.props.project, ' archived ');
     }
 
     activateProject() {
-        ManageActions.updateStatusProject(this.props.project, 'active');
+        ManageActions.updateStatusProject(this.props.project, ' active ');
     }
 
     changeUser(value) {
@@ -165,33 +165,33 @@ class ProjectContainer extends React.Component {
     getProjectMenu(activityLogUrl) {
         let menuHtml = <div className="menu">
             <div className="scrolling menu">
-                <div className="item" onClick={this.openChangeOrganizationModal.bind(this)}>
-                    <a><i className="icon-forward icon"/>Move project</a>
-                </div>
-                <div className="item"><a href={activityLogUrl} target="_blank"><i className="icon-download-logs icon"/>Activity Log</a></div>
+                <a className="item" onClick={this.openChangeOrganizationModal.bind(this)}>
+                    <i className="icon-forward icon"/>Move project
+                </a>
+                <a className="item" href={activityLogUrl} target="_blank"><i className="icon-download-logs icon"/>Activity Log</a>
 
-                <div className="item"><a onClick={this.archiveProject.bind(this)}><i className="icon-drawer icon"/>Archive project</a></div>
+                <a className="item" onClick={this.archiveProject.bind(this)}><span><i className="icon-drawer icon"/>Archive project</span></a>
 
-                <div className="item"><a onClick={this.removeProject.bind(this)}><i className="icon-trash-o icon"/>Cancel project</a></div>
+                <a className="item" onClick={this.removeProject.bind(this)}><span><i className="icon-trash-o icon"/>Cancel project</span></a>
             </div>
                         </div>;
         if ( this.props.project.get('has_archived') ) {
             menuHtml = <div className="menu">
                 <div className="scrolling menu">
-                    <div className="item"><a href={activityLogUrl} target="_blank"><i className="icon-download-logs icon"/>Activity Log</a></div>
+                    <a className="item" href={activityLogUrl} target="_blank"><span><i className="icon-download-logs icon"/>Activity Log</span></a>
 
-                    <div className="item"><a onClick={this.activateProject.bind(this)}><i className="icon-drawer unarchive-project icon"/>Unarchive project</a></div>
+                    <a className="item" onClick={this.activateProject.bind(this)}><span><i className="icon-drawer unarchive-project icon"/>Unarchive project</span></a>
 
-                    <div className="item"><a onClick={this.removeProject.bind(this)}><i className="icon-trash-o"/>Cancel project</a></div>
+                    <a className="item" onClick={this.removeProject.bind(this)}><span><i className="icon-trash-o"/>Cancel project</span></a>
                 </div>
                         </div>;
         } else if ( this.props.project.get('has_cancelled') ) {
             menuHtml = <div className="menu">
 
                 <div className="scrolling menu">
-                    <div className="item"><a href={activityLogUrl} target="_blank"><i className="icon-download-logs icon"/> Activity Log</a></div>
+                    <a className="item" href={activityLogUrl} target="_blank"><span><i className="icon-download-logs icon"/> Activity Log</span></a>
 
-                    <div className="item"><a onClick={this.activateProject.bind(this)}><i className="icon-drawer unarchive-project icon"/> Resume Project</a></div>
+                    <a className="item" onClick={this.activateProject.bind(this)}><span><i className="icon-drawer unarchive-project icon"/> Resume Project</span></a>
                 </div>
                         </div>;
         }
@@ -239,7 +239,7 @@ class ProjectContainer extends React.Component {
     getJobSplitOrMergeButton(isChunk, mergeUrl, splitUrl ) {
 
         if (isChunk) {
-            return <a className="ui basic button" target="_blank" href={mergeUrl}>
+            return <a className="merge ui basic button" target="_blank" href={mergeUrl}>
                 <i className="icon-compress icon"/> Merge
             </a>
         } else {
@@ -467,7 +467,7 @@ class ProjectContainer extends React.Component {
                             <div className="two wide computer two wide tablet three wide mobile column">
                                 <div className="ui stackable grid">
                                     <div className="sixteen wide column">
-                                        <div className="ui blue ribbon label">
+                                        <div className="ui grey ribbon label">
                                             <span className="project-id">
                                                 {this.props.project.get('id')}
                                             </span>
@@ -507,7 +507,7 @@ class ProjectContainer extends React.Component {
                                         <div className="project-activity-icon">
                                             {workspace}
                                             {dropDownUsers}
-                                            <div className="project-menu circular ui icon top right pointing dropdown button shadow-1"
+                                            <div className="project-menu circular ui icon top right pointing dropdown button"
                                                     ref={(dropdown) => this.dropdown = dropdown}>
                                                 <i className="icon-more_vert icon" />
                                                 {projectMenu}

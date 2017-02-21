@@ -42,7 +42,7 @@ body.manage {
             left: -15px;
         }
         .project-header {
-            background-color: #e8e8e8;
+            background-color: #e0e1e2;
             padding-bottom: 22px !important;
             .project-id {
                 padding: 10px 0 10px 15px;
@@ -60,6 +60,11 @@ body.manage {
                     background: #d0d0d0;
                     border: none;
                     font-weight: 600;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    -o-text-overflow: ellipsis;
+                    -ms-text-overflow: ellipsis;
+                    text-overflow: ellipsis;
                     transition: 0.3s ease !important;
                     &:hover {
                         background: #d8d8d8;
@@ -76,6 +81,11 @@ body.manage {
             .project-payable {
                 padding: 10px 0;
                 float: left;
+                a {
+                    &:hover {
+                        text-decoration: underline;
+                    }
+                }
             }
             .project-activity-icon {
                 padding: 0 15px !important;
@@ -212,8 +222,12 @@ body.manage {
                     }
                     .split-merge {
                         padding: 10px 15px;
-                        button-split-merge {
-                            padding: 7px 15px !important;
+                        .merge {
+                            font-family: Calibri, Arial, Helvetica, sans-serif;
+                            padding: 5px 17px;
+                            border: 1px solid #797979;
+                            font-size: 16px;
+                            transition: 0.3s ease !important;
                         }
                     }
                 }
@@ -222,6 +236,7 @@ body.manage {
                         .chunk {
                             background-color: #ffffff;
                             padding: 8px 15px;
+
                             .job-id {
                                 padding: 5px 0 !important;
                             }
@@ -231,11 +246,20 @@ body.manage {
                             .job-payable {
                                 padding: 5px 15px !important;
                             }
-                            .send-translator {
+                            .send-translator.open {
                                 padding: 5px 0 !important;
                             }
                             .due-to {
                                 padding: 5px 0 !important;
+                            }
+                            .job-activity-icon {
+                                .open-translate {
+                                    font-family: Calibri;
+                                    padding: 6px 15px;
+                                    vertical-align: top;
+                                    font-size: 16px;
+                                    border: 1px solid #797979;
+                                }
                             }
                         }
                     }
@@ -250,6 +274,11 @@ body.manage {
             .activity-log {
                 margin-top: -10px;
                 margin-right: -15px;
+                a {
+                    &:hover {
+                        text-decoration: underline;
+                    }
+                }
             }
         }
     }
@@ -279,7 +308,7 @@ body.manage {
     bottom: 0;
     left: 0;
     width: 100%;
-    z-index: 4;
+    z-index: 1001;
 }
 
 .manage footer .wrapper {

@@ -37,12 +37,15 @@ header {
                     }
                 }
                 .item > a > .icon-more_vert {
+                    position: absolute;
                     width: 24px;
                     height: 24px;
-                    background-color: transparent;
-                    margin-top: -5px;
                     line-height: 24px;
                     border-radius: 50%;
+                    top: 15%;
+                    right: 10px;
+                    bottom: 20%;
+                    background-color: transparent;
                     transition: 0.3s ease;
                     &:hover {
                         background-color: #dededc;
@@ -54,7 +57,7 @@ header {
             }
             .scrolling {
                 .item.item.item {
-                    padding-right: 10px !important;
+                    padding-right: 20px !important;
                 }
             }
         }
