@@ -126,7 +126,7 @@ let ManageActions = {
             AppDispatcher.dispatch({
                 actionType: ManageConstants.RENDER_PROJECTS,
                 projects: response.data,
-                hideSpinner: true,
+                hideSpinner: false,
             });
         });
     },
@@ -296,7 +296,7 @@ let ManageActions = {
                 actionType: ManageConstants.RENDER_PROJECTS,
                 projects: response.data,
                 organization: organization,
-                hideSpinner: true,
+                hideSpinner: false,
             });
 
         });

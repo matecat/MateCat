@@ -51,6 +51,7 @@ class Header extends React.Component {
                         return true;
                     }
                 });
+                window.scrollTo(0, 0);
                 ManageActions.changeOrganization(selectedOrganization.toJS());
             }
         }

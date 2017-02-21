@@ -124,7 +124,7 @@ class RegisterModal extends React.Component {
             generalErrorHtml = <div><span style={ {color: 'red',fontSize: '14px'} } className="text">{this.state.generalError}</span><br/></div>;
         }
         var loaderClass = (this.state.requestRunning) ? 'show' : '';
-
+        var emailAddress = (this.props.userMail) ? this.props.userMail : '';
         return <div className="register-modal">
             <a className="google-login-button btn-confirm-medium" onClick={this.googole_popup.bind(this)}/>
             <p>By clicking you accept <a href="https://www.matecat.com/terms/" target="_blank">terms and conditions</a></p>
@@ -138,7 +138,8 @@ class RegisterModal extends React.Component {
                            onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
                 <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("emailAddress")}
                            placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")} tabindex={3}
-                           onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
+                           onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}
+                            text={emailAddress}/>
                 <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password")}
                            type="password" placeholder="Password" name="password" errorText={this.errorFor("password")} tabindex={4}
                            onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>

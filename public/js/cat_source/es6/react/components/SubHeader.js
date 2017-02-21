@@ -17,6 +17,9 @@ class SubHeader extends React.Component {
         let self = this;
         if (this.props.selectedOrganization) {
             if (this.organizazionChanged) {
+                if (this.membersChanged) {
+                    $(this.dropdownUsers).dropdown('set selected', '-1');
+                }
                 $(this.dropdownWorkspaces).dropdown('set selected', '-1');
                 $(this.dropdownUsers).dropdown('set selected', '-1');
                 this.organizazionChanged = false;
@@ -31,9 +34,6 @@ class SubHeader extends React.Component {
                         self.changeWorkspace(value);
                     }
                 });
-            }
-            if (this.membersChanged) {
-                $(this.dropdownUsers).dropdown('set selected', '-1');
             }
         }
     }
@@ -235,6 +235,7 @@ class SubHeader extends React.Component {
                 <div className="ui container equal width grid">
                     <div className="column">
                         {workspaceDropDown}
+                        <div className="ui icon button ws-settings" onClick={this.openCreateWorkspace.bind(this)}><i className="icon-settings icon"></i></div>
                     </div>
                     <div className="center aligned column">
                         {membersFilter}
