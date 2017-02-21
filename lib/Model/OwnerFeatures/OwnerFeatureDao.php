@@ -29,7 +29,7 @@ class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
         $stmt = $conn->prepare( "INSERT INTO owner_features " .
             " ( uid, feature_code, options, create_date, last_update, enabled, id_organization )" .
             " VALUES " .
-            " ( :uid, :feature_code, :options, :create_date, :last_update, :enabled, :id_team );"
+            " ( :uid, :feature_code, :options, :create_date, :last_update, :enabled, :id_organization );"
         );
 
         Log::doLog( $obj->attributes() );
