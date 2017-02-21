@@ -18,7 +18,7 @@ class RenameTeams extends AbstractMatecatMigration
     public $sql_down = array(
         " ALTER TABLE organizations RENAME TO teams" ,
         " ALTER TABLE organizations_users CHANGE id_organization id_team int(11)" ,
-        " ALTER TABLE organizations_users DROP INDEX id_organization_uid, ADD INDEX id_team_uid( id_team ) ",
+        " ALTER TABLE organizations_users DROP INDEX id_organization_uid, ADD UNIQUE INDEX id_team_uid( id_team ) ",
         " ALTER TABLE organizations_users RENAME TO teams_users " ,
         " ALTER TABLE owner_features CHANGE id_organization id_team int(11) ",
         " ALTER TABLE owner_features DROP INDEX id_organization_feature, ADD UNIQUE INDEX id_team_feature (id_team,feature_code) ",
