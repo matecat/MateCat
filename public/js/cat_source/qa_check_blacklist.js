@@ -107,7 +107,6 @@ if (QaCheckBlacklist.enabled() )
 
     $( window ).on( 'segmentsAdded', function ( e ) {
         globalReceived = false ;
-        console.log('[QACHECKBLACKLIST] got segmentsAdded');
         renderGlobalWarnings() ;
     });
 
@@ -117,12 +116,10 @@ if (QaCheckBlacklist.enabled() )
         }
 
         globalWarnings = data.resp.data.blacklist ;
-        console.log('[QACHECKBLACKLIST] got getWarning:GLOBAL:success');
         renderGlobalWarnings() ;
     });
 
     $(document).on('getWarning:local:success', function(e, data) {
-      console.log('[QACHECKBLACKLIST] got getWarning:local:success');
         if ( !data.resp.data.blacklist || data.segment.isReadonly() ) {
             // No blacklist data contained in response, skip it
             // or segment is readonly, skip
