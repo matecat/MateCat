@@ -85,7 +85,11 @@ class OrganizationsController extends KleinController {
             $teamDao = new OrganizationDao();
 
             $teamDao->updateOrganizationName( $org );
-            ( new MembershipDao() )->destroyCacheUserOrganizations( $this->user ); // clean the cache
+            $memberList = ( new MembershipDao() )->getMemberListByOrganizationId( $org->id );
+
+            foreach( $memberList as $user ){
+                ( new MembershipDao() )->destroyCacheUserOrganizations( $user->getUser() ); // clean the cache for all organization user to see the changes
+            }
 
             $formatted = new Organization( [ $org ] ) ;
             $this->response->json( [ 'organization' => $formatted->render() ] );

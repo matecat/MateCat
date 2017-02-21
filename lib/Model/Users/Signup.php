@@ -68,7 +68,6 @@ class Signup {
             $this->__prepareNewUser() ;
             $this->user->uid = \Users_UserDao::insertStruct( $this->user, array('raise' => TRUE ) );
 
-            ( new OrganizationDao() )->createPersonalOrganization($this->user) ;
         }
 
         $this->__saveWantedUrl();
@@ -145,6 +144,8 @@ class Signup {
         $user->confirmation_token = null ;
 
         Users_UserDao::updateStruct( $user, array('fields' => array( 'confirmation_token', 'email_confirmed_at' ) ) ) ;
+
+        ( new OrganizationDao() )->createPersonalOrganization( $user ) ;
 
         $email = new WelcomeEmail( $user ) ;
         $email->send() ;

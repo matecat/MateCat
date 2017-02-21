@@ -250,7 +250,12 @@ class Bootstrap {
     }
 
     public static function sessionStart() {
-        @session_start();
+        $session_status = session_status();
+        if( $session_status == PHP_SESSION_NONE ){
+            session_start();
+        } elseif( $session_status == PHP_SESSION_DISABLED ){
+            throw new \Exception( "MateCat needs to have sessions. Sessions must be enabled." );
+        }
     }
 
     protected static function _setIncludePath( $custom_paths = null ) {
