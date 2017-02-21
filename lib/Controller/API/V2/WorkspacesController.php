@@ -77,7 +77,7 @@ class WorkspacesController extends KleinController {
 
     public function update() {
 
-        $requestContent = json_decode( file_get_contents( 'php://input' ) );
+        $requestContent = $this->getPutParams();
 
         try {
 
