@@ -17,7 +17,6 @@ class CreateOrganization extends React.Component {
             .dropdown({
                 allowAdditions: true,
                 action: this.onLabelCreate,
-                onChange: this.onChange
             })
         ;
     }
@@ -42,10 +41,16 @@ class CreateOrganization extends React.Component {
         return true;
     }
 
+    checkMailDropDown() {
+        let mail = $(this.usersInput).find("input.search").val();
+        return ( mail !== '' || APP.checkEmail(mail))
+    }
+
     onInputFocus() {
+        let dropdownError = this.checkMailDropDown();
         this.setState({
             errorInput: false,
-            errorDropdown: false,
+            errorDropdown: dropdownError,
         });
     }
 

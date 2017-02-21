@@ -12,6 +12,7 @@ UI = {
         this.changeProjectWorkspace = this.changeProjectWorkspace.bind(this);
         this.selectedWorkspace = ManageConstants.ALL_WORKSPACES_FILTER;
         this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
+        this.organizationStorageName = 'organizationId';
 
         //Job Actions
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_SETTINGS, this.openJobSettings);
@@ -64,13 +65,13 @@ UI = {
 
             self.organizations = data.organizations;
             ManageActions.renderOrganizations(self.organizations);
-            self.selectedOrganization = data.organizations[0];
-            self.getWorkspaces(self.selectedOrganization).done(function (data) {
-                self.selectedOrganization.workspaces = data.workspaces;
+            self.selectedOrganization = self.getLastOrganizationSelected(self.organizations);
+            self.getOrganizationStructure(self.selectedOrganization).done(function () {
                 ManageActions.selectOrganization(self.selectedOrganization);
-                self.getProjects(self.selectedOrganization).done(function (response) {
+                self.getProjects(self.selectedOrganization).done(function(response){
                     self.renderProjects(response.data, self.selectedOrganization);
                 });
+
             });
         });
 
@@ -119,9 +120,6 @@ UI = {
     },
 
     renderMoreProjects: function () {
-        if (this.selectedOrganization.type !== 'personal') {
-            return;
-        }
         UI.Search.currentPage = UI.Search.currentPage + 1;
         this.getProjects(this.selectedOrganization).done(function (response) {
             let projects = response.data;
@@ -133,6 +131,25 @@ UI = {
         });
     },
 
+    getLastOrganizationSelected: function (organizations) {
+        if (localStorage.getItem(this.organizationStorageName)) {
+            let lastId = localStorage.getItem(this.organizationStorageName);
+            let organization = organizations.find(function (org, i) {
+                return parseInt(org.id) === parseInt(lastId);
+            });
+            if (organization) {
+                return organization;
+            } else {
+                return organizations[0];
+            }
+        } else {
+            return organizations[0];
+        }
+    },
+
+    setOrganizationInStorage(organizationId) {
+        localStorage.setItem(this.organizationStorageName, organizationId);
+    },
     /**
      * Open the settings for the job
      */
@@ -211,6 +228,7 @@ UI = {
         this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
         this.Search.filter = {};
         UI.Search.currentPage = 1;
+        this.setOrganizationInStorage(organization.id);
         return this.getOrganizationStructure(organization).then(function () {
                 return self.getProjects(self.selectedOrganization);
             }

@@ -17,6 +17,9 @@ class SubHeader extends React.Component {
         let self = this;
         if (this.props.selectedOrganization) {
             if (this.organizazionChanged) {
+                if (this.membersChanged) {
+                    $(this.dropdownUsers).dropdown('set selected', '-1');
+                }
                 $(this.dropdownWorkspaces).dropdown('set selected', '-1');
                 $(this.dropdownUsers).dropdown('set selected', '-1');
                 this.organizazionChanged = false;
@@ -47,6 +50,10 @@ class SubHeader extends React.Component {
         if ( (_.isUndefined(this.props.selectedOrganization)) ||
             (nextProps.selectedOrganization.get('id') !== this.props.selectedOrganization.get('id'))) {
             this.organizazionChanged = true;
+        }
+        if ( (_.isUndefined(this.props.selectedOrganization)) ||
+            (nextProps.selectedOrganization.get('members') !== this.props.selectedOrganization.get('members'))) {
+            this.membersChanged = true;
         }
     }
 
@@ -116,7 +123,8 @@ class SubHeader extends React.Component {
 
     getUserFilter() {
         let result = '';
-        if (this.props.selectedOrganization && this.props.selectedOrganization.get('type') === "general" && this.props.selectedOrganization.get('members')) {
+        if (this.props.selectedOrganization && this.props.selectedOrganization.get('type') === "general" &&
+            this.props.selectedOrganization.get('members') && this.props.selectedOrganization.get('members').size > 1) {
 
             let members = this.props.selectedOrganization.get('members').map((member, i) => (
                 <div className="item" data-value={member.get('user').get('uid')}
@@ -169,7 +177,8 @@ class SubHeader extends React.Component {
     getWorkspacesSelect() {
         let result = '';
         let items;
-        if (this.props.selectedOrganization && this.props.selectedOrganization.get("workspaces")) {
+        if (this.props.selectedOrganization && this.props.selectedOrganization.get("workspaces") &&
+            this.props.selectedOrganization.get("workspaces").size > 0) {
             items = this.props.selectedOrganization.get("workspaces").map((workspace, i) => (
                 <div className="item" data-value={workspace.get('id')}
                      data-text={workspace.get('name')}
@@ -177,6 +186,13 @@ class SubHeader extends React.Component {
                     {workspace.get('name')}
                 </div>
             ));
+            let item = <div className="item" data-value='0'
+                            data-text='No Workspace'
+                            key={'organization-0'}>
+                    No Workspace
+                </div>;
+            items = items.unshift(item);
+
         }
         result = <div className="ui dropdown selection workspace-dropdown"
                       ref={(dropdownWorkspaces) => this.dropdownWorkspaces = dropdownWorkspaces}>
@@ -201,12 +217,8 @@ class SubHeader extends React.Component {
                  <div className="divider"></div>*/}
                 <div className="scrolling menu">
                     <div className="item" data-value='-1'
-                         data-text='All Projects'>
+                         data-text='All Projects' key={'organization-all'}>
                         All
-                    </div>
-                    <div className="item" data-value='0'
-                         data-text='No Workspace'>
-                        No Workspace
                     </div>
                     {items}
                 </div>

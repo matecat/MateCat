@@ -49,12 +49,15 @@ $.extend(APP, {
             };
             APP.ModalWindow.showModalComponent(ForgotPasswordModal, props, "Forgot Password", style);
         });
-        $('#modal').on('openregister', function () {
+        $('#modal').on('openregister', function (e, param) {
             var props = {
                 googleUrl: config.authURL
             };
             if (config.showModalBoxLogin == 1) {
                 props.redeemMessage = true
+            }
+            if (param) {
+                $.extend(props, param);
             }
             APP.ModalWindow.showModalComponent(RegisterModal, props, "Register Now");
         });
@@ -136,6 +139,16 @@ $.extend(APP, {
                 break;
             case "login":
                 modal$.trigger('openlogin');
+                break;
+            case "signup":
+                if (!config.loggedUser) {
+                    if (APP.lookupFlashServiceParam("signup_email")) {
+                        let userMail = APP.lookupFlashServiceParam("signup_email")[ 0 ].value;
+                        modal$.trigger('openregister', [{userMail: userMail}]);
+                    } else {
+                        modal$.trigger('openregister');
+                    }
+                }
                 break;
         }
     }
