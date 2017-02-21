@@ -108,7 +108,7 @@ class CreateOrganization extends React.Component {
                                 <div className={"ui fluid multiple search selection dropdown " + inputDropdown}
                                      ref={(usersInput) => this.usersInput = usersInput}>
                                     <input name="tags" type="hidden" />
-                                        <div className="default text">insert email or emails</div>
+                                        <div className="default text">insert email or more emails separated by commas or press enter</div>
                                 </div>
                             </div>
                         </div>
@@ -116,7 +116,7 @@ class CreateOrganization extends React.Component {
                     <div className="matecat-modal-bottom">
                         <div className="ui one column grid right aligned">
                             <div className="column">
-                                <button className={"ui button green " + buttonClass }
+                                <button className={"ui button blue " + buttonClass }
                                         onClick={this.onClick.bind(this)}>Create</button>
                             </div>
                         </div>

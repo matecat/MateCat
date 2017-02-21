@@ -2,15 +2,12 @@
 	background-color: #ffffff;
 	padding: 5px 0 5px 0 !important;
 	box-shadow: rgba(0, 0, 0, 0.137255) 0px 2px 2px 0px, rgba(0, 0, 0, 0.117647) 0px 1px 5px 0px, rgba(0, 0, 0, 0.2) 0px 3px 1px -2px;
-
     .ui.container.equal.width.grid {
         width: 1335px !important;
     }
-
 	.projects-state {
 		width: 40px !important;
 	}
-
 	.assigned-list {
 		margin-right: 8px;
 		.switch {
@@ -29,11 +26,21 @@
 			}
 		}
 	}
-
 	.workspace-dropdown {
 		max-width: 300px;
 	}
-
+	.ws-settings {
+		padding: 0px;
+		width: 38px;
+		height: 38px;
+		margin: 0px;
+		line-height: 19px;
+		vertical-align: top;
+		margin-left: 10px;
+		i {
+			line-height: 26px;
+		}
+	}
 	.users-filter {
 		display: flex;
 		margin-top: 10px;

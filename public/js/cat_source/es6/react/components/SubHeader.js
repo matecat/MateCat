@@ -235,6 +235,7 @@ class SubHeader extends React.Component {
                 <div className="ui container equal width grid">
                     <div className="column">
                         {workspaceDropDown}
+                        <div className="ui icon button ws-settings" onClick={this.openCreateWorkspace.bind(this)}><i className="icon-settings icon"></i></div>
                     </div>
                     <div className="center aligned column">
                         {membersFilter}
