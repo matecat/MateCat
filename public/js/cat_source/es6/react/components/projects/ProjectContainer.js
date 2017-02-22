@@ -340,6 +340,10 @@ class ProjectContainer extends React.Component {
         ManageActions.openChangeProjectWorkspace(this.props.organization, this.props.project);
     }
 
+    openAddMember() {
+        ManageActions.openModifyOrganizationModal(this.props.organization.toJS());
+    }
+
 
     getDropDownUsers() {
        let result = '';
@@ -363,7 +367,8 @@ class ProjectContainer extends React.Component {
                         </span>
 
                        <div className="menu">
-                           <div className="header">
+                           <div className="header"
+                           onClick={this.openAddMember.bind(this)}>
                                <a href="#">New Member <i className="icon-plus3 icon right"/></a>
                            </div>
                            <div className="divider"></div>
