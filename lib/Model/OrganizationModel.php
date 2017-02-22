@@ -74,9 +74,7 @@ class OrganizationModel {
 
         if ( !empty( $this->member_emails ) ) {
 
-            if( $this->struct->type == Constants_Organizations::PERSONAL ){
-                throw new DomainException( "Can not invite members to a Personal organization." );
-            }
+            $this->_checkAddMembersToPersonalOrganization();
 
             $this->new_memberships = $membershipDao->createList( [
                 'organization' => $this->struct,
@@ -184,7 +182,16 @@ class OrganizationModel {
         }
     }
 
+    protected function _checkAddMembersToPersonalOrganization(){
+        if( $this->struct->type == Constants_Organizations::PERSONAL ){
+            throw new DomainException( "Can not invite members to a Personal organization." );
+        }
+    }
+
     protected function _createOrganizationWithMatecatUsers() {
+
+        $this->_checkAddMembersToPersonalOrganization();
+
         $dao = new \Organizations\OrganizationDao() ;
 
         \Database::obtain()->begin();
