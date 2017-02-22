@@ -14,7 +14,7 @@ use API\V2\Exceptions\ValidationError;
 use FlashMessage;
 use Klein\Response;
 
-class OrganizationInvitedUser {
+class InvitedUser {
 
     /**
      * @var string
@@ -35,7 +35,7 @@ class OrganizationInvitedUser {
 
     }
 
-    public function prepareUserInvitedSignUp() {
+    public function prepareUserInvitedSignUpRedirect() {
 
         $_SESSION[ 'invited_to_organization' ] = $this->jwt;
         FlashMessage::set( 'popup', 'signup', FlashMessage::SERVICE );
@@ -43,9 +43,7 @@ class OrganizationInvitedUser {
 
     }
 
-    public static function completeOrganizationSignUp( $user, $session ){
-
-        $invitation = $session[ 'invited_to_organization' ];
+    public static function completeOrganizationSignUp( $user, $invitation ){
 
         $organizationStruct = ( new OrganizationDao )->findById( $invitation[ 'organization_id' ] );
 
@@ -54,7 +52,9 @@ class OrganizationInvitedUser {
         $organizationModel->addMemberEmail( $invitation[ 'email' ] );
         $organizationModel->updateMembers();
 
-        unset( $session[ 'invited_to_organization' ] );
+        $pendingInvitation = new PendingInvitations( ( new \RedisHandler() )->getConnection(), $invitation );
+        $pendingInvitation->remove();
+
         unset( $_SESSION[ 'invited_to_organization' ] );
 
     }

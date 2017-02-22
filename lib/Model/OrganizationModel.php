@@ -1,6 +1,13 @@
 <?php
 
+use Email\EmailInvitedToOrganization;
+use Email\MembershipCreatedEmail;
+use Email\MembershipDeletedEmail;
 use Organizations\MembershipDao ;
+use Organizations\MembershipStruct;
+use Organizations\OrganizationDao;
+use Organizations\OrganizationStruct;
+use Organizations\PendingInvitations;
 
 class OrganizationModel {
 
@@ -38,7 +45,7 @@ class OrganizationModel {
      */
     protected $all_memberships;
 
-    public function __construct( \Organizations\OrganizationStruct $struct ) {
+    public function __construct( OrganizationStruct $struct ) {
         $this->struct = $struct ;
     }
 
@@ -103,6 +110,7 @@ class OrganizationModel {
 
         $this->_sendEmailsToNewMemberships();
         $this->_sendEmailsToInvited();
+        $this->_setPendingStatuses();
         $this->_sendEmailsForRemovedMemberships();
 
         return $this->all_memberships ;
@@ -128,17 +136,31 @@ class OrganizationModel {
     }
 
     public function _sendEmailsToInvited() {
+        foreach( $this->getInvitedEmails() as $email ) {
+            $email = new EmailInvitedToOrganization($this->user, $email, $this->struct);
+            $email->send();
+        }
+    }
 
-        $emails_of_existing_members = array_map(function( \Organizations\MembershipStruct $membership ) {
+    public function _setPendingStatuses(){
+        $redis = ( new \RedisHandler() )->getConnection();
+        foreach ( $this->getInvitedEmails() as $email ) {
+            $pendingInvitation = new PendingInvitations( $redis, [
+                    'organization_id' => $this->struct->id,
+                    'email'           => $email
+            ] );
+            $pendingInvitation->set();
+        }
+    }
+
+    public function getInvitedEmails(){
+
+        $emails_of_existing_members = array_map(function( MembershipStruct $membership ) {
             return $membership->getUser()->email ;
         }, $this->all_memberships );
 
-        $emails_to_invite = array_diff($this->member_emails, $emails_of_existing_members);
+        return array_diff($this->member_emails, $emails_of_existing_members);
 
-        foreach( $emails_to_invite as $email ) {
-            $email = new \Email\EmailInvitedToOrganization($this->user, $email, $this->struct);
-            $email->send();
-        }
     }
 
     /**
@@ -190,7 +212,7 @@ class OrganizationModel {
 
         $this->_checkAddMembersToPersonalOrganization();
 
-        $dao = new \Organizations\OrganizationDao() ;
+        $dao = new OrganizationDao() ;
 
         \Database::obtain()->begin();
         $organization = $dao->createUserOrganization( $this->user, [
@@ -206,14 +228,14 @@ class OrganizationModel {
 
     protected function _sendEmailsToNewMemberships() {
         foreach( $this->getNewMembershipEmailList() as $membership ) {
-            $email = new \Email\MembershipCreatedEmail($this->user, $membership ) ;
+            $email = new MembershipCreatedEmail($this->user, $membership ) ;
             $email->send() ;
         }
     }
 
     protected function _sendEmailsForRemovedMemberships() {
         foreach( $this->getRemovedMembersEmailList() as $user ) {
-            $email = new \Email\MembershipDeletedEmail($this->user, $user, $this->struct ) ;
+            $email = new MembershipDeletedEmail($this->user, $user, $this->struct ) ;
             $email->send() ;
         }
     }
