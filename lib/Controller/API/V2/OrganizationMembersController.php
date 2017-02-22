@@ -15,6 +15,7 @@ use API\V2\Validators\OrganizationAccessValidator;
 use LQA\ModelDao;
 use Organizations\MembershipDao;
 use Organizations\OrganizationDao;
+use Organizations\PendingInvitations;
 
 class OrganizationMembersController extends KleinController {
 
@@ -30,8 +31,14 @@ class OrganizationMembersController extends KleinController {
             ->setCacheTTL( 60 * 60 * 24 )
             ->getMemberListByOrganizationId( $this->request->id_organization );
 
+        $pendingInvitation = new PendingInvitations( ( new \RedisHandler() )->getConnection(), [] );
+
         $formatter = new Membership( $membersList ) ;
-        $this->response->json( array( 'members' => $formatter->render() ) );
+        $this->response->json( [
+                'members' => $formatter->render(),
+                'pending_invitations' => $pendingInvitation->get( $this->request->id_organization )
+        ] );
+
     }
 
     public function update() {
@@ -52,8 +59,12 @@ class OrganizationMembersController extends KleinController {
         $model->addMemberEmails( $params['members'] ) ;
         $full_members_list = $model->updateMembers();
 
+        $pendingInvitation = new PendingInvitations( ( new \RedisHandler() )->getConnection(), [] );
         $formatter = new Membership( $full_members_list ) ;
-        $this->response->json( array( 'members' => $formatter->render() ) );
+        $this->response->json( [
+                'members' => $formatter->render(),
+                'pending_invitations' => $pendingInvitation->get( $organizationStruct->id )
+        ] );
 
     }
 
@@ -68,8 +79,12 @@ class OrganizationMembersController extends KleinController {
         $model->setUser( $this->user ) ;
         $membersList = $model->updateMembers();
 
+        $pendingInvitation = new PendingInvitations( ( new \RedisHandler() )->getConnection(), [] );
         $formatter = new Membership( $membersList ) ;
-        $this->response->json( array( 'members' => $formatter->render() ) );
+        $this->response->json( [
+                'members' => $formatter->render(),
+                'pending_invitations' => $pendingInvitation->get( $organizationStruct->id )
+        ] );
 
     }
 

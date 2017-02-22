@@ -110,6 +110,7 @@ class OrganizationModel {
 
         $this->_sendEmailsToNewMemberships();
         $this->_sendEmailsToInvited();
+        $this->_setPendingStatuses();
         $this->_sendEmailsForRemovedMemberships();
 
         return $this->all_memberships ;
@@ -141,7 +142,7 @@ class OrganizationModel {
         }
     }
 
-    public function setPendingStatuses(){
+    public function _setPendingStatuses(){
         $redis = ( new \RedisHandler() )->getConnection();
         foreach ( $this->getInvitedEmails() as $email ) {
             $pendingInvitation = new PendingInvitations( $redis, [

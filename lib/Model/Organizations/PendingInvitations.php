@@ -37,13 +37,13 @@ class PendingInvitations {
 
     public function remove(){
 
-        $this->redisClient->srem( sprintf( self::REDIS_INVITATIONS_SET, $this->payload[ 'organization_id' ] ), $this->payload[ 'email' ] );
+        return $this->redisClient->srem( sprintf( self::REDIS_INVITATIONS_SET, $this->payload[ 'organization_id' ] ), $this->payload[ 'email' ] );
 
     }
 
     public function get( $id_organization ){
 
-        $this->redisClient->smembers( sprintf( self::REDIS_INVITATIONS_SET, $id_organization ) );
+        return $this->redisClient->smembers( sprintf( self::REDIS_INVITATIONS_SET, $id_organization ) );
 
     }
 
