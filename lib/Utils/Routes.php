@@ -15,9 +15,7 @@ class Routes {
 
         $jwtHandler->setTimeToLive( 60 * 60 * 24 * 3 ); //3 days
 
-        $jwt = $jwtHandler->jsonSerialize();
-
-        return "$host/api/app/orgs/members/invite/$jwt";
+        return "$host/api/app/orgs/members/invite/$jwtHandler";
 
     }
 

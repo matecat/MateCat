@@ -10,14 +10,20 @@
 namespace API\App;
 
 
-use Organizations\OrganizationInvitedUser;
+use Organizations\InvitedUser;
 
+/**
+ * Endpoint to get the call from emails link in the invitation emails
+ *
+ * Class OrganizationsInvitationsController
+ * @package API\App
+ */
 class OrganizationsInvitationsController  extends AbstractStatefulKleinController {
 
     public function collectBackInvitation(){
 
-        $invite = new OrganizationInvitedUser( $this->request->jwt, $this->response );
-        $invite->prepareUserInvitedSignUp();
+        $invite = new InvitedUser( $this->request->jwt, $this->response );
+        $invite->prepareUserInvitedSignUpRedirect();
         $this->response->redirect( \Routes::appRoot() ) ;
 
     }
