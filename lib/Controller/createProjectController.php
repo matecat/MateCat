@@ -412,19 +412,20 @@ class createProjectController extends ajaxController {
 
     }
     
-    private function __setMetadataFromPostInput( $__postInput ) {
-        $options = array() ;
+    private function __setMetadataFromPostInput( $postInput ) {
+        $metadata = array() ;
 
-        if ( isset( $__postInput['lexiqa']) )           $options['lexiqa'] = $__postInput[ 'lexiqa' ];
-        if ( isset( $__postInput['speech2text']) )      $options['speech2text'] = $__postInput[ 'speech2text' ];
-        if ( isset( $__postInput['tag_projection']) )   $options['tag_projection'] = $__postInput[ 'tag_projection' ];
-        if ( isset( $__postInput['segmentation_rule']) ) $options['segmentation_rule'] = $__postInput[ 'segmentation_rule' ];
+        if ( isset( $postInput['lexiqa']) )            $metadata['lexiqa']            = $postInput[ 'lexiqa' ];
+        if ( isset( $postInput['speech2text']) )       $metadata['speech2text']       = $postInput[ 'speech2text' ];
+        if ( isset( $postInput['tag_projection']) )    $metadata['tag_projection']    = $postInput[ 'tag_projection' ];
+        if ( isset( $postInput['segmentation_rule']) ) $metadata['segmentation_rule'] = $postInput[ 'segmentation_rule' ];
 
-        $this->metadata = $options ;
-
-        $this->metadata = $this->featureSet->filter('createProjectAssignInputMetadata', $this->metadata, array(
-            'input' => $__postInput
+        // Give plugin the opportunity to set additional metadata from postInput
+        $metadataFromPlugins = $this->featureSet->filter('createProjectAssignInputMetadata', array(), array(
+            'input' => $postInput
         ));
+
+        $this->metadata = array_merge( $metadata, $metadataFromPlugins );
     }
 
     private function __validateUserMTEngine() {
