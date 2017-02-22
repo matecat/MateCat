@@ -23,7 +23,7 @@ export default class TextField extends React.Component {
 
         if (this.shouldDisplayError()) {
             errorHtml = <div className="validation-error">
-                <span style={this.spanStyle} className="text">{this.props.errorText}</span>
+                <div style={this.spanStyle} className="text">{this.props.errorText}</div>
             </div>
         }
 

@@ -467,9 +467,9 @@ class ProjectContainer extends React.Component {
                             <div className="two wide computer two wide tablet three wide mobile column">
                                 <div className="ui stackable grid">
                                     <div className="sixteen wide column">
-                                        <div className="ui grey ribbon label">
+                                        <div className="ui ribbon label">
                                             <span className="project-id">
-                                                {this.props.project.get('id')}
+                                                {"Id: " + this.props.project.get('id')}
                                             </span>
                                             {state}
                                         </div>
@@ -507,7 +507,7 @@ class ProjectContainer extends React.Component {
                                         <div className="project-activity-icon">
                                             {workspace}
                                             {dropDownUsers}
-                                            <div className="project-menu circular ui icon top right pointing dropdown button"
+                                            <div className="project-menu circular ui icon top right pointing dropdown basic button"
                                                     ref={(dropdown) => this.dropdown = dropdown}>
                                                 <i className="icon-more_vert icon" />
                                                 {projectMenu}
