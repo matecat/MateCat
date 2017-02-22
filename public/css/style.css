@@ -17,6 +17,11 @@ header
 	transition: margin-top 200ms ease-out;
 	-webkit-transition: margin-top 200ms ease-out;
 }
+
+header.upload-page-header {
+	height: 45px;
+	background-color: #4d4d4d;
+}
 body.login header
 {
 	margin-top: 0 !important;

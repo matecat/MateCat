@@ -378,7 +378,10 @@ let ManageActions = {
     },
 
     changeOrganizationFromUploadPage: function () {
-        location.reload();
+        $('.reloading-upload-page').show();
+        setTimeout(function () {
+            $('.reloading-upload-page').hide();
+        }, 1000)
     }
 
 };
