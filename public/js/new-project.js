@@ -255,7 +255,7 @@ $.extend(UI.UPLOAD_PAGE, {
             this.getAllOrganizations().done(function (data) {
                 self.organizations = data.organizations;
                 ManageActions.renderOrganizations(self.organizations);
-                self.selectedOrganization = self.organizations[0];
+                self.selectedOrganization = APP.getLastOrganizationSelected(self.organizations);
                 ManageActions.selectOrganization(self.selectedOrganization);
             });
         } else {
@@ -284,7 +284,7 @@ $.extend(UI.UPLOAD_PAGE, {
     getSelectedOrganization: function () {
         let selectedOrganizationId;
         if (config.isLoggedIn) {
-            selectedOrganizationId = $('#organization').val();
+            selectedOrganizationId = $('.organization-dd').val();
         }
         return selectedOrganizationId;
     },

@@ -65,49 +65,52 @@ ul
 	    text-align: left;
     }
 
-    /*.logo
+    .logo
     {
 	    float: left;
 	    border: 0;
-	    margin-top: 10px;
 	    background: url(../img/logo.png) 0px 2px no-repeat;
 	    width: 145px;
 	    height: 31px;
 	    background-size: 130px 26px;
-    }*/
-
-
-footer
-    {
-	    background: #6d6e71;
-	    height: 27px;
-	    text-align: right;
-	    border-top: 1px solid #333;
-	    color: #fff;
-	    position: fixed;
-	    bottom: 0;
-	    left: 0;
-	    width: 100%;
-	    z-index: 999999999;
     }
 
-    footer p
-    {
-	    margin: 0 5px 0 0;
-	    padding: 0;
-	    float: left;
-    }
 
-    footer ul
-    {
-	    margin: -5px 0 0 0;
-	    padding: 0;
-	    float: left;
-	/*    border-right: 1px solid #333; */
-    }
-    footer nav ul, footer ul.external-links
-    {
-	    border-right: none;
+footer {
+    background: #6d6e71;
+    height: 27px;
+    text-align: right;
+    border-top: 1px solid #333;
+    color: #fff;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 999999999;
+}
+
+footer p {
+    margin: 0 5px 0 0;
+    padding: 0;
+    float: left;
+}
+
+footer ul {
+    margin: -5px 0 0 0;
+    padding: 0;
+    float: left;
+/*    border-right: 1px solid #333; */
+}
+footer nav ul, footer ul.external-links
+{
+    border-right: none;
+}
+
+footer nav ul li {
+    margin-left: 4px;
+}
+footer .wrapper nav ul li:last-child {
+    border-right: none;
 }
 
 footer li
@@ -136,6 +139,7 @@ ul.statistics-details {
     margin-top: -5px;
 
 }
+
 
 ul.statistics-details li {
 		    border-right: 1px solid #fff;
@@ -4779,3 +4783,49 @@ span.share-popup-item-email {
         opacity: 0;
     }
 }
+
+/******** USER LABEL *********/
+.ui.user.label {
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+    background: center/cover #9c9c9c;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.2);
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    color: #fff;
+    display: -webkit-inline-box;
+    display: -webkit-inline-flex;
+    display: -ms-inline-flexbox;
+    display: inline-flex;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    position: relative;
+    vertical-align: top;
+    float: right;
+    font-size: 14px;
+    height: 36px;
+    width: 36px;
+    margin-left: 10px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+.ui.user.label:hover {
+    border: 3px solid #02ceff;
+}
+.btn-confirm-medium.sing-in-header {
+    margin-top: 0;
+    float: right;
+}
+.btn-confirm-medium.sing-in-header:hover {
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+
+/*****************************/

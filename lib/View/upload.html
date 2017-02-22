@@ -228,14 +228,14 @@
 
     </div>
 
-    <div class="translate-box organization" tal:condition="php: !empty(organizations) && count(organizations) > 1" >
-        <h2>Organization</h2>
-        <select name="organization" id="organization">
-            <option tal:repeat="organization organizations"
-                    tal:attributes="value organization/id; selected php: repeat.organization.index == 0 "
-                    tal:content="organization/name"></option>
-        </select>
-    </div>
+    <!--<div class="translate-box organization" tal:condition="php: !empty(organizations) && count(organizations) > 1" >-->
+        <!--<h2>Organization</h2>-->
+        <!--<select name="organization" id="organization">-->
+            <!--<option tal:repeat="organization organizations"-->
+                    <!--tal:attributes="value organization/id; selected php: repeat.organization.index == 0 "-->
+                    <!--tal:content="organization/name"></option>-->
+        <!--</select>-->
+    <!--</div>-->
 
 
     <div class="translate-box settings">
@@ -881,7 +881,7 @@
                 </tal:block>
             </ul>
 
-            <div metal:use-macro="common.html/login_includes" />
+            <!--<div metal:use-macro="common.html/login_includes" />-->
         </nav>
 
     </div>

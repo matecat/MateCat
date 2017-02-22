@@ -94,7 +94,7 @@ $.extend(APP, {
             return false;
         });
 
-        $('#welcomebox:has(.authLink)').click(function(e){
+        $('.open-login-modal').click(function(e){
             e.preventDefault();
             e.stopPropagation();
             $('#modal').trigger('openlogin');

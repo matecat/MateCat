@@ -44,6 +44,7 @@ class Header extends React.Component {
     }
 
     changeOrganization(event, organization) {
+        APP.setOrganizationInStorage(organization.get('id'));
         if (this.props.showSubHeader) {
             if (organization.get('id')  !== this.state.selectedOrganizationId) {
                 let selectedOrganization = this.state.organizations.find(function (org) {
@@ -51,8 +52,11 @@ class Header extends React.Component {
                         return true;
                     }
                 });
+                window.scrollTo(0, 0);
                 ManageActions.changeOrganization(selectedOrganization.toJS());
             }
+        } else {
+            ManageActions.changeOrganizationFromUploadPage();
         }
     }
 
@@ -85,6 +89,74 @@ class Header extends React.Component {
         });
     }
 
+    openPreferencesModal() {
+        $('#modal').trigger('openpreferences');
+    }
+
+    openLoginModal() {
+        $('#modal').trigger('openlogin');
+    }
+
+    getUserIcon() {
+        if (this.props.loggedUser ) {
+            return <div className="ui user label"
+                        onClick={this.openPreferencesModal.bind(this)}>{config.userShortName}</div>
+        } else {
+            return <div className="btn-confirm-medium sing-in-header"
+                        onClick={this.openLoginModal.bind(this)}>Sign in</div>
+        }
+    }
+
+    getOrganizationsSelect() {
+        let result = '';
+        var self = this;
+        if (this.state.organizations.size > 0) {
+            let items = this.state.organizations.map(function(organization, i) {
+                let iconModal = '';
+                if (self.props.showModals) {
+                    iconModal = <a className="organization-filter button show right"
+                                   onClick={(e) => self.openModifyOrganization(e, organization)}>
+                        <i className="icon-more_vert icon"/>
+                    </a>;
+                }
+                return <div className="item" data-value={organization.get('id')}
+                            data-text={organization.get('name')}
+                            key={'organization' + organization.get('name') + organization.get('id')}
+                            onClick={(e) => self.changeOrganization(e, organization)}>
+                    {organization.get('name')}
+                    {iconModal}
+                </div>
+            });
+            let addOrg = '';
+            if (self.props.showModals) {
+                addOrg = <div className="header" style={{cursor: 'pointer'}} onClick={this.openCreateOrganizations.bind(this)}>New Organization
+                    <a className="organization-filter button show">
+                        <i className="icon-plus3 icon"/>
+                    </a>
+                </div>
+            }
+            result = <div className="ui dropdown selection org"
+                          ref={(dropdownOrganizations) => this.dropdownOrganizations = dropdownOrganizations}>
+                <input type="hidden" name="organization" className="organization-dd" />
+                <i className="dropdown icon"/>
+                <span className="text">Choose Organization</span>
+                <div className="menu">
+                    <div className="divider"></div>
+                    {addOrg}
+                    { self.props.showModals ? (
+                            <div className="divider"></div>
+                        ): (
+                            ''
+                        )}
+                    <div className="scrolling menu">
+                        {items}
+                    </div>
+                </div>
+            </div>;
+        }
+        return result;
+    }
+
     getOrganizationsSelect() {
         let result = '';
         var self = this;
@@ -113,13 +185,12 @@ class Header extends React.Component {
                                 </a>
                             </div>
             }
-            result = <div className="ui dropdown selection org"
+            result = <div className="ui top right pointing dropdown select-org"
                           ref={(dropdownOrganizations) => this.dropdownOrganizations = dropdownOrganizations}>
                 <input type="hidden" name="organization" className="organization-dd" />
-                <i className="dropdown icon"/>
                 <span className="text">Choose Organization</span>
+                {/*<i className="dropdown icon"/>*/}
                 <div className="menu">
-                    <div className="divider"></div>
                     {addOrg}
                     { self.props.showModals ? (
                             <div className="divider"></div>
@@ -137,7 +208,8 @@ class Header extends React.Component {
 
     render () {
         let self = this;
-        let organizationsSelect = (this.props.loggedUser && !this.props.showLinks) ? this.getOrganizationsSelect() : '';
+        let organizationsSelect = (this.props.loggedUser) ? this.getOrganizationsSelect() : '';
+        let userIcon = this.getUserIcon();
         let selectedOrganization =  this.state.organizations.find(function (org) {
             return org.get('id') == self.state.selectedOrganizationId;
         });
@@ -157,18 +229,20 @@ class Header extends React.Component {
 
                             </div>
                             <div className="thirteen wide right aligned wide column">
+                                {userIcon}
+
                                 {organizationsSelect}
 
-                                {this.props.showLinks ? (
-                                    <ul id="menu-site">
-                                        <li><a href="https://www.matecat.com/benefits/">Benefits</a></li>
-                                        <li><a href="https://www.matecat.com/outsourcing/">Outsource</a></li>
-                                        <li><a href="https://www.matecat.com/support-plans/">Plans</a></li>
-                                        <li><a href="https://www.matecat.com/about/">About</a></li>
-                                        <li><a href="https://www.matecat.com/faq/">FAQ</a></li>
-                                        <li><a href="https://www.matecat.com/support/">Support</a></li>
-                                        <li><a className="bigred" href="https://www.matecat.com/webinar" target="_blank">Webinar</a></li>
-                                    </ul>
+                                { (this.props.showLinks && !this.props.loggedUser) ? (
+                                        <ul id="menu-site">
+                                            <li><a href="https://www.matecat.com/benefits/">Benefits</a></li>
+                                            <li><a href="https://www.matecat.com/outsourcing/">Outsource</a></li>
+                                            <li><a href="https://www.matecat.com/support-plans/">Plans</a></li>
+                                            <li><a href="https://www.matecat.com/about/">About</a></li>
+                                            <li><a href="https://www.matecat.com/faq/">FAQ</a></li>
+                                            <li><a href="https://www.matecat.com/support/">Support</a></li>
+                                            <li><a className="bigred" href="https://www.matecat.com/webinar" target="_blank">Webinar</a></li>
+                                        </ul>
 
                                     ) : ('')}
                             </div>

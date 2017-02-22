@@ -3,7 +3,7 @@ APP = null;
 APP = {
     init: function () {
         this.setLoginEvents();
-
+        this.organizationStorageName = 'organizationId';
         this.isCattool = $( 'body' ).hasClass( 'cattool' );
         $( "body" ).on( 'click', '.modal .x-popup', function ( e ) {
             e.preventDefault();
@@ -690,7 +690,29 @@ APP = {
 
     getUserShortName: function (user) {
         return (user.first_name[0] + user.last_name[0]).toUpperCase();
-    }
+    },
+
+
+
+    getLastOrganizationSelected: function (organizations) {
+        if (localStorage.getItem(this.organizationStorageName)) {
+            let lastId = localStorage.getItem(this.organizationStorageName);
+            let organization = organizations.find(function (org, i) {
+                return parseInt(org.id) === parseInt(lastId);
+            });
+            if (organization) {
+                return organization;
+            } else {
+                return organizations[0];
+            }
+        } else {
+            return organizations[0];
+        }
+    },
+
+    setOrganizationInStorage(organizationId) {
+        localStorage.setItem(this.organizationStorageName, organizationId);
+    },
 
 };
 

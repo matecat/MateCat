@@ -73,6 +73,9 @@ class OrganizationModel {
         $membershipDao = new MembershipDao();
 
         if ( !empty( $this->member_emails ) ) {
+
+            $this->_checkAddMembersToPersonalOrganization();
+
             $this->new_memberships = $membershipDao->createList( [
                 'organization' => $this->struct,
                 'members' => $this->member_emails
@@ -91,8 +94,6 @@ class OrganizationModel {
                 }
             }
         }
-
-        ( new MembershipDao() )->destroyCacheForListByOrganizationId( $this->struct->id );
 
         $this->all_memberships = ( new MembershipDao )
             ->setCacheTTL(3600)
@@ -179,7 +180,16 @@ class OrganizationModel {
         }
     }
 
+    protected function _checkAddMembersToPersonalOrganization(){
+        if( $this->struct->type == Constants_Organizations::PERSONAL ){
+            throw new DomainException( "Can not invite members to a Personal organization." );
+        }
+    }
+
     protected function _createOrganizationWithMatecatUsers() {
+
+        $this->_checkAddMembersToPersonalOrganization();
+
         $dao = new \Organizations\OrganizationDao() ;
 
         \Database::obtain()->begin();
@@ -190,8 +200,6 @@ class OrganizationModel {
         ] );
 
         \Database::obtain()->commit();
-
-        ( new MembershipDao() )->destroyCacheUserOrganizations( $this->user );
 
         return $organization ;
     }

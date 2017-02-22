@@ -29,6 +29,7 @@ class CreateOrganization extends React.Component {
             this.setState({
                 errorDropdown: false
             });
+            return true;
         } else {
 
             this.setState({
@@ -37,8 +38,8 @@ class CreateOrganization extends React.Component {
             setTimeout(function () {
                 $(self.usersInput).find("input.search").val(text);
             });
+            return false;
         }
-        return true;
     }
 
     checkMailDropDown() {
