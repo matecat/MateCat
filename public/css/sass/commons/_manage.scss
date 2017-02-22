@@ -42,7 +42,7 @@ body.manage {
             left: -15px;
         }
         .project-header {
-            background-color: #e0e1e2;
+            background-color: #dadada;
             padding-bottom: 22px !important;
             .project-id {
                 padding: 10px 0 10px 15px;
@@ -57,8 +57,8 @@ body.manage {
                         transition: 0.3s ease !important;
                 }
                 .ui.form input[type="text"] {
-                    background: #d0d0d0;
-                    border: none;
+                    background: #e8e8e8;;
+                    border: 1px solid #bcbcbc;
                     font-weight: 600;
                     white-space: nowrap;
                     overflow: hidden;
@@ -67,14 +67,15 @@ body.manage {
                     text-overflow: ellipsis;
                     transition: 0.3s ease !important;
                     &:hover {
-                        background: #d8d8d8;
+                        background: #f0f0f0;
                     }
                     &:focus {
                         background: #ffffff;
                         width: 700px;
-                        box-shadow: 0 -1px 0 #e0e0e0,
+                        box-shadow: 0 0 0 #e0e0e0,
                         0 0 2px rgba(0, 0, 0, .12),
                         0 2px 4px rgba(0, 0, 0, .24) !important;
+                        transition: 0.3s ease !important;
                     }
                 }
             }
@@ -94,17 +95,8 @@ body.manage {
                     padding: 0px !important;
                 }
                 .ui.circular.label, .ui.dropdown {
-                    text-align: center;
-                    border-radius: 30px;
                     &.project-menu {
-                        border-radius: 4px;
-                        padding: 0px;
-                        font-size: 18px;
-                        vertical-align: top;
-                        width: 30px;
-                        height: 30px;
-                        line-height: 30px;
-                        text-align: center;
+
                     }
                     &.project-assignee {
                         margin-right: 8px;
