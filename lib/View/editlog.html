@@ -39,8 +39,8 @@
             <div class="wrapper">       
                 <a href="${basepath}" class="logo"></a>
 
-
-                    <a tal:attributes="href string:${basepath}translate/${pname}/${source_code}-${target_code}/${jid}-${password}"  class="downloadtr-button backbtn" >< Back to Translation</a>
+                <div metal:use-macro="common.html/login_includes" />
+                <a tal:attributes="href string:${basepath}translate/${pname}/${source_code}-${target_code}/${jid}-${password}"  class="downloadtr-button backbtn" >< Back to Translation</a>
 
 
             </div>
@@ -186,8 +186,6 @@
 
                         <li><a href="https://www.matecat.com/support/" target="_blank">Support</a></li>
                     </ul>
-
-                    <div metal:use-macro="common.html/login_includes" />
                     
                 </nav>
 

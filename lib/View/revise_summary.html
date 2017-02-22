@@ -38,6 +38,7 @@
 <header style="padding-bottom:5px">
     <div class="wrapper">
         <a href="${basepath}" class="logo"></a>
+        <div metal:use-macro="common.html/login_includes" />
         <a tal:attributes="href string:${basepath}revise/${pname}/${source_code}-${target_code}/${jid}-${password}" class="downloadtr-button backbtn"><
             Go to Revision</a>
 
@@ -45,6 +46,7 @@
             <span id="pname" tal:content="pname">Project</span>
             <span>&nbsp;(<span tal:replace="jid">---</span>) &gt; <b><span tal:replace="source_code">---</span> </b> &gt; <b><span tal:replace="target_code">---</span></b></span>
         </div>
+
     </div>
 </header>
 
@@ -247,8 +249,6 @@
 
                 <li><a href="https://www.matecat.com/support/" target="_blank">Support</a></li>
             </ul>
-
-            <div metal:use-macro="common.html/login_includes" />
 
         </nav>
 
