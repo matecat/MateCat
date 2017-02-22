@@ -165,6 +165,7 @@ class ManageUtils {
             $project[ 'no_active_jobs' ] = true;
             $project[ 'has_cancelled' ]  = 0;
             $project[ 'has_archived' ]   = 0;
+            $project[ 'create_date' ]    = $item[ 'create_date' ];
             $project[ 'password' ]       = $item[ 'password' ];
             $project[ 'tm_analysis' ]    = number_format( $item[ 'tm_analysis_wc' ], 0, ".", "," );
 

@@ -38,14 +38,17 @@ $klein->onError( function ( \Klein\Klein $klein, $err_msg, $err_type, Exception 
     } catch ( AuthenticationError $e ) {
         $klein->response()->code( 401 );
         $klein->response()->json( ( new Error( [ $e ] ) )->render() );
-    } catch ( AuthorizationError $e ) {
-        $klein->response()->code( 403 );
-        $klein->response()->json( ( new Error( [ $e ] ) )->render() );
     } catch ( Model_ValidationError $e ) {
         $klein->response()->code( 400 );
         $klein->response()->json( ( new Error( [ $e ] ) )->render() );
     } catch ( ValidationError $e ) {
         $klein->response()->code( 400 );
+        $klein->response()->json( ( new Error( [ $e ] ) )->render() );
+    } catch ( AuthorizationError $e ) {
+        $klein->response()->code( 403 );
+        $klein->response()->json( ( new Error( [ $e ] ) )->render() );
+    } catch ( DomainException $e ){
+        $klein->response()->code( 403 );
         $klein->response()->json( ( new Error( [ $e ] ) )->render() );
     } catch ( Exceptions_RecordNotFound $e ) {
         \Log::doLog( 'Record Not found error for URI: ' . $_SERVER[ 'REQUEST_URI' ] );

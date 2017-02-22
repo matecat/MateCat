@@ -1514,23 +1514,6 @@ function insertProject( ArrayObject $projectStructure ) {
     return $project;
 }
 
-function updateTranslatorJob( $id_job, Engines_Results_MyMemory_CreateUserResponse $newUser ) {
-
-    $data                       = array();
-    $data[ 'username' ]         = $newUser->id;
-    $data[ 'email' ]            = '';
-    $data[ 'password' ]         = $newUser->pass;
-    $data[ 'first_name' ]       = '';
-    $data[ 'last_name' ]        = '';
-    $data[ 'mymemory_api_key' ] = $newUser->key;
-
-    $db = Database::obtain();
-
-    $res = $db->insert( 'translators', $data ); //ignore errors on duplicate key
-
-    $res = $db->update( 'jobs', array( 'id_translator' => $newUser->id ), ' id = ' . (int)$id_job );
-}
-
 //never used email , first_name and last_name
 //function insertTranslator( $user, $pass, $api_key, $email = '', $first_name = '', $last_name = '' ) {
 function insertTranslator( ArrayObject $projectStructure ) {
@@ -1845,6 +1828,7 @@ function getProjects( Users_UserStruct $user, $start, $step,
                             p.id_assignee AS id_assignee,
                             p.name,
                             p.password,
+                            p.create_date,
                             SUM(draft_words + new_words+translated_words+rejected_words+approved_words) as tm_analysis_wc,
                             project_metadata.value AS features
 
