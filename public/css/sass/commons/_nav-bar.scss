@@ -11,7 +11,8 @@ header {
             padding: 5px 15px 5px 0px !important;
             background-color: #4d4d4d;
         }
-        .ui.selection.dropdown {
+        .ui.selection.dropdown,
+        .ui.select-org.dropdown {
             font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
             text-transform: uppercase;
             font-weight: 600;
@@ -57,11 +58,20 @@ header {
             }
             .scrolling {
                 .item.item.item {
-                    padding-right: 20px !important;
+                    padding-right: 40px !important;
+                    &:hover .organization-filter,
+                    &.active.selected .organization-filter{
+                        visibility: visible;
+                    }
                 }
+                .organization-filter {
+                    visibility: hidden;
+                }
+
             }
         }
-        .ui.selection.visible.dropdown > .text:not(.default) {
+        .ui.selection.visible.dropdown > .text:not(.default),
+        .ui.select-org.visible.dropdown > .text:not(.default) {
             font-weight: 600;
             //color: white;
         }
@@ -105,6 +115,23 @@ header {
             }
             margin-top: 0;
             float: right;
+        }
+
+        .dropdown.select-org {
+            color: gray;
+            font-size: 15px;
+            i.dropdown.icon {
+                top: 12px;
+                margin-left: 0 !important;
+            }
+            span.text {
+                text-align: right;
+                transition: 0.3s ease;
+                line-height: 35px;
+            }
+            &:hover span.text {
+                color: #02ceff;
+            }
         }
 
     }

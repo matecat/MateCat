@@ -44,6 +44,7 @@ class Header extends React.Component {
     }
 
     changeOrganization(event, organization) {
+        APP.setOrganizationInStorage(organization.get('id'));
         if (this.props.showSubHeader) {
             if (organization.get('id')  !== this.state.selectedOrganizationId) {
                 let selectedOrganization = this.state.organizations.find(function (org) {
@@ -54,6 +55,8 @@ class Header extends React.Component {
                 window.scrollTo(0, 0);
                 ManageActions.changeOrganization(selectedOrganization.toJS());
             }
+        } else {
+            ManageActions.changeOrganizationFromUploadPage();
         }
     }
 
@@ -160,12 +163,12 @@ class Header extends React.Component {
         if (this.state.organizations.size > 0) {
             let items = this.state.organizations.map(function(organization, i) {
                 let iconModal = '';
-                // if (self.props.showModals) {
+                if (self.props.showModals) {
                     iconModal = <a className="organization-filter button show right"
                                    onClick={(e) => self.openModifyOrganization(e, organization)}>
                         <i className="icon-more_vert icon"/>
                     </a>
-                // }
+                }
                 return <div className="item" data-value={organization.get('id')}
                      data-text={organization.get('name')}
                      key={'organization' + organization.get('name') + organization.get('id')}
@@ -182,13 +185,12 @@ class Header extends React.Component {
                                 </a>
                             </div>
             }
-            result = <div className="ui dropdown selection org"
+            result = <div className="ui top right pointing dropdown select-org"
                           ref={(dropdownOrganizations) => this.dropdownOrganizations = dropdownOrganizations}>
                 <input type="hidden" name="organization" className="organization-dd" />
-                <i className="dropdown icon"/>
                 <span className="text">Choose Organization</span>
+                {/*<i className="dropdown icon"/>*/}
                 <div className="menu">
-                    <div className="divider"></div>
                     {addOrg}
                     { self.props.showModals ? (
                             <div className="divider"></div>

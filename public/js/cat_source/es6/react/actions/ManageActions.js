@@ -375,6 +375,10 @@ let ManageActions = {
                 organization: data.organization[0],
             });
         });
+    },
+
+    changeOrganizationFromUploadPage: function () {
+        location.reload();
     }
 
 };

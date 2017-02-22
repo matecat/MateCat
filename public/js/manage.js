@@ -12,7 +12,6 @@ UI = {
         this.changeProjectWorkspace = this.changeProjectWorkspace.bind(this);
         this.selectedWorkspace = ManageConstants.ALL_WORKSPACES_FILTER;
         this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
-        this.organizationStorageName = 'organizationId';
 
         //Job Actions
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_SETTINGS, this.openJobSettings);
@@ -38,34 +37,34 @@ UI = {
 
         window.addEventListener('scroll', this.scrollDebounceFn());
 
-        // $(window).on("blur focus", function(e) {
-        //     let prevType = $(this).data("prevType");
-        //
-        //     if (prevType != e.type) {   //  reduce double fire issues
-        //         switch (e.type) {
-        //             case "blur":
-        //                 console.log("leave page");
-        //                 self.pageLeft = true;
-        //                 break;
-        //             case "focus":
-        //                 console.log("Enter page");
-        //                 if (self.pageLeft) {
-        //                     // alert("Refresf");
-        //                     console.log("Refresh projects");
-        //                     self.reloadProjects();
-        //                 }
-        //                 break;
-        //         }
-        //     }
-        //
-        //     $(this).data("prevType", e.type);
-        // });
+        $(window).on("blur focus", function(e) {
+            let prevType = $(this).data("prevType");
+
+            if (prevType != e.type) {   //  reduce double fire issues
+                switch (e.type) {
+                    case "blur":
+                        console.log("leave page");
+                        self.pageLeft = true;
+                        break;
+                    case "focus":
+                        console.log("Enter page");
+                        if (self.pageLeft) {
+                            // alert("Refresf");
+                            console.log("Refresh projects");
+                            self.reloadProjects();
+                        }
+                        break;
+                }
+            }
+
+            $(this).data("prevType", e.type);
+        });
 
         this.getAllOrganizations().done(function (data) {
 
             self.organizations = data.organizations;
             ManageActions.renderOrganizations(self.organizations);
-            self.selectedOrganization = self.getLastOrganizationSelected(self.organizations);
+            self.selectedOrganization = APP.getLastOrganizationSelected(self.organizations);
             self.getOrganizationStructure(self.selectedOrganization).done(function () {
                 ManageActions.selectOrganization(self.selectedOrganization);
                 self.getProjects(self.selectedOrganization).done(function(response){
@@ -131,25 +130,6 @@ UI = {
         });
     },
 
-    getLastOrganizationSelected: function (organizations) {
-        if (localStorage.getItem(this.organizationStorageName)) {
-            let lastId = localStorage.getItem(this.organizationStorageName);
-            let organization = organizations.find(function (org, i) {
-                return parseInt(org.id) === parseInt(lastId);
-            });
-            if (organization) {
-                return organization;
-            } else {
-                return organizations[0];
-            }
-        } else {
-            return organizations[0];
-        }
-    },
-
-    setOrganizationInStorage(organizationId) {
-        localStorage.setItem(this.organizationStorageName, organizationId);
-    },
     /**
      * Open the settings for the job
      */
@@ -228,7 +208,6 @@ UI = {
         this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
         this.Search.filter = {};
         UI.Search.currentPage = 1;
-        this.setOrganizationInStorage(organization.id);
         return this.getOrganizationStructure(organization).then(function () {
                 return self.getProjects(self.selectedOrganization);
             }
