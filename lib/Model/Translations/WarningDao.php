@@ -10,6 +10,14 @@ class WarningDao extends \DataAccess_AbstractDao {
     public static $primary_keys = array();
     const TABLE = 'translation_warnings' ;
 
+    protected $_query_warnings_by_chunk = "
+          SELECT count(1) AS count, jobs.id AS id_job, jobs.password
+            FROM jobs
+              JOIN segment_translations st ON st.id_job = jobs.id
+          WHERE ( st.warning & :level ) = :level
+            AND id = :id AND password = :password
+        " ;
+
     public function getWarningsByProjectIds( $projectIds ) {
         $ids = implode(',', array_map(function( $id ) {
             return (int) $id ;
@@ -31,6 +39,30 @@ class WarningDao extends \DataAccess_AbstractDao {
         $result = $stmt->fetchAll() ;
 
         return $result ;
+    }
+
+    /**
+     * @param \Chunks_ChunkStruct $chunk
+     *
+     * @return int
+     */
+    public function getErrorsByChunk( \Chunks_ChunkStruct $chunk ) {
+        $con = $this->con->getConnection() ;
+
+        $stmt = $con->prepare( $this->_query_warnings_by_chunk ) ;
+        $stmt->execute( [
+                'id' => $chunk->id,
+                'password' => $chunk->password,
+                'level' => WarningModel::ERROR
+        ] ) ;
+
+        $result = $stmt->fetch() ;
+        if ( $result ) {
+            return $result['count'] ;
+        }
+        else {
+            return 0;
+        }
     }
 
     public static function findByChunkAndScope( \Chunks_ChunkStruct $chunk, $scope ) {

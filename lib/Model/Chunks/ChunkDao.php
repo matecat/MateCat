@@ -28,7 +28,7 @@ class Chunks_ChunkDao extends DataAccess_AbstractDao {
         $fetched = $stmt->fetch();
 
         if ( $fetched == false ) {
-            throw new Exceptions\NotFoundError();
+            throw new Exceptions\NotFoundError('Record not found');
         } else {
             return $fetched;
         }

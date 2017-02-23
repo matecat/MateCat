@@ -32,11 +32,17 @@ abstract class KleinController {
     }
 
     public function respond( $method ) {
-        $this->validateAuth();
+        $start = microtime(true) ;
 
+        $this->validateAuth();
         if ( !$this->response->isLocked() ) {
             $this->$method();
         }
+
+        $end = microtime(true) ;
+
+        $this->_logWithTime( $end - $start ) ;
+
     }
 
     protected function validateAuth() {
@@ -109,6 +115,20 @@ abstract class KleinController {
     }
 
     protected function afterConstruct() {
+    }
+
+    protected function _logWithTime( $time ) {
+        $previous_filename = \Log::$fileName ;
+        \Log::$fileName = 'API.log' ;
+
+        $log_string = " " . $this->request->pathname() . " " . round( $time, 4 ) ;
+
+        if ( $this->api_key ) {
+            $log_string .= " key:" . $this->api_key ;
+        }
+
+        \Log::doLog( $log_string  );
+        \Log::$fileName = $previous_filename ;
     }
 
 }
