@@ -29,7 +29,7 @@ $klein->with('/api/v2/activity', function() {
 });
 
 $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
-    // TODO: group all similarly prefixed APIs into this block
+    route( '',              'GET', 'API\V2\ChunkController', 'show' );
     route( '/comments',     'GET', 'API\V2\CommentsController', 'index' );
 
     /**

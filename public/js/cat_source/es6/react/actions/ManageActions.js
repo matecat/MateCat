@@ -350,20 +350,26 @@ let ManageActions = {
     removeUserFromOrganization: function (organization, userId) {
         var self = this;
         UI.removeUserFromOrganization(organization.toJS(), userId).done(function (data) {
-            AppDispatcher.dispatch({
-                actionType: ManageConstants.UPDATE_ORGANIZATION_MEMBERS,
-                organization: organization,
-                members: data.members
-            });
             if (userId === APP.USER.STORE.user.uid) {
                 UI.getAllOrganizations(true).done(function (data) {
                     UI.selectedOrganization = data.organizations[0];
+                    AppDispatcher.dispatch({
+                        actionType: ManageConstants.CHOOSE_ORGANIZATION,
+                        organizationId: UI.selectedOrganization.id
+                    });
                     AppDispatcher.dispatch({
                         actionType: ManageConstants.RENDER_ORGANIZATIONS,
                         organizations: data.organizations,
                         defaultOrganization: data.organizations[0]
                     });
                     self.changeOrganization(data.organizations[0]);
+                });
+            } else {
+                AppDispatcher.dispatch({
+                    actionType: ManageConstants.UPDATE_ORGANIZATION_MEMBERS,
+                    organization: organization,
+                    members: data.members,
+                    pendingInvitations: data.pending_invitations
                 });
             }
         });

@@ -174,6 +174,7 @@ class SubHeader extends React.Component {
         }
         return result;
     }
+
     getWorkspacesSelect() {
         let result = '';
         let items;
@@ -192,39 +193,46 @@ class SubHeader extends React.Component {
                     No Workspace
                 </div>;
             items = items.unshift(item);
-
-        }
-        result = <div className="ui dropdown selection workspace-dropdown"
-                      ref={(dropdownWorkspaces) => this.dropdownWorkspaces = dropdownWorkspaces}>
-            <input type="hidden" name="gender" />
-            <i className="dropdown icon"/>
-            <div className="default text">Choose Workspace</div>
-            <div className="menu">
-                <div className="divider"></div>
-                <div className="header" style={{cursor: 'pointer'}} onClick={this.openCreateWorkspace.bind(this)}>New Workspace
-                    <a className="organization-filter button show">
-                        <i className="icon-plus3 icon"/>
-                    </a>
-                </div>
-                <div className="divider"></div>
-                {/*<div className="header">
-                 <div className="ui form">
-                 <div className="field">
-                 <input type="text" name="Project Name" placeholder="Translated Organization es." />
-                 </div>
-                 </div>
-                 </div>
-                 <div className="divider"></div>*/}
-                <div className="scrolling menu">
-                    <div className="item" data-value='-1'
-                         data-text='All Projects' key={'organization-all'}>
-                        All
+            return <div className="column">
+                    <div className="ui dropdown selection workspace-dropdown"
+                            ref={(dropdownWorkspaces) => this.dropdownWorkspaces = dropdownWorkspaces}>
+                    <input type="hidden" name="gender" />
+                    <i className="dropdown icon"/>
+                    <div className="default text">Choose Workspace</div>
+                    <div className="menu">
+                        <div className="divider"></div>
+                        <div className="header" style={{cursor: 'pointer'}} onClick={this.openCreateWorkspace.bind(this)}>New Workspace
+                            <a className="organization-filter button show">
+                                <i className="icon-plus3 icon"/>
+                            </a>
+                        </div>
+                        <div className="divider"></div>
+                        {/*<div className="header">
+                         <div className="ui form">
+                         <div className="field">
+                         <input type="text" name="Project Name" placeholder="Translated Organization es." />
+                         </div>
+                         </div>
+                         </div>
+                         <div className="divider"></div>*/}
+                        <div className="scrolling menu">
+                            <div className="item" data-value='-1'
+                                 data-text='All Projects' key={'organization-all'}>
+                                All
+                            </div>
+                            {items}
+                        </div>
                     </div>
-                    {items}
                 </div>
-            </div>
-        </div>;
-        return result;
+                <div className="ui icon button ws-settings" onClick={this.openCreateWorkspace.bind(this)}><i className="icon-settings icon"></i></div>
+            </div>;
+        } else {
+            return <div className="column">
+                    <div className="no-workspace pad-left-15">
+                    <a href="#" onClick={this.openCreateWorkspace.bind(this)}>CREATE A NEW WORKSPACE <i className="icon-plus3 icon"/></a>
+                </div>
+            </div>;
+        }
     }
     render () {
         let membersFilter = this.getUserFilter();
@@ -233,9 +241,7 @@ class SubHeader extends React.Component {
         return (
             <section className="row sub-head">
                 <div className="ui container equal width grid">
-                    <div className="column">
-                        {workspaceDropDown}
-                    </div>
+                    {workspaceDropDown}
                     <div className="center aligned column">
                         {membersFilter}
                     </div>

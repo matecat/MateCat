@@ -117,56 +117,6 @@ class Header extends React.Component {
                     iconModal = <a className="organization-filter button show right"
                                    onClick={(e) => self.openModifyOrganization(e, organization)}>
                         <i className="icon-more_vert icon"/>
-                    </a>;
-                }
-                return <div className="item" data-value={organization.get('id')}
-                            data-text={organization.get('name')}
-                            key={'organization' + organization.get('name') + organization.get('id')}
-                            onClick={(e) => self.changeOrganization(e, organization)}>
-                    {organization.get('name')}
-                    {iconModal}
-                </div>
-            });
-            let addOrg = '';
-            if (self.props.showModals) {
-                addOrg = <div className="header" style={{cursor: 'pointer'}} onClick={this.openCreateOrganizations.bind(this)}>New Organization
-                    <a className="organization-filter button show">
-                        <i className="icon-plus3 icon"/>
-                    </a>
-                </div>
-            }
-            result = <div className="ui dropdown selection org"
-                          ref={(dropdownOrganizations) => this.dropdownOrganizations = dropdownOrganizations}>
-                <input type="hidden" name="organization" className="organization-dd" />
-                <i className="dropdown icon"/>
-                <span className="text">Choose Organization</span>
-                <div className="menu">
-                    <div className="divider"></div>
-                    {addOrg}
-                    { self.props.showModals ? (
-                            <div className="divider"></div>
-                        ): (
-                            ''
-                        )}
-                    <div className="scrolling menu">
-                        {items}
-                    </div>
-                </div>
-            </div>;
-        }
-        return result;
-    }
-
-    getOrganizationsSelect() {
-        let result = '';
-        var self = this;
-        if (this.state.organizations.size > 0) {
-            let items = this.state.organizations.map(function(organization, i) {
-                let iconModal = '';
-                if (self.props.showModals) {
-                    iconModal = <a className="organization-filter button show right"
-                                   onClick={(e) => self.openModifyOrganization(e, organization)}>
-                        <i className="icon-more_vert icon"/>
                     </a>
                 }
                 return <div className="item" data-value={organization.get('id')}
