@@ -77,7 +77,7 @@ class WorkspacesController extends KleinController {
 
     public function update() {
 
-        $requestContent = $this->getPutParams();
+        $requestContent = (object)$this->getPutParams();
 
         try {
 
