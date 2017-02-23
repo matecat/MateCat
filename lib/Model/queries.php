@@ -1768,7 +1768,6 @@ function conditionsForProjectsQuery(
  * @param                   $search_source        string
  * @param                   $search_target        string
  * @param                   $search_status        string
- * @param                   $search_onlycompleted bool
  * @param                   $project_id           int
  *
  * @param \Organizations\OrganizationStruct $organization
