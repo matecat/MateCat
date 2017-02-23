@@ -84,7 +84,7 @@ class ModifyOrganization extends React.Component {
     }
 
 
-    getUserList() {
+/*getUserList() {
         let self = this;
         return this.state.organization.get('members').map(function(member, i) {
             let user = member.get('user');
@@ -117,6 +117,50 @@ class ModifyOrganization extends React.Component {
                     <span className="content">
                         {' ' + user.get('first_name') + ' ' + user.get('last_name')}
                     </span>
+                    <div className="right floated content top-2">
+                        <div className="mini ui button" onClick={self.showRemoveUser.bind(self, user.get('uid'))}>Remove</div>
+                    </div>
+                </div>
+            }
+
+        });
+
+    }*/
+
+    getUserList() {
+        let self = this;
+        return this.state.organization.get('members').map(function(member, i) {
+            let user = member.get('user');
+            if (user.get('uid') == APP.USER.STORE.user.uid && self.state.showRemoveMessageUserID == user.get('uid')) {
+                return <div className="item"
+                            key={'user' + user.get('uid')}>
+                    <div className="right floated content top-1 bottom-1">
+                        <div className="ui button green" onClick={self.removeUser.bind(self, user.get('uid'))}>YES</div>
+                        <div className="ui button red" onClick={self.undoRemoveAction.bind(self)}>NO</div>
+                    </div>
+                    <div className="content pad-top-6 pad-bottom-8">
+                        Are you sure you want to leave this organization?
+                    </div>
+                </div>
+            }else if (self.state.showRemoveMessageUserID == user.get('uid')) {
+                return <div className="item"
+                            key={'user' + user.get('uid')}>
+                    <div className="right floated content top-1 bottom-1">
+                        <div className="mini ui button green" onClick={self.removeUser.bind(self, user.get('uid'))}>YES</div>
+                        <div className="mini ui button red" onClick={self.undoRemoveAction.bind(self)}>NO</div>
+                    </div>
+                    <div className="content pad-top-6 pad-bottom-8">
+                        Are you sure you want to remove this user?
+                    </div>
+                </div>
+            } else {
+                return <div className="item"
+                            key={'user' + user.get('uid')}>
+                    <div className="ui circular label">{APP.getUserShortName(user.toJS())}</div>
+                    <div className="content user">
+                        {' ' + user.get('first_name') + ' ' + user.get('last_name')}
+                    </div>
+                    <div className="content email-member">{user.get('email')}</div>
                     <div className="right floated content top-2">
                         <div className="mini ui button" onClick={self.showRemoveUser.bind(self, user.get('uid'))}>Remove</div>
                     </div>
@@ -194,7 +238,7 @@ class ModifyOrganization extends React.Component {
                                 </div>
                             </div>
                             <div className="sixteen wide column">
-                                <div className="ui members-list">
+                                <div className="ui members-list organization">
                                     <div className="ui divided list">
                                         {userlist}
                                         {pendingUsers}

@@ -224,7 +224,6 @@ class SubHeader extends React.Component {
                         </div>
                     </div>
                 </div>
-                <div className="ui icon button ws-settings" onClick={this.openCreateWorkspace.bind(this)}><i className="icon-settings icon"></i></div>
             </div>;
         } else {
             return <div className="column">
