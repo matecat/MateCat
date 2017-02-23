@@ -130,7 +130,34 @@ class ProjectsContainer extends React.Component {
         }
 
         if (!items.size) {
-            items = <div className="no-results-found"><span>No Project Found</span></div>;
+            items = <div className="no-results-found">
+                <div className="ui three doubling cards">
+                    <div className="ui card button">
+                        <div className="content">
+                            <div className="header">
+                                <div className="add-more">+</div>
+                            </div>
+                            <div className="description">Add a new project in this Organization "Nome Organization"</div>
+                        </div>
+                    </div>
+                    <div className="ui card button">
+                        <div className="content">
+                            <div className="header">
+                                <div className="add-more">+</div>
+                            </div>
+                            <div className="description">Add a member in your Organization "Nome Organization"</div>
+                        </div>
+                    </div>
+                    <div className="ui card button">
+                        <div className="content">
+                            <div className="header">
+                                <div className="add-more">+</div>
+                            </div>
+                            <div className="description">Create a Workspace in this Organization "Nome Organization"</div>
+                        </div>
+                    </div>
+                </div>
+            </div>;
             spinner = '';
         }
         var spinnerReloadProjects = '';

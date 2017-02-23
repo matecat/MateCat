@@ -188,7 +188,7 @@ class ModifyOrganization extends React.Component {
                             <div className="sixteen wide column">
                                 <h3>Add members</h3>
                                 <div className={"ui fluid icon input " + usersError }>
-                                    <input type="text" placeholder="joe@email.com"
+                                    <input type="text" placeholder="name@email.com"
                                            onKeyUp={this.handleKeyPressUserInput.bind(this)}
                                            ref={(inputNewUSer) => this.inputNewUSer = inputNewUSer}/>
                                 </div>
