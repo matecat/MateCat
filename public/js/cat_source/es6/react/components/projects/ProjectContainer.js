@@ -147,7 +147,7 @@ class ProjectContainer extends React.Component {
     }
 
     changeProjectName(event) {
-        if (event.target.value !== this.props.project.get('name')) {
+        if (event.target.value !== this.props.project.get('name') && event.target.value !== '') {
             ManageActions.changeProjectName(this.props.organization, this.props.project, event.target.value);
             this.setState({
                 projectName: event.target.value,
@@ -155,6 +155,7 @@ class ProjectContainer extends React.Component {
                 inputSelected: false
             });
         } else {
+            this.inputName.value = (this.props.project.get('name'));
             this.setState({
                 inputNameChanged: false,
                 inputSelected: false

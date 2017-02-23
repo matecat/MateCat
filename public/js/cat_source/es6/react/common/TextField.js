@@ -13,6 +13,13 @@ export default class TextField extends React.Component {
         return this.props.showError && this.props.errorText != "";
     }
 
+    componentDidMount()  {
+        if (this.props.text) {
+            var event = new Event('input', { bubbles: true });
+            this.input.dispatchEvent(event);
+        }
+    }
+
     render() {
         var errorHtml = '';
         var type = 'text' ;
@@ -34,7 +41,8 @@ export default class TextField extends React.Component {
                         } }>
                 <input type={type} placeholder={this.props.placeholder}
                        defaultValue={this.props.text} name={this.props.name} onChange={this.props.onFieldChanged} className={this.props.classes}  tabIndex={this.props.tabindex}
-                       onKeyPress={this.props.onKeyPress}/>
+                       onKeyPress={this.props.onKeyPress}
+                       ref={(input) => this.input = input}/>
                 {errorHtml}
             </div>
         );

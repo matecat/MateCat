@@ -155,6 +155,9 @@ class ManageUtils {
 
         }
 
+        $dao = new Projects_ProjectDao() ;
+        $remoteFileServices = $dao->getRemoteFileServiceName( $projectIDs ) ;
+
         //Prepare project data
         foreach ( $data as $item ) {
 
@@ -185,6 +188,13 @@ class ManageUtils {
             $project[ 'id_assignee' ] = $item[ 'id_assignee' ] ;
             $project[ 'id_workspace' ] = $item[ 'id_workspace' ] ;
             $project[ 'project_slug' ] = Utils::friendly_slug( $project['name'] ) ;
+            $project['remote_file_service'] = null ;
+
+            foreach( $remoteFileServices as $service ) {
+                if ( $project['id'] == $service['id_project'] ) {
+                    $project['remote_file_service'] = $service['service'] ;
+                }
+            }
 
             $projects[ ] = $project;
         }

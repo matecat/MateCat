@@ -127,6 +127,22 @@ class ModifyOrganization extends React.Component {
 
     }
 
+    getPendingInvitations() {
+        let self = this;
+        return this.state.organization.get('pendingInvitations').map(function(mail, i) {
+            return <div className="item"
+                key={'user-invitation' + i}>
+                <span className="content">
+                        {mail}
+                </span>
+                <div className="right floated content top-2">
+                    User invited by mail
+                </div>
+            </div>;
+
+        });
+    }
+
     componentDidMount() {
         OrganizationsStore.addListener(ManageConstants.UPDATE_ORGANIZATION, this.updateOrganization);
     }
@@ -149,6 +165,7 @@ class ModifyOrganization extends React.Component {
         let usersError = (this.state.inputUserError) ? 'error' : '';
         let orgNameError = (this.state.inputNameError) ? 'error' : '';
         let userlist = this.getUserList();
+        let pendingUsers = this.getPendingInvitations();
         let icon = (this.state.readyToSend && !this.state.inputNameError ) ?<i className="icon-checkmark green icon"/> : <i className="icon-pencil icon"/>;
 
         return <div className="modify-organization-modal">
@@ -180,6 +197,7 @@ class ModifyOrganization extends React.Component {
                                 <div className="ui members-list">
                                     <div className="ui divided list">
                                         {userlist}
+                                        {pendingUsers}
                                     </div>
                                 </div>
                             </div>
