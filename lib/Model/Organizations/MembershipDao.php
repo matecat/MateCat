@@ -10,6 +10,7 @@ namespace Organizations;
 
 use API\V2\Json\User;
 use PDO ;
+use Users\MetadataDao;
 use Users_UserDao;
 
 class MembershipDao extends \DataAccess_AbstractDao
@@ -125,6 +126,7 @@ class MembershipDao extends \DataAccess_AbstractDao
 
         foreach( $members as $member ) {
             $member->setUser( ( new Users_UserDao())->setCacheTTL( 60 * 10 )->getByUid( $member->uid ) );
+            $member->setUserMetadata( ( new MetadataDao() )->setCacheTTL( 60 * 10 )->getAllByUid( $member->uid ) );
         }
 
         return $members ;
