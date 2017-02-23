@@ -7,7 +7,6 @@
  */
 
 namespace API\V2\Json;
-use Features\ReviewImproved;
 use Routes ;
 
 class Chunk {
@@ -16,28 +15,31 @@ class Chunk {
 
         $project = $chunk->getProject();
 
-        return [
-            'password'           => $chunk->password,
-            'created_at'         => \Utils::api_timestamp($chunk->create_date),
-            'open_threads_count' => (int) $chunk->getOpenThreadsCount(),
-
-            'urls' => [
-                    'translate' => Routes::translate(
+        $urls = [
+                'translate' => Routes::translate(
                             $project->name,
                             $chunk->id ,
                             $chunk->password,
                             $chunk->source ,
                             $chunk->target
                     ),
-                    'revise' => Routes::revise(
-                            $project->name,
-                            $chunk->id,
-                            ReviewImproved\Utils::revisePassword( $chunk ),
-                            $chunk->source,
-                            $chunk->target
-                    )
-            ],
+                ];
 
+        if ( !$chunk->getProject()-> isFeatureEnabled(\Features::REVIEW_IMPROVED) ) {
+            $urls['revise'] = Routes::revise(
+                    $project->name,
+                    $chunk->id,
+                    $chunk->password,
+                    $chunk->source,
+                    $chunk->target
+            );
+        }
+
+        return [
+            'password'           => $chunk->password,
+            'created_at'         => \Utils::api_timestamp($chunk->create_date),
+            'open_threads_count' => (int) $chunk->getOpenThreadsCount(),
+            'urls'               => $urls,
             'quality_summary'    => [
                     'quality_overall'  => $chunk->getQualityOverall(),
                     'errors_count'     => (int) $chunk->getErrorsCount()
