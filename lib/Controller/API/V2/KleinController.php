@@ -7,8 +7,6 @@ use API\V2\Validators\Base;
 use ApiKeys_ApiKeyStruct;
 use AuthCookie;
 use Users_UserDao;
-use Users_UserStruct;
-use API\V2\Exceptions\AuthorizationError ;
 
 abstract class KleinController {
 
@@ -55,12 +53,19 @@ abstract class KleinController {
     }
 
     public function respond( $method ) {
+        $start = microtime(true) ;
+
         $this->validateAuth();
         $this->identifyUser();
         $this->validateRequest();
         if ( !$this->response->isLocked() ) {
             $this->$method();
         }
+
+        $end = microtime(true) ;
+
+        $this->_logWithTime( $end - $start ) ;
+
     }
 
     public function getRequest() {
@@ -174,6 +179,21 @@ abstract class KleinController {
         $this->downloadToken = null;
     }
 
-    protected function afterConstruct() {}
+    protected function afterConstruct() {
+    }
+
+    protected function _logWithTime( $time ) {
+        $previous_filename = \Log::$fileName ;
+        \Log::$fileName = 'API.log' ;
+
+        $log_string = " " . $this->request->pathname() . " " . round( $time, 4 ) ;
+
+        if ( $this->api_key ) {
+            $log_string .= " key:" . $this->api_key ;
+        }
+
+        \Log::doLog( $log_string  );
+        \Log::$fileName = $previous_filename ;
+    }
 
 }
