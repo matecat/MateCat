@@ -10,16 +10,16 @@ class SubHeader extends React.Component {
         this.NO_WORKSPACES = "0";
 
         this.organizazionChanged = false;
-        this.workspaceChanged = true;
-        this.membersChanged = true;
+        this.dropdownWorkspaceInitialized = false;
+        this.dropDownUsersInitialized = false;
         this.removeWorkspace = this.removeWorkspace.bind(this);
     }
 
     componentDidUpdate() {
         let self = this;
         if (this.props.selectedOrganization) {
-            if (this.organizazionChanged || this.workspaceChanged || this.membersChanged) {
-                if (this.membersChanged && this.props.selectedOrganization.get('members').size > 1) {
+            if (this.organizazionChanged) {
+                if (!this.dropDownUsersInitialized && this.props.selectedOrganization.get('members').size > 1) {
                     $(this.dropdownUsers).dropdown('set selected', '-1');
                     $(this.dropdownUsers).dropdown({
                         fullTextSearch: 'exact',
@@ -27,17 +27,17 @@ class SubHeader extends React.Component {
                             self.changeUser(value);
                         }
                     });
+                    this.dropDownUsersInitialized = true;
                 }
-                if (this.workspaceChanged && this.props.selectedOrganization.get('workspaces').size > 0) {
+                if (!this.dropdownWorkspaceInitialized && this.props.selectedOrganization.get('workspaces').size > 0) {
                     $(this.dropdownWorkspaces).dropdown('set selected', '-1');
                     $(this.dropdownWorkspaces).dropdown({
                         onChange: function(value, text, $selectedItem) {
                             self.changeWorkspace(value);
                         }
                     });
+                    this.dropdownWorkspaceInitialized = true;
                 }
-                this.workspaceChanged = false;
-                this.membersChanged = false;
                 this.organizazionChanged = false;
             }
         }
@@ -53,16 +53,17 @@ class SubHeader extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         if ( (_.isUndefined(this.props.selectedOrganization)) ||
-            (nextProps.selectedOrganization.get('id') !== this.props.selectedOrganization.get('id'))) {
+            nextProps.selectedOrganization.get('id') !== this.props.selectedOrganization.get('id') ||
+            nextProps.selectedOrganization.get('members') !== this.props.selectedOrganization.get('members') ||
+            nextProps.selectedOrganization.get('workspaces') !== this.props.selectedOrganization.get('workspaces')
+            ) {
             this.organizazionChanged = true;
-        }
-        if ( (_.isUndefined(this.props.selectedOrganization)) ||
-            (nextProps.selectedOrganization.get('members') !== this.props.selectedOrganization.get('members'))) {
-            this.membersChanged = true;
-        }
-        if ( (_.isUndefined(this.props.selectedOrganization)) ||
-            (nextProps.selectedOrganization.get('workspaces') !== this.props.selectedOrganization.get('workspaces'))) {
-            this.workspaceChanged = true;
+            if ( nextProps.selectedOrganization && nextProps.selectedOrganization.get('members').size == 1) {
+                this.dropDownUsersInitialized = false;
+            }
+            if ( nextProps.selectedOrganization && nextProps.selectedOrganization.get('workspaces').size == 0) {
+                this.dropdownWorkspaceInitialized = false;
+            }
         }
     }
 
@@ -104,7 +105,7 @@ class SubHeader extends React.Component {
             this.selectedWorkspace = ManageConstants.NO_WORKSPACE_FILTER;
         } else {
             this.selectedWorkspace = this.props.selectedOrganization.get('workspaces').find(function (workspace) {
-                if (workspace.get("id") === parseInt(value)) {
+                if (parseInt(workspace.get("id")) === parseInt(value)) {
                     return true;
                 }
             });
