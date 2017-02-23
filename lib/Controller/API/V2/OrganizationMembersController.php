@@ -9,10 +9,9 @@
 
 namespace API\V2;
 
-use API\V2\Json\Error;
 use API\V2\Json\Membership;
 use API\V2\Validators\OrganizationAccessValidator;
-use LQA\ModelDao;
+use OrganizationModel;
 use Organizations\MembershipDao;
 use Organizations\OrganizationDao;
 use Organizations\PendingInvitations;
@@ -54,7 +53,7 @@ class OrganizationMembersController extends KleinController {
         $organizationStruct = ( new OrganizationDao() )
             ->findById( $this->request->id_organization );
 
-        $model = new \OrganizationModel( $organizationStruct ) ;
+        $model = new OrganizationModel( $organizationStruct ) ;
         $model->setUser( $this->user ) ;
         $model->addMemberEmails( $params['members'] ) ;
         $full_members_list = $model->updateMembers();
@@ -74,7 +73,7 @@ class OrganizationMembersController extends KleinController {
         $organizationStruct = ( new OrganizationDao() )
             ->findById( $this->request->id_organization );
 
-        $model = new \OrganizationModel( $organizationStruct ) ;
+        $model = new OrganizationModel( $organizationStruct ) ;
         $model->removeMemberUids( array( $this->request->uid_member ) );
         $model->setUser( $this->user ) ;
         $membersList = $model->updateMembers();
