@@ -10,30 +10,35 @@ class SubHeader extends React.Component {
         this.NO_WORKSPACES = "0";
 
         this.organizazionChanged = false;
+        this.workspaceChanged = true;
+        this.membersChanged = true;
         this.removeWorkspace = this.removeWorkspace.bind(this);
     }
 
     componentDidUpdate() {
         let self = this;
         if (this.props.selectedOrganization) {
-            if (this.organizazionChanged) {
-                if (this.membersChanged) {
+            if (this.organizazionChanged || this.workspaceChanged || this.membersChanged) {
+                if (this.membersChanged && this.props.selectedOrganization.get('members').size > 1) {
                     $(this.dropdownUsers).dropdown('set selected', '-1');
+                    $(this.dropdownUsers).dropdown({
+                        fullTextSearch: 'exact',
+                        onChange: function(value, text, $selectedItem) {
+                            self.changeUser(value);
+                        }
+                    });
                 }
-                $(this.dropdownWorkspaces).dropdown('set selected', '-1');
-                $(this.dropdownUsers).dropdown('set selected', '-1');
+                if (this.workspaceChanged && this.props.selectedOrganization.get('workspaces').size > 0) {
+                    $(this.dropdownWorkspaces).dropdown('set selected', '-1');
+                    $(this.dropdownWorkspaces).dropdown({
+                        onChange: function(value, text, $selectedItem) {
+                            self.changeWorkspace(value);
+                        }
+                    });
+                }
+                this.workspaceChanged = false;
+                this.membersChanged = false;
                 this.organizazionChanged = false;
-                $(this.dropdownUsers).dropdown({
-                    fullTextSearch: 'exact',
-                    onChange: function(value, text, $selectedItem) {
-                        self.changeUser(value);
-                    }
-                });
-                $(this.dropdownWorkspaces).dropdown({
-                    onChange: function(value, text, $selectedItem) {
-                        self.changeWorkspace(value);
-                    }
-                });
             }
         }
     }
@@ -54,6 +59,10 @@ class SubHeader extends React.Component {
         if ( (_.isUndefined(this.props.selectedOrganization)) ||
             (nextProps.selectedOrganization.get('members') !== this.props.selectedOrganization.get('members'))) {
             this.membersChanged = true;
+        }
+        if ( (_.isUndefined(this.props.selectedOrganization)) ||
+            (nextProps.selectedOrganization.get('workspaces') !== this.props.selectedOrganization.get('workspaces'))) {
+            this.workspaceChanged = true;
         }
     }
 
