@@ -200,6 +200,35 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
         return false;
     }
 
+
+    /**
+     * @param $project_ids
+     * @return array[]
+     *
+     */
+    public function getRemoteFileServiceName( $project_ids ) {
+
+        $project_ids = implode(', ', array_map(function($id) {
+            return (int) $id ;
+        }, $project_ids ));
+
+        $sql = "SELECT id_project, c.service
+          FROM files
+          JOIN remote_files on files.id = remote_files.id_file
+          JOIN connected_services c on c.id = connected_service_id
+          WHERE id_project in ( $project_ids )
+          GROUP BY id_project, c.service " ;
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute();
+        $stmt->setFetchMode( PDO::FETCH_ASSOC );
+
+        return $stmt->fetchAll();
+    }
+
+
+
     protected function _buildResult( $array_result ) {
 
     }
