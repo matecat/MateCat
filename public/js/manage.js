@@ -218,6 +218,7 @@ UI = {
         let self = this;
         return this.getOrganizationMembers(organization).then(function (data) {
             self.selectedOrganization.members = data.members;
+            self.selectedOrganization.pendingInvitations = data.pending_invitations;
             return self.getWorkspaces(organization).then(function (data) {
                 self.selectedOrganization.workspaces = data.workspaces;
             });

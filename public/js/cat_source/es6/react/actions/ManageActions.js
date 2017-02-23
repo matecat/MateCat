@@ -341,7 +341,8 @@ let ManageActions = {
             AppDispatcher.dispatch({
                 actionType: ManageConstants.UPDATE_ORGANIZATION_MEMBERS,
                 organization: organization,
-                members: data.members
+                members: data.members,
+                pendingInvitations: data.pending_invitations
             });
         });
     },

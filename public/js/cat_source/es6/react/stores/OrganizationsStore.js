@@ -65,9 +65,10 @@ let OrganizationsStore = assign({}, EventEmitter.prototype, {
         return this.organizations.get(indexOrg);
     },
 
-    updateOrganizationMembers: function (organization, members) {
+    updateOrganizationMembers: function (organization, members, pendingInvitations) {
         let index = this.organizations.indexOf(organization);
         this.organizations = this.organizations.setIn([index,'members'], Immutable.fromJS(members));
+        this.organizations = this.organizations.setIn([index,'pendingInvitations'], Immutable.fromJS(pendingInvitations));
         return this.organizations.get(index);
     },
 
@@ -95,7 +96,7 @@ AppDispatcher.register(function(action) {
             OrganizationsStore.emitChange(ManageConstants.UPDATE_ORGANIZATIONS, OrganizationsStore.organizations);
             break;
         case ManageConstants.UPDATE_ORGANIZATION_MEMBERS:
-            let org = OrganizationsStore.updateOrganizationMembers(action.organization, action.members);
+            let org = OrganizationsStore.updateOrganizationMembers(action.organization, action.members, action.pendingInvitations);
             OrganizationsStore.emitChange(ManageConstants.UPDATE_ORGANIZATION, org);
             OrganizationsStore.emitChange(ManageConstants.UPDATE_ORGANIZATIONS, OrganizationsStore.organizations);
             break;
