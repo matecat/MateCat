@@ -849,6 +849,25 @@ div#matecat-modal p {
         .ui.members-list {
             max-height: 200px;
             overflow-y: auto;
+            &.organization {
+                .item {
+                    padding: 5px 0 !important;
+                    .ui.circular.label {
+                        float: left !important;
+                    }
+                    .content.user {
+                        min-width: 200px !important;
+                        float: left;
+                        padding: 3px 3px;
+                    }
+                    .content.email-member {
+                        font-size: 14px;
+                        color: gray;
+                        padding: 5px 3px 4px;
+                        float: left;
+                    }
+                }
+            }
         }
         .ui.workspace-list {
             max-height: 200px;
