@@ -61,6 +61,63 @@ class ProjectsContainer extends React.Component {
         });
     }
 
+
+    openAddMember () {
+        ManageActions.openModifyOrganizationModal(this.state.organization.toJS());
+    }
+
+    openAddWorkspace() {
+        ManageActions.openCreateWorkspaceModal(this.state.organization);
+    }
+
+    createNewProject() {
+        window.open("/", '_blank');
+    }
+
+    getButtonsNoProjects() {
+        if (!this.state.organization) return;
+        let thereAreWS = (this.state.organization.get("workspaces") && this.state.organization.get("workspaces").size > 0);
+        let thereAreMembers = (this.state.organization.get("members") && this.state.organization.get("members").size > 1);
+        let containerClass = (!thereAreWS && !thereAreMembers) ? 'three' : ((!thereAreWS || !thereAreMembers) ? 'two' : 'one');
+        return <div className="no-results-found">
+            <div className={"ui " + containerClass +"  doubling cards"}>
+                <div className="ui card button"
+                onClick={this.createNewProject.bind(this)}>
+                    <div className="content">
+                        <div className="header">
+                            <div className="add-more">+</div>
+                        </div>
+                        <div className="description">Add a new project in this Organization {this.state.organization.get('name')}</div>
+                    </div>
+                </div>
+                {!thereAreMembers ? (
+                        <div className="ui card button"
+                             onClick={this.openAddMember.bind(this)}>
+                            <div className="content">
+                                <div className="header">
+                                    <div className="add-more">+</div>
+                                </div>
+                                <div className="description">Add a member in your Organization {this.state.organization.get('name')}</div>
+                            </div>
+                        </div>
+                    ) : ('')}
+
+                {!thereAreWS ? (
+                        <div className="ui card button"
+                             onClick={this.openAddWorkspace.bind(this)}>
+                            <div className="content">
+                                <div className="header">
+                                    <div className="add-more">+</div>
+                                </div>
+                                <div className="description">Create a Workspace in this Organization {this.state.organization.get('name')}</div>
+                            </div>
+                        </div>
+                ) : ('')}
+
+            </div>
+        </div>;
+    }
+
     componentDidMount() {
         ProjectsStore.addListener(ManageConstants.RENDER_PROJECTS, this.renderProjects);
         // ProjectsStore.addListener(ManageConstants.RENDER_ALL_ORGANIZATION_PROJECTS, this.renderAllOrganizationsProjects);
@@ -107,10 +164,6 @@ class ProjectsContainer extends React.Component {
                 downloadTranslationFn={this.props.downloadTranslationFn}
                 organization={this.state.organization}/>
         ));
-        if (!items.size) {
-            items = <div className="no-results-found"><span>No Project Found</span></div>;
-        }
-
 
         let spinner = '';
         if (this.state.more_projects && projects.size > 9) {
@@ -130,36 +183,10 @@ class ProjectsContainer extends React.Component {
         }
 
         if (!items.size) {
-            items = <div className="no-results-found">
-                <div className="ui three doubling cards">
-                    <div className="ui card button">
-                        <div className="content">
-                            <div className="header">
-                                <div className="add-more">+</div>
-                            </div>
-                            <div className="description">Add a new project in this Organization "Nome Organization"</div>
-                        </div>
-                    </div>
-                    <div className="ui card button">
-                        <div className="content">
-                            <div className="header">
-                                <div className="add-more">+</div>
-                            </div>
-                            <div className="description">Add a member in your Organization "Nome Organization"</div>
-                        </div>
-                    </div>
-                    <div className="ui card button">
-                        <div className="content">
-                            <div className="header">
-                                <div className="add-more">+</div>
-                            </div>
-                            <div className="description">Create a Workspace in this Organization "Nome Organization"</div>
-                        </div>
-                    </div>
-                </div>
-            </div>;
+            items = this.getButtonsNoProjects();
             spinner = '';
         }
+
         var spinnerReloadProjects = '';
         if (this.state.reloading_projects) {
             var spinnerContainer = {
