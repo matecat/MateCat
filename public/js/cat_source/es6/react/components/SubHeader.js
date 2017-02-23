@@ -58,11 +58,13 @@ class SubHeader extends React.Component {
             nextProps.selectedOrganization.get('workspaces') !== this.props.selectedOrganization.get('workspaces')
             ) {
             this.organizazionChanged = true;
+            this.dropDownUsersInitialized = false;
+            this.dropdownWorkspaceInitialized = false;
             if ( nextProps.selectedOrganization && nextProps.selectedOrganization.get('members').size == 1) {
-                this.dropDownUsersInitialized = false;
+                this.dropDownUsersInitialized = true;
             }
             if ( nextProps.selectedOrganization && nextProps.selectedOrganization.get('workspaces').size == 0) {
-                this.dropdownWorkspaceInitialized = false;
+                this.dropdownWorkspaceInitialized = true;
             }
         }
     }
