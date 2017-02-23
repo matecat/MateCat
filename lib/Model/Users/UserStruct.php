@@ -90,7 +90,7 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct   implements D
 
     public function getMetadataAsKeyValue() {
         $dao = new \Users\MetadataDao() ;
-        $collection = $dao->allByProjectId($this->uid) ;
+        $collection = $dao->getAllByUid($this->uid) ;
         $data  = array();
         foreach ($collection as $record ) {
             $data[ $record->key ] = $record->value;

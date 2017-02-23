@@ -28,8 +28,24 @@ class MembershipStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
      */
     private $organization ;
 
+
+    /**
+     * @var
+     */
+    private $user_metadata ;
+
+
     public function setUser( \Users_UserStruct $user ) {
         $this->user = $user ;
+    }
+
+
+    public function setUserMetadata($user_metadata) {
+        $this->user_metadata = $user_metadata ;
+    }
+
+    public function getUserMetadata() {
+        return $this->user_metadata ;
     }
 
     /**

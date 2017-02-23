@@ -10,6 +10,7 @@ namespace API\V2\Json;
 
 
 use Organizations\MembershipStruct;
+use Users\MetadataStruct;
 
 class Membership {
 
@@ -28,6 +29,11 @@ class Membership {
 
         if ( !is_null( $membership->getUser() ) ) {
             $out['user'] = User::renderItem( $membership->getUser() ) ;
+        }
+
+        $metadata = UserMetadata::renderMetadataCollection( $membership->getUserMetadata() ) ;
+        if ( !empty( $metadata) ) {
+            $out['user_metadata'] = array_filter( $metadata ) ;
         }
 
         return $out;

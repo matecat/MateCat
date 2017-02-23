@@ -28,7 +28,7 @@ class ProjectUpdateTest extends IntegrationTest  {
 
     }
 
-    public function test_assignee_can_be_set() {
+    public function test_assignee_can_be_set_and_unset() {
         $this->prepareUserAndApiKey();
 
         $project_body = integrationCreateTestProject(array(
@@ -63,6 +63,19 @@ class ProjectUpdateTest extends IntegrationTest  {
 
         $project = Projects_ProjectDao::findById( $project->id ) ;
         $this->assertEquals($project->id_assignee, $other_user->uid ) ;
+
+
+        $test = new CurlTest(array(
+                'headers' => $this->test_data->headers,
+                'path' => "/api/v2/orgs/{$project->id_organization}/projects/{$project->id}",
+                'method' => 'PUT',
+                'params' => array('id_assignee' => null )
+        ) ) ;
+
+        $response = $test->getResponse() ;
+
+        $project = Projects_ProjectDao::findById( $project->id ) ;
+        $this->assertNull($project->id_assignee ) ;
 
     }
 

@@ -13,6 +13,11 @@ class oauthResponseHandlerController extends viewController{
      */
     private $user ;
 
+    /**
+     * @var Google_Service_Oauth2_Userinfoplus
+     */
+    private $remoteUser ;
+
 	public function __construct(){
         parent::sessionStart();
 		parent::__construct();
@@ -57,10 +62,17 @@ class oauthResponseHandlerController extends viewController{
             $this->_welcomeNewUser();
         }
 
+        $this->_updateProfileImage();
+
         $this->_authenticateUser();
 
         $project = new \Users\RedeemableProject($this->user, $_SESSION)  ;
         $project->tryToRedeem()  ;
+    }
+
+    protected function _updateProfileImage() {
+        $dao = new \Users\MetadataDao();
+        $dao->set($this->user->uid, 'gplus_picture', $this->remoteUser->picture );
     }
 
 	protected function _prepareUser() {
@@ -69,12 +81,12 @@ class oauthResponseHandlerController extends viewController{
 
         $plus = new Google_Service_Oauth2($this->client);
         $this->client->authenticate($this->code);
-        $remoteUser = $plus->userinfo->get();
+        $this->remoteUser = $plus->userinfo->get();
 
         $this->user = new Users_UserStruct() ;
-        $this->user->email  = $remoteUser['email'] ;
-        $this->user->first_name = $remoteUser['givenName'];
-        $this->user->last_name = $remoteUser['familyName'];
+        $this->user->email  = $this->remoteUser->email  ;
+        $this->user->first_name = $this->remoteUser->givenName;
+        $this->user->last_name = $this->remoteUser->familyName ;
         $this->user->oauth_access_token = OauthTokenEncryption::getInstance()->encrypt(
             $this->client->getAccessToken()
         );

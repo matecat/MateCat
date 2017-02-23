@@ -1,5 +1,8 @@
 <?php
-use Organizations\OrganizationDao;
+use Organizations\MembershipDao;
+use Organizations\MembershipStruct;
+use Organizations\WorkspaceDao;
+
 
 /**
  * Description of manageController
@@ -184,13 +187,13 @@ class getProjectsController extends ajaxController {
     private function filterAssignee($organization) {
         if ( is_null($this->id_assignee ) ) return ;
 
-        $dao = new \Organizations\MembershipDao();
-        $memberships = $dao->getMemberListByOrganizationId($organization->id);
+        $dao = new MembershipDao();
+        $memberships = $dao->setCacheTTL( 60 * 60 * 24 )->getMemberListByOrganizationId($organization->id);
         $id_assignee = $this->id_assignee ;
         /**
          * @var $users \Organizations\MembershipStruct[]
          */
-        $users = array_values(array_filter($memberships, function( \Organizations\MembershipStruct $membership ) use ( $id_assignee ) {
+        $users = array_values(array_filter($memberships, function( MembershipStruct $membership ) use ( $id_assignee ) {
             return $membership->getUser()->uid == $id_assignee ;
         } ));
 
@@ -209,8 +212,8 @@ class getProjectsController extends ajaxController {
     private function filterWorkspace($organization) {
         if ( is_null($this->id_workspace ) ) return ;
 
-        $dao = new \Organizations\WorkspaceDao() ;
-        $workspaces = $dao->getByOrganizationId($organization->id) ;
+        $dao = new WorkspaceDao() ;
+        $workspaces = $dao->setCacheTTL( 60 * 60 * 24 )->getByOrganizationId($organization->id) ;
         $id_workspace = $this->id_workspace ;
         $wp = array_values( array_filter($workspaces, function($workspace) use ( $id_workspace ) {
             return $id_workspace == $workspace->id ;
@@ -224,7 +227,7 @@ class getProjectsController extends ajaxController {
     }
 
     private function filterOrganization() {
-        $dao = new \Organizations\MembershipDao() ;
+        $dao = new MembershipDao() ;
         $organization = $dao->findOrganizationByIdAndUser($this->id_organization, $this->logged_user ) ;
         if ( !$organization ) {
             throw  new Exception('Organization not found in user memberships') ;

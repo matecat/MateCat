@@ -29,7 +29,7 @@ class ProjectsController extends KleinController {
         $putParams = $this->getPutParams();
 
         foreach ( $acceptedFields as $field ) {
-            if ( isset( $putParams[ $field ] ) ) {
+            if ( array_key_exists($field, $putParams ) ) {
                 $projectModel->prepareUpdate( $field, $putParams[ $field ] );
             }
         }
