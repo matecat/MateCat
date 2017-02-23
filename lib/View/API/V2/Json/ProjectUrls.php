@@ -49,6 +49,9 @@ class ProjectUrls {
                 $jobs[ $record['jid'] ] = array(
                     'id' => $record['jid'],
                     'target_lang' => $record['target'],
+                    'original_download_url' => $this->downloadOriginalUrl( $record ),
+                    'translation_download_url' => $this->downloadTranslationUrl( $record ),
+                    'xliff_download_url' => $this->downloadXliffUrl( $record ),
                     'chunks' => array()
                 );
             }
@@ -70,9 +73,7 @@ class ProjectUrls {
 
         // start over for jobs
 
-        // return array('urls' => $this->data );
-
-        return array('urls' => $this->formatted );
+        return array( 'urls' => $this->formatted );
     }
 
 
