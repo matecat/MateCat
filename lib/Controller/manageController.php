@@ -62,6 +62,7 @@ class manageController extends viewController {
         $this->template->hostpath = INIT::$HTTPHOST;
         $this->template->v_analysis = var_export( INIT::$VOLUME_ANALYSIS_ENABLED, true );
 		$this->template->enable_omegat = ( INIT::$ENABLE_OMEGAT_DOWNLOAD !== false );
+        $this->template->globalMessage = Utils::getGlobalMessage() ;
 
 	}
 
