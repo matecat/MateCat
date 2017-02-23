@@ -15,14 +15,16 @@ class Comments_CommentDao extends DataAccess_AbstractDao {
     /**
      * Returns a structure that lists open threads count
      *
-     * array(
+     * @return  array(
      *        'id_project' => 1,
+     *        'password' => 'xxxx',
      *        'id_job' => 2,
      *        'id_segment' => 3,
      *        'count' => 42
      * );
      *
      * @param $projectIds
+     *
      */
     public function getOpenThreadsForProjects( $projectIds ) {
 
