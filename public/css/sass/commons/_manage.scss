@@ -287,17 +287,43 @@ body.manage {
 // closing rewrite semantic CSS
 
 .no-results-found {
-    background: url(/public/img/jobnotfound.png) no-repeat;
-    background-position: center center;
-    height: 400px;
+    .button {
+        padding: 25px !important;
+        transition: 0.3s ease !important;
+        .content {
+            .header {
+                transition: 0.3s ease !important;
+                .add-more {
+                    font-size: 60px !important;
+                    padding: 25px 0px 35px;
+                }
+            }
+            .description {
+                font-size: 20px;
+                line-height: 30px;
+            }
+        }
+        &:hover {
+            background-color: #09beec;
+            transition: 0.3s ease !important;
+            .header {
+                .add-more {
+                    color: #ffffff;
+                }
+            }
+            .description {
+                color: #ffffff !important;
+            }
+        }
+    }
 }
 
-.no-results-found span {
+/*.no-results-found span {
     text-align: center;
     display: block;
     font-size: 34px;
     margin-top: 20px;
-}
+}*/
 
 .manage footer {
     background: #6d6e71;
