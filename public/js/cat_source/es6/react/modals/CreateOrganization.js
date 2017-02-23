@@ -86,44 +86,50 @@ class CreateOrganization extends React.Component {
     render() {
         var inputError = (this.state.errorInput) ? 'error' : '';
         var inputDropdown = (this.state.errorDropdown) ? 'error' : '';
+
         var buttonClass = (this.state.readyToSend && !this.state.errorInput && !this.state.errorDropdown ) ? '' : 'disabled';
+
         return  <div className="create-organization-modal">
-                    <div className="matecat-modal-top">
-                        <div className="ui one column grid left aligned">
-                            <div className="column">
-                                <h3>Organization Name</h3>
-                                <div className={"ui large fluid icon input " + inputError}>
-                                    <input type="text" placeholder="Organization Name"
-                                           onFocus={this.onInputFocus.bind(this)}
-                                           onKeyUp={this.handleKeyPress.bind(this)}
-                                           ref={(inputNewOrg) => this.inputNewOrg = inputNewOrg}/>
-                                    <i className="icon-pencil icon"/>
-                                </div>
-                            </div>
+            <div className="matecat-modal-top">
+                <div className="ui one column grid left aligned">
+                    <div className="column">
+                        <h3>Organization Name</h3>
+                        <div className={"ui large fluid icon input " + inputError}>
+                            <input type="text" placeholder="Organization Name"
+                                   onFocus={this.onInputFocus.bind(this)}
+                                   onKeyUp={this.handleKeyPress.bind(this)}
+                                   ref={(inputNewOrg) => this.inputNewOrg = inputNewOrg}/>
+                            <i className="icon-pencil icon"/>
                         </div>
                     </div>
-                    <div className="matecat-modal-middle">
-                        <div className="ui one column grid left aligned">
-                            <div className="column">
-                                <h3>Add members</h3>
-                                <div className={"ui fluid multiple search selection dropdown " + inputDropdown}
-                                     ref={(usersInput) => this.usersInput = usersInput}>
-                                    <input name="tags" type="hidden" />
-                                        <div className="default text">insert email or more emails separated by commas or press enter</div>
-                                </div>
-                            </div>
+                </div>
+            </div>
+            <div className="matecat-modal-middle">
+                <div className="ui one column grid left aligned">
+                    <div className="column">
+                        <h3>Add members</h3>
+                        <div className={"ui fluid multiple search selection dropdown " + inputDropdown}
+                             ref={(usersInput) => this.usersInput = usersInput}>
+                            <input name="tags" type="hidden" />
+                            {this.state.errorDropdown ? (
+                                    <div className="default text"></div>
+                                ) : (
+                                    <div className="default text">insert email or more emails separated by commas or press enter</div>
+                                )}
                         </div>
                     </div>
-                    <div className="matecat-modal-bottom">
-                        <div className="ui one column grid right aligned">
-                            <div className="column">
-                                <button className={"ui button blue " + buttonClass }
-                                        onClick={this.onClick.bind(this)}>Create</button>
-                            </div>
-                        </div>
+                </div>
+            </div>
+            <div className="matecat-modal-bottom">
+                <div className="ui one column grid right aligned">
+                    <div className="column">
+                        <button className={"ui button blue " + buttonClass }
+                                onClick={this.onClick.bind(this)}>Create</button>
                     </div>
-                </div>;
-    }
+                </div>
+            </div>
+        </div>;
+        }
 }
 
 
