@@ -34,7 +34,7 @@ class SignupController extends AbstractStatefulKleinController  {
         try {
             $user = Signup::confirm( $this->request->param('token') ) ;
 
-            if( InvitedUser::thereArePendingInvitations() ){
+            if( InvitedUser::hasPendingInvitations() ){
                 InvitedUser::completeOrganizationSignUp( $user, $_SESSION[ 'invited_to_organization' ] );
             }
 

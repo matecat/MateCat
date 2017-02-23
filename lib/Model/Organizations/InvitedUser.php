@@ -59,7 +59,7 @@ class InvitedUser {
 
     }
 
-    public static function thereArePendingInvitations(){
+    public static function hasPendingInvitations(){
         return isset( $_SESSION[ 'invited_to_organization' ] ) && !empty( $_SESSION[ 'invited_to_organization' ][ 'organization_id' ] );
     }
 
