@@ -105,7 +105,7 @@ class LoginModal extends React.Component {
     render() {
         var generalErrorHtml = '';
         if (this.state.generalError.length) {
-            generalErrorHtml = <span style={ {color: 'red',fontSize: '14px'} } className="text">{this.state.generalError}</span>;
+            generalErrorHtml = <div style={ {color: 'red',fontSize: '14px'} } className="text">{this.state.generalError}</div>;
         }
 
         var loaderClass = (this.state.requestRunning) ? 'show' : '';

@@ -14,6 +14,10 @@ body.side-popup {
     float: left;
     cursor: pointer;
     color: #39699a;
+    &:hover {
+        text-decoration: none;
+        color: #1e70bf;
+    }
 }
 
 #resendlink {
@@ -883,3 +887,6 @@ div#matecat-modal p {
     float: left;
 }
 
+.pull-right {
+    float: right !important;
+}
