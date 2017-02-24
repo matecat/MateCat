@@ -109,15 +109,15 @@ class ProjectContainer extends React.Component {
     }
 
     removeProject() {
-        ManageActions.updateStatusProject(this.props.project, ' cancelled ');
+        ManageActions.updateStatusProject(this.props.project, 'cancelled');
     }
 
     archiveProject() {
-        ManageActions.updateStatusProject(this.props.project, ' archived ');
+        ManageActions.updateStatusProject(this.props.project, 'archived');
     }
 
     activateProject() {
-        ManageActions.updateStatusProject(this.props.project, ' active ');
+        ManageActions.updateStatusProject(this.props.project, 'active');
     }
 
     changeUser(value) {
