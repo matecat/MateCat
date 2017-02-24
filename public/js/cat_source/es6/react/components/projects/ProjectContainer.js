@@ -140,6 +140,13 @@ class ProjectContainer extends React.Component {
         }
     }
 
+    removeWorkspace(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        ManageActions.changeProjectWorkspace(-1,  this.props.project);
+    }
+
+
     onKeyUpEvent(event) {
         if(event.key == 'Enter'){
             this.changeProjectName(event);
@@ -368,7 +375,6 @@ class ProjectContainer extends React.Component {
                            key={'user' + user.get('uid')}>
                    <div className="ui circular label">{APP.getUserShortName(user.toJS())}</div>
                    {(user.get('uid') === APP.USER.STORE.user.uid) ? 'To me' : user.get('first_name') + " " + user.get('last_name')}
-                   <div className="ui cancel label"/>
                </div>
            });
 
@@ -381,6 +387,10 @@ class ProjectContainer extends React.Component {
                             Not assigned
 
                         </span>
+                       <div className="ui cancel label"
+                            onClick={self.changeUser.bind(self, '-1')}>
+                           <i className="icon-cancel3"/>
+                       </div>
 
                        <div className="menu">
                            <div className="header"
@@ -471,10 +481,14 @@ class ProjectContainer extends React.Component {
                 return ws.get('id') == self.props.project.get('id_workspace');
             });
             if (ws) {
-                workspace = <a className="ui olive circular label project-workspace shadow-1"
+                workspace = <div className="ui olive circular label project-workspace shadow-1"
                                onClick={this.openChangeOrganizationModal.bind(this)}>
                     {ws.get('name') }
-                </a>
+                    <div className="ui cancel label"
+                         onClick={self.removeWorkspace.bind(self)}>
+                        <i className="icon-cancel3"/>
+                    </div>
+                </div>
             }
         }
 

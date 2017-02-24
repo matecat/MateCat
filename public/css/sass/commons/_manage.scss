@@ -129,18 +129,11 @@ body.manage {
                                 }
                             }
                         }
-                        .ui.cancel.label {
-                            padding: 4px;
-                            background-color: white;
-                            margin: 0px;
-                            border-radius: 15px;
-                            position: absolute;
-                            bottom: 3px;
-                            line-height: 0px;
-                            right: 3px;
-                            i {
-                                font-size: 15px;
-                            }
+                        .item .ui.cancel.label {
+                            display: none;
+                        }
+                        &:hover .text {
+                            padding-right: 30px;
                         }
                     }
                     &.project-not-assigned {
@@ -174,6 +167,31 @@ body.manage {
                                 }
                             }
                         }
+                        .ui.cancel.label {
+                            display: none;
+                        }
+                    }
+                    &.project-assignee,
+                    &.project-workspace {
+                        .ui.cancel.label {
+                            padding: 4px;
+                            background-color: white;
+                            margin: 0px;
+                            border-radius: 15px;
+                            position: absolute;
+                            bottom: 3px;
+                            line-height: 0px;
+                            right: 3px;
+                            visibility: hidden;
+                            i {
+                                font-size: 15px;
+                            }
+                        }
+
+                        &:hover .ui.cancel.label {
+                            visibility: visible;
+                            z-index: 2;
+                        }
                     }
                     &.project-workspace {
                         vertical-align: top;
@@ -185,6 +203,11 @@ body.manage {
                         padding: 0 15px !important;
                         font-size: 12px;
                         font-weight: 100;
+                        position: relative;
+                        cursor: pointer;
+                        &:hover {
+                            padding-right: 30px !important;
+                        }
                     }
                     &.no-workspace {
                         border: .1em dashed #868686;

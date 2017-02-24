@@ -386,8 +386,9 @@ UI = {
     },
 
     changeProjectWorkspace: function (wsId, projectId) {
+        let id = (wsId == -1) ? null : wsId;
         let data = {
-            id_workspace: wsId
+            id_workspace: id
         };
         let idOrg = UI.selectedOrganization.id;
         return $.ajax({
