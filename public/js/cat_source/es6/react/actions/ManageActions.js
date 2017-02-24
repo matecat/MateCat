@@ -132,14 +132,20 @@ let ManageActions = {
     },
 
     changeProjectAssignee: function (organization, project, user) {
-        UI.changeProjectAssignee(organization.get("id"), project.get("id"), user.get("uid")).done(
+        var uid;
+        if (user === -1) {
+            uid = -1
+        } else {
+            uid = user.get("uid")
+        }
+        UI.changeProjectAssignee(organization.get("id"), project.get("id"), uid).done(
             function (response) {
                 AppDispatcher.dispatch({
                     actionType: ManageConstants.CHANGE_PROJECT_ASSIGNEE,
                     project: project,
                     user: user
                 });
-                if (user.get("uid") !== UI.selectedUser && UI.selectedUser !== ManageConstants.ALL_MEMBERS_FILTER) {
+                if (uid !== UI.selectedUser && UI.selectedUser !== ManageConstants.ALL_MEMBERS_FILTER) {
                     setTimeout(function () {
                         AppDispatcher.dispatch({
                             actionType: ManageConstants.HIDE_PROJECT,
@@ -398,6 +404,7 @@ let ManageActions = {
                     pending_invitations: data.pending_invitations
                 });
                 //TODO Refresh current Projects
+                UI.removeUserFilter(userId);
                 UI.reloadProjects();
             }
         });

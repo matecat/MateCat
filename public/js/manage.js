@@ -130,6 +130,12 @@ UI = {
         });
     },
 
+    removeUserFilter: function (uid) {
+        if (UI.Search.filter.id_assignee == uid) {
+            delete UI.Search.filter.id_assignee;
+        }
+    },
+
     /**
      * Open the settings for the job
      */
@@ -403,8 +409,10 @@ UI = {
     },
 
     changeProjectAssignee: function (idOrg, idProject, newUserId) {
+        //Pass null to unassign a Project
+        var idAssignee = (newUserId == '-1') ? null : newUserId;
         let data = {
-            id_assignee: newUserId
+            id_assignee: idAssignee
         };
         return $.ajax({
             data: JSON.stringify(data),
