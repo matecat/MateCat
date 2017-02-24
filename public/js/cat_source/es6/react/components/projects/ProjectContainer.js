@@ -358,6 +358,15 @@ class ProjectContainer extends React.Component {
                </div>
            });
 
+           let defaultValue = (!this.props.project.get('id_assignee') ) ?  <span className="text">
+                            <div className="ui not-assigned label">
+                                <i className="icon-user22"/>
+                            </div>
+                            Not assigned
+                        </span> : <span className="text">
+
+                        </span>;
+
            result = <div className={"ui dropdown top right pointing"}
                          ref={(dropdownUsers) => this.dropdownUsers = dropdownUsers}>
                        <span className="text">

@@ -10,6 +10,8 @@ class SubHeader extends React.Component {
         this.NO_WORKSPACES = "0";
 
         this.organizazionChanged = false;
+        this.dropdownWorkspaceInitialized = false;
+        this.dropDownUsersInitialized = false;
         this.removeWorkspace = this.removeWorkspace.bind(this);
     }
 
@@ -17,23 +19,26 @@ class SubHeader extends React.Component {
         let self = this;
         if (this.props.selectedOrganization) {
             if (this.organizazionChanged) {
-                if (this.membersChanged) {
+                if (!this.dropDownUsersInitialized && this.props.selectedOrganization.get('members').size > 1) {
                     $(this.dropdownUsers).dropdown('set selected', '-1');
+                    $(this.dropdownUsers).dropdown({
+                        fullTextSearch: 'exact',
+                        onChange: function(value, text, $selectedItem) {
+                            self.changeUser(value);
+                        }
+                    });
+                    this.dropDownUsersInitialized = true;
                 }
-                $(this.dropdownWorkspaces).dropdown('set selected', '-1');
-                $(this.dropdownUsers).dropdown('set selected', '-1');
+                if (!this.dropdownWorkspaceInitialized && this.props.selectedOrganization.get('workspaces').size > 0) {
+                    $(this.dropdownWorkspaces).dropdown('set selected', '-1');
+                    $(this.dropdownWorkspaces).dropdown({
+                        onChange: function(value, text, $selectedItem) {
+                            self.changeWorkspace(value);
+                        }
+                    });
+                    this.dropdownWorkspaceInitialized = true;
+                }
                 this.organizazionChanged = false;
-                $(this.dropdownUsers).dropdown({
-                    fullTextSearch: 'exact',
-                    onChange: function(value, text, $selectedItem) {
-                        self.changeUser(value);
-                    }
-                });
-                $(this.dropdownWorkspaces).dropdown({
-                    onChange: function(value, text, $selectedItem) {
-                        self.changeWorkspace(value);
-                    }
-                });
             }
         }
     }
@@ -48,12 +53,19 @@ class SubHeader extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         if ( (_.isUndefined(this.props.selectedOrganization)) ||
-            (nextProps.selectedOrganization.get('id') !== this.props.selectedOrganization.get('id'))) {
+            nextProps.selectedOrganization.get('id') !== this.props.selectedOrganization.get('id') ||
+            nextProps.selectedOrganization.get('members') !== this.props.selectedOrganization.get('members') ||
+            nextProps.selectedOrganization.get('workspaces') !== this.props.selectedOrganization.get('workspaces')
+            ) {
             this.organizazionChanged = true;
-        }
-        if ( (_.isUndefined(this.props.selectedOrganization)) ||
-            (nextProps.selectedOrganization.get('members') !== this.props.selectedOrganization.get('members'))) {
-            this.membersChanged = true;
+            this.dropDownUsersInitialized = false;
+            this.dropdownWorkspaceInitialized = false;
+            if ( nextProps.selectedOrganization && nextProps.selectedOrganization.get('members').size == 1) {
+                this.dropDownUsersInitialized = true;
+            }
+            if ( nextProps.selectedOrganization && nextProps.selectedOrganization.get('workspaces').size == 0) {
+                this.dropdownWorkspaceInitialized = true;
+            }
         }
     }
 
@@ -95,7 +107,7 @@ class SubHeader extends React.Component {
             this.selectedWorkspace = ManageConstants.NO_WORKSPACE_FILTER;
         } else {
             this.selectedWorkspace = this.props.selectedOrganization.get('workspaces').find(function (workspace) {
-                if (workspace.get("id") === parseInt(value)) {
+                if (parseInt(workspace.get("id")) === parseInt(value)) {
                     return true;
                 }
             });

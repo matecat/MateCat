@@ -77,7 +77,7 @@ class ProjectsContainer extends React.Component {
     getButtonsNoProjects() {
         if (!this.state.organization) return;
         let thereAreWS = (this.state.organization.get("workspaces") && this.state.organization.get("workspaces").size > 0);
-        let thereAreMembers = (this.state.organization.get("members") && this.state.organization.get("members").size > 1);
+        let thereAreMembers = (this.state.organization.get("members") && this.state.organization.get("members").size > 1) || this.state.organization.get('type') === 'personal';
         let containerClass = (!thereAreWS && !thereAreMembers) ? 'three' : ((!thereAreWS || !thereAreMembers) ? 'two' : 'one');
         return <div className="no-results-found">
             <div className={"ui " + containerClass +"  doubling cards"}>
@@ -87,7 +87,7 @@ class ProjectsContainer extends React.Component {
                         <div className="header">
                             <div className="add-more">+</div>
                         </div>
-                        <div className="description">Add a new project in this Organization {this.state.organization.get('name')}</div>
+                        <div className="description">Add a New Project in the Organization {this.state.organization.get('name')}</div>
                     </div>
                 </div>
                 {!thereAreMembers ? (
@@ -97,7 +97,7 @@ class ProjectsContainer extends React.Component {
                                 <div className="header">
                                     <div className="add-more">+</div>
                                 </div>
-                                <div className="description">Add a member in your Organization {this.state.organization.get('name')}</div>
+                                <div className="description">Add a member in the Organization {this.state.organization.get('name')}</div>
                             </div>
                         </div>
                     ) : ('')}
@@ -109,7 +109,7 @@ class ProjectsContainer extends React.Component {
                                 <div className="header">
                                     <div className="add-more">+</div>
                                 </div>
-                                <div className="description">Create a Workspace in this Organization {this.state.organization.get('name')}</div>
+                                <div className="description">Create a Workspace in the Organization {this.state.organization.get('name')}</div>
                             </div>
                         </div>
                 ) : ('')}

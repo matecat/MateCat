@@ -347,8 +347,9 @@ let ManageActions = {
         });
     },
 
-    removeUserFromOrganization: function (organization, userId) {
+    removeUserFromOrganization: function (organization, user) {
         var self = this;
+        var userId = user.get('uid')
         UI.removeUserFromOrganization(organization.toJS(), userId).done(function (data) {
             if (userId === APP.USER.STORE.user.uid) {
                 UI.getAllOrganizations(true).done(function (data) {
@@ -371,6 +372,8 @@ let ManageActions = {
                     members: data.members,
                     pendingInvitations: data.pending_invitations
                 });
+                //TODO Refresh current Projects
+                UI.reloadProjects();
             }
         });
     },

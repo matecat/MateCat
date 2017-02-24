@@ -28,9 +28,9 @@ class ModifyOrganization extends React.Component {
         });
     }
 
-    removeUser(userId) {
-        ManageActions.removeUserFromOrganization(this.state.organization, userId);
-        if (userId === APP.USER.STORE.user.uid) {
+    removeUser(user) {
+        ManageActions.removeUserFromOrganization(this.state.organization, user);
+        if (user.get('uid') === APP.USER.STORE.user.uid) {
             APP.ModalWindow.onCloseModal();
         }
     }
@@ -135,7 +135,7 @@ class ModifyOrganization extends React.Component {
                 return <div className="item"
                             key={'user' + user.get('uid')}>
                     <div className="right floated content top-1 bottom-1">
-                        <div className="ui button green" onClick={self.removeUser.bind(self, user.get('uid'))}>YES</div>
+                        <div className="ui button green" onClick={self.removeUser.bind(self, user)}>YES</div>
                         <div className="ui button red" onClick={self.undoRemoveAction.bind(self)}>NO</div>
                     </div>
                     <div className="content pad-top-6 pad-bottom-8">
@@ -146,7 +146,7 @@ class ModifyOrganization extends React.Component {
                 return <div className="item"
                             key={'user' + user.get('uid')}>
                     <div className="right floated content top-1 bottom-1">
-                        <div className="mini ui button green" onClick={self.removeUser.bind(self, user.get('uid'))}>YES</div>
+                        <div className="mini ui button green" onClick={self.removeUser.bind(self, user)}>YES</div>
                         <div className="mini ui button red" onClick={self.undoRemoveAction.bind(self)}>NO</div>
                     </div>
                     <div className="content pad-top-6 pad-bottom-8">
