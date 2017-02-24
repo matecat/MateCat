@@ -14,6 +14,10 @@ body.side-popup {
     float: left;
     cursor: pointer;
     color: #39699a;
+    &:hover {
+        text-decoration: none;
+        color: #1e70bf;
+    }
 }
 
 #resendlink {
@@ -402,7 +406,6 @@ body.side-popup {
 
 .register-modal {
     padding: 10px 15%;
-    width: 100%;
 }
 
 .register-modal h2 {
@@ -772,8 +775,8 @@ div#matecat-modal p {
 .matecat-modal-content .btn-confirm-medium.google-login-button, .matecat-modal-content .btn-confirm-medium.google-login-button:hover, .matecat-modal-content .btn-confirm-medium.google-login-button:focus {
     background-size: cover;
     border: none;
-    height: 45px;
-    width: 196px;
+    height: 30px;
+    width: 160px;
     margin-left: 0;
 }
 
@@ -884,3 +887,6 @@ div#matecat-modal p {
     float: left;
 }
 
+.pull-right {
+    float: right !important;
+}
