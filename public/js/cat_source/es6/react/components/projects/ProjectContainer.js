@@ -365,6 +365,7 @@ class ProjectContainer extends React.Component {
                                 <i className="icon-user22"/>
                             </div>
                             Not assigned
+
                         </span>
 
                        <div className="menu">
