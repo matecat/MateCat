@@ -56,10 +56,12 @@ if ( true )
                 } else {
                     var sourceLang = _.find(config.languages_array, function (e) {
                         return e.code === config.source_rfc;
-                    }).name;
+                    });
                     var targetLang = _.find(config.languages_array, function (e) {
                         return e.code === config.target_rfc;
-                    }).name;
+                    });
+                    sourceLang = (sourceLang) ? sourceLang.name : config.source_rfc;
+                    targetLang = (targetLang) ? targetLang.name : config.target_rfc;
                     var label = sourceLang + " - " + targetLang;
                     tpContainer.find('.option-notsupported-languages').html(label);
                 }
