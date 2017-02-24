@@ -83,50 +83,6 @@ class ModifyOrganization extends React.Component {
        }
     }
 
-
-/*getUserList() {
-        let self = this;
-        return this.state.organization.get('members').map(function(member, i) {
-            let user = member.get('user');
-            if (user.get('uid') == APP.USER.STORE.user.uid && self.state.showRemoveMessageUserID == user.get('uid')) {
-                return <div className="item"
-                            key={'user' + user.get('uid')}>
-                    <div className="right floated content top-1 bottom-1">
-                        <div className="ui button green" onClick={self.removeUser.bind(self, user.get('uid'))}>YES</div>
-                        <div className="ui button red" onClick={self.undoRemoveAction.bind(self)}>NO</div>
-                    </div>
-                    <div className="content pad-top-6 pad-bottom-8">
-                        Are you sure you want to leave this organization?
-                    </div>
-                </div>
-            }else if (self.state.showRemoveMessageUserID == user.get('uid')) {
-                return <div className="item"
-                            key={'user' + user.get('uid')}>
-                    <div className="right floated content top-1 bottom-1">
-                        <div className="mini ui button green" onClick={self.removeUser.bind(self, user.get('uid'))}>YES</div>
-                        <div className="mini ui button red" onClick={self.undoRemoveAction.bind(self)}>NO</div>
-                    </div>
-                    <div className="content pad-top-6 pad-bottom-8">
-                        Are you sure you want to remove this user?
-                    </div>
-                </div>
-            } else {
-                return <div className="item"
-                            key={'user' + user.get('uid')}>
-                    <div className="ui circular label top-3 bottom-3">{APP.getUserShortName(user.toJS())}</div>
-                    <span className="content">
-                        {' ' + user.get('first_name') + ' ' + user.get('last_name')}
-                    </span>
-                    <div className="right floated content top-2">
-                        <div className="mini ui button" onClick={self.showRemoveUser.bind(self, user.get('uid'))}>Remove</div>
-                    </div>
-                </div>
-            }
-
-        });
-
-    }*/
-
     getUserList() {
         let self = this;
         return this.state.organization.get('members').map(function(member, i) {
@@ -173,22 +129,44 @@ class ModifyOrganization extends React.Component {
 
     getPendingInvitations() {
         let self = this;
-        return this.state.organization.get('pendingInvitations').map(function(mail, i) {
-            return <div className="item"
-                key={'user-invitation' + i}>
-                <span className="content">
-                        {mail}
-                </span>
-                <div className="right floated content top-2">
-                    User invited by mail
-                </div>
-            </div>;
+        if (!this.state.organization.get('pendingInvitations')) return;
+        let pendingUsers = this.state.organization.get('pendingInvitations').map(function(mail, i) {
+            return<div className="item"
+                         key={'user-invitation' + i}>
+                    <span className="content">
+                    {mail}
+                    </span>
+                    <div className="right floated content top-2">
+                        User invited by mail
+                    </div>
+                </div>;
 
         });
+        return <div className="sixteen wide column">
+            <div className="ui accordion"
+                 ref={(pendingUsers) => this.pendingUsers = pendingUsers}>
+                <div className="title">
+                    <i className="dropdown icon"/>
+                    View pending people?
+                </div>
+                <div className="content">
+                    <div className="ui members-list organization">
+                        <div className="ui divided list">
+                            {pendingUsers}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    componentDidUpdate() {
+        $(this.pendingUsers).accordion();
     }
 
     componentDidMount() {
         OrganizationsStore.addListener(ManageConstants.UPDATE_ORGANIZATION, this.updateOrganization);
+        $(this.pendingUsers).accordion();
     }
 
     componentWillUnmount() {
@@ -237,11 +215,13 @@ class ModifyOrganization extends React.Component {
                                            ref={(inputNewUSer) => this.inputNewUSer = inputNewUSer}/>
                                 </div>
                             </div>
+
+                            {pendingUsers}
+
                             <div className="sixteen wide column">
                                 <div className="ui members-list organization">
                                     <div className="ui divided list">
                                         {userlist}
-                                        {pendingUsers}
                                     </div>
                                 </div>
                             </div>
