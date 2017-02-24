@@ -82,7 +82,11 @@
 		justify-content: center;
 		width: 100%;
 		.projects-state {
-			margin-left: 10px !important;
+			margin: 0 0 0 10px !important;
+			padding: 0 !important;
+			line-height: 35px;
+			text-align: center;
+			background-color: transparent;
 		}
 		.input-field {
 			width: 100%;
