@@ -95,7 +95,7 @@ class CreateWorkspace extends React.Component {
                     return <div className="item"
                                 key={'WS' + ws.get('id')}>
                         <div className="right floated content">
-                            <div className="mini ui button green" onClick={self.removeWS.bind(self, ws)}>YES</div>
+                            <div className="mini ui button gre" onClick={self.removeWS.bind(self, ws)}>YES</div>
                             <div className="mini ui button red" onClick={self.undoRemoveAction.bind(self)}>NO</div>
                         </div>
                         <div className="content pad-top-6 pad-bottom-6">
@@ -162,7 +162,7 @@ class CreateWorkspace extends React.Component {
                                 </div>
                             </div>
                             <div className="column right aligned">
-                                <button className={"ui button green right aligned " + buttonClass}
+                                <button className={"ui button blue right aligned " + buttonClass}
                                 onClick={this.createWorkspace.bind(this)}>Create</button>
                             </div>
                         </div>
