@@ -129,7 +129,7 @@ class ModifyOrganization extends React.Component {
 
     getPendingInvitations() {
         let self = this;
-        if (!this.state.organization.get('pending_invitations')) return;
+        if (!this.state.organization.get('pending_invitations').size > 0) return;
         let pendingUsers = this.state.organization.get('pending_invitations').map(function(mail, i) {
             return<div className="item"
                          key={'user-invitation' + i}>
