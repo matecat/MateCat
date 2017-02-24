@@ -49,7 +49,7 @@ class ChangeProjectWorkspace extends React.Component {
                 <div className="ui one column grid left aligned">
                     <div className="column">
                         <h3>Send this project:</h3>
-                        <div className="ui teal label">
+                        <div className="ui label">
                             <span className="project-id">929830</span> (archived)
                         </div>
                         <span className="project-name">NOME_PROGETTO.TXT</span>
@@ -68,7 +68,7 @@ class ChangeProjectWorkspace extends React.Component {
                     </div>
                     <div className="column right aligned">
                         <div className="column">
-                            <button className="ui button green right aligned"
+                            <button className="ui button blue right aligned"
                             onClick={this.changeWorkspace.bind(this)}>Move</button>
                         </div>
                     </div>
