@@ -129,6 +129,19 @@ body.manage {
                                 }
                             }
                         }
+                        .ui.cancel.label {
+                            padding: 4px;
+                            background-color: white;
+                            margin: 0px;
+                            border-radius: 15px;
+                            position: absolute;
+                            bottom: 3px;
+                            line-height: 0px;
+                            right: 3px;
+                            i {
+                                font-size: 15px;
+                            }
+                        }
                     }
                     &.project-not-assigned {
                         border: 1px dashed #868686;

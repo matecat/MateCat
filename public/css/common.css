@@ -1576,6 +1576,12 @@ float: none!important;
 		padding: 4px 18px;
 		margin-left: 10px;
 	}
+    #cancelMultilang:hover {
+        padding: 4px 18px;
+        margin-left: 10px;
+        color: #333333;
+    }
+
 
 .mgmt-panel-tm .nav-tabs
 {

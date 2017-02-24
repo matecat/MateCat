@@ -57,7 +57,9 @@
 
 <div metal:define-macro="login_includes">
     <tal:block tal:condition="php: empty(logged_user)">
-        <div class="btn-confirm-medium sing-in-header open-login-modal">Sign in</div>
+        <div class="position-sing-in">
+            <div class="btn-confirm-medium sing-in-header open-login-modal">Sign in</div>
+        </div>
     </tal:block>
 
     <tal:block tal:condition="php: !empty(logged_user)">
