@@ -208,6 +208,7 @@ UI = {
         this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
         this.Search.filter = {};
         UI.Search.currentPage = 1;
+        APP.setOrganizationInStorage(organization.id);
         return this.getOrganizationStructure(organization).then(function () {
                 return self.getProjects(self.selectedOrganization);
             }
@@ -218,7 +219,7 @@ UI = {
         let self = this;
         return this.getOrganizationMembers(organization).then(function (data) {
             self.selectedOrganization.members = data.members;
-            self.selectedOrganization.pendingInvitations = data.pending_invitations;
+            self.selectedOrganization.pending_invitations = data.pending_invitations;
             return self.getWorkspaces(organization).then(function (data) {
                 self.selectedOrganization.workspaces = data.workspaces;
             });
@@ -476,7 +477,7 @@ UI = {
         let props = {
             organization: organization
         };
-        APP.ModalWindow.showModalComponent(ModifyOrganizationModal, props, "Modify "+ organization.get('name') + " Organization");
+        APP.ModalWindow.showModalComponent(ModifyOrganizationModal, props, "Modify Organization");
     },
 
     openChangeProjectWorkspace: function (workspaces, project) {

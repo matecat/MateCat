@@ -209,6 +209,7 @@ let ManageActions = {
     openModifyOrganizationModal: function (organization) {
         UI.getOrganizationMembers(organization).then(function (data) {
             organization.members = data.members;
+            organization.pending_invitations = data.pending_invitations;
             AppDispatcher.dispatch({
                 actionType: ManageConstants.OPEN_MODIFY_ORGANIZATION_MODAL,
                 organization: organization
@@ -250,17 +251,39 @@ let ManageActions = {
 
     createOrganization: function (organizationName, members) {
         let organization;
+        let self = this;
         UI.createOrganization(organizationName, members).then(function (response) {
-                organization = response.organization;
-                UI.getWorkspaces(organization).then(function (data) {
-                    organization.workspaces = data.workspaces;
-                    AppDispatcher.dispatch({
-                        actionType: ManageConstants.ADD_ORGANIZATION,
-                        organization: organization
-                    });
+            organization = response.organization;
+                // UI.getWorkspaces(organization).then(function (data) {
+                //     organization.workspaces = data.workspaces;
+                //     AppDispatcher.dispatch({
+                //         actionType: ManageConstants.ADD_ORGANIZATION,
+                //         organization: organization
+                //     });
+                // });
+            AppDispatcher.dispatch({
+                actionType: ManageConstants.ADD_ORGANIZATION,
+                organization: organization
+            });
+            self.showReloadSpinner();
+            UI.changeOrganization(organization).then(function (response) {
+                AppDispatcher.dispatch({
+                    actionType: ManageConstants.UPDATE_ORGANIZATION,
+                    organization: UI.selectedOrganization
                 });
-            }
-        );
+                AppDispatcher.dispatch({
+                    actionType: ManageConstants.CHOOSE_ORGANIZATION,
+                    organizationId: UI.selectedOrganization.id
+                });
+                AppDispatcher.dispatch({
+                    actionType: ManageConstants.RENDER_PROJECTS,
+                    projects: response.data,
+                    organization: organization,
+                    hideSpinner: false,
+                });
+
+            });
+        });
     },
 
     updateOrganization: function (organization) {
@@ -342,35 +365,37 @@ let ManageActions = {
                 actionType: ManageConstants.UPDATE_ORGANIZATION_MEMBERS,
                 organization: organization,
                 members: data.members,
-                pendingInvitations: data.pending_invitations
+                pending_invitations: data.pending_invitations
             });
         });
     },
 
     removeUserFromOrganization: function (organization, user) {
         var self = this;
-        var userId = user.get('uid')
+        var userId = user.get('uid');
         UI.removeUserFromOrganization(organization.toJS(), userId).done(function (data) {
-            if (userId === APP.USER.STORE.user.uid) {
-                UI.getAllOrganizations(true).done(function (data) {
-                    UI.selectedOrganization = data.organizations[0];
-                    AppDispatcher.dispatch({
-                        actionType: ManageConstants.CHOOSE_ORGANIZATION,
-                        organizationId: UI.selectedOrganization.id
+            if (userId === APP.USER.STORE.user.uid ) {
+                if ( UI.selectedOrganization.id === organization.get('id')) {
+                    UI.getAllOrganizations(true).done(function (data) {
+                        AppDispatcher.dispatch({
+                            actionType: ManageConstants.RENDER_ORGANIZATIONS,
+                            organizations: data.organizations,
+                        });
+                        self.changeOrganization(data.organizations[0]);
+
                     });
+                } else {
                     AppDispatcher.dispatch({
-                        actionType: ManageConstants.RENDER_ORGANIZATIONS,
-                        organizations: data.organizations,
-                        defaultOrganization: data.organizations[0]
+                        actionType: ManageConstants.REMOVE_ORGANIZATION,
+                        organization: organization,
                     });
-                    self.changeOrganization(data.organizations[0]);
-                });
+                }
             } else {
                 AppDispatcher.dispatch({
                     actionType: ManageConstants.UPDATE_ORGANIZATION_MEMBERS,
                     organization: organization,
                     members: data.members,
-                    pendingInvitations: data.pending_invitations
+                    pending_invitations: data.pending_invitations
                 });
                 //TODO Refresh current Projects
                 UI.reloadProjects();

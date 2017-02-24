@@ -152,7 +152,7 @@ class CreateWorkspace extends React.Component {
                     <div className="matecat-modal-top">
                         <div className="ui one column grid left aligned">
                             <div className="column">
-                                <h3>Create New Workspace into ORGANIZATION </h3>
+                                <h3>Create New Workspace into {this.state.organization.get('name')} </h3>
                                 <div className="ui large fluid icon input">
                                     <input type="text" placeholder="Workspace Name"
                                            ref={(inputNewWS) => this.inputNewWS = inputNewWS}

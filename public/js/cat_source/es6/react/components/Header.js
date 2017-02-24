@@ -44,7 +44,6 @@ class Header extends React.Component {
     }
 
     changeOrganization(event, organization) {
-        APP.setOrganizationInStorage(organization.get('id'));
         if (this.props.showSubHeader) {
             if (organization.get('id')  !== this.state.selectedOrganizationId) {
                 let selectedOrganization = this.state.organizations.find(function (org) {
