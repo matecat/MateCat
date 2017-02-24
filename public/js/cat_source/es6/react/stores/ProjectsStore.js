@@ -72,19 +72,24 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
     },
 
     changeProjectWorkspace: function (project, workspaceId) {
+        let id = ( workspaceId !== -1 ) ? id = workspaceId : null;
         let projectOld = this.projects.find(function (prj) {
             return prj.get('id') == project.get('id');
         });
         let indexProject = this.projects.indexOf(projectOld);
-        this.projects = this.projects.setIn([indexProject,'id_workspace'], workspaceId);
+        this.projects = this.projects.setIn([indexProject,'id_workspace'], id);
     },
 
     changeProjectAssignee: function (project, user) {
-        let projectOld = this.projects.find(function (prj) {
+        let uid;
+        if (user !== -1)  {
+            uid = user.get('uid');
+        }
+        var projectOld = this.projects.find(function (prj) {
             return prj.get('id') == project.get('id');
         });
-        let indexProject = this.projects.indexOf(projectOld);
-        this.projects = this.projects.setIn([indexProject,'id_assignee'], user.get('uid'));
+        var indexProject = this.projects.indexOf(projectOld);
+        this.projects = this.projects.setIn([indexProject, 'id_assignee'], uid);
     },
 
     unwrapImmutableObject(object) {

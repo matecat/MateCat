@@ -684,8 +684,9 @@ class FilesStorage {
      * project.
      *
      * @param projectStructure the projectStructure of new project.
+     *
+     * @return bool|string
      */
-
     public function getTemporaryUploadedZipFile( $uploadToken ) {
         $files  = scandir( INIT::$UPLOAD_REPOSITORY . '/' . $uploadToken );
         $zip_name = null; 
@@ -771,5 +772,46 @@ class FilesStorage {
     private function link($source, $destination) {
         return EnvWrap::link($source, $destination);
     }
+
+    /**
+     * @param array $segments_metadata
+     * @throws UnexpectedValueException
+     */
+    public static function storeFastAnalysisFile( $id_project, Array $segments_metadata = [] ) {
+
+        $storedBytes = file_put_contents( INIT::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_{$id_project}.ser", serialize( $segments_metadata ) );
+        if ( $storedBytes === false ) {
+            throw new UnexpectedValueException( 'Internal Error: Failed to store segments for fast analysis on disk.', -14 );
+        }
+
+    }
+
+    /**
+     * @param $id_project
+     *
+     * @return array
+     * @throws UnexpectedValueException
+     *
+     */
+    public static function getFastAnalysisData( $id_project ){
+
+        $analysisData = unserialize( file_get_contents( INIT::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_{$id_project}.ser" ) );
+        if( $analysisData === false ){
+            throw new UnexpectedValueException( 'Internal Error: Failed to retrieve analysis information from disk.', -15 );
+        }
+
+        return $analysisData;
+
+    }
+
+    /**
+     * @param $id_project
+     *
+     * @return bool
+     */
+    public static function deleteFastAnalysisFile( $id_project ){
+        return unlink( INIT::$ANALYSIS_FILES_REPOSITORY . DIRECTORY_SEPARATOR . "waiting_analysis_{$id_project}.ser" );
+    }
+
 }
 

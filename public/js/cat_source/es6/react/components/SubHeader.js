@@ -52,6 +52,7 @@ class SubHeader extends React.Component {
     }
 
     componentWillReceiveProps(nextProps) {
+        if ( (_.isUndefined(nextProps.selectedOrganization) )) return;
         if ( (_.isUndefined(this.props.selectedOrganization)) ||
             nextProps.selectedOrganization.get('id') !== this.props.selectedOrganization.get('id') ||
             nextProps.selectedOrganization.get('members') !== this.props.selectedOrganization.get('members') ||
@@ -60,7 +61,7 @@ class SubHeader extends React.Component {
             this.organizazionChanged = true;
             this.dropDownUsersInitialized = false;
             this.dropdownWorkspaceInitialized = false;
-            if ( nextProps.selectedOrganization && nextProps.selectedOrganization.get('members').size == 1) {
+            if ( nextProps.selectedOrganization && nextProps.selectedOrganization.get('type') !== 'personal' && nextProps.selectedOrganization.get('members').size == 1) {
                 this.dropDownUsersInitialized = true;
             }
             if ( nextProps.selectedOrganization && nextProps.selectedOrganization.get('workspaces').size == 0) {

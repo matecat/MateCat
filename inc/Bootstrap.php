@@ -73,6 +73,7 @@ class Bootstrap {
         INIT::$FILES_REPOSITORY                = INIT::$STORAGE_DIR . "/files_storage/files";
         INIT::$CACHE_REPOSITORY                = INIT::$STORAGE_DIR . "/files_storage/cache";
         INIT::$ZIP_REPOSITORY                  = INIT::$STORAGE_DIR . "/files_storage/originalZip";
+        INIT::$ANALYSIS_FILES_REPOSITORY       = INIT::$STORAGE_DIR . "/files_storage/fastAnalysis";
         INIT::$CONVERSIONERRORS_REPOSITORY     = INIT::$STORAGE_DIR . "/conversion_errors";
         INIT::$CONVERSIONERRORS_REPOSITORY_WEB = INIT::$BASEURL . "storage/conversion_errors";
         INIT::$TMP_DOWNLOAD                    = INIT::$STORAGE_DIR . "/tmp_download";
@@ -103,6 +104,9 @@ class Bootstrap {
         }
         if ( !is_dir( INIT::$CACHE_REPOSITORY ) ) {
             mkdir( INIT::$CACHE_REPOSITORY, 0755, true );
+        }
+        if ( !is_dir( INIT::$ANALYSIS_FILES_REPOSITORY ) ) {
+            mkdir( INIT::$ANALYSIS_FILES_REPOSITORY, 0755, true );
         }
         if ( !is_dir( INIT::$ZIP_REPOSITORY ) ) {
             mkdir( INIT::$ZIP_REPOSITORY, 0755, true );

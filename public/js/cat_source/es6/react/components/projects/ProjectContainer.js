@@ -35,6 +35,8 @@ class ProjectContainer extends React.Component {
         //Select the assigee
         if ( this.props.project.get('id_assignee') ) {
             $(this.dropdownUsers).dropdown('set selected', this.props.project.get('id_assignee'));
+        } else {
+            $(this.dropdownUsers).dropdown('set selected', -1);
         }
 
         this.getLastAction();
@@ -72,10 +74,12 @@ class ProjectContainer extends React.Component {
         this.inputTimeout;
         if (this.dropdownUsers) {
             if (this.props.project.get('id_assignee') ) {
+                $(this.dropdownUsers).dropdown('set selected', this.props.project.get('id_assignee'));
                 this.dropdownUsers.classList.remove("project-not-assigned");
                 this.dropdownUsers.classList.add("project-assignee");
                 this.dropdownUsers.classList.add("shadow-1");
             } else {
+                $(this.dropdownUsers).dropdown('set selected', -1);
                 this.dropdownUsers.classList.remove("project-assignee");
                 this.dropdownUsers.classList.remove("shadow-1");
                 this.dropdownUsers.classList.add("project-not-assigned");
@@ -117,16 +121,31 @@ class ProjectContainer extends React.Component {
     }
 
     changeUser(value) {
-        let newUser = this.props.organization.get('members').find(function (member) {
-            let user = member.get('user');
-            if (user.get('uid') === parseInt(value) ) {
-                return true;
-            }
-        });
-        if ( !this.props.project.get('id_assignee') || newUser.get('user').get("uid") != this.props.project.get('id_assignee')) {
-            ManageActions.changeProjectAssignee(this.props.organization, this.props.project, newUser.get('user'));
+        let user, idUser;
+        if (value === '-1') {
+            user = -1;
+            idUser = -1;
+        } else {
+            let newUser = this.props.organization.get('members').find(function (member) {
+                let user = member.get('user');
+                if (user.get('uid') === parseInt(value) ) {
+                    return true;
+                }
+            });
+            user = newUser.get('user');
+            idUser = user.get('uid');
+        }
+        if ( (!this.props.project.get('id_assignee') && idUser !== -1) || (this.props.project.get('id_assignee') && idUser != this.props.project.get('id_assignee'))) {
+            ManageActions.changeProjectAssignee(this.props.organization, this.props.project, user);
         }
     }
+
+    removeWorkspace(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        ManageActions.changeProjectWorkspace(-1,  this.props.project);
+    }
+
 
     onKeyUpEvent(event) {
         if(event.key == 'Enter'){
@@ -348,6 +367,7 @@ class ProjectContainer extends React.Component {
 
     getDropDownUsers() {
        let result = '';
+       var self = this;
        if (this.props.organization.get('members') && this.props.organization.get("type") !== 'personal') {
            let members = this.props.organization.get('members').map(function(member, i) {
                let user = member.get('user');
@@ -358,24 +378,19 @@ class ProjectContainer extends React.Component {
                </div>
            });
 
-           let defaultValue = (!this.props.project.get('id_assignee') ) ?  <span className="text">
-                            <div className="ui not-assigned label">
-                                <i className="icon-user22"/>
-                            </div>
-                            Not assigned
-                        </span> : <span className="text">
-
-                        </span>;
-
            result = <div className={"ui dropdown top right pointing"}
                          ref={(dropdownUsers) => this.dropdownUsers = dropdownUsers}>
-                       <span className="text">
+                        <span className="text">
                             <div className="ui not-assigned label">
                                 <i className="icon-user22"/>
                             </div>
                             Not assigned
 
                         </span>
+                       <div className="ui cancel label"
+                            onClick={self.changeUser.bind(self, '-1')}>
+                           <i className="icon-cancel3"/>
+                       </div>
 
                        <div className="menu">
                            <div className="header"
@@ -389,6 +404,12 @@ class ProjectContainer extends React.Component {
                            </div>
                            <div className="scrolling menu">
                                {members}
+                               <div className="item" data-value="-1">
+                                   <div className="ui not-assigned label">
+                                       <i className="icon-user22"/>
+                                   </div>
+                                   Not assigned
+                               </div>
                            </div>
                        </div>
                    </div>;
@@ -460,10 +481,14 @@ class ProjectContainer extends React.Component {
                 return ws.get('id') == self.props.project.get('id_workspace');
             });
             if (ws) {
-                workspace = <a className="ui olive circular label project-workspace shadow-1"
+                workspace = <div className="ui olive circular label project-workspace shadow-1"
                                onClick={this.openChangeOrganizationModal.bind(this)}>
                     {ws.get('name') }
-                </a>
+                    <div className="ui cancel label"
+                         onClick={self.removeWorkspace.bind(self)}>
+                        <i className="icon-cancel3"/>
+                    </div>
+                </div>
             }
         }
 

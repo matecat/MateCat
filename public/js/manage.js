@@ -130,6 +130,12 @@ UI = {
         });
     },
 
+    removeUserFilter: function (uid) {
+        if (UI.Search.filter.id_assignee == uid) {
+            delete UI.Search.filter.id_assignee;
+        }
+    },
+
     /**
      * Open the settings for the job
      */
@@ -208,6 +214,7 @@ UI = {
         this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
         this.Search.filter = {};
         UI.Search.currentPage = 1;
+        APP.setOrganizationInStorage(organization.id);
         return this.getOrganizationStructure(organization).then(function () {
                 return self.getProjects(self.selectedOrganization);
             }
@@ -218,7 +225,7 @@ UI = {
         let self = this;
         return this.getOrganizationMembers(organization).then(function (data) {
             self.selectedOrganization.members = data.members;
-            self.selectedOrganization.pendingInvitations = data.pending_invitations;
+            self.selectedOrganization.pending_invitations = data.pending_invitations;
             return self.getWorkspaces(organization).then(function (data) {
                 self.selectedOrganization.workspaces = data.workspaces;
             });
@@ -379,8 +386,9 @@ UI = {
     },
 
     changeProjectWorkspace: function (wsId, projectId) {
+        let id = (wsId == -1) ? null : wsId;
         let data = {
-            id_workspace: wsId
+            id_workspace: id
         };
         let idOrg = UI.selectedOrganization.id;
         return $.ajax({
@@ -402,8 +410,10 @@ UI = {
     },
 
     changeProjectAssignee: function (idOrg, idProject, newUserId) {
+        //Pass null to unassign a Project
+        var idAssignee = (newUserId == '-1') ? null : newUserId;
         let data = {
-            id_assignee: newUserId
+            id_assignee: idAssignee
         };
         return $.ajax({
             data: JSON.stringify(data),
@@ -476,7 +486,7 @@ UI = {
         let props = {
             organization: organization
         };
-        APP.ModalWindow.showModalComponent(ModifyOrganizationModal, props, "Modify "+ organization.get('name') + " Organization");
+        APP.ModalWindow.showModalComponent(ModifyOrganizationModal, props, "Modify Organization");
     },
 
     openChangeProjectWorkspace: function (workspaces, project) {
