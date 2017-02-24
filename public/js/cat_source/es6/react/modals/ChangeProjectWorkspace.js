@@ -50,9 +50,9 @@ class ChangeProjectWorkspace extends React.Component {
                     <div className="column">
                         <h3>Send this project:</h3>
                         <div className="ui label">
-                            <span className="project-id">929830</span> (archived)
+                            <span className="project-id">{this.props.project.get('id')}</span>
                         </div>
-                        <span className="project-name">NOME_PROGETTO.TXT</span>
+                        <span className="project-name">{this.props.project.get('name')}</span>
                     </div>
                 </div>
             </div>
