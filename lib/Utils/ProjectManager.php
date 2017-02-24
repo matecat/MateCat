@@ -93,15 +93,17 @@ class ProjectManager {
                             'tms_engine'           => null,
                             'ppassword'            => null,
                             'array_jobs'           => array(
-                                    'job_list'     => array(),
-                                    'job_pass'     => array(),
-                                    'job_segments' => array()
+                                    'job_list'      => array(),
+                                    'job_pass'      => array(),
+                                    'job_segments'  => array(),
+                                    'job_languages' => array(),
                             ),
                             'job_segments'         => array(), //array of job_id => array( min_seg, max_seg )
                             'segments'             => array(), //array of files_id => segmentsArray()
+                            'segments_metadata'    => array(), //array of segments_metadata
                             'translations'         => array(),
                             'notes'                => array(),
-                            //one translation for every file because translations are files related
+                        //one translation for every file because translations are files related
                             'query_translations'   => array(),
                             'status'               => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
                             'job_to_split'         => null,
@@ -120,8 +122,6 @@ class ProjectManager {
                             'metadata'             => array(),
                             'id_assignee'          => null
                     ) );
-
-
 
         }
 
@@ -238,10 +238,6 @@ class ProjectManager {
     private function createProjectRecord() {
         $this->projectStructure[ 'ppassword' ]  = $this->_generatePassword();
         $this->projectStructure[ 'user_ip' ]    = Utils::getRealIpAddr();
-
-        if ( $this->team ) {
-            $this->projectStructure[ 'id_team' ] = $this->team->id ;
-        }
 
         $this->project = insertProject( $this->projectStructure );
         $this->projectStructure[ 'id_project' ] = $this->project->id;
@@ -534,6 +530,8 @@ class ProjectManager {
                 $isEmptyProject = true;
             }
 
+            $this->writeFastAnalysisData();
+
         } catch ( Exception $ex ) {
 
             $this->projectStructure[ 'result' ][ 'errors' ][] = array(
@@ -649,9 +647,36 @@ class ProjectManager {
         );
     }
 
+    private function writeFastAnalysisData(){
+
+        $job_id_passes = ltrim(
+                array_reduce(
+                        array_keys( $this->projectStructure[ 'array_jobs' ][ 'job_segments' ]->getArrayCopy() ),
+                            function ( $acc, $value ) {
+                                $acc .= "," . strtr( $value, '-', ':' );
+                                return $acc;
+                            }
+                ), "," );
+
+        foreach ( $this->projectStructure[ 'segments_metadata' ] as &$segmentList ) {
+
+            unset( $segmentList[ 'internal_id' ] );
+            unset( $segmentList[ 'xliff_mrk_id' ] );
+            unset( $segmentList[ 'show_in_cattool' ] );
+            $segmentList[ 'jsid' ] = $segmentList[ 'id' ] . "-" . $job_id_passes;
+            $segmentList[ 'source' ] = $this->projectStructure[ 'source_language' ];
+            $segmentList[ 'target' ] = implode( ",", $this->projectStructure[ 'array_jobs' ][ 'job_languages' ]->getArrayCopy() );
+
+        }
+
+        FilesStorage::storeFastAnalysisFile( $this->project->id, $this->projectStructure[ 'segments_metadata' ]->getArrayCopy() );
+
+        //free memory
+        unset( $this->projectStructure[ 'segments_metadata' ] );
+
+    }
+
     /**
-     * @param $projectStructure
-     *
      * @return string
      */
     private function analyzeURL() {
@@ -944,6 +969,7 @@ class ProjectManager {
             $projectStructure[ 'array_jobs' ][ 'job_list' ]->append( $newJob->id );
             $projectStructure[ 'array_jobs' ][ 'job_pass' ]->append( $newJob->password );
             $projectStructure[ 'array_jobs' ][ 'job_segments' ]->offsetSet( $newJob->id . "-" . $newJob->password, $this->min_max_segments_id );
+            $projectStructure[ 'array_jobs' ][ 'job_languages' ]->offsetSet( $newJob->id, $newJob->id . ":" . $target );
 
             foreach ( $projectStructure[ 'file_id_list' ] as $fid ) {
 
@@ -1683,9 +1709,6 @@ class ProjectManager {
         //update the last id, if there is another cycle update this value
         $this->min_max_segments_id[ 'job_last_segment' ] = end( $sequenceIds );
 
-        //Prepare a new struct to transport the segments metadata
-        $segments_metadata = [];
-
         foreach ( $sequenceIds as $position => $id_segment ){
 
             /**
@@ -1707,11 +1730,14 @@ class ProjectManager {
 
             $this->projectStructure[ 'segments' ][ $fid ][ $position ] = "( $id_segment,$tuple_string )";
 
-            $segments_metadata[] = array(
-                'id'            => $id_segment,
-                'internal_id'   => $tuple[0],
-                'segment_hash'  => $tuple[4],
-                'xliff_mrk_id'  => $tuple[6]
+            $this->projectStructure[ 'segments_metadata' ][] = array(
+                    'id'              => $id_segment,
+                    'internal_id'     => $tuple[ 0 ],
+                    'segment'         => $tuple[ 3 ],
+                    'segment_hash'    => $tuple[ 4 ],
+                    'raw_word_count'  => $tuple[ 5 ],
+                    'xliff_mrk_id'    => $tuple[ 6 ],
+                    'show_in_cattool' => $tuple[ 9 ],
             );
 
         }
@@ -1745,7 +1771,7 @@ class ProjectManager {
             //internal counter for the segmented translations ( mrk in target )
             $array_internal_segmentation_counter = array();
 
-            foreach ( $segments_metadata as $k => $row ) {
+            foreach ( $this->projectStructure[ 'segments_metadata' ] as $k => $row ) {
 
                 // The following call is to save `id_segment` for notes,
                 // to be used later to insert the record in notes table.
@@ -1791,11 +1817,25 @@ class ProjectManager {
                     //WARNING offset 2 are the target translations
                     $this->projectStructure[ 'translations' ][ "" . $row[ 'internal_id' ] ][ $short_var_counter ]->offsetSet( 3, $row[ 'segment_hash' ] );
 
+                    // Remove an existent translation, we won't send these segment to the analysis because it is marked as locked
+                    unset( $this->projectStructure[ 'segments_metadata' ][ $k ] );
+
                 }
 
             }
 
         }
+
+        //More cleaning on the segments, remove show_in_cattool == false
+        $this->projectStructure[ 'segments_metadata' ]->exchangeArray(
+                array_filter( $this->projectStructure[ 'segments_metadata' ]->getArrayCopy(), function ( $value ) {
+                    return $value[ 'show_in_cattool' ] == 1;
+                } )
+        );
+
+        //free memory
+        $this->projectStructure[ 'segments' ][ $fid ]->exchangeArray( [] );
+
     }
 
     /**
@@ -1871,7 +1911,7 @@ class ProjectManager {
                     Log::doLog( "Pre-Translations: Executed Query " . ( $i + 1 ) );
                 } catch ( PDOException $e ) {
                     Log::doLog( "Segment import - DB Error: " . $e->getMessage() . " - \n" );
-                    throw new Exception( "Translations Segment import - DB Error: " . $e->getMessage() . " - $chunk", -2 );
+                    throw new PDOException( "Translations Segment import - DB Error: " . $e->getMessage() . " - $chunk", -2 );
                 }
 
             }

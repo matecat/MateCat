@@ -1,6 +1,7 @@
 <?php
 namespace Analysis\Workers;
 
+use FilesStorage;
 use \TaskRunner\Commons\AbstractDaemon,
     \TaskRunner\Commons\QueueElement,
     TaskRunner\Commons\Context,
@@ -17,6 +18,7 @@ use \AMQHandler,
     \Database,
     \Utils,
     \PDOException,
+    \UnexpectedValueException,
     \Log;
 
 
@@ -43,6 +45,7 @@ class FastAnalysis extends AbstractDaemon {
     const ERR_TOO_LARGE      = 128;
     const ERR_500            = 129;
     const ERR_EMPTY_RESPONSE = 130;
+    const ERR_FILE_NOT_FOUND = 131;
 
     /**
      * @var ContextList
@@ -216,6 +219,7 @@ class FastAnalysis extends AbstractDaemon {
                 // INSERT DATA
 
                 self::_updateProject( $pid, $status );
+                FilesStorage::deleteFastAnalysisFile( $pid );
 
             }
 
@@ -239,9 +243,20 @@ class FastAnalysis extends AbstractDaemon {
         $myMemory = Engine::getInstance( 1 /* MyMemory */ );
 
         try {
-            $this->segments = self::_getSegmentsForFastVolumeAnalysis( $pid );
-        } catch( PDOException $e ) {
-            throw new Exception( "Error Fetching data for Project. Too large. Skip.", self::ERR_TOO_LARGE );
+
+            self::_TimeStampMsg( "Fetching data from disk" );
+            $this->segments = FilesStorage::getFastAnalysisData( $pid );
+
+        } catch ( UnexpectedValueException $e ) {
+
+            self::_TimeStampMsg( "Error Fetching data from disk. Fallback to database." );
+
+            try {
+                $this->segments = self::_getSegmentsForFastVolumeAnalysis( $pid );
+            } catch ( PDOException $e ) {
+                throw new Exception( "Error Fetching data for Project. Too large. Skip.", self::ERR_TOO_LARGE );
+            }
+
         }
 
         if ( count( $this->segments ) == 0 ) {
