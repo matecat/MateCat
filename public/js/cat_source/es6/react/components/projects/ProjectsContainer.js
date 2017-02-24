@@ -77,7 +77,7 @@ class ProjectsContainer extends React.Component {
     getButtonsNoProjects() {
         if (!this.state.organization) return;
         let thereAreWS = (this.state.organization.get("workspaces") && this.state.organization.get("workspaces").size > 0);
-        let thereAreMembers = (this.state.organization.get("members") && this.state.organization.get("members").size > 1);
+        let thereAreMembers = (this.state.organization.get("members") && this.state.organization.get("members").size > 1) || this.state.organization.get('type') === 'personal';
         let containerClass = (!thereAreWS && !thereAreMembers) ? 'three' : ((!thereAreWS || !thereAreMembers) ? 'two' : 'one');
         return <div className="no-results-found">
             <div className={"ui " + containerClass +"  doubling cards"}>
