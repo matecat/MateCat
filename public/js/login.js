@@ -141,7 +141,7 @@ $.extend(APP, {
                 modal$.trigger('openlogin');
                 break;
             case "signup":
-                if (!config.loggedUser) {
+                if (!config.isLoggedIn) {
                     if (APP.lookupFlashServiceParam("signup_email")) {
                         let userMail = APP.lookupFlashServiceParam("signup_email")[ 0 ].value;
                         modal$.trigger('openregister', [{userMail: userMail}]);
