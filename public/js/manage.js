@@ -298,12 +298,14 @@ UI = {
         return APP.doRequest({
             data: data,
             success: function(d){
-                // if( typeof d.errors != 'undefined' && d.errors.length ){
-                //     window.location = '/';
-                // }
+                if (typeof d.errors != 'undefined' && d.errors.length && d.errors[0].code === 401) {
+                    window.location.reload();
+                }else if( typeof d.errors != 'undefined' && d.errors.length ){
+                    window.location = '/';
+                }
             },
             error: function(d){
-                // window.location = '/';
+                window.location = '/';
             }
         });
     },
