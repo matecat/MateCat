@@ -97,6 +97,7 @@ class ProjectManager {
                                     'job_pass'      => array(),
                                     'job_segments'  => array(),
                                     'job_languages' => array(),
+                                    'payable_rates' => array(),
                             ),
                             'job_segments'         => array(), //array of job_id => array( min_seg, max_seg )
                             'segments'             => array(), //array of files_id => segmentsArray()
@@ -663,9 +664,11 @@ class ProjectManager {
             unset( $segmentList[ 'internal_id' ] );
             unset( $segmentList[ 'xliff_mrk_id' ] );
             unset( $segmentList[ 'show_in_cattool' ] );
-            $segmentList[ 'jsid' ] = $segmentList[ 'id' ] . "-" . $job_id_passes;
-            $segmentList[ 'source' ] = $this->projectStructure[ 'source_language' ];
-            $segmentList[ 'target' ] = implode( ",", $this->projectStructure[ 'array_jobs' ][ 'job_languages' ]->getArrayCopy() );
+
+            $segmentList[ 'jsid' ]          = $segmentList[ 'id' ] . "-" . $job_id_passes;
+            $segmentList[ 'source' ]        = $this->projectStructure[ 'source_language' ];
+            $segmentList[ 'target' ]        = implode( ",", $this->projectStructure[ 'array_jobs' ][ 'job_languages' ]->getArrayCopy() );
+            $segmentList[ 'payable_rates' ] = $this->projectStructure[ 'array_jobs' ][ 'payable_rates' ]->getArrayCopy();
 
         }
 
@@ -917,7 +920,7 @@ class ProjectManager {
             $shortTargetLang = substr( $target, 0, 2 );
 
             //get payable rates
-            $projectStructure[ 'payable_rates' ] = Analysis_PayableRates::getPayableRates( $shortSourceLang, $shortTargetLang );
+            $payableRates = json_encode( Analysis_PayableRates::getPayableRates( $shortSourceLang, $shortTargetLang ) );
 
             $password = $this->_generatePassword();
 
@@ -961,7 +964,7 @@ class ProjectManager {
             $newJob->job_first_segment = $this->min_max_segments_id[ 'job_first_segment' ];
             $newJob->job_last_segment  = $this->min_max_segments_id[ 'job_last_segment' ];
             $newJob->tm_keys           = $projectStructure[ 'tm_keys' ];
-            $newJob->payable_rates     = json_encode( $projectStructure[ 'payable_rates' ] );
+            $newJob->payable_rates     = $payableRates;
             $newJob->dqf_key           = $projectStructure[ 'dqf_key' ];
 
             $newJob = Jobs_JobDao::createFromStruct( $newJob );
@@ -970,6 +973,7 @@ class ProjectManager {
             $projectStructure[ 'array_jobs' ][ 'job_pass' ]->append( $newJob->password );
             $projectStructure[ 'array_jobs' ][ 'job_segments' ]->offsetSet( $newJob->id . "-" . $newJob->password, $this->min_max_segments_id );
             $projectStructure[ 'array_jobs' ][ 'job_languages' ]->offsetSet( $newJob->id, $newJob->id . ":" . $target );
+            $projectStructure[ 'array_jobs' ][ 'payable_rates' ]->offsetSet( $newJob->id, $payableRates );
 
             foreach ( $projectStructure[ 'file_id_list' ] as $fid ) {
 
