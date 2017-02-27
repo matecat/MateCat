@@ -4180,4 +4180,6 @@ section:hover .segment-side-buttons {
 	color: #797979;
 }
 
-
+.ui.user.label {
+	top: 5px;
+}
