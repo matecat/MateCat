@@ -235,6 +235,7 @@ UI = {
     filterProjects: function(userUid, workspaceId, name, status) {
         let self = this;
         this.Search.filter = {};
+        this.Search.currentPage = 1;
         let filter = {};
         if (typeof userUid != "undefined") {
              if (userUid === ManageConstants.NOT_ASSIGNED_FILTER) {
