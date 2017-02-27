@@ -2,6 +2,7 @@
 use Organizations\MembershipDao;
 use Organizations\MembershipStruct;
 use Organizations\WorkspaceDao;
+use \API\V2\Json\Error;
 
 
 /**
@@ -127,8 +128,9 @@ class getProjectsController extends ajaxController {
 
     public function doAction() {
 
-        if( !$this->userIsLogged ){
-            throw new Exception('User not Logged');
+        if ( !$this->userIsLogged ) {
+            $this->result = ( new Error( [ new Exception( 'User not Logged', 401 ) ] ) )->render();
+            return;
         }
 
         $organization = $this->filterOrganization();
