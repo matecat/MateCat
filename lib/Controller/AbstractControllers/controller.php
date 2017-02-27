@@ -114,23 +114,34 @@ abstract class controller {
     public function setUserCredentials(){
 
         $this->logged_user = new Users_UserStruct();
-        if ( !empty( $_SESSION[ 'cid' ] ) ){
-            $this->logged_user->uid = $_SESSION[ 'uid' ];
-            $this->logged_user->email = $_SESSION[ 'cid' ];
+        $this->logged_user->uid = $_SESSION[ 'uid' ];
+        $this->logged_user->email = $_SESSION[ 'cid' ];
 
-            $userDao = new Users_UserDao(Database::obtain());
-            $userObject = $userDao->setCacheTTL( 3600 )->read( $this->logged_user ); // one hour cache
-
-            /**
-             * @var $userObject Users_UserStruct
-             */
-            $this->logged_user = $userObject[0];
+        try {
+            $userDao = new Users_UserDao( Database::obtain() );
+            $this->logged_user = $userDao->setCacheTTL( 3600 )->read( $this->logged_user )[0]; // one hour cache
+        } catch( Exception $e ){
+            Log::doLog( 'User not logged.' );
         }
 
         $this->userIsLogged = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) );
         $this->uid          = $this->logged_user->getUid();
         $this->userMail     = $this->logged_user->getEmail();
 
+    }
+
+    /**
+     *  Try to get user name from cookie if it is not present and put it in session.
+     *
+     */
+    protected function _setUserFromAuthCookie() {
+        if ( empty( $_SESSION[ 'cid' ] ) ) {
+            $username_from_cookie = AuthCookie::getCredentials();
+            if ( $username_from_cookie ) {
+                $_SESSION[ 'cid' ] = $username_from_cookie['username'];
+                $_SESSION[ 'uid' ] = $username_from_cookie['uid'];
+            }
+        }
     }
 
 }

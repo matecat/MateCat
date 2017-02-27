@@ -19,6 +19,10 @@ class ActivityLogController extends KleinController {
     protected $rawLogContent;
     protected $project_data;
 
+    public function afterConstruct(){
+        \Bootstrap::sessionClose();
+    }
+
     public function lastOnProject(){
 
         $validator = new Validators\ProjectPasswordValidator( $this->request );

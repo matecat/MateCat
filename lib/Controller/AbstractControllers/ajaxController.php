@@ -84,7 +84,7 @@ abstract class ajaxController extends controller {
 
         //Warning, sessions enabled, disable them after check, $_SESSION is in read only mode after disable
         parent::sessionStart();
-
+        $this->_setUserFromAuthCookie();
         $this->setUserCredentials();
 
         if ( $close ) {
