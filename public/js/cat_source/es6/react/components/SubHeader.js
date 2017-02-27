@@ -210,8 +210,8 @@ class SubHeader extends React.Component {
                 </div>;
             items = items.unshift(item);
             return <div className="column">
-                    <div className="ui dropdown selection workspace-dropdown"
-                            ref={(dropdownWorkspaces) => this.dropdownWorkspaces = dropdownWorkspaces}>
+                <div className="ui dropdown selection workspace-dropdown"
+                        ref={(dropdownWorkspaces) => this.dropdownWorkspaces = dropdownWorkspaces}>
                     <input type="hidden" name="gender" />
                     <i className="dropdown icon"/>
                     <div className="default text">Choose Workspace</div>

@@ -204,9 +204,12 @@ body.manage {
                         font-size: 12px;
                         font-weight: 100;
                         position: relative;
+                        background-color: #fbd406;
+                        color: white;
                         cursor: pointer;
                         &:hover {
                             padding-right: 33px !important;
+                            background-color: #fbd406;
                         }
                     }
                     &.no-workspace {

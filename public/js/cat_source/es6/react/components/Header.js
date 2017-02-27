@@ -128,7 +128,7 @@ class Header extends React.Component {
             });
             let addOrg = '';
             if (self.props.showModals) {
-                addOrg = <div className="header" style={{cursor: 'pointer'}} onClick={this.openCreateOrganizations.bind(this)}>New Organization
+                addOrg = <div className="header" onClick={this.openCreateOrganizations.bind(this)}>New Organization
                                 <a className="organization-filter button show">
                                     <i className="icon-plus3 icon"/>
                                 </a>
