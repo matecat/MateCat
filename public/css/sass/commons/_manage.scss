@@ -109,15 +109,15 @@ body.manage {
                     }
                     &.project-assignee {
                         margin-right: 8px;
+                        background-color: #10ccce !important;
+                        &:hover {
+                            background-color: #14bbbd !important;
+                        }
                         .text {
-                            background-color: #10ccce !important;
                             border-radius: 15px;
                             padding: 3px 15px 3px 3px;
                             color: #ffffff;
                             transition: 0.3s ease;
-                            &:hover {
-                                background-color: #14bbbd !important;
-                            }
                         }
                         .menu {
                             z-index: 1;
@@ -186,6 +186,9 @@ body.manage {
                             i {
                                 font-size: 15px;
                             }
+                            &:hover {
+                                background-color: rgba(115, 115, 115, 0.44);
+                            }
                         }
 
                         &:hover .ui.cancel.label {
@@ -204,12 +207,12 @@ body.manage {
                         font-size: 12px;
                         font-weight: 100;
                         position: relative;
-                        background-color: #fbd406;
+                        background-color: #fbd300;
                         color: white;
                         cursor: pointer;
                         &:hover {
                             padding-right: 33px !important;
-                            background-color: #fbd406;
+                            background-color: #f3cb00;
                         }
                     }
                     &.no-workspace {

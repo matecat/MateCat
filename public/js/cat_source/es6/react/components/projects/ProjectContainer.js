@@ -440,8 +440,7 @@ class ProjectContainer extends React.Component {
                         <span className="text">
                             Not assigned
                         </span>
-                    <div className="ui cancel label"
-                         onClick={}>
+                    <div className="ui cancel label">
                         <i className="icon-cancel3"/>
                     </div>
 
