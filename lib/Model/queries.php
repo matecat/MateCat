@@ -1864,6 +1864,10 @@ function getJobsFromProjects( array $projectIDs, $search_source, $search_target,
     );
 
     $where_query = implode( " AND ", $conditions );
+    if( !empty( $where_query ) ){
+        $where_query = " AND " . $where_query;
+    }
+
     $features = Projects_MetadataDao::FEATURES_KEY ;
 
     $jobsQuery = "SELECT
@@ -1907,7 +1911,7 @@ function getJobsFromProjects( array $projectIDs, $search_source, $search_target,
 
             LEFT JOIN project_metadata ON project_metadata.id_project = projects.id AND project_metadata.`key` = '$features'
 
-            WHERE j.id_project IN ( " . implode( ",", $projectIDs ) . " ) AND $where_query
+            WHERE j.id_project IN ( " . implode( ",", $projectIDs ) . " ) $where_query
             ORDER BY j.id DESC,
                      j.job_first_segment ASC";
 

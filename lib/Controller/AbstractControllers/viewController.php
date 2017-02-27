@@ -160,20 +160,6 @@ abstract class viewController extends controller {
     }
 
     /**
-     *  Try to get user name from cookie if it is not present and put it in session.
-     *
-     */
-    protected function _setUserFromAuthCookie() {
-        if ( empty( $_SESSION[ 'cid' ] ) ) {
-            $username_from_cookie = AuthCookie::getCredentials();
-            if ( $username_from_cookie ) {
-                $_SESSION[ 'cid' ] = $username_from_cookie['username'];
-                $_SESSION[ 'uid' ] = $username_from_cookie['uid'];
-            }
-        }
-    }
-
-    /**
      * Perform Authentication Requests and set incoming url
      *
      * @return bool
