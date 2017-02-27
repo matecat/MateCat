@@ -496,6 +496,29 @@
                                 </div>
                             </div>
 
+                            <div tal:condition="dqf_enabled" class="options-box dqf-box">
+                                <h3>DQF  </h3>
+                                <p tal:condition="php: !empty(logged_user)">
+                                    Enable this option to use DQF in MateCat.
+                                </p>
+                                <p tal:condition="php: empty(logged_user)" >
+                                    Login and set your DQF credentials to use DQF in MateCat.
+                                </p>
+
+                                <div class="onoffswitch-container">
+                                    <div class="onoffswitch">
+                                        <input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="dqf_switch" />
+                                        <label class="onoffswitch-label" for="lexi_qa">
+                                            <span class="onoffswitch-inner"></span>
+                                            <span class="onoffswitch-switch"></span>
+                                            <span class="onoffswitch-label-status-active">Active</span>
+                                            <span class="onoffswitch-label-status-inactive">Inactive</span>
+                                            <span class="onoffswitch-label-status-unavailable">Unavailable</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="options-box seg_rule">
                                 <h3>Segmentation Rules</h3>
                                 <p>Select how sentences are split according to specific types of content.</p>
@@ -505,15 +528,6 @@
                                     <option value="paragraph">Paragraph (beta)</option>
                                 </select>
                             </div>
-
-                            <!-- div class="translate-checkbox">
-                                <span class="tms-checkbox" id="disable_tms_checkbox">
-                                    <label class="tms-label" for="disable_tms_engine">Disable TM, Concordance and Glossary</label>
-                                    <input type="checkbox" value="true" id="disable_tms_engine" name="no_tms_engine"/>
-                                </span>
-                            </div -->
-
-                            <!-- img id='get-new-tm-spinner' alt="Loading..." src="public/img/loader.gif" class="tm-button"/ -->
 
                         </div>
                     </div>
