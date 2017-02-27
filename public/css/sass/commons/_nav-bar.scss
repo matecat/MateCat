@@ -13,7 +13,8 @@ header {
             height: 48px !important;
         }
         .ui.selection.dropdown,
-        .ui.select-org.dropdown {
+        .ui.select-org.dropdown,
+        .ui.selection.workspace-dropdown {
             font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
             font-weight: 600;
             &.org {
@@ -37,7 +38,7 @@ header {
                         margin-top: -2px;
                     }
                 }
-                .item > a > .icon-more_vert {
+                .item > a > i {
                     position: absolute;
                     width: 24px;
                     height: 24px;

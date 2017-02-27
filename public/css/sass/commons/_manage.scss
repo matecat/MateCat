@@ -37,7 +37,7 @@ body.manage {
         margin-bottom: 30px !important;
         .ui.ribbon.label {
             position: absolute;
-            top: 15px;
+            top: 14px;
             z-index: 2;
             left: -15px;
         }
@@ -89,7 +89,7 @@ body.manage {
                 }
             }
             .project-activity-icon {
-                padding: 0 15px !important;
+                padding: 4px 15px 0px !important;
                 font-family: Calibri, Arial, Helvetica, sans-serif;
                 @media only screen and (max-width: 767px) {
                     padding: 0px !important;
@@ -175,7 +175,7 @@ body.manage {
                     &.project-workspace {
                         .ui.cancel.label {
                             padding: 4px;
-                            background-color: white;
+                            background-color: rgba(76, 76, 76, 0.21);
                             margin: 0px;
                             border-radius: 15px;
                             position: absolute;
@@ -206,7 +206,7 @@ body.manage {
                         position: relative;
                         cursor: pointer;
                         &:hover {
-                            padding-right: 30px !important;
+                            padding-right: 33px !important;
                         }
                     }
                     &.no-workspace {

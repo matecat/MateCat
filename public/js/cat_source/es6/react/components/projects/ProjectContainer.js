@@ -518,7 +518,7 @@ class ProjectContainer extends React.Component {
                                 </div>
                             </div>
 
-                            <div className="fourteen wide computer fourteen wide tablet thirteen wide mobile column">
+                            <div className="fourteen wide computer fourteen wide tablet thirteen wide mobile column pad-top-8">
                                 <div className="ui mobile reversed stackable grid">
                                     <div className="five wide computer four wide tablet only reverse tablet only column">
                                         <div className="ui grid">
