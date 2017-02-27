@@ -553,6 +553,9 @@ class FastAnalysis extends AbstractDaemon {
 
                 try {
 
+                    //store the payable_rates array
+                    $jobs_payable_rates = $queue_element[ 'payable_rates' ];
+
                     $languages_job = explode( ",", $queue_element[ 'target' ] );  //now target holds more than one language ex: ( 80415:fr-FR,80416:it-IT )
                     //in memory replacement avoid duplication of the segment list
                     //send in queue every element * number of languages
@@ -562,6 +565,7 @@ class FastAnalysis extends AbstractDaemon {
 
                         $queue_element[ 'target' ] = $language;
                         $queue_element[ 'id_job' ] = $id_job;
+                        $queue_element[ 'payable_rates' ] = $jobs_payable_rates[ $id_job ]; // assign the right payable rate for the current job
 
                         $element = new QueueElement();
                         $element->params = $queue_element;
@@ -601,23 +605,24 @@ class FastAnalysis extends AbstractDaemon {
         //we want segments that we decided to show in cattool
         //and segments that are NOT locked ( already translated )
 
+        $query = <<<HD
+            SELECT concat( s.id, '-', group_concat( distinct concat( j.id, ':' , j.password ) ) ) AS jsid, s.segment, 
+                j.source, s.segment_hash, 
+                s.id as id,
+                s.raw_word_count,
+                GROUP_CONCAT( DISTINCT CONCAT( j.id, ':' , j.target ) ) AS target,
+                CONCAT( "{", GROUP_CONCAT( DISTINCT CONCAT( '"', j.id, '"', ':' , j.payable_rates ) SEPARATOR ',' ), "}" ) AS payable_rates
+            FROM segments AS s
+            INNER JOIN files_job AS fj ON fj.id_file = s.id_file
+            INNER JOIN jobs as j ON fj.id_job = j.id
+            LEFT JOIN segment_translations AS st ON st.id_segment = s.id
+                WHERE j.id_project = '$pid'
+                AND IFNULL( st.locked, 0 ) = 0
+                AND show_in_cattool != 0
+            GROUP BY s.id
+            ORDER BY s.id
+HD;
 
-
-        $query = "select concat( s.id, '-', group_concat( distinct concat( j.id, ':' , j.password ) ) ) as jsid, s.segment, j.source, s.segment_hash, s.id as id,
-
-		s.raw_word_count,
-		group_concat( distinct concat( j.id, ':' , j.target ) ) as target,
-		j.payable_rates
-
-		from segments as s
-		inner join files_job as fj on fj.id_file=s.id_file
-		inner join jobs as j on fj.id_job=j.id
-		left join segment_translations as st on st.id_segment = s.id
-		where j.id_project='$pid'
-		and IFNULL( st.locked, 0 ) = 0
-		and show_in_cattool != 0
-		group by s.id
-		order by s.id";
         $db    = Database::obtain();
         try {
             $results = $db->fetch_array( $query );
@@ -625,6 +630,13 @@ class FastAnalysis extends AbstractDaemon {
             Log::doLog( $e->getMessage() );
             throw $e;
         }
+
+        $results = array_map( function ( $segment ) {
+            $segment[ 'payable_rates' ] = array_map( function ( $rowPayable ) {
+                return json_encode( $rowPayable );
+            }, json_decode( $segment[ 'payable_rates' ], true ) );
+            return $segment;
+        }, $results );
 
         return $results;
     }
