@@ -38,7 +38,7 @@ class MembershipCreatedEmail extends AbstractEmail
     public function __construct( \Users_UserStruct $sender, MembershipStruct $membership ) {
         $this->user = $membership->getUser() ;
         $this->_setlayout('skeleton.html');
-        $this->_settemplate('organization/membership_created_content.html');
+        $this->_settemplate('Organization/membership_created_content.html');
         $this->membership = $membership ;
 
         $this->sender = $sender ;
