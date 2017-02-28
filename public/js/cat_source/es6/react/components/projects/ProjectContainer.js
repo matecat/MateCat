@@ -60,6 +60,12 @@ class ProjectContainer extends React.Component {
         }
         ProjectsStore.addListener(ManageConstants.HIDE_PROJECT, this.hideProject);
 
+        // $('.ui.progress')
+        //     .progress({
+        //         duration : 200,
+        //         total    : 200
+        //     });
+
     }
 
     componentWillUnmount() {

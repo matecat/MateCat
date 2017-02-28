@@ -714,6 +714,151 @@ APP = {
         localStorage.setItem(this.organizationStorageName, organizationId);
     },
 
+    downloadFile: function (idJob, pass, callback) {
+
+        //create an iFrame element
+        var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop({
+            id:'iframeDownload',
+            src: ''
+        });
+
+        //append iFrame to the DOM
+        $("body").append( iFrameDownload );
+
+        //generate a token download
+        var downloadToken = new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 );
+
+        //set event listner, on ready, attach an interval that check for finished download
+        iFrameDownload.ready(function () {
+
+            //create a GLOBAL setInterval so in anonymous function it can be disabled
+            downloadTimer = window.setInterval(function () {
+
+                //check for cookie
+                var token = $.cookie( downloadToken );
+
+                //if the cookie is found, download is completed
+                //remove iframe an re-enable download button
+                if ( typeof token != 'undefined' ) {
+                    /*
+                     * the token is a json and must be read with "parseJSON"
+                     * in case of failure:
+                     *      error_message = Object {code: -110, message: "Download failed.
+                     *      Please contact the owner of this MateCat instance"}
+                     *
+                     * in case of success:
+                     *      error_message = Object {code: 0, message: "Download Complete."}
+                     *
+                     */
+                    tokenData = $.parseJSON(token);
+                    if(parseInt(tokenData.code) < 0) {
+                        var notification = {
+                            title: 'Error',
+                            text: 'Download failed. Please, fix any tag issues and try again in 5 minutes. If it still fails, please, contactsupport@matecat.com',
+                            type: 'error'
+                        };
+                        APP.addNotification(notification);
+                        // UI.showMessage({msg: tokenData.message})
+                    }
+                    if (callback) {
+                        callback();
+                    }
+
+                    window.clearInterval( downloadTimer );
+                    $.cookie( downloadToken, null, { path: '/', expires: -1 });
+                    iFrameDownload.remove();
+                }
+
+            }, 2000);
+
+        });
+
+        //clone the html form and append a token for download
+        // var iFrameForm = $("#fileDownload").clone().append(
+        //     $( document.createElement( 'input' ) ).prop({
+        //         type:'hidden',
+        //         name:'downloadToken',
+        //         value: downloadToken
+        //     })
+        // );
+
+        var iFrameForm = $('<form id="fileDownload" action="'+ config.basepath +'" method="post">' +
+                '<input type="hidden" name="action" value="downloadFile" />' +
+                '<input type="hidden" name="id_job" value="'+ idJob +'" />' +
+                '<input type="hidden" name="id_file" value="" />' +
+                '<input type="hidden" name="password" value="'+ pass +'"/>' +
+                '<input type="hidden" name="download_type" value="all" />' +
+                '<input type="hidden" name="downloadToken" value="'+ downloadToken +'" />' +
+            '</form>');
+
+        //append from to newly created iFrame and submit form post
+        iFrameDownload.contents().find('body').append( iFrameForm );
+        iFrameDownload.contents().find("#fileDownload").submit();
+
+    },
+
+    downloadGDriveFile: function (openOriginalFiles, jobId, pass ,callback) {
+
+        if (typeof openOriginalFiles === 'undefined') {
+            openOriginalFiles = 0;
+        }
+
+        // TODO: this should be relative to the current USER, find a
+        // way to generate this at runtime.
+        //
+        /*if( !config.isGDriveProject || config.isGDriveProject == 'false' ) {
+         UI.showDownloadCornerTip();
+         }*/
+
+        if ( typeof window.googleDriveWindows == 'undefined' ) {
+            window.googleDriveWindows = {};
+        }
+
+        var winName ;
+
+        var driveUpdateDone = function(data) {
+            if( !data.urls || data.urls.length === 0 ) {
+                APP.alert({msg: "MateCat was not able to update project files on Google Drive. Maybe the project owner revoked privileges to access those files. Ask the project owner to login again and grant Google Drive privileges to MateCat."});
+
+                return;
+            }
+
+            var winName ;
+
+            $.each( data.urls, function(index, item) {
+                winName = 'window' + item.localId ;
+
+                if ( typeof window.googleDriveWindows[ winName ] != 'undefined' && window.googleDriveWindows[ winName ].opener != null ) {
+                    window.googleDriveWindows[ winName ].location.href = item.alternateLink ;
+                    window.googleDriveWindows[ winName ].focus();
+                } else {
+                    window.googleDriveWindows[ winName ] = window.open( item.alternateLink );
+                }
+            });
+        };
+
+        $.ajax({
+            cache: false,
+            url: APP.downloadFileURL( openOriginalFiles, jobId, pass ),
+            dataType: 'json'
+        })
+            .done( driveUpdateDone )
+            .always(function() {
+                if (callback){
+                    callback();
+                }
+            });
+    },
+
+    downloadFileURL : function( openOriginalFiles, idJob, pass ) {
+        return sprintf( '%s?action=downloadFile&id_job=%s&password=%s&original=%s',
+            config.basepath,
+            idJob,
+            pass,
+            openOriginalFiles
+        );
+    },
+
 };
 
 $(document).ready(function(){

@@ -424,6 +424,20 @@ let ManageActions = {
         setTimeout(function () {
             $('.reloading-upload-page').hide();
         }, 1000)
+    },
+
+    enableDownloadButton: function (id) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.ENABLE_DOWNLOAD_BUTTON,
+            idProject: id
+        });
+    },
+
+    disableDownloadButton: function (id) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.DISABLE_DOWNLOAD_BUTTON,
+            idProject: id
+        });
     }
 
 };

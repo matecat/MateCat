@@ -41,6 +41,9 @@ module.exports = keyMirror({
     ALL_MEMBERS_FILTER : null,
     NOT_ASSIGNED_FILTER: null,
     NO_WORKSPACE_FILTER: null,
-    ALL_WORKSPACES_FILTER: null
+    ALL_WORKSPACES_FILTER: null,
+
+    ENABLE_DOWNLOAD_BUTTON: null,
+    DISABLE_DOWNLOAD_BUTTON: null
 
 });
