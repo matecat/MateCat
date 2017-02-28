@@ -3,7 +3,7 @@
 
 namespace Translations ;
 
-use Features\Ebay;
+use Constants_TranslationStatus;
 use PDO;
 
 class WarningDao extends \DataAccess_AbstractDao {
@@ -21,6 +21,9 @@ class WarningDao extends \DataAccess_AbstractDao {
 
     public function getWarningsByProjectIds( $projectIds ) {
 
+        $statuses[] = Constants_TranslationStatus::STATUS_TRANSLATED;
+        $statuses[] = Constants_TranslationStatus::STATUS_APPROVED;
+
         $arrayCount = count( $projectIds );
         $rowCount = ( $arrayCount  ? $arrayCount - 1 : 0);
         $placeholders = sprintf( "?%s", str_repeat(",?", $rowCount ) );
@@ -31,13 +34,16 @@ class WarningDao extends \DataAccess_AbstractDao {
               JOIN segment_translations st USE INDEX( id_job ) ON st.id_job = jobs.id AND st.id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
                 WHERE st.warning = 1
                 AND id_project IN( $placeholders )
+                AND st.status IN( ?, ? )
                 GROUP BY id_job, password
         ";
+
+        $params = array_merge( $projectIds, $statuses );
 
         $con = $this->con->getConnection();
 
         $stmt = $con->prepare( $sql );
-        $stmt->execute( $projectIds );
+        $stmt->execute( $params );
         $result = $stmt->fetchAll( PDO::FETCH_ASSOC );
 
         return $result;
