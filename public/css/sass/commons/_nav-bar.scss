@@ -13,7 +13,8 @@ header {
             height: 48px !important;
         }
         .ui.selection.dropdown,
-        .ui.select-org.dropdown {
+        .ui.select-org.dropdown,
+        .ui.selection.workspace-dropdown {
             font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
             font-weight: 600;
             &.org {
@@ -27,29 +28,32 @@ header {
                     font-size: 14px;
                     margin: 0px;
                     padding: 15px;
+                    cursor: pointer;
+                    color: #09beec;
                     &:hover {
-                        background-color: darkgrey;
+                        background-color: #f3f3f3;
                     }
                     i {
                         float: right;
                         font-size: 18px;
                         margin-right: 0px;
-                        margin-top: -2px;
+                        color: #09beec;
                     }
                 }
-                .item > a > .icon-more_vert {
+                .item > a > i {
                     position: absolute;
                     width: 24px;
                     height: 24px;
                     line-height: 24px;
                     border-radius: 50%;
-                    top: 15%;
+                    top: 16%;
                     right: 10px;
                     bottom: 20%;
                     background-color: transparent;
-                    transition: 0.3s ease;
+                    color: #09beec;
                     &:hover {
                         background-color: #dededc;
+                        transition: 0.3s ease;
                     }
                 }
                 .divider {

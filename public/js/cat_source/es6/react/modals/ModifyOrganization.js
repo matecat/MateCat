@@ -147,7 +147,7 @@ class ModifyOrganization extends React.Component {
                  ref={(pendingUsers) => this.pendingUsers = pendingUsers}>
                 <div className="title">
                     <i className="dropdown icon"/>
-                    View pending people?
+                    View pending users?
                 </div>
                 <div className="content">
                     <div className="ui members-list organization">

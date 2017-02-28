@@ -198,6 +198,9 @@ class SubHeader extends React.Component {
                      data-text={workspace.get('name')}
                      key={'organization' + workspace.get('name') + workspace.get('id')}>
                     {workspace.get('name')}
+                    <a className="organization-filter button show">
+                        <i className="icon-settings icon" onClick={this.openCreateWorkspace.bind(this)}/>
+                    </a>
                 </div>
             ));
             let item = <div className="item" data-value='0'
@@ -207,8 +210,8 @@ class SubHeader extends React.Component {
                 </div>;
             items = items.unshift(item);
             return <div className="column">
-                    <div className="ui dropdown selection workspace-dropdown"
-                            ref={(dropdownWorkspaces) => this.dropdownWorkspaces = dropdownWorkspaces}>
+                <div className="ui dropdown selection workspace-dropdown"
+                        ref={(dropdownWorkspaces) => this.dropdownWorkspaces = dropdownWorkspaces}>
                     <input type="hidden" name="gender" />
                     <i className="dropdown icon"/>
                     <div className="default text">Choose Workspace</div>

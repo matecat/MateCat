@@ -34,9 +34,15 @@ class ProjectContainer extends React.Component {
         this.initUsersDropdown();
         //Select the assigee
         if ( this.props.project.get('id_assignee') ) {
-            $(this.dropdownUsers).dropdown('set selected', this.props.project.get('id_assignee'));
+            $(this.dropdownUsers).dropdown('set selected', this.props.project.get('workspace'));
         } else {
             $(this.dropdownUsers).dropdown('set selected', -1);
+        }
+
+        if ( this.props.project.get('workspace') ) {
+            $(this.dropdownWorkspace).dropdown('set selected', this.props.project.get('workspace'));
+        } else {
+            $(this.dropdownWorkspace).dropdown('set selected', -1);
         }
 
         this.getLastAction();
@@ -417,6 +423,45 @@ class ProjectContainer extends React.Component {
        return result;
     }
 
+    getWorkspacesDropdown() {
+        let result = '';
+        var self = this;
+        if (this.props.organization.get('workspaces') ) {
+            let workspaces = this.props.organization.get('workspaces').map(function(ws, i) {
+
+                return <div className="item " data-value={ws.get('id')}
+                            key={'ws' + ws.get('id')}>
+                    {ws.get('name')}
+                </div>
+            });
+
+            result = <div className={"ui project-workspace dropdown top right pointing shadow-1"}
+                          ref={(dropdownWorkspace) => this.dropdownWorkspace = dropdownWorkspace}>
+                        <span className="text">
+                            Not assigned
+                        </span>
+                    <div className="ui cancel label">
+                        <i className="icon-cancel3"/>
+                    </div>
+
+                    <div className="menu">
+                        <div className="ui icon search input">
+                            <i className="icon-search icon"/>
+                            <input type="text" name="UserName" placeholder="Name or email." />
+                        </div>
+                        <div className="scrolling menu">
+                            {workspaces}
+                            <div className="item" data-value="-1">
+                                No Workspace
+                            </div>
+                        </div>
+                    </div>
+                </div>;
+            }
+
+        return result;
+    }
+
     shouldComponentUpdate(nextProps, nextState){
         return (nextProps.project !== this.props.project ||
         nextState.lastAction !==  this.state.lastAction ||
@@ -474,27 +519,9 @@ class ProjectContainer extends React.Component {
             state = <span>(cancelled)</span>;
         }
 
-        // Workspace label
-        let workspace = '';
-        if (this.props.project.get('id_workspace') ) {
-            let ws = this.props.organization.get('workspaces').find(function (ws) {
-                return ws.get('id') == self.props.project.get('id_workspace');
-            });
-            if (ws) {
-                workspace = <div className="ui olive circular label project-workspace shadow-1"
-                               onClick={this.openChangeOrganizationModal.bind(this)}>
-                    {ws.get('name') }
-                    <div className="ui cancel label"
-                         onClick={self.removeWorkspace.bind(self)}>
-                        <i className="icon-cancel3"/>
-                    </div>
-                </div>
-            }
-        }
-
         // Users dropdown
         let dropDownUsers = this.getDropDownUsers();
-
+        let dropDownWS = this.getWorkspacesDropdown();
         //Input Class
         let inputClass = (this.state.inputSelected) ? 'selected' : '';
         let inputIcon = (this.state.inputNameChanged) ? <i className="icon-checkmark green icon" /> : <i className="icon-pencil icon" />;
@@ -518,7 +545,7 @@ class ProjectContainer extends React.Component {
                                 </div>
                             </div>
 
-                            <div className="fourteen wide computer fourteen wide tablet thirteen wide mobile column">
+                            <div className="fourteen wide computer fourteen wide tablet thirteen wide mobile column pad-top-8">
                                 <div className="ui mobile reversed stackable grid">
                                     <div className="five wide computer four wide tablet only reverse tablet only column">
                                         <div className="ui grid">
@@ -546,7 +573,7 @@ class ProjectContainer extends React.Component {
                                             <a href={analyzeUrl} target="_blank">{payableWords} <span>payable words</span></a>
                                         </div>
                                         <div className="project-activity-icon">
-                                            {workspace}
+                                            {dropDownWS}
                                             {dropDownUsers}
                                             <div className="project-menu circular ui icon top right pointing dropdown basic button"
                                                     ref={(dropdown) => this.dropdown = dropdown}>
