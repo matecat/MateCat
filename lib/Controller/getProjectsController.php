@@ -187,7 +187,8 @@ class getProjectsController extends ajaxController {
      */
 
     private function filterAssignee($organization) {
-        if ( is_null($this->id_assignee ) ) return ;
+
+        if ( is_null($this->id_assignee ) ) return null;
 
         $dao = new MembershipDao();
         $memberships = $dao->setCacheTTL( 60 * 60 * 24 )->getMemberListByOrganizationId($organization->id);
@@ -212,7 +213,8 @@ class getProjectsController extends ajaxController {
      * @throws Exception
      */
     private function filterWorkspace($organization) {
-        if ( is_null($this->id_workspace ) ) return ;
+
+        if ( is_null($this->id_workspace ) ) return null;
 
         $dao = new WorkspaceDao() ;
         $workspaces = $dao->setCacheTTL( 60 * 60 * 24 )->getByOrganizationId($organization->id) ;

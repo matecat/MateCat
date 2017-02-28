@@ -128,6 +128,11 @@ footer li
 	    margin-top: 5px;
 }
 
+footer .link-manage-page {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
 ul.statistics-details {
     margin: 0 auto;
     overflow: hidden;
@@ -4835,3 +4840,4 @@ span.share-popup-item-email {
 
 
 /*****************************/
+

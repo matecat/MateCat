@@ -23,6 +23,7 @@ class LoginModal extends React.Component {
 
     googole_popup(  ) {
         var url = this.props.googleUrl;
+        var self = this;
         this.checkRedeemProject();
         var newWindow = window.open( url, 'name', 'height=600,width=900' );
         if ( window.focus ) {
@@ -31,7 +32,11 @@ class LoginModal extends React.Component {
         var interval = setInterval(function () {
             if (newWindow.closed) {
                 clearInterval(interval);
-                window.location.reload();
+                if (self.props.goToManage) {
+                    window.location = '/manage/';
+                } else {
+                    window.location.reload();
+                }
             }
         }, 600);
     }
@@ -56,7 +61,11 @@ class LoginModal extends React.Component {
         }
         this.setState({requestRunning: true});
         this.checkRedeemProject().then(this.sendLoginData().done(function (data) {
-            window.location.reload();
+            if (self.props.goToManage) {
+                window.location = '/manage/';
+            } else {
+                window.location.reload();
+            }
         }).fail(function (response) {
             var text;
             if (response.responseText.length) {

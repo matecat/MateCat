@@ -30,7 +30,7 @@ body.incomingMsg header
 header .wrapper{
 	height:20px; padding:0px 0 0 0;
 }
-.header-menu {
+.header-menu {;
 	float:right;
 	margin-right:16px;
 	margin-left: 15px;
@@ -4179,6 +4179,8 @@ section:hover .segment-side-buttons {
 	opacity: 0.5;
 	color: #797979;
 }
+
+/************************************************/
 
 .ui.user.label {
 	top: 5px;

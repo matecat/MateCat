@@ -1772,7 +1772,7 @@ function conditionsForProjectsQuery(
  *
  * @param \Organizations\OrganizationStruct $organization
  *
- * @return array|int|resource|void
+ * @return array
  */
 function getProjects( Users_UserStruct $user, $start, $step,
                       $search_in_pname, $search_source, $search_target,
@@ -1833,7 +1833,7 @@ function getProjects( Users_UserStruct $user, $start, $step,
 
             FROM projects p
 
-            INNER JOIN jobs j ON j.id_project=p.id
+            INNER JOIN jobs j ON j.id_project = p.id
 
             LEFT JOIN project_metadata ON project_metadata.id_project = p.id AND project_metadata.`key` = '$features'
 
@@ -1845,7 +1845,7 @@ function getProjects( Users_UserStruct $user, $start, $step,
 
     $stmt = Database::obtain()->getConnection()->prepare( $projectsQuery );
     $stmt->execute( $data );
-    return $stmt->fetchAll() ;
+    return $stmt->fetchAll( PDO::FETCH_ASSOC ) ;
 }
 
 

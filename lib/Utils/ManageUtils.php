@@ -95,6 +95,7 @@ class ManageUtils {
             foreach( $warningsCount as $count ) {
                 if ( $count[ 'id_job' ] == $job[ 'id' ] && $count[ 'password' ] == $job[ 'password' ] ) {
                     $job[ 'warnings_count' ] = (int) $count[ 'count' ] ;
+                    $job[ 'warning_segments' ] = array_map( function( $id_segment ){ return (int)$id_segment; }, explode( ",", $count[ 'segment_list' ] ) );
                 }
             }
 

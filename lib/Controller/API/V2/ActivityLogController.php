@@ -20,6 +20,7 @@ class ActivityLogController extends KleinController {
     protected $project_data;
 
     public function afterConstruct(){
+        \Bootstrap::sessionStart();
         \Bootstrap::sessionClose();
     }
 

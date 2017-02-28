@@ -4,6 +4,7 @@
 namespace Translations ;
 
 use Features\Ebay;
+use PDO;
 
 class WarningDao extends \DataAccess_AbstractDao {
 
@@ -19,26 +20,27 @@ class WarningDao extends \DataAccess_AbstractDao {
         " ;
 
     public function getWarningsByProjectIds( $projectIds ) {
-        $ids = implode(',', array_map(function( $id ) {
-            return (int) $id ;
-        }, $projectIds ) );
+
+        $arrayCount = count( $projectIds );
+        $rowCount = ( $arrayCount  ? $arrayCount - 1 : 0);
+        $placeholders = sprintf( "?%s", str_repeat(",?", $rowCount ) );
 
         $sql = "
-          SELECT count(1) AS count, jobs.id AS id_job, jobs.password
+          SELECT COUNT(1) as count, jobs.id AS id_job, jobs.password, group_concat( st.id_segment ORDER BY id_segment ) as segment_list
             FROM jobs
-              JOIN segment_translations st ON st.id_job = jobs.id
+              JOIN segment_translations st USE INDEX( id_job ) ON st.id_job = jobs.id AND st.id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
                 WHERE st.warning = 1
-                AND id_project IN ( $ids )
+                AND id_project IN( $placeholders )
                 GROUP BY id_job, password
-        " ;
+        ";
 
-        $con = $this->con->getConnection() ;
+        $con = $this->con->getConnection();
 
-        $stmt = $con->prepare( $sql ) ;
-        $stmt->execute() ;
-        $result = $stmt->fetchAll() ;
+        $stmt = $con->prepare( $sql );
+        $stmt->execute( $projectIds );
+        $result = $stmt->fetchAll( PDO::FETCH_ASSOC );
 
-        return $result ;
+        return $result;
     }
 
     /**

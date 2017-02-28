@@ -86,6 +86,10 @@ $.extend(APP, {
             APP.ModalWindow.showModalComponent(LoginModal, props, title, style);
         });
 
+        $('.link-manage-page').on('click', function () {
+            APP.openManagePage();
+        });
+
         //Link footer
         $('.user-menu-preferences').on('click', function (e) {
             e.preventDefault();
@@ -121,6 +125,7 @@ $.extend(APP, {
 
         this.checkForPopupToOpen();
     },
+
     checkForPopupToOpen: function () {
 
         var openFromFlash = APP.lookupFlashServiceParam("popup");
@@ -150,6 +155,14 @@ $.extend(APP, {
                     }
                 }
                 break;
+        }
+    },
+
+    openManagePage: function () {
+        if (!config.isLoggedIn) {
+            $('#modal').trigger('openlogin', [{goToManage: true}]);
+        } else {
+            window.location = '/manage/';
         }
     }
 });
