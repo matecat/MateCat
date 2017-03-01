@@ -40,7 +40,7 @@ class ProjectUrls {
                     'id' => $record['id_file'],
                     'name' => $record['filename'],
                     'original_download_url' => $this->downloadOriginalUrl( $record ),
-                    'translation_download_url' => $this->downloadTranslationUrl( $record ),
+                    'translation_download_url' => $this->downloadFileTranslationUrl( $record ),
                     'xliff_download_url' => $this->downloadXliffUrl( $record )
                 );
             }
@@ -93,11 +93,19 @@ class ProjectUrls {
         );
     }
 
+    private function downloadFileTranslationUrl($record ) {
+        return Routes::downloadTranslation(
+                $record['jid'],
+                $record['jpassword'],
+                $record['id_file']
+        );
+    }
+
     private function downloadTranslationUrl($record) {
         return Routes::downloadTranslation(
             $record['jid'],
             $record['jpassword'],
-            $record['id_file']
+            ''
         );
     }
 

@@ -36,6 +36,7 @@ class Chunk {
         }
 
         return [
+            'status'             => $chunk->status_owner,
             'password'           => $chunk->password,
             'created_at'         => \Utils::api_timestamp($chunk->create_date),
             'open_threads_count' => (int) $chunk->getOpenThreadsCount(),
