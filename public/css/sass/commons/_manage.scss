@@ -231,6 +231,9 @@ body.manage {
                             color: deepskyblue;
                             background-color: transparent;
                         }
+                        .ui.cancel.label {
+                            display: none;
+                        }
                     }
                 }
             }
