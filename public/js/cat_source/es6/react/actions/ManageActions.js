@@ -229,14 +229,6 @@ let ManageActions = {
         });
     },
 
-    openChangeProjectWorkspace: function (organization, project) {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.OPEN_CHANGE_ORGANIZATION_MODAL,
-            workspaces: organization.get('workspaces'),
-            project: project
-        });
-    },
-
     openAssignToTranslator: function (project, job) {
         AppDispatcher.dispatch({
             actionType: ManageConstants.OPEN_ASSIGN_TO_TRANSLATOR_MODAL,
@@ -424,6 +416,20 @@ let ManageActions = {
         setTimeout(function () {
             $('.reloading-upload-page').hide();
         }, 1000)
+    },
+
+    enableDownloadButton: function (id) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.ENABLE_DOWNLOAD_BUTTON,
+            idProject: id
+        });
+    },
+
+    disableDownloadButton: function (id) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.DISABLE_DOWNLOAD_BUTTON,
+            idProject: id
+        });
     }
 
 };

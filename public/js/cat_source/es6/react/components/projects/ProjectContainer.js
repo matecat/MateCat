@@ -31,34 +31,17 @@ class ProjectContainer extends React.Component {
         $(this.dropdown).dropdown({
             direction : 'downward'
         });
-        this.initUsersDropdown();
-        //Select the assigee
-        if ( this.props.project.get('id_assignee') ) {
-            $(this.dropdownUsers).dropdown('set selected', this.props.project.get('workspace'));
-        } else {
-            $(this.dropdownUsers).dropdown('set selected', -1);
-        }
-
-        if ( this.props.project.get('workspace') ) {
-            $(this.dropdownWorkspace).dropdown('set selected', this.props.project.get('workspace'));
-        } else {
-            $(this.dropdownWorkspace).dropdown('set selected', -1);
-        }
+        this.initDropdowns();
 
         this.getLastAction();
 
-        if (this.dropdownUsers) {
-            if (this.props.project.get('id_assignee') ) {
-                this.dropdownUsers.classList.remove("project-not-assigned");
-                this.dropdownUsers.classList.remove("shadow-1");
-                this.dropdownUsers.classList.add("project-assignee");
-            } else {
-                this.dropdownUsers.classList.remove("project-assignee");
-                this.dropdownUsers.classList.add("shadow-1");
-                this.dropdownUsers.classList.add("project-not-assigned");
-            }
-        }
         ProjectsStore.addListener(ManageConstants.HIDE_PROJECT, this.hideProject);
+
+        // $('.ui.progress')
+        //     .progress({
+        //         duration : 200,
+        //         total    : 200
+        //     });
 
     }
 
@@ -75,9 +58,21 @@ class ProjectContainer extends React.Component {
 
     componentDidUpdate() {
         let self = this;
-        this.initUsersDropdown();
+        this.initDropdowns();
         console.log("Updated Project : " + this.props.project.get('id'));
-        this.inputTimeout;
+
+        clearTimeout(this.inputTimeout);
+        if (this.state.inputNameChanged) {
+            this.inputTimeout = setTimeout(function () {
+               self.setState({
+                   inputNameChanged: false
+               })
+            }, 3000);
+        }
+    }
+
+    initDropdowns() {
+        let self = this;
         if (this.dropdownUsers) {
             if (this.props.project.get('id_assignee') ) {
                 $(this.dropdownUsers).dropdown('set selected', this.props.project.get('id_assignee'));
@@ -90,28 +85,36 @@ class ProjectContainer extends React.Component {
                 this.dropdownUsers.classList.remove("shadow-1");
                 this.dropdownUsers.classList.add("project-not-assigned");
             }
-
+            if (this.props.organization.get('type') != "personal") {
+                $(this.dropdownUsers).dropdown({
+                    fullTextSearch: 'exact',
+                    onChange: function(value, text, $selectedItem) {
+                        self.changeUser(value);
+                    }
+                });
+            }
         }
-        clearTimeout(this.inputTimeout);
-        if (this.state.inputNameChanged) {
-            this.inputTimeout = setTimeout(function () {
-               self.setState({
-                   inputNameChanged: false
-               })
-            }, 3000);
-        }
-    }
-
-    initUsersDropdown() {
-        let self = this;
-        if (this.props.organization.get('type') != "personal") {
-            $(this.dropdownUsers).dropdown({
+        if (this.dropdownWorkspace) {
+            if ( this.props.project.get('id_workspace') ) {
+                $(this.dropdownWorkspace).dropdown('set selected', this.props.project.get('id_workspace'));
+                this.dropdownWorkspace.classList.remove("no-workspace");
+                this.dropdownWorkspace.classList.add("project-workspace");
+                this.dropdownWorkspace.classList.add("shadow-1");
+            } else {
+                $(this.dropdownWorkspace).dropdown('set selected', -1);
+                this.dropdownWorkspace.classList.remove("project-workspace");
+                this.dropdownWorkspace.classList.remove("shadow-1");
+                this.dropdownWorkspace.classList.add("no-workspace");
+            }
+            $(this.dropdownWorkspace).dropdown({
                 fullTextSearch: 'exact',
                 onChange: function(value, text, $selectedItem) {
-                    self.changeUser(value);
+                    self.changeWorkspace(value);
                 }
             });
         }
+
+
     }
 
     removeProject() {
@@ -145,6 +148,24 @@ class ProjectContainer extends React.Component {
             ManageActions.changeProjectAssignee(this.props.organization, this.props.project, user);
         }
     }
+
+    changeWorkspace(value) {
+        let ws, idWS;
+        if (value === '-1') {
+            ws = -1;
+            idWS = -1;
+        } else {
+            let selectedWS = this.props.organization.get('workspaces').find(function (ws) {
+                return ws.get('id') === parseInt(value);
+            });
+            idWS = selectedWS.get('id');
+        }
+
+        if (!this.props.project.get('id_workspace') && idWS !== -1 || this.props.project.get('id_workspace') && idWS != this.props.project.get('id_workspace')) {
+            ManageActions.changeProjectWorkspace(idWS,  this.props.project);
+        }
+    }
+
 
     removeWorkspace(event) {
         event.preventDefault();
@@ -191,9 +212,6 @@ class ProjectContainer extends React.Component {
     getProjectMenu(activityLogUrl) {
         let menuHtml = <div className="menu">
             <div className="scrolling menu">
-                <a className="item" onClick={this.openChangeOrganizationModal.bind(this)}>
-                    <i className="icon-forward icon"/>Move project
-                </a>
                 <a className="item" href={activityLogUrl} target="_blank"><i className="icon-download-logs icon"/>Activity Log</a>
 
                 <a className="item" onClick={this.archiveProject.bind(this)}><span><i className="icon-drawer icon"/>Archive project</span></a>
@@ -362,14 +380,9 @@ class ProjectContainer extends React.Component {
         });
     }
 
-    openChangeOrganizationModal() {
-        ManageActions.openChangeProjectWorkspace(this.props.organization, this.props.project);
-    }
-
     openAddMember() {
         ManageActions.openModifyOrganizationModal(this.props.organization.toJS());
     }
-
 
     getDropDownUsers() {
        let result = '';
@@ -438,11 +451,12 @@ class ProjectContainer extends React.Component {
             result = <div className={"ui project-workspace dropdown top right pointing shadow-1"}
                           ref={(dropdownWorkspace) => this.dropdownWorkspace = dropdownWorkspace}>
                         <span className="text">
-                            Not assigned
+                            No Workspace
                         </span>
-                    <div className="ui cancel label">
-                        <i className="icon-cancel3"/>
-                    </div>
+                <div className="ui cancel label"
+                     onClick={self.changeWorkspace.bind(self, '-1')}>
+                    <i className="icon-cancel3"/>
+                </div>
 
                     <div className="menu">
                         <div className="ui icon search input">

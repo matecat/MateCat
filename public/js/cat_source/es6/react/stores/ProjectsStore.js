@@ -195,6 +195,10 @@ AppDispatcher.register(function(action) {
             ProjectsStore.emitChange(ManageConstants.REMOVE_WORKSPACE, action.workspace);
             ProjectsStore.emitChange(ManageConstants.UPDATE_PROJECTS, ProjectsStore.projects);
             break;
+        case ManageConstants.ENABLE_DOWNLOAD_BUTTON:
+        case ManageConstants.DISABLE_DOWNLOAD_BUTTON:
+            ProjectsStore.emitChange(action.actionType, action.idProject);
+            break;
     }
 });
 

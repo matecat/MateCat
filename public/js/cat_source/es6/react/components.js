@@ -47,11 +47,11 @@ window.ResetPasswordModal = require('./modals/ResetPasswordModal').default;
 window.LoginModal = require('./modals/LoginModal').default;
 window.ForgotPasswordModal = require('./modals/ForgotPasswordModal').default;
 window.RegisterModal = require('./modals/RegisterModal').default;
+window.ConfirmMessageModal = require('./modals/ConfirmMessageModal').default;
 
 window.CreateOrganizationModal = require('./modals/CreateOrganization').default;
 window.ModifyOrganizationModal = require('./modals/ModifyOrganization').default;
 window.CreateWorkspaceModal = require('./modals/CreateWorkspace').default;
-window.ChangeProjectWorkspaceModal = require('./modals/ChangeProjectWorkspace').default;
 window.AssignToTranslator = require('./modals/AssignToTranslator').default;
 
 

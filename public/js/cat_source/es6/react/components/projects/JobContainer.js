@@ -2,6 +2,9 @@ class JobContainer extends React.Component {
 
     constructor (props) {
         super(props);
+        this.state = {
+            showDownloadProgress: false
+        }
         this.getTranslateUrl = this.getTranslateUrl.bind(this);
         this.getOutsourceUrl = this.getOutsourceUrl.bind(this);
         this.getAnalysisUrl = this.getAnalysisUrl.bind(this);
@@ -14,6 +17,15 @@ class JobContainer extends React.Component {
             belowOrigin: true
         });
         $('.button.tm-keys, .button.comments-tooltip, .warning-tooltip, .qr-tooltip, .translate-tooltip').popup();
+
+        ProjectsStore.addListener(ManageConstants.ENABLE_DOWNLOAD_BUTTON, this.enableDownloadMenu.bind(this));
+        ProjectsStore.addListener(ManageConstants.DISABLE_DOWNLOAD_BUTTON, this.disableDownloadMenu.bind(this));
+
+    }
+
+    componentWillUnmount() {
+        ProjectsStore.removeListener(ManageConstants.ENABLE_DOWNLOAD_BUTTON, this.enableDownloadMenu);
+        ProjectsStore.removeListener(ManageConstants.DISABLE_DOWNLOAD_BUTTON, this.disableDownloadMenu);
     }
 
     /**
@@ -39,7 +51,9 @@ class JobContainer extends React.Component {
 }
 
     shouldComponentUpdate(nextProps, nextState){
-        return (nextProps.job !== this.props.job || nextProps.lastAction !== this.props.lastAction )
+        return (nextProps.job !== this.props.job ||
+        nextProps.lastAction !== this.props.lastAction ||
+        nextState.showDownloadProgress !== this.state.showDownloadProgress)
     }
 
     getTranslateUrl() {
@@ -61,10 +75,15 @@ class JobContainer extends React.Component {
 
     getEditingLogUrl() {
         return '/editlog/' + this.props.job.get('id') + '-' + this.props.job.get('password');
+
     }
 
     getQAReport() {
-        return '/revise-summary/' + this.props.job.get('id') + '-' + this.props.job.get('password');
+        if (this.props.project.get('features') && this.props.project.get('features').indexOf('review_improved')) {
+            return '/plugins/review_improved/quality_report/' + this.props.job.get('id') + '/' + this.props.job.get('password');
+        } else {
+            return '/revise-summary/' + this.props.job.get('id') + '-' + this.props.job.get('password');
+        }
     }
 
     changePassword() {
@@ -118,11 +137,45 @@ class JobContainer extends React.Component {
     }
 
     downloadTranslation() {
-        this.props.downloadTranslationFn(this.props.project.toJS(), this.props.job.toJS());
+        let url = this.getTranslateUrl() + '?action=warnings';
+        this.props.downloadTranslationFn(this.props.project.toJS(), this.props.job.toJS(), url);
+    }
+
+    disableDownloadMenu(idJob) {
+        if (this.props.job.get('id') === idJob) {
+            $(this.downloadMenu).addClass('disabled');
+            this.setState({
+                showDownloadProgress: true
+            });
+        }
+    }
+
+    enableDownloadMenu(idJob) {
+        if (this.props.job.get('id') === idJob) {
+            $(this.downloadMenu).removeClass('disabled');
+            this.setState({
+                showDownloadProgress: false
+            });
+        }
     }
 
     openAssignToTranslatorModal() {
         ManageActions.openAssignToTranslator(this.props.project, this.props.job);
+    }
+
+    getDownloadLabel() {
+        let jobStatus = this.getTranslationStatus();
+        let remoteService = this.props.project.get('remote_file_service');
+        let label = <span ><i className="icon-eye icon"/>Preview</span>;
+        if ((jobStatus == 'translated' || jobStatus == 'approved') && (!remoteService)) {
+            label = <span><i className="icon-download icon"/>Download Translation</span>;
+        } else if ((jobStatus == 'translated' || jobStatus == 'approved') && (remoteService == 'gdrive')) {
+            label = <span><i className="icon-download icon"/>Open in Google Drive</span>;
+        } else if (remoteService && (remoteService == 'gdrive')) {
+            label = <span ><i className="icon-eye icon"/>Preview in Google Drive</span>;
+        }
+        return <a className="item" onClick={this.downloadTranslation}
+                  ref={(downloadMenu) => this.downloadMenu = downloadMenu}>{label}</a>
     }
 
 
@@ -136,10 +189,8 @@ class JobContainer extends React.Component {
 
         let originalUrl = '/?action=downloadOriginal&id_job=' + this.props.job.get('id') +' &password=' + this.props.job.get('password') + '&download_type=all';
 
-        let jobStatus = this.getTranslationStatus();
-        let downloadButton = (jobStatus == 'translated' || jobStatus == 'approved') ?
-            <a className="item" onClick={this.downloadTranslation}><span><i className="icon-download icon"/>Download Translation</span></a> : <a className="item" onClick={this.downloadTranslation}><span ><i className="icon-eye icon"/>Preview</span></a>;
 
+        let downloadButton = this.getDownloadLabel();
         let splitButton = (!this.props.isChunk) ? <a className="item" target="_blank" href={splitUrl}><span><i className="icon-expand icon"/> Split</span></a> : '';
 
         let menuHtml = <div className="menu">
@@ -459,6 +510,10 @@ class JobContainer extends React.Component {
                         </div>
 
                     </div>
+                { this.state.showDownloadProgress ? (
+                    <div className="chunk-download-progress"></div>
+                ):('')}
+
                 </div>;
     }
 }

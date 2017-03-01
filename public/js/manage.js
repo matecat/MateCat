@@ -20,7 +20,6 @@ UI = {
         //Modals
         ProjectsStore.addListener(ManageConstants.OPEN_CREATE_ORGANIZATION_MODAL, this.openCreateOrganizationModal);
         ProjectsStore.addListener(ManageConstants.OPEN_MODIFY_ORGANIZATION_MODAL, this.openModifyOrganizationModal);
-        ProjectsStore.addListener(ManageConstants.OPEN_CHANGE_ORGANIZATION_MODAL, this.openChangeProjectWorkspace);
         ProjectsStore.addListener(ManageConstants.OPEN_ASSIGN_TO_TRANSLATOR_MODAL, this.openAssignToTranslator);
         ProjectsStore.addListener(ManageConstants.OPEN_CREATE_WORKSPACE_MODAL, this.openCreateWorkspace);
     },
@@ -374,11 +373,54 @@ UI = {
         });
     },
 
-    downloadTranslation: function(project, job) {
-        let url = '/translate/'+project.name +'/'+ job.source +'-'+job.target+'/'+ job.id +'-'+ job.password + "?action=download" ;
-        window.open(url, '_blank');
+    downloadTranslation: function(project, job, urlWarnings) {
+
+        var continueDownloadFunction ;
+        var callback = ManageActions.enableDownloadButton.bind(null, job.id);
+
+        if ( project.remote_file_service == 'gdrive' ) {
+            continueDownloadFunction = function() {
+                APP.ModalWindow.onCloseModal();
+                ManageActions.disableDownloadButton(job.id);
+                APP.downloadGDriveFile(null, job.id, job.password ,callback);
+            }
+        }
+        else  {
+            continueDownloadFunction = function() {
+                APP.ModalWindow.onCloseModal();
+                ManageActions.disableDownloadButton(job.id);
+                APP.downloadFile(job.id, job.password, callback);
+            }
+        }
+
+        var openUrl = function () {
+            APP.ModalWindow.onCloseModal();
+            ManageActions.enableDownloadButton(job.id);
+            window.open(urlWarnings, '_blank');
+        };
+
+        //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
+        if ( job.warnings_count > 0 ) {
+            let props = {
+                text: 'Potential errors (e.g. tag mismatches, inconsistencies etc.) found in the text. ' +
+                'If you continue, your download may fail or part of the content be untranslated - search ' +
+                'the string "UNTRANSLATED_CONTENT" in the downloaded file(s).<br><br>Continue downloading ' +
+                'or fix the error in MateCat:',
+                successText: "Continue",
+                successCallback: continueDownloadFunction,
+                cancelText: "Fix errors",
+                cancelCallback: openUrl
+
+            };
+            APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Confirmation required");
+        } else {
+            continueDownloadFunction();
+        }
+
 
     },
+
+
 
     getLastProjectActivityLogAction: function (id, pass) {
         return $.ajax({
@@ -490,15 +532,6 @@ UI = {
             organization: organization
         };
         APP.ModalWindow.showModalComponent(ModifyOrganizationModal, props, "Modify Organization");
-    },
-
-    openChangeProjectWorkspace: function (workspaces, project) {
-
-        let props = {
-            project: project,
-            workspaces: workspaces
-        };
-        APP.ModalWindow.showModalComponent(ChangeProjectWorkspaceModal, props, "Change Workspace");
     },
 
     openAssignToTranslator: function (project, job) {
