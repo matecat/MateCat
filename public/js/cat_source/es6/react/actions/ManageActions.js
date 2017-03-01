@@ -229,14 +229,6 @@ let ManageActions = {
         });
     },
 
-    openChangeProjectWorkspace: function (organization, project) {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.OPEN_CHANGE_ORGANIZATION_MODAL,
-            workspaces: organization.get('workspaces'),
-            project: project
-        });
-    },
-
     openAssignToTranslator: function (project, job) {
         AppDispatcher.dispatch({
             actionType: ManageConstants.OPEN_ASSIGN_TO_TRANSLATOR_MODAL,

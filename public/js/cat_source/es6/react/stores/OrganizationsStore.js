@@ -112,9 +112,6 @@ AppDispatcher.register(function(action) {
             OrganizationsStore.removeOrganization(action.organization);
             OrganizationsStore.emitChange(ManageConstants.RENDER_ORGANIZATIONS, OrganizationsStore.organizations);
             break;
-        case ManageConstants.OPEN_CHANGE_ORGANIZATION_MODAL:
-            ProjectsStore.emitChange(action.actionType, action.workspaces, action.project);
-            break;
         case ManageConstants.ADD_ORGANIZATION:
             OrganizationsStore.addOrganization(action.organization);
             OrganizationsStore.emitChange(ManageConstants.RENDER_ORGANIZATIONS, OrganizationsStore.organizations);

@@ -212,9 +212,6 @@ class ProjectContainer extends React.Component {
     getProjectMenu(activityLogUrl) {
         let menuHtml = <div className="menu">
             <div className="scrolling menu">
-                <a className="item" onClick={this.openChangeOrganizationModal.bind(this)}>
-                    <i className="icon-forward icon"/>Move project
-                </a>
                 <a className="item" href={activityLogUrl} target="_blank"><i className="icon-download-logs icon"/>Activity Log</a>
 
                 <a className="item" onClick={this.archiveProject.bind(this)}><span><i className="icon-drawer icon"/>Archive project</span></a>
@@ -381,10 +378,6 @@ class ProjectContainer extends React.Component {
             }
 
         });
-    }
-
-    openChangeOrganizationModal() {
-        ManageActions.openChangeProjectWorkspace(this.props.organization, this.props.project);
     }
 
     openAddMember() {

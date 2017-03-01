@@ -20,7 +20,6 @@ UI = {
         //Modals
         ProjectsStore.addListener(ManageConstants.OPEN_CREATE_ORGANIZATION_MODAL, this.openCreateOrganizationModal);
         ProjectsStore.addListener(ManageConstants.OPEN_MODIFY_ORGANIZATION_MODAL, this.openModifyOrganizationModal);
-        ProjectsStore.addListener(ManageConstants.OPEN_CHANGE_ORGANIZATION_MODAL, this.openChangeProjectWorkspace);
         ProjectsStore.addListener(ManageConstants.OPEN_ASSIGN_TO_TRANSLATOR_MODAL, this.openAssignToTranslator);
         ProjectsStore.addListener(ManageConstants.OPEN_CREATE_WORKSPACE_MODAL, this.openCreateWorkspace);
     },
@@ -533,15 +532,6 @@ UI = {
             organization: organization
         };
         APP.ModalWindow.showModalComponent(ModifyOrganizationModal, props, "Modify Organization");
-    },
-
-    openChangeProjectWorkspace: function (workspaces, project) {
-
-        let props = {
-            project: project,
-            workspaces: workspaces
-        };
-        APP.ModalWindow.showModalComponent(ChangeProjectWorkspaceModal, props, "Change Workspace");
     },
 
     openAssignToTranslator: function (project, job) {
