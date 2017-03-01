@@ -13,14 +13,6 @@ class CreateWorkspace extends React.Component {
         this.updateOrganization = this.updateOrganization.bind(this);
     }
 
-    componentDidMount() {
-        OrganizationsStore.addListener(ManageConstants.UPDATE_ORGANIZATION, this.updateOrganization);
-    }
-
-    componentWillUnmount() {
-        OrganizationsStore.removeListener(ManageConstants.UPDATE_ORGANIZATION, this.updateOrganization);
-    }
-
     createWorkspace() {
         if ( this.inputNewWS.value.length > 0) {
             ManageActions.createWorkspace(this.state.organization.toJS(), this.inputNewWS.value);
@@ -134,6 +126,15 @@ class CreateWorkspace extends React.Component {
         } else {
             return '';
         }
+    }
+
+    componentDidMount() {
+        OrganizationsStore.addListener(ManageConstants.UPDATE_ORGANIZATION, this.updateOrganization);
+        this.inputNewWS.focus();
+    }
+
+    componentWillUnmount() {
+        OrganizationsStore.removeListener(ManageConstants.UPDATE_ORGANIZATION, this.updateOrganization);
     }
 
     shouldComponentUpdate(nextProps, nextState) {
