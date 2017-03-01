@@ -25,49 +25,9 @@ class ProjectContainer extends React.Component {
         this.hideProject = this.hideProject.bind(this);
     }
 
-    componentDidMount() {
-        let self = this;
-
-        $(this.dropdown).dropdown({
-            direction : 'downward'
-        });
-        this.initDropdowns();
-
-        this.getLastAction();
-
-        ProjectsStore.addListener(ManageConstants.HIDE_PROJECT, this.hideProject);
-
-        // $('.ui.progress')
-        //     .progress({
-        //         duration : 200,
-        //         total    : 200
-        //     });
-
-    }
-
-    componentWillUnmount() {
-        ProjectsStore.removeListener(ManageConstants.HIDE_PROJECT, this.hideProject);
-        $(this.project).transition('fly right');
-    }
-
     hideProject(project) {
         if ( this.props.project.get('id') === project.get('id') ) {
             $(this.project).transition('fly right');
-        }
-    }
-
-    componentDidUpdate() {
-        let self = this;
-        this.initDropdowns();
-        console.log("Updated Project : " + this.props.project.get('id'));
-
-        clearTimeout(this.inputTimeout);
-        if (this.state.inputNameChanged) {
-            this.inputTimeout = setTimeout(function () {
-               self.setState({
-                   inputNameChanged: false
-               })
-            }, 3000);
         }
     }
 
@@ -439,8 +399,8 @@ class ProjectContainer extends React.Component {
     getWorkspacesDropdown() {
         let result = '';
         var self = this;
-        if (this.props.organization.get('workspaces') ) {
-            let workspaces = this.props.organization.get('workspaces').map(function(ws, i) {
+        if (this.props.organization.get('workspaces')) {
+            let workspaces = this.props.organization.get('workspaces').map(function (ws, i) {
 
                 return <div className="item " data-value={ws.get('id')}
                             key={'ws' + ws.get('id')}>
@@ -458,22 +418,55 @@ class ProjectContainer extends React.Component {
                     <i className="icon-cancel3"/>
                 </div>
 
-                    <div className="menu">
-                        <div className="ui icon search input">
-                            <i className="icon-search icon"/>
-                            <input type="text" name="UserName" placeholder="Name or email." />
-                        </div>
-                        <div className="scrolling menu">
-                            {workspaces}
-                            <div className="item" data-value="-1">
-                                No Workspace
-                            </div>
+                <div className="menu">
+                    <div className="ui icon search input">
+                        <i className="icon-search icon"/>
+                        <input type="text" name="UserName" placeholder="Name or email."/>
+                    </div>
+                    <div className="scrolling menu">
+                        {workspaces}
+                        <div className="item" data-value="-1">
+                            No Workspace
                         </div>
                     </div>
-                </div>;
-            }
+                </div>
+            </div>;
+        }
 
         return result;
+    }
+
+    componentDidUpdate() {
+        let self = this;
+        this.initDropdowns();
+        console.log("Updated Project : " + this.props.project.get('id'));
+
+        clearTimeout(this.inputTimeout);
+        if (this.state.inputNameChanged) {
+            this.inputTimeout = setTimeout(function () {
+                self.setState({
+                    inputNameChanged: false
+                })
+            }, 3000);
+        }
+    }
+
+    componentDidMount() {
+        let self = this;
+
+        $(this.dropdown).dropdown({
+            direction : 'downward'
+        });
+        this.initDropdowns();
+
+        this.getLastAction();
+
+        ProjectsStore.addListener(ManageConstants.HIDE_PROJECT, this.hideProject);
+    }
+
+    componentWillUnmount() {
+        ProjectsStore.removeListener(ManageConstants.HIDE_PROJECT, this.hideProject);
+        $(this.project).transition('fly right');
     }
 
     shouldComponentUpdate(nextProps, nextState){

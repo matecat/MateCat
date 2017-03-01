@@ -9,7 +9,7 @@ class ModifyOrganization extends React.Component {
             inputUserError: false,
             inputNameError: false,
             showRemoveMessageUserID: null,
-            readyToSend: false
+            readyToSend: false,
         };
         this.updateOrganization = this.updateOrganization.bind(this);
     }
@@ -76,9 +76,9 @@ class ModifyOrganization extends React.Component {
                 });
             }
             return false;
-        } else {
+       } else {
            this.setState({
-               inputNameError: false
+               inputNameError: false,
            });
        }
     }
@@ -161,7 +161,16 @@ class ModifyOrganization extends React.Component {
     }
 
     componentDidUpdate() {
+        var self = this;
         $(this.pendingUsers).accordion();
+        clearTimeout(this.inputTimeout);
+        if (this.state.readyToSend) {
+            this.inputTimeout = setTimeout(function () {
+                self.setState({
+                    readyToSend: false
+                })
+            }, 3000);
+        }
     }
 
     componentDidMount() {
@@ -179,7 +188,6 @@ class ModifyOrganization extends React.Component {
                 nextState.inputNameError !== this.state.inputNameError ||
                 nextState.showRemoveMessageUserID !== this.state.showRemoveMessageUserID ||
                 nextState.readyToSend !== this.state.readyToSend
-
         )
     }
 
