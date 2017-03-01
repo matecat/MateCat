@@ -64,10 +64,15 @@ class JobContainer extends React.Component {
 
     getEditingLogUrl() {
         return '/editlog/' + this.props.job.get('id') + '-' + this.props.job.get('password');
+
     }
 
     getQAReport() {
-        return '/revise-summary/' + this.props.job.get('id') + '-' + this.props.job.get('password');
+        if (this.props.project.get('features') && this.props.project.get('features').indexOf('review_improved')) {
+            return '/plugins/review_improved/quality_report/' + this.props.job.get('id') + '/' + this.props.job.get('password');
+        } else {
+            return '/revise-summary/' + this.props.job.get('id') + '-' + this.props.job.get('password');
+        }
     }
 
     changePassword() {
