@@ -463,7 +463,7 @@ class downloadFileController extends downloadController {
         $response = array('urls' => array() );
 
         foreach ( $files as $file ) {
-            $gdriveFile = $this->gdriveService->files->get( $file->remote_id );
+            $gdriveFile = $this->remoteFileService->getFile( $file->remote_id );
 
             $response[ 'urls' ][] = array(
                     'localId'       => $file->id,
