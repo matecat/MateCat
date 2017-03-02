@@ -4837,6 +4837,23 @@ span.share-popup-item-email {
     -webkit-box-shadow: none;
     box-shadow: none;
 }
+.organization-name {
+    position: relative;
+    display: inline-block;
+    outline: none;
+    text-align: left;
+    -webkit-transition: box-shadow 0.1s ease, width 0.1s ease;
+    transition: box-shadow 0.1s ease, width 0.1s ease;
+    -webkit-tap-highlight-color: transparent;
+    float: right;
+    text-align: right;
+    line-height: 35px;
+    color: gray;
+    font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+}
+
 
 
 /*****************************/
