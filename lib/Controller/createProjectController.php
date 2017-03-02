@@ -131,7 +131,7 @@ class createProjectController extends ajaxController {
         $this->lang_detect_files       = $__postInput[ 'lang_detect_files' ];
         $this->pretranslate_100        = $__postInput[ 'pretranslate_100' ];
         $this->dqf_key                 = $__postInput[ 'dqf_key' ];
-        
+
         $this->__setMetadataFromPostInput( $__postInput ) ;
 
         if ( $this->disable_tms_engine_flag ) {
@@ -280,12 +280,13 @@ class createProjectController extends ajaxController {
         \Log::doLog( '------------------------------'); 
         \Log::doLog( $arFiles ); 
 
+        FilesStorage::moveFileFromUploadSessionToQueuePath( $_COOKIE[ 'upload_session' ] );
+
         $projectManager = new ProjectManager();
 
         $projectStructure = $projectManager->getProjectStructure();
 
         $projectStructure[ 'project_name' ]         = $this->project_name;
-        $projectStructure[ 'result' ]               = $this->result;
         $projectStructure[ 'private_tm_key' ]       = $this->private_tm_key;
         $projectStructure[ 'private_tm_user' ]      = $this->private_tm_user;
         $projectStructure[ 'private_tm_pass' ]      = $this->private_tm_pass;
@@ -301,6 +302,8 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'skip_lang_validation' ] = true;
         $projectStructure[ 'pretranslate_100' ]     = $this->pretranslate_100;
 
+        $projectStructure[ 'user_ip' ]              = Utils::getRealIpAddr();
+
         //TODO enable from CONFIG
         $projectStructure[ 'metadata' ]             = $this->metadata;
 
@@ -315,14 +318,17 @@ class createProjectController extends ajaxController {
             $projectStructure[ 'owner' ]        = $this->userMail ;
         }
 
-        $projectManager = new ProjectManager( $projectStructure );
-        $projectManager->createProject();
-
-        // Strictly related to the UI ( not API ) interaction, should yet be moved away from controller.
+        $projectEnqueue = new AMQHandler();
+        $projectEnqueue->send( 'project_queue', json_encode( $projectStructure ), array( 'persistent' => WorkerClient::$_HANDLER->persistent ) );
         $this->__clearSessionFiles();
         $this->__assignLastCreatedPid( $projectStructure['id_project'] ) ;
+        die();
+//        $projectManager = new ProjectManager( $projectStructure );
+//        $projectManager->createProject();
 
-        $this->result = $projectStructure[ 'result' ];
+        // Strictly related to the UI ( not API ) interaction, should yet be moved away from controller.
+
+//        $this->result = $projectStructure[ 'result' ];
 
     }
 
@@ -391,7 +397,7 @@ class createProjectController extends ajaxController {
     private function __clearSessionFiles() {
 
         if ( $this->userIsLogged ) {
-            $gdriveSession = new GDrive\Session( $_SESSION ) ;
+            $gdriveSession = new GDrive\Session() ;
             $gdriveSession->clearFiles() ;
         }
     }

@@ -596,7 +596,6 @@ class NewController extends ajaxController {
         $projectStructure[ 'project_name' ] = $this->project_name;
         $projectStructure[ 'job_subject' ]  = $this->subject;
 
-        $projectStructure[ 'result' ]               = $this->result;
         $projectStructure[ 'private_tm_key' ]       = $this->private_tm_key;
         $projectStructure[ 'private_tm_user' ]      = $this->private_tm_user;
         $projectStructure[ 'private_tm_pass' ]      = $this->private_tm_pass;
@@ -612,6 +611,8 @@ class NewController extends ajaxController {
         $projectStructure[ 'metadata' ]             = $this->metadata ;
         $projectStructure[ 'pretranslate_100']      = $this->pretranslate_100 ;
 
+        $projectStructure[ 'user_ip' ]              = Utils::getRealIpAddr();
+
         if ( $this->current_user ) {
             $projectStructure[ 'owner' ]       = $this->current_user->getEmail();
             $projectStructure[ 'id_customer' ] = $this->current_user->getEmail();
@@ -620,6 +621,12 @@ class NewController extends ajaxController {
         $projectManager = new ProjectManager( $projectStructure );
         
         $projectManager->sanitizeProjectOptions = false ; 
+
+        FilesStorage::moveFileFromUploadSessionToQueuePath( $uploadFile->getDirUploadToken() );
+
+        $projectEnqueue = new AMQHandler();
+        $projectEnqueue->send( 'project_queue', json_encode( $projectManager->getProjectStructure() ), array( 'persistent' => WorkerClient::$_HANDLER->persistent ) );
+        die();
 
         $projectManager->createProject();
 
