@@ -2285,6 +2285,22 @@ input.email-export-tmx {
     text-decoration: none;
     line-height: 29px;
 }
+
+.btn-orange-medium {
+    background: #f26522;
+    width: 35px;
+    height: 35px;
+    border: 1px solid #848689;
+    border-radius: 2px;
+    color: white;
+    text-align: center;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    line-height: 35px;
+}
+
+.btn-orange-medium:hover,
 .btn-orange-small:hover {
     background: #d1581c;
     cursor: pointer;
@@ -2292,10 +2308,14 @@ input.email-export-tmx {
     box-shadow: 0 1px 2px #ccc;
     border: 1px solid #000;
 }
+
+.btn-orange-medium .text:before,
 .btn-orange-small .text:before {
     content: "\f00d";
     vertical-align: text-top;
 }
+
+.btn-orange-medium .text,
 .btn-orange-small .text {
     color: #fff;
 }
@@ -2377,7 +2397,6 @@ input.email-export-tmx {
     background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
     background: -moz-linear-gradient(top, #09beec, #119ec4);
     background: linear-gradient(top, #09beec, #119ec4);
-    margin: 10px 10px;
     display: inline-block;
     text-align: center;
     position: relative;
@@ -2560,7 +2579,7 @@ margin: 10px 0;
 margin: 0 0 5px;
 clear: both;
 text-align: left;
-line-height: 30px;
+line-height: 35px;
 }
 
 p.required {
@@ -3552,6 +3571,7 @@ color: #000;
 #logoutlink:before,
 .btn-confirm-small .text:before,
 .btn-orange-small .text:before,
+.btn-orange-medium .text:before,
 [class^="icon-"], [class*=" icon-"],
 .sorting_desc:after,
 .sorting_asc:after,

@@ -71,6 +71,10 @@ class RemoteFileService extends AbstractRemoteFileService
         }
     }
 
+    public function getFile( $remote_id ){
+        return $this->gdriveService->files->get( $remote_id );
+    }
+
     /**
      * __checkTokenExpired
      */
