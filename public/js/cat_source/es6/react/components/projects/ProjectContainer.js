@@ -176,28 +176,28 @@ class ProjectContainer extends React.Component {
             <div className="scrolling menu">
                 <a className="item" href={activityLogUrl} target="_blank"><i className="icon-download-logs icon"/>Activity Log</a>
 
-                <a className="item" onClick={this.archiveProject.bind(this)}><span><i className="icon-drawer icon"/>Archive project</span></a>
+                <a className="item" onClick={this.archiveProject.bind(this)}><i className="icon-drawer icon"/>Archive project</a>
 
-                <a className="item" onClick={this.removeProject.bind(this)}><span><i className="icon-trash-o icon"/>Cancel project</span></a>
+                <a className="item" onClick={this.removeProject.bind(this)}><i className="icon-trash-o icon"/>Cancel project</a>
             </div>
                         </div>;
         if ( this.props.project.get('has_archived') ) {
             menuHtml = <div className="menu">
                 <div className="scrolling menu">
-                    <a className="item" href={activityLogUrl} target="_blank"><span><i className="icon-download-logs icon"/>Activity Log</span></a>
+                    <a className="item" href={activityLogUrl} target="_blank"><i className="icon-download-logs icon"/>Activity Log</a>
 
-                    <a className="item" onClick={this.activateProject.bind(this)}><span><i className="icon-drawer unarchive-project icon"/>Unarchive project</span></a>
+                    <a className="item" onClick={this.activateProject.bind(this)}><i className="icon-drawer unarchive-project icon"/>Unarchive project</a>
 
-                    <a className="item" onClick={this.removeProject.bind(this)}><span><i className="icon-trash-o"/>Cancel project</span></a>
+                    <a className="item" onClick={this.removeProject.bind(this)}><i className="icon-trash-o"/>Cancel project</a>
                 </div>
                         </div>;
         } else if ( this.props.project.get('has_cancelled') ) {
             menuHtml = <div className="menu">
 
                 <div className="scrolling menu">
-                    <a className="item" href={activityLogUrl} target="_blank"><span><i className="icon-download-logs icon"/> Activity Log</span></a>
+                    <a className="item" href={activityLogUrl} target="_blank"><i className="icon-download-logs icon"/> Activity Log</a>
 
-                    <a className="item" onClick={this.activateProject.bind(this)}><span><i className="icon-drawer unarchive-project icon"/> Resume Project</span></a>
+                    <a className="item" onClick={this.activateProject.bind(this)}><i className="icon-drawer unarchive-project icon"/> Resume Project</a>
                 </div>
                         </div>;
         }
