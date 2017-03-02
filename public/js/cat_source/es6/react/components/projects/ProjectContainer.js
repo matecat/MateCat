@@ -566,8 +566,8 @@ class ProjectContainer extends React.Component {
                                                                        onClick={this.inputNameClick.bind(this)}
                                                                        onBlur={this.inputNameOnBlur.bind(this)}
                                                                        ref={(inputName) => this.inputName = inputName}
-                                                                        defaultValue={this.state.projectName}/>
-                                                                {inputIcon}
+                                                                        defaultValue={this.state.projectName} disabled/>
+                                                                {/*{inputIcon}*/}
                                                             </div>
                                                         </div>
                                                     </div>

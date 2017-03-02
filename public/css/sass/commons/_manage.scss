@@ -47,6 +47,9 @@ body.manage {
             .project-id {
                 padding: 10px 0 10px 15px;
             }
+            .ui.form .field :disabled {
+                opacity: 1 !important;
+            }
             .project-name {
                 .ui.icon.input {
                     transition: 0.3s ease !important;
