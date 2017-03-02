@@ -1535,7 +1535,8 @@ class ProjectManager {
                                     $src = trim( strip_tags( html_entity_decode( $extract_external[ 'seg' ], ENT_QUOTES, 'UTF-8' ) ) );
                                     $trg = trim( strip_tags( html_entity_decode( $target_extract_external[ 'seg' ], ENT_QUOTES, 'UTF-8' ) ) );
 
-                                    if ( $src != $trg && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
+
+                                    if ( $this->__isTranslated( $src, $trg ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
 
                                         $target_extract_external[ 'seg' ] = CatUtils::raw2DatabaseXliff( $target_extract_external[ 'seg' ] );
                                         $target                           = $this->dbHandler->escape( $target_extract_external[ 'seg' ] );
@@ -1618,7 +1619,7 @@ class ProjectManager {
 
                                 $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'target' ][ 'raw-content' ] );
 
-                                if ( $xliff_trans_unit[ 'source' ][ 'raw-content' ] != $target_extract_external[ 'seg' ] ) {
+                                if ( $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ] ) ) {
 
                                     $target = CatUtils::raw2DatabaseXliff( $target_extract_external[ 'seg' ] );
                                     $target = $this->dbHandler->escape( $target );
@@ -2413,6 +2414,30 @@ class ProjectManager {
 
         if ( count( $this->projectStructure[ 'private_tm_key' ] ) > 0 ) {
             $this->tmxServiceWrapper->setTmKey( $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ] );
+        }
+    }
+
+    /**
+     * Decide if the pair source and target should be considered translated.
+     * If the strings are different, it's always considered translated.
+     *
+     * If they  are identical, let plugins decide how to treat the case.
+     *
+     * @param $source
+     * @param $target
+     *
+     * @return bool|mixed
+     */
+    private function __isTranslated( $source, $target ) {
+        if ( $source != $target ) {
+            return true ;
+        }
+        else {
+            // evaluate if identical source and target should be considered non translated
+            $identicalSourceAndTargetIsTranslated = false;
+            $identicalSourceAndTargetIsTranslated = $this->features->filter('filterIdenticalSourceAndTargetIsTranslated', $identicalSourceAndTargetIsTranslated );
+
+            return $identicalSourceAndTargetIsTranslated ;
         }
     }
 
