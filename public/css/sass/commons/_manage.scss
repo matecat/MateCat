@@ -112,9 +112,10 @@ body.manage {
                     }
                     &.project-assignee {
                         margin-right: 8px;
-                        background-color: #10ccce !important;
+                        background-color: #59467a !important;
                         &:hover {
-                            background-color: #14bbbd !important;
+                            background-color: #67528c !important;
+                            padding-right: 5px;
                         }
                         .text {
                             border-radius: 15px;
@@ -178,7 +179,7 @@ body.manage {
                     &.project-workspace {
                         .ui.cancel.label {
                             padding: 4px;
-                            background-color: rgba(76, 76, 76, 0.21);
+                            background-color: rgba(255, 255, 255, 0.10);
                             margin: 0px;
                             border-radius: 15px;
                             position: absolute;
@@ -188,9 +189,10 @@ body.manage {
                             visibility: hidden;
                             i {
                                 font-size: 15px;
+                                color: rgba(255, 255, 255, 0.39);
                             }
                             &:hover {
-                                background-color: rgba(115, 115, 115, 0.44);
+                                background-color: rgba(255, 255, 255, 0.18);
                             }
                         }
 
@@ -210,12 +212,12 @@ body.manage {
                         font-size: 12px;
                         font-weight: 100;
                         position: relative;
-                        background-color: #fbd300;
+                        background-color: #c55938;
                         color: white;
                         cursor: pointer;
                         &:hover {
-                            padding-right: 33px !important;
-                            background-color: #f3cb00;
+                            padding-right: 35px !important;
+                            background-color: #d66340;
                         }
                     }
                     &.no-workspace {
@@ -303,6 +305,12 @@ body.manage {
                                 padding: 5px 0 !important;
                             }
                             .job-activity-icon {
+                                .ui.button {
+                                    margin-right: 8px;
+                                }
+                                .job-menu {
+                                    margin-right: 0px !important;
+                                }
                                 .open-translate {
                                     font-family: Calibri;
                                     padding: 6px 15px;
@@ -432,7 +440,6 @@ footer nav {
     display: block;
     line-height: 19px;
     box-shadow: none;
-    width: 165px;
     text-align: right;
 }
 
@@ -447,7 +454,7 @@ footer nav, footer nav a {
 
 
 footer nav ul li {
-    padding:5px;
+    padding:7px 5px 5px 5px;
 }
 
 footer nav ul a, #welcomebox {

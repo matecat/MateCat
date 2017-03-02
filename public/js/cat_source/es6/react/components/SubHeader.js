@@ -223,21 +223,11 @@ class SubHeader extends React.Component {
                             </a>
                         </div>
                         <div className="divider"></div>
-                        {/*<div className="header">
-                         <div className="ui form">
-                         <div className="field">
-                         <input type="text" name="Project Name" placeholder="Translated Organization es." />
-                         </div>
-                         </div>
-                         </div>
-                         <div className="divider"></div>*/}
-                        <div className="scrolling menu">
-                            <div className="item" data-value='-1'
-                                 data-text='All Projects' key={'organization-all'}>
-                                All
-                            </div>
-                            {items}
+                        <div className="item" data-value='-1'
+                             data-text='All Projects' key={'organization-all'}>
+                            All
                         </div>
+                        {items}
                     </div>
                 </div>
             </div>;

@@ -112,13 +112,42 @@ header {
             transition: 0.3s ease;
             cursor: pointer;
         }
-        .btn-confirm-medium.sing-in-header {
-            &:hover {
-                -webkit-box-shadow: none;
-                box-shadow: none;
-            }
-            margin-top: 0;
+        .ui.user-nolog.label {
+            -webkit-box-align: center;
+            -webkit-align-items: center;
+            -ms-flex-align: center;
+            align-items: center;
+            background: center/cover transparent;
+            border-radius: 50%;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+            color: #fff;
+            display: -webkit-inline-box;
+            display: -webkit-inline-flex;
+            display: -ms-inline-flexbox;
+            display: inline-flex;
+            -webkit-box-pack: center;
+            -webkit-justify-content: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+            position: relative;
+            vertical-align: top;
             float: right;
+            font-size: 14px;
+            height: 36px;
+            width: 36px;
+            margin-left: 10px;
+            text-decoration: none;
+            cursor: pointer;
+            border: 1px dashed;
+            //margin-top: 0;
+            //float: right;
+            &:hover {
+                border: 1px dashed #00A8D2;
+                i {
+                    color: #00A8D2;
+                }
+            }
         }
 
         .dropdown.select-org {

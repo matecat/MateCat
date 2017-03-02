@@ -101,8 +101,10 @@ class Header extends React.Component {
             return <div className="ui user label"
                         onClick={this.openPreferencesModal.bind(this)}>{config.userShortName}</div>
         } else {
-            return <div className="btn-confirm-medium sing-in-header"
-                        onClick={this.openLoginModal.bind(this)}>Sign in</div>
+            return <div className="ui user-nolog label" onClick={this.openLoginModal.bind(this)}>
+	            <i className="icon-user22"></i>
+                    </div>
+
         }
     }
 
