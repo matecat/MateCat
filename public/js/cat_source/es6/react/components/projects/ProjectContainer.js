@@ -94,6 +94,7 @@ class ProjectContainer extends React.Component {
         if (value === '-1') {
             user = -1;
             idUser = -1;
+            $(this.dropdownUsers).dropdown('hide');
         } else {
             let newUser = this.props.organization.get('members').find(function (member) {
                 let user = member.get('user');
@@ -114,6 +115,7 @@ class ProjectContainer extends React.Component {
         if (value === '-1') {
             ws = -1;
             idWS = -1;
+            $(this.dropdownWorkspace).dropdown('hide');
         } else {
             let selectedWS = this.props.organization.get('workspaces').find(function (ws) {
                 return ws.get('id') === parseInt(value);
@@ -307,7 +309,7 @@ class ProjectContainer extends React.Component {
                             <div className="job-header sixteen wide column shadow-1">
 
                                 <div className="ui grid">
-                                    <div className="nine wide column">
+                                    <div className="three wide column">
                                         <div className="source-target">
                                             <div className="source-box">
                                                 {job.get('sourceTxt')}
@@ -318,7 +320,12 @@ class ProjectContainer extends React.Component {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="seven wide column right aligned">
+                                    <div className="three wide computer six wide tablet column">
+                                        <div className="creation-date">
+                                            <span>Created: {job.get('formatted_create_date')}</span>
+                                        </div>
+                                    </div>
+                                    <div className="ten wide column right aligned">
                                         <div className="split-merge">
                                             {button}
                                         </div>
@@ -353,7 +360,7 @@ class ProjectContainer extends React.Component {
                return <div className="item " data-value={user.get('uid')}
                            key={'user' + user.get('uid')}>
                    <div className="ui circular label">{APP.getUserShortName(user.toJS())}</div>
-                   {(user.get('uid') === APP.USER.STORE.user.uid) ? 'To me' : user.get('first_name') + " " + user.get('last_name')}
+                   {user.get('first_name') + " " + user.get('last_name')}
                </div>
            });
 

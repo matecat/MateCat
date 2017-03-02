@@ -269,6 +269,9 @@ body.manage {
                             float: left;
                         }
                     }
+                    .creation-date{
+                        padding: 15px 15px !important;
+                    }
                     .split-merge {
                         padding: 10px 15px;
                         .merge {
@@ -292,8 +295,7 @@ body.manage {
                             .progress-bar {
 
                             }
-                            .job-payable,
-                            .creation-date{
+                            .job-payable{
                                 padding: 5px 15px !important;
                             }
                             .send-translator.open {

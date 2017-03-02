@@ -143,7 +143,7 @@ class SubHeader extends React.Component {
                 <div className="item" data-value={member.get('user').get('uid')}
                      key={'user' + member.get('user').get('uid')}>
                     <a className="ui circular label">{APP.getUserShortName(member.get('user').toJS())}</a>
-                    {(member.get('user').get('uid') === APP.USER.STORE.user.uid)? 'My Projects' : member.get('user').get('first_name') + ' ' + member.get('user').get('last_name')}
+                    {member.get('user').get('first_name') + ' ' + member.get('user').get('last_name')}
                 </div>
 
             ));
@@ -233,7 +233,7 @@ class SubHeader extends React.Component {
                          <div className="divider"></div>*/}
                         <div className="scrolling menu">
                             <div className="item" data-value='-1'
-                                 data-text='All Projects' key={'organization-all'}>
+                                 data-text='All' key={'organization-all'}>
                                 All
                             </div>
                             {items}
