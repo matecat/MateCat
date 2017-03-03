@@ -403,6 +403,11 @@ class JobContainer extends React.Component {
                             <div className="ui mobile reversed stackable grid">
                                 <div className="twelve wide computer only eleven wide tablet only column">
                                     <div className="ui grid">
+                                        <div className="five wide computer six wide tablet column">
+                                            <div className="creation-date">
+                                                <span>Created: {this.props.job.get('formatted_create_date')}</span>
+                                            </div>
+                                        </div>
                                         <div className="three wide computer six wide tablet column">
                                             <div className="progress-bar">
                                                 <div className="progr">

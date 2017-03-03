@@ -320,11 +320,11 @@ class ProjectContainer extends React.Component {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="three wide computer six wide tablet column">
-                                        <div className="creation-date">
-                                            <span>Created: {job.get('formatted_create_date')}</span>
-                                        </div>
-                                    </div>
+                                    {/*<div className="three wide computer six wide tablet column">*/}
+                                        {/*<div className="creation-date">*/}
+                                            {/*<span>Created: {job.get('formatted_create_date')}</span>*/}
+                                        {/*</div>*/}
+                                    {/*</div>*/}
                                     <div className="ten wide column right aligned">
                                         <div className="split-merge">
                                             {button}
