@@ -239,7 +239,7 @@ class ProjectManager {
         }
 
         $this->project = insertProject( $this->projectStructure );
-        $this->projectStructure[ 'id_project' ] = $this->project->id;
+        $this->projectStructure[ 'id_project' ] = $this->project->id; //redundant
     }
 
 

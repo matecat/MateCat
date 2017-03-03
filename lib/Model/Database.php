@@ -30,8 +30,10 @@ class Database implements IDatabase {
 
 
     const SEQ_ID_SEGMENT = 'id_segment';
+    const SEQ_ID_PROJECT = 'id_project';
     protected static $SEQUENCES = [
-            Database::SEQ_ID_SEGMENT
+            Database::SEQ_ID_SEGMENT,
+            Database::SEQ_ID_PROJECT
     ];
 
     /**

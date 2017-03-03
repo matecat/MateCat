@@ -1,5 +1,7 @@
 <?php
 
+use ProjectQueue\Queue;
+
 set_time_limit( 180 );
 
 /**
@@ -624,13 +626,15 @@ class NewController extends ajaxController {
 
         FilesStorage::moveFileFromUploadSessionToQueuePath( $uploadFile->getDirUploadToken() );
 
-        $projectEnqueue = new AMQHandler();
-        $projectEnqueue->send( 'project_queue', json_encode( $projectManager->getProjectStructure() ), array( 'persistent' => WorkerClient::$_HANDLER->persistent ) );
-        die();
+        //reserve a project id from the sequence
+        $projectStructure[ 'id_project' ] = Database::obtain()->nextSequence( Database::SEQ_ID_PROJECT )[ 0 ];
 
-        $projectManager->createProject();
+        Queue::sendProject( $projectStructure );
 
-        $this->result = $projectStructure[ 'result' ];
+        $time = time();
+        do {
+            $this->result = Queue::getPublishedResults( $projectStructure['id_project'] ); //LOOP for 180 seconds **** UGLY **** Deprecate in API V2
+        } while( time() - $time <= 180 || $this->result == null );
 
         if ( !empty( $projectStructure[ 'result' ][ 'errors' ] ) ) {
             //errors already logged

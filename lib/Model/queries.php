@@ -1541,6 +1541,7 @@ function fetchStatus( $sid, $results, $status = Constants_TranslationStatus::STA
 //function insertProject( $id_customer, $project_name, $analysis_status, $password, $ip = 'UNKNOWN' ) {
 function insertProject( ArrayObject $projectStructure ) {
     $data                        = array();
+    $data[ 'id' ]                = $projectStructure[ 'id_project' ];
     $data[ 'id_customer' ]       = $projectStructure[ 'id_customer' ];
     $data[ 'id_organization' ]   = $projectStructure[ 'id_team' ];
     $data[ 'name' ]              = $projectStructure[ 'project_name' ];
