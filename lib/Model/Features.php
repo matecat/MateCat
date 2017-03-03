@@ -16,7 +16,7 @@ class Features {
     const REVIEW_IMPROVED      = 'review_improved';
     const QACHECK_GLOSSARY     = 'qa_check_glossary';
     const QACHECK_BLACKLIST    = 'qa_check_blacklist';
-    const DQF                  = 'dqf';
+    const DQF                  = \Features\Dqf::FEATURE_CODE  ;
 
     public static $VALID_CODES = array(
         Features::PROJECT_COMPLETION,

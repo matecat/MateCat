@@ -45,6 +45,7 @@ class ProjectCreationTest extends IntegrationTest  {
                 'job_subject' => 'general',
                 'file_name' => 'amex-test.docx.xlf',
                 'upload_session' => $upload_session,
+                'dqf' => 1,
                 'files' => array( $file ),
                 'cookies' => [
                         [ \INIT::$AUTHCOOKIENAME, $auth_cookie ]
@@ -57,11 +58,9 @@ class ProjectCreationTest extends IntegrationTest  {
 
         $this->assertEquals( $this->test_data->user->email, $project->id_customer ) ;
 
-        // TODO: check DQF and review improved and all required features are enabled
-
-
+        $this->assertEquals(0, count( array_diff(
+                array(Features::DQF, Features::PROJECT_COMPLETION, Features::REVIEW_IMPROVED, Features::TRANSLATION_VERSIONS),
+                $project->getFeatures()->getCodes()
+            ) ) ) ;
     }
-
-
-
 }

@@ -195,12 +195,13 @@ APP.getCreateProjectParams = function() {
 		private_keys_list			: UI.extractTMdataFromTable(),
 		lang_detect_files  			: UI.skipLangDetectArr,
 		pretranslate_100    		: ($("#pretranslate100" ).is(':checked')) ? 1 : 0,
-		dqf_key             		: ($('#dqf_key' ).length == 1) ? $('#dqf_key' ).val() : null,
 		lexiqa				        : !!( $("#lexi_qa").prop("checked") && !$("#lexi_qa").prop("disabled") ),
 		speech2text         		: !!( $("#s2t_check").prop("checked") && !$("#s2t_check").prop("disabled") ),
 		tag_projection			    : !!( $("#tagp_check").prop("checked") && !$("#tagp_check").prop("disabled") ),
 		segmentation_rule			: $( '#segm_rule' ).val(),
-        id_team             : UI.UPLOAD_PAGE.getSelectedTeam()
+        id_team                     : UI.UPLOAD_PAGE.getSelectedTeam(),
+        dqf                         : $( '#dqf_switch').val()
+
 	} ;
 };
 
@@ -239,6 +240,11 @@ APP.checkForSpeechToText = function(){
 	$('.options-box #s2t_check').attr('checked', !disableS2T);
 };
 
+APP.checkForDqf = function() {
+    $('#dqf_switch').prop("disabled", false);
+    $('#dqf_switch').attr("checked", false);
+};
+
 UI.UPLOAD_PAGE = {};
 
 $.extend(UI.UPLOAD_PAGE, {
@@ -257,6 +263,7 @@ $.extend(UI.UPLOAD_PAGE, {
          * SpeechToText language Enable/Disable
          */
         APP.checkForSpeechToText();
+        APP.checkForDqf();
         this.render();
         this.addEvents();
         $("#activetm").on("update", this.checkTmKeys);

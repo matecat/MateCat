@@ -120,7 +120,6 @@ class ProjectManager {
                             'uid'                  => null,
                             'skip_lang_validation' => false,
                             'pretranslate_100'     => 0,
-                            'dqf_key'              => null,
                             'owner'                => '',
                             'word_count_type'      => '',
                             'metadata'             => [],
@@ -241,18 +240,22 @@ class ProjectManager {
      * 
      */
     private function saveMetadata() {
-        $dao = new Projects_MetadataDao();
-        $dao->set( $this->projectStructure['id_project'], Projects_MetadataDao::FEATURES_KEY,  implode(',', $this->features->getCodes() ) ) ;
-
+        /// TODO: before this is processed we need to add dependencies of features for the project, for instance
+        /// we must set review_improved in case DQF is enabled and active for the current project.
         $options = $this->projectStructure['metadata'];
-        
+
+        $this->features->loadProjectDependenciesFromProjectMetadata( $options ) ;
+
         if ( $this->projectStructure[ 'sanitize_project_options' ] ) {
-            $options = $this->sanitizeProjectOptions( $options ) ; 
+            $options = $this->sanitizeProjectOptions( $options ) ;
         }
 
         if ( empty( $options ) ) {
             return ;
         }
+
+        $dao = new Projects_MetadataDao();
+        $dao->set( $this->projectStructure['id_project'], Projects_MetadataDao::FEATURES_KEY,  implode(',', $this->features->getCodes() ) ) ;
 
         foreach( $options as $key => $value ) {
             $dao->set(
@@ -691,47 +694,8 @@ class ProjectManager {
 
         $this->pushActivityLog();
 
-        //create Project into DQF queue
-        if ( INIT::$DQF_ENABLED && !empty( $this->projectStructure[ 'dqf_key' ] ) ) {
-
-            $dqfProjectStruct                  = DQF_DqfProjectStruct::getStruct();
-            $dqfProjectStruct->api_key         = $this->projectStructure[ 'dqf_key' ];
-            $dqfProjectStruct->project_id      = $this->projectStructure[ 'id_project' ];
-            $dqfProjectStruct->name            = $this->projectStructure[ 'project_name' ];
-            $dqfProjectStruct->source_language = $this->projectStructure[ 'source_language' ];
-
-            $dqfQueue = new DqfQueueHandler();
-
-            try {
-
-                $projectManagerInfo = $dqfQueue->checkProjectManagerKey( $this->projectStructure[ 'dqf_key' ] );
-
-                $dqfQueue->createProject( $dqfProjectStruct );
-
-                //for each job, push a task into AMQ's DQF queue
-                foreach ( $this->projectStructure[ 'array_jobs' ][ 'job_list' ] as $i => $jobID ) {
-                    /**
-                     * @var $dqfTaskStruct DQF_DqfTaskStruct
-                     */
-                    $dqfTaskStruct                  = DQF_DqfTaskStruct::getStruct();
-                    $dqfTaskStruct->api_key         = $this->projectStructure[ 'dqf_key' ];
-                    $dqfTaskStruct->project_id      = $this->projectStructure[ 'id_project' ];
-                    $dqfTaskStruct->task_id         = $jobID;
-                    $dqfTaskStruct->target_language = $this->projectStructure[ 'target_language' ][ $i ];
-                    $dqfTaskStruct->file_name       = uniqid( '', true ) . $this->projectStructure[ 'project_name' ];
-
-                    $dqfQueue->createTask( $dqfTaskStruct );
-
-                }
-            } catch ( Exception $exn ) {
-                $output = __METHOD__ . " (code " . $exn->getCode() . " ) - " . $exn->getMessage();
-                Log::doLog( $output );
-
-                Utils::sendErrMailReport( $output, $exn->getMessage() );
-            }
-        }
-        
         Database::obtain()->begin();
+
         $this->features->run('postProjectCreate',
             $this->projectStructure
         );

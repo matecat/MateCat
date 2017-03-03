@@ -58,7 +58,15 @@ abstract class BaseFeature {
     }
 
     /**
-     * @return mixed
+     * These are the other features this feature relies on application wide.
+     * @return array
      */
     abstract function getDependencies() ;
+
+
+    /**
+     * These are the features this feature relies on when it is active for a given project.
+     * @return array
+     */
+    // abstract function getProjectDependencies() ;
 }

@@ -10,8 +10,7 @@ if ( true )
             var lexiqaCheck = $('.qa-box #lexi_qa');
             var speech2textCheck = $('.s2t-box #s2t_check');
             var tagProjectionCheck = $('.tagp #tagp_check');
-
-
+            var dqfCheck = $('.dqf-box #dqf_switch');
 
             $('.mgmt-table-options .options-box.dqf_options_box').hide();
             $('.mgmt-table-options .options-box.seg_rule select#segm_rule').val(config.segmentation_rule).attr("disabled", true);
@@ -86,6 +85,16 @@ if ( true )
                 speech2textCheck.on('change', this.toggleSpeech2TextOption.bind(this));
                 (Speech2Text.enabled()) ? speech2textCheck.attr('checked', true) : speech2textCheck.attr('checked', false);
             }
+
+            // Check DQF
+            if ( UI.checkDqfCanActivate() ) {
+                (UI.checkDqfIsActive()) ? dqfCheck.attr('checked', true) : dqfCheck.attr('checked', false);
+                dqfCheck.on('change', this.toggleDqf.bind(this));
+                dqfCheck.addClass('option-unavailable');
+            }
+            else {
+
+            }
         },
 
         toggleLexiqaOption: function () {
@@ -101,8 +110,18 @@ if ( true )
         toggleTagProjectionOption: function () {
             var selected = $('.tagp #tagp_check').is(':checked');
             (selected) ? UI.enableTagProjectionInJob() : UI.disableTagProjectionInJob();
+        },
+
+        toggleDqfOption: function() {
+            // TODO
+        },
+        checkDqfCanActivate : function() {
+            return true ;
+        },
+        checkDqfIsActive : function() {
+            return true ;
         }
 
     });
-    
+
 })(jQuery, UI ); 

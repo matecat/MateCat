@@ -145,9 +145,9 @@ class ReviewImproved extends BaseFeature {
     public function postProjectCreate($projectStructure) {
         \Log::doLog( $this->feature );
 
-        $this->feature_options = json_decode( $this->feature->options );
+        $this->feature_options = $this->feature->getOptions() ;
 
-        if ( property_exists($this->feature_options, 'id_qa_model' ) ) {
+        if ( isset( $this->feature_options['id_qa_model']) ) {
             $this->setQaModelFromFeatureOptions($projectStructure);
         }
         else {
@@ -220,12 +220,13 @@ class ReviewImproved extends BaseFeature {
      * Entry point for project data validation for this feature.
      */
     public function validateProjectCreation($projectStructure)  {
-        $this->feature_options = json_decode( $this->feature->options );
+        $this->feature_options = $this->feature->getOptions() ;
 
-        if ( property_exists($this->feature_options, 'id_qa_model' ) ) {
-            // pass
+        if ( isset( $this->feature_options['id_qa_model'] ) ) {
+            // QA model was already provided referencing a pre-saved id
+            // TODO: ensure the record exists and it's valid
         } else {
-            $this->validateModeFromJsonFile($projectStructure);
+            self::loadAndValidateModelFromJsonFile($projectStructure);
         }
     }
 
@@ -332,7 +333,7 @@ class ReviewImproved extends BaseFeature {
         $project = \Projects_ProjectDao::findById( $projectStructure['id_project'] );
 
         $dao = new \Projects_ProjectDao( \Database::obtain() );
-        $dao->updateField( $project, 'id_qa_model', $this->feature_options->id_qa_model );
+        $dao->updateField( $project, 'id_qa_model', $this->feature_options['id_qa_model'] );
 
     }
 
@@ -344,7 +345,7 @@ class ReviewImproved extends BaseFeature {
      * If validation fails, adds errors to the projectStructure.
      */
 
-    private function validateModeFromJsonFile( $projectStructure ) {
+    public static function loadAndValidateModelFromJsonFile( $projectStructure ) {
         // detect if the project created was a zip file, in which case try to detect 
         // id_qa_model from json file. 
         // otherwise assign the default model 

@@ -16,13 +16,12 @@ class FeatureSet {
      */
     public function __construct( array $features = array() ) {
         $this->features = $features;
-        $this->loadFromMandatory();
+
+        $this->__loadFromMandatory();
     }
 
     public function getCodes() {
-        return array_map( function( $feature ) {
-            return $feature->feature_code ;
-        }, $this->features);
+        return array_values( array_map( function( $feature ) { return $feature->feature_code ; }, $this->features) );
     }
 
     public function loadFromString( $string ) {
@@ -44,6 +43,16 @@ class FeatureSet {
      */
     public function loadForProject( Projects_ProjectStruct $project ) {
         $this->loadFromString( $project->getMetadataValue( Projects_MetadataDao::FEATURES_KEY ) );
+    }
+
+    public function loadProjectDependenciesFromProjectMetadata( $metadata ) {
+        $project_dependencies = [];
+        $project_dependencies = $this->filter('filterProjectDependencies', $project_dependencies, $metadata );
+        $features = [] ;
+        foreach( $project_dependencies as $dependency ) {
+            $features [] = new BasicFeatureStruct( array( 'feature_code' => $dependency ) );
+        }
+        $this->features = static::merge( $this->features, $features );
     }
 
     /**
@@ -85,9 +94,6 @@ class FeatureSet {
 
         foreach( $this->features as $feature ) {
             $name = "Features\\" . $feature->toClassName() ;
-            // XXX FIXME TODO: find a better way for this initialiation, $projectStructure is not defined
-            // here, so the feature initializer should not need the project strucutre at all.
-            // The `id_customer` should be enough. XXX
             if ( class_exists( $name ) ) {
                 $obj = new $name( $feature );
 
@@ -153,6 +159,15 @@ class FeatureSet {
         }
     }
 
+    /**
+     * Returns an array of feature object instances, merging two input array,
+     * ensuring no duplicates are present.
+     *
+     * @param $left
+     * @param $right
+     *
+     * @return array
+     */
     public static function merge( $left, $right ) {
         $returnable = array();
 
@@ -176,16 +191,16 @@ class FeatureSet {
     /**
      * Loads plugins into the featureset from the list of mandatory plugins.
      */
-    private function loadFromMandatory() {
+    private function __loadFromMandatory() {
         $features = [] ;
 
         if ( INIT::$DQF_ENABLED ) {
-            $features[] = new BasicFeatureStruct(array('feature_code' => Features::DQF ) );
+            $features[] = new BasicFeatureStruct(['feature_code' => Features::DQF ]) ;
         }
 
         if ( !empty( INIT::$MANDATORY_PLUGINS ) )  {
             foreach( INIT::$MANDATORY_PLUGINS as $plugin) {
-                $features[] = new BasicFeatureStruct(array('feature_code' => $plugin) );
+                $features[] = new BasicFeatureStruct(['feature_code' => $plugin ] );
             }
         }
 
@@ -199,16 +214,25 @@ class FeatureSet {
      * @param $feature
      * @param $args
      */
-    private function runOnFeature($method, BasicFeatureStruct $feature, $args)
-    {
-        $name = "Features\\" . $feature->toClassName();
+    private function runOnFeature($method, BasicFeatureStruct $feature, $args) {
+        $name = self::getClassName( $feature->feature_code );
 
-        if (class_exists($name)) {
+        if ( $name ) {
             $obj = new $name($feature);
 
             if (method_exists($obj, $method)) {
                 call_user_func_array(array($obj, $method), $args);
             }
+        }
+    }
+
+    public static function getClassName( $code ) {
+        $className = '\Features\\' . Utils::underscoreToCamelCase( $code );
+        if ( class_exists( $className ) ) {
+            return $className;
+        }
+        else {
+            return false ;
         }
     }
 
