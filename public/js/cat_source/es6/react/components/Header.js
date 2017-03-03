@@ -102,7 +102,7 @@ class Header extends React.Component {
                         onClick={this.openPreferencesModal.bind(this)}>{config.userShortName}</div>
         } else {
             return <div className="ui user-nolog label" onClick={this.openLoginModal.bind(this)}>
-	            <i className="icon-user22"></i>
+	                    <i className="icon-user22"/>
                     </div>
 
         }
