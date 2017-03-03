@@ -80,9 +80,6 @@ header {
             //color: white;
         }
         .ui.user.label {
-            &:hover {
-                border: 3px solid #02ceff;
-            }
             -webkit-box-align: center;
             -webkit-align-items: center;
             -ms-flex-align: center;
@@ -108,17 +105,51 @@ header {
             height: 36px;
             width: 36px;
             margin-left: 10px;
+            margin-right: 51px;
             text-decoration: none;
             transition: 0.3s ease;
             cursor: pointer;
-        }
-        .btn-confirm-medium.sing-in-header {
             &:hover {
-                -webkit-box-shadow: none;
-                box-shadow: none;
+                border: 3px solid #02ceff;
             }
-            margin-top: 0;
+        }
+        .ui.user-nolog.label {
+            -webkit-box-align: center;
+            -webkit-align-items: center;
+            -ms-flex-align: center;
+            align-items: center;
+            background: center/cover transparent;
+            border-radius: 50%;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+            color: #fff;
+            display: -webkit-inline-box;
+            display: -webkit-inline-flex;
+            display: -ms-inline-flexbox;
+            display: inline-flex;
+            -webkit-box-pack: center;
+            -webkit-justify-content: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+            position: relative;
+            vertical-align: top;
             float: right;
+            font-size: 14px;
+            height: 36px;
+            width: 36px;
+            margin-left: 10px;
+            margin-right: 51px;
+            text-decoration: none;
+            cursor: pointer;
+            border: 1px dashed;
+            //margin-top: 0;
+            //float: right;
+            &:hover {
+                border: 1px dashed #09beec !important;
+                i {
+                    color: #09beec;
+                }
+            }
         }
 
         .dropdown.select-org {
@@ -130,11 +161,13 @@ header {
             }
             span.text {
                 text-align: right;
-                transition: 0.3s ease;
                 line-height: 35px;
+                text-decoration: underline;
             }
             &:hover span.text {
                 color: #02ceff;
+                text-decoration: none;
+                transition: 0.3s ease;
             }
         }
 

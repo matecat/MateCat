@@ -166,16 +166,19 @@ class JobContainer extends React.Component {
     getDownloadLabel() {
         let jobStatus = this.getTranslationStatus();
         let remoteService = this.props.project.get('remote_file_service');
-        let label = <span ><i className="icon-eye icon"/>Preview</span>;
+        let label = <a className="item" onClick={this.downloadTranslation}
+                       ref={(downloadMenu) => this.downloadMenu = downloadMenu}><i className="icon-eye icon"></i> Preview</a>;
         if ((jobStatus == 'translated' || jobStatus == 'approved') && (!remoteService)) {
-            label = <span><i className="icon-download icon"/>Download Translation</span>;
+            label = <a className="item" onClick={this.downloadTranslation}
+                       ref={(downloadMenu) => this.downloadMenu = downloadMenu}><i className="icon-download icon"/> Download Translation</a>;
         } else if ((jobStatus == 'translated' || jobStatus == 'approved') && (remoteService == 'gdrive')) {
-            label = <span><i className="icon-download icon"/>Open in Google Drive</span>;
+            label = <a className="item" onClick={this.downloadTranslation}
+                       ref={(downloadMenu) => this.downloadMenu = downloadMenu}><i className="icon-download icon"/> Open in Google Drive</a>;
         } else if (remoteService && (remoteService == 'gdrive')) {
-            label = <span ><i className="icon-eye icon"/>Preview in Google Drive</span>;
+            label = <a className="item" onClick={this.downloadTranslation}
+                       ref={(downloadMenu) => this.downloadMenu = downloadMenu}><i className="icon-eye icon"/> Preview in Google Drive</a>;
         }
-        return <a className="item" onClick={this.downloadTranslation}
-                  ref={(downloadMenu) => this.downloadMenu = downloadMenu}>{label}</a>
+        return label
     }
 
 
@@ -191,64 +194,64 @@ class JobContainer extends React.Component {
 
 
         let downloadButton = this.getDownloadLabel();
-        let splitButton = (!this.props.isChunk) ? <a className="item" target="_blank" href={splitUrl}><span><i className="icon-expand icon"/> Split</span></a> : '';
+        let splitButton = (!this.props.isChunk) ? <a className="item" target="_blank" href={splitUrl}><i className="icon-expand icon"/> Split</a> : '';
 
         let menuHtml = <div className="menu">
 
-                <div className="scrolling menu">
-                    <a className="item" onClick={this.changePassword.bind(this)}><span><i className="icon-refresh icon"/> Change Password</span></a>
+                {/*<div className="scrolling menu">*/}
+                    <a className="item" onClick={this.changePassword.bind(this)}><i className="icon-refresh icon"/> Change Password</a>
                         {splitButton}
-                    <a className="item" target="_blank" href={reviseUrl}><span><i className="icon-edit icon"/> Revise</span></a>
+                    <a className="item" target="_blank" href={reviseUrl}><i className="icon-edit icon"/> Revise</a>
                     <div className="divider"/>
-                    <a className="item" target="_blank" href={qaReportUrl}><span><i className="icon-qr-matecat icon"/> QA Report</span></a>
-                    <a className="item" target="_blank" href={editLogUrl}><span><i className="icon-download-logs icon"/> Editing Log</span></a>
+                    <a className="item" target="_blank" href={qaReportUrl}><i className="icon-qr-matecat icon"/> QA Report</a>
+                    <a className="item" target="_blank" href={editLogUrl}><i className="icon-download-logs icon"/> Editing Log</a>
                         {downloadButton}
                     <div className="divider"/>
-                    <a className="item" target="_blank" href={originalUrl}><span><i className="icon-download icon"/> Download Original</span></a>
-                    <a className="item" target="_blank" href={exportXliffUrl}><span><i className="icon-download icon"/> Export XLIFF</span></a>
-                    <a className="item" target="_blank" href={jobTMXUrl}><span><i className="icon-download icon"/> Export TMX</span></a>
+                    <a className="item" target="_blank" href={originalUrl}><i className="icon-download icon"/> Download Original</a>
+                    <a className="item" target="_blank" href={exportXliffUrl}><i className="icon-download icon"/> Export XLIFF</a>
+                    <a className="item" target="_blank" href={jobTMXUrl}><i className="icon-download icon"/> Export TMX</a>
                     <div className="divider"/>
-                    <a className="item" onClick={this.archiveJob.bind(this)}><span><i className="icon-drawer icon"/> Archive job</span></a>
-                    <a className="item" onClick={this.cancelJob.bind(this)}><span><i className="icon-trash-o icon"/> Cancel job</span></a>
+                    <a className="item" onClick={this.archiveJob.bind(this)}><i className="icon-drawer icon"/> Archive job</a>
+                    <a className="item" onClick={this.cancelJob.bind(this)}><i className="icon-trash-o icon"/> Cancel job</a>
                 </div>
-            </div>;
+            /*</div>*/;
         if ( this.props.job.get('status') === 'archived' ) {
             menuHtml = <div className="menu">
 
-                <div className="scrolling menu">
-                    <a className="item" onClick={this.changePassword.bind(this)}><span><i className="icon-refresh icon"/> Change Password</span></a>
+                {/*<div className="scrolling menu">*/}
+                    <a className="item" onClick={this.changePassword.bind(this)}><i className="icon-refresh icon"/> Change Password</a>
                     {splitButton}
-                    <a className="item" target="_blank" href={reviseUrl}><span><i className="icon-edit icon"/> Revise</span></a>
-                    <a className="item" target="_blank" href={qaReportUrl}><span><i className="icon-qr-matecat icon"/> QA Report</span></a>
+                    <a className="item" target="_blank" href={reviseUrl}><i className="icon-edit icon"/> Revise</a>
+                    <a className="item" target="_blank" href={qaReportUrl}><i className="icon-qr-matecat icon"/> QA Report</a>
                     <div className="item" target="_blank" href={editLogUrl}><a><i className="icon-download-logs icon"/> Editing Log</a></div>
                         {downloadButton}
                     <div className="divider"/>
-                    <a className="item" target="_blank" href={originalUrl}><span><i className="icon-download icon"/> Download Original</span></a>
-                    <a className="item" target="_blank" href={exportXliffUrl}><span><i className="icon-download icon"/> Export XLIFF</span></a>
-                    <a className="item" target="_blank" href={jobTMXUrl}><span><i className="icon-download icon"/> Export TMX</span></a>
+                    <a className="item" target="_blank" href={originalUrl}><i className="icon-download icon"/> Download Original</a>
+                    <a className="item" target="_blank" href={exportXliffUrl}><i className="icon-download icon"/> Export XLIFF</a>
+                    <a className="item" target="_blank" href={jobTMXUrl}><i className="icon-download icon"/> Export TMX</a>
                     <div className="divider"/>
-                    <a className="item" onClick={this.activateJob.bind(this)}><span ><i className="icon-drawer unarchive-project icon"/> Unarchive job</span></a>
-                    <a className="item" onClick={this.cancelJob.bind(this)}><span ><i className="icon-trash-o icon"/> Cancel job</span></a>
+                    <a className="item" onClick={this.activateJob.bind(this)}><i className="icon-drawer unarchive-project icon"/> Unarchive job</a>
+                    <a className="item" onClick={this.cancelJob.bind(this)}><i className="icon-trash-o icon"/> Cancel job</a>
                 </div>
-            </div>;
+            /*</div>*/;
         } else if ( this.props.job.get('status') === 'cancelled' ) {
             menuHtml = <div className="menu">
 
-                    <div className="scrolling menu">
-                        <a className="item" onClick={this.changePassword.bind(this)}><span><i className="icon-refresh icon"/> Change Password</span></a>
+                    {/*<div className="scrolling menu">*/}
+                        <a className="item" onClick={this.changePassword.bind(this)}>i className="icon-refresh icon"/> Change Password</a>
                         {splitButton}
-                        <a className="item" target="_blank" href={reviseUrl}><span><i className="icon-edit icon"/> Revise</span></a>
-                        <a className="item" target="_blank" href={qaReportUrl}><span><i className="icon-qr-matecat icon"/> QA Report</span></a>
-                        <a className="item" target="_blank" href={editLogUrl}><span><i className="icon-download-logs icon"/> Editing Log</span></a>
+                        <a className="item" target="_blank" href={reviseUrl}><i className="icon-edit icon"/> Revise</a>
+                        <a className="item" target="_blank" href={qaReportUrl}><i className="icon-qr-matecat icon"/> QA Report</a>
+                        <a className="item" target="_blank" href={editLogUrl}><i className="icon-download-logs icon"/> Editing Log</a>
                         {downloadButton}
                         <div className="divider"/>
-                        <a className="item" target="_blank" href={originalUrl}><span><i className="icon-download icon"/> Download Original</span></a>
-                        <a className="item" target="_blank" href={exportXliffUrl}><span><i className="icon-download icon"/> Export XLIFF</span></a>
-                        <a className="item" target="_blank" href={jobTMXUrl}><span><i className="icon-download icon"/> Export TMX</span></a>
+                        <a className="item" target="_blank" href={originalUrl}>i className="icon-download icon"/> Download Original</a>
+                        <a className="item" target="_blank" href={exportXliffUrl}><i className="icon-download icon"/> Export XLIFF</a>
+                        <a className="item" target="_blank" href={jobTMXUrl}><i className="icon-download icon"/> Export TMX</a>
                         <div className="divider"/>
-                        <a className="item" onClick={this.activateJob.bind(this)}><span><i className="icon-drawer unarchive-project icon"/> Resume job</span></a>
+                        <a className="item" onClick={this.activateJob.bind(this)}><i className="icon-drawer unarchive-project icon"/> Resume job</a>
                     </div>
-                </div>;
+                /*</div>*/;
         }
         return menuHtml;
     }
@@ -400,6 +403,11 @@ class JobContainer extends React.Component {
                             <div className="ui mobile reversed stackable grid">
                                 <div className="twelve wide computer only eleven wide tablet only column">
                                     <div className="ui grid">
+                                        <div className="five wide computer six wide tablet column">
+                                            <div className="creation-date">
+                                                <span>Created: {this.props.job.get('formatted_create_date')}</span>
+                                            </div>
+                                        </div>
                                         <div className="three wide computer six wide tablet column">
                                             <div className="progress-bar">
                                                 <div className="progr">
@@ -450,11 +458,11 @@ class JobContainer extends React.Component {
                                         <a className="open-translate ui primary button open" target="_blank" href={translateUrl}>
                                             Open
                                         </a>
-                                        <button className="job-menu circular ui icon top right pointing dropdown  basic button"
+                                        <div className="job-menu circular ui icon top right pointing dropdown  basic button"
                                                 ref={(dropdown) => this.dropdown = dropdown}>
                                             <i className="icon-more_vert icon"/>
                                             {jobMenu}
-                                        </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

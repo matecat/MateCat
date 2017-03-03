@@ -1429,6 +1429,7 @@ div.continue-gdrive {
     background: url(../../img/logo-drive-16.png) 0.7rem 0.55rem no-repeat;
     margin-right: 10px;
     background-size: 20px;
+    height: 36px;
 }
 
 .continue-gdrive span.clear-gdrive {
@@ -1487,4 +1488,11 @@ td.action .btn {
     .btn-ok.share-button {
         padding: 4px 5px !important;
     }
+}
+header .nav-mc-bar .dropdown.select-org span.text {
+    line-height: 33px;
+}
+
+.ui.user.label {
+    top: 0px !important;
 }

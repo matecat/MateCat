@@ -4182,6 +4182,8 @@ section:hover .segment-side-buttons {
 
 /************************************************/
 
-.ui.user.label {
-	top: 5px;
+.edit-log {
+    top: 5px;
+    font-weight: bold;
+    right: -1px;
 }

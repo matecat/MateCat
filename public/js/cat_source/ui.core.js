@@ -2009,7 +2009,7 @@ UI = {
 
         UI.disableDownloadButtonForDownloadStart();
 
-        APP.downloadFile(UI.reEnableDownloadButton.bind(this));
+        APP.downloadFile(config.id_job, config.password, UI.reEnableDownloadButton.bind(this));
 
     },
 	fillWarnings: function(segment, warnings) {

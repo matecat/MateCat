@@ -58,11 +58,14 @@
 <div metal:define-macro="login_includes">
     <tal:block tal:condition="php: empty(logged_user)">
         <div class="position-sing-in">
-            <div class="btn-confirm-medium sing-in-header open-login-modal">Sign in</div>
+            <div class="ui user-nolog label open-login-modal sing-in-header" >
+                <i class="icon-user22 "/>
+            </div>
         </div>
     </tal:block>
 
     <tal:block tal:condition="php: !empty(logged_user)">
-        <div class="ui user label user-menu-preferences">${logged_user}</div>
+        <div class="ui user label user-menu-preferences edit-log">${logged_user}</div>
+        <div class="organization-name"></div>
     </tal:block>
 </div>

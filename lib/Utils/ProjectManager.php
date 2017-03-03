@@ -2109,7 +2109,7 @@ class ProjectManager {
      * @return bool
      */
     public static function notesAllowedByMimeType( $mimeType ) {
-        return in_array( $mimeType, array('sdlxliff', 'xliff') ) ;
+        return in_array( $mimeType, array('sdlxliff', 'xliff', 'xlf') ) ;
     }
 
     public static function getExtensionFromMimeType( $mime_type ) {

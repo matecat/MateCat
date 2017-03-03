@@ -119,6 +119,8 @@ UI = {
 		this.pollData();
 
         this.checkQueryParams();
+
+        this.setOrganizationinHeader();
 	},
 	performPreCheckSplitComputation: function(doStringSanitization) {
 
@@ -790,7 +792,14 @@ UI = {
             }
         }
 
-	}
+	},
+
+    setOrganizationinHeader: function () {
+        APP.USER.loadUserData().done(function (data) {
+            var selectedOrganization = APP.getLastOrganizationSelected(data.organizations);
+            $('.organization-name').text(selectedOrganization.name);
+        })
+    }
 };
 
 function wordCountTotalOrPayable( job ) {
