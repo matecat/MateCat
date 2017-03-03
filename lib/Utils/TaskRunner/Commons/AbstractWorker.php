@@ -12,6 +12,7 @@ use \SplObserver;
 use \SplSubject;
 use \AMQHandler;
 use \Database, \PDOException ;
+use TaskRunner\Exceptions\EndQueueException ;
 
 /**
  * Class AbstractWorker
@@ -56,6 +57,13 @@ abstract class AbstractWorker implements SplSubject {
      * @var AMQHandler
      */
     protected $_queueHandler;
+
+    /**
+     * Number of times the worker must be retried in case of error
+     *
+     * @var int
+     */
+    protected $maxRequeueNum = 100;
 
     /**
      * TMAnalysisWorker constructor.
@@ -107,15 +115,6 @@ abstract class AbstractWorker implements SplSubject {
      * @return mixed
      */
     abstract public function process( AbstractElement $queueElement );
-
-    /**
-     * Check how much times the element was re-queued and raise an Exception when the limit is reached ( 100 times )
-     *
-     * @param QueueElement $queueElement
-     *
-     * @return void
-     */
-    abstract protected function _checkForReQueueEnd(  QueueElement $queueElement );
 
     /**
      * Attach an SplObserver
@@ -174,6 +173,23 @@ abstract class AbstractWorker implements SplSubject {
     protected function _doLog( $msg ){
         $this->_logMsg = get_class( $this ) . " - " . print_r( $msg, true );
         $this->notify();
+    }
+
+    /**
+     * Check how much times the element was re-queued and raise an Exception when the limit is reached ( 100 times )
+     *
+     * @param QueueElement $queueElement
+     *
+     * @return void
+     */
+    protected function _checkForReQueueEnd( QueueElement $queueElement ) {
+        if ( isset( $queueElement->reQueueNum ) && $queueElement->reQueueNum >= $this->maxRequeueNum ) {
+            $this->_doLog( "--- (Worker " . $this->_workerPid . ") : Frame Re-queue max value reached, acknowledge and skip." );
+            throw new EndQueueException( "--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.", self::ERR_REQUEUE_END );
+
+        } elseif ( isset( $queueElement->reQueueNum ) ) {
+            $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Frame re-queued {$queueElement->reQueueNum} times." );
+        }
     }
 
 
