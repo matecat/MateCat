@@ -264,7 +264,7 @@ class Executor implements SplObserver {
 
             } catch( PDOException $e ){
 
-                $this->_logMsg( "************* (Executor " . $this->_executorPID . ") Caught a Database exception. Wait 2 seconds and try next cycle *************\n" . $e->getMessage() );
+                $this->_logMsg( "************* (Executor " . $this->_executorPID . ") Caught a Database exception. Wait 2 seconds and try next cycle *************\n************* " . $e->getMessage() );
                 $amqHandlerPublisher          = new AMQHandler();
                 $amqHandlerPublisher->reQueue( $queueElement, $this->_executionContext );
                 $amqHandlerPublisher->disconnect();
@@ -272,7 +272,7 @@ class Executor implements SplObserver {
 
             } catch ( Exception $e ){
 
-                $this->_logMsg( "************* (Executor " . $this->_executorPID . ") Caught a generic exception. SKIP Frame *************\n" . $e->getMessage() );
+                $this->_logMsg( "************* (Executor " . $this->_executorPID . ") Caught a generic exception. SKIP Frame *************\n************* " . $e->getMessage() );
 
             }
 

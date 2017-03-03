@@ -4,6 +4,7 @@ define( 'DEFAULT_NUM_RESULTS', 2 );
 set_time_limit( 0 );
 
 use ConnectedServices\GDrive as GDrive ;
+use ProjectQueue\Queue;
 
 class createProjectController extends ajaxController {
 
@@ -331,17 +332,17 @@ class createProjectController extends ajaxController {
             $projectStructure[ 'id_organization' ] = $this->organization->id ;
         }
 
-        $projectEnqueue = new AMQHandler();
-        $projectEnqueue->send( 'project_queue', json_encode( $projectStructure ), array( 'persistent' => WorkerClient::$_HANDLER->persistent ) );
+        //reserve a project id from the sequence
+        $projectStructure[ 'id_project' ] = Database::obtain()->nextSequence( Database::SEQ_ID_PROJECT )[ 0 ];
+
+        Queue::sendProject( $projectStructure );
+
+        sleep(10);
+        $this->result = Queue::getPublishedResults( $projectStructure['id_project'] ); //TODO LOOP PLZ in the UI
+
         $this->__clearSessionFiles();
-        $this->__assignLastCreatedPid( $projectStructure['id_project'] ) ;
-        die();
-//        $projectManager = new ProjectManager( $projectStructure );
-//        $projectManager->createProject();
+        $this->__assignLastCreatedPid( $projectStructure['id_project'] ) ; //TODO get ID from published results ( API or directly from handler in a loop )
 
-        // Strictly related to the UI ( not API ) interaction, should yet be moved away from controller.
-
-//        $this->result = $projectStructure[ 'result' ];
 
     }
 

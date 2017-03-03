@@ -236,7 +236,7 @@ class ProjectManager {
     private function createProjectRecord() {
         $this->projectStructure[ 'ppassword' ]  = $this->_generatePassword();
         $this->project = insertProject( $this->projectStructure );
-        $this->projectStructure[ 'id_project' ] = $this->project->id;
+        $this->projectStructure[ 'id_project' ] = $this->project->id; //redundant
     }
 
 
