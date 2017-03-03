@@ -28,6 +28,16 @@ body.manage {
     font-size: 18px;
 }
 
+.ui.top.right.pointing.dropdown > .menu:after {
+    top: -0.25em;
+    left: auto;
+    right: .5em;
+    margin: 0em;
+    -webkit-transform: rotate(45deg);
+    transform: rotate(45deg);
+    background-color: #ffffff;
+}
+
 // Closing Shadow - Transitions for buttons
 
 .project-list {
@@ -60,9 +70,11 @@ body.manage {
                         transition: 0.3s ease !important;
                 }
                 .ui.form input[type="text"] {
-                    background: #e8e8e8;;
+                    background: #dadada;
                     border: 1px solid #bcbcbc;
                     font-weight: 600;
+                    font-size: 16px;
+                    padding: 8px 15px;
                     white-space: nowrap;
                     overflow: hidden;
                     -o-text-overflow: ellipsis;

@@ -584,7 +584,7 @@ margin-right:4px;
 }
 
 .dropdown span {
-margin-right: 8px;
+margin-right: 0px;
 margin-top: 2px;
 float: left;
 position: relative;
@@ -4839,6 +4839,7 @@ span.share-popup-item-email {
     vertical-align: top;
     float: right;
     font-size: 14px;
+    font-weight: bold;
     height: 36px;
     width: 36px;
     margin-left: 10px;
@@ -4874,16 +4875,17 @@ span.share-popup-item-email {
     height: 36px;
     width: 36px;
     margin-left: 10px;
+    margin-right: -1px;
     text-decoration: none;
     cursor: pointer;
     border: 1px dashed !important;
 }
 .user-nolog.sing-in-header:hover {
-    border: 1px dashed #00A8D2;
+    border: 1px dashed #09BEEC !important;
 }
 
 .user-nolog.sing-in-header:hover i{
-    color: #00A8D2;
+    color: #09beec;
 }
 .organization-name {
     position: relative;
@@ -4902,6 +4904,13 @@ span.share-popup-item-email {
     font-size: 15px;
 }
 
+.ui.user.label {
+    top: 5px;
+}
+
+/*.edit-log {
+    top: 1px;
+}*/
 
 
 /*****************************/
