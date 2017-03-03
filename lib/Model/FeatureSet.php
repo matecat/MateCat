@@ -177,12 +177,18 @@ class FeatureSet {
      * Loads plugins into the featureset from the list of mandatory plugins.
      */
     private function loadFromMandatory() {
-        if ( empty( INIT::$MANDATORY_PLUGINS ) ) return ;
-
         $features = [] ;
-        foreach( INIT::$MANDATORY_PLUGINS as $plugin) {
-            $features[] = new BasicFeatureStruct(array('feature_code' => $plugin) );
+
+        if ( INIT::$DQF_ENABLED ) {
+            $features[] = new BasicFeatureStruct(array('feature_code' => Features::DQF ) );
         }
+
+        if ( !empty( INIT::$MANDATORY_PLUGINS ) )  {
+            foreach( INIT::$MANDATORY_PLUGINS as $plugin) {
+                $features[] = new BasicFeatureStruct(array('feature_code' => $plugin) );
+            }
+        }
+
         $this->features = static::merge($this->features, $features);
     }
 
