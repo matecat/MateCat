@@ -18,7 +18,13 @@ class ProjectOptionsSanitizer {
         'it-IT',
         'pt-PT',
         'pt-BR',
-        'es-ES'
+        'es-ES',
+        'da-DK',
+        'nb-NO',
+        'nn-NO',
+        'sv-SE',
+        'uk-UA',
+        'ru-RU'
     );
     /**
      * All combinations of languages for Tag Ptojection
