@@ -334,7 +334,7 @@ $.extend(UI, {
 			}
 		} else { // search mode: normal
 			status = (p.status == 'all') ? '' : '.status-' + p.status;
-			var txt = (typeof p.sourdoMarkSearchResultsce != 'undefined') ? p.source : (typeof p.target != 'undefined') ? p.target : '';
+			var txt = (typeof p.source != 'undefined') ? p.source : (typeof p.target != 'undefined') ? p.target : '';
 			if (singleSegment) {
 				what = (typeof p.source != 'undefined') ? ' .source' : (typeof p.target != 'undefined') ? ' .targetarea' : '';
 				q = '#' + $(singleSegment).attr('id') + what;
