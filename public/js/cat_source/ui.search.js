@@ -334,7 +334,7 @@ $.extend(UI, {
 			}
 		} else { // search mode: normal
 			status = (p.status == 'all') ? '' : '.status-' + p.status;
-			var txt = (typeof p.source != 'undefined') ? p.source : (typeof p.target != 'undefined') ? p.target : '';
+			var txt = (typeof p.sourdoMarkSearchResultsce != 'undefined') ? p.source : (typeof p.target != 'undefined') ? p.target : '';
 			if (singleSegment) {
 				what = (typeof p.source != 'undefined') ? ' .source' : (typeof p.target != 'undefined') ? ' .targetarea' : '';
 				q = '#' + $(singleSegment).attr('id') + what;
@@ -350,9 +350,21 @@ $.extend(UI, {
             var reg = new RegExp('(' + htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
             var reg1 = new RegExp('(' + htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)').replace(/\\\\\(/gi, "\(").replace(/\\\\\)/gi, "\)") + ')', "g" + ignoreCase);
 
+			// Finding double spaces
+            if (txt == "  ") {
+                reg1 = new RegExp(/( &nbsp;)/, 'gi');
+                reg = new RegExp(/( &nbsp;)/, 'gi');
+            }
 
 			if ((typeof where == 'undefined') || (where == 'no')) {
-				UI.doMarkSearchResults(hasTags, $(q + ":" + containsFunc + "('" + txt + "')"), reg1, q, txt, ignoreCase);
+				var elems;
+				if (txt == "  ") {
+					elems = $(q).filter(function(index){ return $(this).text().indexOf('  ')  });
+                    reg1 = new RegExp(/( &nbsp;)/, 'gi');
+				} else {
+					elems = $(q + ":" + containsFunc + "('" + txt + "')");
+				}
+				UI.doMarkSearchResults(hasTags, elems, reg1, q, txt, ignoreCase);
 			} else {
 				sid = $(seg).attr('id');
 				if (where == 'before') {
