@@ -8,71 +8,69 @@
 
 namespace Email;
 
-use Organizations\MembershipStruct;
+use Teams\MembershipStruct;
 
-class MembershipCreatedEmail extends AbstractEmail
-{
+class MembershipCreatedEmail extends AbstractEmail {
 
     /**
      * @var \Users_UserStruct
      */
-    protected $user ;
+    protected $user;
 
     /**
      * @var MembershipStruct
      */
-    protected $membership ;
+    protected $membership;
 
-    protected $title ;
+    protected $title;
 
     /**
      * @var  \Users_UserStruct
      */
-    protected $sender  ;
+    protected $sender;
 
     /**
      * MembershipCreatedEmail constructor.
+     *
      * @param \Users_UserStruct $sender
-     * @param MembershipStruct $membership
+     * @param MembershipStruct  $membership
      */
     public function __construct( \Users_UserStruct $sender, MembershipStruct $membership ) {
-        $this->user = $membership->getUser() ;
-        $this->_setlayout('skeleton.html');
-        $this->_settemplate('Organization/membership_created_content.html');
-        $this->membership = $membership ;
+        $this->user = $membership->getUser();
+        $this->_setlayout( 'skeleton.html' );
+        $this->_settemplate( 'Team/membership_created_content.html' );
+        $this->membership = $membership;
 
-        $this->sender = $sender ;
-        $this->title = "You've been added to organization " . $this->membership->getOrganization()->name ;
+        $this->sender = $sender;
+        $this->title  = "You've been added to team " . $this->membership->getTeam()->name;
     }
 
     public function send() {
-        $recipient  = array( $this->user->email, $this->user->fullName() );
+        $recipient = array( $this->user->email, $this->user->fullName() );
 
-        $this->doSend( $recipient, $this->title ,
-            $this->_buildHTMLMessage(),
-            $this->_buildTxtMessage( $this->_buildMessageContent() )
+        $this->doSend( $recipient, $this->title,
+                $this->_buildHTMLMessage(),
+                $this->_buildTxtMessage( $this->_buildMessageContent() )
         );
     }
 
-    public function _getDefaultMailConf()
-    {
+    public function _getDefaultMailConf() {
         return parent::_getDefaultMailConf();
     }
 
-    public function _getLayoutVariables()
-    {
-        $vars = parent::_getLayoutVariables();
-        $vars['title'] = $this->title ;
+    public function _getLayoutVariables() {
+        $vars            = parent::_getLayoutVariables();
+        $vars[ 'title' ] = $this->title;
 
-        return $vars ;
+        return $vars;
     }
 
     public function _getTemplateVariables() {
 
         return array(
-            'user'           => $this->user->toArray(),
-            'sender'         => $this->sender->toArray(),
-            'organization'   => $this->membership->getOrganization()->toArray()
+                'user'   => $this->user->toArray(),
+                'sender' => $this->sender->toArray(),
+                'team'   => $this->membership->getTeam()->toArray()
         );
     }
 

@@ -10,15 +10,15 @@
 namespace API\App;
 
 
-use Organizations\InvitedUser;
+use Teams\InvitedUser;
 
 /**
  * Endpoint to get the call from emails link in the invitation emails
  *
- * Class OrganizationsInvitationsController
+ * Class TeamsInvitationsController
  * @package API\App
  */
-class OrganizationsInvitationsController  extends AbstractStatefulKleinController {
+class TeamsInvitationsController  extends AbstractStatefulKleinController {
 
     public function collectBackInvitation(){
 

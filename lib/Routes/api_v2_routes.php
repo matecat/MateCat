@@ -127,20 +127,15 @@ route(
 
 route( '/api/v2/ping', 'HEAD', '\API\V2\KeyCheckController', 'ping' );
 
-$klein->with('/api/v2/orgs', function() {
+$klein->with('/api/v2/teams', function() {
 
-    route( '',                    'POST', '\API\V2\OrganizationsController', 'create') ;
-    route( '/[i:id_organization]', 'PUT',  '\API\V2\OrganizationsController', 'update' ) ;
+    route( '',                    'POST', '\API\V2\TeamsController', 'create') ;
+    route( '/[i:id_team]', 'PUT',  '\API\V2\TeamsController', 'update' ) ;
 
-    route( '/[i:id_organization]/members', 'POST', '\API\V2\OrganizationMembersController', 'update') ;
-    route( '/[i:id_organization]/members', 'GET',  '\API\V2\OrganizationMembersController', 'index' ) ;
-    route( '/[i:id_organization]/members/[i:uid_member]', 'DELETE' , '\API\V2\OrganizationMembersController', 'delete' );
+    route( '/[i:id_team]/members', 'POST', '\API\V2\TeamMembersController', 'update') ;
+    route( '/[i:id_team]/members', 'GET',  '\API\V2\TeamMembersController', 'index' ) ;
+    route( '/[i:id_team]/members/[i:uid_member]', 'DELETE' , '\API\V2\TeamMembersController', 'delete' );
 
-    route( '/[i:id_organization]/workspaces', 'POST', '\API\V2\WorkspacesController', 'create' ) ;
-    route( '/[i:id_organization]/workspaces', 'GET',  '\API\V2\WorkspacesController', 'show' ) ;
-    route( '/[i:id_organization]/workspaces/[i:id_workspace]', 'PUT',  '\API\V2\WorkspacesController', 'update' ) ;
-    route( '/[i:id_organization]/workspaces/[i:id_workspace]', 'DELETE',  '\API\V2\WorkspacesController', 'delete' ) ;
-
-    route( '/[i:id_organization]/projects/[i:id_project]', 'PUT', 'API\V2\ProjectsController', 'update' ) ;
+    route( '/[i:id_team]/projects/[i:id_project]', 'PUT', 'API\V2\ProjectsController', 'update' ) ;
 }) ;
 

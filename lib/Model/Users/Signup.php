@@ -6,7 +6,7 @@ use Email\ForgotPasswordEmail;
 use Email\SignupEmail;
 use Email\WelcomeEmail;
 use Exceptions\ValidationError;
-use Organizations\OrganizationDao;
+use Teams\TeamDao;
 use Users_UserStruct ;
 use Utils ;
 use Users_UserDao;
@@ -145,7 +145,7 @@ class Signup {
 
         Users_UserDao::updateStruct( $user, array('fields' => array( 'confirmation_token', 'email_confirmed_at' ) ) ) ;
 
-        ( new OrganizationDao() )->createPersonalOrganization( $user ) ;
+        ( new TeamDao() )->createPersonalTeam( $user ) ;
 
         $email = new WelcomeEmail( $user ) ;
         $email->send() ;

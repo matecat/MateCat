@@ -13,7 +13,7 @@ class SimpleHashTest extends AbstractTest
     public function testWrongInitialization(){
         $invited_by_uid   = 166;
         $email            = "domenico@translated.net";
-        $request_info     = [ "organization_id" => 1 ];
+        $request_info     = [ "team_id" => 1 ];
         $this->setExpectedException( '\UnexpectedValueException' );
         new SimpleJWT( [
                 $invited_by_uid,
@@ -25,7 +25,7 @@ class SimpleHashTest extends AbstractTest
     public function testEncryption(){
         $invited_by_uid   = 166;
         $email            = "domenico@translated.net";
-        $request_info     = [ "organization_id" => 1 ];
+        $request_info     = [ "team_id" => 1 ];
 
         $x = new SimpleJWT( [
                 'invited_by_uid' => $invited_by_uid,
@@ -47,7 +47,7 @@ class SimpleHashTest extends AbstractTest
     public function testValidateTokenEncryption(){
         $invited_by_uid   = 166;
         $email            = "domenico@translated.net";
-        $request_info     = [ "organization_id" => 1 ];
+        $request_info     = [ "team_id" => 1 ];
 
         $x = new SimpleJWT( [
                 'invited_by_uid' => $invited_by_uid,
@@ -62,7 +62,7 @@ class SimpleHashTest extends AbstractTest
     public function testValidateTokenEncryptionByJWT(){
         $invited_by_uid   = 166;
         $email            = "domenico@translated.net";
-        $request_info     = [ "organization_id" => 1 ];
+        $request_info     = [ "team_id" => 1 ];
 
         $x = new SimpleJWT( [
                 'invited_by_uid' => $invited_by_uid,
@@ -77,7 +77,7 @@ class SimpleHashTest extends AbstractTest
     public function testInvalidToken_tamper_field(){
         $invited_by_uid   = 166;
         $email            = "domenico@translated.net";
-        $request_info     = [ "organization_id" => 1 ];
+        $request_info     = [ "team_id" => 1 ];
 
         $x = new SimpleJWT( [
                 'invited_by_uid' => $invited_by_uid,
@@ -99,7 +99,7 @@ class SimpleHashTest extends AbstractTest
     public function testInvalidToken_tamper_hash(){
         $invited_by_uid   = 166;
         $email            = "domenico@translated.net";
-        $request_info     = [ "organization_id" => 1 ];
+        $request_info     = [ "team_id" => 1 ];
 
         $x = new SimpleJWT( [
                 'invited_by_uid' => $invited_by_uid,
@@ -121,7 +121,7 @@ class SimpleHashTest extends AbstractTest
     public function testArrayAccess(){
         $invited_by_uid   = 166;
         $email            = "domenico@translated.net";
-        $request_info     = [ "organization_id" => 1 ];
+        $request_info     = [ "team_id" => 1 ];
 
         $x = new SimpleJWT( [
                 'invited_by_uid' => $invited_by_uid,
@@ -154,7 +154,7 @@ class SimpleHashTest extends AbstractTest
     public function testAssignmentRuntime(){
         $invited_by_uid   = 166;
         $email            = "domenico@translated.net";
-        $request_info     = [ "organization_id" => 1 ];
+        $request_info     = [ "team_id" => 1 ];
 
         $x = new SimpleJWT();
 
@@ -184,7 +184,7 @@ class SimpleHashTest extends AbstractTest
 
         $invited_by_uid   = 166;
         $email            = "domenico@translated.net";
-        $request_info     = [ "organization_id" => 1 ];
+        $request_info     = [ "team_id" => 1 ];
 
         $x = new SimpleJWT( [
                 'invited_by_uid' => $invited_by_uid,

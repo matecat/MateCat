@@ -3,7 +3,7 @@
 class ManageUtils {
 
     /**
-     * @param Users_UserStruct $user
+     * @param Users_UserStruct               $user
      * @param $start
      * @param $step
      * @param $search_in_pname
@@ -12,28 +12,25 @@ class ManageUtils {
      * @param $search_status
      * @param $search_only_completed
      * @param $project_id
-     * @param \Organizations\OrganizationStruct|null $organization
-     * @param \Organizations\WorkspaceStruct|null $workspace
-     * @param Users_UserStruct|null $assignee
-     * @param bool $no_workspace
-     * @param bool $no_assignee
-     * @return array
+     * @param \Teams\TeamStruct|null $team
+     * @param Users_UserStruct|null          $assignee
+     * @param bool                           $no_assignee
+     *
+*@return array
      */
     public static function queryProjects(
             Users_UserStruct $user, $start, $step, $search_in_pname,
             $search_source, $search_target, $search_status, $search_only_completed,
             $project_id,
-            \Organizations\OrganizationStruct $organization = null,
-            \Organizations\WorkspaceStruct $workspace = null,
+            \Teams\TeamStruct $team = null,
             Users_UserStruct $assignee = null,
-            $no_workspace = false,
             $no_assignee = false
     ) {
 
         $data = getProjects(
             $user, $start, $step, $search_in_pname, $search_source, $search_target,
-            $search_status, $search_only_completed, $project_id, $organization,
-            $workspace, $assignee, $no_workspace, $no_assignee
+            $search_status, $search_only_completed, $project_id, $team,
+            $assignee, $no_assignee
         );
 
         $projects     = array();
@@ -187,7 +184,6 @@ class ManageUtils {
 
             $project[ 'features' ] = $item[ 'features' ] ;
             $project[ 'id_assignee' ] = $item[ 'id_assignee' ] ;
-            $project[ 'id_workspace' ] = $item[ 'id_workspace' ] ;
             $project[ 'project_slug' ] = Utils::friendly_slug( $project['name'] ) ;
             $project['remote_file_service'] = null ;
 

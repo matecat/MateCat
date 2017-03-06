@@ -7,7 +7,7 @@
  *
  */
 
-namespace Organizations;
+namespace Teams;
 
 
 use API\V2\Exceptions\ValidationError;
@@ -37,30 +37,30 @@ class InvitedUser {
 
     public function prepareUserInvitedSignUpRedirect() {
 
-        $_SESSION[ 'invited_to_organization' ] = $this->jwt;
+        $_SESSION[ 'invited_to_team' ] = $this->jwt;
         FlashMessage::set( 'popup', 'signup', FlashMessage::SERVICE );
         FlashMessage::set( 'signup_email', $this->jwt[ 'email' ], FlashMessage::SERVICE );
 
     }
 
-    public static function completeOrganizationSignUp( $user, $invitation ){
+    public static function completeTeamSignUp( $user, $invitation ){
 
-        $organizationStruct = ( new OrganizationDao )->findById( $invitation[ 'organization_id' ] );
+        $teamStruct = ( new TeamDao )->findById( $invitation[ 'team_id' ] );
 
-        $organizationModel = new \OrganizationModel( $organizationStruct );
-        $organizationModel->setUser( $user );
-        $organizationModel->addMemberEmail( $invitation[ 'email' ] );
-        $organizationModel->updateMembers();
+        $teamModel = new \TeamModel( $teamStruct );
+        $teamModel->setUser( $user );
+        $teamModel->addMemberEmail( $invitation[ 'email' ] );
+        $teamModel->updateMembers();
 
         $pendingInvitation = new PendingInvitations( ( new \RedisHandler() )->getConnection(), $invitation );
         $pendingInvitation->remove();
 
-        unset( $_SESSION[ 'invited_to_organization' ] );
+        unset( $_SESSION[ 'invited_to_team' ] );
 
     }
 
     public static function hasPendingInvitations(){
-        return isset( $_SESSION[ 'invited_to_organization' ] ) && !empty( $_SESSION[ 'invited_to_organization' ][ 'organization_id' ] );
+        return isset( $_SESSION[ 'invited_to_team' ] ) && !empty( $_SESSION[ 'invited_to_team' ][ 'team_id' ] );
     }
 
 }

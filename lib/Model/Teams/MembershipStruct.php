@@ -6,7 +6,7 @@
  * Time: 10:45
  */
 
-namespace Organizations;
+namespace Teams;
 
 use DataAccess_AbstractDaoSilentStruct ;
 use DataAccess_IDaoStruct ;
@@ -14,7 +14,7 @@ use DataAccess_IDaoStruct ;
 class MembershipStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
 
     public $id ;
-    public $id_organization;
+    public $id_team;
     public $uid ;
     public $is_admin ;
 
@@ -24,9 +24,9 @@ class MembershipStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
     private $user ;
 
     /**
-     * @var OrganizationStruct
+     * @var TeamStruct
      */
-    private $organization ;
+    private $team ;
 
 
     /**
@@ -59,13 +59,13 @@ class MembershipStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
     }
 
     /**
-     * @return OrganizationStruct
+     * @return TeamStruct
      */
-    public function getOrganization() {
-        if ( is_null( $this->organization ) ) {
-            $this->organization = ( new OrganizationDao() )->findById( $this->id_organization ) ;
+    public function getTeam() {
+        if ( is_null( $this->team ) ) {
+            $this->team = ( new TeamDao() )->findById( $this->id_team ) ;
         }
-        return $this->organization;
+        return $this->team;
     }
 
 }

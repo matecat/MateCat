@@ -3,7 +3,7 @@
 namespace API\App;
 
 use Exceptions\ValidationError;
-use Organizations\InvitedUser;
+use Teams\InvitedUser;
 use Users\PasswordReset;
 use Users\Signup ;
 use FlashMessage ;
@@ -35,7 +35,7 @@ class SignupController extends AbstractStatefulKleinController  {
             $user = Signup::confirm( $this->request->param('token') ) ;
 
             if( InvitedUser::hasPendingInvitations() ){
-                InvitedUser::completeOrganizationSignUp( $user, $_SESSION[ 'invited_to_organization' ] );
+                InvitedUser::completeTeamSignUp( $user, $_SESSION[ 'invited_to_team' ] );
             }
 
             $project = new RedeemableProject( $user, $_SESSION );

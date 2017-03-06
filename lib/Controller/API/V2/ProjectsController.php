@@ -12,8 +12,8 @@ namespace API\V2;
 use API\App\AbstractStatefulKleinController;
 
 use API\V2\Json\Project;
-use API\V2\Validators\OrganizationAccessValidator;
-use API\V2\Validators\OrganizationProjectValidator;
+use API\V2\Validators\TeamAccessValidator;
+use API\V2\Validators\TeamProjectValidator;
 
 class ProjectsController extends KleinController {
 
@@ -21,7 +21,7 @@ class ProjectsController extends KleinController {
 
     public function update() {
 
-        $acceptedFields = array( 'id_assignee', 'name', 'id_workspace' );
+        $acceptedFields = array( 'id_assignee', 'name' );
 
         $projectModel   = new \ProjectModel( $this->project );
         $projectModel->setUser( $this->user ) ;
@@ -43,8 +43,8 @@ class ProjectsController extends KleinController {
     protected function afterConstruct() {
         parent::afterConstruct();
         $this->project = \Projects_ProjectDao::findById( $this->request->id_project );
-        $this->appendValidator( new OrganizationAccessValidator( $this ) );
-        $this->appendValidator( ( new OrganizationProjectValidator( $this ) )->setProject( $this->project ) );
+        $this->appendValidator( new TeamAccessValidator( $this ) );
+        $this->appendValidator( ( new TeamProjectValidator( $this ) )->setProject( $this->project ) );
     }
 
 }

@@ -1,5 +1,5 @@
 <?php
-use Organizations\MembershipDao;
+use Teams\MembershipDao;
 
 /**
  * Created by PhpStorm.
@@ -72,20 +72,20 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct   implements D
     }
 
     /**
-     * @return null|\Organizations\OrganizationStruct
+     * @return null|\Teams\TeamStruct
      */
-    public function getPersonalOrganization() {
-        $oDao = new \Organizations\OrganizationDao();
+    public function getPersonalTeam() {
+        $oDao = new \Teams\TeamDao();
         $oDao->setCacheTTL( 60 * 60 * 24 );
         return $oDao->getPersonalByUser( $this );
     }
 
     /**
-     * @return \Organizations\OrganizationStruct[]|null
+     * @return \Teams\TeamStruct[]|null
      */
-    public function getUserOrganizations(){
+    public function getUserTeams(){
         $mDao = new MembershipDao();
-        return $mDao->findUserOrganizations( $this );
+        return $mDao->findUserTeams( $this );
     }
 
     public function getMetadataAsKeyValue() {

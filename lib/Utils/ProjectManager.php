@@ -12,7 +12,7 @@ use Analysis\DqfQueueHandler;
 include_once INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
 
 use ConnectedServices\GDrive as GDrive  ;
-use Organizations\OrganizationStruct;
+use Teams\TeamStruct;
 
 class ProjectManager {
     
@@ -156,10 +156,10 @@ class ProjectManager {
     }
 
     /**
-     * @param \Organizations\OrganizationStruct $organization
+     * @param \Teams\TeamStruct $team
      */
-    public function setOrganization( OrganizationStruct $organization ) {
-        $this->projectStructure['id_organization'] = $organization->id ;
+    public function setTeam( TeamStruct $team ) {
+        $this->projectStructure['id_team'] = $team->id ;
     }
 
     /**

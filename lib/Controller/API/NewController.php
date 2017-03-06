@@ -1,5 +1,7 @@
 <?php
 
+use Teams\MembershipDao;
+
 set_time_limit( 180 );
 
 /**
@@ -56,7 +58,7 @@ class NewController extends ajaxController {
     private $seg_rule;
 
     private $private_tm_user = null;
-    private $private_tm_pass = null;
+    private   $private_tm_pass = null;
 
     private $new_keys = array();
 
@@ -79,11 +81,11 @@ class NewController extends ajaxController {
     );
 
     /**
-     * @var \Organizations\OrganizationStruct
+     * @var \Teams\TeamStruct
      */
-    protected $organization;
+    protected $team;
 
-    protected $id_organization ;
+    protected $id_team ;
 
     public function __construct() {
 
@@ -123,7 +125,7 @@ class NewController extends ajaxController {
                 'pretranslate_100' => array(
                         'filter' => array( 'filter' => FILTER_VALIDATE_INT )
                 ),
-                'id_organization' => array( 'filter' => FILTER_VALIDATE_INT )
+                'id_team' => array( 'filter' => FILTER_VALIDATE_INT )
         );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -153,7 +155,7 @@ class NewController extends ajaxController {
         $this->seg_rule         = ( !empty( $__postInput[ 'segmentation_rule' ] ) ) ? $__postInput[ 'segmentation_rule' ] : '';
         $this->subject          = ( !empty( $__postInput[ 'subject' ] ) ) ? $__postInput[ 'subject' ] : 'general';
         $this->owner            = $__postInput[ 'owner_email' ];
-        $this->id_organization  = $__postInput[ 'id_organization' ];
+        $this->id_team          = $__postInput[ 'id_team' ];
 
         // Force pretranslate_100 to be 0 or 1
         $this->pretranslate_100 = (int) !!$__postInput[ 'pretranslate_100' ];
@@ -355,7 +357,7 @@ class NewController extends ajaxController {
         }
 
         try {
-            $this->__validateOrganization();
+            $this->__validateTeam();
         }
         catch( Exception $ex ) {
             $this->api_output[ 'message' ] = $ex->getMessage();
@@ -641,8 +643,8 @@ class NewController extends ajaxController {
         
         $projectManager->sanitizeProjectOptions = false ; 
 
-        if ( $this->organization ) {
-            $projectManager->setOrganization( $this->organization ) ;
+        if ( $this->team ) {
+            $projectManager->setTeam( $this->team ) ;
         }
 
         $projectManager->createProject();
@@ -798,21 +800,21 @@ class NewController extends ajaxController {
         );
     }
 
-    private function __validateOrganization() {
-        if ( $this->current_user && !empty( $this->id_organization ) ) {
-            $dao = new \Organizations\MembershipDao();
-            $org = $dao->findOrganizationByIdAndUser( $this->id_organization, $this->current_user ) ;
+    private function __validateTeam() {
+        if ( $this->current_user && !empty( $this->id_team ) ) {
+            $dao = new MembershipDao();
+            $org = $dao->findTeamByIdAndUser( $this->id_team, $this->current_user ) ;
 
             if ( !$org ) {
-                throw new Exception('Organization and user membership does not match');
+                throw new Exception('Team and user membership does not match');
             }
             else {
-                $this->organization = $org  ;
+                $this->team = $org  ;
             }
         }
 
         else if ( $this->current_user ) {
-            $this->organization = $this->current_user->getPersonalOrganization();
+            $this->team = $this->current_user->getPersonalTeam();
         }
     }
 }

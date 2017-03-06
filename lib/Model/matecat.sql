@@ -1,6 +1,6 @@
--- MySQL dump 10.13  Distrib 5.7.17, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.12, for linux-glibc2.5 (x86_64)
 --
--- Host: localhost    Database: matecat
+-- Host: 127.0.0.1    Database: matecat
 -- ------------------------------------------------------
 -- Server version	5.7.17-log
 
@@ -14,9 +14,14 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+SET @MYSQLDUMP_TEMP_LOG_BIN = @@SESSION.SQL_LOG_BIN;
+SET @@SESSION.SQL_LOG_BIN= 0;
 
-CREATE DATABASE matecat;
-USE matecat;
+--
+-- GTID state at the beginning of the backup 
+--
+
+SET @@GLOBAL.GTID_PURGED='593f0565-c841-11e6-a695-0242ac110002:1-230370';
 
 --
 -- Table structure for table `activity_log`
@@ -40,7 +45,7 @@ CREATE TABLE `activity_log` (
   KEY `id_project_idx` (`id_project`) USING BTREE,
   KEY `uid_idx` (`uid`) USING BTREE,
   KEY `event_date_idx` (`event_date`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=862 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1031 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -166,7 +171,7 @@ CREATE TABLE `connected_services` (
   `is_default` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uid_email_service` (`uid`,`email`,`service`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -237,7 +242,7 @@ CREATE TABLE `files` (
   KEY `id_project` (`id_project`),
   KEY `sha1` (`sha1_original_file`) USING HASH,
   KEY `filename` (`filename`)
-) ENGINE=InnoDB AUTO_INCREMENT=227 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=340 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -344,7 +349,7 @@ CREATE TABLE `jobs` (
   KEY `status_owner_idx` (`status_owner`),
   KEY `status_idx` (`status`),
   KEY `create_date_idx` (`create_date`)
-) ENGINE=InnoDB AUTO_INCREMENT=169 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=299 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -433,60 +438,6 @@ CREATE TABLE `notifications` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `organizations`
---
-
-DROP TABLE IF EXISTS `organizations`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `organizations` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `created_by` bigint(20) NOT NULL,
-  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `type` varchar(45) NOT NULL DEFAULT 'personal',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `organizations_pending_users`
---
-
-DROP TABLE IF EXISTS `organizations_pending_users`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `organizations_pending_users` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `invited_by_uid` int(10) unsigned NOT NULL,
-  `email` varchar(255) NOT NULL,
-  `expire_date` datetime DEFAULT NULL,
-  `token` varchar(255) NOT NULL,
-  `request_info` varchar(2048) NOT NULL DEFAULT '{}',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `token_idx` (`token`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `organizations_users`
---
-
-DROP TABLE IF EXISTS `organizations_users`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `organizations_users` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_organization` int(11) DEFAULT NULL,
-  `uid` bigint(20) NOT NULL,
-  `is_admin` tinyint(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `id_organization_uid` (`id_organization`,`uid`) USING BTREE,
-  KEY `uid` (`uid`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Table structure for table `original_files_map`
 --
 
@@ -515,7 +466,7 @@ DROP TABLE IF EXISTS `owner_features`;
 CREATE TABLE `owner_features` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `uid` bigint(20) DEFAULT NULL,
-  `id_organization` int(11) DEFAULT NULL,
+  `id_team` int(11) DEFAULT NULL,
   `feature_code` varchar(45) NOT NULL,
   `options` text,
   `create_date` datetime NOT NULL,
@@ -523,7 +474,7 @@ CREATE TABLE `owner_features` (
   `enabled` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uid_feature` (`uid`,`feature_code`) USING BTREE,
-  UNIQUE KEY `id_organization_feature` (`id_organization`,`feature_code`) USING BTREE
+  UNIQUE KEY `id_team_feature` (`id_team`,`feature_code`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -557,7 +508,7 @@ CREATE TABLE `project_metadata` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_project_and_key` (`id_project`,`key`) USING BTREE,
   KEY `id_project` (`id_project`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=592 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=918 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -571,7 +522,7 @@ CREATE TABLE `projects` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `password` varchar(45) DEFAULT NULL,
   `id_customer` varchar(45) NOT NULL,
-  `id_organization` int(11) DEFAULT NULL,
+  `id_team` int(11) DEFAULT NULL,
   `name` varchar(200) DEFAULT 'project',
   `create_date` datetime NOT NULL,
   `id_engine_tm` int(11) DEFAULT NULL,
@@ -585,7 +536,6 @@ CREATE TABLE `projects` (
   `pretranslate_100` int(1) DEFAULT '0',
   `id_qa_model` int(11) DEFAULT NULL,
   `id_assignee` int(10) unsigned DEFAULT NULL,
-  `id_workspace` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `id_customer` (`id_customer`),
   KEY `status_analysis` (`status_analysis`),
@@ -593,8 +543,8 @@ CREATE TABLE `projects` (
   KEY `remote_ip_address` (`remote_ip_address`),
   KEY `name` (`name`),
   KEY `id_assignee_idx` (`id_assignee`),
-  KEY `id_workspace_idx` (`id_workspace`)
-) ENGINE=InnoDB AUTO_INCREMENT=189 DEFAULT CHARSET=utf8;
+  KEY `id_team_idx` (`id_team`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=57571 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -612,7 +562,7 @@ CREATE TABLE `qa_categories` (
   `severities` text COMMENT 'json field',
   PRIMARY KEY (`id`),
   KEY `id_model` (`id_model`)
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -638,7 +588,7 @@ CREATE TABLE `qa_chunk_reviews` (
   KEY `id_project` (`id_project`),
   KEY `review_password` (`review_password`),
   KEY `id_job` (`id_job`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -707,7 +657,7 @@ CREATE TABLE `qa_models` (
   `pass_type` varchar(255) DEFAULT NULL,
   `pass_options` text,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -728,7 +678,7 @@ CREATE TABLE `remote_files` (
   KEY `id_file` (`id_file`) USING BTREE,
   KEY `id_job` (`id_job`) USING BTREE,
   KEY `connected_service_id` (`connected_service_id`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -881,7 +831,7 @@ CREATE TABLE `segments` (
   KEY `show_in_cat` (`show_in_cattool`) USING BTREE,
   KEY `raw_word_count` (`raw_word_count`) USING BTREE,
   KEY `segment_hash` (`segment_hash`) USING HASH COMMENT 'MD5 hash of segment content'
-) ENGINE=InnoDB AUTO_INCREMENT=15982 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=57604 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -892,8 +842,58 @@ DROP TABLE IF EXISTS `sequences`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `sequences` (
-  `id_segment` bigint(20) unsigned NOT NULL
+  `id_segment` bigint(20) unsigned NOT NULL,
+  `id_project` bigint(20) unsigned NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Temporary view structure for view `show_clients`
+--
+
+DROP TABLE IF EXISTS `show_clients`;
+/*!50001 DROP VIEW IF EXISTS `show_clients`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `show_clients` AS SELECT 
+ 1 AS `host_short`,
+ 1 AS `users`,
+ 1 AS `COUNT(*)`*/;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Table structure for table `teams`
+--
+
+DROP TABLE IF EXISTS `teams`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `teams` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `created_by` bigint(20) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `type` varchar(45) NOT NULL DEFAULT 'personal',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `teams_users`
+--
+
+DROP TABLE IF EXISTS `teams_users`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `teams_users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_team` int(11) DEFAULT NULL,
+  `uid` bigint(20) NOT NULL,
+  `is_admin` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_team_uid` (`id_team`,`uid`) USING BTREE,
+  KEY `uid` (`uid`)
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -948,7 +948,7 @@ CREATE TABLE `user_metadata` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uid_and_key` (`uid`,`key`) USING BTREE,
   KEY `uid` (`uid`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -974,24 +974,11 @@ CREATE TABLE `users` (
   PRIMARY KEY (`uid`),
   UNIQUE KEY `email` (`email`),
   UNIQUE KEY `confirmation_token` (`confirmation_token`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `workspaces`
---
-
-DROP TABLE IF EXISTS `workspaces`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `workspaces` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) NOT NULL,
-  `id_organization` int(11) NOT NULL,
-  `options` varchar(10240) DEFAULT '{}',
-  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+
+SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -1002,7 +989,7 @@ CREATE TABLE `workspaces` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-02-22 14:19:32
+-- Dump completed on 2017-03-06 15:33:16
 
 INSERT INTO `engines` VALUES (0,'NONE','NONE','No MT','','',NULL,NULL,NULL,'{}','NONE','',NULL,100,0,NULL);
 INSERT INTO `engines` VALUES (1,'MyMemory (All Pairs)','TM','Machine translation from Google Translate and Microsoft Translator.','http://api.mymemory.translated.net','get','set','update','delete','{\"gloss_get_relative_url\":\"glossary/get\",\"gloss_set_relative_url\":\"glossary/set\",\"gloss_update_relative_url\":\"glossary/update\",\"glossary_import_relative_url\":\"glossary/import\",\"glossary_export_relative_url\":\"glossary/export\",\"gloss_delete_relative_url\":\"glossary/delete\",\"tmx_import_relative_url\":\"tmx/import\",\"tmx_status_relative_url\":\"tmx/status\",\"tmx_export_create_url\":\"tmx/export/create\",\"tmx_export_check_url\":\"tmx/export/check\",\"tmx_export_download_url\":\"tmx/export/download\",\"tmx_export_list_url\":\"tmx/export/list\",\"tmx_export_email_url\":\"tmx/export/create\",\"api_key_create_user_url\":\"createranduser\",\"api_key_check_auth_url\":\"authkey\",\"analyze_url\":\"analyze\",\"detect_language_url\":\"langdetect.php\"}','MyMemory','{}','1',0,1,NULL);
@@ -1067,7 +1054,10 @@ INSERT INTO `phinxlog` VALUES (20170201160907,'2017-02-02 10:44:42','2017-02-02 
 INSERT INTO `phinxlog` VALUES (20170202125007,'2017-02-15 12:16:07','2017-02-15 12:16:09');
 INSERT INTO `phinxlog` VALUES (20170203120331,'2017-02-15 12:16:09','2017-02-15 12:16:09');
 INSERT INTO `phinxlog` VALUES (20170203145956,'2017-02-15 12:16:09','2017-02-15 12:16:10');
-INSERT INTO `phinxlog` VALUES (20170216185557,'2017-02-16 20:11:50','2017-02-16 20:11:50');
+INSERT INTO `phinxlog` VALUES (20170220193303,'2017-02-22 19:30:58','2017-02-22 19:30:58');
+INSERT INTO `phinxlog` VALUES (20170227194426,'2017-02-27 20:46:26','2017-02-27 20:46:27');
+INSERT INTO `phinxlog` VALUES (20170306121226,'2017-03-06 12:50:42','2017-03-06 12:50:50');
+
 
 CREATE SCHEMA `matecat_conversions_log` DEFAULT CHARACTER SET utf8 ;
 USE matecat_conversions_log ;

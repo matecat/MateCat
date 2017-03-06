@@ -8,7 +8,7 @@
  */
 
 
-class Constants_Organizations {
+class Constants_Teams {
 
     const PERSONAL = 'personal';
     const GENERAL  = 'general';

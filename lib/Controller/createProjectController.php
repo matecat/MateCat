@@ -28,9 +28,9 @@ class createProjectController extends ajaxController {
     private $lang_handler ;
 
     /**
-     * @var \Organizations\OrganizationStruct
+     * @var \Teams\TeamStruct
      */
-    private $organization ;
+    private $team ;
 
     /**
      * @var FeatureSet
@@ -63,7 +63,7 @@ class createProjectController extends ajaxController {
                 'dqf_key'            => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
-                'id_organization' => array( 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR  )
+                'id_team' => array( 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR  )
 
                 //            This will be sanitized inside the TmKeyManagement class
                 //            SKIP
@@ -165,7 +165,7 @@ class createProjectController extends ajaxController {
         $this->__validateUserMTEngine();
 
         if ( $this->userIsLogged ) {
-            $this->__setOrganization( $__postInput['id_organization'] );
+            $this->__setTeam( $__postInput['id_team'] );
         }
 
     }
@@ -325,7 +325,7 @@ class createProjectController extends ajaxController {
             $projectStructure[ 'uid' ]           = $this->uid;
             $projectStructure[ 'id_customer' ]   = $this->userMail;
             $projectStructure[ 'owner' ]         = $this->userMail ;
-            $projectStructure[ 'id_organization' ] = $this->organization->id ;
+            $projectStructure[ 'id_team' ] = $this->team->id ;
         }
 
 
@@ -436,24 +436,24 @@ class createProjectController extends ajaxController {
     /**
      * TODO: this should be moved to a model that.
      *
-     * @param null $id_organization
+     * @param null $id_team
      *
      * @throws Exception
      */
-    private function __setOrganization($id_organization = null) {
-        if ( is_null( $id_organization ) ) {
-            $this->organization = $this->logged_user->getPersonalOrganization() ;
+    private function __setTeam( $id_team = null) {
+        if ( is_null( $id_team ) ) {
+            $this->team = $this->logged_user->getPersonalTeam() ;
         }
         else {
-            // check for the organization to be allowed
-            $dao = new \Organizations\MembershipDao() ;
-            $organization = $dao->findOrganizationByIdAndUser($id_organization, $this->logged_user) ;
+            // check for the team to be allowed
+            $dao = new \Teams\MembershipDao() ;
+            $team = $dao->findTeamByIdAndUser($id_team, $this->logged_user) ;
 
-            if ( !$organization ) {
-                throw new Exception('Organization and user memberships do not match') ;
+            if ( !$team ) {
+                throw new Exception('Team and user memberships do not match') ;
             }
             else {
-                $this->organization = $organization ;
+                $this->team = $team ;
             }
         }
     }

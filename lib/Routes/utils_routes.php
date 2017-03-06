@@ -32,4 +32,4 @@ route( '/api/app/projects/[:id_project]',                   'PUT', 'API\App\Proj
 route( '/api/app/connected_services/[:id_service]/verify',  'GET', 'ConnectedServices\ConnectedServicesController', 'verify' );
 route( '/api/app/connected_services/[:id_service]',         'POST', 'ConnectedServices\ConnectedServicesController', 'update' );
 
-route( '/api/app/orgs/members/invite/[:jwt]',               'GET',  '\API\App\OrganizationsInvitationsController', 'collectBackInvitation' ) ;
+route( '/api/app/teams/members/invite/[:jwt]',               'GET',  '\API\App\TeamsInvitationsController', 'collectBackInvitation' ) ;

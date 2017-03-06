@@ -1,5 +1,7 @@
 <?php
 
+use Teams\TeamDao;
+
 class Factory_User extends Factory_Base {
 
     public static $email_counter = 0 ;
@@ -20,9 +22,9 @@ class Factory_User extends Factory_Base {
         $userStruct = new Users_UserStruct( $values );
         $user = $dao->createUser( $userStruct );
 
-        $orgDao = new \Organizations\OrganizationDao() ;
-        $org = $orgDao->createUserOrganization( $user, array(
-            'type' => Constants_Organizations::PERSONAL,
+        $orgDao = new TeamDao() ;
+        $team = $orgDao->createUserTeam( $user, array(
+            'type' => Constants_Teams::PERSONAL,
             'name' => 'personal'
         ));
 

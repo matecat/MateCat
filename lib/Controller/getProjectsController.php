@@ -1,7 +1,6 @@
 <?php
-use Organizations\MembershipDao;
-use Organizations\MembershipStruct;
-use Organizations\WorkspaceDao;
+use Teams\MembershipDao;
+use Teams\MembershipStruct;
 use \API\V2\Json\Error;
 
 
@@ -57,12 +56,10 @@ class getProjectsController extends ajaxController {
      */
     private $start;
 
-    private $id_organization ;
+    private $id_team ;
     private $id_assignee ;
-    private $id_workspace ;
 
     private $no_assignee ;
-    private $no_workspace ;
 
 
     public function __construct() {
@@ -95,12 +92,10 @@ class getProjectsController extends ajaxController {
                         'filter'  => FILTER_VALIDATE_BOOLEAN,
                         'options' => [ FILTER_NULL_ON_FAILURE ]
                 ],
-                'id_organization' => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'id_team' => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'id_assignee' => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'id_workspace' => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
 
                 'no_assignee' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
-                'no_workspace' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ]
 
         ];
 
@@ -115,12 +110,10 @@ class getProjectsController extends ajaxController {
         $this->search_in_pname       = $postInput[ 'pn' ];
         $this->search_source         = $postInput[ 'source' ];
         $this->search_target         = $postInput[ 'target' ];
-        $this->id_organization       = $postInput[ 'id_organization' ];
+        $this->id_team               = $postInput[ 'id_team' ];
         $this->id_assignee           = $postInput[ 'id_assignee' ];
-        $this->id_workspace          = $postInput[ 'id_workspace' ];
 
         $this->no_assignee           = $postInput[ 'no_assignee' ];
-        $this->no_workspace          = $postInput[ 'no_workspace' ];
 
         $this->search_only_completed = $postInput[ 'onlycompleted' ];
 
@@ -133,24 +126,23 @@ class getProjectsController extends ajaxController {
             return;
         }
 
-        $organization = $this->filterOrganization();
-        $workspace = $this->filterWorkspace($organization);
-        $assignee = $this->filterAssignee($organization);
+        $team = $this->filterTeam();
+        $assignee = $this->filterAssignee($team);
 
         $projects = ManageUtils::queryProjects( $this->logged_user, $this->start, $this->step,
             $this->search_in_pname,
             $this->search_source, $this->search_target, $this->search_status,
             $this->search_only_completed, $this->project_id,
-            $organization, $workspace, $assignee,
-            $this->no_workspace, $this->no_assignee
+            $team, $assignee,
+            $this->no_assignee
         );
 
         $projnum = getProjectsNumber( $this->logged_user,
             $this->search_in_pname, $this->search_source,
             $this->search_target, $this->search_status,
             $this->search_only_completed,
-            $organization, $workspace, $assignee,
-            $this->no_workspace, $this->no_assignee
+            $team, $assignee,
+            $this->no_assignee
             );
 
         $projects = $this->filterProjectsWithUserFeatures( $projects ) ;
@@ -181,63 +173,41 @@ class getProjectsController extends ajaxController {
     }
 
     /**
-     * @param $organization
+     * @param $team
+     *
      * @return Users_UserStruct
      * @throws Exception
      */
 
-    private function filterAssignee($organization) {
+    private function filterAssignee( $team) {
 
         if ( is_null($this->id_assignee ) ) return null;
 
         $dao = new MembershipDao();
-        $memberships = $dao->setCacheTTL( 60 * 60 * 24 )->getMemberListByOrganizationId($organization->id);
+        $memberships = $dao->setCacheTTL( 60 * 60 * 24 )->getMemberListByTeamId( $team->id);
         $id_assignee = $this->id_assignee ;
         /**
-         * @var $users \Organizations\MembershipStruct[]
+         * @var $users \Teams\MembershipStruct[]
          */
         $users = array_values(array_filter($memberships, function( MembershipStruct $membership ) use ( $id_assignee ) {
             return $membership->getUser()->uid == $id_assignee ;
         } ));
 
         if ( empty( $users ) ) {
-            throw new Exception('Assignee not found in organization') ;
+            throw new Exception('Assignee not found in team') ;
         }
 
         return $users[0]->getUser();
     }
 
-    /**
-     * @param $organization
-     * @return \Organizations\WorkspaceStruct
-     * @throws Exception
-     */
-    private function filterWorkspace($organization) {
-
-        if ( is_null($this->id_workspace ) ) return null;
-
-        $dao = new WorkspaceDao() ;
-        $workspaces = $dao->setCacheTTL( 60 * 60 * 24 )->getByOrganizationId($organization->id) ;
-        $id_workspace = $this->id_workspace ;
-        $wp = array_values( array_filter($workspaces, function($workspace) use ( $id_workspace ) {
-            return $id_workspace == $workspace->id ;
-        }));
-
-        if ( empty( $wp ) ) {
-            throw new Exception('Workspace not found in organization') ;
-        }
-
-        return $wp[0];
-    }
-
-    private function filterOrganization() {
+    private function filterTeam() {
         $dao = new MembershipDao() ;
-        $organization = $dao->findOrganizationByIdAndUser($this->id_organization, $this->logged_user ) ;
-        if ( !$organization ) {
-            throw  new Exception('Organization not found in user memberships') ;
+        $team = $dao->findTeamByIdAndUser($this->id_team, $this->logged_user ) ;
+        if ( !$team ) {
+            throw  new Exception('Team not found in user memberships') ;
         }
         else {
-            return $organization ;
+            return $team ;
         }
     }
 }

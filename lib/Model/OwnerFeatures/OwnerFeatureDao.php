@@ -1,21 +1,21 @@
 <?php
 
-use Organizations\OrganizationStruct;
+use Teams\TeamStruct;
 
 class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
 
-    public function findFromUserOrTeam( Users_UserStruct $user, \Organizations\OrganizationStruct $team ) {
+    public function findFromUserOrTeam( Users_UserStruct $user, TeamStruct $team ) {
        // TODO:
     }
 
-    public function getByOrganization( OrganizationStruct $team ) {
+    public function getByTeam( TeamStruct $team ) {
         $conn = Database::obtain()->getConnection();
 
         $stmt = $conn->prepare( "SELECT * FROM owner_features " .
-            " WHERE owner_features.id_organization = :id_organization " .
+            " WHERE owner_features.id_team = :id_team " .
             " AND owner_features.enabled "
         );
-        $stmt->execute( array( 'id_organization' => $team->id) );
+        $stmt->execute( array( 'id_team' => $team->id) );
         $stmt->setFetchMode(PDO::FETCH_CLASS, 'OwnerFeatures_OwnerFeatureStruct');
         return $stmt->fetchAll();
     }
@@ -34,9 +34,9 @@ class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
         $obj->last_update = date('Y-m-d H:i:s');
 
         $stmt = $conn->prepare( "INSERT INTO owner_features " .
-            " ( uid, feature_code, options, create_date, last_update, enabled, id_organization )" .
+            " ( uid, feature_code, options, create_date, last_update, enabled, id_team )" .
             " VALUES " .
-            " ( :uid, :feature_code, :options, :create_date, :last_update, :enabled, :id_organization );"
+            " ( :uid, :feature_code, :options, :create_date, :last_update, :enabled, :id_team );"
         );
 
         Log::doLog( $obj->attributes() );

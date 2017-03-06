@@ -8,15 +8,13 @@
 
 namespace CommandLineTasks;
 
-use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Organizations\MembershipDao;
-use Organizations\MembershipStruct;
-use Organizations\OrganizationDao;
-use Organizations\OrganizationStruct;
+use Teams\MembershipDao;
+use Teams\MembershipStruct;
+use Teams\TeamDao;
 
 class CreateTeamMembershipTask extends Command
 {
@@ -38,7 +36,7 @@ class CreateTeamMembershipTask extends Command
 
     protected function execute( InputInterface $input, OutputInterface $output ) {
         // find the team, ensure the user is not already a member or the
-        $teamDao = new OrganizationDao();
+        $teamDao = new TeamDao();
         $team = $teamDao->findById( $input->getArgument('team_id') );
 
         if ( !$team ) {

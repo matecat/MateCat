@@ -10,32 +10,32 @@
 namespace API\V2;
 
 use API\V2\Json\Membership;
-use API\V2\Validators\OrganizationAccessValidator;
-use OrganizationModel;
-use Organizations\MembershipDao;
-use Organizations\OrganizationDao;
-use Organizations\PendingInvitations;
+use API\V2\Validators\TeamAccessValidator;
+use TeamModel;
+use Teams\MembershipDao;
+use Teams\TeamDao;
+use Teams\PendingInvitations;
 
-class OrganizationMembersController extends KleinController {
+class TeamMembersController extends KleinController {
 
     protected function afterConstruct() {
-        $this->appendValidator( new OrganizationAccessValidator( $this ) );
+        $this->appendValidator( new TeamAccessValidator( $this ) );
     }
 
     /**
-     * Get organization members list
+     * Get team members list
      */
     public function index(){
         $membersList = ( new MembershipDao )
             ->setCacheTTL( 60 * 60 * 24 )
-            ->getMemberListByOrganizationId( $this->request->id_organization );
+            ->getMemberListByTeamId( $this->request->id_team );
 
         $pendingInvitation = new PendingInvitations( ( new \RedisHandler() )->getConnection(), [] );
 
         $formatter = new Membership( $membersList ) ;
         $this->response->json( [
                 'members' => $formatter->render(),
-                'pending_invitations' => $pendingInvitation->get( $this->request->id_organization )
+                'pending_invitations' => $pendingInvitation->get( $this->request->id_team )
         ] );
 
     }
@@ -50,10 +50,10 @@ class OrganizationMembersController extends KleinController {
             ]
         ], true ) ;
 
-        $organizationStruct = ( new OrganizationDao() )
-            ->findById( $this->request->id_organization );
+        $teamStruct = ( new TeamDao() )
+            ->findById( $this->request->id_team );
 
-        $model = new OrganizationModel( $organizationStruct ) ;
+        $model = new TeamModel( $teamStruct ) ;
         $model->setUser( $this->user ) ;
         $model->addMemberEmails( $params['members'] ) ;
         $full_members_list = $model->updateMembers();
@@ -62,7 +62,7 @@ class OrganizationMembersController extends KleinController {
         $formatter = new Membership( $full_members_list ) ;
         $this->response->json( [
                 'members' => $formatter->render(),
-                'pending_invitations' => $pendingInvitation->get( $organizationStruct->id )
+                'pending_invitations' => $pendingInvitation->get( $teamStruct->id )
         ] );
 
     }
@@ -70,10 +70,10 @@ class OrganizationMembersController extends KleinController {
     public function delete(){
         \Database::obtain()->begin();
 
-        $organizationStruct = ( new OrganizationDao() )
-            ->findById( $this->request->id_organization );
+        $teamStruct = ( new TeamDao() )
+            ->findById( $this->request->id_team );
 
-        $model = new OrganizationModel( $organizationStruct ) ;
+        $model = new TeamModel( $teamStruct ) ;
         $model->removeMemberUids( array( $this->request->uid_member ) );
         $model->setUser( $this->user ) ;
         $membersList = $model->updateMembers();
@@ -82,7 +82,7 @@ class OrganizationMembersController extends KleinController {
         $formatter = new Membership( $membersList ) ;
         $this->response->json( [
                 'members' => $formatter->render(),
-                'pending_invitations' => $pendingInvitation->get( $organizationStruct->id )
+                'pending_invitations' => $pendingInvitation->get( $teamStruct->id )
         ] );
 
     }

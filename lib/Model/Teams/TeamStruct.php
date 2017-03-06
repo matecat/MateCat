@@ -6,19 +6,19 @@
  * Time: 10:17
  */
 
-namespace Organizations;
+namespace Teams;
 
-use Constants_Organizations;
+use Constants_Teams;
 use DataAccess_AbstractDaoSilentStruct ;
 use DataAccess_IDaoStruct ;
 
-class OrganizationStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
+class TeamStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
 
     public $id ;
     public $name;
     public $created_by;
     public $created_at ;
-    public $type = Constants_Organizations::PERSONAL;
+    public $type = Constants_Teams::PERSONAL;
 
     protected $members ;
 

@@ -3,19 +3,19 @@
 
 class Routes {
 
-    public static function inviteToOrganizationConfirm( $requestInfo, Array $options = [] ) {
+    public static function inviteToTeamConfirm( $requestInfo, Array $options = [] ) {
 
         $host = self::httpHost( $options );
 
         $jwtHandler = new SimpleJWT( [
-                'invited_by_uid'  => $requestInfo[ 'invited_by_uid' ],
-                'email'           => $requestInfo[ 'email' ],
-                'organization_id' => $requestInfo[ 'organization_id' ],
+                'invited_by_uid' => $requestInfo[ 'invited_by_uid' ],
+                'email'          => $requestInfo[ 'email' ],
+                'team_id'        => $requestInfo[ 'team_id' ],
         ] );
 
         $jwtHandler->setTimeToLive( 60 * 60 * 24 * 3 ); //3 days
 
-        return "$host/api/app/orgs/members/invite/$jwtHandler";
+        return "$host/api/app/teams/members/invite/$jwtHandler";
 
     }
 

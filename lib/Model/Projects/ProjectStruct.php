@@ -1,11 +1,13 @@
 <?php
 
+use Teams\TeamDao;
+
 class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
     public $id ;
     public $password ;
     public $name ;
     public $id_customer ;
-    public $id_organization ;
+    public $id_team ;
     public $create_date ;
     public $id_engine_tm ;
     public $id_engine_mt ;
@@ -17,7 +19,6 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     public $pretranslate_100 ;
     public $id_qa_model ;
     public $id_assignee ;
-    public $id_workspace ;
 
 
     /**
@@ -80,14 +81,14 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     /**
-     * @return null|\Organizations\OrganizationStruct
+     * @return null|\Teams\TeamStruct
      */
-    public function getOrganization() {
-        if ( is_null( $this->id_organization ) ) {
+    public function getTeam() {
+        if ( is_null( $this->id_team ) ) {
             return null ;
         }
-        $dao = new \Organizations\OrganizationDao() ;
-        return $dao->findById( $this->id_organization ) ;
+        $dao = new TeamDao() ;
+        return $dao->findById( $this->id_team ) ;
     }
 
     /**

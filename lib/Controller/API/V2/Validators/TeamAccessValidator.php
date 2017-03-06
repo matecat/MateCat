@@ -12,11 +12,11 @@ namespace API\V2\Validators;
 
 use API\V2\Exceptions\AuthorizationError;
 use API\V2\KleinController;
-use Organizations\MembershipDao;
+use Teams\MembershipDao;
 
-class OrganizationAccessValidator extends Base {
+class TeamAccessValidator extends Base {
 
-    public $organization;
+    public    $team;
     protected $controller;
 
     public function __construct( KleinController $controller ) {
@@ -30,16 +30,16 @@ class OrganizationAccessValidator extends Base {
             throw new AuthorizationError('Not Authorized', 401);
         }
 
-        $this->organization = ( new MembershipDao() )->findOrganizationByIdAndUser(
-                $this->request->id_organization, $this->controller->getUser()
+        $this->team = ( new MembershipDao() )->findTeamByIdAndUser(
+                $this->request->id_team, $this->controller->getUser()
         );
 
-        if ( empty( $this->organization ) ) {
+        if ( empty( $this->team ) ) {
             throw new AuthorizationError( "Not Authorized", 401 );
         }
 
-        if ( method_exists($this->controller, 'setOrganization') ) {
-            $this->controller->setOrganization( $this->organization );
+        if ( method_exists($this->controller, 'setTeam') ) {
+            $this->controller->setTeam( $this->team );
         }
 
     }

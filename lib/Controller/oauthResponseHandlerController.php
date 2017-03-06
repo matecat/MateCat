@@ -1,4 +1,6 @@
 <?php
+use Teams\TeamDao;
+
 header("Cache-Control: no-store, no-cache, must-revalidate");  // HTTP/1.1
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
@@ -100,8 +102,8 @@ class oauthResponseHandlerController extends viewController{
         $this->user->create_date = Utils::mysqlTimestamp(time() ) ;
         $this->user->uid = Users_UserDao::insertStruct($this->user);
 
-        $dao = new \Organizations\OrganizationDao();
-        $dao->createPersonalOrganization($this->user);
+        $dao = new TeamDao();
+        $dao->createPersonalTeam($this->user);
     }
 
     protected function _updateExistingUser(Users_UserStruct $existing_user) {

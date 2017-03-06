@@ -9,42 +9,42 @@
 namespace API\V2\Json;
 
 
-use Organizations\MembershipStruct;
+use Teams\MembershipStruct;
 use Users\MetadataStruct;
 
 class Membership {
 
-    protected $data ;
+    protected $data;
 
-    public function __construct($data)
-    {
-        $this->data = $data  ;
+    public function __construct( $data ) {
+        $this->data = $data;
     }
 
-    public function renderItem(MembershipStruct $membership ) {
+    public function renderItem( MembershipStruct $membership ) {
         $out = array(
-            'id' => (int) $membership->id,
-            'id_organization' => (int) $membership->id_organization,
+                'id'      => (int)$membership->id,
+                'id_team' => (int)$membership->id_team,
         );
 
         if ( !is_null( $membership->getUser() ) ) {
-            $out['user'] = User::renderItem( $membership->getUser() ) ;
+            $out[ 'user' ] = User::renderItem( $membership->getUser() );
         }
 
-        $metadata = UserMetadata::renderMetadataCollection( $membership->getUserMetadata() ) ;
-        if ( !empty( $metadata) ) {
-            $out['user_metadata'] = array_filter( $metadata ) ;
+        $metadata = UserMetadata::renderMetadataCollection( $membership->getUserMetadata() );
+        if ( !empty( $metadata ) ) {
+            $out[ 'user_metadata' ] = array_filter( $metadata );
         }
 
         return $out;
     }
 
     public function render() {
-        $out = [] ;
-        foreach($this->data as $membership) {
+        $out = [];
+        foreach ( $this->data as $membership ) {
             $out[] = $this->renderItem( $membership );
         }
-        return $out ;
+
+        return $out;
     }
 
 

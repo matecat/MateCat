@@ -232,12 +232,12 @@
 
     </div>
 
-    <!--<div class="translate-box organization" tal:condition="php: !empty(organizations) && count(organizations) > 1" >-->
+    <!--<div class="translate-box organization" tal:condition="php: !empty(teams) && count(teams) > 1" >-->
         <!--<h2>Organization</h2>-->
         <!--<select name="organization" id="organization">-->
-            <!--<option tal:repeat="organization organizations"-->
-                    <!--tal:attributes="value organization/id; selected php: repeat.organization.index == 0 "-->
-                    <!--tal:content="organization/name"></option>-->
+            <!--<option tal:repeat="team teams"-->
+                    <!--tal:attributes="value team/id; selected php: repeat.team.index == 0 "-->
+                    <!--tal:content="team/name"></option>-->
         <!--</select>-->
     <!--</div>-->
 

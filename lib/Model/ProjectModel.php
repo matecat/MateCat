@@ -1,7 +1,8 @@
 <?php
 
-use API\V2\Exceptions\AuthorizationError;
 use Features\QaCheckBlacklist\BlacklistFromZip;
+use Teams\MembershipDao;
+use Teams\MembershipStruct;
 
 class ProjectModel {
 
@@ -65,10 +66,6 @@ class ProjectModel {
             $this->checkIdAssignee();
         }
 
-        if ( isset( $this->willChange[ 'id_workspace' ] ) ) {
-            $this->checkIdWorkspace();
-        }
-
         foreach ( $this->willChange as $field => $value ) {
             $newStruct->$field = $value;
         }
@@ -110,25 +107,17 @@ class ProjectModel {
     }
 
     private function checkIdAssignee() {
-        $membershipDao = new \Organizations\MembershipDao();
-        $members       = $membershipDao->getMemberListByOrganizationId( $this->project_struct->id_organization );
+        $membershipDao = new MembershipDao();
+        $members       = $membershipDao->getMemberListByTeamId( $this->project_struct->id_team );
         $id_assignee   = $this->willChange[ 'id_assignee' ];
-        $found         = array_filter( $members, function ( \Organizations\MembershipStruct $member ) use ( $id_assignee ) {
+        $found         = array_filter( $members, function ( MembershipStruct $member ) use ( $id_assignee ) {
             return ( $id_assignee == $member->uid );
         } );
 
         if ( empty( $found ) ) {
-            throw new \Exceptions\ValidationError( 'Assignee must be organization member' );
+            throw new \Exceptions\ValidationError( 'Assignee must be team member' );
         }
 
-    }
-
-    private function checkIdWorkspace() {
-        $wDao   = new \Organizations\WorkspaceDao();
-        $wSpace = $wDao->getById( $this->willChange[ 'id_workspace' ] );
-        if ( $wSpace->id_organization != $this->project_struct->id_organization ) {
-            throw new AuthorizationError( 'Not Authorized', 401 );
-        }
     }
 
 }

@@ -1498,7 +1498,7 @@ function fetchStatus( $sid, $results, $status = Constants_TranslationStatus::STA
 function insertProject( ArrayObject $projectStructure ) {
     $data                        = array();
     $data[ 'id_customer' ]       = $projectStructure[ 'id_customer' ];
-    $data[ 'id_organization' ]   = $projectStructure[ 'id_organization' ];
+    $data[ 'id_team' ]   = $projectStructure[ 'id_team' ];
     $data[ 'name' ]              = $projectStructure[ 'project_name' ];
     $data[ 'create_date' ]       = $projectStructure[ 'create_date' ];
     $data[ 'status_analysis' ]   = $projectStructure[ 'status' ];
@@ -1770,7 +1770,7 @@ function conditionsForProjectsQuery(
  * @param                   $search_status        string
  * @param                   $project_id           int
  *
- * @param \Organizations\OrganizationStruct $organization
+ * @param \Teams\TeamStruct $team
  *
  * @return array
  */
@@ -1778,10 +1778,9 @@ function getProjects( Users_UserStruct $user, $start, $step,
                       $search_in_pname, $search_source, $search_target,
                       $search_status, $search_only_completed,
                       $project_id,
-                      \Organizations\OrganizationStruct $organization = null,
-                      \Organizations\WorkspaceStruct $workspace = null,
+                      \Teams\TeamStruct $team = null,
                       Users_UserStruct $assignee = null,
-                      $no_workspace, $no_assignee
+                      $no_assignee
 
 ) {
 
@@ -1795,17 +1794,9 @@ function getProjects( Users_UserStruct $user, $start, $step,
         $data['project_id'] = $project_id ;
     }
 
-    if ( !is_null( $organization ) ) {
-        $conditions[] = " p.id_organization = :id_organization " ;
-        $data [ 'id_organization' ] = $organization->id ;
-    }
-
-    if ( $no_workspace ) {
-        $conditions[] = " p.id_workspace IS NULL " ;
-    }
-    elseif ( !is_null( $workspace ) ) {
-        $conditions[] = " p.id_workspace = :id_workspace " ;
-        $data ['id_workspace'] = $workspace->id ;
+    if ( !is_null( $team ) ) {
+        $conditions[] = " p.id_team = :id_team " ;
+        $data [ 'id_team' ] = $team->id ;
     }
 
     if ( $no_assignee ) {
@@ -1822,8 +1813,7 @@ function getProjects( Users_UserStruct $user, $start, $step,
 
     $projectsQuery =
             "SELECT p.id AS pid,
-                            p.id_organization AS id_organization,
-                            p.id_workspace AS id_workspace,
+                            p.id_team AS id_team,
                             p.id_assignee AS id_assignee,
                             p.name,
                             p.password,
@@ -1923,10 +1913,8 @@ function getJobsFromProjects( array $projectIDs, $search_source, $search_target,
 
 function getProjectsNumber( Users_UserStruct $user, $search_in_pname, $search_source, $search_target, $search_status,
                             $search_only_completed,
-                            \Organizations\OrganizationStruct $organization = null,
-                            \Organizations\WorkspaceStruct $workspace = null,
+                            \Teams\TeamStruct $team = null,
                             Users_UserStruct $assignee = null,
-                            $no_workspace = false,
                             $no_assignee = false
 ) {
 
@@ -1943,17 +1931,9 @@ function getProjectsNumber( Users_UserStruct $user, $search_in_pname, $search_so
     " ;
 
 
-    if ( !is_null( $organization ) ) {
-        $conditions[] = " p.id_organization = :id_organization " ;
-        $data [ 'id_organization' ] = $organization->id ;
-    }
-
-    if ( $no_workspace ) {
-        $conditions[] = " p.id_workspace IS NULL " ;
-    }
-    elseif ( !is_null( $workspace ) ) {
-        $conditions[] = " p.id_workspace = :id_workspace " ;
-        $data ['id_workspace'] = $workspace->id ;
+    if ( !is_null( $team ) ) {
+        $conditions[] = " p.id_team = :id_team " ;
+        $data [ 'id_team' ] = $team->id ;
     }
 
     if ( $no_assignee ) {

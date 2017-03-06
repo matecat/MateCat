@@ -51,10 +51,10 @@ class RedeemableProject
         if ( $this->isPresent() && $this->isRedeemable() ) {
 
             $this->project->id_customer = $this->user->email ;
-            $this->project->id_organization = $this->user->getPersonalOrganization()->id ;
+            $this->project->id_team = $this->user->getPersonalTeam()->id ;
 
             Projects_ProjectDao::updateStruct( $this->project, array(
-                'fields' => array( 'id_organization', 'id_customer' )
+                'fields' => array( 'id_team', 'id_customer' )
             ) ) ;
 
             ( new Jobs_JobDao() )->updateOwner( $this->project, $this->user );

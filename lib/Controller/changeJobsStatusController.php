@@ -1,7 +1,5 @@
 <?php
 
-use Organizations\OrganizationDao;
-
 class changeJobsStatusController extends ajaxController {
 
     private $res_type;
@@ -64,7 +62,7 @@ class changeJobsStatusController extends ajaxController {
             throw new Exception( "User Not Logged." );
         }
 
-        $organization = $this->logged_user->getPersonalOrganization();
+        $team = $this->logged_user->getPersonalTeam();
 
         if ( $this->res_type == "prj" ) {
 
@@ -93,14 +91,14 @@ class changeJobsStatusController extends ajaxController {
             $projects = ManageUtils::queryProjects( $this->logged_user,
                 1, 1, false, false,
                 false, false, false, null,
-                $organization
+                $team
             );
 
             $projnum = getProjectsNumber(
                 $this->logged_user,
                 false, false,
                 false, false, false,
-                $organization
+                $team
             );
 
             $this->result[ 'code' ]    = 1;

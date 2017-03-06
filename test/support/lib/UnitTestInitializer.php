@@ -8,7 +8,7 @@
  * Date: 30/06/16
  * Time: 11.23
  */
-class UnitTestInitializer
+class UnitTestInitializer extends IntegrationTest
 {
     /**
      * @var Database

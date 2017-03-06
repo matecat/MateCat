@@ -11,13 +11,8 @@ namespace API\V2\Validators;
 
 use API\V2\KleinController;
 use Exceptions\NotFoundError;
-use Klein\Request;
-use Organizations\OrganizationStruct;
-use Organizations\MembershipDao;
 
-use API\V2\Exceptions\AuthorizationError;
-
-class OrganizationProjectValidator extends Base {
+class TeamProjectValidator extends Base {
 
 
     /**
@@ -48,7 +43,7 @@ class OrganizationProjectValidator extends Base {
     /**
      * @param \Projects_ProjectStruct $project
      *
-     * @return OrganizationProjectValidator
+     * @return TeamProjectValidator
      */
     public function setProject( \Projects_ProjectStruct $project ){
         $this->project = $project;
