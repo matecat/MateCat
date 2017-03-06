@@ -6,16 +6,19 @@
     <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
     <meta name="viewport" content="width=device-width"/>
 
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery.js?build=${build_number}"></script>
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery-ui-1.8.20.custom.min.js?build=${build_number}"></script>
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery.hotkeys.js?build=${build_number}"></script>
+    <!--<script type="text/javascript" src="${basepath}public/js/lib/jquery.js?build=${build_number}"></script>-->
+    <!--<script type="text/javascript" src="${basepath}public/js/lib/jquery-ui-1.8.20.custom.min.js?build=${build_number}"></script>-->
+    <!--<script type="text/javascript" src="${basepath}public/js/lib/jquery.hotkeys.js?build=${build_number}"></script>-->
     <script type="text/javascript" src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
 
     <script type="text/javascript" src="${basepath}public/js/build/common.js?build=${build_number}"></script>
     <script type="text/javascript" src="${basepath}public/js/manage.js?build=${build_number}"></script>
     <script type="text/javascript" src="${basepath}public/js/build/react.js?build=${build_number}"></script>
     <script type="text/javascript" src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/outsource.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/forcedelivery.js"></script>
 
+    <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
     <link href="${basepath}public/css/build/manage-build.css?build=${build_number}" rel="stylesheet" type="text/css"/>
 
 
@@ -50,6 +53,9 @@
     </div>
 </div>
 
+<div metal:use-macro="outsourceModal.html/outsource_modal">
+    <!-- Outsource Modal Popup goes here -->
+</div>
 
 <footer>
     <div class="wrapper">

@@ -228,6 +228,7 @@ module.exports = function(grunt) {
                     basePath + 'lib/jquery.tablesorter-fork-mottie.js',
                     basePath + 'lib/jquery.tooltipster.min.js',
                     basePath + 'lib/jquery.powertip.min.js',
+                    basePath + 'lib/jquery-dateFormat.min.js',
                     basePath + 'lib/handlebars.runtime-v4.0.5.js',
                     basePath + 'lib/waypoints.min.js',
                     basePath + 'lib/diff_match_patch.js',

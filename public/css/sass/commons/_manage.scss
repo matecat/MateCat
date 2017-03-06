@@ -472,4 +472,7 @@ footer nav ul a:hover {
     color: #ffffff;
 }
 
+.modal[data-type=view] {
+    display: none;
+}
 

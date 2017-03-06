@@ -133,6 +133,41 @@ function renderQuote( clickedButton ) {
     });
 }
 
+function renderQuote2( idProject, password, jid, jpassword, fixedDelivery, typeOfService ) {
+
+    getOutsourceQuote2( idProject, password, jid, jpassword, fixedDelivery, typeOfService, function( quoteData ){
+        UI.quoteResponse = quoteData.data[0];
+        var chunk = quoteData.data[0][0];
+
+        showOutsourcePopup( UI.showPopupDetails );
+        UI.url_ok = quoteData.return_url.url_ok;
+        UI.url_ko = quoteData.return_url.url_ko;
+        UI.data_key = chunk.id;
+
+        // a generic error
+        if( chunk.quote_result != 1 ){
+            renderGenericErrorQuote();
+            return false;
+        }
+
+        // job already outsourced
+        if( chunk.outsourced == 1 ) {
+            renderOutsourcedQuote( chunk );
+            return false;
+        }
+
+        // delivery date too strict
+        if( chunk.quote_available != 1 ) {
+            renderNotAvailableQuote();
+            return false;
+        }
+
+        renderNormalQuote( chunk );
+
+        $(document).trigger('outsource-rendered', { quote_data : quoteData } );
+    });
+}
+
 
 
 function getOutsourceQuote( clickedButton, callback ) {
@@ -153,6 +188,29 @@ function getOutsourceQuote( clickedButton, callback ) {
             ]
         },
         context: clickedButton.parents('.totaltable').find('.languages .splitnum').text(),
+        success: function(d) {
+            if( typeof callback == "function" )
+                callback( d );
+        }
+    });
+}
+
+function getOutsourceQuote2( idProject, password, jid, jpassword, fixedDelivery, typeOfService, callback ) {
+
+    APP.doRequest({
+        data: {
+            action: 'outsourceTo',
+            pid: idProject,
+            ppassword: password,
+            fixedDelivery: fixedDelivery,
+            typeOfService: typeOfService,
+            jobs: [
+                {
+                    jid: jid,
+                    jpassword: jpassword
+                }
+            ]
+        },
         success: function(d) {
             if( typeof callback == "function" )
                 callback( d );
