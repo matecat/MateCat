@@ -98,7 +98,7 @@ class QAComponent extends React.Component {
             } else if($('#segment-' + segmentId + '-1').length) {
                 window.location.hash = segmentId + '-1';
             }
-            UI.scrollSegment('#segment-' + segmentId);
+            UI.scrollSegment($('#segment-' + segmentId));
         }
     }
 
