@@ -628,6 +628,7 @@ class NewController extends ajaxController {
 
         //reserve a project id from the sequence
         $projectStructure[ 'id_project' ] = Database::obtain()->nextSequence( Database::SEQ_ID_PROJECT )[ 0 ];
+        $projectStructure[ 'ppassword' ]  = $projectManager->generatePassword();
 
         Queue::sendProject( $projectStructure );
 
