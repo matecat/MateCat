@@ -92,10 +92,14 @@
         
         if ( segment.length ) {
             return doDirectScroll( segment, highlight, quick ) ; 
+        } else if($(inputSegment + '-1').length) {
+            return doDirectScroll( $(inputSegment + '-1'), highlight, quick ) ;
         }
         else {
             return tryToRenderAgain( segment, highlight ) ;
         }
+
+
 
     }
 
