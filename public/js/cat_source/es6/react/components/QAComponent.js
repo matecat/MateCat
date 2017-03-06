@@ -93,8 +93,12 @@ class QAComponent extends React.Component {
 
     scrollToSegment(segmentId) {
         if ( segmentId) {
+            if ( $('#segment-' + segmentId).length ) {
+                window.location.hash = segmentId;
+            } else if($('#segment-' + segmentId + '-1').length) {
+                window.location.hash = segmentId + '-1';
+            }
             UI.scrollSegment($('#segment-' + segmentId));
-            window.location.hash = segmentId;
         }
     }
 
