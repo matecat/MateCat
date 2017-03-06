@@ -334,15 +334,17 @@ class createProjectController extends ajaxController {
 
         //reserve a project id from the sequence
         $projectStructure[ 'id_project' ] = Database::obtain()->nextSequence( Database::SEQ_ID_PROJECT )[ 0 ];
+        $projectStructure[ 'ppassword' ]  = $projectManager->generatePassword();
 
         Queue::sendProject( $projectStructure );
-
-        sleep(10);
-        $this->result = Queue::getPublishedResults( $projectStructure['id_project'] ); //TODO LOOP PLZ in the UI
 
         $this->__clearSessionFiles();
         $this->__assignLastCreatedPid( $projectStructure['id_project'] ) ; //TODO get ID from published results ( API or directly from handler in a loop )
 
+        $this->result[ 'data' ] = [
+                'id_project' => $projectStructure[ 'id_project' ],
+                'password'   => $projectStructure[ 'ppassword' ]
+        ];
 
     }
 

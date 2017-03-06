@@ -21,28 +21,15 @@ class CreationStatus {
     }
 
     public function render() {
-        $out = [];
-
-        /**
-         * @var $record stdClass
-         */
-        foreach ( $this->data as $record ) {
-
-            $formatted = array(
-                    'status'       => 'OK',
-                    'message'      => 'Project created',
-                    'id_project'   => $record->id_project,
-                    'project_pass' => $record->ppassword,
-                    'name'         => $record->name,
-                    'new_keys'     => $record->new_keys,
-                    'analyze_url'  => $record->analyze_url,
-            );
-
-            $out[] = $formatted;
-
-        }
-
-        return $out;
+        return [
+                'status'       => 200,
+                'message'      => 'Project created',
+                'id_project'   => $this->data->id_project,
+                'project_pass' => $this->data->ppassword,
+                'project_name' => $this->data->project_name,
+                'new_keys'     => $this->data->new_keys,
+                'analyze_url'  => $this->data->analyze_url,
+        ];
     }
 
 }

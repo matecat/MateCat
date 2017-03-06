@@ -234,9 +234,9 @@ class ProjectManager {
      *
      */
     private function createProjectRecord() {
-        $this->projectStructure[ 'ppassword' ]  = $this->_generatePassword();
         $this->project = insertProject( $this->projectStructure );
         $this->projectStructure[ 'id_project' ] = $this->project->id; //redundant
+        $this->projectStructure[ 'ppassword' ]  = $this->project->password; //redundant
     }
 
 
@@ -925,7 +925,7 @@ class ProjectManager {
             //get payable rates
             $payableRates = json_encode( Analysis_PayableRates::getPayableRates( $shortSourceLang, $shortTargetLang ) );
 
-            $password = $this->_generatePassword();
+            $password = $this->generatePassword();
 
             $tm_key = array();
 
@@ -1292,7 +1292,7 @@ class ProjectManager {
             //IF THIS IS NOT the original job, DELETE relevant fields
             if ( $contents[ 'segment_start' ] != $projectStructure[ 'split_result' ][ 'job_first_segment' ] ) {
                 //next insert
-                $jobInfo[ 'password' ]    = $this->_generatePassword();
+                $jobInfo[ 'password' ]    = $this->generatePassword();
                 $jobInfo[ 'create_date' ] = date( 'Y-m-d H:i:s' );
             }
 
@@ -1406,7 +1406,7 @@ class ProjectManager {
 
         $oldPassword = $first_job[ 'password' ];
         if ( $renewPassword ) {
-            $first_job[ 'password' ] = self::_generatePassword();
+            $first_job[ 'password' ] = self::generatePassword();
         }
 
         $_data = array();
@@ -2228,7 +2228,7 @@ class ProjectManager {
 
     }
 
-    protected function _generatePassword( $length = 12 ) {
+    public function generatePassword( $length = 12 ) {
         return CatUtils::generate_password( $length );
     }
 
@@ -2408,8 +2408,6 @@ class ProjectManager {
             $this->projectStructure[ 'private_tm_user' ] = $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ];
             $this->projectStructure[ 'private_tm_pass' ] = $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ];
         }
-
-        insertTranslator( $this->projectStructure );
 
         $this->projectStructure['private_tm_key'] = $this->features->filter('filter_project_manager_private_tm_key',
                 $this->projectStructure['private_tm_key'],
