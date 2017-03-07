@@ -24,6 +24,12 @@ $.extend(UI, {
             $('.revision_heading').toggleClass('hide');
         });
 
+        $("body").on('click', '.modal .x-popup', function(e) {
+            e.preventDefault();
+            $( "body").removeClass( "showingOutsourceTo" );
+            APP.closePopup();
+        })
+
         // close and reset the popup to its default state
         $('.modal.outsource .x-popup').click( function() {
             resetOutsourcePopup( true );

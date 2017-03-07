@@ -78,6 +78,8 @@ box-shadow: inset 0 0 1px 1px #888;
     margin: -170px 0 0 -425px;
     padding-bottom: 10px;
     box-sizing: content-box;
+    top: 35%;
+    left: 50%;
 }
 
 .outsource.modal .popup-box {

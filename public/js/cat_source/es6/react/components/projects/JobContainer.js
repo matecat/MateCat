@@ -378,8 +378,7 @@ class JobContainer extends React.Component {
         $( ".title-words" ).text( 'Words' );
 
 
-        // if(config.enable_outsource) {
-        //     e.preventDefault();
+        if(config.enable_outsource) {
             resetOutsourcePopup( false );
             $('body').addClass('showingOutsourceTo');
             // $('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
@@ -388,7 +387,7 @@ class JobContainer extends React.Component {
             showOutsourcePopup( "1" );
             renderQuote2(this.props.project.get('id'), this.props.project.get('password'), this.props.job.get('id'), this.props.job.get('password'), "0", "professional");
             $('.outsource.modal').show();
-        // }
+        }
     }
 
     render () {

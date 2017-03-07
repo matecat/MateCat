@@ -525,4 +525,7 @@ UI = {
 $(document).ready(function(){
     UI.init();
     UI.render();
+    if ( config.enable_outsource ) {
+        UI.outsourceInit();
+    }
 });
