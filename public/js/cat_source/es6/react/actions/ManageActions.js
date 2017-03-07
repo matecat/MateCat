@@ -210,7 +210,7 @@ let ManageActions = {
         let team;
         let self = this;
         UI.createTeam(teamName, members).then(function (response) {
-            team = response.organization;
+            team = response.team;
             AppDispatcher.dispatch({
                 actionType: ManageConstants.ADD_TEAM,
                 team: team

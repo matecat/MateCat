@@ -190,7 +190,7 @@ APP.getCreateProjectParams = function() {
 		speech2text         		: !!( $("#s2t_check").prop("checked") && !$("#s2t_check").prop("disabled") ),
 		tag_projection			    : !!( $("#tagp_check").prop("checked") && !$("#tagp_check").prop("disabled") ),
 		segmentation_rule			: $( '#segm_rule' ).val(),
-        id_organization             : UI.UPLOAD_PAGE.getSelectedTeam()
+        id_team             : UI.UPLOAD_PAGE.getSelectedTeam()
 	} ;
 };
 

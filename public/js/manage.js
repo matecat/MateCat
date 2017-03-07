@@ -57,7 +57,7 @@ UI = {
 
         this.getAllTeams().done(function (data) {
 
-            self.teams = data.organizations;
+            self.teams = data.teams;
             ManageActions.renderTeams(self.teams);
             self.selectedTeam = APP.getLastTeamSelected(self.teams);
             self.getTeamStructure(self.selectedTeam).done(function () {
@@ -272,7 +272,7 @@ UI = {
         let pageNumber = (page) ? page : UI.Search.currentPage;
         let data = {
             action: 'getProjects',
-            id_organization: team.id,
+            id_team: team.id,
             page:	pageNumber,
             filter: (!$.isEmptyObject(UI.Search.filter)) ? 1 : 0,
         };
@@ -304,7 +304,7 @@ UI = {
             async: true,
             data: data,
             type: "POST",
-            url : "/api/v2/orgs"
+            url : "/api/v2/teams"
         });
 
     },
@@ -313,7 +313,7 @@ UI = {
         return $.ajax({
             async: true,
             type: "get",
-            url : "/api/v2/orgs/" + team.id + "/members"
+            url : "/api/v2/teams/" + team.id + "/members"
         });
     },
 
@@ -381,7 +381,7 @@ UI = {
         return $.ajax({
             data: JSON.stringify(data),
             type: "PUT",
-            url : "/api/v2/orgs/" + idOrg + "/projects/" + idProject,
+            url : "/api/v2/teams/" + idOrg + "/projects/" + idProject,
         });
     },
 
@@ -394,7 +394,7 @@ UI = {
         return $.ajax({
             data: JSON.stringify(data),
             type: "put",
-            url : "/api/v2/orgs/" + idOrg + "/projects/" + idProject,
+            url : "/api/v2/teams/" + idOrg + "/projects/" + idProject,
         });
     },
 
@@ -428,14 +428,14 @@ UI = {
         return $.ajax({
             data: data,
             type: "post",
-            url : "/api/v2/orgs/"+ team.id +"/members",
+            url : "/api/v2/teams/"+ team.id +"/members",
         });
     },
 
     removeUserFromTeam: function (team, userId) {
         return $.ajax({
             type: "delete",
-            url : "/api/v2/orgs/"+ team.id +"/members/" + userId,
+            url : "/api/v2/teams/"+ team.id +"/members/" + userId,
         });
     },
 
@@ -446,7 +446,7 @@ UI = {
         return $.ajax({
             data: JSON.stringify(data),
             type: "PUT",
-            url : "/api/v2/orgs/" + team.id,
+            url : "/api/v2/teams/" + team.id,
         });
     },
 
