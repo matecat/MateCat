@@ -3,7 +3,7 @@ APP = null;
 APP = {
     init: function () {
         this.setLoginEvents();
-        this.organizationStorageName = 'organizationId';
+        this.teamStorageName = 'teamId';
         this.isCattool = $( 'body' ).hasClass( 'cattool' );
         $( "body" ).on( 'click', '.modal .x-popup', function ( e ) {
             e.preventDefault();
@@ -694,24 +694,24 @@ APP = {
 
 
 
-    getLastOrganizationSelected: function (organizations) {
-        if (localStorage.getItem(this.organizationStorageName)) {
-            let lastId = localStorage.getItem(this.organizationStorageName);
-            let organization = organizations.find(function (org, i) {
-                return parseInt(org.id) === parseInt(lastId);
+    getLastTeamSelected: function (teams) {
+        if (localStorage.getItem(this.teamStorageName)) {
+            let lastId = localStorage.getItem(this.teamStorageName);
+            let team = teams.find(function (t, i) {
+                return parseInt(t.id) === parseInt(lastId);
             });
-            if (organization) {
-                return organization;
+            if (team) {
+                return team;
             } else {
-                return organizations[0];
+                return team[0];
             }
         } else {
-            return organizations[0];
+            return teams[0];
         }
     },
 
-    setOrganizationInStorage(organizationId) {
-        localStorage.setItem(this.organizationStorageName, organizationId);
+    setTeamInStorage(teamId) {
+        localStorage.setItem(this.teamStorageName, teamId);
     },
 
     downloadFile: function (idJob, pass, callback) {

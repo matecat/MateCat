@@ -5,86 +5,86 @@ class Header extends React.Component {
     constructor (props) {
         super(props);
         this.state = {
-            organizations: [],
-            selectedOrganizationId : null
+            teams: [],
+            selectedTeamId : null
         };
-        this.renderOrganizations = this.renderOrganizations.bind(this);
-        this.updateOrganizations = this.updateOrganizations.bind(this);
-        this.chooseOrganizations = this.chooseOrganizations.bind(this);
-        this.openModifyOrganization = this.openModifyOrganization.bind(this);
+        this.renderTeams = this.renderTeams.bind(this);
+        this.updateTeams = this.updateTeams.bind(this);
+        this.chooseTeams = this.chooseTeams.bind(this);
+        this.openModifyTeam = this.openModifyTeam.bind(this);
     }
 
     componentDidMount () {
-        if (this.state.selectedOrganizationId) {
-            dropdownOrganizations.dropdown('set selected',  this.state.selectedOrganizationId);
+        if (this.state.selectedTeamId) {
+            this.dropdownTeams.dropdown('set selected',  this.state.selectedTeamId);
         }
-        OrganizationsStore.addListener(ManageConstants.RENDER_ORGANIZATIONS, this.renderOrganizations);
-        OrganizationsStore.addListener(ManageConstants.UPDATE_ORGANIZATIONS, this.updateOrganizations);
-        OrganizationsStore.addListener(ManageConstants.CHOOSE_ORGANIZATION, this.chooseOrganizations);
+        TeamsStore.addListener(ManageConstants.RENDER_TEAMS, this.renderTeams);
+        TeamsStore.addListener(ManageConstants.UPDATE_TEAMs, this.updateTeams);
+        TeamsStore.addListener(ManageConstants.CHOOSE_TEAM, this.chooseTeams);
     }
 
     componentWillUnmount() {
-        OrganizationsStore.removeListener(ManageConstants.RENDER_ORGANIZATIONS, this.renderOrganizations);
-        OrganizationsStore.removeListener(ManageConstants.UPDATE_ORGANIZATIONS, this.updateOrganizations);
-        OrganizationsStore.removeListener(ManageConstants.CHOOSE_ORGANIZATION, this.chooseOrganizations);
+        TeamsStore.removeListener(ManageConstants.RENDER_TEAMS, this.renderTeams);
+        TeamsStore.removeListener(ManageConstants.UPDATE_TEAMs, this.updateTeams);
+        TeamsStore.removeListener(ManageConstants.CHOOSE_TEAM, this.chooseTeams);
     }
 
     componentDidUpdate() {
         let self = this;
-        if (this.state.organizations.size > 0){
-            let dropdownOrganizations = $(this.dropdownOrganizations);
-            if (this.state.selectedOrganizationId ) {
+        if (this.state.teams.size > 0){
+            let dropdownTeams = $(this.dropdownTeams);
+            if (this.state.selectedTeamId ) {
                 setTimeout(function () {
-                    dropdownOrganizations.dropdown('set selected', self.state.selectedOrganizationId);
+                    dropdownTeams.dropdown('set selected', self.state.selectedTeamId);
                 });
             } else {
-                dropdownOrganizations.dropdown();
+                dropdownTeams.dropdown();
             }
         }
     }
 
-    changeOrganization(event, organization) {
+    changeTeam(event, team) {
         if (this.props.showSubHeader) {
-            if (organization.get('id')  !== this.state.selectedOrganizationId) {
-                let selectedOrganization = this.state.organizations.find(function (org) {
-                    if (org.get("id") === organization.get("id")) {
+            if (team.get('id')  !== this.state.selectedTeamId) {
+                let selectedTeam = this.state.teams.find(function (org) {
+                    if (org.get("id") === team.get("id")) {
                         return true;
                     }
                 });
                 window.scrollTo(0, 0);
-                ManageActions.changeOrganization(selectedOrganization.toJS());
+                ManageActions.changeTeam(selectedTeam.toJS());
             }
         } else {
-            ManageActions.changeOrganizationFromUploadPage();
+            ManageActions.changeTeamFromUploadPage();
         }
     }
 
-    openCreateOrganizations () {
-        ManageActions.openCreateOrganizationModal();
+    openCreateTeams () {
+        ManageActions.openCreateTeamModal();
     }
 
-    openModifyOrganization (event, organization) {
+    openModifyTeam (event, team) {
         event.stopPropagation();
         event.preventDefault();
-        $(this.dropdownOrganizations).dropdown('set selected', '' + this.state.selectedOrganizationId);
-        ManageActions.openModifyOrganizationModal(organization.toJS());
+        $(this.dropdownTeams).dropdown('set selected', '' + this.state.selectedTeamId);
+        ManageActions.openModifyTeamModal(team.toJS());
     }
 
-    renderOrganizations(organizations) {
+    renderTeams(teams) {
         this.setState({
-            organizations : organizations
+            teams : teams
         });
     }
 
-    updateOrganizations(organizations) {
+    updateTeams(teams) {
         this.setState({
-            organizations : organizations,
+            teams : teams,
         });
     }
 
-    chooseOrganizations(id) {
+    chooseTeams(id) {
         this.setState({
-            selectedOrganizationId : id,
+            selectedTeamId : id,
         });
     }
 
@@ -108,41 +108,41 @@ class Header extends React.Component {
         }
     }
 
-    getOrganizationsSelect() {
+    getTeamsSelect() {
         let result = '';
         var self = this;
-        if (this.state.organizations.size > 0) {
-            let items = this.state.organizations.map(function(organization, i) {
+        if (this.state.teams.size > 0) {
+            let items = this.state.teams.map(function(team, i) {
                 let iconModal = '';
                 if (self.props.showModals) {
-                    iconModal = <a className="organization-filter button show right"
-                                   onClick={(e) => self.openModifyOrganization(e, organization)}>
+                    iconModal = <a className="team-filter button show right"
+                                   onClick={(e) => self.openModifyTeam(e, team)}>
                         <i className="icon-more_vert icon"/>
                     </a>
                 }
-                return <div className="item" data-value={organization.get('id')}
-                     data-text={organization.get('name')}
-                     key={'organization' + organization.get('name') + organization.get('id')}
-                     onClick={(e) => self.changeOrganization(e, organization)}>
-                    {organization.get('name')}
+                return <div className="item" data-value={team.get('id')}
+                     data-text={team.get('name')}
+                     key={'team' + team.get('name') + team.get('id')}
+                     onClick={(e) => self.changeTeam(e, team)}>
+                    {team.get('name')}
                     {iconModal}
                 </div>
             });
-            let addOrg = '';
+            let addTeam = '';
             if (self.props.showModals) {
-                addOrg = <div className="header" onClick={this.openCreateOrganizations.bind(this)}>New Organization
-                                <a className="organization-filter button show">
+                addTeam = <div className="header" onClick={this.openCreateTeams.bind(this)}>New Team
+                                <a className="team-filter button show">
                                     <i className="icon-plus3 icon"/>
                                 </a>
                             </div>
             }
             result = <div className="ui top right pointing dropdown select-org"
-                          ref={(dropdownOrganizations) => this.dropdownOrganizations = dropdownOrganizations}>
-                <input type="hidden" name="organization" className="organization-dd" />
-                <span className="text">Choose Organization</span>
+                          ref={(dropdownTeams) => this.dropdownTeams = dropdownTeams}>
+                <input type="hidden" name="team" className="team-dd" />
+                <span className="text">Choose Team</span>
                 {/*<i className="dropdown icon"/>*/}
                 <div className="menu">
-                    {addOrg}
+                    {addTeam}
                     { self.props.showModals ? (
                             <div className="divider"></div>
                         ): (
@@ -159,15 +159,15 @@ class Header extends React.Component {
 
     render () {
         let self = this;
-        let organizationsSelect = (this.props.loggedUser) ? this.getOrganizationsSelect() : '';
+        let teamsSelect = (this.props.loggedUser) ? this.getTeamsSelect() : '';
         let userIcon = this.getUserIcon();
-        let selectedOrganization =  this.state.organizations.find(function (org) {
-            return org.get('id') == self.state.selectedOrganizationId;
+        let selectedTeam =  this.state.teams.find(function (org) {
+            return org.get('id') == self.state.selectedTeamId;
         });
         let subHeader = '';
         if (this.props.showSubHeader) {
             subHeader = <SubHeader
-                selectedOrganization={selectedOrganization}
+                selectedTeam={selectedTeam}
             />;
         }
 
@@ -182,7 +182,7 @@ class Header extends React.Component {
                             <div className="thirteen wide right aligned wide column">
                                 {userIcon}
 
-                                {organizationsSelect}
+                                {teamsSelect}
 
                                 { (this.props.showLinks && !this.props.loggedUser) ? (
                                         <ul id="menu-site">

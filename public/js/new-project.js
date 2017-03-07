@@ -190,7 +190,7 @@ APP.getCreateProjectParams = function() {
 		speech2text         		: !!( $("#s2t_check").prop("checked") && !$("#s2t_check").prop("disabled") ),
 		tag_projection			    : !!( $("#tagp_check").prop("checked") && !$("#tagp_check").prop("disabled") ),
 		segmentation_rule			: $( '#segm_rule' ).val(),
-        id_organization             : UI.UPLOAD_PAGE.getSelectedOrganization()
+        id_organization             : UI.UPLOAD_PAGE.getSelectedTeam()
 	} ;
 };
 
@@ -252,11 +252,11 @@ $.extend(UI.UPLOAD_PAGE, {
                 showModals: false,
                 showLinks: true
             }), headerMountPoint);
-            this.getAllOrganizations().done(function (data) {
-                self.organizations = data.organizations;
-                ManageActions.renderOrganizations(self.organizations);
-                self.selectedOrganization = APP.getLastOrganizationSelected(self.organizations);
-                ManageActions.selectOrganization(self.selectedOrganization);
+            this.getAllTeams().done(function (data) {
+                self.teams = data.teams;
+                ManageActions.renderTeams(self.teams);
+                self.selectedTeam = APP.getLastTeamSelected(self.teams);
+                ManageActions.selectTeam(self.selectedTeam);
             });
         } else {
             ReactDOM.render(React.createElement(Header, {
@@ -268,10 +268,10 @@ $.extend(UI.UPLOAD_PAGE, {
         }
     },
 
-    getAllOrganizations: function () {
-        if ( APP.USER.STORE.organizations ) {
+    getAllTeams: function () {
+        if ( APP.USER.STORE.teams ) {
             let data = {
-                organizations: APP.USER.STORE.organizations
+                teams: APP.USER.STORE.teams
             };
             let deferred = $.Deferred().resolve(data);
             return deferred.promise();
@@ -281,12 +281,12 @@ $.extend(UI.UPLOAD_PAGE, {
 
     },
 
-    getSelectedOrganization: function () {
-        let selectedOrganizationId;
+    getSelectedTeam: function () {
+        let selectedTeamId;
         if (config.isLoggedIn) {
-            selectedOrganizationId = $('.organization-dd').val();
+            selectedTeamId = $('.team-dd').val();
         }
-        return selectedOrganizationId;
+        return selectedTeamId;
     },
 
 

@@ -175,8 +175,7 @@ body.manage {
                             display: none;
                         }
                     }
-                    &.project-assignee,
-                    &.project-workspace {
+                    &.project-assignee {
                         .ui.cancel.label {
                             padding: 4px;
                             background-color: rgba(255, 255, 255, 0.10);
@@ -199,45 +198,6 @@ body.manage {
                         &:hover .ui.cancel.label {
                             visibility: visible;
                             z-index: 2;
-                        }
-                    }
-                    &.project-workspace {
-                        vertical-align: top;
-                        height: 30px;
-                        text-align: center;
-                        line-height: 30px;
-                        margin-right: 8px;
-                        transition: 0.3s ease;
-                        padding: 0 15px !important;
-                        font-size: 12px;
-                        font-weight: 100;
-                        position: relative;
-                        background-color: #c55938;
-                        color: white;
-                        cursor: pointer;
-                        &:hover {
-                            padding-right: 35px !important;
-                            background-color: #d66340;
-                        }
-                    }
-                    &.no-workspace {
-                        border: .1em dashed #868686;
-                        vertical-align: top;
-                        height: 30px;
-                        text-align: center;
-                        line-height: 30px;
-                        margin-right: 8px;
-                        transition: 0.3s ease;
-                        padding: 0 15px !important;
-                        font-size: 12px;
-                        font-weight: 100;
-                        &:hover {
-                            border: .1em dashed deepskyblue;
-                            color: deepskyblue;
-                            background-color: transparent;
-                        }
-                        .ui.cancel.label {
-                            display: none;
                         }
                     }
                 }

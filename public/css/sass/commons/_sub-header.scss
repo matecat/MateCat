@@ -4,19 +4,6 @@
 	box-shadow: rgba(0, 0, 0, 0.137255) 0px 2px 2px 0px, rgba(0, 0, 0, 0.117647) 0px 1px 5px 0px, rgba(0, 0, 0, 0.2) 0px 3px 1px -2px;
     .ui.container.equal.width.grid {
         width: 1335px !important;
-		.no-workspace {
-            padding-top: 10px !important;
-            transition: 0.3s ease !important;
-            a {
-                color: #09beec;
-                i {
-                    vertical-align: text-bottom;
-                }
-                &:hover {
-                    color: #4183C4
-                }
-            }
-        }
     }
 	.projects-state {
 		width: 40px !important;
@@ -38,9 +25,6 @@
 
 			}
 		}
-	}
-	.workspace-dropdown {
-		max-width: 300px;
 	}
 	.ws-settings {
 		padding: 0px;

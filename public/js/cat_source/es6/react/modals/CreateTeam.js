@@ -1,5 +1,5 @@
 
-class CreateOrganization extends React.Component {
+class CreateTeam extends React.Component {
 
 
     constructor(props) {
@@ -72,7 +72,7 @@ class CreateOrganization extends React.Component {
         e.preventDefault();
         if (this.inputNewOrg.value.length > 0 && !this.state.errorDropdown) {
             var members = ($(this.usersInput).dropdown('get value').length > 0) ? $(this.usersInput).dropdown('get value').split(",") : [];
-            ManageActions.createOrganization(this.inputNewOrg.value,  members);
+            ManageActions.createTeam(this.inputNewOrg.value,  members);
             APP.ModalWindow.onCloseModal();
             this.inputNewOrg.value = '';
         } else if (this.inputNewOrg.value.length == 0 ) {
@@ -89,13 +89,13 @@ class CreateOrganization extends React.Component {
 
         var buttonClass = (this.state.readyToSend && !this.state.errorInput && !this.state.errorDropdown ) ? '' : 'disabled';
 
-        return  <div className="create-organization-modal">
+        return  <div className="create-team-modal">
             <div className="matecat-modal-top">
                 <div className="ui one column grid left aligned">
                     <div className="column">
-                        <h3>Organization Name</h3>
+                        <h3>Team Name</h3>
                         <div className={"ui large fluid icon input " + inputError}>
-                            <input type="text" placeholder="Organization Name"
+                            <input type="text" placeholder="Team Name"
                                    onFocus={this.onInputFocus.bind(this)}
                                    onKeyUp={this.handleKeyPress.bind(this)}
                                    ref={(inputNewOrg) => this.inputNewOrg = inputNewOrg}/>
@@ -133,4 +133,4 @@ class CreateOrganization extends React.Component {
 }
 
 
-export default CreateOrganization ;
+export default CreateTeam ;
