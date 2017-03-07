@@ -45,7 +45,7 @@ class ProjectContainer extends React.Component {
                 this.dropdownUsers.classList.remove("shadow-1");
                 this.dropdownUsers.classList.add("project-not-assigned");
             }
-            if (this.props.organization.get('type') != "personal") {
+            if (this.props.team.get('type') != "personal") {
                 $(this.dropdownUsers).dropdown({
                     fullTextSearch: 'exact',
                     onChange: function(value, text, $selectedItem) {
@@ -53,25 +53,6 @@ class ProjectContainer extends React.Component {
                     }
                 });
             }
-        }
-        if (this.dropdownWorkspace) {
-            if ( this.props.project.get('id_workspace') ) {
-                $(this.dropdownWorkspace).dropdown('set selected', this.props.project.get('id_workspace'));
-                this.dropdownWorkspace.classList.remove("no-workspace");
-                this.dropdownWorkspace.classList.add("project-workspace");
-                this.dropdownWorkspace.classList.add("shadow-1");
-            } else {
-                $(this.dropdownWorkspace).dropdown('set selected', -1);
-                this.dropdownWorkspace.classList.remove("project-workspace");
-                this.dropdownWorkspace.classList.remove("shadow-1");
-                this.dropdownWorkspace.classList.add("no-workspace");
-            }
-            $(this.dropdownWorkspace).dropdown({
-                fullTextSearch: 'exact',
-                onChange: function(value, text, $selectedItem) {
-                    self.changeWorkspace(value);
-                }
-            });
         }
 
 
@@ -96,7 +77,7 @@ class ProjectContainer extends React.Component {
             idUser = -1;
             $(this.dropdownUsers).dropdown('hide');
         } else {
-            let newUser = this.props.organization.get('members').find(function (member) {
+            let newUser = this.props.team.get('members').find(function (member) {
                 let user = member.get('user');
                 if (user.get('uid') === parseInt(value) ) {
                     return true;
@@ -106,33 +87,8 @@ class ProjectContainer extends React.Component {
             idUser = user.get('uid');
         }
         if ( (!this.props.project.get('id_assignee') && idUser !== -1) || (this.props.project.get('id_assignee') && idUser != this.props.project.get('id_assignee'))) {
-            ManageActions.changeProjectAssignee(this.props.organization, this.props.project, user);
+            ManageActions.changeProjectAssignee(this.props.team, this.props.project, user);
         }
-    }
-
-    changeWorkspace(value) {
-        let ws, idWS;
-        if (value === '-1') {
-            ws = -1;
-            idWS = -1;
-            $(this.dropdownWorkspace).dropdown('hide');
-        } else {
-            let selectedWS = this.props.organization.get('workspaces').find(function (ws) {
-                return ws.get('id') === parseInt(value);
-            });
-            idWS = selectedWS.get('id');
-        }
-
-        if (!this.props.project.get('id_workspace') && idWS !== -1 || this.props.project.get('id_workspace') && idWS != this.props.project.get('id_workspace')) {
-            ManageActions.changeProjectWorkspace(idWS,  this.props.project);
-        }
-    }
-
-
-    removeWorkspace(event) {
-        event.preventDefault();
-        event.stopPropagation();
-        ManageActions.changeProjectWorkspace(-1,  this.props.project);
     }
 
 
@@ -156,7 +112,7 @@ class ProjectContainer extends React.Component {
 
     changeProjectName(event) {
         if (event.target.value !== this.props.project.get('name') && event.target.value !== '') {
-            ManageActions.changeProjectName(this.props.organization, this.props.project, event.target.value);
+            ManageActions.changeProjectName(this.props.team, this.props.project, event.target.value);
             this.setState({
                 projectName: event.target.value,
                 inputNameChanged: true,
@@ -348,14 +304,14 @@ class ProjectContainer extends React.Component {
     }
 
     openAddMember() {
-        ManageActions.openModifyOrganizationModal(this.props.organization.toJS());
+        ManageActions.openModifyTeamModal(this.props.team.toJS());
     }
 
     getDropDownUsers() {
        let result = '';
        var self = this;
-       if (this.props.organization.get('members') && this.props.organization.get("type") !== 'personal') {
-           let members = this.props.organization.get('members').map(function(member, i) {
+       if (this.props.team.get('members') && this.props.team.get("type") !== 'personal') {
+           let members = this.props.team.get('members').map(function(member, i) {
                let user = member.get('user');
                return <div className="item " data-value={user.get('uid')}
                            key={'user' + user.get('uid')}>
@@ -403,46 +359,6 @@ class ProjectContainer extends React.Component {
        return result;
     }
 
-    getWorkspacesDropdown() {
-        let result = '';
-        var self = this;
-        if (this.props.organization.get('workspaces')) {
-            let workspaces = this.props.organization.get('workspaces').map(function (ws, i) {
-
-                return <div className="item " data-value={ws.get('id')}
-                            key={'ws' + ws.get('id')}>
-                    {ws.get('name')}
-                </div>
-            });
-
-            result = <div className={"ui project-workspace dropdown top right pointing shadow-1"}
-                          ref={(dropdownWorkspace) => this.dropdownWorkspace = dropdownWorkspace}>
-                        <span className="text">
-                            No Workspace
-                        </span>
-                <div className="ui cancel label"
-                     onClick={self.changeWorkspace.bind(self, '-1')}>
-                    <i className="icon-cancel3"/>
-                </div>
-
-                <div className="menu">
-                    <div className="ui icon search input">
-                        <i className="icon-search icon"/>
-                        <input type="text" name="UserName" placeholder="Name or email."/>
-                    </div>
-                    <div className="scrolling menu">
-                        {workspaces}
-                        <div className="item" data-value="-1">
-                            No Workspace
-                        </div>
-                    </div>
-                </div>
-            </div>;
-        }
-
-        return result;
-    }
-
     componentDidUpdate() {
         let self = this;
         this.initDropdowns();
@@ -479,7 +395,7 @@ class ProjectContainer extends React.Component {
     shouldComponentUpdate(nextProps, nextState){
         return (nextProps.project !== this.props.project ||
         nextState.lastAction !==  this.state.lastAction ||
-        nextProps.organization !==  this.props.organization ||
+        nextProps.team !==  this.props.team ||
         nextState.inputSelected !==  this.state.inputSelected ||
         nextState.inputNameChanged !==  this.state.inputNameChanged
         )
@@ -535,7 +451,6 @@ class ProjectContainer extends React.Component {
 
         // Users dropdown
         let dropDownUsers = this.getDropDownUsers();
-        let dropDownWS = this.getWorkspacesDropdown();
         //Input Class
         let inputClass = (this.state.inputSelected) ? 'selected' : '';
         let inputIcon = (this.state.inputNameChanged) ? <i className="icon-checkmark green icon" /> : <i className="icon-pencil icon" />;
@@ -587,7 +502,6 @@ class ProjectContainer extends React.Component {
                                             <a href={analyzeUrl} target="_blank">{payableWords} <span>payable words</span></a>
                                         </div>
                                         <div className="project-activity-icon">
-                                            {dropDownWS}
                                             {dropDownUsers}
                                             <div className="project-menu circular ui icon top right pointing dropdown basic button"
                                                     ref={(dropdown) => this.dropdown = dropdown}>

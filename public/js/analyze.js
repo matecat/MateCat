@@ -120,7 +120,7 @@ UI = {
 
         this.checkQueryParams();
 
-        this.setOrganizationinHeader();
+        this.setTeamHeader();
 	},
 	performPreCheckSplitComputation: function(doStringSanitization) {
 
@@ -794,10 +794,10 @@ UI = {
 
 	},
 
-    setOrganizationinHeader: function () {
+    setTeamHeader: function () {
         APP.USER.loadUserData().done(function (data) {
-            var selectedOrganization = APP.getLastOrganizationSelected(data.organizations);
-            $('.organization-name').text(selectedOrganization.name);
+            var selectedTeam = APP.getLastTeamSelected(data.teams);
+            $('.team-name').text(selectedTeam.name);
         })
     }
 };

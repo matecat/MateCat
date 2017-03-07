@@ -13,8 +13,7 @@ header {
             height: 48px !important;
         }
         .ui.selection.dropdown,
-        .ui.select-org.dropdown,
-        .ui.selection.workspace-dropdown {
+        .ui.select-org.dropdown {
             font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
             font-weight: 600;
             &.org {

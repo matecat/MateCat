@@ -8,9 +8,7 @@ UI = {
         this.openJobSettings = this.openJobSettings.bind(this);
         this.changeJobsOrProjectStatus = this.changeJobsOrProjectStatus.bind(this);
         this.changeJobPassword = this.changeJobPassword.bind(this);
-        this.changeOrganization = this.changeOrganization.bind(this);
-        this.changeProjectWorkspace = this.changeProjectWorkspace.bind(this);
-        this.selectedWorkspace = ManageConstants.ALL_WORKSPACES_FILTER;
+        this.changeTeam = this.changeTeam.bind(this);
         this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
 
         //Job Actions
@@ -18,10 +16,8 @@ UI = {
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_TM_PANEL, this.openJobTMPanel);
 
         //Modals
-        ProjectsStore.addListener(ManageConstants.OPEN_CREATE_ORGANIZATION_MODAL, this.openCreateOrganizationModal);
-        ProjectsStore.addListener(ManageConstants.OPEN_MODIFY_ORGANIZATION_MODAL, this.openModifyOrganizationModal);
-        ProjectsStore.addListener(ManageConstants.OPEN_ASSIGN_TO_TRANSLATOR_MODAL, this.openAssignToTranslator);
-        ProjectsStore.addListener(ManageConstants.OPEN_CREATE_WORKSPACE_MODAL, this.openCreateWorkspace);
+        ProjectsStore.addListener(ManageConstants.OPEN_CREATE_TEAM_MODAL, this.openCreateTeamModal);
+        ProjectsStore.addListener(ManageConstants.OPEN_MODIFY_TEAM_MODAL, this.openModifyTeamModal);
     },
 
     render: function () {
@@ -59,15 +55,15 @@ UI = {
             $(this).data("prevType", e.type);
         });
 
-        this.getAllOrganizations().done(function (data) {
+        this.getAllTeams().done(function (data) {
 
-            self.organizations = data.organizations;
-            ManageActions.renderOrganizations(self.organizations);
-            self.selectedOrganization = APP.getLastOrganizationSelected(self.organizations);
-            self.getOrganizationStructure(self.selectedOrganization).done(function () {
-                ManageActions.selectOrganization(self.selectedOrganization);
-                self.getProjects(self.selectedOrganization).done(function(response){
-                    self.renderProjects(response.data, self.selectedOrganization);
+            self.teams = data.organizations;
+            ManageActions.renderTeams(self.teams);
+            self.selectedTeam = APP.getLastTeamSelected(self.teams);
+            self.getTeamStructure(self.selectedTeam).done(function () {
+                ManageActions.selectTeam(self.selectedTeam);
+                self.getProjects(self.selectedTeam).done(function(response){
+                    self.renderProjects(response.data, self.selectedTeam);
                 });
 
             });
@@ -78,7 +74,7 @@ UI = {
     reloadProjects: function () {
         let self = this;
         if ( UI.Search.currentPage === 1) {
-            this.getProjects(self.selectedOrganization).done(function (response) {
+            this.getProjects(self.selectedTeam).done(function (response) {
                 let projects = response.data;
                 ManageActions.renderProjects(projects);
             });
@@ -91,14 +87,14 @@ UI = {
                         $.merge(total_projects, projects);
                     };
             for (let i=1; i<= UI.Search.currentPage; i++ ) {
-                requests.push(this.getProjects(self.selectedOrganization, i));
+                requests.push(this.getProjects(self.selectedTeam, i));
             }
             $.when.apply(this, requests).done(function() {
                 let results = requests.length > 1 ? arguments : [arguments];
                 for( let i = 0; i < results.length; i++ ){
                     onDone(results[i][0]);
                 }
-                ManageActions.renderProjects(total_projects, self.selectedOrganization,  true);
+                ManageActions.renderProjects(total_projects, self.selectedTeam,  true);
             });
 
         }
@@ -113,13 +109,13 @@ UI = {
                 downloadTranslationFn : this.downloadTranslation,
             }), mountPoint);
         }
-        ManageActions.renderProjects(projects, this.selectedOrganization);
+        ManageActions.renderProjects(projects, this.selectedTeam);
 
     },
 
     renderMoreProjects: function () {
         UI.Search.currentPage = UI.Search.currentPage + 1;
-        this.getProjects(this.selectedOrganization).done(function (response) {
+        this.getProjects(this.selectedTeam).done(function (response) {
             let projects = response.data;
             if (projects.length > 0) {
                 ManageActions.renderMoreProjects(projects);
@@ -192,10 +188,10 @@ UI = {
         });
     },
 
-    getAllOrganizations: function (force) {
-        if ( APP.USER.STORE.organizations && !force) {
+    getAllTeams: function (force) {
+        if ( APP.USER.STORE.teams && !force) {
             let data = {
-                organizations: APP.USER.STORE.organizations
+                teams: APP.USER.STORE.teams
             };
             let deferred = $.Deferred().resolve(data);
             return deferred.promise();
@@ -205,33 +201,29 @@ UI = {
 
     },
 
-    changeOrganization: function (organization) {
+    changeTeam: function (team) {
 
         let self = this;
-        this.selectedOrganization = organization;
-        this.selectedWorkspace = ManageConstants.ALL_WORKSPACES_FILTER;
+        this.selectedTeam = team;
         this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
         this.Search.filter = {};
         UI.Search.currentPage = 1;
-        APP.setOrganizationInStorage(organization.id);
-        return this.getOrganizationStructure(organization).then(function () {
-                return self.getProjects(self.selectedOrganization);
+        APP.setTeamInStorage(team.id);
+        return this.getTeamStructure(team).then(function () {
+                return self.getProjects(self.selectedTeam);
             }
         );
     },
 
-    getOrganizationStructure: function (organization) {
+    getTeamStructure: function (team) {
         let self = this;
-        return this.getOrganizationMembers(organization).then(function (data) {
-            self.selectedOrganization.members = data.members;
-            self.selectedOrganization.pending_invitations = data.pending_invitations;
-            return self.getWorkspaces(organization).then(function (data) {
-                self.selectedOrganization.workspaces = data.workspaces;
-            });
+        return this.getTeamMembers(team).then(function (data) {
+            self.selectedTeam.members = data.members;
+            self.selectedTeam.pending_invitations = data.pending_invitations;
         });
     },
 
-    filterProjects: function(userUid, workspaceId, name, status) {
+    filterProjects: function(userUid, name, status) {
         let self = this;
         this.Search.filter = {};
         this.Search.currentPage = 1;
@@ -244,14 +236,6 @@ UI = {
             }
             this.selectedUser = userUid;
         }
-        if ((typeof workspaceId !== "undefined") ) {
-            if (workspaceId === ManageConstants.NO_WORKSPACE_FILTER) {
-                filter.no_workspace = true;
-            } else if (workspaceId !== ManageConstants.ALL_WORKSPACES_FILTER) {
-                filter.id_workspace = workspaceId;
-            }
-            this.selectedWorkspace = workspaceId;
-        }
         if ((typeof name !== "undefined") ) {
             filter.pn = name;
         }
@@ -262,7 +246,7 @@ UI = {
         if (!_.isEmpty(this.Search.filter)) {
             UI.Search.currentPage = 1;
         }
-        return this.getProjects(this.selectedOrganization);
+        return this.getProjects(this.selectedTeam);
     },
 
     scrollDebounceFn: function() {
@@ -284,11 +268,11 @@ UI = {
     /**
      * Retrieve Projects. Passing filters is possible to retrieve projects
      */
-    getProjects: function(organization, page) {
+    getProjects: function(team, page) {
         let pageNumber = (page) ? page : UI.Search.currentPage;
         let data = {
             action: 'getProjects',
-            id_organization: organization.id,
+            id_organization: team.id,
             page:	pageNumber,
             filter: (!$.isEmptyObject(UI.Search.filter)) ? 1 : 0,
         };
@@ -310,10 +294,10 @@ UI = {
         });
     },
 
-    createOrganization: function (organizationName, members) {
+    createTeam: function (teamName, members) {
         let data = {
             type: 'general',
-            name: organizationName,
+            name: teamName,
             members: members
         };
         return $.ajax({
@@ -325,51 +309,11 @@ UI = {
 
     },
 
-    createWorkspace: function (organization, wsName) {
-        let data = {
-            name : wsName
-        };
-        return $.ajax({
-            async: true,
-            data: data,
-            type: "POST",
-            url : "/api/v2/orgs/" + organization.id + "/workspaces"
-        });
-
-    },
-
-    removeWorkspace:function (organization, ws) {
-        return $.ajax({
-            async: true,
-            type: "DELETE",
-            url : "/api/v2/orgs/" + organization.id + "/workspaces/" + ws.id
-        });
-    },
-
-    renameWorkspace:function (organization, ws) {
-        let data = {
-            name: ws.name
-        };
-        return $.ajax({
-            data: JSON.stringify(data),
-            type: "PUT",
-            url : "/api/v2/orgs/" + organization.id + "/workspaces/" + ws.id
-        });
-    },
-
-    getWorkspaces: function (organization) {
-        return $.ajax({
-            async: true,
-            type: "GET",
-            url : "/api/v2/orgs/" + organization.id + "/workspaces"
-        });
-    },
-
-    getOrganizationMembers: function (organization) {
+    getTeamMembers: function (team) {
         return $.ajax({
             async: true,
             type: "get",
-            url : "/api/v2/orgs/" + organization.id + "/members"
+            url : "/api/v2/orgs/" + team.id + "/members"
         });
     },
 
@@ -430,19 +374,6 @@ UI = {
         });
     },
 
-    changeProjectWorkspace: function (wsId, projectId) {
-        let id = (wsId == -1) ? null : wsId;
-        let data = {
-            id_workspace: id
-        };
-        let idOrg = UI.selectedOrganization.id;
-        return $.ajax({
-            data: JSON.stringify(data),
-            type: "put",
-            url : "/api/v2/orgs/" + idOrg + "/projects/" + projectId,
-        });
-    },
-
     changeProjectName: function (idOrg, idProject, newName) {
         let data = {
             name: newName
@@ -490,32 +421,32 @@ UI = {
         });
     },
 
-    addUserToOrganization: function (organization, userEmail) {
+    addUserToTeam: function (team, userEmail) {
         let data = {
             members: [userEmail]
         };
         return $.ajax({
             data: data,
             type: "post",
-            url : "/api/v2/orgs/"+ organization.id +"/members",
+            url : "/api/v2/orgs/"+ team.id +"/members",
         });
     },
 
-    removeUserFromOrganization: function (organization, userId) {
+    removeUserFromTeam: function (team, userId) {
         return $.ajax({
             type: "delete",
-            url : "/api/v2/orgs/"+ organization.id +"/members/" + userId,
+            url : "/api/v2/orgs/"+ team.id +"/members/" + userId,
         });
     },
 
-    changeOrganizationName: function (organization, newName) {
+    changeTeamName: function (team, newName) {
         let data = {
             name: newName
         };
         return $.ajax({
             data: JSON.stringify(data),
             type: "PUT",
-            url : "/api/v2/orgs/" + organization.id,
+            url : "/api/v2/orgs/" + team.id,
         });
     },
 
@@ -523,31 +454,15 @@ UI = {
 
     //********* Modals **************//
 
-    openCreateOrganizationModal: function () {
-        APP.ModalWindow.showModalComponent(CreateOrganizationModal, {}, "Create new organization");
+    openCreateTeamModal: function () {
+        APP.ModalWindow.showModalComponent(CreateTeamModal, {}, "Create new Team");
     },
 
-    openModifyOrganizationModal: function (organization) {
+    openModifyTeamModal: function (team) {
         let props = {
-            organization: organization
+            team: team
         };
-        APP.ModalWindow.showModalComponent(ModifyOrganizationModal, props, "Modify Organization");
-    },
-
-    openAssignToTranslator: function (project, job) {
-        let props = {
-            project: project,
-            job: job
-        };
-        APP.ModalWindow.showModalComponent(AssignToTranslator, props, "Assign to a translator");
-
-    },
-
-    openCreateWorkspace: function (organization) {
-        let props = {
-            organization: organization
-        };
-        APP.ModalWindow.showModalComponent(CreateWorkspaceModal, props, "Create new workspace");
+        APP.ModalWindow.showModalComponent(ModifyTeamModal, props, "Modify Team");
     },
 
     //***********************//

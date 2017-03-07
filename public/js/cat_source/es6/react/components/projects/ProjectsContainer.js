@@ -11,34 +11,34 @@ class ProjectsContainer extends React.Component {
             projects : [],
             more_projects: true,
             reloading_projects: false,
-            organization: null,
+            team: null,
         };
         this.renderProjects = this.renderProjects.bind(this);
         this.updateProjects = this.updateProjects.bind(this);
-        this.updateOrganization = this.updateOrganization.bind(this);
+        this.updateTeam = this.updateTeam.bind(this);
         this.hideSpinner = this.hideSpinner.bind(this);
         this.showProjectsReloadSpinner = this.showProjectsReloadSpinner.bind(this);
     }
 
 
-    renderProjects(projects, organization, hideSpinner) {
+    renderProjects(projects, team, hideSpinner) {
         let more_projects = true;
         if (hideSpinner) {
             more_projects = this.state.more_projects
         }
-        let organizationState = (organization)? organization : this.state.organization;
+        let teamState = (team)? team : this.state.team;
         this.setState({
             projects: projects,
             more_projects: more_projects,
             reloading_projects: false,
-            organization: organizationState,
+            team: teamState,
         });
     }
 
-    updateOrganization(organization) {
-        if (organization.get('id') === this.state.organization.get('id')) {
+    updateTeam(team) {
+        if (team.get('id') === this.state.team.get('id')) {
             this.setState({
-                organization: organization,
+                team: team,
             });
         }
     }
@@ -63,11 +63,7 @@ class ProjectsContainer extends React.Component {
 
 
     openAddMember () {
-        ManageActions.openModifyOrganizationModal(this.state.organization.toJS());
-    }
-
-    openAddWorkspace() {
-        ManageActions.openCreateWorkspaceModal(this.state.organization);
+        ManageActions.openModifyTeamModal(this.state.team.toJS());
     }
 
     createNewProject() {
@@ -75,10 +71,10 @@ class ProjectsContainer extends React.Component {
     }
 
     getButtonsNoProjects() {
-        if (!this.state.organization) return;
-        let thereAreWS = (this.state.organization.get("workspaces") && this.state.organization.get("workspaces").size > 0);
-        let thereAreMembers = (this.state.organization.get("members") && this.state.organization.get("members").size > 1) || this.state.organization.get('type') === 'personal';
-        let containerClass = (!thereAreWS && !thereAreMembers) ? 'three' : ((!thereAreWS || !thereAreMembers) ? 'two' : 'one');
+        if (!this.state.team) return;
+
+        let thereAreMembers = (this.state.team.get("members") && this.state.team.get("members").size > 1) || this.state.team.get('type') === 'personal';
+        let containerClass = (!thereAreMembers) ? 'two' : 'one';
         return <div className="no-results-found">
             <div className={"ui " + containerClass +"  doubling cards"}>
                 <div className="ui card button"
@@ -87,7 +83,7 @@ class ProjectsContainer extends React.Component {
                         <div className="header">
                             <div className="add-more">+</div>
                         </div>
-                        <div className="description">Add a New Project in the Organization {this.state.organization.get('name')}</div>
+                        <div className="description">Add a New Project in the Team {this.state.team.get('name')}</div>
                     </div>
                 </div>
                 {!thereAreMembers ? (
@@ -97,43 +93,30 @@ class ProjectsContainer extends React.Component {
                                 <div className="header">
                                     <div className="add-more">+</div>
                                 </div>
-                                <div className="description">Add a member in the Organization {this.state.organization.get('name')}</div>
+                                <div className="description">Add a member in the Team {this.state.team.get('name')}</div>
                             </div>
                         </div>
                     ) : ('')}
-
-                {!thereAreWS ? (
-                        <div className="ui card button"
-                             onClick={this.openAddWorkspace.bind(this)}>
-                            <div className="content">
-                                <div className="header">
-                                    <div className="add-more">+</div>
-                                </div>
-                                <div className="description">Create a Workspace in the Organization {this.state.organization.get('name')}</div>
-                            </div>
-                        </div>
-                ) : ('')}
-
             </div>
         </div>;
     }
 
     componentDidMount() {
         ProjectsStore.addListener(ManageConstants.RENDER_PROJECTS, this.renderProjects);
-        // ProjectsStore.addListener(ManageConstants.RENDER_ALL_ORGANIZATION_PROJECTS, this.renderAllOrganizationsProjects);
+        // ProjectsStore.addListener(ManageConstants.RENDER_ALL_TEAM_PROJECTS, this.renderAllTeamssProjects);
         ProjectsStore.addListener(ManageConstants.UPDATE_PROJECTS, this.updateProjects);
         ProjectsStore.addListener(ManageConstants.NO_MORE_PROJECTS, this.hideSpinner);
         ProjectsStore.addListener(ManageConstants.SHOW_RELOAD_SPINNER, this.showProjectsReloadSpinner);
-        OrganizationsStore.addListener(ManageConstants.UPDATE_ORGANIZATION, this.updateOrganization);
+        TeamsStore.addListener(ManageConstants.UPDATE_TEAM, this.updateTeam);
     }
 
     componentWillUnmount() {
         ProjectsStore.removeListener(ManageConstants.RENDER_PROJECTS, this.renderProjects);
-        // ProjectsStore.removeListener(ManageConstants.RENDER_ALL_ORGANIZATION_PROJECTS, this.renderAllOrganizationsProjects);
+        // ProjectsStore.removeListener(ManageConstants.RENDER_ALL_TEAM_PROJECTS, this.renderAllTeamssProjects);
         ProjectsStore.removeListener(ManageConstants.UPDATE_PROJECTS, this.updateProjects);
         ProjectsStore.removeListener(ManageConstants.NO_MORE_PROJECTS, this.hideSpinner);
         ProjectsStore.removeListener(ManageConstants.SHOW_RELOAD_SPINNER, this.showProjectsReloadSpinner);
-        OrganizationsStore.removeListener(ManageConstants.UPDATE_ORGANIZATION, this.updateOrganization);
+        TeamsStore.removeListener(ManageConstants.UPDATE_TEAM, this.updateTeam);
     }
 
     componentDidUpdate() {
@@ -148,7 +131,7 @@ class ProjectsContainer extends React.Component {
         return (nextState.projects !== this.state.projects ||
         nextState.more_projects !== this.state.more_projects ||
         nextState.reloading_projects !== this.state.reloading_projects ||
-        nextState.organization !== this.state.organization)
+        nextState.team !== this.state.team)
     }
 
     render() {
@@ -162,7 +145,7 @@ class ProjectsContainer extends React.Component {
                 lastActivityFn={this.props.getLastActivity}
                 changeJobPasswordFn={this.props.changeJobPasswordFn}
                 downloadTranslationFn={this.props.downloadTranslationFn}
-                organization={this.state.organization}/>
+                team={this.state.team}/>
         ));
 
         let spinner = '';

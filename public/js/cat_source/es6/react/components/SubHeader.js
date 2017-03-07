@@ -6,20 +6,16 @@ class SubHeader extends React.Component {
         super(props);
         this.ALL_MEMBERS = "-1";
         this.NOT_ASSIGNED = "0";
-        this.ALL_WORKSPACES = "-1";
-        this.NO_WORKSPACES = "0";
 
-        this.organizazionChanged = false;
-        this.dropdownWorkspaceInitialized = false;
+        this.teamChanged = false;
         this.dropDownUsersInitialized = false;
-        this.removeWorkspace = this.removeWorkspace.bind(this);
     }
 
     componentDidUpdate() {
         let self = this;
-        if (this.props.selectedOrganization) {
-            if (this.organizazionChanged) {
-                if (!this.dropDownUsersInitialized && this.props.selectedOrganization.get('members').size > 1) {
+        if (this.props.selectedTeam) {
+            if (this.teamChanged) {
+                if (!this.dropDownUsersInitialized && this.props.selectedTeam.get('members').size > 1) {
                     $(this.dropdownUsers).dropdown('set selected', '-1');
                     $(this.dropdownUsers).dropdown({
                         fullTextSearch: 'exact',
@@ -29,57 +25,26 @@ class SubHeader extends React.Component {
                     });
                     this.dropDownUsersInitialized = true;
                 }
-                if (!this.dropdownWorkspaceInitialized && this.props.selectedOrganization.get('workspaces').size > 0) {
-                    $(this.dropdownWorkspaces).dropdown('set selected', '-1');
-                    $(this.dropdownWorkspaces).dropdown({
-                        onChange: function(value, text, $selectedItem) {
-                            self.changeWorkspace(value);
-                        }
-                    });
-                    this.dropdownWorkspaceInitialized = true;
-                }
-                this.organizazionChanged = false;
+                this.teamChanged = false;
             }
         }
-    }
-
-    componentDidMount () {
-        ProjectsStore.addListener(ManageConstants.REMOVE_WORKSPACE, this.removeWorkspace);
-    }
-
-    componentWillUnmount() {
-        ProjectsStore.removeListener(ManageConstants.REMOVE_WORKSPACE, this.removeWorkspace);
     }
 
     componentWillReceiveProps(nextProps) {
-        if ( (_.isUndefined(nextProps.selectedOrganization) )) return;
-        if ( (_.isUndefined(this.props.selectedOrganization)) ||
-            nextProps.selectedOrganization.get('id') !== this.props.selectedOrganization.get('id') ||
-            nextProps.selectedOrganization.get('members') !== this.props.selectedOrganization.get('members') ||
-            nextProps.selectedOrganization.get('workspaces') !== this.props.selectedOrganization.get('workspaces')
-            ) {
-            this.organizazionChanged = true;
+        if ( (_.isUndefined(nextProps.selectedTeam) )) return;
+        if ( (_.isUndefined(this.props.selectedTeam)) ||
+            nextProps.selectedTeam.get('id') !== this.props.selectedTeam.get('id') ||
+            nextProps.selectedTeam.get('members') !== this.props.selectedTeam.get('members') ) {
+            this.teamChanged = true;
             this.dropDownUsersInitialized = false;
-            this.dropdownWorkspaceInitialized = false;
-            if ( nextProps.selectedOrganization && nextProps.selectedOrganization.get('type') !== 'personal' && nextProps.selectedOrganization.get('members').size == 1) {
+            if ( nextProps.selectedTeam && nextProps.selectedTeam.get('type') !== 'personal' && nextProps.selectedTeam.get('members').size == 1) {
                 this.dropDownUsersInitialized = true;
             }
-            if ( nextProps.selectedOrganization && nextProps.selectedOrganization.get('workspaces').size == 0) {
-                this.dropdownWorkspaceInitialized = true;
-            }
         }
     }
-
-    removeWorkspace(ws) {
-        let currentWsId = (this.selectedWorkspace && this.selectedWorkspace.toJS ) ? this.selectedWorkspace.get('id') : -1;
-        if(currentWsId == ws.get('id')) {
-            $(this.dropdownWorkspaces).dropdown('set selected', '-1');
-        }
-    }
-
 
     changeUser(value) {
-        if ( this.organizazionChanged ) {
+        if ( this.teamChanged ) {
             return;
         }
         let self = this;
@@ -88,58 +53,32 @@ class SubHeader extends React.Component {
         } else if ( value === this.NOT_ASSIGNED ) {
             this.selectedUser = ManageConstants.NOT_ASSIGNED_FILTER;
         } else {
-            this.selectedUser = this.props.selectedOrganization.get('members').find(function (member) {
+            this.selectedUser = this.props.selectedTeam.get('members').find(function (member) {
                 if (parseInt(member.get('user').get("uid")) === parseInt(value)) {
                     return true;
                 }
             });
         }
-        ManageActions.filterProjects(self.selectedUser, self.selectedWorkspace, self.currentText, self.currentStatus);
+        ManageActions.filterProjects(self.selectedUser, self.currentText, self.currentStatus);
     }
-
-    changeWorkspace(value) {
-        if ( this.organizazionChanged ) {
-            return;
-        }
-        let self = this;
-        if (value === this.ALL_WORKSPACES) {
-            this.selectedWorkspace = ManageConstants.ALL_WORKSPACES_FILTER;
-        } else if ( value === this.NO_WORKSPACES ) {
-            this.selectedWorkspace = ManageConstants.NO_WORKSPACE_FILTER;
-        } else {
-            this.selectedWorkspace = this.props.selectedOrganization.get('workspaces').find(function (workspace) {
-                if (parseInt(workspace.get("id")) === parseInt(value)) {
-                    return true;
-                }
-            });
-        }
-        setTimeout(function () {
-            ManageActions.filterProjects(self.selectedUser, self.selectedWorkspace, self.currentText, self.currentStatus);
-        });
-    }
-
-    openCreateWorkspace() {
-        ManageActions.openCreateWorkspaceModal(this.props.selectedOrganization);
-    }
-
 
     onChangeSearchInput(value) {
         this.currentText = value;
         let self = this;
-        ManageActions.filterProjects(self.selectedUser, self.selectedWorkspace, self.currentText, self.currentStatus);
+        ManageActions.filterProjects(self.selectedUser, self.currentText, self.currentStatus);
     }
 
     filterByStatus(status) {
         this.currentStatus = status;
-        ManageActions.filterProjects(this.selectedUser, this.selectedWorkspace, this.currentText, this.currentStatus);
+        ManageActions.filterProjects(this.selectedUser, this.currentText, this.currentStatus);
     }
 
     getUserFilter() {
         let result = '';
-        if (this.props.selectedOrganization && this.props.selectedOrganization.get('type') === "general" &&
-            this.props.selectedOrganization.get('members') && this.props.selectedOrganization.get('members').size > 1) {
+        if (this.props.selectedTeam && this.props.selectedTeam.get('type') === "general" &&
+            this.props.selectedTeam.get('members') && this.props.selectedTeam.get('members').size > 1) {
 
-            let members = this.props.selectedOrganization.get('members').map((member, i) => (
+            let members = this.props.selectedTeam.get('members').map((member, i) => (
                 <div className="item" data-value={member.get('user').get('uid')}
                      key={'user' + member.get('user').get('uid')}>
                     <a className="ui circular label">{APP.getUserShortName(member.get('user').toJS())}</a>
@@ -162,7 +101,7 @@ class SubHeader extends React.Component {
                             <p>Projects of: </p>
                         </div>
 
-                        <div className="list-organization">
+                        <div className="list-team">
                             <div className="ui dropdown top right pointing users-projects"
                                  ref={(dropdownUsers) => this.dropdownUsers = dropdownUsers}>
                                 <span className="text">
@@ -188,65 +127,12 @@ class SubHeader extends React.Component {
         return result;
     }
 
-    getWorkspacesSelect() {
-        let result = '';
-        let items;
-        if (this.props.selectedOrganization && this.props.selectedOrganization.get("workspaces") &&
-            this.props.selectedOrganization.get("workspaces").size > 0) {
-            items = this.props.selectedOrganization.get("workspaces").map((workspace, i) => (
-                <div className="item" data-value={workspace.get('id')}
-                     data-text={workspace.get('name')}
-                     key={'organization' + workspace.get('name') + workspace.get('id')}>
-                    {workspace.get('name')}
-                    <a className="organization-filter button show">
-                        <i className="icon-settings icon" onClick={this.openCreateWorkspace.bind(this)}/>
-                    </a>
-                </div>
-            ));
-            let item = <div className="item" data-value='0'
-                            data-text='No Workspace'
-                            key={'organization-0'}>
-                    No Workspace
-                </div>;
-            items = items.unshift(item);
-            return <div className="column">
-                <div className="ui dropdown selection workspace-dropdown"
-                        ref={(dropdownWorkspaces) => this.dropdownWorkspaces = dropdownWorkspaces}>
-                    <input type="hidden" name="gender" />
-                    <i className="dropdown icon"/>
-                    <div className="default text">Choose Workspace</div>
-                    <div className="menu">
-                        <div className="divider"></div>
-                        <div className="header" style={{cursor: 'pointer'}} onClick={this.openCreateWorkspace.bind(this)}>New Workspace
-                            <a className="organization-filter button show">
-                                <i className="icon-plus3 icon"/>
-                            </a>
-                        </div>
-                        <div className="divider"></div>
-                        <div className="item" data-value='-1'
-                             data-text='All' key={'organization-all'}>
-                            All
-                        </div>
-                        {items}
-                    </div>
-                </div>
-            </div>;
-        } else {
-            return <div className="column">
-                    <div className="no-workspace pad-left-15">
-                    <a href="#" onClick={this.openCreateWorkspace.bind(this)}>CREATE A NEW WORKSPACE <i className="icon-plus3 icon"/></a>
-                </div>
-            </div>;
-        }
-    }
     render () {
         let membersFilter = this.getUserFilter();
-        let workspaceDropDown = this.getWorkspacesSelect();
 
         return (
             <section className="row sub-head">
                 <div className="ui container equal width grid">
-                    {workspaceDropDown}
                     <div className="center aligned column">
                         {membersFilter}
                     </div>

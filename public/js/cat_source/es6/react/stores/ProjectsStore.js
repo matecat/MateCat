@@ -71,15 +71,6 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
         this.projects = this.projects.setIn([indexProject,'project_slug'], newProject.project_slug);
     },
 
-    changeProjectWorkspace: function (project, workspaceId) {
-        let id = ( workspaceId !== -1 ) ? id = workspaceId : null;
-        let projectOld = this.projects.find(function (prj) {
-            return prj.get('id') == project.get('id');
-        });
-        let indexProject = this.projects.indexOf(projectOld);
-        this.projects = this.projects.setIn([indexProject,'id_workspace'], id);
-    },
-
     changeProjectAssignee: function (project, user) {
         let uid;
         if (user !== -1)  {
@@ -100,17 +91,6 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
         }
     },
 
-    removeWorkspace(workspace) {
-        let idWS = workspace.get('id');
-        this.projects = this.projects.map(function (prj) {
-            if (prj.get('id_workspace') === idWS) {
-                return prj.set('id_workspace', null);
-            } else {
-                return prj;
-            }
-        });
-    },
-
     emitChange: function(event, args) {
         this.emit.apply(this, arguments);
     },
@@ -124,11 +104,11 @@ AppDispatcher.register(function(action) {
     switch(action.actionType) {
         case ManageConstants.RENDER_PROJECTS:
             ProjectsStore.updateAll(action.projects);
-            ProjectsStore.emitChange(action.actionType, ProjectsStore.projects, Immutable.fromJS(action.organization), action.hideSpinner);
+            ProjectsStore.emitChange(action.actionType, ProjectsStore.projects, Immutable.fromJS(action.team), action.hideSpinner);
             break;
-        case ManageConstants.RENDER_ALL_ORGANIZATION_PROJECTS:
+        case ManageConstants.RENDER_ALL_TEAM_PROJECTS:
             ProjectsStore.updateAll(action.projects);
-            ProjectsStore.emitChange(action.actionType, ProjectsStore.projects, Immutable.fromJS(action.organizations), action.hideSpinner);
+            ProjectsStore.emitChange(action.actionType, ProjectsStore.projects, Immutable.fromJS(action.teams), action.hideSpinner);
             break;
         case ManageConstants.UPDATE_PROJECTS:
             ProjectsStore.updateAll(action.projects);
@@ -170,30 +150,15 @@ AppDispatcher.register(function(action) {
             ProjectsStore.changeProjectAssignee(action.project, action.user);
             ProjectsStore.emitChange(ManageConstants.UPDATE_PROJECTS, ProjectsStore.projects);
             break;
-        case ManageConstants.CHANGE_PROJECT_WORKSPACE:
-            ProjectsStore.changeProjectWorkspace(action.project, action.workspaceId);
-            ProjectsStore.emitChange(ManageConstants.UPDATE_PROJECTS, ProjectsStore.projects);
-            break;
         // Move this actions
-        case ManageConstants.OPEN_CREATE_ORGANIZATION_MODAL:
+        case ManageConstants.OPEN_CREATE_TEAM_MODAL:
             ProjectsStore.emitChange(action.actionType);
             break;
-        case ManageConstants.OPEN_ASSIGN_TO_TRANSLATOR_MODAL:
-            ProjectsStore.emitChange(action.actionType, action.project, action.job);
-            break;
-        case ManageConstants.OPEN_MODIFY_ORGANIZATION_MODAL:
-            ProjectsStore.emitChange(action.actionType, Immutable.fromJS(action.organization));
-            break;
-        case ManageConstants.OPEN_CREATE_WORKSPACE_MODAL:
-            ProjectsStore.emitChange(action.actionType, action.organization);
+        case ManageConstants.OPEN_MODIFY_TEAM_MODAL:
+            ProjectsStore.emitChange(action.actionType, Immutable.fromJS(action.team));
             break;
         case ManageConstants.HIDE_PROJECT:
             ProjectsStore.emitChange(action.actionType, Immutable.fromJS(action.project));
-            break;
-        case ManageConstants.REMOVE_WORKSPACE:
-            ProjectsStore.removeWorkspace(action.workspace);
-            ProjectsStore.emitChange(ManageConstants.REMOVE_WORKSPACE, action.workspace);
-            ProjectsStore.emitChange(ManageConstants.UPDATE_PROJECTS, ProjectsStore.projects);
             break;
         case ManageConstants.ENABLE_DOWNLOAD_BUTTON:
         case ManageConstants.DISABLE_DOWNLOAD_BUTTON:

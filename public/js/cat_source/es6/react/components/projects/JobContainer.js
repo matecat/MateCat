@@ -4,7 +4,7 @@ class JobContainer extends React.Component {
         super(props);
         this.state = {
             showDownloadProgress: false
-        }
+        };
         this.getTranslateUrl = this.getTranslateUrl.bind(this);
         this.getOutsourceUrl = this.getOutsourceUrl.bind(this);
         this.getAnalysisUrl = this.getAnalysisUrl.bind(this);
@@ -157,10 +157,6 @@ class JobContainer extends React.Component {
                 showDownloadProgress: false
             });
         }
-    }
-
-    openAssignToTranslatorModal() {
-        ManageActions.openAssignToTranslator(this.props.project, this.props.job);
     }
 
     getDownloadLabel() {
@@ -375,6 +371,26 @@ class JobContainer extends React.Component {
         }
     }
 
+    openOutsourceModal() {
+
+        $( ".title-source" ).text( 'Source');
+        $( ".title-target" ).text( 'Target');
+        $( ".title-words" ).text( 'Words' );
+
+
+        // if(config.enable_outsource) {
+        //     e.preventDefault();
+            resetOutsourcePopup( false );
+            $('body').addClass('showingOutsourceTo');
+            // $('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
+            // $('.outsource.modal .uploadbtn:not(.showprices)').attr('href', $(this).attr('href'));
+            // showOutsourcePopup( UI.showPopupDetails );
+            showOutsourcePopup( "1" );
+            renderQuote2(this.props.project.get('id'), this.props.project.get('password'), this.props.job.get('id'), this.props.job.get('password'), "0", "professional");
+            $('.outsource.modal').show();
+        // }
+    }
+
     render () {
         let translateUrl = this.getTranslateUrl();
         let outsourceUrl = this.getOutsourceUrl();
@@ -429,24 +445,12 @@ class JobContainer extends React.Component {
                                             </div>
                                         </div>
 
-                                        {/*<div className="ten wide column">
-                                            <div className="ui grid one column">
-                                                <div className="eight wide column">
-                                                    <div className="send-translator"
-                                                         onClick={this.openAssignToTranslatorModal.bind(this)}>
-                                                        <i className="icon-forward icon"></i>
-                                                        <a href="#"><span id="translator-job">Send to translator</span></a>
-                                                    </div>
-                                                </div>
-                                                <div className="eight wide column ">
-                                                    <div className="due-to"
-                                                         onClick={this.openAssignToTranslatorModal.bind(this)}>
-                                                        <i className="icon-calendar icon"></i>
-                                                        <a href="#"><span id="due-date">Choose delivery date</span></a>
-                                                    </div>
-                                                </div>
+                                        <div className="four wide computer six wide tablet column">
+                                            <div className="creation-date"
+                                                onClick={this.openOutsourceModal.bind(this)}>
+                                                <span>Assigns a translator</span>
                                             </div>
-                                        </div>*/}
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="four wide computer five wide tablet right floated right aligned column">
@@ -490,24 +494,6 @@ class JobContainer extends React.Component {
                                     </div>
                                 </div>
 
-                                {/*/!*<div className="ten wide column">*!/
-                                    /!*<div className="ui grid one column">*!/
-                                        /!*<div className="nine wide column">*!/
-                                            /!*<div className="send-translator"*!/
-                                                 /!*onClick={this.openAssignToTranslatorModal.bind(this)}>*!/
-                                                /!*<i className="icon-forward icon"/>*!/
-                                                /!*<a href="#"><span id="translator-job">Send to translator</span></a>*!/
-                                            /!*</div>*!/
-                                        /!*</div>*!/
-                                        /!*<div className="seven wide column right aligned">*!/
-                                            /!*<div className="due-to"*!/
-                                                 /!*onClick={this.openAssignToTranslatorModal.bind(this)}>*!/
-                                                /!*<i className="icon-calendar icon"/>*!/
-                                                /!*<a href="#"><span id="due-date">Delivery date</span></a>*!/
-                                            /!*</div>*!/
-                                        /!*</div>*!/
-                                    /!*</div>*!/
-                                /!*</div>*!/*/}
                             </div>
                         </div>
 
