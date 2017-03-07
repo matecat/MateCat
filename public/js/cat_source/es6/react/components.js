@@ -51,6 +51,5 @@ window.ConfirmMessageModal = require('./modals/ConfirmMessageModal').default;
 
 window.CreateTeamModal = require('./modals/CreateTeam').default;
 window.ModifyTeamModal = require('./modals/ModifyTeam').default;
-window.AssignToTranslator = require('./modals/AssignToTranslator').default;
 
 

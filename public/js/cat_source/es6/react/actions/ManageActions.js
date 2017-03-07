@@ -196,14 +196,6 @@ let ManageActions = {
         });
     },
 
-    openAssignToTranslator: function (project, job) {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.OPEN_ASSIGN_TO_TRANSLATOR_MODAL,
-            project: project,
-            job: job
-        });
-    },
-
     /********* teams *********/
 
     renderTeams: function (teams, defaultTeam) {

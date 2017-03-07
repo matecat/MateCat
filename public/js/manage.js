@@ -18,7 +18,6 @@ UI = {
         //Modals
         ProjectsStore.addListener(ManageConstants.OPEN_CREATE_TEAM_MODAL, this.openCreateTeamModal);
         ProjectsStore.addListener(ManageConstants.OPEN_MODIFY_TEAM_MODAL, this.openModifyTeamModal);
-        ProjectsStore.addListener(ManageConstants.OPEN_ASSIGN_TO_TRANSLATOR_MODAL, this.openAssignToTranslator);
     },
 
     render: function () {
@@ -464,15 +463,6 @@ UI = {
             team: team
         };
         APP.ModalWindow.showModalComponent(ModifyTeamModal, props, "Modify Team");
-    },
-
-    openAssignToTranslator: function (project, job) {
-        let props = {
-            project: project,
-            job: job
-        };
-        APP.ModalWindow.showModalComponent(AssignToTranslator, props, "Assign to a translator");
-
     },
 
     //***********************//
