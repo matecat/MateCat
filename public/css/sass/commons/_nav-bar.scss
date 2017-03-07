@@ -62,12 +62,12 @@ header {
             .scrolling {
                 .item.item.item {
                     padding-right: 40px !important;
-                    &:hover .organization-filter,
-                    &.active.selected .organization-filter{
+                    &:hover .team-filter,
+                    &.active.selected .team-filter{
                         visibility: visible;
                     }
                 }
-                .organization-filter {
+                .team-filter {
                     visibility: hidden;
                 }
 
