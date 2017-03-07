@@ -2051,33 +2051,6 @@ function getProjectForVolumeAnalysis( $limit = 1 ) {
     return $results;
 }
 
-/**
- *
- * Not used
- *
- * @deprecated
- *
- * @param $jid
- *
- * @return array
- */
-function getSegmentsForTMVolumeAnalysys( $jid ) {
-    $query = "select s.id as sid ,segment ,raw_word_count,st.match_type from segments s
-		left join segment_translations st on st.id_segment=s.id
-
-		where st.id_job='$jid' and st.match_type<>'' and st.tm_analysis_status='UNDONE' and s.raw_word_count>0
-		limit 100";
-
-    $db      = Database::obtain();
-    try {
-        $results = $db->fetch_array($query);
-    } catch( PDOException $e ) {
-        Log::doLog( $e->getMessage() );
-        return $e->getCode() * -1;
-    }
-    return $results;
-}
-
 function initializeWordCount( WordCount_Struct $wStruct ) {
 
     $db = Database::obtain();
