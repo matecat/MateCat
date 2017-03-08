@@ -5,6 +5,7 @@ use ActivityLog\ActivityLogDao;
 use ActivityLog\ActivityLogStruct;
 use Database;
 use PDOException;
+use Segments_SegmentDao;
 use TaskRunner\Commons\AbstractElement,
         TaskRunner\Commons\AbstractWorker,
         TaskRunner\Commons\QueueElement,
@@ -16,7 +17,7 @@ use TaskRunner\Commons\AbstractElement,
  * Date: 13/06/16
  * Time: 11:49
  */
-class ActivityLogWorker extends AbstractWorker {
+class SetCurrentSegmentWorker extends AbstractWorker {
 
     public function process( AbstractElement $queueElement ) {
 
@@ -25,12 +26,10 @@ class ActivityLogWorker extends AbstractWorker {
          */
         $this->_checkForReQueueEnd( $queueElement );
 
-        $logEvent = new ActivityLogStruct( $queueElement->params->toArray() );
-
-        //re inizialize DB if socked is closed
+        //re initialize DB if socket is closed
         $this->_checkDatabaseConnection();
 
-        $this->_writeLog( $logEvent );
+        $this->_writeCurrentSegment( $queueElement->params->toArray() );
 
     }
 
@@ -49,7 +48,7 @@ class ActivityLogWorker extends AbstractWorker {
          */
         if ( isset( $queueElement->reQueueNum ) && $queueElement->reQueueNum >= 100 ) {
 
-            $msg = "\n\n Error Set Contribution  \n\n " . var_export( $queueElement, true );
+            $msg = "\n\n Error Set Current Segment  \n\n " . var_export( $queueElement, true );
             \Utils::sendErrMailReport( $msg );
             $this->_doLog( "--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip." );
             throw new EndQueueException( "--- (Worker " . $this->_workerPid . ") :  Frame Re-queue max value reached, acknowledge and skip.", self::ERR_REQUEUE_END );
@@ -60,10 +59,10 @@ class ActivityLogWorker extends AbstractWorker {
 
     }
 
-    protected function _writeLog( ActivityLogStruct $logEvent ){
+    protected function _writeCurrentSegment( Array $currentSegmentEvent ){
 
-        $logActivityDao = new ActivityLogDao();
-        $logActivityDao->create( $logEvent );
+        $segmentsDao = new Segments_SegmentDao();
+        return $segmentsDao->updateCurrentSegment( $currentSegmentEvent[ 'id_segment' ], $currentSegmentEvent[ 'id_job' ], $currentSegmentEvent[ 'password' ] );
 
     }
 
