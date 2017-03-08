@@ -9,6 +9,7 @@
 
 namespace ProjectQueue;
 
+use AMQHandler;
 use \ArrayObject;
 use Constants_ProjectStatus;
 use \Exception,
@@ -35,6 +36,7 @@ class Queue {
     public static function sendProject( ArrayObject $projectStructure ) {
 
         try {
+            WorkerClient::init( new AMQHandler() );
             WorkerClient::enqueue( 'PROJECT_QUEUE', 'AsyncTasks\Workers\ProjectCreationWorker', json_encode( $projectStructure ), [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
         } catch ( Exception $e ) {
 
