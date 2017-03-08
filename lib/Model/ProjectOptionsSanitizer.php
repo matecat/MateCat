@@ -24,7 +24,8 @@ class ProjectOptionsSanitizer {
         'nn-NO',
         'sv-SE',
         'uk-UA',
-        'ru-RU'
+        'ru-RU',
+        'de-CH'
     );
     /**
      * All combinations of languages for Tag Ptojection
