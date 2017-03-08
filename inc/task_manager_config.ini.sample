@@ -72,11 +72,20 @@ QA_CHECKS[max_executors] = 1
 QA_CHECKS[redis_key] = "qa_checks_key"
 QA_CHECKS[loggerName] = "qa_checks.log"
 
-;;##############################
+;;#################################
 ;;##### Key Name activity_log #####
-;;##############################
+;;#################################
 ACTIVITYLOG[queue_name]    = "activity_log"
 ACTIVITYLOG[pid_set_name]  = "ch_pid_activity_log"
 ACTIVITYLOG[max_executors] = 1
 ACTIVITYLOG[redis_key]     = "activity_log_list"
 ACTIVITYLOG[loggerName]    = "activity_log.log"
+
+;;##############################
+;;##### Key Name DQF       #####
+;;##############################
+DQF[queue_name]    = "dqf"
+DQF[pid_set_name]  = "ch_pid_dqf"
+DQF[max_executors] = 1
+DQF[redis_key]     = "dqf_list"
+DQF[loggerName]    = "dqf.log"
