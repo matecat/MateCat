@@ -90,7 +90,7 @@ class Engines_LetsMT extends Engines_AbstractEngine implements Engines_EngineInt
                 foreach ( $parsed[ 'System' ] as $systemData ) {
                     $statusName = "";
                     $status     = "";
-                    foreach ( $systemData[ 'Metadata' ] as $value ) {
+                    foreach ( $systemData[ 'ProjectMetadata' ] as $value ) {
                         if ( $value[ 'Key' ] === 'status' ) {
                             $status = $value[ 'Value' ];
                             switch ( $status ) {

@@ -329,4 +329,17 @@ class MultiCurlHandler {
         return ( !empty( $this->multi_curl_info[ $tokenHash ][ 'error' ] ) && $this->multi_curl_info[ $tokenHash ][ 'errno' ] != 0 ) || (int)$this->multi_curl_info[ $tokenHash ][ 'http_code' ] >= 400;
     }
 
+    /**
+     * Returns an array with errors on each resource. Returns empty array in case of no errors.
+     *
+     * @return array
+     */
+    public function getErrors() {
+        $map = array_map( function( $tokenHash ) {
+            $this->getError( $tokenHash );
+        }, array_keys( $this->multi_curl_info ) ) ;
+
+        return array_filter( $map );
+    }
+
 } 

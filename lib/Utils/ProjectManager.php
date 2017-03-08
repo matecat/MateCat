@@ -128,7 +128,8 @@ class ProjectManager {
                             'instance_id'          => ( !is_null( INIT::$INSTANCE_ID ) ? (int)INIT::$INSTANCE_ID : 0 ),
                             'id_team'              => null,
                             'team'                 => null,
-                            'sanitize_project_options' => true
+                            'sanitize_project_options' => true,
+                            'file_segments_count'  => []
                     ] );
 
         }
@@ -1908,6 +1909,12 @@ class ProjectManager {
 
             $this->projectStructure[ 'segments' ][ $fid ][ $position ] = "( $id_segment,$tuple_string )";
 
+            if ( !isset( $this->projectStructure[ 'file_segments_count' ] [ $fid ] )  ) {
+                $this->projectStructure[ 'file_segments_count' ] [ $fid ] = 0;
+            }
+            $this->projectStructure[ 'file_segments_count' ] [ $fid ] ++ ;
+
+            // TODO: continue here to find the count of segments per project
             $segments_metadata[] = [
                     'id'              => $id_segment,
                     'internal_id'     => self::sanitizedUnitId( $tuple[ 0 ], $fid ),

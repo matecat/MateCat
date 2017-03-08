@@ -8,7 +8,7 @@
 
 namespace Features\Dqf\Service\Struct;
 
-class LoginResponseStruct extends BaseStruct  {
+class LoginResponseStruct extends BaseStruct {
 
     public $message ;
     public $expires ;

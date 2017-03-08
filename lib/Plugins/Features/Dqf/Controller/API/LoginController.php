@@ -20,7 +20,7 @@ class LoginController extends KleinController {
         $password = 'fabrizio@translated.net';
 
         $client = new Client();
-        $session = $client->getSession( $username, $password )->login();
+        $session = $client->getSession( $username, $password );
         $this->response->code(200);
         $this->response->json(['session' => [
                 'sessionId' => $session->getSessionId(),

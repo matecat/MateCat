@@ -2,9 +2,12 @@
 
 namespace Features;
 
+use Features\Dqf\Service\Struct\ProjectCreationStruct;
 use Monolog\Logger;
 
-use Features\Dqf\Utils\Metadata ;
+use Features\Dqf\Utils\ProjectMetadata ;
+use WorkerClient;
+use AMQHandler ;
 
 class Dqf extends BaseFeature {
 
@@ -38,7 +41,7 @@ class Dqf extends BaseFeature {
      */
     public static function staticLogger() {
         if ( is_null( self::$logger ) ) {
-            $feature = new \BasicFeatureStruct(['feature_code' => 'dqf' ]);
+            $feature = new \BasicFeatureStruct(['feature_code' => self::FEATURE_CODE ]);
             self::$logger = ( new Dqf($feature) )->getLogger();
         }
         return self::$logger ;
@@ -50,7 +53,7 @@ class Dqf extends BaseFeature {
      * @return array
      */
     public function filterCreateProjectInputFilters( $inputFilter ) {
-        return array_merge( $inputFilter, Metadata::getInputFilter() ) ;
+        return array_merge( $inputFilter, ProjectMetadata::getInputFilter() ) ;
     }
 
 
@@ -63,18 +66,24 @@ class Dqf extends BaseFeature {
     public function createProjectAssignInputMetadata( $metadata, $options ) {
         $options = \Utils::ensure_keys( $options, array('input'));
 
-        $metadata = array_intersect_key( $options['input'], array_flip( Metadata::$keys ) ) ;
+        $metadata = array_intersect_key( $options['input'], array_flip( ProjectMetadata::$keys ) ) ;
         $metadata = array_filter( $metadata ); // <-- remove all `empty` array elements
 
         return  $metadata ;
     }
 
+    /**
+     * @param $projectStructure
+     */
     public function postProjectCreate( $projectStructure ) {
-        /*
-         * 1. enqueue project creation worker
-         *
-         * 2. enqueue
-         */
+        $struct = new ProjectCreationStruct([
+            'id_project'           => $projectStructure['id_project'],
+            'source_language'      => $projectStructure['source_language'],
+            'file_segments_count'  => $projectStructure['file_segments_count']
+        ]);
+
+        WorkerClient::init( new AMQHandler() );
+        WorkerClient::enqueue( 'DQF', '\Features\Dqf\Worker\CreateProjectWorker', $struct->toArray() );
     }
 
     /**
@@ -98,7 +107,7 @@ class Dqf extends BaseFeature {
             // TODO: other incoming DQF related options to be validated,
         }
 
-        $user_error = array( -1000, 'DQF user is not set');
+        $user_error = array( -1000, 'DQF user is not set' );
 
         if ( empty($projectStructure['id_customer'] ) ) {
             $projectStructure['result']['errors'][] = $user_error  ;

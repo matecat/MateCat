@@ -6,19 +6,32 @@ namespace Features\Dqf\Service;
 use Features\Dqf;
 use Translations\WarningModel;
 
+use Features\Dqf\Service\Struct\ISessionBasedRequestStruct ;
+
 class Client {
 
+    protected $curl_options = array() ;
     /**
-     * @var Client
+     * @var Session
      */
+    protected $session;
 
     public function __construct() {
 
     }
 
-    public function getSession( $username, $password ) {
-        $session = new Session( $this, $username, $password );
-        return $session ;
+    public function getSession() {
+        return $this->session ;
+    }
+
+    public function setCredentials( $username, $password ) {
+
+        if ( is_null( $this->session ) ) {
+            $this->session = new Session( $this, $username, $password );
+            $this->session->login(); // TODO: defer this to lazy load when sessionId is required
+        }
+
+        return $this->session ;
     }
 
     public function url( $path ) {
@@ -26,15 +39,27 @@ class Client {
         return $base . '/v3' . $path ;
     }
 
-    public function optionsPost( $params = array(), $headers = array() ) {
-        $out = array();
-
-        $out[ CURLOPT_HTTPHEADER ]     = $this->headers( $headers ) ;
+    public function _curlOptionsForPostParams( $params ) {
+        $out = [];
         $out[ CURLOPT_POST ]           = true ;
         $out[ CURLOPT_POSTFIELDS ]     = $params ;
         $out[ CURLOPT_RETURNTRANSFER ] = true ;
+        return $out ;
+    }
 
-        return $out;
+    public function setHeaders( ISessionBasedRequestStruct $requestParams ) {
+        $out = array();
+        $out[ CURLOPT_HTTPHEADER ] = $this->headers( $requestParams->getHeaders() );
+        $this->curl_options = $out + $this->curl_options ;
+    }
+
+    public function setPostParams( ISessionBasedRequestStruct $requestStruct ) {
+        $params = $this->_curlOptionsForPostParams( $requestStruct->getParams() ) ;
+        $this->curl_options = $params + $this->curl_options ;
+    }
+
+    public function getCurlOptions() {
+        return $this->curl_options ;
     }
 
     /**
@@ -52,19 +77,14 @@ class Client {
     }
 
     protected function headers($headers) {
-        $default = array(
-                'apiKey' => \INIT::$DQF_API_KEY
-        );
-
-        $headers = array_merge($default, $headers ) ;
-        $out = array();
+        $out = [];
         foreach( $headers as $key => $header ) {
             $out[] = $key . ': ' . $header ;
         }
         return $out ;
     }
 
-     function encrypt($input) {
+    function encrypt($input) {
          $size = mcrypt_get_block_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
          $input = $this->pkcs5_pad($input, $size);
 
