@@ -14,6 +14,8 @@ class manageController extends viewController {
 
     protected $featureSet ;
 
+    protected $_outsource_login_API = '//signin.translated.net/';
+
 	public function __construct() {
 		$isAuthRequired = true;
 		parent::__construct( $isAuthRequired );

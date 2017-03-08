@@ -372,22 +372,7 @@ class JobContainer extends React.Component {
     }
 
     openOutsourceModal() {
-
-        $( ".title-source" ).text( 'Source');
-        $( ".title-target" ).text( 'Target');
-        $( ".title-words" ).text( 'Words' );
-
-
-        if(config.enable_outsource) {
-            resetOutsourcePopup( false );
-            $('body').addClass('showingOutsourceTo');
-            // $('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
-            // $('.outsource.modal .uploadbtn:not(.showprices)').attr('href', $(this).attr('href'));
-            // showOutsourcePopup( UI.showPopupDetails );
-            showOutsourcePopup( "1" );
-            renderQuote2(this.props.project.get('id'), this.props.project.get('password'), this.props.job.get('id'), this.props.job.get('password'), "0", "professional");
-            $('.outsource.modal').show();
-        }
+        ManageActions.openOutsourceModal(this.props.project, this.props.job, this.getTranslateUrl());
     }
 
     render () {
@@ -447,7 +432,7 @@ class JobContainer extends React.Component {
                                         <div className="four wide computer six wide tablet column">
                                             <div className="creation-date"
                                                 onClick={this.openOutsourceModal.bind(this)}>
-                                                <span>Assigns a translator</span>
+                                                <span>Outsource</span>
                                             </div>
                                         </div>
                                     </div>

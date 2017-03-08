@@ -122,7 +122,12 @@ function prepareAndSubmitQuote( chosenDate, hideNeedItFaster ) {
     }
 
     var fullTranslateUrl = $(".onyourown a.uploadbtn").attr("href");
-    $(".translate[href='" + fullTranslateUrl.substr(fullTranslateUrl.indexOf("/translate/")) + "']").trigger( "click" );
+    if ($(".translate[href='" + fullTranslateUrl.substr(fullTranslateUrl.indexOf("/translate/")) + "']").length > 0) {
+        $(".translate[href='" + fullTranslateUrl.substr(fullTranslateUrl.indexOf("/translate/")) + "']").trigger( "click" );
+    } else {
+        UI.restartOutsourceModal()
+    }
+    // $(".translate[href='" + fullTranslateUrl.substr(fullTranslateUrl.indexOf("/translate/")) + "']").trigger( "click" );
 }
 
 

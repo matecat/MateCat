@@ -196,6 +196,10 @@ let ManageActions = {
         });
     },
 
+    openOutsourceModal: function (project, job, url) {
+        UI.openOutsourceModal(project.toJS(), job.toJS(), url);
+    },
+
     /********* teams *********/
 
     renderTeams: function (teams, defaultTeam) {

@@ -20,7 +20,12 @@ $.extend(UI, {
         $( "input[name='revision']" ).click(function() {
             $(this).parent().toggleClass('noopacity');
             var fullTranslateUrl = $(".onyourown a.uploadbtn:not(.showprices)").attr("href");
-            $(".translate[href='" + fullTranslateUrl.substr(fullTranslateUrl.indexOf("/translate/")) + "']").trigger( "click" );
+            if ($(".translate[href='" + fullTranslateUrl.substr(fullTranslateUrl.indexOf("/translate/")) + "']").length > 0) {
+                $(".translate[href='" + fullTranslateUrl.substr(fullTranslateUrl.indexOf("/translate/")) + "']").trigger( "click" );
+            } else {
+                UI.restartOutsourceModal()
+            }
+
             $('.revision_heading').toggleClass('hide');
         });
 
@@ -100,7 +105,33 @@ $.extend(UI, {
 		})
 
         fetchChangeRates();
-	}
+	},
+    startOutSourceModal: function (project, job, url) {
+        this.currentOutsourceProject = project;
+        this.currentOutsourceJob = job;
+        this.currentOutsourceUrl = url;
+        $( ".title-source" ).text( job.sourceTxt);
+        $( ".title-target" ).text( job.targetTxt);
+        $( ".title-words" ).text(job.stats.TOTAL_FORMATTED );
+
+        if(config.enable_outsource) {
+            resetOutsourcePopup( false );
+            $('body').addClass('showingOutsourceTo');
+            $('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + url);
+            $('.outsource.modal .uploadbtn:not(.showprices)').attr('href', url);
+            showOutsourcePopup( UI.showPopupDetails );
+            renderQuoteFromManage(project.id, project.password, job.id, job.password);
+            $('.outsource.modal').show();
+        }
+    },
+    restartOutsourceModal: function () {
+        if(config.enable_outsource) {
+            resetOutsourcePopup( false );
+            showOutsourcePopup( UI.showPopupDetails );
+            renderQuoteFromManage(this.currentOutsourceProject.id, this.currentOutsourceProject.password, this.currentOutsourceJob.id, this.currentOutsourceJob.password);
+            $('.outsource.modal').show();
+        }
+    }
 });
 
 
@@ -139,9 +170,12 @@ function renderQuote( clickedButton ) {
     });
 }
 
-function renderQuote2( idProject, password, jid, jpassword, fixedDelivery, typeOfService ) {
+function renderQuoteFromManage( idProject, password, jid, jpassword) {
 
-    getOutsourceQuote2( idProject, password, jid, jpassword, fixedDelivery, typeOfService, function( quoteData ){
+    var typeOfService = $( "input[name='revision']" ).is(":checked") ? "premium" : "professional";
+    var fixedDelivery =  $( "#forceDeliveryChosenDate" ).text();
+
+    getOutsourceQuoteFromManage( idProject, password, jid, jpassword, fixedDelivery, typeOfService, function(quoteData ){
         UI.quoteResponse = quoteData.data[0];
         var chunk = quoteData.data[0][0];
 
@@ -201,7 +235,7 @@ function getOutsourceQuote( clickedButton, callback ) {
     });
 }
 
-function getOutsourceQuote2( idProject, password, jid, jpassword, fixedDelivery, typeOfService, callback ) {
+function getOutsourceQuoteFromManage(idProject, password, jid, jpassword, fixedDelivery, typeOfService, callback ) {
 
     APP.doRequest({
         data: {
@@ -288,7 +322,7 @@ function renderNormalQuote( chunk ) {
     // no info available about translator
     if( chunk.show_translator_data != 1 ) {
         $('.outsourceto').addClass("translatorNotAvailable");
-        $('.outsource.modal .minus,').hide();
+        $('.outsource.modal .minus').hide();
         $('.trustbox2').removeClass('hide');
         $('.translator_bio,.outsource.modal .more,.trustbox1, .translator_not_found,.translator_not_found, .trust_text p:first-child').addClass('hide');
         return false;
@@ -486,6 +520,7 @@ function updateCartParameters() {
 function resetOutsourcePopup( resetHard ) {
     $('.outsourceto').attr( "class", "outsourceto" );
     $('.needitfaster').html('Need it faster?');
+    $('.delivery_details span.zone2').html('');
     $('.trustbox2').attr( "class", "trustbox2" );
     $('.trustbox1').attr( "class", "trustbox1" );
     $('.translator_bio').attr( "class", "translator_bio" );
