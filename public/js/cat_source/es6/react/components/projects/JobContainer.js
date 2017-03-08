@@ -12,22 +12,6 @@ class JobContainer extends React.Component {
         this.downloadTranslation = this.downloadTranslation.bind(this);
     }
 
-    componentDidMount () {
-        $(this.dropdown).dropdown({
-            belowOrigin: true
-        });
-        $('.button.tm-keys, .button.comments-tooltip, .warning-tooltip, .qr-tooltip, .translate-tooltip').popup();
-
-        ProjectsStore.addListener(ManageConstants.ENABLE_DOWNLOAD_BUTTON, this.enableDownloadMenu.bind(this));
-        ProjectsStore.addListener(ManageConstants.DISABLE_DOWNLOAD_BUTTON, this.disableDownloadMenu.bind(this));
-
-    }
-
-    componentWillUnmount() {
-        ProjectsStore.removeListener(ManageConstants.ENABLE_DOWNLOAD_BUTTON, this.enableDownloadMenu);
-        ProjectsStore.removeListener(ManageConstants.DISABLE_DOWNLOAD_BUTTON, this.disableDownloadMenu);
-    }
-
     /**
      * Returns the translation status evaluating the job stats
      */
@@ -375,10 +359,37 @@ class JobContainer extends React.Component {
         ManageActions.openOutsourceModal(this.props.project, this.props.job, this.getTranslateUrl());
     }
 
+    getOutsourceButton() {
+        let label = <div>Outsource</div>;
+        if (this.props.job.get('outsource')) {
+            if (this.props.job.get('outsource').get('outsourced') == "1") {
+                label = <div style={{color: 'green'}}>Outsourced</div>;
+            }
+        }
+        return label;
+    }
+
+    componentDidMount () {
+        $(this.dropdown).dropdown({
+            belowOrigin: true
+        });
+        $('.button.tm-keys, .button.comments-tooltip, .warning-tooltip, .qr-tooltip, .translate-tooltip').popup();
+
+        ProjectsStore.addListener(ManageConstants.ENABLE_DOWNLOAD_BUTTON, this.enableDownloadMenu.bind(this));
+        ProjectsStore.addListener(ManageConstants.DISABLE_DOWNLOAD_BUTTON, this.disableDownloadMenu.bind(this));
+
+        ManageActions.getOutsourceQuote(this.props.project, this.props.job);
+    }
+
+    componentWillUnmount() {
+        ProjectsStore.removeListener(ManageConstants.ENABLE_DOWNLOAD_BUTTON, this.enableDownloadMenu);
+        ProjectsStore.removeListener(ManageConstants.DISABLE_DOWNLOAD_BUTTON, this.disableDownloadMenu);
+    }
+
     render () {
         let translateUrl = this.getTranslateUrl();
         let outsourceUrl = this.getOutsourceUrl();
-
+        let outsourceButton = this.getOutsourceButton();
         let analysisUrl = this.getAnalysisUrl();
         let splitUrl = this.getSplitUrl();
         let mergeUrl = this.getMergeUrl();
@@ -432,7 +443,7 @@ class JobContainer extends React.Component {
                                         <div className="four wide computer six wide tablet column">
                                             <div className="creation-date"
                                                 onClick={this.openOutsourceModal.bind(this)}>
-                                                <span>Outsource</span>
+                                                {outsourceButton}
                                             </div>
                                         </div>
                                     </div>

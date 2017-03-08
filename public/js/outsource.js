@@ -102,7 +102,7 @@ $.extend(UI, {
 			$('#continueForm input[name=quoteData]').attr('value', JSON.stringify( UI.quoteResponse ) );
 			$('#continueForm').submit();
             $('#continueForm input[name=quoteData]').attr('value', '' );
-		})
+		});
 
         fetchChangeRates();
 	},
@@ -131,7 +131,11 @@ $.extend(UI, {
             renderQuoteFromManage(this.currentOutsourceProject.id, this.currentOutsourceProject.password, this.currentOutsourceJob.id, this.currentOutsourceJob.password);
             $('.outsource.modal').show();
         }
-    }
+    },
+
+    getOutsourceQuoteFromManage: getOutsourceQuoteFromManage,
+
+
 });
 
 
@@ -237,7 +241,7 @@ function getOutsourceQuote( clickedButton, callback ) {
 
 function getOutsourceQuoteFromManage(idProject, password, jid, jpassword, fixedDelivery, typeOfService, callback ) {
 
-    APP.doRequest({
+    return APP.doRequest({
         data: {
             action: 'outsourceTo',
             pid: idProject,

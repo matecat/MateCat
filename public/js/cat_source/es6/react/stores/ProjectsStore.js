@@ -83,6 +83,15 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
         this.projects = this.projects.setIn([indexProject, 'id_assignee'], uid);
     },
 
+    updateJobOusource: function (project, job, outsource) {
+        let projectOld = this.projects.find(function (prj) {
+            return prj.get('id') == project.get('id');
+        });
+        let indexProject = this.projects.indexOf(projectOld);
+        let indexJob = project.get('jobs').indexOf(job);
+        this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'outsource'], Immutable.fromJS(outsource));
+    },
+
     unwrapImmutableObject(object) {
         if (object && typeof object.toJS === "function") {
             return object.toJS();
@@ -150,19 +159,23 @@ AppDispatcher.register(function(action) {
             ProjectsStore.changeProjectAssignee(action.project, action.user);
             ProjectsStore.emitChange(ManageConstants.UPDATE_PROJECTS, ProjectsStore.projects);
             break;
+        case ManageConstants.HIDE_PROJECT:
+            ProjectsStore.emitChange(action.actionType, Immutable.fromJS(action.project));
+            break;
+        case ManageConstants.UPDATE_JOB_OUTSOURCE:
+            ProjectsStore.updateJobOusource(action.project, action.job, action.outsource);
+            ProjectsStore.emitChange(ManageConstants.UPDATE_PROJECTS, ProjectsStore.projects);
+            break;
+        case ManageConstants.ENABLE_DOWNLOAD_BUTTON:
+        case ManageConstants.DISABLE_DOWNLOAD_BUTTON:
+            ProjectsStore.emitChange(action.actionType, action.idProject);
+            break;
         // Move this actions
         case ManageConstants.OPEN_CREATE_TEAM_MODAL:
             ProjectsStore.emitChange(action.actionType);
             break;
         case ManageConstants.OPEN_MODIFY_TEAM_MODAL:
             ProjectsStore.emitChange(action.actionType, Immutable.fromJS(action.team));
-            break;
-        case ManageConstants.HIDE_PROJECT:
-            ProjectsStore.emitChange(action.actionType, Immutable.fromJS(action.project));
-            break;
-        case ManageConstants.ENABLE_DOWNLOAD_BUTTON:
-        case ManageConstants.DISABLE_DOWNLOAD_BUTTON:
-            ProjectsStore.emitChange(action.actionType, action.idProject);
             break;
     }
 });

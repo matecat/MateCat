@@ -352,6 +352,20 @@ let ManageActions = {
             actionType: ManageConstants.DISABLE_DOWNLOAD_BUTTON,
             idProject: id
         });
+    },
+
+    getOutsourceQuote: function (project, job) {
+        UI.getOutsourceQuoteFromManage(project.get('id'), project.get('password'),
+            job.get('id'), job.get('password'), 0, 'professional').done(function (response) {
+            if (response.data) {
+                AppDispatcher.dispatch({
+                    actionType: ManageConstants.UPDATE_JOB_OUTSOURCE,
+                    project: project,
+                    job: job,
+                    outsource: response.data[0][0]
+                });
+            }
+        });
     }
 
 };
