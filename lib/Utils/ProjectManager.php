@@ -1487,6 +1487,7 @@ class ProjectManager {
         //needed to check if a file has only one segment
         //for correctness: we could have more tag files in the xliff
         $_fileCounter_Show_In_Cattool = 0;
+        $num_words = 0; //initialize counter for words in the file to avoid IDE warnings
 
         // Creating the Query
         foreach ( $xliff[ 'files' ] as $xliff_file ) {
@@ -1606,6 +1607,9 @@ class ProjectManager {
                                     $mrk_ext_succ_tags
                             ] );
 
+                            //increment counter for word count
+                            $this->files_word_count += $num_words;
+
                         } // end foreach seg-source
 
                         if ( self::notesAllowedByMimeType( $mimeType ) ) {
@@ -1693,6 +1697,9 @@ class ProjectManager {
                                 null
                         ] );
 
+                        //increment counter for word count
+                        $this->files_word_count += $num_words;
+
                     }
                 }
 
@@ -1709,7 +1716,7 @@ class ProjectManager {
             throw new Exception( "Segment import - no segments found", -1 );
         } else {
             //increment global counter
-            $this->show_in_cattool_segs_counter = $_fileCounter_Show_In_Cattool;
+            $this->show_in_cattool_segs_counter += $_fileCounter_Show_In_Cattool;
         }
 
         $baseQuery = "INSERT INTO segments ( id, internal_id, id_file, id_file_part, segment, segment_hash, raw_word_count, xliff_mrk_id, xliff_ext_prec_tags, xliff_ext_succ_tags, show_in_cattool,xliff_mrk_ext_prec_tags,xliff_mrk_ext_succ_tags) values ";
