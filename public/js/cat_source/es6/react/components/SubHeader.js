@@ -133,9 +133,7 @@ class SubHeader extends React.Component {
         return (
             <section className="row sub-head">
                 <div className="ui container equal width grid">
-                    <div className="center aligned column">
-                        {membersFilter}
-                    </div>
+
                     <div className="column">
                         <div className="search-state-filters">
                             <SearchInput
@@ -143,6 +141,10 @@ class SubHeader extends React.Component {
                             <FilterProjects
                                 filterFunction={this.filterByStatus.bind(this)}/>
                         </div>
+                    </div>
+
+                    <div className="center aligned column">
+                        {membersFilter}
                     </div>
 
                 </div>

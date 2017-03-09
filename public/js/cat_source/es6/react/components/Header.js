@@ -179,7 +179,10 @@ class Header extends React.Component {
                                 <a href="/" className="logo"/>
 
                             </div>
-                            <div className="ten wide right floated right aligned column">
+                            <div className="ten wide column">
+                                {subHeader}
+                            </div>
+                            <div className="three wide right floated right aligned column">
                                 {userIcon}
 
                                 {teamsSelect}
@@ -199,7 +202,6 @@ class Header extends React.Component {
                             </div>
                         </div>
                     </nav>
-                {subHeader}
                 </section>;
     }
 }
