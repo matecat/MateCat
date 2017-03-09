@@ -12,22 +12,6 @@ class JobContainer extends React.Component {
         this.downloadTranslation = this.downloadTranslation.bind(this);
     }
 
-    componentDidMount () {
-        $(this.dropdown).dropdown({
-            belowOrigin: true
-        });
-        $('.button.tm-keys, .button.comments-tooltip, .warning-tooltip, .qr-tooltip, .translate-tooltip').popup();
-
-        ProjectsStore.addListener(ManageConstants.ENABLE_DOWNLOAD_BUTTON, this.enableDownloadMenu.bind(this));
-        ProjectsStore.addListener(ManageConstants.DISABLE_DOWNLOAD_BUTTON, this.disableDownloadMenu.bind(this));
-
-    }
-
-    componentWillUnmount() {
-        ProjectsStore.removeListener(ManageConstants.ENABLE_DOWNLOAD_BUTTON, this.enableDownloadMenu);
-        ProjectsStore.removeListener(ManageConstants.DISABLE_DOWNLOAD_BUTTON, this.disableDownloadMenu);
-    }
-
     /**
      * Returns the translation status evaluating the job stats
      */
@@ -372,29 +356,40 @@ class JobContainer extends React.Component {
     }
 
     openOutsourceModal() {
+        ManageActions.openOutsourceModal(this.props.project, this.props.job, this.getTranslateUrl());
+    }
 
-        $( ".title-source" ).text( 'Source');
-        $( ".title-target" ).text( 'Target');
-        $( ".title-words" ).text( 'Words' );
+    getOutsourceButton() {
+        let label = <div>Outsource</div>;
+        if (this.props.job.get('outsource')) {
+            if (this.props.job.get('outsource').get('outsourced') == "1") {
+                label = <div style={{color: 'green'}}>Outsourced</div>;
+            }
+        }
+        return label;
+    }
 
+    componentDidMount () {
+        $(this.dropdown).dropdown({
+            belowOrigin: true
+        });
+        $('.button.tm-keys, .button.comments-tooltip, .warning-tooltip, .qr-tooltip, .translate-tooltip').popup();
 
-        // if(config.enable_outsource) {
-        //     e.preventDefault();
-            resetOutsourcePopup( false );
-            $('body').addClass('showingOutsourceTo');
-            // $('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
-            // $('.outsource.modal .uploadbtn:not(.showprices)').attr('href', $(this).attr('href'));
-            // showOutsourcePopup( UI.showPopupDetails );
-            showOutsourcePopup( "1" );
-            renderQuote2(this.props.project.get('id'), this.props.project.get('password'), this.props.job.get('id'), this.props.job.get('password'), "0", "professional");
-            $('.outsource.modal').show();
-        // }
+        ProjectsStore.addListener(ManageConstants.ENABLE_DOWNLOAD_BUTTON, this.enableDownloadMenu.bind(this));
+        ProjectsStore.addListener(ManageConstants.DISABLE_DOWNLOAD_BUTTON, this.disableDownloadMenu.bind(this));
+
+        ManageActions.getOutsourceQuote(this.props.project, this.props.job);
+    }
+
+    componentWillUnmount() {
+        ProjectsStore.removeListener(ManageConstants.ENABLE_DOWNLOAD_BUTTON, this.enableDownloadMenu);
+        ProjectsStore.removeListener(ManageConstants.DISABLE_DOWNLOAD_BUTTON, this.disableDownloadMenu);
     }
 
     render () {
         let translateUrl = this.getTranslateUrl();
         let outsourceUrl = this.getOutsourceUrl();
-
+        let outsourceButton = this.getOutsourceButton();
         let analysisUrl = this.getAnalysisUrl();
         let splitUrl = this.getSplitUrl();
         let mergeUrl = this.getMergeUrl();
@@ -454,9 +449,13 @@ class JobContainer extends React.Component {
                                                 {/*<a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>*/}
                                                 <span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')} words</span>
                                             </div>
-                                            {/*<div className="creation-date">
-                                                <span>Created: {this.props.job.get('formatted_create_date')}</span>
-                                            </div>*/}
+                                        </div>
+
+                                        <div className="four wide computer six wide tablet column">
+                                            <div className="creation-date"
+                                                onClick={this.openOutsourceModal.bind(this)}>
+                                                {outsourceButton}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

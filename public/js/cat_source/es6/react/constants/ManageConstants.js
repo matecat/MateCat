@@ -34,6 +34,8 @@ module.exports = keyMirror({
     NOT_ASSIGNED_FILTER: null,
 
     ENABLE_DOWNLOAD_BUTTON: null,
-    DISABLE_DOWNLOAD_BUTTON: null
+    DISABLE_DOWNLOAD_BUTTON: null,
+
+    UPDATE_JOB_OUTSOURCE: null
 
 });

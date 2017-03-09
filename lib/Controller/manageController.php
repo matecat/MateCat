@@ -12,6 +12,10 @@ class manageController extends viewController {
 	private $page = 1;
 	public $notAllCancelled = 0;
 
+    protected $featureSet ;
+
+    protected $_outsource_login_API = '//signin.translated.net/';
+
 	public function __construct() {
 		$isAuthRequired = true;
 		parent::__construct( $isAuthRequired );
@@ -36,6 +40,11 @@ class manageController extends viewController {
 		} else {
 			$this->filter_enabled = false;
 		};
+
+
+        $this->featureSet = new FeatureSet() ;
+        $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
+
 	}
 
 	public function doAction() {
@@ -64,7 +73,7 @@ class manageController extends viewController {
 		$this->template->enable_omegat = ( INIT::$ENABLE_OMEGAT_DOWNLOAD !== false );
         $this->template->globalMessage = Utils::getGlobalMessage() ;
         $this->template->outsource_service_login    = $this->_outsource_login_API ;
-
+        $this->template->enable_outsource           = $this->featureSet->filter('filter_enable_outsource', INIT::$ENABLE_OUTSOURCE);
 	}
 
 }

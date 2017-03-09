@@ -8,6 +8,43 @@
 .popup a.anonymous{font-size:12px;}
 .popup a.anonymous:visited, .popup a.anonymous:active {color:black;}
 
+.popup h1 {
+    overflow: visible;
+    max-height: inherit;
+    font-size: 24px;
+    background: #4D4D4D url(../img/logo-ico.png) 12px 12px no-repeat;
+    padding: 10px 10px 7px 58px;
+    background-size: 35px;
+    /* border-bottom: 1px solid #000; */
+    color: #fff;
+    margin: 0 !important;
+    text-align: left;
+}
+
+.popup .x-popup {
+    color: #fff;
+    text-decoration: none;
+    display: block;
+    height: 30px;
+    font-size: 20px;
+    padding-top: 10px;
+    float: right;
+    margin: 0 10px 0 0;
+    background-size: 22px;
+    font-family: 'icomoon';
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+.x-popup:before {
+    content: "\f057";
+}
+
 .outer {
     background: url(../img/bg_login_button.gif) 0 0 repeat;
     border-radius: 6px;
@@ -78,6 +115,8 @@ box-shadow: inset 0 0 1px 1px #888;
     margin: -170px 0 0 -425px;
     padding-bottom: 10px;
     box-sizing: content-box;
+    top: 35%;
+    left: 50%;
 }
 
 .outsource.modal .popup-box {
@@ -459,6 +498,8 @@ span.revision_delivery {
 .outsource .heading h3 {
     float: left;
     font-size: 20px;
+    margin-bottom: 0;
+    line-height: 30px;
 }
 
 .onyourown h2,
@@ -842,7 +883,8 @@ select#changeTimezone,
     margin-right: 1%;
     border: 1px solid #ccc;
     height: 30px;
-    font-size: 10px;
+    font-size: 13px;
+    font-family: Arial;
 }
 
 select#changeTimezone {
@@ -1075,6 +1117,7 @@ a.tooltip.gray span:after {
     text-align: left;
     -moz-box-shadow: 0 0px 11px #888;
     -webkit-box-shadow: 0 0px 11px #888;
+
 }
 
 #forceDeliveryContainer .title {
@@ -1175,11 +1218,13 @@ a.tooltip.gray span:after {
     font-weight: normal;
     margin: 0px 0 6px 12px;
     line-height: 100%;
+    color: #333;
 }
 
 #forceDeliveryContainer .delivery-manual-time select {
     width: 250px;
     margin-left: 12px;
+    color: #333;
 }
 
 
@@ -1215,7 +1260,8 @@ a.tooltip.gray span:after {
 #forceDeliveryContainer select {
         border: 1px solid #ccc;
     height: 30px;
-    font-size: 10px;
+    font-size: 12px;
+    font-family: Arial;
 }
 
 #forceDeliveryContainer .clear {
@@ -1492,6 +1538,134 @@ td.datepickerSunday:not(.datepickerDisabled) a {
 .quoteError .delivery
  {
     padding: 0.5% 2% 4% 2%;
+}
+
+/******** Outsource Modal *******/
+.modal.outsource .uploadbtn.in-popup, .modal.outsource .continuebtn, .modal.outsource .standardbtn {
+    background: #09beec;
+    font-weight: bold;
+    -webkit-transition: all 100ms ease-in;
+    -moz-transition: all 100ms ease-in;
+    font-size: 20px !important;
+    cursor: pointer;
+    color: #fff;
+    -moz-box-shadow: 0 1px 2px #ccc;
+    -webkit-box-shadow: 0 1px 2px #ccc;
+    box-shadow: 0 1px 2px #ccc;
+    border: 1px solid #666;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+    text-decoration: none;
+    opacity: 0.9;
+    text-align: center;
+    padding: 5px 10px !important;
+    float: right;
+    margin: 2% 2.5% 2% 2%!important;
+    width: 160px;
+}
+
+.modal.outsource .uploadbtn:hover, .modal.outsource .continuebtn:hover, .modal.outsource .standardbtn:hover {
+    -moz-box-shadow: 0 1px 2px #666;
+    -webkit-box-shadow: 0 1px 2px #666;
+    box-shadow: 0 1px 2px #666;
+    background: #12b4df;
+}
+.modal.outsource .continuebtn {
+    clear: both;
+    float: none;
+    width: 160px;
+    margin: 10px auto 0 auto!important;
+    overflow: hidden;
+    background: #7eaf3e;
+    display: block;
+}
+
+.modal.outsource .continuebtn:hover {
+    background: #7eaf3e;
+}
+
+.modal.outsource  .more:before {
+    content: "\f196";
+    margin-right: 7px;
+    font-family: 'icomoon';
+    speak: none;
+    font-style: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+}
+
+.modal.outsource .trustbox2 a {
+    text-decoration: underline;
+}
+
+.modal.outsource .tooltip {
+    cursor: help;
+    position: absolute;
+    border: 1px solid #717171;
+    border-radius: 20px;
+    width: 13px !important;
+    font-size: 13px;
+    height: 11px;
+    font-weight: bold;
+    padding-left: 0px;
+    padding-top: 2px;
+    margin-top: -3px;
+    line-height: 11px;
+    margin-left: 5px;
+    color: #717171;
+    box-shadow: 1px 1px 1px #999;
+}
+
+.modal.outsource .tooltip span {
+    width: 200px;
+    height: auto;
+    line-height: 22px;
+    color: #333;
+    padding: 10px;
+    left: -98px;
+    font-weight: 400;
+    font-size: 15px;
+    text-align: center;
+    border: 1px solid #727272;
+    text-indent: 0px;
+    border-radius: 5px;
+    position: absolute;
+    pointer-events: none;
+    top: -110px;
+    opacity: 0;
+    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+    -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+    -moz-box-box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+    -webkit-transition: all 0.3s ease-in-out;
+    -moz-transition: all 0.3s ease-in-out;
+    -o-transition: all 0.3s ease-in-out;
+    -ms-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+    z-index: 1000000000000000;
+}
+
+.modal.outsource .tooltip:hover span {
+    opacity: 1;
+    top: -165px;
+}
+.modal.outsource .tooltip span:after {
+    bottom: -10px;
+    margin-left: -1px;
+    border-top: 10px solid #EEE;
+}
+.modal.outsource .tooltip span:before, .tooltip span:after {
+    content: '';
+    position: absolute;
+    bottom: -11px;
+    left: 43%;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid #727272;
 }
 
 

@@ -465,6 +465,10 @@ UI = {
         APP.ModalWindow.showModalComponent(ModifyTeamModal, props, "Modify Team");
     },
 
+    openOutsourceModal: function (project, job, url) {
+        UI.startOutSourceModal(project, job, url);
+    },
+
     //***********************//
 
 
@@ -525,4 +529,7 @@ UI = {
 $(document).ready(function(){
     UI.init();
     UI.render();
+    if ( config.enable_outsource ) {
+        UI.outsourceInit();
+    }
 });
