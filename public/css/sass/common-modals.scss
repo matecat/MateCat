@@ -85,15 +85,6 @@ body.side-popup {
     color: red;
 }
 
-.coupon-container .validation-success {
-    color: green;
-    margin-top: 2px;
-}
-
-.coupon-container p {
-    line-height: 5px !important;
-}
-
 .user-info-form,
 .user-reset-password,
 .user-gdrive {
@@ -316,31 +307,6 @@ body.side-popup {
     box-sizing: border-box;
     font-size: 15px;
     color: #333;
-}
-
-.coupon-container input#user-coupon {
-
-    width: 76%;
-    float: left;
-    box-sizing: border-box;
-}
-
-.coupon-container.coupon-success input#user-coupon {
-    width: 100% !important;
-    float: none;
-}
-
-.coupon-container {
-    width: 100%;
-    margin: 0 auto;
-    overflow: hidden;
-    margin-bottom: 20px;
-}
-
-.coupon-container .btn-confirm-medium {
-    margin: 6px 0% 0 3%;
-    width: 21%;
-    box-sizing: border-box;
 }
 
 .user-info-form input {
@@ -785,12 +751,6 @@ div#matecat-modal p {
     background-position: 0 -101px;
     background-size: cover;
     box-shadow: none;
-}
-
-.matecat-modal .coupon-container .btn-confirm-medium {
-    margin: 6px 0% 0 3%;
-    width: 21%;
-    box-sizing: border-box;
 }
 
 .matecat-modal-content .btn-confirm-medium.sing-in {
