@@ -382,17 +382,28 @@ class JobContainer extends React.Component {
         return label;
     }
 
-    getOutsourceInfo() {
-        let label = '';
+    getOutsourceJobSent() {
+        let outsourceJobLabel = '';
         if (this.props.job.get('outsource')) {
             if (this.props.job.get('outsource').get('outsourced') == "1") {
-                label = <div style={{float: 'left'}}>
+                outsourceJobLabel = <div className="translated-outsuorced">
                     <a href="http://www.translated.net" target="_blank"><img className='outsource-logo' src="/public/img/logo_translated.png" title="visit our website"/></a>
-                    <span>{this.props.job.get('outsource').get('delivery')}</span>
-                </div>;
+                </div>
+                ;
             }
         }
-        return label;
+        return outsourceJobLabel;
+    }
+
+    getOutsourceDelivery() {
+        let outsourceDelivery = '';
+        if (this.props.job.get('outsource')) {
+            if (this.props.job.get('outsource').get('outsourced') == "1") {
+                outsourceDelivery = <div className="job-delivery">{this.props.job.get('outsource').get('delivery')}</div>
+                ;
+            }
+        }
+        return outsourceDelivery;
     }
 
     componentDidMount () {
@@ -415,7 +426,8 @@ class JobContainer extends React.Component {
     render () {
         let translateUrl = this.getTranslateUrl();
         let outsourceButton = this.getOutsourceButton();
-        let outsourceInfo = this.getOutsourceInfo();
+        let outsourceJobLabel = this.getOutsourceJobSent();
+        let outsourceDelivery = this.getOutsourceDelivery();
         let analysisUrl = this.getProjectAnalyzeUrl();
         let splitUrl = this.getSplitUrl();
         let mergeUrl = this.getMergeUrl();
@@ -474,14 +486,17 @@ class JobContainer extends React.Component {
                                                 <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
                                                 {/*<span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')} words</span>*/}
                                             </div>
+                                            <div className="translated-outsourced">
+                                                {outsourceJobLabel}
+                                            </div>
+
                                         </div>
                                     </div>
                                 </div>
                                 <div className="eight wide computer five wide tablet right floated right aligned column">
                                         {QRIcon}
                                         {warningsIcon}
-                                        {outsourceInfo}
-
+                                        {outsourceDelivery}
                                         {outsourceButton}
                                         <a className="open-translate ui primary button open" target="_blank" href={translateUrl}>
                                             Open
