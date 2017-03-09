@@ -163,7 +163,7 @@ class ProjectContainer extends React.Component {
     getLastAction() {
         let self = this;
         this.props.lastActivityFn(this.props.project.get('id'), this.props.project.get('password')).done(function (data) {
-            let lastAction = (data.activity[0])? data.activity[0] : [];
+            let lastAction = (data.activity[0])? data.activity[0] : null;
             self.setState({
                 lastAction: lastAction,
                 jobsActions: data.activity
@@ -262,32 +262,6 @@ class ProjectContainer extends React.Component {
                     }
 
                     let jobList = <div className="job ui grid" key = { (i - 1) + job.get('id')}>
-                            <div className="job-header sixteen wide column shadow-1">
-
-                                <div className="ui grid">
-                                    <div className="three wide column">
-                                        <div className="source-target">
-                                            <div className="source-box">
-                                                {job.get('sourceTxt')}
-                                            </div>
-                                            <div className="in-to"><i className="icon-chevron-right icon"/></div>
-                                            <div className="target-box">
-                                                {job.get('targetTxt')}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {/*<div className="three wide computer six wide tablet column">*/}
-                                        {/*<div className="creation-date">*/}
-                                            {/*<span>Created: {job.get('formatted_create_date')}</span>*/}
-                                        {/*</div>*/}
-                                    {/*</div>*/}
-                                    <div className="ten wide column right aligned">
-                                        <div className="split-merge">
-                                            {button}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                             <div className="job-body sixteen wide column">
                                 <div className="ui grid chunks">
                                 {chunks}
@@ -344,15 +318,15 @@ class ProjectContainer extends React.Component {
                                <i className="icon-search icon"/>
                                <input type="text" name="UserName" placeholder="Name or email." />
                            </div>
-                           <div className="scrolling menu">
+                           {/*<div className="scrolling menu">*/}
                                {members}
-                               <div className="item" data-value="-1">
+                               <div className="item cancel-item" data-value="-1">
                                    <div className="ui not-assigned label">
                                        <i className="icon-user22"/>
                                    </div>
                                    Not assigned
                                </div>
-                           </div>
+                           {/*</div>*/}
                        </div>
                    </div>;
        }
@@ -417,24 +391,20 @@ class ProjectContainer extends React.Component {
 
         //Last Activity Log Action
         let lastAction;
-        if (this.state.lastAction) {
-            if (this.state.lastAction.length === 0) {
-                lastAction = '';
-            } else {
-                let date = this.getLastActionDate();
-                lastAction = <div className="sixteen wide right aligned column pad-top-0 pad-bottom-0">
-                    <div className="activity-log">
-                        <a href={activityLogUrl} target="_blank" className="right activity-log">
-                            <i> <span>Last action: {this.state.lastAction.action + ' on ' + date}</span><span> by {this.state.lastAction.first_name }</span></i>
-                        </a>
-                    </div>
-                </div>;
-            }
-        } else {
-            lastAction = <div className="sixteen wide right aligned column">
+        if (this.state.lastAction ) {
+            let date = this.getLastActionDate();
+            lastAction = <div className="sixteen wide right aligned column pad-top-0 pad-bottom-0">
                 <div className="activity-log">
                     <a href={activityLogUrl} target="_blank" className="right activity-log">
-                        <i>Loading....</i>
+                        <i> <span>Last action: {this.state.lastAction.action + ' on ' + date}</span><span> by {this.state.lastAction.first_name }</span></i>
+                    </a>
+                </div>
+            </div>;
+        } else {
+            lastAction = <div className="sixteen wide right aligned column pad-top-0 pad-bottom-0">
+                <div className="activity-log">
+                    <a href={activityLogUrl} target="_blank" className="right activity-log">
+                        <i> <span>Created on: {this.props.project.get('jobs').first().get('formatted_create_date')}</span></i>
                     </a>
                 </div>
             </div>;
@@ -498,9 +468,9 @@ class ProjectContainer extends React.Component {
                                         </div>
                                     </div>
                                     <div className="eleven wide computer twelve wide tablet right aligned column">
-                                        <div className="project-payable">
-                                            <a href={analyzeUrl} target="_blank">{payableWords} <span>payable words</span></a>
-                                        </div>
+                                        {/*<div className="project-payable ui grid computer tablet only">*/}
+                                            {/*<a href={analyzeUrl} target="_blank">{payableWords} <span>payable words</span></a>*/}
+                                        {/*</div>*/}
                                         <div className="project-activity-icon">
                                             {dropDownUsers}
                                             <div className="project-menu circular ui icon top right pointing dropdown basic button"
@@ -516,13 +486,14 @@ class ProjectContainer extends React.Component {
                                 <div className="project-name">
                                     <div className="ui form">
                                         <div className="field">
-                                            <div className="ui icon input">
-                                                <input type="text" defaultValue={this.state.projectName}
+                                            <div className={"ui icon input " + inputClass}>
+                                                <input type="text"
                                                        onKeyUp={this.onKeyUpEvent.bind(this)}
                                                        onClick={this.inputNameClick.bind(this)}
                                                        onBlur={this.inputNameOnBlur.bind(this)}
-                                                />
-                                                {inputIcon}
+                                                       ref={(inputName) => this.inputName = inputName}
+                                                       defaultValue={this.state.projectName} disabled/>
+                                                {/*{inputIcon}*/}
                                             </div>
                                         </div>
                                     </div>
@@ -533,9 +504,7 @@ class ProjectContainer extends React.Component {
                                     <a href={analyzeUrl} target="_blank">{payableWords} <span>payable words</span></a>
                                 </div>
                             </div>
-
                         </div>
-
                         <div className="project-body ui grid">
                             <div className="jobs sixteen wide column pad-bottom-0">
                                 {jobsList}

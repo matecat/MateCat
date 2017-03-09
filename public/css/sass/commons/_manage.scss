@@ -38,6 +38,11 @@ body.manage {
     background-color: #ffffff;
 }
 
+.item.cancel-item {
+    position: absolute !important;
+    left: -99999px;
+}
+
 // Closing Shadow - Transitions for buttons
 
 .project-list {
@@ -95,7 +100,7 @@ body.manage {
                 }
             }
             .project-payable {
-                padding: 10px 0;
+                padding: 23px 0;
                 float: left;
                 a {
                     &:hover {
@@ -228,24 +233,7 @@ body.manage {
                 .job-header {
                     background-color: #ffffff !important;
                     padding: 0 0 !important;
-                    .source-target {
-                        padding: 15px 15px 35px !important;
-                        .source-box {
-                            float: left;
-                        }
-                        .in-to {
-                            float: left;
-                            margin-left: 0.25em;
-                            margin-top: 2px;
-                            color: #5a5a5a;
-                        }
-                        .target-box {
-                            float: left;
-                        }
-                    }
-                    .creation-date{
-                        padding: 15px 15px !important;
-                    }
+
                     .split-merge {
                         padding: 10px 15px;
                         .merge {
@@ -262,24 +250,69 @@ body.manage {
                         .chunk {
                             background-color: #ffffff;
                             padding: 8px 15px;
+                            .source-target {
+                                padding: 5px 0 !important;
+                                min-width: 150px;
+                                .source-box {
+                                    float: left;
+                                    width: 60px;
+                                    white-space: nowrap;
+                                    overflow: hidden;
+                                    text-overflow: ellipsis;
+                                }
+                                .in-to {
+                                    float: left;
+                                    margin-top: 2px;
+                                    color: #5a5a5a;
+                                }
+                                .target-box {
+                                    float: left;
+                                    width: 60px;
+                                    white-space: nowrap;
+                                    overflow: hidden;
+                                    text-overflow: ellipsis;
+
+                                }
+                            }
+                            .creation-date{
+                                padding: 5px 15px !important;
+                            }
 
                             .job-id {
                                 padding: 5px 0 !important;
+                                float: left;
+                                min-width: 80px;
                             }
                             .progress-bar {
 
                             }
-                            .job-payable,
-                            .creation-date{
-                                padding: 5px 15px !important;
+                            .tm-job {
+                                float: left;
+                                width: 30px;
+                                height: 30px;
+                                margin-left: 5px;
                             }
-                            .send-translator.open {
-                                padding: 5px 0 !important;
+                            .job-activity-icons {
+                                float: left;
+                                width: 30px;
+                                height: 30px;
+                                margin-left: 5px;
+                                .comments {
+
+                                }
+                            }
+
+                            .job-payable {
+                                padding: 5px 15px !important;
+                                float: left;
+                            }
+                            .translated-outsourced {
+
                             }
                             .due-to {
                                 padding: 5px 0 !important;
                             }
-                            .job-activity-icon {
+                            .open-outsource {
                                 .ui.button {
                                     margin-right: 8px;
                                 }
@@ -292,6 +325,14 @@ body.manage {
                                     vertical-align: top;
                                     font-size: 16px;
                                     border: 1px solid #797979;
+                                }
+                                .creation-date {
+                                    font-family: Calibri;
+                                    padding: 6px 15px !important;
+                                    vertical-align: top;
+                                    font-size: 16px;
+                                    border: 1px solid #797979;
+                                    float: none;
                                 }
                             }
                             .chunk-download-progress {
@@ -314,6 +355,11 @@ body.manage {
                                     -webkit-animation: progress-active 1s ease infinite;
                                     animation: progress-active 1s ease infinite;
                                 }
+                            }
+                            img.outsource-logo {
+                                width: 115px;
+                                margin: 0 5px;
+                                vertical-align: middle;
                             }
                         }
                     }
