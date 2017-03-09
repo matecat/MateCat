@@ -6,7 +6,6 @@ class JobContainer extends React.Component {
             showDownloadProgress: false
         };
         this.getTranslateUrl = this.getTranslateUrl.bind(this);
-        this.getOutsourceUrl = this.getOutsourceUrl.bind(this);
         this.getAnalysisUrl = this.getAnalysisUrl.bind(this);
         this.changePassword = this.changePassword.bind(this);
         this.downloadTranslation = this.downloadTranslation.bind(this);
@@ -162,7 +161,7 @@ class JobContainer extends React.Component {
     }
 
 
-    getJobMenu(splitUrl) {
+    getJobMenu(splitUrl, mergeUrl) {
         let reviseUrl = this.getReviseUrl();
         let editLogUrl = this.getEditingLogUrl();
         let qaReportUrl = this.getQAReport();
@@ -174,7 +173,7 @@ class JobContainer extends React.Component {
 
 
         let downloadButton = this.getDownloadLabel();
-        let splitButton = (!this.props.isChunk) ? <a className="item" target="_blank" href={splitUrl}><i className="icon-expand icon"/> Split</a> : '';
+        let splitButton = (!this.props.isChunk) ? <a className="item" target="_blank" href={splitUrl}><i className="icon-expand icon"/> Split</a> : <a className="item" target="_blank" href={mergeUrl}><i className="icon-compress icon"/> Merge</a>;
 
         let menuHtml = <div className="menu">
 
@@ -236,13 +235,12 @@ class JobContainer extends React.Component {
         return menuHtml;
     }
 
-    getOutsourceUrl() {
-        return '/analyze/'+ this.props.project.get('project_slug') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=analysis&jobid=' + this.props.job.get('id');
-    }
-
-
     getAnalysisUrl() {
         return '/jobanalysis/'+this.props.project.get('id')+ '-' + this.props.job.get('id') + '-' + this.props.job.get('password');
+    }
+
+    getProjectAnalyzeUrl() {
+        return '/analyze/' + this.props.project.get('project_slug') + '/' +this.props.project.get('id')+ '-' + this.props.project.get('password');
     }
 
     getSplitUrl() {
@@ -356,14 +354,42 @@ class JobContainer extends React.Component {
     }
 
     openOutsourceModal() {
-        ManageActions.openOutsourceModal(this.props.project, this.props.job, this.getTranslateUrl());
+        if (this.props.job.get('outsource') && this.props.job.get('outsource').get('outsourced') == "1") {
+            window.open(this.props.job.get('outsource').get('link_to_status'), "_blank");
+        } else {
+            ManageActions.openOutsourceModal(this.props.project, this.props.job, this.getTranslateUrl());
+        }
     }
 
     getOutsourceButton() {
-        let label = <div>Outsource</div>;
+        let label = <a className="ui green button disabled"
+                       onClick={this.openOutsourceModal.bind(this)}>
+           Outsource
+        </a>;
         if (this.props.job.get('outsource')) {
             if (this.props.job.get('outsource').get('outsourced') == "1") {
-                label = <div style={{color: 'green'}}>Outsourced</div>;
+                label = <a className="ui grey button "
+                           onClick={this.openOutsourceModal.bind(this)}>
+                    Outsourced
+                </a>;
+            } else {
+                label = <a className="ui green button"
+                           onClick={this.openOutsourceModal.bind(this)}>
+                    Outsource
+                </a>;
+            }
+        }
+        return label;
+    }
+
+    getOutsourceInfo() {
+        let label = '';
+        if (this.props.job.get('outsource')) {
+            if (this.props.job.get('outsource').get('outsourced') == "1") {
+                label = <div style={{float: 'left'}}>
+                    <a href="http://www.translated.net" target="_blank"><img className='outsource-logo' src="/public/img/logo_translated.png" title="visit our website"/></a>
+                    <span>{this.props.job.get('outsource').get('delivery')}</span>
+                </div>;
             }
         }
         return label;
@@ -388,14 +414,13 @@ class JobContainer extends React.Component {
 
     render () {
         let translateUrl = this.getTranslateUrl();
-        let outsourceUrl = this.getOutsourceUrl();
         let outsourceButton = this.getOutsourceButton();
-        let analysisUrl = this.getAnalysisUrl();
+        let outsourceInfo = this.getOutsourceInfo();
+        let analysisUrl = this.getProjectAnalyzeUrl();
         let splitUrl = this.getSplitUrl();
         let mergeUrl = this.getMergeUrl();
         let splitMergeButton = this.getSplitOrMergeButton(splitUrl, mergeUrl);
         // let modifyDate = this.getModifyDate();
-
         let jobMenu = this.getJobMenu(splitUrl, mergeUrl);
         let tmIcon = this.getTMIcon();
         let QRIcon = this.getQRIcon();
@@ -420,9 +445,9 @@ class JobContainer extends React.Component {
 
                         <div className="thirteen wide computer fourteen wide tablet thirteen wide mobile column pad-left-0">
                             <div className="ui mobile reversed stackable grid">
-                                <div className="twelve wide column">
+                                <div className="eight wide column">
                                     <div className="ui grid">
-                                        <div className="nine wide computer six wide tablet column">
+                                        <div className="twelve wide computer six wide tablet column">
                                             <div className="job-id">
                                                 { idJobLabel }
                                             </div>
@@ -446,29 +471,18 @@ class JobContainer extends React.Component {
                                                 </div>
                                             </div>
                                             <div className="job-payable">
-                                                {/*<a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>*/}
-                                                <span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')} words</span>
-                                            </div>
-                                        </div>
-
-                                        <div className="four wide computer six wide tablet column">
-                                            <div className="creation-date"
-                                                onClick={this.openOutsourceModal.bind(this)}>
-                                                {outsourceButton}
+                                                <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
+                                                {/*<span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')} words</span>*/}
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="four wide computer five wide tablet right floated right aligned column">
-                                    <div className="open-outsource">
+                                <div className="eight wide computer five wide tablet right floated right aligned column">
                                         {QRIcon}
                                         {warningsIcon}
+                                        {outsourceInfo}
 
-
-                                        <a className="creation-date ui green button"
-                                            onClick={this.openOutsourceModal.bind(this)}>
-                                            Outsource
-                                        </a>
+                                        {outsourceButton}
                                         <a className="open-translate ui primary button open" target="_blank" href={translateUrl}>
                                             Open
                                         </a>
@@ -477,7 +491,6 @@ class JobContainer extends React.Component {
                                             <i className="icon-more_vert icon"/>
                                             {jobMenu}
                                         </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
