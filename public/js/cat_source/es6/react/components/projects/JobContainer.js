@@ -405,7 +405,7 @@ class JobContainer extends React.Component {
 
         return <div className="chunk sixteen wide column shadow-1">
                     <div className="ui grid">
-                        <div className="two wide computer two wide tablet three wide mobile column">
+                        <div className="three wide computer two wide tablet three wide mobile column">
                             <div className="source-target">
                                 <div className="source-box">
                                     {this.props.job.get('sourceTxt')}
@@ -418,7 +418,7 @@ class JobContainer extends React.Component {
                         </div>
 
 
-                        <div className="fourteen wide computer fourteen wide tablet thirteen wide mobile column pad-left-0">
+                        <div className="thirteen wide computer fourteen wide tablet thirteen wide mobile column pad-left-0">
                             <div className="ui mobile reversed stackable grid">
                                 <div className="twelve wide column">
                                     <div className="ui grid">
