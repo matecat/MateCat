@@ -95,8 +95,10 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
             return prj.get('id') == project.get('id');
         });
         let indexProject = this.projects.indexOf(projectOld);
-        let indexJob = project.get('jobs').indexOf(job);
-        this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'outsource'], Immutable.fromJS(outsource));
+        if (indexProject != -1) {
+            let indexJob = project.get('jobs').indexOf(job);
+            this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'outsource'], Immutable.fromJS(outsource));
+        }
     },
 
     saveOutsource: function (project, job, outsource) {

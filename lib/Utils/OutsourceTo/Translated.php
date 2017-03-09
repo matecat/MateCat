@@ -366,7 +366,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
             $url =  "http://www.translated.net/hts/matecat-endpoint.php?f=quote&cid=htsdemo&p=htsdemo5&s=$source&t=$target" .
                 "&pn=MATECAT_{$job['jid']}-{$job['jpassword']}&w=$words&df=matecat&matecat_pid=" . $this->pid .
-                "&matecat_ppass=" . $this->ppassword . "&matecat_pname=" . $volAnalysis[ 'data' ][ 'summary' ][ 'NAME' ] .
+                "&matecat_ppass=" . $this->ppassword . "&matecat_pname=" . urlencode($volAnalysis[ 'data' ][ 'summary' ][ 'NAME' ]) .
                 "&subject=$subject&jt=R&fd=" . urlencode( $fixedDeliveryDateForQuote ) . "&of=json";
 
             Log::doLog( "Not Found in Cache. Call url for Quote:  " . $url );
