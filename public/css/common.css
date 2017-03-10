@@ -3293,11 +3293,15 @@ section.currSearchSegment mark.searchMarker
 }
 
 .offline header {
-background: #6d6e71;
+background: #4d4d4d;
 border-bottom: 1px solid #333;
 padding: 0px 0 2px 0;
 margin-bottom: 20px;
-/*height: 45px;*/
+height: 45px;
+}
+
+.offline a.logo {
+    margin-top: 3px;
 }
 
 .offline h1 {font-size:40px;}
