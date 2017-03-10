@@ -89,9 +89,15 @@ class SubHeader extends React.Component {
 
             let item = <div className="item" data-value="-1"
                             key={'user' + -1}>
-                            <a className="ui all label">ALL</a>
+                            <a className="ui all label">All</a>
                             All Members
                         </div>;
+            members = members.unshift(item);
+            item = <div className="item" data-value="0"
+                            key={'user' + 0}>
+                        <a className="ui all label">NA</a>
+                        Not assigned
+                    </div>;
             members = members.unshift(item);
 
 
