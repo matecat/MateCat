@@ -510,6 +510,7 @@ class catController extends viewController {
 
         if ( $this->job_not_found ) {
             parent::makeTemplate( 'job_not_found.html' );
+            header("HTTP/1.0 404 Not Found");
             return;
         }
 
