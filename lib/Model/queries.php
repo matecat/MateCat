@@ -1506,6 +1506,7 @@ function insertProject( ArrayObject $projectStructure ) {
     $data[ 'password' ]          = $projectStructure[ 'ppassword' ];
     $data[ 'pretranslate_100' ]  = $projectStructure[ 'pretranslate_100' ];
     $data[ 'remote_ip_address' ] = empty( $projectStructure[ 'user_ip' ] ) ? 'UNKNOWN' : $projectStructure[ 'user_ip' ];
+    $data[ 'instance_id' ]       = !is_null( $projectStructure[ 'instance_id' ] ) ? $projectStructure[ 'instance_id' ] : null;
 
     $db = Database::obtain();
     $db->begin();
@@ -1513,6 +1514,7 @@ function insertProject( ArrayObject $projectStructure ) {
     $project = Projects_ProjectDao::findById( $projectId );
     $db->commit();
     return $project;
+
 }
 
 //never used email , first_name and last_name
@@ -2027,27 +2029,6 @@ function getProjectStatsVolumeAnalysis( $pid ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
-    return $results;
-}
-
-function getProjectForVolumeAnalysis( $limit = 1 ) {
-
-    $query_limit = " limit $limit";
-
-    $query = "select p.id, id_tms, id_mt_engine, tm_keys , p.pretranslate_100, group_concat( distinct j.id ) as jid_list
-		from projects p
-		inner join jobs j on j.id_project=p.id
-		where status_analysis = '" . Constants_ProjectStatus::STATUS_NEW . "'
-		group by 1
-		order by id $query_limit
-		";
-
-    $db    = Database::obtain();
-    //Needed to address the query to the master database if exists
-    \Database::obtain()->begin();
-
-    $results = $db->fetch_array($query); // this is a select, should never return a transaction exception
-    $db->getConnection()->commit();
     return $results;
 }
 

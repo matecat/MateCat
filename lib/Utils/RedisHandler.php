@@ -36,10 +36,44 @@ class RedisHandler {
                 || !$this->redisHandler->getConnection()->isConnected()
                 || !is_resource( $resource )
         ){
-            $this->redisHandler = new Predis\Client( INIT::$REDIS_SERVERS );
+
+            $connectionParams = INIT::$REDIS_SERVERS;
+
+            if ( is_string( $connectionParams ) ) {
+
+                $connectionParams = $this->formatDSN( $connectionParams );
+
+            } elseif( is_array( $connectionParams ) ){
+
+                $connectionParams = array_map( 'RedisHandler::formatDSN', $connectionParams );
+
+            }
+
+            $this->redisHandler = new Predis\Client( $connectionParams );
+
         }
 
         return $this->redisHandler;
+
+    }
+
+    protected function formatDSN( $dsnString ){
+
+        if ( !is_null( INIT::$INSTANCE_ID ) ) {
+
+            $conf = parse_url( $dsnString );
+
+            if ( isset( $conf[ 'query' ] ) ) {
+                $instanceID = "&database=" . INIT::$INSTANCE_ID;
+            } else {
+                $instanceID = "?database=" . INIT::$INSTANCE_ID;
+            }
+
+            return $dsnString . $instanceID;
+
+        }
+
+        return $dsnString;
 
     }
 
