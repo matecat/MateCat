@@ -158,7 +158,7 @@ body.manage {
                         }
                     }
                     &.project-not-assigned {
-                        border: 1px dashed #868686;
+                        border: 1px solid #868686;
                         padding: 0px 15px 0px 3px;
                         transition: 0.3s ease;
                         color: rgba(0, 0, 0, 0.6);
@@ -167,7 +167,7 @@ body.manage {
                             transition: 0.3s ease;
                         }
                         &:hover {
-                            border: .1em dashed deepskyblue;
+                            border: .1em solid deepskyblue;
                             color: deepskyblue;
                             .icon-user22 {
                                 color: deepskyblue;
@@ -274,9 +274,7 @@ body.manage {
 
                                 }
                             }
-                            .creation-date{
-                                padding: 5px 15px !important;
-                            }
+
 
                             .job-id {
                                 padding: 5px 0 !important;
@@ -303,38 +301,47 @@ body.manage {
                             }
 
                             .job-payable {
-                                padding: 5px 15px !important;
+                                padding: 6px 10px !important;
                                 float: left;
                             }
                             .translated-outsourced {
-
+                                float: left;
+                                padding-top: 5px;
+                                vertical-align: text-bottom;
+                                img.outsource-logo {
+                                    width: 115px;
+                                    margin: 0 5px;
+                                    vertical-align: middle;
+                                }
                             }
-                            .due-to {
-                                padding: 5px 0 !important;
+                            .job-delivery {
+                                display: inline-block;
+                                margin-right: 8px;
+                                vertical-align: text-bottom;
+                            }
+                            .open-translate {
+                                font-family: Calibri;
+                                padding: 6px 15px;
+                                vertical-align: top;
+                                font-size: 16px;
+                                border: 1px solid #797979;
                             }
                             .open-outsource {
-                                .ui.button {
-                                    margin-right: 8px;
-                                }
-                                .job-menu {
-                                    margin-right: 0px !important;
-                                }
-                                .open-translate {
-                                    font-family: Calibri;
-                                    padding: 6px 15px;
-                                    vertical-align: top;
-                                    font-size: 16px;
-                                    border: 1px solid #797979;
-                                }
-                                .creation-date {
-                                    font-family: Calibri;
-                                    padding: 6px 15px !important;
-                                    vertical-align: top;
-                                    font-size: 16px;
-                                    border: 1px solid #797979;
-                                    float: none;
-                                }
+                                font-family: Calibri;
+                                padding: 6px 15px;
+                                vertical-align: top;
+                                font-size: 16px;
+                                border: 1px solid #797979;
+                                //background-color: #7eaf3e;
                             }
+                            .open-outsourced {
+                                font-family: Calibri;
+                                padding: 6px 15px;
+                                vertical-align: top;
+                                font-size: 16px;
+                                border: 1px solid #797979;
+                            }
+
                             .chunk-download-progress {
                                 height: 2px;
                                 background-color: #ffffff;
@@ -356,11 +363,7 @@ body.manage {
                                     animation: progress-active 1s ease infinite;
                                 }
                             }
-                            img.outsource-logo {
-                                width: 115px;
-                                margin: 0 5px;
-                                vertical-align: middle;
-                            }
+
                         }
                     }
                 }
