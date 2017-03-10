@@ -101,11 +101,13 @@ BrowserMatch ^Mozilla/4 gzip-only-text/html
 BrowserMatch ^Mozilla/4\.0[678] no-gzip
 BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
 BrowserMatch \bMSI[E] !no-gzip !gzip-only-text/html
-Header append Vary User-Agent env=!dont-vary
 </IfModule>
 
 <IfModule mod_headers.c>
 Header append Vary User-Agent env=!dont-vary
+Header always append X-Frame-Options SAMEORIGIN
+Header always append X-Content-Type-Options nosniff
+Header always append X-XSS-Protection "1; mode=block"
 </IfModule>
 Header set Access-Control-Allow-Origin "*"
 php_value display_errors 0
