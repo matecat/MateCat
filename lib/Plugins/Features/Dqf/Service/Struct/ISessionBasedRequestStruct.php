@@ -9,6 +9,12 @@
 namespace Features\Dqf\Service\Struct;
 
 
+/**
+ * Interface ISessionBasedRequestStruct
+ * @package Features\Dqf\Service\Struct
+ *
+ * @deprecated this is no longer required and should be removed
+ */
 interface ISessionBasedRequestStruct {
 
     public function getParams();

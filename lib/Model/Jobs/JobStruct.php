@@ -191,7 +191,7 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     /**
      * @return Files_FileStruct[]
      */
-    public function getFile() {
+    public function getFiles() {
         return Files_FileDao::getByJobId( $this->id );
     }
 

@@ -20,7 +20,7 @@ class ProjectRequestStruct extends BaseRequestStruct implements  ISessionBasedRe
     public $industryId ;
     public $processId ;
     public $qualityLevelId ;
-    public $cliendId ;
+    public $clientId ;
     public $templateName ;
     public $tmsProjectKey ;
 

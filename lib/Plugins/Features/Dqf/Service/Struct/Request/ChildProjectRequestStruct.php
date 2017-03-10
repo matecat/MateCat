@@ -1,0 +1,36 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: fregini
+ * Date: 10/03/2017
+ * Time: 14:53
+ */
+
+namespace Features\Dqf\Service\Struct\Request;
+
+use Features\Dqf\Service\Struct\BaseRequestStruct;
+use Features\Dqf\Service\Struct\ISessionBasedRequestStruct;
+
+class ChildProjectRequestStruct extends BaseRequestStruct  implements ISessionBasedRequestStruct {
+
+    public $sessionId ;
+    public $apiKey ;
+    public $parentKey ;
+    public $name ;
+    public $type ;
+    public $assignee ;
+    public $clientId ;
+
+    public function getPathParams() {
+        return [];
+    }
+
+    public function getParams() {
+        return $this->toArray(['parentKey', 'name', 'type', 'assignee', 'clientId']) ;
+    }
+
+    public function getHeaders() {
+        return $this->toArray(['sessonId', 'apiKey']);
+    }
+
+}

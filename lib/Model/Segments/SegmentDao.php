@@ -5,6 +5,40 @@ use DataAccess\ShapelessConcreteStruct;
 class Segments_SegmentDao extends DataAccess_AbstractDao {
 
 
+    public function countByFile( Files_FileStruct $file ) {
+        $conn = $this->con->getConnection();
+        $sql = "SELECT COUNT(1) FROM segments WHERE id_file = :id_file " ;
+
+        $stmt = $conn->prepare( $sql ) ;
+        $stmt->execute( array( 'id_file' => $file->id ) ) ;
+        return (int) $stmt->fetch()[0] ;
+    }
+
+    /**
+     * Returns an array of segments for the given file.
+     * In order to limit the amount of memory, this method accepts an array of
+     * columns to be returned.
+     *
+     * @param $id_file
+     * @param $fields_list array
+     *
+     * @return Segments_SegmentStruct[]
+     */
+    public function getByFileId( $id_file, $fields_list = array() ) {
+        $conn = $this->con->getConnection();
+
+        if ( empty( $fields_list ) ) {
+            $fields_list[] = '*' ;
+        }
+
+        $sql = " SELECT " . implode(', ', $fields_list ) . " FROM segments WHERE id_file = :id_file " ;
+        $stmt = $conn->prepare( $sql ) ;
+        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Segments_SegmentStruct' );
+        $stmt->execute( array( 'id_file' => $id_file ) ) ;
+
+        return $stmt->fetchAll() ;
+    }
+
     /**
      * @param Chunks_ChunkStruct $chunk
      * @return mixed

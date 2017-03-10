@@ -10,7 +10,9 @@ namespace Features\Dqf\Service;
 
 use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
 use Features\Dqf\Service\Struct\MasterFileRequestStruct;
-
+use Features\Dqf\Service\Struct\Request\FileTargetLanguageRequestStruct;
+use Features\Dqf\Service\Struct\Response\MasterFileResponseStruct;
+use Symfony\Component\Config\Definition\Exception\Exception;
 
 
 class MasterProjectFiles {
@@ -20,54 +22,113 @@ class MasterProjectFiles {
      */
     protected $files = [];
 
-    protected $client ;
+    /**
+     * @var Session
+     */
+    protected $session ;
+
     /**
      * @var CreateProjectResponseStruct
      */
     protected $remoteProject ;
 
-    public function __construct( Client $client, CreateProjectResponseStruct $remoteProject ) {
-        $this->client = $client ;
+    /**
+     * @var MasterFileResponseStruct[]
+     */
+    protected $remoteFiles ;
+
+    /**
+     * @var array
+     */
+    protected $_targetLanguages ;
+
+    public function __construct( Session $session, CreateProjectResponseStruct $remoteProject ) {
+        $this->session = $session ;
         $this->remoteProject = $remoteProject ;
     }
 
     public function setFile( \Files_FileStruct $file, $numberOfSegments ) {
         $fileRequestStruct = new MasterFileRequestStruct();
 
-        $fileRequestStruct->sessionId   = $this->client->getSession()->getSessionId();
+        $fileRequestStruct->sessionId   = $this->session->getSessionId();
         $fileRequestStruct->projectKey  = $this->remoteProject->dqfUUID ;
-
-        // $fileRequestStruct->projectId = $this->remoteProject->dqfId ;
 
         $fileRequestStruct->name             = $file->filename ;
         $fileRequestStruct->clientId         = $file->id ;
         $fileRequestStruct->numberOfSegments = $numberOfSegments ;
 
         $this->files[] = $fileRequestStruct ;
-
-        // TODO: keep working from here
     }
 
-    public function send() {
-        $curl = new \MultiCurlHandler();
-        $url = sprintf( '/project/master/%s/file', $this->remoteProject->dqfId);
+    /**
+     * @return MasterFileResponseStruct[]
+     */
+    public function getRemoteFiles() {
+        $this->_submitFiles();
+        $this->_submitTargetLanguages();
+
+        return $this->remoteFiles ;
+    }
+
+    public function setTargetLanguages( $languages ) {
+        $this->_targetLanguages = $languages ;
+    }
+
+    protected function _submitTargetLanguages() {
+        $client = new Client();
+        $client->setSession( $this->session );
+
+        foreach( $this->remoteFiles as $file ) {
+            foreach( $this->_targetLanguages as $language ) {
+                $requestStruct = new FileTargetLanguageRequestStruct() ;
+                $requestStruct->targetLanguageCode = $language ;
+                $requestStruct->sessonId = $this->session->getSessionId() ;
+                $requestStruct->projectKey = $this->remoteProject->dqfUUID ;
+                $requestStruct->projectId = $this->remoteProject->dqfId ;
+                $requestStruct->fileId = $file->dqfId ;
+
+                $client->createResource('/project/master/%s/file/%s/targetLang', 'post', [
+                        'formData' => $requestStruct->getParams(),
+                        'pathParams' => $requestStruct->getPathParams(),
+                        'headers' => $requestStruct->getHeaders()
+                ] );
+            }
+        }
+
+        $client->curl()->multiExec();
+
+        if ( count( $client->curl()->getErrors() ) > 0 ) {
+            throw new \Exception('Errors setting files target languages: ' .
+            implode(', ', $client->curl()->getAllContents() )) ;
+        }
+
+        return true ;
+    }
+
+    protected function _submitFiles() {
+        $client = new Client();
+        $client->setSession( $this->session );
+        $url = sprintf( '/project/master/%s/file', $this->remoteProject->dqfId ) ;
 
         foreach( $this->files as $file ) {
-
-            $this->client->setHeaders( $file );
-            $this->client->setPostParams( $file );
-
-            $curl->createResource( $this->client->url( $url ), $this->client->getCurlOptions() );
+            $client->createResource( $url, 'post', [
+                    'headers'  => $file->getHeaders(),
+                    'formData' => $file->getParams()
+            ], $file->clientId );
         }
 
-        $curl->multiExec();
+        $client->curl()->multiExec();
 
-        if ( count( $curl->getErrors() ) > 0 ) {
-            throw new \Exception('Errors while creating files') ;
+
+        if ( count( $client->curl()->getErrors() ) > 0 ) {
+            throw new \Exception('Errors while creating files: ') ;
         }
 
-        $result = $curl->getAllInfo();
-
-
+        foreach( $this->files as $file ) {
+            $this->remoteFiles[ $file->clientId ] = new MasterFileResponseStruct(
+                    json_decode( $client->curl()->getSingleContent( $file->clientId ), true )
+            );
+        }
     }
+
 }

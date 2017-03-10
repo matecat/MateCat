@@ -14,7 +14,13 @@ abstract class BaseRequestStruct extends BaseStruct {
     abstract function getHeaders() ;
 
     public function getParams() {
-        return array_diff_key( $this->toArray(), $this->getHeaders() );
+        $params = array_diff_key( $this->toArray(), $this->getHeaders() );
+        $params = array_diff_key( $params, $this->getPathParams() );
+        return $params ;
+    }
+
+    public function getPathParams() {
+        return array();
     }
 
     public function __construct( array $array_params = array() ) {

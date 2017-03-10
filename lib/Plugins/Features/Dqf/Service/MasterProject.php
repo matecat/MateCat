@@ -16,35 +16,31 @@ class MasterProject {
     protected $params;
     protected $request;
 
-    public function __construct( Client $client ) {
-        $this->client = $client ;
-        $this->session = $client->getSession();
+    public function __construct( Session $session) {
+        $this->session = $session ;
     }
 
     public function create( ProjectRequestStruct $projectRequestData ) {
-        $curl = new \MultiCurlHandler();
 
         $projectRequestData->sessionId = $this->session->getSessionId() ;
-        $projectRequestData->apiKey = \INIT::$DQF_API_KEY ;
+        $projectRequestData->apiKey    = \INIT::$DQF_API_KEY ;
 
-        $this->client->setHeaders( $projectRequestData ) ;
-        $this->client->setPostParams( $projectRequestData ) ;
+        $client = new Client();
+        $client->setSession( $this->session );
 
-        $request = $curl->createResource(
-                $this->client->url('/project/master'),
-                $this->client->getCurlOptions()
-        );
+        $request = $client->createResource( '/project/master', 'post', [
+                'formData' => $projectRequestData->getParams(),
+                'headers' => $projectRequestData->getHeaders()
+        ] );
 
-        $curl->multiExec();
-        $curl->setRequestHeader( $request );
+        $client->curl()->multiExec();
 
-        $content = json_decode( $curl->getSingleContent( $request ), true );
+        $content = json_decode( $client->curl()->getSingleContent( $request ), true );
 
         \Log::doLog( var_export( $content, true ) ) ;
 
-        if ( $curl->hasError( $request ) ) {
-            // TODO: log error
-
+        if ( $client->curl()->hasError( $request ) ) {
+            throw new \Exception('Error during project creation' ) ;
         }
 
         return new CreateProjectResponseStruct( $content );

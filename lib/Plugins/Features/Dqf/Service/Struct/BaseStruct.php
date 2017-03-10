@@ -33,7 +33,6 @@ abstract class BaseStruct {
             $attributes[ $property->getName() ] = $property->getValue( $this );
         }
         return $attributes;
-
     }
 
 

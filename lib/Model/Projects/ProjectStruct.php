@@ -40,6 +40,22 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     /**
+     * @return array
+     */
+    public function getTargetLanguages() {
+        return array_map(function(Jobs_JobStruct $job) {
+            return $job->target ;
+        }, $this->getJobs() );
+    }
+
+    /**
+     * @return Projects_MetadataStruct[]
+     */
+    public function getMetadata() {
+        return Projects_MetadataDao::getByProjectId( $this->id );
+    }
+
+    /**
      * Proxy to set metadata for the current project
      *
      * @param $key

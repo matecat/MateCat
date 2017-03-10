@@ -5,16 +5,19 @@
 namespace Features\Dqf\Model ;
 
 use Exceptions\NotFoundError;
+use Features\Dqf\Service\ChildProject;
 use Features\Dqf\Service\MasterProject;
 use Features\Dqf\Service\MasterProjectFiles;
 use Features\Dqf\Service\Struct\CreateProjectResponseStruct;
-use Features\Dqf\Service\Struct\MasterFileRequestStruct;
+use Features\Dqf\Service\MasterProjectSegmentsBatch;
 use Features\Dqf\Service\Struct\ProjectCreationStruct;
 use Features\Dqf\Service\Struct\ProjectRequestStruct;
+use Features\Dqf\Service\Struct\Response\MasterFileResponseStruct;
+use Features\Dqf\Service\Session ;
+
 use Features\Dqf\Utils\UserMetadata;
 use Features\Dqf\Utils\ProjectMetadata ;
 use Projects_ProjectStruct ;
-
 use Features\Dqf\Service\Client ;
 
 class ProjectCreation {
@@ -29,9 +32,9 @@ class ProjectCreation {
     protected $logger ;
 
     /**
-     * @var Client
+     * @var Session
      */
-    protected $client ;
+    protected $session ;
 
     /**
      * @var CreateProjectResponseStruct
@@ -43,13 +46,28 @@ class ProjectCreation {
      */
     protected $inputStruct ;
 
+    /**
+     * @var MasterFileResponseStruct[]
+     */
+    protected $remoteFiles ;
+
+    /**
+     * @var array
+     */
+    protected $segmentsBatchResult ;
+
+    /**
+     * @var array
+     */
+    protected $childProjects ;
+
     public function __construct( ProjectCreationStruct $struct ) {
         $this->inputStruct = $struct  ;
         $this->project = \Projects_ProjectDao::findById( $struct->id_project );
     }
 
     public function setLogger($logger) {
-        $this->logger = $logger  ;
+        $this->logger = $logger ;
     }
 
     public function process() {
@@ -65,12 +83,11 @@ class ProjectCreation {
          *
          */
 
-        $this->_initClient() ;
+        $this->_initSession();
         $this->_createProject();
         $this->_submitProjectFiles();
         $this->_submitSourceSegments();
-
-
+        $this->_submitChildProjects();
     }
 
     protected function _createProject() {
@@ -79,26 +96,27 @@ class ProjectCreation {
         $params = new ProjectRequestStruct(array_merge( array(
                 'name' => $this->project->name,
                 'sourceLanguageCode' => $this->inputStruct->source_language,
-                'cliendId' => $this->project->id,
+                'clientId' => $this->project->id,
                 'templateName' => '',
                 'tmsProjectKey' => ''
         ), $projectInputParams ) );
 
-        $project = new MasterProject($this->client);
+        $project = new MasterProject($this->session);
         $this->remoteProject = $project->create( $params ) ;
-
     }
 
     protected function _submitProjectFiles() {
         $files = \Files_FileDao::getByProjectId($this->project->id) ;
-        $filesSubmit = new MasterProjectFiles( $this->client, $this->remoteProject ) ;
+        $filesSubmit = new MasterProjectFiles( $this->session, $this->remoteProject ) ;
 
         foreach( $files as $file ) {
             $segmentsCount = $this->inputStruct->file_segments_count[ $file->id ];
             $filesSubmit->setFile( $file, $segmentsCount );
         }
 
-        $filesSubmit->send();
+        $filesSubmit->setTargetLanguages( $this->project->getTargetLanguages() );
+
+        $this->remoteFiles = $filesSubmit->getRemoteFiles();
     }
 
     protected function _getCredentials() {
@@ -111,19 +129,25 @@ class ProjectCreation {
         return UserMetadata::extractCredentials( $user->getMetadataAsKeyValue() );
     }
 
-    protected function _initClient() {
+    protected function _initSession() {
         list( $username, $password ) = $this->_getCredentials();
-        $this->client = new Client();
-        $this->client->setCredentials( $username, $password );
+        $this->session = new Session( $username, $password );
+        $this->session->login();
     }
 
     protected function _submitSourceSegments() {
-
-
+        $batchSegments = new MasterProjectSegmentsBatch($this->session, $this->remoteProject, $this->remoteFiles);
+        $this->segmentsBatchResult = $batchSegments->getResult() ;
     }
 
-    protected function _submitTargetLanguages() {
+    protected function _submitChildProjects() {
+        $this->childProjects = [] ;
 
+        foreach( $this->project->getChunks() as $chunk ) {
+            $childProject = new ChildProject($this->session, $this->remoteProject, $chunk ) ;
+            $this->childProjects[ $chunk->getIdentifier() ] =
+                    $childProject->createTranslationChild( $this->remoteFiles );
+        }
     }
 
     public function submitChildProjects() {
@@ -138,11 +162,8 @@ class ProjectCreation {
 
     }
 
-
     protected function closeProjectCreation() {
 
     }
-
-
 
 }

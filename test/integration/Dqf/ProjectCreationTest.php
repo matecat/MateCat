@@ -2,6 +2,10 @@
 
 
 
+
+use Features\Dqf\Service\Struct\ProjectCreationStruct ;
+use Features\Dqf\Model\ProjectCreation;
+
 class ProjectCreationTest extends IntegrationTest  {
 
     protected $test_data ;
@@ -22,6 +26,8 @@ class ProjectCreationTest extends IntegrationTest  {
     }
 
     public function test_project_is_created() {
+        $this->alterAutoIncrement();
+
         $upload_session = uniqid();
 
         $file = test_file_path('xliff/amex-test.docx.xlf') ;
@@ -62,5 +68,21 @@ class ProjectCreationTest extends IntegrationTest  {
                 array(Features::DQF, Features::PROJECT_COMPLETION, Features::REVIEW_IMPROVED, Features::TRANSLATION_VERSIONS),
                 $project->getFeatures()->getCodes()
             ) ) ) ;
+
+        // Simulate the initial process of this project
+        $files = $project->getChunks()[0]->getFiles() ;
+
+        // find number of segments per file
+        $struct = new ProjectCreationStruct([
+                'id_project' =>  $id_project,
+                'source_language' => 'en-US',
+                'file_segments_count' => [
+                        $files[0]->id => $files[0]->getSegmentsCount()
+                ]
+        ]);
+
+        $model = new ProjectCreation( $struct );
+        $model->process() ;
+
     }
 }

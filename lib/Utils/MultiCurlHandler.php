@@ -336,10 +336,12 @@ class MultiCurlHandler {
      */
     public function getErrors() {
         $map = array_map( function( $tokenHash ) {
-            $this->getError( $tokenHash );
+            if ( $this->hasError( $tokenHash ) ) {
+                return $this->getError( $tokenHash );
+            }
         }, array_keys( $this->multi_curl_info ) ) ;
 
-        return array_filter( $map );
+        return array_filter( $map );  // <- remove null array entries
     }
 
 } 
