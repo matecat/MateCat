@@ -165,10 +165,14 @@ class Header extends React.Component {
             return org.get('id') == self.state.selectedTeamId;
         });
         let subHeader = '';
+        let containerClass = "thirteen";
         if (this.props.showSubHeader) {
-            subHeader = <SubHeader
+            subHeader = <div className="ten wide column">
+                <SubHeader
                 selectedTeam={selectedTeam}
-            />;
+            />
+            </div>;
+            containerClass = "three";
         }
 
         return <section className="nav-mc-bar ui grid">
@@ -179,10 +183,10 @@ class Header extends React.Component {
                                 <a href="/" className="logo"/>
 
                             </div>
-                            <div className="ten wide column">
+
                                 {subHeader}
-                            </div>
-                            <div className="three wide right floated right aligned column">
+
+                            <div className={containerClass + " wide right floated right aligned column" }>
                                 {userIcon}
 
                                 {teamsSelect}
@@ -200,6 +204,7 @@ class Header extends React.Component {
 
                                     ) : ('')}
                             </div>
+
                         </div>
                     </nav>
                 </section>;

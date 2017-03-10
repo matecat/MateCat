@@ -325,13 +325,18 @@ abstract class viewController extends controller {
      * template. This is the pleace where to set variables like user_id, email address and so on.
      */
     private function setTemplateFinalVars() {
-        $this->template->logged_user   = $this->logged_user->shortName() ;
-        $this->template->extended_user = $this->logged_user->fullName() ;
 
-        $this->template->isLoggedIn    = $this->isLoggedIn();
-        $this->template->userMail      = $this->logged_user->getEmail() ;
+        if( $this->logged_user instanceof Users_UserStruct ){
+            $this->template->logged_user   = $this->logged_user->shortName() ;
+            $this->template->extended_user = $this->logged_user->fullName() ;
 
-        $this->collectFlashMessages();
+            $this->template->isLoggedIn    = $this->isLoggedIn();
+            $this->template->userMail      = $this->logged_user->getEmail() ;
+            $this->collectFlashMessages();
+        } else {
+            Log::doLog( "Bad Configuration" );
+        }
+
     }
 
     /**

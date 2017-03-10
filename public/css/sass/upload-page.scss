@@ -944,7 +944,7 @@ tr.ready .size span{visibility: visible;}
 .tm-button{width: 20px; display:none; float: left; margin-left: -10px; margin-top: 35px;}
 
 .disabled, .disabled:hover, .disabled:active{opacity:0.5 !important;cursor:default;-moz-box-shadow: none;-webkit-box-shadow: none;border:1px solid #666}
-header{position: relative;}
+header{position: relative; min-width: 600px;}
 
 .wrapper{width:98%;min-width:960px;margin:0px auto 0 auto;padding:5px 0 0 0;width:92%;font-size:14px;position:relative;text-align:left;}
 .logo{}

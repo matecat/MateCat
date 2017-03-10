@@ -362,7 +362,7 @@ class JobContainer extends React.Component {
     }
 
     getOutsourceButton() {
-        let label = <a className="ui green button disabled"
+        let label = <a className="ui green button"
                        onClick={this.openOutsourceModal.bind(this)}>
            Outsource
         </a>;
