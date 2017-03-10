@@ -370,7 +370,7 @@ class JobContainer extends React.Component {
             if (this.props.job.get('outsource').get('outsourced') == "1") {
                 label = <a className="ui grey button "
                            onClick={this.openOutsourceModal.bind(this)}>
-                    Outsourced
+                    View status
                 </a>;
             } else {
                 label = <a className="ui green button"
