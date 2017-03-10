@@ -85,10 +85,13 @@ class Bootstrap {
 
         INIT::$TASK_RUNNER_CONFIG = @parse_ini_file( 'task_manager_config.ini', true );
 
-        WorkerClient::init();
-
-        Database::obtain ( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        Log::$uniqID = ( isset( $_COOKIE['PHPSESSID'] ) ? substr( $_COOKIE['PHPSESSID'], 0 , 13 ) : uniqid() );
+        try {
+            Log::$uniqID = ( isset( $_COOKIE['PHPSESSID'] ) ? substr( $_COOKIE['PHPSESSID'], 0 , 13 ) : uniqid() );
+            WorkerClient::init();
+            Database::obtain ( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        } catch( \Exception $e ){
+            Log::doLog( $e->getMessage() );
+        }
 
         if ( !is_dir( INIT::$STORAGE_DIR ) ) {
             mkdir( INIT::$STORAGE_DIR, 0755, true );
