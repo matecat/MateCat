@@ -113,7 +113,7 @@ class Executor implements SplObserver {
     protected function __construct( Context $_context ) {
 
         $this->_executorPID = posix_getpid();
-        $this->_executor_instance_id = $this->_executorPID . ":" . gethostname() . ":" . INIT::$INSTANCE_ID;
+        $this->_executor_instance_id = $this->_executorPID . ":" . gethostname() . ":" . (int) INIT::$INSTANCE_ID;
 
         Log::$fileName     = $_context->loggerName;
 

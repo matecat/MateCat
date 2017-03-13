@@ -126,7 +126,7 @@ class ProjectManager {
                             'metadata'             => [],
                             'id_assignee'          => null,
                             'session'              => ( isset( $_SESSION ) ? $_SESSION : false ),
-                            'instance_id'          => ( !is_null( INIT::$INSTANCE_ID ) ? INIT::$INSTANCE_ID : null )
+                            'instance_id'          => ( !is_null( INIT::$INSTANCE_ID ) ? (int)INIT::$INSTANCE_ID : 0 )
                     ] );
 
         }

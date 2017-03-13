@@ -64,9 +64,9 @@ class RedisHandler {
             $conf = parse_url( $dsnString );
 
             if ( isset( $conf[ 'query' ] ) ) {
-                $instanceID = "&database=" . INIT::$INSTANCE_ID;
+                $instanceID = "&database=" . (int) INIT::$INSTANCE_ID;
             } else {
-                $instanceID = "?database=" . INIT::$INSTANCE_ID;
+                $instanceID = "?database=" . (int) INIT::$INSTANCE_ID;
             }
 
             return $dsnString . $instanceID;

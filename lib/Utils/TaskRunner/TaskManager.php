@@ -126,7 +126,7 @@ class TaskManager extends AbstractDaemon {
          * Kill all managers. "There can be only one."
          * Register My Host address ( and also overwrite the old one )
          */
-        if ( !$this->_queueHandler->getRedisClient()->sadd( RedisKeys::TASK_RUNNER_PID, gethostname() . ":" . INIT::$INSTANCE_ID ) ){
+        if ( !$this->_queueHandler->getRedisClient()->sadd( RedisKeys::TASK_RUNNER_PID, gethostname() . ":" . (int) INIT::$INSTANCE_ID ) ){
             //kill all it's children
             $this->_killPids();
         }
@@ -136,7 +136,7 @@ class TaskManager extends AbstractDaemon {
 
             try {
 
-                if( !$this->_queueHandler->getRedisClient()->sismember( RedisKeys::TASK_RUNNER_PID, gethostname() . ":" . INIT::$INSTANCE_ID ) ) {
+                if( !$this->_queueHandler->getRedisClient()->sismember( RedisKeys::TASK_RUNNER_PID, gethostname() . ":" . (int) INIT::$INSTANCE_ID ) ) {
                     self::_TimeStampMsg( "(parent " . self::$tHandlerPID . " }) : ERROR OCCURRED, MY PID DISAPPEARED FROM REDIS:  PARENT EXITING !!" );
                     self::cleanShutDown();
                     die();
@@ -218,7 +218,7 @@ class TaskManager extends AbstractDaemon {
 
             self::_TimeStampMsg( "(parent " . self::$tHandlerPID . ") : child $dead exited: deleting file ...." );
             foreach ( $this->_queueContextList->list as $queue ) {
-                $_was_active = $this->_queueHandler->getRedisClient()->sismember( $queue->pid_set_name, $dead . ":" . gethostname() . ":" . INIT::$INSTANCE_ID );
+                $_was_active = $this->_queueHandler->getRedisClient()->sismember( $queue->pid_set_name, $dead . ":" . gethostname() . ":" . (int) INIT::$INSTANCE_ID );
                 if ( $_was_active ) {
                     $this->_killPids( null, $dead );
                 }
@@ -301,7 +301,7 @@ class TaskManager extends AbstractDaemon {
 
         //SHUTDOWN
         static::$__INSTANCE->_killPids();
-        static::$__INSTANCE->_queueHandler->getRedisClient()->srem( RedisKeys::TASK_RUNNER_PID, gethostname() . ":" . INIT::$INSTANCE_ID );
+        static::$__INSTANCE->_queueHandler->getRedisClient()->srem( RedisKeys::TASK_RUNNER_PID, gethostname() . ":" . (int) INIT::$INSTANCE_ID );
         $msg = str_pad( " TASK RUNNER " . gethostname() . ":" . INIT::$INSTANCE_ID . " HALTED ", 50, "-", STR_PAD_BOTH );
         self::_TimeStampMsg( $msg );
 
@@ -337,7 +337,7 @@ class TaskManager extends AbstractDaemon {
         if ( !empty( $pid ) && !empty( $queueInfo ) ) {
 
             self::_TimeStampMsg( "Killing pid $pid from " . $queueInfo->pid_set_name );
-            $numDeleted += $this->_queueHandler->getRedisClient()->srem( $queueInfo->pid_set_name, $pid . ":" . gethostname() . ":" . INIT::$INSTANCE_ID );
+            $numDeleted += $this->_queueHandler->getRedisClient()->srem( $queueInfo->pid_set_name, $pid . ":" . gethostname() . ":" . (int) INIT::$INSTANCE_ID );
             posix_kill( $pid, SIGINT );
             $queueInfo->pid_list_len = $this->_queueHandler->getRedisClient()->decr( $queueInfo->queue_name );
 
@@ -349,7 +349,7 @@ class TaskManager extends AbstractDaemon {
              */
             foreach ( $this->_queueContextList->list as $queue ) {
 
-                $deleted = $this->_queueHandler->getRedisClient()->srem( $queue->pid_set_name, $pid . ":" . gethostname() . ":" . INIT::$INSTANCE_ID );
+                $deleted = $this->_queueHandler->getRedisClient()->srem( $queue->pid_set_name, $pid . ":" . gethostname() . ":" . (int) INIT::$INSTANCE_ID );
                 if( $deleted ){
                     posix_kill( $pid, SIGINT );
                     $queue->pid_list_len = $this->_queueHandler->getRedisClient()->decr( $queue->queue_name );
