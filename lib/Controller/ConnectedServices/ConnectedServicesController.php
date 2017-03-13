@@ -57,7 +57,7 @@ class ConnectedServicesController extends AbstractStatefulKleinController  {
     }
 
     protected function afterConstruct() {
-
+        \Bootstrap::sessionClose();
     }
 
     private function __handleGDrive() {

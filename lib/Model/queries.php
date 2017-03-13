@@ -1497,6 +1497,7 @@ function fetchStatus( $sid, $results, $status = Constants_TranslationStatus::STA
 //function insertProject( $id_customer, $project_name, $analysis_status, $password, $ip = 'UNKNOWN' ) {
 function insertProject( ArrayObject $projectStructure ) {
     $data                        = array();
+    $data[ 'id' ]                = $projectStructure[ 'id_project' ];
     $data[ 'id_customer' ]       = $projectStructure[ 'id_customer' ];
     $data[ 'id_organization' ]   = $projectStructure[ 'id_organization' ];
     $data[ 'name' ]              = $projectStructure[ 'project_name' ];
@@ -1505,6 +1506,7 @@ function insertProject( ArrayObject $projectStructure ) {
     $data[ 'password' ]          = $projectStructure[ 'ppassword' ];
     $data[ 'pretranslate_100' ]  = $projectStructure[ 'pretranslate_100' ];
     $data[ 'remote_ip_address' ] = empty( $projectStructure[ 'user_ip' ] ) ? 'UNKNOWN' : $projectStructure[ 'user_ip' ];
+    $data[ 'instance_id' ]       = !is_null( $projectStructure[ 'instance_id' ] ) ? $projectStructure[ 'instance_id' ] : null;
 
     $db = Database::obtain();
     $db->begin();
@@ -1512,6 +1514,7 @@ function insertProject( ArrayObject $projectStructure ) {
     $project = Projects_ProjectDao::findById( $projectId );
     $db->commit();
     return $project;
+
 }
 
 //never used email , first_name and last_name
@@ -2018,54 +2021,6 @@ function getProjectStatsVolumeAnalysis( $pid ) {
 			AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
 			AND ( st.eq_word_count != 0  OR s.raw_word_count != 0 )
 			";
-
-    $db      = Database::obtain();
-    try {
-        $results = $db->fetch_array($query);
-    } catch( PDOException $e ) {
-        Log::doLog( $e->getMessage() );
-        return $e->getCode() * -1;
-    }
-    return $results;
-}
-
-function getProjectForVolumeAnalysis( $limit = 1 ) {
-
-    $query_limit = " limit $limit";
-
-    $query = "select p.id, id_tms, id_mt_engine, tm_keys , p.pretranslate_100, group_concat( distinct j.id ) as jid_list
-		from projects p
-		inner join jobs j on j.id_project=p.id
-		where status_analysis = '" . Constants_ProjectStatus::STATUS_NEW . "'
-		group by 1
-		order by id $query_limit
-		";
-
-    $db    = Database::obtain();
-    //Needed to address the query to the master database if exists
-    \Database::obtain()->begin();
-
-    $results = $db->fetch_array($query); // this is a select, should never return a transaction exception
-    $db->getConnection()->commit();
-    return $results;
-}
-
-/**
- *
- * Not used
- *
- * @deprecated
- *
- * @param $jid
- *
- * @return array
- */
-function getSegmentsForTMVolumeAnalysys( $jid ) {
-    $query = "select s.id as sid ,segment ,raw_word_count,st.match_type from segments s
-		left join segment_translations st on st.id_segment=s.id
-
-		where st.id_job='$jid' and st.match_type<>'' and st.tm_analysis_status='UNDONE' and s.raw_word_count>0
-		limit 100";
 
     $db      = Database::obtain();
     try {

@@ -215,7 +215,7 @@ class ConversionHandler {
             $fs->deleteHashFromUploadDir( $uploadDir, $sha1 . "|" . $this->source_lang );
 
             //put reference to cache in upload dir to link cache to session
-            $fs->linkSessionToCache(
+            $fs->linkSessionToCacheForOriginalFiles(
                     $sha1,
                     $this->source_lang,
                     $this->cookieDir,

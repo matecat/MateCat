@@ -1,7 +1,9 @@
 <?php
 namespace Analysis\Workers;
 
+use Constants_ProjectStatus;
 use FilesStorage;
+use PDO;
 use \TaskRunner\Commons\AbstractDaemon,
     \TaskRunner\Commons\QueueElement,
     TaskRunner\Commons\Context,
@@ -19,7 +21,8 @@ use \AMQHandler,
     \Utils,
     \PDOException,
     \UnexpectedValueException,
-    \Log;
+    \Log,
+    \INIT;
 
 
 include_once \INIT::$MODEL_ROOT . '/queries.php';
@@ -40,6 +43,9 @@ class FastAnalysis extends AbstractDaemon {
     protected $actual_project_row;
 
     protected $_configFile;
+
+    protected $_tHandlerPID;
+    protected $_executor_instance_id;
 
     const ERR_NO_SEGMENTS    = 127;
     const ERR_TOO_LARGE      = 128;
@@ -94,7 +100,7 @@ class FastAnalysis extends AbstractDaemon {
 
         try {
             self::$queueHandler = new AMQHandler();
-            self::$queueHandler->getRedisClient()->rpush( RedisKeys::FAST_PID_LIST, self::$tHandlerPID );
+            self::$queueHandler->getRedisClient()->sadd( RedisKeys::FAST_PID_LIST, self::$tHandlerPID . ":" . gethostname() . ":" . (int) INIT::$INSTANCE_ID );
 
             $this->_updateConfiguration();
 
@@ -118,7 +124,7 @@ class FastAnalysis extends AbstractDaemon {
 
             try {
                 $this->_checkDatabaseConnection();
-                $projects_list = getProjectForVolumeAnalysis( 5 );
+                $projects_list = $this->_getLockProjectForVolumeAnalysis( 5 );
             } catch ( PDOException $e ){
                 self::_TimeStampMsg( $e->getMessage() . " - Error again. Try to reconnect in next cycle." );
                 sleep(3); // wait for reconnection
@@ -320,12 +326,12 @@ class FastAnalysis extends AbstractDaemon {
                 $run->RUNNING = false;
                 break;
             default :
-                $msg = str_pad( " FAST ANALYSIS " . getmypid() . " Received Signal $sig_no ", 50, "-", STR_PAD_BOTH );
+                $msg = str_pad( " FAST ANALYSIS " . getmypid() . ":" . gethostname() . ":" . INIT::$INSTANCE_ID . " Received Signal $sig_no ", 50, "-", STR_PAD_BOTH );
                 self::_TimeStampMsg( $msg );
                 break;
         }
 
-        $msg = str_pad( " FAST ANALYSIS " . getmypid() . " Caught Signal $sig_no ", 50, "-", STR_PAD_BOTH );
+        $msg = str_pad( " FAST ANALYSIS " . getmypid() . ":" . gethostname() . ":" . INIT::$INSTANCE_ID . " Caught Signal $sig_no ", 50, "-", STR_PAD_BOTH );
         self::_TimeStampMsg( $msg );
 
     }
@@ -337,9 +343,9 @@ class FastAnalysis extends AbstractDaemon {
         self::$tHandlerPID = null;
 
         //SHUTDOWN
-        self::$queueHandler->getRedisClient()->lrem( RedisKeys::FAST_PID_LIST, 0, self::$tHandlerPID );
+        self::$queueHandler->getRedisClient()->srem( RedisKeys::FAST_PID_LIST, getmypid() . ":" . gethostname() . ":" . (int) INIT::$INSTANCE_ID );
 
-        $msg = str_pad( " FAST ANALYSIS " . self::$tHandlerPID . " HALTED GRACEFULLY ", 50, "-", STR_PAD_BOTH );
+        $msg = str_pad( " FAST ANALYSIS " . getmypid() . ":" . gethostname() . ":" . INIT::$INSTANCE_ID . " HALTED GRACEFULLY ", 50, "-", STR_PAD_BOTH );
         self::_TimeStampMsg( $msg );
 
         self::$queueHandler->getRedisClient()->disconnect();
@@ -732,6 +738,51 @@ HD;
         }
 
         return $context;
+
+    }
+
+    protected function _getLockProjectForVolumeAnalysis( $limit = 1 ) {
+
+        $bindParams = [ 'project_status' => Constants_ProjectStatus::STATUS_NEW ];
+
+        $query_limit = " LIMIT " . (int)$limit;
+
+        $and_InstanceId = null;
+        if( !is_null( INIT::$INSTANCE_ID ) ){
+            $and_InstanceId = ' AND instance_id = :instance_id ';
+            $bindParams[ 'instance_id' ] = (int) INIT::$INSTANCE_ID;
+        }
+
+        $query = "
+        SELECT p.id, id_tms, id_mt_engine, tm_keys, p.pretranslate_100, GROUP_CONCAT( DISTINCT j.id ) AS jid_list
+            FROM projects p
+            INNER JOIN jobs j ON j.id_project=p.id
+            WHERE status_analysis = :project_status $and_InstanceId
+            GROUP BY 1
+        ORDER BY id $query_limit ;
+	";
+
+        $db    = Database::obtain();
+        //Needed to address the query to the master database if exists
+        \Database::obtain()->begin();
+
+        $stmt = $db->getConnection()->prepare( $query );
+        $stmt->execute( $bindParams );
+        $results = $stmt->fetchAll( PDO::FETCH_ASSOC );
+
+        $db->getConnection()->commit();
+
+        foreach( $results as $position => $project ){
+            //acquire a lock
+            $valid = self::$queueHandler->getRedisClient()->setnx( '_fPid:' . $project[ 'id' ], 1 );
+            if( !$valid ){
+                unset( $results[ $position ] );
+            } else {
+                self::$queueHandler->getRedisClient()->expire( '_fPid:' . $project[ 'id' ], 60 * 60 * 24 );
+            }
+        }
+
+        return $results;
 
     }
 

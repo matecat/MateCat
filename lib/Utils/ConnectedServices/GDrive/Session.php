@@ -21,6 +21,12 @@ use INIT ;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
+/**
+ * Class Session
+ * @package ConnectedServices\GDrive
+ *
+ * TODO: This class has duplicated code from FilesStorage
+ */
 class Session {
 
     const FILE_LIST = 'gdriveFileList';
@@ -48,12 +54,33 @@ class Session {
      */
     protected $user ;
 
-    public function __construct( $session ) {
-        if ( !isset( $session['uid'] )) {
+    /**
+     * MUST NOT TO BE CALLED FROM THE cli
+     *
+     * Session constructor.
+     * @throws Exception
+     */
+    public function __construct() {
+        if ( !isset( $_SESSION['uid'] )) {
             throw new \Exception('Cannot instantiate session for unlogged user') ;
         }
 
-        $this->session = $session ;
+        $this->session = &$_SESSION ;
+    }
+
+    /**
+     * This class overrides a not existent super global when called by CLI
+     *
+     * @param $session
+     *
+     * @return Session
+     */
+    public static function getInstanceForCLI( $session ){
+        if( PHP_SAPI != 'cli' ){
+            throw new \RuntimeException( "This method MUST be called by CLI." );
+        }
+        $_SESSION = $session;
+        return new self();
     }
 
     public function changeSourceLanguage($newSourceLang, $originalSourceLang) {
@@ -97,7 +124,7 @@ class Session {
     public function getFileStructureForJsonOutput() {
         $response = array();
 
-        foreach( $_SESSION[ self::FILE_LIST ]  as $fileId => $file ) {
+        foreach( $this->session[ self::FILE_LIST ]  as $fileId => $file ) {
             $path = $this->getGDriveFilePath( $file );
 
             $fileName = $file[ self::FILE_NAME ];
@@ -114,13 +141,16 @@ class Session {
                     'fileExtension' => $fileExtension
                 );
             } else {
-                unset( $_SESSION[ self::FILE_LIST ][ $fileId ] );
+                unset( $this->session[ self::FILE_LIST ][ $fileId ] );
             }
         }
 
         return $response ;
     }
 
+    /**
+     * MUST NOT TO BE CALLED FROM THE cli
+     */
     public static function cleanupSessionFiles() {
         if( self::sessionHasFiles( $_SESSION ) ) {
             unset( $_SESSION[ self::FILE_LIST ] );
@@ -171,13 +201,13 @@ class Session {
 
     public function addFiles( $fileId, $fileName, $fileHash ) {
 
-        if( !isset( $_SESSION[ self::FILE_LIST ] )
-            || !is_array( $_SESSION[ self::FILE_LIST ] ) ) {
+        if( !isset( $this->session[ self::FILE_LIST ] )
+            || !is_array( $this->session[ self::FILE_LIST ] ) ) {
 
-            $_SESSION[ self::FILE_LIST ] = array();
+            $this->session[ self::FILE_LIST ] = array();
         }
 
-        $_SESSION[ self::FILE_LIST ][ $fileId ] = array(
+        $this->session[ self::FILE_LIST ][ $fileId ] = array(
             self::FILE_NAME => $fileName,
             self::FILE_HASH => $fileHash,
             self::CONNNECTED_SERVICE_ID => $this->serviceStruct->id,
@@ -187,8 +217,8 @@ class Session {
 
     public function hasFiles() {
         return
-            isset( $_SESSION[ self::FILE_LIST ] )
-            && !empty( $_SESSION[ self::FILE_LIST ] ) ;
+            isset( $this->session[ self::FILE_LIST ] )
+            && !empty( $this->session[ self::FILE_LIST ] ) ;
     }
 
     /**
@@ -257,7 +287,7 @@ class Session {
         $success = false ;
 
         if( isset( $this->session[ self::FILE_LIST ][ $fileId ] ) ) {
-            $file = $_SESSION[ self::FILE_LIST ][ $fileId ];
+            $file = $this->session[ self::FILE_LIST ][ $fileId ];
             $pathCache = $this->getCacheFileDir( $file );
 
             $this->deleteDirectory($pathCache);
@@ -307,7 +337,7 @@ class Session {
 
 
     private function getCacheFileDir( $file, $lang = '' ){
-        $sourceLang = $_SESSION[ \Constants::SESSION_ACTUAL_SOURCE_LANG ];
+        $sourceLang = $this->session[ \Constants::SESSION_ACTUAL_SOURCE_LANG ];
 
         if( $lang !== '' ) {
             $sourceLang = $lang;
@@ -315,11 +345,7 @@ class Session {
 
         $fileHash = $file[ self::FILE_HASH ];
 
-        $cacheTreeAr = array(
-            'firstLevel'  => $fileHash{0} . $fileHash{1},
-            'secondLevel' => $fileHash{2} . $fileHash{3},
-            'thirdLevel'  => substr( $fileHash, 4 )
-        );
+        $cacheTreeAr = \FilesStorage::composeCachePath( $fileHash );
 
         $cacheTree = implode(DIRECTORY_SEPARATOR, $cacheTreeAr);
 
