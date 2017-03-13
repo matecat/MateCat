@@ -78,6 +78,7 @@ class INIT {
     public static $CACHE_REPOSITORY;
     public static $ZIP_REPOSITORY;
     public static $ANALYSIS_FILES_REPOSITORY;
+    public static $QUEUE_PROJECT_REPOSITORY;
     public static $CONVERSIONERRORS_REPOSITORY;
     public static $CONVERSIONERRORS_REPOSITORY_WEB;
     public static $TMP_DOWNLOAD;
