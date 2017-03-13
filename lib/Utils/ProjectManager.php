@@ -7,6 +7,8 @@
  *
  */
 
+use ActivityLog\Activity;
+use ActivityLog\ActivityLogStruct;
 use Analysis\DqfQueueHandler;
 
 include_once INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
@@ -609,6 +611,8 @@ class ProjectManager {
 
         $this->dbHandler->query( $update_project_count );
 
+        $this->pushActivityLog();
+
         //create Project into DQF queue
         if ( INIT::$DQF_ENABLED && !empty( $this->projectStructure[ 'dqf_key' ] ) ) {
 
@@ -652,6 +656,18 @@ class ProjectManager {
         $this->features->run('postProjectCreate',
             $this->projectStructure
         );
+    }
+
+    private function pushActivityLog(){
+
+        $activity             = new ActivityLogStruct();
+        $activity->id_project = $this->projectStructure[ 'id_project' ];
+        $activity->action     = ActivityLogStruct::PROJECT_CREATED;
+        $activity->ip         = $this->projectStructure[ 'user_ip' ];
+        $activity->uid        = $this->projectStructure[ 'session' ][ 'uid' ];
+        $activity->event_date = date( 'Y-m-d H:i:s' );
+        Activity::save( $activity );
+
     }
 
     private function writeFastAnalysisData(){
