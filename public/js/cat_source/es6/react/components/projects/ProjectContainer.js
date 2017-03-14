@@ -152,7 +152,7 @@ class ProjectContainer extends React.Component {
 
                     <a className="item" onClick={this.activateProject.bind(this)}><i className="icon-drawer unarchive-project icon"/>Unarchive project</a>
 
-                    <a className="item" onClick={this.removeProject.bind(this)}><i className="icon-trash-o"/>Cancel project</a>
+                    <a className="item" onClick={this.removeProject.bind(this)}><i className="icon-trash-o icon"/>Cancel project</a>
                 </div>
                         </div>;
         } else if ( this.props.project.get('has_cancelled') ) {
