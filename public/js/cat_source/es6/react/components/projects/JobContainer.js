@@ -362,7 +362,7 @@ class JobContainer extends React.Component {
     }
 
     getOutsourceButton() {
-        let label = <a className="ui green button"
+        let label = <a className="open-outsourced ui button"
                        onClick={this.openOutsourceModal.bind(this)}>
            Outsource
         </a>;
@@ -387,7 +387,7 @@ class JobContainer extends React.Component {
         if (this.props.job.get('outsource')) {
             if (this.props.job.get('outsource').get('outsourced') == "1") {
                 outsourceJobLabel =
-                    <span>Outsourced <a href="http://www.translated.net" target="_blank"><img className='outsource-logo' src="/public/img/logo_translated.png" title="visit our website"/></a></span>
+                    <a href="http://www.translated.net" target="_blank"><img className='outsource-logo' src="/public/img/logo_translated.png" title="visit our website"/></a>
                 ;
             }
         }
@@ -509,7 +509,7 @@ class JobContainer extends React.Component {
                                         <a className="open-translate ui primary button open" target="_blank" href={translateUrl}>
                                             Open
                                         </a>
-                                        <div className="job-menu circular ui icon top right pointing dropdown  basic button"
+                                        <div className="ui icon top right pointing dropdown job-menu  button"
                                                 ref={(dropdown) => this.dropdown = dropdown}>
                                             <i className="icon-more_vert icon"/>
                                             {jobMenu}
