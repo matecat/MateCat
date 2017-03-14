@@ -51,5 +51,6 @@ window.ConfirmMessageModal = require('./modals/ConfirmMessageModal').default;
 
 window.CreateTeamModal = require('./modals/CreateTeam').default;
 window.ModifyTeamModal = require('./modals/ModifyTeam').default;
+window.ChangeTeamModal = require('./modals/ChangeProjectTeam').default;
 
 

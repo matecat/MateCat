@@ -18,6 +18,7 @@ UI = {
         //Modals
         ProjectsStore.addListener(ManageConstants.OPEN_CREATE_TEAM_MODAL, this.openCreateTeamModal);
         ProjectsStore.addListener(ManageConstants.OPEN_MODIFY_TEAM_MODAL, this.openModifyTeamModal);
+        ProjectsStore.addListener(ManageConstants.OPEN_CHANGE_TEAM_MODAL, this.openChangeTeamModal.bind(this));
     },
 
     render: function () {
@@ -450,6 +451,17 @@ UI = {
         });
     },
 
+    changeProjectTeam: function (newTeamId, project) {
+        let data = {
+            id_team: newTeamId
+        };
+        return $.ajax({
+            data: JSON.stringify(data),
+            type: "PUT",
+            url : "/api/v2/teams/" + this.selectedTeam.id + "/projects/" + project.id+ "/move"
+        });
+    },
+
     //*******************************//
 
     //********* Modals **************//
@@ -463,6 +475,15 @@ UI = {
             team: team
         };
         APP.ModalWindow.showModalComponent(ModifyTeamModal, props, "Modify Team");
+    },
+
+    openChangeTeamModal: function (teams, project) {
+        let props = {
+            teams: teams,
+            project: project,
+            selectedTeam: this.selectedTeam.id
+        };
+        APP.ModalWindow.showModalComponent(ChangeTeamModal, props, "Modify Team");
     },
 
     openOutsourceModal: function (project, job, url) {

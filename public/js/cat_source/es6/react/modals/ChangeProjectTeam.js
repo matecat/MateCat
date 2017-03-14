@@ -5,34 +5,34 @@ class ChangeProjectWorkspace extends React.Component {
     constructor(props) {
         super(props);
         this.state ={
-            selectWorkspace: -1
+            selectedTeam: this.props.selectedTeam
         };
     }
 
-    changeWorkspace() {
-        ManageActions.changeProjectWorkspace(this.state.selectedWs,  this.props.project);
+    changeTeam() {
+        ManageActions.changeProjectTeam(this.state.selectedTeam,  this.props.project);
         APP.ModalWindow.onCloseModal();
     }
 
     componentDidMount () {
     }
 
-    selectWorkspace(wsId) {
+    selectTeam(teamId) {
         this.setState({
-            selectedWs: wsId
+            selectedTeam: teamId
         })
     }
 
-    getWorkspacesList() {
+    getTeamsList() {
         let self = this;
-        if (this.props.workspaces) {
-            return this.props.workspaces.map(function (ws, i) {
-                let selectedClass = (self.state.selectedWs == ws.get('id')) ? 'active' : '';
+        if (this.props.teams) {
+            return this.props.teams.map(function (team, i) {
+                let selectedClass = (self.state.selectedTeam == team.get('id')) ? 'active' : '';
                 return <div className={"item " + selectedClass}
-                            key={'ws' + ws.get('id')}
-                            onClick={self.selectWorkspace.bind(self, ws.get('id'))}>
+                            key={'team' + team.get('id')}
+                            onClick={self.selectTeam.bind(self, team.get('id'))}>
                             <div className="content" >
-                                {ws.get('name')}
+                                {team.get('name')}
                             </div>
                         </div>;
             });
@@ -43,12 +43,12 @@ class ChangeProjectWorkspace extends React.Component {
     }
 
     render() {
-        let workspacesList = this.getWorkspacesList();
-        return <div className="change-workspace-modal">
+        let teamsList = this.getTeamsList();
+        return <div className="change-team-modal">
             <div className="matecat-modal-top">
                 <div className="ui one column grid left aligned">
                     <div className="column">
-                        <h3>Send this project:</h3>
+                        <h3>Move this project:</h3>
                         <div className="ui label">
                             <span className="project-id">ID: {this.props.project.get('id')}</span>
                         </div>
@@ -59,17 +59,17 @@ class ChangeProjectWorkspace extends React.Component {
             <div className="matecat-modal-middle">
                 <div className="ui one column grid left aligned">
                     <div className="column">
-                        <h3>Choose new Workspace</h3>
+                        <h3>Choose new Team</h3>
                         <div className="column">
                             <div className="ui middle aligned selection divided list">
-                                {workspacesList}
+                                {teamsList}
                             </div>
                         </div>
                     </div>
                     <div className="column right aligned">
                         <div className="column">
                             <button className="ui button blue right aligned"
-                            onClick={this.changeWorkspace.bind(this)}>Move</button>
+                            onClick={this.changeTeam.bind(this)}>Move</button>
                         </div>
                     </div>
                 </div>
