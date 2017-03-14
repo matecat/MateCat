@@ -52,6 +52,11 @@ class getProjectsController extends ajaxController {
      */
     private $start;
 
+    /**
+     * @var FeatureSet
+     */
+    private $featureSet;
+
     public function __construct() {
 
         //SESSION ENABLED
@@ -106,7 +111,11 @@ class getProjectsController extends ajaxController {
             throw new Exception('User not Logged');
         }
 
-        $team = Users_UserDao::findDefaultTeam( $this->logged_user );
+        $this->featureSet = new FeatureSet();
+        $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
+
+        $team = null ;
+        $team = $this->featureSet->filter('filter_get_projects_team', $team);
 
         $projects = ManageUtils::queryProjects( $this->logged_user, $this->start, $this->step,
             $this->search_in_pname,
@@ -132,9 +141,7 @@ class getProjectsController extends ajaxController {
     }
 
     private function filterProjectsWithUserFeatures( $projects ) {
-        $featureSet = new FeatureSet() ;
-        $featureSet->loadFromUserEmail( $this->logged_user->email ) ;
-        $projects = $featureSet->filter('filter_manage_projects_loaded', $projects);
+        $projects = $this->featureSet->filter('filter_manage_projects_loaded', $projects);
         return $projects ;
     }
 

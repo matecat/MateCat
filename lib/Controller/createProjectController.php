@@ -316,7 +316,6 @@ class createProjectController extends ajaxController {
         }
 
         $projectManager = new ProjectManager( $projectStructure );
-        $projectManager->setUser( $this->logged_user ) ;
         $projectManager->createProject();
 
         // Strictly related to the UI ( not API ) interaction, should yet be moved away from controller.
@@ -332,13 +331,6 @@ class createProjectController extends ajaxController {
 
         if ( $this->userIsLogged ) {
             $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
-
-            $dao = new \Teams\MembershipDao() ;
-            $team = $dao->findTeambyUser( $this->logged_user ) ;
-
-            if ( $team ) {
-                $this->featureSet->loadFromTeam( $team ) ;
-            }
         }
     }
 

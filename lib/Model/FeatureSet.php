@@ -199,8 +199,4 @@ class FeatureSet {
         }
     }
 
-    public static function splitString( $string ) {
-        return explode(',', $string);
-    }
-
 }

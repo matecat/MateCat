@@ -159,20 +159,6 @@ class ProjectManager {
     }
 
     /**
-     * Set the user who is creating the project. Loads additional features looking up the
-     * the ones activated for the team.
-     *
-     * @param Users_UserStruct $user
-     */
-    public function setUser( Users_UserStruct $user ) {
-        $this->team = Users_UserDao::findDefaultTeam( $user ) ;
-
-        if ( $this->team ) {
-            $this->features->loadFromTeam( $this->team ) ;
-        }
-    }
-
-    /**
      * @param $id
      *
      * @throws Exceptions_RecordNotFound
@@ -260,6 +246,8 @@ class ProjectManager {
 
 
     public function createProject() {
+
+        $this->team = $this->features->filter('filter_team_for_project_creation', $this->team ) ;
 
         // project name sanitize
         $oldName                                  = $this->projectStructure[ 'project_name' ];

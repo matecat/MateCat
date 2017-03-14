@@ -621,10 +621,6 @@ class NewController extends ajaxController {
         
         $projectManager->sanitizeProjectOptions = false ; 
 
-        if ( $this->current_user ) {
-            $projectManager->setUser( $this->current_user ) ;
-        }
-
         $projectManager->createProject();
 
         $this->result = $projectStructure[ 'result' ];
