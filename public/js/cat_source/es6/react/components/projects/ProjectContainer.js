@@ -431,12 +431,15 @@ class ProjectContainer extends React.Component {
                     <div className="sixteen wide column">
                         <div className="project-header ui grid">
 
-                            <div className="two wide computer two wide tablet three wide mobile column">
+                            <div className="eight wide column">
                                 <div className="ui stackable grid">
                                     <div className="sixteen wide column">
                                         <div className="ui ribbon label">
+                                            <span className="project-name">
+                                                {this.state.projectName}
+                                            </span>
                                             <span className="project-id">
-                                                {"Id: " + this.props.project.get('id')}
+                                                {"(ID: " + this.props.project.get('id') + ")"}
                                             </span>
                                             {state}
                                         </div>
@@ -444,30 +447,9 @@ class ProjectContainer extends React.Component {
                                 </div>
                             </div>
 
-                            <div className="fourteen wide computer fourteen wide tablet thirteen wide mobile column pad-top-8">
-                                <div className="ui mobile reversed stackable grid">
-                                    <div className="five wide computer four wide tablet only reverse tablet only column">
-                                        <div className="ui grid">
-                                            <div className="sixteen wide column">
-                                                <div className="project-name">
-                                                    <div className="ui form">
-                                                        <div className="field">
-                                                            <div className={"ui icon input " + inputClass}>
-                                                                <input type="text"
-                                                                       onKeyUp={this.onKeyUpEvent.bind(this)}
-                                                                       onClick={this.inputNameClick.bind(this)}
-                                                                       onBlur={this.inputNameOnBlur.bind(this)}
-                                                                       ref={(inputName) => this.inputName = inputName}
-                                                                        defaultValue={this.state.projectName} disabled/>
-                                                                {/*{inputIcon}*/}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="eleven wide computer twelve wide tablet right aligned column">
+                            <div className="eight wide right floated column pad-top-8">
+                                <div className="ui mobile reversed stackable grid right aligned">
+                                    <div className=" computer twelve wide tablet right floated column">
                                         {/*<div className="project-payable ui grid computer tablet only">*/}
                                             {/*<a href={analyzeUrl} target="_blank">{payableWords} <span>payable words</span></a>*/}
                                         {/*</div>*/}
@@ -482,28 +464,12 @@ class ProjectContainer extends React.Component {
                                     </div>
                                 </div>
                             </div>
-                            <div className="sixteen wide column mobile only pad-top-0 pad-bottom-0">
-                                <div className="project-name">
-                                    <div className="ui form">
-                                        <div className="field">
-                                            <div className={"ui icon input " + inputClass}>
-                                                <input type="text"
-                                                       onKeyUp={this.onKeyUpEvent.bind(this)}
-                                                       onClick={this.inputNameClick.bind(this)}
-                                                       onBlur={this.inputNameOnBlur.bind(this)}
-                                                       ref={(inputName) => this.inputName = inputName}
-                                                       defaultValue={this.state.projectName} disabled/>
-                                                {/*{inputIcon}*/}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="sixteen wide column mobile only pad-top-0 pad-bottom-20 right aligned">
-                                <div className="project-payable">
-                                    <a href={analyzeUrl} target="_blank">{payableWords} <span>payable words</span></a>
-                                </div>
-                            </div>
+
+                            {/*<div className="sixteen wide column mobile only pad-top-0 pad-bottom-20 right aligned">*/}
+                                {/*<div className="project-payable">*/}
+                                    {/*<a href={analyzeUrl} target="_blank">{payableWords} <span>payable words</span></a>*/}
+                                {/*</div>*/}
+                            {/*</div>*/}
                         </div>
                         <div className="project-body ui grid">
                             <div className="jobs sixteen wide column pad-bottom-0">

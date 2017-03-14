@@ -1,5 +1,6 @@
 <?php
 
+use API\V2\Exceptions\AuthorizationError;
 use Features\QaCheckBlacklist\BlacklistFromZip;
 use Teams\MembershipDao;
 use Teams\MembershipStruct;
@@ -66,6 +67,10 @@ class ProjectModel {
             $this->checkIdAssignee();
         }
 
+        if ( isset( $this->willChange[ 'id_team' ] ) ) {
+            $this->checkIdTeam();
+        }
+
         foreach ( $this->willChange as $field => $value ) {
             $newStruct->$field = $value;
         }
@@ -116,6 +121,23 @@ class ProjectModel {
 
         if ( empty( $found ) ) {
             throw new \Exceptions\ValidationError( 'Assignee must be team member' );
+        }
+
+    }
+
+    private function checkIdTeam(){
+
+        $memberShip = new MembershipDao();
+
+        //choose this method ( and use array_map ) instead of findTeamByIdAndUser because thr results of this one are cached
+        $memberList = $memberShip->getMemberListByTeamId( $this->willChange[ 'id_team' ] );
+
+        $found = array_filter( $memberList, function( $values ) {
+            return $values->uid == $this->user->uid;
+        } );
+
+        if ( empty( $found ) ) {
+            throw new AuthorizationError( "Not Authorized", 401 );
         }
 
     }

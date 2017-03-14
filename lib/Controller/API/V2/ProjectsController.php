@@ -21,7 +21,7 @@ class ProjectsController extends KleinController {
 
     public function update() {
 
-        $acceptedFields = array( 'id_assignee', 'name' );
+        $acceptedFields = array( 'id_assignee', 'name', 'id_team' );
 
         $projectModel   = new \ProjectModel( $this->project );
         $projectModel->setUser( $this->user ) ;

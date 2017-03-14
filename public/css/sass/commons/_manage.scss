@@ -57,15 +57,29 @@ body.manage {
         margin-bottom: 30px !important;
         .ui.ribbon.label {
             position: absolute;
-            top: 14px;
+            top: 8px;
             z-index: 2;
             left: -15px;
+            width: 100% !important;
+            max-width: 650px;
+            line-height: 17px;
+
         }
         .project-header {
             background-color: #dadada;
             padding-bottom: 22px !important;
+            .project-name {
+                font-size: 16px;
+                width: 80%;
+                float: left;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 600px;
+            }
             .project-id {
-                padding: 10px 0 10px 15px;
+                float: right;
+                font-size: 14px;
+                font-weight: normal;
             }
             .ui.form .field :disabled {
                 opacity: 1 !important;

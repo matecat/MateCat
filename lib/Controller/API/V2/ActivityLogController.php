@@ -30,7 +30,7 @@ class ActivityLogController extends KleinController {
         $validator->validate();
 
         $activityLogDao = new ActivityLogDao();
-        $rawContent = $activityLogDao->getLastJobInProject( $validator->getIdProject() ) ;
+        $rawContent = $activityLogDao->getLastActionInProject( $validator->getIdProject() ) ;
 
         $formatted = new Activity( $rawContent ) ;
         $this->response->json( array( 'activity' => $formatted->render() ) );
