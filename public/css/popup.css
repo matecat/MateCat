@@ -126,6 +126,8 @@ box-shadow: inset 0 0 1px 1px #888;
     width: auto!important;
     overflow: hidden;
 }
+.outsource.modal .out-email,
+.outsource.modal .out-date,
 .outsource.modal .out-link {
     padding: .7em .6em;
     display: inline-block;
@@ -140,6 +142,11 @@ box-shadow: inset 0 0 1px 1px #888;
     color: #333;
     width: 70%;
     margin: 2%;
+}
+
+.outsource.modal .out-email,
+.outsource.modal .out-date {
+    width: 30%;
 }
 
 .outsource.modal p {
@@ -396,7 +403,7 @@ body.showingOutsourceTo {
     font-weight: bold;
 }
 
-div#forceDeliveryContainer .x-popup2 {
+div.modal-outsource-datepicker .x-popup2 {
     color: #666;
     position: absolute;
     right: 8px;
@@ -404,7 +411,7 @@ div#forceDeliveryContainer .x-popup2 {
     text-decoration: none;
 }
 
-div#forceDeliveryContainer .x-popup2:hover {
+div.modal-outsource-datepicker .x-popup2:hover {
     color: red;
 }
 
@@ -1025,7 +1032,7 @@ cursor: pointer;
     margin: 0 0 0 -400px;   
 }
 
-#forceDeliveryContainer {
+#forceDeliveryContainer  {
     top: 425px!important;
 }
 
@@ -1100,7 +1107,7 @@ a.tooltip.gray span:after {
 
 /* force delivery */
 
-#forceDeliveryContainer {
+.modal-outsource-datepicker {
     height: 185px;
     width: 520px;
     background: #FFFFFF;
@@ -1110,17 +1117,21 @@ a.tooltip.gray span:after {
     z-index: 10001;
     color: #fff;
     padding: 20px;
-    top: 424px;
+    top: 120px;
     left: 435px;
     zoom: 0.9;
     z-index: 99999999999999999999;    
     text-align: left;
     -moz-box-shadow: 0 0px 11px #888;
     -webkit-box-shadow: 0 0px 11px #888;
-
 }
 
-#forceDeliveryContainer .title {
+#forceDeliveryContainer {
+    top: 424px;
+    left: 435px;
+}
+
+.modal-outsource-datepicker .title {
     font-size:220%;
     margin:0px 0 10px 0px;
     color:#002f65;
@@ -1135,7 +1146,7 @@ a.tooltip.gray span:after {
     z-index: 100000000000000000000000000000000!important;
 }
 
-#forceDeliveryContainer .delivery-auto {
+.modal-outsource-datepicker .delivery-auto {
     width: 635px;
     height: auto;
     padding: 10px;
@@ -1146,27 +1157,27 @@ a.tooltip.gray span:after {
     color: #999;
 }
 
-#forceDeliveryContainer tbody:nth-child(3) tr td:not(.empty) {
+.modal-outsource-datepicker tbody:nth-child(3) tr td:not(.empty) {
     border-top:0!important;
 }
 
-#forceDeliveryContainer .delivery-auto h2 {
+.modal-outsource-datepicker .delivery-auto h2 {
     font-size: 24px;
     margin: 0 0 10px 0;
     color: #002F65;
 }
 
-#forceDeliveryContainer .delivery-auto h2 label {
+.modal-outsource-datepicker .delivery-auto h2 label {
     cursor: pointer;
 }
 
 
-#forceDeliveryContainer .delivery-auto p {
+.modal-outsource-datepicker .delivery-auto p {
     font-size: 16px;
     margin: -5px 0 0 10px;
 }
 
-#forceDeliveryContainer .delivery-manual {
+.modal-outsource-datepicker .delivery-manual {
 
     vertical-align: baseline;
     line-height: 1;
@@ -1174,28 +1185,28 @@ a.tooltip.gray span:after {
 
 }
 
-#forceDeliveryContainer .delivery-manual br {
+.modal-outsource-datepicker .delivery-manual br {
     line-height: 1.15;
 }
 
-#forceDeliveryContainer .delivery-manual h2 {
+.modal-outsource-datepicker .delivery-manual h2 {
     font-size: 24px;
     margin: 0 0 10px 0;
     color: #002F65;
 }
 
-#forceDeliveryContainer .delivery-manual h2 label {
+.modal-outsource-datepicker .delivery-manual h2 label {
     cursor: pointer;
 }
 
 
-#forceDeliveryContainer .delivery-manual-date {
+.modal-outsource-datepicker .delivery-manual-date {
     float: left;
     width: 240px;
     height: 200px;
 }
 
-#forceDeliveryContainer .delivery-manual-date h3 {
+.modal-outsource-datepicker .delivery-manual-date h3 {
     text-align: left;
     margin-left: 20px;
     font-size: 19px;
@@ -1204,14 +1215,14 @@ a.tooltip.gray span:after {
     line-height: 100%;
 }
 
-#forceDeliveryContainer .delivery-manual-time {
+.modal-outsource-datepicker .delivery-manual-time {
     float: left;
     width: 255px;
     height: 200px;
     margin: 0px 10px 0px 0;
 }
 
-#forceDeliveryContainer .delivery-manual-time h3 {
+.modal-outsource-datepicker .delivery-manual-time h3 {
     text-align: left;
     margin-left: 20px;
     font-size: 17px;
@@ -1221,16 +1232,16 @@ a.tooltip.gray span:after {
     color: #333;
 }
 
-#forceDeliveryContainer .delivery-manual-time select {
+.modal-outsource-datepicker .delivery-manual-time select {
     width: 250px;
     margin-left: 12px;
     color: #333;
 }
 
 
-#forceDeliveryContainer #delivery_manual_error,
-#forceDeliveryContainer #delivery_not_available,
-#forceDeliveryContainer #delivery_before_time {
+.modal-outsource-datepicker #delivery_manual_error,
+.modal-outsource-datepicker #delivery_not_available,
+.modal-outsource-datepicker #delivery_before_time {
     opacity: 0.87;
     color: red;
     margin-left: 12px;
@@ -1243,9 +1254,9 @@ a.tooltip.gray span:after {
     z-index: 100000;
 }
 
-#forceDeliveryContainer #delivery_manual_error div,
-#forceDeliveryContainer #delivery_not_available div
-#forceDeliveryContainer #delivery_before_time div {
+.modal-outsource-datepicker #delivery_manual_error div,
+.modal-outsource-datepicker #delivery_not_available div
+.modal-outsource-datepicker #delivery_before_time div {
     width: 225px;
     text-align: left;
     font-size: 13px;
@@ -1253,35 +1264,35 @@ a.tooltip.gray span:after {
     border-radius: 6px;
 }
 
-#forceDeliveryContainer #delivery_before_time {
+.modal-outsource-datepicker #delivery_before_time {
     color:green;
 }
 
-#forceDeliveryContainer select {
+.modal-outsource-datepicker select {
         border: 1px solid #ccc;
     height: 30px;
     font-size: 12px;
     font-family: Arial;
 }
 
-#forceDeliveryContainer .clear {
+.modal-outsource-datepicker .clear {
     clear: both;
 }
 
-#forceDeliveryContainer input[type="button"], 
-#forceDeliveryContainer .btn-cancel {
+.modal-outsource-datepicker input[type="button"],
+.modal-outsource-datepicker .btn-cancel {
     width: auto!important;
     float: right;
     margin-top: 25px!important;
     margin-right: 35px;
 }
 
-#forceDeliveryContainer .delivery-selected {
+.modal-outsource-datepicker .delivery-selected {
     color: #000 !important;
 }
 
 
-#forceDeliveryContainer .tprice {
+.modal-outsource-datepicker .tprice {
     width: 250px;
     box-shadow: none;
 }
@@ -1303,32 +1314,32 @@ a.tooltip.gray span:after {
 }
 
 
-#forceDeliveryContainer .datepickerMonths,
-#forceDeliveryContainer .datepickerYears {
+.modal-outsource-datepicker .datepickerMonths,
+.modal-outsource-datepicker .datepickerYears {
     display: none;
 }
 
-#forceDeliveryContainer td.datepickerSpecial a {
+.modal-outsource-datepicker td.datepickerSpecial a {
     border: 1px solid;
     color: #09beec;
     background-color: #F3F3F3!important;
 }
 
-#forceDeliveryContainer .datepickerDoW th {
+.modal-outsource-datepicker .datepickerDoW th {
     padding: 5px 0;
 }
 
-#forceDeliveryContainer .datepickerDoW th:first-child,
-#forceDeliveryContainer th.datepickerWeek {
+.modal-outsource-datepicker .datepickerDoW th:first-child,
+.modal-outsource-datepicker th.datepickerWeek {
     display: none;
 }
 
-#forceDeliveryContainer .datepickerNotInMonth {
+.modal-outsource-datepicker .datepickerNotInMonth {
     visibility: hidden;
 }
 
 
-#forceDeliveryContainer .datepicker table {
+.modal-outsource-datepicker .datepicker table {
     background-color: transparent;
     border: none;
     font-size: 16px;
@@ -1337,36 +1348,36 @@ a.tooltip.gray span:after {
         border-collapse: collapse;
 }
 
-#forceDeliveryContainer .datepicker table tr td a {
+.modal-outsource-datepicker .datepicker table tr td a {
     background-color: #E1E1E1;
     text-decoration: none;
 }
 
-#forceDeliveryContainer .datepicker table td.datepickerDisabled a,
-#forceDeliveryContainer .datepicker table a.datepickerDisabled,
-#forceDeliveryContainer .datepickerGoPrev a,
-#forceDeliveryContainer .datepickerGoNext a {
+.modal-outsource-datepicker .datepicker table td.datepickerDisabled a,
+.modal-outsource-datepicker .datepicker table a.datepickerDisabled,
+.modal-outsource-datepicker .datepickerGoPrev a,
+.modal-outsource-datepicker .datepickerGoNext a {
     background-color: transparent;
     color: #333;
 }
 
-#forceDeliveryContainer .datepickerGoPrev a,
-#forceDeliveryContainer .datepickerGoNext a {
+.modal-outsource-datepicker .datepickerGoPrev a,
+.modal-outsource-datepicker .datepickerGoNext a {
     font-size: 13px;
     background-color: transparent !important;
 }
 
-#forceDeliveryContainer .datepickerDisabled a {
+.modal-outsource-datepicker .datepickerDisabled a {
     color: #666 !important;
     font-weight: normal;
     cursor: default;
 }
 
-#forceDeliveryContainer .datepicker table .datepickerDoW {
+.modal-outsource-datepicker .datepicker table .datepickerDoW {
     font-size: 12px;
 }
 
-#forceDeliveryContainer .datepicker a {
+.modal-outsource-datepicker .datepicker a {
   text-decoration: none;
   padding: 4px;
   outline: none;
@@ -1374,7 +1385,7 @@ a.tooltip.gray span:after {
   color: #333;
 }
 
-#forceDeliveryContainer .datepickerDays a {
+.modal-outsource-datepicker .datepickerDays a {
   line-height: 20px;
   height: 16px;
   margin: 1px;
@@ -1383,32 +1394,32 @@ a.tooltip.gray span:after {
 }
 
 
-#forceDeliveryContainer .datepickerDays a:hover {
+.modal-outsource-datepicker .datepickerDays a:hover {
     background-color: #09beec;
     color:#fff;
 }
 
-#forceDeliveryContainer td.datepickerSpecial a:hover {
+.modal-outsource-datepicker td.datepickerSpecial a:hover {
     background-color: #09beec!important;
     color: #fff;
 }
 
-#forceDeliveryContainer .datepickerWeek a {
+.modal-outsource-datepicker .datepickerWeek a {
     font-weight: normal;
 }
 
-#forceDeliveryContainer .datepickerMonth a,
-#forceDeliveryContainer .datepickerDoW span {
+.modal-outsource-datepicker .datepickerMonth a,
+.modal-outsource-datepicker .datepickerDoW span {
     text-decoration: none;
     font-weight: normal;
     text-align: center;
 }
 
-#forceDeliveryContainer .datepicker table td.datepickerDisabled a {
+.modal-outsource-datepicker .datepicker table td.datepickerDisabled a {
     opacity: 0.5;
 }
 
-#forceDeliveryContainer .datepickerSelected a {
+.modal-outsource-datepicker .datepickerSelected a {
     background-color: #7eaf3e !important;
     color:#fff;
 }
