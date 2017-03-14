@@ -362,18 +362,18 @@ class JobContainer extends React.Component {
     }
 
     getOutsourceButton() {
-        let label = <a className="ui green button"
+        let label = <a className="open-outsourced ui button"
                        onClick={this.openOutsourceModal.bind(this)}>
            Outsource
         </a>;
         if (this.props.job.get('outsource')) {
             if (this.props.job.get('outsource').get('outsourced') == "1") {
-                label = <a className="ui grey button "
+                label = <a className="open-outsourced ui button "
                            onClick={this.openOutsourceModal.bind(this)}>
                     View status
                 </a>;
             } else {
-                label = <a className="ui green button"
+                label = <a className="open-outsource ui green button"
                            onClick={this.openOutsourceModal.bind(this)}>
                     Outsource
                 </a>;
@@ -386,9 +386,8 @@ class JobContainer extends React.Component {
         let outsourceJobLabel = '';
         if (this.props.job.get('outsource')) {
             if (this.props.job.get('outsource').get('outsourced') == "1") {
-                outsourceJobLabel = <div className="translated-outsuorced">
+                outsourceJobLabel =
                     <a href="http://www.translated.net" target="_blank"><img className='outsource-logo' src="/public/img/logo_translated.png" title="visit our website"/></a>
-                </div>
                 ;
             }
         }
@@ -457,9 +456,9 @@ class JobContainer extends React.Component {
 
                         <div className="thirteen wide computer fourteen wide tablet thirteen wide mobile column pad-left-0">
                             <div className="ui mobile reversed stackable grid">
-                                <div className="eight wide column">
+                                <div className="nine wide column">
                                     <div className="ui grid">
-                                        <div className="twelve wide computer six wide tablet column">
+                                        <div className="sixteen wide computer six wide tablet column">
                                             <div className="job-id">
                                                 { idJobLabel }
                                             </div>
@@ -480,6 +479,14 @@ class JobContainer extends React.Component {
                                             <div className="job-activity-icons">
                                                 <div className="comments">
                                                     {commentsIcon}
+                                                    {/*<div className="ui menu">
+                                                        <a className="browse item">
+                                                            <i class="icon-cart icon"></i>
+                                                        </a>
+                                                        <div className="ui fluid popup bottom left transition hidden">
+
+                                                        </div>
+                                                    </div>*/}
                                                 </div>
                                             </div>
                                             <div className="job-payable">
@@ -493,7 +500,8 @@ class JobContainer extends React.Component {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="eight wide computer five wide tablet right floated right aligned column">
+                                <div className="seven wide computer five wide tablet right floated right aligned column">
+
                                         {QRIcon}
                                         {warningsIcon}
                                         {outsourceDelivery}
@@ -501,11 +509,12 @@ class JobContainer extends React.Component {
                                         <a className="open-translate ui primary button open" target="_blank" href={translateUrl}>
                                             Open
                                         </a>
-                                        <div className="job-menu circular ui icon top right pointing dropdown  basic button"
+                                        <div className="ui icon top right pointing dropdown job-menu  button"
                                                 ref={(dropdown) => this.dropdown = dropdown}>
                                             <i className="icon-more_vert icon"/>
                                             {jobMenu}
                                         </div>
+
                                 </div>
                             </div>
                         </div>

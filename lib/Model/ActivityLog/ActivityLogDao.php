@@ -20,11 +20,11 @@ class ActivityLogDao extends DataAccess_AbstractDao {
     public $epilogueString = "";
     public $whereConditions = " id_project = :id_project ";
 
-    public function getLastJobInProject($id_project) {
+    public function getLastActionInProject( $id_project) {
         $conn = Database::obtain()->getConnection();
         $sql = "SELECT users.uid, users.email, users.first_name, users.last_name, activity_log.* FROM activity_log
           JOIN (
-           SELECT MAX(id) AS id FROM activity_log WHERE id_project = :id_project AND id_job IS NOT NULL GROUP BY id_job
+           SELECT MAX(id) AS id FROM activity_log WHERE id_project = :id_project GROUP BY id_job
           ) t ON t.id = activity_log.id JOIN users on activity_log.uid = users.uid " ;
 
         $stmt = $conn->prepare( $sql ) ;
