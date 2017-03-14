@@ -261,7 +261,14 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
                 "&matecat_pid=" . $this->pid . "&matecat_ppass=" . $this->ppassword . "&matecat_words=$words" .
                 "&matecat_jid=" . $job[ 'jid' ] . "&matecat_jpass=" . $job[ 'jpassword' ] . "&of=json";
 
-            $mh->createResource( $url, $this->_curlOptions, $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-outsourced" );
+            $curl_opt = array(
+                    CURLOPT_HTTPGET        => true,
+                    CURLOPT_TIMEOUT        => 15,
+                    CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                    CURLOPT_CONNECTTIMEOUT => 5
+            );
+
+            $mh->createResource( $url, $this->_curlOptions, $job[ 'jid' ] . "-" . $job[ 'jpassword' ] . "-outsourced", $curl_opt );
         }
 
 

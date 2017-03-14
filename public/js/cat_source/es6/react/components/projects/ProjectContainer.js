@@ -263,9 +263,9 @@ class ProjectContainer extends React.Component {
 
         var state = '';
         if ( this.props.project.get('has_archived') ) {
-            state = <div className="col m1"><span className="new badge grey darken-1" style={{marginTop: '5px'}}>archived</span></div>
+            state = <div className="col" style={{padding: "0"}}><span className="new badge grey darken-1" style={{marginTop: '5px'}}>archived</span></div>
         }  else if ( this.props.project.get('has_cancelled') ) {
-            state = <div className="col m1"><span className="new badge grey darken-5" style={{marginTop: '5px'}}>cancelled</span></div>
+            state = <div className="col" style={{padding: "0"}}><span className="new badge grey darken-5" style={{marginTop: '5px'}}>cancelled</span></div>
         }
 
         return <div className="card-panel project">
@@ -277,19 +277,21 @@ class ProjectContainer extends React.Component {
                                     <div id="id-project">{this.props.project.get('id')}</div>
                                 </div>
                             </div>
-                            <div className="col m6">
+                            {state}
+                            <div className="col">
                                 <div className="project-name">
-                                    <form>
+
                                         {/*<div className="row">*/}
-                                            {state}
+
                                             {/*<div className="input-field col m10">*/}
-                                            <div className="input-field">
-                                                <input id="icon_prefix" type="text" disabled="disabled" defaultValue={this.props.project.get('name')}/><i
-                                                    className="material-icons prefix hide">mode_edit</i>
+                                            <div className="box-project-name">
+                                                {/*<input id="icon_prefix" type="text" disabled="disabled" defaultValue={this.props.project.get('name')}/>*/}
+                                                <div className="project-name-text">{this.props.project.get('name')}</div>
+                                                <i className="material-icons prefix hide">mode_edit</i>
                                             </div>
 
                                         {/*</div>*/}
-                                    </form>
+
                                 </div>
                             </div>
                             <div className="col">

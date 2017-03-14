@@ -24,6 +24,7 @@ class ProjectManager {
      * @var int
      */
     protected $show_in_cattool_segs_counter = 0;
+    protected $files_word_count = 0;
     protected $min_max_segments_id = [];
 
     /**
@@ -602,13 +603,14 @@ class ProjectManager {
 
         $update_project_count = "
             UPDATE projects
-              SET status_analysis = '%s'
+              SET status_analysis = '%s', standard_analysis_wc = %u
             WHERE id = %u
         ";
 
         $update_project_count = sprintf(
                 $update_project_count,
                 $this->projectStructure[ 'status' ],
+                $this->files_word_count * count( $this->projectStructure[ 'array_jobs' ][ 'job_languages' ] ),  //estimation of total segments in the project
                 $this->projectStructure[ 'id_project' ]
         );
 
@@ -1455,6 +1457,7 @@ class ProjectManager {
         //needed to check if a file has only one segment
         //for correctness: we could have more tag files in the xliff
         $_fileCounter_Show_In_Cattool = 0;
+        $num_words = 0; //initialize counter for words in the file to avoid IDE warnings
 
         // Creating the Query
         foreach ( $xliff[ 'files' ] as $xliff_file ) {
@@ -1515,7 +1518,8 @@ class ProjectManager {
                                     $src = trim( strip_tags( html_entity_decode( $extract_external[ 'seg' ], ENT_QUOTES, 'UTF-8' ) ) );
                                     $trg = trim( strip_tags( html_entity_decode( $target_extract_external[ 'seg' ], ENT_QUOTES, 'UTF-8' ) ) );
 
-                                    if ( $src != $trg && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
+
+                                    if ( $this->__isTranslated( $src, $trg ) && !is_numeric( $src ) && !empty( $trg ) ) { //treat 0,1,2.. as translated content!
 
                                         $target_extract_external[ 'seg' ] = CatUtils::raw2DatabaseXliff( $target_extract_external[ 'seg' ] );
                                         $target                           = $this->dbHandler->escape( $target_extract_external[ 'seg' ] );
@@ -1573,6 +1577,9 @@ class ProjectManager {
                                     $mrk_ext_succ_tags
                             ] );
 
+                            //increment counter for word count
+                            $this->files_word_count += $num_words;
+
                         } // end foreach seg-source
 
                         if ( self::notesAllowedByMimeType( $mimeType ) ) {
@@ -1598,7 +1605,7 @@ class ProjectManager {
 
                                 $target_extract_external = $this->_strip_external( $xliff_trans_unit[ 'target' ][ 'raw-content' ] );
 
-                                if ( $xliff_trans_unit[ 'source' ][ 'raw-content' ] != $target_extract_external[ 'seg' ] ) {
+                                if ( $this->__isTranslated( $xliff_trans_unit[ 'source' ][ 'raw-content' ], $target_extract_external[ 'seg' ] ) ) {
 
                                     $target = CatUtils::raw2DatabaseXliff( $target_extract_external[ 'seg' ] );
                                     $target = $this->dbHandler->escape( $target );
@@ -1660,6 +1667,9 @@ class ProjectManager {
                                 null
                         ] );
 
+                        //increment counter for word count
+                        $this->files_word_count += $num_words;
+
                     }
                 }
 
@@ -1676,7 +1686,7 @@ class ProjectManager {
             throw new Exception( "Segment import - no segments found", -1 );
         } else {
             //increment global counter
-            $this->show_in_cattool_segs_counter = $_fileCounter_Show_In_Cattool;
+            $this->show_in_cattool_segs_counter += $_fileCounter_Show_In_Cattool;
         }
 
         $baseQuery = "INSERT INTO segments ( id, internal_id, id_file, id_file_part, segment, segment_hash, raw_word_count, xliff_mrk_id, xliff_ext_prec_tags, xliff_ext_succ_tags, show_in_cattool,xliff_mrk_ext_prec_tags,xliff_mrk_ext_succ_tags) values ";
@@ -2072,7 +2082,7 @@ class ProjectManager {
      * @return bool
      */
     public static function notesAllowedByMimeType( $mimeType ) {
-        return in_array( $mimeType, array('sdlxliff', 'xliff') ) ;
+        return in_array( $mimeType, array('sdlxliff', 'xliff', 'xlf') ) ;
     }
 
     public static function getExtensionFromMimeType( $mime_type ) {
@@ -2379,6 +2389,30 @@ class ProjectManager {
 
         if ( count( $this->projectStructure[ 'private_tm_key' ] ) > 0 ) {
             $this->tmxServiceWrapper->setTmKey( $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ] );
+        }
+    }
+
+    /**
+     * Decide if the pair source and target should be considered translated.
+     * If the strings are different, it's always considered translated.
+     *
+     * If they  are identical, let plugins decide how to treat the case.
+     *
+     * @param $source
+     * @param $target
+     *
+     * @return bool|mixed
+     */
+    private function __isTranslated( $source, $target ) {
+        if ( $source != $target ) {
+            return true ;
+        }
+        else {
+            // evaluate if identical source and target should be considered non translated
+            $identicalSourceAndTargetIsTranslated = false;
+            $identicalSourceAndTargetIsTranslated = $this->features->filter('filterIdenticalSourceAndTargetIsTranslated', $identicalSourceAndTargetIsTranslated );
+
+            return $identicalSourceAndTargetIsTranslated ;
         }
     }
 

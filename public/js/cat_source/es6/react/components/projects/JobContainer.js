@@ -50,7 +50,7 @@ class JobContainer extends React.Component {
         var chunk_id = this.props.job.get('id') + ( ( use_prefix ) ? '-' + this.props.index : '' ) ;
         return '/translate/'+this.props.project.get('name')+'/'+ this.props.job.get('source') +'-'+this.props.job.get('target')+'/'+ chunk_id +'-'+ this.props.job.get('password')  ;
     }
-
+p
     getReviseUrl() {
         var use_prefix = ( this.props.jobsLenght > 1 );
         var chunk_id = this.props.job.get('id') + ( ( use_prefix ) ? '-' + this.props.index : '' ) ;
@@ -230,7 +230,7 @@ class JobContainer extends React.Component {
             var tooltipText = '';
             keys.forEach(function (key, i) {
                 var descript = (key.name) ? key.name : "Private TM and Glossary";
-                var item = '<div style="text-align: left"><span style="font-weight: bold">' + descript + '</span> KEY: ' + key.key + '</div>';
+                var item = '<div style="text-align: left"> <span style="font-weight: bold">' + descript + '</span> (' + key.key + ')</div>';
                 tooltipText =  tooltipText + item;
             });
             return <li>
@@ -341,7 +341,7 @@ class JobContainer extends React.Component {
                 <div className="row">
                     <div className="col">
                         <div className="job-id">
-                            <div id={"id-job-" + this.props.job.get('id')}>{ idJobLabel }</div>
+                            <div id={"id-job-" + this.props.job.get('id')}>{ idJobLabel } </div>
                         </div>
                     </div>
                     <div className="col">
@@ -359,7 +359,10 @@ class JobContainer extends React.Component {
                     </div>
                     <div className="col">
                         <div className="payable-words">
+                            {/*
                             <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
+                            */}
+                            <span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')} words</span>
                         </div>
                     </div>
                     {/*<div className="col">*/}

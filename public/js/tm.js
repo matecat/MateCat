@@ -158,8 +158,10 @@
                 var descKey = $('#new-tm-description').val();
 
                 if (config.isLoggedIn) {
-                    UI.saveTMkey(keyValue, descKey).done(function () {
-                        UI.checkTMKey('key');
+                    UI.saveTMkey(keyValue, descKey).done(function (data) {
+                        if(data.errors.length === 0) {
+                            UI.checkTMKey('key');
+                        }
                     });
                 } else {
                     UI.checkTMKey('key');
@@ -1165,7 +1167,13 @@
                     $('.popup-tm').removeClass('saving');
                     UI.hideAllBoxOnTables();
                     if(d.errors.length) {
-                        UI.showErrorOnActiveTMTable(d.errors[0].message);
+                        setTimeout(function () {
+                            if (d.errors[0].code === "23000") {
+                                UI.showErrorOnActiveTMTable("The key you entered is invalid.");
+                            } else {
+                                UI.showErrorOnActiveTMTable(d.errors[0].message);
+                            }
+                        }, 200);
                     }
                 }
             });
@@ -1314,7 +1322,7 @@
         showDeleteTmMessage: function (button) {
             $("tr.tm-key-deleting").removeClass('tm-key-deleting');
             var message = 'Do you really want to delete the resource "YYY" (XXX)? ' +
-                    '<a class="pull-right btn-orange-small cancelDelete cancel-tm-key-delete">      <span class="text"></span>   </a>' +
+                    '<a class="pull-right btn-orange-medium cancelDelete cancel-tm-key-delete">      <span class="text"></span>   </a>' +
                     '<a class="pull-right btn-confirm-small confirmDelete confirm-tm-key-delete" style="display: inline;">       <span class="text">Confirm</span>   </a>';
             var elem = $(button).closest("table");
             var tr = $(button).closest("tr");
