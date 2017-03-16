@@ -181,7 +181,6 @@ class Header extends React.Component {
                         <div className="ui grid">
                             <div className="three wide column">
                                 <a href="/" className="logo"/>
-
                             </div>
 
                                 {subHeader}

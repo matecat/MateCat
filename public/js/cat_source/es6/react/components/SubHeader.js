@@ -142,6 +142,9 @@ class SubHeader extends React.Component {
 
                     <div className="column">
                         <div className="search-state-filters">
+                            <div className="status">
+                                <div className="active">Active:</div>
+                            </div>
                             <SearchInput
                                 onChange={this.onChangeSearchInput.bind(this)}/>
                             <FilterProjects

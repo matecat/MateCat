@@ -63,15 +63,32 @@
 		display: flex;
 		justify-content: center;
 		width: 100%;
+		background-color: #5f5f5f;
+		.status {
+			.active, .archived, .cancelled {
+				border: 1px solid #8e8e8e;
+				margin: 6px;
+				padding: 2px 4px;
+				background: #4d4d4d;
+				color: #bbbbbb;
+			}
+		}
 		.projects-state {
 			margin: 0 0 0 10px !important;
 			padding: 0 !important;
-			line-height: 35px;
 			text-align: center;
-			background-color: transparent;
+			line-height: 36px;
+			background: transparent;
 		}
 		.input-field {
 			width: 100%;
+			.ui.input input {
+				background: #5f5f5f;
+				border: none;
+				&:focus {
+					color: #ffffff;
+				}
+			}
 		}
 	}
 

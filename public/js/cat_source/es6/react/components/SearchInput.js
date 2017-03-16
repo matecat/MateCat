@@ -46,7 +46,7 @@ class SearchInput extends React.Component {
                                ref={(input) => this.textInput = input}
                                onChange={this.filterByNameDebounce.bind(this)}
                                onKeyPress={this.onKeyPressEvent.bind(this)}/>
-                        <i className="search icon"/>
+                        {/*<i className="search icon"/>*/}
                     </div>
                 </div>
 
