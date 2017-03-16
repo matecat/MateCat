@@ -162,6 +162,8 @@ class ManageUtils {
             $project                     = array();
             $project[ 'id' ]             = $item[ 'pid' ];
             $project[ 'name' ]           = $item[ 'name' ];
+            $project[ 'id_team' ]        = (int) $item[ 'id_team' ] ;
+
             $project[ 'jobs' ]           = array();
             $project[ 'no_active_jobs' ] = true;
             $project[ 'has_cancelled' ]  = 0;
