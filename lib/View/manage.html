@@ -21,8 +21,6 @@
     <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
     <link href="${basepath}public/css/build/manage-build.css?build=${build_number}" rel="stylesheet" type="text/css"/>
 
-
-
     <script type="text/javascript">
         var config = {
             basepath: '${basepath | string:/}',
@@ -32,21 +30,15 @@
             enable_outsource: ${enable_outsource | string:false},
         };
     </script>
-
-
 </head>
 
 <body tal:condition="not:supportedBrowser">
     <div metal:use-macro="unsupported_browser.html/unsupported"/>
 </body>
 
-<body tal:condition="supportedBrowser" tal:attributes="class php:(filtered_class EQ ' open')? 'manage filterOpen':'manage'">
-<!--metal:use-macro="header.html/main_header"-->
-
+<body tal:condition="supportedBrowser">
 <header>
-
 </header>
-
 
 <div id="manage-container" class="new-container">
     <div class="ui active inverted dimmer">

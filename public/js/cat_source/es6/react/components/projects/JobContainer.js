@@ -76,7 +76,7 @@ class JobContainer extends React.Component {
             .done(function (data) {
                 let notification = {
                     title: 'Change job password',
-                    text: 'The password has been changed. <a class="undo-password">Undo</a>',
+                    text: 'The password has been changed. <a className="undo-password">Undo</a>',
                     type: 'warning',
                     position: 'tc',
                     allowHtml: true,
@@ -331,6 +331,8 @@ class JobContainer extends React.Component {
         return icon;
     }
 
+    getWarningsGroup() {}
+
     getSplitOrMergeButton(splitUrl, mergeUrl) {
 
         if (this.props.isChunk) {
@@ -362,7 +364,7 @@ class JobContainer extends React.Component {
     }
 
     getOutsourceButton() {
-        let label = <a className="open-outsourced ui button"
+        let label = <a className="open-outsource ui green button"
                        onClick={this.openOutsourceModal.bind(this)}>
            Outsource
         </a>;
@@ -410,7 +412,7 @@ class JobContainer extends React.Component {
             belowOrigin: true
         });
         $('.button.tm-keys, .button.comments-tooltip, .warning-tooltip, .qr-tooltip, .translate-tooltip').popup();
-
+        $(this.iconsButton).dropdown();
         ProjectsStore.addListener(ManageConstants.ENABLE_DOWNLOAD_BUTTON, this.enableDownloadMenu.bind(this));
         ProjectsStore.addListener(ManageConstants.DISABLE_DOWNLOAD_BUTTON, this.disableDownloadMenu.bind(this));
 
@@ -437,11 +439,13 @@ class JobContainer extends React.Component {
         let QRIcon = this.getQRIcon();
         let commentsIcon = this.getCommentsIcon();
         let warningsIcon = this.getWarningsIcon();
+        let getWarningsGroup = this.getWarningsGroup();
         let idJobLabel = ( !this.props.isChunk ) ? this.props.job.get('id') : this.props.job.get('id') + '-' + this.props.index;
 
         return <div className="chunk sixteen wide column shadow-1">
                     <div className="ui grid">
-                        <div className="three wide computer two wide tablet three wide mobile column">
+
+                        <div className="eleven wide column">
                             <div className="source-target">
                                 <div className="source-box">
                                     {this.props.job.get('sourceTxt')}
@@ -451,98 +455,67 @@ class JobContainer extends React.Component {
                                     {this.props.job.get('targetTxt')}
                                 </div>
                             </div>
+                            <div className="job-id">
+                                { idJobLabel }
+                            </div>
+                            <div className="progress-bar">
+                                <div className="progr">
+                                    <div className="meter">
+                                        <a className="warning-bar translate-tooltip" data-html={'Rejected '+this.props.job.get('stats').get('REJECTED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('REJECTED_PERC') + '%'}}/>
+                                        <a className="approved-bar translate-tooltip" data-html={'Approved '+this.props.job.get('stats').get('APPROVED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('APPROVED_PERC')+ '%' }}/>
+                                        <a className="translated-bar translate-tooltip" data-html={'Translated '+this.props.job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('TRANSLATED_PERC') + '%' }}/>
+                                        <a className="draft-bar translate-tooltip" data-html={'Draft '+this.props.job.get('stats').get('DRAFT_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('DRAFT_PERC') + '%' }}/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="tm-job">
+                                {tmIcon}
+                            </div>
+                            <div className="job-activity-icons">
+                                <div className="ui icon top right pointing dropdown group-activity-icon basic button" ref={(button) => this.iconsButton = button}>
+                                    <i className="icon-alarm icon" />
+                                    <div className="menu group-activity-icons transition hidden">
+                                        <div className="item">
+                                            {QRIcon}
+                                        </div>
+                                        <div className="item">
+                                            {warningsIcon}
+                                        </div>
+                                        <div className="item">
+                                            {commentsIcon}
+                                        </div>
+                                    </div>
+                                </div>
+                                {/*<div className="comments">
+                                    {commentsIcon}
+                                </div>*/}
+
+                            </div>
+                            <div className="job-payable">
+                                <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
+                            </div>
+                            <div className="translated-outsourced">
+                                {outsourceJobLabel}
+                            </div>
+
+
                         </div>
 
 
-                        <div className="thirteen wide computer fourteen wide tablet thirteen wide mobile column pad-left-0">
-                            <div className="ui mobile reversed stackable grid">
-                                <div className="nine wide column">
-                                    <div className="ui grid">
-                                        <div className="sixteen wide computer six wide tablet column">
-                                            <div className="job-id">
-                                                { idJobLabel }
-                                            </div>
-                                            <div className="progress-bar">
-                                                <div className="progr">
-                                                    <div className="meter">
-                                                        <a className="warning-bar translate-tooltip" data-html={'Rejected '+this.props.job.get('stats').get('REJECTED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('REJECTED_PERC') + '%'}}/>
-                                                        <a className="approved-bar translate-tooltip" data-html={'Approved '+this.props.job.get('stats').get('APPROVED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('APPROVED_PERC')+ '%' }}/>
-                                                        <a className="translated-bar translate-tooltip" data-html={'Translated '+this.props.job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('TRANSLATED_PERC') + '%' }}/>
-                                                        <a className="draft-bar translate-tooltip" data-html={'Draft '+this.props.job.get('stats').get('DRAFT_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('DRAFT_PERC') + '%' }}/>
+                        <div className="five wide column right aligned pad-right-10">
 
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="tm-job">
-                                                {tmIcon}
-                                            </div>
-                                            <div className="job-activity-icons">
-                                                <div className="comments">
-                                                    {commentsIcon}
-                                                    {/*<div className="ui menu">
-                                                        <a className="browse item">
-                                                            <i class="icon-cart icon"></i>
-                                                        </a>
-                                                        <div className="ui fluid popup bottom left transition hidden">
-
-                                                        </div>
-                                                    </div>*/}
-                                                </div>
-                                            </div>
-                                            <div className="job-payable">
-                                                <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
-                                                {/*<span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')} words</span>*/}
-                                            </div>
-                                            <div className="translated-outsourced">
-                                                {outsourceJobLabel}
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="seven wide computer five wide tablet right floated right aligned column">
-
-                                        {QRIcon}
-                                        {warningsIcon}
-                                        {outsourceDelivery}
-                                        {outsourceButton}
-                                        <a className="open-translate ui primary button open" target="_blank" href={translateUrl}>
-                                            Open
-                                        </a>
-                                        <div className="ui icon top right pointing dropdown job-menu  button"
-                                                ref={(dropdown) => this.dropdown = dropdown}>
-                                            <i className="icon-more_vert icon"/>
-                                            {jobMenu}
-                                        </div>
-
-                                </div>
+                            {outsourceDelivery}
+                            {outsourceButton}
+                            <a className="open-translate ui primary button open" target="_blank" href={translateUrl}>
+                                Open
+                            </a>
+                            <div className="ui icon top right pointing dropdown job-menu  button"
+                                    ref={(dropdown) => this.dropdown = dropdown}>
+                                <i className="icon-more_vert icon"/>
+                                {jobMenu}
                             </div>
                         </div>
 
-                        {/*<div className="sixteen wide mobile only column pad-top-0">
-                            <div className="ui stackable grid">
-
-                                <div className="three wide column pad-top-0 pad-bottom-0">
-                                    <div className="progress-bar">
-                                        <div className="progr">
-                                            <div className="meter">
-                                                <a className="warning-bar translate-tooltip" data-html={'Rejected '+this.props.job.get('stats').get('REJECTED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('REJECTED_PERC') + '%'}}/>
-                                                <a className="approved-bar translate-tooltip" data-html={'Approved '+this.props.job.get('stats').get('APPROVED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('APPROVED_PERC')+ '%' }}/>
-                                                <a className="translated-bar translate-tooltip" data-html={'Translated '+this.props.job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('TRANSLATED_PERC') + '%' }}/>
-                                                <a className="draft-bar translate-tooltip" data-html={'Draft '+this.props.job.get('stats').get('DRAFT_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('DRAFT_PERC') + '%' }}/>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="job-payable three wide right aligned column pad-top-0 pad-bottom-0">
-                                    <div className="pad-bottom-15">
-                                        <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>*/}
 
                     </div>
                 { this.state.showDownloadProgress ? (
