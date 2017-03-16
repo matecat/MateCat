@@ -272,10 +272,10 @@ class JobContainer extends React.Component {
                 let item = '<div style="text-align: left"><span style="font-weight: bold">' + descript + '</span> (' + key.key + ')</div>';
                 tooltipText =  tooltipText + item;
             });
-            return <a className=" ui icon basic button tm-keys" data-html={tooltipText}
+            return  <a className=" ui icon basic button tm-keys" data-html={tooltipText}
                    onClick={this.openTMPanel.bind(this)}>
                     <i className="icon-tm-matecat icon"/>
-                </a>;
+            </a>;
         } else {
             return '';
         }
@@ -292,10 +292,10 @@ class JobContainer extends React.Component {
                 tooltipText = 'There are <span style="font-weight: bold">' + openThreads + '</span> open threads';
             }
             var translatedUrl = this.getTranslateUrl() + '?action=openComments';
-            icon = <a className=" ui icon basic button comments-tooltip"
+            icon = <div className="comments-icon-container activity-icon-single"><a className=" ui icon basic button comments-tooltip"
                       data-html={tooltipText} href={translatedUrl} target="_blank">
                     <i className="icon-uniE96B icon"/>
-                </a>;
+            </a></div>;
         }
         return icon;
 
@@ -308,10 +308,10 @@ class JobContainer extends React.Component {
             var url = this.getQAReport();
             let tooltipText = "Overall quality: " + quality.toUpperCase();
             var classQuality = (quality === "poor") ? 'yellow' : 'red';
-            icon = <a className={"ui icon basic button qr-tooltip " + classQuality}
+            icon = <div className="qreport-icon-container activity-icon-single"><a className={"ui icon basic button qr-tooltip " + classQuality}
                       data-html={tooltipText} href={url} target="_blank" data-position="top center">
                     <i className="icon-qr-matecat icon"/>
-                </a>
+            </a></div>
             ;
         }
         return icon;
@@ -323,15 +323,68 @@ class JobContainer extends React.Component {
         if ( warnings > 0 ) {
             var url = this.getTranslateUrl() + '?action=warnings';
             let tooltipText = "Click to see issues";
-            icon = <a className="ui icon basic button warning-tooltip"
-                      data-html={tooltipText} href={url} target="_blank" data-position="top center">
-                    <i className="icon-notice icon"/>
-                </a>;
+            icon = <div className="warnings-icon-container activity-icon-single">
+                <a className="ui icon basic button warning-tooltip"
+                   data-html={tooltipText} href={url} target="_blank" data-position="top center">
+                <i className="icon-notice icon"/>
+            </a></div>;
         }
         return icon;
     }
 
-    getWarningsGroup() {}
+
+    getWarningsMenuItem() {
+        var icon = '';
+        var warnings = this.props.job.get('warnings_count');
+        if ( warnings > 0 ) {
+            var url = this.getTranslateUrl() + '?action=warnings';
+            let tooltipText = "Click to see issues";
+            icon =<a className="ui icon basic button "
+                      href={url} target="_blank" data-position="top center">
+                    <i className="icon-notice icon"/>
+                    {tooltipText}
+            </a>;
+        }
+        return icon;
+    }
+
+    getCommentsMenuItem() {
+        let icon = '';
+        let openThreads = this.props.job.get("open_threads_count");
+        if (openThreads > 0) {
+            let tooltipText = "";
+            if (this.props.job.get("open_threads_count") === 1) {
+                tooltipText = 'There is an open thread';
+            } else {
+                tooltipText = 'There are <span style="font-weight: bold">' + openThreads + '</span> open threads';
+            }
+            var translatedUrl = this.getTranslateUrl() + '?action=openComments';
+            icon = <a className=" ui icon basic button "
+                      href={translatedUrl} target="_blank">
+                <i className="icon-uniE96B icon"/>
+                {tooltipText}
+            </a>;
+        }
+        return icon;
+
+    }
+
+    getQRMenuItem() {
+        var icon = '';
+        var quality = this.props.job.get('quality_overall');
+        if ( quality === "poor" || quality === "fail" ) {
+            var url = this.getQAReport();
+            let tooltipText = "Overall quality: " + quality.toUpperCase();
+            var classQuality = (quality === "poor") ? 'yellow' : 'red';
+            icon = <a className={"ui icon basic button " + classQuality}
+                      href={url} target="_blank" data-position="top center">
+                <i className="icon-qr-matecat icon"/>
+                {tooltipText}
+            </a>
+            ;
+        }
+        return icon;
+    }
 
     getSplitOrMergeButton(splitUrl, mergeUrl) {
 
@@ -407,13 +460,61 @@ class JobContainer extends React.Component {
         return outsourceDelivery;
     }
 
+    getWarningsInfo() {
+        let n = {
+            number: 0,
+            icon: ''
+        };
+        let quality = this.props.job.get('quality_overall');
+        if (quality && quality === "poor" || quality === "fail") {
+            n.number++;
+            n.icon = this.getQRIcon();
+        }
+        if (this.props.job.get("open_threads_count") && this.props.job.get("open_threads_count") > 0) {
+            n.number++;
+            n.icon =  this.getCommentsIcon();
+        }
+        if (this.props.job.get('warnings_count') && this.props.job.get('warnings_count') > 0) {
+            n.number++;
+            n.icon = this.getWarningsIcon();
+        }
+        return n;
+    }
+
+    getWarningsGroup() {
+        let icons = this.getWarningsInfo();
+        if (icons.number > 1 ) {
+            let QRIcon = this.getQRMenuItem();
+            let commentsIcon = this.getCommentsMenuItem();
+            let warningsIcon = this.getWarningsMenuItem();
+
+            return <div className="job-activity-icons">
+                <div className="ui icon top right pointing dropdown group-activity-icon basic button"
+                     ref={(button) => this.iconsButton = button}>
+                    <i className="icon-alarm icon"/>
+                    <div className="menu group-activity-icons transition hidden">
+                        <div className="item">
+                            {QRIcon}
+                        </div>
+                        <div className="item">
+                            {warningsIcon}
+                        </div>
+                        <div className="item">
+                            {commentsIcon}
+                        </div>
+                    </div>
+                </div>
+            </div>;
+        } else {
+            return <div className="job-activity-icons">{icons.icon}</div>;
+        }
+    }
+
     componentDidMount () {
         $(this.dropdown).dropdown({
             belowOrigin: true
         });
-        $('.button.tm-keys, .button.comments-tooltip, .warning-tooltip, .qr-tooltip, .translate-tooltip').popup({
-            preserve:true
-        });
+        $('.button.tm-keys, .button.comments-tooltip, .warning-tooltip, .qr-tooltip, .translate-tooltip').popup();
         $(this.iconsButton).dropdown();
         ProjectsStore.addListener(ManageConstants.ENABLE_DOWNLOAD_BUTTON, this.enableDownloadMenu.bind(this));
         ProjectsStore.addListener(ManageConstants.DISABLE_DOWNLOAD_BUTTON, this.disableDownloadMenu.bind(this));
@@ -435,13 +536,11 @@ class JobContainer extends React.Component {
         let splitUrl = this.getSplitUrl();
         let mergeUrl = this.getMergeUrl();
         let splitMergeButton = this.getSplitOrMergeButton(splitUrl, mergeUrl);
+        let warningIcons = this.getWarningsGroup();
         // let modifyDate = this.getModifyDate();
         let jobMenu = this.getJobMenu(splitUrl, mergeUrl);
         let tmIcon = this.getTMIcon();
-        let QRIcon = this.getQRIcon();
-        let commentsIcon = this.getCommentsIcon();
-        let warningsIcon = this.getWarningsIcon();
-        let getWarningsGroup = this.getWarningsGroup();
+
         let idJobLabel = ( !this.props.isChunk ) ? this.props.job.get('id') : this.props.job.get('id') + '-' + this.props.index;
 
         return <div className="chunk sixteen wide column shadow-1">
@@ -473,26 +572,7 @@ class JobContainer extends React.Component {
                             <div className="tm-job">
                                 {tmIcon}
                             </div>
-                            <div className="job-activity-icons">
-                                <div className="ui icon top right pointing dropdown group-activity-icon basic button" ref={(button) => this.iconsButton = button}>
-                                    <i className="icon-alarm icon" />
-                                    <div className="menu group-activity-icons transition hidden">
-                                        <div className="item">
-                                            {QRIcon}
-                                        </div>
-                                        <div className="item">
-                                            {warningsIcon}
-                                        </div>
-                                        <div className="item">
-                                            {commentsIcon}
-                                        </div>
-                                    </div>
-                                </div>
-                                {/*<div className="comments">
-                                    {commentsIcon}
-                                </div>*/}
-
-                            </div>
+                            {warningIcons}
                             <div className="job-payable">
                                 <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
                             </div>
