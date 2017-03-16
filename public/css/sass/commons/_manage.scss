@@ -70,6 +70,7 @@ body.manage {
             max-width: 650px;
             line-height: 17px;
             background-color: #d6d6d6;
+            color: #000000;
         }
         .project-header {
             background-color: #e0e1e2;
@@ -147,14 +148,27 @@ body.manage {
                     &.project-menu.ui.button {
                         box-shadow: none;
                     }
+                    &.project-personal-assignee {
+                        margin-right: 8px;
+                        background-color: #e0e1e2 !important;
+                        vertical-align: top;
+                        border: 1px solid #bdbdbd;
+                        cursor: default;
+                        .text {
+                            border-radius: 15px;
+                            padding: 2px 14px 2px 2px;
+                            color: black;
+                            transition: 0.3s ease;
+                            .ui.circular.label {
+                                background-color: #cecece;
+                                color: #888888;
+                            }
+                        }
+                    }
                     &.project-assignee {
                         margin-right: 8px;
                         background-color: #59467a !important;
                         vertical-align: top;
-                        &:hover {
-                            background-color: #67528c !important;
-                            padding-right: 5px;
-                        }
                         .text {
                             border-radius: 15px;
                             padding: 3px 15px 3px 3px;
@@ -175,9 +189,12 @@ body.manage {
                             display: none;
                         }
                         &:hover .text {
+                            background-color: #67528c !important;
+                            padding-right: 5px;
                             padding-right: 30px;
                         }
                     }
+
                     &.project-not-assigned {
                         border: 1px solid #868686;
                         padding: 0px 15px 0px 3px;
@@ -279,8 +296,8 @@ body.manage {
                                 margin-right: 10px;
                                 .source-box {
                                     float: left;
-                                    max-width: 80px;
-                                    min-width: 80px;
+                                    max-width: 70px;
+                                    min-width: 70px;
                                     white-space: nowrap;
                                     overflow: hidden;
                                     text-overflow: ellipsis;
@@ -292,7 +309,7 @@ body.manage {
                                 }
                                 .target-box {
                                     float: left;
-                                    width: 80px;
+                                    width: 70px;
                                     white-space: nowrap;
                                     overflow: hidden;
                                     text-overflow: ellipsis;
@@ -303,7 +320,7 @@ body.manage {
                             .job-id {
                                 padding: 5px 0 !important;
                                 float: left;
-                                min-width: 80px;
+                                min-width: 70px;
                             }
                             .progress-bar {
 
