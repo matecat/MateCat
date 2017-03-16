@@ -181,8 +181,9 @@ class outsourceToController extends ajaxController {
         $this->result[ 'code' ]       = 1;
         $this->result[ 'data' ]       = array_values( $client_output );
         $this->result[ 'return_url' ] = array(
-                'url_ok' => $outsourceTo->getOutsourceLoginUrlOk(),
-                'url_ko' => $outsourceTo->getOutsourceLoginUrlKo(),
+                'url_ok'          => $outsourceTo->getOutsourceLoginUrlOk(),
+                'url_ko'          => $outsourceTo->getOutsourceLoginUrlKo(),
+                'confirm_urls'    => $outsourceTo->getOutsourceConfirm(),
         );
 
     }
