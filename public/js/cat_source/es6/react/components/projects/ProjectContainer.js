@@ -110,6 +110,10 @@ class ProjectContainer extends React.Component {
         this.changeProjectName(event);
     }
 
+    openChangeTeamModal() {
+        ManageActions.openChangeTeamModal(this.props.project)
+    }
+
     changeProjectName(event) {
         if (event.target.value !== this.props.project.get('name') && event.target.value !== '') {
             ManageActions.changeProjectName(this.props.team, this.props.project, event.target.value);
@@ -130,6 +134,10 @@ class ProjectContainer extends React.Component {
     getProjectMenu(activityLogUrl) {
         let menuHtml = <div className="menu">
             <div className="scrolling menu">
+                <a className="item" onClick={this.openChangeTeamModal.bind(this)}>
+                    <i className="icon-forward icon"/>Move project
+                </a>
+
                 <a className="item" href={activityLogUrl} target="_blank"><i className="icon-download-logs icon"/>Activity Log</a>
 
                 <a className="item" onClick={this.archiveProject.bind(this)}><i className="icon-drawer icon"/>Archive project</a>
@@ -144,7 +152,7 @@ class ProjectContainer extends React.Component {
 
                     <a className="item" onClick={this.activateProject.bind(this)}><i className="icon-drawer unarchive-project icon"/>Unarchive project</a>
 
-                    <a className="item" onClick={this.removeProject.bind(this)}><i className="icon-trash-o"/>Cancel project</a>
+                    <a className="item" onClick={this.removeProject.bind(this)}><i className="icon-trash-o icon"/>Cancel project</a>
                 </div>
                         </div>;
         } else if ( this.props.project.get('has_cancelled') ) {

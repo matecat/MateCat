@@ -7,32 +7,62 @@ $( document ).ready( function()
 
         $( "#changeTimezone").addClass( "hide" );
         $('#forceDeliveryContainer').removeClass('hide');
-        $( "#whenTime option[value='" + hours + "']" ).attr( "selected", "selected" );
-        $( "#whenTimezone option[value='" + $( "#changeTimezone").val() + "']" ).attr( "selected", "selected" );
+        $( ".whenTime option[value='" + hours + "']" ).attr( "selected", "selected" );
+        $( ".whenTimezone option[value='" + $( "#changeTimezone").val() + "']" ).attr( "selected", "selected" );
     });
 
+    $('.out-date').click(function () {
+        var hours = new Date().getHours() + 1;
+        hours += ( hours % 2 == 0 ) ? 1 : 0;
+        hours = ( hours > 21 || hours < 7 ) ? 7 : hours;
+
+        $( ".whenTime option[value='" + hours + "']" ).attr( "selected", "selected" );
+        $( ".whenTimezone option[value='" + $( "#out-changeTimezone").val() + "']" ).attr( "selected", "selected" );
+        $('#out-datepicker').removeClass('hide');
+    });
+
+    $('.outsource-select-date').click(function () {
+        $('#out-datepicker').addClass('hide');
+        setOutsourceDate(getChosenOutsourceDate());
+    });
+
+    // $('#outsource-assign-date, #outsource-assign-timezone').on('change', function () {
+    //     setOutsourceDate(getChosenOutsourceDate());
+    // });
+
+    $('.outsource-cancel-date').click(function () {
+        $('#out-datepicker').addClass('hide');
+    });
     $('.modal.outsource .x-popup2').click(function () {
         $('#forceDeliveryContainer').addClass('hide');
+        $('#out-datepicker').addClass('hide');
     });
 
-    $('.modal.outsource .btn-cancel').click(function() {
+    $('.modal.outsource .cancelForceDelivery').click(function() {
         prepareAndSubmitQuote( 0, true );
     });
 
-    $( ".popup").on( "change", "#whenTime, #whenTimezone", function() {
+    $( ".popup").on( "change", "#forceDeliveryContainer #whenTime, #forceDeliveryContainer #whenTimezone", function() {
         prepareAndSubmitQuote( getChosenDeliveryDate(), false );
     });
 
 
-    $( ".popup").on( "click", ".datepickerDays a, .datepickerDays span", function() {
+    $( ".popup").on( "click", "#forceDeliveryContainer .datepickerDays a, #forceDeliveryContainer .datepickerDays span", function() {
         prepareAndSubmitQuote( getChosenDeliveryDate(), false );
     });
+
+    // $( ".popup").on( "click", "#out-datepicker .datepickerDays a, #forceDeliveryContainer .datepickerDays span", function() {
+    //     setOutsourceDate(getChosenOutsourceDate());
+    // });
 
 
     $( ".forceDeliveryButtonOk").click( function() {
         $('#forceDeliveryContainer').addClass('hide');
+        $('#out-datepicker').addClass('hide');
         $( "#changeTimezone").removeClass( "hide" );
     });
+
+
 
     
 	var initLayout = function() {
@@ -50,7 +80,7 @@ $( document ).ready( function()
 	    var formattedNow = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDate();
 	    var formattedTomorrow = tomorrow.getFullYear() + "-" + (tomorrow.getMonth() + 1) + "-" + tomorrow.getDate();
 
-	    $('#date2').DatePicker({
+	    $('#date2, #date-trans').DatePicker({
 	        flat: true,
 	        date: formattedNow,
 	        current: formattedNow,
@@ -81,8 +111,6 @@ $( document ).ready( function()
 	EYE.register(initLayout, 'init');
 });
 
-
-
 function getChosenDeliveryDate() {
     var day 	 = $( "#date2" ).DatePickerGetDate().getDate();
     var month 	 = $( "#date2" ).DatePickerGetDate().getMonth();
@@ -93,6 +121,16 @@ function getChosenDeliveryDate() {
     return new Date ( year, month, day, time, 00 ).getTime() - ( parseFloat( timezone).toFixed( 1 ) * 3600000 ) - ( new Date().getTimezoneOffset() * 60000 );
 }
 
+function getChosenOutsourceDate() {
+    var $elem =     $( "#date-trans" );
+    var day 	 = $elem.DatePickerGetDate().getDate();
+    var month 	 = $elem.DatePickerGetDate().getMonth();
+    var year 	 = $elem.DatePickerGetDate().getFullYear();
+    var time 	 = $( "#outsource-assign-date" ).val();
+    // var timezone = $( "#outsource-assign-timezone" ).val();
+
+    return new Date ( year, month, day, time, 00 ).getTime();
+}
 
 function checkChosenDeliveryDate( chosenDate ) {
     var baseDate = new Date();
@@ -106,14 +144,14 @@ function prepareAndSubmitQuote( chosenDate, hideNeedItFaster ) {
     if( chosenDate != 0 && !checkChosenDeliveryDate( chosenDate ) ) {
         $( "#delivery_manual_error").removeClass( "hide" );
         $('#delivery_before_time,#delivery_not_available').addClass('hide');
-        $('.forceDeliveryButtonOk').addClass('disabled')
+        $('.forceDeliveryButtonOk').addClass('disabled');
         return;
     }
 
     setCookie( "matecat_timezone", $( "#whenTimezone").val() );
 
     $( "#delivery_manual_error").addClass( "hide" );
-    $('.forceDeliveryButtonOk').removeClass('disabled')
+    $('.forceDeliveryButtonOk').removeClass('disabled');
     $( "#forceDeliveryChosenDate").text( chosenDate );
 
     if( hideNeedItFaster ) {
@@ -128,6 +166,26 @@ function prepareAndSubmitQuote( chosenDate, hideNeedItFaster ) {
         UI.restartOutsourceModal()
     }
     // $(".translate[href='" + fullTranslateUrl.substr(fullTranslateUrl.indexOf("/translate/")) + "']").trigger( "click" );
+}
+
+function setOutsourceDate(chosenDate) {
+    if( chosenDate != 0 && !checkChosenDeliveryDate( chosenDate ) ) {
+        $( "#outsource-delivery_error").removeClass( "hide" );
+        $('.outsource-select-date').addClass('disabled');
+        return;
+    }
+
+    setCookie( "matecat_timezone", $( "#outsource-assign-timezone").val() );
+
+    $( "#outsource-delivery_error").addClass( "hide" );
+    $('.outsource-select-date').removeClass('disabled');
+
+    setCookie( "matecat_timezone", $( "#outsource-assign-timezone").val( ));
+
+    var date = new Date(chosenDate);
+
+    $('.outsource .out-date').val( date.toString() );
+
 }
 
 
@@ -964,6 +1022,7 @@ function prepareAndSubmitQuote( chosenDate, hideNeedItFaster ) {
                 });
             },
             click = function(ev) {
+
                 var clickedOnAcceptableDay = false;
                 if ($(ev.target).is('span')) {
                     ev.target = ev.target.parentNode;
@@ -1093,6 +1152,11 @@ function prepareAndSubmitQuote( chosenDate, hideNeedItFaster ) {
                     if (changed) {
                         options.onChange.apply(this, prepareDate(options));
                     }
+                }
+
+                var parentClass = $(ev.currentTarget).closest('.modal-outsource-datepicker').attr('id');
+                if ( parentClass == 'out-datepicker' ) {
+                    return false;
                 }
 
                 if( !checkChosenDeliveryDate( getChosenDeliveryDate() ) ) {

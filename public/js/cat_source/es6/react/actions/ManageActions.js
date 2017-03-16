@@ -176,12 +176,38 @@ let ManageActions = {
 
     },
 
+    changeProjectTeam: function (teamId, project) {
+        UI.changeProjectTeam(teamId, project.toJS()).done(function () {
+            if (teamId !== UI.selectedTeam.id) {
+                setTimeout(function () {
+                    AppDispatcher.dispatch({
+                        actionType: ManageConstants.HIDE_PROJECT,
+                        project: project
+                    });
+                }, 500);
+                setTimeout(function () {
+                    AppDispatcher.dispatch({
+                        actionType: ManageConstants.REMOVE_PROJECT,
+                        project: project
+                    });
+                }, 1000);
+            }
+        });
+    },
+
 
     /********* Modals *********/
 
     openCreateTeamModal: function () {
         AppDispatcher.dispatch({
             actionType: ManageConstants.OPEN_CREATE_TEAM_MODAL,
+        });
+    },
+
+    openChangeTeamModal: function (project) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.OPEN_CHANGE_TEAM_MODAL,
+            project: project
         });
     },
 
