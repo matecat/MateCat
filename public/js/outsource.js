@@ -132,6 +132,12 @@ $.extend(UI, {
         $( ".title-target" ).text( job.targetTxt);
         $( ".title-words" ).text(job.stats.TOTAL_FORMATTED );
 
+        if (job.outsource) {
+            var dd = new Date( job.outsource.delivery );
+            $('.modal.outsource .out-date').val( $.format.date(dd, "d MMMM") + ' at ' + $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a") );
+        }
+
+
         if(config.enable_outsource) {
             resetOutsourcePopup( false );
             $('body').addClass('showingOutsourceTo');

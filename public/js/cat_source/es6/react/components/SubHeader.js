@@ -9,6 +9,9 @@ class SubHeader extends React.Component {
 
         this.teamChanged = false;
         this.dropDownUsersInitialized = false;
+        this.state= {
+            currentStatus : 'active'
+        };
     }
 
     componentDidUpdate() {
@@ -59,18 +62,18 @@ class SubHeader extends React.Component {
                 }
             });
         }
-        ManageActions.filterProjects(self.selectedUser, self.currentText, self.currentStatus);
+        ManageActions.filterProjects(self.selectedUser, self.currentText, self.state.currentStatus);
     }
 
     onChangeSearchInput(value) {
         this.currentText = value;
         let self = this;
-        ManageActions.filterProjects(self.selectedUser, self.currentText, self.currentStatus);
+        ManageActions.filterProjects(self.selectedUser, self.currentText, self.state.currentStatus);
     }
 
     filterByStatus(status) {
-        this.currentStatus = status;
-        ManageActions.filterProjects(this.selectedUser, this.currentText, this.currentStatus);
+        this.setState({currentStatus: status});
+        ManageActions.filterProjects(this.selectedUser, this.currentText, this.state.currentStatus);
     }
 
     getUserFilter() {
@@ -133,9 +136,23 @@ class SubHeader extends React.Component {
         return result;
     }
 
+    getCurrentStatusLabel() {
+        switch (this.state.currentStatus) {
+            case 'active':
+                return <div className="active">Active:</div>;
+                break;
+            case 'archived':
+                return <div className="archived">Archived:</div>;
+                break;
+            case 'cancelled':
+                return <div className="cancelled">Cancelled:</div>;
+                break;
+        }
+    }
+
     render () {
         let membersFilter = this.getUserFilter();
-
+        let currentStatusLabel = this.getCurrentStatusLabel();
         return (
             <section className="row sub-head">
                 <div className="ui container equal width grid">
@@ -143,7 +160,7 @@ class SubHeader extends React.Component {
                     <div className="column">
                         <div className="search-state-filters">
                             <div className="status">
-                                <div className="active">Active:</div>
+                                {currentStatusLabel}
                             </div>
                             <SearchInput
                                 onChange={this.onChangeSearchInput.bind(this)}/>
