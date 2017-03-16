@@ -7,7 +7,7 @@
   position: fixed;
   width: $notifications-width;
   padding: 0 10px 10px 10px;
-  z-index: 99999;
+  z-index: 99999999;
   @include box-sizing(border-box);
   height: auto;
 }

@@ -26,13 +26,11 @@ $( document ).ready( function()
         setOutsourceDate(getChosenOutsourceDate());
     });
 
-    // $('#outsource-assign-date, #outsource-assign-timezone').on('change', function () {
-    //     setOutsourceDate(getChosenOutsourceDate());
-    // });
-
     $('.outsource-cancel-date').click(function () {
         $('#out-datepicker').addClass('hide');
+        $('.outsource .out-date').val('');
     });
+
     $('.modal.outsource .x-popup2').click(function () {
         $('#forceDeliveryContainer').addClass('hide');
         $('#out-datepicker').addClass('hide');
@@ -46,26 +44,22 @@ $( document ).ready( function()
         prepareAndSubmitQuote( getChosenDeliveryDate(), false );
     });
 
-
     $( ".popup").on( "click", "#forceDeliveryContainer .datepickerDays a, #forceDeliveryContainer .datepickerDays span", function() {
         prepareAndSubmitQuote( getChosenDeliveryDate(), false );
     });
 
-    // $( ".popup").on( "click", "#out-datepicker .datepickerDays a, #forceDeliveryContainer .datepickerDays span", function() {
-    //     setOutsourceDate(getChosenOutsourceDate());
-    // });
-
+    $( ".popup").on( "change", "#out-datepicker #outsource-assign-date, #out-datepicker #outsource-assign-timezone", function() {
+        setOutsourceDate(getChosenOutsourceDate());
+    });
 
     $( ".forceDeliveryButtonOk").click( function() {
         $('#forceDeliveryContainer').addClass('hide');
         $('#out-datepicker').addClass('hide');
         $( "#changeTimezone").removeClass( "hide" );
     });
-
-
-
     
 	var initLayout = function() {
+	    setTimezoneSelect();
 	    var now = new Date();
 	    now.setHours(0, 0, 0, 0);
 
@@ -111,6 +105,16 @@ $( document ).ready( function()
 	EYE.register(initLayout, 'init');
 });
 
+
+function setTimezoneSelect() {
+    var timezoneToShow = readCookie( "matecat_timezone" );
+    if ( timezoneToShow == "" ) {
+        timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
+    }
+    $( "#changeTimezone option[value='" + timezoneToShow + "']").attr( "selected", "selected" );
+    $( "#outsource-assign-timezone option[value='" + timezoneToShow + "']").attr( "selected", "selected" );
+}
+
 function getChosenDeliveryDate() {
     var day 	 = $( "#date2" ).DatePickerGetDate().getDate();
     var month 	 = $( "#date2" ).DatePickerGetDate().getMonth();
@@ -126,10 +130,21 @@ function getChosenOutsourceDate() {
     var day 	 = $elem.DatePickerGetDate().getDate();
     var month 	 = $elem.DatePickerGetDate().getMonth();
     var year 	 = $elem.DatePickerGetDate().getFullYear();
-    var time 	 = $( "#outsource-assign-date" ).val();
-    // var timezone = $( "#outsource-assign-timezone" ).val();
+    var time 	 = $( "#outsource-assign-date").val();
+    var timezone = $( "#outsource-assign-timezone").val();
 
-    return new Date ( year, month, day, time, 00 ).getTime();
+    return new Date ( year, month, day, time, 00 ).getTime() - ( parseFloat( timezone).toFixed( 1 ) * 3600000 ) - ( new Date().getTimezoneOffset() * 60000 );
+}
+
+
+function getChosenOutsourceDateToString() {
+    var $elem =     $( "#date-trans" );
+    var day 	 = $elem.DatePickerGetDate().getDate();
+    var month 	 = $elem.DatePickerGetDate().getMonthName();
+    var time 	 = $( "#outsource-assign-date option:selected").html();
+    var timezone = $( "#outsource-assign-timezone option:selected").html();
+    var timeZoneString = timezone.substring(0, timezone.indexOf(")")+1);
+    return day + ' ' + month + ' at ' + time + ' ' + timeZoneString;
 }
 
 function checkChosenDeliveryDate( chosenDate ) {
@@ -138,7 +153,6 @@ function checkChosenDeliveryDate( chosenDate ) {
 
     return chosenDate > now;
 }
-
 
 function prepareAndSubmitQuote( chosenDate, hideNeedItFaster ) {
     if( chosenDate != 0 && !checkChosenDeliveryDate( chosenDate ) ) {
@@ -180,14 +194,11 @@ function setOutsourceDate(chosenDate) {
     $( "#outsource-delivery_error").addClass( "hide" );
     $('.outsource-select-date').removeClass('disabled');
 
-    setCookie( "matecat_timezone", $( "#outsource-assign-timezone").val( ));
 
-    var date = new Date(chosenDate);
-
-    $('.outsource .out-date').val( date.toString() );
+    $('.outsource .out-date').val( getChosenOutsourceDateToString() );
+    UI.checkSendToTranslatorButton();
 
 }
-
 
 (function() {
     var cache = {};
@@ -212,7 +223,6 @@ function setOutsourceDate(chosenDate) {
         return data ? fn(data) : fn;
     };
 })();
-
 
 (function($) {
     var EYE = window.EYE = function() {
@@ -1156,6 +1166,7 @@ function setOutsourceDate(chosenDate) {
 
                 var parentClass = $(ev.currentTarget).closest('.modal-outsource-datepicker').attr('id');
                 if ( parentClass == 'out-datepicker' ) {
+                    setOutsourceDate(getChosenOutsourceDate());
                     return false;
                 }
 

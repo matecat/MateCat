@@ -62,10 +62,19 @@
                         <div class="heading">
                             <h3>Share the following link with your translator</h3>
                         </div>
-                        <input class="out-email" type="email" placeholder="Insert email"/>
-                        <input class="out-date" type="datetime" placeholder="Date" readonly="readonly"/>
+
                         <input class="out-link" type="text" value="http://matecat.local/translate/prova/en-US-fr-FR/19153-bd17c71da22f#11143640" readonly="readonly"/>
                         <a  href='javascript:void(0)' onclick='trackClick( "translate" );' class="uploadbtn in-popup" target="_blank">Open</a>
+
+                        <!-- end date picker -->
+                    </div>
+                    <div id="open-translator" class="open-send-to-translator">Send job to translator</div>
+                    <div class="send-to-translator hide">
+                        <div class="send-to-translator-container ">
+                            <input class="out-email" type="email" placeholder="Insert email"/>
+                            <input class="out-date" type="datetime" placeholder="Date" readonly="readonly"/>
+                            <a  class="send-to-translator-btn in-popup disabled" target="_blank">Send</a>
+                        </div>
                         <!-- begin date picker -->
                         <div id="out-datepicker" class="modal-outsource-datepicker hide">
                             <div class="delivery-manual">
@@ -90,7 +99,7 @@
                                     <br /><br />
 
                                     <h3>Timezone</h3>
-                                        <select name="whenTimezone" class="whenTimezone" id="outsource-assign-timezone">
+                                    <select name="whenTimezone" class="whenTimezone" id="outsource-assign-timezone">
                                         <option value="-11">(GMT -11:00 ) Midway Islands, American Samoa</option>
                                         <option value="-10">(GMT -10:00 ) Hawaii, Tahiti, Cook Islands</option>
                                         <option value="-9">(GMT -9:00 ) Alaska</option>
@@ -124,7 +133,7 @@
                                     </select>
 
                                     <!--  design took fron validationEngine not the logic. Hardcoded -->
-                                    <div id="outsource-delivery_error" class="hide">
+                                    <div id="outsource-delivery_error" class="delivery_manual_error hide">
                                         <div>* Chosen delivery date is in the past</div>
                                     </div>
 
@@ -133,7 +142,6 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- end date picker -->
                     </div>
                     <div class="viewvendors">
                         <h3>Outsource to a translation company</h3>
@@ -351,13 +359,13 @@
                                     </select>
 
                                     <!--  design took fron validationEngine not the logic. Hardcoded -->
-                                    <div id="delivery_manual_error" class="hide">
+                                    <div id="delivery_manual_error" class="delivery_manual_error hide">
                                         <div>* Chosen delivery date is in the past</div>
                                     </div>
-                                    <div id="delivery_before_time" class="hide">
+                                    <div id="delivery_before_time" class="delivery_before_time hide">
                                         <div>We will deliver before the selected date</div>
                                     </div>
-                                    <div id="delivery_not_available" class="hide">
+                                    <div id="delivery_not_available" class="delivery_not_available hide">
                                         <div>Deadline too close, pick another one.</div>
                                     </div>
 

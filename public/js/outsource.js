@@ -33,7 +33,7 @@ $.extend(UI, {
             e.preventDefault();
             $( "body").removeClass( "showingOutsourceTo" );
             APP.closePopup();
-        })
+        });
 
         // close and reset the popup to its default state
         $('.modal.outsource .x-popup').click( function() {
@@ -104,12 +104,30 @@ $.extend(UI, {
             $('#continueForm input[name=quoteData]').attr('value', '' );
 		});
 
+        $('.modal.outsource input.out-email').on('keyup', function () {
+            _.debounce(function() {
+                UI.checkInputEmailInput();
+                UI.checkSendToTranslatorButton();
+            }, 300)();
+        });
+
+        $(".outsource.modal .send-to-translator-btn").on('click', function(e) {
+            e.preventDefault();
+            UI.sendJobToTranslator();
+        });
+
+        $("#open-translator").on('click', function () {
+            $("#open-translator").addClass('hide');
+            $('.send-to-translator').removeClass('hide');
+        });
+
         fetchChangeRates();
 	},
     startOutSourceModal: function (project, job, url) {
         this.currentOutsourceProject = project;
         this.currentOutsourceJob = job;
         this.currentOutsourceUrl = url;
+
         $( ".title-source" ).text( job.sourceTxt);
         $( ".title-target" ).text( job.targetTxt);
         $( ".title-words" ).text(job.stats.TOTAL_FORMATTED );
@@ -119,6 +137,8 @@ $.extend(UI, {
             $('body').addClass('showingOutsourceTo');
             $('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + url);
             $('.outsource.modal .uploadbtn:not(.showprices)').attr('href', url);
+            $("#open-translator").addClass('hide');
+            $('.send-to-translator').removeClass('hide');
             showOutsourcePopup( UI.showPopupDetails );
             renderQuoteFromManage(project.id, project.password, job.id, job.password);
             $('.outsource.modal').show();
@@ -133,9 +153,70 @@ $.extend(UI, {
         }
     },
 
-    getOutsourceQuoteFromManage: getOutsourceQuoteFromManage,
+    checkSendToTranslatorButton: function () {
+        var email = $('.modal.outsource input.out-email').val();
+        var date = $('.outsource .out-date').val();
 
+        if (email.length > 0 && date.length > 0 && APP.checkEmail(email)) {
+            $('.send-to-translator-btn').removeClass('disabled');
+            return true;
+        } else {
+            $('.send-to-translator-btn').addClass('disabled');
+            return false;
+        }
+    },
 
+    checkInputEmailInput: function () {
+        var email = $('.modal.outsource input.out-email').val();
+        if (!APP.checkEmail(email)) {
+            $('.modal.outsource input.out-email').addClass('error');
+        } else {
+            $('.modal.outsource input.out-email').removeClass('error');
+        }
+    },
+
+    sendJobToTranslator: function () {
+        if (UI.checkSendToTranslatorButton()) {
+            var email = $('.modal.outsource input.out-email').val();
+            var date = getChosenOutsourceDate();
+            UI.sendTranslatorRequest(email, date).done(function () {
+                let notification = {
+                    title: 'Job sent',
+                    text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                    type: 'success',
+                    position: 'tc',
+                    allowHtml: true,
+                    timer: 100000
+                };
+                let boxUndo = APP.addNotification(notification);
+            }).error(function () {
+                let notification = {
+                    title: 'Problems',
+                    text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                    type: 'error',
+                    position: 'tc',
+                    allowHtml: true,
+                    timer: 100000
+                };
+                let boxUndo = APP.addNotification(notification);
+            });
+        }
+    },
+
+    sendTranslatorRequest: function (email, date) {
+        let data = {
+            email: email,
+            date: date
+        };
+        return $.ajax({
+            async: true,
+            data: data,
+            type: "POST",
+            url : "/api/v2/jobs/" + UI.currentOutsourceJob.id +"/" + UI.currentOutsourceJob.password
+        });
+    },
+
+    getOutsourceQuoteFromManage: getOutsourceQuoteFromManage
 });
 
 
@@ -372,7 +453,6 @@ function renderLocalizationInfos( price, delivery, revision_price, revision_deli
         changeTimezone(revision_delivery, -1 * ( new Date().getTimezoneOffset() / 60 ), timezoneToShow, "span.revision_delivery");
     }
     updateTimezonesDescriptions( timezoneToShow );
-    $( "#changeTimezone option[value='" + timezoneToShow + "']").attr( "selected", "selected" );
 
 
     // if the customer has a currency in the cookie, then use it
@@ -542,7 +622,7 @@ function resetOutsourcePopup( resetHard ) {
     $('.tprice').removeClass('blink');
     $('.modal.outsource .continuebtn, .modal.outsource .contact_box,.paymentinfo,.outsource #changeTimezone,.outsource #changecurrency,.addrevision, .guaranteed_by .more, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2, .needitfaster, .showpricesloading').removeClass('hide');
     $('.ErrorMsg,.modal.outsource .tooltip, .outsource_notify, .delivery_before_time, .checkstatus, #delivery_not_available, .trustbox2, .translator_info_box, .hide_translator.more, .showprices').addClass('hide');
-
+    $('#out-datepicker').addClass('hide');
     if( resetHard ) {
         $('.modal.outsource .displayprice').empty();
         $('.modal.outsource .delivery .time').empty();
