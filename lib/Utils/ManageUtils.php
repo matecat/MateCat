@@ -80,6 +80,14 @@ class ManageUtils {
             $job[ 'mt_engine_name' ]        = $job_array[ 'name' ];
             $job[ 'id_tms' ]                = $job_array[ 'id_tms' ];
 
+            $job[ 'outsource' ] = null;
+            if( $job_array[ 'id_vendor' ] !== null ){
+                $job[ 'outsourced' ] = [];
+                $job[ 'outsourced' ][ 'id_vendor' ] = $job_array[ 'id_vendor' ];
+                $job[ 'outsourced' ][ 'vendor_name' ] = $job_array[ 'vendor_name' ];
+                $job[ 'outsourced' ][ 'outsource_date' ] = $job_array[ 'outsource_date' ];
+                $job[ 'outsourced' ][ 'delivery_date' ] = $job_array[ 'delivery_date' ];
+            }
 
             $job[ 'open_threads_count' ] = 0 ;
             foreach( $openThreads as $openThread ) {
