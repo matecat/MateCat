@@ -232,15 +232,11 @@ class ProjectManager {
      *
      */
     private function createProjectRecord() {
-<<<<<<< HEAD
-        $this->projectStructure[ 'ppassword' ]  = $this->_generatePassword();
 
         if ( $this->team ) {
             $this->projectStructure[ 'id_team' ] = $this->team->id ;
         }
 
-=======
->>>>>>> c527448... Completed UI Fixes
         $this->project = insertProject( $this->projectStructure );
         $this->projectStructure[ 'id_project' ] = $this->project->id; //redundant
         $this->projectStructure[ 'ppassword' ]  = $this->project->password; //redundant
