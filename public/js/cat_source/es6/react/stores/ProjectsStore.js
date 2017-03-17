@@ -90,6 +90,15 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
         this.projects = this.projects.setIn([indexProject, 'id_assignee'], uid);
     },
 
+    changeProjectTeam: function (project, teamId) {
+
+        var projectOld = this.projects.find(function (prj) {
+            return prj.get('id') == project.get('id');
+        });
+        var indexProject = this.projects.indexOf(projectOld);
+        this.projects = this.projects.setIn([indexProject, 'id_team'], parseInt(teamId));
+    },
+
     updateJobOusource: function (project, job, outsource) {
         let projectOld = this.projects.find(function (prj) {
             return prj.get('id') == project.get('id');
@@ -174,6 +183,10 @@ AppDispatcher.register(function(action) {
             break;
         case ManageConstants.CHANGE_PROJECT_ASSIGNEE:
             ProjectsStore.changeProjectAssignee(action.project, action.user);
+            ProjectsStore.emitChange(ManageConstants.UPDATE_PROJECTS, ProjectsStore.projects);
+            break;
+        case ManageConstants.CHANGE_PROJECT_TEAM:
+            ProjectsStore.changeProjectTeam(action.project, action.teamId);
             ProjectsStore.emitChange(ManageConstants.UPDATE_PROJECTS, ProjectsStore.projects);
             break;
         case ManageConstants.HIDE_PROJECT:

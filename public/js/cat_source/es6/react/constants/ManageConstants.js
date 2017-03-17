@@ -29,6 +29,7 @@ module.exports = keyMirror({
     ADD_TEAM: null,
     FILTER_PROJECTS: null,
     CHANGE_PROJECT_ASSIGNEE: null,
+    CHANGE_PROJECT_TEAM: null,
 
 
     ALL_MEMBERS_FILTER : null,

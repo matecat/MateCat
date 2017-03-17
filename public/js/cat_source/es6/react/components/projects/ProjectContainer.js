@@ -55,7 +55,7 @@ class ProjectContainer extends React.Component {
             }
         }
         if (this.dropdownTeams) {
-            $(this.dropdownTeams).dropdown('set selected', this.props.team.get('id'));
+            $(this.dropdownTeams).dropdown('set selected', this.props.project.get('id_team'));
             $(this.dropdownTeams).dropdown({
                 fullTextSearch: 'exact',
                 onChange: function(value, text, $selectedItem) {
@@ -101,7 +101,7 @@ class ProjectContainer extends React.Component {
     }
 
     changeTeam(value) {
-        if ( this.props.team.get('id') !==  parseInt(value) ) {
+        if ( this.props.project.get('id_team') !==  parseInt(value) ) {
             ManageActions.changeProjectTeam(value,  this.props.project);
         }
     }
@@ -303,63 +303,75 @@ class ProjectContainer extends React.Component {
         ManageActions.openModifyTeamModal(this.props.team.toJS());
     }
 
-    getDropDownUsers() {
-       let result = '';
-       var self = this;
-       if (this.props.team.get("type") == 'personal') {
-            return <div className="ui dropdown top right pointing project-not-assigned">
-                        <span className="text">
-                            <div className="ui not-assigned label">
-                                <i className="icon-user22"/>
-                            </div>
-                            {APP.USER.STORE.user.first_name + " " + APP.USER.STORE.user.last_name}
-                        </span>
-            </div>;
-       } else if (this.props.team.get('members')) {
-           let members = this.props.team.get('members').map(function(member, i) {
-               let user = member.get('user');
-               return <div className="item " data-value={user.get('uid')}
-                           key={'user' + user.get('uid')}>
-                   <div className="ui circular label">{APP.getUserShortName(user.toJS())}</div>
-                   {user.get('first_name') + " " + user.get('last_name')}
-               </div>
-           });
+    createUserDropDown(users) {
+        var self = this;
+        let members = users.map(function(member, i) {
+            let user = member.get('user');
+            return <div className="item " data-value={user.get('uid')}
+                        key={'user' + user.get('uid')}>
+                <div className="ui circular label">{APP.getUserShortName(user.toJS())}</div>
+                {user.get('first_name') + " " + user.get('last_name')}
+            </div>
+        });
 
-           result = <div className={"ui dropdown top right pointing"}
-                         ref={(dropdownUsers) => this.dropdownUsers = dropdownUsers}>
+        return <div className={"ui dropdown top right pointing"}
+                      ref={(dropdownUsers) => this.dropdownUsers = dropdownUsers}>
                         <span className="text">
                             <div className="ui not-assigned label">
                                 <i className="icon-user22"/>
                             </div>
                             Not assigned
-
                         </span>
-                       <div className="ui cancel label"
-                            onClick={self.changeUser.bind(self, '-1')}>
-                           <i className="icon-cancel3"/>
-                       </div>
+            <div className="ui cancel label"
+                 onClick={self.changeUser.bind(self, '-1')}>
+                <i className="icon-cancel3"/>
+            </div>
 
-                       <div className="menu">
-                           <div className="header"
-                           onClick={this.openAddMember.bind(this)}>
-                               <a href="#">New Member <i className="icon-plus3 icon right"/></a>
-                           </div>
-                           <div className="divider"></div>
-                           <div className="ui icon search input">
-                               <i className="icon-search icon"/>
-                               <input type="text" name="UserName" placeholder="Name or email." />
-                           </div>
-                           {/*<div className="scrolling menu">*/}
-                               {members}
-                               <div className="item cancel-item" data-value="-1">
-                                   <div className="ui not-assigned label">
-                                       <i className="icon-user22"/>
-                                   </div>
-                                   Not assigned
-                               </div>
-                           {/*</div>*/}
-                       </div>
-                   </div>;
+            <div className="menu">
+                <div className="header"
+                     onClick={this.openAddMember.bind(this)}>
+                    <a href="#">New Member <i className="icon-plus3 icon right"/></a>
+                </div>
+                <div className="divider"></div>
+                <div className="ui icon search input">
+                    <i className="icon-search icon"/>
+                    <input type="text" name="UserName" placeholder="Name or email." />
+                </div>
+                {/*<div className="scrolling menu">*/}
+                {members}
+                <div className="item cancel-item" data-value="-1">
+                    <div className="ui not-assigned label">
+                        <i className="icon-user22"/>
+                    </div>
+                    Not assigned
+                </div>
+                {/*</div>*/}
+            </div>
+        </div>;
+    }
+
+    getDropDownUsers() {
+       let result = '';
+       var self = this;
+       if (this.props.team.get("type") == 'personal') {
+           if (this.props.project.get('id_team') == this.props.team.get("id")) {
+               result = <div className="ui dropdown project-personal-assignee">
+               <span className="text">
+                    <div className="ui circular label">{APP.getUserShortName(APP.USER.STORE.user)}</div>
+                   {APP.USER.STORE.user.first_name + " " + APP.USER.STORE.user.last_name}
+                </span>
+               </div>;
+           } else if (this.props.teams){
+               let team = this.props.teams.find(function (team) {
+                   return team.get('id') == self.props.project.get('id_team');
+               });
+               if (team.get('members')) {
+                   result = this.createUserDropDown(team.get('members'));
+               }
+           }
+
+       } else if (this.props.team.get('members')) {
+           result = this.createUserDropDown(this.props.team.get('members'))
        }
        return result;
     }
@@ -367,11 +379,11 @@ class ProjectContainer extends React.Component {
     getDropDownTeams() {
         let result = '';
         var self = this;
-        if (this.props.team.get("type") == 'personal') {
+        if (this.props.team.get("type") == 'personal' && this.props.teams) {
             let teams = this.props.teams.map(function(team, i) {
-                return <div className="item " data-value={team.id}
-                            key={'team-dropdown-item' + team.id}>
-                    {team.name}
+                return <div className="item " data-value={team.get('id')}
+                            key={'team-dropdown-item' + team.get('id')}>
+                    {team.get('name')}
                 </div>
             });
 
@@ -429,7 +441,8 @@ class ProjectContainer extends React.Component {
         nextState.lastAction !==  this.state.lastAction ||
         nextProps.team !==  this.props.team ||
         nextState.inputSelected !==  this.state.inputSelected ||
-        nextState.inputNameChanged !==  this.state.inputNameChanged
+        nextState.inputNameChanged !==  this.state.inputNameChanged ||
+            nextProps.teams !== this.props.teams
         )
     }
 

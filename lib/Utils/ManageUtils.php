@@ -82,11 +82,11 @@ class ManageUtils {
 
             $job[ 'outsource' ] = null;
             if( $job_array[ 'id_vendor' ] !== null ){
-                $job[ 'outsourced' ] = [];
-                $job[ 'outsourced' ][ 'id_vendor' ] = $job_array[ 'id_vendor' ];
-                $job[ 'outsourced' ][ 'vendor_name' ] = $job_array[ 'vendor_name' ];
-                $job[ 'outsourced' ][ 'outsource_date' ] = $job_array[ 'outsource_date' ];
-                $job[ 'outsourced' ][ 'delivery_date' ] = $job_array[ 'delivery_date' ];
+                $job[ 'outsource' ] = [];
+                $job[ 'outsource' ][ 'id_vendor' ] = $job_array[ 'id_vendor' ];
+                $job[ 'outsource' ][ 'vendor_name' ] = $job_array[ 'vendor_name' ];
+                $job[ 'outsource' ][ 'outsource_date' ] = $job_array[ 'outsource_date' ];
+                $job[ 'outsource' ][ 'delivery_date' ] = $job_array[ 'delivery_date' ];
             }
 
             $job[ 'open_threads_count' ] = 0 ;
