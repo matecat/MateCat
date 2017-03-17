@@ -145,7 +145,8 @@ class ProjectsContainer extends React.Component {
                 lastActivityFn={this.props.getLastActivity}
                 changeJobPasswordFn={this.props.changeJobPasswordFn}
                 downloadTranslationFn={this.props.downloadTranslationFn}
-                team={this.state.team}/>
+                team={this.state.team}
+                teams={this.props.teams}/>
         ));
 
         let spinner = '';

@@ -178,7 +178,7 @@ let ManageActions = {
 
     changeProjectTeam: function (teamId, project) {
         UI.changeProjectTeam(teamId, project.toJS()).done(function () {
-            if (teamId !== UI.selectedTeam.id) {
+            if (teamId !== UI.selectedTeam.id && UI.selectedTeam.type !== 'personal') {
                 setTimeout(function () {
                     AppDispatcher.dispatch({
                         actionType: ManageConstants.HIDE_PROJECT,
@@ -191,6 +191,20 @@ let ManageActions = {
                         project: project
                     });
                 }, 1000);
+            }
+            if (UI.selectedTeam.type == 'personal') {
+                var team =  APP.USER.STORE.teams.filter(function (team) {
+                    return team.id == teamId
+                });
+                UI.getTeamMembers(teamId).then(function (data) {
+                    team.members = data.members;
+                    team.pending_invitations = data.pending_invitations;
+                    //TODO Crere evento per aggiornare la lista dei team che sono in ProjectsContainer
+                    // AppDispatcher.dispatch({
+                    //     actionType: ManageConstants.,
+                    //     team: team
+                    // });
+                });
             }
         });
     },
@@ -212,7 +226,7 @@ let ManageActions = {
     },
 
     openModifyTeamModal: function (team) {
-        UI.getTeamMembers(team).then(function (data) {
+        UI.getTeamMembers(team.id).then(function (data) {
             team.members = data.members;
             team.pending_invitations = data.pending_invitations;
             AppDispatcher.dispatch({

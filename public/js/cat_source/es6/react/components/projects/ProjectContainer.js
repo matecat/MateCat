@@ -54,6 +54,15 @@ class ProjectContainer extends React.Component {
                 });
             }
         }
+        if (this.dropdownTeams) {
+            $(this.dropdownTeams).dropdown('set selected', this.props.team.get('id'));
+            $(this.dropdownTeams).dropdown({
+                fullTextSearch: 'exact',
+                onChange: function(value, text, $selectedItem) {
+                    self.changeTeam(value);
+                }
+            });
+        }
 
 
     }
@@ -91,6 +100,11 @@ class ProjectContainer extends React.Component {
         }
     }
 
+    changeTeam(value) {
+        if ( this.props.team.get('id') !==  parseInt(value) ) {
+            ManageActions.changeProjectTeam(value,  this.props.project);
+        }
+    }
 
     onKeyUpEvent(event) {
         if(event.key == 'Enter'){
@@ -292,7 +306,16 @@ class ProjectContainer extends React.Component {
     getDropDownUsers() {
        let result = '';
        var self = this;
-       if (this.props.team.get('members') && this.props.team.get("type") !== 'personal') {
+       if (this.props.team.get("type") == 'personal') {
+            return <div className="ui dropdown top right pointing project-not-assigned">
+                        <span className="text">
+                            <div className="ui not-assigned label">
+                                <i className="icon-user22"/>
+                            </div>
+                            {APP.USER.STORE.user.first_name + " " + APP.USER.STORE.user.last_name}
+                        </span>
+            </div>;
+       } else if (this.props.team.get('members')) {
            let members = this.props.team.get('members').map(function(member, i) {
                let user = member.get('user');
                return <div className="item " data-value={user.get('uid')}
@@ -339,6 +362,33 @@ class ProjectContainer extends React.Component {
                    </div>;
        }
        return result;
+    }
+
+    getDropDownTeams() {
+        let result = '';
+        var self = this;
+        if (this.props.team.get("type") == 'personal') {
+            let teams = this.props.teams.map(function(team, i) {
+                return <div className="item " data-value={team.id}
+                            key={'team-dropdown-item' + team.id}>
+                    {team.name}
+                </div>
+            });
+
+            result = <div className={"ui dropdown top right pointing project-assignee shadow-1"}
+                          ref={(dropdownTeams) => this.dropdownTeams = dropdownTeams}>
+                        <span className="text">
+                            {/*<div className="ui not-assigned label">
+                                <i className="icon-user22"/>
+                            </div>
+                            Personal*/}
+                        </span>
+                <div className="menu">
+                    {teams}
+                </div>
+            </div>;
+        }
+        return result;
     }
 
     componentDidUpdate() {
@@ -429,6 +479,7 @@ class ProjectContainer extends React.Component {
 
         // Users dropdown
         let dropDownUsers = this.getDropDownUsers();
+        let dropDownTeams = this.getDropDownTeams();
         //Input Class
         let inputClass = (this.state.inputSelected) ? 'selected' : '';
         let inputIcon = (this.state.inputNameChanged) ? <i className="icon-checkmark green icon" /> : <i className="icon-pencil icon" />;
@@ -462,6 +513,7 @@ class ProjectContainer extends React.Component {
                                             {/*<a href={analyzeUrl} target="_blank">{payableWords} <span>payable words</span></a>*/}
                                         {/*</div>*/}
                                         <div className="project-activity-icon">
+                                            {dropDownTeams}
                                             {dropDownUsers}
                                             <div className="project-menu ui icon top right pointing dropdown circular button"
                                                     ref={(dropdown) => this.dropdown = dropdown}>

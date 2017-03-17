@@ -22,7 +22,7 @@ module.exports = keyMirror({
     RENDER_TEAMS: null,
     REMOVE_TEAM: null,
     UPDATE_TEAM: null,
-    UPDATE_TEAMs: null,
+    UPDATE_TEAMS: null,
     UPDATE_TEAM_NAME: null,
     UPDATE_TEAM_MEMBERS: null,
     CHOOSE_TEAM: null,

@@ -19,13 +19,13 @@ class Header extends React.Component {
             this.dropdownTeams.dropdown('set selected',  this.state.selectedTeamId);
         }
         TeamsStore.addListener(ManageConstants.RENDER_TEAMS, this.renderTeams);
-        TeamsStore.addListener(ManageConstants.UPDATE_TEAMs, this.updateTeams);
+        TeamsStore.addListener(ManageConstants.UPDATE_TEAMS, this.updateTeams);
         TeamsStore.addListener(ManageConstants.CHOOSE_TEAM, this.chooseTeams);
     }
 
     componentWillUnmount() {
         TeamsStore.removeListener(ManageConstants.RENDER_TEAMS, this.renderTeams);
-        TeamsStore.removeListener(ManageConstants.UPDATE_TEAMs, this.updateTeams);
+        TeamsStore.removeListener(ManageConstants.UPDATE_TEAMS, this.updateTeams);
         TeamsStore.removeListener(ManageConstants.CHOOSE_TEAM, this.chooseTeams);
     }
 

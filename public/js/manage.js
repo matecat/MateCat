@@ -108,6 +108,7 @@ UI = {
                 getLastActivity: this.getLastProjectActivityLogAction,
                 changeJobPasswordFn: this.changeJobPassword,
                 downloadTranslationFn : this.downloadTranslation,
+                teams: APP.USER.STORE.teams
             }), mountPoint);
         }
         ManageActions.renderProjects(projects, this.selectedTeam);
@@ -218,7 +219,7 @@ UI = {
 
     getTeamStructure: function (team) {
         let self = this;
-        return this.getTeamMembers(team).then(function (data) {
+        return this.getTeamMembers(team.id).then(function (data) {
             self.selectedTeam.members = data.members;
             self.selectedTeam.pending_invitations = data.pending_invitations;
         });
@@ -310,11 +311,11 @@ UI = {
 
     },
 
-    getTeamMembers: function (team) {
+    getTeamMembers: function (teamId) {
         return $.ajax({
             async: true,
             type: "get",
-            url : "/api/v2/teams/" + team.id + "/members"
+            url : "/api/v2/teams/" + teamId + "/members"
         });
     },
 
@@ -458,7 +459,7 @@ UI = {
         return $.ajax({
             data: JSON.stringify(data),
             type: "PUT",
-            url : "/api/v2/teams/" + this.selectedTeam.id + "/projects/" + project.id+ "/move"
+            url : "/api/v2/teams/" + this.selectedTeam.id + "/projects/" + project.id
         });
     },
 
