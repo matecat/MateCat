@@ -493,7 +493,7 @@ class ProjectContainer extends React.Component {
                             <div className="eight wide column">
                                 <div className="ui stackable grid">
                                     <div className="sixteen wide column">
-                                        <div className="ui ribbon label">
+                                        <div className="ui ribbon label shadow-1">
                                             <span className="project-name">
                                                 {this.state.projectName}
                                             </span>
@@ -509,9 +509,7 @@ class ProjectContainer extends React.Component {
                             <div className="eight wide right floated column pad-top-8">
                                 <div className="ui mobile reversed stackable grid right aligned">
                                     <div className=" computer twelve wide tablet right floated column">
-                                        {/*<div className="project-payable ui grid computer tablet only">*/}
-                                            {/*<a href={analyzeUrl} target="_blank">{payableWords} <span>payable words</span></a>*/}
-                                        {/*</div>*/}
+
                                         <div className="project-activity-icon">
                                             {dropDownTeams}
                                             {dropDownUsers}
@@ -521,15 +519,12 @@ class ProjectContainer extends React.Component {
                                                 {projectMenu}
                                             </div>
                                         </div>
+
                                     </div>
                                 </div>
                             </div>
 
-                            {/*<div className="sixteen wide column mobile only pad-top-0 pad-bottom-20 right aligned">*/}
-                                {/*<div className="project-payable">*/}
-                                    {/*<a href={analyzeUrl} target="_blank">{payableWords} <span>payable words</span></a>*/}
-                                {/*</div>*/}
-                            {/*</div>*/}
+
                         </div>
                         <div className="project-body ui grid">
                             <div className="jobs sixteen wide column pad-bottom-0">

@@ -39,6 +39,16 @@ abstract class OutsourceTo_AbstractProvider {
     protected $_outsource_login_url_ko = "";
 
     /**
+     * These are the url that the vendor system must call in order to confirm the outsource to MateCat
+     *
+     * Set them appropriately in the constructor.
+     *
+     * @var string
+     */
+    protected $_outsource_url_confirm = "";
+
+
+    /**
      * Class constructor
      *
      * Here will be defined the callback urls for success or failure on login system
@@ -207,6 +217,10 @@ abstract class OutsourceTo_AbstractProvider {
      */
     public function getOutsourceLoginUrlOk() {
         return $this->_outsource_login_url_ok;
+    }
+
+    public function getOutsourceConfirm(){
+        return $this->_outsource_url_confirm;
     }
 
 }
