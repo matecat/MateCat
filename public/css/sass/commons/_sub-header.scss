@@ -39,7 +39,7 @@
 	.users-filter {
 		display: flex;
 		margin-top: 10px;
-		justify-content: center;
+		float: right;
 		.input-field {
 			margin-left: 10px;
 			margin-top: -2px;
@@ -66,14 +66,15 @@
 		background-color: #5f5f5f;
 		.status {
 			.active, .archived, .cancelled {
-				border: 1px solid #8e8e8e;
+				/*border: 1px solid #8e8e8e;*/
 				margin: 6px;
 				padding: 2px 4px;
-				background: #4d4d4d;
+				/*background: #4d4d4d;*/
 				color: #bbbbbb;
 				position: relative;
 				left: 3px;
 				z-index: 1;
+				cursor: default;
 			}
 		}
 		.projects-state {
@@ -81,7 +82,7 @@
 			padding: 0 !important;
 			text-align: center;
 			line-height: 36px !important;
-			background: transparent;
+			background: #5f5f5f;
 		}
 		.input-field {
 			width: 100%;

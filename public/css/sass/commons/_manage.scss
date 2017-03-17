@@ -136,7 +136,7 @@ body.manage {
                 }
             }
             .project-activity-icon {
-                padding: 4px 12px 0px !important;
+                padding: 2px 12px 0px !important;
                 font-family: Calibri, Arial, Helvetica, sans-serif;
                 @media only screen and (max-width: 767px) {
                     padding: 0px !important;
@@ -156,7 +156,7 @@ body.manage {
                         cursor: default;
                         .text {
                             border-radius: 15px;
-                            padding: 2px 14px 2px 2px;
+                            padding: 2px 14px 2px 3px;
                             color: black;
                             transition: 0.3s ease;
                             .ui.circular.label {
@@ -370,12 +370,13 @@ body.manage {
                                 }
                             }
                             .translated-outsourced {
-                                float: left;
-                                padding-top: 5px;
+                                top: 3px;
                                 vertical-align: text-bottom;
+                                display: inline-block;
+                                position: relative;
                                 img.outsource-logo {
-                                    width: 115px;
-                                    margin: 0 5px;
+                                    width: 100px;
+                                    margin: 0 17px 0 0;
                                     vertical-align: middle;
                                 }
                             }
@@ -401,7 +402,7 @@ body.manage {
                             }
                             .open-outsourced {
                                 font-family: Calibri;
-                                padding: 6px 15px;
+                                padding: 6px 11px;
                                 vertical-align: top;
                                 font-size: 16px;
                                 border: 1px solid #797979;

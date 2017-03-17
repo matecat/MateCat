@@ -2560,7 +2560,7 @@ input::selection {
 
 .ui.blue.buttons .button:hover,
 .ui.blue.button:hover {
-  background-color: #1678c2;
+  background-color: #08b3de;
   color: #FFFFFF;
   text-shadow: none;
 }
@@ -2600,14 +2600,14 @@ input::selection {
 .ui.basic.blue.button:hover {
   background: transparent !important;
   box-shadow: 0px 0px 0px 1px #1678c2 inset !important;
-  color: #1678c2 !important;
+  color: #08b3de !important;
 }
 
 .ui.basic.blue.buttons .button:focus,
 .ui.basic.blue.button:focus {
   background: transparent !important;
   box-shadow: 0px 0px 0px 1px #0d71bb inset !important;
-  color: #1678c2 !important;
+  color: #08b3de !important;
 }
 
 .ui.basic.blue.buttons .active.button,
@@ -2722,7 +2722,7 @@ input::selection {
 
 .ui.green.buttons .button:hover,
 .ui.green.button:hover {
-  background-color: #16ab39;
+  background-color: #85b742;
   color: #FFFFFF;
   text-shadow: none;
 }
@@ -4184,7 +4184,7 @@ input::selection {
 
 .ui.primary.buttons .button:hover,
 .ui.primary.button:hover {
-  background-color: #1678c2;
+  background-color: #08b3de;
   color: #FFFFFF;
   text-shadow: none;
 }
@@ -4224,14 +4224,14 @@ input::selection {
 .ui.basic.primary.button:hover {
   background: transparent !important;
   box-shadow: 0px 0px 0px 1px #1678c2 inset !important;
-  color: #1678c2 !important;
+  color: #08b3de !important;
 }
 
 .ui.basic.primary.buttons .button:focus,
 .ui.basic.primary.button:focus {
   background: transparent !important;
   box-shadow: 0px 0px 0px 1px #0d71bb inset !important;
-  color: #1678c2 !important;
+  color: #08b3de !important;
 }
 
 .ui.basic.primary.buttons .active.button,
@@ -4358,7 +4358,7 @@ input::selection {
 
 .ui.positive.buttons .button:hover,
 .ui.positive.button:hover {
-  background-color: #16ab39;
+  background-color: #85b742;
   color: #FFFFFF;
   text-shadow: none;
 }
@@ -6820,7 +6820,7 @@ a.ui.inverted.teal.header:hover {
 }
 
 a.ui.blue.header:hover {
-  color: #1678c2 !important;
+  color: #08b3de !important;
 }
 
 .ui.blue.dividing.header {
@@ -12899,8 +12899,8 @@ a.ui.basic.teal.label:hover {
 
 .ui.blue.labels .label:hover,
 a.ui.blue.label:hover {
-  background-color: #1678c2 !important;
-  border-color: #1678c2 !important;
+  background-color: #08b3de !important;
+  border-color: #08b3de !important;
   color: #FFFFFF !important;
 }
 
@@ -12928,8 +12928,8 @@ a.ui.blue.label:hover {
 .ui.basic.blue.labels a.label:hover,
 a.ui.basic.blue.label:hover {
   background-color: #FFFFFF !important;
-  color: #1678c2 !important;
-  border-color: #1678c2 !important;
+  color: #08b3de !important;
+  border-color: #08b3de !important;
 }
 
 /*--- Violet ---*/
