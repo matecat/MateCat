@@ -2,6 +2,26 @@
 
 class Segments_SegmentDao extends DataAccess_AbstractDao {
 
+
+    /**
+     * @param Chunks_ChunkStruct $chunk
+     * @return mixed
+     */
+    function countByChunk( Chunks_ChunkStruct $chunk) {
+        $conn = $this->con->getConnection();
+        $query = "SELECT COUNT(1) FROM segments s
+            JOIN segment_translations st ON s.id = st.id_segment
+            JOIN jobs ON st.id_job = jobs.id
+            WHERE jobs.id = :id_job
+            AND jobs.password = :password
+            AND s.show_in_cattool ;
+            "  ;
+        $stmt = $conn->prepare( $query ) ;
+        $stmt->execute( array( 'id_job' => $chunk->id, 'password' => $chunk->password ) ) ;
+        $result = $stmt->fetch() ;
+        return (int) $result[ 0 ] ;
+    }
+
     /**
      * @param $id_job
      * @param $password

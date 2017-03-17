@@ -76,6 +76,22 @@ if ( QaCheckGlossary.enabled() )
 
         updateGlossaryUnusedMatches( segment, unusedMatches ) ;
     }
+    /*
+    * Can be called externaly (by LexiQA) to reload powerip
+    */
+    function redoBindEvents(container) {
+        $('.unusedGlossaryTerm', container).powerTip({
+            placement : 's'
+        });
+        $('.unusedGlossaryTerm', container).data({ 'powertipjq' : $('<div class="unusedGlossaryTip" style="padding: 4px;">Unused glossary term</div>') });
+    }
+    /*
+    * Can be called externaly (by LexiQA) to destroy powtip and prevent
+    * memory leak when HTML is replaced
+    */
+    function destroyPowertip(container) {
+        $.powerTip.destroy($('.blacklistItem', container));
+    }
 
     function bindEvents( container, unusedMatches ) {
 
@@ -100,7 +116,9 @@ if ( QaCheckGlossary.enabled() )
         removeUnusedGlossaryMarks( container ) ;
 
         var newHTML = container.html();
-
+        //clean up lexiqa highlighting - if enabled
+        if (LXQ.enabled())
+          newHTML = LXQ.cleanUpHighLighting(newHTML);
         $.each(unusedMatches, function( index ) {
             var value = this.raw_segment ;
             value = escapeRegExp( value );
@@ -130,7 +148,9 @@ if ( QaCheckGlossary.enabled() )
     }
 
     $.extend(QaCheckGlossary, {
-        removeUnusedGlossaryMarks : removeUnusedGlossaryMarks
+        removeUnusedGlossaryMarks : removeUnusedGlossaryMarks,
+        destroyPowertip: destroyPowertip,
+        redoBindEvents: redoBindEvents
     });
 
 })(jQuery, QaCheckGlossary);

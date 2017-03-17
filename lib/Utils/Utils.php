@@ -20,6 +20,7 @@ class Utils {
 
 
     /**
+     *
      *  TODO: this is a helper function to be used when transitioning to
      *  more decoupled implementations.
      */

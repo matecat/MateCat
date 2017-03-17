@@ -192,6 +192,30 @@ $.extend(UI, {
 					}, 300);
 					APP.removeParam('action');
 					break;
+				case 'openComments':
+                    if ( MBC.enabled() ) {
+                    	var interval = setInterval(function () {
+                            if ( $( '.mbc-history-balloon-outer' ) ) {
+                                $( '.mbc-history-balloon-outer' ).addClass( 'mbc-visible' );
+								clearInterval(interval);
+                            }
+                        }, 500);
+
+					}
+                    APP.removeParam('action');
+                    break;
+                case 'warnings':
+                    var interval = setInterval(function () {
+                        if ( $( '#notifbox.warningbox' ) ) {
+                            $("#point2seg").trigger('mousedown');
+                            clearInterval(interval);
+                        }
+                    }, 500);
+                    setTimeout(function () {
+
+                    });
+                    APP.removeParam('action');
+                    break;
 			}
 		}
 

@@ -176,9 +176,7 @@ $.extend(UI, {
 					return false;
 				}
 				$('#outer').empty();
-				UI.render({
-					firstLoad: false
-				});
+				UI.render();
 			}
 		});
 	},
@@ -547,7 +545,6 @@ $.extend(UI, {
 					// load new segments
 					if (!this.searchResultsSegments) {
 						this.pendingRender = {
-							firstLoad: false,
 							applySearch: true,
 							detectSegmentToScroll: true
 						};
@@ -555,7 +552,6 @@ $.extend(UI, {
 						var seg2scroll = this.nextUnloadedResultSegment();
 						$('#outer').empty();
 						this.render({
-							firstLoad: false,
 							applySearch: true,
 							segmentToScroll: seg2scroll
 						});
@@ -592,7 +588,6 @@ $.extend(UI, {
 				// load new segments
 				if (!this.searchResultsSegments) {
 					this.pendingRender = {
-						firstLoad: false,
 						applySearch: true,
 						detectSegmentToScroll: true
 					};
@@ -600,7 +595,6 @@ $.extend(UI, {
 					seg2scroll = this.nextUnloadedResultSegment();
 					$('#outer').empty();
 					this.render({
-						firstLoad: false,
 						applySearch: true,
 						segmentToScroll: seg2scroll
 					});

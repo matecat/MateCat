@@ -273,7 +273,6 @@ class FastAnalysis extends AbstractDaemon {
         }
 
         self::_TimeStampMsg( "Done." );
-
         self::_TimeStampMsg( "Pid $pid: " . count( $this->segments ) . " segments" );
         self::_TimeStampMsg( "Sending query to MyMemory analysis..." );
 

@@ -23,6 +23,6 @@ class ProjectCompletion extends BaseFeature {
         $chunk_completion_update_struct->id_job = $chunk->id ;
         $chunk_completion_update_struct->setTimestamp('last_translation_at', strtotime('now'));
 
-        $record = Chunks_ChunkCompletionUpdateDao::createOrUpdateFromStruct( $chunk_completion_update_struct );
+        Chunks_ChunkCompletionUpdateDao::createOrUpdateFromStruct( $chunk_completion_update_struct );
     }
 }

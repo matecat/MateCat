@@ -6,6 +6,9 @@ class ProjectValidator {
 
   private $api_record ;
   private $id_project ;
+    /**
+     * @var \Projects_ProjectStruct
+     */
   private $project ;
   private $feature ;
 
@@ -37,10 +40,7 @@ class ProjectValidator {
   }
 
   private function validateFeatureEnabled() {
-      \Log::doLog( var_export( $this->feature, true ));
-
-    return $this->feature == null ||
-      $this->project->getOwnerFeature( $this->feature )  ;
+    return $this->feature == null || $this->project->isFeatureEnabled( $this->feature ) ;
   }
 
   private function inProjectScope() {

@@ -32,6 +32,7 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
            AND st.id_segment
            BETWEEN :job_first_segment AND :job_last_segment
            AND st.status = :status
+           ORDER BY st.id_segment
            ";
 
         $conn = \Database::obtain()->getConnection();
@@ -206,19 +207,22 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
             $sqlSort = 'ASC';
         }
 
-        $sql = "SELECT st.id_segment AS id
-          FROM
-           segment_translations st JOIN jobs
-           ON jobs.id = st.id_job
-           AND jobs.password = :password
-           AND jobs.id = :id_job
-           AND st.id_segment
-           BETWEEN :job_first_segment AND :job_last_segment
-           JOIN segments s ON s.id = st.id_segment
-           WHERE 1
-           $where->sql
-           ORDER BY st.edit_distance $sqlSort
-           LIMIT $limit->limit ";
+        $sql = "
+          SELECT id FROM (
+              SELECT st.id_segment AS id
+              FROM
+               segment_translations st JOIN jobs
+               ON jobs.id = st.id_job
+               AND jobs.password = :password
+               AND jobs.id = :id_job
+               AND st.id_segment
+               BETWEEN :job_first_segment AND :job_last_segment
+               JOIN segments s ON s.id = st.id_segment
+               WHERE 1
+               $where->sql
+               ORDER BY st.edit_distance $sqlSort
+               LIMIT $limit->limit ) t1
+           ORDER BY t1.id ";
 
         return $sql ;
     }
@@ -232,7 +236,8 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
             $sqlSort = 'ASC';
         }
 
-        $sql = "SELECT st.id_segment AS id
+        $sql = "SELECT id FROM (
+          SELECT st.id_segment AS id
           FROM
            segment_translations st JOIN jobs
            ON jobs.id = st.id_job
@@ -244,7 +249,8 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
            WHERE 1
            $where->sql
            ORDER BY CHAR_LENGTH(s.segment) $sqlSort
-           LIMIT $limit->limit ";
+           LIMIT $limit->limit
+          ) t1 ORDER BY t1.id ";
 
         return $sql ;
     }

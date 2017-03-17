@@ -20,9 +20,9 @@ if ( SegmentFilter.enabled() )
         if ( nextFiltered && UI.Segment.findEl( nextFiltered ).length ) {
             original_gotoPreviousSegment.apply(undefined, arguments);
         } else if ( nextFiltered ) {
-            UI.render({ firstLoad: false, segmentToOpen: nextFiltered });
+            UI.render({ segmentToOpen: nextFiltered });
         } else {
-            original_gotoPreviousSegment.apply(undefined, arguments);
+            // in this case there is no previous, do nothing, remain on the current segment.
         }
     };
 
@@ -34,9 +34,9 @@ if ( SegmentFilter.enabled() )
         if ( nextFiltered && UI.Segment.findEl( nextFiltered ).length ) {
             original_gotoNextSegment.apply(undefined, arguments);
         } else if ( nextFiltered ) {
-            UI.render({ firstLoad: false, segmentToOpen: nextFiltered });
+            UI.render({ segmentToOpen: nextFiltered });
         } else {
-            original_gotoNextSegment.apply(undefined, arguments);
+            // in this case there is no next, do nothing, remain on the current segment.
         }
     };
 

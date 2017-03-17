@@ -176,7 +176,7 @@ class CatDecorator {
 
         LexiQADecorator::getInstance( $this->template )->checkJobHasLexiQAEnabled( $chunk_options_model )->decorateViewLexiQA();
 
-        $this->template->segmentation_rule = $chunk_options_model->project_metadata[ 'segmentation_rule' ];
+        $this->template->segmentation_rule = @$chunk_options_model->project_metadata[ 'segmentation_rule' ];
         $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages );
 
     }

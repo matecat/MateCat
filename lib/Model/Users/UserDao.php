@@ -203,7 +203,6 @@ class Users_UserDao extends DataAccess_AbstractDao {
         return $input;
     }
 
-
     /**
      * @param $array_result array
      *

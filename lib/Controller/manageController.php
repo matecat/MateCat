@@ -9,8 +9,7 @@ use ActivityLog\ActivityLogStruct;
  */
 class manageController extends viewController {
 
-	private $jid = "";
-	private $pid = "";
+	private $page = 1;
 	public $notAllCancelled = 0;
 
 	public function __construct() {
@@ -26,11 +25,10 @@ class manageController extends viewController {
 
         $postInput = filter_input_array(INPUT_GET, $filterArgs);
 
-        $this->page = $postInput[ 'page' ];
-
-        if($this->page == null || empty($this->page)){
-            $this->page = 1;
+        if( !empty( $postInput[ 'page' ] ) ){
+            $this->page = $postInput[ 'page' ];
         }
+
 		$this->lang_handler = Langs_Languages::getInstance();
 
 		if ($postInput[ 'filter' ] !== null && $postInput[ 'filter' ]) {
@@ -42,11 +40,10 @@ class manageController extends viewController {
 
 	public function doAction() {
 
-		list( $uid, $email ) = $this->getLoginUserParams();
 		$activity             = new ActivityLogStruct();
 		$activity->action     = ActivityLogStruct::ACCESS_MANAGE_PAGE;
 		$activity->ip         = Utils::getRealIpAddr();
-		$activity->uid        = $uid;
+		$activity->uid        = $this->logged_user->uid;
 		$activity->event_date = date( 'Y-m-d H:i:s' );
 		Activity::save( $activity );
 		

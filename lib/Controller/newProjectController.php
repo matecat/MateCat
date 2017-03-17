@@ -9,7 +9,6 @@ class newProjectController extends viewController {
 
     private $guid = '';
     private $mt_engines;
-    private $tms_engines;
     private $lang_handler;
 
     private $sourceLangArray = array();
@@ -19,6 +18,11 @@ class newProjectController extends viewController {
     private $project_name='';
 
     private $keyList = array();
+
+    /**
+     * @var FeatureSet
+     */
+    private $featureSet ;
 
     public function __construct() {
 
@@ -38,6 +42,8 @@ class newProjectController extends viewController {
         $this->subject_handler = Langs_LanguageDomains::getInstance();
 
         $this->subjectArray = $this->subject_handler->getEnabledDomains();
+
+        $this->featureSet = new FeatureSet() ;
     }
 
     public function doAction() {
@@ -60,7 +66,6 @@ class newProjectController extends viewController {
 
         $this->initUploadDir();
 
-        list( $uid, $cid ) = $this->getLoginUserParams();
         $engine = new EnginesModel_EngineDAO( Database::obtain() );
         $engineQuery         = new EnginesModel_EngineStruct();
         $engineQuery->type   = 'MT';
@@ -68,18 +73,19 @@ class newProjectController extends viewController {
         if ( @(bool)$_GET[ 'amt' ] == true ) {
             $engineQuery->uid    = 'all';
         } else {
-            $engineQuery->uid    = ( $uid == null ? -1 : $uid );
+            $engineQuery->uid    = ( $this->logged_user->uid == null ? -1 : $this->logged_user->uid );
         }
 
         $engineQuery->active = 1;
         $this->mt_engines = $engine->read( $engineQuery );
 
         if ( $this->isLoggedIn() ) {
+            $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
 
             try {
 
                 $_keyList = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-                $dh       = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => @$_SESSION[ 'uid' ] ) );
+                $dh       = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $this->logged_user->uid ) );
 
                 $keyList = $_keyList->read( $dh );
                 foreach ( $keyList as $memKey ) {
@@ -90,11 +96,15 @@ class newProjectController extends viewController {
             } catch ( Exception $e ) {
                 Log::doLog( $e->getMessage() );
             }
-
         }
-
     }
 
+    /**
+     * Here we want to be explicit about the team the user is currently working on.
+     * Even if a user is included in more teams, we'd prefer to have the team bound
+     * to the given session.
+     *
+     */
     private function array_sort_by_column( &$arr, $col, $dir = SORT_ASC ) {
         $sort_col = array();
         foreach ( $arr as $key => $row ) {
@@ -128,7 +138,7 @@ class newProjectController extends viewController {
                             $ar[ 'name' ]     = $this->lang_handler->getLocalizedName( $lang );
                             $ar[ 'code' ]     = $lang;
                             $ar[ 'selected' ] = ( $key == '0' ) ? 1 : 0;
-                            $ar[ 'direction' ]    = ( $this->lang_handler->isRTL( strtolower( ( $lang ) ) ) ? 'rtl' : 'ltr' );
+                            $ar[ 'direction' ]    = ( $this->lang_handler->isRTL( $lang ) ? 'rtl' : 'ltr' );
                             array_push( $tmpSourceArAs, $ar );
                         }
                     }
@@ -283,7 +293,11 @@ class newProjectController extends viewController {
         $this->template->currentTargetLang = $this->getCurrentTargetLang();
         
         $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages ); 
-        LexiQADecorator::getInstance( $this->template )->featureEnabled( $this->logged_user, Database::obtain() )->decorateViewLexiQA();
+        LexiQADecorator::getInstance( $this->template )->featureEnabled( $this->featureSet )->decorateViewLexiQA();
+
+        $this->template->additional_input_params_base_path  = \INIT::$TEMPLATE_ROOT ;
+
+        $this->featureSet->appendDecorators('NewProjectDecorator', $this, $this->template ) ;
 
         $this->template->globalMessage = Utils::getGlobalMessage() ;
 
@@ -304,10 +318,6 @@ class newProjectController extends viewController {
         }
 
         return Constants::DEFAULT_TARGET_LANG;
-    }
-
-    private function generateGDriveAuthUrl(){
-        $this->gdriveAuthUrl = \GDrive::generateGDriveAuthUrl();
     }
 
     private function evalTragetLangHistory() {

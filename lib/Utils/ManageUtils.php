@@ -3,22 +3,30 @@
 class ManageUtils {
 
     /**
-     * @param $start                int
-     * @param $step                 int
-     * @param $search_in_pname      string|null
-     * @param $search_source        string|null
-     * @param $search_target        string|null
-     * @param $search_status        string|null
-     * @param $search_onlycompleted bool
-     * @param $filter_enabled       bool
-     * @param $project_id           int
+     * @param Users_UserStruct  $user
+     * @param                   $start                int
+     * @param                   $step                 int
+     * @param                   $search_in_pname      string|null
+     * @param                   $search_source        string|null
+     * @param                   $search_target        string|null
+     * @param                   $search_status        string|null
+     * @param                   $search_only_completed bool
+     * @param                   $project_id           int
+     *
+     * @param \Teams\TeamStruct $team
      *
      * @return array
-     * @throws Exception
+     * @internal param bool $filter_enabled
      */
-    public static function queryProjects( $start, $step, $search_in_pname, $search_source, $search_target, $search_status, $search_onlycompleted, $filter_enabled, $project_id ) {
+    public static function queryProjects(
+            Users_UserStruct $user, $start, $step, $search_in_pname,
+            $search_source, $search_target, $search_status, $search_only_completed,
+            $project_id, \Teams\TeamStruct $team = null ) {
 
-        $data = getProjects( $start, $step, $search_in_pname, $search_source, $search_target, $search_status, $search_onlycompleted, $filter_enabled, $project_id );
+        $data = getProjects(
+            $user, $start, $step, $search_in_pname, $search_source, $search_target,
+            $search_status, $search_only_completed, $project_id, $team
+        );
 
         $projects     = array();
         $projectIDs   = array();
@@ -34,7 +42,7 @@ class ManageUtils {
         }
 
         //get job data using job IDs
-        $jobData = getJobsFromProjects( $projectIDs, $search_source, $search_target, $search_status, $search_onlycompleted );
+        $jobData = getJobsFromProjects( $projectIDs, $search_source, $search_target, $search_status, $search_only_completed );
 
         $dao = new Comments_CommentDao() ;
         $openThreads = $dao->getOpenThreadsForProjects( $projectIDs ) ;
@@ -82,8 +90,13 @@ class ManageUtils {
                 }
             }
 
+
+            $job['quality_overall'] = CatUtils::getQualityOverallFromJobArray( $job_array ) ;
+
+
             //generate and set job stats
             $jobStats = new WordCount_Struct();
+            $jobStats->setIdJob( $job_array[ 'id' ] );
             $jobStats->setDraftWords( $job_array[ 'DRAFT' ] );
             $jobStats->setRejectedWords( $job_array[ 'REJECT' ] );
             $jobStats->setTranslatedWords( $job_array[ 'TRANSLATED' ] );
@@ -158,6 +171,8 @@ class ManageUtils {
             $project[ 'has_archived' ]   = ( in_array( Constants_JobStatus::STATUS_ARCHIVED, $project2info[ $project[ 'id' ] ][ 'status' ] ) );
             $project[ 'mt_engine_name' ] = $project2info[ $project[ 'id' ] ][ 'mt_engine_name' ];
             $project[ 'id_tms' ]         = $project2info[ $project[ 'id' ] ][ 'id_tms' ];
+
+            $project[ 'features' ] = $item[ 'features' ] ;
 
             $projects[ ] = $project;
         }

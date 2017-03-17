@@ -37,7 +37,7 @@ class QAComponent extends React.Component {
     static togglePanel() {
         var qa_cont = $('.qa-container');
         qa_cont.toggleClass("qa-open");
-        qa_cont.slideToggle();
+        qa_cont.toggle();
 
         if ( !qa_cont.hasClass('qa-open') ) {
             this.setState({

@@ -1,5 +1,4 @@
 <?php
-include_once INIT::$UTILS_ROOT . "/manage.class.php";
 
 /**
  * Description of manageController
@@ -7,11 +6,6 @@ include_once INIT::$UTILS_ROOT . "/manage.class.php";
  * @author andrea
  */
 class getProjectsController extends ajaxController {
-
-    /**
-     * @var Langs_Languages
-     */
-    private $lang_handler;
 
     /**
      * @var int
@@ -27,11 +21,6 @@ class getProjectsController extends ajaxController {
      * @var bool
      */
     private $project_id;
-
-    /**
-     * @var bool
-     */
-    private $filter_enabled;
 
     /**
      * @var string|bool
@@ -63,6 +52,11 @@ class getProjectsController extends ajaxController {
      */
     private $start;
 
+    /**
+     * @var FeatureSet
+     */
+    private $featureSet;
+
     public function __construct() {
 
         //SESSION ENABLED
@@ -73,10 +67,6 @@ class getProjectsController extends ajaxController {
                 'page'          => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'step'          => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'project'       => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
-                'filter'        => [
-                        'filter'  => FILTER_VALIDATE_BOOLEAN,
-                        'options' => [ FILTER_NULL_ON_FAILURE ]
-                ],
                 'pn'            => [
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => FILTER_FLAG_STRIP_LOW
@@ -101,13 +91,12 @@ class getProjectsController extends ajaxController {
 
         $postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        ( !empty( $postInput[ 'status' ] ) ? $this->search_status = $postInput[ 'status' ] : null );
+        ( !empty( $postInput[ 'status' ] ) && Constants_JobStatus::isAllowedStatus( $postInput[ 'status' ] ) ? $this->search_status = $postInput[ 'status' ] : null );
         ( !empty( $postInput[ 'page' ] ) ? $this->page = (int)$postInput[ 'page' ] : null );
         ( !empty( $postInput[ 'step' ] ) ? $this->step = (int)$postInput[ 'step' ] : null );
 
         $this->start                 = ( $this->page - 1 ) * $this->step;
         $this->project_id            = $postInput[ 'project' ];
-        $this->filter_enabled        = (bool)$postInput[ 'filter' ];
         $this->search_in_pname       = $postInput[ 'pn' ];
         $this->search_source         = $postInput[ 'source' ];
         $this->search_target         = $postInput[ 'target' ];
@@ -122,33 +111,48 @@ class getProjectsController extends ajaxController {
             throw new Exception('User not Logged');
         }
 
-        $projects = ManageUtils::queryProjects( $this->start, $this->step,
+        $this->featureSet = new FeatureSet();
+        $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
+
+        $team = null ;
+        $team = $this->featureSet->filter('filter_get_projects_team', $team);
+
+        $projects = ManageUtils::queryProjects( $this->logged_user, $this->start, $this->step,
             $this->search_in_pname,
             $this->search_source, $this->search_target, $this->search_status,
-            $this->search_only_completed, $this->filter_enabled, $this->project_id );
+            $this->search_only_completed, $this->project_id,
+            $team
+        );
 
-        $projnum = getProjectsNumber( $this->start, $this->step,
+        $projnum = getProjectsNumber( $this->logged_user,
             $this->search_in_pname, $this->search_source,
             $this->search_target, $this->search_status,
-            $this->search_only_completed, $this->filter_enabled );
+            $this->search_only_completed, $team );
 
-        /**
-         * pass projects in a filter to find associated reivew_password if needed.
-         * Review password may be needed or not depending on the project. Some
-         * projects may need a separate review password, others not. Even thought
-         * the feature is disable for the given project, the password. Given this
-         * recordset is paginated, it may be feasible to seek for a revision password
-         * for each of them in a separate query.
-         */
 
-        $featureSet = FeatureSet::fromIdCustomer( $this->userMail );
+        $projects = $this->filterProjectsWithUserFeatures( $projects ) ;
 
-        $projects = $featureSet->filter('filter_manage_projects_loaded', $projects);
+        $projects = $this->filterProjectsWithProjectFeatures( $projects ) ;
 
         $this->result[ 'data' ]     = $projects;
         $this->result[ 'page' ]     = $this->page;
         $this->result[ 'pnumber' ]  = $projnum[ 0 ][ 'c' ];
         $this->result[ 'pageStep' ] = $this->step;
+    }
+
+    private function filterProjectsWithUserFeatures( $projects ) {
+        $projects = $this->featureSet->filter('filter_manage_projects_loaded', $projects);
+        return $projects ;
+    }
+
+    private function filterProjectsWithProjectFeatures( $projects ) {
+        foreach( $projects as $key => $project ) {
+            $features = new FeatureSet() ;
+            $features->loadFromString( $project['features'] );
+
+            $projects[ $key ] = $features->filter('filter_manage_single_project', $project );
+        }
+        return $projects ;
     }
 
 }

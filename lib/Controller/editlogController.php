@@ -53,14 +53,13 @@ class editlogController extends viewController {
 
         $this->model->controllerDoAction();
 
-        list( $uid, $email ) = $this->getLoginUserParams();
         $projectInfo = Projects_ProjectDao::findByJobId( $this->jid );
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $this->jid;
         $activity->id_project = $projectInfo->id;
         $activity->action     = ActivityLogStruct::ACCESS_EDITLOG_PAGE;
         $activity->ip         = Utils::getRealIpAddr();
-        $activity->uid        = $uid;
+        $activity->uid        = $this->logged_user->uid;
         $activity->event_date = date( 'Y-m-d H:i:s' );
         Activity::save( $activity );
         

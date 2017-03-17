@@ -315,7 +315,7 @@ class Bootstrap {
      */
     public static function getEnvConfigKey( $key ) {
         $config = self::getEnvConfig() ;
-        return $config[ $key ] ;
+        return @$config[ $key ] ;
     }
 
     /**
