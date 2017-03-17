@@ -71,13 +71,16 @@
 				padding: 2px 4px;
 				background: #4d4d4d;
 				color: #bbbbbb;
+				position: relative;
+				left: 3px;
+				z-index: 1;
 			}
 		}
 		.projects-state {
 			margin: 0 0 0 10px !important;
 			padding: 0 !important;
 			text-align: center;
-			line-height: 36px;
+			line-height: 36px !important;
 			background: transparent;
 		}
 		.input-field {
