@@ -1858,8 +1858,6 @@ function getJobsFromProjects( array $projectIDs, $search_source, $search_target,
         $where_query = " AND " . $where_query;
     }
 
-    $features = Projects_MetadataDao::FEATURES_KEY ;
-
     $jobsQuery = "SELECT
                  j.id,
 
@@ -1892,14 +1890,18 @@ function getJobsFromProjects( array $projectIDs, $search_source, $search_target,
                  j.approved_words,
                  j.rejected_words,
                  projects.status_analysis,
-                 project_metadata.value AS features
+                 project_metadata.value AS features,
+
+                 id_vendor,
+                 vendor_name,
+                 osc.create_date as outsource_date,
+                 delivery_date
 
             FROM jobs j
-            LEFT JOIN engines e ON j.id_mt_engine=e.id
-
             JOIN projects ON projects.id = j.id_project
-
-            LEFT JOIN project_metadata ON project_metadata.id_project = projects.id AND project_metadata.`key` = '$features'
+            LEFT JOIN outsource_confirmation osc  ON osc.id_job = j.id AND osc.password = j.password
+            LEFT JOIN engines e ON j.id_mt_engine=e.id
+            LEFT JOIN project_metadata ON project_metadata.id_project = projects.id AND project_metadata.`key` = '". Projects_MetadataDao::FEATURES_KEY . "'
 
             WHERE j.id_project IN ( " . implode( ",", $projectIDs ) . " ) $where_query
             ORDER BY j.id DESC,
@@ -2222,7 +2224,11 @@ function changePassword( $res, $id, $password, $new_password ) {
         $query = sprintf( $query, 'jobs', $db->escape( $new_password ), $id, $db->escape( $password ) );
     }
     try {
+
         $res = $db->query($query);
+
+        ( new \Outsource\ConfirmationDao() )->updatePassword( $id, $password, $new_password  );
+
     } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;

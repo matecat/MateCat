@@ -6,7 +6,7 @@ nbproject/
 
 # Configuration files
 .num_processes
-inc/login_secret.dat
+inc/*.dat
 inc/oauth_config.ini
 inc/Error_Mail_List.ini
 inc/config.ini
