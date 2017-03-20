@@ -2714,6 +2714,7 @@ input::selection {
   color: #FFFFFF;
   text-shadow: none;
   background-image: none;
+  transition: 0.3s ease;
 }
 
 .ui.green.button {
@@ -2725,20 +2726,24 @@ input::selection {
   background-color: #85b742;
   color: #FFFFFF;
   text-shadow: none;
+  box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
 .ui.green.buttons .button:focus,
 .ui.green.button:focus {
-  background-color: #0ea432;
+  background-color: #85b742;
   color: #FFFFFF;
   text-shadow: none;
+  box-shadow: none !important;
 }
 
 .ui.green.buttons .button:active,
 .ui.green.button:active {
-  background-color: #198f35;
+  background-color: #85b742;
   color: #FFFFFF;
   text-shadow: none;
+  box-shadow: none !important;
+  transition: none !important;
 }
 
 .ui.green.buttons .active.button,
@@ -2748,6 +2753,8 @@ input::selection {
   background-color: #13ae38;
   color: #FFFFFF;
   text-shadow: none;
+  box-shadow: none !important;
+  transition: none !important;
 }
 
 /* Basic */
@@ -4176,6 +4183,7 @@ input::selection {
   color: #FFFFFF;
   text-shadow: none;
   background-image: none;
+  transition: 0.3s ease;
 }
 
 .ui.primary.button {
@@ -4187,20 +4195,24 @@ input::selection {
   background-color: #08b3de;
   color: #FFFFFF;
   text-shadow: none;
+  box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
 .ui.primary.buttons .button:focus,
 .ui.primary.button:focus {
-  background-color: #0d71bb;
+  background-color: #08b3de;
   color: #FFFFFF;
   text-shadow: none;
+  box-shadow: none !important;
 }
 
 .ui.primary.buttons .button:active,
 .ui.primary.button:active {
-  background-color: #1a69a4;
+  background-color: #08b3de;
   color: #FFFFFF;
   text-shadow: none;
+  box-shadow: none !important;
+  transition: none;
 }
 
 .ui.primary.buttons .active.button,
@@ -4210,6 +4222,7 @@ input::selection {
   background-color: #1279c6;
   color: #FFFFFF;
   text-shadow: none;
+  transition: none;
 }
 
 /* Basic */
@@ -15144,7 +15157,7 @@ ol.ui.horizontal.list li:before,
 
 .ui.active.reveal .visible.content,
 .ui.reveal:hover .visible.content {
-  z-index: 4 !important;
+  z-index: 3 !important;
 }
 
 /*******************************
@@ -30476,7 +30489,7 @@ select.ui.dropdown {
   position: absolute;
   top: 50%;
   left: 50%;
-  z-index: 4;
+  z-index: 3;
   -webkit-transform: translateX(-50%) translateY(-50%);
   transform: translateX(-50%) translateY(-50%);
   color: #FFFFFF;

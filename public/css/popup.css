@@ -390,7 +390,8 @@ body.showingOutsourceTo {
 }
 
 .modal.outsource a:hover {
-    text-decoration: none!important;
+    text-decoration: none !important;
+    color: #red;
 }
 
 .contact_box p {

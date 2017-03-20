@@ -84,7 +84,7 @@ body.manage {
         .project-header {
             /*background-color: #e0e1e2;
             padding-bottom: 22px !important;*/
-            background-color: #f9f9f9;
+            background-color: #f3f3f3;
             padding-bottom: 10px !important;
             border-bottom: 1px solid #ccc;
             margin-bottom: -23px;
@@ -350,7 +350,7 @@ body.manage {
                                 float: left;
                                 width: 30px;
                                 height: 30px;
-                                margin-left: 5px;
+                                //margin-left: 5px;
                             }
                             .job-activity-icons {
                                 float: left;
@@ -363,12 +363,21 @@ body.manage {
                                 .group-activity-icons {
                                     .item {
                                         margin: 0;
-                                        padding: 0 !important;
+                                        padding: 1px !important;
                                         a {
-                                            margin: 0;
                                             padding: 0;
                                             width: 100%;
                                             border-radius: 0px;
+                                            font-size: 15px;
+                                            font-weight: normal;
+                                            font-family: Calibri, Arial, Helvetica, sans-serif;
+                                            text-align: left;
+                                            margin: 0 15px 0 10px;
+                                            background: transparent !important;
+                                            box-shadow: none !important;
+                                            i {
+                                                margin-right: 10px;
+                                            }
                                         }
                                     }
                                 }
