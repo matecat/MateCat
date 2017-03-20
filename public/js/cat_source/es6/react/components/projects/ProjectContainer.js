@@ -387,10 +387,6 @@ class ProjectContainer extends React.Component {
             result = <div className={"ui dropdown top right pointing project-assignee shadow-1"}
                           ref={(dropdownTeams) => this.dropdownTeams = dropdownTeams}>
                         <span className="text">
-                            {/*<div className="ui not-assigned label">
-                                <i className="icon-user22"/>
-                            </div>
-                            Personal*/}
                         </span>
                 <div className="menu">
                     {teams}
