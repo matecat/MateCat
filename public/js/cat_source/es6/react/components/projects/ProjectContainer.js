@@ -502,7 +502,7 @@ class ProjectContainer extends React.Component {
                             <div className="eight wide column">
                                 <div className="ui stackable grid">
                                     <div className="sixteen wide column">
-                                        <div className="ui ribbon label shadow-1">
+                                        <div className="ui ribbon label">
                                             <span className="project-name">
                                                 {this.state.projectName}
                                             </span>
