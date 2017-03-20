@@ -920,3 +920,7 @@ top: 25%;
 .ui.user.label {
 	top: 0px;
 }
+
+.matecat-modal-header {
+	min-height: 30px !important;
+}

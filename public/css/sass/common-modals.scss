@@ -2,6 +2,15 @@ body.side-popup {
     overflow: hidden !important;
     font-family: Calibri, Arial, Helvetica, sans-serif;
 }
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+}
+a, ul, li, ol, p, input, input[type="text"] input[type="email"] .input{
+    font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+}
+::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+    font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+}
 
 /***********************/
 /***** Login Footer ****/
@@ -514,6 +523,7 @@ body.side-popup {
     margin: 0;
     padding: 0;
     font-size: 22px;
+    font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
 
 .user-link {
@@ -799,6 +809,7 @@ div#matecat-modal p {
     }
     .matecat-modal-top {
         background-color: #f4f4f4;
+        border-bottom: 1px solid #cccccc;
     }
     .matecat-modal-middle,
     .matecat-modal-bottom,
@@ -845,4 +856,35 @@ div#matecat-modal p {
 
 .pull-right {
     float: right !important;
+}
+
+
+.create-team-modal {
+    .create-team {
+        font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+        padding: 11px 22px;
+        vertical-align: top;
+        font-size: 18px;
+        border: 1px solid #797979;
+    }
+}
+
+.ui.fluid.input > input {
+    font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+}
+
+.ui.multiple.search.dropdown {
+    cursor: text;
+    width: 80%;
+    border: 1px solid rgba(34, 36, 38, 0.15);
+    margin-right: 10px;
+    &:focus {
+        border: 1px solid yellow;
+    }
+    &:active {
+        border: 1px solid yellow;
+    }
+    &:hover {
+        border: 1px solid rgba(34, 36, 38, 0.15);
+    }
 }
