@@ -741,7 +741,7 @@ class FilesStorage {
      */
 
     public function getTemporaryUploadedZipFile( $uploadToken ) {
-        $files  = scandir( INIT::$UPLOAD_REPOSITORY . '/' . $uploadToken );
+        $files  = scandir( INIT::$QUEUE_PROJECT_REPOSITORY . '/' . $uploadToken );
         $zip_name = null; 
         $zip_file = null; 
 
