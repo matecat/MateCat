@@ -442,7 +442,7 @@ class ProjectContainer extends React.Component {
                             <div className="eight wide column">
                                 <div className="ui stackable grid">
                                     <div className="sixteen wide column">
-                                        <div className="ui ribbon label shadow-1">
+                                        <div className="ui ribbon label">
                                             <span className="project-name">
                                                 {this.state.projectName}
                                             </span>
@@ -460,12 +460,12 @@ class ProjectContainer extends React.Component {
                                     <div className=" computer twelve wide tablet right floated column">
 
                                         <div className="project-activity-icon">
-                                            <div className="ui dropdown project-personal-assignee">
+                                            {/*<div className="ui dropdown project-personal-assignee">
                                                 <span className="text">
                                                     <div className="ui circular label">RS</div>
                                                     Ruben Santillan
                                                 </span>
-                                            </div>
+                                            </div>*/}
                                             {dropDownUsers}
                                             <div className="project-menu ui icon top right pointing dropdown circular button"
                                                     ref={(dropdown) => this.dropdown = dropdown}>

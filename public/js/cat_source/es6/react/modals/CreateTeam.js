@@ -93,7 +93,7 @@ class CreateTeam extends React.Component {
             <div className="matecat-modal-top">
                 <div className="ui one column grid left aligned">
                     <div className="column">
-                        <h3>Team Name</h3>
+                        <h2>Team Name</h2>
                         <div className={"ui large fluid icon input " + inputError}>
                             <input type="text" placeholder="Team Name"
                                    onFocus={this.onInputFocus.bind(this)}
@@ -107,27 +107,27 @@ class CreateTeam extends React.Component {
             <div className="matecat-modal-middle">
                 <div className="ui one column grid left aligned">
                     <div className="column">
-                        <h3>Add members</h3>
-                        <div className={"ui fluid multiple search selection dropdown " + inputDropdown}
+                        <h2>Add members</h2>
+                        <div className={"ui multiple search selection dropdown " + inputDropdown}
                              ref={(usersInput) => this.usersInput = usersInput}>
                             <input name="tags" type="hidden" />
                             {this.state.errorDropdown ? (
                                     <div className="default text"></div>
                                 ) : (
-                                    <div className="default text">insert email or more emails separated by commas or press enter</div>
+                                    <div className="default text">insert email or emails separated by commas or press enter</div>
                                 )}
                         </div>
-                    </div>
-                </div>
-            </div>
-            <div className="matecat-modal-bottom">
-                <div className="ui one column grid right aligned">
-                    <div className="column">
-                        <button className={"ui button blue " + buttonClass }
+                        <button className={"create-team ui primary button open" + buttonClass }
                                 onClick={this.onClick.bind(this)}>Create</button>
                     </div>
                 </div>
             </div>
+            {/*<div className="matecat-modal-bottom">
+                <div className="ui one column grid right aligned">
+                    <div className="column">
+                    </div>
+                </div>
+            </div>*/}
         </div>;
         }
 }

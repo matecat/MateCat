@@ -544,9 +544,9 @@ class JobContainer extends React.Component {
         let idJobLabel = ( !this.props.isChunk ) ? this.props.job.get('id') : this.props.job.get('id') + '-' + this.props.index;
 
         return <div className="chunk sixteen wide column shadow-1">
-                    <div className="ui grid">
+                    <div className="ui stackable grid">
 
-                        <div className="eleven wide column">
+                        <div className="eight wide column">
                             <div className="source-target">
                                 <div className="source-box">
                                     {this.props.job.get('sourceTxt')}
@@ -576,16 +576,14 @@ class JobContainer extends React.Component {
                             <div className="job-payable">
                                 <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
                             </div>
-                            <div className="translated-outsourced">
-                                {outsourceJobLabel}
-                            </div>
-
-
                         </div>
 
 
-                        <div className="five wide column right aligned pad-right-10">
+                        <div className="eight wide column right aligned pad-right-10">
 
+                            <div className="translated-outsourced">
+                                {outsourceJobLabel}
+                            </div>
                             {outsourceDelivery}
                             {outsourceButton}
                             <a className="open-translate ui primary button open" target="_blank" href={translateUrl}>
