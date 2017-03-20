@@ -45,13 +45,16 @@ class ProjectContainer extends React.Component {
                 this.dropdownUsers.classList.remove("shadow-1");
                 this.dropdownUsers.classList.add("project-not-assigned");
             }
-            if (this.props.team.get('type') != "personal") {
-                $(this.dropdownUsers).dropdown({
-                    fullTextSearch: 'exact',
-                    onChange: function(value, text, $selectedItem) {
-                        self.changeUser(value);
-                    }
-                });
+            $(this.dropdownUsers).dropdown({
+                fullTextSearch: 'exact',
+                onChange: function(value, text, $selectedItem) {
+                    self.changeUser(value);
+                }
+            });
+            if (this.projectTeam.get('type') == 'personal') {
+                this.dropdownUsers.classList.add("disabled");
+            } else {
+                this.dropdownUsers.classList.remove("disabled");
             }
         }
         if (this.dropdownTeams) {
@@ -353,20 +356,14 @@ class ProjectContainer extends React.Component {
     getDropDownUsers() {
        let result = '';
        var self = this;
+       self.projectTeam = this.props.team;
        if (this.props.team.get("type") == 'personal') {
-           if (this.props.project.get('id_team') == this.props.team.get("id")) {
-               result = <div className="ui dropdown project-personal-assignee">
-               <span className="text">
-                    <div className="ui circular label">{APP.getUserShortName(APP.USER.STORE.user)}</div>
-                   {APP.USER.STORE.user.first_name + " " + APP.USER.STORE.user.last_name}
-                </span>
-               </div>;
-           } else if (this.props.teams){
-               let team = this.props.teams.find(function (team) {
+           if (this.props.teams){
+               self.projectTeam = this.props.teams.find(function (team) {
                    return team.get('id') == self.props.project.get('id_team');
                });
-               if (team.get('members')) {
-                   result = this.createUserDropDown(team.get('members'));
+               if (self.projectTeam.get('members')) {
+                   result = this.createUserDropDown(self.projectTeam.get('members'));
                }
            }
 
@@ -408,14 +405,14 @@ class ProjectContainer extends React.Component {
         this.initDropdowns();
         console.log("Updated Project : " + this.props.project.get('id'));
 
-        clearTimeout(this.inputTimeout);
-        if (this.state.inputNameChanged) {
-            this.inputTimeout = setTimeout(function () {
-                self.setState({
-                    inputNameChanged: false
-                })
-            }, 3000);
-        }
+        // clearTimeout(this.inputTimeout);
+        // if (this.state.inputNameChanged) {
+        //     this.inputTimeout = setTimeout(function () {
+        //         self.setState({
+        //             inputNameChanged: false
+        //         })
+        //     }, 3000);
+        // }
     }
 
     componentDidMount() {
@@ -441,8 +438,7 @@ class ProjectContainer extends React.Component {
         nextState.lastAction !==  this.state.lastAction ||
         nextProps.team !==  this.props.team ||
         nextState.inputSelected !==  this.state.inputSelected ||
-        nextState.inputNameChanged !==  this.state.inputNameChanged ||
-            nextProps.teams !== this.props.teams
+        nextState.inputNameChanged !==  this.state.inputNameChanged
         )
     }
 

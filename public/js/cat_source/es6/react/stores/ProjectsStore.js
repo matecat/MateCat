@@ -38,6 +38,7 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
         this.projects = this.projects.concat(Immutable.fromJS(projects));
     },
 
+
     removeProject: function (project) {
         let projectOld = this.projects.find(function (prj) {
             return prj.get('id') == project.get('id');

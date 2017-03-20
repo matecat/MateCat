@@ -175,11 +175,33 @@ let ManageActions = {
 
     changeProjectTeam: function (teamId, project) {
         UI.changeProjectTeam(teamId, project.toJS()).done(function () {
-            AppDispatcher.dispatch({
-                actionType: ManageConstants.CHANGE_PROJECT_TEAM,
-                project: project,
-                teamId: teamId
+            var team =  UI.teams.find(function (team) {
+                return team.id == teamId
             });
+            if (UI.selectedTeam.type == 'personal' && team.type !== 'personal') {
+
+                UI.getTeamMembers(teamId).then(function (data) {
+                    team.members = data.members;
+                    team.pending_invitations = data.pending_invitations;
+                    AppDispatcher.dispatch({
+                        actionType: ManageConstants.UPDATE_TEAM,
+                        team: team
+                    });
+                    setTimeout(function () {
+                        AppDispatcher.dispatch({
+                            actionType: ManageConstants.CHANGE_PROJECT_TEAM,
+                            project: project,
+                            teamId: teamId
+                        });
+                    });
+                });
+            } else {
+                AppDispatcher.dispatch({
+                    actionType: ManageConstants.CHANGE_PROJECT_TEAM,
+                    project: project,
+                    teamId: teamId
+                });
+            }
             if (teamId !== UI.selectedTeam.id && UI.selectedTeam.type !== 'personal') {
                 setTimeout(function () {
                     AppDispatcher.dispatch({
@@ -194,20 +216,7 @@ let ManageActions = {
                     });
                 }, 1000);
             }
-            if (UI.selectedTeam.type == 'personal') {
-                var team =  UI.teams.find(function (team) {
-                    return team.id == teamId
-                });
-                UI.getTeamMembers(teamId).then(function (data) {
-                    team.members = data.members;
-                    team.pending_invitations = data.pending_invitations;
-                    //TODO Crere evento per aggiornare la lista dei team che sono in ProjectsContainer
-                    AppDispatcher.dispatch({
-                        actionType: ManageConstants.UPDATE_TEAM,
-                        team: team
-                    });
-                });
-            }
+
         });
     },
 
