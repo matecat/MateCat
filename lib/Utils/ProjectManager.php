@@ -127,6 +127,7 @@ class ProjectManager {
                             'owner'                => '',
                             'word_count_type'      => '',
                             'metadata'             => [],
+                            'id_team'              => null,
                             'id_assignee'          => null,
                             'session'              => ( isset( $_SESSION ) ? $_SESSION : false )
                     ] );

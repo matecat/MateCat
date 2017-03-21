@@ -13,7 +13,7 @@ use PDO ;
 class MembershipDao extends \DataAccess_AbstractDao
 {
 
-    const TABLE = "organizations_users";
+    const TABLE = "teams_users";
     const STRUCT_TYPE = "\\Teams\\MembershipStruct";
 
     protected static $auto_increment_fields = array('id');
