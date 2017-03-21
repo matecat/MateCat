@@ -45,14 +45,26 @@ class ProjectContainer extends React.Component {
                 this.dropdownUsers.classList.remove("shadow-1");
                 this.dropdownUsers.classList.add("project-not-assigned");
             }
-            if (this.props.team.get('type') != "personal") {
-                $(this.dropdownUsers).dropdown({
-                    fullTextSearch: 'exact',
-                    onChange: function(value, text, $selectedItem) {
-                        self.changeUser(value);
-                    }
-                });
+            $(this.dropdownUsers).dropdown({
+                fullTextSearch: 'exact',
+                onChange: function(value, text, $selectedItem) {
+                    self.changeUser(value);
+                }
+            });
+            if (this.projectTeam.get('type') == 'personal') {
+                this.dropdownUsers.classList.add("disabled");
+            } else {
+                this.dropdownUsers.classList.remove("disabled");
             }
+        }
+        if (this.dropdownTeams) {
+            $(this.dropdownTeams).dropdown('set selected', this.props.project.get('id_team'));
+            $(this.dropdownTeams).dropdown({
+                fullTextSearch: 'exact',
+                onChange: function(value, text, $selectedItem) {
+                    self.changeTeam(value);
+                }
+            });
         }
 
 
@@ -91,6 +103,11 @@ class ProjectContainer extends React.Component {
         }
     }
 
+    changeTeam(value) {
+        if ( this.props.project.get('id_team') !==  parseInt(value) ) {
+            ManageActions.changeProjectTeam(value,  this.props.project);
+        }
+    }
 
     onKeyUpEvent(event) {
         if(event.key == 'Enter'){
@@ -289,56 +306,98 @@ class ProjectContainer extends React.Component {
         ManageActions.openModifyTeamModal(this.props.team.toJS());
     }
 
-    getDropDownUsers() {
-       let result = '';
-       var self = this;
-       if (this.props.team.get('members') && this.props.team.get("type") !== 'personal') {
-           let members = this.props.team.get('members').map(function(member, i) {
-               let user = member.get('user');
-               return <div className="item " data-value={user.get('uid')}
-                           key={'user' + user.get('uid')}>
-                   <div className="ui circular label">{APP.getUserShortName(user.toJS())}</div>
-                   {user.get('first_name') + " " + user.get('last_name')}
-               </div>
-           });
+    createUserDropDown(users) {
+        var self = this;
+        let members = users.map(function(member, i) {
+            let user = member.get('user');
+            return <div className="item " data-value={user.get('uid')}
+                        key={'user' + user.get('uid')}>
+                <div className="ui circular label">{APP.getUserShortName(user.toJS())}</div>
+                {user.get('first_name') + " " + user.get('last_name')}
+            </div>
+        });
 
-           result = <div className={"ui dropdown top right pointing"}
-                         ref={(dropdownUsers) => this.dropdownUsers = dropdownUsers}>
+        return <div className={"ui dropdown top right pointing"}
+                      ref={(dropdownUsers) => this.dropdownUsers = dropdownUsers}>
                         <span className="text">
                             <div className="ui not-assigned label">
                                 <i className="icon-user22"/>
                             </div>
                             Not assigned
-
                         </span>
-                       <div className="ui cancel label"
-                            onClick={self.changeUser.bind(self, '-1')}>
-                           <i className="icon-cancel3"/>
-                       </div>
+            <div className="ui cancel label"
+                 onClick={self.changeUser.bind(self, '-1')}>
+                <i className="icon-cancel3"/>
+            </div>
 
-                       <div className="menu">
-                           <div className="header"
-                           onClick={this.openAddMember.bind(this)}>
-                               <a href="#">New Member <i className="icon-plus3 icon right"/></a>
-                           </div>
-                           <div className="divider"></div>
-                           <div className="ui icon search input">
-                               <i className="icon-search icon"/>
-                               <input type="text" name="UserName" placeholder="Name or email." />
-                           </div>
-                           {/*<div className="scrolling menu">*/}
-                               {members}
-                               <div className="item cancel-item" data-value="-1">
-                                   <div className="ui not-assigned label">
-                                       <i className="icon-user22"/>
-                                   </div>
-                                   Not assigned
-                               </div>
-                           {/*</div>*/}
-                       </div>
-                   </div>;
+            <div className="menu">
+                <div className="header"
+                     onClick={this.openAddMember.bind(this)}>
+                    <a href="#">New Member <i className="icon-plus3 icon right"/></a>
+                </div>
+                <div className="divider"></div>
+                <div className="ui icon search input">
+                    <i className="icon-search icon"/>
+                    <input type="text" name="UserName" placeholder="Name or email." />
+                </div>
+                {/*<div className="scrolling menu">*/}
+                {members}
+                <div className="item cancel-item" data-value="-1">
+                    <div className="ui not-assigned label">
+                        <i className="icon-user22"/>
+                    </div>
+                    Not assigned
+                </div>
+                {/*</div>*/}
+            </div>
+        </div>;
+    }
+
+    getDropDownUsers() {
+       let result = '';
+       var self = this;
+       self.projectTeam = this.props.team;
+       if (this.props.team.get("type") == 'personal') {
+           if (this.props.teams){
+               self.projectTeam = this.props.teams.find(function (team) {
+                   return team.get('id') == self.props.project.get('id_team');
+               });
+               if (self.projectTeam.get('members')) {
+                   result = this.createUserDropDown(self.projectTeam.get('members'));
+               }
+           }
+
+       } else if (this.props.team.get('members')) {
+           result = this.createUserDropDown(this.props.team.get('members'))
        }
        return result;
+    }
+
+    getDropDownTeams() {
+        let result = '';
+        var self = this;
+        if (this.props.team.get("type") == 'personal' && this.props.teams) {
+            let teams = this.props.teams.map(function(team, i) {
+                return <div className="item " data-value={team.get('id')}
+                            key={'team-dropdown-item' + team.get('id')}>
+                    {team.get('name')}
+                </div>
+            });
+
+            result = <div className={"ui dropdown top right pointing project-assignee shadow-1"}
+                          ref={(dropdownTeams) => this.dropdownTeams = dropdownTeams}>
+                        <span className="text">
+                            {/*<div className="ui not-assigned label">
+                                <i className="icon-user22"/>
+                            </div>
+                            Personal*/}
+                        </span>
+                <div className="menu">
+                    {teams}
+                </div>
+            </div>;
+        }
+        return result;
     }
 
     componentDidUpdate() {
@@ -346,14 +405,14 @@ class ProjectContainer extends React.Component {
         this.initDropdowns();
         console.log("Updated Project : " + this.props.project.get('id'));
 
-        clearTimeout(this.inputTimeout);
-        if (this.state.inputNameChanged) {
-            this.inputTimeout = setTimeout(function () {
-                self.setState({
-                    inputNameChanged: false
-                })
-            }, 3000);
-        }
+        // clearTimeout(this.inputTimeout);
+        // if (this.state.inputNameChanged) {
+        //     this.inputTimeout = setTimeout(function () {
+        //         self.setState({
+        //             inputNameChanged: false
+        //         })
+        //     }, 3000);
+        // }
     }
 
     componentDidMount() {
@@ -429,6 +488,7 @@ class ProjectContainer extends React.Component {
 
         // Users dropdown
         let dropDownUsers = this.getDropDownUsers();
+        let dropDownTeams = this.getDropDownTeams();
         //Input Class
         let inputClass = (this.state.inputSelected) ? 'selected' : '';
         let inputIcon = (this.state.inputNameChanged) ? <i className="icon-checkmark green icon" /> : <i className="icon-pencil icon" />;
@@ -442,7 +502,7 @@ class ProjectContainer extends React.Component {
                             <div className="eight wide column">
                                 <div className="ui stackable grid">
                                     <div className="sixteen wide column">
-                                        <div className="ui ribbon label shadow-1">
+                                        <div className="ui ribbon label">
                                             <span className="project-name">
                                                 {this.state.projectName}
                                             </span>
@@ -460,12 +520,7 @@ class ProjectContainer extends React.Component {
                                     <div className=" computer twelve wide tablet right floated column">
 
                                         <div className="project-activity-icon">
-                                            <div className="ui dropdown project-personal-assignee">
-                                                <span className="text">
-                                                    <div className="ui circular label">RS</div>
-                                                    Ruben Santillan
-                                                </span>
-                                            </div>
+                                            {dropDownTeams}
                                             {dropDownUsers}
                                             <div className="project-menu ui icon top right pointing dropdown circular button"
                                                     ref={(dropdown) => this.dropdown = dropdown}>
@@ -473,7 +528,7 @@ class ProjectContainer extends React.Component {
                                                 {projectMenu}
                                             </div>
                                         </div>
-                                        
+
                                     </div>
                                 </div>
                             </div>

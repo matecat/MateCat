@@ -422,7 +422,7 @@ class JobContainer extends React.Component {
            Outsource
         </a>;
         if (this.props.job.get('outsource')) {
-            if (this.props.job.get('outsource').get('outsourced') == "1") {
+            if (this.props.job.get('outsource').get('id_vendor') == "1") {
                 label = <a className="open-outsourced ui button "
                            onClick={this.openOutsourceModal.bind(this)}>
                     View status
@@ -440,7 +440,7 @@ class JobContainer extends React.Component {
     getOutsourceJobSent() {
         let outsourceJobLabel = '';
         if (this.props.job.get('outsource')) {
-            if (this.props.job.get('outsource').get('outsourced') == "1") {
+            if (this.props.job.get('outsource').get('id_vendor') == "1") {
                 outsourceJobLabel =
                     <a href="http://www.translated.net" target="_blank"><img className='outsource-logo' src="/public/img/logo_translated.png" title="visit our website"/></a>
                 ;
@@ -519,7 +519,7 @@ class JobContainer extends React.Component {
         ProjectsStore.addListener(ManageConstants.ENABLE_DOWNLOAD_BUTTON, this.enableDownloadMenu.bind(this));
         ProjectsStore.addListener(ManageConstants.DISABLE_DOWNLOAD_BUTTON, this.disableDownloadMenu.bind(this));
 
-        ManageActions.getOutsourceQuote(this.props.project, this.props.job);
+        // ManageActions.getOutsourceQuote(this.props.project, this.props.job);
     }
 
     componentWillUnmount() {
@@ -544,9 +544,9 @@ class JobContainer extends React.Component {
         let idJobLabel = ( !this.props.isChunk ) ? this.props.job.get('id') : this.props.job.get('id') + '-' + this.props.index;
 
         return <div className="chunk sixteen wide column shadow-1">
-                    <div className="ui grid">
+                    <div className="ui stackable grid">
 
-                        <div className="eleven wide column">
+                        <div className="eight wide column">
                             <div className="source-target">
                                 <div className="source-box">
                                     {this.props.job.get('sourceTxt')}
@@ -576,16 +576,14 @@ class JobContainer extends React.Component {
                             <div className="job-payable">
                                 <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
                             </div>
-                            <div className="translated-outsourced">
-                                {outsourceJobLabel}
-                            </div>
-
-
                         </div>
 
 
-                        <div className="five wide column right aligned pad-right-10">
+                        <div className="eight wide column right aligned pad-right-10">
 
+                            <div className="translated-outsourced">
+                                {outsourceJobLabel}
+                            </div>
                             {outsourceDelivery}
                             {outsourceButton}
                             <a className="open-translate ui primary button open" target="_blank" href={translateUrl}>

@@ -118,6 +118,7 @@ $.extend(UI, {
 
         $("#open-translator").on('click', function () {
             $("#open-translator").addClass('hide');
+            $('.onyourown').addClass('opened-send-translator');
             $('.send-to-translator').removeClass('hide');
         });
 
@@ -145,6 +146,7 @@ $.extend(UI, {
             $('.outsource.modal .uploadbtn:not(.showprices)').attr('href', url);
             $("#open-translator").addClass('hide');
             $('.send-to-translator').removeClass('hide');
+            $('.onyourown').addClass('opened-send-translator');
             showOutsourcePopup( UI.showPopupDetails );
             renderQuoteFromManage(project.id, project.password, job.id, job.password);
             $('.outsource.modal').show();

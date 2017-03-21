@@ -1,6 +1,6 @@
 /*popup*/
 .popup-outer{background:#000;position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999999;opacity:0.6;}
-.modal .popup{overflow:hidden;line-height:30px;border-radius: 7px;-webkit-box-shadow: 0 1px 20px #000;box-shadow: 0 1px 20px #000;width:500px;background:#fff;margin:-200px 0 0 -250px; padding:0 0px 20px 0px;position:fixed;left:46%;z-index:999999999999999999999999999;}
+.modal .popup{overflow:hidden;line-height:30px;border-radius: 7px;-webkit-box-shadow: 0 1px 20px #000;box-shadow: 0 1px 20px #000;min-width:500px;background:#fff;margin:-200px 0 0 -250px; padding:0 0px 20px 0px;position:fixed;left:46%;z-index:999999999999999999999999999;}
 .popup p{font-size:18px}
 .popup h1{overflow:visible;max-height:inherit;font-size:24px;padding:10px 10px 7px 58px;border-bottom:1px solid #000;color:#fff;margin:0 !important;text-align:left;}
 .popup h2{font-weight:normal;font-size:16px;color:black;display:block;margin:20px 0 20px 0;}
@@ -19,6 +19,7 @@
     color: #fff;
     margin: 0 !important;
     text-align: left;
+    font-family: "calibri", Arial, Helvetica, sans-serif;
 }
 
 .popup .x-popup {
@@ -117,6 +118,7 @@ box-shadow: inset 0 0 1px 1px #888;
     box-sizing: content-box;
     top: 35%;
     left: 50%;
+    font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
 
 .outsource.modal .popup-box {
@@ -125,6 +127,7 @@ box-shadow: inset 0 0 1px 1px #888;
     margin: 0 auto;
     width: auto!important;
     overflow: hidden;
+    font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
 .outsource.modal .out-email,
 .outsource.modal .out-date,
@@ -181,6 +184,7 @@ p.translator_name {
     font-weight: bold;
     padding: 0;
     margin: 15px 0;
+    font-family: "calibri", Arial, Helvetica, sans-serif;
 }
 
 .onyourown h2,
@@ -193,6 +197,8 @@ p.translator_name {
     margin: 2% 2.5% 2% 2%!important;
     width: 160px;
 }
+
+
 
 .outsource.modal.loading .delivery
 {
@@ -384,7 +390,8 @@ body.showingOutsourceTo {
 }
 
 .modal.outsource a:hover {
-    text-decoration: none!important;
+    text-decoration: none !important;
+    color: #red;
 }
 
 .contact_box p {
@@ -503,11 +510,16 @@ span.revision_delivery {
     overflow: hidden;
 }
 
+.onyourown.opened-send-translator {
+    border-radius: 3px 3px 0px 0px;
+}
+
 .outsource .heading h3 {
     float: left;
     font-size: 20px;
     margin-bottom: 0;
     line-height: 30px;
+    font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
 
 .onyourown h2,
@@ -520,6 +532,7 @@ span.revision_delivery {
 .contact_box h3 {
     float: left;
     margin-right: 10px;
+    font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
 
 
@@ -679,6 +692,7 @@ a.hide_translator {
 
 .addrevision h4 {
     opacity: 0.6;
+    font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
 
 .addrevision.noopacity {
@@ -1717,7 +1731,8 @@ div#open-translator {
 
 .send-to-translator {
     border: 1px solid #ccc;
-    border-radius: 3px;
+    border-radius: 0px 0px 3px 3px;
     margin: 0 auto;
     overflow: hidden;
+    margin-top: -1px;
 }

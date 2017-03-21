@@ -64,7 +64,7 @@ UI = {
             self.getTeamStructure(self.selectedTeam).done(function () {
                 ManageActions.selectTeam(self.selectedTeam);
                 self.getProjects(self.selectedTeam).done(function(response){
-                    self.renderProjects(response.data, self.selectedTeam);
+                    self.renderProjects(response.data);
                 });
 
             });
@@ -95,7 +95,7 @@ UI = {
                 for( let i = 0; i < results.length; i++ ){
                     onDone(results[i][0]);
                 }
-                ManageActions.renderProjects(total_projects, self.selectedTeam,  true);
+                ManageActions.renderProjects(total_projects, self.selectedTeam, this.teams,  true);
             });
 
         }
@@ -108,9 +108,10 @@ UI = {
                 getLastActivity: this.getLastProjectActivityLogAction,
                 changeJobPasswordFn: this.changeJobPassword,
                 downloadTranslationFn : this.downloadTranslation,
+                // teams: this.teams
             }), mountPoint);
         }
-        ManageActions.renderProjects(projects, this.selectedTeam);
+        ManageActions.renderProjects(projects, this.selectedTeam, this.teams);
 
     },
 
@@ -218,7 +219,7 @@ UI = {
 
     getTeamStructure: function (team) {
         let self = this;
-        return this.getTeamMembers(team).then(function (data) {
+        return this.getTeamMembers(team.id).then(function (data) {
             self.selectedTeam.members = data.members;
             self.selectedTeam.pending_invitations = data.pending_invitations;
         });
@@ -271,12 +272,23 @@ UI = {
      */
     getProjects: function(team, page) {
         let pageNumber = (page) ? page : UI.Search.currentPage;
-        let data = {
-            action: 'getProjects',
-            id_team: team.id,
-            page:	pageNumber,
-            filter: (!$.isEmptyObject(UI.Search.filter)) ? 1 : 0,
-        };
+        let data = {};
+        // if (team.type == 'personal') {
+        //     this.Search.filter.id_assignee = APP.USER.STORE.user.uid;
+        //     data = {
+        //         action: 'getProjects',
+        //         page:	pageNumber,
+        //         filter: (!$.isEmptyObject(UI.Search.filter)) ? 1 : 0,
+        //     };
+        // } else {
+            data = {
+                action: 'getProjects',
+                id_team: team.id,
+                page:	pageNumber,
+                filter: (!$.isEmptyObject(UI.Search.filter)) ? 1 : 0,
+            };
+        // }
+
         // Filters
         data = $.extend(data,UI.Search.filter);
 
@@ -310,11 +322,11 @@ UI = {
 
     },
 
-    getTeamMembers: function (team) {
+    getTeamMembers: function (teamId) {
         return $.ajax({
             async: true,
             type: "get",
-            url : "/api/v2/teams/" + team.id + "/members"
+            url : "/api/v2/teams/" + teamId + "/members"
         });
     },
 

@@ -19,13 +19,13 @@ class Header extends React.Component {
             this.dropdownTeams.dropdown('set selected',  this.state.selectedTeamId);
         }
         TeamsStore.addListener(ManageConstants.RENDER_TEAMS, this.renderTeams);
-        TeamsStore.addListener(ManageConstants.UPDATE_TEAMs, this.updateTeams);
+        TeamsStore.addListener(ManageConstants.UPDATE_TEAMS, this.updateTeams);
         TeamsStore.addListener(ManageConstants.CHOOSE_TEAM, this.chooseTeams);
     }
 
     componentWillUnmount() {
         TeamsStore.removeListener(ManageConstants.RENDER_TEAMS, this.renderTeams);
-        TeamsStore.removeListener(ManageConstants.UPDATE_TEAMs, this.updateTeams);
+        TeamsStore.removeListener(ManageConstants.UPDATE_TEAMS, this.updateTeams);
         TeamsStore.removeListener(ManageConstants.CHOOSE_TEAM, this.chooseTeams);
     }
 
@@ -167,12 +167,12 @@ class Header extends React.Component {
         let subHeader = '';
         let containerClass = "thirteen";
         if (this.props.showSubHeader) {
-            subHeader = <div className="ten wide column">
+            subHeader = <div className="eleven wide column">
                 <SubHeader
                 selectedTeam={selectedTeam}
             />
             </div>;
-            containerClass = "three";
+            containerClass = "two";
         }
 
         return <section className="nav-mc-bar ui grid">
