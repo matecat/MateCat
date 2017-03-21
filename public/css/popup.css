@@ -97,10 +97,13 @@ background: -webkit-gradient(linear, left top, left bottom, from(#f6f6f6), to(#e
 
 
 
-.btn-ok:hover, .btn-cancel:hover{
+.btn-cancel:hover{
 cursor:pointer;-webkit-box-shadow: 0 1px 2px #ccc;box-shadow: 0 1px 2px #ccc;border:1px solid #000;
 }
 
+.btn-ok:hover{
+    cursor:pointer;-webkit-box-shadow: 0 1px 2px #ccc;box-shadow: 0 1px 2px #ccc;border:1px solid #000; color: #ffffff;
+}
 
 
 .btn-ok:active, .btn-cancel:active{
@@ -391,7 +394,7 @@ body.showingOutsourceTo {
 
 .modal.outsource a:hover {
     text-decoration: none !important;
-    color: #red;
+    /*color: red;*/
 }
 
 .contact_box p {
@@ -1304,6 +1307,12 @@ a.tooltip.gray span:after {
 
 a.btn-cancel.in-popup.cancelForceDelivery {
     margin-right: 40px !important;
+    height: 16px;
+}
+
+a.btn-cancel.in-popup.cancelForceDelivery:hover {
+    margin-right: 40px !important;
+    color: #333333;
 }
 
 .modal-outsource-datepicker .delivery-selected {
@@ -1735,4 +1744,5 @@ div#open-translator {
     margin: 0 auto;
     overflow: hidden;
     margin-top: -1px;
+    background: linear-gradient(to right, #fff, #fff 37%, #f8f8f8 37%, #fcfcfc 100%);
 }
