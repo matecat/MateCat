@@ -452,8 +452,8 @@ class JobContainer extends React.Component {
     getOutsourceDelivery() {
         let outsourceDelivery = '';
         if (this.props.job.get('outsource')) {
-            if (this.props.job.get('outsource').get('outsourced') == "1") {
-                outsourceDelivery = <div className="job-delivery">{this.props.job.get('outsource').get('delivery')}</div>
+            if (this.props.job.get('outsource').get('id_vendor') == "1") {
+                outsourceDelivery = <div className="job-delivery">{this.props.job.get('outsource').get('delivery_date')}</div>
                 ;
             }
         }

@@ -82,6 +82,10 @@ AppDispatcher.register(function(action) {
             TeamsStore.emitChange(ManageConstants.UPDATE_TEAM, updated);
             TeamsStore.emitChange(ManageConstants.UPDATE_TEAMS, TeamsStore.teams);
             break;
+        case ManageConstants.UPDATE_TEAMS:
+            TeamsStore.updateAll(action.teams);
+            TeamsStore.emitChange(ManageConstants.UPDATE_TEAMS, TeamsStore.teams);
+            break;
         case ManageConstants.CHOOSE_TEAM:
             TeamsStore.emitChange(action.actionType, action.teamId);
             break;

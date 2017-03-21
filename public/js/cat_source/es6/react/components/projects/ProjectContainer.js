@@ -364,6 +364,8 @@ class ProjectContainer extends React.Component {
                });
                if (self.projectTeam.get('members')) {
                    result = this.createUserDropDown(self.projectTeam.get('members'));
+               } else {
+                   this.updateMembers = true;
                }
            }
 
@@ -388,10 +390,10 @@ class ProjectContainer extends React.Component {
                           ref={(dropdownTeams) => this.dropdownTeams = dropdownTeams}>
                         <span className="text">
                         </span>
-                <div className="menu">
-                    {teams}
-                </div>
-            </div>;
+                        <div className="menu">
+                            {teams}
+                        </div>
+                    </div>;
         }
         return result;
     }
@@ -421,6 +423,8 @@ class ProjectContainer extends React.Component {
 
         this.getLastAction();
 
+
+
         ProjectsStore.addListener(ManageConstants.HIDE_PROJECT, this.hideProject);
     }
 
@@ -433,6 +437,7 @@ class ProjectContainer extends React.Component {
         return (nextProps.project !== this.props.project ||
         nextState.lastAction !==  this.state.lastAction ||
         nextProps.team !==  this.props.team ||
+        nextProps.teams !==  this.props.teams ||
         nextState.inputSelected !==  this.state.inputSelected ||
         nextState.inputNameChanged !==  this.state.inputNameChanged
         )

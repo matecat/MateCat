@@ -12,6 +12,7 @@ let ManageActions = {
      * @param hideSpinner
      * */
     renderProjects: function (projects, team, teams, hideSpinner) {
+
         AppDispatcher.dispatch({
             actionType: ManageConstants.RENDER_PROJECTS,
             projects: projects,
@@ -292,9 +293,20 @@ let ManageActions = {
     },
 
     updateTeam: function (team) {
+        UI.getTeamMembers(team.id).then(function (data) {
+            team.members = data.members;
+            team.pending_invitations = data.pending_invitations;
+            AppDispatcher.dispatch({
+                actionType: ManageConstants.UPDATE_TEAM,
+                team: team
+            });
+        });
+    },
+
+    updateTeams: function (teams) {
         AppDispatcher.dispatch({
-            actionType: ManageConstants.UPDATE_TEAM,
-            team: team
+            actionType: ManageConstants.UPDATE_TEAMS,
+            teams: teams
         });
     },
 
@@ -374,6 +386,7 @@ let ManageActions = {
             }
         });
     },
+
     changeTeamName: function(team, newName) {
         UI.changeTeamName(team, newName).done(function (data) {
             AppDispatcher.dispatch({

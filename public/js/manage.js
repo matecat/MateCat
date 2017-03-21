@@ -72,34 +72,34 @@ UI = {
 
     },
 
-    reloadProjects: function () {
-        let self = this;
-        if ( UI.Search.currentPage === 1) {
-            this.getProjects(self.selectedTeam).done(function (response) {
-                let projects = response.data;
-                ManageActions.renderProjects(projects);
-            });
-        } else {
-            ManageActions.showReloadSpinner();
-            let total_projects = [];
-            let requests = [];
-            let onDone = function (response) {
-                        let projects = response.data;
-                        $.merge(total_projects, projects);
-                    };
-            for (let i=1; i<= UI.Search.currentPage; i++ ) {
-                requests.push(this.getProjects(self.selectedTeam, i));
-            }
-            $.when.apply(this, requests).done(function() {
-                let results = requests.length > 1 ? arguments : [arguments];
-                for( let i = 0; i < results.length; i++ ){
-                    onDone(results[i][0]);
-                }
-                ManageActions.renderProjects(total_projects, self.selectedTeam, this.teams,  true);
-            });
-
-        }
-    },
+    // reloadProjects: function () {
+    //     let self = this;
+    //     if ( UI.Search.currentPage === 1) {
+    //         this.getProjects(self.selectedTeam).done(function (response) {
+    //             let projects = response.data;
+    //             ManageActions.renderProjects(projects);
+    //         });
+    //     } else {
+    //         ManageActions.showReloadSpinner();
+    //         let total_projects = [];
+    //         let requests = [];
+    //         let onDone = function (response) {
+    //                     let projects = response.data;
+    //                     $.merge(total_projects, projects);
+    //                 };
+    //         for (let i=1; i<= UI.Search.currentPage; i++ ) {
+    //             requests.push(this.getProjects(self.selectedTeam, i));
+    //         }
+    //         $.when.apply(this, requests).done(function() {
+    //             let results = requests.length > 1 ? arguments : [arguments];
+    //             for( let i = 0; i < results.length; i++ ){
+    //                 onDone(results[i][0]);
+    //             }
+    //             ManageActions.renderProjects(total_projects, self.selectedTeam, self.teams,  true);
+    //         });
+    //
+    //     }
+    // },
 
     renderProjects: function (projects) {
         if ( !this.ProjectsContainer ) {
@@ -108,11 +108,31 @@ UI = {
                 getLastActivity: this.getLastProjectActivityLogAction,
                 changeJobPasswordFn: this.changeJobPassword,
                 downloadTranslationFn : this.downloadTranslation,
-                // teams: this.teams
             }), mountPoint);
         }
+        // If is the Personal team selected I need to know all teams members before load the projects
+        if (this.selectedTeam.type === 'personal') {
+            var self = this;
+            let requests = [];
+            let onDone = function (data) {
+                var team = self.teams.find(function (t) {
+                    return t.id === data.members[0].id_team
+                });
+                team.members = data.members;
+                team.pending_invitations = data.pending_invitations;
+            };
+            this.teams.forEach(function(team) {
+                requests.push(self.getTeamMembers(team.id));
+            });
+            $.when.apply(this, requests).done(function() {
+                let results = requests.length > 1 ? arguments : [arguments];
+                for( let i = 0; i < results.length; i++ ){
+                    onDone(results[i][0]);
+                }
+                ManageActions.updateTeams(self.teams);
+            });
+        }
         ManageActions.renderProjects(projects, this.selectedTeam, this.teams);
-
     },
 
     renderMoreProjects: function () {
