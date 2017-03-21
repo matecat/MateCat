@@ -165,14 +165,14 @@ class Header extends React.Component {
             return org.get('id') == self.state.selectedTeamId;
         });
         let subHeader = '';
-        let containerClass = "thirteen";
+        let containerClass = "user-teams thirteen";
         if (this.props.showSubHeader) {
             subHeader = <div className="eleven wide column">
                 <SubHeader
                 selectedTeam={selectedTeam}
             />
             </div>;
-            containerClass = "two";
+            containerClass = "user-teams two";
         }
 
         return <section className="nav-mc-bar ui grid">

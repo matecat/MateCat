@@ -584,7 +584,7 @@ margin-right:4px;
 }
 
 .dropdown span {
-margin-right: 0px;
+margin-right: 11px;
 margin-top: 2px;
 float: left;
 position: relative;
@@ -1434,6 +1434,10 @@ margin-left: 10px;
 
     .popup .x-popup:hover, .slide-panel .x-popup:hover, .x-popup2:hover {
         color:red;
+    }
+
+    .x-popup:hover {
+        color: red;
     }
 	
 	 .mgmt-panel .x-popup {
@@ -2994,7 +2998,7 @@ td.action .btn {
   cursor: pointer;
   height: 22px;
   color: #333!important;
-  width: 75px!important;
+  /*width: 75px!important;*/
   background: #dcdedf!important;
   border-radius: 2px 0 0 2px;
   -moz-box-shadow: 0 1px 2px #ccc;
@@ -3121,7 +3125,7 @@ input#new-tm-key {
 #activetm input#new-tm-key,
 input.email-export-tmx
  {
-	width: 155px;
+	width: 170px;
 	padding: 12px 5px;
 	margin: 0;
 	height: 0px;
@@ -4905,7 +4909,7 @@ span.share-popup-item-email {
 }
 
 .ui.user.label {
-    top: 5px;
+    /*top: 5px;*/
 }
 
 /*.edit-log {
