@@ -345,7 +345,7 @@ class Bootstrap {
             INIT::$HTTPHOST = INIT::$PROTOCOL . "://" . $_SERVER[ 'HTTP_HOST' ];
 
         } else {
-            INIT::$HTTPHOST = $env[ 'CLI_HTTP_HOST' ];
+            INIT::$HTTPHOST = $env[ 'CLI_HTTP_HOST' ]; //not so useful
         }
 
         INIT::obtain(); //load configurations

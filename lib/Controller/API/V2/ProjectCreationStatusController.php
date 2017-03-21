@@ -10,7 +10,6 @@
 namespace API\V2;
 
 
-use API\V2\Exceptions\AuthorizationError;
 use API\V2\Json\CreationStatus;
 use API\V2\Json\Error;
 use API\V2\Json\WaitCreation;

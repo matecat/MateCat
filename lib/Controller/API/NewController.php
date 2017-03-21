@@ -530,6 +530,7 @@ class NewController extends ajaxController {
         $projectStructure[ 'pretranslate_100']      = $this->pretranslate_100 ;
 
         $projectStructure[ 'user_ip' ]              = Utils::getRealIpAddr();
+        $projectStructure[ 'HTTP_HOST' ]            = INIT::$HTTPHOST;
 
         if ( $this->current_user ) {
             $projectStructure[ 'owner' ]       = $this->current_user->getEmail();

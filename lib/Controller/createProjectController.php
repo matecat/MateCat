@@ -304,6 +304,7 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'pretranslate_100' ]     = $this->pretranslate_100;
 
         $projectStructure[ 'user_ip' ]              = Utils::getRealIpAddr();
+        $projectStructure[ 'HTTP_HOST' ]            = INIT::$HTTPHOST;
 
         //TODO enable from CONFIG
         $projectStructure[ 'metadata' ]             = $this->metadata;

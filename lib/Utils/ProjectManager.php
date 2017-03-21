@@ -78,6 +78,7 @@ class ProjectManager {
         if ( $projectStructure == null ) {
             $projectStructure = new RecursiveArrayObject(
                     [
+                            'HTTP_HOST'            => null,
                             'id_project'           => null,
                             'create_date'          => date( "Y-m-d H:i:s" ),
                             'id_customer'          => self::TRANSLATED_USER,
@@ -594,7 +595,7 @@ class ProjectManager {
         $this->projectStructure[ 'result' ][ 'lang_detect' ]     = $this->projectStructure[ 'lang_detect_files' ];
 
         if ( INIT::$VOLUME_ANALYSIS_ENABLED ){
-            $this->projectStructure[ 'result' ][ 'analyze_url' ]     = $this->analyzeURL();
+            $this->projectStructure[ 'result' ][ 'analyze_url' ] = $this->analyzeURL( $this->projectStructure[ 'HTTP_HOST' ] );
         }
 
         $update_project_count = "
@@ -689,13 +690,18 @@ class ProjectManager {
     }
 
     /**
+     * @param $http_host string
      * @return string
      */
-    private function analyzeURL() {
-        return Routes::analyze( array(
-            'project_name' => $this->projectStructure['project_name'],
-            'id_project' => $this->projectStructure['result']['id_project'],
-            'password' => $this->projectStructure['result']['ppassword'])
+    private function analyzeURL( $http_host = null ) {
+
+        return Routes::analyze(
+                [
+                        'http_host'    => $http_host,
+                        'project_name' => $this->projectStructure[ 'project_name' ],
+                        'id_project'   => $this->projectStructure[ 'result' ][ 'id_project' ],
+                        'password'     => $this->projectStructure[ 'result' ][ 'ppassword' ]
+                ]
         );
     }
 
