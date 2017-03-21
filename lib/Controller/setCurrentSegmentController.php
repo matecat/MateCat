@@ -97,8 +97,6 @@ class setCurrentSegmentController extends ajaxController {
             }
         }
 
-        $insertRes = setCurrentSegmentInsert( $this->id_segment, $this->id_job, $this->password );
-
         $this->result[ 'code' ] = 1;
         $this->result[ 'data' ] = array();
 
