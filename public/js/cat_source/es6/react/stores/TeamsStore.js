@@ -70,17 +70,21 @@ AppDispatcher.register(function(action) {
             break;
         case ManageConstants.UPDATE_TEAM_NAME:
             TeamsStore.updateTeamName(action.team);
-            TeamsStore.emitChange(ManageConstants.UPDATE_TEAMs, TeamsStore.teams);
+            TeamsStore.emitChange(ManageConstants.UPDATE_TEAMS, TeamsStore.teams);
             break;
         case ManageConstants.UPDATE_TEAM_MEMBERS:
             let org = TeamsStore.updateTeamMembers(action.team, action.members, action.pending_invitations);
             TeamsStore.emitChange(ManageConstants.UPDATE_TEAM, org);
-            TeamsStore.emitChange(ManageConstants.UPDATE_TEAMs, TeamsStore.teams);
+            TeamsStore.emitChange(ManageConstants.UPDATE_TEAMS, TeamsStore.teams);
             break;
         case ManageConstants.UPDATE_TEAM:
             let updated = TeamsStore.updateTeam(action.team);
             TeamsStore.emitChange(ManageConstants.UPDATE_TEAM, updated);
-            TeamsStore.emitChange(ManageConstants.UPDATE_TEAMs, TeamsStore.teams);
+            TeamsStore.emitChange(ManageConstants.UPDATE_TEAMS, TeamsStore.teams);
+            break;
+        case ManageConstants.UPDATE_TEAMS:
+            TeamsStore.updateAll(action.teams);
+            TeamsStore.emitChange(ManageConstants.UPDATE_TEAMS, TeamsStore.teams);
             break;
         case ManageConstants.CHOOSE_TEAM:
             TeamsStore.emitChange(action.actionType, action.teamId);

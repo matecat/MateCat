@@ -53,7 +53,7 @@ class MembershipStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
      */
     public function getUser( ) {
         if ( is_null($this->user) ) {
-            $this->user = ( new \Users_UserDao() )->getByUid( $this->uid );
+            $this->user = ( new \Users_UserDao() )->setCacheTTL( 60 * 60 *24  )->getByUid( $this->uid );
         }
         return $this->user ;
     }
@@ -63,7 +63,7 @@ class MembershipStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
      */
     public function getTeam() {
         if ( is_null( $this->team ) ) {
-            $this->team = ( new TeamDao() )->findById( $this->id_team ) ;
+            $this->team = ( new TeamDao() )->setCacheTTL( 60 * 60 *24  )->findById( $this->id_team ) ;
         }
         return $this->team;
     }

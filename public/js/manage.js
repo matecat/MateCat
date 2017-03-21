@@ -64,7 +64,7 @@ UI = {
             self.getTeamStructure(self.selectedTeam).done(function () {
                 ManageActions.selectTeam(self.selectedTeam);
                 self.getProjects(self.selectedTeam).done(function(response){
-                    self.renderProjects(response.data, self.selectedTeam);
+                    self.renderProjects(response.data);
                 });
 
             });
@@ -72,34 +72,34 @@ UI = {
 
     },
 
-    reloadProjects: function () {
-        let self = this;
-        if ( UI.Search.currentPage === 1) {
-            this.getProjects(self.selectedTeam).done(function (response) {
-                let projects = response.data;
-                ManageActions.renderProjects(projects);
-            });
-        } else {
-            ManageActions.showReloadSpinner();
-            let total_projects = [];
-            let requests = [];
-            let onDone = function (response) {
-                        let projects = response.data;
-                        $.merge(total_projects, projects);
-                    };
-            for (let i=1; i<= UI.Search.currentPage; i++ ) {
-                requests.push(this.getProjects(self.selectedTeam, i));
-            }
-            $.when.apply(this, requests).done(function() {
-                let results = requests.length > 1 ? arguments : [arguments];
-                for( let i = 0; i < results.length; i++ ){
-                    onDone(results[i][0]);
-                }
-                ManageActions.renderProjects(total_projects, self.selectedTeam,  true);
-            });
-
-        }
-    },
+    // reloadProjects: function () {
+    //     let self = this;
+    //     if ( UI.Search.currentPage === 1) {
+    //         this.getProjects(self.selectedTeam).done(function (response) {
+    //             let projects = response.data;
+    //             ManageActions.renderProjects(projects);
+    //         });
+    //     } else {
+    //         ManageActions.showReloadSpinner();
+    //         let total_projects = [];
+    //         let requests = [];
+    //         let onDone = function (response) {
+    //                     let projects = response.data;
+    //                     $.merge(total_projects, projects);
+    //                 };
+    //         for (let i=1; i<= UI.Search.currentPage; i++ ) {
+    //             requests.push(this.getProjects(self.selectedTeam, i));
+    //         }
+    //         $.when.apply(this, requests).done(function() {
+    //             let results = requests.length > 1 ? arguments : [arguments];
+    //             for( let i = 0; i < results.length; i++ ){
+    //                 onDone(results[i][0]);
+    //             }
+    //             ManageActions.renderProjects(total_projects, self.selectedTeam, self.teams,  true);
+    //         });
+    //
+    //     }
+    // },
 
     renderProjects: function (projects) {
         if ( !this.ProjectsContainer ) {
@@ -110,8 +110,29 @@ UI = {
                 downloadTranslationFn : this.downloadTranslation,
             }), mountPoint);
         }
-        ManageActions.renderProjects(projects, this.selectedTeam);
-
+        // If is the Personal team selected I need to know all teams members before load the projects
+        if (this.selectedTeam.type === 'personal') {
+            var self = this;
+            let requests = [];
+            let onDone = function (data) {
+                var team = self.teams.find(function (t) {
+                    return t.id === data.members[0].id_team
+                });
+                team.members = data.members;
+                team.pending_invitations = data.pending_invitations;
+            };
+            this.teams.forEach(function(team) {
+                requests.push(self.getTeamMembers(team.id));
+            });
+            $.when.apply(this, requests).done(function() {
+                let results = requests.length > 1 ? arguments : [arguments];
+                for( let i = 0; i < results.length; i++ ){
+                    onDone(results[i][0]);
+                }
+                ManageActions.updateTeams(self.teams);
+            });
+        }
+        ManageActions.renderProjects(projects, this.selectedTeam, this.teams);
     },
 
     renderMoreProjects: function () {
@@ -218,7 +239,7 @@ UI = {
 
     getTeamStructure: function (team) {
         let self = this;
-        return this.getTeamMembers(team).then(function (data) {
+        return this.getTeamMembers(team.id).then(function (data) {
             self.selectedTeam.members = data.members;
             self.selectedTeam.pending_invitations = data.pending_invitations;
         });
@@ -271,12 +292,23 @@ UI = {
      */
     getProjects: function(team, page) {
         let pageNumber = (page) ? page : UI.Search.currentPage;
-        let data = {
-            action: 'getProjects',
-            id_team: team.id,
-            page:	pageNumber,
-            filter: (!$.isEmptyObject(UI.Search.filter)) ? 1 : 0,
-        };
+        let data = {};
+        // if (team.type == 'personal') {
+        //     this.Search.filter.id_assignee = APP.USER.STORE.user.uid;
+        //     data = {
+        //         action: 'getProjects',
+        //         page:	pageNumber,
+        //         filter: (!$.isEmptyObject(UI.Search.filter)) ? 1 : 0,
+        //     };
+        // } else {
+            data = {
+                action: 'getProjects',
+                id_team: team.id,
+                page:	pageNumber,
+                filter: (!$.isEmptyObject(UI.Search.filter)) ? 1 : 0,
+            };
+        // }
+
         // Filters
         data = $.extend(data,UI.Search.filter);
 
@@ -310,11 +342,11 @@ UI = {
 
     },
 
-    getTeamMembers: function (team) {
+    getTeamMembers: function (teamId) {
         return $.ajax({
             async: true,
             type: "get",
-            url : "/api/v2/teams/" + team.id + "/members"
+            url : "/api/v2/teams/" + teamId + "/members"
         });
     },
 
@@ -458,7 +490,7 @@ UI = {
         return $.ajax({
             data: JSON.stringify(data),
             type: "PUT",
-            url : "/api/v2/teams/" + this.selectedTeam.id + "/projects/" + project.id+ "/move"
+            url : "/api/v2/teams/" + this.selectedTeam.id + "/projects/" + project.id
         });
     },
 

@@ -422,7 +422,7 @@ class JobContainer extends React.Component {
            Outsource
         </a>;
         if (this.props.job.get('outsource')) {
-            if (this.props.job.get('outsource').get('outsourced') == "1") {
+            if (this.props.job.get('outsource').get('id_vendor') == "1") {
                 label = <a className="open-outsourced ui button "
                            onClick={this.openOutsourceModal.bind(this)}>
                     View status
@@ -440,7 +440,7 @@ class JobContainer extends React.Component {
     getOutsourceJobSent() {
         let outsourceJobLabel = '';
         if (this.props.job.get('outsource')) {
-            if (this.props.job.get('outsource').get('outsourced') == "1") {
+            if (this.props.job.get('outsource').get('id_vendor') == "1") {
                 outsourceJobLabel =
                     <a href="http://www.translated.net" target="_blank"><img className='outsource-logo' src="/public/img/logo_translated.png" title="visit our website"/></a>
                 ;
@@ -452,8 +452,8 @@ class JobContainer extends React.Component {
     getOutsourceDelivery() {
         let outsourceDelivery = '';
         if (this.props.job.get('outsource')) {
-            if (this.props.job.get('outsource').get('outsourced') == "1") {
-                outsourceDelivery = <div className="job-delivery">{this.props.job.get('outsource').get('delivery')}</div>
+            if (this.props.job.get('outsource').get('id_vendor') == "1") {
+                outsourceDelivery = <div className="job-delivery">{this.props.job.get('outsource').get('delivery_date')}</div>
                 ;
             }
         }
@@ -519,7 +519,7 @@ class JobContainer extends React.Component {
         ProjectsStore.addListener(ManageConstants.ENABLE_DOWNLOAD_BUTTON, this.enableDownloadMenu.bind(this));
         ProjectsStore.addListener(ManageConstants.DISABLE_DOWNLOAD_BUTTON, this.disableDownloadMenu.bind(this));
 
-        ManageActions.getOutsourceQuote(this.props.project, this.props.job);
+        // ManageActions.getOutsourceQuote(this.props.project, this.props.job);
     }
 
     componentWillUnmount() {

@@ -31,7 +31,7 @@ class Project {
     public function renderItem( $data ) {
         return array(
                 'id'           => (int)$data->id,
-                'id_assignee'  => (int)$data->id_assignee,
+                'id_assignee'  => ( is_null( $data->id_assignee ) ? $data->id_assignee : (int)$data->id_assignee ),
                 'name'         => $data->name,
                 'id_team'      => (int)$data->id_team,
                 'project_slug' => Utils::friendly_slug( $data->name )

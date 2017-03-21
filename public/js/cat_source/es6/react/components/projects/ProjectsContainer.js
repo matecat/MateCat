@@ -12,10 +12,12 @@ class ProjectsContainer extends React.Component {
             more_projects: true,
             reloading_projects: false,
             team: null,
+            teams: null
         };
         this.renderProjects = this.renderProjects.bind(this);
         this.updateProjects = this.updateProjects.bind(this);
         this.updateTeam = this.updateTeam.bind(this);
+        this.updateTeams = this.updateTeams.bind(this);
         this.hideSpinner = this.hideSpinner.bind(this);
         this.showProjectsReloadSpinner = this.showProjectsReloadSpinner.bind(this);
     }
@@ -41,6 +43,12 @@ class ProjectsContainer extends React.Component {
                 team: team,
             });
         }
+    }
+
+    updateTeams(teams) {
+        this.setState({
+            teams: teams,
+        });
     }
 
     updateProjects(projects) {
@@ -108,6 +116,9 @@ class ProjectsContainer extends React.Component {
         ProjectsStore.addListener(ManageConstants.NO_MORE_PROJECTS, this.hideSpinner);
         ProjectsStore.addListener(ManageConstants.SHOW_RELOAD_SPINNER, this.showProjectsReloadSpinner);
         TeamsStore.addListener(ManageConstants.UPDATE_TEAM, this.updateTeam);
+        TeamsStore.addListener(ManageConstants.UPDATE_TEAMS, this.updateTeams);
+        TeamsStore.addListener(ManageConstants.RENDER_TEAMS, this.updateTeams);
+
     }
 
     componentWillUnmount() {
@@ -117,6 +128,8 @@ class ProjectsContainer extends React.Component {
         ProjectsStore.removeListener(ManageConstants.NO_MORE_PROJECTS, this.hideSpinner);
         ProjectsStore.removeListener(ManageConstants.SHOW_RELOAD_SPINNER, this.showProjectsReloadSpinner);
         TeamsStore.removeListener(ManageConstants.UPDATE_TEAM, this.updateTeam);
+        TeamsStore.removeListener(ManageConstants.UPDATE_TEAMS, this.updateTeams);
+        TeamsStore.removeListener(ManageConstants.RENDER_TEAMS, this.updateTeams);
     }
 
     componentDidUpdate() {
@@ -131,7 +144,8 @@ class ProjectsContainer extends React.Component {
         return (nextState.projects !== this.state.projects ||
         nextState.more_projects !== this.state.more_projects ||
         nextState.reloading_projects !== this.state.reloading_projects ||
-        nextState.team !== this.state.team)
+        nextState.team !== this.state.team ||
+        nextState.teams !== this.state.teams )
     }
 
     render() {
@@ -145,7 +159,8 @@ class ProjectsContainer extends React.Component {
                 lastActivityFn={this.props.getLastActivity}
                 changeJobPasswordFn={this.props.changeJobPasswordFn}
                 downloadTranslationFn={this.props.downloadTranslationFn}
-                team={this.state.team}/>
+                team={this.state.team}
+                teams={this.state.teams}/>
         ));
 
         let spinner = '';

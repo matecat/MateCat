@@ -7,26 +7,24 @@ let ManageActions = {
 
     /** Render the list of projects
      * @param projects
+     * @param team
      * @param teams
      * @param hideSpinner
      * */
-    renderProjects: function (projects, teams, hideSpinner) {
+    renderProjects: function (projects, team, teams, hideSpinner) {
+
         AppDispatcher.dispatch({
             actionType: ManageConstants.RENDER_PROJECTS,
             projects: projects,
-            team: teams,
+            team: team,
             hideSpinner: hideSpinner,
         });
-    },
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.RENDER_TEAMS,
+            teams: teams,
+        });
 
-    // renderAllTeamssProjects: function (projects, teams, hideSpinner) {
-    //     AppDispatcher.dispatch({
-    //         actionType: ManageConstants.RENDER_ALL_TEAM_PROJECTS,
-    //         projects: projects,
-    //         teams: teams,
-    //         hideSpinner: hideSpinner,
-    //     });
-    // },
+    },
 
     updateProjects: function (projects) {
         AppDispatcher.dispatch({
@@ -178,7 +176,34 @@ let ManageActions = {
 
     changeProjectTeam: function (teamId, project) {
         UI.changeProjectTeam(teamId, project.toJS()).done(function () {
-            if (teamId !== UI.selectedTeam.id) {
+            var team =  UI.teams.find(function (team) {
+                return team.id == teamId
+            });
+            if (UI.selectedTeam.type == 'personal' && team.type !== 'personal') {
+
+                UI.getTeamMembers(teamId).then(function (data) {
+                    team.members = data.members;
+                    team.pending_invitations = data.pending_invitations;
+                    AppDispatcher.dispatch({
+                        actionType: ManageConstants.UPDATE_TEAM,
+                        team: team
+                    });
+                    setTimeout(function () {
+                        AppDispatcher.dispatch({
+                            actionType: ManageConstants.CHANGE_PROJECT_TEAM,
+                            project: project,
+                            teamId: teamId
+                        });
+                    });
+                });
+            } else {
+                AppDispatcher.dispatch({
+                    actionType: ManageConstants.CHANGE_PROJECT_TEAM,
+                    project: project,
+                    teamId: teamId
+                });
+            }
+            if (teamId !== UI.selectedTeam.id && UI.selectedTeam.type !== 'personal') {
                 setTimeout(function () {
                     AppDispatcher.dispatch({
                         actionType: ManageConstants.HIDE_PROJECT,
@@ -192,6 +217,7 @@ let ManageActions = {
                     });
                 }, 1000);
             }
+
         });
     },
 
@@ -212,7 +238,7 @@ let ManageActions = {
     },
 
     openModifyTeamModal: function (team) {
-        UI.getTeamMembers(team).then(function (data) {
+        UI.getTeamMembers(team.id).then(function (data) {
             team.members = data.members;
             team.pending_invitations = data.pending_invitations;
             AppDispatcher.dispatch({
@@ -267,9 +293,20 @@ let ManageActions = {
     },
 
     updateTeam: function (team) {
+        UI.getTeamMembers(team.id).then(function (data) {
+            team.members = data.members;
+            team.pending_invitations = data.pending_invitations;
+            AppDispatcher.dispatch({
+                actionType: ManageConstants.UPDATE_TEAM,
+                team: team
+            });
+        });
+    },
+
+    updateTeams: function (teams) {
         AppDispatcher.dispatch({
-            actionType: ManageConstants.UPDATE_TEAM,
-            team: team
+            actionType: ManageConstants.UPDATE_TEAMS,
+            teams: teams
         });
     },
 
@@ -349,6 +386,7 @@ let ManageActions = {
             }
         });
     },
+
     changeTeamName: function(team, newName) {
         UI.changeTeamName(team, newName).done(function (data) {
             AppDispatcher.dispatch({
