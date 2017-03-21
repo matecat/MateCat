@@ -4,6 +4,7 @@ define( 'DEFAULT_NUM_RESULTS', 2 );
 set_time_limit( 0 );
 
 use ConnectedServices\GDrive as GDrive ;
+use ProjectQueue\Queue;
 
 class createProjectController extends ajaxController {
 
@@ -131,7 +132,7 @@ class createProjectController extends ajaxController {
         $this->lang_detect_files       = $__postInput[ 'lang_detect_files' ];
         $this->pretranslate_100        = $__postInput[ 'pretranslate_100' ];
         $this->dqf_key                 = $__postInput[ 'dqf_key' ];
-        
+
         $this->__setMetadataFromPostInput( $__postInput ) ;
 
         if ( $this->disable_tms_engine_flag ) {
@@ -280,12 +281,13 @@ class createProjectController extends ajaxController {
         \Log::doLog( '------------------------------'); 
         \Log::doLog( $arFiles ); 
 
+        FilesStorage::moveFileFromUploadSessionToQueuePath( $_COOKIE[ 'upload_session' ] );
+
         $projectManager = new ProjectManager();
 
         $projectStructure = $projectManager->getProjectStructure();
 
         $projectStructure[ 'project_name' ]         = $this->project_name;
-        $projectStructure[ 'result' ]               = $this->result;
         $projectStructure[ 'private_tm_key' ]       = $this->private_tm_key;
         $projectStructure[ 'private_tm_user' ]      = $this->private_tm_user;
         $projectStructure[ 'private_tm_pass' ]      = $this->private_tm_pass;
@@ -301,6 +303,8 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'skip_lang_validation' ] = true;
         $projectStructure[ 'pretranslate_100' ]     = $this->pretranslate_100;
 
+        $projectStructure[ 'user_ip' ]              = Utils::getRealIpAddr();
+
         //TODO enable from CONFIG
         $projectStructure[ 'metadata' ]             = $this->metadata;
 
@@ -315,14 +319,19 @@ class createProjectController extends ajaxController {
             $projectStructure[ 'owner' ]        = $this->userMail ;
         }
 
-        $projectManager = new ProjectManager( $projectStructure );
-        $projectManager->createProject();
+        //reserve a project id from the sequence
+        $projectStructure[ 'id_project' ] = Database::obtain()->nextSequence( Database::SEQ_ID_PROJECT )[ 0 ];
+        $projectStructure[ 'ppassword' ]  = $projectManager->generatePassword();
 
-        // Strictly related to the UI ( not API ) interaction, should yet be moved away from controller.
+        Queue::sendProject( $projectStructure );
+
         $this->__clearSessionFiles();
-        $this->__assignLastCreatedPid( $projectStructure['id_project'] ) ;
+        $this->__assignLastCreatedPid( $projectStructure['id_project'] ) ; //TODO get ID from published results ( API or directly from handler in a loop )
 
-        $this->result = $projectStructure[ 'result' ];
+        $this->result[ 'data' ] = [
+                'id_project' => $projectStructure[ 'id_project' ],
+                'password'   => $projectStructure[ 'ppassword' ]
+        ];
 
     }
 
@@ -391,7 +400,7 @@ class createProjectController extends ajaxController {
     private function __clearSessionFiles() {
 
         if ( $this->userIsLogged ) {
-            $gdriveSession = new GDrive\Session( $_SESSION ) ;
+            $gdriveSession = new GDrive\Session() ;
             $gdriveSession->clearFiles() ;
         }
     }

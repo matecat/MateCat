@@ -52,10 +52,7 @@ class UserController extends AbstractStatefulKleinController  {
     }
 
     protected function afterConstruct() {
-        if ( !isset( $_SESSION['uid'] ) ) {
-            throw new NotFoundError('user session not found');
-        }
-
+        \Bootstrap::sessionClose();
         $this->__findUser();
         $this->__findConnectedServices();
 
@@ -63,7 +60,11 @@ class UserController extends AbstractStatefulKleinController  {
 
     private function __findUser() {
         $dao = new Users_UserDao();
-        $this->user = $dao->getByUid( $_SESSION['uid'] ) ;
+
+        if ( isset( $_SESSION['uid'] ) ) {
+            $this->user = $dao->getByUid( $_SESSION['uid'] ) ;
+        }
+
         if (!$this->user) {
             throw new NotFoundError('user not found');
         }

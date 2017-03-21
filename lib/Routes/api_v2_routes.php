@@ -9,10 +9,10 @@
 
 $klein->with('/api/v2/projects/[:id_project]/[:password]', function() {
 
-    route( '/urls',                 'GET',  'API\V2\UrlsController',        'urls'      );
-    route( '/jobs/[:id_job]/merge', 'POST', 'API\V2\JobMergeController',    'merge'     );
-    route( '/rename', 'POST', 'API\V2\ProjectRenameController',    'rename'     );
-
+    route( '/urls',                 'GET',  'API\V2\UrlsController',                    'urls' );
+    route( '/jobs/[:id_job]/merge', 'POST', 'API\V2\JobMergeController',                'merge' );
+    route( '/creation_status',      'GET',  'API\V2\ProjectCreationStatusController',   'get' );
+    route( '/rename',               'POST', 'API\V2\ProjectRenameController',           'rename' );
 });
 
 $klein->with('/api/v2/activity', function() {
