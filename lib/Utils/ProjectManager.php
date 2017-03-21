@@ -124,7 +124,10 @@ class ProjectManager {
                             'owner'                => '',
                             'word_count_type'      => '',
                             'metadata'             => array(),
-                            'id_assignee'          => null
+                            'id_assignee'          => null,
+                            'session'              => ( isset( $_SESSION ) ? $_SESSION : false ),
+                            'id_team'              => null,
+                            'team'                 => null
                     ) );
 
         }
@@ -162,6 +165,7 @@ class ProjectManager {
      * @param \Teams\TeamStruct $team
      */
     public function setTeam( TeamStruct $team ) {
+        $this->projectStructure['team'] = $team ;
         $this->projectStructure['id_team'] = $team->id ;
     }
 
@@ -240,13 +244,28 @@ class ProjectManager {
      *
      */
     private function createProjectRecord() {
+
+        $this->__checkForSelfAssignment();
         $this->projectStructure[ 'ppassword' ]  = $this->_generatePassword();
         $this->projectStructure[ 'user_ip' ]    = Utils::getRealIpAddr();
 
         $this->project = insertProject( $this->projectStructure );
         $this->projectStructure[ 'id_project' ] = $this->project->id;
+
     }
 
+    private function __checkForSelfAssignment(){
+
+        if ( !empty( $this->projectStructure[ 'session' ][ 'uid' ] ) ) {
+            //if this is a logged user, check if the project container is the personal team
+            // and in such case set the user as project assignee
+            if( $this->projectStructure[ 'team' ]->type == Constants_Teams::PERSONAL ){
+                $this->projectStructure[ 'id_assignee' ] = $this->projectStructure[ 'session' ][ 'uid' ];
+            }
+
+        }
+
+    }
 
     public function createProject() {
 

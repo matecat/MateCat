@@ -127,7 +127,12 @@ class getProjectsController extends ajaxController {
         }
 
         $team = $this->filterTeam();
-        $assignee = $this->filterAssignee($team);
+        if( $team->type == Constants_Teams::PERSONAL ){
+            $assignee = $this->logged_user;
+            $team = null;
+        } else {
+            $assignee = $this->filterAssignee( $team );
+        }
 
         $projects = ManageUtils::queryProjects( $this->logged_user, $this->start, $this->step,
             $this->search_in_pname,
@@ -179,25 +184,27 @@ class getProjectsController extends ajaxController {
      * @throws Exception
      */
 
-    private function filterAssignee( $team) {
+    private function filterAssignee( $team ) {
 
-        if ( is_null($this->id_assignee ) ) return null;
+        if ( is_null( $this->id_assignee ) ) {
+            return null;
+        }
 
-        $dao = new MembershipDao();
-        $memberships = $dao->setCacheTTL( 60 * 60 * 24 )->getMemberListByTeamId( $team->id);
-        $id_assignee = $this->id_assignee ;
+        $dao         = new MembershipDao();
+        $memberships = $dao->setCacheTTL( 60 * 60 * 24 )->getMemberListByTeamId( $team->id );
+        $id_assignee = $this->id_assignee;
         /**
          * @var $users \Teams\MembershipStruct[]
          */
-        $users = array_values(array_filter($memberships, function( MembershipStruct $membership ) use ( $id_assignee ) {
-            return $membership->getUser()->uid == $id_assignee ;
-        } ));
+        $users = array_values( array_filter( $memberships, function ( MembershipStruct $membership ) use ( $id_assignee ) {
+            return $membership->getUser()->uid == $id_assignee;
+        } ) );
 
         if ( empty( $users ) ) {
-            throw new Exception('Assignee not found in team') ;
+            throw new Exception( 'Assignee not found in team' );
         }
 
-        return $users[0]->getUser();
+        return $users[ 0 ]->getUser();
     }
 
     private function filterTeam() {
