@@ -697,7 +697,7 @@ class ProjectManager {
 
         return Routes::analyze(
                 [
-                        'http_host'    => $http_host,
+                        'http_host'    => ( is_null( $http_host ) ? INIT::$HTTPHOST : $http_host ),
                         'project_name' => $this->projectStructure[ 'project_name' ],
                         'id_project'   => $this->projectStructure[ 'result' ][ 'id_project' ],
                         'password'     => $this->projectStructure[ 'result' ][ 'ppassword' ]
