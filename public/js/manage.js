@@ -458,7 +458,7 @@ UI = {
         return $.ajax({
             data: JSON.stringify(data),
             type: "PUT",
-            url : "/api/v2/teams/" + this.selectedTeam.id + "/projects/" + project.id+ "/move"
+            url : "/api/v2/teams/" + this.selectedTeam.id + "/projects/" + project.id
         });
     },
 

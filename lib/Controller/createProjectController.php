@@ -325,7 +325,8 @@ class createProjectController extends ajaxController {
             $projectStructure[ 'uid' ]           = $this->uid;
             $projectStructure[ 'id_customer' ]   = $this->userMail;
             $projectStructure[ 'owner' ]         = $this->userMail ;
-            $projectStructure[ 'id_team' ] = $this->team->id ;
+            $projectStructure[ 'id_team' ]       = $this->team->id ;
+            $projectStructure[ 'team' ]          = $this->team; // set the team object to avoid useless query
         }
 
 
@@ -440,7 +441,7 @@ class createProjectController extends ajaxController {
      *
      * @throws Exception
      */
-    private function __setTeam( $id_team = null) {
+    private function __setTeam( $id_team = null ) {
         if ( is_null( $id_team ) ) {
             $this->team = $this->logged_user->getPersonalTeam() ;
         }

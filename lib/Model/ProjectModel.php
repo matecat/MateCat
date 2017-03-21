@@ -4,6 +4,7 @@ use API\V2\Exceptions\AuthorizationError;
 use Features\QaCheckBlacklist\BlacklistFromZip;
 use Teams\MembershipDao;
 use Teams\MembershipStruct;
+use Teams\TeamDao;
 
 class ProjectModel {
 
@@ -67,6 +68,10 @@ class ProjectModel {
             $this->checkIdAssignee();
         }
 
+        if( array_key_exists( 'id_assignee', $this->willChange ) ){
+            $this->checkAssigneeChangeInPersonalTeam();
+        }
+
         if ( isset( $this->willChange[ 'id_team' ] ) ) {
             $this->checkIdTeam();
         }
@@ -111,9 +116,20 @@ class ProjectModel {
         }
     }
 
+    private function checkAssigneeChangeInPersonalTeam(){
+
+        $teamDao = new TeamDao();
+        $team = $teamDao->setCacheTTL( 60 * 60 * 24 )->findById( $this->project_struct->id_team );
+        if( $team->type == Constants_Teams::PERSONAL ){
+            throw new \Exceptions\ValidationError( 'Can\'t change the Assignee of a personal project.' );
+        }
+
+    }
+
     private function checkIdAssignee() {
+
         $membershipDao = new MembershipDao();
-        $members       = $membershipDao->getMemberListByTeamId( $this->project_struct->id_team );
+        $members       = $membershipDao->setCacheTTL( 60 )->getMemberListByTeamId( $this->project_struct->id_team );
         $id_assignee   = $this->willChange[ 'id_assignee' ];
         $found         = array_filter( $members, function ( MembershipStruct $member ) use ( $id_assignee ) {
             return ( $id_assignee == $member->uid );
@@ -130,7 +146,7 @@ class ProjectModel {
         $memberShip = new MembershipDao();
 
         //choose this method ( and use array_map ) instead of findTeamByIdAndUser because thr results of this one are cached
-        $memberList = $memberShip->getMemberListByTeamId( $this->willChange[ 'id_team' ] );
+        $memberList = $memberShip->setCacheTTL( 60 )->getMemberListByTeamId( $this->willChange[ 'id_team' ] );
 
         $found = array_filter( $memberList, function( $values ) {
             return $values->uid == $this->user->uid;
@@ -139,6 +155,20 @@ class ProjectModel {
         if ( empty( $found ) ) {
             throw new AuthorizationError( "Not Authorized", 401 );
         }
+
+        // if the project has an assignee, we have to check if the assignee_id exists in the other team. If not, reset the assignee
+        if( $this->project_struct->id_assignee ){
+
+            $found = array_filter( $memberList, function( $values ) {
+                return $this->project_struct->id_assignee == $values->uid;
+            } );
+
+            if( empty( $found )){
+                $this->willChange[ 'id_assignee' ] = null; //unset the assignee
+            }
+
+        }
+
 
     }
 
