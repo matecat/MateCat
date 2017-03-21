@@ -1744,4 +1744,5 @@ div#open-translator {
     margin: 0 auto;
     overflow: hidden;
     margin-top: -1px;
+    background: linear-gradient(to right, #fff, #fff 37%, #f8f8f8 37%, #fcfcfc 100%);
 }

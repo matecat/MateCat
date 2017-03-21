@@ -169,7 +169,7 @@ class SubHeader extends React.Component {
                         </div>
                     </div>
 
-                    <div className="center aligned column  pad-right-0">
+                    <div className="center aligned column pad-right-0">
                         {membersFilter}
                     </div>
 
