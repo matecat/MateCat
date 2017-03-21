@@ -570,7 +570,7 @@ class NewController extends ajaxController {
 
         } else {
             //everything ok
-            $this->api_output[ 'status' ]       = 200;
+            $this->api_output[ 'status' ]       = 'OK';
             $this->api_output[ 'message' ]      = 'Success';
             $this->api_output[ 'id_project' ]   = $this->result[ 'id_project' ];
             $this->api_output[ 'project_pass' ] = $this->result[ 'ppassword' ];
