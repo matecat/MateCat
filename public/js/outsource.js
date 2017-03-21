@@ -134,7 +134,7 @@ $.extend(UI, {
         $( ".title-words" ).text(job.stats.TOTAL_FORMATTED );
 
         if (job.outsource) {
-            var dd = new Date( job.outsource.delivery );
+            var dd = new Date( job.outsource.delivery_date );
             $('.modal.outsource .out-date').val( $.format.date(dd, "d MMMM") + ' at ' + $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a") );
         }
 
@@ -162,14 +162,14 @@ $.extend(UI, {
     },
 
     checkSendToTranslatorButton: function () {
-        var email = $('.modal.outsource input.out-email').val();
+        var email = UI.checkInputEmailInput();
         var date = $('.outsource .out-date').val();
 
         if (email.length > 0 && date.length > 0 && APP.checkEmail(email)) {
-            $('.send-to-translator-btn').removeClass('disabled');
+            // $('.send-to-translator-btn').removeClass('disabled');
             return true;
         } else {
-            $('.send-to-translator-btn').addClass('disabled');
+            // $('.send-to-translator-btn').addClass('disabled');
             return false;
         }
     },
@@ -178,8 +178,10 @@ $.extend(UI, {
         var email = $('.modal.outsource input.out-email').val();
         if (!APP.checkEmail(email)) {
             $('.modal.outsource input.out-email').addClass('error');
+            return false;
         } else {
             $('.modal.outsource input.out-email').removeClass('error');
+            return true;
         }
     },
 

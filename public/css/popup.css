@@ -450,7 +450,7 @@ span.revision_delivery {
     width: 100%;
     border-top: 1px solid #ccc;
     text-align: center;
-    margin-top: 30px!important;
+    margin-top: 15px!important;
 }
 
 .pricebox .tprice,
@@ -1729,10 +1729,34 @@ div#open-translator {
     margin-right: 50px;
 }
 
-.send-to-translator {
+.modal.outsource .send-to-translator {
     border: 1px solid #ccc;
     border-radius: 0px 0px 3px 3px;
     margin: 0 auto;
     overflow: hidden;
     margin-top: -1px;
+    margin-bottom: 15px;
+}
+
+.modal.outsource .outsource-divider {
+    width: 230px;
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+    height: 20px;
+    line-height: 20px;
+}
+
+.modal.outsource .divider-line {
+    height: 2px;
+    width: 100px;
+    background-color: #c5c5c5;
+    margin-top: 10px;
+    display: block;
+    float: left;
+}
+
+.modal.outsource .outsource-divider span {
+    float: left;
+    width: 30px;
 }
