@@ -792,6 +792,9 @@ div#matecat-modal p {
     font-variant: normal;
     text-transform: none;
     line-height: 1;
+    &:hover {
+        color: red;
+    }
 
     /* Better Font Rendering =========== */
     -webkit-font-smoothing: antialiased;
@@ -825,20 +828,36 @@ div#matecat-modal p {
             overflow-y: auto;
             &.team {
                 .item {
-                    padding: 5px 0 !important;
+                    background-color: #ffffff;
+                    padding: 0 0 4px 0 !important;
+                    display: inline-block;
+                    width: 100%;
+                    &:hover {
+                        background-color: #e0e1e2;
+                        .content.top-2 {
+                            display: inherit;
+                        }
+                    }
                     .ui.circular.label {
                         float: left !important;
+                        margin-top: 6px;
+                        margin-left: 5px;
+                        margin-right: 5px;
                     }
                     .content.user {
-                        min-width: 200px !important;
+                        min-width: 180px !important;
                         float: left;
-                        padding: 3px 3px;
+                        margin-top: 8px;
+                        font-size: 14px;
                     }
                     .content.email-member {
                         font-size: 14px;
                         color: gray;
-                        padding: 5px 3px 4px;
                         float: left;
+                        margin: 10px 0px 4px 0px;
+                    }
+                    .content.top-2 {
+                        display: none;
                     }
                 }
             }
@@ -886,5 +905,19 @@ div#matecat-modal p {
     }
     &:hover {
         border: 1px solid rgba(34, 36, 38, 0.15);
+    }
+}
+
+
+.btn-cancel.outsource-cancel-date {
+    height: 16px;
+    &:hover {
+        color: #333333;
+    }
+}
+
+.action {
+    .tmx-import-slider {
+        width: 150px !important;
     }
 }

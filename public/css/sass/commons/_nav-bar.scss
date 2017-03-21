@@ -4,6 +4,7 @@ header {
     width: 100%;
     z-index: 4;
     margin: 0;
+    height: 45px;
     .nav-mc-bar {
         margin: 0px !important;
         height: 48px !important;
@@ -104,7 +105,7 @@ header {
             height: 36px;
             width: 36px;
             margin-left: 10px;
-            margin-right: 51px;
+            margin-right: 10px;
             text-decoration: none;
             transition: 0.3s ease;
             cursor: pointer;
@@ -137,7 +138,7 @@ header {
             height: 36px;
             width: 36px;
             margin-left: 10px;
-            margin-right: 51px;
+            margin-right: 10px;
             text-decoration: none;
             cursor: pointer;
             border: 1px dashed;
@@ -173,9 +174,13 @@ header {
     }
 }
 
+.user-teams {
+    padding-right: 0px !important;
+}
+
 
 .logo {
-    position: absolute;
+    position: relative;
     float: left;
     border: 0;
     margin-top: 5px;
@@ -183,7 +188,7 @@ header {
     width: 145px;
     height: 31px;
     background-size: 130px 26px;
-    left: 81px;
+    left: 13px;
 }
 
 #menu-site {
