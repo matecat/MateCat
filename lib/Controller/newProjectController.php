@@ -79,7 +79,7 @@ class newProjectController extends viewController {
         $this->mt_engines = $engine->read( $engineQuery );
 
         if ( $this->isLoggedIn() ) {
-            $this->__loadFeatures();
+            $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
 
             try {
 
@@ -98,10 +98,12 @@ class newProjectController extends viewController {
         }
     }
 
-    private function __loadFeatures() {
-        $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
-    }
-
+    /**
+     * Here we want to be explicit about the team the user is currently working on.
+     * Even if a user is included in more teams, we'd prefer to have the team bound
+     * to the given session.
+     *
+     */
     private function array_sort_by_column( &$arr, $col, $dir = SORT_ASC ) {
         $sort_col = array();
         foreach ( $arr as $key => $row ) {

@@ -3,7 +3,6 @@
 namespace API\App;
 
 use API\App\Json\ConnectedService;
-use API\V2\AuthorizationError;
 use API\V2\Json\Team;
 use API\V2\Json\User;
 

@@ -61,6 +61,10 @@ class getProjectsController extends ajaxController {
 
     private $no_assignee ;
 
+    /**
+     * @var FeatureSet
+     */
+    private $featureSet;
 
     public function __construct() {
 
@@ -126,6 +130,9 @@ class getProjectsController extends ajaxController {
             return;
         }
 
+        $this->featureSet = new FeatureSet();
+        $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
+
         $team = $this->filterTeam();
         if( $team->type == Constants_Teams::PERSONAL ){
             $assignee = $this->logged_user;
@@ -161,9 +168,7 @@ class getProjectsController extends ajaxController {
     }
 
     private function filterProjectsWithUserFeatures( $projects ) {
-        $featureSet = new FeatureSet() ;
-        $featureSet->loadFromUserEmail( $this->logged_user->email ) ;
-        $projects = $featureSet->filter('filter_manage_projects_loaded', $projects);
+        $projects = $this->featureSet->filter('filter_manage_projects_loaded', $projects);
         return $projects ;
     }
 

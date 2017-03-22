@@ -344,142 +344,25 @@ $.extend(UI.UPLOAD_PAGE, {
             APP.doRequest({
                 data: APP.getCreateProjectParams(),
 
-                beforeSend: function (){
-                    $('.error-message').hide();
-                    $('.uploadbtn').attr('value','Analyzing...').attr('disabled','disabled').addClass('disabled');
-                },
-                success: function(d){
-                    console.log('d: ', d);
+			beforeSend: function (){
+				$('.error-message').hide();
+				$('.uploadbtn').attr('value','Analyzing...').attr('disabled','disabled').addClass('disabled');
+			},
+			success: function(d){
 
-                    if(typeof(d.lang_detect) !== 'undefined'){
-                        UI.skipLangDetectArr = d.lang_detect;
-                    }
+				if( typeof d.errors != 'undefined' && d.errors.length ) {
+					//normal error management
+					$('.error-message').append( '<div class="error-content">' + this.message + '<br /></div>' ).show();
+					$('.uploadbtn').attr('value', 'Analyze');
+					$('body').removeClass('creating');
 
-                    if ( UI.skipLangDetectArr != null ) {
-                        $.each(UI.skipLangDetectArr, function(file, status){
-                            if(status == 'ok') 	UI.skipLangDetectArr[file] = 'skip';
-                            else UI.skipLangDetectArr[file] = 'detect';
+				} else {
+                    APP.handleCreationStatus( d.data.id_project, d.data.password  );
+				}
 
-                        });
-                    }
-
-
-                    if( typeof d.errors != 'undefined' && d.errors.length ) {
-
-                        var alertComposedMessage = [];
-                        $('.error-message').text('');
-
-                        $.each(d.errors, function() {
-
-                            switch(this.code) {
-                                //no useful memories found in TMX
-                                case -16 :
-                                    UI.addTMXLangFailure();
-                                    break;
-                                case -14 :
-                                    UI.addInlineMessage(
-                                        ".tmx",
-                                        this.message
-                                    );
-                                    break;
-                                //no text to translate found.
-                                case -1  : 	var fileName = this.message.replace("No text to translate in the file ", "")
-                                    .replace(/.$/g,"");
-
-                                    console.log(fileName);
-                                    UI.addInlineMessage(
-                                        fileName,
-                                        'Is this a scanned file or image?<br/>Try converting to DOCX using an OCR software '+
-                                        '(ABBYY FineReader or Nuance PDF Converter)'
-                                    );
-                                    break;
-                                case -17  :
-                                    $.each(d.lang_detect, function (fileName, status){
-                                        if(status == 'detect'){
-                                            UI.addInlineMessage(
-                                                fileName,
-                                                'Different source language. <a class="skip_link" id="skip_'+fileName+'">Ignore</a>'
-                                            );
-                                        }
-                                    });
-                                    break;
-
-                                default:
-                            }
-
-                            //normal error management
-                            $('.error-message').append( '<div class="error-content">' + this.message + '<br /></div>' ).show();
-
-                        });
-
-                        $('.uploadbtn').attr('value', 'Analyze');
-                        $('body').removeClass('creating');
-
-                    } else {
-
-                        //reset the clearNotCompletedUploads event that should be called in main.js onbeforeunload
-                        //--> we don't want to delete the files on the upload directory
-                        clearNotCompletedUploads = function(){};
-
-                        if( config.analysisEnabled ) {
-
-                            //this should not be.
-                            //A project now are never EMPTY, it is not created anymore
-                            if( d.status == 'EMPTY' ){
-
-                                console.log('EMPTY');
-                                $('body').removeClass('creating');
-                                APP.alert({msg: 'No text to translate in the file(s).<br />Perhaps it is a scanned file or an image?'});
-                                $('.uploadbtn').attr('value','Analyze').removeAttr('disabled').removeClass('disabled');
-
-                            } else {
-                                setTimeout( function(){ location.href = d.analyze_url; }, 2000 );
-                            }
-
-                        } else {
-
-                            if( Object.keys( d.target_language ).length > 1 ){ //if multiple language selected show a job list
-                                d.files = [];
-                                d.trgLangHumanReadable = $('#target-lang option:selected').text().split(',');
-                                d.srcLangHumanReadable = $('#source-lang option:selected').text();
-
-                                $.each( d.target_language, function( idx, val ){
-                                    d.files.push({ href: config.hostpath + config.basepath + 'translate/' + d.project_name + '/' + d.source_language.substring(0,2) + '-' + val.substring(0,2) + '/' + d.id_job[idx] + '-' + d.password[idx] });
-                                } );
-
-                                $('.uploadbtn-box').fadeOut('slow', function(){
-                                    $('.uploadbtn-box').replaceWith( tmpl("job-links-list", d));
-
-                                    var btnContainer = $('.btncontinue');
-                                    var btnNew = $('#add-files').clone();
-                                    btnContainer.fadeOut('slow',function () {
-                                        btnContainer.html('').addClass('newProject');
-                                        btnNew.children('span').text('New Project');
-                                        btnNew.children('i').remove();
-                                        btnNew.children('input').remove();
-                                        btnNew.attr({id: 'new-project'}).on('click',function () {
-                                            location.href = config.hostpath + config.basepath;
-                                        }).css({margin: 'auto 0'});
-                                        btnNew.appendTo(btnContainer);
-                                    }).css({height: '50px'}).fadeIn(1000);
-
-                                    $('.translate-box input, .translate-box select').attr({disabled:'disabled'});
-                                    $('td.delete').empty();
-                                    $('#info-login').fadeIn(1000);
-                                    $('#project-' + d.id_project).fadeIn(1000);
-
-                                });
-
-                            } else {
-                                location.href = config.hostpath + config.basepath + 'translate/' + d.project_name + '/' + d.source_language.substring(0,2) + '-' + d.target_language[0].substring(0,2) + '/' + d.id_job[0] + '-' + d.password[0];
-                            }
-
-                        }
-                    }
-
-                }
-            });
+            }
         });
+    });
 
         $('.upload-table').on('click', 'a.skip_link', function(){
             var fname = decodeURIComponent($(this).attr("id").replace("skip_",""));
@@ -576,6 +459,152 @@ $.extend(UI.UPLOAD_PAGE, {
         });
     }
 });
+APP.handleCreationStatus = function( id_project, password ){
+
+    $.ajax({
+        url: "/api/v2/projects/" + id_project + "/" + password + "/creation_status",
+        type: 'GET'
+    }).done( function( data ) {
+        if( data.status == 202 ) {
+            setTimeout( APP.handleCreationStatus, 1000, id_project, password );
+        } else {
+            APP.postProjectCreation( data );
+        }
+    }).error( function(){
+        setTimeout( APP.handleCreationStatus, 1000, id_project, password );
+    });
+
+};
+
+
+APP.postProjectCreation = function ( d ) {
+
+    if ( typeof(d.lang_detect) !== 'undefined' ) {
+        UI.skipLangDetectArr = d.lang_detect;
+    }
+
+    if ( UI.skipLangDetectArr != null ) {
+        $.each( UI.skipLangDetectArr, function ( file, status ) {
+            if ( status == 'ok' ) UI.skipLangDetectArr[file] = 'skip';
+            else UI.skipLangDetectArr[file] = 'detect';
+
+        } );
+    }
+
+    if ( typeof d.errors != 'undefined' && d.errors.length ) {
+
+        $( '.error-message' ).text( '' );
+
+        $.each( d.errors, function () {
+
+            switch ( this.code ) {
+                //no useful memories found in TMX
+                case -16 :
+                    UI.addTMXLangFailure();
+                    break;
+                case -14 :
+                    UI.addInlineMessage(
+                        ".tmx",
+                        this.message
+                    );
+                    break;
+                //no text to translate found.
+                case -1  :
+                    var fileName = this.message.replace( "No text to translate in the file ", "" )
+                        .replace( /.$/g, "" );
+
+                    console.log( fileName );
+                    UI.addInlineMessage(
+                        fileName,
+                        'Is this a scanned file or image?<br/>Try converting to DOCX using an OCR software ' +
+                        '(ABBYY FineReader or Nuance PDF Converter)'
+                    );
+                    break;
+                case -17  :
+                    $.each( d.lang_detect, function ( fileName, status ) {
+                        if ( status == 'detect' ) {
+                            UI.addInlineMessage(
+                                fileName,
+                                'Different source language. <a class="skip_link" id="skip_' + fileName + '">Ignore</a>'
+                            );
+                        }
+                    } );
+                    break;
+
+                default:
+            }
+
+            //normal error management
+            $( '.error-message' ).append( '<div class="error-content">' + this.message + '<br /></div>' ).show();
+
+        } );
+
+        $( '.uploadbtn' ).attr( 'value', 'Analyze' );
+        $( 'body' ).removeClass( 'creating' );
+
+    } else {
+
+        //reset the clearNotCompletedUploads event that should be called in main.js onbeforeunload
+        //--> we don't want to delete the files on the upload directory
+        clearNotCompletedUploads = function () {};
+
+        if ( config.analysisEnabled ) {
+
+            //this should not be.
+            //A project now are never EMPTY, it is not created anymore
+            if ( d.status == 'EMPTY' ) {
+
+                console.log( 'EMPTY' );
+                $( 'body' ).removeClass( 'creating' );
+                APP.alert( {msg: 'No text to translate in the file(s).<br />Perhaps it is a scanned file or an image?'} );
+                $( '.uploadbtn' ).attr( 'value', 'Analyze' ).removeAttr( 'disabled' ).removeClass( 'disabled' );
+
+            } else {
+                location.href = d.analyze_url;
+            }
+
+        } else {
+
+            if ( Object.keys( d.target_language ).length > 1 ) { //if multiple language selected show a job list
+                d.files = [];
+                d.trgLangHumanReadable = $( '#target-lang option:selected' ).text().split( ',' );
+                d.srcLangHumanReadable = $( '#source-lang option:selected' ).text();
+
+                $.each( d.target_language, function ( idx, val ) {
+                    d.files.push( {href: config.hostpath + config.basepath + 'translate/' + d.project_name + '/' + d.source_language.substring( 0, 2 ) + '-' + val.substring( 0, 2 ) + '/' + d.id_job[idx] + '-' + d.password[idx]} );
+                } );
+
+                $( '.uploadbtn-box' ).fadeOut( 'slow', function () {
+                    $( '.uploadbtn-box' ).replaceWith( tmpl( "job-links-list", d ) );
+
+                    var btnContainer = $( '.btncontinue' );
+                    var btnNew = $( '#add-files' ).clone();
+                    btnContainer.fadeOut( 'slow', function () {
+                        btnContainer.html( '' ).addClass( 'newProject' );
+                        btnNew.children( 'span' ).text( 'New Project' );
+                        btnNew.children( 'i' ).remove();
+                        btnNew.children( 'input' ).remove();
+                        btnNew.attr( {id: 'new-project'} ).on( 'click', function () {
+                            location.href = config.hostpath + config.basepath;
+                        } ).css( {margin: 'auto 0'} );
+                        btnNew.appendTo( btnContainer );
+                    } ).css( {height: '50px'} ).fadeIn( 1000 );
+
+                    $( '.translate-box input, .translate-box select' ).attr( {disabled: 'disabled'} );
+                    $( 'td.delete' ).empty();
+                    $( '#info-login' ).fadeIn( 1000 );
+                    $( '#project-' + d.id_project ).fadeIn( 1000 );
+
+                } );
+
+            } else {
+                location.href = config.hostpath + config.basepath + 'translate/' + d.project_name + '/' + d.source_language.substring( 0, 2 ) + '-' + d.target_language[0].substring( 0, 2 ) + '/' + d.id_job[0] + '-' + d.password[0];
+            }
+
+        }
+    }
+
+};
 
 $(document).ready(function() {
     UI.UPLOAD_PAGE.init();

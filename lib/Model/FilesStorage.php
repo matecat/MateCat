@@ -57,6 +57,26 @@ class FilesStorage {
 
     }
 
+    public static function moveFileFromUploadSessionToQueuePath( $upload_session ){
+
+        $destination = INIT::$QUEUE_PROJECT_REPOSITORY. DIRECTORY_SEPARATOR . $upload_session;
+        mkdir( $destination, 0755 );
+        foreach (
+                $iterator = new \RecursiveIteratorIterator(
+                        new \RecursiveDirectoryIterator( INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $upload_session, \RecursiveDirectoryIterator::SKIP_DOTS ),
+                        \RecursiveIteratorIterator::SELF_FIRST ) as $item
+        ) {
+            if ( $item->isDir() ) {
+                mkdir( $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName() );
+            } else {
+                copy( $item, $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName() );
+            }
+        }
+
+        Utils::deleteDir( INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $upload_session );
+
+    }
+
     /**
      * Rebuild the filename that will be taken from disk in the cache directory
      *
@@ -68,7 +88,7 @@ class FilesStorage {
     public function getOriginalFromCache( $hash, $lang ) {
 
         //compose path
-        $cacheTree = implode( DIRECTORY_SEPARATOR, $this->_composeCachePath( $hash ) );
+        $cacheTree = implode( DIRECTORY_SEPARATOR, static::composeCachePath( $hash ) );
 
         $path = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "orig";
 
@@ -112,7 +132,7 @@ class FilesStorage {
      * Cache Handling Methods --- START
      */
 
-    protected function _composeCachePath( $hash ){
+    public static function composeCachePath( $hash ){
 
         $cacheTree = array(
                 'firstLevel'  => $hash{0} . $hash{1},
@@ -126,7 +146,7 @@ class FilesStorage {
 
     public function getXliffFromCache( $hash, $lang ) {
 
-        $cacheTree = implode( DIRECTORY_SEPARATOR, $this->_composeCachePath( $hash ) );
+        $cacheTree = implode( DIRECTORY_SEPARATOR, static::composeCachePath( $hash ) );
 
         //compose path
         $path = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang . DIRECTORY_SEPARATOR . "package" . DIRECTORY_SEPARATOR . "work";
@@ -148,7 +168,7 @@ class FilesStorage {
 
     public function makeCachePackage( $hash, $lang, $originalPath = false, $xliffPath ) {
 
-        $cacheTree = implode( DIRECTORY_SEPARATOR, $this->_composeCachePath( $hash ) );
+        $cacheTree = implode( DIRECTORY_SEPARATOR, static::composeCachePath( $hash ) );
 
         //don't save in cache when a specified filter version is forced
         if ( INIT::$FILTERS_SOURCE_TO_XLIFF_FORCE_VERSION !== false &&  is_dir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang ) ) {
@@ -334,11 +354,45 @@ class FilesStorage {
 
     }
 
-    public function linkSessionToCache( $hash, $lang, $uid, $realFileName ) {
+    /**
+     * @param $hash
+     * @param $lang
+     * @param $uid
+     * @param $realFileName
+     *
+     * @return int
+     */
+    public function linkSessionToCacheForAlreadyConvertedFiles( $hash, $lang, $uid, $realFileName ) {
+        //get upload dir
+        $dir = INIT::$QUEUE_PROJECT_REPOSITORY . DIRECTORY_SEPARATOR . $uid;
+        //create a file in it, which is called as the hash that indicates the location of the cache for storage
+        return $this->_linkToCache( $dir, $hash, $lang, $realFileName );
+    }
+
+    /**
+     * @param $hash
+     * @param $lang
+     * @param $uid
+     * @param $realFileName
+     *
+     * @return int
+     */
+    public function linkSessionToCacheForOriginalFiles( $hash, $lang, $uid, $realFileName ) {
         //get upload dir
         $dir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $uid;
+        //create a file in it, which is called as the hash that indicates the location of the cache for storage
+        return $this->_linkToCache( $dir, $hash, $lang, $realFileName );
+    }
 
-        //create a file in it, named after cache position on storage
+    /**
+     * @param $dir
+     * @param $hash
+     * @param $lang
+     * @param $realFileName
+     *
+     * @return int
+     */
+    protected function _linkToCache( $dir, $hash, $lang, $realFileName ){
         return file_put_contents( $dir . DIRECTORY_SEPARATOR . $hash . "|" . $lang, $realFileName . "\n" , FILE_APPEND | LOCK_EX );
     }
 
@@ -371,7 +425,7 @@ class FilesStorage {
     public function moveFromCacheToFileDir( $dateHashPath, $lang, $idFile, $newFileName = null ) {
 
         list( $datePath, $hash ) = explode( DIRECTORY_SEPARATOR, $dateHashPath );
-        $cacheTree = implode( DIRECTORY_SEPARATOR, $this->_composeCachePath( $hash ) );
+        $cacheTree = implode( DIRECTORY_SEPARATOR, static::composeCachePath( $hash ) );
 
         //destination dir
         $fileDir  = $this->filesDir . DIRECTORY_SEPARATOR . $datePath . DIRECTORY_SEPARATOR . $idFile;
@@ -688,7 +742,7 @@ class FilesStorage {
      * @return bool|string
      */
     public function getTemporaryUploadedZipFile( $uploadToken ) {
-        $files  = scandir( INIT::$UPLOAD_REPOSITORY . '/' . $uploadToken );
+        $files  = scandir( INIT::$QUEUE_PROJECT_REPOSITORY . '/' . $uploadToken );
         $zip_name = null; 
         $zip_file = null; 
 
