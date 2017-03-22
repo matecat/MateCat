@@ -828,37 +828,47 @@ div#matecat-modal p {
             overflow-y: auto;
             &.team {
                 .item {
-                    background-color: #ffffff;
-                    padding: 0 0 4px 0 !important;
-                    display: inline-block;
-                    width: 100%;
+                    padding: 10px;
                     &:hover {
-                        background-color: #e0e1e2;
-                        .content.top-2 {
+                        //background-color: #e0e1e2;
+                        .mini.ui.basic.button.right.floated  {
                             display: inherit;
                         }
                     }
-                    .ui.circular.label {
-                        float: left !important;
-                        margin-top: 6px;
-                        margin-left: 5px;
-                        margin-right: 5px;
+                    .image {
+                        width: 50px !important;
+                        max-width: 50px;
+                        height: 50px;
+                        background-color: #f4f4f4;
+                        border-radius: 50%;
+                        vertical-align: middle;
+                        text-align: center;
+                        font-size: 21px;
                     }
+
                     .content.user {
-                        min-width: 180px !important;
-                        float: left;
-                        margin-top: 8px;
-                        font-size: 14px;
+                        font-weight: bold;
+                        & invited {
+                            font-weight: 100;
+                        }
                     }
-                    .content.email-member {
+                    .content.email-user-invited {
+                        font-weight: 100;
+                        font-size: 14px;
+                        color: grey;
+                    }
+                    /*.content.email-member {
                         font-size: 14px;
                         color: gray;
                         float: left;
                         margin: 10px 0px 4px 0px;
-                    }
-                    .content.top-2 {
+                        margin-left: 10px;
+                    }*/
+                    .mini.ui.basic.button.right.floated {
+                        margin-top: 10px;
                         display: none;
                     }
+
                 }
             }
         }
@@ -894,15 +904,15 @@ div#matecat-modal p {
 
 .ui.multiple.search.dropdown {
     cursor: text;
-    width: 80%;
+    width: 100%;
     border: 1px solid rgba(34, 36, 38, 0.15);
     margin-right: 10px;
     &:focus {
         border: 1px solid yellow;
     }
-    &:active {
+    /*&:active {
         border: 1px solid yellow;
-    }
+    }*/
     &:hover {
         border: 1px solid rgba(34, 36, 38, 0.15);
     }

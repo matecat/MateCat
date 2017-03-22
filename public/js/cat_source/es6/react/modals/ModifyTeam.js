@@ -112,14 +112,15 @@ class ModifyTeam extends React.Component {
             } else {
                 return <div className="item"
                             key={'user' + user.get('uid')}>
-                    <div className="ui circular label">{APP.getUserShortName(user.toJS())}</div>
-                    <div className="content user">
-                        {' ' + user.get('first_name') + ' ' + user.get('last_name')}
+                    <div className="mini ui basic button right floated" onClick={self.showRemoveUser.bind(self, user.get('uid'))}>Remove</div>
+                    <div className="ui tiny image label">{APP.getUserShortName(user.toJS())}</div>
+                    <div className="middle aligned content">
+                        <div className="content user">
+                            {' ' + user.get('first_name') + ' ' + user.get('last_name')}
+                        </div>
+                        <div className="content email-user-invited">{user.get('email')}</div>
                     </div>
-                    <div className="content email-member">{user.get('email')}</div>
-                    <div className="right floated content top-2">
-                        <div className="mini ui button" onClick={self.showRemoveUser.bind(self, user.get('uid'))}>Remove</div>
-                    </div>
+
                 </div>
             }
 
@@ -202,7 +203,7 @@ class ModifyTeam extends React.Component {
             <div className="matecat-modal-top">
                 <div className="ui one column grid left aligned">
                     <div className="column">
-                        <h3>Change team Name</h3>
+                        <h3>Change Team Name</h3>
                         <div className={"ui fluid icon input " + orgNameError}>
                             <input type="text" defaultValue={this.state.team.get('name')}
                             onKeyUp={this.onKeyPressEvent.bind(this)}
@@ -216,7 +217,7 @@ class ModifyTeam extends React.Component {
                     <div className="matecat-modal-middle">
                         <div className="ui grid left aligned">
                             <div className="sixteen wide column">
-                                <h3>Add members</h3>
+                                <h3>Add Members</h3>
                                 <div className={"ui fluid icon input " + usersError }>
                                     <input type="text" placeholder="name@email.com"
                                            onKeyUp={this.handleKeyPressUserInput.bind(this)}
