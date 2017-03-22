@@ -257,12 +257,8 @@ class ProjectManager {
     private function __checkForSelfAssignment(){
 
         if ( !empty( $this->projectStructure[ 'session' ][ 'uid' ] ) ) {
-            //if this is a logged user, check if the project container is the personal team
-            // and in such case set the user as project assignee
-            if( $this->projectStructure[ 'team' ]->type == Constants_Teams::PERSONAL ){
-                $this->projectStructure[ 'id_assignee' ] = $this->projectStructure[ 'session' ][ 'uid' ];
-            }
-
+            //if this is a logged user, set the user as project assignee
+            $this->projectStructure[ 'id_assignee' ] = $this->projectStructure[ 'session' ][ 'uid' ];
         }
 
     }
