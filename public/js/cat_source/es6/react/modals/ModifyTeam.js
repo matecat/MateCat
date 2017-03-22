@@ -41,6 +41,10 @@ class ModifyTeam extends React.Component {
         });
     }
 
+    resendInvite(mail) {
+        ManageActions.addUserToTeam(this.state.team, mail);
+    }
+
     handleKeyPressUserInput(e) {
         e.stopPropagation();
         if (e.key === 'Enter' ) {
@@ -85,6 +89,7 @@ class ModifyTeam extends React.Component {
 
     getUserList() {
         let self = this;
+
         return this.state.team.get('members').map(function(member, i) {
             let user = member.get('user');
             if (user.get('uid') == APP.USER.STORE.user.uid && self.state.showRemoveMessageUserID == user.get('uid')) {
@@ -131,34 +136,24 @@ class ModifyTeam extends React.Component {
     getPendingInvitations() {
         let self = this;
         if (!this.state.team.get('pending_invitations').size > 0) return;
-        let pendingUsers = this.state.team.get('pending_invitations').map(function(mail, i) {
-            return<div className="item"
+        return this.state.team.get('pending_invitations').map(function(mail, i) {
+            return <div className="item pending-invitation"
                          key={'user-invitation' + i}>
-                    <span className="content">
-                    {mail}
-                    </span>
-                    <div className="right floated content top-2">
-                        User invited by mail
-                    </div>
-                </div>;
-
-        });
-        return <div className="sixteen wide column">
-            <div className="ui accordion"
-                 ref={(pendingUsers) => this.pendingUsers = pendingUsers}>
-                <div className="title">
-                    <i className="dropdown icon"/>
-                    View pending users?
-                </div>
-                <div className="content">
-                    <div className="ui members-list team">
-                        <div className="ui divided list">
-                            {pendingUsers}
+                        <div className="ui circular label">{mail.substring(0, 1).toUpperCase()}</div>
+                        <div className="content user">
+                            {mail}
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+
+                        <div className="content email-member">
+                            {mail}
+                        </div>
+                        <div className="right floated content top-2">
+                            <div className="mini ui button"
+                                 onClick={self.resendInvite.bind(self, mail)}>Resend Invite</div>
+                        </div>
+                    </div>;
+        });
+
     }
 
     componentDidUpdate() {
@@ -225,11 +220,12 @@ class ModifyTeam extends React.Component {
                                 </div>
                             </div>
 
-                            {pendingUsers}
+
 
                             <div className="sixteen wide column">
                                 <div className="ui members-list team">
                                     <div className="ui divided list">
+                                        {pendingUsers}
                                         {userlist}
                                     </div>
                                 </div>

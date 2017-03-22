@@ -398,8 +398,9 @@ let ManageActions = {
         });
     },
 
-    changeTeamFromUploadPage: function () {
+    changeTeamFromUploadPage: function (team) {
         $('.reloading-upload-page').show();
+        APP.setTeamInStorage(team.id);
         setTimeout(function () {
             $('.reloading-upload-page').hide();
         }, 1000)

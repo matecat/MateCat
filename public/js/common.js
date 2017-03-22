@@ -3,8 +3,8 @@ APP = null;
 APP = {
     init: function () {
         this.setLoginEvents();
-        if (config.isLoggedIn && APP.USER.STORE.user) {
-            this.teamStorageName = 'teamId' + APP.USER.STORE.user.uid;
+        if (config.isLoggedIn) {
+            APP.teamStorageName = 'teamId-' + config.userMail;
         }
         this.isCattool = $( 'body' ).hasClass( 'cattool' );
         $( "body" ).on( 'click', '.modal .x-popup', function ( e ) {
