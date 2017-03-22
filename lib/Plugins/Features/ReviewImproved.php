@@ -190,7 +190,7 @@ class ReviewImproved extends BaseFeature {
     public function validateProjectCreation($projectStructure)  {
         $this->feature_options = json_decode( $this->feature->options );
 
-        if ( $this->feature_options->id_qa_model ) {
+        if ( property_exists($this->feature_options, 'id_qa_model' ) ) {
             // pass
         } else {
             $this->validateModeFromJsonFile($projectStructure);
