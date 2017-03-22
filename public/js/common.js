@@ -3,7 +3,7 @@ APP = null;
 APP = {
     init: function () {
         this.setLoginEvents();
-        this.teamStorageName = 'teamId';
+        this.teamStorageName = 'teamId' + APP.USER.STORE.user.uid;
         this.isCattool = $( 'body' ).hasClass( 'cattool' );
         $( "body" ).on( 'click', '.modal .x-popup', function ( e ) {
             e.preventDefault();
