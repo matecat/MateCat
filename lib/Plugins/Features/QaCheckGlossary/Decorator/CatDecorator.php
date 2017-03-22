@@ -19,6 +19,6 @@ class CatDecorator extends \AbstractDecorator {
      */
     public function decorate() {
         $this->template->qa_check_glossary_enabled = true ;
-        $this->template->deny_lexiqa = true ;
+        //$this->template->deny_lexiqa = true ;
     }
 }

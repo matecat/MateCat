@@ -15,6 +15,8 @@ class Constants_ProjectStatus {
     const STATUS_FAST_OK                = 'FAST_OK';
     const STATUS_DONE                   = 'DONE';
 
+    const PROJECT_QUEUE_HASH            = 'project_completed:%u';
+
     public static $ALLOWED_STATUSES = [
             self::STATUS_DONE,
             self::STATUS_FAST_OK,

@@ -16,6 +16,6 @@ class CatDecorator extends \AbstractDecorator {
      */
     public function decorate() {
         $this->template->qa_check_blacklist_enabled = true ;
-        $this->template->deny_lexiqa = true ;
+        //$this->template->deny_lexiqa = true ;
     }
 }

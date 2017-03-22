@@ -820,6 +820,15 @@ class setTranslationController extends ajaxController {
         ) ) ) {
             return;
         }
+
+        $skip_set_contribution = false ;
+        $skip_set_contribution = $this->feature_set->filter('filter_skip_set_contribution',
+                $skip_set_contribution, $_Translation, $old_translation
+        );
+
+        if ( $skip_set_contribution ) {
+            return ;
+        }
         
         /**
          * Set the new contribution in queue
