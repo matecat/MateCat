@@ -4,7 +4,9 @@ APP = {
     init: function () {
         this.setLoginEvents();
         if (config.isLoggedIn) {
-            this.teamStorageName = 'teamId' + APP.USER.STORE.user.uid;
+            APP.USER.loadUserData().done(function () {
+                APP.teamStorageName = 'teamId' + APP.USER.STORE.user.uid;
+            });
         }
         this.isCattool = $( 'body' ).hasClass( 'cattool' );
         $( "body" ).on( 'click', '.modal .x-popup', function ( e ) {
