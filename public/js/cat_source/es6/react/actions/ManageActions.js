@@ -128,21 +128,22 @@ let ManageActions = {
         });
     },
 
-    changeProjectAssignee: function (teams, project, user) {
+    changeProjectAssignee: function (team, project, user) {
         var uid;
         if (user === -1) {
             uid = -1
         } else {
             uid = user.get("uid")
         }
-        UI.changeProjectAssignee(teams.get("id"), project.get("id"), uid).done(
+        UI.changeProjectAssignee(team.get("id"), project.get("id"), uid).done(
             function (response) {
                 AppDispatcher.dispatch({
                     actionType: ManageConstants.CHANGE_PROJECT_ASSIGNEE,
                     project: project,
                     user: user
                 });
-                if (uid !== UI.selectedUser && UI.selectedUser !== ManageConstants.ALL_MEMBERS_FILTER) {
+                if ( (uid !== UI.selectedUser && UI.selectedUser !== ManageConstants.ALL_MEMBERS_FILTER) ||
+                    ( UI.selectedTeam.type == 'personal' && uid !== APP.USER.STORE.user.uid) ) {
                     setTimeout(function () {
                         AppDispatcher.dispatch({
                             actionType: ManageConstants.HIDE_PROJECT,
