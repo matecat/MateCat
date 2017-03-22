@@ -153,11 +153,15 @@ class ProjectContainer extends React.Component {
     }
 
     getProjectMenu(activityLogUrl) {
+        let moveProjectItemMenu = '';
+        if (this.props.teams.size > 1) {
+            moveProjectItemMenu = <a className="item" onClick={this.openChangeTeamModal.bind(this)}>
+                <i className="icon-forward icon"/>Move project
+            </a>;
+        }
         let menuHtml = <div className="menu">
             <div className="scrolling menu">
-                <a className="item" onClick={this.openChangeTeamModal.bind(this)}>
-                    <i className="icon-forward icon"/>Move project
-                </a>
+                {moveProjectItemMenu}
 
                 <a className="item" href={activityLogUrl} target="_blank"><i className="icon-download-logs icon"/>Activity Log</a>
 
