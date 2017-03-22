@@ -1745,7 +1745,6 @@ div#open-translator {
     overflow: hidden;
     margin-top: -1px;
     background: linear-gradient(to right, #fff, #fff 37%, #f8f8f8 37%, #fcfcfc 100%);
-    margin-bottom: 15px;
 }
 
 .modal.outsource .outsource-divider {
@@ -1755,6 +1754,7 @@ div#open-translator {
     position: relative;
     height: 20px;
     line-height: 20px;
+    margin-top: 15px;
 }
 
 .modal.outsource .divider-line {

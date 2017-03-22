@@ -154,7 +154,7 @@ class ProjectContainer extends React.Component {
 
     getProjectMenu(activityLogUrl) {
         let moveProjectItemMenu = '';
-        if (this.props.teams.size > 1) {
+        if (this.props.teams && this.props.teams.size > 1) {
             moveProjectItemMenu = <a className="item" onClick={this.openChangeTeamModal.bind(this)}>
                 <i className="icon-forward icon"/>Move project
             </a>;
