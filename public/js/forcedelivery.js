@@ -28,7 +28,6 @@ $( document ).ready( function()
 
     $('.outsource-cancel-date').click(function () {
         $('#out-datepicker').addClass('hide');
-        $('.outsource .out-date').val('');
     });
 
     $('.modal.outsource .x-popup2').click(function () {

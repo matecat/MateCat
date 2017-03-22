@@ -442,8 +442,7 @@ class JobContainer extends React.Component {
         if (this.props.job.get('outsource')) {
             if (this.props.job.get('outsource').get('id_vendor') == "1") {
                 outsourceJobLabel =
-                    <a href="http://www.translated.net" target="_blank"><img className='outsource-logo' src="/public/img/logo_translated.png" title="visit our website"/></a>
-                ;
+                    <a href="http://www.translated.net" target="_blank"><img className='outsource-logo' src="/public/img/logo_translated.png" title="visit our website"/></a>;
             }
         }
         return outsourceJobLabel;
@@ -453,8 +452,8 @@ class JobContainer extends React.Component {
         let outsourceDelivery = '';
         if (this.props.job.get('outsource')) {
             if (this.props.job.get('outsource').get('id_vendor') == "1") {
-                outsourceDelivery = <div className="job-delivery">{this.props.job.get('outsource').get('delivery_date')}</div>
-                ;
+                let date  = this.props.job.get('outsource').get('delivery_date').substring(0, this.props.job.get('outsource').get('delivery_date').lastIndexOf(":"))
+                outsourceDelivery = <div className="job-delivery">{date}</div>;
             }
         }
         return outsourceDelivery;

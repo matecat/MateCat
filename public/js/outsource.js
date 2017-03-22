@@ -136,8 +136,10 @@ $.extend(UI, {
         if (job.outsource) {
             var dd = new Date( job.outsource.delivery_date );
             $('.modal.outsource .out-date').val( $.format.date(dd, "d MMMM") + ' at ' + $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a") );
-        }
+        } else {
+            $('.modal.outsource .out-date').val( getChosenOutsourceDateToString() );
 
+        }
 
         if(config.enable_outsource) {
             resetOutsourcePopup( false );
@@ -147,6 +149,10 @@ $.extend(UI, {
             $("#open-translator").addClass('hide');
             $('.send-to-translator').removeClass('hide');
             $('.onyourown').addClass('opened-send-translator');
+            //TODO
+            $('.modal.outsource input.out-email').val("");
+            $('.modal.outsource input.out-email').removeClass("error");
+
             showOutsourcePopup( UI.showPopupDetails );
             renderQuoteFromManage(project.id, project.password, job.id, job.password);
             $('.outsource.modal').show();

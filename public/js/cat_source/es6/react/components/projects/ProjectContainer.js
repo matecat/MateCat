@@ -89,7 +89,11 @@ class ProjectContainer extends React.Component {
             idUser = -1;
             $(this.dropdownUsers).dropdown('hide');
         } else {
-            let newUser = this.props.team.get('members').find(function (member) {
+            let team = this.props.team;
+            if (this.props.team.get('type') == 'personal') {
+                team = this.projectTeam;
+            }
+            let newUser = team.get('members').find(function (member) {
                 let user = member.get('user');
                 if (user.get('uid') === parseInt(value) ) {
                     return true;
@@ -364,11 +368,8 @@ class ProjectContainer extends React.Component {
                });
                if (self.projectTeam.get('members')) {
                    result = this.createUserDropDown(self.projectTeam.get('members'));
-               } else {
-                   this.updateMembers = true;
                }
            }
-
        } else if (this.props.team.get('members')) {
            result = this.createUserDropDown(this.props.team.get('members'))
        }
