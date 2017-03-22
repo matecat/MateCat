@@ -44,19 +44,20 @@ class Header extends React.Component {
     }
 
     changeTeam(event, team) {
-        if (this.props.showSubHeader) {
-            if (team.get('id')  !== this.state.selectedTeamId) {
-                let selectedTeam = this.state.teams.find(function (org) {
-                    if (org.get("id") === team.get("id")) {
-                        return true;
-                    }
-                });
+        if (team.get('id')  !== this.state.selectedTeamId) {
+            let selectedTeam = this.state.teams.find(function (org) {
+                if (org.get("id") === team.get("id")) {
+                    return true;
+                }
+            });
+            if (this.props.showSubHeader) {
                 window.scrollTo(0, 0);
                 ManageActions.changeTeam(selectedTeam.toJS());
+            } else {
+                ManageActions.changeTeamFromUploadPage(selectedTeam.toJS());
             }
-        } else {
-            ManageActions.changeTeamFromUploadPage();
         }
+
     }
 
     openCreateTeams () {
