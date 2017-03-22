@@ -83,6 +83,11 @@ class Executor implements SplObserver {
     public $_executorPID;
 
     /**
+     * @var string
+     */
+    public $_executor_instance_id;
+
+    /**
      * Logging method
      *
      * @param $msg
@@ -108,6 +113,8 @@ class Executor implements SplObserver {
     protected function __construct( Context $_context ) {
 
         $this->_executorPID = posix_getpid();
+        $this->_executor_instance_id = $this->_executorPID . ":" . gethostname() . ":" . (int) INIT::$INSTANCE_ID;
+
         Log::$fileName     = $_context->loggerName;
 
         $this->_executionContext = $_context;
@@ -116,10 +123,10 @@ class Executor implements SplObserver {
 
             $this->_queueHandler = new AMQHandler();
 
-            if ( !$this->_queueHandler->getRedisClient()->sadd( $this->_executionContext->pid_set_name, $this->_executorPID ) ) {
-                throw new Exception( "(Executor {$this->_executorPID}) : FATAL !! cannot create my resource ID. Exiting!" );
+            if ( !$this->_queueHandler->getRedisClient()->sadd( $this->_executionContext->pid_set_name, $this->_executor_instance_id ) ) {
+                throw new Exception( "(Executor " . $this->_executor_instance_id . ") : FATAL !! cannot create my resource ID. Exiting!" );
             } else {
-                $this->_logMsg( "(Executor {$this->_executorPID}) : spawned !!!" );
+                $this->_logMsg( "(Executor " . $this->_executor_instance_id . ") : spawned !!!" );
             }
 
             $this->_queueHandler->subscribe( $this->_executionContext->queue_name );
@@ -205,8 +212,8 @@ class Executor implements SplObserver {
             try {
 
                 // PROCESS CONTROL FUNCTIONS
-                if ( !self::_myProcessExists( $this->_executorPID ) ) {
-                    $this->_logMsg( "(Executor " . $this->_executorPID . ") :  EXITING! my pid does not exists anymore, my parent told me to die." );
+                if ( !self::_myProcessExists( $this->_executor_instance_id ) ) {
+                    $this->_logMsg( "(Executor " . $this->_executor_instance_id . ") :  EXITING! my pid does not exists anymore, my parent told me to die." );
                     $this->RUNNING = false;
                     break;
                 }
@@ -228,7 +235,7 @@ class Executor implements SplObserver {
 
             }
 
-            $this->_logMsg( "--- (Executor " . $this->_executorPID . ") - QueueElement found: " . var_export( $queueElement, true ) );
+            $this->_logMsg( "--- (Executor " . $this->_executor_instance_id . ") - QueueElement found: " . var_export( $queueElement, true ) );
 
             try {
 
@@ -238,7 +245,7 @@ class Executor implements SplObserver {
                 if( ltrim( $queueElement->classLoad, "\\" ) != ltrim( get_class( $this->_worker ), "\\" ) ){
                     $this->_worker = new $queueElement->classLoad( $this->_queueHandler );
                     $this->_worker->attach( $this );
-                    $this->_worker->setPid( $this->_executorPID );
+                    $this->_worker->setPid( $this->_executor_instance_id );
                     $this->_worker->setContext( $this->_executionContext  );
                 }
 
@@ -246,11 +253,11 @@ class Executor implements SplObserver {
 
             } catch ( EndQueueException $e ){
 
-                $this->_logMsg( "--- (Executor " . $this->_executorPID . ") : End queue limit reached. Acknowledged. - " . $e->getMessage() ); // ERROR End Queue
+                $this->_logMsg( "--- (Executor " . $this->_executor_instance_id . ") : End queue limit reached. Acknowledged. - " . $e->getMessage() ); // ERROR End Queue
 
             } catch ( ReQueueException $e ){
 
-                $this->_logMsg( "--- (Executor " . $this->_executorPID . ") : Error executing task. Re-Queue - " . $e->getMessage() ); // ERROR Re-queue
+                $this->_logMsg( "--- (Executor " . $this->_executor_instance_id . ") : Error executing task. Re-Queue - " . $e->getMessage() ); // ERROR Re-queue
 
                 //set/increment the reQueue number
                 $queueElement->reQueueNum     = ++$queueElement->reQueueNum;
@@ -264,7 +271,7 @@ class Executor implements SplObserver {
 
             } catch( PDOException $e ){
 
-                $this->_logMsg( "************* (Executor " . $this->_executorPID . ") Caught a Database exception. Wait 2 seconds and try next cycle *************\n************* " . $e->getMessage() );
+                $this->_logMsg( "************* (Executor " . $this->_executor_instance_id . ") Caught a Database exception. Wait 2 seconds and try next cycle *************\n************* " . $e->getMessage() );
                 $queueElement->reQueueNum     = ++$queueElement->reQueueNum;
                 $amqHandlerPublisher          = new AMQHandler();
                 $amqHandlerPublisher->reQueue( $queueElement, $this->_executionContext );
@@ -273,14 +280,14 @@ class Executor implements SplObserver {
 
             } catch ( Exception $e ){
 
-                $this->_logMsg( "************* (Executor " . $this->_executorPID . ") Caught a generic exception. SKIP Frame *************\n************* " . $e->getMessage() );
+                $this->_logMsg( "************* (Executor " . $this->_executor_instance_id . ") Caught a generic exception. SKIP Frame *************\n************* " . $e->getMessage() );
 
             }
 
             //unlock frame
             $this->_queueHandler->ack( $msgFrame );
 
-            $this->_logMsg( "--- (Executor " . $this->_executorPID . ") - QueueElement acknowledged." );
+            $this->_logMsg( "--- (Executor " . $this->_executor_instance_id . ") - QueueElement acknowledged." );
 
         } while( $this->RUNNING );
 
@@ -308,7 +315,7 @@ class Executor implements SplObserver {
             if ( $msgFrame instanceof StompFrame && ( $msgFrame->command == "MESSAGE" || array_key_exists( 'MESSAGE', $msgFrame->headers /* Stomp Client bug... hack */ ) ) ) {
 
                 $this->_frameID++;
-                $this->_logMsg( "--- (Executor " . $this->_executorPID . ") : processing frame {$this->_frameID}" );
+                $this->_logMsg( "--- (Executor " . $this->_executor_instance_id . ") : processing frame {$this->_frameID}" );
 
                 $queueElement = json_decode( $msgFrame->body, true );
                 $queueElement = new QueueElement( $queueElement );
@@ -318,12 +325,12 @@ class Executor implements SplObserver {
                     \Utils::raiseJsonExceptionError();
                     $this->_queueHandler->ack( $msgFrame );
                     sleep( 2 );
-                    throw new WorkerClassException( "--- (Executor " . $this->_executorPID . ") : found frame but no valid Worker Class found: wait 2 seconds" );
+                    throw new WorkerClassException( "--- (Executor " . $this->_executor_instance_id . ") : found frame but no valid Worker Class found: wait 2 seconds" );
 
                 }
 
             } else {
-                throw new FrameException( "--- (Executor " . $this->_executorPID . ") : no frame found. Starting next cycle." );
+                throw new FrameException( "--- (Executor " . $this->_executor_instance_id . ") : no frame found. Starting next cycle." );
             }
 
         } catch ( Exception $e ) {
@@ -348,7 +355,7 @@ class Executor implements SplObserver {
         static::$__INSTANCE->_queueHandler->disconnect();
 
         //SHUTDOWN
-        $msg = str_pad( " Executor " . getmypid() . " HALTED ", 50, "-", STR_PAD_BOTH );
+        $msg = str_pad( " Executor " . getmypid() . ":" . gethostname() . ":" . INIT::$INSTANCE_ID . " HALTED ", 50, "-", STR_PAD_BOTH );
         static::$__INSTANCE->_logMsg( $msg );
 
         die();

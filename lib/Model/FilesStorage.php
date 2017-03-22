@@ -176,11 +176,11 @@ class FilesStorage {
         }
 
         //create cache dir structure
-        mkdir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang, 0755, true );
+        @mkdir( $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang, 0755, true );
         $cacheDir = $this->cacheDir . DIRECTORY_SEPARATOR . $cacheTree . "|" . $lang . DIRECTORY_SEPARATOR . "package";
-        mkdir( $cacheDir, 0755, true );
-        mkdir( $cacheDir . DIRECTORY_SEPARATOR . "orig" );
-        mkdir( $cacheDir . DIRECTORY_SEPARATOR . "work" );
+        @mkdir( $cacheDir, 0755, true );
+        @mkdir( $cacheDir . DIRECTORY_SEPARATOR . "orig" );
+        @mkdir( $cacheDir . DIRECTORY_SEPARATOR . "work" );
 
         //if it's not an xliff as original
         if ( !$originalPath ) {

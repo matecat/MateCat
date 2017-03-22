@@ -50,6 +50,7 @@ class UserController extends AbstractStatefulKleinController  {
     }
 
     protected function afterConstruct() {
+        \Bootstrap::sessionClose();
         $this->__findUser();
         $this->__findConnectedServices();
     }

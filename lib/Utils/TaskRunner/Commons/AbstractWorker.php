@@ -40,9 +40,9 @@ abstract class AbstractWorker implements SplSubject {
     /**
      * This process ID
      *
-     * @var int
+     * @var string
      */
-    protected $_workerPid = 0;
+    protected $_workerPid = '0';
 
     /**
      * The context object.

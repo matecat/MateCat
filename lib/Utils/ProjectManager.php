@@ -18,9 +18,6 @@ use Teams\TeamStruct;
 
 class ProjectManager {
     
-    public $sanitizeProjectOptions = true ;
-
-
     /**
      * Counter fro the total number of segments in the project with the flag ( show_in_cattool == true )
      *
@@ -124,11 +121,13 @@ class ProjectManager {
                             'dqf_key'              => null,
                             'owner'                => '',
                             'word_count_type'      => '',
-                            'metadata'             => array(),
+                            'metadata'             => [],
                             'id_assignee'          => null,
                             'session'              => ( isset( $_SESSION ) ? $_SESSION : false ),
+                            'instance_id'          => ( !is_null( INIT::$INSTANCE_ID ) ? (int)INIT::$INSTANCE_ID : 0 ),
                             'id_team'              => null,
-                            'team'                 => null
+                            'team'                 => null,
+                            'sanitize_project_options' => true
                     ] );
 
         }
@@ -207,7 +206,7 @@ class ProjectManager {
 
         $options = $this->projectStructure['metadata'];
         
-        if ( $this->sanitizeProjectOptions ) {
+        if ( $this->projectStructure[ 'sanitize_project_options' ] ) {
             $options = $this->sanitizeProjectOptions( $options ) ; 
         }
 
@@ -246,7 +245,7 @@ class ProjectManager {
         $this->project = insertProject( $this->projectStructure );
         $this->projectStructure[ 'id_project' ] = $this->project->id; //redundant
         $this->projectStructure[ 'ppassword' ]  = $this->project->password; //redundant
-        
+
     }
 
     private function __checkForSelfAssignment(){
@@ -264,7 +263,7 @@ class ProjectManager {
             $this->gdriveSession = GDrive\Session::getInstanceForCLI( $this->projectStructure[ 'session' ] ) ;
         }
 
-        $this->team = $this->features->filter('filter_team_for_project_creation', $this->team ) ;
+        $this->projectStructure['team'] = $this->features->filter('filter_team_for_project_creation', $this->projectStructure['team'] ) ;
 
         // project name sanitize
         $oldName                                  = $this->projectStructure[ 'project_name' ];

@@ -324,8 +324,7 @@ class createProjectController extends ajaxController {
             $projectStructure[ 'uid' ]           = $this->uid;
             $projectStructure[ 'id_customer' ]   = $this->userMail;
             $projectStructure[ 'owner' ]         = $this->userMail ;
-            $projectStructure[ 'id_team' ]       = $this->team->id ;
-            $projectStructure[ 'team' ]          = $this->team; // set the team object to avoid useless query
+            $projectManager->setTeam( $this->team ); // set the team object to avoid useless query
         }
 
         //reserve a project id from the sequence

@@ -58,7 +58,7 @@ class FindByIdAndPasswordProjectTest extends AbstractTest
         $this->assertEquals($this->project['fast_analysis_wc'], $result->fast_analysis_wc);
         $this->assertEquals($this->project['standard_analysis_wc'], $result->standard_analysis_wc);
         $this->assertEquals($this->project['remote_ip_address'], $result->remote_ip_address);
-        $this->assertEquals($this->project['for_debug'], $result->for_debug);
+        $this->assertEquals($this->project['instance_number'], $result->instance_number);
         $this->assertEquals($this->project['pretranslate_100'], $result->pretranslate_100);
         $this->assertEquals($this->project['id_qa_model'], $result->id_qa_model);
     }

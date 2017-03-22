@@ -532,6 +532,8 @@ class NewController extends ajaxController {
         $projectManager   = new ProjectManager();
         $projectStructure = $projectManager->getProjectStructure();
 
+        $projectStructure[ 'sanitize_project_options' ] = false;
+
         $projectStructure[ 'project_name' ] = $this->project_name;
         $projectStructure[ 'job_subject' ]  = $this->subject;
 
@@ -556,17 +558,10 @@ class NewController extends ajaxController {
         if ( $this->current_user ) {
             $projectStructure[ 'owner' ]       = $this->current_user->getEmail();
             $projectStructure[ 'id_customer' ] = $this->current_user->getEmail();
-        }
-
-        $projectManager = new ProjectManager( $projectStructure );
-        
-        $projectManager->sanitizeProjectOptions = false ; 
-
-        FilesStorage::moveFileFromUploadSessionToQueuePath( $uploadFile->getDirUploadToken() );
-
-        if ( $this->team ) {
             $projectManager->setTeam( $this->team ) ;
         }
+
+        FilesStorage::moveFileFromUploadSessionToQueuePath( $uploadFile->getDirUploadToken() );
 
         //reserve a project id from the sequence
         $projectStructure[ 'id_project' ] = Database::obtain()->nextSequence( Database::SEQ_ID_PROJECT )[ 0 ];
