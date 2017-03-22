@@ -786,12 +786,12 @@
     ,
         {
             "localized":[{
-                "en":"Kurdish"
+                "en":"Kurdish Kurmanji"
             }],
             "isocode":"ku",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"ku-TR"
+            "rfc3066code":"ku-KMR"
         }
     ,
         {
@@ -799,9 +799,9 @@
                 "en":"Kurdish Sorani"
             }],
             "isocode":"ku",
-            "enabled":false,
+            "enabled":true,
             "rtl":true,
-            "rfc3066code":"ku-TR"
+            "rfc3066code":"ku-CKB"
         }
     ,
         {
@@ -879,9 +879,9 @@
                 "en":"Malagasy"
             }],
             "isocode":"mg",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"mg-MG"
+            "rfc3066code":"mg-MLG"
         }
     ,
         {
@@ -1369,7 +1369,7 @@
                 "en":"Somali"
             }],
             "isocode":"so",
-            "enabled":false,
+            "enabled":true,
             "rtl":true,
             "rfc3066code":"so-SO"
         }
