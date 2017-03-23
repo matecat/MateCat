@@ -824,13 +824,8 @@ div#matecat-modal p {
     .matecat-modal-bottom,
     .matecat-modal-top{
         padding: 25px;
-
-        .ui.segment.members-list {
-            max-height: 200px;
-            overflow-y: auto;
-        }
         .ui.members-list {
-            height: 230px;
+            min-height: 45px;
             .ui.divided.list {
                 position: absolute;
                 top: 0px;
@@ -838,7 +833,8 @@ div#matecat-modal p {
                 bottom: 0px;
                 right: 13px;
                 padding: 10px 15px 10px 15px;
-                overflow-y: scroll;
+                overflow-y: auto;
+                max-height: 210px;
             }
             ::-webkit-scrollbar {
                 width: 10px;
@@ -963,12 +959,11 @@ div#matecat-modal p {
             border-radius: 2px;
         }
     }
-    .ui.members-list {
-        /* Let's get this party started */
-
-    }
 }
 
+.modify-team-modal {
+
+}
 
 
 .ui.fluid.input > input {
@@ -1011,4 +1006,15 @@ div#matecat-modal p {
 
 .ui.divided.list .list > .item:first-child, .ui.divided.list > .item:first-child {
     border-top: 1px solid rgba(34, 36, 38, 0.15);
+}
+
+.matecat-modal-content {
+    .modify-team-modal {
+        .ui.members-list {
+            min-height: 250px;
+            .ui.divided.list {
+
+            }
+        }
+    }
 }
