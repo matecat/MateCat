@@ -93,20 +93,21 @@ class CreateTeam extends React.Component {
             <div className="matecat-modal-top">
                 <div className="ui one column grid left aligned">
                     <div className="column">
-                        <h2>Team Name</h2>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                        <h2>Assign a name to your team</h2>
                         <div className={"ui large fluid icon input " + inputError}>
                             <input type="text" placeholder="Team Name"
                                    onFocus={this.onInputFocus.bind(this)}
                                    onKeyUp={this.handleKeyPress.bind(this)}
                                    ref={(inputNewOrg) => this.inputNewOrg = inputNewOrg}/>
-                            <i className="icon-pencil icon"/>
+                            {/*<i className="icon-pencil icon"/>*/}
                         </div>
                     </div>
                 </div>
             </div>
             <div className="matecat-modal-middle">
                 <div className="ui one column grid left aligned">
-                    <div className="column">
+                    <div className="sixteen wide column">
                         <h2>Add members</h2>
                         <div className={"ui multiple search selection dropdown " + inputDropdown}
                              ref={(usersInput) => this.usersInput = usersInput}>
@@ -117,17 +118,32 @@ class CreateTeam extends React.Component {
                                     <div className="default text">insert email or emails separated by commas or press enter</div>
                                 )}
                         </div>
-                        <button className={"create-team ui primary button open" + buttonClass }
+                        {/*<div class="validation-error"><span class="text" style="color: red; font-size: 14px;">Email is required</span></div>*/}
+                    </div>
+                    {/*<div className="sixteen wide column">
+                        <div className="ui members-list team">
+                            <div className="ui divided list">
+                                <div className="item">
+                                    <div className="mini ui basic button right floated">Re-send</div>
+                                    <div className="ui tiny image label">A</div>
+                                    <div className="middle aligned content">
+                                        <div className="content user">Albert Mischiante</div>
+                                        <div className="content email-user-invited">albertmischiante@malavita.com</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>*/}
+                </div>
+            </div>
+            <div className="matecat-modal-bottom">
+                <div className="ui one column grid right aligned">
+                    <div className="column">
+                        <button className={"create-team ui primary button open " + buttonClass }
                                 onClick={this.onClick.bind(this)}>Create</button>
                     </div>
                 </div>
             </div>
-            {/*<div className="matecat-modal-bottom">
-                <div className="ui one column grid right aligned">
-                    <div className="column">
-                    </div>
-                </div>
-            </div>*/}
         </div>;
         }
 }
