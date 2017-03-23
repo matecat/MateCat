@@ -24,9 +24,12 @@ class TeamStruct extends DataAccess_AbstractDaoSilentStruct implements DataAcces
 
     /**
      * @param MembershipStruct[] $list
+     *
+     * @return $this
      */
     public function setMembers($list) {
         $this->members = $list ;
+        return $this;
     }
 
     /**

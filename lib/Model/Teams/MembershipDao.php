@@ -127,8 +127,8 @@ class MembershipDao extends \DataAccess_AbstractDao {
         );
 
         foreach ( $members as $member ) {
-            $member->setUser( ( new Users_UserDao() )->setCacheTTL( 60 * 10 )->getByUid( $member->uid ) );
-            $member->setUserMetadata( ( new MetadataDao() )->setCacheTTL( 60 * 10 )->getAllByUid( $member->uid ) );
+            $member->setUser( ( new Users_UserDao() )->setCacheTTL( 60 * 10 * 24 )->getByUid( $member->uid ) );
+            $member->setUserMetadata( ( new MetadataDao() )->setCacheTTL( 60 * 10 * 24 )->getAllByUid( $member->uid ) );
         }
 
         return $members;
