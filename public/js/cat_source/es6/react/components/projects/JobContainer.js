@@ -13,7 +13,7 @@ class JobContainer extends React.Component {
         $(this.dropdown).dropdown({
             belowOrigin: true
         });
-        $('.tooltipped.tm-keys, .comments-tooltip').tooltip({
+        $('.tooltipped.tm-keys, .comments-tooltip, .warnings-tooltip, .qr-tooltip').tooltip({
             delay: 50,
             html: 'true'
         });
@@ -277,8 +277,10 @@ class JobContainer extends React.Component {
         var quality = this.props.job.get('quality_overall');
         if ( quality === "poor" || quality === "fail" ) {
             var url = this.getQAReport();
+            let tooltipText = "Overall quality: " + quality.toUpperCase();
             icon = <li>
-                <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0"
+                <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0 tooltipped qr-tooltip"
+                   data-tooltip={tooltipText} data-position="top"
                    href={url} target="_blank">
                     <i className={"icon-qr-matecat " + quality}/>
                 </a>
@@ -292,8 +294,10 @@ class JobContainer extends React.Component {
         var warnings = this.props.job.get('warnings_count');
         if ( warnings > 0 ) {
             var url = this.getTranslateUrl() + '?action=warnings';
+            let tooltipText = "Click to see issues";
             icon = <li>
-                <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0"
+                <a className="btn-floating btn-flat waves-effect waves-dark z-depth-0 tooltipped warnings-tooltip"
+                   data-tooltip={tooltipText} data-position="top"
                    href={url} target="_blank">
                     <i className="icon-notice"/>
                 </a>
