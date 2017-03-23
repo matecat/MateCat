@@ -93,7 +93,8 @@ class CreateTeam extends React.Component {
             <div className="matecat-modal-top">
                 <div className="ui one column grid left aligned">
                     <div className="column">
-                        <h3>Team Name</h3>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                        <h2>Assign a name to your team</h2>
                         <div className={"ui large fluid icon input " + inputError}>
                             <input type="text" placeholder="Team Name"
                                    onFocus={this.onInputFocus.bind(this)}
@@ -107,7 +108,7 @@ class CreateTeam extends React.Component {
             <div className="matecat-modal-middle">
                 <div className="ui one column grid left aligned">
                     <div className="sixteen wide column">
-                        <h3>Add members</h3>
+                        <h2>Add members</h2>
                         <div className={"ui multiple search selection dropdown " + inputDropdown}
                              ref={(usersInput) => this.usersInput = usersInput}>
                             <input name="tags" type="hidden" />
@@ -117,8 +118,9 @@ class CreateTeam extends React.Component {
                                     <div className="default text">insert email or emails separated by commas or press enter</div>
                                 )}
                         </div>
+                        {/*<div class="validation-error"><span class="text" style="color: red; font-size: 14px;">Email is required</span></div>*/}
                     </div>
-                    <div className="sixteen wide column">
+                    {/*<div className="sixteen wide column">
                         <div className="ui members-list team">
                             <div className="ui divided list">
                                 <div className="item">
@@ -131,13 +133,13 @@ class CreateTeam extends React.Component {
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div>*/}
                 </div>
             </div>
             <div className="matecat-modal-bottom">
                 <div className="ui one column grid right aligned">
                     <div className="column">
-                        <button className={"create-team ui primary button open" + buttonClass }
+                        <button className={"create-team ui primary button open " + buttonClass }
                                 onClick={this.onClick.bind(this)}>Create</button>
                     </div>
                 </div>

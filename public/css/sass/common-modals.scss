@@ -5,7 +5,13 @@ body.side-popup {
 h1, h2, h3, h4, h5, h6 {
     font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
-a, ul, li, ol, p, input, input[type="text"] input[type="email"] .input{
+h2 {
+    font-size: 22px;
+}
+a {
+    ont-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+}
+ul, li, ol, p, input, input[type="text"] input[type="email"] .input{
     font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
 ::-webkit-input-placeholder { /* Chrome/Opera/Safari */
@@ -828,11 +834,11 @@ div#matecat-modal p {
             overflow-y: auto;
             &.team {
                 .item {
-                    padding: 10px;
+                    padding: 10px 0;
                     &:hover {
                         //background-color: #e0e1e2;
                         .mini.ui.basic.button.right.floated  {
-                            display: inherit;
+                            /*display: inherit;*/
                         }
                     }
                     .image {
@@ -857,6 +863,12 @@ div#matecat-modal p {
                         font-size: 14px;
                         color: grey;
                     }
+                    .content.pending-msg {
+                        font-weight: 100;
+                        font-size: 14px;
+                        color: grey;
+                        margin-top: 16px;
+                    }
                     /*.content.email-member {
                         font-size: 14px;
                         color: gray;
@@ -866,7 +878,7 @@ div#matecat-modal p {
                     }*/
                     .mini.ui.basic.button.right.floated {
                         margin-top: 10px;
-                        display: none;
+                        /*display: none;*/
                     }
 
                 }
@@ -888,28 +900,35 @@ div#matecat-modal p {
 }
 
 
-.create-team-modal {
+.create-team-modal, .modify-team-modal {
     .create-team {
         font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
         padding: 11px 22px;
         vertical-align: top;
         font-size: 18px;
         border: 1px solid #797979;
+        margin-right: 0px;
     }
 }
+
+
 
 .ui.fluid.input > input {
     font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    box-shadow: inset 0 1px 3px #ddd;
+    font-size: 15px;
 }
 
 .ui.multiple.search.dropdown {
-    cursor: text;
+    //cursor: text;
     width: 100%;
-    border: 1px solid rgba(34, 36, 38, 0.15);
-    margin-right: 10px;
-    &:focus {
+    //border: 1px solid rgba(34, 36, 38, 0.15);
+    //margin-right: 10px;
+    box-shadow: inset 0 1px 3px #ddd;
+    font-size: 15px;
+    /*&:focus {
         border: 1px solid yellow;
-    }
+    }*/
     /*&:active {
         border: 1px solid yellow;
     }*/
@@ -930,4 +949,8 @@ div#matecat-modal p {
     .tmx-import-slider {
         width: 150px !important;
     }
+}
+
+.ui.divided.list .list > .item:first-child, .ui.divided.list > .item:first-child {
+    border-top: 1px solid rgba(34, 36, 38, 0.15);
 }

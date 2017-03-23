@@ -139,18 +139,16 @@ class ModifyTeam extends React.Component {
         return this.state.team.get('pending_invitations').map(function(mail, i) {
             return <div className="item pending-invitation"
                          key={'user-invitation' + i}>
-                        <div className="ui circular label">{mail.substring(0, 1).toUpperCase()}</div>
-                        <div className="content user">
-                            {mail}
+                        <div className="mini ui basic button right floated"
+                             onClick={self.resendInvite.bind(self, mail)}>Resend Invite</div>
+                        <div className="ui right floated content pending-msg">Pending user</div>
+                        <div className="ui tiny image label">{mail.substring(0, 1).toUpperCase()}</div>
+                        <div className="middle aligned content">
+                            <div className="content user">
+                                {mail}
+                            </div>
                         </div>
 
-                        <div className="content email-member">
-                            {mail}
-                        </div>
-                        <div className="right floated content top-2">
-                            <div className="mini ui button"
-                                 onClick={self.resendInvite.bind(self, mail)}>Resend Invite</div>
-                        </div>
                     </div>;
         });
 
@@ -158,7 +156,6 @@ class ModifyTeam extends React.Component {
 
     componentDidUpdate() {
         var self = this;
-        $(this.pendingUsers).accordion();
         clearTimeout(this.inputTimeout);
         if (this.state.readyToSend) {
             this.inputTimeout = setTimeout(function () {
@@ -171,7 +168,6 @@ class ModifyTeam extends React.Component {
 
     componentDidMount() {
         TeamsStore.addListener(ManageConstants.UPDATE_TEAM, this.updateTeam);
-        $(this.pendingUsers).accordion();
     }
 
     componentWillUnmount() {
@@ -198,7 +194,7 @@ class ModifyTeam extends React.Component {
             <div className="matecat-modal-top">
                 <div className="ui one column grid left aligned">
                     <div className="column">
-                        <h3>Change Team Name</h3>
+                        <h2>Change Team Name</h2>
                         <div className={"ui fluid icon input " + orgNameError}>
                             <input type="text" defaultValue={this.state.team.get('name')}
                             onKeyUp={this.onKeyPressEvent.bind(this)}
@@ -212,7 +208,7 @@ class ModifyTeam extends React.Component {
                     <div className="matecat-modal-middle">
                         <div className="ui grid left aligned">
                             <div className="sixteen wide column">
-                                <h3>Add Members</h3>
+                                <h2>Add Members</h2>
                                 <div className={"ui fluid icon input " + usersError }>
                                     <input type="text" placeholder="name@email.com"
                                            onKeyUp={this.handleKeyPressUserInput.bind(this)}
@@ -230,9 +226,18 @@ class ModifyTeam extends React.Component {
                                     </div>
                                 </div>
                             </div>
+
+
                         </div>
                     </div>
                 ) : ('')}
+                    <div className="matecat-modal-bottom">
+                        <div className="ui one column grid right aligned">
+                            <div className="column">
+                                <button className="create-team ui primary button open">Confirm</button>
+                            </div>
+                        </div>
+                    </div>
 
         </div>;
     }
