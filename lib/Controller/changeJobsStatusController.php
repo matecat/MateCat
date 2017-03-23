@@ -55,14 +55,11 @@ class changeJobsStatusController extends ajaxController {
 
     }
 
-
-    public function doAction() {
+   public function doAction() {
 
         if ( ! $this->userIsLogged ) {
             throw new Exception( "User Not Logged." );
         }
-
-        $team = $this->logged_user->getPersonalTeam();
 
         if ( $this->res_type == "prj" ) {
 
@@ -88,25 +85,10 @@ class changeJobsStatusController extends ajaxController {
 
             updateJobsStatus( $this->res_type, $this->res_id, $this->new_status, $this->only_if );
 
-            $projects = ManageUtils::queryProjects( $this->logged_user,
-                1, 1, false, false,
-                false, false, false, null,
-                $team
-            );
-
-            $projnum = getProjectsNumber(
-                $this->logged_user,
-                false, false,
-                false, false, false,
-                $team
-            );
-
             $this->result[ 'code' ]    = 1;
             $this->result[ 'data' ]    = "OK";
             $this->result[ 'status' ]  = $this->new_status;
-            $this->result[ 'newItem' ] = $projects;
             $this->result[ 'page' ]    = 1;
-            $this->result[ 'pnumber' ] = $projnum[ 0 ][ 'c' ];
 
         } else {
 

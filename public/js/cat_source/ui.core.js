@@ -90,6 +90,8 @@ UI = {
 		this.createFooter(segment.el, isNotSimilar);
 		this.createButtons(segment);
 		this.createHeader(segment.el);
+
+        $(document).trigger('segment:activate', { segment: segment } );
 	},
     evalCurrentSegmentTranslationAndSourceTags : function( segment ) {
         if ( segment.length == 0 ) return ;
@@ -881,7 +883,7 @@ UI = {
 		$('#outer').removeClass('loading loadingBefore');
 		this.loadingMore = false;
 		this.setWaypoints();
-        $(window).trigger('segmentsAdded');
+        $(window).trigger('segmentsAdded',{ resp : d.data.files });
 	},
 
     /**
@@ -1345,24 +1347,24 @@ UI = {
 					$('#file-' + fid).append(newFile);
 				}
 			}
-            if (LXQ.enabled())
-            $.each(this.segments,function(i,seg) {
-            if (!starting)
-            if (LXQ.hasOwnProperty('lexiqaData') && LXQ.lexiqaData.hasOwnProperty('lexiqaWarnings') &&
-                LXQ.lexiqaData.lexiqaWarnings.hasOwnProperty(seg.sid)) {
-                    console.log('in loadmore segments, segment: '+seg.sid+' already has qa info...');
-                    //FOTDDD
-                    LXQ.redoHighlighting(seg.sid,true);
-                    LXQ.redoHighlighting(seg.sid,false);
-                }
-            });
+            // if (LXQ.enabled())
+            // $.each(this.segments,function(i,seg) {
+            // if (!starting)
+            // if (LXQ.hasOwnProperty('lexiqaData') && LXQ.lexiqaData.hasOwnProperty('lexiqaWarnings') &&
+            //     LXQ.lexiqaData.lexiqaWarnings.hasOwnProperty(seg.sid)) {
+            //         console.log('in loadmore segments, segment: '+seg.sid+' already has qa info...');
+            //         //FOTDDD
+            //         LXQ.redoHighlighting(seg.sid,true);
+            //         LXQ.redoHighlighting(seg.sid,false);
+            //     }
+            // });
 		});
 
         $(document).trigger('files:appended');
 
 		if (starting) {
 			this.init();
-            LXQ.getLexiqaWarnings();
+            // LXQ.getLexiqaWarnings();
 		}
 
 	},
@@ -2169,16 +2171,16 @@ UI = {
             APP.addNotification(notification);
 		}
 	},
-    segmentLexiQA: function(_segment) {
-        var segment = _segment;
-        //new API?
-        if (_segment.raw) {
-            segment = _segment.raw
-        }
-        var translation = $('.editarea', segment ).text().replace(/\uFEFF/g,'');
-        var id_segment = UI.getSegmentId(segment);
-        LXQ.doLexiQA(segment, translation, id_segment,false, function () {}) ;
-    },
+  segmentLexiQA: function(_segment) {
+    var segment = _segment;
+    //new API?
+    if (_segment.raw) {
+      segment = _segment.raw
+    }
+    var translation = $('.editarea', segment ).text().replace(/\uFEFF/g,'');
+    var id_segment = UI.getSegmentId(segment);
+    LXQ.doLexiQA(segment, translation, id_segment,false, function () {}) ;
+  },
     segmentQA : function( segment ) {
         if ( ! ( segment instanceof UI.Segment) ) {
             segment = new UI.Segment( segment );
@@ -2209,24 +2211,22 @@ UI = {
 				action: 'getWarning',
 				id: segment.id,
 				token: token,
-                id_job: config.id_job,
+        id_job: config.id_job,
 				password: config.password,
 				src_content: src_content,
 				trg_content: trg_content,
-                segment_status: segment_status,
+        segment_status: segment_status,
 			},
 			error: function() {
 				UI.failedConnection(0, 'getWarning');
 			},
 			success: function(d) {
 				if (segment.el.hasClass('waiting_for_check_result')) {
-
           // TODO: define d.total more explicitly
 					if ( !d.total ) {
-  						$('p.warnings', segment.el).empty();
-  						$('span.locked.mismatch', segment.el).removeClass('mismatch');
-              $('.editor .editarea .order-error').removeClass('order-error');
-
+						$('p.warnings', segment.el).empty();
+						$('span.locked.mismatch', segment.el).removeClass('mismatch');
+            $('.editor .editarea .order-error').removeClass('order-error');
 					}
           else {
               UI.fillCurrentSegmentWarnings(d.details, false); // update warnings
@@ -2235,9 +2235,8 @@ UI = {
               segment.el.removeClass('waiting_for_check_result');
           }
 				}
-
         $(document).trigger('getWarning:local:success', { resp : d, segment: segment }) ;
-        if (LXQ.enabled()) UI.segmentLexiQA(segment);
+        //if (LXQ.enabled()) UI.segmentLexiQA(segment);
 			}
 		}, 'local');
 
@@ -2432,9 +2431,9 @@ UI = {
                 MateCat.db.segments.update( _.extend(record, data.translation) );
 
                 $(document).trigger('translation:change', data.translation);
-
-                var translation = $('.editarea', segment ).text().replace(/\uFEFF/g,'');
-                LXQ.doLexiQA(segment,translation,id_segment,true,null);
+                data.segment = segment;
+                // var translation = $('.editarea', segment ).text().replace(/\uFEFF/g,'');
+                // LXQ.doLexiQA(segment,translation,id_segment,true,null);
                 $(document).trigger('setTranslation:success', data);
 			}
 		});
@@ -3072,7 +3071,7 @@ UI = {
         });
 
         var initialRenderPromise ;
-        if ( SegmentFilter.enabled() && SegmentFilter.getStoredState() ) {
+        if ( SegmentFilter.enabled() && SegmentFilter.getStoredState().reactState ) {
             SegmentFilter.openFilter();
             initialRenderPromise = ( new $.Deferred() ).resolve();
         }

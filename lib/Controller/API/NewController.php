@@ -1,8 +1,10 @@
 <?php
 
+use ProjectQueue\Queue;
 use Teams\MembershipDao;
 
-set_time_limit( 180 );
+//limit execution time to 300 seconds
+set_time_limit( 300 );
 
 /**
  *
@@ -58,7 +60,7 @@ class NewController extends ajaxController {
     private $seg_rule;
 
     private $private_tm_user = null;
-    private   $private_tm_pass = null;
+    private $private_tm_pass = null;
 
     private $new_keys = array();
 
@@ -88,9 +90,6 @@ class NewController extends ajaxController {
     protected $id_team ;
 
     public function __construct() {
-
-        //limit execution time to 300 seconds
-        set_time_limit( 300 );
 
         parent::__construct();
 
@@ -160,24 +159,10 @@ class NewController extends ajaxController {
         // Force pretranslate_100 to be 0 or 1
         $this->pretranslate_100 = (int) !!$__postInput[ 'pretranslate_100' ];
 
-        try {
-            $this->private_tm_key = array_map(
-                    'self::parseTmKeyInput',
-                    explode( ",", $__postInput[ 'private_tm_key' ] )
-            );
-        } catch ( Exception $e ) {
-            $this->api_output[ 'message' ] = $e->getMessage();
-            $this->api_output[ 'debug' ]   = $e->getMessage();
-            Log::doLog( $e->getMessage() );
-
-            return -6;
-        }
-
         if ( $this->owner === false ) {
             $this->api_output[ 'message' ] = "Project Creation Failure";
             $this->api_output[ 'debug' ]   = "Email is not valid";
             Log::doLog( "Email is not valid" );
-
             return -5;
         } else if ( !is_null( $this->owner ) && !empty( $this->owner ) ) {
             $domain = explode( "@", $this->owner );
@@ -186,7 +171,6 @@ class NewController extends ajaxController {
                 $this->api_output[ 'message' ] = "Project Creation Failure";
                 $this->api_output[ 'debug' ]   = "Email is not valid";
                 Log::doLog( "Email is not valid" );
-
                 return -5;
             }
         }
@@ -196,7 +180,6 @@ class NewController extends ajaxController {
         } catch ( Exception $ex ) {
             $this->api_output[ 'message' ] = 'Error evaluating metadata param';
             Log::doLog( $ex->getMessage() );
-
             return -1;
         }
 
@@ -206,16 +189,7 @@ class NewController extends ajaxController {
         } catch ( Exception $ex ) {
             $this->api_output[ 'message' ] = $ex->getMessage();
             Log::doLog( $ex->getMessage() );
-
             return -1;
-        }
-
-        if ( count( $this->private_tm_key ) > self::MAX_NUM_KEYS ) {
-            $this->api_output[ 'message' ] = "Project Creation Failure";
-            $this->api_output[ 'debug' ]   = "Too much keys provided. Max number of keys is " . self::MAX_NUM_KEYS;
-            Log::doLog( "Too much keys provided. Max number of keys is " . self::MAX_NUM_KEYS );
-
-            return -2;
         }
 
         $langDomains = Langs_LanguageDomains::getInstance();
@@ -240,7 +214,6 @@ class NewController extends ajaxController {
             $this->api_output[ 'message' ] = "Project Creation Failure";
             $this->api_output[ 'debug' ]   = "Subject not allowed: " . $this->subject;
             Log::doLog( "Subject not allowed: " . $this->subject );
-
             return -3;
         }
 
@@ -248,7 +221,6 @@ class NewController extends ajaxController {
             $this->api_output[ 'message' ] = "Project Creation Failure";
             $this->api_output[ 'debug' ]   = "Segmentation rule not allowed: " . $this->seg_rule;
             Log::doLog( "Segmentation rule not allowed: " . $this->seg_rule );
-
             return -4;
         }
 
@@ -259,73 +231,18 @@ class NewController extends ajaxController {
 
         if ( empty( $_FILES ) ) {
             $this->result[ 'errors' ][] = array( "code" => -1, "message" => "Missing file. Not Sent." );
-
             return -1;
         }
 
-        $this->private_tm_key = array_values( array_filter( $this->private_tm_key ) );
-
-        //If a TMX file has been uploaded and no key was provided, create a new key.
-        if ( empty( $this->private_tm_key ) ) {
-            foreach ( $_FILES as $_fileinfo ) {
-                $pathinfo = FilesStorage::pathinfo_fix( $_fileinfo[ 'name' ] );
-                if ( $pathinfo[ 'extension' ] == 'tmx' ) {
-                    $this->private_tm_key[] = 'new';
-                    break;
-                }
-            }
+        try {
+            $this->validateTmAndKeys( $__postInput );
+        } catch( Exception $e ){
+            $this->api_output[ 'message' ] = "Project Creation Failure";
+            $this->api_output[ 'debug' ]   = $e->getMessage();
+            Log::doLog( "Error: " . $e->getCode() . " - " . $e->getMessage() );
+            return -$e->getCode();
         }
 
-        //remove all empty entries
-        foreach ( $this->private_tm_key as $__key_idx => $tm_key ) {
-            //from api a key is sent and the value is 'new'
-            if ( $tm_key[ 'key' ] == 'new' ) {
-
-                try {
-
-                    $APIKeySrv = new TMSService();
-
-                    $newUser = $APIKeySrv->createMyMemoryKey();
-
-                    //TODO: i need to store an array of these
-                    $this->private_tm_user = $newUser->id;
-                    $this->private_tm_pass = $newUser->pass;
-
-                    $this->private_tm_key[ $__key_idx ] =
-                            array(
-                                    'key'  => $newUser->key,
-                                    'name' => null,
-                                    'r'    => $tm_key[ 'r' ],
-                                    'w'    => $tm_key[ 'w' ]
-
-                            );
-                    $this->new_keys[]                   = $newUser->key;
-
-                } catch ( Exception $e ) {
-
-                    $this->api_output[ 'message' ] = 'Project Creation Failure';
-                    $this->api_output[ 'debug' ]   = array( "code" => $e->getCode(), "message" => $e->getMessage() );
-
-                    return -1;
-                }
-
-            } //if a string is sent, transform it into a valid array
-            else if ( !empty( $tm_key ) ) {
-                $this->private_tm_key[ $__key_idx ] =
-                        array(
-                                'key'  => $tm_key[ 'key' ],
-                                'name' => null,
-                                'r'    => $tm_key['r'],
-                                'w'    => $tm_key['w']
-
-                        );
-            }
-
-            $this->private_tm_key[ $__key_idx ] = array_filter(
-                    $this->private_tm_key[ $__key_idx ],
-                    array( "self", "sanitizeTmKeyArr" )
-            );
-        }
     }
 
     /**
@@ -618,7 +535,6 @@ class NewController extends ajaxController {
         $projectStructure[ 'project_name' ] = $this->project_name;
         $projectStructure[ 'job_subject' ]  = $this->subject;
 
-        $projectStructure[ 'result' ]               = $this->result;
         $projectStructure[ 'private_tm_key' ]       = $this->private_tm_key;
         $projectStructure[ 'private_tm_user' ]      = $this->private_tm_user;
         $projectStructure[ 'private_tm_pass' ]      = $this->private_tm_pass;
@@ -634,6 +550,9 @@ class NewController extends ajaxController {
         $projectStructure[ 'metadata' ]             = $this->metadata ;
         $projectStructure[ 'pretranslate_100']      = $this->pretranslate_100 ;
 
+        $projectStructure[ 'user_ip' ]              = Utils::getRealIpAddr();
+        $projectStructure[ 'HTTP_HOST' ]            = INIT::$HTTPHOST;
+
         if ( $this->current_user ) {
             $projectStructure[ 'owner' ]       = $this->current_user->getEmail();
             $projectStructure[ 'id_customer' ] = $this->current_user->getEmail();
@@ -643,29 +562,45 @@ class NewController extends ajaxController {
         
         $projectManager->sanitizeProjectOptions = false ; 
 
+        FilesStorage::moveFileFromUploadSessionToQueuePath( $uploadFile->getDirUploadToken() );
+
         if ( $this->team ) {
             $projectManager->setTeam( $this->team ) ;
         }
 
-        $projectManager->createProject();
+        //reserve a project id from the sequence
+        $projectStructure[ 'id_project' ] = Database::obtain()->nextSequence( Database::SEQ_ID_PROJECT )[ 0 ];
+        $projectStructure[ 'ppassword' ]  = $projectManager->generatePassword();
 
-        $this->result = $projectStructure[ 'result' ];
+        Queue::sendProject( $projectStructure );
 
-        if ( !empty( $projectStructure[ 'result' ][ 'errors' ] ) ) {
-            //errors already logged
+        $time = time();
+        do {
+            $this->result = Queue::getPublishedResults( $projectStructure['id_project'] ); //LOOP for 290 seconds **** UGLY **** Deprecate in API V2
+            if ( $this->result != null ){
+                break;
+            }
+            sleep(2);
+        } while( time() - $time <= 290 );
+
+        if( $this->result == null ){
+            $this->api_output[ 'status' ]  = 504;
             $this->api_output[ 'message' ] = 'Project Creation Failure';
-            $this->api_output[ 'debug' ]   = array_values( $projectStructure[ 'result' ][ 'errors' ] );
+            $this->api_output[ 'debug' ]   = 'Execution timeout';
+        } elseif ( !empty( $this->result[ 'errors' ] ) ) {
+            //errors already logged
+            $this->api_output[ 'status' ]  = 500;
+            $this->api_output[ 'message' ] = 'Project Creation Failure';
+            $this->api_output[ 'debug' ]   = array_values( $this->result );
 
         } else {
             //everything ok
             $this->api_output[ 'status' ]       = 'OK';
             $this->api_output[ 'message' ]      = 'Success';
-            $this->api_output[ 'id_project' ]   = $projectStructure[ 'result' ][ 'id_project' ];
-            $this->api_output[ 'project_pass' ] = $projectStructure[ 'result' ][ 'ppassword' ];
-
+            $this->api_output[ 'id_project' ]   = $this->result[ 'id_project' ];
+            $this->api_output[ 'project_pass' ] = $this->result[ 'ppassword' ];
             $this->api_output[ 'new_keys' ] = $this->new_keys;
-
-            $this->api_output[ 'analyze_url' ] = $projectStructure[ 'result' ][ 'analyze_url' ];
+            $this->api_output[ 'analyze_url' ] = $this->result[ 'analyze_url' ];
         }
 
     }
@@ -799,6 +734,87 @@ class NewController extends ajaxController {
                 'w'   => $write,
         );
     }
+
+    protected function validateTmAndKeys( $__postInput ) {
+
+        try {
+            $this->private_tm_key = array_map(
+                    'self::parseTmKeyInput',
+                    explode( ",", $__postInput[ 'private_tm_key' ] )
+            );
+        } catch ( Exception $e ) {
+            throw new Exception( $e->getMessage(), -6 );
+        }
+
+        if ( count( $this->private_tm_key ) > self::MAX_NUM_KEYS ) {
+            throw new Exception( "Too much keys provided. Max number of keys is " . self::MAX_NUM_KEYS, -2 );
+        }
+
+        $this->private_tm_key = array_values( array_filter( $this->private_tm_key ) );
+
+        //If a TMX file has been uploaded and no key was provided, create a new key.
+        if ( empty( $this->private_tm_key ) ) {
+            foreach ( $_FILES as $_fileinfo ) {
+                $pathinfo = FilesStorage::pathinfo_fix( $_fileinfo[ 'name' ] );
+                if ( $pathinfo[ 'extension' ] == 'tmx' ) {
+                    $this->private_tm_key[] = [ 'key' => 'new' ];
+                    break;
+                }
+            }
+        }
+
+        //remove all empty entries
+        foreach ( $this->private_tm_key as $__key_idx => $tm_key ) {
+            //from api a key is sent and the value is 'new'
+            if ( $tm_key[ 'key' ] == 'new' ) {
+
+                try {
+
+                    $APIKeySrv = new TMSService();
+
+                    $newUser = $APIKeySrv->createMyMemoryKey();
+
+                    //TODO: i need to store an array of these
+                    $this->private_tm_user = $newUser->id;
+                    $this->private_tm_pass = $newUser->pass;
+
+                    $this->private_tm_key[ $__key_idx ] =
+                            array(
+                                    'key'  => $newUser->key,
+                                    'name' => null,
+                                    'r'    => $tm_key[ 'r' ],
+                                    'w'    => $tm_key[ 'w' ]
+
+                            );
+                    $this->new_keys[]                   = $newUser->key;
+
+                } catch ( Exception $e ) {
+                    throw new Exception( $e->getMessage(), -1 );
+                }
+
+            } //if a string is sent, transform it into a valid array
+            else {
+                if ( !empty( $tm_key ) ) {
+                    $this->private_tm_key[ $__key_idx ] =
+                            array(
+                                    'key'  => $tm_key[ 'key' ],
+                                    'name' => null,
+                                    'r'    => $tm_key[ 'r' ],
+                                    'w'    => $tm_key[ 'w' ]
+
+                            );
+                }
+            }
+
+            $this->private_tm_key[ $__key_idx ] = array_filter(
+                    $this->private_tm_key[ $__key_idx ],
+                    array( "self", "sanitizeTmKeyArr" )
+            );
+
+        }
+
+    }
+
 
     private function __validateTeam() {
         if ( $this->current_user && !empty( $this->id_team ) ) {

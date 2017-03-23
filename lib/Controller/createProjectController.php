@@ -1,9 +1,6 @@
 <?php
-
-define( 'DEFAULT_NUM_RESULTS', 2 );
-set_time_limit( 0 );
-
 use ConnectedServices\GDrive as GDrive ;
+use ProjectQueue\Queue;
 
 class createProjectController extends ajaxController {
 
@@ -72,8 +69,6 @@ class createProjectController extends ajaxController {
         );
 
         $this->checkLogin( false );
-
-
         $this->__setupFeatureSet();
 
         $filterArgs = $this->__addFilterForMetadataInput( $filterArgs ) ;
@@ -292,12 +287,13 @@ class createProjectController extends ajaxController {
         \Log::doLog( '------------------------------'); 
         \Log::doLog( $arFiles ); 
 
+        FilesStorage::moveFileFromUploadSessionToQueuePath( $_COOKIE[ 'upload_session' ] );
+
         $projectManager = new ProjectManager();
 
         $projectStructure = $projectManager->getProjectStructure();
 
         $projectStructure[ 'project_name' ]         = $this->project_name;
-        $projectStructure[ 'result' ]               = $this->result;
         $projectStructure[ 'private_tm_key' ]       = $this->private_tm_key;
         $projectStructure[ 'private_tm_user' ]      = $this->private_tm_user;
         $projectStructure[ 'private_tm_pass' ]      = $this->private_tm_pass;
@@ -312,6 +308,9 @@ class createProjectController extends ajaxController {
         $projectStructure[ 'lang_detect_files' ]    = $this->lang_detect_files;
         $projectStructure[ 'skip_lang_validation' ] = true;
         $projectStructure[ 'pretranslate_100' ]     = $this->pretranslate_100;
+
+        $projectStructure[ 'user_ip' ]              = Utils::getRealIpAddr();
+        $projectStructure[ 'HTTP_HOST' ]            = INIT::$HTTPHOST;
 
         //TODO enable from CONFIG
         $projectStructure[ 'metadata' ]             = $this->metadata;
@@ -329,15 +328,19 @@ class createProjectController extends ajaxController {
             $projectStructure[ 'team' ]          = $this->team; // set the team object to avoid useless query
         }
 
+        //reserve a project id from the sequence
+        $projectStructure[ 'id_project' ] = Database::obtain()->nextSequence( Database::SEQ_ID_PROJECT )[ 0 ];
+        $projectStructure[ 'ppassword' ]  = $projectManager->generatePassword();
 
-        $projectManager = new ProjectManager( $projectStructure );
-        $projectManager->createProject();
+        Queue::sendProject( $projectStructure );
 
-        // Strictly related to the UI ( not API ) interaction, should yet be moved away from controller.
         $this->__clearSessionFiles();
         $this->__assignLastCreatedPid( $projectStructure['id_project'] ) ;
 
-        $this->result = $projectStructure[ 'result' ];
+        $this->result[ 'data' ] = [
+                'id_project' => $projectStructure[ 'id_project' ],
+                'password'   => $projectStructure[ 'ppassword' ]
+        ];
 
     }
 
@@ -406,7 +409,7 @@ class createProjectController extends ajaxController {
     private function __clearSessionFiles() {
 
         if ( $this->userIsLogged ) {
-            $gdriveSession = new GDrive\Session( $_SESSION ) ;
+            $gdriveSession = new GDrive\Session() ;
             $gdriveSession->clearFiles() ;
         }
     }
