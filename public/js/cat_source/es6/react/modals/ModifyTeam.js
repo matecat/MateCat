@@ -33,6 +33,9 @@ class ModifyTeam extends React.Component {
         if (user.get('uid') === APP.USER.STORE.user.uid) {
             APP.ModalWindow.onCloseModal();
         }
+        this.setState({
+            showRemoveMessageUserID: null
+        });
     }
 
     undoRemoveAction() {
