@@ -169,6 +169,13 @@ header {
                 text-decoration: none;
                 transition: 0.3s ease;
             }
+            &.only-one-team .scrolling.menu {
+                display: none;
+            }
+            &.disable-dropdown-team {
+                pointer-events: none;
+                cursor: default;
+            }
         }
 
     }
