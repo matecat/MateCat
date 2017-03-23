@@ -15,9 +15,7 @@ class Header extends React.Component {
     }
 
     componentDidMount () {
-        if (this.state.selectedTeamId) {
-            this.dropdownTeams.dropdown('set selected',  this.state.selectedTeamId);
-        }
+
         TeamsStore.addListener(ManageConstants.RENDER_TEAMS, this.renderTeams);
         TeamsStore.addListener(ManageConstants.UPDATE_TEAMS, this.updateTeams);
         TeamsStore.addListener(ManageConstants.CHOOSE_TEAM, this.chooseTeams);
@@ -30,8 +28,17 @@ class Header extends React.Component {
     }
 
     componentDidUpdate() {
+        this.initDropdown();
+    }
+
+    initDropdown() {
         let self = this;
         if (this.state.teams.size > 0){
+            if (this.state.teams.size == 1) {
+                this.dropdownTeams.classList.add("only-one-team");
+            } else {
+                this.dropdownTeams.classList.remove("only-one-team");
+            }
             let dropdownTeams = $(this.dropdownTeams);
             if (this.state.selectedTeamId ) {
                 setTimeout(function () {
@@ -112,6 +119,8 @@ class Header extends React.Component {
     getTeamsSelect() {
         let result = '';
         var self = this;
+        let dropdownIcon = '';
+        let dontShowCursorClass = (this.state.teams.size == 1)? 'disable-dropdown-team' : '';
         if (this.state.teams.size > 0) {
             let items = this.state.teams.map(function(team, i) {
                 let iconModal = '';
@@ -131,15 +140,20 @@ class Header extends React.Component {
             });
             let addTeam = '';
             if (self.props.showModals) {
+                if (this.state.teams.size > 1) {
+                    dropdownIcon = <i className="dropdown icon"/>;
+                    dontShowCursorClass = '';
+                }
                 addTeam = <div className="header" onClick={this.openCreateTeams.bind(this)}>New Team
                                 <a className="team-filter button show">
                                     <i className="icon-plus3 icon"/>
                                 </a>
                             </div>
             }
-            result = <div className="ui top right pointing dropdown select-org"
+            result = <div className={"ui top right pointing dropdown select-org " + dontShowCursorClass}
                           ref={(dropdownTeams) => this.dropdownTeams = dropdownTeams}>
                 <input type="hidden" name="team" className="team-dd" />
+                {dropdownIcon}
                 <span className="text">Choose Team</span>
                 {/*<i className="dropdown icon"/>*/}
                 <div className="menu">
