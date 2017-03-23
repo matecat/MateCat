@@ -88,7 +88,7 @@ class CreateTeam extends React.Component {
         var inputDropdown = (this.state.errorDropdown) ? 'error' : '';
 
         var buttonClass = (this.state.readyToSend && !this.state.errorInput && !this.state.errorDropdown ) ? '' : 'disabled';
-
+        var user = APP.USER.STORE.user;
         return  <div className="create-team-modal">
             <div className="matecat-modal-top">
                 <div className="ui one column grid left aligned">
@@ -120,20 +120,19 @@ class CreateTeam extends React.Component {
                         </div>
                         {/*<div class="validation-error"><span class="text" style="color: red; font-size: 14px;">Email is required</span></div>*/}
                     </div>
-                    {/*<div className="sixteen wide column">
+                    <div className="sixteen wide column">
                         <div className="ui members-list team">
                             <div className="ui divided list">
                                 <div className="item">
-                                    <div className="mini ui basic button right floated">Re-send</div>
-                                    <div className="ui tiny image label">A</div>
+                                    <div className="ui tiny image label">{APP.getUserShortName(user)}</div>
                                     <div className="middle aligned content">
-                                        <div className="content user">Albert Mischiante</div>
-                                        <div className="content email-user-invited">albertmischiante@malavita.com</div>
+                                        <div className="content user"> {' ' + user.first_name + ' ' + user.last_name}</div>
+                                        <div className="content email-user-invited">{user.email}</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>*/}
+                    </div>
                 </div>
             </div>
             <div className="matecat-modal-bottom">
