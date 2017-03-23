@@ -1,5 +1,7 @@
 <?php
 
+use Teams\TeamStruct;
+
 class Projects_ProjectDao extends DataAccess_AbstractDao {
     const TABLE = "projects";
 
@@ -10,7 +12,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      * @var string
      */
     protected static $_sql_for_project_unassignment = "
-        UPDATE projects SET id_assignee = NULL WHERE id_assignee = :id_assignee
+        UPDATE projects SET id_assignee = NULL WHERE id_assignee = :id_assignee and id_team = :id_team ;
     ";
 
     /**
@@ -48,10 +50,13 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      * @param Users_UserStruct $user
      * @return int
      */
-    public function unassignProjects(Users_UserStruct $user) {
+    public function unassignProjects( TeamStruct $team, Users_UserStruct $user) {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( static::$_sql_for_project_unassignment ) ;
-        $stmt->execute( ['id_assignee' => $user->uid ] ) ;
+        $stmt->execute( [
+                'id_assignee' => $user->uid,
+                'id_team'     => $team->id
+        ] ) ;
 
         return $stmt->rowCount();
     }
