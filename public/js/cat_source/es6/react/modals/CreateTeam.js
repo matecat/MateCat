@@ -77,6 +77,10 @@ class CreateTeam extends React.Component {
                 errorDropdown: false,
             });
         }
+        if (e.key === ' ') {
+            this.onLabelCreate(mail, mail);
+            $(this.usersInput).find("input.search").val('');
+        }
     }
 
 
