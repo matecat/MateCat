@@ -5,6 +5,7 @@ APP = {
         this.setLoginEvents();
         if (config.isLoggedIn) {
             APP.teamStorageName = 'teamId-' + config.userMail;
+            this.setTeamNameInMenu();
         }
         this.isCattool = $( 'body' ).hasClass( 'cattool' );
         $( "body" ).on( 'click', '.modal .x-popup', function ( e ) {
@@ -860,6 +861,17 @@ APP = {
             openOriginalFiles
         );
     },
+
+    setTeamNameInMenu: function () {
+        if (APP.USER.STORE.teams) {
+            var team = this.getLastTeamSelected(APP.USER.STORE.teams);
+            $('.user-menu-container .organization-name').text(team.name);
+        } else {
+            setTimeout(this.setTeamNameInMenu, 500);
+        }
+    },
+
+
 
 };
 
