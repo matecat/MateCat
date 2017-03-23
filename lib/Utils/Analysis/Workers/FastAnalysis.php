@@ -100,7 +100,7 @@ class FastAnalysis extends AbstractDaemon {
 
         try {
             self::$queueHandler = new AMQHandler();
-            self::$queueHandler->getRedisClient()->sadd( RedisKeys::FAST_PID_LIST, self::$tHandlerPID . ":" . gethostname() . ":" . (int) INIT::$INSTANCE_ID );
+            self::$queueHandler->getRedisClient()->sadd( RedisKeys::FAST_PID_SET, self::$tHandlerPID . ":" . gethostname() . ":" . (int) INIT::$INSTANCE_ID );
 
             $this->_updateConfiguration();
 
@@ -343,7 +343,7 @@ class FastAnalysis extends AbstractDaemon {
         self::$tHandlerPID = null;
 
         //SHUTDOWN
-        self::$queueHandler->getRedisClient()->srem( RedisKeys::FAST_PID_LIST, getmypid() . ":" . gethostname() . ":" . (int) INIT::$INSTANCE_ID );
+        self::$queueHandler->getRedisClient()->srem( RedisKeys::FAST_PID_SET, getmypid() . ":" . gethostname() . ":" . (int) INIT::$INSTANCE_ID );
 
         $msg = str_pad( " FAST ANALYSIS " . getmypid() . ":" . gethostname() . ":" . INIT::$INSTANCE_ID . " HALTED GRACEFULLY ", 50, "-", STR_PAD_BOTH );
         self::_TimeStampMsg( $msg );
