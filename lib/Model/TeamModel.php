@@ -102,6 +102,8 @@ class TeamModel {
             }
         }
 
+        ( new MembershipDao )->destroyCacheForListByTeamId( $this->struct->id );
+
         $this->all_memberships = ( new MembershipDao )
                 ->setCacheTTL( 3600 )
                 ->getMemberListByTeamId( $this->struct->id );
@@ -126,13 +128,13 @@ class TeamModel {
         $this->_checkType();
         $this->_checkPersonalUnique();
 
-        $team = $this->_createTeamWithMatecatUsers();
-
-        $this->new_memberships = $team->getMembers();
+        $this->struct = $this->_createTeamWithMatecatUsers(); //update the struct of the team in the model
 
         $this->_sendEmailsToNewMemberships();
+        $this->_sendEmailsToInvited();
+        $this->_setPendingStatuses();
 
-        return $team;
+        return $this->struct;
     }
 
     public function _sendEmailsToInvited() {
@@ -192,7 +194,7 @@ class TeamModel {
 
     protected function _checkType() {
         if ( !Constants_Teams::isAllowedType( $this->struct->type ) ) {
-            throw new InvalidArgumentException( "User already has the personal team" );
+            throw new InvalidArgumentException( "Invalid Team Type" );
         }
     }
 
@@ -221,6 +223,8 @@ class TeamModel {
                 'name'    => $this->struct->name,
                 'members' => $this->member_emails
         ] );
+
+        $this->new_memberships = $this->all_memberships = $team->getMembers(); //the new members are obviously all existent members
 
         \Database::obtain()->commit();
 
