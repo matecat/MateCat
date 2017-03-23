@@ -97,7 +97,7 @@ class TeamModel {
 
                 if ( $user ) {
                     $this->removed_users[] = $user;
-                    $projectDao->unassignProjects( $user );
+                    $projectDao->unassignProjects( $this->struct, $user );
                 }
             }
         }

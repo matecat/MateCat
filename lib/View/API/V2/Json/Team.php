@@ -9,6 +9,7 @@
 namespace API\V2\Json;
 
 
+use Teams\PendingInvitations;
 use Teams\TeamStruct;
 
 class Team {
@@ -29,8 +30,15 @@ class Team {
         ];
 
         $members = $team->getMembers();
+        $invitations = ( new PendingInvitations( ( new \RedisHandler() )->getConnection(), [] ) )->get( (int)$team->id );
+
         if ( !empty( $members ) ) {
-            $row[ 'members' ] = $members;
+            $memberShipFormatter = new Membership( $members );
+            $row[ 'members' ] = $memberShipFormatter->render();
+        }
+
+        if( !empty( $invitations ) ){
+            $row[ 'pending_invitations' ] = $invitations;
         }
 
         return $row;

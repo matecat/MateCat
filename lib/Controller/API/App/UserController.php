@@ -9,6 +9,7 @@ use API\V2\Json\User;
 use ConnectedServices\ConnectedServiceDao ;
 use Exceptions\NotFoundError;
 use Teams\MembershipDao;
+use Teams\TeamStruct;
 use Users_UserDao ;
 use Utils ;
 
@@ -23,6 +24,15 @@ class UserController extends AbstractStatefulKleinController  {
     public function show() {
         $metadata = $this->user->getMetadataAsKeyValue() ;
 
+        $membersDao = new MembershipDao();
+        $userTeams = array_map(
+                function ( $team ) use( $membersDao ) {
+                    /** @var $team TeamStruct */
+                    return $team->setMembers( $membersDao->setCacheTTL( 60 * 60 * 24 )->getMemberListByTeamId( $team->id ) );
+                },
+                $membersDao->setCacheTTL( 60 * 60 * 24 )->findUserTeams( $this->user )
+        );
+
         // TODO: move this into a formatter class
         $this->response->json( array(
             'user' => User::renderItem( $this->user ),
@@ -31,9 +41,7 @@ class UserController extends AbstractStatefulKleinController  {
             // TODO: this is likely to be unsafe to be passed here without a whitelist.
             'metadata' =>  ( empty( $metadata ) ? NULL : $metadata ),
 
-            'teams' => ( new Team() )->render(
-                (new MembershipDao() )->setCacheTTL( 60 * 60 * 24 )->findUserTeams( $this->user )
-            )
+            'teams' => ( new Team() )->render( $userTeams )
 
         ));
     }

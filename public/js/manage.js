@@ -72,34 +72,34 @@ UI = {
 
     },
 
-    // reloadProjects: function () {
-    //     let self = this;
-    //     if ( UI.Search.currentPage === 1) {
-    //         this.getProjects(self.selectedTeam).done(function (response) {
-    //             let projects = response.data;
-    //             ManageActions.renderProjects(projects);
-    //         });
-    //     } else {
-    //         ManageActions.showReloadSpinner();
-    //         let total_projects = [];
-    //         let requests = [];
-    //         let onDone = function (response) {
-    //                     let projects = response.data;
-    //                     $.merge(total_projects, projects);
-    //                 };
-    //         for (let i=1; i<= UI.Search.currentPage; i++ ) {
-    //             requests.push(this.getProjects(self.selectedTeam, i));
-    //         }
-    //         $.when.apply(this, requests).done(function() {
-    //             let results = requests.length > 1 ? arguments : [arguments];
-    //             for( let i = 0; i < results.length; i++ ){
-    //                 onDone(results[i][0]);
-    //             }
-    //             ManageActions.renderProjects(total_projects, self.selectedTeam, self.teams,  true);
-    //         });
-    //
-    //     }
-    // },
+    reloadProjects: function () {
+        let self = this;
+        if ( UI.Search.currentPage === 1) {
+            this.getProjects(self.selectedTeam).done(function (response) {
+                let projects = response.data;
+                ManageActions.renderProjects(projects);
+            });
+        } else {
+            ManageActions.showReloadSpinner();
+            let total_projects = [];
+            let requests = [];
+            let onDone = function (response) {
+                        let projects = response.data;
+                        $.merge(total_projects, projects);
+                    };
+            for (let i=1; i<= UI.Search.currentPage; i++ ) {
+                requests.push(this.getProjects(self.selectedTeam, i));
+            }
+            $.when.apply(this, requests).done(function() {
+                let results = requests.length > 1 ? arguments : [arguments];
+                for( let i = 0; i < results.length; i++ ){
+                    onDone(results[i][0]);
+                }
+                ManageActions.renderProjects(total_projects, self.selectedTeam, self.teams,  true);
+            });
+
+        }
+    },
 
     renderProjects: function (projects) {
         if ( !this.ProjectsContainer ) {

@@ -70,24 +70,25 @@ class ModifyTeam extends React.Component {
 
 
     onKeyPressEvent(e) {
-       if (e.key === 'Enter' ) {
-            if (this.inputName.value.length > 0 && this.inputName.value != this.state.team.get('name')) {
-                ManageActions.changeTeamName(this.state.team.toJS(), this.inputName.value);
-                $(this.inputName).blur();
-                this.setState({
-                    readyToSend: true
-                });
-            } else {
-                this.setState({
-                    inputNameError: true
-                });
-            }
-            return false;
-       } else {
            this.setState({
                inputNameError: false,
            });
-       }
+    }
+
+    changeTeamName() {
+        if (this.inputName.value.length > 0 && this.inputName.value != this.state.team.get('name')) {
+            ManageActions.changeTeamName(this.state.team.toJS(), this.inputName.value);
+            $(this.inputName).blur();
+            this.setState({
+                readyToSend: true
+            });
+            APP.ModalWindow.onCloseModal();
+        } else {
+            this.setState({
+                inputNameError: true
+            });
+        }
+
     }
 
     getUserList() {
@@ -240,7 +241,8 @@ class ModifyTeam extends React.Component {
                     <div className="matecat-modal-bottom">
                         <div className="ui one column grid right aligned">
                             <div className="column">
-                                <button className="create-team ui primary button open">Confirm</button>
+                                <button className="create-team ui primary button open"
+                                onClick={this.changeTeamName.bind(this)}>Confirm</button>
                             </div>
                         </div>
                     </div>
