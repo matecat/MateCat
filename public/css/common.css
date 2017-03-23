@@ -4908,14 +4908,30 @@ span.share-popup-item-email {
     font-size: 15px;
 }
 
-.ui.user.label {
-    /*top: 5px;*/
+.user-menu-container {
+    padding-left: 50px;
+    position: relative;
+    float: right;
 }
 
-/*.edit-log {
-    top: 1px;
-}*/
+.user-menu-container .organization-name {
+    color: gray;
+    font-size: 15px;
+    font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    font-weight: 600;
+    text-decoration: underline;
+    float: right;
+    line-height: 37px;
+}
 
+.cattool .user-menu-container {
+    padding-left: 0px;
+    padding-top: 5px;
+}
+
+.cattool .organization-name {
+    display: none;
+}
 
 /*****************************/
 

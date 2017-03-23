@@ -62,7 +62,7 @@ class JobContainer extends React.Component {
     }
 
     getQAReport() {
-        if (this.props.project.get('features') && this.props.project.get('features').indexOf('review_improved')) {
+        if (this.props.project.get('features') && this.props.project.get('features').indexOf('review_improved') > -1) {
             return '/plugins/review_improved/quality_report/' + this.props.job.get('id') + '/' + this.props.job.get('password');
         } else {
             return '/revise-summary/' + this.props.job.get('id') + '-' + this.props.job.get('password');

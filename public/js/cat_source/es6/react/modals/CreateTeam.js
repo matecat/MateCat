@@ -35,9 +35,8 @@ class CreateTeam extends React.Component {
             this.setState({
                 errorDropdown: true
             });
-            setTimeout(function () {
                 $(self.usersInput).find("input.search").val(text);
-            });
+
             return false;
         }
     }
@@ -48,11 +47,15 @@ class CreateTeam extends React.Component {
     }
 
     onInputFocus() {
+        var self = this;
         let dropdownError = this.checkMailDropDown();
-        this.setState({
-            errorInput: false,
-            errorDropdown: dropdownError,
+        setTimeout(function () {
+            self.setState({
+                errorInput: false,
+                errorDropdown: dropdownError,
+            });
         });
+
     }
 
     handleKeyPress(e) {
@@ -66,6 +69,20 @@ class CreateTeam extends React.Component {
             });
         }
     }
+
+    handleKeyUpInEmailInput(e) {
+        let mail = $(this.usersInput).find("input.search").val();
+        if (mail === '') {
+            this.setState({
+                errorDropdown: false,
+            });
+        }
+        if (e.key === ' ') {
+            this.onLabelCreate(mail, mail);
+            $(this.usersInput).find("input.search").val('');
+        }
+    }
+
 
     onClick(e) {
         e.stopPropagation();
@@ -88,7 +105,7 @@ class CreateTeam extends React.Component {
         var inputDropdown = (this.state.errorDropdown) ? 'error' : '';
 
         var buttonClass = (this.state.readyToSend && !this.state.errorInput && !this.state.errorDropdown ) ? '' : 'disabled';
-
+        var user = APP.USER.STORE.user;
         return  <div className="create-team-modal">
             <div className="matecat-modal-top">
                 <div className="ui one column grid left aligned">
@@ -110,7 +127,8 @@ class CreateTeam extends React.Component {
                     <div className="sixteen wide column">
                         <h2>Add members</h2>
                         <div className={"ui multiple search selection dropdown " + inputDropdown}
-                             ref={(usersInput) => this.usersInput = usersInput}>
+                             ref={(usersInput) => this.usersInput = usersInput}
+                             onKeyUp={this.handleKeyUpInEmailInput.bind(this)}>
                             <input name="tags" type="hidden" />
                             {this.state.errorDropdown ? (
                                     <div className="default text"></div>
@@ -118,17 +136,18 @@ class CreateTeam extends React.Component {
                                     <div className="default text">insert email or emails separated by commas or press enter</div>
                                 )}
                         </div>
-                        {/*<div class="validation-error"><span class="text" style="color: red; font-size: 14px;">Email is required</span></div>*/}
+                        {this.state.errorDropdown ? (
+                                <div className="validation-error"><span className="text" style={{color: 'red', fontSize: '14px'}}>Email is required</span></div>
+                            ): ''}
                     </div>
                     <div className="sixteen wide column">
                         <div className="ui members-list team">
                             <div className="ui divided list">
                                 <div className="item">
-                                    <div className="mini ui basic button right floated">Re-send</div>
-                                    <div className="ui tiny image label">A</div>
+                                    <div className="ui tiny image label">{APP.getUserShortName(user)}</div>
                                     <div className="middle aligned content">
-                                        <div className="content user">Albert Mischiante</div>
-                                        <div className="content email-user-invited">albertmischiante@malavita.com</div>
+                                        <div className="content user"> {' ' + user.first_name + ' ' + user.last_name}</div>
+                                        <div className="content email-user-invited">{user.email}</div>
                                     </div>
                                 </div>
                             </div>
