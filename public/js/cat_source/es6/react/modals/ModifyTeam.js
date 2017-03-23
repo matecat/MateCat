@@ -217,6 +217,9 @@ class ModifyTeam extends React.Component {
                                            onKeyUp={this.handleKeyPressUserInput.bind(this)}
                                            ref={(inputNewUSer) => this.inputNewUSer = inputNewUSer}/>
                                 </div>
+                                {this.state.inputUserError ? (
+                                        <div className="validation-error"><span className="text" style={{color: 'red', fontSize: '14px'}}>Email is required</span></div>
+                                    ): ''}
                             </div>
 
 
