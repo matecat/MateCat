@@ -4,7 +4,7 @@
 class OutsourceConfirmation extends AbstractMatecatMigration {
 
     public $sql_up = "
-        CREATE TABLE `matecat`.`outsource_confirmation` (
+        CREATE TABLE `outsource_confirmation` (
           `id` INT NOT NULL AUTO_INCREMENT,
           `id_job` INT NOT NULL,
           `password` VARCHAR(45) NOT NULL,
