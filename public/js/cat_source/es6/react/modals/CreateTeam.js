@@ -120,7 +120,7 @@ class CreateTeam extends React.Component {
                         </div>
                         {/*<div class="validation-error"><span class="text" style="color: red; font-size: 14px;">Email is required</span></div>*/}
                     </div>
-                    {/*<div className="sixteen wide column">
+                    <div className="sixteen wide column">
                         <div className="ui members-list team">
                             <div className="ui divided list">
                                 <div className="item">
@@ -133,7 +133,7 @@ class CreateTeam extends React.Component {
                                 </div>
                             </div>
                         </div>
-                    </div>*/}
+                    </div>
                 </div>
             </div>
             <div className="matecat-modal-bottom">
