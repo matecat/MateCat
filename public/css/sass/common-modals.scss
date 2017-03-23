@@ -830,8 +830,37 @@ div#matecat-modal p {
             overflow-y: auto;
         }
         .ui.members-list {
-            max-height: 230px;
-            overflow-y: auto;
+            height: 230px;
+            .ui.divided.list {
+                position: absolute;
+                top: 0px;
+                left: 0px;
+                bottom: 0px;
+                right: 13px;
+                padding: 10px 15px 10px 15px;
+                overflow-y: scroll;
+            }
+            ::-webkit-scrollbar {
+                width: 10px;
+            }
+
+            /* Track */
+            ::-webkit-scrollbar-track {
+                -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+                -webkit-border-radius: 10px;
+                border-radius: 10px;
+            }
+
+            /* Handle */
+            ::-webkit-scrollbar-thumb {
+                -webkit-border-radius: 10px;
+                border-radius: 10px;
+                background: #a7a5a5;
+                -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+            }
+            ::-webkit-scrollbar-thumb:window-inactive {
+                background: #a7a5a5;
+            }
             &.team {
                 .item {
                     padding: 5px 0;
@@ -839,6 +868,9 @@ div#matecat-modal p {
                         //background-color: #e0e1e2;
                         .mini.ui.button.right.floated  {
                             display: inherit;
+                        }
+                        .content.pending-msg {
+                            display: none;
                         }
                     }
                     .image {
@@ -881,6 +913,7 @@ div#matecat-modal p {
                         border: 1px solid #797979;
                         display: none;
                         border-radius: 2px;
+                        background-color: #ededee;
                     }
                     .mini.ui.primary.button {
                         border: 1px solid #797979;
@@ -929,6 +962,10 @@ div#matecat-modal p {
         &.primary.button {
             border-radius: 2px;
         }
+    }
+    .ui.members-list {
+        /* Let's get this party started */
+
     }
 }
 

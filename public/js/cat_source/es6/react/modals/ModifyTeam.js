@@ -240,7 +240,7 @@ class ModifyTeam extends React.Component {
                     <div className="matecat-modal-bottom">
                         <div className="ui one column grid right aligned">
                             <div className="column">
-                                <button className="create-team ui primary button open">Confirm</button>
+                                <button className="create-team ui primary button open">Apply</button>
                             </div>
                         </div>
                     </div>
