@@ -1011,9 +1011,9 @@ div#matecat-modal p {
 .matecat-modal-content {
     .modify-team-modal {
         .ui.members-list {
-            min-height: 250px;
+            min-height: 180px;
             .ui.divided.list {
-
+                max-height: 210px;
             }
         }
     }
