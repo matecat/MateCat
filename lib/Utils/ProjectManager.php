@@ -246,7 +246,13 @@ class ProjectManager {
         $this->project = insertProject( $this->projectStructure );
         $this->projectStructure[ 'id_project' ] = $this->project->id; //redundant
         $this->projectStructure[ 'ppassword' ]  = $this->project->password; //redundant
-        
+
+        //clean the cache for the team member list of assigned projects
+        if( $this->projectStructure[ 'team' ] !== null ){
+            $teamDao = new \Teams\TeamDao();
+            $teamDao->destroyCacheAssignee( $this->projectStructure[ 'team' ] );
+        }
+
     }
 
     private function __checkForSelfAssignment(){

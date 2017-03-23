@@ -26,6 +26,14 @@ class TeamDao extends \DataAccess_AbstractDao {
     protected static $_query_get_user_teams     = " SELECT * FROM teams WHERE created_by = :created_by ";
     protected static $_update_team_by_id        = " UPDATE teams SET name = :name WHERE id = :id ";
 
+    protected static $_query_get_assignee_with_projects = "
+        SELECT COUNT(1) AS projects, id_assignee AS uid
+        FROM projects 
+        WHERE 
+        id_team = :id_team
+        GROUP BY id_assignee;
+    ";
+
     /**
      * @param $id
      *
@@ -91,15 +99,34 @@ class TeamDao extends \DataAccess_AbstractDao {
     }
 
     /**
-     * @param string $sql
+     * @param TeamStruct $team
      *
-     * @return \PDOStatement
+     * @return \DataAccess_IDaoStruct[]|MembershipStruct[]
      */
-    protected function _getStatementForCache( $sql ) {
-        $conn = \Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql );
+    public function getAssigneeWithProjectsByTeam( TeamStruct $team ){
 
-        return $stmt;
+        $stmt = $this->_getStatementForCache( self::$_query_get_assignee_with_projects );
+        return $this->_fetchObject( $stmt,
+                new MembershipStruct(),
+                array(
+                        'id_team' => $team->id,
+                )
+        );
+
+    }
+
+    /**
+     * @param TeamStruct $team
+     *
+     * @return bool|int
+     */
+    public function destroyCacheAssignee( TeamStruct $team ){
+        $stmt = $this->_getStatementForCache( self::$_query_get_assignee_with_projects );
+        return $this->_destroyObjectCache( $stmt,
+                array(
+                        'id_team' => $team->id,
+                )
+        );
     }
 
     public function destroyCacheById( $id ) {

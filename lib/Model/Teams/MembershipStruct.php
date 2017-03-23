@@ -34,6 +34,10 @@ class MembershipStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
      */
     private $user_metadata ;
 
+    /**
+     * @var int
+     */
+    private $projects = 0;
 
     public function setUser( \Users_UserStruct $user ) {
         $this->user = $user ;
@@ -67,5 +71,24 @@ class MembershipStruct extends DataAccess_AbstractDaoSilentStruct implements Dat
         }
         return $this->team;
     }
+
+    /**
+     * @return int
+     */
+    public function getAssignedProjects() {
+        return $this->projects;
+    }
+
+    /**
+     * @param int $projects
+     *
+     * @return $this
+     */
+    public function setAssignedProjects( $projects ) {
+        $this->projects = $projects;
+
+        return $this;
+    }
+
 
 }

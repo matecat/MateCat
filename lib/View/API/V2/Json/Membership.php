@@ -35,6 +35,8 @@ class Membership {
             $out[ 'user_metadata' ] = array_filter( $metadata );
         }
 
+        $out[ 'projects' ] = (int)$membership->getAssignedProjects();
+
         return $out;
     }
 
