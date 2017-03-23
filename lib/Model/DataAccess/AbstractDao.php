@@ -322,7 +322,7 @@ abstract class DataAccess_AbstractDao {
      * @param DataAccess_IDaoStruct $fetchClass
      * @param array                 $bindParams
      *
-     * @return DataAccess_IDaoStruct|DataAccess_IDaoStruct[]
+     * @return DataAccess_IDaoStruct[]
      */
     protected function _fetchObject( PDOStatement $stmt, DataAccess_IDaoStruct $fetchClass, Array $bindParams ) {
 

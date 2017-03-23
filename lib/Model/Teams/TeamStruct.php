@@ -20,6 +20,9 @@ class TeamStruct extends DataAccess_AbstractDaoSilentStruct implements DataAcces
     public $created_at ;
     public $type = Constants_Teams::PERSONAL;
 
+    /**
+     * @var MembershipStruct[]
+     */
     protected $members ;
 
     /**

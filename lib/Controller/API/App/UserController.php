@@ -8,6 +8,7 @@ use API\V2\Json\User;
 
 use ConnectedServices\ConnectedServiceDao ;
 use Exceptions\NotFoundError;
+use TeamModel;
 use Teams\MembershipDao;
 use Teams\TeamStruct;
 use Users_UserDao ;
@@ -27,8 +28,10 @@ class UserController extends AbstractStatefulKleinController  {
         $membersDao = new MembershipDao();
         $userTeams = array_map(
                 function ( $team ) use( $membersDao ) {
+                    $teamModel = new TeamModel( $team );
+                    $teamModel->updateMembersProjectsCount();
                     /** @var $team TeamStruct */
-                    return $team->setMembers( $membersDao->setCacheTTL( 60 * 60 * 24 )->getMemberListByTeamId( $team->id ) );
+                    return $team;
                 },
                 $membersDao->setCacheTTL( 60 * 60 * 24 )->findUserTeams( $this->user )
         );
