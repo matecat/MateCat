@@ -127,7 +127,7 @@ class Header extends React.Component {
                 if (self.props.showModals) {
                     iconModal = <a className="team-filter button show right"
                                    onClick={(e) => self.openModifyTeam(e, team)}>
-                        <i className="icon-more_vert icon"/>
+                        <i className="icon-settings icon"/>
                     </a>
                 }
                 return <div className="item" data-value={team.get('id')}

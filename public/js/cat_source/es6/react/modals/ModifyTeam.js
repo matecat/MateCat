@@ -99,29 +99,29 @@ class ModifyTeam extends React.Component {
             if (user.get('uid') == APP.USER.STORE.user.uid && self.state.showRemoveMessageUserID == user.get('uid')) {
                 return <div className="item"
                             key={'user' + user.get('uid')}>
-                    <div className="right floated content top-1 bottom-1">
-                        <div className="ui button green" onClick={self.removeUser.bind(self, user)}>YES</div>
-                        <div className="ui button red" onClick={self.undoRemoveAction.bind(self)}>NO</div>
+                    <div className="right floated content top-5 bottom-5">
+                        <div className="ui mini primary button" onClick={self.removeUser.bind(self, user)}><i className="icon-check icon"/>Confirm</div>
+                        <div className="ui icon mini button red" onClick={self.undoRemoveAction.bind(self)}><i className="icon-cancel3 icon"/></div>
                     </div>
-                    <div className="content pad-top-6 pad-bottom-8">
+                    <div className="content pad-top-10 pad-bottom-8">
                         Are you sure you want to leave this team?
                     </div>
                 </div>
             }else if (self.state.showRemoveMessageUserID == user.get('uid')) {
                 return <div className="item"
                             key={'user' + user.get('uid')}>
-                    <div className="right floated content top-1 bottom-1">
-                        <div className="mini ui button green" onClick={self.removeUser.bind(self, user)}>YES</div>
-                        <div className="mini ui button red" onClick={self.undoRemoveAction.bind(self)}>NO</div>
+                    <div className="right floated content top-5 bottom-5">
+                        <div className="ui mini primary button" onClick={self.removeUser.bind(self, user)}><i className="icon-check icon" /> Confirm</div>
+                        <div className="mini ui icon button red" onClick={self.undoRemoveAction.bind(self)}><i className="icon-cancel3 icon" /></div>
                     </div>
-                    <div className="content pad-top-6 pad-bottom-8">
+                    <div className="content pad-top-10 pad-bottom-8">
                         Are you sure you want to remove this user?
                     </div>
                 </div>
             } else {
                 return <div className="item"
                             key={'user' + user.get('uid')}>
-                    <div className="mini ui basic button right floated" onClick={self.showRemoveUser.bind(self, user.get('uid'))}>Remove</div>
+                    <div className="mini ui button right floated" onClick={self.showRemoveUser.bind(self, user.get('uid'))}>Remove</div>
                     <div className="ui tiny image label">{APP.getUserShortName(user.toJS())}</div>
                     <div className="middle aligned content">
                         <div className="content user">
@@ -143,7 +143,7 @@ class ModifyTeam extends React.Component {
         return this.state.team.get('pending_invitations').map(function(mail, i) {
             return <div className="item pending-invitation"
                          key={'user-invitation' + i}>
-                        <div className="mini ui basic button right floated"
+                        <div className="mini ui button right floated"
                              onClick={self.resendInvite.bind(self, mail)}>Resend Invite</div>
                         <div className="ui right floated content pending-msg">Pending user</div>
                         <div className="ui tiny image label">{mail.substring(0, 1).toUpperCase()}</div>
@@ -242,7 +242,7 @@ class ModifyTeam extends React.Component {
                         <div className="ui one column grid right aligned">
                             <div className="column">
                                 <button className="create-team ui primary button open"
-                                onClick={this.changeTeamName.bind(this)}>Confirm</button>
+                                onClick={this.changeTeamName.bind(this)}>Apply</button>
                             </div>
                         </div>
                     </div>

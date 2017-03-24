@@ -3527,7 +3527,7 @@ input::selection {
 
 .ui.red.buttons .button,
 .ui.red.button {
-  background-color: #DB2828;
+  background-color: #f26522;
   color: #FFFFFF;
   text-shadow: none;
   background-image: none;
@@ -3542,6 +3542,7 @@ input::selection {
   background-color: #d01919;
   color: #FFFFFF;
   text-shadow: none;
+  box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
 }
 
 .ui.red.buttons .button:focus,
@@ -3556,6 +3557,7 @@ input::selection {
   background-color: #b21e1e;
   color: #FFFFFF;
   text-shadow: none;
+  box-shadow: none;
 }
 
 .ui.red.buttons .active.button,
@@ -4446,7 +4448,7 @@ input::selection {
 
 .ui.negative.buttons .button,
 .ui.negative.button {
-  background-color: #DB2828;
+  background-color: #f26522;
   color: #FFFFFF;
   text-shadow: none;
   background-image: none;
@@ -22162,7 +22164,7 @@ Floated Menu / Item
 
 .ui.inverted.menu .red.active.item,
 .ui.inverted.red.menu {
-  background-color: #DB2828;
+  background-color: #f26522;
 }
 
 .ui.inverted.red.menu .item:before {
@@ -32468,7 +32470,7 @@ a.ui.nag {
 /* Red */
 
 .ui.red.progress .bar {
-  background-color: #DB2828;
+  background-color: #f26522;
 }
 
 .ui.red.inverted.progress .bar {
