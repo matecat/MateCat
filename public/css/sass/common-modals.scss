@@ -11,7 +11,7 @@ h2 {
 a {
     ont-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
-ul, li, ol, p, input, input[type="text"] input[type="email"] .input{
+ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="email"] .input{
     font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
 ::-webkit-input-placeholder { /* Chrome/Opera/Safari */
@@ -909,15 +909,35 @@ div#matecat-modal p {
                         border: 1px solid #797979;
                         display: none;
                         border-radius: 2px;
-                        background-color: #ededee;
+                        font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+                        font-size: 14px;
+                        padding: 6px 15px;
+                        background-color: #f6f6f6;
+                        &:hover {
+                            box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+                        }
+                        &:focus {
+                            box-shadow: none !important;
+                        }
+                        &:active {
+                            box-shadow: none !important;
+                        }
                     }
                     .mini.ui.primary.button {
                         border: 1px solid #797979;
                         border-radius: 2px;
+                        font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+                        font-size: 14px;
+                        padding: 6px 15px;
+                        font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+                        i {
+                            opacity: 1;
+                        }
                     }
                     .ui.primary.button {
                         border: 1px solid #797979;
                         border-radius: 2px;
+                        font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
                     }
                     .mini.ui.icon.button {
                         width: 30px;
@@ -927,6 +947,7 @@ div#matecat-modal p {
                         vertical-align: bottom;
                         border: 1px solid #797979;
                         border-radius: 2px;
+
                     }
                 }
             }
@@ -1020,6 +1041,22 @@ div#matecat-modal p {
         }
     }
     .modify-team-modal {
+        .matecat-modal-top {
+            .ui.fluid.input {
+                i {
+                    display: none;
+                }
+                &:hover {
+                    i {
+                        display: inherit;
+                    }
+                }
+            }
+            .ui.icon.input > input:focus ~ i.icon {
+                opacity: 1;
+                display: inherit;
+            }
+        }
         .ui.members-list {
             min-height: 180px;
             .ui.divided.list {

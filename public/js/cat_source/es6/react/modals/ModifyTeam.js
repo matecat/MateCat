@@ -192,7 +192,7 @@ class ModifyTeam extends React.Component {
         let orgNameError = (this.state.inputNameError) ? 'error' : '';
         let userlist = this.getUserList();
         let pendingUsers = this.getPendingInvitations();
-        let icon = (this.state.readyToSend && !this.state.inputNameError ) ?<i className=""/> : <i className=""/>;
+        let icon = (this.state.readyToSend && !this.state.inputNameError ) ?<i className="icon-checkmark green icon"/> : <i className="icon-pencil icon"/>;
 
         return <div className="modify-team-modal">
             <div className="matecat-modal-top">
