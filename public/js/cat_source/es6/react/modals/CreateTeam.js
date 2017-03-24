@@ -31,11 +31,14 @@ class CreateTeam extends React.Component {
             });
             return true;
         } else {
-
             this.setState({
                 errorDropdown: true
             });
-                $(self.usersInput).find("input.search").val(text);
+            // setTimeout(function () {
+            //     $(self.usersInput).find("input.search").val(text);
+            //
+            // });
+            $(this.usersInput).dropdown('set text', text);
 
             return false;
         }
@@ -71,6 +74,7 @@ class CreateTeam extends React.Component {
     }
 
     handleKeyUpInEmailInput(e) {
+        if (e.key == 'Enter') return;
         let mail = $(this.usersInput).find("input.search").val();
         if (mail === '') {
             this.setState({
@@ -128,8 +132,9 @@ class CreateTeam extends React.Component {
                         <h2>Add members</h2>
                         <div className={"ui multiple search selection dropdown " + inputDropdown}
                              ref={(usersInput) => this.usersInput = usersInput}
-                             onKeyUp={this.handleKeyUpInEmailInput.bind(this)}>
+                             onKeyUp={this.handleKeyUpInEmailInput.bind(this)} >
                             <input name="tags" type="hidden" />
+
                             {this.state.errorDropdown ? (
                                     <div className="default text"></div>
                                 ) : (
