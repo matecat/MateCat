@@ -831,7 +831,7 @@ div#matecat-modal p {
                 top: 0px;
                 left: 0px;
                 bottom: 0px;
-                right: 13px;
+                right: 0px;
                 padding: 10px 15px 10px 15px;
                 overflow-y: auto;
                 max-height: 210px;
@@ -1004,16 +1004,29 @@ div#matecat-modal p {
     }
 }
 
-.ui.divided.list .list > .item:first-child, .ui.divided.list > .item:first-child {
-    border-top: 1px solid rgba(34, 36, 38, 0.15);
-}
 
 .matecat-modal-content {
+    .matecat-modal-middle {
+        padding: 0 25px;
+    }
+    .create-team-modal {
+        .ui.members-list {
+            .ui.divided.list {
+                .item:first-child {
+                    border-top: 1px solid rgba(34, 36, 38, 0.15);
+                    border-bottom: 1px solid rgba(34, 36, 38, 0.15);
+                }
+            }
+        }
+    }
     .modify-team-modal {
         .ui.members-list {
             min-height: 180px;
             .ui.divided.list {
                 max-height: 210px;
+                .item:first-child {
+                    border-top: 1px solid rgba(34, 36, 38, 0.15);
+                }
             }
         }
     }

@@ -99,22 +99,22 @@ class ModifyTeam extends React.Component {
             if (user.get('uid') == APP.USER.STORE.user.uid && self.state.showRemoveMessageUserID == user.get('uid')) {
                 return <div className="item"
                             key={'user' + user.get('uid')}>
-                    <div className="right floated content top-1 bottom-1">
+                    <div className="right floated content top-5 bottom-5">
                         <div className="ui mini primary button" onClick={self.removeUser.bind(self, user)}><i className="icon-check icon"/>Confirm</div>
                         <div className="ui icon mini button red" onClick={self.undoRemoveAction.bind(self)}><i className="icon-cancel3 icon"/></div>
                     </div>
-                    <div className="content pad-top-6 pad-bottom-8">
+                    <div className="content pad-top-10 pad-bottom-8">
                         Are you sure you want to leave this team?
                     </div>
                 </div>
             }else if (self.state.showRemoveMessageUserID == user.get('uid')) {
                 return <div className="item"
                             key={'user' + user.get('uid')}>
-                    <div className="right floated content top-1 bottom-1">
+                    <div className="right floated content top-5 bottom-5">
                         <div className="ui mini primary button" onClick={self.removeUser.bind(self, user)}><i className="icon-check icon" /> Confirm</div>
                         <div className="mini ui icon button red" onClick={self.undoRemoveAction.bind(self)}><i className="icon-cancel3 icon" /></div>
                     </div>
-                    <div className="content pad-top-6 pad-bottom-8">
+                    <div className="content pad-top-10 pad-bottom-8">
                         Are you sure you want to remove this user?
                     </div>
                 </div>
