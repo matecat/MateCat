@@ -52,14 +52,7 @@ class ModifyTeam extends React.Component {
         e.stopPropagation();
         if (e.key === 'Enter' ) {
             e.preventDefault();
-            if ( APP.checkEmail(this.inputNewUSer.value)) {
-                ManageActions.addUserToTeam(this.state.team, this.inputNewUSer.value);
-                this.inputNewUSer.value = '';
-            } else {
-                this.setState({
-                    inputUserError: true
-                });
-            }
+            this.addUser();
         } else {
             this.setState({
                 inputUserError: false
@@ -68,11 +61,33 @@ class ModifyTeam extends React.Component {
         return false;
     }
 
+    addUser() {
+        if ( APP.checkEmail(this.inputNewUSer.value)) {
+            ManageActions.addUserToTeam(this.state.team, this.inputNewUSer.value);
+            this.inputNewUSer.value = '';
+            return true;
+        } else {
+            this.setState({
+                inputUserError: true
+            });
+            return false;
+        }
+    }
+
 
     onKeyPressEvent(e) {
-           this.setState({
-               inputNameError: false,
-           });
+        if (e.key === 'Enter' ) {
+            this.changeTeamName();
+            return false;
+        } else if (this.inputName.value.length == 0) {
+            this.setState({
+                inputNameError: true
+            });
+        } else {
+            this.setState({
+                inputNameError: false,
+            });
+        }
     }
 
     changeTeamName() {
@@ -82,13 +97,22 @@ class ModifyTeam extends React.Component {
             this.setState({
                 readyToSend: true
             });
-            APP.ModalWindow.onCloseModal();
-        } else {
+            return true;
+        } else if (this.inputName.value.length == 0){
             this.setState({
                 inputNameError: true
             });
+            return false;
         }
+        return true;
+    }
 
+    applyChanges() {
+        var teamNameOk = this.changeTeamName();
+        var emailOk = (this.inputName.value.length > 0) ? this.addUser() : true;
+        if ( teamNameOk && emailOk )  {
+            APP.ModalWindow.onCloseModal();
+        }
     }
 
     getUserList() {
@@ -99,29 +123,29 @@ class ModifyTeam extends React.Component {
             if (user.get('uid') == APP.USER.STORE.user.uid && self.state.showRemoveMessageUserID == user.get('uid')) {
                 return <div className="item"
                             key={'user' + user.get('uid')}>
-                    <div className="right floated content top-1 bottom-1">
-                        <div className="ui button green" onClick={self.removeUser.bind(self, user)}>YES</div>
-                        <div className="ui button red" onClick={self.undoRemoveAction.bind(self)}>NO</div>
+                    <div className="right floated content top-5 bottom-5">
+                        <div className="ui mini primary button" onClick={self.removeUser.bind(self, user)}><i className="icon-check icon"/>Confirm</div>
+                        <div className="ui icon mini button red" onClick={self.undoRemoveAction.bind(self)}><i className="icon-cancel3 icon"/></div>
                     </div>
-                    <div className="content pad-top-6 pad-bottom-8">
+                    <div className="content pad-top-10 pad-bottom-8">
                         Are you sure you want to leave this team?
                     </div>
                 </div>
             }else if (self.state.showRemoveMessageUserID == user.get('uid')) {
                 return <div className="item"
                             key={'user' + user.get('uid')}>
-                    <div className="right floated content top-1 bottom-1">
-                        <div className="mini ui button green" onClick={self.removeUser.bind(self, user)}>YES</div>
-                        <div className="mini ui button red" onClick={self.undoRemoveAction.bind(self)}>NO</div>
+                    <div className="right floated content top-5 bottom-5">
+                        <div className="ui mini primary button" onClick={self.removeUser.bind(self, user)}><i className="icon-check icon" /> Confirm</div>
+                        <div className="mini ui icon button red" onClick={self.undoRemoveAction.bind(self)}><i className="icon-cancel3 icon" /></div>
                     </div>
-                    <div className="content pad-top-6 pad-bottom-8">
+                    <div className="content pad-top-10 pad-bottom-8">
                         Are you sure you want to remove this user?
                     </div>
                 </div>
             } else {
                 return <div className="item"
                             key={'user' + user.get('uid')}>
-                    <div className="mini ui basic button right floated" onClick={self.showRemoveUser.bind(self, user.get('uid'))}>Remove</div>
+                    <div className="mini ui button right floated" onClick={self.showRemoveUser.bind(self, user.get('uid'))}>Remove</div>
                     <div className="ui tiny image label">{APP.getUserShortName(user.toJS())}</div>
                     <div className="middle aligned content">
                         <div className="content user">
@@ -143,7 +167,7 @@ class ModifyTeam extends React.Component {
         return this.state.team.get('pending_invitations').map(function(mail, i) {
             return <div className="item pending-invitation"
                          key={'user-invitation' + i}>
-                        <div className="mini ui basic button right floated"
+                        <div className="mini ui button right floated"
                              onClick={self.resendInvite.bind(self, mail)}>Resend Invite</div>
                         <div className="ui right floated content pending-msg">Pending user</div>
                         <div className="ui tiny image label">{mail.substring(0, 1).toUpperCase()}</div>
@@ -193,6 +217,7 @@ class ModifyTeam extends React.Component {
         let userlist = this.getUserList();
         let pendingUsers = this.getPendingInvitations();
         let icon = (this.state.readyToSend && !this.state.inputNameError ) ?<i className="icon-checkmark green icon"/> : <i className="icon-pencil icon"/>;
+        let applyButtonClass = (this.state.inputUserError || this.state.inputNameError) ?  'disabled' : '';
 
         return <div className="modify-team-modal">
             <div className="matecat-modal-top">
@@ -205,6 +230,9 @@ class ModifyTeam extends React.Component {
                             ref={(inputName) => this.inputName = inputName}/>
                             {icon}
                         </div>
+                        {this.state.inputNameError ? (
+                                <div className="validation-error"><span className="text" style={{color: 'red', fontSize: '14px'}}>Team name is required</span></div>
+                            ): ''}
                     </div>
                 </div>
             </div>
@@ -214,7 +242,7 @@ class ModifyTeam extends React.Component {
                             <div className="sixteen wide column">
                                 <h2>Add Members</h2>
                                 <div className={"ui fluid icon input " + usersError }>
-                                    <input type="text" placeholder="name@email.com"
+                                    <input type="text" placeholder="insert email and press enter"
                                            onKeyUp={this.handleKeyPressUserInput.bind(this)}
                                            ref={(inputNewUSer) => this.inputNewUSer = inputNewUSer}/>
                                 </div>
@@ -241,8 +269,8 @@ class ModifyTeam extends React.Component {
                     <div className="matecat-modal-bottom">
                         <div className="ui one column grid right aligned">
                             <div className="column">
-                                <button className="create-team ui primary button open"
-                                onClick={this.changeTeamName.bind(this)}>Confirm</button>
+                                <button className={"create-team ui primary button open " + applyButtonClass}
+                                onClick={this.applyChanges.bind(this)}>Apply</button>
                             </div>
                         </div>
                     </div>

@@ -162,7 +162,10 @@ body.manage {
                 .ui.dropdown {
                     text-align: center;
                     border-radius: 30px;
-
+                    .ui.icon.input input {
+                        padding-right: 2.67142857em !important;
+                        box-shadow: inset 0 1px 3px #ddd;
+                    }
                     &.project-menu.ui.button {
                         box-shadow: none;
                     }
@@ -196,11 +199,24 @@ body.manage {
                         }
                         .menu {
                             z-index: 1;
+                            .divider {
+                                margin: 0;
+                            }
                             .header {
                                 font-size: 14px;
+                                margin: 0px;
+                                padding: 15px;
+                                cursor: pointer;
+                                a {
+                                    color: #09beec;
+                                }
                                 i {
                                     float: right;
                                     font-size: 18px;
+                                    color: #09beec;
+                                }
+                                &:hover {
+                                    background-color: #f3f3f3;
                                 }
                             }
                         }

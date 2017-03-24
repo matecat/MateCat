@@ -817,39 +817,67 @@ div#matecat-modal p {
         min-height: 40px;
     }
     .matecat-modal-top {
-        background-color: #f4f4f4;
-        border-bottom: 1px solid #cccccc;
+        background-color: #ffffff;
+        /*border-bottom: 1px solid #cccccc;*/
     }
     .matecat-modal-middle,
     .matecat-modal-bottom,
     .matecat-modal-top{
         padding: 25px;
-
-        .ui.segment.members-list {
-            max-height: 200px;
-            overflow-y: auto;
-        }
         .ui.members-list {
-            max-height: 200px;
-            overflow-y: auto;
+            min-height: 45px;
+            .ui.divided.list {
+                position: absolute;
+                top: 0px;
+                left: 0px;
+                bottom: 0px;
+                right: 0px;
+                padding: 10px 15px 10px 15px;
+                overflow-y: auto;
+                max-height: 210px;
+            }
+            ::-webkit-scrollbar {
+                width: 10px;
+            }
+
+            /* Track */
+            ::-webkit-scrollbar-track {
+                -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+                -webkit-border-radius: 10px;
+                border-radius: 10px;
+            }
+
+            /* Handle */
+            ::-webkit-scrollbar-thumb {
+                -webkit-border-radius: 10px;
+                border-radius: 10px;
+                background: #a7a5a5;
+                -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+            }
+            ::-webkit-scrollbar-thumb:window-inactive {
+                background: #a7a5a5;
+            }
             &.team {
                 .item {
-                    padding: 10px 0;
+                    padding: 5px 0;
                     &:hover {
                         //background-color: #e0e1e2;
-                        .mini.ui.basic.button.right.floated  {
-                            /*display: inherit;*/
+                        .mini.ui.button.right.floated  {
+                            display: inherit;
+                        }
+                        .content.pending-msg {
+                            display: none;
                         }
                     }
                     .image {
-                        width: 50px !important;
-                        max-width: 50px;
-                        height: 50px;
+                        width: 40px !important;
+                        max-width: 40px;
+                        height: 40px;
                         background-color: #f4f4f4;
                         border-radius: 50%;
                         vertical-align: middle;
                         text-align: center;
-                        font-size: 21px;
+                        font-size: 17px;
                     }
 
                     .content.user {
@@ -867,7 +895,7 @@ div#matecat-modal p {
                         font-weight: 100;
                         font-size: 14px;
                         color: grey;
-                        margin-top: 16px;
+                        margin-top: 12px;
                     }
                     /*.content.email-member {
                         font-size: 14px;
@@ -876,11 +904,30 @@ div#matecat-modal p {
                         margin: 10px 0px 4px 0px;
                         margin-left: 10px;
                     }*/
-                    .mini.ui.basic.button.right.floated {
-                        margin-top: 10px;
-                        /*display: none;*/
+                    .mini.ui.button.right.floated {
+                        margin-top: 5px;
+                        border: 1px solid #797979;
+                        display: none;
+                        border-radius: 2px;
+                        background-color: #ededee;
                     }
-
+                    .mini.ui.primary.button {
+                        border: 1px solid #797979;
+                        border-radius: 2px;
+                    }
+                    .ui.primary.button {
+                        border: 1px solid #797979;
+                        border-radius: 2px;
+                    }
+                    .mini.ui.icon.button {
+                        width: 30px;
+                        height: 30px;
+                        line-height: 20px;
+                        text-align: center;
+                        vertical-align: bottom;
+                        border: 1px solid #797979;
+                        border-radius: 2px;
+                    }
                 }
             }
         }
@@ -908,9 +955,15 @@ div#matecat-modal p {
         font-size: 18px;
         border: 1px solid #797979;
         margin-right: 0px;
+        &.primary.button {
+            border-radius: 2px;
+        }
     }
 }
 
+.modify-team-modal {
+
+}
 
 
 .ui.fluid.input > input {
@@ -951,6 +1004,30 @@ div#matecat-modal p {
     }
 }
 
-.ui.divided.list .list > .item:first-child, .ui.divided.list > .item:first-child {
-    border-top: 1px solid rgba(34, 36, 38, 0.15);
+
+.matecat-modal-content {
+    .matecat-modal-middle {
+        padding: 0 25px;
+    }
+    .create-team-modal {
+        .ui.members-list {
+            .ui.divided.list {
+                .item:first-child {
+                    border-top: 1px solid rgba(34, 36, 38, 0.15);
+                    border-bottom: 1px solid rgba(34, 36, 38, 0.15);
+                }
+            }
+        }
+    }
+    .modify-team-modal {
+        .ui.members-list {
+            min-height: 180px;
+            .ui.divided.list {
+                max-height: 210px;
+                .item:first-child {
+                    border-top: 1px solid rgba(34, 36, 38, 0.15);
+                }
+            }
+        }
+    }
 }
