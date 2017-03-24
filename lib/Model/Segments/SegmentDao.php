@@ -100,9 +100,4 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         return $stmt->fetch();
     }
 
-    protected function _buildResult( $array_result ) {
-        // XXX: deprecated?
-
-    }
-
 }
