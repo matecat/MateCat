@@ -97,13 +97,6 @@ class setCurrentSegmentController extends ajaxController {
             }
         }
 
-        //send this to the queue for activity log
-        WorkerClient::enqueue( 'ACTIVITYLOG', '\AsyncTasks\Workers\SetCurrentSegmentWorker', [
-                'id_job'     => $this->id_job,
-                'password'   => $this->password,
-                'id_segment' => $this->id_segment
-        ], [ 'persistent' => WorkerClient::$_HANDLER->persistent ] );
-
         $this->result[ 'code' ] = 1;
         $this->result[ 'data' ] = array();
 

@@ -100,27 +100,4 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
         return $stmt->fetch();
     }
 
-    /**
-     * @param $id_segment
-     * @param $id_job
-     * @param $password
-     *
-     * @return int
-     */
-    public function updateCurrentSegment( $id_segment, $id_job, $password ) {
-
-        $pdo = Database::obtain()->getConnection();
-        $stmt = $pdo->prepare( " UPDATE jobs SET last_opened_segment = :current WHERE id = :id_job AND password = :password " );
-
-        $stmt->execute( [
-                'current'  => $id_segment,
-                'id_job'   => $id_job,
-                'password' => $password
-        ] );
-
-        return $stmt->rowCount();
-
-    }
-
-
 }

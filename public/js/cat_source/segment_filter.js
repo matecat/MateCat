@@ -15,6 +15,33 @@ if (SegmentFilter.enabled())
         return 'SegmentFilter-v2-' + page + '-' + config.id_job + '-' + config.password ;
     } ;
 
+    var segmentIsInSample = function( segmentId, listOfSegments ) {
+        return listOfSegments.indexOf( segmentId ) !== -1 ;
+    }
+
+    var notification;
+
+    var callbackForSegmentNotInSample = function( segmentId ) {
+        var title = 'Segment not in sample' ;
+        var text = 'Sample is trying to focus on segment #' + segmentId + ', but ' +
+                'segment is no longer in the sample' ;
+
+        return function() {
+            if ( notification ) APP.removeNotification( notification ) ;
+
+            notification = APP.addNotification({
+                autoDismiss : false,
+                dismissable : true,
+                position    : "bl",
+                text        : text,
+                title       : title,
+                type        : 'warning',
+                allowHtml   : true
+            });
+        } ;
+
+    } ;
+
     $.extend(SF, {
         getLastFilterData : function() {
             return this.getStoredState().serverData ;
@@ -79,7 +106,7 @@ if (SegmentFilter.enabled())
             $(document).trigger('segment-filter-submit');
         },
 
-        filterSubmit : function( data ) {
+        filterSubmit : function( data, wantedSegment = null ) {
             $('body').addClass('sampling-enabled');
 
             data = { filter: data } ;
@@ -105,9 +132,22 @@ if (SegmentFilter.enabled())
                 }) ;
 
                 $('#outer').empty();
+
+                var afterRenderCallback = function() { } ;
+                var segmentToOpen ;
+
+                if ( !wantedSegment ) {
+                    segmentToOpen =  data[ 'segment_ids' ] [ 0 ] ;
+                } else if ( wantedSegment && !segmentIsInSample( wantedSegment, data[ 'segment_ids' ] ) ) {
+                    segmentToOpen =  data[ 'segment_ids' ] [ 0 ] ;
+                    afterRenderCallback = callbackForSegmentNotInSample( wantedSegment )  ;
+                } else {
+                    segmentToOpen = wantedSegment ;
+                }
+
                 return UI.render({
-                    segmentToOpen: data['segment_ids'][0]
-                });
+                    segmentToOpen: segmentToOpen
+                }).done( afterRenderCallback ) ;
             })
         },
 

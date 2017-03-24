@@ -35,8 +35,6 @@ class catController extends viewController {
     private $firstSegmentOfFiles = '[]';
     private $fileCounter = '[]';
 
-    private $last_opened_segment;
-
     private $qa_data = '[]';
 
     private $qa_overall = '';
@@ -293,10 +291,6 @@ class catController extends viewController {
             unset( $job[ 'rejected_words' ] );
 
         }
-
-        $this->last_opened_segment = $this->job->last_opened_segment
-            ? $this->job->last_opened_segment
-            : getFirstSegmentId( $this->job->id, $this->job->password );
 
         /**
          * get first segment of every file
@@ -566,8 +560,6 @@ class catController extends viewController {
 
         $this->template->first_job_segment   = $this->job->job_first_segment ;
         $this->template->last_job_segment    = $this->job->job_last_segment ;
-
-        $this->template->last_opened_segment = $this->last_opened_segment;
 
         $this->template->owner_email         = $this->job_owner;
 
