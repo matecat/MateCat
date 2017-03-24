@@ -81,14 +81,15 @@ class SubHeader extends React.Component {
         if (this.props.selectedTeam && this.props.selectedTeam.get('type') === "general" &&
             this.props.selectedTeam.get('members') && this.props.selectedTeam.get('members').size > 1) {
 
-            let members = this.props.selectedTeam.get('members').map((member, i) => (
-                <div className="item" data-value={member.get('user').get('uid')}
+            let members = this.props.selectedTeam.get('members').map(function(member, i) {
+                let classDisable = (member.get('projects') === 0) ? 'disabled' : '';
+                return <div className={"item " + classDisable} data-value={member.get('user').get('uid')}
                      key={'user' + member.get('user').get('uid')}>
                     <a className="ui circular label">{APP.getUserShortName(member.get('user').toJS())}</a>
                     {member.get('user').get('first_name') + ' ' + member.get('user').get('last_name')}
-                </div>
+                </div>;
 
-            ));
+            });
 
             let item = <div className="item" data-value="-1"
                             key={'user' + -1}>
