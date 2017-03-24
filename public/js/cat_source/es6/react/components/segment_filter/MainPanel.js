@@ -25,13 +25,10 @@ class MainPanel extends React.Component {
     }
 
     componentDidMount() {
-        if ( SegmentFilter.getStoredState().reactState ) {
-            this.makeCall();
+        let storedState = SegmentFilter.getStoredState() ;
+        if ( storedState.reactState ) {
+            this.doSubmitFilter( storedState.lastSegmentId );
         }
-    }
-
-    componentWillUnmount() {
-
     }
 
     resetState() {
@@ -57,10 +54,10 @@ class MainPanel extends React.Component {
 
     submitClick(e) {
         e.preventDefault() ;
-        this.makeCall();
+        this.doSubmitFilter();
     }
 
-    makeCall() {
+    doSubmitFilter( segmentToOpen = null ) {
         let sample  ;
 
         if ( this.state.samplingEnabled ) {
@@ -68,13 +65,12 @@ class MainPanel extends React.Component {
                 type : this.state.samplingType,
                 size : this.state.samplingSize,
             }
-
         }
 
         SegmentFilter.filterSubmit({
-            status : this.state.selectedStatus,
-            sample : sample
-        });
+            status        : this.state.selectedStatus,
+            sample        : sample,
+        }, segmentToOpen );
 
         this.setState({
             searchSettingsOpen : false

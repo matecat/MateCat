@@ -365,8 +365,7 @@ abstract class DataAccess_AbstractDao {
      * @deprecated Use instead PDO::setFetchMode()
      * @return DataAccess_IDaoStruct|DataAccess_IDaoStruct[]
      */
-    protected function _buildResult( $array_result ) {
-    }
+    protected function _buildResult( $array_result ){}
 
     /**
      * Returns a string suitable for insert of the fields

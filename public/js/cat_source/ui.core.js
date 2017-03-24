@@ -767,9 +767,24 @@ UI = {
 			this.startSegmentId = this.segmentToScrollAtRender;
 		} else {
 			var hash = UI.parsedHash.segmentId;
+            config.last_opened_segment = UI.getLastSegmentFromLocalStorage();
+            if (!config.last_opened_segment) {
+                config.last_opened_segment = config.first_job_segment;
+            }
 			this.startSegmentId = (hash) ? hash : config.last_opened_segment;
 		}
 	},
+    getLastSegmentFromLocalStorage: function () {
+        return localStorage.getItem(UI.localStorageCurrentSegmentId);
+    },
+    setLastSegmentFromLocalStorage: function (segmentId) {
+        try {
+            localStorage.setItem(UI.localStorageCurrentSegmentId, segmentId);
+        } catch (e) {
+            UI.clearStorage("currentSegmentId");
+            localStorage.setItem(UI.localStorageCurrentSegmentId, segmentId);
+        }
+    },
     fixHeaderHeightChange: function() {
         var headerHeight = $('header .wrapper').height() + ((this.body.hasClass('filterOpen'))? $('header .searchbox').height() : 0) + ((this.body.hasClass('incomingMsg'))? $('header #messageBar').height() : 0);
         $('#outer').css('margin-top', headerHeight + 'px');
@@ -1567,7 +1582,7 @@ UI = {
 		}
 
 		if (this.readonly) return;
-
+        this.setLastSegmentFromLocalStorage(id_segment.toString());
 		APP.doRequest({
 			data: {
 				action: 'setCurrentSegment',
@@ -1588,7 +1603,7 @@ UI = {
 		if (d.errors.length) {
 			this.processErrors(d.errors, 'setCurrentSegment');
         }
-
+        // this.setLastSegmentFromLocalStorage(d.nextSegmentId);
 		this.nextUntranslatedSegmentIdByServer = d.nextSegmentId;
         this.propagationsAvailable = d.data.prop_available;
 		this.getNextSegment(this.currentSegment, 'untranslated');
@@ -3059,6 +3074,7 @@ UI = {
         UI.firstLoad = true;
         UI.body = $('body');
         UI.checkSegmentsArray = {} ;
+        UI.localStorageCurrentSegmentId = "currentSegmentId-"+config.id_job+config.password;
 
         APP.init();
         // If some icon is added on the top header menu, the file name is resized
