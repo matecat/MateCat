@@ -104,7 +104,7 @@ class CreateTeam extends React.Component {
         var inputError = (this.state.errorInput) ? 'error' : '';
         var inputDropdown = (this.state.errorDropdown) ? 'error' : '';
 
-        var buttonClass = (this.state.readyToSend && !this.state.errorInput && !this.state.errorDropdown ) ? '' : 'disabled';
+        var buttonClass = (this.state.readyToSend && !this.state.errorInput && !this.state.errorDropdown ) ? '' : '';
         var user = APP.USER.STORE.user;
         return  <div className="create-team-modal">
             <div className="matecat-modal-top">
