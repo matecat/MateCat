@@ -110,28 +110,6 @@ UI = {
                 downloadTranslationFn : this.downloadTranslation,
             }), mountPoint);
         }
-        // If is the Personal team selected I need to know all teams members before load the projects
-        if (this.selectedTeam.type === 'personal') {
-            var self = this;
-            let requests = [];
-            let onDone = function (data) {
-                var team = self.teams.find(function (t) {
-                    return t.id === data.members[0].id_team
-                });
-                team.members = data.members;
-                team.pending_invitations = data.pending_invitations;
-            };
-            this.teams.forEach(function(team) {
-                requests.push(self.getTeamMembers(team.id));
-            });
-            $.when.apply(this, requests).done(function() {
-                let results = requests.length > 1 ? arguments : [arguments];
-                for( let i = 0; i < results.length; i++ ){
-                    onDone(results[i][0]);
-                }
-                ManageActions.updateTeams(self.teams);
-            });
-        }
         ManageActions.renderProjects(projects, this.selectedTeam, this.teams);
     },
 
@@ -455,8 +433,9 @@ UI = {
     },
 
     addUserToTeam: function (team, userEmail) {
+        var email = (typeof userEmail === "string") ? [userEmail] : userEmail;
         let data = {
-            members: [userEmail]
+            members: email
         };
         return $.ajax({
             data: data,

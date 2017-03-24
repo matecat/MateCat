@@ -18,6 +18,8 @@ class ProjectModel {
     protected $willChange = array();
     protected $changedFields = array();
 
+    protected $cacheTeamsToClean = [];
+
     /**
      * @var Users_UserStruct
      */
@@ -95,6 +97,8 @@ class ProjectModel {
 
         $this->project_struct = $newStruct;
 
+        $this->cleanChaches();
+
         return $this->project_struct;
     }
 
@@ -139,6 +143,8 @@ class ProjectModel {
             throw new \Exceptions\ValidationError( 'Assignee must be team member' );
         }
 
+        $this->cacheTeamsToClean[] = $this->project_struct->id_team;
+
     }
 
     private function checkIdTeam(){
@@ -159,8 +165,6 @@ class ProjectModel {
         // if the project has an assignee, we have to check if the assignee_id exists in the other team. If not, reset the assignee
         if( $this->project_struct->id_assignee ){
 
-            $teamDao = new TeamDao();
-
             $found = array_filter( $memberList, function( $values ) {
                 return $this->project_struct->id_assignee == $values->uid;
             } );
@@ -170,17 +174,26 @@ class ProjectModel {
             } else {
 
                 //clean the cache for the new team member list of assigned projects
-                $newTeam = $teamDao->setCacheTTL( 60 * 60 * 24 )->findById( $this->willChange[ 'id_team' ] );
-                $teamDao->destroyCacheAssignee( $newTeam );
+                $this->cacheTeamsToClean[] = $this->willChange[ 'id_team' ];
 
             }
 
             //clean the cache for the old team member list of assigned projects
-            $oldTeam = $teamDao->setCacheTTL( 60 * 60 * 24 )->findById( $this->project_struct->id_team );
-            $teamDao->destroyCacheAssignee( $oldTeam );
+            $this->cacheTeamsToClean[] = $this->project_struct->id_team;
 
         }
 
+
+    }
+
+    private function cleanChaches(){
+
+        $teamDao = new TeamDao();
+        $this->cacheTeamsToClean = array_unique( $this->cacheTeamsToClean );
+        foreach( $this->cacheTeamsToClean as $team_id ){
+            $teamInCacheToClean = $teamDao->setCacheTTL( 60 * 60 * 24 )->findById( $team_id );
+            $teamDao->destroyCacheAssignee( $teamInCacheToClean );
+        }
 
     }
 

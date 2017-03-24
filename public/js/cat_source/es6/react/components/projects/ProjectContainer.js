@@ -318,7 +318,7 @@ class ProjectContainer extends React.Component {
         var self = this;
         let members = users.map(function(member, i) {
             let user = member.get('user');
-            return <div className="item " data-value={user.get('uid')}
+            return <div className="item" data-value={user.get('uid')}
                         key={'user' + user.get('uid')}>
                 <div className="ui circular label">{APP.getUserShortName(user.toJS())}</div>
                 {user.get('first_name') + " " + user.get('last_name')}
