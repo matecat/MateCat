@@ -455,8 +455,9 @@ UI = {
     },
 
     addUserToTeam: function (team, userEmail) {
+        var email = (typeof userEmail === "string") ? [userEmail] : userEmail;
         let data = {
-            members: [userEmail]
+            members: email
         };
         return $.ajax({
             data: data,
