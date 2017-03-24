@@ -180,12 +180,12 @@ class Header extends React.Component {
         let subHeader = '';
         let containerClass = "user-teams thirteen";
         if (this.props.showSubHeader) {
-            subHeader = <div className="eleven wide column">
+            subHeader = <div className="ten wide column">
                 <SubHeader
                 selectedTeam={selectedTeam}
             />
             </div>;
-            containerClass = "user-teams two";
+            containerClass = "user-teams three";
         }
 
         return <section className="nav-mc-bar ui grid">
