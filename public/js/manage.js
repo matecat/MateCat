@@ -77,7 +77,7 @@ UI = {
         if ( UI.Search.currentPage === 1) {
             this.getProjects(self.selectedTeam).done(function (response) {
                 let projects = response.data;
-                ManageActions.renderProjects(projects);
+                ManageActions.renderProjects(projects, self.selectedTeam, self.teams,  true);
             });
         } else {
             ManageActions.showReloadSpinner();
