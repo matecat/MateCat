@@ -159,13 +159,25 @@ class ProjectModel {
         // if the project has an assignee, we have to check if the assignee_id exists in the other team. If not, reset the assignee
         if( $this->project_struct->id_assignee ){
 
+            $teamDao = new TeamDao();
+
             $found = array_filter( $memberList, function( $values ) {
                 return $this->project_struct->id_assignee == $values->uid;
             } );
 
             if( empty( $found )){
                 $this->willChange[ 'id_assignee' ] = null; //unset the assignee
+            } else {
+
+                //clean the cache for the new team member list of assigned projects
+                $newTeam = $teamDao->setCacheTTL( 60 * 60 * 24 )->findById( $this->willChange[ 'id_team' ] );
+                $teamDao->destroyCacheAssignee( $newTeam );
+
             }
+
+            //clean the cache for the old team member list of assigned projects
+            $oldTeam = $teamDao->setCacheTTL( 60 * 60 * 24 )->findById( $this->project_struct->id_team );
+            $teamDao->destroyCacheAssignee( $oldTeam );
 
         }
 

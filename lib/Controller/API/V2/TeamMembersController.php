@@ -26,13 +26,14 @@ class TeamMembersController extends KleinController {
      * Get team members list
      */
     public function index(){
-        $membersList = ( new MembershipDao )
-            ->setCacheTTL( 60 * 60 * 24 )
-            ->getMemberListByTeamId( $this->request->id_team );
 
         $pendingInvitation = new PendingInvitations( ( new \RedisHandler() )->getConnection(), [] );
 
-        $formatter = new Membership( $membersList ) ;
+        $team = ( new TeamDao() )->setCacheTTL( 60 * 60 * 24 )->findById( $this->request->id_team );
+        $teamModel = new TeamModel( $team );
+        $teamModel->updateMembersProjectsCount();
+
+        $formatter = new Membership( $team->getMembers() ) ;
         $this->response->json( [
                 'members' => $formatter->render(),
                 'pending_invitations' => $pendingInvitation->get( $this->request->id_team )

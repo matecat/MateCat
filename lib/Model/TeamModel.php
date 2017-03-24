@@ -245,4 +245,35 @@ class TeamModel {
         }
     }
 
+    /**
+     * @return $this
+     */
+    public function updateMembersProjectsCount(){
+
+        $this->all_memberships = ( new MembershipDao() )->setCacheTTL( 60 * 60 * 24 )->getMemberListByTeamId( $this->struct->id );
+
+        if( !empty( $this->all_memberships ) ){
+
+            $membersWithProjects = ( new TeamDao() )->setCacheTTL( 60 * 60 )->getAssigneeWithProjectsByTeam( $this->struct );
+
+            $assigneeIds = [];
+            foreach( $membersWithProjects as $assignee ){
+                $assigneeIds[ $assignee->uid ] = $assignee->getAssignedProjects();
+            }
+
+            foreach ( $this->all_memberships as $member ){
+                $memberWithAssignment = array_key_exists( $member->uid, $assigneeIds );
+                if( $memberWithAssignment !== false ){
+                    $member->setAssignedProjects( $assigneeIds[ $member->uid ] );
+                }
+            }
+
+            $this->struct->setMembers( $this->all_memberships );
+
+        }
+
+        return $this;
+
+    }
+
 }
