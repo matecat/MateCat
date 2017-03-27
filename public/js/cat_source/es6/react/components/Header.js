@@ -119,7 +119,7 @@ class Header extends React.Component {
     getTeamsSelect() {
         let result = '';
         var self = this;
-        let dropdownIcon = '';
+        let dropdownIcon = (this.state.teams.size > 1)? <i className="dropdown icon"/> : '';
         let dontShowCursorClass = (this.state.teams.size == 1)? 'disable-dropdown-team' : '';
         if (this.state.teams.size > 0) {
             let items = this.state.teams.map(function(team, i) {
@@ -140,7 +140,6 @@ class Header extends React.Component {
             });
             let addTeam = '';
             if (self.props.showModals) {
-                dropdownIcon = <i className="dropdown icon"/>;
                 dontShowCursorClass = '';
                 addTeam = <div className="header" onClick={this.openCreateTeams.bind(this)}>New Team
                                 <a className="team-filter button show">

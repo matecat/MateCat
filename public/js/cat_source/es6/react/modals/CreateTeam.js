@@ -34,10 +34,6 @@ class CreateTeam extends React.Component {
             this.setState({
                 errorDropdown: true
             });
-            // setTimeout(function () {
-            //     $(self.usersInput).find("input.search").val(text);
-            //
-            // });
             $(this.usersInput).dropdown('set text', text);
 
             return false;
