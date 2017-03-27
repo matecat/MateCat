@@ -218,7 +218,7 @@ class ModifyTeam extends React.Component {
             return <div className="item pending-invitation"
                         key={'user-new' + i}>
                 <div className="mini ui button right floated"
-                     onClick={self.cancelInvite.bind(self, mail)}>Cancel</div>
+                     onClick={self.cancelInvite.bind(self, mail)}>Delete Invitation</div>
                 <div className="ui right floated content pending-msg">New Member</div>
                 <div className="ui tiny image label">{mail.substring(0, 1).toUpperCase()}</div>
                 <div className="middle aligned content">
