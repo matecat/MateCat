@@ -175,7 +175,7 @@ class SubHeader extends React.Component {
                         </div>
                     </div>
 
-                    <div className="six wide column">
+                    {/*<div className="six wide column">
                         <div className="ui right labeled fluid input">
                             <input type="text" placeholder="Find domain" />
                             <div className="ui dropdown label">
@@ -188,7 +188,7 @@ class SubHeader extends React.Component {
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div>*/}
 
                     <div className="center aligned column pad-right-0">
                         {membersFilter}
