@@ -9,9 +9,9 @@ h2 {
     font-size: 22px;
 }
 a {
-    ont-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
-ul, li, ol, p, input, input[type="text"] input[type="email"] .input{
+ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="email"] .input{
     font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
 ::-webkit-input-placeholder { /* Chrome/Opera/Safari */
@@ -471,7 +471,7 @@ ul, li, ol, p, input, input[type="text"] input[type="email"] .input{
 /* Modal Body */
 .matecat-modal-body {
     min-height: 50px;
-    color: #000;
+    /*color: #000;*/
     background-color: #fff;
     border-radius: 0 0 4px 4px;
     margin: 0 auto;
@@ -895,7 +895,7 @@ div#matecat-modal p {
                         font-weight: 100;
                         font-size: 14px;
                         color: grey;
-                        margin-top: 12px;
+                        margin-top: 13px;
                     }
                     /*.content.email-member {
                         font-size: 14px;
@@ -905,19 +905,39 @@ div#matecat-modal p {
                         margin-left: 10px;
                     }*/
                     .mini.ui.button.right.floated {
-                        margin-top: 5px;
+                        margin-top: 6px;
                         border: 1px solid #797979;
                         display: none;
                         border-radius: 2px;
-                        background-color: #ededee;
+                        font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+                        font-size: 14px;
+                        padding: 6px 15px;
+                        background-color: #f6f6f6;
+                        &:hover {
+                            box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+                        }
+                        &:focus {
+                            box-shadow: none !important;
+                        }
+                        &:active {
+                            box-shadow: none !important;
+                        }
                     }
                     .mini.ui.primary.button {
                         border: 1px solid #797979;
                         border-radius: 2px;
+                        font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+                        font-size: 14px;
+                        padding: 6px 15px;
+                        font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+                        i {
+                            opacity: 1;
+                        }
                     }
                     .ui.primary.button {
                         border: 1px solid #797979;
                         border-radius: 2px;
+                        font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
                     }
                     .mini.ui.icon.button {
                         width: 30px;
@@ -927,6 +947,7 @@ div#matecat-modal p {
                         vertical-align: bottom;
                         border: 1px solid #797979;
                         border-radius: 2px;
+
                     }
                 }
             }
@@ -1020,6 +1041,22 @@ div#matecat-modal p {
         }
     }
     .modify-team-modal {
+        .matecat-modal-top {
+            .ui.fluid.input {
+                i {
+                    display: none;
+                }
+                &:hover {
+                    i {
+                        display: inherit;
+                    }
+                }
+            }
+            .ui.icon.input > input:focus ~ i.icon {
+                opacity: 1;
+                display: inherit;
+            }
+        }
         .ui.members-list {
             min-height: 180px;
             .ui.divided.list {

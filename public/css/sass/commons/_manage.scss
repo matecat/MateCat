@@ -186,6 +186,36 @@ body.manage {
                             }
                         }
                     }
+                    &.project-team {
+                        margin-right: 8px;
+                        background-color: #5f748e;
+                        vertical-align: top;
+                        .text {
+                            border-radius: 15px;
+                            padding: 5px 15px;
+                            color: #ffffff;
+                            transition: 0.3s ease;
+                        }
+                        .menu {
+                            z-index: 1;
+                            .divider {
+                                margin: 0;
+                            }
+                            .header {
+                                font-size: 14px;
+                                margin: 0px;
+                                padding: 15px;
+                                cursor: pointer;
+
+                                &:hover {
+                                    background-color: #f3f3f3;
+                                }
+                            }
+                        }
+                        &:hover .text {
+                            background-color: #4e5f75 !important
+                        }
+                    }
                     &.project-assignee {
                         margin-right: 8px;
                         /*background-color: #59467a !important;*/
