@@ -84,8 +84,10 @@ class ProjectsContainer extends React.Component {
         let thereAreMembers = (this.state.team.get("members") && this.state.team.get("members").size > 1 ||
             this.state.team.get("pending_invitations") && this.state.team.get("pending_invitations").size > 0) || this.state.team.get('type') === 'personal';
         let containerClass = (!thereAreMembers) ? 'two' : 'one';
-        return <div className="no-results-found">
-            <div className={"ui " + containerClass +"  doubling cards"}>
+        return <div className="notify-notfound">
+            <div className="message-nofound">No Project Found</div>
+            <div className="no-results-found">
+            {/*<div className={"ui " + containerClass +"  doubling cards"}>
                 <div className="ui card button"
                 onClick={this.createNewProject.bind(this)}>
                     <div className="content">
@@ -106,6 +108,14 @@ class ProjectsContainer extends React.Component {
                             </div>
                         </div>
                     ) : ('')}
+            </div>*/}
+            </div>
+            <div className="message-create">Create a new Project
+                <p>
+                    <a className="ui primary button" onClick={this.createNewProject.bind(this)}>
+                        Create Project
+                    </a>
+                </p>
             </div>
         </div>;
     }
