@@ -185,7 +185,15 @@ class ModifyTeam extends React.Component {
                 return <div className="item"
                             key={'user' + user.get('uid')}>
                     <div className="mini ui button right floated" onClick={self.showRemoveUser.bind(self, user.get('uid'))}>Remove</div>
-                    <div className="ui tiny image label">{APP.getUserShortName(user.toJS())}</div>
+
+                    { member.get('user_metadata') ?
+                        (<img className="ui mini circular image"
+                                                          src={member.get('user_metadata').get('gplus_picture') + "?sz=80"}/>)
+                        :(
+                            <div className="ui tiny image label">{APP.getUserShortName(user.toJS())}</div>
+                        )}
+
+
                     <div className="middle aligned content">
                         <div className="content user">
                             {' ' + user.get('first_name') + ' ' + user.get('last_name')}

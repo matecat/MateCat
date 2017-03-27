@@ -318,9 +318,14 @@ class ProjectContainer extends React.Component {
         var self = this;
         let members = users.map(function(member, i) {
             let user = member.get('user');
+            let userIcon = <a className="ui circular label">{APP.getUserShortName(member.get('user').toJS())}</a>;
+            if ( member.get('user_metadata') ) {
+                userIcon = <img className="ui avatar image ui-user-dropdown-image"
+                                src={member.get('user_metadata').get('gplus_picture') + "?sz=80"}/>;
+            }
             return <div className="item" data-value={user.get('uid')}
                         key={'user' + user.get('uid')}>
-                <div className="ui circular label">{APP.getUserShortName(user.toJS())}</div>
+                {userIcon}
                 {user.get('first_name') + " " + user.get('last_name')}
             </div>
         });

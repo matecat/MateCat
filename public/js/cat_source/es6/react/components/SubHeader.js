@@ -83,9 +83,14 @@ class SubHeader extends React.Component {
 
             let members = this.props.selectedTeam.get('members').map(function(member, i) {
                 let classDisable = (member.get('projects') === 0) ? 'disabled' : '';
+                let userIcon = <a className="ui circular label">{APP.getUserShortName(member.get('user').toJS())}</a>;
+                if ( member.get('user_metadata') ) {
+                    userIcon = <img className="ui avatar image ui-user-dropdown-image"
+                                     src={member.get('user_metadata').get('gplus_picture') + "?sz=80"}/>;
+                }
                 return <div className={"item " + classDisable} data-value={member.get('user').get('uid')}
                      key={'user' + member.get('user').get('uid')}>
-                    <a className="ui circular label">{APP.getUserShortName(member.get('user').toJS())}</a>
+                    {userIcon}
                     {member.get('user').get('first_name') + ' ' + member.get('user').get('last_name')}
                 </div>;
 

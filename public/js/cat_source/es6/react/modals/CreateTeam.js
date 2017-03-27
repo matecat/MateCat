@@ -145,7 +145,12 @@ class CreateTeam extends React.Component {
                         <div className="ui members-list team">
                             <div className="ui divided list">
                                 <div className="item">
-                                    <div className="ui tiny image label">{APP.getUserShortName(user)}</div>
+                                    { APP.USER.STORE.metadata ? (
+                                            <img className="ui mini circular image "
+                                                 src={APP.USER.STORE.metadata.gplus_picture + "?sz=80"}/>
+                                        ) : (
+                                            <div className="ui tiny image label">{APP.getUserShortName(user)}</div>
+                                        )}
                                     <div className="middle aligned content">
                                         <div className="content user"> {' ' + user.first_name + ' ' + user.last_name}</div>
                                         <div className="content email-user-invited">{user.email}</div>
