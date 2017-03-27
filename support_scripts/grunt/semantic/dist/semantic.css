@@ -3539,7 +3539,7 @@ input::selection {
 
 .ui.red.buttons .button:hover,
 .ui.red.button:hover {
-  background-color: #d01919;
+  background-color: #d1581c;
   color: #FFFFFF;
   text-shadow: none;
   box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
@@ -3547,26 +3547,28 @@ input::selection {
 
 .ui.red.buttons .button:focus,
 .ui.red.button:focus {
-  background-color: #ca1010;
+  background-color: #d1581c;
   color: #FFFFFF;
   text-shadow: none;
+  box-shadow: none !important;
 }
 
 .ui.red.buttons .button:active,
 .ui.red.button:active {
-  background-color: #b21e1e;
+  background-color: #d1581c;
   color: #FFFFFF;
   text-shadow: none;
-  box-shadow: none;
+  box-shadow: none !important;
 }
 
 .ui.red.buttons .active.button,
 .ui.red.buttons .active.button:active,
 .ui.red.active.button,
 .ui.red.button .active.button:active {
-  background-color: #d41515;
+  background-color: #d1581c;
   color: #FFFFFF;
   text-shadow: none;
+  box-shadow: none !important;
 }
 
 /* Basic */
@@ -4460,7 +4462,7 @@ input::selection {
 
 .ui.negative.buttons .button:hover,
 .ui.negative.button:hover {
-  background-color: #d01919;
+  background-color: #d1581c;
   color: #FFFFFF;
   text-shadow: none;
 }
