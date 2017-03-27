@@ -517,7 +517,7 @@ class JobContainer extends React.Component {
         $(this.dropdown).dropdown({
             belowOrigin: true
         });
-        $('.button.tm-keys, .button.comments-tooltip, .warning-tooltip, .qr-tooltip, .translate-tooltip').popup();
+        $('.button.tm-keys, .button.comments-tooltip, .warning-tooltip, .qr-tooltip, .translate-tooltip, .languages-tooltip').popup();
         $(this.iconsButton).dropdown();
         ProjectsStore.addListener(ManageConstants.ENABLE_DOWNLOAD_BUTTON, this.enableDownloadMenu.bind(this));
         ProjectsStore.addListener(ManageConstants.DISABLE_DOWNLOAD_BUTTON, this.disableDownloadMenu.bind(this));
@@ -550,7 +550,7 @@ class JobContainer extends React.Component {
                     <div className="ui stackable grid">
 
                         <div className="eight wide column">
-                            <div className="source-target">
+                            <div className="source-target languages-tooltip" data-html={this.props.job.get('sourceTxt') + ' > ' + this.props.job.get('targetTxt')}>
                                 <div className="source-box">
                                     {this.props.job.get('sourceTxt')}
                                 </div>

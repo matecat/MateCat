@@ -19,10 +19,12 @@ let ManageActions = {
             team: team,
             hideSpinner: hideSpinner,
         });
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.RENDER_TEAMS,
-            teams: teams,
-        });
+        if (teams) {
+            AppDispatcher.dispatch({
+                actionType: ManageConstants.RENDER_TEAMS,
+                teams: teams,
+            });
+        }
 
     },
 

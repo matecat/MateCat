@@ -38,7 +38,7 @@ body.manage {
     margin: 0em;
     vertical-align: inherit;
 }
-
+/*
 .ui.top.right.pointing.dropdown > .menu:after {
     top: -0.25em;
     left: auto;
@@ -47,7 +47,7 @@ body.manage {
     -webkit-transform: rotate(45deg);
     transform: rotate(45deg);
     background-color: #ffffff;
-}
+}*/
 
 .item.cancel-item {
     position: absolute !important;
@@ -226,6 +226,9 @@ body.manage {
                             padding: 3px 15px 3px 3px;
                             color: #ffffff;
                             transition: 0.3s ease;
+                            img {
+                                max-height: 24px;
+                            }
                         }
                         .menu {
                             z-index: 1;

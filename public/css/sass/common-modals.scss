@@ -1026,15 +1026,26 @@ div#matecat-modal p {
 }
 
 
+
+
 .matecat-modal-content {
+    .message-modal {
+        padding: 25px 0;
+    }
+
     .matecat-modal-middle {
         padding: 0 25px;
+        .ui.primary.button, .ui.red.button {
+            font-family: Calibri;
+            border: 1px solid #797979;
+            border-radius: 2px;
+        }
     }
     .create-team-modal {
         .ui.members-list {
             .ui.divided.list {
                 .item:first-child {
-                    border-top: 1px solid rgba(34, 36, 38, 0.15);
+                    //border-top: 1px solid rgba(34, 36, 38, 0.15);
                     border-bottom: 1px solid rgba(34, 36, 38, 0.15);
                 }
             }
@@ -1065,6 +1076,12 @@ div#matecat-modal p {
                     border-top: 1px solid rgba(34, 36, 38, 0.15);
                 }
             }
+        }
+    }
+    .change-team-modal {
+        height: 400px;
+        .menu {
+            height: 180px;
         }
     }
 }

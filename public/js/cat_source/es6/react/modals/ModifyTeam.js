@@ -150,26 +150,29 @@ class ModifyTeam extends React.Component {
         return this.state.team.get('members').map(function(member, i) {
             let user = member.get('user');
             if (user.get('uid') == APP.USER.STORE.user.uid && self.state.showRemoveMessageUserID == user.get('uid')) {
-                return <div className="item"
-                            key={'user' + user.get('uid')}>
-                    <div className="right floated content top-5 bottom-5">
-                        <div className="ui mini primary button" onClick={self.removeUser.bind(self, user)}><i className="icon-check icon"/>Confirm</div>
-                        <div className="ui icon mini button red" onClick={self.undoRemoveAction.bind(self)}><i className="icon-cancel3 icon"/></div>
+                if (self.state.team.get('members').size > 1) {
+                    return <div className="item"
+                                key={'user' + user.get('uid')}>
+                        <div className="right floated content top-5 bottom-5">
+                            <div className="ui mini primary button" onClick={self.removeUser.bind(self, user)}><i className="icon-check icon"/>Confirm</div>
+                            <div className="ui icon mini button red" onClick={self.undoRemoveAction.bind(self)}><i className="icon-cancel3 icon"/></div>
+                        </div>
+                        <div className="content pad-top-10 pad-bottom-8">
+                            Are you sure you want to leave this team?
+                        </div>
                     </div>
-                    <div className="content pad-top-10 pad-bottom-8">
-                        Are you sure you want to leave this team?
-                    </div>
-                </div>
-                    /*<div className="item"
-                key={'user' + user.get('uid')}>
-                    <div className="right floated content top-20 bottom-5">
-                    <div className="ui mini primary button" onClick={self.removeUser.bind(self, user)}><i className="icon-check icon"/>Confirm</div>
-                    <div className="ui icon mini button red" onClick={self.undoRemoveAction.bind(self)}><i className="icon-cancel3 icon"/></div>
-                    </div>
-                    <div className="content pad-top-10 pad-bottom-8">
-                     Abandoning this team, all projects within are unattainable, move them to your Personal Team if you do not want to lose them permanently
-            </div>
-            </div>*/
+                } else {
+                    return <div className="item"
+                                key={'user' + user.get('uid')}>
+                        <div className="right floated content top-20 bottom-5">
+                            <div className="ui mini primary button" onClick={self.removeUser.bind(self, user)}><i className="icon-check icon"/>Confirm</div>
+                            <div className="ui icon mini button red" onClick={self.undoRemoveAction.bind(self)}><i className="icon-cancel3 icon"/></div>
+                        </div>
+                        <div className="content pad-top-10 pad-bottom-8">
+                            Abandoning this team, all projects within are unattainable, move them to your Personal Team if you do not want to lose them permanently
+                        </div>
+                    </div>;
+                }
             }else if (self.state.showRemoveMessageUserID == user.get('uid')) {
                 return <div className="item"
                             key={'user' + user.get('uid')}>

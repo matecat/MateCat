@@ -133,21 +133,21 @@ $.extend(UI, {
         $( ".title-target" ).text( job.targetTxt);
         $( ".title-words" ).text(job.stats.TOTAL_FORMATTED );
 
-        if (job.outsource) {
-            var dd = new Date( job.outsource.delivery_date );
-            $('.modal.outsource .out-date').val( $.format.date(dd, "d MMMM") + ' at ' + $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a") );
-        } else {
-            $('.modal.outsource .out-date').val( getChosenOutsourceDateToString() );
-
-        }
+        // if (job.outsource) {
+        //     var dd = new Date( job.outsource.delivery_date );
+        //     $('.modal.outsource .out-date').val( $.format.date(dd, "d MMMM") + ' at ' + $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a") );
+        // } else {
+        //     $('.modal.outsource .out-date').val( getChosenOutsourceDateToString() );
+        //
+        // }
 
         if(config.enable_outsource) {
             resetOutsourcePopup( false );
             $('body').addClass('showingOutsourceTo');
             $('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + url);
             $('.outsource.modal .uploadbtn:not(.showprices)').attr('href', url);
-            $("#open-translator").addClass('hide');
-            $('.send-to-translator').removeClass('hide');
+            // $("#open-translator").addClass('hide');
+            // $('.send-to-translator').removeClass('hide');
             $('.onyourown').addClass('opened-send-translator');
             //TODO
             $('.modal.outsource input.out-email').val("");
