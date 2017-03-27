@@ -157,8 +157,17 @@ let ManageActions = {
                         });
                     }, 1000);
                 }
+                UI.getTeamMembers(team.get("id")).done(function (data) {
+                    team = team.set('members', data.members);
+                    team = team.set('pending_invitations', data.pending_invitations);
+                    AppDispatcher.dispatch({
+                        actionType: ManageConstants.UPDATE_TEAM,
+                        team: team.toJS()
+                    });
+                });
             }
         );
+
 
     },
 
