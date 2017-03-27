@@ -163,7 +163,7 @@ class SubHeader extends React.Component {
             <section className="row sub-head">
                 <div className="ui container equal width grid">
 
-                    <div className="column">
+                    <div className="six wide column">
                         <div className="search-state-filters">
                             <div className="status">
                                 {currentStatusLabel}
@@ -174,6 +174,21 @@ class SubHeader extends React.Component {
                                 filterFunction={this.filterByStatus.bind(this)}/>
                         </div>
                     </div>
+
+                    {/*<div className="six wide column">
+                        <div className="ui right labeled fluid input">
+                            <input type="text" placeholder="Find domain" />
+                            <div className="ui dropdown label">
+                                <div className="text">Active</div>
+                                <i className="dropdown icon" />
+                                <div className="menu">
+                                    <div className="item">Active</div>
+                                    <div className="item">.net</div>
+                                    <div className="item">.org</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>*/}
 
                     <div className="center aligned column pad-right-0">
                         {membersFilter}
