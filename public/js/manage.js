@@ -494,7 +494,7 @@ UI = {
             project: project,
             selectedTeam: this.selectedTeam.id
         };
-        APP.ModalWindow.showModalComponent(ChangeTeamModal, props, "Modify Team");
+        APP.ModalWindow.showModalComponent(ChangeTeamModal, props, "Move project");
     },
 
     openOutsourceModal: function (project, job, url) {
