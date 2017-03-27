@@ -706,7 +706,7 @@ APP = {
             if (team) {
                 return team;
             } else {
-                return team[0];
+                return teams[0];
             }
         } else {
             return teams[0];
