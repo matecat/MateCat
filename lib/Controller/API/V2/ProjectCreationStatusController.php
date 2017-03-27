@@ -25,13 +25,14 @@ class ProjectCreationStatusController extends KleinController {
 
             $response = [];
             foreach( $result[ 'errors' ] as $error ){
-                $response[] = new Exception( $error[ 'debug' ], $error[ 'code' ] );
+                $response[] = new Exception( $error[ 'message' ], $error[ 'code' ] );
             }
 
-            $this->response->json( ( new Error( [ (object)$result ] ) )->render() );
+            $this->response->code( 500 );
+            $this->response->json( ( new Error( (object)$response ) )->render() );
 
         } elseif( empty( $result ) ){
-
+            $this->response->code( 202 );
             $this->response->json( ( new WaitCreation() )->render() );
 
         } else {
