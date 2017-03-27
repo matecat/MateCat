@@ -95,12 +95,18 @@ class PreferencesModal extends React.Component {
 
         return <div className="preferences-modal">
 
-                     <div className="user-info-form">
-                        <div className="avatar-user pull-left">{config.userShortName}</div>
-                        <div className="user-name pull-left">
+                    <div className="user-info-form">
+                        {(APP.USER.STORE.metadata) ? (
+                                <img className="ui tiny circular image pull-left"
+                                     src={APP.USER.STORE.metadata.gplus_picture + "?sz=80"} style={{width:"50px"}}/>
+                            ) : (
+                                <div className="avatar-user pull-left">{config.userShortName}</div>
+                            )}
+
+                         <div className="user-name pull-left">
                             <strong>{this.props.user.first_name} {this.props.user.last_name}</strong><br/>
-                        <span className="grey-txt">{this.props.user.email}</span><br/>
-                        </div>
+                         <span className="grey-txt">{this.props.user.email}</span><br/>
+                         </div>
                          <br/>
                          <div className="user-link">
                             <div id='logoutlink' className="pull-right" onClick={this.logoutUser.bind(this)}>Logout</div>
