@@ -73,7 +73,13 @@ class ProjectOptionSanitizerTest extends AbstractTest {
             'lexiqa' => 0,
             'another_key_set_by_plugin' => 42
         ), $sanitizer->sanitize() ) ;
+    }
 
+    function testLexiQaWorksWithRecursiveArrayObject() {
+        $sanitizer = new ProjectOptionsSanitizer(['lexiqa' => TRUE]);
+        $sanitizer->setLanguages('en-US', new RecursiveArrayObject( ['en-GB'] ) ) ;
+        $result = $sanitizer->sanitize();
+        $this->assertEquals( array('lexiqa' => 1), $result ) ;
     }
 
 
