@@ -66,14 +66,24 @@ class ProjectOptionsSanitizer {
     public function __construct( $input_options ) { 
         $this->options = $input_options ; 
     }
-    
+
+    /**
+     * @param $source
+     * @param $target
+     */
     public function setLanguages( $source, $target ) {
-        if ( !is_array( $target ) ) {
+        if ( is_string( $target ) ) {
             $target = array( $target ) ; 
+        } elseif ( method_exists($target, 'getArrayCopy') ) {
+            $target = $target->getArrayCopy();
         }
-        
-        $this->source_lang = $source ; 
-        $this->target_lang = $target ; 
+
+        if ( !is_array($target)) {
+            throw new Exception('Target should be an array');
+        }
+
+        $this->source_lang = $source ;
+        $this->target_lang = $target ;
     }
 
     /**

@@ -464,14 +464,15 @@ APP.handleCreationStatus = function( id_project, password ){
     $.ajax({
         url: "/api/v2/projects/" + id_project + "/" + password + "/creation_status",
         type: 'GET'
-    }).done( function( data ) {
-        if( data.status == 202 ) {
+    }).done( function( data, statusText, xhr ) {
+        if( data.status == 202 || xhr.status == 202 ) {
             setTimeout( APP.handleCreationStatus, 1000, id_project, password );
         } else {
             APP.postProjectCreation( data );
         }
-    }).error( function(){
-        setTimeout( APP.handleCreationStatus, 1000, id_project, password );
+    }).error( function( data, statusText, xhr ){
+    	let _data = $.parseJSON( data.responseText );
+        APP.postProjectCreation( _data );
     });
 
 };

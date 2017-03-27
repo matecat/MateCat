@@ -39,7 +39,7 @@ class Error {
                 $output = $error;
             }
 
-            $row[ 'errors' ] = [
+            $row[ 'errors' ][] = [
                     "code"    => $code,
                     "message" => $output
             ];
