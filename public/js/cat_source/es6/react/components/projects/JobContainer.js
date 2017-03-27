@@ -509,6 +509,10 @@ class JobContainer extends React.Component {
         }
     }
 
+    componentDidUpdate() {
+        $(this.iconsButton).dropdown();
+    }
+
     componentDidMount () {
         $(this.dropdown).dropdown({
             belowOrigin: true

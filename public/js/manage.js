@@ -77,7 +77,7 @@ UI = {
         if ( UI.Search.currentPage === 1) {
             this.getProjects(self.selectedTeam).done(function (response) {
                 let projects = response.data;
-                ManageActions.renderProjects(projects, self.selectedTeam, self.teams,  true);
+                ManageActions.renderProjects(projects, self.selectedTeam, null,  true);
             });
         } else {
             ManageActions.showReloadSpinner();
@@ -95,7 +95,7 @@ UI = {
                 for( let i = 0; i < results.length; i++ ){
                     onDone(results[i][0]);
                 }
-                ManageActions.renderProjects(total_projects, self.selectedTeam, self.teams,  true);
+                ManageActions.renderProjects(total_projects, self.selectedTeam, null,  true);
             });
 
         }
