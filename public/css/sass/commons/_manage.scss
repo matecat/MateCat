@@ -6,7 +6,7 @@ body.manage {
     //box-sizing: content-box;
     //margin-top: 55px;
     font-family: Calibri, Arial, Helvetica, sans-serif;
-    background-color: #f1f1f1;
+    background-color: #e4e6e8;
     @media only screen and (min-width: 1380px) {
         .ui.container {
             width: 1280px;
@@ -497,8 +497,11 @@ body.manage {
                                     &:hover {
                                         background-color: #ececec;
                                     }
-                                    &.active {
-                                        background-color: #e2e2e2!important;
+                                    &:active {
+                                        background-color: #e2e2e2;
+                                    }
+                                    &:focus {
+                                        background-color: #e2e2e2;
                                     }
                                 }
                             }
