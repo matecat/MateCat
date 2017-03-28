@@ -79,11 +79,11 @@ body.manage {
 
             .project-name {
                 font-size: 17px;
-                width: 80%;
+                white-space: nowrap;
                 float: left;
                 overflow: hidden;
                 text-overflow: ellipsis;
-                max-width: 600px;
+                max-width: 350px;
             }
             .project-id {
                 float: right;
@@ -498,7 +498,7 @@ body.manage {
                                         background-color: #ececec;
                                     }
                                     &.active {
-                                        background-color: #BABBBC;
+                                        background-color: #e2e2e2!important;
                                     }
                                 }
                             }
