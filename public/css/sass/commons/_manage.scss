@@ -481,6 +481,12 @@ body.manage {
                                 &:hover {
                                     box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
                                 }
+                                &:focus {
+                                    box-shadow: none;
+                                }
+                                &:active {
+                                    box-shadow: none;
+                                }
                             }
                             .job-menu {
                                 i {
