@@ -97,6 +97,16 @@ AppDispatcher.register(function(action) {
             TeamsStore.addTeam(action.team);
             TeamsStore.emitChange(ManageConstants.RENDER_TEAMS, TeamsStore.teams);
             break;
+        // Move this actions
+        case ManageConstants.OPEN_CREATE_TEAM_MODAL:
+            TeamsStore.emitChange(action.actionType);
+            break;
+        case ManageConstants.OPEN_MODIFY_TEAM_MODAL:
+            TeamsStore.emitChange(action.actionType, Immutable.fromJS(action.team), action.hideChangeName);
+            break;
+        case ManageConstants.OPEN_CHANGE_TEAM_MODAL:
+            TeamsStore.emitChange(action.actionType, TeamsStore.teams, action.project);
+            break;
     }
 });
 module.exports = TeamsStore;

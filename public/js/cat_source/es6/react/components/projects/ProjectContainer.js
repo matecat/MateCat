@@ -311,7 +311,7 @@ class ProjectContainer extends React.Component {
     }
 
     openAddMember() {
-        ManageActions.openModifyTeamModal(this.props.team.toJS());
+        ManageActions.openAddTeamMemberModal(this.props.team.toJS());
     }
 
     createUserDropDown(users) {
@@ -414,15 +414,6 @@ class ProjectContainer extends React.Component {
         console.log("Updated Project : " + this.props.project.get('id'));
 
         $(this.dropdownTeams).popup();
-
-        // clearTimeout(this.inputTimeout);
-        // if (this.state.inputNameChanged) {
-        //     this.inputTimeout = setTimeout(function () {
-        //         self.setState({
-        //             inputNameChanged: false
-        //         })
-        //     }, 3000);
-        // }
     }
 
     componentDidMount() {

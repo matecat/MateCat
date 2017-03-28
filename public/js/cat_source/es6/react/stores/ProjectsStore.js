@@ -202,16 +202,6 @@ AppDispatcher.register(function(action) {
         case ManageConstants.DISABLE_DOWNLOAD_BUTTON:
             ProjectsStore.emitChange(action.actionType, action.idProject);
             break;
-        // Move this actions
-        case ManageConstants.OPEN_CREATE_TEAM_MODAL:
-            ProjectsStore.emitChange(action.actionType);
-            break;
-        case ManageConstants.OPEN_MODIFY_TEAM_MODAL:
-            ProjectsStore.emitChange(action.actionType, Immutable.fromJS(action.team));
-            break;
-        case ManageConstants.OPEN_CHANGE_TEAM_MODAL:
-            ProjectsStore.emitChange(action.actionType, Immutable.fromJS(APP.USER.STORE.teams), action.project);
-            break;
     }
 });
 
