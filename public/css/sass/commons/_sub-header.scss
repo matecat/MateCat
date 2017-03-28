@@ -73,9 +73,9 @@
 	.search-state-filters {
 		input.search-projects {
 			font-size: 14px !important;
-			background-color: #8c8c8c !important;
+			background-color: #616161 !important;
 			box-shadow: none !important;
-			transition: 0.3s ease;
+            transition: 0.3s ease;
 			&:hover {
 				background-color: #676767 !important;
 			}
@@ -86,8 +86,10 @@
 			}
 		}
 		.ui.dropdown {
-            background-color: #8c8c8c;
+            background-color: #848484;
             border-left: 1px solid #4d4d4d;
+            transition: 0.3s ease;
+            color: #ffffff;
             &:hover {
                 background-color: #bbbbbb;
             }
