@@ -29,7 +29,7 @@ class Status {
          * @var $redisHandler Client
          */
 
-        $fastList = $redisHandler->lrange( RedisKeys::FAST_PID_LIST, 0, -1 );
+        $fastList = $redisHandler->lrange( RedisKeys::FAST_PID_SET, 0, -1 );
 
         return !empty( $fastList );
 
