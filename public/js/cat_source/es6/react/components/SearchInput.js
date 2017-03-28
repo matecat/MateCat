@@ -50,7 +50,7 @@ class SearchInput extends React.Component {
                     </div>
                 </div>
 
-                  
+
         );
     }
 }
