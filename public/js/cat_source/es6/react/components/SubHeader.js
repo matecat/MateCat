@@ -164,30 +164,12 @@ class SubHeader extends React.Component {
             <section className="row sub-head">
                 <div className="ui container equal width grid">
 
-                    {/*<div className="six wide column">
-                        <div className="search-state-filters">
-                            <div className="status">
-                                {currentStatusLabel}
-                            </div>
+                    <div className="column">
+                        <div className="ui right labeled fluid input search-state-filters">
                             <SearchInput
                                 onChange={this.onChangeSearchInput.bind(this)}/>
                             <FilterProjects
                                 filterFunction={this.filterByStatus.bind(this)}/>
-                        </div>
-                    </div>*/}
-
-                    <div className="column">
-                        <div className="ui right labeled fluid input search-state-filters">
-                            <input className="search-projects" type="text" placeholder="Search by project name" />
-                            <div className="ui dropdown label">
-                                <i className="icon-filter icon" />
-                                <div className="text">Active</div>
-                                <div className="menu">
-                                    <div className="item">Active</div>
-                                    <div className="item">.net</div>
-                                    <div className="item">.org</div>
-                                </div>
-                            </div>
                         </div>
                     </div>
 

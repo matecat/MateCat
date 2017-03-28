@@ -7,43 +7,53 @@ class FilterProjects extends React.Component {
 
     componentDidMount () {
         let self = this;
-        this.dropdown = $('.ui.dropdown.projects-state');
-        this.dropdown.dropdown({
+
+        $(this.dropdown).dropdown({
             onChange: function() {
                 self.onChangeFunction();
             }
         });
         this.currentFilter = 'active';
-        this.dropdown.dropdown('set selected', 'active');
+        $(this.dropdown).dropdown('set selected', 'active');
     }
 
     onChangeFunction() {
-        if (this.currentFilter !== this.dropdown.dropdown('get value')) {
-            this.props.filterFunction(this.dropdown.dropdown('get value'));
-            this.currentFilter = this.dropdown.dropdown('get value');
+        if (this.currentFilter !== $(this.dropdown).dropdown('get value')) {
+            this.props.filterFunction($(this.dropdown).dropdown('get value'));
+            this.currentFilter = $(this.dropdown).dropdown('get value');
         }
     }
 
     render () {
-        return <div className="projects-state ui icon top right pointing dropdown button">
+        return <div className="ui dropdown label" ref={(dropdown) => this.dropdown = dropdown}>
+                    <i className="icon-filter icon" />
+                    <div className="text">Active</div>
+                    <div className="menu">
+                        <div className="item" data-value="active">Active</div>
+                        <div className="item" data-value="archived">Archived</div>
+                        <div className="item" data-value="cancelled">Cancelled</div>
+                    </div>
+                </div> ;
+
+        /*<div className="projects-state ui icon top right pointing dropdown button">
                     <i className="filter icon"/>
                     <div className="menu">
                         <div className="scrolling menu">
                             <div className="item" data-value="active">
-                                {/*<div className="ui red empty circular label"></div>*/}
+                                {/!*<div className="ui red empty circular label"></div>*!/}
                                 Active Projects
                             </div>
                             <div className="item" data-value="archived">
-                                {/*<div className="ui blue empty circular label"></div>*/}
+                                {/!*<div className="ui blue empty circular label"></div>*!/}
                                 Archived Projects
                             </div>
                             <div className="item" data-value="cancelled">
-                                {/*<div className="ui black empty circular label"></div>*/}
+                                {/!*<div className="ui black empty circular label"></div>*!/}
                                 Cancelled Projects
                             </div>
                         </div>
                     </div>
-                </div>;
+                </div>;*/
     }
 }
 
