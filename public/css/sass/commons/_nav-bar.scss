@@ -153,7 +153,7 @@ header {
         }
 
         .dropdown.select-org {
-            color: gray;
+            color: #ffffff;
             font-size: 15px;
             i.dropdown.icon {
                 top: 12px;
@@ -165,7 +165,7 @@ header {
                 text-decoration: underline;
             }
             &:hover span.text {
-                color: #02ceff;
+                color: #09beec;
                 text-decoration: none;
                 transition: 0.3s ease;
             }
