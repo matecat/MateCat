@@ -255,7 +255,20 @@ let ManageActions = {
             team.pending_invitations = data.pending_invitations;
             AppDispatcher.dispatch({
                 actionType: ManageConstants.OPEN_MODIFY_TEAM_MODAL,
-                team: team
+                team: team,
+                hideChangeName: false
+            });
+        });
+    },
+
+    openAddTeamMemberModal: function (team) {
+        UI.getTeamMembers(team.id).then(function (data) {
+            team.members = data.members;
+            team.pending_invitations = data.pending_invitations;
+            AppDispatcher.dispatch({
+                actionType: ManageConstants.OPEN_MODIFY_TEAM_MODAL,
+                team: team,
+                hideChangeName: true
             });
         });
     },

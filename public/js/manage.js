@@ -16,9 +16,9 @@ UI = {
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_TM_PANEL, this.openJobTMPanel);
 
         //Modals
-        ProjectsStore.addListener(ManageConstants.OPEN_CREATE_TEAM_MODAL, this.openCreateTeamModal);
-        ProjectsStore.addListener(ManageConstants.OPEN_MODIFY_TEAM_MODAL, this.openModifyTeamModal);
-        ProjectsStore.addListener(ManageConstants.OPEN_CHANGE_TEAM_MODAL, this.openChangeTeamModal.bind(this));
+        TeamsStore.addListener(ManageConstants.OPEN_CREATE_TEAM_MODAL, this.openCreateTeamModal);
+        TeamsStore.addListener(ManageConstants.OPEN_MODIFY_TEAM_MODAL, this.openModifyTeamModal);
+        TeamsStore.addListener(ManageConstants.OPEN_CHANGE_TEAM_MODAL, this.openChangeTeamModal.bind(this));
     },
 
     render: function () {
@@ -481,9 +481,10 @@ UI = {
         APP.ModalWindow.showModalComponent(CreateTeamModal, {}, "Create new Team");
     },
 
-    openModifyTeamModal: function (team) {
+    openModifyTeamModal: function (team, hideChangeName) {
         let props = {
-            team: team
+            team: team,
+            hideChangeName: hideChangeName
         };
         APP.ModalWindow.showModalComponent(ModifyTeamModal, props, "Modify Team");
     },

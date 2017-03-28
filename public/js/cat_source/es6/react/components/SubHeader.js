@@ -12,6 +12,7 @@ class SubHeader extends React.Component {
         this.state= {
             currentStatus : 'active'
         };
+        this.selectedUser = -1
     }
 
     componentDidUpdate() {
@@ -19,7 +20,7 @@ class SubHeader extends React.Component {
         if (this.props.selectedTeam) {
             if (this.teamChanged) {
                 if (!this.dropDownUsersInitialized && this.props.selectedTeam.get('members').size > 1) {
-                    $(this.dropdownUsers).dropdown('set selected', '-1');
+                    $(this.dropdownUsers).dropdown('set selected', this.selectedUser);
                     $(this.dropdownUsers).dropdown({
                         fullTextSearch: 'exact',
                         onChange: function(value, text, $selectedItem) {

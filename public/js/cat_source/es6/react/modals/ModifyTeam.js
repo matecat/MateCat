@@ -290,26 +290,27 @@ class ModifyTeam extends React.Component {
         let newUsers = this.getNewUsersList();
         let icon = (this.state.readyToSend && !this.state.inputNameError ) ?<i className="icon-checkmark green icon"/> : <i className="icon-pencil icon"/>;
         let applyButtonClass = (this.state.inputUserError || this.state.inputNameError) ?  'disabled' : '';
-
+        let middleContainerStyle = (this.props.hideChangeName ) ? {paddingTop: "20px"} : {};
         return <div className="modify-team-modal">
-            <div className="matecat-modal-top">
-                <div className="ui one column grid left aligned">
-                    <div className="column">
-                        <h2>Change Team Name</h2>
-                        <div className={"ui fluid icon input " + orgNameError}>
-                            <input type="text" defaultValue={this.state.team.get('name')}
-                            onKeyUp={this.onKeyPressEvent.bind(this)}
-                            ref={(inputName) => this.inputName = inputName}/>
-                            {icon}
+                { !this.props.hideChangeName ?(
+                <div className="matecat-modal-top">
+                    <div className="ui one column grid left aligned">
+                        <div className="column">
+                            <h2>Change Team Name</h2>
+                            <div className={"ui fluid icon input " + orgNameError}>
+                                <input type="text" defaultValue={this.state.team.get('name')}
+                                       onKeyUp={this.onKeyPressEvent.bind(this)}
+                                       ref={(inputName) => this.inputName = inputName}/>
+                                {icon}
+                            </div>
+                            {this.state.inputNameError ? (
+                                    <div className="validation-error"><span className="text" style={{color: 'red', fontSize: '14px'}}>Team name is required</span></div>
+                                ): ''}
                         </div>
-                        {this.state.inputNameError ? (
-                                <div className="validation-error"><span className="text" style={{color: 'red', fontSize: '14px'}}>Team name is required</span></div>
-                            ): ''}
                     </div>
-                </div>
-            </div>
+                </div>) : ('')}
             { this.state.team.get('type') !== "personal" ? (
-                    <div className="matecat-modal-middle">
+                    <div className="matecat-modal-middle" style={middleContainerStyle}>
                         <div className="ui grid left aligned">
                             <div className="sixteen wide column">
                                 <h2>Add Members</h2>
