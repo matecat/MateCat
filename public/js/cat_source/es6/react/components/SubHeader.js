@@ -12,7 +12,7 @@ class SubHeader extends React.Component {
         this.state= {
             currentStatus : 'active'
         };
-        this.selectedUser = -1
+        this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
     }
 
     componentDidUpdate() {
