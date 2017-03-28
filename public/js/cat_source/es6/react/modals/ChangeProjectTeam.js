@@ -30,7 +30,7 @@ class ChangeProjectWorkspace extends React.Component {
         if (this.props.teams) {
             return this.props.teams.map(function (team, i) {
                 let selectedClass = (self.state.selectedTeam == team.get('id')) ? 'active' : '';
-                self.selectTeamName = team.get('name');
+                self.selectTeamName = (self.state.selectedTeam == team.get('id')) ? team.get('name') : self.selectTeamName;
                 return <div className={"item " + selectedClass}
                             key={'team' + team.get('id')}
                             onClick={self.selectTeam.bind(self, team.get('id'))}>

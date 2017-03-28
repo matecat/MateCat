@@ -12,6 +12,7 @@ class SubHeader extends React.Component {
         this.state= {
             currentStatus : 'active'
         };
+        this.selectedUser = -1
     }
 
     componentDidUpdate() {
@@ -19,7 +20,7 @@ class SubHeader extends React.Component {
         if (this.props.selectedTeam) {
             if (this.teamChanged) {
                 if (!this.dropDownUsersInitialized && this.props.selectedTeam.get('members').size > 1) {
-                    $(this.dropdownUsers).dropdown('set selected', '-1');
+                    $(this.dropdownUsers).dropdown('set selected', this.selectedUser);
                     $(this.dropdownUsers).dropdown({
                         fullTextSearch: 'exact',
                         onChange: function(value, text, $selectedItem) {
@@ -163,7 +164,7 @@ class SubHeader extends React.Component {
             <section className="row sub-head">
                 <div className="ui container equal width grid">
 
-                    <div className="six wide column">
+                    {/*<div className="six wide column">
                         <div className="search-state-filters">
                             <div className="status">
                                 {currentStatusLabel}
@@ -173,14 +174,14 @@ class SubHeader extends React.Component {
                             <FilterProjects
                                 filterFunction={this.filterByStatus.bind(this)}/>
                         </div>
-                    </div>
+                    </div>*/}
 
-                    {/*<div className="six wide column">
-                        <div className="ui right labeled fluid input">
-                            <input type="text" placeholder="Find domain" />
+                    <div className="column">
+                        <div className="ui right labeled fluid input search-state-filters">
+                            <input className="search-projects" type="text" placeholder="Search by project name" />
                             <div className="ui dropdown label">
+                                <i className="icon-filter icon" />
                                 <div className="text">Active</div>
-                                <i className="dropdown icon" />
                                 <div className="menu">
                                     <div className="item">Active</div>
                                     <div className="item">.net</div>
@@ -188,7 +189,7 @@ class SubHeader extends React.Component {
                                 </div>
                             </div>
                         </div>
-                    </div>*/}
+                    </div>
 
                     <div className="center aligned column pad-right-0">
                         {membersFilter}

@@ -64,25 +64,29 @@ class ModifyTeam extends React.Component {
         e.stopPropagation();
         if (e.key === 'Enter' ) {
             e.preventDefault();
-            if ( APP.checkEmail(this.inputNewUSer.value)) {
-                // this.state.usersToAdd.push(this.inputNewUSer.value);
-                let arrayNewUsers = this.state.usersToAdd.slice();
-                arrayNewUsers.push(this.inputNewUSer.value);
-                this.setState({
-                    usersToAdd: arrayNewUsers
-                });
-                this.inputNewUSer.value = '';
-            } else {
-                this.setState({
-                    inputUserError: true
-                });
-            }
+            this.addTemporaryUser();
         } else {
             this.setState({
                 inputUserError: false
             });
         }
         return false;
+    }
+
+    addTemporaryUser() {
+        if ( APP.checkEmail(this.inputNewUSer.value)) {
+            // this.state.usersToAdd.push(this.inputNewUSer.value);
+            let arrayNewUsers = this.state.usersToAdd.slice();
+            arrayNewUsers.push(this.inputNewUSer.value);
+            this.setState({
+                usersToAdd: arrayNewUsers
+            });
+            this.inputNewUSer.value = '';
+        } else {
+            this.setState({
+                inputUserError: true
+            });
+        }
     }
 
     addUser() {
@@ -120,14 +124,14 @@ class ModifyTeam extends React.Component {
     }
 
     changeTeamName() {
-        if (this.inputName.value.length > 0 && this.inputName.value != this.state.team.get('name')) {
+        if (this.inputName && this.inputName.value.length > 0 && this.inputName.value != this.state.team.get('name')) {
             ManageActions.changeTeamName(this.state.team.toJS(), this.inputName.value);
             $(this.inputName).blur();
             this.setState({
                 readyToSend: true
             });
             return true;
-        } else if (this.inputName.value.length == 0){
+        } else if (this.inputName && this.inputName.value.length == 0){
             this.setState({
                 inputNameError: true
             });
@@ -137,9 +141,26 @@ class ModifyTeam extends React.Component {
     }
 
     applyChanges() {
+        self = this;
         var teamNameOk = this.changeTeamName();
-        var emailOk = (this.inputName.value.length > 0) ? this.addUser() : true;
-        if ( teamNameOk && emailOk )  {
+        if (this.inputNewUSer.value.length > 0) {
+            if ( APP.checkEmail(this.inputNewUSer.value)) {
+                this.addTemporaryUser();
+                setTimeout(function () {
+                    self.applyChanges();
+                });
+                return false;
+            } else {
+                this.setState({
+                    inputUserError: true
+                });
+                return true;
+            }
+        }
+        if (this.state.usersToAdd.length > 0) {
+            this.addUser();
+        }
+        if ( teamNameOk )  {
             APP.ModalWindow.onCloseModal();
         }
     }
@@ -290,26 +311,27 @@ class ModifyTeam extends React.Component {
         let newUsers = this.getNewUsersList();
         let icon = (this.state.readyToSend && !this.state.inputNameError ) ?<i className="icon-checkmark green icon"/> : <i className="icon-pencil icon"/>;
         let applyButtonClass = (this.state.inputUserError || this.state.inputNameError) ?  'disabled' : '';
-
+        let middleContainerStyle = (this.props.hideChangeName ) ? {paddingTop: "20px"} : {};
         return <div className="modify-team-modal">
-            <div className="matecat-modal-top">
-                <div className="ui one column grid left aligned">
-                    <div className="column">
-                        <h2>Change Team Name</h2>
-                        <div className={"ui fluid icon input " + orgNameError}>
-                            <input type="text" defaultValue={this.state.team.get('name')}
-                            onKeyUp={this.onKeyPressEvent.bind(this)}
-                            ref={(inputName) => this.inputName = inputName}/>
-                            {icon}
+                { !this.props.hideChangeName ?(
+                <div className="matecat-modal-top">
+                    <div className="ui one column grid left aligned">
+                        <div className="column">
+                            <h2>Change Team Name</h2>
+                            <div className={"ui fluid icon input " + orgNameError}>
+                                <input type="text" defaultValue={this.state.team.get('name')}
+                                       onKeyUp={this.onKeyPressEvent.bind(this)}
+                                       ref={(inputName) => this.inputName = inputName}/>
+                                {icon}
+                            </div>
+                            {this.state.inputNameError ? (
+                                    <div className="validation-error"><span className="text" style={{color: 'red', fontSize: '14px'}}>Team name is required</span></div>
+                                ): ''}
                         </div>
-                        {this.state.inputNameError ? (
-                                <div className="validation-error"><span className="text" style={{color: 'red', fontSize: '14px'}}>Team name is required</span></div>
-                            ): ''}
                     </div>
-                </div>
-            </div>
+                </div>) : ('')}
             { this.state.team.get('type') !== "personal" ? (
-                    <div className="matecat-modal-middle">
+                    <div className="matecat-modal-middle" style={middleContainerStyle}>
                         <div className="ui grid left aligned">
                             <div className="sixteen wide column">
                                 <h2>Add Members</h2>
