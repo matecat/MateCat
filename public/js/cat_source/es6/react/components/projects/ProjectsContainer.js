@@ -81,34 +81,13 @@ class ProjectsContainer extends React.Component {
     getButtonsNoProjects() {
         if (!this.state.team) return;
 
-        // let thereAreMembers = (this.state.team.get("members") && this.state.team.get("members").size > 1 ||
-        //     this.state.team.get("pending_invitations") && this.state.team.get("pending_invitations").size > 0) || this.state.team.get('type') === 'personal';
-        // let containerClass = (!thereAreMembers) ? 'two' : 'one';
+        let thereAreMembers = (this.state.team.get("members") && this.state.team.get("members").size > 1 ||
+            this.state.team.get("pending_invitations") && this.state.team.get("pending_invitations").size > 0) || this.state.team.get('type') === 'personal';
+        let containerClass = (!thereAreMembers) ? 'two' : 'one';
         return <div className="notify-notfound">
-            <div className="message-nofound">No Project Found</div>
+            <div className="message-nofound">Welcome to  {this.state.team.get('name')} Team</div>
             <div className="no-results-found">
-            {/*<div className={"ui " + containerClass +"  doubling cards"}>
-                <div className="ui card button"
-                onClick={this.createNewProject.bind(this)}>
-                    <div className="content">
-                        <div className="header">
-                            <div className="add-more">+</div>
-                        </div>
-                        <div className="description">Add a New Project in the Team {this.state.team.get('name')}</div>
-                    </div>
-                </div>
-                {!thereAreMembers ? (
-                        <div className="ui card button"
-                             onClick={this.openAddMember.bind(this)}>
-                            <div className="content">
-                                <div className="header">
-                                    <div className="add-more">+</div>
-                                </div>
-                                <div className="description">Add a member in the Team {this.state.team.get('name')}</div>
-                            </div>
-                        </div>
-                    ) : ('')}
-            </div>*/}
+
             </div>
             <div className="message-create">Create a new Project
                 <p>
@@ -116,6 +95,13 @@ class ProjectsContainer extends React.Component {
                         Create Project
                     </a>
                 </p>
+                {!thereAreMembers ? (
+                        <p>
+                            <a className="ui primary button" onClick={this.openAddMember.bind(this)}>
+                                Add member
+                            </a>
+                        </p>
+                    ) : ('')}
             </div>
         </div>;
     }

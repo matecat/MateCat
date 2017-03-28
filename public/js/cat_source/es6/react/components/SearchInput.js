@@ -39,16 +39,22 @@ class SearchInput extends React.Component {
 
 
     render () {
-        return (<div className="input-field">
+        return (
+            <input className="search-projects" type="text" placeholder="Search by project name"
+                   ref={(input) => this.textInput = input}
+                   onChange={this.filterByNameDebounce.bind(this)}
+                   onKeyPress={this.onKeyPressEvent.bind(this)}/>
+
+            /*<div className="input-field">
                     <div className="ui fluid icon input">
                         <input id="search" type="search" required="required"
                                placeholder="Search by project name"
                                ref={(input) => this.textInput = input}
                                onChange={this.filterByNameDebounce.bind(this)}
                                onKeyPress={this.onKeyPressEvent.bind(this)}/>
-                        {/*<i className="search icon"/>*/}
+                        {/!*<i className="search icon"/>*!/}
                     </div>
-                </div>
+                </div>*/
 
 
         );
