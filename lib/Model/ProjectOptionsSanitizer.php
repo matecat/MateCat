@@ -19,6 +19,8 @@ class ProjectOptionsSanitizer {
         'pt-PT',
         'pt-BR',
         'es-ES',
+        'es-MX',
+        'es-CO',
         'da-DK',
         'nb-NO',
         'nn-NO',
