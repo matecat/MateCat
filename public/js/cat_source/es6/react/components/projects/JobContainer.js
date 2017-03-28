@@ -549,7 +549,7 @@ class JobContainer extends React.Component {
         return <div className="chunk sixteen wide column shadow-1">
                     <div className="ui stackable grid">
 
-                        <div className="eight wide column">
+                        <div className="ten wide column">
                             <div className="source-target languages-tooltip" data-html={this.props.job.get('sourceTxt') + ' > ' + this.props.job.get('targetTxt')}>
                                 <div className="source-box">
                                     {this.props.job.get('sourceTxt')}
@@ -582,7 +582,7 @@ class JobContainer extends React.Component {
                         </div>
 
 
-                        <div className="eight wide column right aligned pad-right-10">
+                        <div className="six wide column right aligned pad-right-10">
 
                             <div className="translated-outsourced">
                                 {outsourceJobLabel}

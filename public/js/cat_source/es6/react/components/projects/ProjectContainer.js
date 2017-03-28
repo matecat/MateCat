@@ -521,7 +521,7 @@ class ProjectContainer extends React.Component {
 
                             <div className="eight wide right floated column pad-top-8">
                                 <div className="ui mobile reversed stackable grid right aligned">
-                                    <div className=" computer twelve wide tablet right floated column">
+                                    <div className="sixteen wide right floated column">
 
                                         <div className="project-activity-icon">
                                             {dropDownTeams}
