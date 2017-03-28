@@ -64,25 +64,29 @@ class ModifyTeam extends React.Component {
         e.stopPropagation();
         if (e.key === 'Enter' ) {
             e.preventDefault();
-            if ( APP.checkEmail(this.inputNewUSer.value)) {
-                // this.state.usersToAdd.push(this.inputNewUSer.value);
-                let arrayNewUsers = this.state.usersToAdd.slice();
-                arrayNewUsers.push(this.inputNewUSer.value);
-                this.setState({
-                    usersToAdd: arrayNewUsers
-                });
-                this.inputNewUSer.value = '';
-            } else {
-                this.setState({
-                    inputUserError: true
-                });
-            }
+            this.addTemporaryUser();
         } else {
             this.setState({
                 inputUserError: false
             });
         }
         return false;
+    }
+
+    addTemporaryUser() {
+        if ( APP.checkEmail(this.inputNewUSer.value)) {
+            // this.state.usersToAdd.push(this.inputNewUSer.value);
+            let arrayNewUsers = this.state.usersToAdd.slice();
+            arrayNewUsers.push(this.inputNewUSer.value);
+            this.setState({
+                usersToAdd: arrayNewUsers
+            });
+            this.inputNewUSer.value = '';
+        } else {
+            this.setState({
+                inputUserError: true
+            });
+        }
     }
 
     addUser() {
@@ -120,14 +124,14 @@ class ModifyTeam extends React.Component {
     }
 
     changeTeamName() {
-        if (this.inputName.value.length > 0 && this.inputName.value != this.state.team.get('name')) {
+        if (this.inputName && this.inputName.value.length > 0 && this.inputName.value != this.state.team.get('name')) {
             ManageActions.changeTeamName(this.state.team.toJS(), this.inputName.value);
             $(this.inputName).blur();
             this.setState({
                 readyToSend: true
             });
             return true;
-        } else if (this.inputName.value.length == 0){
+        } else if (this.inputName && this.inputName.value.length == 0){
             this.setState({
                 inputNameError: true
             });
@@ -137,9 +141,26 @@ class ModifyTeam extends React.Component {
     }
 
     applyChanges() {
+        self = this;
         var teamNameOk = this.changeTeamName();
-        var emailOk = (this.inputName.value.length > 0) ? this.addUser() : true;
-        if ( teamNameOk && emailOk )  {
+        if (this.inputNewUSer.value.length > 0) {
+            if ( APP.checkEmail(this.inputNewUSer.value)) {
+                this.addTemporaryUser();
+                setTimeout(function () {
+                    self.applyChanges();
+                });
+                return false;
+            } else {
+                this.setState({
+                    inputUserError: true
+                });
+                return true;
+            }
+        }
+        if (this.state.usersToAdd.length > 0) {
+            this.addUser();
+        }
+        if ( teamNameOk )  {
             APP.ModalWindow.onCloseModal();
         }
     }
