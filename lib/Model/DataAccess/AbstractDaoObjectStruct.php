@@ -167,4 +167,13 @@ abstract class DataAccess_AbstractDaoObjectStruct extends stdClass {
 
     }
 
+    /**
+     * Compatibility with ArrayObject
+     *
+     * @return array
+     */
+    public function getArrayCopy(){
+        return $this->toArray();
+    }
+
 } 

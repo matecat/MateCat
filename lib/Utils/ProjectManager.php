@@ -269,7 +269,13 @@ class ProjectManager {
             $this->gdriveSession = GDrive\Session::getInstanceForCLI( $this->projectStructure[ 'session' ] ) ;
         }
 
-        $this->projectStructure['team'] = $this->features->filter('filter_team_for_project_creation', $this->projectStructure['team'] ) ;
+        /**
+         * Normalize ArrayObject team in TeamStruct
+         */
+        $this->projectStructure[ 'team' ] = new TeamStruct(
+                $this->features->filter( 'filter_team_for_project_creation', $this->projectStructure[ 'team' ]->getArrayCopy()
+                )
+        );
 
         // project name sanitize
         $oldName                                  = $this->projectStructure[ 'project_name' ];
