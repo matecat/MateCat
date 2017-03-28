@@ -63,9 +63,9 @@ body.manage {
             max-width: 505px;
             width: 100%;
             line-height: 17px;
-            background-color: #e4e4e4;
+            background-color: #d8d8d8;
             color: #000000;
-            border: 1px solid #dcdcdc;
+            border: 1px solid #c1c1c1;
         }
         .project-header {
             /*background-color: #e0e1e2;
@@ -78,7 +78,7 @@ body.manage {
             position: relative;
 
             .project-name {
-                font-size: 16px;
+                font-size: 17px;
                 width: 80%;
                 float: left;
                 overflow: hidden;
@@ -174,7 +174,7 @@ body.manage {
                     }
                     &.project-team {
                         margin-right: 8px;
-                        background-color: #03ccd8;
+                        background-color: #8c97b9;
                         vertical-align: top;
                         .text {
                             border-radius: 15px;
@@ -199,7 +199,7 @@ body.manage {
                             }
                         }
                         &:hover .text {
-                            background-color: #04b9c3 !important
+                            background-color: #838dad !important
                         }
                     }
                     &.project-assignee {
@@ -478,6 +478,9 @@ body.manage {
                                 font-size: 16px;
                                 border: 1px solid #797979;
                                 border-radius: 2px;
+                                &:hover {
+                                    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+                                }
                             }
                             .job-menu {
                                 i {
