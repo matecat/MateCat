@@ -158,6 +158,16 @@ let ManageActions = {
                             project: project
                         });
                     }, 1000);
+                    let name = (user.toJS)? user.get('first_name') + ' ' + user.get('last_name') : "Not assigned";
+                    let notification = {
+                        title: 'Assignee changed',
+                        text: 'The project ' + project.get('name') + ' has been assigned to ' + name,
+                        type: 'success',
+                        position: 'tc',
+                        allowHtml: true,
+                        timer: 3000
+                    };
+                    let boxUndo = APP.addNotification(notification);
                 }
                 UI.getTeamMembers(team.get("id")).done(function (data) {
                     team = team.set('members', data.members);
@@ -222,6 +232,15 @@ let ManageActions = {
                         project: project
                     });
                 }, 500);
+                let notification = {
+                    title: 'Project Moved',
+                    text: 'The project ' + project.get('name') + ' has been moved to the ' + team.name + ' Team',
+                    type: 'success',
+                    position: 'tc',
+                    allowHtml: true,
+                    timer: 3000
+                };
+                let boxUndo = APP.addNotification(notification);
                 setTimeout(function () {
                     AppDispatcher.dispatch({
                         actionType: ManageConstants.REMOVE_PROJECT,
@@ -291,6 +310,7 @@ let ManageActions = {
         let team;
         let self = this;
         UI.createTeam(teamName, members).then(function (response) {
+            UI.teams.push(response.team);
             team = response.team;
             AppDispatcher.dispatch({
                 actionType: ManageConstants.ADD_TEAM,
