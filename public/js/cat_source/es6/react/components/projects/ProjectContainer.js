@@ -311,7 +311,7 @@ class ProjectContainer extends React.Component {
     }
 
     openAddMember() {
-        ManageActions.openAddTeamMemberModal(this.props.team.toJS());
+        ManageActions.openAddTeamMemberModal(this.projectTeam.toJS());
     }
 
     createUserDropDown(users) {

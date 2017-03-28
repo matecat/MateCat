@@ -330,7 +330,7 @@ class ModifyTeam extends React.Component {
                         </div>
                     </div>
                 </div>) : ('')}
-            { this.state.team.get('type') !== "personal" ? (
+            { (this.state.team.get('type') !== "personal" ) ? (
                     <div className="matecat-modal-middle" style={middleContainerStyle}>
                         <div className="ui grid left aligned">
                             <div className="sixteen wide column">
@@ -341,7 +341,7 @@ class ModifyTeam extends React.Component {
                                            ref={(inputNewUSer) => this.inputNewUSer = inputNewUSer}/>
                                 </div>
                                 {this.state.inputUserError ? (
-                                        <div className="validation-error"><span className="text" style={{color: 'red', fontSize: '14px'}}>Email is required</span></div>
+                                        <div className="validation-error"><span className="text" style={{color: 'red', fontSize: '14px'}}>A valid email is required</span></div>
                                     ): ''}
                             </div>
 
