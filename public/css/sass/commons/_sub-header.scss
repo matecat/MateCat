@@ -66,6 +66,10 @@
 					&:hover {
 						text-decoration: none;
 					}
+                    img {
+                        width: 24px;
+                        height: 24px;
+                    }
 				}
 			}
 		}
@@ -76,6 +80,7 @@
 			background-color: #616161 !important;
 			box-shadow: none !important;
             transition: 0.3s ease;
+            color: #ffffff;
 			&:hover {
 				background-color: #676767 !important;
 			}
