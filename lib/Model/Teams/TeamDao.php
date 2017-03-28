@@ -34,6 +34,11 @@ class TeamDao extends \DataAccess_AbstractDao {
         GROUP BY id_assignee;
     ";
 
+    protected static $_sql_delete_empty_team = "
+        DELETE FROM teams 
+        WHERE id = :id_team and type != 'personal' 
+    ";
+
     /**
      * @param $id
      *
@@ -213,6 +218,21 @@ class TeamDao extends \DataAccess_AbstractDao {
         $conn->commit();
 
         return $org;
+    }
+
+    /**
+     * @param TeamStruct $team
+     *
+     * @return int
+     */
+    public function deleteTeam( TeamStruct $team ){
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( static::$_sql_delete_empty_team ) ;
+        $stmt->execute( [
+                'id_team'       => $team->id
+        ] );
+
+        return $stmt->rowCount();
     }
 
 }

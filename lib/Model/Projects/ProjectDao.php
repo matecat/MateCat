@@ -15,6 +15,10 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
         UPDATE projects SET id_assignee = NULL WHERE id_assignee = :id_assignee and id_team = :id_team ;
     ";
 
+    protected static $_sql_massive_self_assignment = "
+        UPDATE projects SET id_assignee = :id_assignee , id_team = :personal_team WHERE id_team = :id_team ;
+    ";
+
     /**
      * @param $project
      * @param $field
@@ -57,6 +61,25 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
                 'id_assignee' => $user->uid,
                 'id_team'     => $team->id
         ] ) ;
+
+        return $stmt->rowCount();
+    }
+
+    /**
+     * @param TeamStruct       $team
+     * @param Users_UserStruct $user
+     * @param TeamStruct       $personalTeam
+     *
+     * @return int
+     */
+    public function massiveSelfAssignment( TeamStruct $team, Users_UserStruct $user, TeamStruct $personalTeam ){
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( static::$_sql_massive_self_assignment ) ;
+        $stmt->execute( [
+                'id_assignee'   => $user->uid,
+                'id_team'       => $team->id,
+                'personal_team' => $personalTeam->id
+        ] );
 
         return $stmt->rowCount();
     }
