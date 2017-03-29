@@ -1037,7 +1037,7 @@ div#matecat-modal p {
     .matecat-modal-middle {
         padding: 0 25px;
         .ui.primary.button, .ui.red.button {
-            font-family: Calibri;
+            font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
             border: 1px solid #797979;
             border-radius: 2px;
         }
@@ -1081,6 +1081,9 @@ div#matecat-modal p {
     }
     .change-team-modal {
         height: 400px;
+        .project-name {
+            font-weight: 600;
+        }
         .menu {
             height: 180px;
         }

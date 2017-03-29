@@ -175,7 +175,12 @@ body.manage {
                         margin-right: 8px;
                         background-color: #8c97b9;
                         vertical-align: top;
+                        height: 30px;
                         .text {
+                            width: 170px;
+                            white-space: nowrap;
+                            overflow: auto;
+                            text-overflow: ellipsis;
                             border-radius: 15px;
                             padding: 5px 15px;
                             color: #ffffff;
@@ -185,6 +190,13 @@ body.manage {
                             z-index: 1;
                             .divider {
                                 margin: 0;
+                            }
+                            .item {
+                                max-width: 200px;
+                                min-width: 170px;
+                                white-space: nowrap;
+                                overflow: auto;
+                                text-overflow: ellipsis;
                             }
                             .header {
                                 font-size: 14px;
@@ -503,6 +515,7 @@ body.manage {
                                 }
                                 &.ui.button {
                                     background-color: transparent;
+                                    border-radius: 2px;
                                     &:hover {
                                         background-color: #ececec;
                                     }

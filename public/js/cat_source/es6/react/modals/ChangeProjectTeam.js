@@ -55,7 +55,9 @@ class ChangeProjectWorkspace extends React.Component {
                         <div className="">
                             <span className="project-id">PROJECT ID: {this.props.project.get('id')}</span>
                         </div>
-                        <span className="project-name">PROJECT NAME: {this.props.project.get('name')}</span>
+                        <div className="">
+                            PROJECT NAME: <span className="project-name"> {this.props.project.get('name')}</span>
+                        </div>
                     </div>
                 </div>
             </div>

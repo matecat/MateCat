@@ -63,6 +63,12 @@ header {
             .scrolling {
                 .item.item.item {
                     padding-right: 40px !important;
+                    padding-right: 40px !important;
+                    max-width: 250px;
+                    min-width: 200px;
+                    white-space: nowrap;
+                    overflow: auto;
+                    text-overflow: ellipsis;
                     &:hover .team-filter,
                     &.active.selected .team-filter{
                         visibility: visible;
@@ -163,6 +169,10 @@ header {
                 text-align: right;
                 line-height: 35px;
                 text-decoration: underline;
+                width: 190px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
             &:hover span.text {
 
