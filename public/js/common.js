@@ -882,7 +882,7 @@ APP = {
                 return false;
             });
         }
-    }
+    },
 
 
 

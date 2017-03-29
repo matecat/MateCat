@@ -387,7 +387,6 @@ let ManageActions = {
                 hideSpinner: false,
                 filtering: false
             });
-
         });
     },
 
