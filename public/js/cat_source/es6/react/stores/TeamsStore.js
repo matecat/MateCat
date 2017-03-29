@@ -40,6 +40,7 @@ let TeamsStore = assign({}, EventEmitter.prototype, {
         });
         let index = this.teams.indexOf(teamOld);
         this.teams = this.teams.setIn([index, 'name'], team.name);
+        return this.teams.get(index);
     },
 
     updateTeamMembers: function (team, members, pendingInvitations) {
@@ -69,7 +70,8 @@ AppDispatcher.register(function(action) {
             TeamsStore.emitChange(action.actionType, TeamsStore.teams);
             break;
         case ManageConstants.UPDATE_TEAM_NAME:
-            TeamsStore.updateTeamName(action.team);
+            let updatedName = TeamsStore.updateTeamName(action.team);
+            TeamsStore.emitChange(ManageConstants.UPDATE_TEAM, updatedName);
             TeamsStore.emitChange(ManageConstants.UPDATE_TEAMS, TeamsStore.teams);
             break;
         case ManageConstants.UPDATE_TEAM_MEMBERS:
