@@ -294,6 +294,7 @@ UI = {
         return APP.doRequest({
             data: data,
             success: function(d){
+                APP.timeAfterProjectRequest = new Date();
                 if (typeof d.errors != 'undefined' && d.errors.length && d.errors[0].code === 401) {
                     window.location.reload();
                 }else if( typeof d.errors != 'undefined' && d.errors.length ){

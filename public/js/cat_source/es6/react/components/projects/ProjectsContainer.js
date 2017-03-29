@@ -138,7 +138,6 @@ class ProjectsContainer extends React.Component {
         TeamsStore.removeListener(ManageConstants.UPDATE_TEAM, this.updateTeam);
         TeamsStore.removeListener(ManageConstants.UPDATE_TEAMS, this.updateTeams);
         TeamsStore.removeListener(ManageConstants.RENDER_TEAMS, this.updateTeams);
-
     }
 
     componentDidUpdate() {
@@ -147,6 +146,12 @@ class ProjectsContainer extends React.Component {
             setTimeout(function () {
                 $(self.spinner).css("visibility", "hidden");
             }, 3000);
+        }
+        if (APP.timeAfterProjectRequest) {
+            var t2 = new Date();
+            var dif = (t2 - APP.timeAfterProjectRequest)/1000;
+            console.log("Render Projects in: " + dif);
+            APP.timeAfterProjectRequest = null;
         }
     }
 

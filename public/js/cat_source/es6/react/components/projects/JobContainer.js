@@ -546,7 +546,6 @@ class JobContainer extends React.Component {
     }
 
     render () {
-        APP["singleJobStart" + this.props.job.get('id')] = new Date();
         let translateUrl = this.getTranslateUrl();
         let outsourceButton = this.getOutsourceButton();
         let outsourceJobLabel = this.getOutsourceJobSent();
