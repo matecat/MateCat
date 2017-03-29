@@ -6,6 +6,7 @@ APP = {
         if (config.isLoggedIn) {
             APP.teamStorageName = 'teamId-' + config.userMail;
             this.setTeamNameInMenu();
+            this.setUserImage()
         }
         this.isCattool = $( 'body' ).hasClass( 'cattool' );
         $( "body" ).on( 'click', '.modal .x-popup', function ( e ) {
@@ -695,8 +696,6 @@ APP = {
         return (user.first_name[0] + user.last_name[0]).toUpperCase();
     },
 
-
-
     getLastTeamSelected: function (teams) {
         if (localStorage.getItem(this.teamStorageName)) {
             let lastId = localStorage.getItem(this.teamStorageName);
@@ -870,6 +869,14 @@ APP = {
             setTimeout(this.setTeamNameInMenu, 500);
         }
     },
+
+    setUserImage: function () {
+        if (APP.USER.STORE.metadata) {
+            var urlImage = APP.USER.STORE.metadata.gplus_picture;
+            var html = '<img class="ui-user-top-image-general" src="' + urlImage + '"/>';
+            $('.user-menu-container .user-menu-preferences').replaceWith(html);
+        }
+    }
 
 
 
