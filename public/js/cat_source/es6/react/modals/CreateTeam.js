@@ -138,7 +138,7 @@ class CreateTeam extends React.Component {
                                 )}
                         </div>
                         {this.state.errorDropdown ? (
-                                <div className="validation-error"><span className="text" style={{color: 'red', fontSize: '14px'}}>Email not valid</span></div>
+                                <div className="validation-error"><span className="text" style={{color: 'red', fontSize: '14px'}}>A valid email is required</span></div>
                             ): ''}
                     </div>
                     <div className="sixteen wide column">
