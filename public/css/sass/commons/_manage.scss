@@ -177,7 +177,8 @@ body.manage {
                         vertical-align: top;
                         height: 30px;
                         .text {
-                            width: 170px;
+                            max-width: 170px;
+                            min-width: 30px;
                             white-space: nowrap;
                             overflow: auto;
                             text-overflow: ellipsis;
