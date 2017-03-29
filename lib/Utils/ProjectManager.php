@@ -240,25 +240,29 @@ class ProjectManager {
      *
      */
     private function createProjectRecord() {
-
-        $this->__checkForSelfAssignment();
         $this->project = insertProject( $this->projectStructure );
         $this->projectStructure[ 'id_project' ] = $this->project->id; //redundant
         $this->projectStructure[ 'ppassword' ]  = $this->project->password; //redundant
-
-        //clean the cache for the team member list of assigned projects
-        if( $this->projectStructure[ 'team' ] !== null ){
-            $teamDao = new \Teams\TeamDao();
-            $teamDao->destroyCacheAssignee( $this->projectStructure[ 'team' ] );
-        }
-
     }
 
-    private function __checkForSelfAssignment(){
+    private function __checkForProjectAssignment(){
 
-        if ( !empty( $this->projectStructure[ 'session' ][ 'uid' ] ) ) {
+        if ( !empty( $this->projectStructure[ 'uid' ] ) ) {
+
             //if this is a logged user, set the user as project assignee
-            $this->projectStructure[ 'id_assignee' ] = $this->projectStructure[ 'session' ][ 'uid' ];
+            $this->projectStructure[ 'id_assignee' ] = $this->projectStructure[ 'uid' ];
+
+            /**
+             * Normalize ArrayObject team in TeamStruct
+             */
+            $this->projectStructure[ 'team' ] = new TeamStruct(
+                    $this->features->filter( 'filter_team_for_project_creation', $this->projectStructure[ 'team' ]->getArrayCopy() )
+            );
+
+            //clean the cache for the team member list of assigned projects
+            $teamDao = new \Teams\TeamDao();
+            $teamDao->destroyCacheAssignee( $this->projectStructure[ 'team' ] );
+
         }
 
     }
@@ -269,13 +273,7 @@ class ProjectManager {
             $this->gdriveSession = GDrive\Session::getInstanceForCLI( $this->projectStructure[ 'session' ] ) ;
         }
 
-        /**
-         * Normalize ArrayObject team in TeamStruct
-         */
-        $this->projectStructure[ 'team' ] = new TeamStruct(
-                $this->features->filter( 'filter_team_for_project_creation', $this->projectStructure[ 'team' ]->getArrayCopy()
-                )
-        );
+        $this->__checkForProjectAssignment();
 
         // project name sanitize
         $oldName                                  = $this->projectStructure[ 'project_name' ];
@@ -722,7 +720,7 @@ class ProjectManager {
         $activity->id_project = $this->projectStructure[ 'id_project' ];
         $activity->action     = ActivityLogStruct::PROJECT_CREATED;
         $activity->ip         = $this->projectStructure[ 'user_ip' ];
-        $activity->uid        = $this->projectStructure[ 'session' ][ 'uid' ];
+        $activity->uid        = $this->projectStructure[ 'uid' ];
         $activity->event_date = date( 'Y-m-d H:i:s' );
         Activity::save( $activity );
 
