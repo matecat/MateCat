@@ -30,8 +30,13 @@ class TeamsController extends KleinController {
         $params = $this->request->paramsPost()->getIterator()->getArrayCopy();
 
         $params = filter_var_array( $params, [
-                'name'    => [ 'filter' => FILTER_SANITIZE_STRING ],
-                'type'    => [ 'filter' => FILTER_SANITIZE_STRING ],
+                'name'    => [
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => FILTER_FLAG_ENCODE_LOW | FILTER_FLAG_NO_ENCODE_QUOTES | FILTER_FLAG_STRIP_BACKTICK
+                ],
+                'type'    => [
+                        'filter' => FILTER_SANITIZE_STRING
+                ],
                 'members' => [
                         'filter' => FILTER_SANITIZE_EMAIL,
                         'flags'  => FILTER_REQUIRE_ARRAY
