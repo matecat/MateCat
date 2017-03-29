@@ -260,12 +260,10 @@ UI = {
 
     },
 
-    checkHeaviness: function() {
-        if ($('section').length > config.maxNumSegments && !UI.offline) {
-            UI.reloadToSegment(UI.currentSegmentId);
-        }
+    maxNumSegmentsReached : function() {
+        return $('section').length > config.maxNumSegments  ;
+    },
 
-	},
     checkIfFinished: function(closing) {
        if (((this.progress_perc != this.done_percentage) && (this.progress_perc == '100')) || ((closing) && (this.progress_perc == '100'))) {
                this.body.addClass('justdone');
@@ -3321,7 +3319,12 @@ UI = {
             }
 
         }
-        UI.checkHeaviness();
+
+        if ( UI.maxNumSegmentsReached() && !UI.offline ) {
+            UI.reloadToSegment( UI.currentSegmentId );
+            return ;
+        }
+
         if ( UI.blockButtons ) {
             if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId === '') {
             } else {
