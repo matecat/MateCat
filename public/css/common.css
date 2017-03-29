@@ -4932,16 +4932,7 @@ img.ui-user-top-image-general {
     float: right;
     margin: 0 10px;
     margin-top: 2px;
-}
-
-img.ui-user-top-image-general {
-    width: 35px;
-    height: auto;
-    overflow: hidden;
-    border-radius: 500rem;
-    float: right;
-    margin-top: 2px;
-    margin: 0 10px;
+    cursor: pointer;
 }
 
 .cattool .user-menu-container {

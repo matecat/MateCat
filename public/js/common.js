@@ -873,8 +873,14 @@ APP = {
     setUserImage: function () {
         if (APP.USER.STORE.metadata) {
             var urlImage = APP.USER.STORE.metadata.gplus_picture;
-            var html = '<img class="ui-user-top-image-general" src="' + urlImage + '"/>';
+            var html = '<img class="ui-user-top-image-general user-menu-preferences" src="' + urlImage + '"/>';
             $('.user-menu-container .user-menu-preferences').replaceWith(html);
+            $('.user-menu-preferences').on('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $('#modal').trigger('openpreferences');
+                return false;
+            });
         }
     }
 
