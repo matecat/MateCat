@@ -80,7 +80,7 @@ UI = {
                 ManageActions.renderProjects(projects, self.selectedTeam, null,  false);
             });
         } else {
-            ManageActions.showReloadSpinner();
+            // ManageActions.showReloadSpinner();
             let total_projects = [];
             let requests = [];
             let onDone = function (response) {

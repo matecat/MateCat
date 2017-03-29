@@ -200,7 +200,7 @@ let ManageActions = {
 
     changeProjectTeam: function (teamId, project) {
         UI.changeProjectTeam(teamId, project.toJS()).done(function () {
-            var team =  UI.teams.find(function (team) {
+            var team =  TeamsStore.teams.find(function (team) {
                 return team.id == teamId
             });
             if (UI.selectedTeam.type == 'personal' && team.type !== 'personal') {
