@@ -71,6 +71,17 @@
                         height: 24px;
                     }
 				}
+                i {
+                    margin-left: 5px;
+                }
+                .scrolling.menu {
+                    .item{
+                        img {
+                            width: 24px;
+                            height: 24px;
+                        }
+                    }
+                }
 			}
 		}
 	}
@@ -97,7 +108,7 @@
             color: #ffffff;
             font-weight: 100;
             &:hover {
-                background-color: #bbbbbb;
+                background-color: #8c8c8c;
             }
             &:active {
                 background-color: #b1b1b1;
