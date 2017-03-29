@@ -35,8 +35,8 @@ header {
                     }
                     i {
                         float: right;
-                        font-size: 18px;
-                        margin-right: 0px;
+                        font-size: 24px;
+                        margin-right: -3px;
                         color: #09beec;
                     }
                 }
@@ -51,6 +51,8 @@ header {
                     bottom: 20%;
                     background-color: transparent;
                     color: #09beec;
+                    font-size: 18px;
+                    padding-left: 1px;
                     &:hover {
                         background-color: #dededc;
                         transition: 0.3s ease;
