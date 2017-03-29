@@ -1042,7 +1042,7 @@ div#matecat-modal p {
     .matecat-modal-middle {
         padding: 0 25px;
         .ui.primary.button, .ui.red.button {
-            font-family: Calibri;
+            font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
             border: 1px solid #797979;
             border-radius: 2px;
         }
@@ -1085,9 +1085,48 @@ div#matecat-modal p {
         }
     }
     .change-team-modal {
-        height: 400px;
-        .menu {
-            height: 180px;
+        height: 305px;
+        .matecat-modal-top {
+            .move-ribbon {
+                background: #e8e8e8;
+                padding: 8px 15px;
+                border-radius: 4px;
+                .project-name {
+                    font-weight: 600;
+                }
+                .project-id {
+                    float: right;
+                }
+            }
+        }
+        .dropdown {
+            .menu {
+                max-height: 85px !important;
+            }
+            ::-webkit-scrollbar {
+                width: 10px;
+            }
+
+            /* Track */
+            ::-webkit-scrollbar-track {
+                -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+                -webkit-border-radius: 10px;
+                border-radius: 10px;
+            }
+
+            /* Handle */
+            ::-webkit-scrollbar-thumb {
+                -webkit-border-radius: 10px;
+                border-radius: 10px;
+                background: #a7a5a5;
+                -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+            }
+            ::-webkit-scrollbar-thumb:window-inactive {
+                background: #a7a5a5;
+            }
+            .default.text {
+                color: #000;
+            }
         }
     }
 }

@@ -175,7 +175,13 @@ body.manage {
                         margin-right: 8px;
                         background-color: #8c97b9;
                         vertical-align: top;
+                        height: 30px;
                         .text {
+                            max-width: 170px;
+                            min-width: 30px;
+                            white-space: nowrap;
+                            overflow: auto;
+                            text-overflow: ellipsis;
                             border-radius: 15px;
                             padding: 5px 15px;
                             color: #ffffff;
@@ -185,6 +191,13 @@ body.manage {
                             z-index: 1;
                             .divider {
                                 margin: 0;
+                            }
+                            .item {
+                                max-width: 200px;
+                                min-width: 170px;
+                                white-space: nowrap;
+                                overflow: auto;
+                                text-overflow: ellipsis;
                             }
                             .header {
                                 font-size: 14px;
@@ -245,6 +258,14 @@ body.manage {
                             background-color: #ffffff !important;
                             padding-right: 5px;
                             padding-right: 30px;
+                        }
+                        &.disabled {
+                            background-color: #f4f4f4!important;
+                            box-shadow: 0px 0px 1px #666!important;
+                            opacity: 1;
+                            &.text {
+                                color: #666!important;
+                            }
                         }
                     }
 
@@ -503,6 +524,13 @@ body.manage {
                                 }
                                 &.ui.button {
                                     background-color: transparent;
+                                    border-radius: 2px;
+                                    .divider {
+                                        margin: 0;
+                                    }
+                                    .item {
+                                        padding: 10px 15px !important;
+                                    }
                                     &:hover {
                                         background-color: #ececec;
                                     }

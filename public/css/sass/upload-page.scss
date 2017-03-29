@@ -854,7 +854,7 @@ span.gdrive-icon {
 
 
 
-.error-content {padding-left: 45px; padding-right: 10px;}
+.error-content {padding-left: 45px; padding-right: 10px;  float: left;}
 .error-content a {
 color: white;
 }
@@ -863,11 +863,11 @@ color: white;
 {
 	background:#d65757 url(../../img/error-symbol.png) 10px center no-repeat;
 	color:#fff;
-	padding:10px 0 10px 3%;
+	padding:10px 0 10px;
 	margin:10px 0;
 	float:left;
 	font-weight:bold;
-	width:97%;
+	width:100%;
 	-moz-border-radius: 2px;
 	border-radius: 2px;
 	border:1px solid #c45f5f;
@@ -1490,7 +1490,7 @@ td.action .btn {
     }
 }
 header .nav-mc-bar .dropdown.select-org span.text {
-    line-height: 33px;
+    line-height: 32px;
 }
 
 .ui.user.label {

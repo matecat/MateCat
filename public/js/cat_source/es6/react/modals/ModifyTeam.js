@@ -234,7 +234,7 @@ class ModifyTeam extends React.Component {
 
     getPendingInvitations() {
         let self = this;
-        if (!this.state.team.get('pending_invitations').size > 0) return;
+        if (!this.state.team.get('pending_invitations') || !this.state.team.get('pending_invitations').size > 0) return;
         return this.state.team.get('pending_invitations').map(function(mail, i) {
             return <div className="item pending-invitation"
                          key={'user-invitation' + i}>
@@ -281,7 +281,7 @@ class ModifyTeam extends React.Component {
                 self.setState({
                     readyToSend: false
                 })
-            }, 3000);
+            }, 1000);
         }
     }
 
@@ -365,7 +365,7 @@ class ModifyTeam extends React.Component {
                         <div className="ui one column grid right aligned">
                             <div className="column">
                                 <button className={"create-team ui primary button open " + applyButtonClass}
-                                onClick={this.applyChanges.bind(this)}>Apply</button>
+                                onClick={this.applyChanges.bind(this)}>Confirm</button>
                             </div>
                         </div>
                     </div>

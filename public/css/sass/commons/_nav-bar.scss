@@ -35,8 +35,9 @@ header {
                     }
                     i {
                         float: right;
-                        font-size: 18px;
-                        margin-right: 0px;
+                        font-size: 24px;
+                        margin-top: -3px;
+                        margin-right: -3px;
                         color: #09beec;
                     }
                 }
@@ -51,6 +52,8 @@ header {
                     bottom: 20%;
                     background-color: transparent;
                     color: #09beec;
+                    font-size: 18px;
+                    padding-left: 1px;
                     &:hover {
                         background-color: #dededc;
                         transition: 0.3s ease;
@@ -63,6 +66,12 @@ header {
             .scrolling {
                 .item.item.item {
                     padding-right: 40px !important;
+                    padding-right: 40px !important;
+                    max-width: 250px;
+                    min-width: 200px;
+                    white-space: nowrap;
+                    overflow: auto;
+                    text-overflow: ellipsis;
                     &:hover .team-filter,
                     &.active.selected .team-filter{
                         visibility: visible;
@@ -163,6 +172,10 @@ header {
                 text-align: right;
                 line-height: 35px;
                 text-decoration: underline;
+                width: 190px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
             &:hover span.text {
 
