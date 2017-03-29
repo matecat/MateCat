@@ -274,11 +274,7 @@ class ProjectManager {
             $this->gdriveSession = GDrive\Session::getInstanceForCLI( $this->projectStructure[ 'session' ] ) ;
         }
 
-<<<<<<< Updated upstream
-        $this->team = $this->features->filter('filter_team_for_project_creation', $this->team ) ;
-=======
         $this->__checkForProjectAssignment();
->>>>>>> Stashed changes
 
         // project name sanitize
         $oldName                                  = $this->projectStructure[ 'project_name' ];

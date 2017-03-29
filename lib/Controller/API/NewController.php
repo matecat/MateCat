@@ -554,16 +554,11 @@ class NewController extends ajaxController {
         $projectStructure[ 'HTTP_HOST' ]            = INIT::$HTTPHOST;
 
         if ( $this->current_user ) {
-<<<<<<< Updated upstream
-            $projectStructure[ 'owner' ]       = $this->current_user->getEmail();
-            $projectStructure[ 'id_customer' ] = $this->current_user->getEmail();
-=======
             $projectStructure[ 'userIsLogged' ]  = true;
             $projectStructure[ 'uid' ]           = $this->current_user->getUid();
             $projectStructure[ 'id_customer' ]   = $this->current_user->getEmail();
             $projectStructure[ 'owner' ]         = $this->current_user->getEmail();
             $projectManager->setTeam( $this->team ) ;
->>>>>>> Stashed changes
         }
 
         $projectManager = new ProjectManager( $projectStructure );
