@@ -175,6 +175,9 @@ header {
             &.disable-dropdown-team {
                 pointer-events: none;
                 cursor: default;
+                .text {
+                    text-decoration: none;
+                }
             }
         }
 
