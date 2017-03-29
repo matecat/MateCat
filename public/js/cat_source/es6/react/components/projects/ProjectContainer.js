@@ -255,7 +255,6 @@ class ProjectContainer extends React.Component {
         let visibleJobsBoxes = 0;
         orderedJobs.map(function(job, i){
 
-            let openJobClass = '';
             let next_job_id = (orderedJobs.get(i+1)) ? orderedJobs.get(i+1).get('id') : 0;
             //To check if is a chunk (jobs with same id)
             let isChunk = false;
@@ -286,14 +285,6 @@ class ProjectContainer extends React.Component {
                                 activityLogUrl =  {self.getActivityLogUrl()}/>;
                 chunks.push(item);
                 if ( job.get('id') !== next_job_id) {
-                    let button;
-                    if ( chunks.length > 1 ) {
-                        let mergeUrl = self.getJobMergeUrl(job);
-                        button = self.getJobSplitOrMergeButton(true, mergeUrl);
-                    } else {
-                        button = '';
-                    }
-
                     let jobList = <div className="job ui grid" key = { (i - 1) + job.get('id')}>
                             <div className="job-body sixteen wide column">
                                 <div className="ui grid chunks">
@@ -411,7 +402,7 @@ class ProjectContainer extends React.Component {
     componentDidUpdate() {
         let self = this;
         this.initDropdowns();
-        console.log("Updated Project : " + this.props.project.get('id'));
+        // console.log("Updated Project : " + this.props.project.get('id'));
 
         $(this.dropdownTeams).popup();
     }
@@ -425,8 +416,6 @@ class ProjectContainer extends React.Component {
         this.initDropdowns();
 
         this.getLastAction();
-
-
 
         ProjectsStore.addListener(ManageConstants.HIDE_PROJECT, this.hideProject);
     }

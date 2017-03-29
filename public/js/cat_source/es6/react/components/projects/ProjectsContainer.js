@@ -127,7 +127,6 @@ class ProjectsContainer extends React.Component {
         TeamsStore.addListener(ManageConstants.UPDATE_TEAM, this.updateTeam);
         TeamsStore.addListener(ManageConstants.UPDATE_TEAMS, this.updateTeams);
         TeamsStore.addListener(ManageConstants.RENDER_TEAMS, this.updateTeams);
-
     }
 
     componentWillUnmount() {
@@ -139,6 +138,7 @@ class ProjectsContainer extends React.Component {
         TeamsStore.removeListener(ManageConstants.UPDATE_TEAM, this.updateTeam);
         TeamsStore.removeListener(ManageConstants.UPDATE_TEAMS, this.updateTeams);
         TeamsStore.removeListener(ManageConstants.RENDER_TEAMS, this.updateTeams);
+
     }
 
     componentDidUpdate() {
@@ -149,6 +149,10 @@ class ProjectsContainer extends React.Component {
             }, 3000);
         }
     }
+
+    componentWillUpdate() {}
+
+
     shouldComponentUpdate(nextProps, nextState) {
         return (nextState.projects !== this.state.projects ||
         nextState.more_projects !== this.state.more_projects ||
