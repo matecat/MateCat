@@ -517,6 +517,12 @@ body.manage {
                                 &.ui.button {
                                     background-color: transparent;
                                     border-radius: 2px;
+                                    .divider {
+                                        margin: 0;
+                                    }
+                                    item {
+                                        padding: 10px 15px !important;
+                                    }
                                     &:hover {
                                         background-color: #ececec;
                                     }
