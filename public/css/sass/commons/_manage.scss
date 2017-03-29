@@ -6,7 +6,7 @@ body.manage {
     //box-sizing: content-box;
     //margin-top: 55px;
     font-family: Calibri, Arial, Helvetica, sans-serif;
-    background-color: #f1f1f1;
+    background-color: #e4e6e8;
     @media only screen and (min-width: 1380px) {
         .ui.container {
             width: 1280px;
@@ -56,24 +56,15 @@ body.manage {
     .project {
         margin-bottom: 30px !important;
         .ui.ribbon.label {
-            /*position: absolute;
-            top: 8px;
-            z-index: 2;
-            left: -15px;
-            width: 100% !important;
-            max-width: 650px;
-            line-height: 17px;
-            background-color: #d6d6d6;
-            color: #000000;*/
             position: absolute;
             top: 11px;
             z-index: 2;
             left: -15px;
-            min-width: 450px;
+            max-width: 505px;
+            width: 100%;
             line-height: 17px;
-            background-color: #e4e4e4;
+            background-color: #d8d8d8;
             color: #000000;
-            border: 1px solid #dcdcdc;
         }
         .project-header {
             /*background-color: #e0e1e2;
@@ -86,12 +77,12 @@ body.manage {
             position: relative;
 
             .project-name {
-                font-size: 16px;
-                width: 80%;
+                font-size: 17px;
+                white-space: nowrap;
                 float: left;
                 overflow: hidden;
                 text-overflow: ellipsis;
-                max-width: 600px;
+                max-width: 350px;
             }
             .project-id {
                 float: right;
@@ -182,7 +173,7 @@ body.manage {
                     }
                     &.project-team {
                         margin-right: 8px;
-                        background-color: #5f748e;
+                        background-color: #8c97b9;
                         vertical-align: top;
                         .text {
                             border-radius: 15px;
@@ -207,18 +198,18 @@ body.manage {
                             }
                         }
                         &:hover .text {
-                            background-color: #4e5f75 !important
+                            background-color: #838dad !important
                         }
                     }
                     &.project-assignee {
                         margin-right: 8px;
                         /*background-color: #59467a !important;*/
-                        background-color: #4d4d4d !important;
+                        background-color: #ffffff !important;
                         vertical-align: top;
                         .text {
                             border-radius: 15px;
                             padding: 3px 15px 3px 3px;
-                            color: #ffffff;
+                            color: #000000;
                             transition: 0.3s ease;
                             img {
                                 max-height: 24px;
@@ -251,7 +242,7 @@ body.manage {
                             display: none;
                         }
                         &:hover .text {
-                            background-color: #2b2b2b !important;
+                            background-color: #ffffff !important;
                             padding-right: 5px;
                             padding-right: 30px;
                         }
@@ -283,9 +274,19 @@ body.manage {
                         .menu {
                             .header {
                                 font-size: 14px;
+                                margin: 0px;
+                                padding: 15px;
+                                cursor: pointer;
+                                a {
+                                    color: #09beec;
+                                }
                                 i {
                                     float: right;
                                     font-size: 18px;
+                                    color: #09beec;
+                                }
+                                &:hover {
+                                    background-color: #f3f3f3;
                                 }
                             }
                         }
@@ -296,7 +297,7 @@ body.manage {
                     &.project-assignee {
                         .ui.cancel.label {
                             padding: 4px;
-                            background-color: rgba(255, 255, 255, 0.10);
+                            background-color: #d6d6d6;
                             margin: 0px;
                             border-radius: 15px;
                             position: absolute;
@@ -306,10 +307,10 @@ body.manage {
                             visibility: hidden;
                             i {
                                 font-size: 15px;
-                                color: rgba(255, 255, 255, 0.39);
+                                color: #ffffff;
                             }
                             &:hover {
-                                background-color: #333333 !important;
+                                background-color: #cccccc !important;
                             }
                         }
 
@@ -444,7 +445,7 @@ body.manage {
                                 }
                             }
                             .translated-outsourced {
-                                top: 3px;
+                                top: 4px;
                                 vertical-align: text-bottom;
                                 display: inline-block;
                                 position: relative;
@@ -459,6 +460,8 @@ body.manage {
                                 display: inline-block;
                                 margin-right: 8px;
                                 vertical-align: text-bottom;
+                                float: left;
+                                margin-top: 5px;
                             }
                             .open-translate {
                                 font-family: Calibri;
@@ -484,6 +487,15 @@ body.manage {
                                 font-size: 16px;
                                 border: 1px solid #797979;
                                 border-radius: 2px;
+                                &:hover {
+                                    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+                                }
+                                &:focus {
+                                    box-shadow: none !important;
+                                }
+                                &:active {
+                                    box-shadow: none !important;
+                                }
                             }
                             .job-menu {
                                 i {
@@ -494,8 +506,11 @@ body.manage {
                                     &:hover {
                                         background-color: #ececec;
                                     }
-                                    &.active {
-                                        background-color: #ececec;
+                                    &:active {
+                                        background-color: #e2e2e2;
+                                    }
+                                    &:focus {
+                                        background-color: #e2e2e2;
                                     }
                                 }
                             }
@@ -545,6 +560,13 @@ body.manage {
         }
     }
 }
+
+.no-results-teams .no-results-found {
+    background: url(/public/img/matecat_teams.png) no-repeat!important;
+    background-position: center center!important;
+    background-size: 420px!important;
+}
+
 // closing rewrite semantic CSS
 .notify-notfound {
     .no-results-found {
@@ -587,6 +609,7 @@ body.manage {
         font-size: 34px;
         margin-top: 20px;
     }
+
     .message-create {
         text-align: center;
         display: block;

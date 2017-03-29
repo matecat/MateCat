@@ -165,7 +165,7 @@ header {
                 text-decoration: underline;
             }
             &:hover span.text {
-                color: #09beec;
+
                 text-decoration: none;
                 transition: 0.3s ease;
             }
@@ -175,6 +175,9 @@ header {
             &.disable-dropdown-team {
                 pointer-events: none;
                 cursor: default;
+                .text {
+                    text-decoration: none;
+                }
             }
         }
 
@@ -183,6 +186,9 @@ header {
 
 .user-teams {
     padding-right: 0px !important;
+    .ui-user-top-image {
+        margin-top: 2px;
+    }
 }
 
 
@@ -215,4 +221,8 @@ header {
 
 .menu-site-right {
     float: right !important;
+}
+
+.upload-page-header .dropdown span {
+    margin-right: 0!important;
 }

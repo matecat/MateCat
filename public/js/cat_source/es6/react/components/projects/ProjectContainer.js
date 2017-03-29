@@ -311,7 +311,7 @@ class ProjectContainer extends React.Component {
     }
 
     openAddMember() {
-        ManageActions.openAddTeamMemberModal(this.props.team.toJS());
+        ManageActions.openAddTeamMemberModal(this.projectTeam.toJS());
     }
 
     createUserDropDown(users) {
@@ -388,7 +388,7 @@ class ProjectContainer extends React.Component {
     getDropDownTeams() {
         let result = '';
         var self = this;
-        if (this.props.team.get("type") == 'personal' && this.props.teams) {
+        if (this.props.team.get("type") == 'personal' && this.props.teams && this.props.teams.size > 1) {
             let teams = this.props.teams.map(function(team, i) {
                 return <div className="item " data-value={team.get('id')}
                             key={'team-dropdown-item' + team.get('id')}>
@@ -521,7 +521,7 @@ class ProjectContainer extends React.Component {
 
                             <div className="eight wide right floated column pad-top-8">
                                 <div className="ui mobile reversed stackable grid right aligned">
-                                    <div className=" computer twelve wide tablet right floated column">
+                                    <div className="sixteen wide right floated column">
 
                                         <div className="project-activity-icon">
                                             {dropDownTeams}

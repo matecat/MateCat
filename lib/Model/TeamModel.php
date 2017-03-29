@@ -90,16 +90,30 @@ class TeamModel {
         }
 
         if ( !empty( $this->uids_to_remove ) ) {
+
+            //check if this is the last user of the team
+            $memberList = $membershipDao->getMemberListByTeamId( $this->struct->id );
+
             $projectDao = new Projects_ProjectDao();
 
             foreach ( $this->uids_to_remove as $uid ) {
                 $user = $membershipDao->deleteUserFromTeam( $uid, $this->struct->id );
 
-                if ( $user ) {
+                //check if this is the last user of the team
+                // if it is, move all projects of the team to the personal team and assign them to himself
+                // moreover, delete the old team
+                if( count( $memberList ) == 1 ){
+                    $teamDao = new TeamDao();
+                    $personalTeam = $teamDao->setCacheTTL( 60 * 60 * 24 )->getPersonalByUser( $user );
+                    $projectDao->massiveSelfAssignment( $this->struct, $user, $personalTeam );
+                    $teamDao->deleteTeam( $this->struct );
+                } elseif ( $user ) {
                     $this->removed_users[] = $user;
                     $projectDao->unassignProjects( $this->struct, $user );
                 }
+
             }
+
         }
 
         ( new MembershipDao )->destroyCacheForListByTeamId( $this->struct->id );

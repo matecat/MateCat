@@ -110,7 +110,7 @@ class CreateTeam extends React.Component {
             <div className="matecat-modal-top">
                 <div className="ui one column grid left aligned">
                     <div className="column">
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                        <p>Create a new team and invite your colleagues and collaborators to manage better all your MateCat projects.</p>
                         <h2>Assign a name to your team</h2>
                         <div className={"ui large fluid icon input " + inputError}>
                             <input type="text" placeholder="Team Name"
@@ -138,7 +138,7 @@ class CreateTeam extends React.Component {
                                 )}
                         </div>
                         {this.state.errorDropdown ? (
-                                <div className="validation-error"><span className="text" style={{color: 'red', fontSize: '14px'}}>Email is required</span></div>
+                                <div className="validation-error"><span className="text" style={{color: 'red', fontSize: '14px'}}>A valid email is required</span></div>
                             ): ''}
                     </div>
                     <div className="sixteen wide column">

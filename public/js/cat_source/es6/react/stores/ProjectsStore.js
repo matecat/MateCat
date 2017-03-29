@@ -18,18 +18,11 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
 
     projects : null,
 
-    outsourceRequests: [],
     /**
      * Update all
      */
     updateAll: function (projects) {
-        var self = this;
         this.projects = Immutable.fromJS(projects);
-        if ( this.outsourceRequests.length > 0 ) {
-            this.outsourceRequests.forEach(function (item, index) {
-                self.updateJobOusource(item.project, item.job, item.outsource);
-            });
-        } 
     },
     /**
      * Add Projects (pagination)
@@ -111,14 +104,6 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
         }
     },
 
-    saveOutsource: function (project, job, outsource) {
-        this.outsourceRequests.push({
-            project: project,
-            job: job,
-            outsource: outsource
-        });
-    },
-
     unwrapImmutableObject(object) {
         if (object && typeof object.toJS === "function") {
             return object.toJS();
@@ -140,7 +125,7 @@ AppDispatcher.register(function(action) {
     switch(action.actionType) {
         case ManageConstants.RENDER_PROJECTS:
             ProjectsStore.updateAll(action.projects);
-            ProjectsStore.emitChange(action.actionType, ProjectsStore.projects, Immutable.fromJS(action.team), action.hideSpinner);
+            ProjectsStore.emitChange(action.actionType, ProjectsStore.projects, Immutable.fromJS(action.team), action.hideSpinner, action.filtering);
             break;
         case ManageConstants.RENDER_ALL_TEAM_PROJECTS:
             ProjectsStore.updateAll(action.projects);
@@ -192,11 +177,6 @@ AppDispatcher.register(function(action) {
             break;
         case ManageConstants.HIDE_PROJECT:
             ProjectsStore.emitChange(action.actionType, Immutable.fromJS(action.project));
-            break;
-        case ManageConstants.UPDATE_JOB_OUTSOURCE:
-            ProjectsStore.updateJobOusource(action.project, action.job, action.outsource);
-            ProjectsStore.saveOutsource(action.project, action.job, action.outsource);
-            ProjectsStore.emitChange(ManageConstants.UPDATE_PROJECTS, ProjectsStore.projects);
             break;
         case ManageConstants.ENABLE_DOWNLOAD_BUTTON:
         case ManageConstants.DISABLE_DOWNLOAD_BUTTON:

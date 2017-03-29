@@ -12,7 +12,8 @@ class ProjectsContainer extends React.Component {
             more_projects: true,
             reloading_projects: false,
             team: null,
-            teams: null
+            teams: null,
+            filtering: false
         };
         this.renderProjects = this.renderProjects.bind(this);
         this.updateProjects = this.updateProjects.bind(this);
@@ -23,7 +24,7 @@ class ProjectsContainer extends React.Component {
     }
 
 
-    renderProjects(projects, team, hideSpinner) {
+    renderProjects(projects, team, hideSpinner, filtering) {
         let more_projects = true;
         if (hideSpinner) {
             more_projects = this.state.more_projects
@@ -34,6 +35,7 @@ class ProjectsContainer extends React.Component {
             more_projects: more_projects,
             reloading_projects: false,
             team: teamState,
+            filtering: filtering
         });
     }
 
@@ -85,24 +87,34 @@ class ProjectsContainer extends React.Component {
             this.state.team.get("pending_invitations") && this.state.team.get("pending_invitations").size > 0) || this.state.team.get('type') === 'personal';
         let containerClass = (!thereAreMembers) ? 'two' : 'one';
         return <div className="notify-notfound">
-            <div className="message-nofound">Welcome to  {this.state.team.get('name')} Team</div>
-            <div className="no-results-found">
+            {this.state.filtering ? (
+                <div>
+                    <div className="message-nofound">No Projects Found</div>
+                    <div className="no-results-found"></div>
+                </div>
+                ) :(
+                <div className="no-results-teams">
+                    <div className="message-nofound">Welcome to  {this.state.team.get('name')} Team</div>
+                    <div className="no-results-found">
 
-            </div>
-            <div className="message-create">Create a new Project
-                <p>
-                    <a className="ui primary button" onClick={this.createNewProject.bind(this)}>
+                    </div>
+                    <div className="message-create">Lorem ipsum dolor sit amet
+                    <p>
+                        <a className="ui primary button" onClick={this.createNewProject.bind(this)}>
                         Create Project
-                    </a>
-                </p>
-                {!thereAreMembers ? (
-                        <p>
-                            <a className="ui primary button" onClick={this.openAddMember.bind(this)}>
-                                Add member
-                            </a>
-                        </p>
-                    ) : ('')}
-            </div>
+                        </a>
+                    </p>
+                    {!thereAreMembers ? (
+                            <p>
+                                <a className="ui primary button" onClick={this.openAddMember.bind(this)}>
+                                    Add member
+                                </a>
+                            </p>
+                        ) : ('')}
+                    </div>
+                </div>
+                )}
+
         </div>;
     }
 

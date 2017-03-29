@@ -18,6 +18,7 @@ let ManageActions = {
             projects: projects,
             team: team,
             hideSpinner: hideSpinner,
+            filtering: false
         });
         if (teams) {
             AppDispatcher.dispatch({
@@ -126,6 +127,7 @@ let ManageActions = {
                 actionType: ManageConstants.RENDER_PROJECTS,
                 projects: response.data,
                 hideSpinner: false,
+                filtering: true
             });
         });
     },
@@ -198,7 +200,7 @@ let ManageActions = {
 
     changeProjectTeam: function (teamId, project) {
         UI.changeProjectTeam(teamId, project.toJS()).done(function () {
-            var team =  UI.teams.find(function (team) {
+            var team =  TeamsStore.teams.find(function (team) {
                 return team.id == teamId
             });
             if (UI.selectedTeam.type == 'personal' && team.type !== 'personal') {
@@ -331,6 +333,7 @@ let ManageActions = {
                     projects: response.data,
                     team: team,
                     hideSpinner: false,
+                    filtering: false
                 });
 
             });
@@ -382,6 +385,7 @@ let ManageActions = {
                 projects: response.data,
                 team: team,
                 hideSpinner: false,
+                filtering: false
             });
 
         });
@@ -461,20 +465,6 @@ let ManageActions = {
         AppDispatcher.dispatch({
             actionType: ManageConstants.DISABLE_DOWNLOAD_BUTTON,
             idProject: id
-        });
-    },
-
-    getOutsourceQuote: function (project, job) {
-        UI.getOutsourceQuoteFromManage(project.get('id'), project.get('password'),
-            job.get('id'), job.get('password'), 0, 'professional').done(function (response) {
-            if (response.data) {
-                AppDispatcher.dispatch({
-                    actionType: ManageConstants.UPDATE_JOB_OUTSOURCE,
-                    project: project,
-                    job: job,
-                    outsource: response.data[0][0]
-                });
-            }
         });
     }
 

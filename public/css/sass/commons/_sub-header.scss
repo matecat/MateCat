@@ -65,28 +65,57 @@
 					transition: 0.3s ease;
 					&:hover {
 						text-decoration: none;
-						color: #09beec;
 					}
+                    img {
+                        width: 24px;
+                        height: 24px;
+                    }
 				}
+                i {
+                    margin-left: 5px;
+                }
+                .scrolling.menu {
+                    .item{
+                        img {
+                            width: 24px;
+                            height: 24px;
+                        }
+                    }
+                }
 			}
 		}
 	}
 	.search-state-filters {
 		input.search-projects {
 			font-size: 14px !important;
-			background-color: #6f6f6f !important;
+			background-color: #616161 !important;
 			box-shadow: none !important;
-			transition: 0.3s ease;
+            transition: 0.3s ease;
+            color: #ffffff;
 			&:hover {
 				background-color: #676767 !important;
 			}
 			&:focus {
 				background-color: #676767 !important;
-				color: #09beec;
+				color: #ffffff;
+                border-right: #676767 !important;
 			}
 		}
 		.ui.dropdown {
-
+            background-color: #848484;
+            border-left: 1px solid #4d4d4d;
+            transition: 0.3s ease;
+            color: #ffffff;
+            font-weight: 100;
+            &:hover {
+                background-color: #8c8c8c;
+            }
+            &:active {
+                background-color: #b1b1b1;
+            }
+            &:focus {
+                background-color: #b1b1b1
+            }
 		}
 
 	}
