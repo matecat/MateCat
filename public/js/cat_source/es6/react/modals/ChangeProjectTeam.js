@@ -51,12 +51,10 @@ class ChangeProjectWorkspace extends React.Component {
             <div className="matecat-modal-top">
                 <div className="ui one column grid left aligned">
                     <div className="column">
-                        <h3>Move this project:</h3>
-                        <div className="">
-                            <span className="project-id">PROJECT ID: {this.props.project.get('id')}</span>
-                        </div>
-                        <div className="">
-                            PROJECT NAME: <span className="project-name"> {this.props.project.get('name')}</span>
+                        <h2>Move this project:</h2>
+                        <div className="move-ribbon">
+                            <span className="project-name"> {this.props.project.get('name')}</span>
+                            <span className="project-id">(ID: {this.props.project.get('id')})</span>
                         </div>
                     </div>
                 </div>
@@ -64,17 +62,12 @@ class ChangeProjectWorkspace extends React.Component {
             <div className="matecat-modal-middle">
                 <div className="ui one column grid left aligned">
                     <div className="column">
-                        <h3>Choose new Team</h3>
-                        {/*<div className="column">
-                            <div className="ui middle aligned selection divided list">
-                                {teamsList}
-                            </div>
-                        </div>*/}
+                        <h2>Choose new Team</h2>
                         <div className="ui selection fluid bottom dropdown"
-                             ref={(dropdown) => this.dropdown = dropdown}>
+                             ref={(dropdown) => this.dropdown = dropdown} >
                             <input type="hidden" name="gender" />
                             <i className="dropdown icon" />
-                            <div className="default text">{this.selectTeamName}</div>
+                            <div className="default text">{this.selectTeamName }</div>
                             <div className="menu">
                                 {teamsList}
                             </div>

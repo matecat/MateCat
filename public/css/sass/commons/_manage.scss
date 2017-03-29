@@ -259,6 +259,14 @@ body.manage {
                             padding-right: 5px;
                             padding-right: 30px;
                         }
+                        &.disabled {
+                            background-color: #f4f4f4!important;
+                            box-shadow: 0px 0px 1px #666!important;
+                            opacity: 1;
+                            &.text {
+                                color: #666!important;
+                            }
+                        }
                     }
 
                     &.project-not-assigned {
