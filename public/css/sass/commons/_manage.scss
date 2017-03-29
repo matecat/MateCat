@@ -274,9 +274,19 @@ body.manage {
                         .menu {
                             .header {
                                 font-size: 14px;
+                                margin: 0px;
+                                padding: 15px;
+                                cursor: pointer;
+                                a {
+                                    color: #09beec;
+                                }
                                 i {
                                     float: right;
                                     font-size: 18px;
+                                    color: #09beec;
+                                }
+                                &:hover {
+                                    background-color: #f3f3f3;
                                 }
                             }
                         }
@@ -481,10 +491,10 @@ body.manage {
                                     box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
                                 }
                                 &:focus {
-                                    box-shadow: none;
+                                    box-shadow: none !important;
                                 }
                                 &:active {
-                                    box-shadow: none;
+                                    box-shadow: none !important;
                                 }
                             }
                             .job-menu {
@@ -550,6 +560,13 @@ body.manage {
         }
     }
 }
+
+.no-results-teams .no-results-found {
+    background: url(/public/img/matecat_teams.png) no-repeat!important;
+    background-position: center center!important;
+    background-size: 420px!important;
+}
+
 // closing rewrite semantic CSS
 .notify-notfound {
     .no-results-found {
@@ -592,6 +609,7 @@ body.manage {
         font-size: 34px;
         margin-top: 20px;
     }
+
     .message-create {
         text-align: center;
         display: block;
