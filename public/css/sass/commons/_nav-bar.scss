@@ -185,6 +185,9 @@ header {
             &.disable-dropdown-team {
                 pointer-events: none;
                 cursor: default;
+                .text {
+                    text-decoration: none;
+                }
             }
         }
 
@@ -228,4 +231,8 @@ header {
 
 .menu-site-right {
     float: right !important;
+}
+
+.upload-page-header .dropdown span {
+    margin-right: 0!important;
 }

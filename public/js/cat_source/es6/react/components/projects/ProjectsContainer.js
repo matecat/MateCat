@@ -93,12 +93,12 @@ class ProjectsContainer extends React.Component {
                     <div className="no-results-found"></div>
                 </div>
                 ) :(
-                <div>
+                <div className="no-results-teams">
                     <div className="message-nofound">Welcome to  {this.state.team.get('name')} Team</div>
                     <div className="no-results-found">
 
                     </div>
-                    <div className="message-create">Create a new Project
+                    <div className="message-create">Lorem ipsum dolor sit amet
                     <p>
                         <a className="ui primary button" onClick={this.createNewProject.bind(this)}>
                         Create Project

@@ -388,7 +388,7 @@ class ProjectContainer extends React.Component {
     getDropDownTeams() {
         let result = '';
         var self = this;
-        if (this.props.team.get("type") == 'personal' && this.props.teams) {
+        if (this.props.team.get("type") == 'personal' && this.props.teams && this.props.teams.size > 1) {
             let teams = this.props.teams.map(function(team, i) {
                 return <div className="item " data-value={team.get('id')}
                             key={'team-dropdown-item' + team.get('id')}>

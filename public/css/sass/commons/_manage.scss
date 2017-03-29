@@ -573,6 +573,13 @@ body.manage {
         }
     }
 }
+
+.no-results-teams .no-results-found {
+    background: url(/public/img/matecat_teams.png) no-repeat!important;
+    background-position: center center!important;
+    background-size: 420px!important;
+}
+
 // closing rewrite semantic CSS
 .notify-notfound {
     .no-results-found {
@@ -615,6 +622,7 @@ body.manage {
         font-size: 34px;
         margin-top: 20px;
     }
+
     .message-create {
         text-align: center;
         display: block;
