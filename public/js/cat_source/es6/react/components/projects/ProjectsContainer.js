@@ -127,7 +127,6 @@ class ProjectsContainer extends React.Component {
         TeamsStore.addListener(ManageConstants.UPDATE_TEAM, this.updateTeam);
         TeamsStore.addListener(ManageConstants.UPDATE_TEAMS, this.updateTeams);
         TeamsStore.addListener(ManageConstants.RENDER_TEAMS, this.updateTeams);
-
     }
 
     componentWillUnmount() {
@@ -148,7 +147,17 @@ class ProjectsContainer extends React.Component {
                 $(self.spinner).css("visibility", "hidden");
             }, 3000);
         }
+        if (APP.timeAfterProjectRequest) {
+            var t2 = new Date();
+            var dif = (t2 - APP.timeAfterProjectRequest)/1000;
+            console.log("Render Projects in: " + dif);
+            APP.timeAfterProjectRequest = null;
+        }
     }
+
+    componentWillUpdate() {}
+
+
     shouldComponentUpdate(nextProps, nextState) {
         return (nextState.projects !== this.state.projects ||
         nextState.more_projects !== this.state.more_projects ||

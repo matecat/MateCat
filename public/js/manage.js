@@ -39,14 +39,13 @@ UI = {
             if (prevType != e.type) {   //  reduce double fire issues
                 switch (e.type) {
                     case "blur":
-                        console.log("leave page");
+                        // console.log("leave page");
                         self.pageLeft = true;
                         break;
                     case "focus":
-                        console.log("Enter page");
+                        // console.log("Enter page");
                         if (self.pageLeft) {
-                            // alert("Refresf");
-                            console.log("Refresh projects");
+                            // console.log("Refresh projects");
                             self.reloadProjects();
                         }
                         break;
@@ -102,6 +101,7 @@ UI = {
     },
 
     renderProjects: function (projects) {
+        APP.beforeRenderProjects = new Date();
         if ( !this.ProjectsContainer ) {
             let mountPoint = $("#manage-container")[0];
             this.ProjectsContainer = ReactDOM.render(React.createElement(ProjectsContainer, {
@@ -110,6 +110,7 @@ UI = {
                 downloadTranslationFn : this.downloadTranslation
             }), mountPoint);
         }
+
         ManageActions.renderProjects(projects, this.selectedTeam, this.teams);
     },
 
@@ -293,6 +294,7 @@ UI = {
         return APP.doRequest({
             data: data,
             success: function(d){
+                APP.timeAfterProjectRequest = new Date();
                 if (typeof d.errors != 'undefined' && d.errors.length && d.errors[0].code === 401) {
                     window.location.reload();
                 }else if( typeof d.errors != 'undefined' && d.errors.length ){
