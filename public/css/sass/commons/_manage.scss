@@ -461,6 +461,8 @@ body.manage {
                                 padding: 6px 10px !important;
                                 float: left;
                                 text-decoration: underline;
+                                min-width: 105px;
+                                text-align: right;
                                 &:hover {
                                     text-decoration: none;
                                 }
