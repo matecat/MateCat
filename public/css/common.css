@@ -4914,8 +4914,12 @@ span.share-popup-item-email {
     float: right;
 }
 
+.user-info-form img {
+    border-radius: 500rem;
+}
+
 .user-menu-container .organization-name {
-    color: gray;
+    color: #fff;
     font-size: 15px;
     font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
     font-weight: 600;

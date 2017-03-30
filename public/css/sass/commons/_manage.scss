@@ -180,7 +180,7 @@ body.manage {
                             max-width: 170px;
                             min-width: 30px;
                             white-space: nowrap;
-                            overflow: auto;
+                            overflow: hidden;
                             text-overflow: ellipsis;
                             border-radius: 15px;
                             padding: 5px 15px;
@@ -196,7 +196,7 @@ body.manage {
                                 max-width: 200px;
                                 min-width: 170px;
                                 white-space: nowrap;
-                                overflow: auto;
+                                overflow: hidden;
                                 text-overflow: ellipsis;
                             }
                             .header {
@@ -738,3 +738,13 @@ footer nav ul a:hover {
     display: none;
 }
 
+/* fix di daniele */
+
+.matecat-modal-content .matecat-modal-middle .ui.members-list .ui.divided.list {
+    position: relative!important;
+    padding: 0 10px 0 0;
+}
+
+.matecat-modal-content .modify-team-modal .ui.members-list {
+    min-height: initial!important;
+}
