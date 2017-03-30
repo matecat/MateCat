@@ -261,7 +261,7 @@ class ModifyTeam extends React.Component {
                         key={'user-new' + i}>
                 <div className="mini ui button right floated"
                      onClick={self.cancelInvite.bind(self, mail)}>Delete Invitation</div>
-                <div className="ui right floated content pending-msg">New Member</div>
+                <div className="ui right floated content pending-msg">Confirm to send invite</div>
                 <div className="ui tiny image label">{mail.substring(0, 1).toUpperCase()}</div>
                 <div className="middle aligned content">
                     <div className="content user">
@@ -334,7 +334,7 @@ class ModifyTeam extends React.Component {
                     <div className="matecat-modal-middle" style={middleContainerStyle}>
                         <div className="ui grid left aligned">
                             <div className="sixteen wide column">
-                                <h2>Add Members</h2>
+                                <h2>Invite Members</h2>
                                 <div className={"ui fluid icon input " + usersError }>
                                     <input type="text" placeholder="insert email and press enter"
                                            onKeyUp={this.handleKeyPressUserInput.bind(this)}

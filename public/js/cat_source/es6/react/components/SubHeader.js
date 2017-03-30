@@ -173,6 +173,10 @@ class SubHeader extends React.Component {
                         </div>
                     </div>
 
+                    {/*<div className="cta-create-team" onClick={this.openCreateTeams.bind(this)}>
+                        <a class="cta-create-team-text">Create New Team <i className="icon-settings icon"></i></a>
+                    </div>*/}
+
                     <div className="center aligned column pad-right-0">
                         {membersFilter}
                     </div>
