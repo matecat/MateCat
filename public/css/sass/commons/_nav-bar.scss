@@ -70,7 +70,7 @@ header {
                     max-width: 250px;
                     min-width: 200px;
                     white-space: nowrap;
-                    overflow: auto;
+                    overflow: hidden;
                     text-overflow: ellipsis;
                     &:hover .team-filter,
                     &.active.selected .team-filter{
