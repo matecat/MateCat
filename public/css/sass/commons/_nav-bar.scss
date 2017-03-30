@@ -59,6 +59,11 @@ header {
                         transition: 0.3s ease;
                     }
                 }
+                .item:first-child {
+                    a > i {
+                        display: none;
+                    }
+                }
                 .divider {
                     margin: 0;
                 }
@@ -194,10 +199,10 @@ header {
                 }
             }
         }
-        .cta-create-team {
+        /*.cta-create-team {
             margin-top: 10px;
             float: left;
-        }
+        }*/
 
     }
 }
