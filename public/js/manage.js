@@ -39,13 +39,18 @@ UI = {
             if (prevType != e.type) {   //  reduce double fire issues
                 switch (e.type) {
                     case "blur":
-                        // console.log("leave page");
+                        console.log("leave page");
                         self.pageLeft = true;
+                        clearInterval(UI.reloadProjectsInterval);
                         break;
                     case "focus":
-                        // console.log("Enter page");
+                        clearInterval(UI.reloadProjectsInterval);
+                        console.log("Enter page");
+                        UI.reloadProjectsInterval = setInterval(function () {
+                            console.log("Reload Projects");
+                            self.reloadProjects();
+                        }, 5e3);
                         if (self.pageLeft) {
-                            // console.log("Refresh projects");
                             self.reloadProjects();
                         }
                         break;
