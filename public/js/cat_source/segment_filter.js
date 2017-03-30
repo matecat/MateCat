@@ -106,7 +106,10 @@ if (SegmentFilter.enabled())
             $(document).trigger('segment-filter-submit');
         },
 
-        filterSubmit : function( data, wantedSegment = null ) {
+        filterSubmit : function( data, wantedSegment) {
+            if (!wantedSegment) {
+                wantedSegment = null;
+            }
             $('body').addClass('sampling-enabled');
 
             data = { filter: data } ;
