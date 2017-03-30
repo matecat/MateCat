@@ -808,14 +808,21 @@ UI = {
 		$('.footer-message', segment).fadeOut(6000);
 	},
 	getMoreSegments: function(where) {
+
         console.log('get more segments');
-		if ((where == 'after') && (this.noMoreSegmentsAfter))
+
+		if ((where == 'after') && (this.noMoreSegmentsAfter)) {
 			return;
-		if ((where == 'before') && (this.noMoreSegmentsBefore))
+        }
+
+		if ((where == 'before') && (this.noMoreSegmentsBefore)) {
 			return;
-		if (this.loadingMore) {
+        }
+
+		if ( this.loadingMore ) {
 			return;
 		}
+
 		this.loadingMore = true;
 
 		var segId = this.detectRefSegId(where);
