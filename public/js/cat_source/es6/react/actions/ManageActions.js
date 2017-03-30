@@ -201,8 +201,9 @@ let ManageActions = {
     changeProjectTeam: function (teamId, project) {
         UI.changeProjectTeam(teamId, project.toJS()).done(function () {
             var team =  TeamsStore.teams.find(function (team) {
-                return team.id == teamId
+                return team.get('id') == teamId
             });
+            team = team.toJS();
             if (UI.selectedTeam.type == 'personal' && team.type !== 'personal') {
 
                 UI.getTeamMembers(teamId).then(function (data) {
