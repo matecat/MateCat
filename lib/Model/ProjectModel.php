@@ -151,7 +151,7 @@ class ProjectModel {
 
         $memberShip = new MembershipDao();
 
-        //choose this method ( and use array_map ) instead of findTeamByIdAndUser because thr results of this one are cached
+        //choose this method ( and use array_filter ) instead of findTeamByIdAndUser because the results of this one are cached
         $memberList = $memberShip->setCacheTTL( 60 )->getMemberListByTeamId( $this->willChange[ 'id_team' ] );
 
         $found = array_filter( $memberList, function( $values ) {
