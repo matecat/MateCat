@@ -554,8 +554,11 @@ class NewController extends ajaxController {
         $projectStructure[ 'HTTP_HOST' ]            = INIT::$HTTPHOST;
 
         if ( $this->current_user ) {
-            $projectStructure[ 'owner' ]       = $this->current_user->getEmail();
-            $projectStructure[ 'id_customer' ] = $this->current_user->getEmail();
+            $projectStructure[ 'userIsLogged' ]  = true;
+            $projectStructure[ 'uid' ]           = $this->current_user->getUid();
+            $projectStructure[ 'id_customer' ]   = $this->current_user->getEmail();
+            $projectStructure[ 'owner' ]         = $this->current_user->getEmail();
+            $projectManager->setTeam( $this->team ) ;
         }
 
         $projectManager = new ProjectManager( $projectStructure );
@@ -643,20 +646,28 @@ class NewController extends ajaxController {
     }
 
     private function validateAuthHeader() {
-        if ( !isset( $_SERVER[ 'HTTP_X_MATECAT_KEY' ] ) ) {
-            return true;
+
+        $api_key = @$_SERVER[ 'HTTP_X_MATECAT_KEY' ];
+        $api_secret = ( !empty( $_SERVER[ 'HTTP_X_MATECAT_SECRET' ] ) ? $_SERVER[ 'HTTP_X_MATECAT_SECRET' ] : "wrong" );
+
+        if ( FALSE !== strpos( @$_SERVER[ 'HTTP_X_MATECAT_KEY' ], '-' ) ) {
+            list( $api_key, $api_secret ) = explode('-', $_SERVER[ 'HTTP_X_MATECAT_KEY' ] ) ;
         }
 
-        $key = ApiKeys_ApiKeyDao::findByKey( $_SERVER[ 'HTTP_X_MATECAT_KEY' ] );
-        if ( $key && $key->validSecret( $_SERVER[ 'HTTP_X_MATECAT_SECRET' ] ) ) {
-            Log::doLog( $key );
+        if ( $api_key && $api_secret ) {
+            $key = \ApiKeys_ApiKeyDao::findByKey( $api_key );
 
+            if( !$key || !$key->validSecret( $api_secret ) ){
+                return false;
+            }
+
+            Log::doLog( $key );
             $this->current_user = $key->getUser();
 
-            return true;
-        } else {
-            return false;
         }
+
+        return true;
+
     }
 
     /**
@@ -679,6 +690,8 @@ class NewController extends ajaxController {
      * conversion depth param.
      *
      * @param $json_string
+     *
+     * @throws Exception
      */
     private function validateMetadataParam($json_string) {
         if (!empty($json_string)) {
