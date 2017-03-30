@@ -99,6 +99,9 @@ class ProjectContainer extends React.Component {
                     return true;
                 }
             });
+            if (!newUser) {
+                return;
+            }
             user = newUser.get('user');
             idUser = user.get('uid');
         }
