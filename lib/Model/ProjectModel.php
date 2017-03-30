@@ -97,7 +97,7 @@ class ProjectModel {
 
         $this->project_struct = $newStruct;
 
-        $this->cleanChaches();
+        $this->cleanAssigneeCaches();
 
         return $this->project_struct;
     }
@@ -186,7 +186,7 @@ class ProjectModel {
 
     }
 
-    private function cleanChaches(){
+    private function cleanAssigneeCaches(){
 
         $teamDao = new TeamDao();
         $this->cacheTeamsToClean = array_unique( $this->cacheTeamsToClean );
