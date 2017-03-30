@@ -260,12 +260,10 @@ UI = {
 
     },
 
-    checkHeaviness: function() {
-        if ($('section').length > config.maxNumSegments && !UI.offline) {
-            UI.reloadToSegment(UI.currentSegmentId);
-        }
+    maxNumSegmentsReached : function() {
+        return $('section').length > config.maxNumSegments  ;
+    },
 
-	},
     checkIfFinished: function(closing) {
        if (((this.progress_perc != this.done_percentage) && (this.progress_perc == '100')) || ((closing) && (this.progress_perc == '100'))) {
                this.body.addClass('justdone');
@@ -810,14 +808,21 @@ UI = {
 		$('.footer-message', segment).fadeOut(6000);
 	},
 	getMoreSegments: function(where) {
+
         console.log('get more segments');
-		if ((where == 'after') && (this.noMoreSegmentsAfter))
+
+		if ((where == 'after') && (this.noMoreSegmentsAfter)) {
 			return;
-		if ((where == 'before') && (this.noMoreSegmentsBefore))
+        }
+
+		if ((where == 'before') && (this.noMoreSegmentsBefore)) {
 			return;
-		if (this.loadingMore) {
+        }
+
+		if ( this.loadingMore ) {
 			return;
 		}
+
 		this.loadingMore = true;
 
 		var segId = this.detectRefSegId(where);
@@ -3321,7 +3326,12 @@ UI = {
             }
 
         }
-        UI.checkHeaviness();
+
+        if ( UI.maxNumSegmentsReached() && !UI.offline ) {
+            UI.reloadToSegment( UI.currentSegmentId );
+            return ;
+        }
+
         if ( UI.blockButtons ) {
             if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId === '') {
             } else {
