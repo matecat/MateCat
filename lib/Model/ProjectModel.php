@@ -159,7 +159,7 @@ class ProjectModel {
         } );
 
         if ( empty( $found ) ) {
-            throw new AuthorizationError( "Not Authorized", 401 );
+            throw new AuthorizationError( "Not Authorized", 403 );
         }
 
         // if the project has an assignee, we have to check if the assignee_id exists in the other team. If not, reset the assignee
