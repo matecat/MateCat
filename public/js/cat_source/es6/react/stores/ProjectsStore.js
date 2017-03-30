@@ -18,11 +18,16 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
 
     projects : null,
 
+    setProjects: function (projects) {
+        this.projects = Immutable.fromJS(projects);
+    },
     /**
      * Update all
      */
     updateAll: function (projects) {
-        this.projects = Immutable.fromJS(projects);
+
+        this.projects = this.projects.mergeDeep(projects);
+
     },
     /**
      * Add Projects (pagination)
@@ -124,11 +129,11 @@ AppDispatcher.register(function(action) {
 
     switch(action.actionType) {
         case ManageConstants.RENDER_PROJECTS:
-            ProjectsStore.updateAll(action.projects);
+            ProjectsStore.setProjects(action.projects);
             ProjectsStore.emitChange(action.actionType, ProjectsStore.projects, Immutable.fromJS(action.team), action.hideSpinner, action.filtering);
             break;
         case ManageConstants.RENDER_ALL_TEAM_PROJECTS:
-            ProjectsStore.updateAll(action.projects);
+            ProjectsStore.setProjects(action.projects);
             ProjectsStore.emitChange(action.actionType, ProjectsStore.projects, Immutable.fromJS(action.teams), action.hideSpinner);
             break;
         case ManageConstants.UPDATE_PROJECTS:

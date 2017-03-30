@@ -138,6 +138,11 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     line-height: 25px;
 }
 
+
+.user-info-form img {
+    border-radius: 500rem;
+}
+
 .preferences-modal .user-name strong {
     font-size: 24px;
 }
@@ -828,14 +833,16 @@ div#matecat-modal p {
         .ui.members-list {
             min-height: 45px;
             .ui.divided.list {
-                position: absolute;
+                //position: absolute;
                 top: 0px;
                 left: 0px;
                 bottom: 0px;
                 right: 0px;
-                padding: 10px 15px 10px 15px;
+                //padding: 10px 15px 10px 15px;
                 overflow-y: auto;
                 max-height: 210px;
+                position: relative!important;
+                padding: 0 10px 0 0;
             }
             ::-webkit-scrollbar {
                 width: 10px;
@@ -1070,7 +1077,8 @@ div#matecat-modal p {
             }
         }
         .ui.members-list {
-            min-height: 180px;
+            //min-height: 180px;
+            min-height: initial!important;
             .ui.divided.list {
                 max-height: 210px;
                 .item:first-child {

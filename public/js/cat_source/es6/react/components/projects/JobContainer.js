@@ -515,7 +515,8 @@ class JobContainer extends React.Component {
 
     componentDidUpdate() {
         $(this.iconsButton).dropdown();
-        // console.log("Updated Job : " + this.props.job.get('id'));
+        this.initTooltips();
+        console.log("Updated Job : " + this.props.job.get('id'));
     }
 
     componentDidMount () {
@@ -591,13 +592,13 @@ class JobContainer extends React.Component {
                                     </div>
                                 </div>
                             </div>
+                            <div className="job-payable">
+                                <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
+                            </div>
                             <div className="tm-job">
                                 {tmIcon}
                             </div>
                             {warningIcons}
-                            <div className="job-payable">
-                                <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
-                            </div>
                         </div>
 
 

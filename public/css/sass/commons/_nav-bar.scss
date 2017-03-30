@@ -70,7 +70,7 @@ header {
                     max-width: 250px;
                     min-width: 200px;
                     white-space: nowrap;
-                    overflow: auto;
+                    overflow: hidden;
                     text-overflow: ellipsis;
                     &:hover .team-filter,
                     &.active.selected .team-filter{
@@ -172,7 +172,8 @@ header {
                 text-align: right;
                 line-height: 35px;
                 text-decoration: underline;
-                width: 190px;
+                min-width: 0px;
+                max-width: 110px;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -192,6 +193,10 @@ header {
                     text-decoration: none;
                 }
             }
+        }
+        .cta-create-team {
+            margin-top: 10px;
+            float: left;
         }
 
     }

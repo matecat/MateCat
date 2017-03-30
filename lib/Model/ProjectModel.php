@@ -151,7 +151,7 @@ class ProjectModel {
 
         $memberShip = new MembershipDao();
 
-        //choose this method ( and use array_map ) instead of findTeamByIdAndUser because thr results of this one are cached
+        //choose this method ( and use array_filter ) instead of findTeamByIdAndUser because the results of this one are cached
         $memberList = $memberShip->setCacheTTL( 60 )->getMemberListByTeamId( $this->willChange[ 'id_team' ] );
 
         $found = array_filter( $memberList, function( $values ) {
@@ -159,7 +159,7 @@ class ProjectModel {
         } );
 
         if ( empty( $found ) ) {
-            throw new AuthorizationError( "Not Authorized", 401 );
+            throw new AuthorizationError( "Not Authorized", 403 );
         }
 
         // if the project has an assignee, we have to check if the assignee_id exists in the other team. If not, reset the assignee

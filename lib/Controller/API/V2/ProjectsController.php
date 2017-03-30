@@ -9,9 +9,8 @@
 namespace API\V2;
 
 
-use API\App\AbstractStatefulKleinController;
-
 use API\V2\Json\Project;
+use API\V2\Validators\ProjectExistsInTeamValidator;
 use API\V2\Validators\TeamAccessValidator;
 use API\V2\Validators\TeamProjectValidator;
 
@@ -45,6 +44,7 @@ class ProjectsController extends KleinController {
         $this->project = \Projects_ProjectDao::findById( $this->request->id_project );
         $this->appendValidator( new TeamAccessValidator( $this ) );
         $this->appendValidator( ( new TeamProjectValidator( $this ) )->setProject( $this->project ) );
+        $this->appendValidator( ( new ProjectExistsInTeamValidator( $this ) )->setProject( $this->project ) );
     }
 
 }
