@@ -1,9 +1,9 @@
 // rewrite semantic CSS
 
 body.manage {
-    //min-width: 1040px;
+    min-width: 1024px;
     //font-size: 14px;
-    //box-sizing: content-box;
+    /*box-sizing: content-box;*/
     //margin-top: 55px;
     font-family: Calibri, Arial, Helvetica, sans-serif;
     background-color: #e4e6e8;
@@ -472,7 +472,7 @@ body.manage {
                                 vertical-align: text-bottom;
                                 display: inline-block;
                                 position: relative;
-                                float: left;
+                                float: right;
                                 img.outsource-logo {
                                     width: 100px;
                                     margin: 0 17px 0 0;
@@ -481,10 +481,13 @@ body.manage {
                             }
                             .job-delivery {
                                 display: inline-block;
-                                margin-right: 8px;
+                                margin-right: 15px;
                                 vertical-align: text-bottom;
-                                float: left;
+                                float: right;
                                 margin-top: 5px;
+                                @media only screen and (max-width: 1200px) {
+                                    display: none;
+                                }
                             }
                             .open-translate {
                                 font-family: Calibri;
@@ -492,7 +495,8 @@ body.manage {
                                 vertical-align: top;
                                 font-size: 16px;
                                 border: 1px solid #797979;
-                                border-radius: 2px
+                                border-radius: 2px;
+                                float: right;
                             }
                             .open-outsource {
                                 font-family: Calibri;
@@ -500,7 +504,8 @@ body.manage {
                                 vertical-align: top;
                                 font-size: 16px;
                                 border: 1px solid #797979;
-                                border-radius: 2px
+                                border-radius: 2px;
+                                float: right;
                                 //background-color: #7eaf3e;
                             }
                             .open-outsourced {
@@ -510,6 +515,7 @@ body.manage {
                                 font-size: 16px;
                                 border: 1px solid #797979;
                                 border-radius: 2px;
+                                float: right;
                                 &:hover {
                                     box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
                                 }
@@ -527,6 +533,7 @@ body.manage {
                                 &.ui.button {
                                     background-color: transparent;
                                     border-radius: 2px;
+                                    float: right;
                                     .divider {
                                         margin: 0;
                                     }
@@ -633,6 +640,12 @@ body.manage {
         background-position: center center;
         height: 320px;
     }
+    .welcome-to-matecat {
+        background: url(/public/img/welcome-to-matecat.png) no-repeat;
+        background-position: center center;
+        height: 320px;
+        background-size: 420px !important;
+    }
     .message-nofound {
         text-align: center;
         display: block;
@@ -655,7 +668,7 @@ body.manage {
                 font-size: 20px;
                 border: 1px solid #797979;
                 border-radius: 2px;
-                margin: 0;
+                margin: 10px;
             }
         }
     }
@@ -749,3 +762,7 @@ footer nav ul a:hover {
 .matecat-modal-content .modify-team-modal .ui.members-list {
     min-height: initial!important;
 }*/
+
+body {
+    min-width: 1024px;
+}

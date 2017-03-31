@@ -59,6 +59,11 @@ header {
                         transition: 0.3s ease;
                     }
                 }
+                .item:first-child {
+                    a > i {
+                        display: none;
+                    }
+                }
                 .divider {
                     margin: 0;
                 }
@@ -194,11 +199,6 @@ header {
                 }
             }
         }
-        .cta-create-team {
-            margin-top: 10px;
-            float: left;
-        }
-
     }
 }
 
@@ -243,4 +243,20 @@ header {
 
 .upload-page-header .dropdown span {
     margin-right: 0!important;
+}
+
+
+.cta-create-team {
+    position: fixed !important;
+    .ui.primary.button {
+        border: 1px solid #797979;
+        float: right;
+        border-radius: 2px;
+        font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;;
+    }
+    .content {
+        p {
+            font-size: 15px;
+        }
+    }
 }
