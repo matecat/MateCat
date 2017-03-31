@@ -44,7 +44,10 @@ let TeamsStore = assign({}, EventEmitter.prototype, {
     },
 
     updateTeamMembers: function (team, members, pendingInvitations) {
-        let index = this.teams.indexOf(team);
+        let teamOld = this.teams.find(function (org) {
+            return org.get('id') == team.get('id');
+        });
+        let index = this.teams.indexOf(teamOld);
         this.teams = this.teams.setIn([index,'members'], Immutable.fromJS(members));
         this.teams = this.teams.setIn([index,'pending_invitations'], Immutable.fromJS(pendingInvitations));
         return this.teams.get(index);
