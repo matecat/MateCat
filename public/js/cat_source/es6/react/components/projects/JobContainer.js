@@ -536,7 +536,7 @@ class JobContainer extends React.Component {
         $(this.draftTooltip).popup();
         $(this.activityTooltip).popup();
         $(this.commentsTooltip).popup();
-        $(this.tmTooltip).popup();
+        $(this.tmTooltip).popup({hoverable: true});
         $(this.warningTooltip).popup();
         $(this.languageTooltip).popup();
     }

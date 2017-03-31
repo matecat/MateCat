@@ -12,6 +12,7 @@ class Header extends React.Component {
         this.updateTeams = this.updateTeams.bind(this);
         this.chooseTeams = this.chooseTeams.bind(this);
         this.openModifyTeam = this.openModifyTeam.bind(this);
+        this.showPopup = true;
     }
 
     componentDidMount () {
@@ -29,6 +30,7 @@ class Header extends React.Component {
 
     componentDidUpdate() {
         this.initDropdown();
+        this.initPopup()
     }
 
     initDropdown() {
@@ -47,7 +49,40 @@ class Header extends React.Component {
             } else {
                 dropdownTeams.dropdown();
             }
+
         }
+    }
+
+    initPopup() {
+        var self = this;
+        //TODO Read Cookie
+        let tooltipTex = "<div class='header'>Now you can add teams! Start Now!</div>" +
+            "<div class='content'>Now you can add teams to organize and share the projects you create with Matecat. Get started by clicking above and creating your first team!" +
+                "<div class='ui primary button close-popup-teams'>Got it!</div>" +
+            "</div>"
+        if (this.state.teams.size == 1 && this.props.showModals && this.showPopup) {
+            $(this.dropdownTeams).popup({
+                on:'click',
+                onHidden: self.removePopup.bind(this),
+                html : tooltipTex,
+                closable:false,
+                onCreate: self.onCreatePopup.bind(this)
+            }).popup("show");
+            this.showPopup = false;
+        }
+    }
+
+    removePopup() {
+        $(this.dropdownTeams).popup('destroy');
+        //TODO Set Cookie
+        return true;
+    }
+
+    onCreatePopup() {
+        var self = this;
+        $('.close-popup-teams').on('click', function () {
+            $(self.dropdownTeams).popup('hide');
+        })
     }
 
     changeTeam(event, team) {
