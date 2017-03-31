@@ -64,7 +64,7 @@ class ModifyTeam extends React.Component {
         e.stopPropagation();
         if (e.key === 'Enter' ) {
             e.preventDefault();
-            this.addTemporaryUser();
+            this.addUser();
         } else {
             this.setState({
                 inputUserError: false
@@ -73,7 +73,7 @@ class ModifyTeam extends React.Component {
         return false;
     }
 
-    addTemporaryUser() {
+    /*addTemporaryUser() {
         if ( APP.checkEmail(this.inputNewUSer.value)) {
             // this.state.usersToAdd.push(this.inputNewUSer.value);
             let arrayNewUsers = this.state.usersToAdd.slice();
@@ -87,14 +87,14 @@ class ModifyTeam extends React.Component {
                 inputUserError: true
             });
         }
-    }
-
-    addUser() {
-        ManageActions.addUserToTeam(this.state.team, this.state.usersToAdd);
-        return true;
-    }
+    }*/
 
     /*addUser() {
+        ManageActions.addUserToTeam(this.state.team, this.state.usersToAdd);
+        return true;
+    }*/
+
+    addUser() {
         if ( APP.checkEmail(this.inputNewUSer.value)) {
             ManageActions.addUserToTeam(this.state.team, this.inputNewUSer.value);
             this.inputNewUSer.value = '';
@@ -105,7 +105,7 @@ class ModifyTeam extends React.Component {
             });
             return false;
         }
-    }*/
+    }
 
 
     onKeyPressEvent(e) {
@@ -145,7 +145,7 @@ class ModifyTeam extends React.Component {
         var teamNameOk = this.changeTeamName();
         if (this.inputNewUSer.value.length > 0) {
             if ( APP.checkEmail(this.inputNewUSer.value)) {
-                this.addTemporaryUser();
+                this.addUser();
                 setTimeout(function () {
                     self.applyChanges();
                 });
@@ -253,26 +253,6 @@ class ModifyTeam extends React.Component {
 
     }
 
-    getNewUsersList() {
-        let self = this;
-        if (this.state.usersToAdd.length == 0) return;
-        return this.state.usersToAdd.map(function(mail, i) {
-            return <div className="item pending-invitation"
-                        key={'user-new' + i}>
-                <div className="mini ui button right floated"
-                     onClick={self.cancelInvite.bind(self, mail)}>Delete Invitation</div>
-                <div className="ui right floated content pending-msg">Confirm to send invite</div>
-                <div className="ui tiny image label">{mail.substring(0, 1).toUpperCase()}</div>
-                <div className="middle aligned content">
-                    <div className="content user">
-                        {mail}
-                    </div>
-                </div>
-
-            </div>;
-        });
-    }
-
     componentDidUpdate() {
         var self = this;
         clearTimeout(this.inputTimeout);
@@ -308,7 +288,6 @@ class ModifyTeam extends React.Component {
         let orgNameError = (this.state.inputNameError) ? 'error' : '';
         let userlist = this.getUserList();
         let pendingUsers = this.getPendingInvitations();
-        let newUsers = this.getNewUsersList();
         let icon = (this.state.readyToSend && !this.state.inputNameError ) ?<i className="icon-checkmark green icon"/> : <i className="icon-pencil icon"/>;
         let applyButtonClass = (this.state.inputUserError || this.state.inputNameError) ?  'disabled' : '';
         let middleContainerStyle = (this.props.hideChangeName ) ? {paddingTop: "20px"} : {};
@@ -350,7 +329,6 @@ class ModifyTeam extends React.Component {
                             <div className="sixteen wide column">
                                 <div className="ui members-list team">
                                     <div className="ui divided list">
-                                        {newUsers}
                                         {pendingUsers}
                                         {userlist}
                                     </div>

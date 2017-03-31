@@ -180,7 +180,11 @@ let ManageActions = {
                     });
                 });
             }
-        );
+        ).error(function (response) {
+            console.log("Error change assignee", response);
+            alert(response.responseJSON.errors[0].message);
+            UI.reloadProjects();
+        });
 
 
     },

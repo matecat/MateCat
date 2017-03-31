@@ -126,10 +126,21 @@ class Header extends React.Component {
         var self = this;
         let dropdownIcon = (this.state.teams.size > 1)? <i className="dropdown icon"/> : '';
         let dontShowCursorClass = (this.state.teams.size == 1)? 'disable-dropdown-team' : '';
+        let personalTeam='';
         if (this.state.teams.size > 0) {
             let items = this.state.teams.map(function(team, i) {
                 let iconModal = '';
-                if (self.props.showModals) {
+                if (team.get('type') == 'personal') {
+                    personalTeam = <div className="item" data-value={team.get('id')}
+                                        data-text={team.get('name')}
+                                        key={'team' + team.get('name') + team.get('id')}
+                                        onClick={(e) => self.changeTeam(e, team)}>
+                        {team.get('name')}
+                        {iconModal}
+                    </div>;
+                    return ;
+                }
+                if (self.props.showModals && team.get('type') !== 'personal') {
                     iconModal = <a className="team-filter button show right"
                                    onClick={(e) => self.openModifyTeam(e, team)}>
                         <i className="icon-settings icon"/>
@@ -166,6 +177,7 @@ class Header extends React.Component {
                             ''
                         )}
                     <div className="scrolling menu">
+                        {personalTeam}
                         {items}
                     </div>
                 </div>

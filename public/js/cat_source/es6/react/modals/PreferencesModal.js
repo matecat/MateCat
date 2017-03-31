@@ -5,8 +5,13 @@ class PreferencesModal extends React.Component {
         super(props);
 
         this.state = {
-            service: this.props.service
+            service: this.props.service,
+            coupon: this.props.metadata.coupon,
+            couponError: '',
+            validCoupon : false
         };
+
+        this.onKeyPressCopupon = this.onKeyPressCopupon.bind( this );
     }
 
     openResetPassword() {
@@ -59,6 +64,47 @@ class PreferencesModal extends React.Component {
 
     }
 
+    submitUserChanges() {
+        var self = this;
+        if (!this.state.validCoupon) {
+            return;
+        }
+        return $.post('/api/app/user/metadata', { metadata : {
+            coupon : this.couponInput.value
+        }
+        }).done( function( data ) {
+            if (data) {
+                APP.USER.STORE.metadata = data;
+                self.setState({
+                    coupon: APP.USER.STORE.metadata.coupon
+                });
+            } else {
+                self.setState({
+                    couponError: 'Invalid Coupon'
+                });
+            }
+        }).fail(function () {
+            self.setState({
+                couponError: 'Invalid Coupon'
+            });
+        });
+    }
+
+    onKeyPressCopupon(e) {
+        var length = this.couponInput.value.length;
+        var validCoupon = false;
+        if ( length >= 8 ) {
+            validCoupon = true;
+        }
+        this.setState({
+            couponError : '',
+            validCoupon : validCoupon
+        });
+        if (e.key === 'Enter') {
+            this.submitUserChanges();
+        }
+    }
+
     disableGDrive() {
         return $.post('/api/app/connected_services/' + this.state.service.id, { disabled: true } );
 
@@ -93,20 +139,41 @@ class PreferencesModal extends React.Component {
 
         }
 
+        var couponHtml = '';
+        if ( !this.state.coupon) {
+            var buttonClass = (this.state.validCoupon) ? '' : 'disabled';
+            couponHtml = <div className="coupon-container">
+                <h2 htmlFor="user-coupon">Coupon</h2>
+                <input type="text" name="coupon" id="user-coupon" placeholder="Insert your code"
+                       onKeyUp={this.onKeyPressCopupon.bind(this)}
+                       ref={(input) => this.couponInput = input}/>
+                <a className={"btn-confirm-medium " + buttonClass}  onClick={this.submitUserChanges.bind(this)}>Apply</a>
+                <div className="coupon-message">
+                    <span style={{color: 'red', fontSize: '14px',position: 'absolute', right: '27%', lineHeight: '24px'}} className="coupon-message">{this.state.couponError}</span>
+                </div>
+            </div>
+        } else {
+
+            couponHtml = <div className="coupon-container coupon-success">
+
+                <h2 htmlFor="user-coupon">Coupon</h2>
+                <input type="text" name="coupon" id="user-coupon" defaultValue={this.state.coupon} disabled /><br/>
+                <div className="coupon-message">
+                    <span style={{color: 'green', fontSize: '14px', position: 'absolute', right: '42%', lineHeight: '24px'}} className="coupon-message">Coupon activated</span>
+                </div>
+
+
+            </div>
+        }
+
         return <div className="preferences-modal">
 
-                    <div className="user-info-form">
-                        {(APP.USER.STORE.metadata) ? (
-                                <img className="ui tiny circular image pull-left"
-                                     src={APP.USER.STORE.metadata.gplus_picture + "?sz=80"} style={{width:"50px"}}/>
-                            ) : (
-                                <div className="avatar-user pull-left">{config.userShortName}</div>
-                            )}
-
-                         <div className="user-name pull-left">
+                     <div className="user-info-form">
+                        <div className="avatar-user pull-left">{config.userShortName}</div>
+                        <div className="user-name pull-left">
                             <strong>{this.props.user.first_name} {this.props.user.last_name}</strong><br/>
-                         <span className="grey-txt">{this.props.user.email}</span><br/>
-                         </div>
+                        <span className="grey-txt">{this.props.user.email}</span><br/>
+                        </div>
                          <br/>
                          <div className="user-link">
                             <div id='logoutlink' className="pull-right" onClick={this.logoutUser.bind(this)}>Logout</div>
@@ -137,6 +204,7 @@ class PreferencesModal extends React.Component {
                             </div>
                             <label>{services_label}</label>
                         </div>
+                        {couponHtml}
                     </div>
             </div>;
     }
