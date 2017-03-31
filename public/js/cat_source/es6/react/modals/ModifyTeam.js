@@ -313,7 +313,7 @@ class ModifyTeam extends React.Component {
                     <div className="matecat-modal-middle" style={middleContainerStyle}>
                         <div className="ui grid left aligned">
                             <div className="sixteen wide column">
-                                <h2>Add Members</h2>
+                                <h2>Invite Members</h2>
                                 <div className={"ui fluid icon input " + usersError }>
                                     <input type="text" placeholder="insert email and press enter"
                                            onKeyUp={this.handleKeyPressUserInput.bind(this)}
