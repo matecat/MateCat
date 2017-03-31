@@ -11,6 +11,8 @@ UI = {
         this.changeTeam = this.changeTeam.bind(this);
         this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
 
+        this.popupInfoTeamsStorageName = 'infoTeamPopup-' + config.userMail;
+
         //Job Actions
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_SETTINGS, this.openJobSettings);
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_TM_PANEL, this.openJobTMPanel);
@@ -67,10 +69,10 @@ UI = {
             self.selectedTeam = APP.getLastTeamSelected(self.teams);
             self.getTeamStructure(self.selectedTeam).done(function () {
                 ManageActions.selectTeam(self.selectedTeam);
+                self.checkPopupInfoTeams();
                 self.getProjects(self.selectedTeam).done(function(response){
                     self.renderProjects(response.data);
                 });
-
             });
         });
 
@@ -271,6 +273,17 @@ UI = {
             console.log("Scroll end");
             this.renderMoreProjects();
         }
+    },
+
+    checkPopupInfoTeams: function () {
+        let openPopup = localStorage.getItem(this.popupInfoTeamsStorageName);
+        if (!openPopup) {
+            ManageActions.openPopupTeams();
+        }
+    },
+
+    setPopupTeamsCookie: function () {
+        localStorage.setItem(this.popupInfoTeamsStorageName, true);
     },
 
     //********** REQUESTS *********************//

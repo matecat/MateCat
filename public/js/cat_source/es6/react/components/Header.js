@@ -20,17 +20,18 @@ class Header extends React.Component {
         TeamsStore.addListener(ManageConstants.RENDER_TEAMS, this.renderTeams);
         TeamsStore.addListener(ManageConstants.UPDATE_TEAMS, this.updateTeams);
         TeamsStore.addListener(ManageConstants.CHOOSE_TEAM, this.chooseTeams);
+        TeamsStore.addListener(ManageConstants.OPEN_INFO_TEAMS_POPUP, this.initPopup.bind(this));
     }
 
     componentWillUnmount() {
         TeamsStore.removeListener(ManageConstants.RENDER_TEAMS, this.renderTeams);
         TeamsStore.removeListener(ManageConstants.UPDATE_TEAMS, this.updateTeams);
         TeamsStore.removeListener(ManageConstants.CHOOSE_TEAM, this.chooseTeams);
+        TeamsStore.removeListener(ManageConstants.OPEN_INFO_TEAMS_POPUP, this.initPopup);
     }
 
     componentDidUpdate() {
         this.initDropdown();
-        this.initPopup()
     }
 
     initDropdown() {
@@ -55,12 +56,11 @@ class Header extends React.Component {
 
     initPopup() {
         var self = this;
-        //TODO Read Cookie
-        let tooltipTex = "<div class='header'>Now you can add teams! Start Now!</div>" +
-            "<div class='content'>Now you can add teams to organize and share the projects you create with Matecat. Get started by clicking above and creating your first team!" +
-                "<div class='ui primary button close-popup-teams'>Got it!</div>" +
-            "</div>"
         if (this.state.teams.size == 1 && this.props.showModals && this.showPopup) {
+            let tooltipTex = "<div class='header'>Now you can add teams! Start Now!</div>" +
+                "<div class='content'>Now you can add teams to organize and share the projects you create with Matecat. Get started by clicking above and creating your first team!" +
+                "<div class='ui primary button close-popup-teams'>Got it!</div>" +
+                "</div>";
             $(this.dropdownTeams).popup({
                 on:'click',
                 onHidden: self.removePopup.bind(this),
@@ -74,7 +74,7 @@ class Header extends React.Component {
 
     removePopup() {
         $(this.dropdownTeams).popup('destroy');
-        //TODO Set Cookie
+        ManageActions.setPopupTeamsCookie();
         return true;
     }
 

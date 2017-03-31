@@ -470,8 +470,17 @@ let ManageActions = {
             actionType: ManageConstants.DISABLE_DOWNLOAD_BUTTON,
             idProject: id
         });
-    }
+    },
 
+    openPopupTeams: function () {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.OPEN_INFO_TEAMS_POPUP,
+        });
+    },
+
+    setPopupTeamsCookie: function () {
+        UI.setPopupTeamsCookie();
+    }
 };
 
 module.exports = ManageActions;
