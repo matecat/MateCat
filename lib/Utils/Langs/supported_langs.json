@@ -441,6 +441,16 @@
     ,
         {
             "localized":[{
+                "en":"Fula"
+            }],
+            "isocode":"ff",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"ff-FUL"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Filipino"
             }],
             "isocode":"fil",
@@ -577,9 +587,9 @@
                 "en":"Hausa"
             }],
             "isocode":"ha",
-            "enabled":false,
-            "rtl":false,
-            "rfc3066code":"ha-HA"
+            "enabled":true,
+            "rtl":true,
+            "rfc3066code":"ha-HAU"
         }
     ,
         {
@@ -732,6 +742,16 @@
             "enabled":false,
             "rtl":false,
             "rfc3066code":"ka-IN"
+        }
+    ,
+        {
+            "localized":[{
+                "en":"Kanuri"
+            }],
+            "isocode":"kn",
+            "enabled":true,
+            "rtl":true,
+            "rfc3066code":"kr-KAU"
         }
     ,
         {
