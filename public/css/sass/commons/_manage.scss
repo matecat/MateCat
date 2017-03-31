@@ -640,6 +640,12 @@ body.manage {
         background-position: center center;
         height: 320px;
     }
+    .welcome-to-matecat {
+        background: url(/public/img/welcome-to-matecat.png) no-repeat;
+        background-position: center center;
+        height: 320px;
+        background-size: 420px !important;
+    }
     .message-nofound {
         text-align: center;
         display: block;
@@ -662,7 +668,7 @@ body.manage {
                 font-size: 20px;
                 border: 1px solid #797979;
                 border-radius: 2px;
-                margin: 0;
+                margin: 10px;
             }
         }
     }

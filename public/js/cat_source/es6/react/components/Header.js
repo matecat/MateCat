@@ -56,9 +56,10 @@ class Header extends React.Component {
     initPopup() {
         var self = this;
         //TODO Read Cookie
-        let tooltipTex = "<div class='header'>Now you can add teams! Start Now!</div>" +
-            "<div class='content'>Now you can add teams to organize and share the projects you create with Matecat. Get started by clicking above and creating your first team!" +
-                "<div class='ui primary button close-popup-teams'>Got it!</div>" +
+        let tooltipTex = "<h4 class='header'>Add your first team!</h4>" +
+            "<div class='content'>" +
+                "<p>Create a team and invite your colleagues to share and manage projects as a team.</p>" +
+                "<a class='ui primary button close-popup-teams'>Got it!</a>" +
             "</div>"
         if (this.state.teams.size == 1 && this.props.showModals && this.showPopup) {
             $(this.dropdownTeams).popup({
@@ -66,7 +67,10 @@ class Header extends React.Component {
                 onHidden: self.removePopup.bind(this),
                 html : tooltipTex,
                 closable:false,
-                onCreate: self.onCreatePopup.bind(this)
+                onCreate: self.onCreatePopup.bind(this),
+                className   : {
+                    popup: 'ui popup cta-create-team'
+                }
             }).popup("show");
             this.showPopup = false;
         }
