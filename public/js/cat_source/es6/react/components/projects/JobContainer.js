@@ -560,69 +560,60 @@ class JobContainer extends React.Component {
 
         let idJobLabel = ( !this.props.isChunk ) ? this.props.job.get('id') : this.props.job.get('id') + '-' + this.props.index;
 
-        return <div className="chunk sixteen wide column shadow-1">
-                    <div className="ui stackable grid">
+        return <div className="chunk sixteen wide column shadow-1 pad-right-10">
 
-                        <div className="eight wide column">
-                            <div className="source-target languages-tooltip"
-                                 ref={(tooltip) => this.languageTooltip = tooltip}
-                                 data-html={this.props.job.get('sourceTxt') + ' > ' + this.props.job.get('targetTxt')}>
-                                <div className="source-box">
-                                    {this.props.job.get('sourceTxt')}
-                                </div>
-                                <div className="in-to"><i className="icon-chevron-right icon"/></div>
-                                <div className="target-box">
-                                    {this.props.job.get('targetTxt')}
-                                </div>
-                            </div>
-                            <div className="job-id">
-                                { idJobLabel }
-                            </div>
-                            <div className="progress-bar">
-                                <div className="progr">
-                                    <div className="meter">
-                                        <a className="warning-bar translate-tooltip" data-html={'Rejected '+this.props.job.get('stats').get('REJECTED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('REJECTED_PERC') + '%'}}
-                                           ref={(tooltip) => this.rejectedTooltip = tooltip}/>
-                                        <a className="approved-bar translate-tooltip" data-html={'Approved '+this.props.job.get('stats').get('APPROVED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('APPROVED_PERC')+ '%' }}
-                                           ref={(tooltip) => this.approvedTooltip = tooltip}/>
-                                        <a className="translated-bar translate-tooltip" data-html={'Translated '+this.props.job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('TRANSLATED_PERC') + '%' }}
-                                           ref={(tooltip) => this.translatedTooltip = tooltip}/>
-                                        <a className="draft-bar translate-tooltip" data-html={'Draft '+this.props.job.get('stats').get('DRAFT_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('DRAFT_PERC') + '%' }}
-                                           ref={(tooltip) => this.draftTooltip = tooltip}/>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="job-payable">
-                                <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
-                            </div>
-                            <div className="tm-job">
-                                {tmIcon}
-                            </div>
-                            {warningIcons}
+                    <div className="source-target languages-tooltip"
+                         ref={(tooltip) => this.languageTooltip = tooltip}
+                         data-html={this.props.job.get('sourceTxt') + ' > ' + this.props.job.get('targetTxt')}>
+                        <div className="source-box">
+                            {this.props.job.get('sourceTxt')}
                         </div>
-
-
-                        <div className="eight wide column right aligned pad-right-10">
-
-                            <div className="translated-outsourced">
-                                {outsourceJobLabel}
-                            </div>
-                            {outsourceDelivery}
-                            {outsourceButton}
-                            <a className="open-translate ui primary button open" target="_blank" href={translateUrl}>
-                                Open
-                            </a>
-                            <div className="ui icon top right pointing dropdown job-menu  button"
-                                    ref={(dropdown) => this.dropdown = dropdown}>
-                                <i className="icon-more_vert icon"/>
-                                {jobMenu}
-                            </div>
+                        <div className="in-to"><i className="icon-chevron-right icon"/></div>
+                        <div className="target-box">
+                            {this.props.job.get('targetTxt')}
                         </div>
-
-
                     </div>
+                    <div className="job-id">
+                        { idJobLabel }
+                    </div>
+                    <div className="progress-bar">
+                        <div className="progr">
+                            <div className="meter">
+                                <a className="warning-bar translate-tooltip" data-html={'Rejected '+this.props.job.get('stats').get('REJECTED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('REJECTED_PERC') + '%'}}
+                                   ref={(tooltip) => this.rejectedTooltip = tooltip}/>
+                                <a className="approved-bar translate-tooltip" data-html={'Approved '+this.props.job.get('stats').get('APPROVED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('APPROVED_PERC')+ '%' }}
+                                   ref={(tooltip) => this.approvedTooltip = tooltip}/>
+                                <a className="translated-bar translate-tooltip" data-html={'Translated '+this.props.job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('TRANSLATED_PERC') + '%' }}
+                                   ref={(tooltip) => this.translatedTooltip = tooltip}/>
+                                <a className="draft-bar translate-tooltip" data-html={'Draft '+this.props.job.get('stats').get('DRAFT_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('DRAFT_PERC') + '%' }}
+                                   ref={(tooltip) => this.draftTooltip = tooltip}/>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="job-payable">
+                        <a href={analysisUrl} target="_blank"><span id="words">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span> words</a>
+                    </div>
+                    <div className="tm-job">
+                        {tmIcon}
+                    </div>
+                    {warningIcons}
+                    <div className="ui icon top right pointing dropdown job-menu  button"
+                            ref={(dropdown) => this.dropdown = dropdown}>
+                        <i className="icon-more_vert icon"/>
+                        {jobMenu}
+                    </div>
+                    <a className="open-translate ui primary button open" target="_blank" href={translateUrl}>
+                        Open
+                    </a>
+                    {outsourceButton}
+                    {outsourceDelivery}
+                    <div className="translated-outsourced">
+                        {outsourceJobLabel}
+                    </div>
+
+
                 { this.state.showDownloadProgress ? (
-                    <div className="chunk-download-progress"></div>
+                    <div className="chunk-download-progress"/>
                 ):('')}
 
         </div>
