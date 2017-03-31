@@ -146,7 +146,7 @@ class Header extends React.Component {
             let addTeam = '';
             if (self.props.showModals) {
                 dontShowCursorClass = '';
-                addTeam = <div className="header" onClick={this.openCreateTeams.bind(this)}>New Team
+                addTeam = <div className="header" onClick={this.openCreateTeams.bind(this)}>Create New Team
                                 <a className="team-filter button show">
                                     <i className="icon-plus3 icon"/>
                                 </a>
