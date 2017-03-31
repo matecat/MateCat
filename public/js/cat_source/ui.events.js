@@ -1223,7 +1223,7 @@ $.extend(UI, {
 			e.preventDefault();
 
 			if (!($('#segment-' + UI.currentSegmentId).length)) {
-				$('#outer').empty();
+				UI.unmountSegments();
 				UI.render();
 			} else {
 				UI.scrollSegment(UI.currentSegment);

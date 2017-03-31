@@ -134,7 +134,7 @@ if (SegmentFilter.enabled())
                     reactState : window.segment_filter_panel.state
                 }) ;
 
-                $('#outer').empty();
+                UI.unmountSegments();
 
                 var afterRenderCallback = function() { } ;
                 var segmentToOpen ;
