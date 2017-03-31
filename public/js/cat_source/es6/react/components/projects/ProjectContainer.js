@@ -369,8 +369,10 @@ class ProjectContainer extends React.Component {
                self.projectTeam = this.props.teams.find(function (team) {
                    return team.get('id') == self.props.project.get('id_team');
                });
-               if (self.projectTeam.get('members')) {
+               if (self.projectTeam && self.projectTeam.get('members')) {
                    result = this.createUserDropDown(self.projectTeam.get('members'));
+               } else {
+                   ManageActions.getAllTeams();
                }
            }
        } else if (this.props.team.get('members')) {
@@ -429,10 +431,10 @@ class ProjectContainer extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState){
-        return (nextProps.project !== this.props.project ||
+        return (!nextProps.project.equals(this.props.project) ||
         nextState.lastAction !==  this.state.lastAction ||
-        nextProps.team !==  this.props.team ||
-        nextProps.teams !==  this.props.teams ||
+        !nextProps.team.equals(this.props.team) ||
+        !nextProps.teams.equals(this.props.teams) ||
         nextState.inputSelected !==  this.state.inputSelected ||
         nextState.inputNameChanged !==  this.state.inputNameChanged
         )

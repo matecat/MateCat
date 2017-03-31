@@ -34,7 +34,7 @@ class JobContainer extends React.Component {
 }
 
     shouldComponentUpdate(nextProps, nextState){
-        return (nextProps.job !== this.props.job ||
+        return (!nextProps.job.equals(this.props.job) ||
         nextProps.lastAction !== this.props.lastAction ||
         nextState.showDownloadProgress !== this.state.showDownloadProgress)
     }
