@@ -290,9 +290,24 @@ class XliffSAXTranslationReplacer {
 
                     $this->lastTransUnit = array();
 
+                    $warning = false;
                     for( $i = 0; $i < count( $list_of_ids ) ; $i++ ) {
-                        $id = $list_of_ids[ $i ] ;
-                        $this->lastTransUnit[] = $this->segments[ $id ] ;
+                        if( isset( $list_of_ids[ $i ] ) ){
+                            $id = $list_of_ids[ $i ] ;
+                            if( isset( $this->segments[ $id ] ) ){
+                                $this->lastTransUnit[] = $this->segments[ $id ] ;
+                            }
+                        } else {
+                            $warning = true;
+                        }
+                    }
+
+                    if( $warning ){
+                        $old_fname = Log::$fileName;
+                        Log::$fileName = "XliffSax_Polling.log";
+                        Log::doLog( "WARNING: PHP Notice polling: " . $this->currentId . " ---- " . $this->currentBuffer );
+                        Log::doLog( "\$_list_of_ids: " . var_export( $list_of_ids, true ) );
+                        Log::$fileName = $old_fname;
                     }
 
                     // init translation
