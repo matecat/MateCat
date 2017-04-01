@@ -190,7 +190,8 @@ class ModifyTeam extends React.Component {
                             <div className="ui icon mini button red" onClick={self.undoRemoveAction.bind(self)}><i className="icon-cancel3 icon"/></div>
                         </div>
                         <div className="content pad-top-10 pad-bottom-8">
-                            Abandoning this team, all projects within are unattainable, move them to your Personal Team if you do not want to lose them permanently
+                            By removing the last member the team will be deleted.
+                            All projects will be moved to your Personal area.
                         </div>
                     </div>;
                 }
@@ -343,7 +344,7 @@ class ModifyTeam extends React.Component {
                         <div className="ui one column grid right aligned">
                             <div className="column">
                                 <button className={"create-team ui primary button open " + applyButtonClass}
-                                onClick={this.applyChanges.bind(this)}>Confirm</button>
+                                onClick={this.applyChanges.bind(this)}>Close</button>
                             </div>
                         </div>
                     </div>

@@ -12,6 +12,7 @@ class Header extends React.Component {
         this.updateTeams = this.updateTeams.bind(this);
         this.chooseTeams = this.chooseTeams.bind(this);
         this.openModifyTeam = this.openModifyTeam.bind(this);
+        this.showPopup = true;
     }
 
     componentDidMount () {
@@ -19,12 +20,14 @@ class Header extends React.Component {
         TeamsStore.addListener(ManageConstants.RENDER_TEAMS, this.renderTeams);
         TeamsStore.addListener(ManageConstants.UPDATE_TEAMS, this.updateTeams);
         TeamsStore.addListener(ManageConstants.CHOOSE_TEAM, this.chooseTeams);
+        TeamsStore.addListener(ManageConstants.OPEN_INFO_TEAMS_POPUP, this.initPopup.bind(this));
     }
 
     componentWillUnmount() {
         TeamsStore.removeListener(ManageConstants.RENDER_TEAMS, this.renderTeams);
         TeamsStore.removeListener(ManageConstants.UPDATE_TEAMS, this.updateTeams);
         TeamsStore.removeListener(ManageConstants.CHOOSE_TEAM, this.chooseTeams);
+        TeamsStore.removeListener(ManageConstants.OPEN_INFO_TEAMS_POPUP, this.initPopup);
     }
 
     componentDidUpdate() {
@@ -47,7 +50,43 @@ class Header extends React.Component {
             } else {
                 dropdownTeams.dropdown();
             }
+
         }
+    }
+
+    initPopup() {
+        var self = this;
+        if (this.state.teams.size == 1 && this.props.showModals && this.showPopup) {
+            let tooltipTex = "<h4 class='header'>Add your first team!</h4>" +
+                "<div class='content'>" +
+                "<p>Create a team and invite your colleagues to share and manage projects as a team.</p>" +
+                "<a class='ui primary button close-popup-teams'>Got it!</a>" +
+                "</div>"
+            $(this.dropdownTeams).popup({
+                on:'click',
+                onHidden: self.removePopup.bind(this),
+                html : tooltipTex,
+                closable:false,
+                onCreate: self.onCreatePopup.bind(this),
+                className   : {
+                    popup: 'ui popup cta-create-team'
+                }
+            }).popup("show");
+            this.showPopup = false;
+        }
+    }
+
+    removePopup() {
+        $(this.dropdownTeams).popup('destroy');
+        ManageActions.setPopupTeamsCookie();
+        return true;
+    }
+
+    onCreatePopup() {
+        var self = this;
+        $('.close-popup-teams').on('click', function () {
+            $(self.dropdownTeams).popup('hide');
+        })
     }
 
     changeTeam(event, team) {
@@ -157,7 +196,7 @@ class Header extends React.Component {
             let addTeam = '';
             if (self.props.showModals) {
                 dontShowCursorClass = '';
-                addTeam = <div className="header" onClick={this.openCreateTeams.bind(this)}>New Team
+                addTeam = <div className="header" onClick={this.openCreateTeams.bind(this)}>Create New Team
                                 <a className="team-filter button show">
                                     <i className="icon-plus3 icon"/>
                                 </a>

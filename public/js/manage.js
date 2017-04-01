@@ -11,6 +11,8 @@ UI = {
         this.changeTeam = this.changeTeam.bind(this);
         this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
 
+        this.popupInfoTeamsStorageName = 'infoTeamPopup-' + config.userMail;
+
         //Job Actions
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_SETTINGS, this.openJobSettings);
         ProjectsStore.addListener(ManageConstants.OPEN_JOB_TM_PANEL, this.openJobTMPanel);
@@ -33,32 +35,32 @@ UI = {
 
         window.addEventListener('scroll', this.scrollDebounceFn());
 
-        // $(window).on("blur focus", function(e) {
-        //     let prevType = $(this).data("prevType");
-        //
-        //     if (prevType != e.type) {   //  reduce double fire issues
-        //         switch (e.type) {
-        //             case "blur":
-        //                 console.log("leave page");
-        //                 self.pageLeft = true;
-        //                 // clearInterval(UI.reloadProjectsInterval);
-        //                 break;
-        //             case "focus":
-        //                 // clearInterval(UI.reloadProjectsInterval);
-        //                 console.log("Enter page");
-        //                 // UI.reloadProjectsInterval = setInterval(function () {
-        //                 //     console.log("Reload Projects");
-        //                 //     self.reloadProjects();
-        //                 // }, 5e3);
-        //                 if (self.pageLeft) {
-        //                     self.reloadProjects();
-        //                 }
-        //                 break;
-        //         }
-        //     }
-        //
-        //     $(this).data("prevType", e.type);
-        // });
+        $(window).on("blur focus", function(e) {
+            let prevType = $(this).data("prevType");
+
+            if (prevType != e.type) {   //  reduce double fire issues
+                switch (e.type) {
+                    case "blur":
+                        console.log("leave page");
+                        self.pageLeft = true;
+                        // clearInterval(UI.reloadProjectsInterval);
+                        break;
+                    case "focus":
+                        // clearInterval(UI.reloadProjectsInterval);
+                        console.log("Enter page");
+                        // UI.reloadProjectsInterval = setInterval(function () {
+                        //     console.log("Reload Projects");
+                        //     self.reloadProjects();
+                        // }, 5e3);
+                        if (self.pageLeft) {
+                            self.reloadProjects();
+                        }
+                        break;
+                }
+            }
+
+            $(this).data("prevType", e.type);
+        });
 
         this.getAllTeams().done(function (data) {
 
@@ -67,10 +69,10 @@ UI = {
             self.selectedTeam = APP.getLastTeamSelected(self.teams);
             self.getTeamStructure(self.selectedTeam).done(function () {
                 ManageActions.selectTeam(self.selectedTeam);
+                self.checkPopupInfoTeams();
                 self.getProjects(self.selectedTeam).done(function(response){
                     self.renderProjects(response.data);
                 });
-
             });
         });
 
@@ -102,10 +104,10 @@ UI = {
                 ManageActions.updateProjects(total_projects);
             });
         }
-        // this.getAllTeams().done(function () {
-        //     self.teams = data.teams;
-        //     ManageActions.updateTeams(self.teams);
-        // });
+        this.getAllTeams(true).done(function (data) {
+            self.teams = data.teams;
+            ManageActions.updateTeams(self.teams);
+        });
 
     },
 
@@ -273,6 +275,36 @@ UI = {
         }
     },
 
+    checkPopupInfoTeams: function () {
+        let openPopup = localStorage.getItem(this.popupInfoTeamsStorageName);
+        if (!openPopup) {
+            ManageActions.openPopupTeams();
+        }
+    },
+
+    setPopupTeamsCookie: function () {
+        localStorage.setItem(this.popupInfoTeamsStorageName, true);
+    },
+
+    showNotificationProjectsChanged: function () {
+        let notification = {
+            title: 'Project Changed',
+            text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua',
+            type: 'warning',
+            position: 'tc',
+            allowHtml: true,
+            autoDismiss: false,
+        };
+        let boxUndo = APP.addNotification(notification);
+    },
+
+    selectPersonalTeam: function () {
+        var personalTeam = this.teams.find(function (team) {
+            return team.type == 'personal';
+        });
+        ManageActions.changeTeam(personalTeam);
+    },
+
     //********** REQUESTS *********************//
 
     /**
@@ -303,10 +335,13 @@ UI = {
         return APP.doRequest({
             data: data,
             success: function(d){
-                APP.timeAfterProjectRequest = new Date();
-                if (typeof d.errors != 'undefined' && d.errors.length && d.errors[0].code === 401) {
+
+                if (typeof d.errors != 'undefined' && d.errors.length && d.errors[0].code === 401   ) { //Not Logged or not in the team
                     window.location.reload();
-                }else if( typeof d.errors != 'undefined' && d.errors.length ){
+                } else if( typeof d.errors != 'undefined' && d.errors.length && d.errors[0].code === 404){
+                    UI.selectPersonalTeam();
+                    // UI.reloadProjects();
+                } else if( typeof d.errors != 'undefined' && d.errors.length ){
                     window.location = '/';
                 }
             },

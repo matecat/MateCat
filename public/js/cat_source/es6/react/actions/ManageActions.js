@@ -182,7 +182,7 @@ let ManageActions = {
             }
         ).error(function (response) {
             console.log("Error change assignee", response);
-            alert(response.responseJSON.errors[0].message);
+            UI.showNotificationProjectsChanged();
             UI.reloadProjects();
         });
 
@@ -256,6 +256,10 @@ let ManageActions = {
                 }, 1000);
             }
 
+        }).error(function (response) {
+            console.log("Error change assignee", response);
+            UI.showNotificationProjectsChanged();
+            UI.reloadProjects();
         });
     },
 
@@ -360,6 +364,15 @@ let ManageActions = {
         AppDispatcher.dispatch({
             actionType: ManageConstants.UPDATE_TEAMS,
             teams: teams
+        });
+    },
+
+    getAllTeams: function () {
+        UI.getAllTeams(true).done(function (data) {
+            AppDispatcher.dispatch({
+                actionType: ManageConstants.RENDER_TEAMS,
+                teams: data.teams,
+            });
         });
     },
 
@@ -470,8 +483,17 @@ let ManageActions = {
             actionType: ManageConstants.DISABLE_DOWNLOAD_BUTTON,
             idProject: id
         });
-    }
+    },
 
+    openPopupTeams: function () {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.OPEN_INFO_TEAMS_POPUP,
+        });
+    },
+
+    setPopupTeamsCookie: function () {
+        UI.setPopupTeamsCookie();
+    }
 };
 
 module.exports = ManageActions;

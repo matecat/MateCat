@@ -1,4 +1,5 @@
 <?php
+use Exceptions\NotFoundError;
 use Teams\MembershipDao;
 use Teams\MembershipStruct;
 use \API\V2\Json\Error;
@@ -133,7 +134,13 @@ class getProjectsController extends ajaxController {
         $this->featureSet = new FeatureSet();
         $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
 
-        $team = $this->filterTeam();
+        try {
+            $team = $this->filterTeam();
+        } catch( NotFoundError $e ){
+            $this->result = ( new Error( [ $e ] ) )->render();
+            return;
+        }
+
         if( $team->type == Constants_Teams::PERSONAL ){
             $assignee = $this->logged_user;
             $team = null;
@@ -216,7 +223,7 @@ class getProjectsController extends ajaxController {
         $dao = new MembershipDao() ;
         $team = $dao->findTeamByIdAndUser($this->id_team, $this->logged_user ) ;
         if ( !$team ) {
-            throw  new Exception('Team not found in user memberships') ;
+            throw  new NotFoundError( 'Team not found in user memberships', 404 ) ;
         }
         else {
             return $team ;

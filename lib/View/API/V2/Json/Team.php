@@ -37,9 +37,7 @@ class Team {
             $row[ 'members' ] = $memberShipFormatter->render();
         }
 
-        if( !empty( $invitations ) ){
-            $row[ 'pending_invitations' ] = $invitations;
-        }
+        $row[ 'pending_invitations' ] = $invitations;
 
         return $row;
     }
