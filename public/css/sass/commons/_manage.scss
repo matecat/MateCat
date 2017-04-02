@@ -766,3 +766,20 @@ footer nav ul a:hover {
 body {
     min-width: 1024px;
 }
+
+body {
+    .manage {
+        min-width: 1024px;
+        @media only screen and (min-width: 768px) and (max-width: 991px) {
+            min-width: 1024px !important;
+            width: 1200px !important;
+        }
+    }
+}
+
+body {
+    header {
+        min-width: 1024px;
+    }
+}
+
