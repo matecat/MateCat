@@ -26,7 +26,12 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
      */
     updateAll: function (projects) {
 
-        this.projects = this.projects.mergeDeep(projects);
+        /*this.projects = this.projects.mergeWith((oldProject, newProject, index) => {
+            return (newProject.get('id') === newProject.get('id')) ? oldProject : newProject
+        },Immutable.fromJS(projects));*/
+        // this.projects = this.projects.toSet().union(Immutable.fromJS(projects).toSet()).toList();
+        //
+        this.projects = Immutable.fromJS(projects);
 
     },
     /**

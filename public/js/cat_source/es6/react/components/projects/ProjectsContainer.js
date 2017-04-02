@@ -86,7 +86,7 @@ class ProjectsContainer extends React.Component {
         let thereAreMembers = (this.state.team.get("members") && this.state.team.get("members").size > 1 ||
             this.state.team.get("pending_invitations") && this.state.team.get("pending_invitations").size > 0) || this.state.team.get('type') === 'personal';
         return <div className="notify-notfound">
-            {this.state.filtering ? (
+            {(this.state.filtering || this.state.team.get('type') === 'personal' )? (
                 <div>
                     <div className="message-nofound">No Projects Found</div>
                     <div className="no-results-found"></div>
@@ -179,11 +179,11 @@ class ProjectsContainer extends React.Component {
 
 
     shouldComponentUpdate(nextProps, nextState) {
-        return (nextState.projects !== this.state.projects ||
+        return (!nextState.projects.equals(this.state.projects) ||
         nextState.more_projects !== this.state.more_projects ||
         nextState.reloading_projects !== this.state.reloading_projects ||
-        nextState.team !== this.state.team ||
-        nextState.teams !== this.state.teams )
+        !nextState.team.equals(this.state.team) ||
+        !nextState.teams.equals(this.state.teams) )
     }
 
     render() {
