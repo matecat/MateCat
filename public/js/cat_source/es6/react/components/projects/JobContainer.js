@@ -272,7 +272,7 @@ class JobContainer extends React.Component {
                 let item = '<div style="text-align: left"><span style="font-weight: bold">' + descript + '</span> (' + key.key + ')</div>';
                 tooltipText =  tooltipText + item;
             });
-            return  <a className=" ui icon basic button tm-keys" data-html={tooltipText}
+            return  <a className=" ui icon basic button tm-keys" data-html={tooltipText} data-variation="tiny"
                        ref={(tooltip) => this.tmTooltip = tooltip}
                    onClick={this.openTMPanel.bind(this)}>
                     <i className="icon-tm-matecat icon"/>
@@ -294,7 +294,7 @@ class JobContainer extends React.Component {
             }
             var translatedUrl = this.getTranslateUrl() + '?action=openComments';
             icon = <div className="comments-icon-container activity-icon-single"><a className=" ui icon basic button comments-tooltip"
-                      data-html={tooltipText} href={translatedUrl} target="_blank"
+                      data-html={tooltipText} href={translatedUrl} data-variation="tiny" target="_blank"
                         ref={(tooltip) => this.commentsTooltip = tooltip}>
                     <i className="icon-uniE96B icon"/>
             </a></div>;
@@ -311,7 +311,7 @@ class JobContainer extends React.Component {
             let tooltipText = "Overall quality: " + quality.toUpperCase();
             var classQuality = (quality === "poor") ? 'yellow' : 'red';
             icon = <div className="qreport-icon-container activity-icon-single"><a className={"ui icon basic button qr-tooltip " + classQuality}
-                      data-html={tooltipText} href={url} target="_blank" data-position="top center"
+                      data-html={tooltipText} href={url} target="_blank" data-position="top center" data-variation="tiny"
                         ref={(tooltip) => this.activityTooltip = tooltip}>
                     <i className="icon-qr-matecat icon"/>
             </a></div>
@@ -327,8 +327,8 @@ class JobContainer extends React.Component {
             var url = this.getTranslateUrl() + '?action=warnings';
             let tooltipText = "Click to see issues";
             icon = <div className="warnings-icon-container activity-icon-single">
-                <a className="ui icon basic button warning-tooltip"
-                   data-html={tooltipText} href={url} target="_blank" data-position="top center"
+                <a className="ui icon basic red button warning-tooltip"
+                   data-html={tooltipText} href={url} target="_blank" data-position="top center" data-variation="tiny"
                    ref={(tooltip) => this.warningTooltip = tooltip}>
                 <i className="icon-notice icon"/>
             </a></div>;
@@ -343,7 +343,7 @@ class JobContainer extends React.Component {
         if ( warnings > 0 ) {
             var url = this.getTranslateUrl() + '?action=warnings';
             let tooltipText = "Click to see issues";
-            icon =<a className="ui icon basic button "
+            icon =<a className="ui icon basic red button "
                       href={url} target="_blank" data-position="top center">
                     <i className="icon-notice icon"/>
                     {tooltipText}
@@ -579,13 +579,13 @@ class JobContainer extends React.Component {
                     <div className="progress-bar">
                         <div className="progr">
                             <div className="meter">
-                                <a className="warning-bar translate-tooltip" data-html={'Rejected '+this.props.job.get('stats').get('REJECTED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('REJECTED_PERC') + '%'}}
+                                <a className="warning-bar translate-tooltip" data-variation="tiny" data-html={'Rejected '+this.props.job.get('stats').get('REJECTED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('REJECTED_PERC') + '%'}}
                                    ref={(tooltip) => this.rejectedTooltip = tooltip}/>
-                                <a className="approved-bar translate-tooltip" data-html={'Approved '+this.props.job.get('stats').get('APPROVED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('APPROVED_PERC')+ '%' }}
+                                <a className="approved-bar translate-tooltip" data-variation="tiny" data-html={'Approved '+this.props.job.get('stats').get('APPROVED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('APPROVED_PERC')+ '%' }}
                                    ref={(tooltip) => this.approvedTooltip = tooltip}/>
-                                <a className="translated-bar translate-tooltip" data-html={'Translated '+this.props.job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('TRANSLATED_PERC') + '%' }}
+                                <a className="translated-bar translate-tooltip" data-variation="tiny" data-html={'Translated '+this.props.job.get('stats').get('TRANSLATED_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('TRANSLATED_PERC') + '%' }}
                                    ref={(tooltip) => this.translatedTooltip = tooltip}/>
-                                <a className="draft-bar translate-tooltip" data-html={'Draft '+this.props.job.get('stats').get('DRAFT_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('DRAFT_PERC') + '%' }}
+                                <a className="draft-bar translate-tooltip" data-variation="tiny" data-html={'Draft '+this.props.job.get('stats').get('DRAFT_PERC_FORMATTED') +'%'} style={{width: this.props.job.get('stats').get('DRAFT_PERC') + '%' }}
                                    ref={(tooltip) => this.draftTooltip = tooltip}/>
                             </div>
                         </div>

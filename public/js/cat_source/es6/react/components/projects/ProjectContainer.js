@@ -320,7 +320,7 @@ class ProjectContainer extends React.Component {
             return <div className="item" data-value={user.get('uid')}
                         key={'user' + user.get('uid')}>
                 {userIcon}
-                {user.get('first_name') + " " + user.get('last_name')}
+                <span className="user-name-dropdown">{user.get('first_name') + " " + user.get('last_name')}</span>
             </div>
         });
 
@@ -340,12 +340,12 @@ class ProjectContainer extends React.Component {
             <div className="menu">
                 <div className="header"
                      onClick={this.openAddMember.bind(this)}>
-                    <a href="#">New Member <i className="icon-plus3 icon right"/></a>
+                    <a href="#">Add New Member <i className="icon-plus3 icon right"/></a>
                 </div>
                 <div className="divider"></div>
                 <div className="ui icon search input">
                     <i className="icon-search icon"/>
-                    <input type="text" name="UserName" placeholder="Name or email." />
+                    <input type="text" name="UserName" placeholder="Search by name." />
                 </div>
                 {/*<div className="scrolling menu">*/}
                 {members}
@@ -393,7 +393,7 @@ class ProjectContainer extends React.Component {
             });
             let tooltipText = "You can move this project to other team";
             result = <div className={"ui dropdown top right pointing project-team shadow-1 "}
-                          ref={(dropdownTeams) => this.dropdownTeams = dropdownTeams} data-html={tooltipText}>
+                          ref={(dropdownTeams) => this.dropdownTeams = dropdownTeams} data-html={tooltipText} data-variation="tiny">
                         <span className="text">
                         </span>
                         <div className="menu">
@@ -501,11 +501,11 @@ class ProjectContainer extends React.Component {
                                 <div className="ui stackable grid">
                                     <div className="sixteen wide column">
                                         <div className="ui ribbon label">
+                                            <span className="project-id" title="Project id">
+                                                {"(" + this.props.project.get('id') + ")"}
+                                            </span>
                                             <span className="project-name" title="Project name">
                                                 {this.state.projectName}
-                                            </span>
-                                            <span className="project-id" title="Project id">
-                                                {"(ID: " + this.props.project.get('id') + ")"}
                                             </span>
                                             {state}
                                         </div>
