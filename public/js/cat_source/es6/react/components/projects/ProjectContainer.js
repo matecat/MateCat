@@ -460,7 +460,7 @@ class ProjectContainer extends React.Component {
             let date = this.getLastActionDate();
             lastAction = <div className="sixteen wide right aligned column pad-top-0 pad-bottom-0">
                 <div className="activity-log">
-                    <a href={activityLogUrl} target="_blank" className="right activity-log">
+                    <a href={activityLogUrl} target="_blank" className="right activity-log" title="Activity log">
                         <i> <span>Last action: {this.state.lastAction.action + ' on ' + date}</span><span> by {this.state.lastAction.first_name }</span></i>
                     </a>
                 </div>
@@ -468,7 +468,7 @@ class ProjectContainer extends React.Component {
         } else {
             lastAction = <div className="sixteen wide right aligned column pad-top-0 pad-bottom-0">
                 <div className="activity-log">
-                    <a href={activityLogUrl} target="_blank" className="right activity-log">
+                    <a href={activityLogUrl} target="_blank" className="right activity-log" title="Activity log">
                         <i> <span>Created on: {this.props.project.get('jobs').first().get('formatted_create_date')}</span></i>
                     </a>
                 </div>
@@ -501,10 +501,10 @@ class ProjectContainer extends React.Component {
                                 <div className="ui stackable grid">
                                     <div className="sixteen wide column">
                                         <div className="ui ribbon label">
-                                            <span className="project-name">
+                                            <span className="project-name" title="Project name">
                                                 {this.state.projectName}
                                             </span>
-                                            <span className="project-id">
+                                            <span className="project-id" title="Project id">
                                                 {"(ID: " + this.props.project.get('id') + ")"}
                                             </span>
                                             {state}
@@ -520,7 +520,7 @@ class ProjectContainer extends React.Component {
                                         <div className="project-activity-icon">
                                             {dropDownTeams}
                                             {dropDownUsers}
-                                            <div className="project-menu ui icon top right pointing dropdown circular button"
+                                            <div className="project-menu ui icon top right pointing dropdown circular button" title="Project menu"
                                                     ref={(dropdown) => this.dropdown = dropdown}>
                                                 <i className="icon-more_vert icon" />
                                                 {projectMenu}

@@ -111,7 +111,7 @@ class SubHeader extends React.Component {
             members = members.unshift(item);
 
 
-            result = <div className="users-filter">
+            result = <div className="users-filter" title="Filter project by members">
 
                         <div className="assigned-list">
                             <p>Projects of: </p>

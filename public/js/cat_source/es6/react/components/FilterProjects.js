@@ -25,7 +25,7 @@ class FilterProjects extends React.Component {
     }
 
     render () {
-        return <div className="ui top left pointing dropdown" ref={(dropdown) => this.dropdown = dropdown}>
+        return <div className="ui top left pointing dropdown" title="Status Filter" ref={(dropdown) => this.dropdown = dropdown}>
                     <i className="icon-filter icon" />
                     <div className="text">Active</div>
                     <div className="menu">

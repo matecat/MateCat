@@ -93,7 +93,7 @@ class ProjectsContainer extends React.Component {
                 </div>
                 ) :(this.state.team.get('type') === 'personal' ?
                         (<div className="no-results-teams">
-                                <div className="message-nofound">Welcome to your personal area</div>
+                                <div className="message-nofound">Welcome to your Personal area</div>
                                 <div className="welcome-to-matecat">
 
                                 </div>
