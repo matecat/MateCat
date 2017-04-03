@@ -85,14 +85,14 @@ class ProjectContainer extends React.Component {
     changeUser(value) {
         let user, idUser;
         let team = this.props.team;
+        if (this.props.team.get('type') == 'personal') {
+            team = this.projectTeam;
+        }
         if (value === '-1') {
             user = -1;
             idUser = -1;
             $(this.dropdownUsers).dropdown('hide');
         } else {
-            if (this.props.team.get('type') == 'personal') {
-                team = this.projectTeam;
-            }
             let newUser = team.get('members').find(function (member) {
                 let user = member.get('user');
                 if (user.get('uid') === parseInt(value) ) {
