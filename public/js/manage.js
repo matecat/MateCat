@@ -288,8 +288,8 @@ UI = {
 
     showNotificationProjectsChanged: function () {
         let notification = {
-            title: 'Project Changed',
-            text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua',
+            title: 'Ooops...',
+            text: 'Something went wrong, the project has been assigned to another member or moved to another team.',
             type: 'warning',
             position: 'tc',
             allowHtml: true,
@@ -515,7 +515,7 @@ UI = {
         return $.ajax({
             data: JSON.stringify(data),
             type: "PUT",
-            url : "/api/v2/teams/" + this.selectedTeam.id + "/projects/" + project.id
+            url : "/api/v2/teams/" + project.id_team + "/projects/" + project.id
         });
     },
 

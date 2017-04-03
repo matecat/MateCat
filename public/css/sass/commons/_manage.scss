@@ -767,19 +767,6 @@ body {
     min-width: 1024px;
 }
 
-body {
-    .manage {
-        min-width: 1024px;
-        @media only screen and (min-width: 768px) and (max-width: 991px) {
-            min-width: 1024px !important;
-            width: 1200px !important;
-        }
-    }
+.ui.pointing.dropdown > .menu:after {
+    box-shadow: -1px -1px 0px 0px rgb(222, 222, 223);
 }
-
-body {
-    header {
-        min-width: 1024px;
-    }
-}
-
