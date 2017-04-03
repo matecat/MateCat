@@ -446,7 +446,7 @@ class JobContainer extends React.Component {
         if (this.props.job.get('outsource')) {
             if (this.props.job.get('outsource').get('id_vendor') == "1") {
                 outsourceJobLabel =
-                    <a href="http://www.translated.net" target="_blank"><img className='outsource-logo' src="/public/img/logo_translated.png" title="visit our website"/></a>;
+                    <a href="http://www.translated.net" target="_blank"><img className='outsource-logo' src="/public/img/logo_translated.png" title="Outsourced to translated.net" alt="Translated logo"/></a>;
             }
         }
         return outsourceJobLabel;
@@ -457,7 +457,7 @@ class JobContainer extends React.Component {
         if (this.props.job.get('outsource')) {
             if (this.props.job.get('outsource').get('id_vendor') == "1") {
                 let date  = this.props.job.get('outsource').get('delivery_date').substring(0, this.props.job.get('outsource').get('delivery_date').lastIndexOf(":"))
-                outsourceDelivery = <div className="job-delivery">{date}</div>;
+                outsourceDelivery = <div className="job-delivery" title="Delivery date">{date}</div>;
             }
         }
         return outsourceDelivery;
@@ -573,7 +573,7 @@ class JobContainer extends React.Component {
                             {this.props.job.get('targetTxt')}
                         </div>
                     </div>
-                    <div className="job-id">
+                    <div className="job-id" title="Job Id">
                         { idJobLabel }
                     </div>
                     <div className="progress-bar">
@@ -597,7 +597,7 @@ class JobContainer extends React.Component {
                         {tmIcon}
                     </div>
                     {warningIcons}
-                    <div className="ui icon top right pointing dropdown job-menu  button"
+                    <div className="ui icon top right pointing dropdown job-menu  button" title="Job menu"
                             ref={(dropdown) => this.dropdown = dropdown}>
                         <i className="icon-more_vert icon"/>
                         {jobMenu}
