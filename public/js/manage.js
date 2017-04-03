@@ -288,8 +288,8 @@ UI = {
 
     showNotificationProjectsChanged: function () {
         let notification = {
-            title: 'Project Changed',
-            text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua',
+            title: 'Ooops...',
+            text: 'Something went wrong, the project has been assigned to another member or moved to another team.',
             type: 'warning',
             position: 'tc',
             allowHtml: true,
