@@ -24,6 +24,11 @@ class FilterProjects extends React.Component {
         }
     }
 
+    componentDidUpdate() {
+        this.currentFilter = 'active';
+        $(this.dropdown).dropdown('set selected', 'active');
+    }
+
     render () {
         return <div className="ui top left pointing dropdown" title="Status Filter" ref={(dropdown) => this.dropdown = dropdown}>
                     <i className="icon-filter icon" />
