@@ -162,8 +162,21 @@ class ProjectModel {
             throw new AuthorizationError( "Not Authorized", 403 );
         }
 
-        // if the project has an assignee, we have to check if the assignee_id exists in the other team. If not, reset the assignee
-        if( $this->project_struct->id_assignee ){
+        /**
+         * @var $team \Teams\TeamStruct
+         */
+        $team = ( new TeamDao() )->setCacheTTL( 60 * 60 )->getPersonalByUid( $this->user->uid );
+
+        // check if the destination team is personal, in such case set the assignee to the user UID
+        if( $team->id == $this->willChange[ 'id_team' ] && $team->type == Constants_Teams::PERSONAL ){
+            $this->willChange[ 'id_assignee' ] = $this->user->uid;
+            $this->cacheTeamsToClean[] = $this->willChange[ 'id_team' ];
+            $this->cacheTeamsToClean[] = $this->project_struct->id_team;
+        }
+
+        // if the project has an assignee abd the destination team is not personal,
+        // we have to check if the assignee_id exists in the other team. If not, reset the assignee
+        elseif( $this->project_struct->id_assignee ){
 
             $found = array_filter( $memberList, function( $values ) {
                 return $this->project_struct->id_assignee == $values->uid;
@@ -182,7 +195,6 @@ class ProjectModel {
             $this->cacheTeamsToClean[] = $this->project_struct->id_team;
 
         }
-
 
     }
 
