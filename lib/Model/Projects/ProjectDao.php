@@ -30,6 +30,18 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
 
     }
 
+    public function deleteFailedProject( $idProject ){
+
+        if( empty( $idProject ) ) return 0;
+
+        $sql = "DELETE FROM projects WHERE id = :id_project";
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $success = $stmt->execute( [ 'id_project' => $idProject ] );
+        return $stmt->rowCount();
+
+    }
+
     /**
      * @param int $id_job
      * @return Projects_ProjectStruct
