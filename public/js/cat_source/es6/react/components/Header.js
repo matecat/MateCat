@@ -148,12 +148,12 @@ class Header extends React.Component {
             if (APP.USER.STORE.metadata) {
                 return <img onClick={this.openPreferencesModal.bind(this)}
                             className="ui mini circular image ui-user-top-image"
-                            src={APP.USER.STORE.metadata.gplus_picture + "?sz=80"}/>
+                            src={APP.USER.STORE.metadata.gplus_picture + "?sz=80"} title="Personal settings" alt="Profile picture"/>
             }
             return <div className="ui user label"
                         onClick={this.openPreferencesModal.bind(this)}>{config.userShortName}</div>
         } else {
-            return <div className="ui user-nolog label" onClick={this.openLoginModal.bind(this)}>
+            return <div className="ui user-nolog label" onClick={this.openLoginModal.bind(this)} title="Login">
 	                    <i className="icon-user22"/>
                     </div>
 
