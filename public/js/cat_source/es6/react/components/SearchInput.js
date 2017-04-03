@@ -37,6 +37,10 @@ class SearchInput extends React.Component {
         }
     }
 
+    componentDidUpdate() {
+        $(this.textInput).val('');
+    }
+
 
     render () {
         return (
