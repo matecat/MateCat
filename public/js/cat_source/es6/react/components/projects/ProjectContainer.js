@@ -84,15 +84,15 @@ class ProjectContainer extends React.Component {
 
     changeUser(value) {
         let user, idUser;
+        let team = this.props.team;
+        if (this.props.team.get('type') == 'personal') {
+            team = this.projectTeam;
+        }
         if (value === '-1') {
             user = -1;
             idUser = -1;
             $(this.dropdownUsers).dropdown('hide');
         } else {
-            let team = this.props.team;
-            if (this.props.team.get('type') == 'personal') {
-                team = this.projectTeam;
-            }
             let newUser = team.get('members').find(function (member) {
                 let user = member.get('user');
                 if (user.get('uid') === parseInt(value) ) {
@@ -106,7 +106,7 @@ class ProjectContainer extends React.Component {
             idUser = user.get('uid');
         }
         if ( (!this.props.project.get('id_assignee') && idUser !== -1) || (this.props.project.get('id_assignee') && idUser != this.props.project.get('id_assignee'))) {
-            ManageActions.changeProjectAssignee(this.props.team, this.props.project, user);
+            ManageActions.changeProjectAssignee(team, this.props.project, user);
         }
     }
 

@@ -882,7 +882,7 @@ div#matecat-modal p {
                 overflow-y: auto;
                 max-height: 210px;
                 position: relative!important;
-                padding: 0 10px 0 0;
+                padding: 0;
             }
             ::-webkit-scrollbar {
                 width: 10px;
@@ -1030,6 +1030,7 @@ div#matecat-modal p {
     }
 }
 
+
 .modify-team-modal {
 
 }
@@ -1141,6 +1142,10 @@ div#matecat-modal p {
                     float: right;
                 }
             }
+        }
+        .button {
+            font-size: 18px;
+            padding: 11px 22px;
         }
         .dropdown {
             .menu {

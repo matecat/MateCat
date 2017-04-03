@@ -766,3 +766,7 @@ footer nav ul a:hover {
 body {
     min-width: 1024px;
 }
+
+.ui.pointing.dropdown > .menu:after {
+    box-shadow: -1px -1px 0px 0px rgb(222, 222, 223);
+}
