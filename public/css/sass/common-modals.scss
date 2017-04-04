@@ -254,6 +254,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     background: url(https://www.matecat.com/wp-content/themes/stanleywp/images/bgfeat5.png) no-repeat;
     background-size: 84%;
     background-position: 370% center;
+    padding-top: 30px;
 }
 
 .login-container-left {
@@ -385,10 +386,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
 
 .login-form-container,
 .register-form-container {
-    border-top: 1px solid #ccc;
     margin: 0 auto;
-    padding-top: 10px;
-
 }
 
 .login-form-container {
@@ -425,7 +423,7 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
 }
 
 .register-modal {
-    padding: 10px 15%;
+    padding: 25px 15%;
 }
 
 .register-modal h2 {
@@ -792,6 +790,7 @@ div#matecat-modal p {
     background-position: 0 0;
     background-size: cover;
     border: none;
+
 }
 
 .matecat-modal-content .btn-confirm-medium.google-login-button, .matecat-modal-content .btn-confirm-medium.google-login-button:hover, .matecat-modal-content .btn-confirm-medium.google-login-button:focus {
@@ -800,6 +799,8 @@ div#matecat-modal p {
     height: 30px;
     width: 160px;
     margin-left: 0;
+    margin-top: 5px;
+    margin-bottom: 0;
 }
 
 .matecat-modal-content .btn-confirm-medium.google-login-button:hover {
@@ -907,7 +908,7 @@ div#matecat-modal p {
             }
             &.team {
                 .item {
-                    padding: 5px 0;
+                    padding: 5px 10px;
                     &:hover {
                         //background-color: #e0e1e2;
                         .mini.ui.button.right.floated  {
@@ -939,7 +940,8 @@ div#matecat-modal p {
                         font-size: 14px;
                         color: grey;
                     }
-                    .content.pending-msg {
+                    .content.pending-msg,
+                    .content.invite-sent-msg{
                         font-weight: 100;
                         font-size: 14px;
                         color: grey;
@@ -1071,6 +1073,48 @@ div#matecat-modal p {
 .action {
     .tmx-import-slider {
         width: 150px !important;
+    }
+}
+
+.login-form-container {
+    .form-divider {
+        margin-bottom: 15px;
+    }
+}
+.register-modal {
+    .form-divider {
+        margin-top: 25px;
+        margin-bottom: 10px;
+    }
+    .condition-google {
+        font-size: 12px;
+    }
+}
+
+.form-divider {
+
+    width: 100%;
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+    height: 20px;
+    line-height: 20px;
+    margin-top: 15px;
+
+
+    .divider-line {
+        height: 2px;
+        width: 40%;
+        background-color: #c5c5c5;
+        margin-top: 10px;
+        display: block;
+        float: left;
+    }
+
+    span {
+        float: left;
+        width: 20%;
+        color: #656565;
     }
 }
 

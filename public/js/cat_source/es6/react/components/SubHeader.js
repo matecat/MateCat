@@ -157,6 +157,10 @@ class SubHeader extends React.Component {
         }
     }
 
+    shouldComponentUpdate(nextProps, nextState) {
+        return _.isUndefined(this.props.selectedTeam) || !nextProps.selectedTeam.equals(this.props.selectedTeam)
+    }
+
     render () {
         let membersFilter = this.getUserFilter();
         let currentStatusLabel = this.getCurrentStatusLabel();
