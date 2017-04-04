@@ -34,6 +34,8 @@
         <link rel="stylesheet" tal:attributes="href css_url"/>
     </tal:block>
 
+    <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
+
     <!-- Shim to make HTML5 elements usable in older Internet Explorer versions -->
     <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
