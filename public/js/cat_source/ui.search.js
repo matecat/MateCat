@@ -112,7 +112,8 @@ $.extend(UI, {
 			if (this.pendingRender.detectSegmentToScroll) {
 				this.pendingRender.segmentToScroll = this.nextUnloadedResultSegment();
 			}
-			$('#outer').empty();
+
+			UI.unmountSegments();
 
 			this.render(this.pendingRender);
 			this.pendingRender = false;
@@ -174,7 +175,7 @@ $.extend(UI, {
 					APP.alert({msg: d.errors[0].message});
 					return false;
 				}
-				$('#outer').empty();
+				UI.unmountSegments();
 				UI.render();
 			}
 		});
@@ -548,7 +549,7 @@ $.extend(UI, {
 						};
 					} else {
 						var seg2scroll = this.nextUnloadedResultSegment();
-						$('#outer').empty();
+						UI.unmountSegments();
 						this.render({
 							applySearch: true,
 							segmentToScroll: seg2scroll
@@ -581,7 +582,7 @@ $.extend(UI, {
 						return false;
 					}
 				}
-			});			
+			});
 			if (!found) {
 				// load new segments
 				if (!this.searchResultsSegments) {
@@ -591,7 +592,7 @@ $.extend(UI, {
 					};
 				} else {
 					seg2scroll = this.nextUnloadedResultSegment();
-					$('#outer').empty();
+					UI.unmountSegments();
 					this.render({
 						applySearch: true,
 						segmentToScroll: seg2scroll
