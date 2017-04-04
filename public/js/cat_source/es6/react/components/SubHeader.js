@@ -156,7 +156,7 @@ class SubHeader extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        return _.isUndefined(this.props.selectedTeam) || !nextProps.selectedTeam.equals(this.props.selectedTeam)
+        return _.isUndefined(this.props.selectedTeam) || (!_.isUndefined(nextProps.selectedTeam) && !nextProps.selectedTeam.equals(this.props.selectedTeam) )
     }
 
     render () {
