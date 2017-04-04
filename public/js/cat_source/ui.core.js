@@ -417,7 +417,7 @@ UI = {
                 } else {
                     $.cookie('source_copied_to_target-' + config.id_job + "-" + config.password, '1', { expires:1 });
                     APP.closePopup();
-                    $('#outer').empty();
+                    UI.unmountSegments();
                     UI.render({
                         segmentToOpen: UI.currentSegmentId
                     });
@@ -1139,21 +1139,38 @@ UI = {
         // TODO: remove thi function once we know who's calling it.
         console.warn('This function does nothing and should be removed.');
 	},
-	gotoNextSegment: function() {
-        var selector = UI.selectorForNextSegment() ;
-		var next = $('.editor').nextAll( selector  ).first();
 
-		if (next.is('section')) {
-			$(UI.targetContainerSelector(), next).trigger("click", "moving");
-		} else {
-			next = UI.currentFile.next().find( selector ).first();
-			if (next.length) {
-                $(UI.targetContainerSelector(), next).trigger("click", "moving");
-			} else {
-                UI.closeSegment(UI.currentSegment, 1, 'save');
+    /**
+     * findNextSegment
+     *
+     * Finds next segment or returns null if next segment does not exist.
+     */
+    findNextSegment : function() {
+        var selector = UI.selectorForNextSegment() ;
+        var next = $('.editor').nextAll( selector ).first();
+
+        if ( next.is('section') ) {
+            return next ;
+        } else {
+            next = UI.currentFile.next().find( selector ).first();
+            if ( next.length ) {
+                return next ;
             }
-		}
+        }
+        return false ;
+    },
+
+	gotoNextSegment: function() {
+        var next = UI.findNextSegment();
+
+        if ( next ) {
+            $( UI.targetContainerSelector(), next ).trigger("click", "moving");
+        }
+        else {
+            UI.closeSegment(UI.currentSegment, 1, 'save');
+        }
 	},
+
 	gotoNextUntranslatedSegment: function() {
         console.log('gotoNextUntranslatedSegment');
 		if (!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {
@@ -1174,7 +1191,7 @@ UI = {
         if ($('#segment-' + this.currentSegmentId).length) {
 			UI.scrollSegment(this.currentSegment, false, quick);
 		} else {
-			$('#outer').empty();
+            UI.unmountSegments();
 			this.render({
 				segmentToOpen: this.currentSegmentId
 			});
@@ -1233,6 +1250,18 @@ UI = {
 		$('#spellCheck .words').remove();
 	},
 
+    /**
+     * removed the #outer div, taking care of extra cleaning needed, like unmounting
+     * react components, closing side panel etc.
+     */
+    unmountSegments : function() {
+        $('[data-mount=translation-issues-button]').each( function() {
+            ReactDOM.unmountComponentAtNode(this);
+        });
+
+        $('#outer').empty();
+    },
+
     placeCaretAtEnd: function(el) {
 
 		 $(el).focus();
@@ -1260,15 +1289,14 @@ UI = {
 	reloadToSegment: function(segmentId) {
 		this.infiniteScroll = false;
 		config.last_opened_segment = segmentId;
-		window.location.hash = segmentId;
-		$('#outer').empty();
-		this.render();
+        UI.unmountSegments();
+		this.render({ segmentToOpen : segmentId });
 	},
 	renderUntranslatedOutOfView: function() {
 		this.infiniteScroll = false;
 		config.last_opened_segment = this.nextUntranslatedSegmentId;
 		window.location.hash = this.nextUntranslatedSegmentId;
-		$('#outer').empty();
+        UI.unmountSegments();
 		this.render();
 	},
 	reloadWarning: function() {
@@ -1279,10 +1307,10 @@ UI = {
 			return;
 		if (segmentId === '') {
 			this.startSegmentId = config.last_opened_segment;
-			$('#outer').empty();
+            UI.unmountSegments();
 			this.render();
 		} else {
-			$('#outer').empty();
+            UI.unmountSegments();
 			this.render();
 		}
 	},
@@ -1513,14 +1541,14 @@ UI = {
         });
 		segment.addClass('saved');
 	},
+
 	renderAndScrollToSegment: function(sid) {
-		$('#outer').empty();
+        UI.unmountSegments();
 		this.render({
 			caller: 'link2file',
 			segmentToScroll: sid,
 			scrollToFile: true
 		});
-//        this.render(false, segment.selector.split('-')[1]);
 	},
 
 	spellCheck: function(ed) {
@@ -3226,10 +3254,9 @@ UI = {
         }
     },
     restart: function () {
-        $('#outer').empty();
+        UI.unmountSegments();
         this.start();
     },
-
 
     /**
      * Edit area click
@@ -3328,6 +3355,7 @@ UI = {
         }
 
         if ( UI.maxNumSegmentsReached() && !UI.offline ) {
+            // TODO: argument should be next segment to open
             UI.reloadToSegment( UI.currentSegmentId );
             return ;
         }

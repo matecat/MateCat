@@ -150,9 +150,14 @@ class Xliff_Parser {
 					if ($j > 0) {
 						// Getting Trans-unit attributes
 						// ID
-						unset($temp);
-						preg_match('|id\s?=\s?["\'](.*?)["\']|si', $trans_unit, $temp);
-						$xliff['files'][$i]['trans-units'][$j]['attr']['id'] = $temp[1];
+                        unset( $temp );
+                        preg_match( '|id\s?=\s?["\'](.*?)["\']|si', $trans_unit, $temp );
+
+                        if ( trim( $temp[ 1 ] ) == "" ) {
+                            throw new DomainException( "Invalid trans-unit id found. EMPTY value", 400 );
+                        }
+
+                        $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'attr' ][ 'id' ] = $temp[ 1 ];
 
 						// Translate
 						unset($temp);
