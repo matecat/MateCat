@@ -42,6 +42,7 @@ body.manage {
 
 .ui.top.right.pointing.dropdown > .menu:after {
     right: .5em;
+    z-index: -1;
 }
 
 .item.cancel-item {
