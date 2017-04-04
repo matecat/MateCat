@@ -10,7 +10,7 @@ class ModifyTeam extends React.Component {
             inputNameError: false,
             showRemoveMessageUserID: null,
             readyToSend: false,
-            usersToAdd: []
+            resendInviteArray: []
         };
         this.updateTeam = this.updateTeam.bind(this);
     }
@@ -47,17 +47,11 @@ class ModifyTeam extends React.Component {
 
     resendInvite(mail) {
         ManageActions.addUserToTeam(this.state.team, mail);
-    }
-
-    cancelInvite(mail) {
-        var newArray = this.state.usersToAdd.slice();
-        var index = newArray.indexOf(mail);
-        if (index > -1) {
-            newArray.splice(index, 1);this.setState({
-                usersToAdd: newArray
-            });
-
-        }
+        var resendInviteArray = this.state.resendInviteArray;
+        resendInviteArray.push(mail);
+        this.setState({
+            resendInviteArray: resendInviteArray
+        });
     }
 
     handleKeyPressUserInput(e) {
@@ -72,27 +66,6 @@ class ModifyTeam extends React.Component {
         }
         return false;
     }
-
-    /*addTemporaryUser() {
-        if ( APP.checkEmail(this.inputNewUSer.value)) {
-            // this.state.usersToAdd.push(this.inputNewUSer.value);
-            let arrayNewUsers = this.state.usersToAdd.slice();
-            arrayNewUsers.push(this.inputNewUSer.value);
-            this.setState({
-                usersToAdd: arrayNewUsers
-            });
-            this.inputNewUSer.value = '';
-        } else {
-            this.setState({
-                inputUserError: true
-            });
-        }
-    }*/
-
-    /*addUser() {
-        ManageActions.addUserToTeam(this.state.team, this.state.usersToAdd);
-        return true;
-    }*/
 
     addUser() {
         if ( APP.checkEmail(this.inputNewUSer.value)) {
@@ -156,9 +129,6 @@ class ModifyTeam extends React.Component {
                 });
                 return true;
             }
-        }
-        if (this.state.usersToAdd.length > 0) {
-            this.addUser();
         }
         if ( teamNameOk )  {
             APP.ModalWindow.onCloseModal();
@@ -237,11 +207,20 @@ class ModifyTeam extends React.Component {
         let self = this;
         if (!this.state.team.get('pending_invitations') || !this.state.team.get('pending_invitations').size > 0) return;
         return this.state.team.get('pending_invitations').map(function(mail, i) {
+            var inviteResended = (self.state.resendInviteArray.indexOf(mail) > -1);
             return <div className="item pending-invitation"
                          key={'user-invitation' + i}>
-                        <div className="mini ui button right floated"
-                             onClick={self.resendInvite.bind(self, mail)}>Resend Invite</div>
-                        <div className="ui right floated content pending-msg">Pending user</div>
+                {inviteResended ? (
+
+                        <div className="ui right floated content invite-sent-msg">Invite sent</div>
+                        ) : (
+                        <div>
+                            <div className="mini ui button right floated"
+                                 onClick={self.resendInvite.bind(self, mail)}>Resend Invite</div>
+                            <div className="ui right floated content pending-msg">Pending user</div>
+                        </div>
+                        )}
+
                         <div className="ui tiny image label">{mail.substring(0, 1).toUpperCase()}</div>
                         <div className="middle aligned content">
                             <div className="content user">
@@ -279,8 +258,7 @@ class ModifyTeam extends React.Component {
                 nextState.inputUserError !== this.state.inputUserError ||
                 nextState.inputNameError !== this.state.inputNameError ||
                 nextState.showRemoveMessageUserID !== this.state.showRemoveMessageUserID ||
-                nextState.readyToSend !== this.state.readyToSend ||
-                nextState.usersToAdd !== this.state.usersToAdd
+                nextState.readyToSend !== this.state.readyToSend
         )
     }
 

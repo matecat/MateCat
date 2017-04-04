@@ -908,7 +908,7 @@ div#matecat-modal p {
             }
             &.team {
                 .item {
-                    padding: 5px 0;
+                    padding: 5px 10px;
                     &:hover {
                         //background-color: #e0e1e2;
                         .mini.ui.button.right.floated  {
@@ -940,7 +940,8 @@ div#matecat-modal p {
                         font-size: 14px;
                         color: grey;
                     }
-                    .content.pending-msg {
+                    .content.pending-msg,
+                    .content.invite-sent-msg{
                         font-weight: 100;
                         font-size: 14px;
                         color: grey;
