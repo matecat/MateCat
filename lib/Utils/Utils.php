@@ -12,7 +12,7 @@ class Utils {
                 '[{"msg":"%s", "token":"%s", "expire":"%s"}]',
                 $globalMessage[ 'message' ],
                 md5( $globalMessage[ 'message' ] ),
-                $globalMessage[ 'expire' ]
+                ( new DateTime( $globalMessage[ 'expire' ] ) )->format( DateTime::W3C )
             );
         }
         return null;
