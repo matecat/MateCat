@@ -1,20 +1,21 @@
 // rewrite semantic CSS
 
 body.manage {
-    min-width: 1024px;
+    /*min-width: 1024px;*/
     //font-size: 14px;
     /*box-sizing: content-box;*/
     //margin-top: 55px;
     font-family: Calibri, Arial, Helvetica, sans-serif;
     background-color: #e4e6e8;
-    @media only screen and (min-width: 1380px) {
+    overflow: scroll;
+    /*@media only screen and (min-width: 1380px) {
         .ui.container {
             width: 1280px;
-        }
-        .ui.grid.container {
+        }*/
+        /*.ui.grid.container {
             width: 1280px !important;
-        }
-    }
+        }*/
+   /*}*/
 }
 
 // Shadow - Transitions for buttons
@@ -53,8 +54,41 @@ body.manage {
 .project-list {
     padding-top: 100px;
     padding-bottom: 160px;
+    @media only screen and (min-width: 1380px) {
+        .ui.container {
+            width: 1280px;
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }
+    }
+
+    @media only screen and (max-width: 1199px) and (min-width: 992px) {
+        .ui.container {
+            width: 961px;
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }
+    }
+
+    @media only screen and (max-width: 991px) and (min-width: 768px) {
+        .ui.container {
+            min-width: 961px;
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }
+    }
+
+    @media only screen and (max-width: 767px) {
+        .ui.container {
+            margin-left: 1em !important;
+            margin-right: 1em !important;
+            min-width: 961px;
+        }
+    }
+
     .project {
         margin-bottom: 30px !important;
+        /*min-width: 960px;*/
         .ui.ribbon.label {
             position: absolute;
             top: 11px;
@@ -79,20 +113,20 @@ body.manage {
             .project-name {
                 font-size: 17px;
                 white-space: nowrap;
-                float: left;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 max-width: 350px;
             }
             .project-id {
-                float: right;
                 font-size: 14px;
                 font-weight: normal;
+                margin-right: 10px;
+                margin-left: 15px;
             }
             .ui.form .field :disabled {
                 opacity: 1 !important;
             }
-            .project-name {
+            /*.project-name {
                 .ui.icon.input {
                     transition: 0.3s ease !important;
                 }
@@ -125,7 +159,7 @@ body.manage {
                         transition: 0.3s ease !important;
                     }
                 }
-            }
+            }*/
             .project-payable {
                 padding: 23px 0;
                 float: left;
@@ -141,9 +175,9 @@ body.manage {
                 font-family: Calibri, Arial, Helvetica, sans-serif;
                 position: relative;
                 top: 4px;
-                @media only screen and (max-width: 767px) {
+                /*@media only screen and (max-width: 767px) {
                     padding: 0px !important;
-                }
+                }*/
                 .ui.dropdown {
                     text-align: center;
                     border-radius: 30px;
@@ -226,6 +260,10 @@ body.manage {
                             transition: 0.3s ease;
                             img {
                                 max-height: 24px;
+                            }
+                            span {
+                                position: relative;
+                                top: 1px;
                             }
                         }
                         .menu {
@@ -589,6 +627,7 @@ body.manage {
                 margin-right: -15px;
                 a {
                     text-decoration: underline;
+                    color: grey;
                     &:hover {
                         text-decoration: none;
                     }
@@ -763,9 +802,9 @@ footer nav ul a:hover {
     min-height: initial!important;
 }*/
 
-body {
+/*body {
     min-width: 1024px;
-}
+}*/
 
 .ui.pointing.dropdown > .menu:after {
     box-shadow: -1px -1px 0px 0px rgb(222, 222, 223);
