@@ -86,7 +86,7 @@ class ProjectsContainer extends React.Component {
         let thereAreMembers = (this.state.team.get("members") && this.state.team.get("members").size > 1 ||
             this.state.team.get("pending_invitations") && this.state.team.get("pending_invitations").size > 0) || this.state.team.get('type') === 'personal';
         return <div className="notify-notfound">
-            {(this.state.filtering || this.state.team.get('type') === 'personal' )? (
+            {(this.state.filtering )? (
                 <div>
                     <div className="message-nofound">No Projects Found</div>
                     <div className="no-results-found"></div>
