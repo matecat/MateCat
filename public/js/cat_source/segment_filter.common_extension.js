@@ -26,17 +26,32 @@ if ( SegmentFilter.enabled() )
         }
     };
 
+    /**
+     * This function handles the movement to the next segment when filter is open. This is a natural operation
+     * that is commonly used and likely to cause the number of segments loaded to be come huge.
+     *
+     * To handle this case, it checks for the maxNumSegmentsReached function. If the number of segments is too high
+     * it removes the DOM elements UI.unmountSegments().
+     */
+
     var gotoNextSegment = function() {
         var list = SegmentFilter.getLastFilterData()['segment_ids'] ;
-        var index = list.indexOf('' + UI.currentSegmentId);
+        var index = list.indexOf( '' + UI.currentSegmentId );
         var nextFiltered = list[ index + 1 ];
+        var maxReached = UI.maxNumSegmentsReached() ;
 
-        if ( nextFiltered && UI.Segment.findEl( nextFiltered ).length ) {
+        if ( !nextFiltered ) {
+            return ;
+        }
+
+        if ( maxReached ) {
+            UI.unmountSegments() ;
+        }
+
+        if ( UI.Segment.findEl( nextFiltered ).length ) {
             original_gotoNextSegment.apply(undefined, arguments);
         } else if ( nextFiltered ) {
             UI.render({ segmentToOpen: nextFiltered });
-        } else {
-            // in this case there is no next, do nothing, remain on the current segment.
         }
     };
 
