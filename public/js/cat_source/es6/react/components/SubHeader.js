@@ -48,9 +48,7 @@ class SubHeader extends React.Component {
     }
 
     changeUser(value) {
-        if ( this.teamChanged ) {
-            return;
-        }
+
         let self = this;
         if (value === this.ALL_MEMBERS) {
             this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
