@@ -164,9 +164,9 @@ class SubHeader extends React.Component {
         let currentStatusLabel = this.getCurrentStatusLabel();
         return (
             <section className="row sub-head">
-                <div className="ui container equal width grid">
+                <div className="ui grid">
 
-                    <div className="column">
+                    <div className="eight wide column">
                         <div className="ui right labeled fluid input search-state-filters">
                             <SearchInput
                                 onChange={this.onChangeSearchInput.bind(this)}/>
@@ -179,7 +179,7 @@ class SubHeader extends React.Component {
                         <a class="cta-create-team-text">Create New Team <i className="icon-settings icon"></i></a>
                     </div>*/}
 
-                    <div className="center aligned column pad-right-0">
+                    <div className="eight wide column pad-right-0">
                         {membersFilter}
                     </div>
 

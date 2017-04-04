@@ -291,10 +291,12 @@ class XliffSAXTranslationReplacer {
                     $this->lastTransUnit = array();
 
                     $warning = false;
+                    $last_value = null;
                     for( $i = 0; $i < count( $list_of_ids ) ; $i++ ) {
                         if( isset( $list_of_ids[ $i ] ) ){
                             $id = $list_of_ids[ $i ] ;
-                            if( isset( $this->segments[ $id ] ) ){
+                            if( isset( $this->segments[ $id ] ) && ( $i == 0 || $last_value + 1 == $list_of_ids[ $i ] ) ){
+                                $last_value = $list_of_ids[ $i ];
                                 $this->lastTransUnit[] = $this->segments[ $id ] ;
                             }
                         } else {
@@ -305,8 +307,7 @@ class XliffSAXTranslationReplacer {
                     if( $warning ){
                         $old_fname = Log::$fileName;
                         Log::$fileName = "XliffSax_Polling.log";
-                        Log::doLog( "WARNING: PHP Notice polling: " . $this->currentId . " ---- " . $this->currentBuffer );
-                        Log::doLog( "\$_list_of_ids: " . var_export( $list_of_ids, true ) );
+                        Log::doLog( "WARNING: PHP Notice polling. CurrentId: '" . $this->currentId . "' - Filename: '" . $this->segments[ 0 ][ 'filename' ] . "' - First Segment: '" . $this->segments[ 0 ][ 'sid' ] . "'" );
                         Log::$fileName = $old_fname;
                     }
 

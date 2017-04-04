@@ -5,8 +5,7 @@
     var scrollSelector = 'html,body'; 
 
     var tryToRenderAgain = function( segment, highlight ) {
-        
-        $('#outer').empty();
+        UI.unmountSegments();
         
         var id_segment = segment.selector.split('-')[1];
 

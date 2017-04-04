@@ -77,8 +77,16 @@ class Files_FileDao extends DataAccess_AbstractDao {
         return $stmt->fetch();
     }
 
-    function _buildResult( $array_result ) {
-        return null;
+    public function deleteFailedProjectFiles( $idFiles = [] ){
+
+        if ( empty( $idFiles ) ) return 0;
+
+        $sql = "DELETE FROM files WHERE id IN ( " . str_repeat( '?,', count( $idFiles ) - 1) . '?' . " ) ";
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $success = $stmt->execute( $idFiles );
+        return $stmt->rowCount();
+
     }
 
 }

@@ -515,9 +515,14 @@ class ProjectManager {
                     $this->projectStructure[ 'result' ][ 'errors' ][] = array(
                             "code" => -13, "message" => $e->getMessage()
                     );
-                    Log::doLog( $e->getMessage() );
 
-                    return null; // SEVERE EXCEPTION we can not write to disk!! Break project creation
+                    // SEVERE EXCEPTION we can not write to disk!! Break project creation
+
+                } elseif ( $e->getCode() == 400 ) {
+                    $this->projectStructure[ 'result' ][ 'errors' ][] = array(
+                            "code" => $e->getCode(), "message" => $e->getMessage() . " in $originalFileName"
+                    );
+
                 } else {
                     //mysql insert Blob Error
                     $this->projectStructure[ 'result' ][ 'errors' ][] = array(
@@ -528,6 +533,11 @@ class ProjectManager {
 
                 Log::doLog( $e->getMessage() );
                 Log::doLog( $e->getTraceAsString() );
+                Log::doLog( "Deleting Records." );
+                ( new Projects_ProjectDao() )->deleteFailedProject( $this->projectStructure[ 'id_project' ] );
+                ( new Files_FileDao() )->deleteFailedProjectFiles( $this->projectStructure[ 'file_id_list' ]->getArrayCopy() );
+                Log::doLog( "Deleted Project ID: " . $this->projectStructure[ 'id_project' ] );
+                Log::doLog( "Deleted Files ID: " . json_encode( $this->projectStructure[ 'file_id_list' ]->getArrayCopy() ) );
 
             }
 
