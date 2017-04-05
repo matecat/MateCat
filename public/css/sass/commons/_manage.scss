@@ -368,6 +368,7 @@ body.manage {
                             .job-id {
                                 padding: 5px 10px 5px 0px !important;
                                 float: left;
+                                min-width: 80px;
                             }
                             .progress-bar {
 
@@ -440,11 +441,19 @@ body.manage {
                                         vertical-align: middle;
                                     }
                                 }
+                                .job-price {
+                                    display: inline-block;
+                                    margin-right: 15px;
+                                    vertical-align: text-bottom;
+                                    font-weight: 700;
+                                    @media only screen and (max-width: 1200px) {
+                                        display: none;
+                                    }
+                                }
                                 .job-delivery {
                                     display: inline-block;
                                     margin-right: 15px;
                                     vertical-align: text-bottom;
-                                    margin-top: 5px;
                                     @media only screen and (max-width: 1200px) {
                                         display: none;
                                     }
