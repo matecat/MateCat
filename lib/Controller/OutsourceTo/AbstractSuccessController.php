@@ -170,7 +170,10 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
             $payload[ 'vendor_name' ]   = $this->vendor_name;
             $payload[ 'id_job' ]        = (int)$id_job;
             $payload[ 'password' ]      = $password;
+            $payload[ 'currency' ]      = $item[ 'currency' ];
+            $payload[ 'price' ]         = round( $item[ 'price' ], PHP_ROUND_HALF_UP );
             $payload[ 'delivery_date' ] = $item[ 'delivery' ];
+            $payload[ 'quote_pid' ]     = $item[ 'quote_pid' ];
 
             $JWT = new SimpleJWT( $payload );
             $JWT->setTimeToLive( 60 * 20 ); //20 minutes to complete the order

@@ -1,5 +1,9 @@
 <?php
 
+use Exceptions\NotFoundError;
+use Outsource\TranslatedConfirmationStruct;
+use \API\App\Json\OutsourceConfirmation;
+
 class ManageUtils {
 
     /**
@@ -82,11 +86,27 @@ class ManageUtils {
 
             $job[ 'outsource' ] = null;
             if( $job_array[ 'id_vendor' ] !== null ){
-                $job[ 'outsource' ] = [];
-                $job[ 'outsource' ][ 'id_vendor' ] = $job_array[ 'id_vendor' ];
-                $job[ 'outsource' ][ 'vendor_name' ] = $job_array[ 'vendor_name' ];
-                $job[ 'outsource' ][ 'outsource_date' ] = $job_array[ 'outsource_date' ];
-                $job[ 'outsource' ][ 'delivery_date' ] = $job_array[ 'delivery_date' ];
+
+                $_outsource[ 'id_job' ] = $job_array[ 'id' ];
+                $_outsource[ 'password' ] = $job_array[ 'password' ];
+                $_outsource[ 'id_vendor' ] = $job_array[ 'id_vendor' ];
+                $_outsource[ 'vendor_name' ] = $job_array[ 'vendor_name' ];
+                $_outsource[ 'create_date' ] = $job_array[ 'outsource_create_date' ];
+                $_outsource[ 'delivery_date' ] = $job_array[ 'delivery_date' ];
+                $_outsource[ 'price' ] = $job_array[ 'price' ];
+                $_outsource[ 'currency' ] = $job_array[ 'currency' ];
+                $_outsource[ 'quote_pid' ] = $job_array[ 'quote_pid' ];
+
+                switch( $job_array[ 'id_vendor' ] ){
+                    case TranslatedConfirmationStruct::VENDOR_ID:
+                        $confirmStructJson = new OutsourceConfirmation( new TranslatedConfirmationStruct( $_outsource ) );
+                        $job[ 'outsource' ] = $confirmStructJson->render();
+                        break;
+                    default:
+                        throw new NotFoundError( "Vendor id " . $job_array[ 'id_vendor' ] . " not found." );
+                        break;
+                }
+
             }
 
             $job[ 'open_threads_count' ] = 0 ;
