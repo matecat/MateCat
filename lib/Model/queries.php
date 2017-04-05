@@ -1899,8 +1899,11 @@ function getJobsFromProjects( array $projectIDs, $search_source, $search_target,
 
                  id_vendor,
                  vendor_name,
-                 osc.create_date as outsource_date,
-                 delivery_date
+                 osc.create_date as outsource_create_date,
+                 delivery_date,
+                 quote_pid,
+                 price,
+                 currency
 
             FROM jobs j
             JOIN projects ON projects.id = j.id_project
