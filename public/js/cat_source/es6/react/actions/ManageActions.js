@@ -439,6 +439,9 @@ let ManageActions = {
                         team: team,
                     });
                 }
+                if (UI.selectedTeam.type === 'personal') {
+                    UI.reloadProjects();
+                }
             } else {
                 AppDispatcher.dispatch({
                     actionType: ManageConstants.UPDATE_TEAM_MEMBERS,
