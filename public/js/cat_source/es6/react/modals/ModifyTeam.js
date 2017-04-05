@@ -70,7 +70,12 @@ class ModifyTeam extends React.Component {
     addUser() {
         if ( APP.checkEmail(this.inputNewUSer.value)) {
             ManageActions.addUserToTeam(this.state.team, this.inputNewUSer.value);
+            var resendInviteArray = this.state.resendInviteArray;
+            resendInviteArray.push(this.inputNewUSer.value);
             this.inputNewUSer.value = '';
+            this.setState({
+                resendInviteArray: resendInviteArray
+            });
             return true;
         } else {
             this.setState({

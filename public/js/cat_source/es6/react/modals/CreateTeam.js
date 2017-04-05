@@ -17,8 +17,8 @@ class CreateTeam extends React.Component {
             .dropdown({
                 allowAdditions: true,
                 action: this.onLabelCreate,
-            })
-        ;
+            });
+        this.inputNewOrg.focus()
     }
 
     onLabelCreate(value, text){
@@ -126,7 +126,7 @@ class CreateTeam extends React.Component {
                 <div className="ui one column grid left aligned">
                     <div className="sixteen wide column">
                         <h2>Add members</h2>
-                        <div className={"ui multiple search selection dropdown " + inputDropdown}
+                        <div className={"ui multiple search selection dropdown " + inputDropdown + " " + buttonClass}
                              ref={(usersInput) => this.usersInput = usersInput}
                              onKeyUp={this.handleKeyUpInEmailInput.bind(this)} >
                             <input name="tags" type="hidden" />
@@ -143,7 +143,7 @@ class CreateTeam extends React.Component {
                     </div>
                     <div className="sixteen wide column">
                         <div className="ui members-list team">
-                            <div className="ui divided list">
+                            <div className={"ui divided list " + buttonClass}>
                                 <div className="item">
                                     { APP.USER.STORE.metadata ? (
                                             <img className="ui mini circular image "
