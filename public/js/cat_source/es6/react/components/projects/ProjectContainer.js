@@ -391,9 +391,8 @@ class ProjectContainer extends React.Component {
                     {team.get('name')}
                 </div>
             });
-            let tooltipText = "You can move this project to other team";
             result = <div className={"ui dropdown top right pointing project-team shadow-1 "}
-                          ref={(dropdownTeams) => this.dropdownTeams = dropdownTeams} data-html={tooltipText} data-variation="tiny">
+                          ref={(dropdownTeams) => this.dropdownTeams = dropdownTeams}>
                         <span className="text">
                         </span>
                         <div className="menu">
@@ -408,8 +407,6 @@ class ProjectContainer extends React.Component {
         let self = this;
         this.initDropdowns();
         console.log("Updated Project : " + this.props.project.get('id'));
-
-        $(this.dropdownTeams).popup();
     }
 
     componentDidMount() {

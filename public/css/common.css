@@ -4926,6 +4926,11 @@ span.share-popup-item-email {
     text-decoration: none;
     float: right;
     line-height: 37px;
+    min-width: 0px;
+    max-width: 110px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 img.ui-user-top-image-general {
