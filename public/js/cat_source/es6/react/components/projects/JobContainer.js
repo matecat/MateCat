@@ -562,6 +562,9 @@ class JobContainer extends React.Component {
 
         return <div className="chunk sixteen wide column shadow-1 pad-right-10">
 
+                    <div className="job-id" title="Job Id">
+                        { idJobLabel }
+                    </div>
                     <div className="source-target languages-tooltip"
                          ref={(tooltip) => this.languageTooltip = tooltip}
                          data-html={this.props.job.get('sourceTxt') + ' > ' + this.props.job.get('targetTxt')}>
@@ -572,9 +575,6 @@ class JobContainer extends React.Component {
                         <div className="target-box">
                             {this.props.job.get('targetTxt')}
                         </div>
-                    </div>
-                    <div className="job-id" title="Job Id">
-                        { idJobLabel }
                     </div>
                     <div className="progress-bar">
                         <div className="progr">
