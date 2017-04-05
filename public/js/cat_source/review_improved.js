@@ -140,6 +140,8 @@ if ( ReviewImproved.enabled() )
         },
 
         openPanel : function(data) {
+            UI.closeSearch();
+
             $('body').addClass('side-tools-opened review-side-panel-opened');
             hackIntercomButton( true );
 
