@@ -48,9 +48,7 @@ class SubHeader extends React.Component {
     }
 
     changeUser(value) {
-        if ( this.teamChanged ) {
-            return;
-        }
+
         let self = this;
         if (value === this.ALL_MEMBERS) {
             this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
@@ -158,7 +156,7 @@ class SubHeader extends React.Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        return _.isUndefined(this.props.selectedTeam) || !nextProps.selectedTeam.equals(this.props.selectedTeam)
+        return _.isUndefined(this.props.selectedTeam) || (!_.isUndefined(nextProps.selectedTeam) && !nextProps.selectedTeam.equals(this.props.selectedTeam) )
     }
 
     render () {
