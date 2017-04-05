@@ -1142,6 +1142,10 @@ div#matecat-modal p {
                     border-bottom: 1px solid rgba(34, 36, 38, 0.15);
                 }
             }
+            .ui.divided.list.disabled {
+                border: 1px solid white;
+                background-color: white;
+            }
         }
     }
     .modify-team-modal {

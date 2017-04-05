@@ -310,10 +310,10 @@ class JobContainer extends React.Component {
             var url = this.getQAReport();
             let tooltipText = "Overall quality: " + quality.toUpperCase();
             var classQuality = (quality === "poor") ? 'yellow' : 'red';
-            icon = <div className="qreport-icon-container activity-icon-single"><a className={"ui icon basic button qr-tooltip " + classQuality}
+            icon = <div className="qreport-icon-container activity-icon-single"><a className="ui icon basic button qr-tooltip "
                       data-html={tooltipText} href={url} target="_blank" data-position="top center" data-variation="tiny"
                         ref={(tooltip) => this.activityTooltip = tooltip}>
-                    <i className="icon-qr-matecat icon"/>
+                    <i className={"icon-qr-matecat icon " + classQuality }/>
             </a></div>
             ;
         }
@@ -327,10 +327,10 @@ class JobContainer extends React.Component {
             var url = this.getTranslateUrl() + '?action=warnings';
             let tooltipText = "Click to see issues";
             icon = <div className="warnings-icon-container activity-icon-single">
-                <a className="ui icon basic red button warning-tooltip"
+                <a className="ui icon basic button warning-tooltip"
                    data-html={tooltipText} href={url} target="_blank" data-position="top center" data-variation="tiny"
                    ref={(tooltip) => this.warningTooltip = tooltip}>
-                <i className="icon-notice icon"/>
+                <i className="icon-notice icon red"/>
             </a></div>;
         }
         return icon;
@@ -343,9 +343,9 @@ class JobContainer extends React.Component {
         if ( warnings > 0 ) {
             var url = this.getTranslateUrl() + '?action=warnings';
             let tooltipText = "Click to see issues";
-            icon =<a className="ui icon basic red button "
+            icon =<a className="ui icon basic button "
                       href={url} target="_blank" data-position="top center">
-                    <i className="icon-notice icon"/>
+                    <i className="icon-notice icon red"/>
                     {tooltipText}
             </a>;
         }
@@ -380,9 +380,9 @@ class JobContainer extends React.Component {
             var url = this.getQAReport();
             let tooltipText = "Overall quality: " + quality.toUpperCase();
             var classQuality = (quality === "poor") ? 'yellow' : 'red';
-            icon = <a className={"ui icon basic button " + classQuality}
+            icon = <a className="ui icon basic button"
                       href={url} target="_blank" data-position="top center">
-                <i className="icon-qr-matecat icon"/>
+                <i className={"icon-qr-matecat icon " + classQuality}/>
                 {tooltipText}
             </a>
             ;
@@ -563,11 +563,11 @@ class JobContainer extends React.Component {
         return <div className="chunk sixteen wide column shadow-1 pad-right-10">
 
                     <div className="job-id" title="Job Id">
-                        { idJobLabel }
+                        {"(" + idJobLabel + ")"}
                     </div>
                     <div className="source-target languages-tooltip"
                          ref={(tooltip) => this.languageTooltip = tooltip}
-                         data-html={this.props.job.get('sourceTxt') + ' > ' + this.props.job.get('targetTxt')}>
+                         data-html={this.props.job.get('sourceTxt') + ' > ' + this.props.job.get('targetTxt')} data-variation="tiny">
                         <div className="source-box">
                             {this.props.job.get('sourceTxt')}
                         </div>
@@ -605,10 +605,12 @@ class JobContainer extends React.Component {
                     <a className="open-translate ui primary button open" target="_blank" href={translateUrl}>
                         Open
                     </a>
-                    {outsourceButton}
-                    {outsourceDelivery}
-                    <div className="translated-outsourced">
-                        {outsourceJobLabel}
+                        {outsourceButton}
+                    <div className="outsource-job">
+                        <div className="translated-outsourced">
+                            {outsourceJobLabel}
+                            {outsourceDelivery}
+                        </div>
                     </div>
 
 

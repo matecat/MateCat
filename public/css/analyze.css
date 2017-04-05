@@ -1,5 +1,5 @@
 ﻿/* GENERALI */
-body {margin:0;   min-width: 1150px;padding: 30px 0 0 0!important;font-family:calibri, Arial, Helvetica, sans-serif;text-align:center;background:#f0f0f0; overflow: scroll;}
+body {margin:0;   min-width: 1150px;padding: 30px 0 0 0!important;font-family:calibri, Arial, Helvetica, sans-serif;text-align:center;background:#f0f0f0; overflow: visible;}
 th, td { padding: 0px; }
 table { border-collapse:separate; border-spacing: 0; border: 0; width: 100%;}
 header{background:#4D4D4D;top:0;left:0;text-align:left;width:100%;position:absolute;z-index:999999999;border-bottom:1px solid #5F5F5F;padding:2px 0 0px 0;height:45px;}

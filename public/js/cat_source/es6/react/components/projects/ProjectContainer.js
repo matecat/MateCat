@@ -479,9 +479,9 @@ class ProjectContainer extends React.Component {
         // Project State (Archived or Cancelled)
         let state = '';
         if ( this.props.project.get('has_archived') ) {
-            state = <span>(archived)</span>;
+            state =  <div className="status-filter">(archived)</div>;
         }  else if ( this.props.project.get('has_cancelled') ) {
-            state = <span>(cancelled)</span>;
+            state =  <div className="status-filter">(cancelled)</div>;
         }
 
         // Users dropdown
@@ -501,13 +501,13 @@ class ProjectContainer extends React.Component {
                                 <div className="ui stackable grid">
                                     <div className="sixteen wide column">
                                         <div className="ui ribbon label">
-                                            <span className="project-id" title="Project id">
+                                            <div className="project-id" title="Project id">
                                                 {"(" + this.props.project.get('id') + ")"}
-                                            </span>
-                                            <span className="project-name" title="Project name">
+                                            </div>
+                                            <div className="project-name" title="Project name">
                                                 {this.state.projectName}
-                                            </span>
-                                            {state}
+                                            </div>
+                                                {state}
                                         </div>
                                     </div>
                                 </div>

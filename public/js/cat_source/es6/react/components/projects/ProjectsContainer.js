@@ -114,7 +114,7 @@ class ProjectsContainer extends React.Component {
                             </div>
                         ):(
                         <div className="no-results-teams">
-                            <div className="message-nofound">Welcome to  {this.state.team.get('name')} Team</div>
+                            <div className="message-nofound">Welcome to  {this.state.team.get('name')}</div>
                             <div className="no-results-found">
 
                             </div>
