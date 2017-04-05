@@ -113,6 +113,7 @@ class LoginModal extends React.Component {
 
     render() {
         var generalErrorHtml = '';
+        var buttonSignInClass = (_.size(this.state.validationErrors) === 0) ?  '':'disabled';
         if (this.state.generalError.length) {
             generalErrorHtml = <div style={ {color: 'red',fontSize: '14px'} } className="text">{this.state.generalError}</div>;
         }
@@ -157,7 +158,7 @@ class LoginModal extends React.Component {
                             <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password")}
                                        placeholder="Password" name="password" errorText={this.errorFor("password")} tabindex={2}
                                        onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
-                            <a className="login-button btn-confirm-medium sing-in"
+                            <a className={"login-button btn-confirm-medium sing-in " + buttonSignInClass }
                                onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}
                                onClick={this.handleSubmitClicked.bind()} tabIndex={3}><span className={"button-loader " + loaderClass}/> Sign in </a>
                             {generalErrorHtml}
