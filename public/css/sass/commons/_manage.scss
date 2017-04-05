@@ -7,7 +7,7 @@ body.manage {
     //margin-top: 55px;
     font-family: Calibri, Arial, Helvetica, sans-serif;
     background-color: #e4e6e8;
-    overflow: scroll;
+    overflow: visible;
     /*@media only screen and (min-width: 1380px) {
         .ui.container {
             width: 1280px;
@@ -66,10 +66,11 @@ body.manage {
             z-index: 2;
             left: -15px;
             max-width: 505px;
-            width: 100%;
+            min-width: 0px;
             line-height: 17px;
             background-color: #d8d8d8;
             color: #000000;
+            height: 30px;
         }
         .project-header {
             /*background-color: #e0e1e2;
@@ -83,16 +84,21 @@ body.manage {
 
             .project-name {
                 font-size: 17px;
+                max-width: 314px;
+                min-width: 30px;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
-                max-width: 350px;
+                display: inline-block;
+                vertical-align: text-bottom;
             }
             .project-id {
                 font-size: 14px;
                 font-weight: normal;
                 margin-right: 10px;
                 margin-left: 15px;
+                display: inline-block;
+                vertical-align: text-bottom;
             }
             .ui.form .field :disabled {
                 opacity: 1 !important;
@@ -412,11 +418,9 @@ body.manage {
                                 }
                             }
 
-
                             .job-id {
-                                padding: 5px 0 !important;
+                                padding: 5px 10px 5px 0px !important;
                                 float: left;
-                                min-width: 70px;
                             }
                             .progress-bar {
 
@@ -476,26 +480,27 @@ body.manage {
                                     text-decoration: none;
                                 }
                             }
-                            .translated-outsourced {
-                                top: 4px;
-                                vertical-align: text-bottom;
-                                display: inline-block;
-                                position: relative;
-                                float: right;
-                                img.outsource-logo {
-                                    width: 100px;
-                                    margin: 0 17px 0 0;
-                                    vertical-align: middle;
+                            .outsource-job {
+                                text-align: center;
+                                .translated-outsourced {
+                                    top: 3px;
+                                    vertical-align: text-bottom;
+                                    display: inline-block;
+                                    position: relative;
+                                    img.outsource-logo {
+                                        width: 100px;
+                                        margin: -4px 17px 0 0;
+                                        vertical-align: middle;
+                                    }
                                 }
-                            }
-                            .job-delivery {
-                                display: inline-block;
-                                margin-right: 15px;
-                                vertical-align: text-bottom;
-                                float: right;
-                                margin-top: 5px;
-                                @media only screen and (max-width: 1200px) {
-                                    display: none;
+                                .job-delivery {
+                                    display: inline-block;
+                                    margin-right: 15px;
+                                    vertical-align: text-bottom;
+                                    margin-top: 5px;
+                                    @media only screen and (max-width: 1200px) {
+                                        display: none;
+                                    }
                                 }
                             }
                             .open-translate {
@@ -819,4 +824,17 @@ footer nav ul a:hover {
     .project-list {
         padding-top: 50px;
     }
+}
+
+
+.status-filter {
+    display: inline-block;
+    position: absolute;
+    right: -70px;
+    background: #d8d8d8;
+    padding: 4px 5px 4px;
+    top: 3px;
+    border-radius: 2px;
+    color: #5d5d5d;
+    font-weight: 100;
 }

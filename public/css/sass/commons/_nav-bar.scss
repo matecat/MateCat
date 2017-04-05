@@ -261,5 +261,14 @@ header {
         p {
             font-size: 15px;
         }
+        a {
+            float: right;
+            text-decoration: underline;
+            color: #39699a;
+            cursor: pointer;
+            &:hover {
+                text-decoration: none;
+            }
+        }
     }
 }

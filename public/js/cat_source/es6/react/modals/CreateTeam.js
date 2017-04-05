@@ -110,7 +110,7 @@ class CreateTeam extends React.Component {
             <div className="matecat-modal-top">
                 <div className="ui one column grid left aligned">
                     <div className="column">
-                        <p>Create a team and invite your colleagues to share and manage projects as a team.</p>
+                        <p>Create a team and invite your colleagues to share and manage projects.</p>
                         <h2>Assign a name to your team</h2>
                         <div className={"ui large fluid icon input " + inputError}>
                             <input type="text" placeholder="Team Name"

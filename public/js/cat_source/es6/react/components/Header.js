@@ -59,8 +59,8 @@ class Header extends React.Component {
         if (this.state.teams.size == 1 && this.props.showModals && this.showPopup) {
             let tooltipTex = "<h4 class='header'>Add your first team!</h4>" +
                 "<div class='content'>" +
-                "<p>Create a team and invite your colleagues to share and manage projects as a team.</p>" +
-                "<a class='ui primary button close-popup-teams'>Got it!</a>" +
+                "<p>Create a team and invite your colleagues to share and manage projects.</p>" +
+                "<a class='close-popup-teams'>Got it!</a>" +
                 "</div>"
             $(this.dropdownTeams).popup({
                 on:'click',

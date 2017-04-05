@@ -1,9 +1,9 @@
 ﻿/* GENERALI */
-body {margin:0;   min-width: 1150px;padding: 30px 0 0 0!important;font-family:calibri, Arial, Helvetica, sans-serif;text-align:center;background:#f0f0f0; overflow: scroll;}
+body {margin:0;   min-width: 1150px;padding: 30px 0 0 0!important;font-family:calibri, Arial, Helvetica, sans-serif;text-align:center;background:#f0f0f0; overflow: visible;}
 th, td { padding: 0px; }
 table { border-collapse:separate; border-spacing: 0; border: 0; width: 100%;}
 header{background:#4D4D4D;top:0;left:0;text-align:left;width:100%;position:absolute;z-index:999999999;border-bottom:1px solid #5F5F5F;padding:2px 0 0px 0;height:45px;}
-.logo{float:left;border:0;background:url(../img/logo.png) 0px 2px no-repeat;width:145px;height:31px; background-size: 130px 26px;margin-top:3px;  position: relative;  margin-left:13px;}
+.logo{float:left;border:0;background:url(../img/logo.png) 0px 2px no-repeat;width:145px;height:31px; background-size: 130px 26px;margin-top:5px;  position: relative;  margin-left:13px;}
 /*.wrapper{width:960px;margin:0 auto;text-align:left}*/
 .wrapper{width:96%;min-width:1024px;margin:0px auto 0 auto;padding:5px 0 0 0;font-size:14px;position:relative;text-align:left;}
 header .wrapper{width:98%;min-width:960px;margin:0px auto 0 auto;padding:3px 0 0 0;width:100%;font-size:14px;position:absolute;text-align:left;}
