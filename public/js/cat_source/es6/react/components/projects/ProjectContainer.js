@@ -391,7 +391,7 @@ class ProjectContainer extends React.Component {
                     {team.get('name')}
                 </div>
             });
-            let tooltipText = "You can move this project to other team";
+            /*let tooltipText = "You can move this project to other team";*/
             result = <div className={"ui dropdown top right pointing project-team shadow-1 "}
                           ref={(dropdownTeams) => this.dropdownTeams = dropdownTeams} data-html={tooltipText} data-variation="tiny">
                         <span className="text">

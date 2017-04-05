@@ -2,27 +2,11 @@
 
 body.manage {
     min-width: 1024px;
-    //font-size: 14px;
-    /*box-sizing: content-box;*/
-    //margin-top: 55px;
     font-family: Calibri, Arial, Helvetica, sans-serif;
     background-color: #e4e6e8;
     overflow: visible;
-    /*@media only screen and (min-width: 1380px) {
-        .ui.container {
-            width: 1280px;
-        }*/
-        /*.ui.grid.container {
-            width: 1280px !important;
-        }*/
-   /*}*/
-}
 
-// Shadow - Transitions for buttons
-//.ui.button {
-//    transition: 0.3s ease !important;
-//    padding: 8px 15px 8px 15px;
-//}
+}
 
 .ui.icon.button {
     padding: 0px;
@@ -71,15 +55,14 @@ body.manage {
             background-color: #d8d8d8;
             color: #000000;
             height: 30px;
+            border-radius: 0px 2px 2px 0px;
         }
         .project-header {
-            /*background-color: #e0e1e2;
-            padding-bottom: 22px !important;*/
+
             background-color: #f3f3f3;
             padding-bottom: 10px !important;
             border-bottom: 1px solid #ccc;
             margin-bottom: -23px;
-            //z-index: 0;
             position: relative;
 
             .project-name {
@@ -103,40 +86,6 @@ body.manage {
             .ui.form .field :disabled {
                 opacity: 1 !important;
             }
-            /*.project-name {
-                .ui.icon.input {
-                    transition: 0.3s ease !important;
-                }
-                .ui.icon.input.selected {
-                        width: 627px;
-                        z-index: 3;
-                        transition: 0.3s ease !important;
-                }
-                .ui.form input[type="text"] {
-                    background: #dadada;
-                    border: 1px solid #bcbcbc;
-                    font-weight: 600;
-                    font-size: 16px;
-                    padding: 8px 15px;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    -o-text-overflow: ellipsis;
-                    -ms-text-overflow: ellipsis;
-                    text-overflow: ellipsis;
-                    transition: 0.3s ease !important;
-                    &:hover {
-                        background: #f0f0f0;
-                    }
-                    &:focus {
-                        background: #ffffff;
-                        width: 700px;
-                        box-shadow: 0 0 0 #e0e0e0,
-                        0 0 2px rgba(0, 0, 0, .12),
-                        0 2px 4px rgba(0, 0, 0, .24) !important;
-                        transition: 0.3s ease !important;
-                    }
-                }
-            }*/
             .project-payable {
                 padding: 23px 0;
                 float: left;
@@ -152,9 +101,7 @@ body.manage {
                 font-family: Calibri, Arial, Helvetica, sans-serif;
                 position: relative;
                 top: 4px;
-                /*@media only screen and (max-width: 767px) {
-                    padding: 0px !important;
-                }*/
+
                 .ui.dropdown {
                     text-align: center;
                     border-radius: 30px;
@@ -361,9 +308,9 @@ body.manage {
 
         .project-body {
             background-color: #f9f9f9;
-            /*padding-bottom: 0 !important; togliere per rimanere come prima */
+
             .jobs {
-                /*margin-top: -30px;*/
+
                 margin-top: 0px;
             }
             .job {
@@ -430,7 +377,7 @@ body.manage {
                                 float: left;
                                 width: 30px;
                                 height: 30px;
-                                //margin-left: 5px;
+
                             }
                             .job-activity-icons {
                                 float: left;
@@ -622,35 +569,6 @@ body.manage {
 // closing rewrite semantic CSS
 .notify-notfound {
     .no-results-found {
-        /*.button {
-            padding: 25px !important;
-            transition: 0.3s ease !important;
-            .content {
-                .header {
-                    transition: 0.3s ease !important;
-                    .add-more {
-                        font-size: 60px !important;
-                        padding: 25px 0px 35px;
-                    }
-                }
-                .description {
-                    font-size: 20px;
-                    line-height: 30px;
-                }
-            }
-            &:hover {
-                background-color: #09beec;
-                transition: 0.3s ease !important;
-                .header {
-                    .add-more {
-                        color: #ffffff;
-                    }
-                }
-                .description {
-                    color: #ffffff !important;
-                }
-            }
-        }*/
         background: url(/public/img/jobnotfound.png) no-repeat;
         background-position: center center;
         height: 320px;
@@ -666,6 +584,7 @@ body.manage {
         display: block;
         font-size: 34px;
         margin-top: 20px;
+        line-height: 40px;
     }
 
     .message-create {
@@ -673,6 +592,7 @@ body.manage {
         display: block;
         font-size: 25px;
         margin-top: 0px;
+        line-height: 40px;
         p {
             padding: 20px;
             a {
@@ -688,13 +608,6 @@ body.manage {
         }
     }
 }
-
-/*.no-results-found span {
-    text-align: center;
-    display: block;
-    font-size: 34px;
-    margin-top: 20px;
-}*/
 
 .manage footer {
     background: #6d6e71;
@@ -767,20 +680,6 @@ footer nav ul a:hover {
 }
 
 /* fix di daniele */
-
-/*.matecat-modal-content .matecat-modal-middle .ui.members-list .ui.divided.list {
-    position: relative!important;
-    padding: 0 10px 0 0;
-}*/
-
-/*
-.matecat-modal-content .modify-team-modal .ui.members-list {
-    min-height: initial!important;
-}*/
-
-/*body {
-    min-width: 1024px;
-}*/
 
 .ui.pointing.dropdown > .menu:after {
     box-shadow: -1px -1px 0px 0px rgb(222, 222, 223);
