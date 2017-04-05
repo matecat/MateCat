@@ -68,9 +68,10 @@ class MembershipCreatedEmail extends AbstractEmail {
     public function _getTemplateVariables() {
 
         return array(
-                'user'   => $this->user->toArray(),
-                'sender' => $this->sender->toArray(),
-                'team'   => $this->membership->getTeam()->toArray()
+                'user'      => $this->user->toArray(),
+                'sender'    => $this->sender->toArray(),
+                'team'      => $this->membership->getTeam()->toArray(),
+                'manageUrl' => \Routes::manage()
         );
     }
 

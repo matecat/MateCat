@@ -104,6 +104,12 @@ class Routes {
         return $host . "/analyze/" . $project_name . "/" . $params[ 'id_project' ] . "-" . $params[ 'password' ];
     }
 
+    public static function manage( ) {
+        $host = self::httpHost( $options );
+
+        return "$host/manage";
+    }
+
     public static function appRoot( $options = array() ) {
         $query = isset( $options[ 'query' ] ) ? $options[ 'query' ] : null;
 
