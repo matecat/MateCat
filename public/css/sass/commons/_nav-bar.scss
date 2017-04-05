@@ -76,8 +76,8 @@ header {
             .scrolling {
                 .item.item.item {
                     padding-right: 40px !important;
-                    max-width: 250px;
-                    min-width: 200px;
+                    width: 230px;
+                    min-width: 150px;
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
@@ -182,7 +182,7 @@ header {
                 line-height: 35px;
                 text-decoration: underline;
                 min-width: 0px;
-                max-width: 110px;
+                max-width: 100px;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
