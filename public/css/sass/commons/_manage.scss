@@ -82,6 +82,7 @@ body.manage {
                 margin-left: 15px;
                 display: inline-block;
                 vertical-align: text-bottom;
+                min-width: 64px;
             }
             .ui.form .field :disabled {
                 opacity: 1 !important;
@@ -368,7 +369,7 @@ body.manage {
                             .job-id {
                                 padding: 5px 10px 5px 0px !important;
                                 float: left;
-                                min-width: 80px;
+                                min-width: 72px;
                             }
                             .progress-bar {
 
