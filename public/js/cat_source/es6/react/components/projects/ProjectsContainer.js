@@ -30,12 +30,13 @@ class ProjectsContainer extends React.Component {
             more_projects = this.state.more_projects
         }
         let teamState = (team)? team : this.state.team;
+        let filteringState = (filtering) ? filtering : this.state.filtering
         this.setState({
             projects: projects,
             more_projects: more_projects,
             reloading_projects: false,
             team: teamState,
-            filtering: filtering
+            filtering: filteringState
         });
     }
 
