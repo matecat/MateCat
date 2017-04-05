@@ -144,6 +144,7 @@ class LoginModal extends React.Component {
         return <div className="login-modal">
                     {htmlMessage}
                     <div className="login-container-left">
+                        <h2>Sign in</h2>
                         <a className="google-login-button btn-confirm-medium" onClick={this.googole_popup.bind(this)}/>
 
                         <div className="login-form-container">
