@@ -74,6 +74,9 @@
   @include box-sizing(border-box);
   opacity: 0;
   @include transition(0.3s ease-in-out);
+  .notification-message {
+    word-wrap: break-word;
+  }
 }
 
 .notification-type-success {

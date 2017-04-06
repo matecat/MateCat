@@ -245,7 +245,7 @@ let ManageActions = {
                     type: 'success',
                     position: 'tc',
                     allowHtml: true,
-                    timer: 3000
+                    timer: 200000
                 };
                 let boxUndo = APP.addNotification(notification);
                 setTimeout(function () {
