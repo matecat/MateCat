@@ -144,7 +144,6 @@ class LoginModal extends React.Component {
         return <div className="login-modal">
                     {htmlMessage}
                     <div className="login-container-left">
-                        <h2>Sign in</h2>
                         <a className="google-login-button btn-confirm-medium" onClick={this.googole_popup.bind(this)}/>
 
                         <div className="login-form-container">
@@ -157,7 +156,7 @@ class LoginModal extends React.Component {
                                        placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")} tabindex={1}
                                        onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
                             <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password")}
-                                       placeholder="Password" name="password" errorText={this.errorFor("password")} tabindex={2}
+                                       placeholder="Password (minimum 8 characters)" name="password" errorText={this.errorFor("password")} tabindex={2}
                                        onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
                             <a className={"login-button btn-confirm-medium sing-in " + buttonSignInClass }
                                onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}

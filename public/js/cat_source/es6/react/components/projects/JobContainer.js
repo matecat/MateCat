@@ -610,6 +610,7 @@ class JobContainer extends React.Component {
                         <div className="translated-outsourced">
                             {outsourceJobLabel}
                             {outsourceDelivery}
+                            <div className="job-price"><span className="valuation">LT </span><span className="price">1'543,083</span></div>
                         </div>
                     </div>
 

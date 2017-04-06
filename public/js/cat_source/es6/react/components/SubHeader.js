@@ -90,7 +90,8 @@ class SubHeader extends React.Component {
                 return <div className={"item " + classDisable} data-value={member.get('user').get('uid')}
                      key={'user' + member.get('user').get('uid')}>
                     {userIcon}
-                    {member.get('user').get('first_name') + ' ' + member.get('user').get('last_name')}
+                    <span className="user-name-filter">{member.get('user').get('first_name') + ' ' + member.get('user').get('last_name')}</span>
+                    <div className="box-number-project">555</div>
                 </div>;
 
             });
