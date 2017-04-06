@@ -524,7 +524,7 @@ UI = {
     //********* Modals **************//
 
     openCreateTeamModal: function () {
-        APP.ModalWindow.showModalComponent(CreateTeamModal, {}, "Create new Team");
+        APP.ModalWindow.showModalComponent(CreateTeamModal, {}, "Create New Team");
     },
 
     openModifyTeamModal: function (team, hideChangeName) {
