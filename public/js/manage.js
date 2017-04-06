@@ -305,6 +305,21 @@ UI = {
         ManageActions.changeTeam(personalTeam);
     },
 
+    getGMTDate: function (date) {
+        var timezoneToShow = readCookie( "matecat_timezone" );
+        if ( timezoneToShow == "" ) {
+            timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
+        }
+        var dd = new Date( date.replace(/-/g, "/") );
+        var timeZoneFrom = -1 * ( new Date().getTimezoneOffset() / 60 );
+        dd.setMinutes( dd.getMinutes() + (timezoneToShow - timeZoneFrom) * 60 );
+        var selectedElement = $( "#changeTimezone" ).find( "option[value='" + timezoneToShow + "']");
+        return {
+            date: $.format.date(dd, "d MMMM") + ' at ' + $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a"),
+            gmt: selectedElement.text()
+        };
+    },
+
     //********** REQUESTS *********************//
 
     /**

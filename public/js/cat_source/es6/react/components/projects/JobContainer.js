@@ -457,7 +457,11 @@ class JobContainer extends React.Component {
         if (this.props.job.get('outsource')) {
             if (this.props.job.get('outsource').get('id_vendor') == "1") {
                 let date  = this.props.job.get('outsource').get('delivery_date').substring(0, this.props.job.get('outsource').get('delivery_date').lastIndexOf(":"))
-                outsourceDelivery = <div className="job-delivery" title="Delivery date">{date}</div>;
+                let gmtDate = UI.getGMTDate(this.props.job.get('outsource').get('delivery_date'));
+                outsourceDelivery = <div className="job-delivery" title="Delivery date">
+                    <span className="outsource-date-text">{gmtDate.date}</span>
+                    <span className="outsource-gmt-text"> ({gmtDate.gmt})</span>
+                </div>;
             }
         }
         return outsourceDelivery;
