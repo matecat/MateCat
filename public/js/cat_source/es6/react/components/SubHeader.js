@@ -119,10 +119,10 @@ class SubHeader extends React.Component {
                         <div className="list-team">
                             <div className="ui dropdown top right pointing users-projects"
                                  ref={(dropdownUsers) => this.dropdownUsers = dropdownUsers}>
-                                <span className="text">
+                                <div className="text">
                                     <div className="ui all label">ALL</div>
                                   All Members
-                                </span>
+                                </div>
                                 <i className="dropdown icon"/>
                                 <div className="menu">
                                     <div className="ui icon search input">
