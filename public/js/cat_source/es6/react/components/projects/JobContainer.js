@@ -413,8 +413,8 @@ class JobContainer extends React.Component {
     }
 
     openOutsourceModal() {
-        if (this.props.job.get('outsource') && this.props.job.get('outsource').get('outsourced') == "1") {
-            window.open(this.props.job.get('outsource').get('link_to_status'), "_blank");
+        if (this.props.job.get('outsource') && this.props.job.get('outsource').get('quote_review_link')) {
+            window.open(this.props.job.get('outsource').get('quote_review_link'), "_blank");
         } else {
             ManageActions.openOutsourceModal(this.props.project, this.props.job, this.getTranslateUrl());
         }
