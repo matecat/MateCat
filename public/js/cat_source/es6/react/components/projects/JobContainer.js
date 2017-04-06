@@ -463,6 +463,17 @@ class JobContainer extends React.Component {
         return outsourceDelivery;
     }
 
+    getOutsourceDeliveryPrice() {
+        let outsourceDeliveryPrice = '';
+        if (this.props.job.get('outsource')) {
+            if (this.props.job.get('outsource').get('id_vendor') == "1") {
+                let price  = this.props.job.get('outsource').get('price');
+                outsourceDeliveryPrice = <div className="job-price"><span className="valuation">{this.props.job.get('outsource').get('currency')} </span><span className="price">{price}</span></div>;
+            }
+        }
+        return outsourceDeliveryPrice;
+    }
+
     getWarningsInfo() {
         let n = {
             number: 0,
@@ -551,6 +562,7 @@ class JobContainer extends React.Component {
         let outsourceButton = this.getOutsourceButton();
         let outsourceJobLabel = this.getOutsourceJobSent();
         let outsourceDelivery = this.getOutsourceDelivery();
+        let outsourceDeliveryPrice = this.getOutsourceDeliveryPrice();
         let analysisUrl = this.getProjectAnalyzeUrl();
         let splitUrl = this.getSplitUrl();
         let mergeUrl = this.getMergeUrl();
@@ -610,7 +622,7 @@ class JobContainer extends React.Component {
                         <div className="translated-outsourced">
                             {outsourceJobLabel}
                             {outsourceDelivery}
-                            <div className="job-price"><span className="valuation">LT </span><span className="price">1'543,083</span></div>
+                            {outsourceDeliveryPrice}
                         </div>
                     </div>
 
