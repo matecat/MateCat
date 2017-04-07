@@ -49,7 +49,7 @@ body.manage {
             top: 11px;
             z-index: 2;
             left: -15px;
-            max-width: 505px;
+            max-width: 535px;
             min-width: 0px;
             line-height: 17px;
             background-color: #d8d8d8;
@@ -67,7 +67,7 @@ body.manage {
 
             .project-name {
                 font-size: 17px;
-                max-width: 314px;
+                max-width: 390px;
                 min-width: 30px;
                 white-space: nowrap;
                 overflow: hidden;
@@ -433,6 +433,16 @@ body.manage {
                             }
                             .outsource-job {
                                 text-align: center;
+                                .job-to-trasnlator {
+                                    display: inline-block;
+                                    margin-right: 15px;
+                                    vertical-align: text-bottom;
+                                    cursor: pointer;
+                                    text-decoration: underline;
+                                    &:hover {
+                                        text-decoration: none;
+                                    }
+                                }
                                 .translated-outsourced {
                                     top: 7px;
                                     vertical-align: text-bottom;
@@ -444,19 +454,19 @@ body.manage {
                                         vertical-align: middle;
                                     }
                                 }
+                                .job-delivery {
+                                    display: inline-block;
+                                    margin-right: 15px;
+                                    vertical-align: text-bottom;
+                                    @media only screen and (max-width: 1200px) {
+                                        display: none;
+                                    }
+                                }
                                 .job-price {
                                     display: inline-block;
                                     margin-right: 15px;
                                     vertical-align: text-bottom;
                                     font-weight: 700;
-                                    @media only screen and (max-width: 1200px) {
-                                        display: none;
-                                    }
-                                }
-                                .job-delivery {
-                                    display: inline-block;
-                                    margin-right: 15px;
-                                    vertical-align: text-bottom;
                                     @media only screen and (max-width: 1200px) {
                                         display: none;
                                     }
