@@ -624,7 +624,7 @@ class JobContainer extends React.Component {
                         {outsourceButton}
                     <div className="outsource-job">
                         <div className="translated-outsourced">
-                            <a href="mailto:ruben.santillan@translated.net" className="job-to-translator">alessandro.cattelan@translated.net</a>
+                            <a href="#" className="job-to-translator" onClick={this.openOutsourceModal.bind(this)}>alessandro.cattelan@translated.net</a>
                             {outsourceJobLabel}
                             {outsourceDelivery}
                             {outsourceDeliveryPrice}
