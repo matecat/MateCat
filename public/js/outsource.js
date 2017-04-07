@@ -529,7 +529,7 @@ function fetchChangeRates( callback ) {
     }
 
     var changeRates = readCookie( "matecat_changeRates" );
-    if( changeRates != "" ) {
+    if( changeRates != "" && changeRates!="null") {
         UI.changeRates = changeRates;
         if( typeof callback == "function" ) callback();
         return;
