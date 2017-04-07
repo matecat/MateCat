@@ -91,7 +91,7 @@ class SubHeader extends React.Component {
                      key={'user' + member.get('user').get('uid')}>
                     {userIcon}
                     <span className="user-name-filter">{member.get('user').get('first_name') + ' ' + member.get('user').get('last_name')}</span>
-                    <div className="box-number-project">555</div>
+                    <div className="box-number-project">{member.get('projects')}</div>
                 </div>;
 
             });
