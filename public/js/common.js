@@ -55,7 +55,13 @@ APP = {
         } ).on( 'click', '.popup-outer.closeClickingOutside', function ( e ) {
             e.preventDefault();
             $( this ).parents( '.modal' ).find( '.x-popup' ).click();
-        } );
+        } ).on('keyup', function(e) {
+            if (e.keyCode == 27 && ($("body").hasClass("side-popup")) ) {
+                APP.ModalWindow.onCloseModal();
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        });
 
         this.checkGlobalMassages();
 
