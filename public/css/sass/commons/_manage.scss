@@ -439,6 +439,11 @@ body.manage {
                                     vertical-align: text-bottom;
                                     cursor: pointer;
                                     text-decoration: underline;
+                                    min-width: 0px;
+                                    max-width: 160px;
+                                    white-space: nowrap;
+                                    overflow: hidden;
+                                    text-overflow: ellipsis;
                                     &:hover {
                                         text-decoration: none;
                                     }
