@@ -51,6 +51,44 @@ body.manage {
             left: -15px;
             max-width: 535px;
             min-width: 0px;
+482
+                                }
+483
+                            }
+484
+                            .open-translate {
+485
+                                font-family: Calibri;
+486
+                                padding: 6px 15px;
+487
+                                vertical-align: top;
+488
+                                font-size: 16px;
+489
+                                border: 1px solid #797979;
+490
+                                border-radius: 2px;
+491
+                                float: right;
+492
+                            }
+493
+                            .open-outsource {
+494
+                                font-family: Calibri;
+495
+                                padding: 6px 12px;
+496
+                                vertical-align: top;
+497
+                                font-size: 16px;
+498
+                                border: 1px solid #797979;
+499
+                                border-radius: 2px;
+500
+                                float: right;
             line-height: 17px;
             background-color: #d8d8d8;
             color: #000000;
@@ -338,12 +376,17 @@ body.manage {
                         .chunk {
                             background-color: #ffffff;
                             padding: 8px 15px;
+                            .job-id {
+                                float: left;
+                                min-width: 72px;
+                                color: #969696;
+                                font-size: 13px;
+                                line-height: 28px;
+                            }
                             .source-target {
-                                padding: 5px 0 !important;
                                 min-width: 150px;
                                 float: left;
                                 margin-right: 10px;
-
                                 font-weight: bold;
                                 .source-box {
                                     float: left;
@@ -352,11 +395,13 @@ body.manage {
                                     white-space: nowrap;
                                     overflow: hidden;
                                     text-overflow: ellipsis;
+                                    line-height: 30px;
                                 }
                                 .in-to {
                                     float: left;
                                     margin-top: 2px;
                                     color: #5a5a5a;
+                                    line-height: 28px;
                                 }
                                 .target-box {
                                     float: left;
@@ -364,14 +409,8 @@ body.manage {
                                     white-space: nowrap;
                                     overflow: hidden;
                                     text-overflow: ellipsis;
+                                    line-height: 30px;
                                 }
-                            }
-
-                            .job-id {
-                                padding: 5px 10px 5px 0px !important;
-                                float: left;
-                                min-width: 72px;
-                                color: #969696;
                             }
                             .progress-bar {
 
@@ -422,11 +461,12 @@ body.manage {
                             }
 
                             .job-payable {
-                                padding: 6px 10px !important;
+                                padding: 0px 10px 0 !important;
                                 float: left;
                                 text-decoration: underline;
                                 min-width: 105px;
-                                text-align: right;
+                                line-height: 30px;
+                                font-weight: 700;
                                 &:hover {
                                     text-decoration: none;
                                 }
@@ -435,8 +475,7 @@ body.manage {
                                 text-align: center;
                                 .job-to-translator {
                                     display: inline-block;
-                                    margin-right: 10px;
-                                    margin-left: 10px;
+                                    margin-right: 15px;
                                     vertical-align: text-bottom;
                                     cursor: pointer;
                                     text-decoration: underline;
@@ -445,13 +484,14 @@ body.manage {
                                     }
                                 }
                                 .translated-outsourced {
-                                    top: 7px;
+                                    top: 6px;
+                                    bottom: 6px;
                                     vertical-align: text-bottom;
                                     display: inline-block;
                                     position: relative;
                                     img.outsource-logo {
                                         width: 100px;
-                                        margin: -4px 17px 0 0;
+                                        margin: -5px 17px 0 0;
                                         vertical-align: middle;
                                     }
                                 }
@@ -459,6 +499,12 @@ body.manage {
                                     display: inline-block;
                                     margin-right: 15px;
                                     vertical-align: text-bottom;
+                                    .outsource-date-text {
+                                        font-weight: 700;
+                                    }
+                                    .outsource-gmt-text {
+                                        color: #969696;
+                                    }
                                     @media only screen and (max-width: 1200px) {
                                         display: none;
                                     }
@@ -573,7 +619,8 @@ body.manage {
                 margin-right: -15px;
                 a {
                     text-decoration: underline;
-                    color: grey;
+                    color: #7d7d7d;
+                    font-size: 13px;
                     &:hover {
                         text-decoration: none;
                     }
