@@ -492,7 +492,7 @@ body.manage {
                             }
                             .open-outsource {
                                 font-family: Calibri;
-                                padding: 6px 15px;
+                                padding: 6px 12px;
                                 vertical-align: top;
                                 font-size: 16px;
                                 border: 1px solid #797979;
@@ -502,7 +502,7 @@ body.manage {
                             }
                             .open-outsourced {
                                 font-family: Calibri;
-                                padding: 6px 11px;
+                                padding: 6px 8px;
                                 vertical-align: top;
                                 font-size: 16px;
                                 border: 1px solid #797979;
@@ -727,9 +727,17 @@ footer nav ul a:hover {
     }
 }
 
+@media only screen and (min-width: 1200px) {
+    .ui.container {
+        width: 1200px;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+}
+
 @media only screen and (max-width: 1199px) and (min-width: 992px) {
     .ui.container {
-        width: 961px;
+        width: 991px;
         margin-left: auto !important;
         margin-right: auto !important;
     }
@@ -737,12 +745,21 @@ footer nav ul a:hover {
 
 @media only screen and (max-width: 991px) and (min-width: 768px) {
     .ui.container {
-        min-width: 961px;
+        min-width: 991px;
         margin-left: auto !important;
         margin-right: auto !important;
     }
     .project-list {
-        padding-top: 50px;
+        padding-top: 50px;ƒ
+        .job-to-translator {
+            margin-right: 5px;
+            margin-left: 15px;
+            min-width: 0px;
+            max-width: 210px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
     }
 }
 

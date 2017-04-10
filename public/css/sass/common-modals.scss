@@ -100,6 +100,15 @@ ul, li, ol, p, button, .button, .primary, input, input[type="text"] input[type="
     color: red;
 }
 
+.validation-error.email-translator-error {
+    position: relative;
+    top: -25px;
+    left: 18px;
+    padding: 0px;
+    margin-bottom: 0px;
+    height: 0px;
+}
+
 .coupon-container .validation-success {
     color: green;
     margin-top: 2px;

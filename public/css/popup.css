@@ -1126,7 +1126,7 @@ a.tooltip.gray span:after {
 /* force delivery */
 
 .modal-outsource-datepicker {
-    height: 185px;
+    height: 215px;
     width: 520px;
     background: #FFFFFF;
     border: 5px solid #F4F4F4;
@@ -1307,7 +1307,7 @@ a.tooltip.gray span:after {
 
 a.btn-cancel.in-popup.cancelForceDelivery {
     margin-right: 40px !important;
-    height: 16px;
+    height: 15px;
 }
 
 a.btn-cancel.in-popup.cancelForceDelivery:hover {
