@@ -18,11 +18,8 @@ class ModifyTeam extends React.Component {
 
     onLabelCreate(value, text){
         var self = this;
-        if (event.key === ',') {
-            this.createLabel(text);
-            return false;
-        }
-        if ( APP.checkEmail(text)) {
+
+        if ( APP.checkEmail(text) && event.key === 'Enter') {
             $(this.inputNewUSer)
                 .dropdown('set selected', value);
             this.setState({
@@ -30,19 +27,23 @@ class ModifyTeam extends React.Component {
             });
             this.addUsers();
             return true;
-        } else if (text.indexOf(",") > -1) {
+        }  else if (text.indexOf(",") > -1) {
             let members = text.split(",");
             members.forEach(function (item) {
                 self.createLabel(item);
             });
             return false;
-        } else {
-            this.setState({
-                inputUserError: true
-            });
-            $(this.inputNewUSer).dropdown('set text', text);
+        } else  {
+            this.createLabel(text);
             return false;
         }
+        // else {
+        //     this.setState({
+        //         inputUserError: true
+        //     });
+        //     $(this.inputNewUSer).dropdown('set text', text);
+        //     return false;
+        // }
     }
 
     createLabel(text){
