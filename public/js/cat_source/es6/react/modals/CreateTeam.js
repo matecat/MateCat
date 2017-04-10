@@ -57,15 +57,6 @@ class CreateTeam extends React.Component {
 
     }
 
-    //Added  by Rubén
-   /* disabledInput () {
-        document.querySelector('.ciaone').addEventListener('keydown', function (e) {
-            if (e.which == 9) {
-                e.preventDefault();
-            }
-        });
-    }*/
-
     handleKeyPress(e) {
         if (this.inputNewOrg.value.length > 0 ) {
             this.setState({
@@ -85,10 +76,13 @@ class CreateTeam extends React.Component {
             this.setState({
                 errorDropdown: false,
             });
-        }
-        if (e.key === ' ') {
+        } else if (e.key === ' ') {
             this.onLabelCreate(mail, mail);
             $(this.usersInput).find("input.search").val('');
+        } else {
+            this.setState({
+                errorDropdown: false,
+            });
         }
     }
 
