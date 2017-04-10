@@ -469,6 +469,10 @@ let ManageActions = {
     changeTeamFromUploadPage: function (team) {
         $('.reloading-upload-page').show();
         APP.setTeamInStorage(team.id);
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.CHOOSE_TEAM,
+            teamId: team.id
+        });
         setTimeout(function () {
             $('.reloading-upload-page').hide();
         }, 1000)

@@ -76,10 +76,13 @@ class CreateTeam extends React.Component {
             this.setState({
                 errorDropdown: false,
             });
-        }
-        if (e.key === ' ') {
+        } else if (e.key === ' ') {
             this.onLabelCreate(mail, mail);
             $(this.usersInput).find("input.search").val('');
+        } else {
+            this.setState({
+                errorDropdown: false,
+            });
         }
     }
 
@@ -99,6 +102,8 @@ class CreateTeam extends React.Component {
         }
         return false;
     }
+
+
 
     render() {
         var inputError = (this.state.errorInput) ? 'error' : '';

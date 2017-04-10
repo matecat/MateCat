@@ -13,6 +13,60 @@ class ModifyTeam extends React.Component {
             resendInviteArray: []
         };
         this.updateTeam = this.updateTeam.bind(this);
+        this.onLabelCreate = this.onLabelCreate.bind(this);
+    }
+
+    onLabelCreate(value, text){
+        var self = this;
+        if (event.key === ',') {
+            this.createLabel(text);
+            return false;
+        }
+        if ( APP.checkEmail(text)) {
+            $(this.inputNewUSer)
+                .dropdown('set selected', value);
+            this.setState({
+                inputUserError: false
+            });
+            this.addUsers();
+            return true;
+        } else if (text.indexOf(",") > -1) {
+            let members = text.split(",");
+            members.forEach(function (item) {
+                self.createLabel(item);
+            });
+            return false;
+        } else {
+            this.setState({
+                inputUserError: true
+            });
+            $(this.inputNewUSer).dropdown('set text', text);
+            return false;
+        }
+    }
+
+    createLabel(text){
+        var self = this;
+        if ( APP.checkEmail(text)) {
+            $(this.inputNewUSer).find("input.search").val('');
+            $(this.inputNewUSer).dropdown('set selected', text);
+            this.setState({
+                inputUserError: false
+            });
+            return true;
+        } else if (text.indexOf(",") > -1) {
+            let members = text.split(",");
+            members.forEach(function (item) {
+                self.createLabel(item);
+            });
+            return false;
+        } else {
+            this.setState({
+                inputUserError: true
+            });
+            $(this.inputNewUSer).dropdown('set text', text);
+            return true;
+        }
     }
 
     updateTeam(team) {
@@ -55,16 +109,31 @@ class ModifyTeam extends React.Component {
     }
 
     handleKeyPressUserInput(e) {
-        e.stopPropagation();
-        if (e.key === 'Enter' ) {
+        let mail = $(this.inputNewUSer).find("input.search").val();
+        if (e.key == 'Enter') {
+            if (mail == '') {
+                this.addUsers();
+            }
+            return;
+        }
+        if (e.key === ' ') {
+            e.stopPropagation();
             e.preventDefault();
-            this.addUser();
+            this.createLabel(mail);
         } else {
             this.setState({
                 inputUserError: false
             });
         }
         return false;
+    }
+
+    addUsers() {
+        var members = ($(this.inputNewUSer).dropdown('get value').length > 0) ? $(this.inputNewUSer).dropdown('get value').split(",") : [];
+        if (members.length > 0 ) {
+            ManageActions.addUserToTeam(this.state.team, members);
+            $(this.inputNewUSer).dropdown('restore defaults');
+        }
     }
 
     addUser() {
@@ -122,7 +191,9 @@ class ModifyTeam extends React.Component {
         self = this;
         var teamNameOk = this.changeTeamName();
         if (this.inputNewUSer.value.length > 0) {
-            if ( APP.checkEmail(this.inputNewUSer.value)) {
+            if ($(this.inputNewUSer).dropdown('get value').length > 0) {
+                this.addUsers();
+            } else if ( APP.checkEmail(this.inputNewUSer.value)) {
                 this.addUser();
                 setTimeout(function () {
                     self.applyChanges();
@@ -251,6 +322,11 @@ class ModifyTeam extends React.Component {
     }
 
     componentDidMount() {
+        $(this.inputNewUSer)
+            .dropdown({
+                allowAdditions: true,
+                action: this.onLabelCreate,
+            });
         TeamsStore.addListener(ManageConstants.UPDATE_TEAM, this.updateTeam);
     }
 
@@ -298,10 +374,19 @@ class ModifyTeam extends React.Component {
                         <div className="ui grid left aligned">
                             <div className="sixteen wide column">
                                 <h2>Invite Members</h2>
-                                <div className={"ui fluid icon input " + usersError }>
+                               {/* <div className={"ui fluid icon input " + usersError }>
                                     <input type="text" placeholder="insert email and press enter"
                                            onKeyUp={this.handleKeyPressUserInput.bind(this)}
                                            ref={(inputNewUSer) => this.inputNewUSer = inputNewUSer}/>
+                                </div>
+                                {this.state.inputUserError ? (
+                                        <div className="validation-error"><span className="text" style={{color: 'red', fontSize: '14px'}}>A valid email is required</span></div>
+                                    ): ''}*/}
+                                <div className={"ui multiple search selection dropdown " + usersError }
+                                     onKeyUp={this.handleKeyPressUserInput.bind(this)}
+                                     ref={(inputNewUSer) => this.inputNewUSer = inputNewUSer}>
+                                    <input name="tags" type="hidden" />
+                                    <div className="default text">insert email or emails separated by commas or press enter</div>
                                 </div>
                                 {this.state.inputUserError ? (
                                         <div className="validation-error"><span className="text" style={{color: 'red', fontSize: '14px'}}>A valid email is required</span></div>
