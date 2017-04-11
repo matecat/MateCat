@@ -16,6 +16,7 @@ header
 	margin-top: -34px;
 	transition: margin-top 200ms ease-out;
 	-webkit-transition: margin-top 200ms ease-out;
+	height: 81px;
 }
 body.login header
 {
