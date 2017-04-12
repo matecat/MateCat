@@ -721,7 +721,7 @@ UI = {
 		$('.popup-split .popup-box .jobs').empty();
 		$('.popup-split .splitselect').val(numsplit);
 		$('.popup-split .popup-split-job-title').text(jobContainer.find("h3").text());
-		$('.popup-split .popup-split-job-id').text(jobContainer.find(".languages .splitnum").text());
+		$('.popup-split .popup-split-job-id').text("(" + jobContainer.find(".languages .splitnum").text() + ")");
 		$('.popup-split .popup-split-project-title').text($('#pid #pname').data('originaltext'));
 		$('.popup-split h1 .jid').attr('data-jid', jid);
 		$('.popup-split h1 .jid').attr('data-pwd', $(job).attr('data-pwd'));

@@ -34,6 +34,8 @@
         <link rel="stylesheet" tal:attributes="href css_url"/>
     </tal:block>
 
+    <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
+
     <!-- Shim to make HTML5 elements usable in older Internet Explorer versions -->
     <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
@@ -96,7 +98,7 @@
 </body>
 
 <body tal:condition="php:supportedBrowser EQ 1" class="started">
-<div class="reloading-upload-page" style="position: absolute;height: 85%;width: 101%;background-color: rgba(76, 69, 69, 0.3);top: 170px;left: 0;z-index: 3;display: none;">
+<div class="reloading-upload-page" style="position: absolute;height: 85%;width: 100%;background-color: rgba(76, 69, 69, 0.3);top: 170px;left: 0;z-index: 3;display: none;">
     <div class="ui active inverted dimmer">
         <div class="ui massive text loader">Reloading</div>
     </div>

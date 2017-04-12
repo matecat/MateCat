@@ -296,7 +296,7 @@ p.translator_name {
 
 
 body.showingOutsourceTo {
-    overflow: hidden;
+    overflow: hidden !important;
 }
 
 
