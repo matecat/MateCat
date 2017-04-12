@@ -106,7 +106,7 @@ $.extend(UI, {
 
         $('.modal.outsource input.out-email').on('keyup', function () {
             _.debounce(function() {
-                UI.checkInputEmailInput();
+                // UI.checkInputEmailInput();
                 UI.checkSendToTranslatorButton();
             }, 300)();
         });
@@ -168,31 +168,41 @@ $.extend(UI, {
     },
 
     checkSendToTranslatorButton: function () {
-        var email = UI.checkInputEmailInput();
+        var $email = $('.modal.outsource input.out-email');
+        var email = $email.val();
         var date = $('.outsource .out-date').val();
 
-        if (email && date.length > 0 ) {
-            // $('.send-to-translator-btn').removeClass('disabled');
+        if ($email.hasClass('error') ) {
+            $email.removeClass('error');
+            $('.modal.outsource .validation-error.email-translator-error').hide();
+        }
+
+        if (email.length > 0 && date.length > 0 ) {
+            $('.send-to-translator-btn').removeClass('disabled');
             return true;
         } else {
-            // $('.send-to-translator-btn').addClass('disabled');
+            $('.send-to-translator-btn').addClass('disabled');
             return false;
         }
+
+
     },
 
     checkInputEmailInput: function () {
         var email = $('.modal.outsource input.out-email').val();
         if (!APP.checkEmail(email)) {
             $('.modal.outsource input.out-email').addClass('error');
+            $('.modal.outsource .validation-error.email-translator-error').show();
             return false;
         } else {
             $('.modal.outsource input.out-email').removeClass('error');
+            $('.modal.outsource .validation-error.email-translator-error').hide();
             return true;
         }
     },
 
     sendJobToTranslator: function () {
-        if (UI.checkSendToTranslatorButton()) {
+        if (UI.checkSendToTranslatorButton() && UI.checkInputEmailInput()) {
             var email = $('.modal.outsource input.out-email').val();
             var date = getChosenOutsourceDate();
             UI.sendTranslatorRequest(email, date).done(function () {
