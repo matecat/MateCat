@@ -126,7 +126,6 @@ if (true)
                 },
                 success: function ( d ) {
 
-                    $( n ).addClass( 'glossary-loaded' );
 
                     if ( typeof d.errors != 'undefined' && d.errors.length ) {
                         if ( d.errors[0].code == -1 ) {
@@ -135,6 +134,9 @@ if (true)
                     }
                     n = this[0];
                     UI.processLoadedGlossary( d, this );
+
+                    $( n ).addClass( 'glossary-loaded' );
+
                     // I store for the current
                     if ( this[1] == 0 ) {
                         UI.cachedGlossaryData = d;
@@ -161,10 +163,11 @@ if (true)
                     UI.currentSegment.on('afterFooterCreation', function () {
                         UI.processLoadedGlossary(d,context);
                     });
+                    return;
                 }
             }
             var numMatches = Object.size( d.data.matches );
-            var existingMatches = $( '.tab-switcher-gl a .number', segment.el ).data('num');
+            var existingMatches = (segment.el.hasClass('glossary-loaded')) ? 0 : $( '.tab-switcher-gl a .number', segment.el ).data('num');
             numMatches = ( existingMatches && existingMatches > 0) ? existingMatches + numMatches : numMatches;
             if ( numMatches ) {
                 UI.renderGlossary( d, segment.el );
