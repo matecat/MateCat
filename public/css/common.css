@@ -55,26 +55,30 @@ ul
 
     .wrapper
     {
-	    width: 98%;
-	    min-width: 910px;
-	    margin: 0px auto 0 auto;
-	    padding: 5px 0 0 0;
-	    width: 92%;
-	    font-size: 14px;
-	    position: relative;
-	    text-align: left;
+        min-width: 960px;
+        margin: 0px auto 0 auto;
+        padding: 3px 0 0 0;
+        width: 100%;
+        font-size: 14px;
+        position: absolute;
+        text-align: left;
     }
 
     .logo
     {
-	    float: left;
-	    border: 0;
-	    background: url(../img/logo.png) 0px 2px no-repeat;
-	    width: 145px;
-	    height: 31px;
-	    background-size: 130px 26px;
-    }
+        float: left;
+        border: 0;
+        background: url(../img/logo.png) 0px 2px no-repeat;
+        width: 145px;
+        height: 31px;
+        background-size: 130px 26px;
+        margin-top: 5px;
+        position: relative;
 
+    }
+    .offline .logo {
+        margin-left: 13px;
+    }
 
 footer {
     background: #6d6e71;
@@ -1922,6 +1926,7 @@ cursor: pointer;
 -webkit-box-shadow: 0 1px 2px #ccc;
 box-shadow: 0 1px 2px #ccc;
 border: 1px solid #000;
+    color: #333333;
 }
 body.cattool .mgmt-tm.mine thead,
 .mgmt-tm.new thead,
@@ -3301,7 +3306,7 @@ background: #6d6e71;
 border-bottom: 1px solid #333;
 padding: 0px 0 2px 0;
 margin-bottom: 20px;
-/*height: 45px;*/
+height: 45px;
 }
 
 .offline h1 {font-size:40px;}
