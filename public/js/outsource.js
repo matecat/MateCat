@@ -164,6 +164,7 @@ $.extend(UI, {
             $("#open-translator").addClass('hide');
             $('.send-to-translator').removeClass('hide');
             $('.onyourown').addClass('opened-send-translator');
+            $('.out-link').addClass('from-manage');
 
             //TODO
             $('.modal.outsource input.out-email').val("");
