@@ -115,11 +115,11 @@ box-shadow: inset 0 0 1px 1px #888;
 /* outsource popup */
 
 .outsource.modal .popup {
-    width: 950px;
-    margin: -170px 0 0 -475px;
+    width: 970px;
+    margin: -170px 0 0 -485px;
     padding-bottom: 10px;
     box-sizing: content-box;
-    top: 35%;
+    top: 25%;
     left: 50%;
     font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
@@ -133,12 +133,43 @@ box-shadow: inset 0 0 1px 1px #888;
     font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
 }
 .outsource.modal .out-email,
-.outsource.modal .out-date,
-.outsource.modal .out-link {
+.outsource.modal .out-date {
     padding: .7em .6em;
     display: inline-block;
     border: 1px solid #ccc;
     box-shadow: inset 0 1px 3px #ddd;
+    border-radius: 2px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+    font-size: 15px;
+    color: #333;
+    width: 70%;
+    margin: 2%;
+}
+
+.outsource.modal .out-email:focus,
+.outsource.modal .out-date:focus {
+    border-color: #85B7D9;
+    background: #FFFFFF;
+    color: rgba(0, 0, 0, 0.8);
+    border-radius: 2px;
+    outline: none;
+}
+
+select:focus {
+    border-color: #85B7D9;
+    background: #FFFFFF;
+    color: rgba(0, 0, 0, 0.8);
+    outline: none;
+}
+
+.outsource.modal .out-link {
+    padding: .7em .6em;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-shadow: none;
     border-radius: 4px;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -148,6 +179,24 @@ box-shadow: inset 0 0 1px 1px #888;
     color: #333;
     width: 70%;
     margin: 2%;
+    background-color: #f1f1f1;
+}
+
+.outsource.modal .out-link.from-manage {
+    padding: .7em .6em;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-shadow: none;
+    border-radius: 4px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+    font-size: 15px;
+    color: #333;
+    width: 90%;
+    margin: 2%;
+    background-color: #f1f1f1;
 }
 
 .outsource.modal .out-email,
@@ -373,6 +422,7 @@ body.showingOutsourceTo {
 .guaranteed_by p {
    font-size: 14px!important;
    line-height: 22px;
+    padding: 0;
 }
 
 .pricebox .outsourceto .guaranteed_by img {
@@ -564,6 +614,7 @@ span.revision_delivery {
     text-decoration: none;
     cursor: pointer;
     font-weight: normal!important;
+    float: right;
 }
 
 .guaranteed_by a.more span {
@@ -1735,7 +1786,7 @@ div#open-translator {
     text-decoration: underline;
     font-weight: bold;
     cursor: pointer;
-    margin-right: 50px;
+    margin-right: 42px;
 }
 
 .modal.outsource .send-to-translator {
