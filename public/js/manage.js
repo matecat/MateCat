@@ -315,7 +315,9 @@ UI = {
         dd.setMinutes( dd.getMinutes() + (timezoneToShow - timeZoneFrom) * 60 );
         var selectedElement = $( "#changeTimezone" ).find( "option[value='" + timezoneToShow + "']");
         return {
-            date: $.format.date(dd, "d MMMM") + ' at ' + $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a"),
+            day: $.format.date(dd, "d") ,
+            month: $.format.date(dd, "MMMM"),
+            time: $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a"),
             gmt: selectedElement.text()
         };
     },
