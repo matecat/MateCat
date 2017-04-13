@@ -3,7 +3,7 @@ $.extend(UI, {
     },
     showPopupDetails: '1',
     changeRates: [],
-	outsourceInit: function() {
+    outsourceInit: function() {
 
         // hide/show detailed information about the chosen translator
         $('.show_translator, .hide_translator').click(function() {
@@ -63,16 +63,16 @@ $.extend(UI, {
         });
 
         // trigger the process for getting and displaying an outsource quote
-		$(".translate").click(function(e) {
-			var linkPieces = $( this ).attr( "href" ).split( "/" );
-			var jPieces = linkPieces[ linkPieces.length - 1 ].split( "-" );
+        $(".translate").click(function(e) {
+            var linkPieces = $( this ).attr( "href" ).split( "/" );
+            var jPieces = linkPieces[ linkPieces.length - 1 ].split( "-" );
 
-			$( ".title-source" ).text( $( "div[data-jid='" + jPieces[ 0 ] + "'] .source_lang" ).text() );
-			$( ".title-target" ).text( $( "div[data-jid='" + jPieces[ 0 ] + "'] .target_lang" ).text() );
-			$( ".title-words" ).text( $( ".tablestats[data-pwd='" + jPieces[ 1 ] + "'] .stat-payable" ).text() );
+            $( ".title-source" ).text( $( "div[data-jid='" + jPieces[ 0 ] + "'] .source_lang" ).text() );
+            $( ".title-target" ).text( $( "div[data-jid='" + jPieces[ 0 ] + "'] .target_lang" ).text() );
+            $( ".title-words" ).text( $( ".tablestats[data-pwd='" + jPieces[ 1 ] + "'] .stat-payable" ).text() );
 
-			if(config.enable_outsource) {
-				e.preventDefault();
+            if(config.enable_outsource) {
+                e.preventDefault();
                 resetOutsourcePopup( false );
                 $('body').addClass('showingOutsourceTo');
                 $('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
@@ -81,10 +81,10 @@ $.extend(UI, {
                 renderQuote( $( this ) );
                 $('.outsource.modal').show();
             }
-		});
+        });
 
-		$(".outsource.modal").on('click', '.continuebtn', function(e) {
-			e.preventDefault();
+        $(".outsource.modal").on('click', '.continuebtn', function(e) {
+            e.preventDefault();
 
             if( $( this ).hasClass( 'disabled' ) ) {
                 return;
@@ -92,17 +92,18 @@ $.extend(UI, {
 
             updateCartParameters();
 
-			$('#continueForm input[name=url_ok]').attr('value', UI.url_ok);
-			$('#continueForm input[name=url_ko]').attr('value', UI.url_ko);
+            $('#continueForm input[name=url_ok]').attr('value', UI.url_ok);
+            $('#continueForm input[name=url_ko]').attr('value', UI.url_ko);
+            $('#continueForm input[name=confirm_urls]').attr('value', UI.confirm_urls);
             $('#continueForm input[name=data_key]').attr('value', UI.data_key);
 
             UI.populateOutsourceForm();
 
             //IMPORTANT post out the quotes
-			$('#continueForm input[name=quoteData]').attr('value', JSON.stringify( UI.quoteResponse ) );
-			$('#continueForm').submit();
+            $('#continueForm input[name=quoteData]').attr('value', JSON.stringify( UI.quoteResponse ) );
+            $('#continueForm').submit();
             $('#continueForm input[name=quoteData]').attr('value', '' );
-		});
+        });
 
         $('.modal.outsource input.out-email').on('keyup', function () {
             _.debounce(function() {
@@ -123,7 +124,7 @@ $.extend(UI, {
         });
 
         fetchChangeRates();
-	},
+    },
     startOutSourceModal: function (project, job, url) {
         this.currentOutsourceProject = project;
         this.currentOutsourceJob = job;
@@ -245,6 +246,7 @@ function renderQuote( clickedButton ) {
         showOutsourcePopup( UI.showPopupDetails );
         UI.url_ok = quoteData.return_url.url_ok;
         UI.url_ko = quoteData.return_url.url_ko;
+        UI.confirm_urls = quoteData.return_url.confirm_urls;
         UI.data_key = chunk.id;
 
         // a generic error
@@ -283,6 +285,7 @@ function renderQuoteFromManage( idProject, password, jid, jpassword) {
         showOutsourcePopup( UI.showPopupDetails );
         UI.url_ok = quoteData.return_url.url_ok;
         UI.url_ko = quoteData.return_url.url_ko;
+        UI.confirm_urls = quoteData.return_url.confirm_urls;
         UI.data_key = chunk.id;
 
         // a generic error
