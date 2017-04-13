@@ -1518,3 +1518,17 @@ header .nav-mc-bar .dropdown.select-org i.dropdown.icon {
     top: 12px;
     margin-left: -25px !important;
 }
+
+input:focus {
+    border-color: #85B7D9;
+    background: #FFFFFF;
+    color: rgba(0, 0, 0, 0.8);
+    outline: none;
+}
+
+select:focus {
+    border-color: #85B7D9;
+    background: #FFFFFF;
+    color: rgba(0, 0, 0, 0.8);
+    outline: none;
+}
