@@ -106,8 +106,9 @@ $.extend(UI, {
 
             updateCartParameters();
 
-			$('#continueForm input[name=url_ok]').attr('value', UI.url_ok);
-			$('#continueForm input[name=url_ko]').attr('value', UI.url_ko);
+            $('#continueForm input[name=url_ok]').attr('value', UI.url_ok);
+            $('#continueForm input[name=url_ko]').attr('value', UI.url_ko);
+            $('#continueForm input[name=confirm_urls]').attr('value', UI.confirm_urls);
             $('#continueForm input[name=data_key]').attr('value', UI.data_key);
 
             UI.populateOutsourceForm();
@@ -273,6 +274,7 @@ function renderQuote( clickedButton ) {
         showOutsourcePopup( UI.showPopupDetails );
         UI.url_ok = quoteData.return_url.url_ok;
         UI.url_ko = quoteData.return_url.url_ko;
+        UI.confirm_urls = quoteData.return_url.confirm_urls;
         UI.data_key = chunk.id;
 
         // a generic error
@@ -311,6 +313,7 @@ function renderQuoteFromManage( idProject, password, jid, jpassword) {
         showOutsourcePopup( UI.showPopupDetails );
         UI.url_ok = quoteData.return_url.url_ok;
         UI.url_ko = quoteData.return_url.url_ko;
+        UI.confirm_urls = quoteData.return_url.confirm_urls;
         UI.data_key = chunk.id;
 
         // a generic error
