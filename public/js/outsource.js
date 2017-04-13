@@ -3,7 +3,7 @@ $.extend(UI, {
     },
     showPopupDetails: '1',
     changeRates: [],
-    outsourceInit: function() {
+	outsourceInit: function() {
 
         // hide/show detailed information about the chosen translator
         $('.show_translator, .hide_translator').click(function() {
@@ -63,16 +63,30 @@ $.extend(UI, {
         });
 
         // trigger the process for getting and displaying an outsource quote
-        $(".translate").click(function(e) {
-            var linkPieces = $( this ).attr( "href" ).split( "/" );
-            var jPieces = linkPieces[ linkPieces.length - 1 ].split( "-" );
+		$(".translate").click(function(e) {
+			var linkPieces = $( this ).attr( "href" ).split( "/" );
+			var jPieces = linkPieces[ linkPieces.length - 1 ].split( "-" );
 
-            $( ".title-source" ).text( $( "div[data-jid='" + jPieces[ 0 ] + "'] .source_lang" ).text() );
-            $( ".title-target" ).text( $( "div[data-jid='" + jPieces[ 0 ] + "'] .target_lang" ).text() );
-            $( ".title-words" ).text( $( ".tablestats[data-pwd='" + jPieces[ 1 ] + "'] .stat-payable" ).text() );
+			var words = $( ".tablestats[data-pwd='" + jPieces[ 1 ] + "'] .stat-payable" ).text() ;
+			var sourceTxt = $( "div[data-jid='" + jPieces[ 0 ] + "'] .source_lang" ).text();
+			var targetTxt = $( "div[data-jid='" + jPieces[ 0 ] + "'] .target_lang" ).text();
 
-            if(config.enable_outsource) {
-                e.preventDefault();
+			$( ".title-source" ).text( sourceTxt );
+			$( ".title-target" ).text( targetTxt );
+			$( ".title-words" ).text( words );
+
+            UI.currentOutsourceJob = {
+                id: jPieces[ 0 ],
+                password: jPieces[ 1 ],
+                stats: {
+                    TOTAL_FORMATTED: words
+                },
+                sourceTxt: sourceTxt,
+                targetTxt: targetTxt
+            };
+
+			if(config.enable_outsource) {
+				e.preventDefault();
                 resetOutsourcePopup( false );
                 $('body').addClass('showingOutsourceTo');
                 $('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
@@ -81,10 +95,10 @@ $.extend(UI, {
                 renderQuote( $( this ) );
                 $('.outsource.modal').show();
             }
-        });
+		});
 
-        $(".outsource.modal").on('click', '.continuebtn', function(e) {
-            e.preventDefault();
+		$(".outsource.modal").on('click', '.continuebtn', function(e) {
+			e.preventDefault();
 
             if( $( this ).hasClass( 'disabled' ) ) {
                 return;
@@ -100,14 +114,14 @@ $.extend(UI, {
             UI.populateOutsourceForm();
 
             //IMPORTANT post out the quotes
-            $('#continueForm input[name=quoteData]').attr('value', JSON.stringify( UI.quoteResponse ) );
-            $('#continueForm').submit();
+			$('#continueForm input[name=quoteData]').attr('value', JSON.stringify( UI.quoteResponse ) );
+			$('#continueForm').submit();
             $('#continueForm input[name=quoteData]').attr('value', '' );
-        });
+		});
 
         $('.modal.outsource input.out-email').on('keyup', function () {
             _.debounce(function() {
-                UI.checkInputEmailInput();
+                // UI.checkInputEmailInput();
                 UI.checkSendToTranslatorButton();
             }, 300)();
         });
@@ -124,7 +138,7 @@ $.extend(UI, {
         });
 
         fetchChangeRates();
-    },
+	},
     startOutSourceModal: function (project, job, url) {
         this.currentOutsourceProject = project;
         this.currentOutsourceJob = job;
@@ -133,23 +147,26 @@ $.extend(UI, {
         $( ".title-source" ).text( job.sourceTxt);
         $( ".title-target" ).text( job.targetTxt);
         $( ".title-words" ).text(job.stats.TOTAL_FORMATTED );
+        $( ".modal.outsource a.uploadbtn.in-popup").hide();
 
-        // if (job.outsource) {
-        //     var dd = new Date( job.outsource.delivery_date );
-        //     $('.modal.outsource .out-date').val( $.format.date(dd, "d MMMM") + ' at ' + $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a") );
-        // } else {
-        //     $('.modal.outsource .out-date').val( getChosenOutsourceDateToString() );
-        //
-        // }
+        if (job.outsource) {
+            var dd = new Date( job.outsource.delivery_date );
+            $('.modal.outsource .out-date').val( $.format.date(dd, "d MMMM") + ' at ' + $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a") );
+        } else {
+            $('.modal.outsource .out-date').val( getChosenOutsourceDateToString() );
+
+        }
 
         if(config.enable_outsource) {
             resetOutsourcePopup( false );
             $('body').addClass('showingOutsourceTo');
             $('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + url);
             $('.outsource.modal .uploadbtn:not(.showprices)').attr('href', url);
-            // $("#open-translator").addClass('hide');
-            // $('.send-to-translator').removeClass('hide');
+            $("#open-translator").addClass('hide');
+            $('.send-to-translator').removeClass('hide');
             $('.onyourown').addClass('opened-send-translator');
+            $('.out-link').addClass('from-manage');
+
             //TODO
             $('.modal.outsource input.out-email').val("");
             $('.modal.outsource input.out-email').removeClass("error");
@@ -169,14 +186,20 @@ $.extend(UI, {
     },
 
     checkSendToTranslatorButton: function () {
-        var email = UI.checkInputEmailInput();
+        var $email = $('.modal.outsource input.out-email');
+        var email = $email.val();
         var date = $('.outsource .out-date').val();
 
-        if (email.length > 0 && date.length > 0 && APP.checkEmail(email)) {
-            // $('.send-to-translator-btn').removeClass('disabled');
+        if ($email.hasClass('error') ) {
+            $email.removeClass('error');
+            $('.modal.outsource .validation-error.email-translator-error').hide();
+        }
+
+        if (email.length > 0 && date.length > 0 ) {
+            $('.send-to-translator-btn').removeClass('disabled');
             return true;
         } else {
-            // $('.send-to-translator-btn').addClass('disabled');
+            $('.send-to-translator-btn').addClass('disabled');
             return false;
         }
     },
@@ -185,35 +208,40 @@ $.extend(UI, {
         var email = $('.modal.outsource input.out-email').val();
         if (!APP.checkEmail(email)) {
             $('.modal.outsource input.out-email').addClass('error');
+            $('.modal.outsource .validation-error.email-translator-error').show();
             return false;
         } else {
             $('.modal.outsource input.out-email').removeClass('error');
+            $('.modal.outsource .validation-error.email-translator-error').hide();
             return true;
         }
     },
 
     sendJobToTranslator: function () {
-        if (UI.checkSendToTranslatorButton()) {
+        if (UI.checkSendToTranslatorButton() && UI.checkInputEmailInput()) {
             var email = $('.modal.outsource input.out-email').val();
             var date = getChosenOutsourceDate();
             UI.sendTranslatorRequest(email, date).done(function () {
+                APP.closePopup();
                 let notification = {
                     title: 'Job sent',
-                    text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                    text: '<div class="translator-notification-sent">' + UI.currentOutsourceJob.sourceTxt + ' > ' + UI.currentOutsourceJob.targetTxt + ' - ' + UI.currentOutsourceJob.stats.TOTAL_FORMATTED + ' words ' +
+                    '<br/>To: <span>' + email + '</span> </div>',
                     type: 'success',
                     position: 'tc',
                     allowHtml: true,
-                    timer: 100000
+                    timer: 10000
                 };
                 let boxUndo = APP.addNotification(notification);
             }).error(function () {
+                APP.closePopup();
                 let notification = {
-                    title: 'Problems',
-                    text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                    title: 'Problems sending the job',
+                    text: 'Please try later or contact <a href="mailto:support@matecat.com">support@matecat.com</a>',
                     type: 'error',
                     position: 'tc',
                     allowHtml: true,
-                    timer: 100000
+                    timer: 10000
                 };
                 let boxUndo = APP.addNotification(notification);
             });
@@ -532,7 +560,7 @@ function fetchChangeRates( callback ) {
     }
 
     var changeRates = readCookie( "matecat_changeRates" );
-    if( changeRates != "" ) {
+    if( changeRates != "" && changeRates!="null") {
         UI.changeRates = changeRates;
         if( typeof callback == "function" ) callback();
         return;
@@ -642,6 +670,9 @@ function resetOutsourcePopup( resetHard ) {
     $('.modal.outsource .continuebtn, .modal.outsource .contact_box,.paymentinfo,.outsource #changeTimezone,.outsource #changecurrency,.addrevision, .guaranteed_by .more, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2, .needitfaster, .showpricesloading').removeClass('hide');
     $('.ErrorMsg,.modal.outsource .tooltip, .outsource_notify, .delivery_before_time, .checkstatus, #delivery_not_available, .trustbox2, .translator_info_box, .hide_translator.more, .showprices').addClass('hide');
     $('#out-datepicker').addClass('hide');
+    $('.modal.outsource input.out-email').removeClass('error');
+    $('.modal.outsource .validation-error.email-translator-error').hide();
+    $('.send-to-translator-btn').addClass('disabled');
     if( resetHard ) {
         $('.modal.outsource .displayprice').empty();
         $('.modal.outsource .delivery .time').empty();
