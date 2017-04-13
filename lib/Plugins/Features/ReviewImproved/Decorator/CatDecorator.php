@@ -49,7 +49,7 @@ class CatDecorator extends \AbstractDecorator {
         }
 
         $this->template->overall_quality_class = $this->getOverallQualityClass();
-        $this->template->deny_lexiqa = $this->controller->isRevision() ;
+        $this->template->deny_lexiqa = false ; // TODO: remove this variable
 
     }
 

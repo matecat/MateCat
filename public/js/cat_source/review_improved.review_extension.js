@@ -137,10 +137,8 @@ if ( ReviewImproved.enabled() && config.isReview ) {
             return '.errorTaggingArea';
         },
 
-        getSegmentTarget : function() {
-            // read status from DOM? wrong approach, read from
-            // database instead
-            var segment = db.segments.by('sid', sid);
+        getSegmentTarget : function( seg ) {
+            var segment = db.segments.by('sid', UI.getSegmentId( seg ) );
             var translation =  segment.translation ;
 
             return translation ;
