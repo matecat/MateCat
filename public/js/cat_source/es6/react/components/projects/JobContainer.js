@@ -446,7 +446,7 @@ class JobContainer extends React.Component {
         if (this.props.job.get('outsource')) {
             if (this.props.job.get('outsource').get('id_vendor') == "1") {
                 outsourceJobLabel =
-                    <a href="http://www.translated.net" target="_blank"><img className='outsource-logo' src="/public/img/logo_translated.png" title="Outsourced to translated.net" alt="Translated logo"/></a>;
+                    <div className="outsource-logo-box"><img className='outsource-logo' src="/public/img/logo_translated.png" title="Outsourced to translated.net" alt="Translated logo"/></div>;
             }
         }
         return outsourceJobLabel;
@@ -459,8 +459,10 @@ class JobContainer extends React.Component {
                 let date  = this.props.job.get('outsource').get('delivery_date').substring(0, this.props.job.get('outsource').get('delivery_date').lastIndexOf(":"))
                 let gmtDate = UI.getGMTDate(this.props.job.get('outsource').get('delivery_date'));
                 outsourceDelivery = <div className="job-delivery" title="Delivery date">
-                    <span className="outsource-date-text">{gmtDate.date}</span>
-                    <span className="outsource-gmt-text"> ({gmtDate.gmt})</span>
+                    <div className="outsource-day-text">{gmtDate.day}</div>
+                    <div className="outsource-month-text">{gmtDate.month}</div>
+                    <div className="outsource-time-text">{gmtDate.time}</div>
+                    <div className="outsource-gmt-text"> ({gmtDate.gmt})</div>
                 </div>;
             }
         }
@@ -624,10 +626,10 @@ class JobContainer extends React.Component {
                         {outsourceButton}
                     <div className="outsource-job">
                         <div className="translated-outsourced">
-                            <a href="#" className="job-to-translator" onClick={this.openOutsourceModal.bind(this)}>alessandro.cattelan@translated.net</a>
+                            <div href="#" className="job-to-translator" onClick={this.openOutsourceModal.bind(this)}>alessandro.cattelan</div>
                             {outsourceJobLabel}
                             {outsourceDelivery}
-                            {outsourceDeliveryPrice}
+                            {/*{outsourceDeliveryPrice}*/}
                         </div>
                     </div>
 

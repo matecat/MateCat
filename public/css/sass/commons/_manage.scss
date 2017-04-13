@@ -434,55 +434,72 @@ body.manage {
                                 }
                             }
                             .outsource-job {
-                                text-align: center;
-                                .job-to-translator {
-                                    display: inline-block;
-                                    margin-right: 15px;
-                                    vertical-align: text-bottom;
-                                    cursor: pointer;
-                                    text-decoration: underline;
-                                    &:hover {
-                                        text-decoration: none;
-                                    }
-                                }
+                                text-align: left;
                                 .translated-outsourced {
                                     top: 6px;
                                     bottom: 6px;
                                     vertical-align: text-bottom;
                                     display: inline-block;
                                     position: relative;
-                                    img.outsource-logo {
-                                        width: 100px;
-                                        margin: -5px 17px 0 0;
-                                        vertical-align: middle;
+                                    max-width: 380px;
+                                    margin: 0 10px 0 45px;
+                                    .outsource-logo-box {
+                                        min-width: 130px;
+                                        display: inherit;
+                                        margin-left: 10px;
+                                        img.outsource-logo {
+                                            width: 100px;
+                                            margin: -5px 10px 0 0;
+                                            vertical-align: middle;
+                                        }
                                     }
+                                }
+                                .job-to-translator {
+                                    display: inline-block;
+                                    margin-right: 0px;
+                                    margin-left: 10px;
+                                    vertical-align: text-bottom;
+                                    color: #969696;
+                                    min-width: 130px;
                                 }
                                 .job-delivery {
                                     display: inline-block;
-                                    margin-right: 15px;
+                                    margin-right: 10px;
                                     vertical-align: text-bottom;
-                                    .outsource-date-text {
+                                    .outsource-day-text {
+                                        font-weight: 700;
+                                        display: inherit;
+                                        margin-right: 3px;
+                                    }
+                                    .outsource-month-text {
+                                        display: inherit;
+                                        font-weight: 700;
+                                        margin-right: 7px;
+                                    }
+                                    .outsource-time-text {
+                                        display: inherit;
                                         font-weight: 700;
                                     }
                                     .outsource-gmt-text {
                                         color: #969696;
+                                        display: inherit;
                                     }
                                     @media only screen and (max-width: 1200px) {
                                         display: none;
                                     }
                                 }
-                                .job-price {
+                                /*.job-price {
                                     display: inline-block;
-                                    margin-right: 15px;
+                                    margin-right: 10px;
                                     vertical-align: text-bottom;
                                     font-weight: 700;
                                     @media only screen and (max-width: 1200px) {
                                         display: none;
                                     }
-                                }
+                                }*/
                             }
                             .open-translate {
-                                font-family: Calibri;
+                                font-family: Calibri, Arial, Helvetica, sans-serif;
                                 padding: 6px 15px;
                                 vertical-align: top;
                                 font-size: 16px;
@@ -490,9 +507,30 @@ body.manage {
                                 border-radius: 2px;
                                 float: right;
                             }
+                            .open-vendor {
+                                font-family: Calibri, Arial, Helvetica, sans-serif;
+                                padding: 6px 8px;
+                                vertical-align: top;
+                                font-size: 16px;
+                                border: 1px solid #7eaf3e;
+                                border-radius: 2px;
+                                float: right;
+                                font-weight: bold;
+                                box-shadow: none !important;
+                                color: #7eaf3e !important;
+                                &:hover {
+                                    box-shadow: 0 0 0 #e0e0e0, 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.24) !important;
+                                }
+                                &:active {
+                                    box-shadow: none !important;
+                                }
+                                &:focus {
+                                    box-shadow: none !important;
+                                }
+                            }
                             .open-outsource {
-                                font-family: Calibri;
-                                padding: 6px 12px;
+                                font-family: Calibri, Arial, Helvetica, sans-serif;
+                                padding: 6px 23px;
                                 vertical-align: top;
                                 font-size: 16px;
                                 border: 1px solid #797979;
@@ -501,8 +539,8 @@ body.manage {
                                 //background-color: #7eaf3e;
                             }
                             .open-outsourced {
-                                font-family: Calibri;
-                                padding: 6px 8px;
+                                font-family: Calibri, Arial, Helvetica, sans-serif;
+                                padding: 6px 19px;
                                 vertical-align: top;
                                 font-size: 16px;
                                 border: 1px solid #797979;
@@ -629,7 +667,7 @@ body.manage {
             padding: 20px;
             a {
                 text-align: center;
-                font-family: Calibri;
+                font-family: Calibri, Arial, Helvetica, sans-serif;
                 padding: 16px 25px;
                 vertical-align: top;
                 font-size: 20px;
