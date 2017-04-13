@@ -146,7 +146,7 @@ $.extend(UI, {
         $( ".title-source" ).text( job.sourceTxt);
         $( ".title-target" ).text( job.targetTxt);
         $( ".title-words" ).text(job.stats.TOTAL_FORMATTED );
-        $( ".modal.outsource a.uploadbtn.in-popup").remove();
+        $( ".modal.outsource a.uploadbtn.in-popup").hide();
 
         if (job.outsource) {
             var dd = new Date( job.outsource.delivery_date );
