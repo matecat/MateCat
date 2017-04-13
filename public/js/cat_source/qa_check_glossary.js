@@ -120,7 +120,7 @@ if ( QaCheckGlossary.enabled() )
         if (LXQ.enabled())
           newHTML = LXQ.cleanUpHighLighting(newHTML);
         $.each(unusedMatches, function( index ) {
-            var value = this.raw_segment ;
+            var value = (this.raw_segment) ? this.raw_segment : this.translation ;
             value = escapeRegExp( value );
             var re = new RegExp('\\b(' + value + ')\\b',"g");
             newHTML = newHTML.replace(
@@ -140,7 +140,8 @@ if ( QaCheckGlossary.enabled() )
         var currentText = segment.el.find( UI.targetContainerSelector() ).text();
 
         return _.filter( record.glossary_matches, function( item ) {
-            var value = escapeRegExp( item.raw_translation );
+            var translation = (item.raw_translation) ? item.raw_translation : item.translation;
+            var value = escapeRegExp( translation );
             var re = new RegExp( sprintf( matchRegExp, value ),"g");
             var match = currentText.match( re ) ;
             return match == null ;
