@@ -2,6 +2,14 @@
 
 class Jobs_JobDao extends DataAccess_AbstractDao {
 
+    const TABLE       = "jobs";
+    const STRUCT_TYPE = "Jobs_JobStruct";
+
+    protected static $auto_increment_fields = array( 'id' );
+    protected static $primary_keys          = array( 'id', 'password' );
+
+    protected static $_sql_update_password = "UPDATE jobs SET password = :new_password WHERE id = :id AND password = :old_password ";
+
     /**
      * This method is not static and used to cache at Redis level the values for this Job
      *
@@ -13,7 +21,8 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
      * @see \Contribution\ContributionStruct
      *
      * @param Jobs_JobStruct $jobQuery
-     * @return Jobs_JobStruct[]
+     *
+     * @return DataAccess_IDaoStruct[]|Jobs_JobStruct[]
      */
     public function read( \Jobs_JobStruct $jobQuery ){
 
@@ -193,6 +202,24 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         $stmt->execute(array('email' => $user->email, 'id_project' => $project->id ) ) ;
 
         return $stmt->rowCount();
+    }
+
+    public function changePassword( Jobs_JobStruct $jStruct, $new_password ){
+
+        if( empty( $new_password ) ) throw new PDOException( "Invalid empty value: password." );
+
+        $conn = \Database::obtain()->getConnection();
+        $stmt = $conn->prepare( self::$_sql_update_password );
+        $stmt->execute( [
+                'id'           => $jStruct->id,
+                'new_password' => $new_password,
+                'old_password' => $jStruct->password
+        ] );
+
+        $jStruct->password = $new_password;
+
+        return $jStruct;
+
     }
 
 }

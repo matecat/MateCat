@@ -998,7 +998,7 @@ UPDATE engines SET id = 0 WHERE name = 'NONE' ;
 UPDATE engines SET id = 1 WHERE name = 'MyMemory (All Pairs)' ;
 
 -- populate sequences
-INSERT INTO sequences ( id_segment ) VALUES ( IFNULL( (SELECT MAX(id) + 1 FROM segments), 1)  );
+INSERT INTO sequences ( id_segment, id_project ) VALUES ( IFNULL( (SELECT MAX(id) + 1 FROM segments), 1), IFNULL( (SELECT MAX(id) + 1 FROM projects), 1)  );
 
 #Create the user 'matecat'@'%'
 CREATE USER 'matecat'@'%' IDENTIFIED BY 'matecat01';

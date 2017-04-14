@@ -40,6 +40,10 @@ $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
     route( '/quality-report', 'GET',
         'Features\ReviewImproved\Controller\API\QualityReportController', 'show'
     );
+
+    route( '/translator', 'GET',  '\API\V2\JobsTranslatorsController', 'get' ) ;
+    route( '/translator', 'POST',  '\API\V2\JobsTranslatorsController', 'add' ) ;
+
 });
 
 route(

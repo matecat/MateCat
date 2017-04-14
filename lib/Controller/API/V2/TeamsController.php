@@ -12,6 +12,7 @@ namespace API\V2;
 
 use API\V2\Exceptions\AuthorizationError;
 use API\V2\Json\Team;
+use API\V2\Validators\LoginValidator;
 use API\V2\Validators\TeamAccessValidator;
 use InvalidArgumentException;
 use Teams\MembershipDao;
@@ -20,6 +21,10 @@ use API\V2\Json\Error;
 use Teams\TeamStruct;
 
 class TeamsController extends KleinController {
+
+    protected function afterConstruct() {
+        $this->appendValidator( new LoginValidator( $this ) );
+    }
 
     protected function addValidatorAccess() {
         $this->appendValidator( new TeamAccessValidator( $this ) );
