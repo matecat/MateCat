@@ -1,36 +1,44 @@
 class FilterProjects extends React.Component {
     constructor (props) {
         super(props);
+
+        this.onChangeFunction = this.onChangeFunction.bind(this);
     }
 
     componentDidMount () {
-        $(this.select).material_select(this.onChangeFunction.bind(this));
+        let self = this;
+
+        $(this.dropdown).dropdown({
+            onChange: function() {
+                self.onChangeFunction();
+            }
+        });
+        this.currentFilter = 'active';
+        $(this.dropdown).dropdown('set selected', 'active');
     }
 
     onChangeFunction() {
-        this.props.filterFunction(this.select.value)
+        if (this.currentFilter !== $(this.dropdown).dropdown('get value')) {
+            this.props.filterFunction($(this.dropdown).dropdown('get value'));
+            this.currentFilter = $(this.dropdown).dropdown('get value');
+        }
+    }
+
+    componentDidUpdate() {
+        this.currentFilter = 'active';
+        $(this.dropdown).dropdown('set selected', 'active');
     }
 
     render () {
-        return <div className="row">
-                        {/*<div className="col s9">*/}
-                            {/*<h4>Project List</h4>*/}
-                        {/*</div>*/}
-                        <form>
-                        <div className="input-field">
-                            <select defaultValue="active"
-                                    ref={(select) => this.select = select}>
-                                    <option value="active">Active Projects</option>
-                                    <option value="archived">Archived Projects</option>
-                                    <option value="cancelled">Cancelled Projects</option>
-
-                            </select>
-                        </div>
-                        </form>
+        return <div className="ui top left pointing dropdown" title="Status Filter" ref={(dropdown) => this.dropdown = dropdown}>
+                    <i className="icon-filter icon" />
+                    <div className="text">Active</div>
+                    <div className="menu">
+                        <div className="item" data-value="active">Active</div>
+                        <div className="item" data-value="archived">Archived</div>
+                        <div className="item" data-value="cancelled">Cancelled</div>
                     </div>
-
-
-
+                </div> ;
     }
 }
 

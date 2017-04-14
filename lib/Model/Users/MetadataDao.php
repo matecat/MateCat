@@ -8,13 +8,13 @@ use PDO;
 class MetadataDao extends \DataAccess_AbstractDao
 {
 
-    public function allByProjectId( $id ) {
+    public function getAllByUid( $uid ) {
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare(
             "SELECT * FROM user_metadata WHERE " .
             " uid = :uid "
         );
-        $stmt->execute( array( 'uid' => $id ) );
+        $stmt->execute( array( 'uid' => $uid ) );
         $stmt->setFetchMode(PDO::FETCH_CLASS, '\Users\MetadataStruct');
         return $stmt->fetchAll();
     }

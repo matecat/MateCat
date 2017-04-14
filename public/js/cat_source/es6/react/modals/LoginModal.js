@@ -23,6 +23,7 @@ class LoginModal extends React.Component {
 
     googole_popup(  ) {
         var url = this.props.googleUrl;
+        var self = this;
         this.checkRedeemProject();
         var newWindow = window.open( url, 'name', 'height=600,width=900' );
         if ( window.focus ) {
@@ -31,7 +32,11 @@ class LoginModal extends React.Component {
         var interval = setInterval(function () {
             if (newWindow.closed) {
                 clearInterval(interval);
-                window.location.reload();
+                if (self.props.goToManage) {
+                    window.location = '/manage/';
+                } else {
+                    window.location.reload();
+                }
             }
         }, 600);
     }
@@ -56,7 +61,11 @@ class LoginModal extends React.Component {
         }
         this.setState({requestRunning: true});
         this.checkRedeemProject().then(this.sendLoginData().done(function (data) {
-            window.location.reload();
+            if (self.props.goToManage) {
+                window.location = '/manage/';
+            } else {
+                window.location.reload();
+            }
         }).fail(function (response) {
             var text;
             if (response.responseText.length) {
@@ -95,8 +104,8 @@ class LoginModal extends React.Component {
     }
 
     openRegisterModal() {
-    $('#modal').trigger('openregister');
-}
+        $('#modal').trigger('openregister');
+    }
 
     openForgotPassword() {
         $('#modal').trigger('openforgotpassword');
@@ -104,8 +113,9 @@ class LoginModal extends React.Component {
 
     render() {
         var generalErrorHtml = '';
+        var buttonSignInClass = (_.size(this.state.validationErrors) === 0) ?  '':'disabled';
         if (this.state.generalError.length) {
-            generalErrorHtml = <span style={ {color: 'red',fontSize: '14px'} } className="text">{this.state.generalError}</span>;
+            generalErrorHtml = <div style={ {color: 'red',fontSize: '14px'} } className="text">{this.state.generalError}</div>;
         }
 
         var loaderClass = (this.state.requestRunning) ? 'show' : '';
@@ -128,21 +138,27 @@ class LoginModal extends React.Component {
                     <li>Monitor the activity for increased security</li>
                     <li>Manage TMs, MT and glossaries</li>
                 </ul>
-                <a className="register-button btn-confirm-medium" onClick={this.openRegisterModal}>Sign up</a>
+                <a className="register-button btn-confirm-medium sing-up" onClick={this.openRegisterModal}>Sign up</a>
             </div>
         }
         return <div className="login-modal">
                     {htmlMessage}
                     <div className="login-container-left">
                         <a className="google-login-button btn-confirm-medium" onClick={this.googole_popup.bind(this)}/>
+
                         <div className="login-form-container">
+                            <div className="form-divider">
+                                <div className="divider-line"></div>
+                                <span>OR</span>
+                                <div className="divider-line"></div>
+                            </div>
                             <TextField showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("emailAddress")}
                                        placeholder="Email" name="emailAddress" errorText={this.errorFor("emailAddress")} tabindex={1}
                                        onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
                             <TextField type="password" showError={this.state.showErrors} onFieldChanged={this.handleFieldChanged("password")}
-                                       placeholder="Password" name="password" errorText={this.errorFor("password")} tabindex={2}
+                                       placeholder="Password (minimum 8 characters)" name="password" errorText={this.errorFor("password")} tabindex={2}
                                        onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}/>
-                            <a className="login-button btn-confirm-medium"
+                            <a className={"login-button btn-confirm-medium sing-in " + buttonSignInClass }
                                onKeyPress={(e) => { (e.key === 'Enter' ? this.handleSubmitClicked() : null) }}
                                onClick={this.handleSubmitClicked.bind()} tabIndex={3}><span className={"button-loader " + loaderClass}/> Sign in </a>
                             {generalErrorHtml}

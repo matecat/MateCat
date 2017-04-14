@@ -6,71 +6,48 @@
     <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
     <meta name="viewport" content="width=device-width"/>
 
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery.js?build=${build_number}"></script>
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery-ui-1.8.20.custom.min.js?build=${build_number}"></script>
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery.hotkeys.js?build=${build_number}"></script>
+    <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
+
     <script type="text/javascript" src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
 
     <script type="text/javascript" src="${basepath}public/js/build/common.js?build=${build_number}"></script>
     <script type="text/javascript" src="${basepath}public/js/manage.js?build=${build_number}"></script>
-    <script src="${basepath}public/js/build/react.js?build=${build_number}"></script>
-    <script src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/build/react.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/outsource.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/forcedelivery.js"></script>
 
-    <!-- Compiled and minified JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></script>
-
+    <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
     <link href="${basepath}public/css/build/manage-build.css?build=${build_number}" rel="stylesheet" type="text/css"/>
-
-
 
     <script type="text/javascript">
         var config = {
             basepath: '${basepath | string:/}',
             hostpath: '${hostpath | string:/}',
             v_analysis: ${v_analysis},
-            enable_omegat: ${enable_omegat}
+            enable_omegat: ${enable_omegat},
+            enable_outsource: ${enable_outsource | string:false},
         };
     </script>
-
 </head>
 
-<body tal:condition="not:supportedBrowser">
+<body tal:condition="not:supportedBrowser" >
     <div metal:use-macro="unsupported_browser.html/unsupported"/>
 </body>
 
-<body tal:condition="supportedBrowser" tal:attributes="class php:(filtered_class EQ ' open')? 'manage filterOpen':'manage'">
-<!--metal:use-macro="header.html/main_header"-->
-
+<body tal:condition="supportedBrowser" class="manage">
 <header>
-
 </header>
 
-<div id="main-container">
-
-    <!--    <h1>Field test - 1</h1> -->
-    <div style="width: 40%; margin: 0 auto; margin-top: 15%;">
-        <h3>Loading projects</h3>
-        <div class="progress" style="margin: 0 auto; ">
-            <div class="indeterminate"></div>
-        </div>
-        <!--<div class="preloader-wrapper big active" >-->
-            <!--<div class="spinner-layer spinner-blue-only">-->
-                <!--<div class="circle-clipper left">-->
-                    <!--<div class="circle"></div>-->
-                <!--</div><div class="gap-patch">-->
-                <!--<div class="circle"></div>-->
-            <!--</div><div class="circle-clipper right">-->
-                <!--<div class="circle"></div>-->
-            <!--</div>-->
-            <!--</div>-->
-        <!--</div>-->
+<div id="manage-container" class="new-container">
+    <div class="ui active inverted dimmer">
+        <div class="ui massive text loader">Loading Projects</div>
     </div>
 </div>
 
-
-
-
-
+<div metal:use-macro="outsourceModal.html/outsource_modal">
+    <!-- Outsource Modal Popup goes here -->
+</div>
 
 <footer>
     <div class="wrapper">
@@ -80,7 +57,7 @@
                     <a href="https://www.matecat.com/support/" target="_blank">Support</a>
                 </li>
             </ul>
-            <div metal:use-macro="common.html/login_includes" />
+            <!--<div metal:use-macro="common.html/login_includes" />-->
         </nav>
     </div>
 </footer>

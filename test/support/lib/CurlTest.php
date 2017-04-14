@@ -19,8 +19,6 @@ class CurlTest {
   private $response_body ;
   private $response_code ;
   
-  
-
   private $result ;
 
   function __construct( $options=array() ) {
@@ -57,6 +55,11 @@ class CurlTest {
       curl_setopt($ch, CURLOPT_POST, 1);
     }
 
+    if ( $this->method == 'PUT' ) {
+        curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, 'PUT') ;
+        curl_setopt( $ch, CURLOPT_POSTFIELDS, json_encode( $this->params ) ) ;
+    }
+
     if ($this->method == 'POST' && empty($this->files)) {
       curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($this->params));
     } else if (! empty($this->files)) {
@@ -70,7 +73,6 @@ class CurlTest {
     if ($this->method == 'GET' and $this->params) {
       $this->url .= "?" . http_build_query( $this->params );
     }
-
 
     if ( $this->referer != null ) {
         \Log::doLog('referer: ' .  $this->referer );
@@ -134,9 +136,6 @@ class CurlTest {
 
   public function getResponse() {
     if ( $this->run() ) {
-      // var_dump($this->response_body);
-      // var_dump($this->response_header);
-      // var_dump("Response code: " . $this->response_code);
 
       return array(
         'header' => $this->response_header,

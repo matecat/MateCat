@@ -35,12 +35,12 @@
 
     <body class="editlog" tal:condition="php: supportedBrowser NE 0 && !job_archived">
 
-        <header style="padding-bottom:5px" >
+        <header>
             <div class="wrapper">       
                 <a href="${basepath}" class="logo"></a>
 
-
-                    <a tal:attributes="href string:${basepath}translate/${pname}/${source_code}-${target_code}/${jid}-${password}"  class="downloadtr-button backbtn" >< Back to Translation</a>
+                <div metal:use-macro="common.html/login_includes" />
+                <a tal:attributes="href string:${basepath}translate/${pname}/${source_code}-${target_code}/${jid}-${password}"  class="downloadtr-button backbtn" >< Back to Translation</a>
 
 
             </div>
@@ -182,12 +182,10 @@
 
                 <nav>
                     <ul>
-                        <li><a tal:attributes="href string:${basepath}manage/">Manage</a></li>
+                        <li><a class="link-manage-page" >Manage</a></li>
 
                         <li><a href="https://www.matecat.com/support/" target="_blank">Support</a></li>
                     </ul>
-
-                    <div metal:use-macro="common.html/login_includes" />
                     
                 </nav>
 

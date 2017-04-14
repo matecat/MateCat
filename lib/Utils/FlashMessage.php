@@ -12,7 +12,7 @@ class FlashMessage {
     public static function set( $key, $value, $type = self::WARNING ) {
         Bootstrap::sessionStart();
 
-        if ( isset( $_SESSION[ self::KEY ] ) ) {
+        if ( !isset( $_SESSION[ self::KEY ] ) ) {
             $_SESSION[ self::KEY ] = array(
                 self::WARNING => array(),
                 self::ERROR => array(),

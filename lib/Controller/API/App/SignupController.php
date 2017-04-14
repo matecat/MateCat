@@ -2,10 +2,8 @@
 
 namespace API\App;
 
-use API\V2\KleinController;
 use Exceptions\ValidationError;
-use Monolog\Handler\Curl\Util;
-use Symfony\Component\Config\Definition\Exception\Exception;
+use Teams\InvitedUser;
 use Users\PasswordReset;
 use Users\Signup ;
 use FlashMessage ;
@@ -36,7 +34,11 @@ class SignupController extends AbstractStatefulKleinController  {
         try {
             $user = Signup::confirm( $this->request->param('token') ) ;
 
-            $project = new RedeemableProject($user, $_SESSION );
+            if( InvitedUser::hasPendingInvitations() ){
+                InvitedUser::completeTeamSignUp( $user, $_SESSION[ 'invited_to_team' ] );
+            }
+
+            $project = new RedeemableProject( $user, $_SESSION );
             $project->tryToRedeem() ;
 
             if ( $project->getDestinationURL() ) {

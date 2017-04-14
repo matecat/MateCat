@@ -1,6 +1,7 @@
 <?php
 
 use ProjectQueue\Queue;
+use Teams\MembershipDao;
 
 //limit execution time to 300 seconds
 set_time_limit( 300 );
@@ -64,6 +65,9 @@ class NewController extends ajaxController {
     private $new_keys = array();
 
     private $owner = "";
+    /**
+     * @var Users_UserStruct
+     */
     private $current_user;
     private $metadata = array();
 
@@ -74,10 +78,16 @@ class NewController extends ajaxController {
     );
 
     protected $api_output = array(
-            'status'  => '500',
+            'status'  => 'FAIL',
             'message' => 'Untraceable error (sorry, not mapped)'
     );
 
+    /**
+     * @var \Teams\TeamStruct
+     */
+    protected $team;
+
+    protected $id_team ;
 
     public function __construct() {
 
@@ -113,8 +123,8 @@ class NewController extends ajaxController {
                 ),
                 'pretranslate_100' => array(
                         'filter' => array( 'filter' => FILTER_VALIDATE_INT )
-                )
-
+                ),
+                'id_team' => array( 'filter' => FILTER_VALIDATE_INT )
         );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -144,6 +154,7 @@ class NewController extends ajaxController {
         $this->seg_rule         = ( !empty( $__postInput[ 'segmentation_rule' ] ) ) ? $__postInput[ 'segmentation_rule' ] : '';
         $this->subject          = ( !empty( $__postInput[ 'subject' ] ) ) ? $__postInput[ 'subject' ] : 'general';
         $this->owner            = $__postInput[ 'owner_email' ];
+        $this->id_team          = $__postInput[ 'id_team' ];
 
         // Force pretranslate_100 to be 0 or 1
         $this->pretranslate_100 = (int) !!$__postInput[ 'pretranslate_100' ];
@@ -258,6 +269,16 @@ class NewController extends ajaxController {
         if ( !$this->validateAuthHeader() ) {
             header( 'HTTP/1.0 401 Unauthorized' );
             $this->api_output[ 'message' ] = 'Authentication failed';
+
+            return -1;
+        }
+
+        try {
+            $this->__validateTeam();
+        }
+        catch( Exception $ex ) {
+            $this->api_output[ 'message' ] = $ex->getMessage();
+            Log::doLog( $ex->getMessage() );
 
             return -1;
         }
@@ -511,6 +532,8 @@ class NewController extends ajaxController {
         $projectManager   = new ProjectManager();
         $projectStructure = $projectManager->getProjectStructure();
 
+        $projectStructure[ 'sanitize_project_options' ] = false;
+
         $projectStructure[ 'project_name' ] = $this->project_name;
         $projectStructure[ 'job_subject' ]  = $this->subject;
 
@@ -533,13 +556,12 @@ class NewController extends ajaxController {
         $projectStructure[ 'HTTP_HOST' ]            = INIT::$HTTPHOST;
 
         if ( $this->current_user ) {
-            $projectStructure[ 'owner' ]       = $this->current_user->getEmail();
-            $projectStructure[ 'id_customer' ] = $this->current_user->getEmail();
+            $projectStructure[ 'userIsLogged' ]  = true;
+            $projectStructure[ 'uid' ]           = $this->current_user->getUid();
+            $projectStructure[ 'id_customer' ]   = $this->current_user->getEmail();
+            $projectStructure[ 'owner' ]         = $this->current_user->getEmail();
+            $projectManager->setTeam( $this->team ) ;
         }
-
-        $projectManager = new ProjectManager( $projectStructure );
-        
-        $projectManager->sanitizeProjectOptions = false ; 
 
         FilesStorage::moveFileFromUploadSessionToQueuePath( $uploadFile->getDirUploadToken() );
 
@@ -618,20 +640,28 @@ class NewController extends ajaxController {
     }
 
     private function validateAuthHeader() {
-        if ( !isset( $_SERVER[ 'HTTP_X_MATECAT_KEY' ] ) ) {
-            return true;
+
+        $api_key = @$_SERVER[ 'HTTP_X_MATECAT_KEY' ];
+        $api_secret = ( !empty( $_SERVER[ 'HTTP_X_MATECAT_SECRET' ] ) ? $_SERVER[ 'HTTP_X_MATECAT_SECRET' ] : "wrong" );
+
+        if ( FALSE !== strpos( @$_SERVER[ 'HTTP_X_MATECAT_KEY' ], '-' ) ) {
+            list( $api_key, $api_secret ) = explode('-', $_SERVER[ 'HTTP_X_MATECAT_KEY' ] ) ;
         }
 
-        $key = ApiKeys_ApiKeyDao::findByKey( $_SERVER[ 'HTTP_X_MATECAT_KEY' ] );
-        if ( $key && $key->validSecret( $_SERVER[ 'HTTP_X_MATECAT_SECRET' ] ) ) {
-            Log::doLog( $key );
+        if ( $api_key && $api_secret ) {
+            $key = \ApiKeys_ApiKeyDao::findByKey( $api_key );
 
+            if( !$key || !$key->validSecret( $api_secret ) ){
+                return false;
+            }
+
+            Log::doLog( $key );
             $this->current_user = $key->getUser();
 
-            return true;
-        } else {
-            return false;
         }
+
+        return true;
+
     }
 
     /**
@@ -654,6 +684,8 @@ class NewController extends ajaxController {
      * conversion depth param.
      *
      * @param $json_string
+     *
+     * @throws Exception
      */
     private function validateMetadataParam($json_string) {
         if (!empty($json_string)) {
@@ -790,4 +822,22 @@ class NewController extends ajaxController {
 
     }
 
+
+    private function __validateTeam() {
+        if ( $this->current_user && !empty( $this->id_team ) ) {
+            $dao = new MembershipDao();
+            $org = $dao->findTeamByIdAndUser( $this->id_team, $this->current_user ) ;
+
+            if ( !$org ) {
+                throw new Exception('Team and user membership does not match');
+            }
+            else {
+                $this->team = $org  ;
+            }
+        }
+
+        else if ( $this->current_user ) {
+            $this->team = $this->current_user->getPersonalTeam();
+        }
+    }
 }

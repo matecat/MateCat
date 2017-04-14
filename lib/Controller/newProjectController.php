@@ -36,14 +36,13 @@ class newProjectController extends viewController {
         $__postInput = filter_input_array( INPUT_GET, $filterArgs );
         $this->project_name      = $__postInput[ "project_name" ];
 
-        $this->guid = Utils::create_guid();
-
         $this->lang_handler    = Langs_Languages::getInstance();
         $this->subject_handler = Langs_LanguageDomains::getInstance();
 
         $this->subjectArray = $this->subject_handler->getEnabledDomains();
 
         $this->featureSet = new FeatureSet() ;
+
     }
 
     public function doAction() {
@@ -154,12 +153,15 @@ class newProjectController extends viewController {
     }
 
     private function setOrGetGuid() {
-        //Get the guid from the guid if it exists, otherwise set the guid into the cookie
+        // Get the guid from the guid if it exists, otherwise set the guid into the cookie
         if ( !isset( $_COOKIE[ 'upload_session' ] ) ) {
-            setcookie( "upload_session", $this->guid, time() + 86400 );
-        } else {
-            $this->guid = $_COOKIE[ 'upload_session' ];
+            $this->guid = Utils::create_guid();
+            setcookie( "upload_session", $this->guid, time() + 86400, '/' );
         }
+        else {
+            $this->guid = $_COOKIE['upload_session'] ;
+        }
+
     }
 
     private function isUploadTMXAllowed( $default = false ) {
@@ -169,16 +171,11 @@ class newProjectController extends viewController {
         foreach ( INIT::$SUPPORTED_FILE_TYPES as $k => $v ) {
             foreach ( $v as $kk => $vv ) {
                 if ( $kk == 'tmx' ) {
-                    //	echo "true";
-                    //	exit;
                     return true;
                 }
             }
         }
-
-        //echo "false";exit;
         return false;
-
     }
 
     private function getExtensions( $default = false ) {
@@ -300,6 +297,10 @@ class newProjectController extends viewController {
         $this->featureSet->appendDecorators('NewProjectDecorator', $this, $this->template ) ;
 
         $this->template->globalMessage = Utils::getGlobalMessage() ;
+
+        if ( $this->isLoggedIn() ) {
+            $this->template->teams = ( new \Teams\MembershipDao())->findUserTeams($this->logged_user) ;
+        }
 
     }
 

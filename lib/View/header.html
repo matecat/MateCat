@@ -13,6 +13,10 @@
     </p>
     <div id="messageBar"><span class="msg"></span><a href="#" class="close"></a></div>
     <div class="wrapper">
+        <div>
+            <div metal:use-macro="common.html/login_includes" />
+        </div>
+
         <ul class="header-menu" tal:condition="php: !job_archived ">
 
               <li id="quality-report-button" tal:attributes="class header_quality_report_item_class"></li>
@@ -180,35 +184,8 @@
     </div>
 
     <div class="qa-wrapper"></div>
-    
-    <!-- lexiqa popup content -->
-    <!--<div class="lexiqa-wrapper" id="lexiqa-popup">-->
-        <!--<ul class="lexiqa-popup-items">-->
-            <!--<li class="lexiqa-popup-item">-->
-                <!--<a class="lexiqa-popup-icon" href="http://lexiqa.net" target="_blank" alt="lexiQA logo"></a>-->
-            <!--</li>-->
-            <!--<li class="lexiqa-popup-item">QA checks and guide -->
-                <!--<a class="lexiqa-popup-icon" id="lexiqa-quide-link" href="" target="_blank" alt="Read the quick user guide of lexiqa"></a>-->
-            <!--</li>-->
-            <!--<li class="lexiqa-popup-item">Full QA report -->
-                <!--<a class="lexiqa-popup-icon" id="lexiqa-report-link" href="" target="_blank" alt="Read the full QA report"></a>-->
-            <!--</li>-->
-            <!--<li class="lexiqa-popup-item">-->
-                    <!--<span class="lexiqa-popup-switch">Highlighting on/off</span>-->
-                <!--&lt;!&ndash;<a class="lexiqa-popup-icon" href="" target="_blank" alt="Toggle the highlighting on or off"></a>&ndash;&gt;-->
-                <!--&lt;!&ndash;<span class="lxq-highlight-toggle">&ndash;&gt;-->
-                    <!--&lt;!&ndash;<span class="lexiqa-popup-icon">&ndash;&gt;-->
-                        <!--<input id="cmn-toggle-1" class="cmn-toggle cmn-toggle-round" type="checkbox"  checked="checked" />-->
-                        <!--<label for="cmn-toggle-1"></label>-->
-                    <!--&lt;!&ndash;</span>&ndash;&gt;-->
-                <!--&lt;!&ndash;</span>&ndash;&gt;-->
-            <!--</li>-->
-            <!--<li class="lexiqa-popup-item">Next/previous segment with issues-->
-                <!--<a class="lexiqa-popup-icon" href="" id="lexiqa-prev-seg" target="_blank" alt="Go to previous segment"></a>-->
-                <!--<a class="lexiqa-popup-icon" href="" id="lexiqa-next-seg" target="_blank" alt="Go to next segment"></a>-->
-            <!--</li>-->
-        <!--</ul>-->
-    <!--</div>-->
+
+
 
 </header>
 </body>

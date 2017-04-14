@@ -9,21 +9,43 @@
 
 namespace API\V2\Json;
 
-
 use Projects_ProjectStruct;
+use Utils;
 
 class Project {
 
-    public function __construct( Projects_ProjectStruct $data ) {
+    /**
+     * @var Projects_ProjectStruct[]
+     */
+    protected $data;
+
+    public function __construct( Projects_ProjectStruct $data = null ) {
         $this->data = $data;
     }
 
+    /**
+     * @param $data Projects_ProjectStruct
+     *
+     * @return array
+     */
+    public function renderItem( $data ) {
+        return array(
+                'id'           => (int)$data->id,
+                'id_assignee'  => ( is_null( $data->id_assignee ) ? $data->id_assignee : (int)$data->id_assignee ),
+                'name'         => $data->name,
+                'id_team'      => (int)$data->id_team,
+                'project_slug' => Utils::friendly_slug( $data->name )
+        );
+    }
+
     public function render() {
-        unset( $this->data->id_engine_mt );
-        unset( $this->data->id_engine_tm );
-        unset( $this->data->for_debug );
-        unset( $this->data->pretranslate_100 );
-        return $this->data;
+        $out = [];
+
+        foreach ( $this->data as $project ) {
+            $out[] = $this->renderItem( $project );
+        }
+
+        return $out;
     }
 
 }

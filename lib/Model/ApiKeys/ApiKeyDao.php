@@ -30,8 +30,11 @@ class ApiKeys_ApiKeyDao extends DataAccess_AbstractDao {
 
     $values = array_diff_key( $obj->toArray(), array('id' => null) );
 
+    $this->con->begin();
     $stmt->execute( $values );
     $result = $this->getById( $conn->lastInsertId() ) ;
+    $this->con->commit();
+
     return $result[0];
   }
 
@@ -47,7 +50,4 @@ class ApiKeys_ApiKeyDao extends DataAccess_AbstractDao {
     return $stmt->fetchAll( PDO::FETCH_CLASS, 'ApiKeys_ApiKeyStruct');
   }
 
-  protected function _buildResult( $array_result ) {
-
-  }
 }

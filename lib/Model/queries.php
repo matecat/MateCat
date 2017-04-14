@@ -329,50 +329,6 @@ from language_stats
 }
 
 
-function insertUser( $data ) {
-    @$data[ 'create_date' ] = date( 'Y-m-d H:i:s' );
-
-    //insert into db
-    $db      = Database::obtain();
-    $results = $db->insert( 'users', $data );
-
-    return $results;
-}
-
-function tryInsertUserFromOAuth( $data ) {
-    //check if user exists
-    $db = Database::obtain();
-
-    //avoid injection
-    $data[ 'email' ] = $db->escape( $data[ 'email' ] );
-
-    $query   = "SELECT uid, email FROM users WHERE email='" . $data[ 'email' ] . "'";
-    $results = $db->query_first( $query );
-
-    if ( 0 == count( $results ) or false == $results ) {
-        //new client
-        $results = insertUser( $data );
-        //check outcome
-        if ( $results ) {
-            $cid[ 'email' ] = $data[ 'email' ];
-            $cid[ 'uid' ]   = $results;
-        } else {
-            $cid = false;
-        }
-    } else {
-        $cid[ 'email' ] = $data[ 'email' ];
-        $cid[ 'uid' ]   = $results[ 'uid' ];
-
-        // TODO: migrate this to an insert on duplicate key update
-        $sql_update = "UPDATE users set oauth_access_token = ? WHERE uid = ?" ; 
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( $sql_update ); 
-        $stmt->execute( array( $data['oauth_access_token'], $cid['uid'] ) ); 
-    }
-    
-    return $cid;
-}
-
 function getArrayOfSuggestionsJSON( $id_segment ) {
     $query   = "select suggestions_array from segment_translations where id_segment=$id_segment";
     $db      = Database::obtain();
@@ -1550,6 +1506,8 @@ function insertProject( ArrayObject $projectStructure ) {
     $data[ 'password' ]          = $projectStructure[ 'ppassword' ];
     $data[ 'pretranslate_100' ]  = $projectStructure[ 'pretranslate_100' ];
     $data[ 'remote_ip_address' ] = empty( $projectStructure[ 'user_ip' ] ) ? 'UNKNOWN' : $projectStructure[ 'user_ip' ];
+    $data[ 'id_assignee' ]       = $projectStructure[ 'id_assignee' ];
+    $data[ 'instance_id' ]       = !is_null( $projectStructure[ 'instance_id' ] ) ? $projectStructure[ 'instance_id' ] : null;
 
     $db = Database::obtain();
     $db->begin();
@@ -1557,23 +1515,7 @@ function insertProject( ArrayObject $projectStructure ) {
     $project = Projects_ProjectDao::findById( $projectId );
     $db->commit();
     return $project;
-}
 
-function updateTranslatorJob( $id_job, Engines_Results_MyMemory_CreateUserResponse $newUser ) {
-
-    $data                       = array();
-    $data[ 'username' ]         = $newUser->id;
-    $data[ 'email' ]            = '';
-    $data[ 'password' ]         = $newUser->pass;
-    $data[ 'first_name' ]       = '';
-    $data[ 'last_name' ]        = '';
-    $data[ 'mymemory_api_key' ] = $newUser->key;
-
-    $db = Database::obtain();
-
-    $res = $db->insert( 'translators', $data ); //ignore errors on duplicate key
-
-    $res = $db->update( 'jobs', array( 'id_translator' => $newUser->id ), ' id = ' . (int)$id_job );
 }
 
 //never used email , first_name and last_name
@@ -1818,11 +1760,12 @@ function conditionsForProjectsQuery(
         $conditions[]  = " j.completed = 1 ";
     }
 
+
     return array( $conditions, $data )  ;
 }
 
 /**
- * @param Users_UserStruct  $user
+ * @param Users_UserStruct                  $user
  * @param                   $start                int
  * @param                   $step                 int
  * @param                   $search_in_pname      string
@@ -1834,34 +1777,40 @@ function conditionsForProjectsQuery(
  *
  * @param \Teams\TeamStruct $team
  *
- * @return array|int|resource|void
+ * @return array
  */
 function getProjects( Users_UserStruct $user, $start, $step,
                       $search_in_pname, $search_source, $search_target,
-                      $search_status, $search_onlycompleted,
+                      $search_status, $search_only_completed,
                       $project_id,
-                      \Teams\TeamStruct $team = null) {
+                      \Teams\TeamStruct $team = null,
+                      Users_UserStruct $assignee = null,
+                      $no_assignee
+
+) {
 
     list( $conditions, $data ) = conditionsForProjectsQuery(
         $search_in_pname, $search_source, $search_target,
-        $search_status, $search_onlycompleted
+        $search_status, $search_only_completed
     ) ;
-
-    $data['email'] = $user->email ;
 
     if ( $project_id ) {
         $conditions[] = " p.id = :project_id " ;
         $data['project_id'] = $project_id ;
     }
 
-    $ownership_condition = " ( p.id_customer = :email OR j.owner = :email )" ;
-
     if ( !is_null( $team ) ) {
-        $ownership_condition .= " OR p.id_team = :id_team " ;
+        $conditions[] = " p.id_team = :id_team " ;
         $data [ 'id_team' ] = $team->id ;
     }
 
-    $conditions[] = " ( $ownership_condition ) " ;
+    if ( $no_assignee ) {
+        $conditions[] = " p.id_assignee IS NULL " ;
+    }
+    elseif ( !is_null( $assignee ) ) {
+        $conditions[] = " p.id_assignee = :id_assignee " ;
+        $data ['id_assignee'] = $assignee->uid ;
+    }
 
     $where_query = implode( " AND ", $conditions );
 
@@ -1869,14 +1818,17 @@ function getProjects( Users_UserStruct $user, $start, $step,
 
     $projectsQuery =
             "SELECT p.id AS pid,
+                            p.id_team AS id_team,
+                            p.id_assignee AS id_assignee,
                             p.name,
                             p.password,
+                            p.create_date,
                             SUM(draft_words + new_words+translated_words+rejected_words+approved_words) as tm_analysis_wc,
                             project_metadata.value AS features
 
             FROM projects p
 
-            INNER JOIN jobs j ON j.id_project=p.id
+            INNER JOIN jobs j ON j.id_project = p.id
 
             LEFT JOIN project_metadata ON project_metadata.id_project = p.id AND project_metadata.`key` = '$features'
 
@@ -1888,7 +1840,7 @@ function getProjects( Users_UserStruct $user, $start, $step,
 
     $stmt = Database::obtain()->getConnection()->prepare( $projectsQuery );
     $stmt->execute( $data );
-    return $stmt->fetchAll() ;
+    return $stmt->fetchAll( PDO::FETCH_ASSOC ) ;
 }
 
 
@@ -1907,7 +1859,9 @@ function getJobsFromProjects( array $projectIDs, $search_source, $search_target,
     );
 
     $where_query = implode( " AND ", $conditions );
-    $features = Projects_MetadataDao::FEATURES_KEY ;
+    if( !empty( $where_query ) ){
+        $where_query = " AND " . $where_query;
+    }
 
     $jobsQuery = "SELECT
                  j.id,
@@ -1941,16 +1895,23 @@ function getJobsFromProjects( array $projectIDs, $search_source, $search_target,
                  j.approved_words,
                  j.rejected_words,
                  projects.status_analysis,
-                 project_metadata.value AS features
+                 project_metadata.value AS features,
+
+                 id_vendor,
+                 vendor_name,
+                 osc.create_date as outsource_create_date,
+                 delivery_date,
+                 quote_pid,
+                 price,
+                 currency
 
             FROM jobs j
-            LEFT JOIN engines e ON j.id_mt_engine=e.id
-
             JOIN projects ON projects.id = j.id_project
+            LEFT JOIN outsource_confirmation osc  ON osc.id_job = j.id AND osc.password = j.password
+            LEFT JOIN engines e ON j.id_mt_engine=e.id
+            LEFT JOIN project_metadata ON project_metadata.id_project = projects.id AND project_metadata.`key` = '". Projects_MetadataDao::FEATURES_KEY . "'
 
-            LEFT JOIN project_metadata ON project_metadata.id_project = projects.id AND project_metadata.`key` = '$features'
-
-            WHERE j.id_project IN ( " . implode( ",", $projectIDs ) . " ) AND $where_query
+            WHERE j.id_project IN ( " . implode( ",", $projectIDs ) . " ) $where_query
             ORDER BY j.id DESC,
                      j.job_first_segment ASC";
 
@@ -1960,34 +1921,38 @@ function getJobsFromProjects( array $projectIDs, $search_source, $search_target,
 
 }
 
-function getProjectsNumber( Users_UserStruct $user, $search_in_pname, $search_source, $search_target, $search_status, $search_onlycompleted, \Teams\TeamStruct $team = null) {
+function getProjectsNumber( Users_UserStruct $user, $search_in_pname, $search_source, $search_target, $search_status,
+                            $search_only_completed,
+                            \Teams\TeamStruct $team = null,
+                            Users_UserStruct $assignee = null,
+                            $no_assignee = false
+) {
 
     list( $conditions, $data ) = conditionsForProjectsQuery(
         $search_in_pname, $search_source, $search_target,
-        $search_status, $search_onlycompleted
+        $search_status, $search_only_completed
     ) ;
 
-    $data['email'] = $user->email ;
 
     $query  = " SELECT COUNT( distinct id_project ) AS c
     FROM projects p
     INNER JOIN jobs j ON j.id_project = p.id
 
-    INNER JOIN users on users.email = p.id_customer
-
-    WHERE id_customer = :email
     " ;
 
-    // TODO: duplicated code for ownership condition
-    $ownership_condition = " ( p.id_customer = :email OR j.owner = :email )" ;
 
     if ( !is_null( $team ) ) {
-        $ownership_condition .= " OR p.id_team = :id_team " ;
+        $conditions[] = " p.id_team = :id_team " ;
         $data [ 'id_team' ] = $team->id ;
     }
 
-    $conditions[] = " ( $ownership_condition ) " ;
-
+    if ( $no_assignee ) {
+        $conditions[] = " p.id_assignee IS NULL " ;
+    }
+    elseif ( !is_null( $assignee ) ) {
+        $conditions[] = " p.id_assignee = :id_assignee " ;
+        $data ['id_assignee'] = $assignee->uid ;
+    }
 
     if ( count( $conditions ) ) {
         $query = $query . " AND " . implode( " AND ", $conditions );
@@ -2051,27 +2016,6 @@ function getProjectStatsVolumeAnalysis( $pid ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
-    return $results;
-}
-
-function getProjectForVolumeAnalysis( $limit = 1 ) {
-
-    $query_limit = " limit $limit";
-
-    $query = "select p.id, id_tms, id_mt_engine, tm_keys , p.pretranslate_100, group_concat( distinct j.id ) as jid_list
-		from projects p
-		inner join jobs j on j.id_project=p.id
-		where status_analysis = '" . Constants_ProjectStatus::STATUS_NEW . "'
-		group by 1
-		order by id $query_limit
-		";
-
-    $db    = Database::obtain();
-    //Needed to address the query to the master database if exists
-    \Database::obtain()->begin();
-
-    $results = $db->fetch_array($query); // this is a select, should never return a transaction exception
-    $db->getConnection()->commit();
     return $results;
 }
 
@@ -2240,22 +2184,16 @@ function changePassword( $res, $id, $password, $new_password ) {
         $query = sprintf( $query, 'jobs', $db->escape( $new_password ), $id, $db->escape( $password ) );
     }
     try {
+
         $res = $db->query($query);
+
+        ( new \Outsource\ConfirmationDao() )->updatePassword( $id, $password, $new_password  );
+
     } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
         return $e->getCode() * -1;
     }
     return ( $db->affected_rows | $row_exists );
-}
-
-function updateProjectOwner( $ownerEmail, $project_id ) {
-    $db              = Database::obtain();
-    $data            = array();
-    $data[ 'owner' ] = $db->escape( $ownerEmail );
-    $where           = sprintf( " id_project = %u ", $project_id );
-    $result          = $db->update( 'jobs', $data, $where );
-
-    return $result;
 }
 
 /**

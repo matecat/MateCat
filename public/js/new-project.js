@@ -1,236 +1,60 @@
-$(document).ready(function() {
+APP.openOptionsPanel = function (tab, elem) {
+    elToClick = $(elem).attr('data-el-to-click') || null;
+    UI.openLanguageResourcesPanel(tab, elToClick);
+};
 
-	$( "a.more-options" ).on("click", function ( e ) {
-		e.preventDefault();
-		APP.openOptionsPanel("tm")
-	} );
+APP.createTMKey = function () {
 
-	$("#source-lang").on('change', function(e){
-            console.log('source language changed');
-            UI.checkRTL();
-            if($('.template-download').length) { //.template-download is present when jquery file upload is used and a file is found
-                if (UI.conversionsAreToRestart()) {
-                    APP.confirm({msg: 'Source language has been changed.<br/>The files will be reimported.', callback: 'confirmRestartConversions'});
+    if($(".mgmt-tm .new .privatekey .btn-ok").hasClass('disabled') || APP.pendingCreateTMkey) {
+        return false;
+    }
+    APP.pendingCreateTMkey = true;
+
+    //call API
+    APP.doRequest( {
+        data: {
+            action: 'createRandUser'
+        },
+        success: function ( d ) {
+            /*$( '#private-tm-key' ).val( d.data.key );
+            $( '#private-tm-user' ).val( d.data.id );
+            $( '#private-tm-pass' ).val( d.data.pass );
+            $( '#create_private_tm_btn' ).attr( 'data-key', d.data.key );*/
+            APP.pendingCreateTMkey = false;
+            $( 'tr.template-download.fade.ready ').each( function( key, fileUploadedRow ){
+                if( $( '.mgmt-panel #activetm tbody tr.mine' ).length && $( '.mgmt-panel #activetm tbody tr.mine .update input' ).is(":checked")) return false;
+                var _fileName = $( fileUploadedRow ).find( '.name' ).text();
+                if ( _fileName.split('.').pop().toLowerCase() == 'tmx' || _fileName.split('.').pop().toLowerCase() == 'g' ) {
+
+                    UI.appendNewTmKeyToPanel( {
+                        r: 1,
+                        w: 1,
+                        desc: _fileName,
+                        TMKey: d.data.key
+                    } );
+                    UI.setDropDown();
+                    return true;
                 }
-                if( UI.checkTMXLangFailure() ){
-                    UI.delTMXLangFailure();
-                }
-            }
-            else if ($('.template-gdrive').length) {
-                APP.confirm({
-                    msg: 'Source language has been changed.<br/>The files will be reimported.',
-                    callback: 'confirmGDriveRestartConversions'
-                });
-            } else {
-                return;
-            }
-	});
 
-    // APP.tryListGDriveFiles();
+            });
 
-	$("#target-lang").change(function(e) {
-
-        UI.checkRTL();
-		$('.popup-languages li.on').each(function(){
-			$(this).removeClass('on').find('input').removeAttr('checked');
-		});
-		$('.translate-box.target h2 .extra').remove();
-		if( UI.checkTMXLangFailure() ){
-			UI.delTMXLangFailure();
-		}
-		APP.changeTargetLang( $(this).val() );
-		
-    });
-
-	$("input.uploadbtn").click(function(e) {
-        
-        if(!UI.allTMUploadsCompleted()) {
             return false;
         }
+    } );
 
-		$('body').addClass('creating');
 
-		APP.doRequest({
-			data: APP.getCreateProjectParams(),
+};
 
-			beforeSend: function (){
-				$('.error-message').hide();
-				$('.uploadbtn').attr('value','Analyzing...').attr('disabled','disabled').addClass('disabled');
-			},
-			success: function(d){
+function closeMLPanel() {
+    $( ".popup-languages.slide").removeClass('open').hide("slide", { direction: "right" }, 400);
+    $(".popup-outer.lang-slide").hide();
+    $('body').removeClass('side-popup');
 
-				if( typeof d.errors != 'undefined' && d.errors.length ) {
-					//normal error management
-					$('.error-message').append( '<div class="error-content">' + this.message + '<br /></div>' ).show();
-					$('.uploadbtn').attr('value', 'Analyze');
-					$('body').removeClass('creating');
-
-				} else {
-                    APP.handleCreationStatus( d.data.id_project, d.data.password  );
-				}
-
-			}
-		});
-	});
-
-	$('.upload-table').on('click', 'a.skip_link', function(){
-		var fname = decodeURIComponent($(this).attr("id").replace("skip_",""));
-
-		UI.skipLangDetectArr[fname] = 'skip';
-
-		var parentTd_label = $(this).parent(".label");
-
-		$(parentTd_label)
-			.fadeOut(200, function(){
-				$(this).remove()
-			});
-		$(parentTd_label).parent().removeClass("error");
-
-		//analyze button should be reactivated?
-		if($('.upload-table td.error').length == 0){
-			$('.uploadbtn').removeAttr("disabled").removeClass("disabled").focus();
-		}
-	});
-
-    /**
-     * LexiQA language Enable/Disable
-     */
     APP.checkForLexiQALangs();
     APP.checkForTagProjectionLangs();
-	APP.checkForSpeechToText();
-    $("#source-lang").on('change', function(){
-		APP.checkForLexiQALangs();
-		APP.checkForTagProjectionLangs();
-	});
-    $("#target-lang").on('change', function(){
-		APP.checkForLexiQALangs();
-		APP.checkForTagProjectionLangs();
-	});
+    APP.checkForSpeechToText();
+}
 
-	APP.openOptionsPanel = function (tab, elem) {
-		elToClick = $(elem).attr('data-el-to-click') || null;
-		UI.openLanguageResourcesPanel(tab, elToClick);
-	};
-
-	APP.createTMKey = function () {
-
-		if($(".mgmt-tm .new .privatekey .btn-ok").hasClass('disabled') || APP.pendingCreateTMkey) {
-			return false;
-		}
-		APP.pendingCreateTMkey = true;
-
-		//call API
-		APP.doRequest( {
-			data: {
-				action: 'createRandUser'
-			},
-			success: function ( d ) {
-				/*$( '#private-tm-key' ).val( d.data.key );
-				$( '#private-tm-user' ).val( d.data.id );
-				$( '#private-tm-pass' ).val( d.data.pass );
-				$( '#create_private_tm_btn' ).attr( 'data-key', d.data.key );*/
-				APP.pendingCreateTMkey = false;
-				$( 'tr.template-download.fade.ready ').each( function( key, fileUploadedRow ){
-					if( $( '.mgmt-panel #activetm tbody tr.mine' ).length && $( '.mgmt-panel #activetm tbody tr.mine .update input' ).is(":checked")) return false;
-					var _fileName = $( fileUploadedRow ).find( '.name' ).text();
-					if ( _fileName.split('.').pop().toLowerCase() == 'tmx' || _fileName.split('.').pop().toLowerCase() == 'g' ) {
-
-						UI.appendNewTmKeyToPanel( {
-							r: 1,
-							w: 1,
-							desc: _fileName,
-							TMKey: d.data.key
-						} );
-                        UI.setDropDown();
-						return true;
-					}
-
-				});
-
-				return false;
-			}
-		} );
-
-
-	};
-
-    function closeMLPanel() {
-        $( ".popup-languages.slide").removeClass('open').hide("slide", { direction: "right" }, 400);
-        $(".popup-outer.lang-slide").hide();
-        $('body').removeClass('side-popup');
-
-        APP.checkForLexiQALangs();
-        APP.checkForTagProjectionLangs();
-		APP.checkForSpeechToText();
-    };
-
-	$("#multiple-link").click(function(e) {
-        e.preventDefault();
-        $(".popup-languages.slide").addClass('open').show("slide", { direction: "right" }, 400);
-        var tlAr = $('#target-lang').val().split(',');
-        $.each(tlAr, function() {
-            var ll = $('.popup-languages.slide .listlang li #' + this);
-            ll.parent().addClass('on');
-            ll.attr('checked','checked');
-        });
-        $(".popup-outer.lang-slide").show();
-        $('body').addClass('side-popup');
-	});
-	
-	$(".popup-outer.lang-slide, #cancelMultilang, #chooseMultilang").click(function(e) {
-		closeMLPanel();
-	});
-
-	$(".popup-languages .listlang li label").click(function(e) {
-		$(this).parent().toggleClass('on');
-		var c = $(this).parent().find('input');
-		if(c.attr('checked') == 'checked') {
-			c.removeAttr('checked');
-		} else {
-			c.attr('checked','checked');
-		}
-		$('.popup-languages h1 .number').text($(".popup-languages .listlang li.on").length);
-	});
-	$(".popup-languages .listlang li input").click(function(e) {
-		$(this).parent().toggleClass('on');
-		$('.popup-languages h1 .number').text($(".popup-languages .listlang li.on").length);
-	});
-
-	$(".close").click(function(e) {
-		$("div.popup-languages").hide();
-		$("div.grayed").hide();
-	});
-
-	$("#disable_tms_engine").change(function(e){
-		if(this.checked){
-			$("input[id^='private-tm-']").prop("disabled", true);
-			// $("#create_private_tm_btn").addClass("disabled", true);
-		} else {
-			if(!$('#create_private_tm_btn[data-key]').length) {
-				$("input[id^='private-tm-']").prop("disabled", false);
-				$("#create_private_tm_btn").removeClass("disabled");
-			}
-		}
-	});
-
-	/*$("#private-tm-key").on('keyup', function(e) {
-		if($(this).val() == '') {
-			$('#create_private_tm_btn').removeClass('disabled');
-			$('#create_private_tm_btn').removeAttr('disabled');
-		} else {
-			$('#create_private_tm_btn').addClass('disabled');
-			$('#create_private_tm_btn').attr('disabled','disabled');
-		};
-	});*/
-
-	$("input, select").change(function(e) {
-		$('.error-message').hide();
-	});
-	$("input").keyup(function(e) {
-		$('.error-message').hide();
-	});
-
-});
 
 /**
  * ajax call to clear the uploaded files when an user refresh the home page
@@ -365,10 +189,276 @@ APP.getCreateProjectParams = function() {
 		lexiqa				        : !!( $("#lexi_qa").prop("checked") && !$("#lexi_qa").prop("disabled") ),
 		speech2text         		: !!( $("#s2t_check").prop("checked") && !$("#s2t_check").prop("disabled") ),
 		tag_projection			    : !!( $("#tagp_check").prop("checked") && !$("#tagp_check").prop("disabled") ),
-		segmentation_rule			: $( '#segm_rule' ).val()
+		segmentation_rule			: $( '#segm_rule' ).val(),
+        id_team             : UI.UPLOAD_PAGE.getSelectedTeam()
 	} ;
 };
 
+APP.getFilenameFromUploadedFiles = function() {
+	var files = '';
+	$('.upload-table tr:not(.failed) td.name, .gdrive-upload-table tr:not(.failed) td.name').each(function () {
+		files += '@@SEP@@' + $(this).text();
+	});
+	return files.substr(7) ;
+};
+
+/**
+ * Disable/Enable SpeechToText
+ *
+ */
+APP.checkForSpeechToText = function(){
+
+	//disable Tag Projection
+	var disableS2T = !config.defaults.speech2text;
+	var speech2textCheck = $('.s2t-box');
+	speech2textCheck.removeClass('option-unavailable');
+	speech2textCheck.find('.onoffswitch').off('click')
+	if (!('webkitSpeechRecognition' in window)) {
+		disableS2T = true;
+		$('.options-box #s2t_check').prop( "disabled", disableS2T );
+		speech2textCheck.find('.option-s2t-box-chrome-label').css('display', 'inline');
+		speech2textCheck.find('.onoffswitch').off('click').on('click', function () {
+			APP.alert({
+				title: 'Option not available',
+				okTxt: 'Continue',
+				msg: "This options is only available on Chrome browser."
+			});
+		});
+		speech2textCheck.addClass('option-unavailable');
+	}
+	$('.options-box #s2t_check').attr('checked', !disableS2T);
+};
+
+UI.UPLOAD_PAGE = {};
+$.extend(UI.UPLOAD_PAGE, {
+	init: function () {
+        /**
+         * LexiQA language Enable/Disable
+         */
+        APP.checkForLexiQALangs();
+        APP.checkForTagProjectionLangs();
+        APP.checkForSpeechToText();
+        this.render();
+        this.addEvents();
+    },
+
+    render: function () {
+        let headerMountPoint = $("header")[0];
+
+
+        if (config.isLoggedIn) {
+            ReactDOM.render(React.createElement(Header, {
+                showSubHeader: false,
+                showModals: false,
+                showLinks: true
+            }), headerMountPoint);
+            this.getAllTeams().done(function (data) {
+                self.teams = data.teams;
+                ManageActions.renderTeams(self.teams);
+                self.selectedTeam = APP.getLastTeamSelected(self.teams);
+                ManageActions.selectTeam(self.selectedTeam);
+            });
+        } else {
+            ReactDOM.render(React.createElement(Header, {
+                showSubHeader: false,
+                showModals: false,
+                loggedUser: false,
+                showLinks: true
+            }), headerMountPoint);
+        }
+    },
+
+    getAllTeams: function () {
+        if ( APP.USER.STORE.teams ) {
+            let data = {
+                teams: APP.USER.STORE.teams
+            };
+            let deferred = $.Deferred().resolve(data);
+            return deferred.promise();
+        } else {
+            return APP.USER.loadUserData();
+        }
+
+    },
+
+    getSelectedTeam: function () {
+        let selectedTeamId;
+        if (config.isLoggedIn) {
+            selectedTeamId = $('.team-dd').val();
+        }
+        return selectedTeamId;
+    },
+
+
+	addEvents: function () {
+        $( "a.more-options" ).on("click", function ( e ) {
+            e.preventDefault();
+            APP.openOptionsPanel("tm")
+        } );
+
+        $("#source-lang").on('change', function(e){
+            console.log('source language changed');
+            UI.checkRTL();
+            if($('.template-download').length) { //.template-download is present when jquery file upload is used and a file is found
+                if (UI.conversionsAreToRestart()) {
+                    APP.confirm({msg: 'Source language has been changed.<br/>The files will be reimported.', callback: 'confirmRestartConversions'});
+                }
+                if( UI.checkTMXLangFailure() ){
+                    UI.delTMXLangFailure();
+                }
+            }
+            else if ($('.template-gdrive').length) {
+                APP.confirm({
+                    msg: 'Source language has been changed.<br/>The files will be reimported.',
+                    callback: 'confirmGDriveRestartConversions'
+                });
+            } else {
+                return;
+            }
+        });
+
+        // APP.tryListGDriveFiles();
+
+        $("#target-lang").change(function(e) {
+
+            UI.checkRTL();
+            $('.popup-languages li.on').each(function(){
+                $(this).removeClass('on').find('input').removeAttr('checked');
+            });
+            $('.translate-box.target h2 .extra').remove();
+            if( UI.checkTMXLangFailure() ){
+                UI.delTMXLangFailure();
+            }
+            APP.changeTargetLang( $(this).val() );
+
+        });
+
+        $("input.uploadbtn").click(function(e) {
+
+            if(!UI.allTMUploadsCompleted()) {
+                return false;
+            }
+
+            $('body').addClass('creating');
+
+            APP.doRequest({
+                data: APP.getCreateProjectParams(),
+
+			beforeSend: function (){
+				$('.error-message').hide();
+				$('.uploadbtn').attr('value','Analyzing...').attr('disabled','disabled').addClass('disabled');
+			},
+			success: function(d){
+
+				if( typeof d.errors != 'undefined' && d.errors.length ) {
+					//normal error management
+					$('.error-message').append( '<div class="error-content">' + this.message + '<br /></div>' ).show();
+					$('.uploadbtn').attr('value', 'Analyze');
+					$('body').removeClass('creating');
+
+				} else {
+                    APP.handleCreationStatus( d.data.id_project, d.data.password  );
+				}
+
+            }
+        });
+    });
+
+        $('.upload-table').on('click', 'a.skip_link', function(){
+            var fname = decodeURIComponent($(this).attr("id").replace("skip_",""));
+
+            UI.skipLangDetectArr[fname] = 'skip';
+
+            var parentTd_label = $(this).parent(".label");
+
+            $(parentTd_label)
+                .fadeOut(200, function(){
+                    $(this).remove()
+                });
+            $(parentTd_label).parent().removeClass("error");
+
+            //analyze button should be reactivated?
+            if($('.upload-table td.error').length == 0){
+                $('.uploadbtn').removeAttr("disabled").removeClass("disabled").focus();
+            }
+        });
+
+        $("#source-lang").on('change', function(){
+            APP.checkForLexiQALangs();
+            APP.checkForTagProjectionLangs();
+        });
+        $("#target-lang").on('change', function(){
+            APP.checkForLexiQALangs();
+            APP.checkForTagProjectionLangs();
+        });
+
+        $("#multiple-link").click(function(e) {
+            e.preventDefault();
+            $(".popup-languages.slide").addClass('open').show("slide", { direction: "right" }, 400);
+            var tlAr = $('#target-lang').val().split(',');
+            $.each(tlAr, function() {
+                var ll = $('.popup-languages.slide .listlang li #' + this);
+                ll.parent().addClass('on');
+                ll.attr('checked','checked');
+            });
+            $(".popup-outer.lang-slide").show();
+            $('body').addClass('side-popup');
+        });
+
+        $(".popup-outer.lang-slide, #cancelMultilang, #chooseMultilang").click(function(e) {
+            closeMLPanel();
+        });
+
+        $(".popup-languages .listlang li label").click(function(e) {
+            $(this).parent().toggleClass('on');
+            var c = $(this).parent().find('input');
+            if(c.attr('checked') == 'checked') {
+                c.removeAttr('checked');
+            } else {
+                c.attr('checked','checked');
+            }
+            $('.popup-languages h1 .number').text($(".popup-languages .listlang li.on").length);
+        });
+        $(".popup-languages .listlang li input").click(function(e) {
+            $(this).parent().toggleClass('on');
+            $('.popup-languages h1 .number').text($(".popup-languages .listlang li.on").length);
+        });
+
+        $(".close").click(function(e) {
+            $("div.popup-languages").hide();
+            $("div.grayed").hide();
+        });
+
+        $("#disable_tms_engine").change(function(e){
+            if(this.checked){
+                $("input[id^='private-tm-']").prop("disabled", true);
+                // $("#create_private_tm_btn").addClass("disabled", true);
+            } else {
+                if(!$('#create_private_tm_btn[data-key]').length) {
+                    $("input[id^='private-tm-']").prop("disabled", false);
+                    $("#create_private_tm_btn").removeClass("disabled");
+                }
+            }
+        });
+
+        /*$("#private-tm-key").on('keyup', function(e) {
+         if($(this).val() == '') {
+         $('#create_private_tm_btn').removeClass('disabled');
+         $('#create_private_tm_btn').removeAttr('disabled');
+         } else {
+         $('#create_private_tm_btn').addClass('disabled');
+         $('#create_private_tm_btn').attr('disabled','disabled');
+         };
+         });*/
+
+        $("input, select").change(function(e) {
+            $('.error-message').hide();
+        });
+        $("input").keyup(function(e) {
+            $('.error-message').hide();
+        });
+    }
+});
 APP.handleCreationStatus = function( id_project, password ){
 
     $.ajax({
@@ -517,37 +607,6 @@ APP.postProjectCreation = function ( d ) {
 
 };
 
-APP.getFilenameFromUploadedFiles = function() {
-	var files = '';
-	$('.upload-table tr:not(.failed) td.name, .gdrive-upload-table tr:not(.failed) td.name').each(function () {
-		files += '@@SEP@@' + $(this).text();
-	});
-	return files.substr(7) ;
-}
-
-/**
- * Disable/Enable SpeechToText
- *
- */
-APP.checkForSpeechToText = function(){
-
-	//disable Tag Projection
-	var disableS2T = !config.defaults.speech2text;
-	var speech2textCheck = $('.s2t-box');
-	speech2textCheck.removeClass('option-unavailable');
-	speech2textCheck.find('.onoffswitch').off('click')
-	if (!('webkitSpeechRecognition' in window)) {
-		disableS2T = true;
-		$('.options-box #s2t_check').prop( "disabled", disableS2T );
-		speech2textCheck.find('.option-s2t-box-chrome-label').css('display', 'inline');
-		speech2textCheck.find('.onoffswitch').off('click').on('click', function () {
-			APP.alert({
-				title: 'Option not available',
-				okTxt: 'Continue',
-				msg: "This options is only available on Chrome browser."
-			});
-		});
-		speech2textCheck.addClass('option-unavailable');
-	}
-	$('.options-box #s2t_check').attr('checked', !disableS2T);
-};
+$(document).ready(function() {
+    UI.UPLOAD_PAGE.init();
+});

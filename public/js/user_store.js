@@ -37,7 +37,7 @@ APP.USER.STORE = {} ;
 
             return service ;
         });
-    }
+    };
 
     $.extend( APP.USER,  {
         loadUserData : loadUserData,
@@ -45,7 +45,13 @@ APP.USER.STORE = {} ;
         upsertConnectedService : upsertConnectedService
     });
 
-    $(document).ready( loadUserData ) ;
+    // $(document).ready( function() {
+    //     if ( APP.loadUserDataAtDocumentReady ) {
+    //         loadUserData();
+    //     }
+    // } ) ;
+
+    loadUserData();
 
 })(APP, jQuery) ;
 

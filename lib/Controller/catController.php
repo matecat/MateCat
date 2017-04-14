@@ -126,7 +126,16 @@ class catController extends viewController {
             $this->filter_enabled = false;
         };
 
+
         $this->project = Projects_ProjectDao::findByJobId( $this->jid );
+
+        /*
+         * avoid Exception
+         *
+         * Argument 1 passed to FeatureSet::loadForProject() must be an instance of Projects_ProjectStruct, boolean given,
+         */
+        ( !$this->project ? $this->project = new Projects_ProjectStruct() : null ); // <-----
+
         $this->feature_set = new FeatureSet();
         $this->feature_set->loadForProject( $this->project ) ;
 
@@ -495,6 +504,7 @@ class catController extends viewController {
 
         if ( $this->job_not_found ) {
             parent::makeTemplate( 'job_not_found.html' );
+            header("HTTP/1.0 404 Not Found");
             return;
         }
 

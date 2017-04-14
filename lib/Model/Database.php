@@ -139,6 +139,7 @@ class Database implements IDatabase {
         if ( ! $this->getConnection()->inTransaction() ) {
             $this->getConnection()->beginTransaction();
         }
+        return $this->getConnection();
     }
 
 
@@ -183,6 +184,7 @@ class Database implements IDatabase {
 
 
     /**
+     * @deprecated
      * @Override
      * {@inheritdoc}
      * @deprecated

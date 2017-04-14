@@ -65,3 +65,7 @@
     background-color: #ee6633;
     border:2px solid #EE6633;
 }
+
+.ui.user.label {
+    top: 1px;
+}

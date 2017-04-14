@@ -6,6 +6,7 @@ use Email\ForgotPasswordEmail;
 use Email\SignupEmail;
 use Email\WelcomeEmail;
 use Exceptions\ValidationError;
+use Teams\TeamDao;
 use Users_UserStruct ;
 use Utils ;
 use Users_UserDao;
@@ -48,7 +49,7 @@ class Signup {
     public function valid() {
         try {
             $this->__doValidation()  ;
-        } catch( \Exceptions\ValidationError $e ) {
+        } catch( ValidationError $e ) {
             $this->error = $e->getMessage() ;
             return false;
         }
@@ -65,7 +66,8 @@ class Signup {
             \Users_UserDao::updateStruct( $this->user, array('raise' => TRUE ) );
         } else {
             $this->__prepareNewUser() ;
-            \Users_UserDao::insertStruct( $this->user, array('raise' => TRUE ) );
+            $this->user->uid = \Users_UserDao::insertStruct( $this->user, array('raise' => TRUE ) );
+
         }
 
         $this->__saveWantedUrl();
@@ -111,17 +113,17 @@ class Signup {
         }
 
         if ( $persisted && !is_null($persisted->email_confirmed_at) ) {
-            throw new \Exceptions\ValidationError('User with same email already exists');
+            throw new ValidationError('User with same email already exists');
         }
 
         \Users_UserValidator::validatePassword( $this->params['password'] ) ;
 
         if ( empty( $this->params['first_name'] ) ) {
-            throw new \Exceptions\ValidationError('First name must be set') ;
+            throw new ValidationError('First name must be set') ;
         }
 
         if ( empty( $this->params['last_name'] ) ) {
-            throw new \Exceptions\ValidationError('Last name must be set') ;
+            throw new ValidationError('Last name must be set') ;
         }
 
     }
@@ -142,6 +144,8 @@ class Signup {
         $user->confirmation_token = null ;
 
         Users_UserDao::updateStruct( $user, array('fields' => array( 'confirmation_token', 'email_confirmed_at' ) ) ) ;
+
+        ( new TeamDao() )->createPersonalTeam( $user ) ;
 
         $email = new WelcomeEmail( $user ) ;
         $email->send() ;

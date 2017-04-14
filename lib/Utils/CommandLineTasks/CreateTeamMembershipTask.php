@@ -8,7 +8,6 @@
 
 namespace CommandLineTasks;
 
-use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -16,7 +15,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Teams\MembershipDao;
 use Teams\MembershipStruct;
 use Teams\TeamDao;
-use Teams\TeamStruct;
 
 class CreateTeamMembershipTask extends Command
 {

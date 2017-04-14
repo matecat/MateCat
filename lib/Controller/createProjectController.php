@@ -1,8 +1,4 @@
 <?php
-
-define( 'DEFAULT_NUM_RESULTS', 2 );
-set_time_limit( 0 );
-
 use ConnectedServices\GDrive as GDrive ;
 use ProjectQueue\Queue;
 
@@ -27,6 +23,11 @@ class createProjectController extends ajaxController {
     private $metadata;
 
     private $lang_handler ;
+
+    /**
+     * @var \Teams\TeamStruct
+     */
+    private $team ;
 
     /**
      * @var FeatureSet
@@ -58,7 +59,8 @@ class createProjectController extends ajaxController {
                 'pretranslate_100'   => array( 'filter' => FILTER_VALIDATE_INT ),
                 'dqf_key'            => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                )
+                ),
+                'id_team' => array( 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR  )
 
                 //            This will be sanitized inside the TmKeyManagement class
                 //            SKIP
@@ -156,6 +158,10 @@ class createProjectController extends ajaxController {
         $this->__validateSourceLang();
         $this->__validateTargetLangs();
         $this->__validateUserMTEngine();
+
+        if ( $this->userIsLogged ) {
+            $this->__setTeam( $__postInput['id_team'] );
+        }
 
     }
 
@@ -314,10 +320,11 @@ class createProjectController extends ajaxController {
         }
 
         if ( $this->userIsLogged ) {
-            $projectStructure[ 'userIsLogged' ] = true;
-            $projectStructure[ 'uid' ]          = $this->uid;
-            $projectStructure[ 'id_customer' ]  = $this->userMail;
-            $projectStructure[ 'owner' ]        = $this->userMail ;
+            $projectStructure[ 'userIsLogged' ]  = true;
+            $projectStructure[ 'uid' ]           = $this->uid;
+            $projectStructure[ 'id_customer' ]   = $this->userMail;
+            $projectStructure[ 'owner' ]         = $this->userMail ;
+            $projectManager->setTeam( $this->team ); // set the team object to avoid useless query
         }
 
         //reserve a project id from the sequence
@@ -327,7 +334,7 @@ class createProjectController extends ajaxController {
         Queue::sendProject( $projectStructure );
 
         $this->__clearSessionFiles();
-        $this->__assignLastCreatedPid( $projectStructure['id_project'] ) ; //TODO get ID from published results ( API or directly from handler in a loop )
+        $this->__assignLastCreatedPid( $projectStructure['id_project'] ) ;
 
         $this->result[ 'data' ] = [
                 'id_project' => $projectStructure[ 'id_project' ],
@@ -414,20 +421,44 @@ class createProjectController extends ajaxController {
 
     }
     
-    private function __setMetadataFromPostInput( $postInput ) {
-        $metadata = array() ;
+    private function __setMetadataFromPostInput( $__postInput ) {
+        $options = array() ;
 
-        if ( isset( $postInput['lexiqa']) )            $metadata['lexiqa']            = $postInput[ 'lexiqa' ];
-        if ( isset( $postInput['speech2text']) )       $metadata['speech2text']       = $postInput[ 'speech2text' ];
-        if ( isset( $postInput['tag_projection']) )    $metadata['tag_projection']    = $postInput[ 'tag_projection' ];
-        if ( isset( $postInput['segmentation_rule']) ) $metadata['segmentation_rule'] = $postInput[ 'segmentation_rule' ];
+        if ( isset( $__postInput['lexiqa']) )           $options['lexiqa'] = $__postInput[ 'lexiqa' ];
+        if ( isset( $__postInput['speech2text']) )      $options['speech2text'] = $__postInput[ 'speech2text' ];
+        if ( isset( $__postInput['tag_projection']) )   $options['tag_projection'] = $__postInput[ 'tag_projection' ];
+        if ( isset( $__postInput['segmentation_rule']) ) $options['segmentation_rule'] = $__postInput[ 'segmentation_rule' ];
 
-        // Give plugin the opportunity to set additional metadata from postInput
-        $metadataFromPlugins = $this->featureSet->filter('createProjectAssignInputMetadata', array(), array(
-            'input' => $postInput
+        $this->metadata = $options ;
+
+        $this->metadata = $this->featureSet->filter('createProjectAssignInputMetadata', $this->metadata, array(
+            'input' => $__postInput
         ));
+    }
 
-        $this->metadata = array_merge( $metadata, $metadataFromPlugins );
+    /**
+     * TODO: this should be moved to a model that.
+     *
+     * @param null $id_team
+     *
+     * @throws Exception
+     */
+    private function __setTeam( $id_team = null ) {
+        if ( is_null( $id_team ) ) {
+            $this->team = $this->logged_user->getPersonalTeam() ;
+        }
+        else {
+            // check for the team to be allowed
+            $dao = new \Teams\MembershipDao() ;
+            $team = $dao->findTeamByIdAndUser($id_team, $this->logged_user) ;
+
+            if ( !$team ) {
+                throw new Exception('Team and user memberships do not match') ;
+            }
+            else {
+                $this->team = $team ;
+            }
+        }
     }
 
     private function __validateUserMTEngine() {

@@ -1,4 +1,9 @@
 <?php
+use Exceptions\NotFoundError;
+use Teams\MembershipDao;
+use Teams\MembershipStruct;
+use \API\V2\Json\Error;
+
 
 /**
  * Description of manageController
@@ -52,6 +57,11 @@ class getProjectsController extends ajaxController {
      */
     private $start;
 
+    private $id_team ;
+    private $id_assignee ;
+
+    private $no_assignee ;
+
     /**
      * @var FeatureSet
      */
@@ -86,7 +96,12 @@ class getProjectsController extends ajaxController {
                 'onlycompleted' => [
                         'filter'  => FILTER_VALIDATE_BOOLEAN,
                         'options' => [ FILTER_NULL_ON_FAILURE ]
-                ]
+                ],
+                'id_team' => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'id_assignee' => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+
+                'no_assignee' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+
         ];
 
         $postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -100,6 +115,10 @@ class getProjectsController extends ajaxController {
         $this->search_in_pname       = $postInput[ 'pn' ];
         $this->search_source         = $postInput[ 'source' ];
         $this->search_target         = $postInput[ 'target' ];
+        $this->id_team               = $postInput[ 'id_team' ];
+        $this->id_assignee           = $postInput[ 'id_assignee' ];
+
+        $this->no_assignee           = $postInput[ 'no_assignee' ];
 
         $this->search_only_completed = $postInput[ 'onlycompleted' ];
 
@@ -107,28 +126,43 @@ class getProjectsController extends ajaxController {
 
     public function doAction() {
 
-        if( !$this->userIsLogged ){
-            throw new Exception('User not Logged');
+        if ( !$this->userIsLogged ) {
+            $this->result = ( new Error( [ new Exception( 'User not Logged', 401 ) ] ) )->render();
+            return;
         }
 
         $this->featureSet = new FeatureSet();
         $this->featureSet->loadFromUserEmail( $this->logged_user->email ) ;
 
-        $team = null ;
-        $team = $this->featureSet->filter('filter_get_projects_team', $team);
+        try {
+            $team = $this->filterTeam();
+        } catch( NotFoundError $e ){
+            $this->result = ( new Error( [ $e ] ) )->render();
+            return;
+        }
+
+        if( $team->type == Constants_Teams::PERSONAL ){
+            $assignee = $this->logged_user;
+            $team = null;
+        } else {
+            $assignee = $this->filterAssignee( $team );
+        }
 
         $projects = ManageUtils::queryProjects( $this->logged_user, $this->start, $this->step,
             $this->search_in_pname,
             $this->search_source, $this->search_target, $this->search_status,
             $this->search_only_completed, $this->project_id,
-            $team
+            $team, $assignee,
+            $this->no_assignee
         );
 
         $projnum = getProjectsNumber( $this->logged_user,
             $this->search_in_pname, $this->search_source,
             $this->search_target, $this->search_status,
-            $this->search_only_completed, $team );
-
+            $this->search_only_completed,
+            $team, $assignee,
+            $this->no_assignee
+            );
 
         $projects = $this->filterProjectsWithUserFeatures( $projects ) ;
 
@@ -155,4 +189,44 @@ class getProjectsController extends ajaxController {
         return $projects ;
     }
 
+    /**
+     * @param $team
+     *
+     * @return Users_UserStruct
+     * @throws Exception
+     */
+
+    private function filterAssignee( $team ) {
+
+        if ( is_null( $this->id_assignee ) ) {
+            return null;
+        }
+
+        $dao         = new MembershipDao();
+        $memberships = $dao->setCacheTTL( 60 * 60 * 24 )->getMemberListByTeamId( $team->id );
+        $id_assignee = $this->id_assignee;
+        /**
+         * @var $users \Teams\MembershipStruct[]
+         */
+        $users = array_values( array_filter( $memberships, function ( MembershipStruct $membership ) use ( $id_assignee ) {
+            return $membership->getUser()->uid == $id_assignee;
+        } ) );
+
+        if ( empty( $users ) ) {
+            throw new Exception( 'Assignee not found in team' );
+        }
+
+        return $users[ 0 ]->getUser();
+    }
+
+    private function filterTeam() {
+        $dao = new MembershipDao() ;
+        $team = $dao->findTeamByIdAndUser($this->id_team, $this->logged_user ) ;
+        if ( !$team ) {
+            throw  new NotFoundError( 'Team not found in user memberships', 404 ) ;
+        }
+        else {
+            return $team ;
+        }
+    }
 }

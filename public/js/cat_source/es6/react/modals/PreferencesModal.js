@@ -70,8 +70,8 @@ class PreferencesModal extends React.Component {
             return;
         }
         return $.post('/api/app/user/metadata', { metadata : {
-                coupon : this.couponInput.value
-            }
+            coupon : this.couponInput.value
+        }
         }).done( function( data ) {
             if (data) {
                 APP.USER.STORE.metadata = data;
@@ -128,7 +128,7 @@ class PreferencesModal extends React.Component {
             </div>;
         }
 
-        var services_label = 'Connect your Google account to translate files in Drive';
+        var services_label = 'Allow MateCat to access your files on Google Drive';
         if ( this.state.service && !this.state.service.disabled_at) {
             services_label = 'Connected to Google Drive ('+ this.state.service.email+')';
         }
@@ -139,36 +139,32 @@ class PreferencesModal extends React.Component {
 
         }
 
-
-
         var couponHtml = '';
         if ( !this.state.coupon) {
             var buttonClass = (this.state.validCoupon) ? '' : 'disabled';
             couponHtml = <div className="coupon-container">
-                                    <h2 htmlFor="user-coupon">Coupon</h2>
-                                    <input type="text" name="coupon" id="user-coupon" placeholder="Insert your code"
-                                           onKeyUp={this.onKeyPressCopupon.bind(this)}
-                                           ref={(input) => this.couponInput = input}/>
-                                <a className={"btn-confirm-medium " + buttonClass}  onClick={this.submitUserChanges.bind(this)}>Apply</a>
-                                <div className="coupon-message">
-                                        <span style={{color: 'red', fontSize: '14px',position: 'absolute', right: '27%', lineHeight: '24px'}} className="coupon-message">{this.state.couponError}</span>
-                                </div>
-                        </div>
+                <h2 htmlFor="user-coupon">Coupon</h2>
+                <input type="text" name="coupon" id="user-coupon" placeholder="Insert your code"
+                       onKeyUp={this.onKeyPressCopupon.bind(this)}
+                       ref={(input) => this.couponInput = input}/>
+                <a className={"btn-confirm-medium " + buttonClass}  onClick={this.submitUserChanges.bind(this)}>Apply</a>
+                <div className="coupon-message">
+                    <span style={{color: 'red', fontSize: '14px',position: 'absolute', right: '27%', lineHeight: '24px'}} className="coupon-message">{this.state.couponError}</span>
+                </div>
+            </div>
         } else {
 
             couponHtml = <div className="coupon-container coupon-success">
 
-                    <h2 htmlFor="user-coupon">Coupon</h2>
-                    <input type="text" name="coupon" id="user-coupon" defaultValue={this.state.coupon} disabled /><br/>
-                    <div className="coupon-message">
-                        <span style={{color: 'green', fontSize: '14px', position: 'absolute', right: '42%', lineHeight: '24px'}} className="coupon-message">Coupon activated</span>
-                    </div>
+                <h2 htmlFor="user-coupon">Coupon</h2>
+                <input type="text" name="coupon" id="user-coupon" defaultValue={this.state.coupon} disabled /><br/>
+                <div className="coupon-message">
+                    <span style={{color: 'green', fontSize: '14px', position: 'absolute', right: '42%', lineHeight: '24px'}} className="coupon-message">Coupon activated</span>
+                </div>
 
 
             </div>
         }
-
-        // find if the use has the coupon already. If he has then do not show the input field.
 
         return <div className="preferences-modal">
 

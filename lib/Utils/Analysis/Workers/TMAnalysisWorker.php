@@ -685,6 +685,8 @@ class TMAnalysisWorker extends AbstractWorker {
      * Only the last worker can finalize the project by setting a lock on Redis.
      *
      * @param $_project_id
+     *
+     * @throws ReQueueException
      */
     protected function _tryToCloseProject( $_project_id ) {
 

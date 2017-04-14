@@ -1,6 +1,7 @@
 <?php
 namespace API\V2  ;
 use API\V2\Json\SegmentVersion as JsonFormatter;
+use API\V2\Validators\JobPasswordValidator;
 
 
 class SegmentVersion extends KleinController {

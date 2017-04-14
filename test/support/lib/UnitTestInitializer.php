@@ -8,7 +8,7 @@
  * Date: 30/06/16
  * Time: 11.23
  */
-class UnitTestInitializer
+class UnitTestInitializer extends IntegrationTest
 {
     /**
      * @var Database
@@ -46,21 +46,6 @@ class UnitTestInitializer
                 )
             )
         );
-    }
-
-    private function prepareUserAndApiKey()
-    {
-
-        $this->test_data->user = Factory_User::create();
-        $this->test_data->api_key = Factory_ApiKey::create(array(
-            'uid' => $this->test_data->user->uid,
-        ));
-
-        $this->test_data->headers = array(
-            "X-MATECAT-KEY: {$this->test_data->api_key->api_key}",
-            "X-MATECAT-SECRET: {$this->test_data->api_key->api_secret}"
-        );
-
     }
 
     /**

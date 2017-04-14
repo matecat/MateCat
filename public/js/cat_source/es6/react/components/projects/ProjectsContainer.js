@@ -1,11 +1,6 @@
-/**
- * React Component for the editarea.
-
- */
 // var React = require('react');
-var ProjectsStore = require('../../stores/ProjectsStore');
-var Project = require('./ProjectContainer').default;
-var FilterProjects = require("../FilterProjects").default;
+let Project = require('./ProjectContainer').default;
+let FilterProjects = require("../FilterProjects").default;
 
 
 class ProjectsContainer extends React.Component {
@@ -16,22 +11,52 @@ class ProjectsContainer extends React.Component {
             projects : [],
             more_projects: true,
             reloading_projects: false,
+            team: null,
+            teams: null,
+            filtering: false
         };
         this.renderProjects = this.renderProjects.bind(this);
+        this.updateProjects = this.updateProjects.bind(this);
+        this.updateTeam = this.updateTeam.bind(this);
+        this.updateTeams = this.updateTeams.bind(this);
         this.hideSpinner = this.hideSpinner.bind(this);
         this.showProjectsReloadSpinner = this.showProjectsReloadSpinner.bind(this);
     }
 
 
-    renderProjects(projects, hideSpinner) {
-        var more_projects = true;
+    renderProjects(projects, team, hideSpinner, filtering) {
+        let more_projects = true;
         if (hideSpinner) {
             more_projects = this.state.more_projects
         }
+        let teamState = (team)? team : this.state.team;
+        let filteringState = (filtering) ? filtering : this.state.filtering
         this.setState({
             projects: projects,
             more_projects: more_projects,
-            reloading_projects: false
+            reloading_projects: false,
+            team: teamState,
+            filtering: filteringState
+        });
+    }
+
+    updateTeam(team) {
+        if (team.get('id') === this.state.team.get('id')) {
+            this.setState({
+                team: team,
+            });
+        }
+    }
+
+    updateTeams(teams) {
+        this.setState({
+            teams: teams,
+        });
+    }
+
+    updateProjects(projects) {
+        this.setState({
+            projects: projects,
         });
     }
 
@@ -47,84 +72,158 @@ class ProjectsContainer extends React.Component {
         });
     }
 
+
+    openAddMember () {
+        ManageActions.openModifyTeamModal(this.state.team.toJS());
+    }
+
+    createNewProject() {
+        window.open("/", '_blank');
+    }
+
+    getButtonsNoProjects() {
+        if (!this.state.team) return;
+
+        let thereAreMembers = (this.state.team.get("members") && this.state.team.get("members").size > 1 ||
+            this.state.team.get("pending_invitations") && this.state.team.get("pending_invitations").size > 0) || this.state.team.get('type') === 'personal';
+        return <div className="notify-notfound">
+            {(this.state.filtering )? (
+                <div>
+                    <div className="message-nofound">No Projects Found</div>
+                    <div className="no-results-found"></div>
+                </div>
+                ) :(this.state.team.get('type') === 'personal' ?
+                        (<div className="no-results-teams">
+                                <div className="message-nofound">Welcome to your Personal area</div>
+                                <div className="welcome-to-matecat">
+
+                                </div>
+                                <div className="message-create">{/*Lorem ipsum dolor sit amet*/}
+                                    <p>
+                                        <a className="ui primary button" onClick={this.createNewProject.bind(this)}>
+                                            Create Project
+                                        </a>
+                                    </p>
+                                    {!thereAreMembers ? (
+                                        <p>
+                                            <a className="ui primary button" onClick={this.openAddMember.bind(this)}>
+                                                Add member
+                                            </a>
+                                        </p>
+                                    ) : ('')}
+                                </div>
+                            </div>
+                        ):(
+                        <div className="no-results-teams">
+                            <div className="message-nofound">Welcome to  {this.state.team.get('name')}</div>
+                            <div className="no-results-found">
+
+                            </div>
+                            <div className="message-create">{/*Lorem ipsum dolor sit amet*/}
+                                <p>
+                                    <a className="ui primary button" onClick={this.createNewProject.bind(this)}>
+                                        Create Project
+                                    </a>
+                                {!thereAreMembers ? (
+
+                                    <a className="ui primary button" onClick={this.openAddMember.bind(this)}>
+                                        Add member
+                                    </a>
+                                ) : ('')}
+                                </p>
+                            </div>
+                        </div>
+                    )
+                )}
+
+        </div>;
+    }
+
     componentDidMount() {
         ProjectsStore.addListener(ManageConstants.RENDER_PROJECTS, this.renderProjects);
+        // ProjectsStore.addListener(ManageConstants.RENDER_ALL_TEAM_PROJECTS, this.renderAllTeamssProjects);
+        ProjectsStore.addListener(ManageConstants.UPDATE_PROJECTS, this.updateProjects);
         ProjectsStore.addListener(ManageConstants.NO_MORE_PROJECTS, this.hideSpinner);
         ProjectsStore.addListener(ManageConstants.SHOW_RELOAD_SPINNER, this.showProjectsReloadSpinner);
-        // $('.tooltipped').tooltip({delay: 50});
+        TeamsStore.addListener(ManageConstants.UPDATE_TEAM, this.updateTeam);
+        TeamsStore.addListener(ManageConstants.UPDATE_TEAMS, this.updateTeams);
+        TeamsStore.addListener(ManageConstants.RENDER_TEAMS, this.updateTeams);
     }
 
     componentWillUnmount() {
         ProjectsStore.removeListener(ManageConstants.RENDER_PROJECTS, this.renderProjects);
+        // ProjectsStore.removeListener(ManageConstants.RENDER_ALL_TEAM_PROJECTS, this.renderAllTeamssProjects);
+        ProjectsStore.removeListener(ManageConstants.UPDATE_PROJECTS, this.updateProjects);
         ProjectsStore.removeListener(ManageConstants.NO_MORE_PROJECTS, this.hideSpinner);
         ProjectsStore.removeListener(ManageConstants.SHOW_RELOAD_SPINNER, this.showProjectsReloadSpinner);
+        TeamsStore.removeListener(ManageConstants.UPDATE_TEAM, this.updateTeam);
+        TeamsStore.removeListener(ManageConstants.UPDATE_TEAMS, this.updateTeams);
+        TeamsStore.removeListener(ManageConstants.RENDER_TEAMS, this.updateTeams);
     }
 
     componentDidUpdate() {
-        var self = this;
+        let self = this;
         if (!this.state.more_projects) {
             setTimeout(function () {
-                $(self.spinner).fadeOut();
+                $(self.spinner).css("visibility", "hidden");
             }, 3000);
         }
+        if (APP.timeAfterProjectRequest) {
+            var t2 = new Date();
+            var dif = (t2 - APP.timeAfterProjectRequest)/1000;
+            console.log("Render Projects in: " + dif);
+            APP.timeAfterProjectRequest = null;
+        }
     }
+
+    componentWillUpdate() {}
+
+
     shouldComponentUpdate(nextProps, nextState) {
-        return (nextState.projects !== this.state.projects || nextState.more_projects !== this.state.more_projects || nextState.reloading_projects !== this.state.reloading_projects)
+        return (!nextState.projects.equals(this.state.projects) ||
+        nextState.more_projects !== this.state.more_projects ||
+        nextState.reloading_projects !== this.state.reloading_projects ||
+        !nextState.team.equals(this.state.team) ||
+        !nextState.teams.equals(this.state.teams) )
     }
 
     render() {
-        var items = this.state.projects.map((project, i) => (
+        let self = this;
+        let projects = this.state.projects;
+
+        let items = projects.map((project, i) => (
             <Project
                 key={project.get('id')}
                 project={project}
                 lastActivityFn={this.props.getLastActivity}
-                changeStatusFn={this.props.changeStatus}
                 changeJobPasswordFn={this.props.changeJobPasswordFn}
-                downloadTranslationFn={this.props.downloadTranslationFn}/>
+                downloadTranslationFn={this.props.downloadTranslationFn}
+                team={this.state.team}
+                teams={this.state.teams}/>
         ));
-        if (!items.size) {
-            items = <div className="no-results-found"><span>No Project Found</span></div>;
-        }
 
-
-        var spinner = '';
-        if (this.state.more_projects && this.state.projects.size > 9) {
-            spinner = <div className="row">
-                        <div className="manage-spinner" style={{minHeigth: '90px'}}>
-                            <div className="col m12 center-align">
-                                <div className="preloader-wrapper active">
-                                    <div className="spinner-layer spinner-blue-only">
-                                        <div className="circle-clipper left">
-                                            <div className="circle"></div>
-                                        </div>
-                                        <div className="gap-patch">
-                                            <div className="circle"></div>
-                                        </div>
-                                        <div className="circle-clipper right">
-                                            <div className="circle"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="col m12 center-align">
-                            <span>Loading projects</span>
-                        </div>
-                    </div>;
-        } else if (this.state.projects.size > 9) {
-            spinner = <div className="row">
-                <div className="manage-spinner" style={{minHeight: '90px'}}>
-                    <div className="col m12 center-align">
-                        <span ref={(spinner) => this.spinner = spinner}>No more projects</span>
+        let spinner = '';
+        if (this.state.more_projects && projects.size > 9) {
+            spinner = <div className="ui one column shadow-1 grid">
+                <div className="one column spinner" style={{height: "100px"}}>
+                    <div className="ui active inverted dimmer">
+                        <div className="ui medium text loader">Loading more projects</div>
                     </div>
+                </div>
+            </div>;
+        } else if (projects.size > 9) {
+            spinner = <div className="ui one column shadow-1 grid" ref={(spinner) => this.spinner = spinner}>
+                <div className="one column spinner center aligned">
+                        <div className="ui medium header">No more projects</div>
                 </div>
             </div>;
         }
 
         if (!items.size) {
-            items = <div className="no-results-found"><span>No Project Found</span></div>;
+            items = this.getButtonsNoProjects();
             spinner = '';
         }
+
         var spinnerReloadProjects = '';
         if (this.state.reloading_projects) {
             var spinnerContainer = {
@@ -134,37 +233,11 @@ class ProjectsContainer extends React.Component {
                 backgroundColor: 'rgba(76, 69, 69, 0.3)',
                 top: $(window).scrollTop(),
                 left: 0,
-                zIndex: 2
-            };
-            var styleSpinner = {
-                position: 'absolute',
-                width : '300px',
-                height : '100px',
-                top: $(window).height() / 2,
-                left: $(window).width() / 2 - 150,
-                zIndex: 2,
-                fontWeight: 600
+                zIndex: 3
             };
             spinnerReloadProjects =<div style={spinnerContainer}>
-                    <div style={styleSpinner}>
-                        <div className="col m12 center-align">
-                            <div className="preloader-wrapper active">
-                                <div className="spinner-layer spinner-blue-only">
-                                    <div className="circle-clipper left">
-                                        <div className="circle"></div>
-                                    </div>
-                                    <div className="gap-patch">
-                                        <div className="circle"></div>
-                                    </div>
-                                    <div className="circle-clipper right">
-                                        <div className="circle"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="col m12 center-align">
-                            <span>Updating projects</span>
-                        </div>
+                    <div className="ui active inverted dimmer">
+                        <div className="ui massive text loader">Updating Projects</div>
                     </div>
                 </div>;
         }
@@ -172,30 +245,17 @@ class ProjectsContainer extends React.Component {
 
 
         return <div>
-                    {/*<section className="add-project">*/}
-                        {/*<a href="/" target="_blank" className="btn-floating btn-large waves-effect waves-light right create-new blue-matecat tooltipped" data-position="bottom" data-delay="50" data-tooltip="Add new project"/>*/}
-                    {/*</section>*/}
-                    <section className="project-list">
-                        <div className="container">
-                            <div className="row">
-                                {spinnerReloadProjects}
-                                <div className="col m12" ref={(container) => this.container = container}>
-                                    {items}
-                                </div>
-                            </div>
+                    <div className="project-list">
+                        <div className="ui container">
+                            {spinnerReloadProjects}
+                            {items}
+                            {spinner}
                         </div>
-                        {spinner}
-                    </section>
+
+                    </div>
                 </div>;
     }
 }
 
-ProjectsContainer.propTypes = {
-    projects: React.PropTypes.array,
-};
-
-ProjectsContainer.defaultProps = {
-    projects: [],
-};
 
 export default ProjectsContainer ;

@@ -2,6 +2,13 @@
 
 namespace LQA;
 
+/**
+ * Class ModelValidator
+ * @package LQA
+ *
+ * @deprecated Struct validator are deprecated
+ *
+ */
 class ModelValidator extends \DataAccess_AbstractValidator {
 
     static $VALID_TYPES = array(

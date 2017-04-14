@@ -3,13 +3,14 @@
 namespace API\App;
 
 use API\App\Json\ConnectedService;
-use API\V2\AuthorizationError;
-use API\V2\KleinController;
+use API\V2\Json\Team;
+use API\V2\Json\User;
 
 use ConnectedServices\ConnectedServiceDao ;
-use ConnectedServices\ConnectedServiceStruct;
 use Exceptions\NotFoundError;
-use Exceptions\ValidationError;
+use TeamModel;
+use Teams\MembershipDao;
+use Teams\TeamStruct;
 use Users_UserDao ;
 use Utils ;
 
@@ -24,19 +25,27 @@ class UserController extends AbstractStatefulKleinController  {
     public function show() {
         $metadata = $this->user->getMetadataAsKeyValue() ;
 
+        $membersDao = new MembershipDao();
+        $userTeams = array_map(
+                function ( $team ) use( $membersDao ) {
+                    $teamModel = new TeamModel( $team );
+                    $teamModel->updateMembersProjectsCount();
+                    /** @var $team TeamStruct */
+                    return $team;
+                },
+                $membersDao->setCacheTTL( 60 * 60 * 24 )->findUserTeams( $this->user )
+        );
+
         // TODO: move this into a formatter class
         $this->response->json( array(
-            'user' => array(
-                'uid' => $this->user->uid,
-                'first_name' => $this->user->first_name,
-                'last_name' => $this->user->last_name,
-                'email' => $this->user->email,
-                'has_password' => !is_null($this->user->pass)
-            ),
+            'user' => User::renderItem( $this->user ),
             'connected_services' => ( new ConnectedService( $this->connectedServices ))->render(),
 
             // TODO: this is likely to be unsafe to be passed here without a whitelist.
-            'metadata' =>  ( empty( $metadata ) ? NULL : $metadata )
+            'metadata' =>  ( empty( $metadata ) ? NULL : $metadata ),
+
+            'teams' => ( new Team() )->render( $userTeams )
+
         ));
     }
 
@@ -55,7 +64,6 @@ class UserController extends AbstractStatefulKleinController  {
         \Bootstrap::sessionClose();
         $this->__findUser();
         $this->__findConnectedServices();
-
     }
 
     private function __findUser() {

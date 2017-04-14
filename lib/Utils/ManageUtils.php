@@ -1,31 +1,40 @@
 <?php
 
+use Exceptions\NotFoundError;
+use Outsource\TranslatedConfirmationStruct;
+use \API\App\Json\OutsourceConfirmation;
+
 class ManageUtils {
 
     /**
-     * @param Users_UserStruct  $user
-     * @param                   $start                int
-     * @param                   $step                 int
-     * @param                   $search_in_pname      string|null
-     * @param                   $search_source        string|null
-     * @param                   $search_target        string|null
-     * @param                   $search_status        string|null
-     * @param                   $search_only_completed bool
-     * @param                   $project_id           int
+     * @param Users_UserStruct               $user
+     * @param $start
+     * @param $step
+     * @param $search_in_pname
+     * @param $search_source
+     * @param $search_target
+     * @param $search_status
+     * @param $search_only_completed
+     * @param $project_id
+     * @param \Teams\TeamStruct|null $team
+     * @param Users_UserStruct|null          $assignee
+     * @param bool                           $no_assignee
      *
-     * @param \Teams\TeamStruct $team
-     *
-     * @return array
-     * @internal param bool $filter_enabled
+*@return array
      */
     public static function queryProjects(
             Users_UserStruct $user, $start, $step, $search_in_pname,
             $search_source, $search_target, $search_status, $search_only_completed,
-            $project_id, \Teams\TeamStruct $team = null ) {
+            $project_id,
+            \Teams\TeamStruct $team = null,
+            Users_UserStruct $assignee = null,
+            $no_assignee = false
+    ) {
 
         $data = getProjects(
             $user, $start, $step, $search_in_pname, $search_source, $search_target,
-            $search_status, $search_only_completed, $project_id, $team
+            $search_status, $search_only_completed, $project_id, $team,
+            $assignee, $no_assignee
         );
 
         $projects     = array();
@@ -75,6 +84,30 @@ class ManageUtils {
             $job[ 'mt_engine_name' ]        = $job_array[ 'name' ];
             $job[ 'id_tms' ]                = $job_array[ 'id_tms' ];
 
+            $job[ 'outsource' ] = null;
+            if( $job_array[ 'id_vendor' ] !== null ){
+
+                $_outsource[ 'id_job' ] = $job_array[ 'id' ];
+                $_outsource[ 'password' ] = $job_array[ 'password' ];
+                $_outsource[ 'id_vendor' ] = $job_array[ 'id_vendor' ];
+                $_outsource[ 'vendor_name' ] = $job_array[ 'vendor_name' ];
+                $_outsource[ 'create_date' ] = $job_array[ 'outsource_create_date' ];
+                $_outsource[ 'delivery_date' ] = $job_array[ 'delivery_date' ];
+                $_outsource[ 'price' ] = $job_array[ 'price' ];
+                $_outsource[ 'currency' ] = $job_array[ 'currency' ];
+                $_outsource[ 'quote_pid' ] = $job_array[ 'quote_pid' ];
+
+                switch( $job_array[ 'id_vendor' ] ){
+                    case TranslatedConfirmationStruct::VENDOR_ID:
+                        $confirmStructJson = new OutsourceConfirmation( new TranslatedConfirmationStruct( $_outsource ) );
+                        $job[ 'outsource' ] = $confirmStructJson->render();
+                        break;
+                    default:
+                        throw new NotFoundError( "Vendor id " . $job_array[ 'id_vendor' ] . " not found." );
+                        break;
+                }
+
+            }
 
             $job[ 'open_threads_count' ] = 0 ;
             foreach( $openThreads as $openThread ) {
@@ -87,6 +120,7 @@ class ManageUtils {
             foreach( $warningsCount as $count ) {
                 if ( $count[ 'id_job' ] == $job[ 'id' ] && $count[ 'password' ] == $job[ 'password' ] ) {
                     $job[ 'warnings_count' ] = (int) $count[ 'count' ] ;
+                    $job[ 'warning_segments' ] = array_map( function( $id_segment ){ return (int)$id_segment; }, explode( ",", $count[ 'segment_list' ] ) );
                 }
             }
 
@@ -147,16 +181,22 @@ class ManageUtils {
 
         }
 
+        $dao = new Projects_ProjectDao() ;
+        $remoteFileServices = $dao->getRemoteFileServiceName( $projectIDs ) ;
+
         //Prepare project data
         foreach ( $data as $item ) {
 
             $project                     = array();
             $project[ 'id' ]             = $item[ 'pid' ];
             $project[ 'name' ]           = $item[ 'name' ];
+            $project[ 'id_team' ]        = (int) $item[ 'id_team' ] ;
+
             $project[ 'jobs' ]           = array();
             $project[ 'no_active_jobs' ] = true;
             $project[ 'has_cancelled' ]  = 0;
             $project[ 'has_archived' ]   = 0;
+            $project[ 'create_date' ]    = $item[ 'create_date' ];
             $project[ 'password' ]       = $item[ 'password' ];
             $project[ 'tm_analysis' ]    = number_format( $item[ 'tm_analysis_wc' ], 0, ".", "," );
 
@@ -173,6 +213,15 @@ class ManageUtils {
             $project[ 'id_tms' ]         = $project2info[ $project[ 'id' ] ][ 'id_tms' ];
 
             $project[ 'features' ] = $item[ 'features' ] ;
+            $project[ 'id_assignee' ] = $item[ 'id_assignee' ] ;
+            $project[ 'project_slug' ] = Utils::friendly_slug( $project['name'] ) ;
+            $project['remote_file_service'] = null ;
+
+            foreach( $remoteFileServices as $service ) {
+                if ( $project['id'] == $service['id_project'] ) {
+                    $project['remote_file_service'] = $service['service'] ;
+                }
+            }
 
             $projects[ ] = $project;
         }

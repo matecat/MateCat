@@ -116,8 +116,9 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
         $this->currency    = "EUR";
         $this->change_rate = 1;
 
-        $this->_outsource_login_url_ok = INIT::$HTTPHOST . INIT::$BASEURL . "index.php?action=OutsourceTo_TranslatedSuccess";
-        $this->_outsource_login_url_ko = INIT::$HTTPHOST . INIT::$BASEURL . "index.php?action=OutsourceTo_TranslatedError";
+        $this->_outsource_login_url_ok      = INIT::$HTTPHOST . INIT::$BASEURL . "index.php?action=OutsourceTo_TranslatedSuccess";
+        $this->_outsource_login_url_ko      = INIT::$HTTPHOST . INIT::$BASEURL . "index.php?action=OutsourceTo_TranslatedError";
+        $this->_outsource_url_confirm       = INIT::$HTTPHOST . INIT::$BASEURL . "api/app/outsource/confirm/%u/%s";
 
         $this->_curlOptions = array(    CURLOPT_HEADER         => false,
                                         CURLOPT_RETURNTRANSFER => true,
@@ -164,32 +165,17 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
         // if the data (referenced by the above id) is not in session, then retrieve it
         if( !Shop_Cart::getInstance( 'outsource_to_external_cache' )->itemExists( $project_url_api ) ) {
-            Log::doLog( "Project Not Found in Cache. Call API url for STATUS: " . $project_url_api );
+            Log::doLog( "Project Not Found in Cache. Call for STATUS: " . $project_url_api );
 
 
             /**
              ************************** GET VOLUME ANALYSIS FIRST *************************
              */
-            // NOTE: by default timeout is set to 10s, but 5 seconds will be enough to call itself
-            $curlOptionsForAnalysis = $this->_curlOptions;
-            $curlOptionsForAnalysis[ CURLOPT_CONNECTTIMEOUT ] = 5;
-
-            // prepare handlers for curl to quote service, and execute curl
-            $mh           = new MultiCurlHandler();
-            $resourceHash = $mh->createResource( $project_url_api, $curlOptionsForAnalysis );
-            $mh->multiExec();
-
-            // any error? Log it
-            if ( $mh->hasError( $resourceHash ) ) {
-                Log::doLog( $mh->getError( $resourceHash ) );
-            }
-
-            // get API Status reply
-            $volAnalysis = $mh->getSingleContent( $resourceHash );
-
-            // free resources
-            $mh->multiCurlCloseAll();
-
+            $x = new StatusController();
+            $x->setIdProject( $this->pid );
+            $x->setPpassword( $this->ppassword );
+            $x->doAction();
+            $volAnalysis = $x->getApiOutput();
 
             /**
              *************************** GET SUBJECT **************************************
@@ -366,7 +352,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
             $url =  "http://www.translated.net/hts/matecat-endpoint.php?f=quote&cid=htsdemo&p=htsdemo5&s=$source&t=$target" .
                 "&pn=MATECAT_{$job['jid']}-{$job['jpassword']}&w=$words&df=matecat&matecat_pid=" . $this->pid .
-                "&matecat_ppass=" . $this->ppassword . "&matecat_pname=" . $volAnalysis[ 'data' ][ 'summary' ][ 'NAME' ] .
+                "&matecat_ppass=" . $this->ppassword . "&matecat_pname=" . urlencode($volAnalysis[ 'data' ][ 'summary' ][ 'NAME' ]) .
                 "&subject=$subject&jt=R&fd=" . urlencode( $fixedDeliveryDateForQuote ) . "&of=json";
 
             Log::doLog( "Not Found in Cache. Call url for Quote:  " . $url );
@@ -697,4 +683,13 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
         return $this;
     }
+
+    public function getOutsourceConfirm(){
+        $urls = [];
+        foreach ( $this->jobList as $job ) {
+            $urls[ ] = sprintf( $this->_outsource_url_confirm, $job[ 'jid' ], $job[ 'jpassword' ] );
+        }
+        return $urls;
+    }
+
 }

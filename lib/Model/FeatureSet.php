@@ -1,4 +1,5 @@
 <?php
+use Teams\TeamStruct;
 
 /**
  * Created by PhpStorm.
@@ -55,9 +56,9 @@ class FeatureSet {
     /**
      * Loads the features starting from a given team.
      *
-     * @param Users_UserStruct $user
+     * @param TeamStruct $team
      */
-    public function loadFromTeam( \Teams\TeamStruct $team ) {
+    public function loadFromTeam( TeamStruct $team ) {
         $dao = new OwnerFeatures_OwnerFeatureDao() ;
         $features = $dao->getByTeam( $team ) ;
         $this->features = static::merge( $this->features, $features ) ;
@@ -67,13 +68,15 @@ class FeatureSet {
      * Returns the filtered subject variable passed to all enabled features.
      *
      * @param $method
-     * @param $id_customer
      * @param $filterable
      *
      * @return mixed
      *
      * FIXME: this is not a real filter since the input params are not passed
      * modified in cascade to the next function in the queue.
+     * @throws Exceptions_RecordNotFound
+     * @throws \Exceptions\ValidationError
+     * @internal param $id_customer
      */
     public function filter($method, $filterable) {
         $args = array_slice( func_get_args(), 1);
@@ -172,6 +175,8 @@ class FeatureSet {
      * Loads plugins into the featureset from the list of mandatory plugins.
      */
     private function loadFromMandatory() {
+        if ( empty( INIT::$MANDATORY_PLUGINS ) ) return ;
+
         $features = [] ;
         foreach( INIT::$MANDATORY_PLUGINS as $plugin) {
             $features[] = new BasicFeatureStruct(array('feature_code' => $plugin) );

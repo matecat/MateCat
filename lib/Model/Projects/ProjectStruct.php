@@ -1,5 +1,7 @@
 <?php
 
+use Teams\TeamDao;
+
 class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
     public $id ;
     public $password ;
@@ -13,9 +15,10 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     public $fast_analysis_wc ;
     public $standard_analysis_wc ;
     public $remote_ip_address ;
-    public $for_debug ;
+    public $instance_number ;
     public $pretranslate_100 ;
     public $id_qa_model ;
+    public $id_assignee ;
 
 
     /**
@@ -84,7 +87,7 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
         if ( is_null( $this->id_team ) ) {
             return null ;
         }
-        $dao = new \Teams\TeamDao() ;
+        $dao = new TeamDao() ;
         return $dao->findById( $this->id_team ) ;
     }
 

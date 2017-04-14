@@ -2,6 +2,12 @@
 
 namespace API\V2;
 
+use API\V2\Exceptions\AuthenticationError;
+use API\V2\Validators\Base;
+use ApiKeys_ApiKeyStruct;
+use AuthCookie;
+use Users_UserDao;
+
 abstract class KleinController {
 
     /**
@@ -20,6 +26,20 @@ abstract class KleinController {
 
     protected $api_key;
     protected $api_secret;
+
+    /**
+     * @var Base[]
+     */
+    protected $validators = [];
+
+    /**
+     * @var \Users_UserStruct
+     */
+    protected $user;
+
+    /**
+     * @var ApiKeys_ApiKeyStruct
+     */
     protected $api_record;
 
     public function __construct( $request, $response, $service, $app ) {
@@ -29,12 +49,15 @@ abstract class KleinController {
         $this->app      = $app;
 
         $this->afterConstruct();
+
     }
 
     public function respond( $method ) {
         $start = microtime(true) ;
 
         $this->validateAuth();
+        $this->identifyUser();
+        $this->validateRequest();
         if ( !$this->response->isLocked() ) {
             $this->$method();
         }
@@ -43,6 +66,10 @@ abstract class KleinController {
 
         $this->_logWithTime( $end - $start ) ;
 
+    }
+
+    public function getRequest() {
+        return $this->request  ;
     }
 
     protected function validateAuth() {
@@ -55,7 +82,38 @@ abstract class KleinController {
             throw new AuthenticationError();
         }
 
-        $this->validateRequest();
+    }
+
+    public function getPutParams() {
+        return json_decode( file_get_contents( 'php://input' ), true ) ;
+    }
+
+    /**
+     * @return \Users_UserStruct
+     */
+    protected function identifyUser(){
+
+        if( !empty( $this->api_record ) ){
+            $this->user = $this->api_record->getUser();
+        } else { //check if there is an opened cookie
+
+            $user_credentials = [];
+            if( isset( $_SESSION[ 'uid' ] ) ){
+                $user_credentials[ 'uid' ] = $_SESSION[ 'uid' ];
+            } else {
+                $user_credentials = AuthCookie::getCredentials(); //validated cookie
+            }
+
+            $dao = new Users_UserDao();
+            $dao->setCacheTTL( 3600 );
+            $this->user = $dao->getByUid( $user_credentials[ 'uid' ] ) ;
+        }
+
+        return $this->user;
+    }
+
+    public function getUser(){
+        return $this->user;
     }
 
     /**
@@ -83,6 +141,13 @@ abstract class KleinController {
     }
 
     protected function validateRequest() {
+        foreach( $this->validators as $validator ){
+            $validator->validate();
+        }
+    }
+
+    protected function appendValidator( Base $validator ){
+        $this->validators[] = $validator;
     }
 
     /**

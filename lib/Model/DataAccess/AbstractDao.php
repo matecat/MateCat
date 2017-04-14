@@ -36,6 +36,16 @@ abstract class DataAccess_AbstractDao {
      */
     protected $cacheTTL = 0;
 
+    /**
+     * @var array
+     */
+    protected static $primary_keys = [];
+
+    /**
+     * @var string
+     */
+    protected static $TABLE = '';
+
     public function __construct( $con = null ) {
         /**
          * @var $con Database
@@ -48,10 +58,15 @@ abstract class DataAccess_AbstractDao {
         $this->con = $con;
     }
 
-    public function getConnection(){
+    public function getConnection() {
         return $this->con;
     }
 
+    /**
+     * @param DataAccess_IDaoStruct $obj
+     *
+     * @throws Exception
+     */
     public function create( DataAccess_IDaoStruct $obj ) {
         throw new Exception( "Abstract method " . __METHOD__ . " must be overridden " );
     }
@@ -163,7 +178,7 @@ abstract class DataAccess_AbstractDao {
      *
      * @return bool True if object is valid, false otherwise
      */
-    protected function _validateNotNullFields( DataAccess_IDaoStruct $obj ){
+    protected function _validateNotNullFields( DataAccess_IDaoStruct $obj ) {
         //to be overridden in sub-classes
         return true;
     }
@@ -188,14 +203,14 @@ abstract class DataAccess_AbstractDao {
      *
      * @return $this
      */
-    protected function _cacheSetConnection(){
+    protected function _cacheSetConnection() {
         if ( !isset( $this->cache_con ) || empty( $this->cache_con ) ) {
 
             require_once 'Predis/autoload.php';
             try {
                 $this->cache_con = new Predis\Client( INIT::$REDIS_SERVERS );
-                $this->cache_con->get(1);
-            } catch ( Exception $e ){
+                $this->cache_con->get( 1 );
+            } catch ( Exception $e ) {
                 $this->cache_con = null;
                 Log::doLog( $e->getMessage() );
                 Log::doLog( "No Redis server(s) configured." );
@@ -209,8 +224,10 @@ abstract class DataAccess_AbstractDao {
      *
      * @return mixed
      */
-    protected function _getFromCache($query){
-        if($this->cacheTTL == 0 ) return null;
+    protected function _getFromCache( $query ) {
+        if ( $this->cacheTTL == 0 ) {
+            return null;
+        }
 
         $this->_cacheSetConnection();
 
@@ -230,8 +247,10 @@ abstract class DataAccess_AbstractDao {
      *
      * @return void|null
      */
-    protected function _setInCache( $query, $value ){
-        if($this->cacheTTL == 0 ) return null;
+    protected function _setInCache( $query, $value ) {
+        if ( $this->cacheTTL == 0 ) {
+            return null;
+        }
 
         if ( isset( $this->cache_con ) && !empty( $this->cache_con ) ) {
             $this->cache_con->setex( md5( $query ), $this->cacheTTL, serialize( $value ) );
@@ -245,6 +264,7 @@ abstract class DataAccess_AbstractDao {
      */
     public function setCacheTTL( $cacheSecondsTTL ) {
         $this->cacheTTL = $cacheSecondsTTL;
+
         return $this;
     }
 
@@ -272,10 +292,10 @@ abstract class DataAccess_AbstractDao {
      *
      * @return bool
      */
-    protected function _destroyCache( $query ){
+    protected function _destroyCache( $query ) {
         $this->_cacheSetConnection();
         if ( isset( $this->cache_con ) && !empty( $this->cache_con ) ) {
-            return $this->cache_con->del( md5 ($query ));
+            return $this->cache_con->del( md5( $query ) );
         }
 
         return false;
@@ -283,15 +303,30 @@ abstract class DataAccess_AbstractDao {
     }
 
     /**
+     * Serialize params, ensuring values are always treated as strings.
+     *
+     * @param array $params
+     *
+     * @return string
+     */
+    protected function _serializeForCacheKey( Array $params ) {
+        foreach ( $params as $key => $value ) {
+            $params[ $key ] = (string)$value;
+        }
+
+        return serialize( $params );
+    }
+
+    /**
      * @param PDOStatement          $stmt
      * @param DataAccess_IDaoStruct $fetchClass
      * @param array                 $bindParams
      *
-     * @return DataAccess_IDaoStruct|DataAccess_IDaoStruct[]
+     * @return DataAccess_IDaoStruct[]
      */
-    protected function _fetchObject( PDOStatement $stmt, DataAccess_IDaoStruct $fetchClass, Array $bindParams ){
+    protected function _fetchObject( PDOStatement $stmt, DataAccess_IDaoStruct $fetchClass, Array $bindParams ) {
 
-        $_cacheResult = $this->_getFromCache( $stmt->queryString . serialize( $bindParams ) );
+        $_cacheResult = $this->_getFromCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) );
 
         if ( $_cacheResult !== false && $_cacheResult !== null ) {
             return $_cacheResult;
@@ -301,23 +336,23 @@ abstract class DataAccess_AbstractDao {
         $stmt->setFetchMode( PDO::FETCH_CLASS, get_class( $fetchClass ) );
         $stmt->execute( $bindParams );
         $result = $stmt->fetchAll();
-        
-        $this->_setInCache( $stmt->queryString . serialize( $bindParams ), $result );
+
+        $this->_setInCache( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ), $result );
 
         return $result;
 
     }
 
     /**
-     * @param PDOStatement          $stmt
-     * @param array                 $bindParams
+     * @param PDOStatement $stmt
+     * @param array        $bindParams
      *
      * @return bool|int
      */
-    protected function _destroyObjectCache( PDOStatement $stmt, Array $bindParams ){
+    protected function _destroyObjectCache( PDOStatement $stmt, Array $bindParams ) {
         $this->_cacheSetConnection();
         if ( isset( $this->cache_con ) && !empty( $this->cache_con ) ) {
-            return $this->cache_con->del( md5 ( $stmt->queryString . serialize( $bindParams ) ) );
+            return $this->cache_con->del( md5( $stmt->queryString . $this->_serializeForCacheKey( $bindParams ) ) );
         }
 
         return false;
@@ -326,6 +361,7 @@ abstract class DataAccess_AbstractDao {
 
     /**
      * @param $array_result array
+     *
      * @deprecated Use instead PDO::setFetchMode()
      * @return DataAccess_IDaoStruct|DataAccess_IDaoStruct[]
      */
@@ -335,32 +371,43 @@ abstract class DataAccess_AbstractDao {
      * Returns a string suitable for insert of the fields
      * provided by the attributes array.
      *
-     * @param $attrs array of full attributes to update
-     * @param $mask array of attributes to include in the update
+     * @param      $attrs    array of full attributes to update
+     * @param      $mask     array of attributes to include in the update
+     * @param bool $ignore   Use INSERT IGNORE query type
+     * @param bool $no_nulls Exclude NULL fields when build the sql
+     *
      * @return string
+     * @internal param array $options of options for the SQL statement
+     *
      */
+    protected static function buildInsertStatement( $attrs, &$mask, $ignore = false, $no_nulls = false ) {
 
-    protected static function buildInsertStatement( $attrs, $mask ) {
-        $first = array()  ;
-        $second = array() ;
-        $pks = static::$primary_keys;
+        $first  = array();
+        $second = array();
+        $pks    = static::$primary_keys;
 
-        if ( empty($mask) ) {
+        $sql_ignore = $ignore ? " IGNORE " : "";
+
+        if ( empty( $mask ) ) {
             $mask = array_keys( $attrs );
         }
 
-        foreach( $attrs as $key => $value ) {
-            if ( !in_array( $key, $pks ) && in_array($key, $mask) ) {
-                $first[] =  $key;
-                $second[] = ":$key" ;
+        foreach ( $attrs as $key => $value ) {
+            if ( !in_array( $key, $pks ) && in_array( $key, $mask ) ) {
+                if ( $no_nulls && is_null( $value ) ) {
+                    unset( $mask[ array_search( $key, $mask ) ] );
+                    continue;
+                }
+                $first[]  = $key;
+                $second[] = ":$key";
             }
         }
 
-        $sql = "INSERT INTO " . static::TABLE . "(" .
-                implode(', ', $first ) . ") VALUES (" .
-                implode(', ', $second) . ");" ;
+        $sql = "INSERT $sql_ignore INTO " . static::TABLE . "(" .
+                implode( ', ', $first ) . ") VALUES (" .
+                implode( ', ', $second ) . ");";
 
-        return $sql ;
+        return $sql;
     }
 
 
@@ -369,7 +416,8 @@ abstract class DataAccess_AbstractDao {
      * provided by the attributes array.
      *
      * @param $attrs array of full attributes to update
-     * @param $mask array of attributes to include in the update
+     * @param $mask  array of attributes to include in the update
+     *
      * @return string
      */
 
@@ -377,17 +425,17 @@ abstract class DataAccess_AbstractDao {
         $map = array();
         $pks = static::$primary_keys;
 
-        if ( empty($mask) ) {
+        if ( empty( $mask ) ) {
             $mask = array_keys( $attrs );
         }
 
-        foreach( $attrs as $key => $value ) {
-            if ( !in_array( $key, $pks ) && in_array($key, $mask) ) {
-                $map[] =  " $key = :$key " ;
+        foreach ( $attrs as $key => $value ) {
+            if ( !in_array( $key, $pks ) && in_array( $key, $mask ) ) {
+                $map[] = " $key = :$key ";
             }
         }
 
-        return implode(', ', $map);
+        return implode( ', ', $map );
     }
 
     /**
@@ -395,19 +443,20 @@ abstract class DataAccess_AbstractDao {
      * update or delete operations via PDO data binding.
      *
      * @return string
+     *
      * @param $attrs array of attributes of the struct
      */
 
     protected static function buildPkeyCondition( $attrs ) {
         $map = array();
 
-        foreach( $attrs as $key => $value ) {
-            if ( in_array( $key, static::$primary_keys )) {
-                $map[] =  " $key = :$key " ;
+        foreach ( $attrs as $key => $value ) {
+            if ( in_array( $key, static::$primary_keys ) ) {
+                $map[] = " $key = :$key ";
             }
         }
 
-        return implode(' AND ', $map);
+        return implode( ' AND ', $map );
     }
 
     /**
@@ -419,9 +468,9 @@ abstract class DataAccess_AbstractDao {
     protected static function ensurePrimaryKeyValues( $struct ) {
         $attrs = self::structKeys( $struct );
 
-        foreach ( $attrs as $k => $v) {
+        foreach ( $attrs as $k => $v ) {
             if ( $v == null ) {
-                throw new \Exceptions\ValidationError("pkey '$k' is null");
+                throw new \Exceptions\ValidationError( "pkey '$k' is null" );
             }
         }
     }
@@ -434,7 +483,8 @@ abstract class DataAccess_AbstractDao {
      */
 
     protected static function structKeys( $struct ) {
-        $keys = static::$primary_keys  ;
+        $keys = static::$primary_keys;
+
         return $struct->attributes( $keys );
     }
 
@@ -442,30 +492,30 @@ abstract class DataAccess_AbstractDao {
      * Updates the struct. The record is found via the primary
      * key attributes provided by the struct.
      *
-     * @param DataAccess_AbstractDaoObjectStruct $struct
-     * @param array $options
+     * @param DataAccess_AbstractDaoObjectStruct|DataAccess_IDaoStruct $struct
+     * @param array                                                    $options
      *
      * @return bool
      */
-    public static function updateStruct( DataAccess_IDaoStruct $struct, $options=array() ) {
+    public static function updateStruct( DataAccess_IDaoStruct $struct, $options = array() ) {
         $struct->ensureValid();
 
         $attrs = $struct->attributes();
 
-        $sql = " UPDATE " . static::TABLE ;
-        $sql .= " SET " . static::buildUpdateSet( $attrs, $options['fields'] );
+        $sql = " UPDATE " . static::TABLE;
+        $sql .= " SET " . static::buildUpdateSet( $attrs, $options[ 'fields' ] );
         $sql .= " WHERE " . static::buildPkeyCondition( $attrs );
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
         $data = array_merge(
-            $struct->attributes( $options['fields'] ),
-            self::structKeys( $struct )
+                $struct->toArray( $options[ 'fields' ] ),
+                self::structKeys( $struct )
         );
 
-        \Log::doLog("SQL", $sql);
-        \Log::doLog("data", $data);
+        \Log::doLog( "SQL", $sql );
+        \Log::doLog( "data", $data );
 
         return $stmt->execute( $data );
     }
@@ -479,37 +529,41 @@ abstract class DataAccess_AbstractDao {
      * Returns FALSE on failure.
      *
      * @param DataAccess_IDaoStruct $struct
-     * @param array $options
+     * @param array                 $options
+     *
      * @return bool|string
+     * @throws Exception
      */
-    public static function insertStruct( DataAccess_IDaoStruct $struct, $options=array() ) {
+    public static function insertStruct( DataAccess_IDaoStruct $struct, $options = array() ) {
+
+        $ignore   = isset( $options[ 'ignore' ] ) && $options[ 'ignore' ] == true;
+        $no_nulls = isset( $options[ 'no_nulls' ] ) && $options[ 'no_nulls' ] == true;
+
         // TODO: allow the mask to be passed as option.
         $mask = array_keys( $struct->toArray() );
-        $mask = array_diff($mask, static::$auto_increment_fields) ;
+        $mask = array_diff( $mask, static::$auto_increment_fields );
 
-        $sql = self::buildInsertStatement( $struct->toArray(), $mask ) ;
+        $sql  = self::buildInsertStatement( $struct->toArray(), $mask, $ignore, $no_nulls );
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $data = $struct->toArray( $mask ) ;
+        $data = $struct->toArray( $mask );
 
-        \Log::doLog("insert SQL :", $sql);
-        \Log::doLog("insert data :", $data );
+        \Log::doLog( "insert SQL :", $sql );
+        \Log::doLog( "insert data :", $data );
 
         if ( $stmt->execute( $data ) ) {
             if ( count( static::$auto_increment_fields ) ) {
-                return $conn->lastInsertId() ;
+                return $conn->lastInsertId();
+            } else {
+                return true;
             }
-            else {
-                return TRUE;
-            }
-        }
-        else {
+        } else {
 
-            if ( $options['raise'] ) {
-                throw new Exception( $stmt->errorInfo() ) ;
+            if ( $options[ 'raise' ] ) {
+                throw new Exception( $stmt->errorInfo() );
             }
 
-            return FALSE;
+            return false;
         }
     }
 
@@ -517,12 +571,14 @@ abstract class DataAccess_AbstractDao {
      *  Use this function whenever you want to make an empty result
      * returned as null instead of PDO's default FALSE.
      *
+     * @return mixed|null
+     *
      */
     public static function resultOrNull( $result ) {
         if ( $result ) {
-            return $result ;
+            return $result;
         } else {
-            return null ;
+            return null;
         }
     }
 

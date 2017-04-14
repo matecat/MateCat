@@ -7,16 +7,16 @@
  *
  */
 
+use ActivityLog\Activity;
+use ActivityLog\ActivityLogStruct;
 use Analysis\DqfQueueHandler;
 
 include_once INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
 
 use ConnectedServices\GDrive as GDrive  ;
+use Teams\TeamStruct;
 
 class ProjectManager {
-    
-    public $sanitizeProjectOptions = true ;
-
 
     /**
      * Counter fro the total number of segments in the project with the flag ( show_in_cattool == true )
@@ -66,11 +66,6 @@ class ProjectManager {
      * @var Users_UserStruct ;
      */
     protected $user ;
-
-    /**
-     * @var \Teams\TeamStruct
-     */
-    protected $team ;
 
     public function __construct( ArrayObject $projectStructure = null ) {
 
@@ -127,9 +122,12 @@ class ProjectManager {
                             'owner'                => '',
                             'word_count_type'      => '',
                             'metadata'             => [],
-                            'id_team'              => null,
                             'id_assignee'          => null,
-                            'session'              => ( isset( $_SESSION ) ? $_SESSION : false )
+                            'session'              => ( isset( $_SESSION ) ? $_SESSION : false ),
+                            'instance_id'          => ( !is_null( INIT::$INSTANCE_ID ) ? (int)INIT::$INSTANCE_ID : 0 ),
+                            'id_team'              => null,
+                            'team'                 => null,
+                            'sanitize_project_options' => true
                     ] );
 
         }
@@ -157,6 +155,14 @@ class ProjectManager {
                 $this->projectStructure
         );
 
+    }
+
+    /**
+     * @param \Teams\TeamStruct $team
+     */
+    public function setTeam( TeamStruct $team ) {
+        $this->projectStructure['team'] = $team ;
+        $this->projectStructure['id_team'] = $team->id ;
     }
 
     /**
@@ -200,7 +206,7 @@ class ProjectManager {
 
         $options = $this->projectStructure['metadata'];
         
-        if ( $this->sanitizeProjectOptions ) {
+        if ( $this->projectStructure[ 'sanitize_project_options' ] ) {
             $options = $this->sanitizeProjectOptions( $options ) ; 
         }
 
@@ -234,16 +240,32 @@ class ProjectManager {
      *
      */
     private function createProjectRecord() {
-
-        if ( $this->team ) {
-            $this->projectStructure[ 'id_team' ] = $this->team->id ;
-        }
-
         $this->project = insertProject( $this->projectStructure );
         $this->projectStructure[ 'id_project' ] = $this->project->id; //redundant
         $this->projectStructure[ 'ppassword' ]  = $this->project->password; //redundant
     }
 
+    private function __checkForProjectAssignment(){
+
+        if ( !empty( $this->projectStructure[ 'uid' ] ) ) {
+
+            //if this is a logged user, set the user as project assignee
+            $this->projectStructure[ 'id_assignee' ] = $this->projectStructure[ 'uid' ];
+
+            /**
+             * Normalize ArrayObject team in TeamStruct
+             */
+            $this->projectStructure[ 'team' ] = new TeamStruct(
+                    $this->features->filter( 'filter_team_for_project_creation', $this->projectStructure[ 'team' ]->getArrayCopy() )
+            );
+
+            //clean the cache for the team member list of assigned projects
+            $teamDao = new \Teams\TeamDao();
+            $teamDao->destroyCacheAssignee( $this->projectStructure[ 'team' ] );
+
+        }
+
+    }
 
     public function createProject() {
 
@@ -251,7 +273,7 @@ class ProjectManager {
             $this->gdriveSession = GDrive\Session::getInstanceForCLI( $this->projectStructure[ 'session' ] ) ;
         }
 
-        $this->team = $this->features->filter('filter_team_for_project_creation', $this->team ) ;
+        $this->__checkForProjectAssignment();
 
         // project name sanitize
         $oldName                                  = $this->projectStructure[ 'project_name' ];
@@ -624,6 +646,8 @@ class ProjectManager {
 
         $this->dbHandler->query( $update_project_count );
 
+        $this->pushActivityLog();
+
         //create Project into DQF queue
         if ( INIT::$DQF_ENABLED && !empty( $this->projectStructure[ 'dqf_key' ] ) ) {
 
@@ -697,6 +721,18 @@ class ProjectManager {
 
         //free memory
         unset( $this->projectStructure[ 'segments_metadata' ] );
+
+    }
+
+    private function pushActivityLog(){
+
+        $activity             = new ActivityLogStruct();
+        $activity->id_project = $this->projectStructure[ 'id_project' ];
+        $activity->action     = ActivityLogStruct::PROJECT_CREATED;
+        $activity->ip         = $this->projectStructure[ 'user_ip' ];
+        $activity->uid        = $this->projectStructure[ 'uid' ];
+        $activity->event_date = date( 'Y-m-d H:i:s' );
+        Activity::save( $activity );
 
     }
 

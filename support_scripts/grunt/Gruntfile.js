@@ -2,6 +2,7 @@ module.exports = function(grunt) {
     var mapFilePath;
 
     var basePath = '../../public/js/';
+    var gruntDir = '../../support_scripts/grunt/';
     var buildPath = '../../public/js/build/';
     var buildPathCss = '../../public/css/build/';
     var incPath = '../../inc/';
@@ -39,6 +40,8 @@ module.exports = function(grunt) {
         cssBase + 'sass/cattool.scss',
         cssBase + 'sass/speech2text.scss',
         cssBase + 'sass/notifications.scss',
+        cssBase + 'sass/commons/*.scss',
+        cssBase + 'sass/vendor_mc/*',
         cssBase + '../holidays/*.css'
     ];
     var cssWatchFilesUploadPage = [
@@ -50,9 +53,10 @@ module.exports = function(grunt) {
     ];
 
 
-    var cssWatchMaterialize = [
-        cssBase + 'sass/materialize/*'
+    var cssWatchManage = [
+        cssBase + 'sass/commons/*'
     ];
+
 
 
 
@@ -239,14 +243,16 @@ module.exports = function(grunt) {
 
             libs: {
                 src: [
-                    basePath + 'lib/handlebars.runtime-v4.0.5.js',
                     basePath + 'lib/jquery-1.11.0.min.js',
-                    basePath + 'lib/waypoints.min.js',
                     basePath + 'lib/jquery-ui.js',
                     basePath + 'lib/jquery.hotkeys.min.js',
                     basePath + 'lib/jquery.cookie.js',
                     basePath + 'lib/jquery.tablesorter-fork-mottie.js',
                     basePath + 'lib/jquery.tooltipster.min.js',
+                    basePath + 'lib/jquery.powertip.min.js',
+                    basePath + 'lib/jquery-dateFormat.min.js',
+                    basePath + 'lib/handlebars.runtime-v4.0.5.js',
+                    basePath + 'lib/waypoints.min.js',
                     basePath + 'lib/diff_match_patch.js',
                     basePath + 'lib/rangy-core.js',
                     basePath + 'lib/rangy-selectionsaverestore.js',
@@ -254,9 +260,16 @@ module.exports = function(grunt) {
                     basePath + 'lib/handlebars.runtime-v4.0.5.js',
                     basePath + 'lib/lokijs.min.js',
                     basePath + 'lib/sprintf.min.js',
-					basePath + 'lib/jquery.powertip.min.js'
+                    gruntDir + 'semantic/dist/semantic.min.js'
                 ],
                 dest: buildPath + 'libs.js'
+            },
+
+            semantic: {
+                src: [
+                    gruntDir + 'semantic/dist/semantic.min.js'
+                ],
+                dest: buildPath + 'semantic.js'
             },
 
             common: {
@@ -323,15 +336,15 @@ module.exports = function(grunt) {
                     interrupt: true,
                     livereload : true
                 }
-            },
-            cssManage: {
-                files:  cssWatchMaterialize,
-                tasks: ['sass:distManage', 'replace'],
-                options: {
-                    interrupt: true,
-                    livereload : true
-                }
-            },
+            }
+            // cssManage: {
+            //     files:  cssWatchManage,
+            //     tasks: ['sass:distManage', 'replace'],
+            //     options: {
+            //         interrupt: true,
+            //         livereload : true
+            //     }
+            // }
         },
         sass: {
             distCommon: {
@@ -370,10 +383,20 @@ module.exports = function(grunt) {
                     includePaths: [ cssBase, cssBase + 'libs/' ]
                 },
                 src: [
-                    cssBase + 'sass/materialize/manage.scss'
+                    cssBase + 'sass/manage_main.scss'
                 ],
                 dest: cssBase + 'build/manage-build.css'
             },
+            distSemantic: {
+                options : {
+                    sourceMap : false,
+                    includePaths: [ cssBase, gruntDir + 'semantic/dist/' ]
+                },
+                src: [
+                    cssBase + 'sass/vendor_mc/semantic/matecat_semantic.scss'
+                ],
+                dest: cssBase + 'build/semantic.css'
+            }
         },
         jshint: {
             options: {
@@ -450,6 +473,7 @@ module.exports = function(grunt) {
         'browserify:libs',
         'browserify:components',
         'concat:libs',
+        'concat:semantic',
         'concat:app',
         'concat:common',
         'replace:version'

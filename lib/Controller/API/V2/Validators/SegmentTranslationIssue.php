@@ -2,7 +2,8 @@
 
 namespace API\V2\Validators;
 
-use API\V2\ValidationError ;
+
+use API\V2\Exceptions\ValidationError;
 
 class SegmentTranslationIssue extends Base {
 

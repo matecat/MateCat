@@ -7,7 +7,7 @@
   position: fixed;
   width: $notifications-width;
   padding: 0 10px 10px 10px;
-  z-index: 99999;
+  z-index: 99999999;
   @include box-sizing(border-box);
   height: auto;
 }
@@ -74,6 +74,9 @@
   @include box-sizing(border-box);
   opacity: 0;
   @include transition(0.3s ease-in-out);
+  .notification-message {
+    word-wrap: break-word;
+  }
 }
 
 .notification-type-success {

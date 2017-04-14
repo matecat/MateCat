@@ -13,5 +13,6 @@ $app->add( new \CommandLineTasks\CreateTeamTask() ) ;
 $app->add( new \CommandLineTasks\CreateTeamMembershipTask() ) ;
 $app->add( new \CommandLineTasks\OwnerFeatures\AssignFeatureTask() ) ;
 $app->add( new  \CommandLineTasks\Test\PrepareDatabaseTask() ) ;
+$app->add( new \CommandLineTasks\DumpSchemaTask()) ;
 $app->run();
 
