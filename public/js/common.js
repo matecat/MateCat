@@ -53,6 +53,8 @@ APP = {
             $( this ).parents( '.modal' ).find( '.x-popup' ).click();
         } );
 
+        this.checkGlobalMassages();
+
 
     },
     alert: function ( options ) {
@@ -446,6 +448,7 @@ APP = {
         $( 'body' ).append( newPopup );
 
     },
+
     closePopup: function () {
         $( '.modal[data-type=view]' ).hide();
         $( '.modal:not([data-type=view])' ).remove();
@@ -454,6 +457,7 @@ APP = {
             type: "modalClosed"
         });
     },
+
     fitText: function ( container, child, limitHeight, escapeTextLen, actualTextLow, actualTextHi ) {
         if ( typeof escapeTextLen == 'undefined' ) escapeTextLen = 12;
         if ( typeof $( child ).attr( 'data-originalText' ) == 'undefined' ) {
@@ -576,6 +580,27 @@ APP = {
         if (!results[2]) return '';
         return decodeURIComponent(results[2].replace(/\+/g, " "));
     },
+    removeParam: function(parameter)
+    {
+        var url=document.location.href;
+        var urlparts= url.split('?');
+
+        if (urlparts.length>=2)
+        {
+            var urlBase=urlparts.shift();
+            var queryString=urlparts.join("?");
+
+            var prefix = encodeURIComponent(parameter)+'=';
+            var pars = queryString.split(/[&;]/g);
+            for (var i= pars.length; i-->0;)
+                if (pars[i].lastIndexOf(prefix, 0)!==-1)
+                    pars.splice(i, 1);
+            url = urlBase+'?'+pars.join('&');
+            window.history.pushState('',document.title,url); // added this line to push the new url directly to url bar .
+
+        }
+        return url;
+    },
     getCursorPosition :  function(editableDiv) {
         var caretPos = 0,
             sel, range;
@@ -627,6 +652,32 @@ APP = {
         if ( config.flash_messages && config.flash_messages.service ) {
             return _.filter( config.flash_messages.service, function( service, index ) {
                 return service.key == name ;
+            });
+        }
+    },
+
+    checkGlobalMassages: function () {
+        var self = this;
+        if (config.global_message) {
+            var messages = JSON.parse(config.global_message);
+            $.each(messages, function () {
+                var elem = this;
+                if (typeof $.cookie('msg-' + this.token) == 'undefined' && ( new Date(this.expire) > ( new Date() ) )) {
+                    var notification = {
+                        title: 'Notice',
+                        text: this.msg,
+                        type: 'warning',
+                        autoDismiss: false,
+                        position: "bl",
+                        allowHtml: true,
+                        closeCallback: function () {
+                            var expireDate = new Date(elem.expire);
+                            $.cookie('msg-' + elem.token, '', {expires: expireDate});
+                        }
+                    };
+                    APP.addNotification(notification);
+                    return false;
+                }
             });
         }
     }

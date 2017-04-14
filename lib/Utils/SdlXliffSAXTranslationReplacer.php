@@ -59,7 +59,7 @@ class SdlXliffSAXTranslationReplacer extends XliffSAXTranslationReplacer {
                     if ( isset( $this->segments[ 'matecat|' . $this->currentId ] ) && $_sdlStatus_confWritten == false ) {
 
                             //append definition attribute
-                            $tag .= $this->prepareTargetStatuses( $this->lastSegment[ $this->markerPos ] );
+                            $tag .= $this->prepareTargetStatuses( $this->lastTransUnit[ $this->markerPos ] );
 
                             //prepare for an eventual next cycle
                             $this->markerPos++;

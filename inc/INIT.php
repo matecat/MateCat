@@ -77,6 +77,8 @@ class INIT {
     public static $FILES_REPOSITORY;
     public static $CACHE_REPOSITORY;
     public static $ZIP_REPOSITORY;
+    public static $ANALYSIS_FILES_REPOSITORY;
+    public static $QUEUE_PROJECT_REPOSITORY;
     public static $CONVERSIONERRORS_REPOSITORY;
     public static $CONVERSIONERRORS_REPOSITORY_WEB;
     public static $TMP_DOWNLOAD;
@@ -118,9 +120,13 @@ class INIT {
      *
      */
     public static $LXQ_LICENSE = false;
-
     public static $LXQ_SERVER  = "https://backend.lexiqa.net";
-
+    /**
+     * Your partnerid will be provided along with your
+     * @see http://www.lexiqa.net
+     *
+     */
+    public static $LXQ_PARTNERID  = false;
     /**
      * Time zone string that should match the one set in the database.
      * @var string

@@ -16,6 +16,12 @@ if ( ReviewImproved.enabled() ) {
         });
     });
 
+    $(document).on('header-tool:open', function(e, data) {
+        if ( data.name == 'search' ) {
+            ReviewImproved.closePanel();
+        }
+    });
+
     $(document).on('ready', function() {
         ReviewImproved.mountPanelComponent();
     });

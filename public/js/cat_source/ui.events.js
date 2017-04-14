@@ -811,9 +811,10 @@ $.extend(UI, {
 			e.preventDefault();
 
 			if (!($('#segment-' + UI.currentSegmentId).length)) {
-				UI.render({
-					firstLoad: false
-				});
+				UI.unmountSegments();
+                UI.render({
+                    firstLoad: false
+                });
 			} else {
 				UI.scrollSegment(UI.currentSegment);
 			}

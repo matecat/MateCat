@@ -5,7 +5,22 @@ use TaskRunner\Commons\QueueElement;
 
 class Utils {
 
+    public static function getGlobalMessage() {
+        if ( file_exists( INIT::$ROOT . "/inc/.globalmessage.ini" ) ) {
+            $globalMessage              = parse_ini_file( INIT::$ROOT . "/inc/.globalmessage.ini" );
+            return sprintf(
+                '[{"msg":"%s", "token":"%s", "expire":"%s"}]',
+                $globalMessage[ 'message' ],
+                md5( $globalMessage[ 'message' ] ),
+                ( new DateTime( $globalMessage[ 'expire' ] ) )->format( DateTime::W3C )
+            );
+        }
+        return null;
+    }
+
+
     /**
+     *
      *  TODO: this is a helper function to be used when transitioning to
      *  more decoupled implementations.
      */

@@ -750,7 +750,7 @@ class CatUtils {
         $job_stats = getStatsForJob($jid, $fid, $jPassword);
         $job_stats = $job_stats[0];
 
-        $job_stats = self::_getStatsForJob($job_stats, true); //true set estimation check if present
+        $job_stats = self::_getStatsForJob($job_stats); //true set estimation check if present
         return self::_performanceEstimationTime($job_stats);
 
     }
@@ -778,7 +778,7 @@ class CatUtils {
         //avoid division by zero warning
         $total = $wCount->getTotal();
         $job_stats[ 'TOTAL' ]      = ( $total == 0 ? 1 : $total );
-        $job_stats = self::_getStatsForJob($job_stats, true); //true set estimation check if present
+        $job_stats = self::_getStatsForJob($job_stats); //true set estimation check if present
         return self::_performanceEstimationTime($job_stats);
 
     }
@@ -1043,6 +1043,72 @@ class CatUtils {
     public static function htmlentitiesFromUnicode( $str ){
         return "&#" . self::fastUnicode2ord( $str[1] ) . ";";
     }
+
+    /**
+     * @param $job
+     * @return WordCount_Struct
+     */
+    public static function getWStructFromJobArray( $job ) {
+        $job = Utils::ensure_keys($job, array(
+            'new_words', 'draft_words', 'translated_words', 'approved_words', 'rejected_words',
+            'status_analysis', 'jid', 'jpassword'
+        ));
+
+        $wStruct = new WordCount_Struct();
+
+        $wStruct->setIdJob( $job['jid'] ) ;
+        $wStruct->setJobPassword($job['jpassword']);
+        $wStruct->setNewWords($job['new_words']);
+        $wStruct->setDraftWords($job['draft_words']);
+        $wStruct->setTranslatedWords($job['translated_words']);
+        $wStruct->setApprovedWords($job['approved_words']);
+        $wStruct->setRejectedWords($job['rejected_words']);
+
+        // For projects created with No tm analysis enabled
+        if ($wStruct->getTotal() == 0 && ($job['status_analysis'] == Constants_ProjectStatus::STATUS_DONE || $job['status_analysis'] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE)) {
+            $wCounter = new WordCount_Counter();
+            $wStruct = $wCounter->initializeJobWordCount($job['jid'], $job['jpassword'] );
+            Log::doLog("BackWard compatibility set Counter.");
+            return $wStruct;
+        }
+        return $wStruct;
+    }
+
+
+    /**
+     * Returns the string representing the overall quality for a job,
+     * taking into account both old revision and new revision.
+     *
+     * @param $job
+     * @return string
+     */
+    public static function getQualityOverallFromJobArray( $job ) {
+        $job = Utils::ensure_keys($job, array(
+            'new_words', 'draft_words', 'translated_words', 'approved_words', 'rejected_words',
+            'status_analysis', 'jid', 'jpassword', 'features'
+        ));
+
+        $result = null ;
+
+        if ( in_array( Features::REVIEW_IMPROVED, FeatureSet::splitString( $job['features'] ) ) ) {
+            $review = \LQA\ChunkReviewDao::findOneChunkReviewByIdJobAndPassword( $job['jid'], $job['jpassword'] ) ;
+            $result = $review->is_pass ? 'excellent' : 'fail' ;
+        }
+        else {
+            $struct = CatUtils::getWStructFromJobArray( $job ) ;
+            $jobQA = new Revise_JobQA(
+                $job['jid'], $job['jpassword'], $struct->getTotal()
+            );
+
+            $jobQA->retrieveJobErrorTotals();
+            $overall = $jobQA->evalJobVote();
+
+            $result = strtolower( $overall['minText'] ) ;
+        }
+
+        return $result ;
+    }
+
 
     public static function getTMProps( $job_data ){
 

@@ -329,7 +329,7 @@ abstract class DataAccess_AbstractDao {
      * @deprecated Use instead PDO::setFetchMode()
      * @return DataAccess_IDaoStruct|DataAccess_IDaoStruct[]
      */
-    protected abstract function _buildResult( $array_result );
+    protected function _buildResult( $array_result ){}
 
     /**
      * Returns a string suitable for insert of the fields
@@ -510,6 +510,19 @@ abstract class DataAccess_AbstractDao {
             }
 
             return FALSE;
+        }
+    }
+
+    /**
+     *  Use this function whenever you want to make an empty result
+     * returned as null instead of PDO's default FALSE.
+     *
+     */
+    public static function resultOrNull( $result ) {
+        if ( $result ) {
+            return $result ;
+        } else {
+            return null ;
         }
     }
 

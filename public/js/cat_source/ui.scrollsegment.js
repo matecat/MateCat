@@ -5,8 +5,8 @@
     var scrollSelector = 'html,body'; 
 
     var tryToRenderAgain = function( segment, highlight ) {
+        UI.unmountSegments();
         
-
         var id_segment = segment.selector.split('-')[1];
 
         UI.render({
@@ -91,10 +91,14 @@
         
         if ( segment.length ) {
             return doDirectScroll( segment, highlight, quick ) ; 
+        } else if($(segment.selector + '-1').length) {
+            return doDirectScroll( $(segment.selector + '-1'), highlight, quick ) ;
         }
         else {
             return tryToRenderAgain( segment, highlight ) ;
         }
+
+
 
     }
 
@@ -121,10 +125,13 @@
         // XXX: this condition is necessary **only** because in case of first segment of a file,
         // the previous element (<ul>) has display:none style. Such elements are ignored by the
         // the .offset() function.
+        var commonOffset = $('.header-menu').height() +
+            $('.searchbox:visible').height() ;
+
         if ( prev.length ) {
-            pos = prev.offset().top - $('.header-menu').height() ;
+            pos = prev.offset().top - commonOffset ;
         } else {
-            pos = segment.offset().top - $('.header-menu').height() -  $('.searchbox').height();
+            pos = segment.offset().top - commonOffset ;
         }
 
         scrollAnimation.animate({

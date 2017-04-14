@@ -150,9 +150,14 @@ class Xliff_Parser {
 					if ($j > 0) {
 						// Getting Trans-unit attributes
 						// ID
-						unset($temp);
-						preg_match('|id\s?=\s?["\'](.*?)["\']|si', $trans_unit, $temp);
-						$xliff['files'][$i]['trans-units'][$j]['attr']['id'] = $temp[1];
+                        unset( $temp );
+                        preg_match( '|id\s?=\s?["\'](.*?)["\']|si', $trans_unit, $temp );
+
+                        if ( trim( $temp[ 1 ] ) == "" ) {
+                            throw new DomainException( "Invalid trans-unit id found. EMPTY value", 400 );
+                        }
+
+                        $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'attr' ][ 'id' ] = $temp[ 1 ];
 
 						// Translate
 						unset($temp);
@@ -214,9 +219,13 @@ class Xliff_Parser {
                                 $originalMark = trim( '<mrk ' . $markers[ $mi + 1 ] );
 
                                 $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-source' ][ $k ][ 'mid' ]           = $mid[ 1 ];
-                                $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-source' ][ $k ][ 'ext-prec-tags' ] = "";
-                                $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-source' ][ $k ][ 'raw-content' ]   = str_replace( '</mrk>', '', preg_replace( '#<mrk\s[^>]+>(.*)#', '$1', $originalMark ) );
-                                $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-source' ][ $k ][ 'ext-succ-tags' ] = "";
+                                $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-source' ][ $k ][ 'ext-prec-tags' ] = ( $mi == 0 ? $markers[ 0 ] : "" ); //put the first tags of seg-source structure
+
+                                $mark_string = preg_replace( '#^<mrk\s[^>]+>(.*)#', '$1', $originalMark ); // at this point we have: ---> 'Test </mrk> </g>>'
+                                $mark_content = preg_split( '#</mrk>#si', $mark_string );
+
+                                $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-source' ][ $k ][ 'raw-content' ]   = $mark_content[0];
+                                $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-source' ][ $k ][ 'ext-succ-tags' ] = $mark_content[1];
 
 								// Different from source and target content, I expect that if you used seg-source it is a well done tool, so I don't try to fix.
                                 if( isset( $xliff['files'][$i]['trans-units'][$j]['target']['raw-content'] ) && !empty( $xliff['files'][$i]['trans-units'][$j]['target']['raw-content'] ) ){
@@ -234,9 +243,18 @@ class Xliff_Parser {
 
                                         //use seg-target to store segmented translations and use the same positional indexes in source
                                         $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-target' ][ $k ][ 'mid' ]           = $mt_id[ 1 ];
-                                        $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-target' ][ $k ][ 'ext-prec-tags' ] = "";
-                                        $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-target' ][ $k ][ 'raw-content' ]   = str_replace( '</mrk>', '', preg_replace( '#<mrk\s[^>]+>(.*)#', '$1', $originalTransMark ) );
-                                        $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-target' ][ $k ][ 'ext-succ-tags' ] = "";
+                                        $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-target' ][ $k ][ 'ext-prec-tags' ] = ( $mi == 0 ? $target_markers[ 0 ] : "" ); //put the first tags of seg-source structure
+
+                                        $mark_string = preg_replace( '#^<mrk\s[^>]+>(.*)#', '$1', $originalTransMark );
+                                        $mark_content = preg_split( '#</mrk>#si', $mark_string );
+
+                                        if( isset( $mark_content[ 1 ] ) ){
+                                            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-target' ][ $k ][ 'raw-content' ]   = $mark_content[0];
+                                            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-target' ][ $k ][ 'ext-succ-tags' ] = $mark_content[1];
+                                        } else {
+                                            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-target' ][ $k ][ 'raw-content' ]   = "";
+                                            $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'seg-target' ][ $k ][ 'ext-succ-tags' ] = $mark_content[0];
+                                        }
 
                                     }
 

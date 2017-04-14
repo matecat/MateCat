@@ -29,7 +29,7 @@ class EditLogDecorator extends AbstractDecorator {
         $pagination     = $model->getPagination();
         $stats          = $model->getStats();
         $job_stats      = $model->getJobStats();
-        $project_status = $model->getProjectStatus();
+        $project        = $model->getProjectInfo();
         $jobData        = $model->getJobData();
 
         $this->template->pid         = $model->getProjectId();
@@ -48,8 +48,8 @@ class EditLogDecorator extends AbstractDecorator {
         $this->template->pee_slow    = false;// $model->isPEEslow();
         $this->template->tte_fast    = $model->isTTEfast();
 
-        $job_stats[ 'STATUS_BAR_NO_DISPLAY' ] = ( $project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
-        $job_stats[ 'ANALYSIS_COMPLETE' ]     = ( $project_status[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? true : false );
+        $job_stats[ 'STATUS_BAR_NO_DISPLAY' ] = ( @$project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
+        $job_stats[ 'ANALYSIS_COMPLETE' ]     = ( @$project[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE ? true : false );
         $this->template->job_stats            = $job_stats;
 
         $this->template->showDQF = ( INIT::$DQF_ENABLED && !empty( $jobData[ 'dqf_key' ] ) );

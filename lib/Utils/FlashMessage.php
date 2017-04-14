@@ -27,8 +27,11 @@ class FlashMessage {
     }
 
     public static function flush() {
-        $out = $_SESSION[ self::KEY ] ;
-        unset( $_SESSION[ self::KEY ] );
+        $out = null ;
+        if ( isset( $_SESSION[ self::KEY ] ) ) {
+            $out = $_SESSION[ self::KEY ] ;
+            unset( $_SESSION[ self::KEY ] );
+        }
         return $out ;
     }
 

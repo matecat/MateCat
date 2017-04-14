@@ -9,13 +9,28 @@
 
 $klein->with('/api/v2/projects/[:id_project]/[:password]', function() {
 
-    route( '/urls',                 'GET',  'API\V2\UrlsController',        'urls'      );
-    route( '/jobs/[:id_job]/merge', 'POST', 'API\V2\JobMergeController',    'merge'     );
+    route( '/urls',                 'GET',  'API\V2\UrlsController',                    'urls' );
+    route( '/jobs/[:id_job]/merge', 'POST', 'API\V2\JobMergeController',                'merge' );
+    route( '/creation_status',      'GET',  'API\V2\ProjectCreationStatusController',   'get' );
+    route( '/rename',               'POST', 'API\V2\ProjectRenameController',           'rename' );
+});
+
+$klein->with('/api/v2/activity', function() {
+
+    route(
+            '/project/[:id_project]/[:password]/last', 'GET',
+            '\API\V2\ActivityLogController', 'lastOnProject'
+    );
+
+    route(
+            '/job/[:id_job]/[:password]/last', 'GET',
+            'API\V2\ActivityLogController', 'lastOnJob'
+    );
 
 });
 
 $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
-    // TODO: group all similarly prefixed APIs into this block
+    route( '',              'GET', 'API\V2\ChunkController', 'show' );
     route( '/comments',     'GET', 'API\V2\CommentsController', 'index' );
 
     /**
@@ -111,3 +126,7 @@ route(
     '\API\V2\GlossariesController', 'download'
 );
 
+
+route(
+    '/api/v2/ping', 'HEAD', '\API\V2\KeyCheckController', 'ping'
+);

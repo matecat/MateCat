@@ -114,6 +114,8 @@ $.extend(UI, {
 				this.pendingRender.segmentToScroll = this.nextUnloadedResultSegment();
 			}
 
+			UI.unmountSegments();
+
 			this.render(this.pendingRender);
 			this.pendingRender = false;
 		}
@@ -174,9 +176,10 @@ $.extend(UI, {
 					APP.alert({msg: d.errors[0].message});
 					return false;
 				}
-				UI.render({
-					firstLoad: false
-				});
+				UI.unmountSegments();
+                UI.render({
+                    firstLoad: false
+                });
 			}
 		});
 	},
@@ -341,9 +344,21 @@ $.extend(UI, {
             var reg = new RegExp('(' + htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
             var reg1 = new RegExp('(' + htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)').replace(/\\\\\(/gi, "\(").replace(/\\\\\)/gi, "\)") + ')', "g" + ignoreCase);
 
+			// Finding double spaces
+            if (txt == "  ") {
+                reg1 = new RegExp(/( &nbsp;)/, 'gi');
+                reg = new RegExp(/( &nbsp;)/, 'gi');
+            }
 
 			if ((typeof where == 'undefined') || (where == 'no')) {
-				UI.doMarkSearchResults(hasTags, $(q + ":" + containsFunc + "('" + txt + "')"), reg1, q, txt, ignoreCase);
+				var elems;
+				if (txt == "  ") {
+					elems = $(q).filter(function(index){ return $(this).text().indexOf('  ')  });
+                    reg1 = new RegExp(/( &nbsp;)/, 'gi');
+				} else {
+					elems = $(q + ":" + containsFunc + "('" + txt + "')");
+				}
+				UI.doMarkSearchResults(hasTags, elems, reg1, q, txt, ignoreCase);
 			} else {
 				sid = $(seg).attr('id');
 				if (where == 'before') {
@@ -526,12 +541,12 @@ $.extend(UI, {
 					// load new segments
 					if (!this.searchResultsSegments) {
 						this.pendingRender = {
-							firstLoad: false,
 							applySearch: true,
 							detectSegmentToScroll: true
 						};
 					} else {
 						var seg2scroll = this.nextUnloadedResultSegment();
+						UI.unmountSegments();
 						this.render({
 							firstLoad: false,
 							applySearch: true,
@@ -565,17 +580,17 @@ $.extend(UI, {
 						return false;
 					}
 				}
-			});			
+			});
 			if (!found) {
 				// load new segments
 				if (!this.searchResultsSegments) {
 					this.pendingRender = {
-						firstLoad: false,
 						applySearch: true,
 						detectSegmentToScroll: true
 					};
 				} else {
 					seg2scroll = this.nextUnloadedResultSegment();
+					UI.unmountSegments();
 					this.render({
 						firstLoad: false,
 						applySearch: true,

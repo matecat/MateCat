@@ -1,6 +1,7 @@
 <?php
 namespace Analysis\Workers;
 
+use FilesStorage;
 use \TaskRunner\Commons\AbstractDaemon,
     \TaskRunner\Commons\QueueElement,
     TaskRunner\Commons\Context,
@@ -17,6 +18,7 @@ use \AMQHandler,
     \Database,
     \Utils,
     \PDOException,
+    \UnexpectedValueException,
     \Log;
 
 
@@ -39,9 +41,11 @@ class FastAnalysis extends AbstractDaemon {
 
     protected $_configFile;
 
-    const ERR_NO_SEGMENTS = 127;
-    const ERR_TOO_LARGE   = 128;
-    const ERR_500         = 129 ;
+    const ERR_NO_SEGMENTS    = 127;
+    const ERR_TOO_LARGE      = 128;
+    const ERR_500            = 129;
+    const ERR_EMPTY_RESPONSE = 130;
+    const ERR_FILE_NOT_FOUND = 131;
 
     /**
      * @var ContextList
@@ -62,6 +66,21 @@ class FastAnalysis extends AbstractDaemon {
 
         //First Execution, load build object
         $this->_queueContextList = ContextList::get( $config[ 'context_definitions' ] );
+
+    }
+
+    protected function _checkDatabaseConnection(){
+
+        $db = Database::obtain();
+        try {
+            $db->ping();
+//            self::_TimeStampMsg(  "--- Database connection active. " );
+        } catch ( PDOException $e ) {
+            self::_TimeStampMsg( $e->getMessage() . " - Trying to close and reconnect." );
+            $db->close();
+            //reconnect
+            $db->getConnection();
+        }
 
     }
 
@@ -97,7 +116,15 @@ class FastAnalysis extends AbstractDaemon {
 
         do {
 
-            $projects_list = getProjectForVolumeAnalysis( 'fast', 5 );
+            try {
+                $this->_checkDatabaseConnection();
+                $projects_list = getProjectForVolumeAnalysis( 5 );
+            } catch ( PDOException $e ){
+                self::_TimeStampMsg( $e->getMessage() . " - Error again. Try to reconnect in next cycle." );
+                sleep(3); // wait for reconnection
+                continue; // next cycle, reload projects.
+            }
+
             if ( empty( $projects_list ) ) {
                 self::_TimeStampMsg( "No projects: wait 3 seconds." );
                 sleep( 3 );
@@ -139,7 +166,7 @@ class FastAnalysis extends AbstractDaemon {
                         self::_updateProject( $pid, ProjectStatus::STATUS_NOT_TO_ANALYZE );
                         //next project
                         continue;
-                    } elseif ( $e->getCode() == self::ERR_500 ) {
+                    } elseif ( $e->getCode() == self::ERR_500 || $e->getCode() == self::ERR_EMPTY_RESPONSE ) {
                         self::_TimeStampMsg( $e->getMessage() ) ;
                         self::_updateProject( $pid, ProjectStatus::STATUS_NEW );
                         sleep( 3 ) ;
@@ -192,6 +219,7 @@ class FastAnalysis extends AbstractDaemon {
                 // INSERT DATA
 
                 self::_updateProject( $pid, $status );
+                FilesStorage::deleteFastAnalysisFile( $pid );
 
             }
 
@@ -215,9 +243,20 @@ class FastAnalysis extends AbstractDaemon {
         $myMemory = Engine::getInstance( 1 /* MyMemory */ );
 
         try {
+
+            self::_TimeStampMsg( "Fetching data from disk" );
+            $this->segments = FilesStorage::getFastAnalysisData( $pid );
+
+        } catch ( UnexpectedValueException $e ) {
+
+            self::_TimeStampMsg( "Error Fetching data from disk. Fallback to database." );
+
+        try {
             $this->segments = self::_getSegmentsForFastVolumeAnalysis( $pid );
         } catch( PDOException $e ) {
             throw new Exception( "Error Fetching data for Project. Too large. Skip.", self::ERR_TOO_LARGE );
+        }
+
         }
 
         if ( count( $this->segments ) == 0 ) {
@@ -249,7 +288,6 @@ class FastAnalysis extends AbstractDaemon {
         }
 
         self::_TimeStampMsg( "Done." );
-
         self::_TimeStampMsg( "Pid $pid: " . count( $this->segments ) . " segments" );
         self::_TimeStampMsg( "Sending query to MyMemory analysis..." );
 
@@ -264,6 +302,8 @@ class FastAnalysis extends AbstractDaemon {
             throw new Exception( "MyMemory Fast Analysis Failed. {$result->error->message}", self::ERR_TOO_LARGE );
         } elseif ( $result->responseStatus == 500 ) {
             throw new Exception("MyMemory Internal Server Error. Pid: " . $pid , self::ERR_500 );
+        } elseif( !empty( $fastSegmentsRequest ) && empty( $result->responseData )) {
+            throw new Exception("MyMemory Fast Analysis Failed. Pid: " . $pid , self::ERR_EMPTY_RESPONSE );
         }
 
         return $result;
@@ -420,10 +460,6 @@ class FastAnalysis extends AbstractDaemon {
 
         self::_TimeStampMsg( 'Queries: ' . count( $chunks_st ) );
 
-        //USE the MySQL InnoDB isolation Level to protect from thread high concurrency access
-        $db->query( 'SET autocommit=0' );
-        $db->query( 'START TRANSACTION' );
-
         foreach ( $chunks_st as $k => $chunk ) {
 
             $query_st = $segment_translations . implode( ", ", $chunk ) .
@@ -475,15 +511,10 @@ class FastAnalysis extends AbstractDaemon {
         try {
             $db->update( 'projects', $data2, $where );
         } catch ( PDOException $e ) {
-            $db->query( 'ROLLBACK' );
-            $db->query( 'SET autocommit=1' );
             self::_TimeStampMsg( $e->getMessage() );
 
             return $e->getCode() * -1;
         }
-        $db->query( 'COMMIT' );
-        $db->query( 'SET autocommit=1' );
-
 
         /*
          *  $fastResultData[0]['id_mt_engine'] is the index of the MT engine we must use,
@@ -522,6 +553,9 @@ class FastAnalysis extends AbstractDaemon {
 
                 try {
 
+                    //store the payable_rates array
+                    $jobs_payable_rates = $queue_element[ 'payable_rates' ];
+
                     $languages_job = explode( ",", $queue_element[ 'target' ] );  //now target holds more than one language ex: ( 80415:fr-FR,80416:it-IT )
                     //in memory replacement avoid duplication of the segment list
                     //send in queue every element * number of languages
@@ -531,6 +565,7 @@ class FastAnalysis extends AbstractDaemon {
 
                         $queue_element[ 'target' ] = $language;
                         $queue_element[ 'id_job' ] = $id_job;
+                        $queue_element[ 'payable_rates' ] = $jobs_payable_rates[ $id_job ]; // assign the right payable rate for the current job
 
                         $element = new QueueElement();
                         $element->params = $queue_element;
@@ -570,21 +605,24 @@ class FastAnalysis extends AbstractDaemon {
         //we want segments that we decided to show in cattool
         //and segments that are NOT locked ( already translated )
 
-        $query = "select concat( s.id, '-', group_concat( distinct concat( j.id, ':' , j.password ) ) ) as jsid, s.segment, j.source, s.segment_hash, s.id as id,
-
+        $query = <<<HD
+            SELECT concat( s.id, '-', group_concat( distinct concat( j.id, ':' , j.password ) ) ) AS jsid, s.segment, 
+                j.source, s.segment_hash, 
+                s.id as id,
 		s.raw_word_count,
-		group_concat( distinct concat( j.id, ':' , j.target ) ) as target,
-		j.payable_rates
+                GROUP_CONCAT( DISTINCT CONCAT( j.id, ':' , j.target ) ) AS target,
+                CONCAT( "{", GROUP_CONCAT( DISTINCT CONCAT( '"', j.id, '"', ':' , j.payable_rates ) SEPARATOR ',' ), "}" ) AS payable_rates
+            FROM segments AS s
+            INNER JOIN files_job AS fj ON fj.id_file = s.id_file
+            INNER JOIN jobs as j ON fj.id_job = j.id
+            LEFT JOIN segment_translations AS st ON st.id_segment = s.id
+                WHERE j.id_project = '$pid'
+                AND IFNULL( st.locked, 0 ) = 0
+                AND show_in_cattool != 0
+            GROUP BY s.id
+            ORDER BY s.id
+HD;
 
-		from segments as s
-		inner join files_job as fj on fj.id_file=s.id_file
-		inner join jobs as j on fj.id_job=j.id
-		left join segment_translations as st on st.id_segment = s.id
-		where j.id_project='$pid'
-		and IFNULL( st.locked, 0 ) = 0
-		and show_in_cattool != 0
-		group by s.id
-		order by s.id";
         $db    = Database::obtain();
         try {
             $results = $db->fetch_array( $query );
@@ -592,6 +630,13 @@ class FastAnalysis extends AbstractDaemon {
             Log::doLog( $e->getMessage() );
             throw $e;
         }
+
+        $results = array_map( function ( $segment ) {
+            $segment[ 'payable_rates' ] = array_map( function ( $rowPayable ) {
+                return json_encode( $rowPayable );
+            }, json_decode( $segment[ 'payable_rates' ], true ) );
+            return $segment;
+        }, $results );
 
         return $results;
     }

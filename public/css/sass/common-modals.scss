@@ -1,0 +1,794 @@
+body.side-popup {
+    overflow: hidden !important;
+}
+
+/***********************/
+/***** Login Footer ****/
+
+#logoutlink,
+.reset-password,
+#resendlink{
+  margin-bottom: 20px;
+  text-decoration: underline;
+  float: left;
+  cursor: pointer;
+  color: #39699a;
+}
+
+#resendlink {
+  float: none;
+}
+
+footer nav ul li {
+  margin-left: 4px;
+}
+
+
+#welcomebox
+{
+  float: right;
+  cursor: pointer;
+  position: relative;
+  text-decoration: underline;
+  margin-left: 8px;
+}
+
+.manage #welcomebox {
+  margin-top: 0;
+}
+
+#welcomebox .icon-sort-up {
+  font-size: 22px;
+  float: right;
+  margin-left: 9px;
+
+}
+.user-menu {
+  position: absolute;
+  top: -92px;
+  background-color: white;
+  color: black;
+  text-align: left;
+  font-size: 19px;
+  left: -60px;
+  box-shadow: 0px 0px 16px 0px rgba(0, 0, 0, 0.4);
+  visibility: hidden;
+  transform: translateY(1em);
+  transition: all 0.3s ease-in-out 0s, visibility 0s linear 0.3s, z-index 0s linear 0.01s;
+  z-index: -1;
+  opacity: 0;
+}
+
+
+.user-menu li {
+  width: 120px;
+  height: 20px;
+  padding: 10px;
+  line-height: 20px;
+  border-bottom: 1px solid black;
+}
+
+#welcomebox:hover .user-menu {
+  visibility: visible;
+  opacity: 1;
+  z-index: 1;
+  transform: translateY(0%);
+  transition-delay: 0s, 0s, 0.3s;
+}
+.success-modal {
+  padding: 20px;
+}
+
+.validation-error {
+  text-align: left;
+  float: left;
+  color: red;
+}
+
+.coupon-container .validation-success {
+  color: green;
+  margin-top: 2px;
+}
+
+
+.coupon-container p {
+  line-height: 5px!important;
+}
+
+
+.user-info-form,
+.user-reset-password,
+.user-gdrive {
+  margin: 0 auto;
+  width: 93%;
+  float: left;
+  position:relative;
+}
+.user-reset-password {
+  width: 100%;
+}
+
+
+.preferences-modal .user-info-form {
+  font-size: 18px;
+  line-height: 30px;
+  margin-bottom: 30px;
+  background: #f4f4f4;
+  border-bottom: 1px solid #ccc;
+  padding: 20px 20px;
+}
+
+.preferences-modal .user-gdrive {
+  border: 1px solid #ccc;
+  padding: 10px 0 0 10px;
+  border-radius: 4px;
+  background: #f8f6f6;
+  width: 98%;
+  min-height: 40px;
+  margin-bottom: 25px;
+  margin-top: 10px;
+}
+
+.user-name {
+  margin-left: 20px;
+  line-height: 25px;
+}
+
+.preferences-modal .user-name strong {
+  font-size: 24px;
+}
+
+.preferences-modal .avatar-user {
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  font-size: 21px;
+  color: #fff;
+  padding: 10px 10px 10px 10px;
+  background: #b7b7b7;
+  border: 1px solid #ccc;
+  -moz-border-radius: 50px;
+  -webkit-border-radius: 50px;
+  border-radius: 50px;
+}
+
+.preferences-modal .user-info-attributes {
+  padding: 20px;
+}
+
+.preferences-modal .user-info-form label {
+  float: left;
+  margin-top: 7px;
+  font-size: 16px;
+}
+
+.preferences-modal .user-reset-password label {
+  float: left;
+  font-size: 18px;
+  margin-top: 25px;
+}
+.onoffswitch-drive {
+  position: relative;
+  width: 60px;
+  zoom: 0.7;
+  margin-top: 6px;
+  float: left;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.preferences-modal .onoffswitch-drive {
+  position: absolute;
+}
+
+.user-info-form .grey-txt {
+  color: #666;
+}
+
+.user-gdrive > label {
+  line-height: 20px;
+  float: left;
+  margin: 4px 10px 10px 65px;
+  font-size: 15px;
+  max-width: 75%;
+  text-align: left;
+  word-wrap: break-word;
+}
+
+.preferences-modal .user-gdrive > label {
+  margin: 4px 10px 10px 95px;
+}
+
+.user-menu-flat {
+  margin-right: 8px;
+  float: right;
+}
+
+.user-menu-flat li {
+  text-decoration: underline;
+  cursor: pointer;
+  padding-right: 0;
+}
+
+.user-menu-flat li:first-child {
+  border-left: 1px solid;
+  margin-left: 4px;
+}
+
+.user-menu-flat li:last-child {
+  border-right: none;
+}
+
+.reset-password.btn-confirm-medium {
+  float: left;
+}
+
+.login-container-right {
+  width: 61%;
+  padding: 3% 20% 3% 2%;
+  font-size:17px;
+  display: inline-block;
+  float: left;
+  box-sizing: border-box;
+  background: url(https://www.matecat.com/wp-content/themes/stanleywp/images/bgfeat5.png) no-repeat;
+  background-size: 84%;
+  background-position: 370% center;
+}
+.login-container-left {
+  width: 39%;
+  display: inline-block;
+  width: 39%;
+  display: inline-block;
+  padding: 20px 0;
+  background: #f8f8f8;
+  border-left: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+
+.login-container-right h2,
+.login-container-right p,
+.login-container-right ul {
+  text-align: left;
+}
+
+.login-container-right ul {
+  margin-left: 30px;
+  margin-top: 25px;
+}
+
+.login-container-right .register-button {
+  margin-top: 30px;
+  float: left;
+  margin-left: 50px;
+}
+
+
+.google-login-button {
+  background: url(../img/btn_gg_sprite.png) no-repeat;
+  background-position: 0 0;
+}
+
+.google-login-button:hover {
+  background: url(../img/btn_gg_sprite.png) no-repeat;
+  background-position: 0 -101px;
+  box-shadow: none;
+
+}
+
+.google-login-button:focus {
+  background: url(../img/btn_gg_sprite.png) no-repeat;
+  background-position: 0 -50px;
+
+}
+
+.google-login-button,
+.google-login-button:hover,
+.google-login-button:focus {
+  background-size: 100%;
+  border: none;
+  height: 30px;
+}
+
+.forgot-password {
+  cursor: pointer;
+  text-decoration: underline;
+  color:#39699a;
+}
+
+.preferences-modal input[type=text],
+.login-container-left input,
+.register-form-container input[type=text],
+.register-form-container input[type=password],
+.forgot-password-modal input,
+.reset-password-modal input,
+.user-info-form input {
+  margin-top: 5px;
+  font-size: 14px;
+  width: 100%;
+  padding: .7em .6em;
+  display: inline-block;
+  border: 1px solid #ccc;
+  box-shadow: inset 0 1px 3px #ddd;
+  border-radius: 4px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  font-size: 15px;
+  color: #333;
+}
+.coupon-container input#user-coupon {
+
+  width: 76%;
+  float: left;
+  box-sizing: border-box;
+}
+
+.coupon-container.coupon-success input#user-coupon {
+  width: 100%!important;
+  float: none;
+}
+
+.coupon-container {
+  width: 100%;
+  margin: 0 auto;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.coupon-container .btn-confirm-medium {
+  margin: 6px 0% 0 3%;
+  width: 21%;
+  box-sizing: border-box;
+}
+
+.user-info-form input {
+  margin-top: 5px;
+  width: 100%;
+  color: #000;
+}
+
+.login-container-right li {
+  margin-bottom: 15px;
+}
+
+.google-login-button,
+.login-button,
+.register-button,
+.register-submit,
+.send-password-button,
+.reset-password-button {
+  width: 160px;
+  margin-left: 0px;
+}
+
+.login-form-container,
+.register-form-container {
+  border-top: 1px solid #ccc;
+  margin: 0 auto;
+  padding-top: 10px;
+
+}
+
+.login-form-container {
+  width: 225px;
+}
+
+.forgot-password-modal,
+.reset-password-modal {
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 0;
+}
+
+.preferences-modal input:disabled {
+  color: #999;
+  cursor: not-allowed;
+  background: #f4f4f4;
+}
+
+.preferences-modal .reset-password {
+  margin-right: 20px;
+}
+
+.forgot-password-modal {
+  background: url(../img/matecat_watch.png) no-repeat 476px 136px;
+  background-size: 23%;
+  width: 385px;
+  padding: 25px 96px;
+}
+
+.reset-password-modal {
+  padding: 5% 10%;
+  width: 80%;
+}
+
+.register-modal {
+  padding: 10px 15%;
+  width: 70%;
+}
+
+.register-modal h2 {
+  padding: 10px 0 10px 0;
+}
+
+.register-modal .google-login-button {
+  margin-bottom: 0;
+}
+
+.preference-modal-message {
+  box-shadow: 0 2px 2px #e2e2e2;
+  border-radius: 2px;
+  border: 1px solid #ccc;
+  line-height: 20px;
+  padding: 10px 15px;
+  background: rgb(195, 224, 195);
+  /*margin-top: 20px;*/
+  margin-bottom: 10px;
+}
+
+.button-loader {
+  background: url(../img/loader.gif) center center no-repeat;
+  width: 20px;
+  height: 20px;
+  visibility: hidden;
+  position: absolute;
+  background-size: 20px 20px;
+  left: 15px;
+  opacity:0;
+}
+.button-loader.show {
+  visibility: visible;
+  opacity:1;
+  -webkit-transition: all 0.3s ease-in;
+  -moz-transition: all 0.3s ease-in;
+  -o-transition: all 0.3s ease-in;
+}
+/***********************/
+
+/********Modal window ****/
+.matecat-modal {
+  display: block;
+  z-index: 999999999;
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0,0,0);
+  background-color: rgba(0,0,0,0.4);
+}
+
+.matecat-modal-header {
+  text-align: left;
+  min-height: 30px;
+  border-radius: 4px 4px 0 0;
+  overflow: visible;
+  max-height: inherit;
+  font-size: 24px;
+  background: #4D4D4D url(../img/logo-ico.png) 12px 12px no-repeat;
+  padding: 10px 10px 7px 58px;
+  background-size: 35px;
+  /* border-bottom: 1px solid #000; */
+  color: #fff;
+  margin: 0 !important;
+  text-align: left;
+}
+
+.matecat-modal-header h2 {
+  margin: 0!important;
+  line-height: 30px;
+  font-size: 24px;
+  width: auto!important;
+  float: none!important;
+}
+
+
+/* Modal Body */
+.matecat-modal-body {
+  min-height: 50px;
+  color: #000;
+  background-color: #fff;
+  border-radius: 0 0 4px 4px;
+  margin: 0 auto;
+  overflow: hidden;
+
+}
+
+/* Modal Footer */
+.matecat-modal-footer {
+  padding: 2px 16px;
+  color: black;
+  text-align: left;
+  min-height: 30px;
+}
+
+/* Modal Content */
+.matecat-modal-content {
+  position: relative;
+  margin: auto;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 40%;
+  border-radius: 4px;
+  -webkit-animation-name: animatetop;
+  -webkit-animation-duration: 0.4s;
+  animation-name: animatetop;
+  animation-duration: 0.4s;
+  text-align: center;
+  max-width: 600px;
+  min-width: 400px;
+  -webkit-box-shadow: 0 1px 20px #000;
+  box-shadow: 0 1px 20px #000;
+}
+.matecat-modal-body h1 {
+  text-align: center;
+}
+
+.matecat-modal-content .half-form-left {
+  margin-right: 4%;
+}
+.matecat-modal-content .half-form {
+  width: 48%;
+  float: left;
+}
+
+.preferences-modal {
+  text-align: left;
+}
+
+.preferences-modal h2 {
+  margin: 0;
+  padding: 0;
+  font-size: 22px;
+}
+.user-link {
+  float: left;
+  clear: both;
+  font-size: 16px;
+  margin-left: 73px;
+  height: 20px;
+  margin-top: 4px;
+}
+/* The Close Button */
+.close-matecat-modal {
+  color: #fff;
+  float: right;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.close-matecat-modal:hover,
+.close-matecat-modal:focus {
+  color: red;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+div#matecat-modal p {
+  line-height: 20px;
+}
+
+/***********************/
+
+
+/* On-off switch */
+
+.onoffswitch {
+  position: relative;
+  width: 60px;
+  zoom: 0.7;
+  margin-top: 8px;
+  float: left;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none; }
+
+.onoffswitch-checkbox {
+  display: none; }
+
+.onoffswitch-label {
+  display: block!important;
+  overflow: hidden;
+  cursor: pointer!important;
+  border: 2px solid #ccc;
+  border-radius: 20px; 
+  height: 30px!important;
+  padding-left:initial!important;
+}
+
+.onoffswitch-label:before,
+.onoffswitch-label:after {
+  border:none!important;
+}
+
+.onoffswitch-inner {
+  display: block;
+  width: 200%;
+  margin-left: -100%;
+  transition: margin 0.3s ease-in 0s; }
+
+.onoffswitch-inner:before,
+.onoffswitch-inner:after {
+  display: block;
+  float: left;
+  width: 50%;
+  height: 30px;
+  padding: 0;
+  text-align: left;
+  line-height: 30px;
+  font-size: 15px;
+  color: white;
+  font-weight: bold;
+  box-sizing: border-box; }
+
+.onoffswitch-inner:before {
+  content: "";
+  padding-left: 10px;
+  background-color: #22c4ee;
+  color: #FFFFFF; }
+
+.onoffswitch-inner:after {
+  content: "";
+  padding-right: 7px;
+  background-color: #EEEEEE;
+  color: #999999;
+  text-align: right; }
+
+.onoffswitch-switch {
+  display: block;
+  width: 22px;
+  margin: 4px;
+  background: #FFFFFF;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 25px;
+  border: 2px solid #ccc;
+  border-radius: 20px;
+  transition: all 0.3s ease-in 0s; }
+
+.onoffswitch-label-status-active {
+  display: none;
+  font-weight: bold;
+  color: #22c4ee; }
+
+.onoffswitch-label-status-inactive,
+.onoffswitch-label-status-unavailable {
+  display: block;
+  color: #999999; }
+
+.onoffswitch-label:hover {
+  border-color: #A1A1A1; }
+
+.onoffswitch-label-status-active,
+.onoffswitch-label-status-inactive,
+.onoffswitch-label-status-unavailable {
+  position: absolute;
+  left: 80px;
+  font-size: 24px;
+  top: 6px;
+  line-height: 20px; }
+
+.onoffswitch-label-status-unavailable {
+  display: none; }
+
+.option-unavailable .onoffswitch-label-status-unavailable {
+  display: inline; }
+
+.option-unavailable .onoffswitch-label-status-inactive {
+  display: none; }
+
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-label-status-active {
+  display: block; }
+
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-label-status-inactive {
+  display: none; }
+
+.onoffswitch-label-ok {
+  display: block;
+  position: absolute;
+  right: -50px; }
+
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-label-ok {
+  display: none; }
+
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+  margin-left: 0; }
+
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+  right: 0px; }
+
+/* buttons */
+
+.matecat-modal-content .disabled, 
+.matecat-modal-content .disabled:hover, 
+.matecat-modal-content .disabled:active {
+    opacity: 0.5 !important;
+    cursor: default;
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    border: 1px solid #666;
+}
+
+.matecat-modal-content .btn-confirm-medium:hover, 
+.matecat-modal-content .btn-confirm-small:hover {
+    cursor: pointer;
+    -webkit-box-shadow: 0 1px 2px #ccc;
+    box-shadow: 0 1px 2px #ccc;
+    border: 1px solid #000;
+}
+
+
+.matecat-modal-content .btn-confirm-medium {
+    color: #fff;
+    background: #09beec;
+    border: 1px solid #848689;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 8px 18px;
+    border-radius: 2px;
+    font-size: 18px;
+    background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
+    background: -moz-linear-gradient(top, #09beec, #119ec4);
+    background: linear-gradient(top, #09beec, #119ec4);
+    margin: 16px 0 16px 20px;
+    display: inline-block;
+    text-align: center;
+    position: relative;
+}
+
+.matecat-modal-content .btn-confirm-medium.google-login-button {
+  background: url(../../img/btn_gg_sprite.png) no-repeat ;
+  background-position: 0 0 ;
+  background-size: cover;
+  border: none;
+}
+
+.matecat-modal-content .btn-confirm-medium.google-login-button, .matecat-modal-content .btn-confirm-medium.google-login-button:hover, .matecat-modal-content .btn-confirm-medium.google-login-button:focus {
+  background-size: cover;
+  border: none;
+  height: 30px;
+}
+
+.matecat-modal-content .btn-confirm-medium.google-login-button:hover {
+  background: url(../img/btn_gg_sprite.png) no-repeat;
+  background-position: 0 -101px;
+  background-size: cover;
+  box-shadow: none;
+}
+
+.matecat-modal .coupon-container .btn-confirm-medium {
+    margin: 6px 0% 0 3%;
+    width: 21%;
+    box-sizing: border-box;
+}
+
+.matecat-modal-content .disabled, 
+.matecat-modal-content .disabled:hover, 
+.matecat-modal-content .disabled:active {
+    cursor: default;
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    background: #d6d6d6;
+}
+.x-popup, .x-popup2 {
+  font-family: 'icomoon';
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.x-popup:before, .x-popup2:before {
+  content: "\f057";
+}

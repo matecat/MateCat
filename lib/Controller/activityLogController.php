@@ -107,11 +107,8 @@ class activityLogController extends viewController {
 
         $activityLogDao = new ActivityLogDao();
         $this->rawLogContent  = $activityLogDao->read(
-                new ActivityLogStruct(
-                        array(
-                                'id_project' => $this->id_project
-                        )
-                )
+                new ActivityLogStruct(),
+                [ 'id_project' => $this->id_project ]
         );
 
         //NO ACTIVITY DATA FOR THIS PROJECT

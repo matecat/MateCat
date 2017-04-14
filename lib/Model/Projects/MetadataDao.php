@@ -2,6 +2,8 @@
 
 class Projects_MetadataDao extends DataAccess_AbstractDao {
 
+    const FEATURES_KEY = 'features' ;
+
     const WORD_COUNT_RAW = 'raw';
     const WORD_COUNT_EQUIVALENT = 'equivalent';
 
@@ -67,6 +69,8 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
           " ( :id_project, :key, :value ) " .
           " ON DUPLICATE KEY UPDATE value = :value " ;
       $conn = Database::obtain()->getConnection();
+      \Database::obtain()->begin();
+
       $stmt = $conn->prepare(  $sql );
       $stmt->execute( array(
           'id_project' => $id_project,
@@ -74,7 +78,9 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
           'value' => $value
       ) );
 
-      return $this->get($id_project, $key);
+      $metadata = $this->get($id_project, $key);
+      $conn->commit();
+      return $metadata;
   }
 
 

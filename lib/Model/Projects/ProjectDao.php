@@ -4,20 +4,42 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
     const TABLE = "projects";
 
     /**
+     * @param $project
+     * @param $field
+     * @param $value
      *
+     * @return bool
      */
-
     public function updateField( $project, $field, $value ) {
-        $sql = "UPDATE projects SET $field = :value " .
-            " WHERE id = :id ";
+
+        $sql = "UPDATE projects SET {$field} = :value WHERE id = :id ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
-        return $stmt->execute( array(
+        $success = $stmt->execute( array(
             'value' => $value,
             'id' => $project->id
         ));
+
+        if( $success ){
+            $project->$field = $value;
+        }
+
+        return $project;
+
+    }
+
+    public function deleteFailedProject( $idProject ){
+
+        if( empty( $idProject ) ) return 0;
+
+        $sql = "DELETE FROM projects WHERE id = :id_project";
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $success = $stmt->execute( [ 'id_project' => $idProject ] );
+        return $stmt->rowCount();
+
     }
 
     /**

@@ -166,7 +166,46 @@ $.extend(UI, {
 		if(this.surveyAlreadyDisplayed()) {
 			this.surveyDisplayed = true;
 		}
+		this.checkQueryParams();
 	},
+    checkQueryParams: function () {
+        var action = APP.getParameterByName("action");
+        if (action) {
+            switch (action) {
+                case 'download':
+                    var interval = setTimeout(function () {
+                        $('#downloadProject').trigger('click');
+                    }, 300);
+                    APP.removeParam('action');
+                    break;
+                case 'openComments':
+                    if ( MBC.enabled() ) {
+                        var interval = setInterval(function () {
+                            if ( $( '.mbc-history-balloon-outer' ) ) {
+                                $( '.mbc-history-balloon-outer' ).addClass( 'mbc-visible' );
+                                clearInterval(interval);
+                            }
+                        }, 500);
+
+                    }
+                    APP.removeParam('action');
+                    break;
+                case 'warnings':
+                    var interval = setInterval(function () {
+                        if ( $( '#notifbox.warningbox' ) ) {
+                            $("#point2seg").trigger('mousedown');
+                            clearInterval(interval);
+                        }
+                    }, 500);
+                    setTimeout(function () {
+
+                    });
+                    APP.removeParam('action');
+                    break;
+            }
+        }
+
+    },
 	/**
 	 * Register tabs in segment footer
 	 */

@@ -8,6 +8,8 @@
  */
 
 namespace TaskRunner;
+
+use Database;
 use TaskRunner\Commons\Context;
 use TaskRunner\Commons\AbstractWorker;
 use TaskRunner\Commons\QueueElement;
@@ -16,8 +18,15 @@ use TaskRunner\Exceptions\EndQueueException;
 use TaskRunner\Exceptions\FrameException;
 use TaskRunner\Exceptions\ReQueueException;
 use TaskRunner\Exceptions\WorkerClassException;
-
-use \Exception, \Bootstrap, \SplObserver, \SplSubject, \AMQHandler;;
+use \Exception,
+        \Bootstrap,
+        \SplObserver,
+        \SplSubject,
+        \AMQHandler,
+        \INIT,
+        \Log,
+        \PDOException,
+        \StompFrame;
 
 include_once realpath( dirname( __FILE__ ) . '/../../../' ) . "/inc/Bootstrap.php";
 Bootstrap::start();
@@ -29,7 +38,7 @@ Bootstrap::start();
  *
  * @package TaskRunner
  */
-class Executor implements \SplObserver {
+class Executor implements SplObserver {
 
     /**
      * Handler of AMQ connector
@@ -80,8 +89,8 @@ class Executor implements \SplObserver {
      */
     protected function _logMsg( $msg ) {
 //        \INIT::$DEBUG = false;
-        if ( \INIT::$DEBUG ) echo "[" . date( DATE_RFC822 ) . "] " . $msg . "\n";
-        \Log::doLog( $msg );
+        if ( INIT::$DEBUG ) echo "[" . date( DATE_RFC822 ) . "] " . $msg . "\n";
+        Log::doLog( $msg );
     }
 
     /**
@@ -99,7 +108,7 @@ class Executor implements \SplObserver {
     protected function __construct( Context $_context ) {
 
         $this->_executorPID = posix_getpid();
-        \Log::$fileName     = $_context->loggerName;
+        Log::$fileName     = $_context->loggerName;
 
         $this->_executionContext = $_context;
 
@@ -108,14 +117,14 @@ class Executor implements \SplObserver {
             $this->_queueHandler = new AMQHandler();
 
             if ( !$this->_queueHandler->getRedisClient()->sadd( $this->_executionContext->pid_set_name, $this->_executorPID ) ) {
-                throw new \Exception( "(Executor {$this->_executorPID}) : FATAL !! cannot create my resource ID. Exiting!" );
+                throw new Exception( "(Executor {$this->_executorPID}) : FATAL !! cannot create my resource ID. Exiting!" );
             } else {
                 $this->_logMsg( "(Executor {$this->_executorPID}) : spawned !!!" );
             }
 
             $this->_queueHandler->subscribe( $this->_executionContext->queue_name );
 
-        } catch ( \Exception $ex ){
+        } catch ( Exception $ex ){
 
             $msg = "****** No REDIS/AMQ instances found. Exiting. ******";
             $this->_logMsg( $msg );
@@ -210,7 +219,7 @@ class Executor implements \SplObserver {
                  */
                 list( $msgFrame, $queueElement ) = $this->_readAMQFrame();
 
-            } catch ( \Exception $e ) {
+            } catch ( Exception $e ) {
 
 //                $this->_logMsg( "--- (Executor " . $this->_executorPID . ") : Failed to read frame from AMQ. Doing nothing, wait and re-try in next cycle." );
 //                $this->_logMsg( $e->getMessage() );
@@ -237,11 +246,11 @@ class Executor implements \SplObserver {
 
             } catch ( EndQueueException $e ){
 
-//                $this->_logMsg( "--- (Executor " . $this->_executorPID . ") : End queue limit reached. Acknowledged. - " . $e->getMessage() ); // ERROR Re-queue
+                $this->_logMsg( "--- (Executor " . $this->_executorPID . ") : End queue limit reached. Acknowledged. - " . $e->getMessage() ); // ERROR End Queue
 
             } catch ( ReQueueException $e ){
 
-//                $this->_logMsg( "--- (Executor " . $this->_executorPID . ") : Error retrieving Matches. Re-Queue - " . $e->getMessage() ); // ERROR Re-queue
+                $this->_logMsg( "--- (Executor " . $this->_executorPID . ") : Error executing task. Re-Queue - " . $e->getMessage() ); // ERROR Re-queue
 
                 //set/increment the reQueue number
                 $queueElement->reQueueNum     = ++$queueElement->reQueueNum;
@@ -253,9 +262,18 @@ class Executor implements \SplObserver {
 
 //                $this->_logMsg( $e->getMessage() );
 
-            } catch( Exception $e ){
+            } catch( PDOException $e ){
 
-                $this->_logMsg( "************* (Executor " . $this->_executorPID . ") Caught a generic exception. SKIP Frame *************" . $e->getMessage() );
+                $this->_logMsg( "************* (Executor " . $this->_executorPID . ") Caught a Database exception. Wait 2 seconds and try next cycle *************\n************* " . $e->getMessage() );
+                $queueElement->reQueueNum     = ++$queueElement->reQueueNum;
+                $amqHandlerPublisher          = new AMQHandler();
+                $amqHandlerPublisher->reQueue( $queueElement, $this->_executionContext );
+                $amqHandlerPublisher->disconnect();
+                sleep(2);
+
+            } catch ( Exception $e ){
+
+                $this->_logMsg( "************* (Executor " . $this->_executorPID . ") Caught a generic exception. SKIP Frame *************\n************* " . $e->getMessage() );
 
             }
 
@@ -287,7 +305,7 @@ class Executor implements \SplObserver {
 
             $msgFrame = $this->_queueHandler->readFrame();
 
-            if ( $msgFrame instanceof \StompFrame && ( $msgFrame->command == "MESSAGE" || array_key_exists( 'MESSAGE', $msgFrame->headers /* Stomp Client bug... hack */ ) ) ) {
+            if ( $msgFrame instanceof StompFrame && ( $msgFrame->command == "MESSAGE" || array_key_exists( 'MESSAGE', $msgFrame->headers /* Stomp Client bug... hack */ ) ) ) {
 
                 $this->_frameID++;
                 $this->_logMsg( "--- (Executor " . $this->_executorPID . ") : processing frame {$this->_frameID}" );
@@ -308,7 +326,7 @@ class Executor implements \SplObserver {
                 throw new FrameException( "--- (Executor " . $this->_executorPID . ") : no frame found. Starting next cycle." );
             }
 
-        } catch ( \Exception $e ) {
+        } catch ( Exception $e ) {
 //            self::_TimeStampMsg( $e->getMessage() );
 //            self::_TimeStampMsg( $e->getTraceAsString() );
             throw new FrameException( "*** \$this->amqHandler->readFrame() Failed. Continue Execution. ***" );
@@ -325,7 +343,7 @@ class Executor implements \SplObserver {
      */
     public static function cleanShutDown() {
 
-        \Database::obtain()->close();
+        Database::obtain()->close();
         static::$__INSTANCE->_queueHandler->getRedisClient()->disconnect();
         static::$__INSTANCE->_queueHandler->disconnect();
 
@@ -359,9 +377,9 @@ class Executor implements \SplObserver {
         /**
          * @var $subject AbstractWorker
          */
-        \Log::$fileName = $subject->getLoggerName();
+        Log::$fileName = $subject->getLoggerName();
         $this->_logMsg( $subject->getLogMsg() );
-        \Log::$fileName = $this->_executionContext->loggerName;
+        Log::$fileName = $this->_executionContext->loggerName;
 
     }
 
@@ -373,6 +391,7 @@ class Executor implements \SplObserver {
 //$argv[ 1 ] = '{"queue_name":"analysis_queue_P3","pid_set_name":"ch_pid_set_p3","max_executors":"1","redis_key":"p3_list","loggerName":"tm_analysis_P3.log"}';
 // $argv[ 1 ] = '{"queue_name":"analysis_queue_P1","pid_set_name":"ch_pid_set_p1","max_executors":"1","redis_key":"p1_list","loggerName":"tm_analysis_P1.log"}';
 //$argv[ 1 ] = '{"queue_name":"activity_log","pid_set_name":"ch_pid_activity_log","max_executors":"1","redis_key":"activity_log_list","loggerName":"activity_log.log"}';
+//$argv[ 1 ] = '{"queue_name":"project_queue","pid_set_name":"ch_pid_project_queue","max_executors":"1","redis_key":"project_queue_list","loggerName":"project_queue.log"}';
 
 /** @var array $argv */
 Executor::getInstance( Context::buildFromArray( json_decode( $argv[ 1 ], true ) ) )->main();

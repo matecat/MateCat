@@ -21,25 +21,25 @@ class ActivityLogStruct extends DataAccess_AbstractDaoSilentStruct implements Da
     protected static $actionsStrings = array(
 
         /* DOWNLOADS */
-            self::DOWNLOAD_EDIT_LOG           => "Editing Log downloaded.",
-            self::DOWNLOAD_ANALYSIS_REPORT    => "Analysis Report downloaded.",
-            self::DOWNLOAD_PREVIEW            => "Preview downloaded.",
-            self::DOWNLOAD_GDRIVE_PREVIEW     => "Preview opened in Google Drive.",
-            self::DOWNLOAD_ORIGINAL           => "Original file downloaded.",
-            self::DOWNLOAD_TRANSLATION        => "Translation downloaded.",
-            self::DOWNLOAD_GDRIVE_TRANSLATION => "Translation opened in Google Drive.",
-            self::DOWNLOAD_JOB_TMX            => "Job TMX exported.",
-            self::DOWNLOAD_OMEGAT             => "OmegaT package exported.",
-            self::DOWNLOAD_XLIFF              => "XLIFF file(s) downloaded.",
-            self::DOWNLOAD_KEY_TMX            => "Private translation memory %s downloaded.",
+            self::DOWNLOAD_EDIT_LOG           => "Editing Log downloaded",
+            self::DOWNLOAD_ANALYSIS_REPORT    => "Analysis Report downloaded",
+            self::DOWNLOAD_PREVIEW            => "Preview downloaded",
+            self::DOWNLOAD_GDRIVE_PREVIEW     => "Preview opened in Google Drive",
+            self::DOWNLOAD_ORIGINAL           => "Original file downloaded",
+            self::DOWNLOAD_TRANSLATION        => "Translation downloaded",
+            self::DOWNLOAD_GDRIVE_TRANSLATION => "Translation opened in Google Drive",
+            self::DOWNLOAD_JOB_TMX            => "Job TMX exported",
+            self::DOWNLOAD_OMEGAT             => "OmegaT package exported",
+            self::DOWNLOAD_XLIFF              => "XLIFF file(s) downloaded",
+            self::DOWNLOAD_KEY_TMX            => "Private translation memory %s downloaded",
 
         /* ACCESSES */
-            self::ACCESS_ANALYZE_PAGE         => "Access to the Analyze page.",
-            self::ACCESS_EDITLOG_PAGE         => "Access to the Editing Log page.",
-            self::ACCESS_TRANSLATE_PAGE       => "Access to the Translate page.",
-            self::ACCESS_REVISE_PAGE          => "Access to the Revise page.",
-            self::ACCESS_MANAGE_PAGE          => "Access to the Manage page.",
-            self::ACCESS_REVISE_SUMMARY_PAGE  => "Access to the Revise Summary page.",
+            self::ACCESS_ANALYZE_PAGE         => "Access to the Analyze page",
+            self::ACCESS_EDITLOG_PAGE         => "Access to the Editing Log page",
+            self::ACCESS_TRANSLATE_PAGE       => "Access to the Translate page",
+            self::ACCESS_REVISE_PAGE          => "Access to the Revise page",
+            self::ACCESS_MANAGE_PAGE          => "Access to the Manage page",
+            self::ACCESS_REVISE_SUMMARY_PAGE  => "Access to the Revise Summary page",
 
     );
 
@@ -78,7 +78,7 @@ class ActivityLogStruct extends DataAccess_AbstractDaoSilentStruct implements Da
     /**
      * @var int
      */
-    public $id;
+    public $ID;
 
     /**
      * @var int

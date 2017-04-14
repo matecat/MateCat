@@ -14,6 +14,12 @@ class EntryCommentDao extends \DataAccess_AbstractDao {
         return $stmt->fetchAll();
     }
 
+    /**
+     * @param $data
+     * @return mixed
+     * @deprecated remove the need for insert and find
+     */
+
     public function createComment( $data ) {
         $struct = new EntryCommentStruct( $data );
         $struct->ensureValid();
@@ -26,6 +32,8 @@ class EntryCommentDao extends \DataAccess_AbstractDao {
             " ( :uid, :id_qa_entry, :create_date, :comment, :source_page ) ";
 
         $conn = \Database::obtain()->getConnection();
+        \Database::obtain()->begin();
+
         $stmt = $conn->prepare( $sql );
         $stmt->setFetchMode( \PDO::FETCH_CLASS, 'LQA\EntryCommentStruct' );
         $result = $stmt->execute( $struct->attributes(
@@ -37,7 +45,9 @@ class EntryCommentDao extends \DataAccess_AbstractDao {
             \LQA\EntryDao::updateRepliesCount( $struct->id_qa_entry );
         }
 
-        return self::findById( $lastId );
+        $record = self::findById( $lastId );
+        $conn->commit() ;
+        return $record ;
     }
 
     public function findById( $id ) {

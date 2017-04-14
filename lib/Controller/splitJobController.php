@@ -81,10 +81,11 @@ class splitJobController extends ajaxController {
             }
 
             $pManager = new ProjectManager();
-            $pManager->setProjectIdAndLoadProject( $this->project_struct->id );
+
+            $project = Projects_ProjectDao::findById( $this->project_id ) ;
+            $pManager->setProjectIdAndLoadProject( $project->id );
 
             $pStruct = $pManager->getProjectStructure();
-            $pStruct['id_customer'] = $this->project_struct->id_customer ;
 
             switch ( $this->exec ) {
                 case 'merge':

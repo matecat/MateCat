@@ -5,20 +5,28 @@ class ProjectOptionsSanitizer {
     private $options ; 
     private $sanitized = array();  
     
-    private $source_lang ; 
+    private $source_lang ;
     private $target_lang ;
 
     private $boolean_keys = array('speech2text', 'lexiqa', 'tag_projection');
 
     public static $lexiQA_allowed_languages = array(
-        'en-US',
+        'da-DK',
         'en-GB',
+        'en-US',
         'fr-FR',
+        'fr-CA',
         'de-DE',
         'it-IT',
+        'nb-NO',
         'pt-PT',
         'pt-BR',
-        'es-ES'
+        'ru-RU',
+        'es-ES',
+        'es-CO',
+        'es-MX',
+        'sv-SE',
+        'uk-UA',
     );
     /**
      * All combinations of languages for Tag Ptojection
@@ -59,14 +67,24 @@ class ProjectOptionsSanitizer {
     public function __construct( $input_options ) { 
         $this->options = $input_options ; 
     }
-    
+
+    /**
+     * @param $source
+     * @param $target
+     */
     public function setLanguages( $source, $target ) {
-        if ( !is_array( $target ) ) {
+        if ( is_string( $target ) ) {
             $target = array( $target ) ; 
+        } elseif ( method_exists($target, 'getArrayCopy') ) {
+            $target = $target->getArrayCopy();
         }
-        
-        $this->source_lang = $source ; 
-        $this->target_lang = $target ; 
+
+        if ( !is_array($target)) {
+            throw new Exception('Target should be an array');
+        }
+
+        $this->source_lang = $source ;
+        $this->target_lang = $target ;
     }
 
     /**

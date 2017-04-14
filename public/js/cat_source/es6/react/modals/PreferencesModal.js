@@ -23,8 +23,6 @@ class PreferencesModal extends React.Component {
     componentDidMount() {
         if ( this.state.service && !this.state.service.disabled_at) {
             $(this.checkDrive).attr('checked', true);
-        } else {
-
         }
     }
 

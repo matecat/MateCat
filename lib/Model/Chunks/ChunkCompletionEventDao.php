@@ -112,7 +112,7 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
         return $stmt->fetch();
     }
 
-    public function isChunkCompleted( Chunks_ChunkStruct $chunk, array $params = array() ) {
+    public static function isChunkCompleted( Chunks_ChunkStruct $chunk, array $params = array() ) {
         $fetched = self::lastCompletionRecord( $chunk, $params);
         return $fetched != false ;
     }

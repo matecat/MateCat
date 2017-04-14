@@ -1,3 +1,7 @@
+<div id="additional-input-params" metal:define-macro="additional_input_params">
+    <!-- TODO: override this for custom implementations -->
+</div>
+
 <div id="gdrive-files-list" metal:define-macro="gdrive_files">
 
     <div class="gdrive-upload-files drag uploaded">
@@ -16,6 +20,7 @@
 </div> 
 
 <div id="upload-files-list" class="upload-files drag" metal:define-macro="upload_files">
+
     <form id="fileupload" action="${basepath}lib/Utils/fileupload/" method="POST" enctype="multipart/form-data">
 
         <div id="overlay"></div>
@@ -42,27 +47,10 @@
                     <div class="span7">
                         <!-- The fileinput-button span is used to style the file input field as button -->
                                     <span class="btn btn-success fileinput-button">
-<!--                                        <i class="icon-plus icon-white"></i> -->
                                         <span>Add files...</span>
                                         <input type="file" name="files[]" multiple="multiple" class="multiple-button"/>
                                     </span>
 
-
-                        <!--
-                                        <button type="submit" class="btn btn-primary start">
-                                            <i class="icon-upload icon-white"></i>
-                                            <span>Start upload</span>
-                                        </button>
-                                        <button type="reset" class="btn btn-warning cancel">
-                                            <i class="icon-ban-circle icon-white"></i>
-                                            <span>Cancel upload</span>
-                                        </button>
-                                        <button type="button" class="btn btn-danger delete">
-                                            <i class="icon-trash icon-white"></i>
-                                            <span>Delete</span>
-                                        </button>
-                                        <input type="checkbox" class="toggle"/>
-                        -->
                     </div>
                     <!-- The global progress information -->
                     <div class="span5 fileupload-progress fade">
@@ -112,17 +100,16 @@
             <p tal:condition="true:conversion_enabled"><strong>Drag and drop</strong> your file here or </p>
 
             <p tal:condition="not:conversion_enabled"><strong>Drag and drop</strong> your XLIFF here or </p>
-                        <span id="add-files" class="btn fileinput-button">
-<!--                            <i class="icon-plus icon-white"></i> -->
-                            <span>Add files...</span>
-                            <input type="file" name="files[]" multiple="multiple" class="multiple-button"/>
-                        </span>
-                        <span id="clear-all-files" class="btn fileinput-button cancel-btn">
-                            <span>Clear all</span>
-                        </span>
-                        <span id="delete-failed-conversions" class="btn fileinput-button cancel-btn">
-                            <span>Clear all failed</span>
-                        </span>
+            <span id="add-files" class="btn fileinput-button">
+                <span>Add files...</span>
+                <input type="file" name="files[]" multiple="multiple" class="multiple-button"/>
+            </span>
+            <span id="clear-all-files" class="btn fileinput-button cancel-btn">
+                <span>Clear all</span>
+            </span>
+            <span id="delete-failed-conversions" class="btn fileinput-button cancel-btn">
+                <span>Clear all failed</span>
+            </span>
         </div>
     </form>
 </div>

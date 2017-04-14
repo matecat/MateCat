@@ -9,7 +9,7 @@
 class setPrivateTMKeyTest extends IntegrationTest {
 
     function setUp() {
-        $this->test_data=new stdClass();
+        $this->test_data = new stdClass();
     }
 
     function test_set_private_tm_key_works() {

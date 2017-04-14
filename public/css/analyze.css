@@ -158,13 +158,17 @@ span.complete {
 background: #ccc;
 }
 
+.popup .splitbtn-cont {
+    margin-left: 10px;
+    margin-top: 10px;
+}
+
 .splitbtn-cont {
 	margin: 0 auto;
 	overflow: hidden;
 	margin-top: 20px;
 	margin-right: 140px;
 	margin-top: 40px;
-	float: right;
 	font-size: 20px;
 	color:#666;
 }
@@ -216,6 +220,14 @@ background: #ccc;
 	border-radius: 2px;
 	text-decoration:none;
 	opacity:0.9;
+}
+
+.popup-split h2 {
+    font-size: 24px !important;
+    font-weight: bold !important;
+    padding: 0;
+    margin: 15px 10px !important;
+    margin-bottom: 21px !important;
 }
 
 .splitbtn, .mergebtn {margin: 0 0 10px 0;
@@ -342,7 +354,11 @@ tbody:nth-child(3) tr td:not(.empty) {
 /* SPLIT JOB POPUP */
 
 .popup-split .popup {
-	width:670px;margin:0 auto;position:fixed;padding:0px 0 0px 0;top:50%;left:50%;margin:-300px 0 0 -350px;background:#fff;box-shadow: 0px 0px 25px #000;border-radius:7px;text-align:left;font-size:18px;border:1px solid #666;
+	width:670px;margin:0 auto;position:fixed;padding:0px 0 0px 0;
+	left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+	background:#fff;box-shadow: 0px 0px 25px #000;border-radius:7px;text-align:left;font-size:18px;border:1px solid #666;
 }
 
 /* split box */

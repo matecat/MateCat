@@ -31,7 +31,6 @@ $.extend(UI, {
 		this.openTagPlaceholder = 'MATECAT-openTagPlaceholder-MATECAT';
 		this.closeTagPlaceholder = 'MATECAT-closeTagPlaceholder-MATECAT';
 		this.checkUpdatesEvery = 180000;
-		this.autoUpdateEnabled = true;
 		this.goingToNext = false;
 		this.preCloseTagAutocomplete = false;
         this.hiddenTextEnabled = true;
@@ -55,19 +54,26 @@ $.extend(UI, {
 
 		this.taglockEnabled = config.taglockEnabled;
 		this.debug = false;
+        this.findCommonPartInSegmentIds();
 		UI.detectStartSegment();
 		options.openCurrentSegmentAfter = !!((!seg) && (!this.firstLoad));
-		
-		var getSegmentsAjax = UI.getSegments(options);
 
-		if (this.firstLoad && this.autoUpdateEnabled) {
+
+		if ( UI.firstLoad ) {
+
 			this.lastUpdateRequested = new Date();
+
 			setTimeout(function() {
 				UI.getUpdates();
 			}, UI.checkUpdatesEvery);
+
 		}
-		
-		return getSegmentsAjax ; 
+
+		return UI.getSegments(options).done(function() {
+			// Force the firstLoad flag to false whenever the segments are fetched
+			UI.firstLoad = false ;
+		});
+
 	},
 });
 

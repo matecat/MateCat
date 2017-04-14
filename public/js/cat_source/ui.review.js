@@ -295,7 +295,6 @@ if ( Review.enabled() && Review.type == 'simple' ) {
 
         renderAfterConfirm: function (nextId) {
             this.render({
-                firstLoad: false,
                 segmentToOpen: nextId
             });
         },
