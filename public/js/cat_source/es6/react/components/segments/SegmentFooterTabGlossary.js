@@ -32,8 +32,6 @@ class SegmentFooterTabGlossary extends React.Component {
 
     }
 
-
-
     componentWillMount() {
 
     }

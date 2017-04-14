@@ -86,7 +86,7 @@ var SegmentActions = {
         });
     },
     
-    setHeaderPercentuage: function (sid, fid, perc, className, createdBy) {
+    setHeaderPercentage: function (sid, fid, perc, className, createdBy) {
         AppDispatcher.dispatch({
             actionType: SegmentConstants.SET_SEGMENT_HEADER,
             id: sid,

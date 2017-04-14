@@ -37,146 +37,146 @@ var SegmentConstants = require('../constants/SegmentConstants');
 var assign = require('object-assign');
 
 EventEmitter.prototype.setMaxListeners(0);
-// Todo : Possiamo gestire la persistenza qui dentro con LokiJS
 
-var _segments = {};
 
-/**
- * Update all
- */
-function updateAll(segments, fid, where) {
-    if ( _segments[fid] && where === "before" ) {
-        Array.prototype.unshift.apply( _segments[fid], normalizeSplittedSegments(segments));
-    } else if( _segments[fid] && where === "after" ) {
-        Array.prototype.push.apply( _segments[fid], normalizeSplittedSegments(segments));
-    } else {
-        _segments[fid] = normalizeSplittedSegments(segments);
-    }
-}
-
-function normalizeSplittedSegments(segments) {
-    var newSegments = [];
-    $.each(segments, function (index) {
-        var splittedSourceAr = this.segment.split(UI.splittedTranslationPlaceholder);
-        if(splittedSourceAr.length > 1) {
-            var segment = this;
-            var splitGroup = [];
-            $.each(splittedSourceAr, function (i) {
-                splitGroup.push(segment.sid + '-' + (i + 1));
-            });
-
-            $.each(splittedSourceAr, function (i) {
-                var translation = segment.translation.split(UI.splittedTranslationPlaceholder)[i];
-                var status = segment.target_chunk_lengths.statuses[i];
-                var segData = {
-                    autopropagated_from: "0",
-                    has_reference: "false",
-                    parsed_time_to_edit: ["00", "00", "00", "00"],
-                    readonly: "false",
-                    segment: splittedSourceAr[i],
-                    segment_hash: segment.segment_hash,
-                    sid: segment.sid + '-' + (i + 1),
-                    split_group: splitGroup,
-                    split_points_source: [],
-                    status: status,
-                    time_to_edit: "0",
-                    translation: translation,
-                    version: segment.version,
-                    warning: "0"
-                };
-                newSegments.push(segData);
-                segData = null;
-            });
-        } else {
-            newSegments.push(this);
-        }
-
-    });
-    return newSegments;
-}
-
-function getSegmentById(sid, fid) {
-    return _segments[fid].find(function (seg) {
-        return seg.sid == sid;
-    });
-
-}
-
-function splitSegment(oldSid, newSegments, fid, splitGroup) {
-    var currentSegments = _segments[fid];
-    var index = currentSegments.findIndex(function (segment, index) {
-        return (segment.sid == oldSid);
-    });
-    if (index > -1) {
-        newSegments.forEach(function (element) {
-            element.split_group = splitGroup;
-        });
-        Array.prototype.splice.apply(currentSegments, [index, 1].concat(newSegments));
-    } else {
-        removeSplit(oldSid, newSegments, currentSegments);
-    }
-}
-
-function removeSplit(oldSid, newSegments, currentSegments) {
-    var elementsToRemove = [];
-    var indexes = [];
-    currentSegments.map(function (segment, index) {
-        if (segment.sid.split('-').length && segment.sid.split('-')[0] == oldSid){
-            elementsToRemove.push(segment);
-            indexes.push(index);
-            return index;
-        }
-    });
-    if (elementsToRemove.length) {
-        elementsToRemove.forEach(function (seg) {
-            currentSegments.splice(currentSegments.indexOf(seg), 1)
-        });
-        Array.prototype.splice.apply(currentSegments, [indexes[0], 0].concat(newSegments));
-    }
-}
-
-function setStatus(sid, fid, status) {
-    var segment = getSegmentById(sid, fid);
-    segment.status = status;
-}
-
-function setSuggestionMatch(sid, fid, perc) {
-    var segment = getSegmentById(sid, fid);
-    segment.suggestion_match = perc.replace('%', '');
-}
-
-function setPropagation(sid, fid, propagation, from) {
-    var segment = getSegmentById(sid, fid);
-    if (propagation) {
-        segment.autopropagated_from = from;
-    } else {
-        segment.autopropagated_from = "0";
-    }
-}
-function replaceTranslation(sid, fid, translation) {
-    var segment = getSegmentById(sid, fid);
-    return segment.translation = removeLockTagsFromString(translation);
-}
-function replaceSource(sid, fid, source) {
-    var segment = getSegmentById(sid, fid);
-    return segment.translation = removeLockTagsFromString(source);
-}
-function removeLockTagsFromString(str) {
-    return str.replace(/<span contenteditable=\"false\" class=\"locked[^>]*\>(.*?)<\/span\>/gi, "$1");
-}
 
 
 var SegmentStore = assign({}, EventEmitter.prototype, {
 
-    emitChange: function(event, args) {
-        this.emit.apply(this, arguments);
+    _segments : {},
+
+    /**
+     * Update all
+     */
+    updateAll: function(segments, fid, where) {
+        if ( this._segments[fid] && where === "before" ) {
+            Array.prototype.unshift.apply( this._segments[fid], this.normalizeSplittedSegments(segments));
+        } else if( this._segments[fid] && where === "after" ) {
+            Array.prototype.push.apply( this._segments[fid], this.normalizeSplittedSegments(segments));
+        } else {
+            this._segments[fid] = this.normalizeSplittedSegments(segments);
+        }
     },
+
+    normalizeSplittedSegments: function(segments) {
+        var newSegments = [];
+        $.each(segments, function (index) {
+            var splittedSourceAr = this.segment.split(UI.splittedTranslationPlaceholder);
+            if(splittedSourceAr.length > 1) {
+                var segment = this;
+                var splitGroup = [];
+                $.each(splittedSourceAr, function (i) {
+                    splitGroup.push(segment.sid + '-' + (i + 1));
+                });
+
+                $.each(splittedSourceAr, function (i) {
+                    var translation = segment.translation.split(UI.splittedTranslationPlaceholder)[i];
+                    var status = segment.target_chunk_lengths.statuses[i];
+                    var segData = {
+                        autopropagated_from: "0",
+                        has_reference: "false",
+                        parsed_time_to_edit: ["00", "00", "00", "00"],
+                        readonly: "false",
+                        segment: splittedSourceAr[i],
+                        segment_hash: segment.segment_hash,
+                        sid: segment.sid + '-' + (i + 1),
+                        split_group: splitGroup,
+                        split_points_source: [],
+                        status: status,
+                        time_to_edit: "0",
+                        translation: translation,
+                        version: segment.version,
+                        warning: "0"
+                    };
+                    newSegments.push(segData);
+                    segData = null;
+                });
+            } else {
+                newSegments.push(this);
+            }
+
+        });
+        return newSegments;
+    },
+    getSegmentById(sid, fid) {
+        return this._segments[fid].find(function (seg) {
+            return seg.sid == sid;
+        });
+
+    },
+
+    splitSegment(oldSid, newSegments, fid, splitGroup) {
+        var currentSegments = this._segments[fid];
+        var index = currentSegments.findIndex(function (segment, index) {
+            return (segment.sid == oldSid);
+        });
+        if (index > -1) {
+            newSegments.forEach(function (element) {
+                element.split_group = splitGroup;
+            });
+            Array.prototype.splice.apply(currentSegments, [index, 1].concat(newSegments));
+        } else {
+            this.removeSplit(oldSid, newSegments, currentSegments);
+        }
+    },
+
+    removeSplit(oldSid, newSegments, currentSegments) {
+        var elementsToRemove = [];
+        var indexes = [];
+        currentSegments.map(function (segment, index) {
+            if (segment.sid.split('-').length && segment.sid.split('-')[0] == oldSid){
+                elementsToRemove.push(segment);
+                indexes.push(index);
+                return index;
+            }
+        });
+        if (elementsToRemove.length) {
+            elementsToRemove.forEach(function (seg) {
+                currentSegments.splice(currentSegments.indexOf(seg), 1)
+            });
+            Array.prototype.splice.apply(currentSegments, [indexes[0], 0].concat(newSegments));
+        }
+    },
+
+    setStatus(sid, fid, status) {
+        var segment = this.getSegmentById(sid, fid);
+        segment.status = status;
+    },
+
+    setSuggestionMatch(sid, fid, perc) {
+        var segment = this.getSegmentById(sid, fid);
+        segment.suggestion_match = perc.replace('%', '');
+    },
+
+    setPropagation(sid, fid, propagation, from) {
+        var segment = this.getSegmentById(sid, fid);
+        if (propagation) {
+            segment.autopropagated_from = from;
+        } else {
+            segment.autopropagated_from = "0";
+        }
+    },
+    replaceTranslation(sid, fid, translation) {
+        var segment = this.getSegmentById(sid, fid);
+        return segment.translation = this.removeLockTagsFromString(translation);
+    },
+    replaceSource(sid, fid, source) {
+        var segment = this.getSegmentById(sid, fid);
+        return segment.translation = this.removeLockTagsFromString(source);
+    },
+    removeLockTagsFromString(str) {
+        return str.replace(/<span contenteditable=\"false\" class=\"locked[^>]*\>(.*?)<\/span\>/gi, "$1");
+    },
+
     getAllSegments: function () {
         var result = [];
-        $.each(_segments, function(key, value) {
+        $.each(this._segments, function(key, value) {
             result = result.concat(value);
         });
         return result;
+    },
+    emitChange: function(event, args) {
+        this.emit.apply(this, arguments);
     }
 });
 
@@ -186,16 +186,16 @@ AppDispatcher.register(function(action) {
 
     switch(action.actionType) {
         case SegmentConstants.RENDER_SEGMENTS:
-            updateAll(action.segments, action.fid);
-            SegmentStore.emitChange(action.actionType, _segments[action.fid], action.fid);
+            SegmentStore.updateAll(action.segments, action.fid);
+            SegmentStore.emitChange(action.actionType, SegmentStore._segments[action.fid], action.fid);
             break;
         case SegmentConstants.ADD_SEGMENTS:
-            updateAll(action.segments, action.fid, action.where);
-            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, _segments[action.fid], action.fid);
+            SegmentStore.updateAll(action.segments, action.fid, action.where);
+            SegmentStore.emitChange(SegmentConstants.RENDER_SEGMENTS, SegmentStore._segments[action.fid], action.fid);
             break;
         case SegmentConstants.SPLIT_SEGMENT:
-            splitSegment(action.oldSid, action.newSegments, action.fid, action.splitGroup);
-            SegmentStore.emitChange(action.actionType, _segments[action.fid], action.splitGroup, action.fid);
+            SegmentStore.splitSegment(action.oldSid, action.newSegments, action.fid, action.splitGroup);
+            SegmentStore.emitChange(action.actionType, SegmentStore._segments[action.fid], action.splitGroup, action.fid);
             break;
         case SegmentConstants.HIGHLIGHT_EDITAREA:
             SegmentStore.emitChange(action.actionType, action.id);
@@ -207,14 +207,14 @@ AppDispatcher.register(function(action) {
             SegmentStore.emitChange(action.actionType, action.id, action.className);
             break;
         case SegmentConstants.SET_SEGMENT_STATUS:
-            setStatus(action.id, action.fid, action.status);
+            SegmentStore.setStatus(action.id, action.fid, action.status);
             SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_STATUS, action.id, action.status);
             break;
         case SegmentConstants.UPDATE_ALL_SEGMENTS:
             SegmentStore.emitChange(SegmentConstants.UPDATE_ALL_SEGMENTS);
             break;
         case SegmentConstants.SET_SEGMENT_HEADER:
-            setSuggestionMatch(action.id, action.fid, action.perc);
+            SegmentStore.setSuggestionMatch(action.id, action.fid, action.perc);
             SegmentStore.emitChange(SegmentConstants.SET_SEGMENT_PROPAGATION, action.id, false);
             SegmentStore.emitChange(action.actionType, action.id, action.perc, action.className, action.createdBy);
             break;
@@ -223,18 +223,18 @@ AppDispatcher.register(function(action) {
             SegmentStore.emitChange(action.actionType, action.id, action.fid);
             break;
         case SegmentConstants.SET_SEGMENT_PROPAGATION:
-            setPropagation(action.id, action.fid, action.propagation, action.from);
+            SegmentStore.setPropagation(action.id, action.fid, action.propagation, action.from);
             SegmentStore.emitChange(action.actionType, action.id, action.propagation);
             break;
         case SegmentConstants.PROPAGATE_TRANSLATION:
             SegmentStore.emitChange(action.actionType, action.id);
             break;
         case SegmentConstants.REPLACE_TRANSLATION:
-            var trans = replaceTranslation(action.id, action.fid, action.translation);
+            var trans = SegmentStore.replaceTranslation(action.id, action.fid, action.translation);
             SegmentStore.emitChange(action.actionType, action.id, trans);
             break;
         case SegmentConstants.REPLACE_SOURCE:
-            var source = replaceSource(action.id, action.fid, action.source);
+            var source = SegmentStore.replaceSource(action.id, action.fid, action.source);
             SegmentStore.emitChange(action.actionType, action.id, source);
             break;
         case SegmentConstants.ADD_EDITAREA_CLASS:
