@@ -54,7 +54,6 @@ $.extend(UI, {
 
 		this.taglockEnabled = config.taglockEnabled;
 		this.debug = false;
-        this.findCommonPartInSegmentIds();
 		UI.detectStartSegment();
 		options.openCurrentSegmentAfter = !!((!seg) && (!this.firstLoad));
 
