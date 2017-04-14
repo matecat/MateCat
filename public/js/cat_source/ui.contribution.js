@@ -147,7 +147,7 @@ $.extend(UI, {
     getContribution_success: function(d, segment) {
         this.addInStorage('contribution-' + config.id_job + '-' + UI.getSegmentId(segment), JSON.stringify(d), 'contribution');
         this.processContributions(d, segment);
-        this.currentSegmentQA();
+        this.segmentQA(segment);
     },
   	processContributions: function(d, segment) {
 		if(!d) return true;

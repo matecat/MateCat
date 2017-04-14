@@ -107,12 +107,12 @@ if ( SegmentFilter.enabled() )
         editAreaClick : function(target, operation) {
             var e = arguments[0];
             if ( ! UI.isMuted(target) ) {
-                original_editAreaClick.apply( target, operation );
+                original_editAreaClick.apply( this,[target, operation]);
             }
         },
 
         renderSegments : function() {
-            original_renderSegments.apply( undefined, arguments );
+            original_renderSegments.apply( this, arguments );
 
             if (SF.filtering()) {
                 var segments = SegmentStore.getAllSegments();

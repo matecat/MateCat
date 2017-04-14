@@ -941,33 +941,33 @@ $.extend(UI, {
 		this.initTime = this.initEnd - this.initStart;
 		if (this.debug) { console.log('Init time: ' + this.initTime); }
 
-    },
-	autoCompleteTagClick: function (elem) {
-		var text = UI.editarea.html();
-		text = text.replace(/<span class="tag-autocomplete-endcursor"><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>');
-		UI.editarea.html(text);
-
-		UI.editarea.find('.rangySelectionBoundary').before(UI.editarea.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
-		text = UI.editarea.html();
-		text = text.replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1')
-			.replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1')
-			.replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1')
-			.replace(/(<span class="tag-autocomplete-endcursor"\><\/span><span class="undoCursorPlaceholder monad" contenteditable="false"><\/span>)&lt;/gi, '$1');
-
-		UI.editarea.html(text);
-		saveSelection();
-		if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
-			setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
-			saveSelection();
-		}
-		var ph = $('.rangySelectionBoundary', UI.editarea)[0].outerHTML;
-		$('.rangySelectionBoundary', UI.editarea).remove();
-		$('.tag-autocomplete-endcursor', UI.editarea).after(ph);
-		$('.tag-autocomplete-endcursor').before(htmlEncode($(elem).text()));
-		restoreSelection();
-		UI.closeTagAutocompletePanel();
-		UI.currentSegmentQA();
-	}
+    }
+	// autoCompleteTagClick: function (elem) {
+	// 	var text = UI.editarea.html();
+	// 	text = text.replace(/<span class="tag-autocomplete-endcursor"><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>');
+	// 	UI.editarea.html(text);
+    //
+	// 	UI.editarea.find('.rangySelectionBoundary').before(UI.editarea.find('.rangySelectionBoundary + .tag-autocomplete-endcursor'));
+	// 	text = UI.editarea.html();
+	// 	text = text.replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1')
+	// 		.replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1')
+	// 		.replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1')
+	// 		.replace(/(<span class="tag-autocomplete-endcursor"\><\/span><span class="undoCursorPlaceholder monad" contenteditable="false"><\/span>)&lt;/gi, '$1');
+    //
+	// 	UI.editarea.html(text);
+	// 	saveSelection();
+	// 	if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
+	// 		setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
+	// 		saveSelection();
+	// 	}
+	// 	var ph = $('.rangySelectionBoundary', UI.editarea)[0].outerHTML;
+	// 	$('.rangySelectionBoundary', UI.editarea).remove();
+	// 	$('.tag-autocomplete-endcursor', UI.editarea).after(ph);
+	// 	$('.tag-autocomplete-endcursor').before(htmlEncode($(elem).text()));
+	// 	restoreSelection();
+	// 	UI.closeTagAutocompletePanel();
+	// 	UI.currentSegmentQA();
+	// }
 
 });
 

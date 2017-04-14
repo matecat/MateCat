@@ -13,7 +13,7 @@ $.extend(UI, {
 
 		this.isMac = (navigator.platform == 'MacIntel') ? true : false;
 		this.body = $('body');
-		this.firstLoad = (options.firstLoad || false);
+		// this.firstLoad = (options.firstLoad || false);
 		this.initSegNum = 100; // number of segments initially loaded
 		this.moreSegNum = 25;
 		this.numOpenedSegments = 0;
@@ -68,10 +68,7 @@ $.extend(UI, {
 
 		}
 
-		return UI.getSegments(options).done(function() {
-			// Force the firstLoad flag to false whenever the segments are fetched
-			UI.firstLoad = false ;
-		});
+		return UI.getSegments(options);
 
 	},
 });

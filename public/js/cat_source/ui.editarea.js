@@ -47,7 +47,7 @@ $.extend( UI, {
                 e.preventDefault();
                 $('.selected', $(this)).remove();
                 UI.saveInUndoStack('cancel');
-                UI.currentSegmentQA();
+                UI.segmentQA(UI.currentSegment);
             } else {
                 var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
                 var numSpacesBefore = $('.space-marker', UI.editarea).length;
