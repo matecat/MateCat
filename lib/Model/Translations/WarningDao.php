@@ -128,7 +128,8 @@ class WarningDao extends \DataAccess_AbstractDao {
     }
 
     public static function insertWarning( WarningStruct $warning ) {
-        $sql = self::buildInsertStatement( $warning->toArray(), array() ) ;
+        $options = [];
+        $sql = self::buildInsertStatement( $warning->toArray(), $options ) ;
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
