@@ -12,10 +12,7 @@ class SegmentVersion extends KleinController {
 
 
     protected function afterConstruct() {
-        $this->validator = new JobPasswordValidator(
-            $this->request
-
-        );
+        $this->validator = new JobPasswordValidator( $this );
     }
 
     private function validate() {

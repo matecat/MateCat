@@ -920,6 +920,9 @@ class CatUtils {
      *
      * Minimum Password Length 12 Characters
      *
+     * @param int $length
+     *
+     * @return bool|string
      */
     public static function generate_password( $length = 12 ) {
 

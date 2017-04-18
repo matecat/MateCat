@@ -11,7 +11,7 @@ namespace Features;
 use Translations\WarningDao ;
 use Translations\WarningStruct ;
 use Features\QaCheckBlacklist\BlacklistFromZip ;
-use ProjectModel ;
+use Projects\ProjectModel;
 
 use Translations\WarningModel ;
 
