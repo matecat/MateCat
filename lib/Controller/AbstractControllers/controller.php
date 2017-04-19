@@ -111,20 +111,20 @@ abstract class controller {
         return $this->model;
     }
 
-    public function setUserCredentials(){
+    public function setUserCredentials() {
 
-        $this->logged_user = new Users_UserStruct();
-        $this->logged_user->uid = $_SESSION[ 'uid' ];
-        $this->logged_user->email = $_SESSION[ 'cid' ];
+        $this->logged_user        = new Users_UserStruct();
+        $this->logged_user->uid   = ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) ? $_SESSION[ 'uid' ] : null );
+        $this->logged_user->email = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ? $_SESSION[ 'cid' ] : null );
 
         try {
-            $userDao = new Users_UserDao( Database::obtain() );
-            $this->logged_user = $userDao->setCacheTTL( 3600 )->read( $this->logged_user )[0]; // one hour cache
-        } catch( Exception $e ){
+            $userDao           = new Users_UserDao( Database::obtain() );
+            $this->logged_user = $userDao->setCacheTTL( 3600 )->read( $this->logged_user )[ 0 ]; // one hour cache
+        } catch ( Exception $e ) {
             Log::doLog( 'User not logged.' );
         }
 
-        $this->userIsLogged = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) );
+        $this->userIsLogged = ( !empty( $this->logged_user->email ) );
         $this->uid          = $this->logged_user->getUid();
         $this->userMail     = $this->logged_user->getEmail();
 
