@@ -35,7 +35,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         var section = $(e.target).closest('section') ;
 
         if ( section.hasClass('muted') || section.hasClass('readonly') ) {
-            return ; 
+            return ;
         }
 
         if ( ! section.hasClass('opened') ) {
@@ -73,8 +73,10 @@ if ( ReviewImproved.enabled() && config.isReview ) {
     });
 
     var textSelectedInsideSelectionArea = function( selection, container ) {
-        return $.inArray( selection.focusNode, container.contents() ) !==  -1 &&
-            $.inArray( selection.anchorNode, container.contents() ) !== -1 &&
+        // return $.inArray( selection.focusNode, container.contents() ) !==  -1 &&
+        //     $.inArray( selection.anchorNode, container.contents() ) !== -1 &&
+        return container.contents().text().indexOf(selection.focusNode.wholeText)>=0 &&
+            container.contents().text().indexOf(selection.anchorNode.wholeText)>=0 &&
             selection.toString().length > 0 ;
     };
 
@@ -97,17 +99,19 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         UI.gotoNextSegment();
     });
 
-    $(document).on('mouseup', 'section.opened .errorTaggingArea', function(e) {
+
+    $(document).on('mouseup', 'section.opened .errorTaggingArea', function (e) {
         var segment = new UI.Segment( $(e.target).closest('section'));
         var selection = document.getSelection();
         var container = $(e.target);
-
+        if (container.is('lxqwarning')) {
+          container = container.closest('.errorTaggingArea');
+        }
         if ( textSelectedInsideSelectionArea(selection, container ) )  {
             var selection = getSelectionData( selection, container ) ;
             RI.openPanel( { sid: segment.id,  selection : selection });
         }
     });
-
     function renderButtons(segment) {
         if (segment === undefined) {
             segment = UI.Segment.find( UI.currentSegmentId );
