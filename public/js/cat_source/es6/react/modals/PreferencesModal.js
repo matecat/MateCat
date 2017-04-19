@@ -156,7 +156,7 @@ class PreferencesModal extends React.Component {
                     ): (
                     <div>
                         <h2 htmlFor="user-coupon">Coupon</h2>
-                        <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</span>
+                        <span>If you have received a code, you may be eligible for free credit that you can use for the Outsourcing feature.</span>
                         <input type="text" name="coupon" id="user-coupon" placeholder="Insert your code"
                         onKeyUp={this.onKeyPressCoupon.bind(this)}
                         ref={(input) => this.couponInput = input}/>
