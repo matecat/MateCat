@@ -189,23 +189,10 @@ class ModifyTeam extends React.Component {
     }
 
     applyChanges() {
-        self = this;
+        var self = this;
         var teamNameOk = this.changeTeamName();
-        if (this.inputNewUSer.value.length > 0) {
-            if ($(this.inputNewUSer).dropdown('get value').length > 0) {
-                this.addUsers();
-            } else if ( APP.checkEmail(this.inputNewUSer.value)) {
-                this.addUser();
-                setTimeout(function () {
-                    self.applyChanges();
-                });
-                return false;
-            } else {
-                this.setState({
-                    inputUserError: true
-                });
-                return true;
-            }
+        if ($(this.inputNewUSer).dropdown('get value').length > 0) {
+            this.addUsers();
         }
         if ( teamNameOk )  {
             APP.ModalWindow.onCloseModal();
