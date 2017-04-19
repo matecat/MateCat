@@ -60,7 +60,7 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
      * @param $key
      * @param $value
      *
-     * @return Projects_MetadataStruct
+     * @return boolean
      */
   public function set($id_project, $key, $value) {
       $sql = "INSERT INTO project_metadata " .
@@ -69,7 +69,6 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
           " ( :id_project, :key, :value ) " .
           " ON DUPLICATE KEY UPDATE value = :value " ;
       $conn = Database::obtain()->getConnection();
-      \Database::obtain()->begin();
 
       $stmt = $conn->prepare(  $sql );
       $stmt->execute( array(
@@ -78,9 +77,8 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
           'value' => $value
       ) );
 
-      $metadata = $this->get($id_project, $key);
-      $conn->commit();
-      return $metadata;
+      return $conn->lastInsertId();
+
   }
 
 

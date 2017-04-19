@@ -28,8 +28,6 @@ class CategoryDao extends \DataAccess_AbstractDao {
             " ( :id_model, :label, :id_parent, :severities )" ;
 
         $conn = \Database::obtain()->getConnection();
-        \Database::obtain()->begin();
-
         $stmt = $conn->prepare( $sql );
         $stmt->execute(
             array(
@@ -41,7 +39,6 @@ class CategoryDao extends \DataAccess_AbstractDao {
         );
         $lastId = $conn->lastInsertId();
         $record = self::findById( $lastId );
-        $conn->commit() ;
         return $record ;
     }
 
