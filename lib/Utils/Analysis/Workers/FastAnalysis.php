@@ -175,6 +175,7 @@ class FastAnalysis extends AbstractDaemon {
                     } elseif ( $e->getCode() == self::ERR_500 || $e->getCode() == self::ERR_EMPTY_RESPONSE ) {
                         self::_TimeStampMsg( $e->getMessage() ) ;
                         self::_updateProject( $pid, ProjectStatus::STATUS_NEW );
+                        self::$queueHandler->getRedisClient()->del( [ '_fPid:' . $pid ] );
                         sleep( 3 ) ;
                         continue;
                     } else {
