@@ -37,7 +37,6 @@ class ModelDao extends \DataAccess_AbstractDao {
         $struct->ensureValid();
 
         $conn = \Database::obtain()->getConnection();
-        \Database::obtain()->begin();
 
         $stmt = $conn->prepare( $sql );
         $stmt->execute( $struct->attributes(
@@ -46,7 +45,7 @@ class ModelDao extends \DataAccess_AbstractDao {
         $lastId = $conn->lastInsertId();
 
         $record = self::findById( $lastId );
-        $conn->commit() ;
+
         return $record ;
     }
 
