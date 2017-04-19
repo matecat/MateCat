@@ -55,12 +55,13 @@ ul
 
     .wrapper
     {
-        min-width: 960px;
+        width: 98%;
+        min-width: 910px;
         margin: 0px auto 0 auto;
-        padding: 3px 0 0 0;
-        width: 100%;
+        padding: 5px 0 0 0;
+        width: 92%;
         font-size: 14px;
-        position: absolute;
+        position: relative;
         text-align: left;
     }
 
