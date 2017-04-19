@@ -39,6 +39,7 @@
 <header>
     <div class="wrapper">
         <a href="${basepath}" class="logo"></a>
+        <div metal:use-macro="common.html/login_includes" />
     </div>
 </header>
 
@@ -439,11 +440,11 @@
 
         <nav tal:condition="php: Bootstrap::areOauthKeysPresent()">
             <ul>
-                <li><a tal:attributes="href string:${basepath}manage/">Manage</a></li>
+                <li><a class="link-manage-page" >Manage</a></li>
 				<li><a href="https://www.matecat.com/support/" target="_blank">User Guide</a></li>
             </ul>
 
-            <div metal:use-macro="common.html/login_includes" />
+
 
         </nav>
 

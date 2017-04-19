@@ -1,6 +1,9 @@
 <?php
 namespace Analysis\Workers;
 
+use Constants_ProjectStatus;
+use FilesStorage;
+use PDO;
 use \TaskRunner\Commons\AbstractDaemon,
     \TaskRunner\Commons\QueueElement,
     TaskRunner\Commons\Context,
@@ -17,7 +20,9 @@ use \AMQHandler,
     \Database,
     \Utils,
     \PDOException,
-    \Log;
+    \UnexpectedValueException,
+    \Log,
+    \INIT;
 
 
 include_once \INIT::$MODEL_ROOT . '/queries.php';
@@ -39,10 +44,14 @@ class FastAnalysis extends AbstractDaemon {
 
     protected $_configFile;
 
+    protected $_tHandlerPID;
+    protected $_executor_instance_id;
+
     const ERR_NO_SEGMENTS    = 127;
     const ERR_TOO_LARGE      = 128;
     const ERR_500            = 129;
     const ERR_EMPTY_RESPONSE = 130;
+    const ERR_FILE_NOT_FOUND = 131;
 
     /**
      * @var ContextList
@@ -91,7 +100,7 @@ class FastAnalysis extends AbstractDaemon {
 
         try {
             self::$queueHandler = new AMQHandler();
-            self::$queueHandler->getRedisClient()->rpush( RedisKeys::FAST_PID_LIST, self::$tHandlerPID );
+            self::$queueHandler->getRedisClient()->sadd( RedisKeys::FAST_PID_SET, self::$tHandlerPID . ":" . gethostname() . ":" . (int) INIT::$INSTANCE_ID );
 
             $this->_updateConfiguration();
 
@@ -115,7 +124,7 @@ class FastAnalysis extends AbstractDaemon {
 
             try {
                 $this->_checkDatabaseConnection();
-                $projects_list = getProjectForVolumeAnalysis( 5 );
+                $projects_list = $this->_getLockProjectForVolumeAnalysis( 5 );
             } catch ( PDOException $e ){
                 self::_TimeStampMsg( $e->getMessage() . " - Error again. Try to reconnect in next cycle." );
                 sleep(3); // wait for reconnection
@@ -216,6 +225,7 @@ class FastAnalysis extends AbstractDaemon {
                 // INSERT DATA
 
                 self::_updateProject( $pid, $status );
+                FilesStorage::deleteFastAnalysisFile( $pid );
 
             }
 
@@ -239,9 +249,20 @@ class FastAnalysis extends AbstractDaemon {
         $myMemory = Engine::getInstance( 1 /* MyMemory */ );
 
         try {
-            $this->segments = self::_getSegmentsForFastVolumeAnalysis( $pid );
-        } catch( PDOException $e ) {
-            throw new Exception( "Error Fetching data for Project. Too large. Skip.", self::ERR_TOO_LARGE );
+
+            self::_TimeStampMsg( "Fetching data from disk" );
+            $this->segments = FilesStorage::getFastAnalysisData( $pid );
+
+        } catch ( UnexpectedValueException $e ) {
+
+            self::_TimeStampMsg( "Error Fetching data from disk. Fallback to database." );
+
+            try {
+                $this->segments = self::_getSegmentsForFastVolumeAnalysis( $pid );
+            } catch ( PDOException $e ) {
+                throw new Exception( "Error Fetching data for Project. Too large. Skip.", self::ERR_TOO_LARGE );
+            }
+
         }
 
         if ( count( $this->segments ) == 0 ) {
@@ -273,7 +294,6 @@ class FastAnalysis extends AbstractDaemon {
         }
 
         self::_TimeStampMsg( "Done." );
-
         self::_TimeStampMsg( "Pid $pid: " . count( $this->segments ) . " segments" );
         self::_TimeStampMsg( "Sending query to MyMemory analysis..." );
 
@@ -306,12 +326,12 @@ class FastAnalysis extends AbstractDaemon {
                 $run->RUNNING = false;
                 break;
             default :
-                $msg = str_pad( " FAST ANALYSIS " . getmypid() . " Received Signal $sig_no ", 50, "-", STR_PAD_BOTH );
+                $msg = str_pad( " FAST ANALYSIS " . getmypid() . ":" . gethostname() . ":" . INIT::$INSTANCE_ID . " Received Signal $sig_no ", 50, "-", STR_PAD_BOTH );
                 self::_TimeStampMsg( $msg );
                 break;
         }
 
-        $msg = str_pad( " FAST ANALYSIS " . getmypid() . " Caught Signal $sig_no ", 50, "-", STR_PAD_BOTH );
+        $msg = str_pad( " FAST ANALYSIS " . getmypid() . ":" . gethostname() . ":" . INIT::$INSTANCE_ID . " Caught Signal $sig_no ", 50, "-", STR_PAD_BOTH );
         self::_TimeStampMsg( $msg );
 
     }
@@ -323,9 +343,9 @@ class FastAnalysis extends AbstractDaemon {
         self::$tHandlerPID = null;
 
         //SHUTDOWN
-        self::$queueHandler->getRedisClient()->lrem( RedisKeys::FAST_PID_LIST, 0, self::$tHandlerPID );
+        self::$queueHandler->getRedisClient()->srem( RedisKeys::FAST_PID_SET, getmypid() . ":" . gethostname() . ":" . (int) INIT::$INSTANCE_ID );
 
-        $msg = str_pad( " FAST ANALYSIS " . self::$tHandlerPID . " HALTED GRACEFULLY ", 50, "-", STR_PAD_BOTH );
+        $msg = str_pad( " FAST ANALYSIS " . getmypid() . ":" . gethostname() . ":" . INIT::$INSTANCE_ID . " HALTED GRACEFULLY ", 50, "-", STR_PAD_BOTH );
         self::_TimeStampMsg( $msg );
 
         self::$queueHandler->getRedisClient()->disconnect();
@@ -539,6 +559,9 @@ class FastAnalysis extends AbstractDaemon {
 
                 try {
 
+                    //store the payable_rates array
+                    $jobs_payable_rates = $queue_element[ 'payable_rates' ];
+
                     $languages_job = explode( ",", $queue_element[ 'target' ] );  //now target holds more than one language ex: ( 80415:fr-FR,80416:it-IT )
                     //in memory replacement avoid duplication of the segment list
                     //send in queue every element * number of languages
@@ -548,6 +571,7 @@ class FastAnalysis extends AbstractDaemon {
 
                         $queue_element[ 'target' ] = $language;
                         $queue_element[ 'id_job' ] = $id_job;
+                        $queue_element[ 'payable_rates' ] = $jobs_payable_rates[ $id_job ]; // assign the right payable rate for the current job
 
                         $element = new QueueElement();
                         $element->params = $queue_element;
@@ -587,23 +611,24 @@ class FastAnalysis extends AbstractDaemon {
         //we want segments that we decided to show in cattool
         //and segments that are NOT locked ( already translated )
 
+        $query = <<<HD
+            SELECT concat( s.id, '-', group_concat( distinct concat( j.id, ':' , j.password ) ) ) AS jsid, s.segment, 
+                j.source, s.segment_hash, 
+                s.id as id,
+                s.raw_word_count,
+                GROUP_CONCAT( DISTINCT CONCAT( j.id, ':' , j.target ) ) AS target,
+                CONCAT( "{", GROUP_CONCAT( DISTINCT CONCAT( '"', j.id, '"', ':' , j.payable_rates ) SEPARATOR ',' ), "}" ) AS payable_rates
+            FROM segments AS s
+            INNER JOIN files_job AS fj ON fj.id_file = s.id_file
+            INNER JOIN jobs as j ON fj.id_job = j.id
+            LEFT JOIN segment_translations AS st ON st.id_segment = s.id
+                WHERE j.id_project = '$pid'
+                AND IFNULL( st.locked, 0 ) = 0
+                AND show_in_cattool != 0
+            GROUP BY s.id
+            ORDER BY s.id
+HD;
 
-
-        $query = "select concat( s.id, '-', group_concat( distinct concat( j.id, ':' , j.password ) ) ) as jsid, s.segment, j.source, s.segment_hash, s.id as id,
-
-		s.raw_word_count,
-		group_concat( distinct concat( j.id, ':' , j.target ) ) as target,
-		j.payable_rates
-
-		from segments as s
-		inner join files_job as fj on fj.id_file=s.id_file
-		inner join jobs as j on fj.id_job=j.id
-		left join segment_translations as st on st.id_segment = s.id
-		where j.id_project='$pid'
-		and IFNULL( st.locked, 0 ) = 0
-		and show_in_cattool != 0
-		group by s.id
-		order by s.id";
         $db    = Database::obtain();
         try {
             $results = $db->fetch_array( $query );
@@ -611,6 +636,13 @@ class FastAnalysis extends AbstractDaemon {
             Log::doLog( $e->getMessage() );
             throw $e;
         }
+
+        $results = array_map( function ( $segment ) {
+            $segment[ 'payable_rates' ] = array_map( function ( $rowPayable ) {
+                return json_encode( $rowPayable );
+            }, json_decode( $segment[ 'payable_rates' ], true ) );
+            return $segment;
+        }, $results );
 
         return $results;
     }
@@ -706,6 +738,51 @@ class FastAnalysis extends AbstractDaemon {
         }
 
         return $context;
+
+    }
+
+    protected function _getLockProjectForVolumeAnalysis( $limit = 1 ) {
+
+        $bindParams = [ 'project_status' => Constants_ProjectStatus::STATUS_NEW ];
+
+        $query_limit = " LIMIT " . (int)$limit;
+
+        $and_InstanceId = null;
+        if( !is_null( INIT::$INSTANCE_ID ) ){
+            $and_InstanceId = ' AND instance_id = :instance_id ';
+            $bindParams[ 'instance_id' ] = (int) INIT::$INSTANCE_ID;
+        }
+
+        $query = "
+        SELECT p.id, id_tms, id_mt_engine, tm_keys, p.pretranslate_100, GROUP_CONCAT( DISTINCT j.id ) AS jid_list
+            FROM projects p
+            INNER JOIN jobs j ON j.id_project=p.id
+            WHERE status_analysis = :project_status $and_InstanceId
+            GROUP BY 1
+        ORDER BY id $query_limit ;
+	";
+
+        $db    = Database::obtain();
+        //Needed to address the query to the master database if exists
+        \Database::obtain()->begin();
+
+        $stmt = $db->getConnection()->prepare( $query );
+        $stmt->execute( $bindParams );
+        $results = $stmt->fetchAll( PDO::FETCH_ASSOC );
+
+        $db->getConnection()->commit();
+
+        foreach( $results as $position => $project ){
+            //acquire a lock
+            $valid = self::$queueHandler->getRedisClient()->setnx( '_fPid:' . $project[ 'id' ], 1 );
+            if( !$valid ){
+                unset( $results[ $position ] );
+            } else {
+                self::$queueHandler->getRedisClient()->expire( '_fPid:' . $project[ 'id' ], 60 * 60 * 24 );
+            }
+        }
+
+        return $results;
 
     }
 

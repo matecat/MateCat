@@ -61,7 +61,7 @@ class FindByIdCostumerPojectTest extends AbstractTest
         $this->assertEquals($this->project['fast_analysis_wc'], $first_elem_result->fast_analysis_wc);
         $this->assertEquals($this->project['standard_analysis_wc'], $first_elem_result->standard_analysis_wc);
         $this->assertEquals($this->project['remote_ip_address'], $first_elem_result->remote_ip_address);
-        $this->assertEquals($this->project['for_debug'], $first_elem_result->for_debug);
+        $this->assertEquals($this->project['instance_number'], $first_elem_result->instance_number);
         $this->assertEquals($this->project['pretranslate_100'], $first_elem_result->pretranslate_100);
         $this->assertEquals($this->project['id_qa_model'], $first_elem_result->id_qa_model);
     }

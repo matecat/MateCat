@@ -28,9 +28,9 @@
 <header style="padding-bottom:5px" >
     <div class="wrapper">
         <a href="${basepath}" class="logo"></a>
-
+        <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/common.html/login_includes" />
         <a tal:attributes="href download_uri"  class="downloadtr-button backbtn">Download this report</a>
-        <a tal:attributes="href translate_url"  class="downloadtr-button backbtn" >< Back to Translation</a>
+        <a tal:attributes="href back_url"  class="downloadtr-button backbtn" >< ${back_label}</a>
     </div>
 </header>
 
@@ -224,7 +224,6 @@
                     <a href="https://www.matecat.com/support/" target="_blank">Support</a>
                 </li>
             </ul>
-            <div metal:use-macro="${php: INIT::$TEMPLATE_ROOT}/common.html/login_includes" />
         </nav>
     </div>
 </footer>

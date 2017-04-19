@@ -150,19 +150,7 @@ abstract class viewController extends controller {
         require_once INIT::$ROOT . '/inc/PHPTAL/PHPTAL.php';
 
         $this->setBrowserSupport();
-
-        //try to get user name from cookie if it is not present and put it in session
-        if ( empty( $_SESSION[ 'cid' ] ) ) {
-
-            //log::doLog(get_class($this)." requires check for login");
-            $username_from_cookie = AuthCookie::getCredentials();
-            if ( $username_from_cookie ) {
-                $_SESSION[ 'cid' ] = $username_from_cookie['username'];
-                $_SESSION[ 'uid' ] = $username_from_cookie['uid'];
-            }
-
-        }
-
+        $this->_setUserFromAuthCookie();
         $this->setUserCredentials();
 
         if( $isAuthRequired  ) {
@@ -337,13 +325,18 @@ abstract class viewController extends controller {
      * template. This is the pleace where to set variables like user_id, email address and so on.
      */
     private function setTemplateFinalVars() {
-        $this->template->logged_user   = $this->logged_user->shortName() ;
-        $this->template->extended_user = $this->logged_user->fullName() ;
 
-        $this->template->isLoggedIn    = $this->isLoggedIn();
-        $this->template->userMail      = $this->logged_user->getEmail() ;
+        if( $this->logged_user instanceof Users_UserStruct ){
+            $this->template->logged_user   = $this->logged_user->shortName() ;
+            $this->template->extended_user = $this->logged_user->fullName() ;
 
-        $this->collectFlashMessages();
+            $this->template->isLoggedIn    = $this->isLoggedIn();
+            $this->template->userMail      = $this->logged_user->getEmail() ;
+            $this->collectFlashMessages();
+        } else {
+            Log::doLog( "Bad Configuration" );
+        }
+
     }
 
     /**
@@ -425,4 +418,5 @@ abstract class viewController extends controller {
         $messages = FlashMessage::flush() ;
         $this->template->flashMessages = $messages ;
     }
+
 }

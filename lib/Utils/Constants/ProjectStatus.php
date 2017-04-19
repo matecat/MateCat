@@ -9,10 +9,27 @@
 class Constants_ProjectStatus {
 
     const STATUS_NOT_READY_FOR_ANALYSIS = 'NOT_READY_FOR_ANALYSIS';
+    const STATUS_LOCKED_BY_FAST         = 'STATUS_LOCKED_BY_FAST';
     const STATUS_NOT_TO_ANALYZE         = 'NOT_TO_ANALYZE';
     const STATUS_EMPTY                  = 'EMPTY';
     const STATUS_NEW                    = 'NEW';
     const STATUS_FAST_OK                = 'FAST_OK';
     const STATUS_DONE                   = 'DONE';
+
+    const PROJECT_QUEUE_HASH            = 'project_completed:%u';
+
+    public static $ALLOWED_STATUSES = [
+            self::STATUS_DONE,
+            self::STATUS_FAST_OK,
+            self::STATUS_NEW,
+            self::STATUS_EMPTY,
+            self::STATUS_NOT_TO_ANALYZE,
+            self::STATUS_NOT_READY_FOR_ANALYSIS,
+            self::STATUS_LOCKED_BY_FAST
+    ];
+
+    public static function isAllowedStatus( $status ){
+        return in_array( strtoupper( $status ), self::$ALLOWED_STATUSES );
+    }
 
 } 

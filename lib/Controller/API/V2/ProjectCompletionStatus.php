@@ -3,6 +3,7 @@
 namespace API\V2 ;
 
 use Features ;
+use API\V2\Validators\ProjectValidator;
 
 class ProjectCompletionStatus extends KleinController {
 

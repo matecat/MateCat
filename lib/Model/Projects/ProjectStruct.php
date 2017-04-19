@@ -1,10 +1,13 @@
 <?php
 
+use Teams\TeamDao;
+
 class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct {
     public $id ;
     public $password ;
     public $name ;
     public $id_customer ;
+    public $id_team ;
     public $create_date ;
     public $id_engine_tm ;
     public $id_engine_mt ;
@@ -12,9 +15,10 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     public $fast_analysis_wc ;
     public $standard_analysis_wc ;
     public $remote_ip_address ;
-    public $for_debug ;
+    public $instance_number ;
     public $pretranslate_100 ;
     public $id_qa_model ;
+    public $id_assignee ;
 
 
     /**
@@ -24,18 +28,6 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
         return
                 $this->status_analysis == Constants_ProjectStatus::STATUS_DONE ||
                 $this->status_analysis == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE ;
-    }
-    /**
-     * @param $feature_code
-     *
-     * @return OwnerFeatures_OwnerFeatureStruct
-     */
-    public function getOwnerFeature( $feature_code ) {
-        $ret = OwnerFeatures_OwnerFeatureDao::getByOwnerEmailAndCode(
-            $feature_code, $this->id_customer
-        );
-
-        return $ret ;
     }
 
     /**
@@ -89,6 +81,17 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     }
 
     /**
+     * @return null|\Teams\TeamStruct
+     */
+    public function getTeam() {
+        if ( is_null( $this->id_team ) ) {
+            return null ;
+        }
+        $dao = new TeamDao() ;
+        return $dao->findById( $this->id_team ) ;
+    }
+
+    /**
      * @param $feature_code
      *
      * @return bool
@@ -96,8 +99,18 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
      * @deprecated feature enabled for a created project should be decided based on project metadata
      */
     public function isFeatureEnabled( $feature_code ) {
-        $feature = $this->getOwnerFeature( $feature_code );
-        return \Features::enabled($feature, $this);
+        return in_array($feature_code, $this->getFeatures()->getCodes() );
+    }
+
+    /**
+     * @return FeatureSet
+     */
+    public function getFeatures() {
+        return $this->cachable(__METHOD__, $this, function( Projects_ProjectStruct $project ) {
+            $featureSet = new FeatureSet() ;
+            $featureSet->loadForProject( $project );
+            return $featureSet ;
+        });
     }
 
     /**

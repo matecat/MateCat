@@ -1,4 +1,5 @@
 <?php
+use Teams\MembershipDao;
 
 /**
  * Created by PhpStorm.
@@ -70,9 +71,26 @@ class Users_UserStruct extends DataAccess_AbstractDaoSilentStruct   implements D
         return $this->last_name;
     }
 
+    /**
+     * @return null|\Teams\TeamStruct
+     */
+    public function getPersonalTeam() {
+        $oDao = new \Teams\TeamDao();
+        $oDao->setCacheTTL( 60 * 60 * 24 );
+        return $oDao->getPersonalByUser( $this );
+    }
+
+    /**
+     * @return \Teams\TeamStruct[]|null
+     */
+    public function getUserTeams(){
+        $mDao = new MembershipDao();
+        return $mDao->findUserTeams( $this );
+    }
+
     public function getMetadataAsKeyValue() {
         $dao = new \Users\MetadataDao() ;
-        $collection = $dao->allByProjectId($this->uid) ;
+        $collection = $dao->getAllByUid($this->uid) ;
         $data  = array();
         foreach ($collection as $record ) {
             $data[ $record->key ] = $record->value;

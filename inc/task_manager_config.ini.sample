@@ -36,6 +36,15 @@ P3[max_executors] = 1
 P3[redis_key]     = "p3_list"
 P3[loggerName]    = "tm_analysis_P3.log"
 
+;;##################################
+;;##### Key Name project_queue #####
+;;##################################
+PROJECT_QUEUE[queue_name]    = "project_queue"
+PROJECT_QUEUE[pid_set_name]  = "ch_pid_project_queue"
+PROJECT_QUEUE[max_executors] = 1
+PROJECT_QUEUE[redis_key]     = "project_queue_list"
+PROJECT_QUEUE[loggerName]    = "project_queue.log"
+
 ;;##############################
 ;;##### Key Name MailQueue #####
 ;;##############################

@@ -10,4 +10,6 @@ abstract class Base {
         $this->request = $request ;
     }
 
+    abstract function validate();
+
 }

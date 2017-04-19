@@ -34,22 +34,7 @@ class Bootstrap {
         require_once 'Predis/autoload.php';
         @include_once 'vendor/autoload.php';
 
-        if ( stripos( PHP_SAPI, 'cli' ) === false ) {
-
-            register_shutdown_function( 'Bootstrap::sessionClose' );
-
-            INIT::$PROTOCOL = isset( $_SERVER[ 'HTTPS' ] ) ? "https" : "http";
-            INIT::$HTTPHOST = INIT::$PROTOCOL . "://" . $_SERVER[ 'HTTP_HOST' ];
-
-        } else {
-            // Possible CLI configurations. We definitely don't want sessions in our cron scripts
-            //
-            // Read HTTPHOST from config.ini
-            INIT::$HTTPHOST ;
-        }
-
         INIT::$OAUTH_CONFIG = $OAUTH_CONFIG[ 'OAUTH_CONFIG' ];
-        INIT::obtain();
 
         // Overridable defaults
         INIT::$ROOT                           = self::$_ROOT; // Accessible by Apache/PHP
@@ -73,6 +58,8 @@ class Bootstrap {
         INIT::$FILES_REPOSITORY                = INIT::$STORAGE_DIR . "/files_storage/files";
         INIT::$CACHE_REPOSITORY                = INIT::$STORAGE_DIR . "/files_storage/cache";
         INIT::$ZIP_REPOSITORY                  = INIT::$STORAGE_DIR . "/files_storage/originalZip";
+        INIT::$ANALYSIS_FILES_REPOSITORY       = INIT::$STORAGE_DIR . "/files_storage/fastAnalysis";
+        INIT::$QUEUE_PROJECT_REPOSITORY        = INIT::$STORAGE_DIR . "/files_storage/queueProjects";
         INIT::$CONVERSIONERRORS_REPOSITORY     = INIT::$STORAGE_DIR . "/conversion_errors";
         INIT::$CONVERSIONERRORS_REPOSITORY_WEB = INIT::$BASEURL . "storage/conversion_errors";
         INIT::$TMP_DOWNLOAD                    = INIT::$STORAGE_DIR . "/tmp_download";
@@ -84,10 +71,13 @@ class Bootstrap {
 
         INIT::$TASK_RUNNER_CONFIG = @parse_ini_file( 'task_manager_config.ini', true );
 
-        WorkerClient::init();
-
-        Database::obtain ( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-        Log::$uniqID = ( isset( $_COOKIE['PHPSESSID'] ) ? substr( $_COOKIE['PHPSESSID'], 0 , 13 ) : uniqid() );
+        try {
+            Log::$uniqID = ( isset( $_COOKIE['PHPSESSID'] ) ? substr( $_COOKIE['PHPSESSID'], 0 , 13 ) : uniqid() );
+            WorkerClient::init();
+            Database::obtain ( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+        } catch( \Exception $e ){
+            Log::doLog( $e->getMessage() );
+        }
 
         if ( !is_dir( INIT::$STORAGE_DIR ) ) {
             mkdir( INIT::$STORAGE_DIR, 0755, true );
@@ -104,6 +94,9 @@ class Bootstrap {
         if ( !is_dir( INIT::$CACHE_REPOSITORY ) ) {
             mkdir( INIT::$CACHE_REPOSITORY, 0755, true );
         }
+        if ( !is_dir( INIT::$ANALYSIS_FILES_REPOSITORY ) ) {
+            mkdir( INIT::$ANALYSIS_FILES_REPOSITORY, 0755, true );
+        }
         if ( !is_dir( INIT::$ZIP_REPOSITORY ) ) {
             mkdir( INIT::$ZIP_REPOSITORY, 0755, true );
         }
@@ -112,6 +105,9 @@ class Bootstrap {
         }
         if ( !is_dir( INIT::$TMP_DOWNLOAD) ) {
             mkdir( INIT::$TMP_DOWNLOAD, 0755, true );
+        }
+        if ( !is_dir( INIT::$QUEUE_PROJECT_REPOSITORY) ) {
+            mkdir( INIT::$QUEUE_PROJECT_REPOSITORY, 0755, true );
         }
 
         //auth sections
@@ -250,7 +246,12 @@ class Bootstrap {
     }
 
     public static function sessionStart() {
-        @session_start();
+        $session_status = session_status();
+        if( $session_status == PHP_SESSION_NONE ){
+            session_start();
+        } elseif( $session_status == PHP_SESSION_DISABLED ){
+            throw new \Exception( "MateCat needs to have sessions. Sessions must be enabled." );
+        }
     }
 
     protected static function _setIncludePath( $custom_paths = null ) {
@@ -289,6 +290,7 @@ class Bootstrap {
             $fileName  = str_replace( '\\', DIRECTORY_SEPARATOR, $namespace ) . DIRECTORY_SEPARATOR;
         }
         $fileName .= str_replace( '_', DIRECTORY_SEPARATOR, $className ) . '.php';
+        /** @noinspection PhpIncludeInspection */
         @include $fileName;
 
     }
@@ -315,7 +317,7 @@ class Bootstrap {
      */
     public static function getEnvConfigKey( $key ) {
         $config = self::getEnvConfig() ;
-        return $config[ $key ] ;
+        return @$config[ $key ] ;
     }
 
     /**
@@ -339,6 +341,18 @@ class Bootstrap {
             }
 
         }
+
+        if ( stripos( PHP_SAPI, 'cli' ) === false ) {
+
+            register_shutdown_function( 'Bootstrap::sessionClose' );
+            INIT::$PROTOCOL = isset( $_SERVER[ 'HTTPS' ] ) ? "https" : "http";
+            INIT::$HTTPHOST = INIT::$PROTOCOL . "://" . $_SERVER[ 'HTTP_HOST' ];
+
+        } else {
+            INIT::$HTTPHOST = $env[ 'CLI_HTTP_HOST' ];
+        }
+
+        INIT::obtain(); //load configurations
 
         $fileSystem = trim( shell_exec( "df -T " . escapeshellcmd( INIT::$STORAGE_DIR ) . "/files_storage/ | awk '{print $2 }' | sed -n 2p" ) );
 

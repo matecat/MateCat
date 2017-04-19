@@ -30,8 +30,10 @@ class Database implements IDatabase {
 
 
     const SEQ_ID_SEGMENT = 'id_segment';
+    const SEQ_ID_PROJECT = 'id_project';
     protected static $SEQUENCES = [
-            Database::SEQ_ID_SEGMENT
+            Database::SEQ_ID_SEGMENT,
+            Database::SEQ_ID_PROJECT
     ];
 
     /**
@@ -137,6 +139,7 @@ class Database implements IDatabase {
         if ( ! $this->getConnection()->inTransaction() ) {
             $this->getConnection()->beginTransaction();
         }
+        return $this->getConnection();
     }
 
 
@@ -181,8 +184,11 @@ class Database implements IDatabase {
 
 
     /**
+     * @deprecated
      * @Override
      * {@inheritdoc}
+     * @deprecated
+     * TODO: Re-implement with prepared statement
      */
     public function fetch_array($query) {
         $result = $this->query($query);

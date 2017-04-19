@@ -106,6 +106,7 @@
 <header>
     <div class="wrapper">
         <a href="${basepath}" class="logo"></a>
+        <div metal:use-macro="common.html/login_includes" />
         <ul class="pull-right" id="menu-site">
             <li><a href="https://www.matecat.com/benefits/">Benefits</a></li>
             <li><a href="https://www.matecat.com/outsourcing/">Outsource</a></li>
@@ -115,6 +116,7 @@
             <li><a href="https://www.matecat.com/support/">Support</a></li>
             <li><a class="bigred" href="https://www.matecat.com/webinar" target="_blank">Webinar</a></li>
         </ul>
+
     </div>
     <div class="cl"></div>
 </header>
@@ -176,7 +178,6 @@
                     <li><a tal:attributes="href string:${basepath}manage/">Manage</a></li>
                 </tal:block>
             </ul>
-            <div metal:use-macro="common.html/login_includes" />
         </nav>
     </div>
 </footer>

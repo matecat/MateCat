@@ -11,6 +11,8 @@ $klein->with('/api/v2/projects/[:id_project]/[:password]', function() {
 
     route( '/urls',                 'GET',  'API\V2\UrlsController',        'urls'      );
     route( '/jobs/[:id_job]/merge', 'POST', 'API\V2\JobMergeController',    'merge'     );
+    route( '/creation_status',      'GET',  'API\V2\ProjectCreationStatusController',   'get' );
+    route( '/rename', 'POST', 'API\V2\ProjectRenameController',    'rename'     );
 
 });
 
@@ -125,7 +127,18 @@ route(
     '\API\V2\GlossariesController', 'download'
 );
 
+route( '/api/v2/ping', 'HEAD', '\API\V2\KeyCheckController', 'ping' );
 
-route(
-    '/api/v2/ping', 'HEAD', '\API\V2\KeyCheckController', 'ping'
-);
+$klein->with('/api/v2/teams', function() {
+
+    route( '',                    'POST', '\API\V2\TeamsController', 'create') ;
+    route( '/[i:id_team]', 'PUT',  '\API\V2\TeamsController', 'update' ) ;
+
+    route( '/[i:id_team]/members', 'POST', '\API\V2\TeamMembersController', 'update') ;
+    route( '/[i:id_team]/members', 'GET',  '\API\V2\TeamMembersController', 'index' ) ;
+    route( '/[i:id_team]/members/[i:uid_member]', 'DELETE' , '\API\V2\TeamMembersController', 'delete' );
+
+    route( '/[i:id_team]/projects/[i:id_project]', 'PUT', 'API\V2\ProjectsController', 'update' ) ;
+
+}) ;
+

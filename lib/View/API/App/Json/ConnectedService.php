@@ -26,8 +26,10 @@ class ConnectedService {
 
     public function render() {
         $out = [] ;
-        foreach( $this->data as $k => $v ) {
-            $out[] = $this->renderItem( $v ) ;
+        if( !empty( $this->data ) ) {
+            foreach ( $this->data as $k => $v ) {
+                $out[] = $this->renderItem( $v );
+            }
         }
         return $out ;
     }

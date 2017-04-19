@@ -61,11 +61,27 @@ abstract class AbstractEmail
         return ob_get_clean();
     }
 
-    protected function _buildHTMLMessage(){
+    protected function _buildHTMLMessage( $messageContent = null ){
         ob_start();
-        extract( $this->_getLayoutVariables(), EXTR_OVERWRITE );
+        extract( $this->_getLayoutVariables( $messageContent ), EXTR_OVERWRITE );
         include( $this->_layout_path );
         return ob_get_clean();
+    }
+
+    protected function _getLayoutVariables( $messageBody = null ) {
+
+        if ( isset( $this->title ) ) {
+            $title = $this->title ;
+        } else {
+            $title = 'MateCat' ;
+        }
+
+        return array(
+                'title' => $title,
+                'messageBody' => ( !empty( $messageBody ) ? $messageBody : $this->_buildMessageContent() ),
+                'closingLine' => "Kind regards, ",
+                'showTitle' => false
+        );
     }
 
     protected function _getDefaultMailConf() {
@@ -75,9 +91,15 @@ abstract class AbstractEmail
         $mailConf[ 'port' ]       = INIT::$SMTP_PORT;
         $mailConf[ 'sender' ]     = INIT::$SMTP_SENDER;
         $mailConf[ 'hostname' ]   = INIT::$SMTP_HOSTNAME;
+
         $mailConf[ 'from' ]       = INIT::$SMTP_SENDER;
         $mailConf[ 'fromName' ]   = INIT::$MAILER_FROM_NAME;
         $mailConf[ 'returnPath' ] = INIT::$MAILER_RETURN_PATH;
+
+        // TODO: move this into config
+        $mailconf[ 'from' ]       = 'noreply@matecat.com';
+        $mailconf[ 'sender' ]     = 'noreply@matecat.com';
+        $mailconf[ 'returnpath' ] = 'noreply@matecat.com';
 
         return $mailConf ;
     }
@@ -105,15 +127,9 @@ abstract class AbstractEmail
     protected function _buildTxtMessage( $messageBody ){
         $messageBody = preg_replace( "#<[/]*span[^>]*>#i", "\r\n", $messageBody );
         $messageBody = preg_replace( "#<[/]*(ol|ul|li)[^>]*>#i", "\r\n", $messageBody );
+        $messageBody = preg_replace( "#<[/]*(p)[^>]*>#i", "", $messageBody );
+        $messageBody = preg_replace( "#<a.*?href=[\"'](.*)[\"'][^>]*>(.*?)</a>#i", "$2 $1", $messageBody );
         return preg_replace( "#<br[^>]*>#i", "\r\n", $messageBody );
-    }
-
-    protected function _getLayoutVariables() {
-        return array(
-            'title' => 'MateCat',
-            'messageBody' => $this->_buildMessageContent(),
-            'closingLine' => "Kind regards, "
-        );
     }
 
 }

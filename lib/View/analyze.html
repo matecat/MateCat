@@ -7,8 +7,8 @@
     <meta name="viewport" content="width=device-width"/>
 
     <link href="${basepath}public/css/build/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>
-    <link rel="stylesheet" href="${basepath}public/css/analyze.css?build=${build_number}"/>
     <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
+    <link rel="stylesheet" href="${basepath}public/css/analyze.css?build=${build_number}"/>
 
     <script type="text/javascript">
         var config = {
@@ -50,6 +50,7 @@
 <header>
     <div class="wrapper">
         <a href="${basepath}" class="logo"></a>
+        <div metal:use-macro="common.html/login_includes" />
     </div>
 </header>
 
@@ -329,7 +330,8 @@
 
         <h1>Split <span class="jid" data-jid="">Job</span><span class="chunks" style="display: none;">x</span></h1>
         <div class="splitbtn-cont">
-            <h2 class="popup-split-job-title"> Title </h2>
+            <h2 class="popup-split-project-title"> Job Lang </h2>
+            <h3><span class="popup-split-job-id"></span><span class="popup-split-job-title"> Job Lang </span></h3>
             <span class="label left">Split in</span>
             <select name="popup-splitselect" class="splitselect left">
                 <option value="2">2</option>
@@ -446,11 +448,9 @@
 
         <nav>
             <ul>
-                <li><a tal:attributes="href string:${basepath}manage/">Manage</a></li>
+                <li><a class="link-manage-page" >Manage</a></li>
                 <li><a href="https://www.matecat.com/support/" target="_blank">Support</a></li>
             </ul>
-
-            <div metal:use-macro="common.html/login_includes" />
 
         </nav>
 

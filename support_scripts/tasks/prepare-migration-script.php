@@ -1,6 +1,6 @@
-<?php 
+<?php
 
-$root = realpath(dirname(__FILE__) . '/../../');
+$root = realpath( dirname( __FILE__ ) . '/../../' );
 include_once $root . "/inc/Bootstrap.php";
 Bootstrap::start();
 
@@ -8,32 +8,36 @@ Bootstrap::start();
 # the give email, and print the result on screen .
 
 function usage() {
-  echo "Usage: \n
+    echo "Usage: \n
 --migrations=[comma_separated_timestamps]
 ";
 
-  exit; 
+    exit;
 }
 
-$options = getopt( 'h', array( 'migrations:') );
+$options = getopt( 'h', array( 'migrations:' ) );
 
-if (array_key_exists('h', $options))          usage() ;
-if (empty($options['migrations']))            usage() ;
+if ( array_key_exists( 'h', $options ) ) {
+    usage();
+}
+if ( empty( $options[ 'migrations' ] ) ) {
+    usage();
+}
 
-$migrations = explode(',', $options['migrations']);
+$migrations = explode( ',', $options[ 'migrations' ] );
 
 # find corresponding classes
 #
-$filenames = array(); 
-foreach($migrations as $migration) {
-  $name = $root . "/migrations/$migration*" ; 
-  $file = glob( $name ); 
-  if (empty($file)) {
-    echo "Migration for pattern $name does not exist"; 
-    die();
-  }
+$filenames = array();
+foreach ( $migrations as $migration ) {
+    $name = $root . "/migrations/$migration*";
+    $file = glob( $name );
+    if ( empty( $file ) ) {
+        echo "Migration for pattern $name does not exist";
+        die();
+    }
 
-  $filenames[$migration] = $file[0];
+    $filenames[ $migration ] = $file[ 0 ];
 
 }
 
@@ -52,32 +56,38 @@ CREATE TABLE IF NOT EXISTS `phinxlog` (
 
 EOF;
 
-echo $createSchemaTable ; 
+echo $createSchemaTable;
 
-foreach($filenames as $migration => $filename) {
-  include $filename ; 
+foreach ( $filenames as $migration => $filename ) {
+    include $filename;
 
-  list($skip, $name) = preg_split('/_/', $filename, 2);
+    list( $skip, $name ) = preg_split( '/_/', $filename, 2 );
 
-  $name = str_replace('.php', '', $name); 
+    $name = str_replace( '.php', '', $name );
 
-  $class = Phinx\Migration\Util::mapFileNameToClassName($name); 
-  $instance = new $class($migration); 
-  $start_date = $stop_date = date('Y-m-d H:m:s');
+    $class      = Phinx\Migration\Util::mapFileNameToClassName( $name );
+    $instance   = new $class( $migration );
+    $start_date = $stop_date = date( 'Y-m-d H:m:s' );
 
-  echo "\n"; 
-  echo "-- start migration number $migration \n";
-  echo $instance->sql_up; 
-  echo "\n";
+    echo "\n";
+    echo "-- start migration number $migration \n";
 
-  echo <<<EOF
+    if ( is_array( $instance->sql_up ) ) {
+        foreach ( $instance->sql_up as $sql ) {
+            echo $sql . ";\n";
+        }
+    } else {
+        echo $instance->sql_up . ";\n";
+    }
+
+    echo <<<EOF
 
 INSERT INTO phinxlog VALUES ( $migration, null, '$start_date', '$stop_date'); 
 
 EOF;
 
-  echo "-- end migrations number $migration \n";
-  
+    echo "-- end migrations number $migration \n";
+
 }
 
 

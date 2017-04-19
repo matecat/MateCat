@@ -1223,10 +1223,8 @@ $.extend(UI, {
 			e.preventDefault();
 
 			if (!($('#segment-' + UI.currentSegmentId).length)) {
-				$('#outer').empty();
-				UI.render({
-					firstLoad: false
-				});
+				UI.unmountSegments();
+				UI.render();
 			} else {
 				UI.scrollSegment(UI.currentSegment);
 			}
@@ -1267,7 +1265,6 @@ $.extend(UI, {
 				UI.gotoOpenSegment();
 			} else {
 				UI.render({
-					firstLoad: false,
 					segmentToOpen: UI.currentSegmentId
 				});
 			}

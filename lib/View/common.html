@@ -41,16 +41,33 @@
 
 
 
-<div metal:define-macro="login_includes" style="float: left">
+<!--<div metal:define-macro="login_includes" style="float: left">-->
+    <!--<tal:block tal:condition="php: empty(logged_user)">-->
+        <!--<div id='welcomebox'>-->
+            <!--<span>Anonymous</span> (<a id='loginlink' class="authLink" href="javascript:void(0);">Login</a>)-->
+        <!--</div>-->
+    <!--</tal:block>-->
+
+    <!--<tal:block tal:condition="php: !empty(logged_user)">-->
+        <!--<div id='welcomebox' tal:attributes="title extended_user">-->
+            <!--<span class="user-menu-preferences" >Profile (${logged_user})</span>-->
+        <!--</div>-->
+    <!--</tal:block>-->
+<!--</div>-->
+
+<div metal:define-macro="login_includes">
     <tal:block tal:condition="php: empty(logged_user)">
-        <div id='welcomebox'>
-            <span>Anonymous</span> (<a id='loginlink' class="authLink" href="javascript:void(0);">Login</a>)
+        <div class="position-sing-in">
+            <div class="ui user-nolog label open-login-modal sing-in-header" >
+                <i class="icon-user22 "/>
+            </div>
         </div>
     </tal:block>
 
     <tal:block tal:condition="php: !empty(logged_user)">
-        <div id='welcomebox' tal:attributes="title extended_user">
-            <span class="user-menu-preferences" >Profile (${logged_user})</span>
+        <div class="user-menu-container">
+            <div class="ui user label user-menu-preferences edit-log">${logged_user}</div>
+            <div class="organization-name"></div>
         </div>
     </tal:block>
 </div>

@@ -26,7 +26,24 @@ if (QaCheckBlacklist.enabled() )
         });
         $('.blacklistItem', editarea).data({ 'powertipjq' : $('<div class="blacklistTooltip">Blacklisted term</div>') });
     }
-
+    /*
+    * Can be called externaly (by LexiQA) to reload powerip
+    * and add the click handler - which have been removed after the HTML was replaced
+    */
+    function reloadPowertip(editarea) {
+        $('.blacklistItem', editarea).powerTip({
+            placement : 's'
+        });
+        $('.blacklistItem', editarea).data({ 'powertipjq' : $('<div class="blacklistTooltip">Blacklisted term</div>') });
+        $('.blacklistItem', editarea).on('click', blacklistItemClick);
+    }
+    /*
+    * Can be called externaly (by LexiQA) to destroy powtip and prevent
+    * memory leak when HTML is replaced
+    */
+    function destroyPowertip(editarea) {
+        $.powerTip.destroy($('.blacklistItem', editarea));
+    }
     /**
      *
      * @param editarea
@@ -43,7 +60,8 @@ if (QaCheckBlacklist.enabled() )
             editarea[0].normalize() ;
 
             var newHTML = editarea.html() ;
-
+            if (LXQ.enabled())
+              newHTML = LXQ.cleanUpHighLighting(newHTML);
             $(matched_words).each(function(index, value) {
                 value = escapeRegExp( value );
                 var re = new RegExp('\\b(' + value + ')\\b',"g");
@@ -98,7 +116,6 @@ if (QaCheckBlacklist.enabled() )
         }
 
         globalWarnings = data.resp.data.blacklist ;
-
         renderGlobalWarnings() ;
     });
 
@@ -115,8 +132,9 @@ if (QaCheckBlacklist.enabled() )
         updateBlacklistItemsInSegment( editarea, matched_words );
     });
 
+    $.extend(QaCheckBlacklist, {
+        reloadPowertip : reloadPowertip,
+        destroyPowertip: destroyPowertip
+    });
+
 })(jQuery, UI );
-
-
-
-

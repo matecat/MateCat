@@ -125,7 +125,8 @@ FROM segment_translations st
        AND otv.version_number = 0
 
   LEFT JOIN qa_entries issues
-    ON issues.id_segment = st.id_segment
+    ON issues.id_job = jobs.id
+    AND issues.id_segment = s.id
     AND issues.translation_version = st.version_number
 
   LEFT JOIN qa_entry_comments comments

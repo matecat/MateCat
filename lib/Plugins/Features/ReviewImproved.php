@@ -73,37 +73,35 @@ class ReviewImproved extends BaseFeature {
         return $options ;
     }
 
+
     /**
-     * This filter is to store the review_password in the data strucutre
-     * to be passed back to the javascript.
+     *
+     * @param $project
      */
-    public function filter_manage_projects_loaded( $projects ) {
+    public function filter_manage_single_project( $project ) {
         $chunks = array();
-        foreach( $projects as $project ) {
-            foreach( $project['jobs'] as $job ) {
+
+        foreach( $project['jobs'] as $job ) {
                 $chunks[] = array( $job['id'], $job['password'] );
-            }
         }
 
         $chunk_reviews = \LQA\ChunkReviewDao::findChunkReviewsByChunkIds( $chunks );
 
-        foreach( $projects as $k => $project ) {
-            foreach( $project['jobs'] as $kk => $job ) {
-                /**
-                 * Inner cycle to match chunk_reviews records and modify
-                 * the data structure.
-                 */
-                foreach( $chunk_reviews as $chunk_review ) {
-                    if ( $chunk_review->id_job == $job['id'] &&
-                        $chunk_review->password == $job['password']
-                    ) {
-                        $projects[$k]['jobs'][$kk]['review_password'] = $chunk_review->review_password ;
-                    }
+        foreach( $project['jobs'] as $kk => $job ) {
+            /**
+             * Inner cycle to match chunk_reviews records and modify
+             * the data structure.
+             */
+            foreach( $chunk_reviews as $chunk_review ) {
+                if ( $chunk_review->id_job == $job['id'] &&
+                    $chunk_review->password == $job['password']
+                ) {
+                    $project['jobs'][$kk]['review_password'] = $chunk_review->review_password ;
                 }
             }
         }
 
-        return $projects ;
+        return $project ;
     }
 
     /**
@@ -192,7 +190,7 @@ class ReviewImproved extends BaseFeature {
     public function validateProjectCreation($projectStructure)  {
         $this->feature_options = json_decode( $this->feature->options );
 
-        if ( $this->feature_options->id_qa_model ) {
+        if ( property_exists($this->feature_options, 'id_qa_model' ) ) {
             // pass
         } else {
             $this->validateModeFromJsonFile($projectStructure);

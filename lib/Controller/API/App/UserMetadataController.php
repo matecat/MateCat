@@ -12,38 +12,36 @@ namespace API\App;
 use API\V2\KleinController;
 use Exceptions\NotFoundError;
 use Users\MetadataDao;
-use Users\MetadataModel ;
+use Users\MetadataModel;
 
-class UserMetadataController extends AbstractStatefulKleinController
-{
+class UserMetadataController extends AbstractStatefulKleinController {
 
     public function update() {
         // TODO
 
-        $dao = new \Users_UserDao();
-        $user = $dao->getByUid( $_SESSION['uid'] ) ;
+        $dao  = new \Users_UserDao();
+        $user = $dao->getByUid( $_SESSION[ 'uid' ] );
 
         if ( !$user ) {
-            throw new NotFoundError('user not found') ;
+            throw new NotFoundError( 'user not found' );
         }
 
-        $model = new MetadataModel( $user, $this->request->param('metadata') ) ;
+        $model = new MetadataModel( $user, $this->request->param( 'metadata' ) );
 
-        $model->save() ;
-        $data = $user->getMetadataAsKeyValue() ;
+        $model->save();
+        $data = $user->getMetadataAsKeyValue();
         if ( empty ( $data ) ) {
-            $data = null ;
+            $data = null;
         }
 
         $this->response->json(
-            $data
+                $data
         );
 
     }
 
-    protected function afterConstruct()
-    {
-        // TODO: Implement afterConstruct() method.
+    protected function afterConstruct() {
+        \Bootstrap::sessionClose();
     }
 
 

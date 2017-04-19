@@ -56,7 +56,7 @@ class RedisKeys {
     /**
      * Key that holds the process ids of all fast analyses
      */
-    const FAST_PID_LIST = 'fast_pid_list';
+    const FAST_PID_SET = 'fast_pid_set';
 
     /**
      * Key that holds the lock for the first analysis demon child

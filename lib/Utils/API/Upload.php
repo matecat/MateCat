@@ -114,8 +114,8 @@ class Upload {
         $fileName    = $fileUp[ 'name' ];
         $fileTmpName = $fileUp[ 'tmp_name' ];
         $fileType    = $fileUp[ 'type' ];
-        $fileError = $fileUp[ 'error' ];
-        $fileSize  = $fileUp[ 'size' ];
+        $fileError   = $fileUp[ 'error' ];
+        $fileSize    = $fileUp[ 'size' ];
 
         $fileUp = (object)$fileUp;
 
@@ -288,7 +288,7 @@ class Upload {
 
         foreach ( INIT::$SUPPORTED_FILE_TYPES as $key => $value ) {
             foreach ( $value as $typeSupported => $value2 ) {
-                if ( preg_match( '/\.' . $typeSupported . '$/i', $fileUp->type ) ) {
+                if ( property_exists($fileUp, 'type') && preg_match( '/\.' . $typeSupported . '$/i', $fileUp->type ) ) {
                     return true;
                 }
             }

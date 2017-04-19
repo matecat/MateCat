@@ -49,12 +49,15 @@ $.extend(APP, {
             };
             APP.ModalWindow.showModalComponent(ForgotPasswordModal, props, "Forgot Password", style);
         });
-        $('#modal').on('openregister', function () {
+        $('#modal').on('openregister', function (e, param) {
             var props = {
                 googleUrl: config.authURL
             };
             if (config.showModalBoxLogin == 1) {
                 props.redeemMessage = true
+            }
+            if (param) {
+                $.extend(props, param);
             }
             APP.ModalWindow.showModalComponent(RegisterModal, props, "Register Now");
         });
@@ -83,6 +86,10 @@ $.extend(APP, {
             APP.ModalWindow.showModalComponent(LoginModal, props, title, style);
         });
 
+        $('.link-manage-page').on('click', function () {
+            APP.openManagePage();
+        });
+
         //Link footer
         $('.user-menu-preferences').on('click', function (e) {
             e.preventDefault();
@@ -91,7 +98,7 @@ $.extend(APP, {
             return false;
         });
 
-        $('#welcomebox:has(.authLink)').click(function(e){
+        $('.open-login-modal').click(function(e){
             e.preventDefault();
             e.stopPropagation();
             $('#modal').trigger('openlogin');
@@ -118,6 +125,7 @@ $.extend(APP, {
 
         this.checkForPopupToOpen();
     },
+
     checkForPopupToOpen: function () {
 
         var openFromFlash = APP.lookupFlashServiceParam("popup");
@@ -137,6 +145,24 @@ $.extend(APP, {
             case "login":
                 modal$.trigger('openlogin');
                 break;
+            case "signup":
+                if (!config.isLoggedIn) {
+                    if (APP.lookupFlashServiceParam("signup_email")) {
+                        let userMail = APP.lookupFlashServiceParam("signup_email")[ 0 ].value;
+                        modal$.trigger('openregister', [{userMail: userMail}]);
+                    } else {
+                        modal$.trigger('openregister');
+                    }
+                }
+                break;
+        }
+    },
+
+    openManagePage: function () {
+        if (!config.isLoggedIn) {
+            $('#modal').trigger('openlogin', [{goToManage: true}]);
+        } else {
+            window.location = '/manage/';
         }
     }
 });

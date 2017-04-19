@@ -2,19 +2,32 @@ class MainPanel extends React.Component {
     constructor(props) {
         super(props);
 
-
         this.state = this.defaultState();
     }
 
     defaultState() {
-        return {
-            searchSettingsOpen : false, 
-            selectedStatus : '',
-            samplingEnabled : false,
-            samplingType : 'edit_distance_high_to_low',
-            samplingSize : '10',
-            filtering : false,
-            filteredCount : 0
+        var storedState = SegmentFilter.getStoredState() ;
+
+        if ( storedState.reactState ) {
+            return storedState.reactState ;
+        }
+        else {
+            return {
+                searchSettingsOpen : false,
+                selectedStatus : '',
+                samplingEnabled : false,
+                samplingType : 'edit_distance_high_to_low',
+                samplingSize : '5',
+                filtering : false,
+                filteredCount : 0
+            }
+        }
+    }
+
+    componentDidMount() {
+        let storedState = SegmentFilter.getStoredState() ;
+        if ( storedState.reactState ) {
+            this.doSubmitFilter( storedState.lastSegmentId );
         }
     }
 
@@ -31,14 +44,20 @@ class MainPanel extends React.Component {
     clearClick(e) {
         e.preventDefault();
 
-        SegmentFilter.closeFilter();
-        // TODO
+        SegmentFilter.clearFilter();
+    }
 
-        $('body').removeClass('sampling-enabled');
+    closeClick(e) {
+        e.preventDefault();
+        SegmentFilter.closeFilter();
     }
 
     submitClick(e) {
         e.preventDefault() ;
+        this.doSubmitFilter();
+    }
+
+    doSubmitFilter( segmentToOpen = null ) {
         let sample  ;
 
         if ( this.state.samplingEnabled ) {
@@ -46,14 +65,12 @@ class MainPanel extends React.Component {
                 type : this.state.samplingType,
                 size : this.state.samplingSize,
             }
-
-            $('body').addClass('sampling-enabled');
         }
 
         SegmentFilter.filterSubmit({
-            status : this.state.selectedStatus,
-            sample : sample
-        });
+            status        : this.state.selectedStatus,
+            sample        : sample,
+        }, segmentToOpen );
 
         this.setState({
             searchSettingsOpen : false
@@ -103,6 +120,18 @@ class MainPanel extends React.Component {
         });
     }
 
+    moveUp(e) {
+        if ( this.state.filtering && this.state.filteredCount > 1 ) {
+            UI.gotoPreviousSegment() ;
+        }
+    }
+
+    moveDown(e) {
+        if ( this.state.filtering && this.state.filteredCount > 1 ) {
+            UI.gotoNextSegment() ;
+        }
+    }
+
     render() {
 
         var searchSettingsClass = classnames({
@@ -115,11 +144,27 @@ class MainPanel extends React.Component {
         });
 
         var fullOptions = [<option key="" value="">All</option>].concat( options );
-
         var submitEnabled = this.submitEnabled();
-
         var filteringInfo;
+        var navigation ;
         var currentSampleSettings ;
+        var buttonArrowsClass = 'qa-arrows-disabled';
+
+        if ( this.state.filtering && this.state.filteredCount > 1 ) {
+            buttonArrowsClass = 'qa-arrows-enabled';
+        }
+
+        navigation = <div className="sf-segment-navigation-arrows">
+            <div className={'qa-arrows ' + buttonArrowsClass}>
+                <div className="qa-move-up" onClick={this.moveUp.bind(this)}>
+                    <span className="icon-qa-left-arrow"/>
+                </div>
+                <div className="qa-move-down" onClick={this.moveDown.bind(this)}>
+                    <span className="icon-qa-right-arrow"/>
+                </div>
+            </div>
+        </div> ;
+
 
         if ( this.state.filtering ) {
             if (this.state.filteredCount > 0) {
@@ -227,6 +272,13 @@ class MainPanel extends React.Component {
                 {controlsForSampling}
 
                 <div className="block right">
+
+                    <input id="clear-filter"
+                           type="button"
+                           onClick={this.closeClick.bind(this)}
+                           className={classnames({btn: true})}
+                           value="CLOSE" />
+
                     <input id="clear-filter"
                         type="button"
                         onClick={this.clearClick.bind(this)}
@@ -241,6 +293,7 @@ class MainPanel extends React.Component {
 
             </form>
 
+            {navigation}
             {filteringInfo}
 
         </div>; 

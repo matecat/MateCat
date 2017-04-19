@@ -140,7 +140,8 @@ if ( ReviewImproved.enabled() )
         },
 
         openPanel : function(data) {
-            $('article').addClass('review-panel-opened');
+            UI.closeSearch();
+
             $('body').addClass('side-tools-opened review-side-panel-opened');
             hackIntercomButton( true );
 
@@ -160,21 +161,17 @@ if ( ReviewImproved.enabled() )
             }, 500, data);
         },
 
-        isPanelOpened : function() {
-            $('article').hasClass('review-panel-opened');
-        },
-
         closePanel : function() {
             $(document).trigger('review-panel:closed');
 
             hackIntercomButton( false );
 
-            $('article').removeClass('review-panel-opened');
             $('body').removeClass('side-tools-opened review-side-panel-opened');
-            if ( ReviewImproved.isPanelOpened() ) {
-                window.setTimeout( function() {
+
+            if ( UI.currentSegment ) {
+                setTimeout( function() {
                     UI.scrollSegment( UI.currentSegment );
-                }, 100);
+                }, 100 );
             }
         }
     });

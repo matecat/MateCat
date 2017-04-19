@@ -2,6 +2,7 @@
 /**
  * Created by PhpStorm.
  */
+use Outsource\TranslatedConfirmationStruct;
 
 /**
  * Controller that handle the success return from login page
@@ -40,4 +41,14 @@ class OutsourceTo_TranslatedSuccessController extends OutsourceTo_AbstractSucces
      */
     protected $dataKeyName = 'data_key';
 
-} 
+    /**
+     * @var int
+     */
+    protected $id_vendor = TranslatedConfirmationStruct::VENDOR_ID;
+
+    /**
+     * @var string
+     */
+    protected $vendor_name = TranslatedConfirmationStruct::VENDOR_NAME;
+
+}

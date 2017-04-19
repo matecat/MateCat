@@ -1,47 +1,66 @@
 class SearchInput extends React.Component {
     constructor (props) {
         super(props);
+        this.onKeyPressEvent = this.onKeyPressEvent.bind(this);
+        let self = this;
+        this.filterByNameDebounce = _.debounce(function(e) {
+            self.filterByName(e)
+        }, 250);
     }
 
-    filterByName() {
+    filterByName(e) {
         if($(this.textInput).val().length) {
             $(this.closeIcon).show()
         } else {
             $(this.closeIcon).hide();
         }
-        if (!this.performingSearch) {
-            this.props.onChange($(this.textInput).val());
-        }
-        this.onKeyPressEvent = this.onKeyPressEvent.bind(this);
+
+        this.props.onChange($(this.textInput).val());
+
+        return false;
     }
 
     closeSearch() {
         $(this.textInput).val('');
-        this.props.closeSearchCallback();
         $(this.closeIcon).hide();
+        this.props.onChange($(this.textInput).val());
     }
 
     onKeyPressEvent(e) {
         if(e.which == 27) {
             this.closeSearch();
+        } else {
+            if (e.which == 13 || e.keyCode == 13) {
+                e.preventDefault();
+                return false;
+            }
         }
+    }
+
+    componentDidUpdate() {
+        $(this.textInput).val('');
     }
 
 
     render () {
-        return (<div className="row">
-                    <div className="input-field">
-                        <i className="icon-search prefix"/>
-                        <input id="icon_prefix" type="text" className="valid"
+        return (
+            <input className="search-projects" type="text" placeholder="Search by project name"
+                   ref={(input) => this.textInput = input}
+                   onChange={this.filterByNameDebounce.bind(this)}
+                   onKeyPress={this.onKeyPressEvent.bind(this)}/>
+
+            /*<div className="input-field">
+                    <div className="ui fluid icon input">
+                        <input id="search" type="search" required="required"
                                placeholder="Search by project name"
                                ref={(input) => this.textInput = input}
-                               onChange={this.filterByName.bind(this)}
-                                onKeyUp={this.onKeyPressEvent.bind(this)}/>
-                        <i className="prefix close-x" style={{display: 'none'}}
-                           ref={(closeIcon) => this.closeIcon = closeIcon}
-                           onClick={this.closeSearch.bind(this)}/>
+                               onChange={this.filterByNameDebounce.bind(this)}
+                               onKeyPress={this.onKeyPressEvent.bind(this)}/>
+                        {/!*<i className="search icon"/>*!/}
                     </div>
-                </div>
+                </div>*/
+
+
         );
     }
 }

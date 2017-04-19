@@ -22,6 +22,7 @@ class reviseSummaryController extends viewController {
     private $qa_overall_avg;
     private $qa_equivalent_class;
     private $totalJobWords;
+    private $password;
 
     public function __construct() {
 		parent::__construct();
@@ -91,17 +92,12 @@ class reviseSummaryController extends viewController {
 
     protected function _saveActivity(){
 
-        /**
-         * Retrieve user information
-         */
-        list( $uid, $email ) = $this->getLoginUserParams();
-
         $activity             = new ActivityLogStruct();
         $activity->id_job     = $this->jid;
         $activity->id_project = $this->data[ 'id_project' ];
         $activity->action     = ActivityLogStruct::ACCESS_REVISE_SUMMARY_PAGE;
         $activity->ip         = Utils::getRealIpAddr();
-        $activity->uid        = $uid;
+        $activity->uid        = $this->logged_user->uid;
         $activity->event_date = date( 'Y-m-d H:i:s' );
         Activity::save( $activity );
 

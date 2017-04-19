@@ -1,23 +1,99 @@
 <?php
 
+use Teams\TeamStruct;
+
 class Projects_ProjectDao extends DataAccess_AbstractDao {
     const TABLE = "projects";
 
-    /**
-     *
-     */
+    protected static $auto_increment_fields = array('id');
+    protected static $primary_keys = array('id');
 
+    /**
+     * @var string
+     */
+    protected static $_sql_for_project_unassignment = "
+        UPDATE projects SET id_assignee = NULL WHERE id_assignee = :id_assignee and id_team = :id_team ;
+    ";
+
+    protected static $_sql_massive_self_assignment = "
+        UPDATE projects SET id_assignee = :id_assignee , id_team = :personal_team WHERE id_team = :id_team ;
+    ";
+
+    /**
+     * @param $project
+     * @param $field
+     * @param $value
+     *
+     * @return bool
+     */
     public function updateField( $project, $field, $value ) {
-        $sql = "UPDATE projects SET $field = :value " .
-            " WHERE id = :id ";
+
+        $sql = "UPDATE projects SET {$field} = :value WHERE id = :id ";
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 
-        return $stmt->execute( array(
+        $success = $stmt->execute( array(
             'value' => $value,
             'id' => $project->id
         ));
+
+        if( $success ){
+            $project->$field = $value;
+        }
+
+        return $project;
+
+    }
+
+    public function deleteFailedProject( $idProject ){
+
+        if( empty( $idProject ) ) return 0;
+
+        $sql = "DELETE FROM projects WHERE id = :id_project";
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $success = $stmt->execute( [ 'id_project' => $idProject ] );
+        return $stmt->rowCount();
+
+    }
+
+    /**
+     *
+     * This update can easily become massive in case of long lived teams.
+     * TODO: make this update chunked.
+     *
+     * @param Users_UserStruct $user
+     * @return int
+     */
+    public function unassignProjects( TeamStruct $team, Users_UserStruct $user) {
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( static::$_sql_for_project_unassignment ) ;
+        $stmt->execute( [
+                'id_assignee' => $user->uid,
+                'id_team'     => $team->id
+        ] ) ;
+
+        return $stmt->rowCount();
+    }
+
+    /**
+     * @param TeamStruct       $team
+     * @param Users_UserStruct $user
+     * @param TeamStruct       $personalTeam
+     *
+     * @return int
+     */
+    public function massiveSelfAssignment( TeamStruct $team, Users_UserStruct $user, TeamStruct $personalTeam ){
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( static::$_sql_massive_self_assignment ) ;
+        $stmt->execute( [
+                'id_assignee'   => $user->uid,
+                'id_team'       => $team->id,
+                'personal_team' => $personalTeam->id
+        ] );
+
+        return $stmt->rowCount();
     }
 
     /**
@@ -151,6 +227,35 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
 
         return false;
     }
+
+
+    /**
+     * @param $project_ids
+     * @return array[]
+     *
+     */
+    public function getRemoteFileServiceName( $project_ids ) {
+
+        $project_ids = implode(', ', array_map(function($id) {
+            return (int) $id ;
+        }, $project_ids ));
+
+        $sql = "SELECT id_project, c.service
+          FROM files
+          JOIN remote_files on files.id = remote_files.id_file
+          JOIN connected_services c on c.id = connected_service_id
+          WHERE id_project in ( $project_ids )
+          GROUP BY id_project, c.service " ;
+
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( $sql );
+        $stmt->execute();
+        $stmt->setFetchMode( PDO::FETCH_ASSOC );
+
+        return $stmt->fetchAll();
+    }
+
+
 
     protected function _buildResult( $array_result ) {
 

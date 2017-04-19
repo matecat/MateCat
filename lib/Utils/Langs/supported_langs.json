@@ -441,6 +441,16 @@
     ,
         {
             "localized":[{
+                "en":"Fula"
+            }],
+            "isocode":"ff",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"ff-FUL"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Filipino"
             }],
             "isocode":"fil",
@@ -577,9 +587,9 @@
                 "en":"Hausa"
             }],
             "isocode":"ha",
-            "enabled":false,
-            "rtl":false,
-            "rfc3066code":"ha-HA"
+            "enabled":true,
+            "rtl":true,
+            "rfc3066code":"ha-HAU"
         }
     ,
         {
@@ -736,6 +746,16 @@
     ,
         {
             "localized":[{
+                "en":"Kanuri"
+            }],
+            "isocode":"kn",
+            "enabled":true,
+            "rtl":true,
+            "rfc3066code":"kr-KAU"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Kazakh"
             }],
             "isocode":"kk",
@@ -786,12 +806,12 @@
     ,
         {
             "localized":[{
-                "en":"Kurdish"
+                "en":"Kurdish Kurmanji"
             }],
             "isocode":"ku",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"ku-TR"
+            "rfc3066code":"ku-KMR"
         }
     ,
         {
@@ -799,9 +819,9 @@
                 "en":"Kurdish Sorani"
             }],
             "isocode":"ku",
-            "enabled":false,
+            "enabled":true,
             "rtl":true,
-            "rfc3066code":"ku-TR"
+            "rfc3066code":"ku-CKB"
         }
     ,
         {
@@ -879,9 +899,9 @@
                 "en":"Malagasy"
             }],
             "isocode":"mg",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"mg-MG"
+            "rfc3066code":"mg-MLG"
         }
     ,
         {
@@ -1369,7 +1389,7 @@
                 "en":"Somali"
             }],
             "isocode":"so",
-            "enabled":false,
+            "enabled":true,
             "rtl":true,
             "rfc3066code":"so-SO"
         }

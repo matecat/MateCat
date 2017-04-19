@@ -9,7 +9,7 @@ $.extend(UI, {
 				where: 'no'
 			});
 	},
-	resetSearch: function() {console.log('reset search');
+	resetSearch: function() {
 		this.body.removeClass('searchActive');
 		this.clearSearchMarkers();
 		this.setFindFunction('find');
@@ -104,7 +104,6 @@ $.extend(UI, {
 
 	},
 	execFind_success: function(d) {
-        console.log('execFind_success');
 		this.numSearchResultsItem = d.total;
 		this.searchResultsSegments = d.segments;
 		this.numSearchResultsSegments = (d.segments) ? d.segments.length : 0;
@@ -113,7 +112,8 @@ $.extend(UI, {
 			if (this.pendingRender.detectSegmentToScroll) {
 				this.pendingRender.segmentToScroll = this.nextUnloadedResultSegment();
 			}
-			$('#outer').empty();
+
+			UI.unmountSegments();
 
 			this.render(this.pendingRender);
 			this.pendingRender = false;
@@ -175,10 +175,8 @@ $.extend(UI, {
 					APP.alert({msg: d.errors[0].message});
 					return false;
 				}
-				$('#outer').empty();
-				UI.render({
-					firstLoad: false
-				});
+				UI.unmountSegments();
+				UI.render();
 			}
 		});
 	},
@@ -287,7 +285,6 @@ $.extend(UI, {
 		if (this.searchMode == 'onlyStatus') { // search mode: onlyStatus
 
 		} else if (this.searchMode == 'source&target') { // search mode: source&target
-			console.log('source & target');
 			status = (p.status == 'all') ? '' : '.status-' + p.status;
 			q = (singleSegment) ? '#' + $(singleSegment).attr('id') : "section" + status + ':not(.status-new)';
             var psource = p.source.replace(/(\W)/gi, "\\$1");
@@ -350,9 +347,21 @@ $.extend(UI, {
             var reg = new RegExp('(' + htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
             var reg1 = new RegExp('(' + htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)').replace(/\\\\\(/gi, "\(").replace(/\\\\\)/gi, "\)") + ')', "g" + ignoreCase);
 
+			// Finding double spaces
+            if (txt == "  ") {
+                reg1 = new RegExp(/( &nbsp;)/, 'gi');
+                reg = new RegExp(/( &nbsp;)/, 'gi');
+            }
 
 			if ((typeof where == 'undefined') || (where == 'no')) {
-				UI.doMarkSearchResults(hasTags, $(q + ":" + containsFunc + "('" + txt + "')"), reg1, q, txt, ignoreCase);
+				var elems;
+				if (txt == "  ") {
+					elems = $(q).filter(function(index){ return $(this).text().indexOf('  ')  });
+                    reg1 = new RegExp(/( &nbsp;)/, 'gi');
+				} else {
+					elems = $(q + ":" + containsFunc + "('" + txt + "')");
+				}
+				UI.doMarkSearchResults(hasTags, elems, reg1, q, txt, ignoreCase);
 			} else {
 				sid = $(seg).attr('id');
 				if (where == 'before') {
@@ -463,14 +472,14 @@ $.extend(UI, {
 			var m = $(".targetarea mark.currSearchItem");
 
 			if ($(m).nextAll('mark.searchMarker').length) { // there are other subsequent results in the segment
-				console.log('altri item nel segmento');
+
 				$(m).removeClass('currSearchItem');
 				$(m).nextAll('mark.searchMarker').first().addClass('currSearchItem');
 				if (unmark)
 					$(m).replaceWith($(m).text());
 				UI.goingToNext = false;
 			} else { // jump to results in subsequents segments
-				console.log('m.length: ' + m.length);
+
 				var seg = (m.length) ? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
 				if (seg.length) {
 					skipCurrent = $(seg).has("mark.currSearchItem").length;
@@ -490,7 +499,7 @@ $.extend(UI, {
 			var m = $("mark.currSearchItem");
 
 			if ($(m).nextAll('mark.searchMarker').length) { // there are other subsequent results in the segment
-				console.log('altri item nel segmento');
+
 				$(m).removeClass('currSearchItem');
 				$(m).nextAll('mark.searchMarker').first().addClass('currSearchItem');
 				if (unmark)
@@ -514,7 +523,7 @@ $.extend(UI, {
 		}
 	},
 	gotoSearchResultAfter: function(options) {
-		console.log('options: ', options);
+
 		var el = options.el;
 		var skipCurrent = (options.skipCurrent || false);
 		var unmark = (options.unmark || false);
@@ -535,15 +544,13 @@ $.extend(UI, {
 					// load new segments
 					if (!this.searchResultsSegments) {
 						this.pendingRender = {
-							firstLoad: false,
 							applySearch: true,
 							detectSegmentToScroll: true
 						};
 					} else {
 						var seg2scroll = this.nextUnloadedResultSegment();
-						$('#outer').empty();
+						UI.unmountSegments();
 						this.render({
-							firstLoad: false,
 							applySearch: true,
 							segmentToScroll: seg2scroll
 						});
@@ -575,20 +582,18 @@ $.extend(UI, {
 						return false;
 					}
 				}
-			});			
+			});
 			if (!found) {
 				// load new segments
 				if (!this.searchResultsSegments) {
 					this.pendingRender = {
-						firstLoad: false,
 						applySearch: true,
 						detectSegmentToScroll: true
 					};
 				} else {
 					seg2scroll = this.nextUnloadedResultSegment();
-					$('#outer').empty();
+					UI.unmountSegments();
 					this.render({
-						firstLoad: false,
 						applySearch: true,
 						segmentToScroll: seg2scroll
 					});

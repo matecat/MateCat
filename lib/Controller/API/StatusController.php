@@ -13,6 +13,35 @@ class StatusController extends ajaxController {
         'status' => 'FAIL'
     );
 
+    protected $id_project;
+    protected $ppassword;
+
+    /**
+     * @param mixed $id_project
+     *
+     * @return $this
+     */
+    public function setIdProject( $id_project ) {
+        $this->id_project = $id_project;
+
+        return $this;
+    }
+
+    /**
+     * @param mixed $ppassword
+     *
+     * @return $this
+     */
+    public function setPpassword( $ppassword ) {
+        $this->ppassword = $ppassword;
+
+        return $this;
+    }
+
+    public function getApiOutput(){
+        return json_encode( $this->api_output );
+    }
+
     /**
      * Check Status of a created Project With HTTP POST ( application/x-www-form-urlencoded ) protocol
      *

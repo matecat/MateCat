@@ -369,6 +369,10 @@ class UploadHandler {
     }
 
     protected function handle_file_upload( $uploaded_file, $name, $size, $type, $error, $index = null ) {
+
+        Log::$fileName = "upload.log";
+        Log::doLog( $uploaded_file );
+
         $file       = new stdClass();
         $file->name = $this->trim_file_name( $name, $type, $index );
         $file->size = intval( $size );
@@ -382,18 +386,23 @@ class UploadHandler {
             if ( $uploaded_file && is_uploaded_file( $uploaded_file ) ) {
                 // multipart/formdata uploads (POST method uploads)
                 if ( $append_file ) {
-                    file_put_contents(
+                    $res = file_put_contents(
                             $file_path, fopen( $uploaded_file, 'r' ), FILE_APPEND
                     );
+                    Log::doLog( $res );
                 } else {
-                    move_uploaded_file( $uploaded_file, $file_path );
+                    $res = move_uploaded_file( $uploaded_file, $file_path );
+                    Log::doLog( $res );
                 }
             } else {
                 // Non-multipart uploads (PUT method support)
-                file_put_contents(
+                $res = file_put_contents(
                         $file_path, fopen( 'php://input', 'r' ), $append_file ? FILE_APPEND : 0
                 );
+                Log::doLog( $res );
             }
+
+            clearstatcache();
             $file_size = filesize( $file_path );
             if ( $file_size === $file->size ) {
                 if ( $this->options[ 'orient_image' ] ) {
@@ -418,8 +427,7 @@ class UploadHandler {
             $file->size = $file_size;
             $this->set_file_delete_url( $file );
 
-
-            Log::doLog( $file_path ); 
+            Log::doLog( "Size on disk: $file_size - Declared size: $file->size" );
 
             $fileContent    = file_get_contents( $file_path );
             $preg_file_html = '|<file original="(.*?)" source-language="(.*?)" datatype="(.*?)" target-language="(.*?)">|m';
