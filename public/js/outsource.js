@@ -103,7 +103,12 @@ $.extend(UI, {
             $('#continueForm input[name=quoteData]').attr('value', JSON.stringify( UI.quoteResponse ) );
             $('#continueForm').submit();
             $('#continueForm input[name=quoteData]').attr('value', '' );
+<<<<<<< Updated upstream
         });
+=======
+            APP.closePopup();
+		});
+>>>>>>> Stashed changes
 
         $('.modal.outsource input.out-email').on('keyup', function () {
             _.debounce(function() {
