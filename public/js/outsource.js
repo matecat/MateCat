@@ -251,13 +251,13 @@ $.extend(UI, {
     sendTranslatorRequest: function (email, date) {
         let data = {
             email: email,
-            date: date
+            delivery_date: date
         };
         return $.ajax({
             async: true,
             data: data,
             type: "POST",
-            url : "/api/v2/jobs/" + UI.currentOutsourceJob.id +"/" + UI.currentOutsourceJob.password
+            url : "/api/v2/jobs/" + UI.currentOutsourceJob.id +"/" + UI.currentOutsourceJob.password + "/translator"
         });
     },
 
