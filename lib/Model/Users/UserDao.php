@@ -92,7 +92,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
         $stmt = $this->_getStatementForCache( self::$_query_user_by_uid );
         $userQuery = new Users_UserStruct();
         $userQuery->uid = $id;
-        return $this->_fetchObject( $stmt,
+        return @$this->_fetchObject( $stmt,
                 $userQuery,
                 array(
                         'uid' => $userQuery->uid,
