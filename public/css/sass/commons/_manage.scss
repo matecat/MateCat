@@ -350,6 +350,8 @@ body.manage {
                                 float: left;
                                 margin-right: 10px;
                                 font-weight: bold;
+                                position: relative;
+                                top: 1px;
                                 .source-box {
                                     float: left;
                                     max-width: 70px;
@@ -361,9 +363,10 @@ body.manage {
                                 }
                                 .in-to {
                                     float: left;
-                                    margin-top: 2px;
+                                    top: 4px;
                                     color: #5a5a5a;
                                     line-height: 28px;
+                                    position: relative;
                                 }
                                 .target-box {
                                     float: left;
@@ -429,6 +432,8 @@ body.manage {
                                 min-width: 105px;
                                 line-height: 30px;
                                 font-weight: 700;
+                                position: relative;
+                                top: 1px;
                                 &:hover {
                                     text-decoration: none;
                                 }
@@ -443,13 +448,13 @@ body.manage {
                                     position: relative;
                                     img.outsource-logo {
                                         width: 100px;
-                                        margin: -5px 17px 0 0;
+                                        margin: -5px 10px 0 10px;
                                         vertical-align: middle;
                                     }
                                 }
                                 .job-price {
                                     display: inline-block;
-                                    margin-right: 15px;
+                                    margin-right: 8px;
                                     vertical-align: text-bottom;
                                     font-weight: 700;
                                     @media only screen and (max-width: 1200px) {
@@ -458,7 +463,7 @@ body.manage {
                                 }
                                 .job-delivery {
                                     display: inline-block;
-                                    margin-right: 15px;
+                                    margin-right: 10px;
                                     vertical-align: text-bottom;
                                     .outsource-date-text {
                                         font-weight: 700;
@@ -707,19 +712,17 @@ footer nav ul a:hover {
     box-shadow: -1px -1px 0px 0px rgb(222, 222, 223);
 }
 
-
-
-@media only screen and (min-width: 1380px) {
+@media only screen and (min-width: 1200px) {
     .ui.container {
-        width: 1280px;
+        width: 1150px;
         margin-left: auto !important;
         margin-right: auto !important;
     }
 }
 
-@media only screen and (min-width: 1200px) {
+@media only screen and (min-width: 1380px) {
     .ui.container {
-        width: 1200px;
+        width: 1280px;
         margin-left: auto !important;
         margin-right: auto !important;
     }
