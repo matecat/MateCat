@@ -442,7 +442,7 @@ body.manage {
                                     display: inline-block;
                                     position: relative;
                                     max-width: 380px;
-                                    margin: 0 10px 0 45px;
+                                    margin: 0 10px 0 20px;
                                     .outsource-logo-box {
                                         min-width: 130px;
                                         display: inherit;
@@ -755,19 +755,17 @@ footer nav ul a:hover {
     box-shadow: -1px -1px 0px 0px rgb(222, 222, 223);
 }
 
-
-
-@media only screen and (min-width: 1380px) {
+@media only screen and (min-width: 1200px) {
     .ui.container {
-        width: 1280px;
+        width: 1150px;
         margin-left: auto !important;
         margin-right: auto !important;
     }
 }
 
-@media only screen and (min-width: 1200px) {
+@media only screen and (min-width: 1380px) {
     .ui.container {
-        width: 1200px;
+        width: 1280px;
         margin-left: auto !important;
         margin-right: auto !important;
     }
