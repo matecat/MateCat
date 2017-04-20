@@ -626,7 +626,7 @@ class JobContainer extends React.Component {
                         <div className="translated-outsourced">
                             {outsourceJobLabel}
                             {outsourceDelivery}
-                            {outsourceDeliveryPrice}
+                            {/*{outsourceDeliveryPrice}*/}
                         </div>
                     </div>
 
