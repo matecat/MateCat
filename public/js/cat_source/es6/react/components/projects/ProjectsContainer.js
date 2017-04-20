@@ -168,12 +168,6 @@ class ProjectsContainer extends React.Component {
                 $(self.spinner).css("visibility", "hidden");
             }, 3000);
         }
-        if (APP.timeAfterProjectRequest) {
-            var t2 = new Date();
-            var dif = (t2 - APP.timeAfterProjectRequest)/1000;
-            console.log("Render Projects in: " + dif);
-            APP.timeAfterProjectRequest = null;
-        }
     }
 
     componentWillUpdate() {}

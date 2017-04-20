@@ -424,7 +424,6 @@ class ProjectContainer extends React.Component {
 
     componentWillUnmount() {
         ProjectsStore.removeListener(ManageConstants.HIDE_PROJECT, this.hideProject);
-        $(this.project).transition('fly right');
     }
 
     shouldComponentUpdate(nextProps, nextState){
