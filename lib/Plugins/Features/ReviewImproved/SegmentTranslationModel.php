@@ -9,6 +9,7 @@
 namespace Features\ReviewImproved;
 use Features\TranslationVersions\SegmentTranslationModel as VersionModel ;
 use LQA\ChunkReviewStruct;
+use LQA\ChunkReviewDao;
 
 class SegmentTranslationModel
 {
@@ -37,7 +38,7 @@ class SegmentTranslationModel
         $this->model = $model;
         $this->chunk = \Chunks_ChunkDao::getBySegmentTranslation( $this->model->getTranslation()) ;
 
-        $reviews =  \LQA\ChunkReviewDao::findChunkReviewsByChunkIds(array(
+        $reviews =  ChunkReviewDao::findChunkReviewsByChunkIds(array(
             array(
                 $this->chunk->id, $this->chunk->password
             )
@@ -47,7 +48,7 @@ class SegmentTranslationModel
     }
 
     public function recountPenaltyPoints() {
-        $penaltyPoints = \LQA\ChunkReviewDao::getPenaltyPointsForChunk( $this->chunk );
+        $penaltyPoints = ChunkReviewDao::getPenaltyPointsForChunk( $this->chunk );
         $this->chunk_review->penalty_points = $penaltyPoints ;
 
         $chunk_review_model = new ChunkReviewModel( $this->chunk_review );
