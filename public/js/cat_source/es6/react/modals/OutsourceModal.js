@@ -1,0 +1,364 @@
+
+
+class OutsourceModal extends React.Component {
+
+
+    constructor(props) {
+        super(props);
+    }
+    componentDidMount () {
+        if ( config.enable_outsource ) {
+            UI.outsourceInit();
+            ForceDelivery.init();
+            UI.startOutSourceModal(this.props.project, this.props.job, this.props.url);
+        }
+    }
+
+    render() {
+        return <div className="modal outsource">
+        <div className="popup">
+        <div className="popup-box pricebox">
+            <h2>Choose how to translate: <span className="title-source">English</span> &gt; <span className="title-target">Italian</span> <span className="title-words">1000</span> words</h2>
+            <div className="choose">
+                <div className="onyourown">
+                    <div className="heading">
+                        <h3>Share the following link with your translator</h3>
+                    </div>
+
+                    <input className="out-link" type="text" value="http://matecat.local/translate/prova/en-US-fr-FR/19153-bd17c71da22f#11143640" readOnly="true"/>
+                    <a  href='javascript:void(0)' onClick={trackClick( "translate" )} className="uploadbtn in-popup" target="_blank">Open</a>
+
+
+                </div>
+                <div id="open-translator" className="open-send-to-translator">Send job to translator</div>
+                <div className="send-to-translator hide">
+                    <div className="send-to-translator-container ">
+                        <input className="out-email" type="email" placeholder="Insert email"/>
+                        <input className="out-date" type="datetime" placeholder="Date" readOnly/>
+                        <a  className="send-to-translator-btn in-popup disabled" target="_blank">Send to translator</a>
+                        <div className="validation-error email-translator-error"><span className="text" style={{color: "red", fontsize: "14px"}}>A valid email is required</span></div>
+                    </div>
+
+                    {/*<!-- begin date picker -->*/}
+                    <div id="out-datepicker" className="modal-outsource-datepicker hide">
+                        <div className="delivery-manual">
+                            <div className="delivery-manual-date">
+                                <div className="tabsContent">
+                                    <p id="date-trans"></p>
+                                </div>
+                            </div>
+                            <div className="delivery-manual-time">
+                                <h3>Choose a time</h3>
+                                <select name="whenTime" className="whenTime" id="outsource-assign-date">
+                                    <option value="07">7:00 AM</option>
+                                    <option value="09">9:00 AM</option>
+                                    <option value="11">11:00 AM</option>
+                                    <option value="13">1:00 PM</option>
+                                    <option value="15">3:00 PM</option>
+                                    <option value="17">5:00 PM</option>
+                                    <option value="19">7:00 PM</option>
+                                    <option value="21">9:00 PM</option>
+                                </select>
+
+                                <br /><br />
+
+                                <h3>Timezone</h3>
+                                <select name="whenTimezone" className="whenTimezone" id="outsource-assign-timezone">
+                                    <option value="-11">(GMT -11:00 ) Midway Islands, American Samoa</option>
+                                    <option value="-10">(GMT -10:00 ) Hawaii, Tahiti, Cook Islands</option>
+                                    <option value="-9">(GMT -9:00 ) Alaska</option>
+                                    <option value="-8">(GMT -8:00 ) Pacific Standard Time (LA, Vancouver)</option>
+                                    <option value="-7">(GMT -7:00 ) Mountain Standard Time (Denver, SLC)</option>
+                                    <option value="-6">(GMT -6:00 ) Central Standard Time (Mexico, Chicago)</option>
+                                    <option value="-5">(GMT -5:00 ) Eastern Standard Time (NYC, Toronto)</option>
+                                    <option value="-4">(GMT -4:00 ) Atlantic Standard Time (Santiago)</option>
+                                    <option value="-4.5">(GMT -4:30 ) Venezuela (Caracas)</option>
+                                    <option value="-3">(GMT -3:00 ) Brasília, São Paulo, Buenos Aires</option>
+                                    <option value="-2">(GMT -2:00 ) South Sandwich Islands</option>
+                                    <option value="-1">(GMT -1:00 ) Azores, Cape Verde (Praia)</option>
+                                    <option value="0">(GMT) Western European Time (London, Lisbon)</option>
+                                    <option value="1">(GMT +1:00 ) Central European Time (Rome, Paris)</option>
+                                    <option value="2">(GMT +2:00 ) Eastern European Time, CAT </option>
+                                    <option value="3">(GMT +3:00 ) Arabia Standard Time (Baghdad, Riyadh)</option>
+                                    <option value="3.5">(GMT +3:30 ) Iran Standard Time (Tehran)</option>
+                                    <option value="4">(GMT +4:00 ) Moscow, St. Petersburg, Dubai</option>
+                                    <option value="4.5">(GMT +4:30 ) Afghanistan Time (Kabul)</option>
+                                    <option value="5">(GMT +5:00 ) Karachi, Tashkent, Maldive Islands</option>
+                                    <option value="5.5">(GMT +5:30 ) India Standard Time (Mumbai, Colombo)</option>
+                                    <option value="6">(GMT +6:00 ) Yekaterinburg, Almaty, Dhaka</option>
+                                    <option value="7">(GMT +7:00 ) Bangkok, Hanoi, Jakarta</option>
+                                    <option value="8">(GMT +8:00 ) Beijing, Perth, Singapore, Hong Kong</option>
+                                    <option value="9">(GMT +9:00 ) Tokyo, Seoul</option>
+                                    <option value="9.5">(GMT +9:30 ) ACST (Darwin, Adelaide)</option>
+                                    <option value="10">(GMT +10:00 ) AEST (Brisbane, Sydney), Yakutsk</option>
+                                    <option value="11">(GMT +11:00 ) Vladivostok, Nouméa, Solomon Islands</option>
+                                    <option value="12">(GMT +12:00 ) Auckland, Fiji, Marshall Islands</option>
+                                    <option value="13">(GMT +13:00 ) Samoa</option>
+                                </select>
+
+                                {/*<!--  design took fron validationEngine not the logic. Hardcoded -->*/}
+                                <div id="outsource-delivery_error" className="delivery_manual_error hide">
+                                    <div>* Chosen delivery date is in the past</div>
+                                </div>
+
+                                <input type="button" value="Continue" className="uploadbtn in-popup outsource-select-date" />
+                                <a href="#" className="btn-cancel in-popup outsource-cancel-date">Clear</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="outsource-divider">
+                    <div className="divider-line"></div>
+                    <span>or</span>
+                    <div className="divider-line"></div>
+                </div>
+                <div className="viewvendors">
+                    <h3>Outsource to a translation company</h3>
+                    <a onClick={trackClick( "showprices" )} className="uploadbtn showprices">Show Prices</a>
+                    <div className="showpricesloading loading"></div>
+                </div>
+                <div className="outsourceto">
+                    <div className="total_outsource">
+                        <div className="heading">
+                            <h3>Outsource Project Management + Translation<span className="revision_heading hide"> + Revision</span></h3>
+
+                            <select id="changecurrency">
+                                <option value="EUR" data-symbol="€">Euro (EUR)</option>
+                                <option value="USD" data-symbol="US$">US dollar (USD)</option>
+                                <option value="AUD" data-symbol="$">Australian dollar (AUD)</option>
+                                <option value="CAD" data-symbol="$">Canadian dollar (CAD)</option>
+                                <option value="NZD" data-symbol="$">New Zealand dollar (NZD)</option>
+                                <option value="GBP" data-symbol="£">Pound sterling (GBP)</option>
+                                <option value="BRL" data-symbol="R$">Real (BRL)</option>
+                                <option value="RUB" data-symbol="руб">Russian ruble (RUB)</option>
+                                <option value="SEK" data-symbol="kr">Swedish krona (SEK)</option>
+                                <option value="CHF" data-symbol="Fr.">Swiss franc (CHF)</option>
+                                <option value="TRY" data-symbol="TL">Turkish lira (TL)</option>
+                                <option value="KRW" data-symbol="￦">Won (KRW)</option>
+                                <option value="JPY" data-symbol="￥">Yen (JPY)</option>
+                                <option value="PLN" data-symbol="zł">Złoty (PLN)</option>
+                            </select>
+
+                            <select id="changeTimezone">
+                                <option value="-11" data-description-short="GMT -11:00" data-description-long="(GMT -11:00 ) Midway Islands, American Samoa">GMT -11:00</option>
+                                <option value="-10" data-description-short="GMT -10:00" data-description-long="(GMT -10:00 ) Hawaii, Tahiti, Cook Islands">GMT -10:00</option>
+                                <option value="-9" data-description-short="GMT -9:00" data-description-long="(GMT -9:00 ) Alaska">GMT -9:00</option>
+                                <option value="-8" data-description-short="GMT -8:00" data-description-long="(GMT -8:00 ) Pacific Standard Time (LA, Vancouver)">GMT -8:00</option>
+                                <option value="-7" data-description-short="GMT -7:00" data-description-long="(GMT -7:00 ) Mountain Standard Time (Denver, SLC)">GMT -7:00</option>
+                                <option value="-6" data-description-short="GMT -6:00" data-description-long="(GMT -6:00 ) Central Standard Time (Mexico, Chicago)">GMT -6:00</option>
+                                <option value="-5" data-description-short="GMT -5:00" data-description-long="(GMT -5:00 ) Eastern Standard Time (NYC, Toronto)">GMT -5:00</option>
+                                <option value="-4.5" data-description-short="GMT -4:30" data-description-long="(GMT -4:30 ) Venezuela (Caracas)">GMT -4:30</option>
+                                <option value="-4" data-description-short="GMT -4:00" data-description-long="(GMT -4:00 ) Atlantic Standard Time (Santiago)">GMT -4:00</option>
+                                <option value="-3" data-description-short="GMT -3:00" data-description-long="(GMT -3:00 ) Brasília, São Paulo, Buenos Aires">GMT -3:00</option>
+                                <option value="-2" data-description-short="GMT -2:00" data-description-long="(GMT -2:00 ) South Sandwich Islands">GMT -2:00</option>
+                                <option value="-1" data-description-short="GMT -1:00" data-description-long="(GMT -1:00 ) Azores, Cape Verde (Praia)">GMT -1:00</option>
+                                <option value="0" data-description-short="GMT" data-description-long="(GMT) Western European Time (London,Lisbon)">GMT</option>
+                                <option value="1" data-description-short="GMT +1:00" data-description-long="(GMT +1:00 ) Central European Time (Rome, Paris)">GMT +1:00</option>
+                                <option value="2" data-description-short="GMT +2:00" data-description-long="(GMT +2:00 ) Eastern European Time, CAT ">GMT +2:00</option>
+                                <option value="3" data-description-short="GMT +3:00" data-description-long="(GMT +3:00 ) Arabia Standard Time (Baghdad, Riyadh)">GMT +3:00</option>
+                                <option value="3.5" data-description-short="GMT +3:30" data-description-long="(GMT +3:30 ) Iran Standard Time (Tehran)">GMT +3:30</option>
+                                <option value="4" data-description-short="GMT +4:00" data-description-long="(GMT +4:00 ) Moscow, St. Petersburg, Dubai">GMT +4:00</option>
+                                <option value="4.5" data-description-short="GMT +4:30" data-description-long="(GMT +4:30 ) Afghanistan Time (Kabul)">GMT +4:30</option>
+                                <option value="5" data-description-short="GMT +5:00" data-description-long="(GMT +5:00 ) Karachi, Tashkent, Maldive Islands">GMT +5:00</option>
+                                <option value="5.5" data-description-short="GMT +5:30" data-description-long="(GMT +5:30 ) India Standard Time (Mumbai, Colombo)">GMT +5:30</option>
+                                <option value="6" data-description-short="GMT +6:00" data-description-long="(GMT +6:00 ) Yekaterinburg, Almaty, Dhaka">GMT +6:00</option>
+                                <option value="7" data-description-short="GMT +7:00" data-description-long="(GMT +7:00 ) Bangkok, Hanoi, Jakarta">GMT +7:00</option>
+                                <option value="8" data-description-short="GMT +8:00" data-description-long="(GMT +8:00 ) Beijing, Perth, Singapore, Hong Kong">GMT +8:00</option>
+                                <option value="9" data-description-short="GMT +9:00" data-description-long="(GMT +9:00 ) Tokyo, Seoul">GMT +9:00</option>
+                                <option value="9.5" data-description-short="GMT +9:30" data-description-long="(GMT +9:30 ) ACST (Darwin, Adelaide)">GMT +9:30</option>
+                                <option value="10" data-description-short="GMT +10:00" data-description-long="(GMT +10:00 ) AEST (Brisbane, Sydney), Yakutsk">GMT +10:00</option>
+                                <option value="11" data-description-short="GMT +11:00" data-description-long="(GMT +11:00 ) Vladivostok, Nouméa, Solomon Islands">GMT +11:00</option>
+                                <option value="12" data-description-short="GMT +12:00" data-description-long="(GMT +12:00 ) Auckland, Fiji, Marshall Islands">GMT +12:00</option>
+                                <option value="13" data-description-short="GMT +13:00" data-description-long="(GMT +13:00 ) Samoa">GMT +13:00</option>
+                            </select>
+
+                        </div>
+                        <div className="offer">
+                            <div className="guaranteed_by">
+                                <div className="trust_text">
+                                    <strong>Guaranteed by</strong>
+                                    <a href="http://www.translated.net" target="_blank"><img src="/public/img/logo_translated.png" title="visit our website" /></a>
+                                    {/*TODO*/}
+                                    {/*<p className="trustbox1">Translated uses the most qualified translator for your subject (<strong>${subject | string:IT}</strong>)*/}
+                                    <p className="trustbox1">Translated uses the most qualified translator for your subject
+                                        and keeps using the same translator for your next projects. <br /><a className="show_translator more"><span>Read more</span></a></p>
+
+
+                                    <p className="trustbox2 hide">
+                                        Translated has over 15 years' experience as a translation company and offers
+                                        <a href="http://www.translated.net/en/frequently-asked-questions#guarantees" target="_blank">two key guarantees on quality and delivery</a>.
+                                        <br />
+                                        <a className="hide_translator more minus hide"><span>Close</span></a>
+                                    </p>
+                                </div>
+                                <div className="translator_info_box hide">
+                                    <div className="translator_info">
+                                        <div className="translator_bio">
+                                            <span className="translator_name">Translator: <strong></strong></span>
+                                            <p><span className="label_info">Positive feedback:</span><span className="score_number"></span></p>
+                                            <p><span className="label_info">Expert in:</span>
+                                                <span className="subjects"></span>
+                                            </p>
+                                            <p><span className="label_info">Years of experience:</span> <span className="experience"></span></p>
+                                            <p><span className="label_info">Words translated last 12 months:</span><span className="translated_words"></span></p>
+                                        </div>
+
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="delivery_container">
+                                <div className="delivery">
+                                    <div className="delivery_label">Delivery by:</div>
+                                    <div className="delivery_details">
+                                        <div className="ErrorMsgquoteNotAvailable ErrorMsg hide">
+                                            <h3>Not available. </h3>
+                                            <p>Unfortunately the solution chosen is not available.
+                                                Try again with another delivery date.</p>
+                                        </div>
+                                        <div className="ErrorMsg ErrorMsgQuoteError hide">
+                                            <h3><strong>Ooops! </strong>
+                                                <br />Cannot generate quote.</h3>
+                                        </div>
+
+                                        <span className="time" data-timezone="" data-rawtime=""></span>
+                                        <a className="tooltip gray hide">i
+                                            <span><strong>We will deliver before the selected date.</strong><br />
+                                                            This date already provides us with all the time we need to deliver quality work at the lowest price
+                                                            </span>
+                                        </a>
+                                        <br/><span className="zone2"></span>
+                                        <a className="needitfaster">Need it faster?</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="tprice">
+                                <div className="ErrorMsg ErrorMsgQuoteError hide">
+                                    <p>Contact us at <a href="mailto:info@translated.net">info@translated.net</a> <br />or call +39 06 90 254 001</p>
+                                </div>
+                                <span className="euro"></span>
+                                <span className="displayprice" data-currency="EUR" data-rawprice="0.00"></span>
+                                <br />
+
+                                <span className="displaypriceperword">about <span className="euro currency_per_word"></span> <a className="price_p_word"></a> / word</span>
+                                <form id="continueForm" action="${outsource_service_login}" method="POST" target="_blank">
+                                    <input type="hidden" name="url_ok" value=""/>
+                                    <input type="hidden" name="url_ko" value=""/>
+                                    <input type="hidden" name="confirm_urls" value=""/>
+                                    <input type='hidden' name='data_key' value="" />
+                                    <input type="hidden" name="quoteData" value=""/>
+                                    <a href="#" className="continuebtn disabled">Order</a>
+                                </form>
+                            </div>
+
+                            <div className="addrevision">
+                                <input type="checkbox" name="revision" value="revision"/><h4>Add revision</h4><span className="revision_delivery"></span><span className="revision_price_box">+ <span className="revision_currency"></span><span className="revision_price"></span></span>
+                            </div>
+                        </div>
+
+
+
+
+                    </div>
+                </div>
+                {/*<!--end outsourceto-->*/}
+                <div className="paymentinfo">
+                    <p><strong>Easy payments</strong>: pay a single monthly invoice within 30 days of receipt</p>
+                </div>
+                <div className="contact_box">
+                    <h3>Have a specific request?</h3>
+                    <p>Contact us at <a href="mailto:info@translated.net">info@translated.net</a> or call +39 06 90 254 001</p>
+                </div>
+                {/*<!-- end total-->*/}
+                {/*<!-- end reveal prices-->*/}
+                {/*<!-- begin date picker -->*/}
+                <div id="forceDeliveryContainer" className="modal-outsource-datepicker hide">
+                    <div className="delivery-manual">
+                        <span id="forceDeliveryChosenDate" className="hide">0</span>
+
+                        <div className="delivery-manual-date">
+                            <div className="tabsContent">
+                                <p id="date2"></p>
+                            </div>
+                        </div>
+                        <div className="delivery-manual-time">
+                            <h3>Choose a time</h3>
+                            <select name="whenTime"  id="whenTime" className="whenTime">
+                                <option value="07">7:00 AM</option>
+                                <option value="09">9:00 AM</option>
+                                <option value="11">11:00 AM</option>
+                                <option value="13">1:00 PM</option>
+                                <option value="15">3:00 PM</option>
+                                <option value="17">5:00 PM</option>
+                                <option value="19">7:00 PM</option>
+                                <option value="21">9:00 PM</option>
+                            </select>
+
+                            <br /><br />
+
+                            <h3>Timezone</h3>
+                            <select id="whenTimezone" name="whenTimezone" className="whenTimezone">
+                                <option value="-11">(GMT -11:00 ) Midway Islands, American Samoa</option>
+                                <option value="-10">(GMT -10:00 ) Hawaii, Tahiti, Cook Islands</option>
+                                <option value="-9">(GMT -9:00 ) Alaska</option>
+                                <option value="-8">(GMT -8:00 ) Pacific Standard Time (LA, Vancouver)</option>
+                                <option value="-7">(GMT -7:00 ) Mountain Standard Time (Denver, SLC)</option>
+                                <option value="-6">(GMT -6:00 ) Central Standard Time (Mexico, Chicago)</option>
+                                <option value="-5">(GMT -5:00 ) Eastern Standard Time (NYC, Toronto)</option>
+                                <option value="-4">(GMT -4:00 ) Atlantic Standard Time (Santiago)</option>
+                                <option value="-4.5">(GMT -4:30 ) Venezuela (Caracas)</option>
+                                <option value="-3">(GMT -3:00 ) Brasília, São Paulo, Buenos Aires</option>
+                                <option value="-2">(GMT -2:00 ) South Sandwich Islands</option>
+                                <option value="-1">(GMT -1:00 ) Azores, Cape Verde (Praia)</option>
+                                <option value="0">(GMT) Western European Time (London, Lisbon)</option>
+                                <option value="1">(GMT +1:00 ) Central European Time (Rome, Paris)</option>
+                                <option value="2">(GMT +2:00 ) Eastern European Time, CAT </option>
+                                <option value="3">(GMT +3:00 ) Arabia Standard Time (Baghdad, Riyadh)</option>
+                                <option value="3.5">(GMT +3:30 ) Iran Standard Time (Tehran)</option>
+                                <option value="4">(GMT +4:00 ) Moscow, St. Petersburg, Dubai</option>
+                                <option value="4.5">(GMT +4:30 ) Afghanistan Time (Kabul)</option>
+                                <option value="5">(GMT +5:00 ) Karachi, Tashkent, Maldive Islands</option>
+                                <option value="5.5">(GMT +5:30 ) India Standard Time (Mumbai, Colombo)</option>
+                                <option value="6">(GMT +6:00 ) Yekaterinburg, Almaty, Dhaka</option>
+                                <option value="7">(GMT +7:00 ) Bangkok, Hanoi, Jakarta</option>
+                                <option value="8">(GMT +8:00 ) Beijing, Perth, Singapore, Hong Kong</option>
+                                <option value="9">(GMT +9:00 ) Tokyo, Seoul</option>
+                                <option value="9.5">(GMT +9:30 ) ACST (Darwin, Adelaide)</option>
+                                <option value="10">(GMT +10:00 ) AEST (Brisbane, Sydney), Yakutsk</option>
+                                <option value="11">(GMT +11:00 ) Vladivostok, Nouméa, Solomon Islands</option>
+                                <option value="12">(GMT +12:00 ) Auckland, Fiji, Marshall Islands</option>
+                                <option value="13">(GMT +13:00 ) Samoa</option>
+                            </select>
+
+                            {/*<!--  design took fron validationEngine not the logic. Hardcoded -->*/}
+                            <div id="delivery_manual_error" className="delivery_manual_error hide">
+                                <div>* Chosen delivery date is in the past</div>
+                            </div>
+                            <div id="delivery_before_time" className="delivery_before_time hide">
+                                <div>We will deliver before the selected date</div>
+                            </div>
+                            <div id="delivery_not_available" className="delivery_not_available hide">
+                                <div>Deadline too close, pick another one.</div>
+                            </div>
+
+                            <input type="hidden" id="datePickerSelectedDate" value=""  />
+                            <input type="hidden" id="datePickerSelectedDatePrint" value="" />
+                            <input name="forceDeliveryButtonOk" type="button" value="Continue" className="uploadbtn in-popup forceDeliveryButtonOk" />
+                            <a href="#" className="btn-cancel in-popup cancelForceDelivery">Clear</a>
+
+                        </div>
+
+                    </div>
+                </div>
+                {/*<!-- end date picker -->*/}
+
+
+                </div>
+            </div>
+        </div>
+        </div>;
+    }
+}
+
+
+export default OutsourceModal ;
