@@ -106,6 +106,7 @@ ForceDelivery = {
         };
 
         EYE.register(initLayout, 'init');
+        EYE.init();
     }
 };
 

@@ -918,11 +918,6 @@ span.zone2 {
 .pricebox .tprice .euro, .pricebox .tprice .displayprice {display:inline;}
 .pricebox .tprice, .pricebox delivery {line-height:30px;}
 
-.viewvendors h3 {
-    float: left;
-    margin: 2% 2.5% 2% 2%!important;
-}
-
 .showpricesloading {
     float: right;
     width: 160px;

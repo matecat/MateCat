@@ -5,7 +5,60 @@ class OutsourceModal extends React.Component {
 
     constructor(props) {
         super(props);
+        this.state = {
+            showTranslator: false
+        };
+        this.getOutsourceQuote()
     }
+
+    getOutsourceQuote() {
+        var typeOfService = $( "input[name='revision']" ).is(":checked") ? "premium" : "professional";
+        var fixedDelivery =  $( "#forceDeliveryChosenDate" ).text();
+
+        UI.getOutsourceQuoteFromManage(this.props.project.id, this.props.project.password, this.props.job.id, this.props.job.password, fixedDelivery, typeOfService).done(function (data) {
+
+        });
+    }
+
+    showTranslatorInfo() {
+        this.setState({
+            showTranslator: true
+        });
+    }
+
+    hideTranslatorInfo() {
+        this.setState({
+            showTranslator: false
+        });
+    }
+
+    getDeliveryHtml() {
+        let containerClass = (this.state.showTranslator) ? "compress" : "";
+        return <div className={"delivery" + containerClass}>
+            <div className="delivery_label">Delivery by:</div>
+            <div className="delivery_details">
+                <div className="ErrorMsgquoteNotAvailable ErrorMsg hide">
+                    <h3>Not available. </h3>
+                    <p>Unfortunately the solution chosen is not available.
+                        Try again with another delivery date.</p>
+                </div>
+                <div className="ErrorMsg ErrorMsgQuoteError hide">
+                    <h3><strong>Ooops! </strong>
+                        <br />Cannot generate quote.</h3>
+                </div>
+
+                <span className="time" data-timezone="" data-rawtime=""/>
+                <a className="tooltip gray hide">i
+                    <span><strong>We will deliver before the selected date.</strong><br />
+                                                            This date already provides us with all the time we need to deliver quality work at the lowest price
+                                                            </span>
+                </a>
+                <br/><span className="zone2"/>
+                <a className="needitfaster">Need it faster?</a>
+            </div>
+        </div>;
+    }
+
     componentDidMount () {
         if ( config.enable_outsource ) {
             UI.outsourceInit();
@@ -15,18 +68,34 @@ class OutsourceModal extends React.Component {
     }
 
     render() {
+        let textGuaranteedByClass = (this.state.showTranslator) ? "expanded" : "";
+        let pricesClass = (this.state.showTranslator) ? "compress" : "";
+        let deliveryHtml = this.getDeliveryHtml();
+        let date;
+        if (this.props.job.outsource) {
+            let dd = new Date( this.props.job.outsource.delivery_date );
+            date =  $.format.date(dd, "d MMMM") + ' at ' + $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a")
+        } else {
+            date = getChosenOutsourceDateToString();
+        }
+
         return <div className="modal outsource">
         <div className="popup">
-        <div className="popup-box pricebox">
-            <h2>Choose how to translate: <span className="title-source">English</span> &gt; <span className="title-target">Italian</span> <span className="title-words">1000</span> words</h2>
+        <div className={"popup-box pricebox " + pricesClass}>
+            <h2>Choose how to translate:
+                <span className="title-source">{this.props.job.sourceTxt}</span> &gt;
+                <span className="title-target">{this.props.job.targetTxt}</span>
+                <span className="title-words"> {this.props.job.stats.TOTAL_FORMATTED}</span> words</h2>
             <div className="choose">
                 <div className="onyourown">
                     <div className="heading">
                         <h3>Share the following link with your translator</h3>
                     </div>
 
-                    <input className="out-link" type="text" value="http://matecat.local/translate/prova/en-US-fr-FR/19153-bd17c71da22f#11143640" readOnly="true"/>
-                    <a  href='javascript:void(0)' onClick={trackClick( "translate" )} className="uploadbtn in-popup" target="_blank">Open</a>
+                    <input className="out-link" type="text" defaultValue={window.location.protocol + '//' + window.location.host + this.props.url} readOnly="true"/>
+                    {!this.props.fromManage ? (
+                        <a  href='javascript:void(0)' onClick={trackClick( "translate" )} className="uploadbtn in-popup" target="_blank">Open</a>
+                        ) : ('')}
 
 
                 </div>
@@ -34,7 +103,7 @@ class OutsourceModal extends React.Component {
                 <div className="send-to-translator hide">
                     <div className="send-to-translator-container ">
                         <input className="out-email" type="email" placeholder="Insert email"/>
-                        <input className="out-date" type="datetime" placeholder="Date" readOnly/>
+                        <input className="out-date" type="datetime" placeholder="Date" readOnly defaultValue={date}/>
                         <a  className="send-to-translator-btn in-popup disabled" target="_blank">Send to translator</a>
                         <div className="validation-error email-translator-error"><span className="text" style={{color: "red", fontsize: "14px"}}>A valid email is required</span></div>
                     </div>
@@ -112,11 +181,6 @@ class OutsourceModal extends React.Component {
                     <span>or</span>
                     <div className="divider-line"></div>
                 </div>
-                <div className="viewvendors">
-                    <h3>Outsource to a translation company</h3>
-                    <a onClick={trackClick( "showprices" )} className="uploadbtn showprices">Show Prices</a>
-                    <div className="showpricesloading loading"></div>
-                </div>
                 <div className="outsourceto">
                     <div className="total_outsource">
                         <div className="heading">
@@ -174,24 +238,31 @@ class OutsourceModal extends React.Component {
 
                         </div>
                         <div className="offer">
-                            <div className="guaranteed_by">
+
+                            <div className={"guaranteed_by " + textGuaranteedByClass}>
                                 <div className="trust_text">
                                     <strong>Guaranteed by</strong>
                                     <a href="http://www.translated.net" target="_blank"><img src="/public/img/logo_translated.png" title="visit our website" /></a>
-                                    {/*TODO*/}
-                                    {/*<p className="trustbox1">Translated uses the most qualified translator for your subject (<strong>${subject | string:IT}</strong>)*/}
-                                    <p className="trustbox1">Translated uses the most qualified translator for your subject
-                                        and keeps using the same translator for your next projects. <br /><a className="show_translator more"><span>Read more</span></a></p>
 
+                                        <p className="trustbox1">Translated uses the most qualified translator for your subject
+                                            and keeps using the same translator for your next projects. <br />
 
-                                    <p className="trustbox2 hide">
-                                        Translated has over 15 years' experience as a translation company and offers
-                                        <a href="http://www.translated.net/en/frequently-asked-questions#guarantees" target="_blank">two key guarantees on quality and delivery</a>.
-                                        <br />
-                                        <a className="hide_translator more minus hide"><span>Close</span></a>
-                                    </p>
+                                            {!this.state.showTranslator ? (<a className="show_translator more" onClick={this.showTranslatorInfo.bind(this)}><span>Read more</span></a>) : ('')}
+
+                                        </p>
+
+                                    {this.state.showTranslator ? (<p className="trustbox2">
+                                            Translated has over 15 years' experience as a translation company and offers
+                                            <a href="http://www.translated.net/en/frequently-asked-questions#guarantees" target="_blank">two key guarantees on quality and delivery</a>.
+                                            <br />
+                                            <a className="hide_translator more minus"
+                                               onClick={this.hideTranslatorInfo.bind(this)}><span>Close</span></a>
+                                        </p>) : ('')}
+
                                 </div>
-                                <div className="translator_info_box hide">
+
+                                {this.state.showTranslator ? (
+                                <div className="translator_info_box" >
                                     <div className="translator_info">
                                         <div className="translator_bio">
                                             <span className="translator_name">Translator: <strong></strong></span>
@@ -205,34 +276,17 @@ class OutsourceModal extends React.Component {
 
 
                                     </div>
-                                </div>
-                            </div>
-                            <div className="delivery_container">
-                                <div className="delivery">
-                                    <div className="delivery_label">Delivery by:</div>
-                                    <div className="delivery_details">
-                                        <div className="ErrorMsgquoteNotAvailable ErrorMsg hide">
-                                            <h3>Not available. </h3>
-                                            <p>Unfortunately the solution chosen is not available.
-                                                Try again with another delivery date.</p>
-                                        </div>
-                                        <div className="ErrorMsg ErrorMsgQuoteError hide">
-                                            <h3><strong>Ooops! </strong>
-                                                <br />Cannot generate quote.</h3>
-                                        </div>
+                                </div>) : ('')}
 
-                                        <span className="time" data-timezone="" data-rawtime=""></span>
-                                        <a className="tooltip gray hide">i
-                                            <span><strong>We will deliver before the selected date.</strong><br />
-                                                            This date already provides us with all the time we need to deliver quality work at the lowest price
-                                                            </span>
-                                        </a>
-                                        <br/><span className="zone2"></span>
-                                        <a className="needitfaster">Need it faster?</a>
-                                    </div>
-                                </div>
                             </div>
-                            <div className="tprice">
+
+                            { (!this.state.showTranslator) ? (
+                                    <div className="delivery_container">
+                                        {deliveryHtml}
+                                    </div>
+                                ) : ('')}
+
+                            <div className={"tprice " + pricesClass}>
                                 <div className="ErrorMsg ErrorMsgQuoteError hide">
                                     <p>Contact us at <a href="mailto:info@translated.net">info@translated.net</a> <br />or call +39 06 90 254 001</p>
                                 </div>
@@ -240,7 +294,15 @@ class OutsourceModal extends React.Component {
                                 <span className="displayprice" data-currency="EUR" data-rawprice="0.00"></span>
                                 <br />
 
-                                <span className="displaypriceperword">about <span className="euro currency_per_word"></span> <a className="price_p_word"></a> / word</span>
+                                <span className="displaypriceperword">about
+                                    <span className="euro currency_per_word"/>
+                                    <a className="price_p_word"/> / word
+                                    { (this.state.showTranslator) ? (
+                                            <div className="delivery_container">
+                                                {deliveryHtml}
+                                            </div>
+                                        ) : ('')}
+                                </span>
                                 <form id="continueForm" action="${outsource_service_login}" method="POST" target="_blank">
                                     <input type="hidden" name="url_ok" value=""/>
                                     <input type="hidden" name="url_ko" value=""/>

@@ -6,15 +6,15 @@ $.extend(UI, {
 	outsourceInit: function() {
 
         // hide/show detailed information about the chosen translator
-        $('.show_translator, .hide_translator').click(function() {
-            $('.show_translator, .hide_translator').toggleClass('hide');
-            $('.guaranteed_by').toggleClass('expanded');
-            $('.delivery,.tprice,.pricebox').toggleClass('compress');
-            $('.trustbox2').toggleClass('hide');
-            $('.translator_info_box').toggleClass('hide');
-            $('#forceDeliveryContainer').addClass('hide');
-            $('.delivery').appendTo( $( this).hasClass( "hide_translator" ) ? ".delivery_container" : ".displaypriceperword" );
-        });
+        // $('.show_translator, .hide_translator').click(function() {
+        //     $('.show_translator, .hide_translator').toggleClass('hide');
+        //     $('.guaranteed_by').toggleClass('expanded');
+        //     $('.delivery,.tprice,.pricebox').toggleClass('compress');
+        //     $('.trustbox2').toggleClass('hide');
+        //     $('.translator_info_box').toggleClass('hide');
+        //     $('#forceDeliveryContainer').addClass('hide');
+        //     $('.delivery').appendTo( $( this).hasClass( "hide_translator" ) ? ".delivery_container" : ".displaypriceperword" );
+        // });
 
         // add/remove revision service to current job
         $( "input[name='revision']" ).click(function() {
@@ -91,9 +91,8 @@ $.extend(UI, {
                 $('body').addClass('showingOutsourceTo');
                 $('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
                 $('.outsource.modal .uploadbtn:not(.showprices)').attr('href', $(this).attr('href'));
-                showOutsourcePopup( UI.showPopupDetails );
                 renderQuote( $( this ) );
-                $('.outsource.modal').show();
+                // $('.outsource.modal').show();
             }
 		});
 
@@ -144,23 +143,23 @@ $.extend(UI, {
         this.currentOutsourceJob = job;
         this.currentOutsourceUrl = url;
 
-        $( ".title-source" ).text( job.sourceTxt);
-        $( ".title-target" ).text( job.targetTxt);
-        $( ".title-words" ).text(job.stats.TOTAL_FORMATTED );
-        $( ".modal.outsource a.uploadbtn.in-popup").hide();
+        // $( ".title-source" ).text( job.sourceTxt);
+        // $( ".title-target" ).text( job.targetTxt);
+        // $( ".title-words" ).text(job.stats.TOTAL_FORMATTED );
+        // $( ".modal.outsource a.uploadbtn.in-popup").hide();
 
-        if (job.outsource) {
-            var dd = new Date( job.outsource.delivery_date );
-            $('.modal.outsource .out-date').val( $.format.date(dd, "d MMMM") + ' at ' + $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a") );
-        } else {
-            $('.modal.outsource .out-date').val( getChosenOutsourceDateToString() );
-
-        }
+        // if (job.outsource) {
+        //     var dd = new Date( job.outsource.delivery_date );
+        //     $('.modal.outsource .out-date').val( $.format.date(dd, "d MMMM") + ' at ' + $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a") );
+        // } else {
+        //     $('.modal.outsource .out-date').val( getChosenOutsourceDateToString() );
+        //
+        // }
 
         if(config.enable_outsource) {
-            resetOutsourcePopup( false );
-            $('body').addClass('showingOutsourceTo');
-            $('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + url);
+            // resetOutsourcePopup( false );
+            // $('body').addClass('showingOutsourceTo');
+            // $('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + url);
             $('.outsource.modal .uploadbtn:not(.showprices)').attr('href', url);
             $("#open-translator").addClass('hide');
             $('.send-to-translator').removeClass('hide');
@@ -171,15 +170,13 @@ $.extend(UI, {
             $('.modal.outsource input.out-email').val("");
             $('.modal.outsource input.out-email').removeClass("error");
 
-            showOutsourcePopup( UI.showPopupDetails );
             renderQuoteFromManage(project.id, project.password, job.id, job.password);
-            $('.outsource.modal').show();
+            // $('.outsource.modal').show();
         }
     },
     restartOutsourceModal: function () {
         if(config.enable_outsource) {
             resetOutsourcePopup( false );
-            showOutsourcePopup( UI.showPopupDetails );
             renderQuoteFromManage(this.currentOutsourceProject.id, this.currentOutsourceProject.password, this.currentOutsourceJob.id, this.currentOutsourceJob.password);
             $('.outsource.modal').show();
         }
@@ -261,7 +258,28 @@ $.extend(UI, {
         });
     },
 
-    getOutsourceQuoteFromManage: getOutsourceQuoteFromManage
+    getOutsourceQuoteFromManage: function(idProject, password, jid, jpassword, fixedDelivery, typeOfService, callback ) {
+
+        return APP.doRequest({
+            data: {
+                action: 'outsourceTo',
+                pid: idProject,
+                ppassword: password,
+                fixedDelivery: fixedDelivery,
+                typeOfService: typeOfService,
+                jobs: [
+                    {
+                        jid: jid,
+                        jpassword: jpassword
+                    }
+                ]
+            },
+            success: function (d) {
+                if (typeof callback == "function")
+                    callback(d);
+            }
+        });
+    }
 });
 
 
@@ -271,7 +289,6 @@ function renderQuote( clickedButton ) {
         UI.quoteResponse = quoteData.data[0];
         var chunk = quoteData.data[0][0];
 
-        showOutsourcePopup( UI.showPopupDetails );
         UI.url_ok = quoteData.return_url.url_ok;
         UI.url_ko = quoteData.return_url.url_ko;
         UI.confirm_urls = quoteData.return_url.confirm_urls;
@@ -310,7 +327,6 @@ function renderQuoteFromManage( idProject, password, jid, jpassword) {
         UI.quoteResponse = quoteData.data[0];
         var chunk = quoteData.data[0][0];
 
-        showOutsourcePopup( UI.showPopupDetails );
         UI.url_ok = quoteData.return_url.url_ok;
         UI.url_ko = quoteData.return_url.url_ko;
         UI.confirm_urls = quoteData.return_url.confirm_urls;
@@ -677,25 +693,8 @@ function resetOutsourcePopup( resetHard ) {
         $('.modal.outsource .displayprice').empty();
         $('.modal.outsource .delivery .time').empty();
         $('.modal.outsource .revealprices, .modal.outsource').hide();
-        $('#forceDeliveryContainer, .viewvendors').addClass("hide");
+        $('#forceDeliveryContainer').addClass("hide");
     }
 }
 
 
-function showOutsourcePopup( showExpanded ) {
-    if( $( ".outsource" ).css("display") == "none" ) {
-        ( showExpanded == '0' ) ? compressOutsourcePopup() : expandOutsourcePopup();
-    }
-}
-
-
-function expandOutsourcePopup() {
-    $( ".outsourceto, .paymentinfo, .contact_box").removeClass( "hide" );
-    $( ".viewvendors").addClass("hide");
-}
-
-
-function compressOutsourcePopup() {
-    $( ".outsourceto, .paymentinfo, .contact_box").addClass( "hide" );
-    $( ".viewvendors").removeClass( "hide" );
-}
