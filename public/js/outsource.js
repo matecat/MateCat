@@ -160,15 +160,19 @@ $.extend(UI, {
             // resetOutsourcePopup( false );
             // $('body').addClass('showingOutsourceTo');
             // $('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + url);
-            $('.outsource.modal .uploadbtn:not(.showprices)').attr('href', url);
-            $("#open-translator").addClass('hide');
-            $('.send-to-translator').removeClass('hide');
-            $('.onyourown').addClass('opened-send-translator');
-            $('.out-link').addClass('from-manage');
+
+            //TODO Questo ignoro a cosa serva
+            // $('.outsource.modal .uploadbtn:not(.showprices)').attr('href', url);
+
+
+            // $("#open-translator").addClass('hide');
+            // $('.send-to-translator').removeClass('hide');
+            // $('.onyourown').addClass('opened-send-translator');
+            // $('.out-link').addClass('from-manage');
 
             //TODO
-            $('.modal.outsource input.out-email').val("");
-            $('.modal.outsource input.out-email').removeClass("error");
+            // $('.modal.outsource input.out-email').val("");
+            // $('.modal.outsource input.out-email').removeClass("error");
 
             renderQuoteFromManage(project.id, project.password, job.id, job.password);
             // $('.outsource.modal').show();
@@ -435,6 +439,39 @@ function renderOutsourcedQuote( chunk ) {
 }
 
 
+function renderLocalizationInfos( price, delivery, revision_price, revision_delivery ) {
+    // if the customer has a timezone in the cookie, then use it
+    // otherwise attemp to guess it from his browser infos
+    var timezoneToShow = readCookie( "matecat_timezone" );
+    if ( timezoneToShow == "" ) {
+        timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
+    }
+
+    // update the timezone (both the displayed and the stored ones)
+    changeTimezone(delivery, -1 * ( new Date().getTimezoneOffset() / 60 ), timezoneToShow, "span.time");
+    if( revision_delivery ) {
+        changeTimezone(revision_delivery, -1 * ( new Date().getTimezoneOffset() / 60 ), timezoneToShow, "span.revision_delivery");
+    }
+    updateTimezonesDescriptions( timezoneToShow );
+
+
+    // if the customer has a currency in the cookie, then use it
+    // otherwise use the default one
+    var currToShow = readCookie( "matecat_currency" );
+    if ( currToShow == "" ) {
+        currToShow = "EUR";
+    }
+
+    // update the currency (both the displayed and the stored ones)
+    changeCurrency( price, "EUR", currToShow, ".euro", ".displayprice", ".price_p_word");
+    if( revision_price ) {
+        changeCurrency(revision_price, "EUR", currToShow, ".revision_currency", ".revision_price", "");
+    }
+
+    $( "#changecurrency option[value='" + currToShow + "']").attr( "selected", "selected" );
+}
+
+
 function renderNotAvailableQuote() {
     $('.modal.outsource').removeClass('loading');
     $('.needitfaster').html('Change delivery date');
@@ -499,39 +536,6 @@ function renderNormalQuote( chunk ) {
     }
 
     $(".score_number").text(parseInt(voteToShow) + "%");
-}
-
-
-function renderLocalizationInfos( price, delivery, revision_price, revision_delivery ) {
-    // if the customer has a timezone in the cookie, then use it
-    // otherwise attemp to guess it from his browser infos
-    var timezoneToShow = readCookie( "matecat_timezone" );
-    if ( timezoneToShow == "" ) {
-        timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
-    }
-
-    // update the timezone (both the displayed and the stored ones)
-    changeTimezone(delivery, -1 * ( new Date().getTimezoneOffset() / 60 ), timezoneToShow, "span.time");
-    if( revision_delivery ) {
-        changeTimezone(revision_delivery, -1 * ( new Date().getTimezoneOffset() / 60 ), timezoneToShow, "span.revision_delivery");
-    }
-    updateTimezonesDescriptions( timezoneToShow );
-
-
-    // if the customer has a currency in the cookie, then use it
-    // otherwise use the default one
-    var currToShow = readCookie( "matecat_currency" );
-    if ( currToShow == "" ) {
-        currToShow = "EUR";
-    }
-
-    // update the currency (both the displayed and the stored ones)
-    changeCurrency( price, "EUR", currToShow, ".euro", ".displayprice", ".price_p_word");
-    if( revision_price ) {
-        changeCurrency(revision_price, "EUR", currToShow, ".revision_currency", ".revision_price", "");
-    }
-
-    $( "#changecurrency option[value='" + currToShow + "']").attr( "selected", "selected" );
 }
 
 

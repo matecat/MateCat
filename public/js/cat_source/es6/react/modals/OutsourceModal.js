@@ -6,80 +6,222 @@ class OutsourceModal extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            showTranslator: false
+            showTranslatorInfo: false,
+            outsource: false
         };
-        this.getOutsourceQuote()
+        this.getOutsourceQuote();
     }
 
     getOutsourceQuote() {
-        var typeOfService = $( "input[name='revision']" ).is(":checked") ? "premium" : "professional";
-        var fixedDelivery =  $( "#forceDeliveryChosenDate" ).text();
+        let self = this;
+        let typeOfService = $( this.revisionSelect).is(":checked") ? "premium" : "professional";
+        let fixedDelivery =  $( "#forceDeliveryChosenDate" ).text();
 
-        UI.getOutsourceQuoteFromManage(this.props.project.id, this.props.project.password, this.props.job.id, this.props.job.password, fixedDelivery, typeOfService).done(function (data) {
+        UI.getOutsourceQuoteFromManage(this.props.project.id, this.props.project.password, this.props.job.id, this.props.job.password, fixedDelivery, typeOfService).done(function (quoteData) {
+            self.quoteResponse = quoteData.data[0];
+            self.chunk = quoteData.data[0][0];
 
+            self.url_ok = quoteData.return_url.url_ok;
+            self.url_ko = quoteData.return_url.url_ko;
+            self.confirm_urls = quoteData.return_url.confirm_urls;
+            self.data_key = self.chunk.id;
+
+            // a generic error
+            if( self.chunk.quote_result != 1 ){
+                renderGenericErrorQuote();
+                return false;
+            }
+
+            // job already outsourced
+            if( self.chunk.outsourced == 1 ) {
+                renderOutsourcedQuote( self.chunk );
+                return false;
+            }
+
+            // delivery date too strict
+            if( self.chunk.quote_available != 1 ) {
+                renderNotAvailableQuote();
+                return false;
+            }
+
+            self.setState({
+                outsource: true
+            });
+
+            // renderNormalQuote( chunk );
+
+            // Intercom
+            $(document).trigger('outsource-rendered', { quote_data : self.quoteResponse } );
         });
     }
 
     showTranslatorInfo() {
         this.setState({
-            showTranslator: true
+            showTranslatorInfo: true
         });
     }
 
     hideTranslatorInfo() {
         this.setState({
-            showTranslator: false
+            showTranslatorInfo: false
         });
     }
 
-    getDeliveryHtml() {
-        let containerClass = (this.state.showTranslator) ? "compress" : "";
-        return <div className={"delivery" + containerClass}>
-            <div className="delivery_label">Delivery by:</div>
-            <div className="delivery_details">
-                <div className="ErrorMsgquoteNotAvailable ErrorMsg hide">
-                    <h3>Not available. </h3>
-                    <p>Unfortunately the solution chosen is not available.
-                        Try again with another delivery date.</p>
-                </div>
-                <div className="ErrorMsg ErrorMsgQuoteError hide">
-                    <h3><strong>Ooops! </strong>
-                        <br />Cannot generate quote.</h3>
-                </div>
+    getCurrency() {
+        // if the customer has a currency in the cookie, then use it
+        // otherwise use the default one
+        let currToShow = readCookie( "matecat_currency" );
+        if ( currToShow == "" ) {
+            currToShow = "EUR";
+        }
+        return currToShow;
+    }
 
-                <span className="time" data-timezone="" data-rawtime=""/>
-                <a className="tooltip gray hide">i
+    getTimeZone() {
+        let timezoneToShow = readCookie( "matecat_timezone" );
+        if ( timezoneToShow == "" ) {
+            timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
+        }
+        return timezoneToShow;
+    }
+
+    getTimeZone() {
+        let timezoneToShow = readCookie( "matecat_timezone" );
+        if ( timezoneToShow == "" ) {
+            timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
+        }
+        return timezoneToShow;
+    }
+
+    getDate(date, timezoneTo) {
+        let dd = new Date( date.replace(/-/g, "/") );
+        let timezoneFrom = -1 * ( new Date().getTimezoneOffset() / 60 );
+        dd.setMinutes( dd.getMinutes() + (timezoneTo - timezoneFrom) * 60 );
+        return dd;
+    }
+
+    getDateString(date, timezoneTo) {
+        let dd = new Date( date.replace(/-/g, "/") );
+        let timezoneFrom = -1 * ( new Date().getTimezoneOffset() / 60 );
+        dd.setMinutes( dd.getMinutes() + (timezoneTo - timezoneFrom) * 60 );
+        return $.format.date(dd, "d MMMM") + ' at ' + $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a");
+    }
+
+    checkDelivery(deliveryToShow) {
+        return new Date( deliveryToShow ).getTime() < $( "#forceDeliveryChosenDate" ).text();
+    }
+
+    getDeliveryHtml() {
+        let containerClass = (this.state.showTranslatorInfo) ? "compress" : "";
+        if (this.state.outsource) {
+            let isRevisionChecked = $(this.revisionSelect).is( ":checked" );
+            let deliveryToShow = ( isRevisionChecked ) ?  this.chunk.r_delivery : this.chunk.delivery;
+            let priceToShow = ( isRevisionChecked ) ? parseFloat( this.chunk.r_price ) + parseFloat( this.chunk.price ) : this.chunk.price;
+
+            let timeZone = this.getTimeZone();
+            let dateString =  this.getDateString(deliveryToShow, timeZone);
+            let date =  this.getDate(deliveryToShow, timeZone);
+            let tooltip = "";
+
+            if( this.checkDelivery(deliveryToShow) ) {
+                tooltip = <a className="tooltip gray hide">i
                     <span><strong>We will deliver before the selected date.</strong><br />
+                            This date already provides us with all the time we need to deliver quality work at the lowest price
+                        </span>
+                </a>;
+            }
+
+            return <div className={"delivery " + containerClass}>
+                <div className="delivery_label">Delivery by:</div>
+                <div className="delivery_details">
+                    <span className="time" data-timezone={timeZone} data-rawtime={date.toUTCString()}>{dateString}</span>
+                    {tooltip}
+                    <br/><span className="zone2"/>
+                    <a className="needitfaster">Need it faster?</a>
+                </div>
+            </div>;
+
+        } else {
+            return <div className={"delivery " + containerClass}>
+                <div className="delivery_label">Delivery by:</div>
+                <div className="delivery_details">
+                    <div className="ErrorMsgquoteNotAvailable ErrorMsg hide">
+                        <h3>Not available. </h3>
+                        <p>Unfortunately the solution chosen is not available.
+                            Try again with another delivery date.</p>
+                    </div>
+                    <div className="ErrorMsg ErrorMsgQuoteError hide">
+                        <h3><strong>Ooops! </strong>
+                            <br />Cannot generate quote.</h3>
+                    </div>
+
+                    <span className="time" data-timezone="" data-rawtime=""/>
+                    <a className="tooltip gray hide">i
+                        <span><strong>We will deliver before the selected date.</strong><br />
                                                             This date already provides us with all the time we need to deliver quality work at the lowest price
                                                             </span>
-                </a>
-                <br/><span className="zone2"/>
-                <a className="needitfaster">Need it faster?</a>
-            </div>
-        </div>;
+                    </a>
+                    <br/><span className="zone2"/>
+                    <a className="needitfaster">Need it faster?</a>
+                </div>
+            </div>;
+        }
+    }
+
+    getRevisionHtml() {
+        let dateString = '';
+        let timeZone;
+        let date;
+        if (this.state.outsource && this.chunk.r_delivery)  {
+            timeZone = this.getTimeZone();
+            dateString =  this.getDateString(this.chunk.r_delivery, timeZone);
+            date =  this.getDate(this.chunk.r_delivery, timeZone).toUTCString();
+        }
+        return <div className="addrevision">
+                    <input type="checkbox" name="revision" value="revision"
+                           ref={(select) => this.revisionSelect = select}/>
+                    <h4>Add revision</h4>
+                    <span className="revision_delivery" data-timezone={timeZone} data-rawtime={date}>{dateString}</span>
+                    <span className="revision_price_box">+
+                        <span className="revision_currency"/>
+                        <span className="revision_price"/>
+                    </span>
+                </div>;
+    }
+
+    updateTimezonesDescriptions( selectedTimezone ) {
+        $( "#changeTimezone" ).find( "option").each( function() {
+            $( this ).text( $( this ).attr( "data-description-long" ) );
+        });
+
+        var selectedElement = $( "#changeTimezone" ).find( "option[value='" + selectedTimezone + "']");
+        selectedElement.text( selectedElement.attr( "data-description-short" ) );
     }
 
     componentDidMount () {
         if ( config.enable_outsource ) {
             UI.outsourceInit();
             ForceDelivery.init();
-            UI.startOutSourceModal(this.props.project, this.props.job, this.props.url);
+            this.updateTimezonesDescriptions(this.getTimeZone());
         }
     }
 
     render() {
-        let textGuaranteedByClass = (this.state.showTranslator) ? "expanded" : "";
-        let pricesClass = (this.state.showTranslator) ? "compress" : "";
+        let loadingClass = (this.state.outsource) ?  "" : "loading"
+        let textGuaranteedByClass = (this.state.showTranslatorInfo) ? "expanded" : "";
+        let pricesClass = (this.state.showTranslatorInfo) ? "compress" : "";
         let deliveryHtml = this.getDeliveryHtml();
+        let revisionHtml = this.getRevisionHtml();
         let date;
         if (this.props.job.outsource) {
             let dd = new Date( this.props.job.outsource.delivery_date );
             date =  $.format.date(dd, "d MMMM") + ' at ' + $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a")
         } else {
-            date = getChosenOutsourceDateToString();
+            // date = getChosenOutsourceDateToString();
+            date = '';
         }
 
-        return <div className="modal outsource">
+        return <div className={"modal outsource " + loadingClass}>
         <div className="popup">
         <div className={"popup-box pricebox " + pricesClass}>
             <h2>Choose how to translate:
@@ -87,20 +229,23 @@ class OutsourceModal extends React.Component {
                 <span className="title-target">{this.props.job.targetTxt}</span>
                 <span className="title-words"> {this.props.job.stats.TOTAL_FORMATTED}</span> words</h2>
             <div className="choose">
-                <div className="onyourown">
+                <div className={this.props.translatorOpen ? ("onyourown opened-send-translator") :("onyourown")}>
                     <div className="heading">
                         <h3>Share the following link with your translator</h3>
                     </div>
 
-                    <input className="out-link" type="text" defaultValue={window.location.protocol + '//' + window.location.host + this.props.url} readOnly="true"/>
+                    <input className={this.props.fromManage ? ("out-link from-manage") :("out-link")} type="text" defaultValue={window.location.protocol + '//' + window.location.host + this.props.url} readOnly="true"/>
                     {!this.props.fromManage ? (
-                        <a  href='javascript:void(0)' onClick={trackClick( "translate" )} className="uploadbtn in-popup" target="_blank">Open</a>
+                        <a  href={this.props.url} onClick={trackClick( "translate" )} className="uploadbtn in-popup" target="_blank">Open</a>
                         ) : ('')}
 
 
                 </div>
-                <div id="open-translator" className="open-send-to-translator">Send job to translator</div>
-                <div className="send-to-translator hide">
+
+                {!this.props.translatorOpen ? (<div id="open-translator" className="open-send-to-translator">Send job to translator</div>)
+                    : ('')}
+
+                <div className={this.props.translatorOpen ? ("send-to-translator") :("send-to-translator hide")} >
                     <div className="send-to-translator-container ">
                         <input className="out-email" type="email" placeholder="Insert email"/>
                         <input className="out-date" type="datetime" placeholder="Date" readOnly defaultValue={date}/>
@@ -244,14 +389,15 @@ class OutsourceModal extends React.Component {
                                     <strong>Guaranteed by</strong>
                                     <a href="http://www.translated.net" target="_blank"><img src="/public/img/logo_translated.png" title="visit our website" /></a>
 
-                                        <p className="trustbox1">Translated uses the most qualified translator for your subject
+                                        <p className="trustbox1">Translated uses the most qualified translator for your subject true
+                                            {/*(<strong>${subject | string:IT}</strong>)*/}
                                             and keeps using the same translator for your next projects. <br />
 
-                                            {!this.state.showTranslator ? (<a className="show_translator more" onClick={this.showTranslatorInfo.bind(this)}><span>Read more</span></a>) : ('')}
+                                            {!this.state.showTranslatorInfo ? (<a className="show_translator more" onClick={this.showTranslatorInfo.bind(this)}><span>Read more</span></a>) : ('')}
 
                                         </p>
 
-                                    {this.state.showTranslator ? (<p className="trustbox2">
+                                    {this.state.showTranslatorInfo ? (<p className="trustbox2">
                                             Translated has over 15 years' experience as a translation company and offers
                                             <a href="http://www.translated.net/en/frequently-asked-questions#guarantees" target="_blank">two key guarantees on quality and delivery</a>.
                                             <br />
@@ -261,7 +407,7 @@ class OutsourceModal extends React.Component {
 
                                 </div>
 
-                                {this.state.showTranslator ? (
+                                {this.state.showTranslatorInfo ? (
                                 <div className="translator_info_box" >
                                     <div className="translator_info">
                                         <div className="translator_bio">
@@ -280,7 +426,7 @@ class OutsourceModal extends React.Component {
 
                             </div>
 
-                            { (!this.state.showTranslator) ? (
+                            { (!this.state.showTranslatorInfo) ? (
                                     <div className="delivery_container">
                                         {deliveryHtml}
                                     </div>
@@ -294,10 +440,11 @@ class OutsourceModal extends React.Component {
                                 <span className="displayprice" data-currency="EUR" data-rawprice="0.00"></span>
                                 <br />
 
+                                {/*//TODO Inserire spazi*/}
                                 <span className="displaypriceperword">about
                                     <span className="euro currency_per_word"/>
-                                    <a className="price_p_word"/> / word
-                                    { (this.state.showTranslator) ? (
+                                     <a className="price_p_word"/> / word
+                                    { (this.state.showTranslatorInfo) ? (
                                             <div className="delivery_container">
                                                 {deliveryHtml}
                                             </div>
@@ -312,10 +459,8 @@ class OutsourceModal extends React.Component {
                                     <a href="#" className="continuebtn disabled">Order</a>
                                 </form>
                             </div>
+                            {revisionHtml}
 
-                            <div className="addrevision">
-                                <input type="checkbox" name="revision" value="revision"/><h4>Add revision</h4><span className="revision_delivery"></span><span className="revision_price_box">+ <span className="revision_currency"></span><span className="revision_price"></span></span>
-                            </div>
                         </div>
 
 

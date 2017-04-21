@@ -566,7 +566,8 @@ UI = {
             project: project,
             job: job,
             url: url,
-            fromManage: true
+            fromManage: true,
+            translatorOpen: true
         };
         let style = {width: '970px',maxWidth: '970px', top: '45%'};
         APP.ModalWindow.showModalComponent(OutsourceModal, props, "Translate", style);
