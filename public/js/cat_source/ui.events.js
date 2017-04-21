@@ -703,7 +703,7 @@ $.extend(UI, {
 			}, 50);
             if (!UI.body.hasClass('searchActive')) {
 
-                if(UI.isCJK && ( (e.which == '60') || (e.which == '62') ) ) {
+                if(UI.isCJK() && ( (e.which == '60') || (e.which == '62') ) ) {
                 } else {
                     setTimeout(function() {
                         UI.lockTags(UI.editarea);
