@@ -85,7 +85,7 @@ $.extend(UI, {
                 prime = (index < UI.numDisplayContributionMatches)? ' prime' : '';
 
                 var disabled = (this.id == '0') ? true : false;
-                cb = this.created_by;
+                var cb = this.created_by;
                 cl_suggestion = UI.getPercentuageClass(this.match);
 
                 var leftTxt = (in_target) ? this.translation : this.segment;
