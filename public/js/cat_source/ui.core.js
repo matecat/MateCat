@@ -3092,7 +3092,7 @@ UI = {
         return id.replace(UI.commonPartInSegmentIds, '<span class="implicit">' + UI.commonPartInSegmentIds + '</span>');
     },
     isCJK: function () {
-        return $('body').hasClass("rtl-target");
+        return config.isCJK;
     },
     isKorean: function () {
         var l = config.target_rfc;
