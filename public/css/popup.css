@@ -135,6 +135,7 @@ box-shadow: inset 0 0 1px 1px #888;
     top: 25%;
     left: 50%;
     font-family: 'Calibri', 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    font-size: 14px;
 }
 
 .outsource.modal .popup-box {

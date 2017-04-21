@@ -16,7 +16,9 @@ class OutsourceModal extends React.Component {
         let self = this;
         let typeOfService = $( this.revisionSelect).is(":checked") ? "premium" : "professional";
         let fixedDelivery =  $( "#forceDeliveryChosenDate" ).text();
-
+        UI.currentOutsourceProject = this.props.project;
+        UI.currentOutsourceJob = this.props.job;
+        UI.currentOutsourceUrl = this.props.url;
         UI.getOutsourceQuoteFromManage(this.props.project.id, this.props.project.password, this.props.job.id, this.props.job.password, fixedDelivery, typeOfService).done(function (quoteData) {
             self.quoteResponse = quoteData.data[0];
             self.chunk = quoteData.data[0][0];
@@ -189,6 +191,42 @@ class OutsourceModal extends React.Component {
                 </div>;
     }
 
+    getTranslatorInfoHtml() {
+        let subjectsString = "";
+        let isRevisionChecked = $( "input[name='revision']" ).is( ":checked" );
+
+        var voteToShow = ( isRevisionChecked ) ? this.chunk.r_vote : this.chunk.t_vote;
+        if( this.chunk.show_revisor_data != 1 ) {
+            $(".outsourceto").addClass("revisorNotAvailable");
+            voteToShow = this.chunk.t_vote;
+        }
+
+        if (this.chunk.t_chosen_subject.length > 0 && this.chunk.t_subjects.length > 0) {
+            subjectsString = "<strong>" + this.chunk.t_chosen_subject + "</strong>, " + this.chunk.t_subjects;
+        } else if (this.chunk.t_chosen_subject.length > 0) {
+            subjectsString = "<strong>" + this.chunk.t_chosen_subject + "</strong>";
+        } else {
+            subjectsString = this.chunk.t_subjects;
+        }
+
+        let translatedWords = this.chunk.t_words_total.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
+        return <div className="translator_info_box" >
+            <div className="translator_info">
+                <div className="translator_bio">
+                    <span className="translator_name">Translator: <strong>{this.chunk.t_name}</strong></span>
+                    <p><span className="label_info">Positive feedback:</span><span className="score_number">{parseInt(voteToShow) + "%"}</span></p>
+                    <p><span className="label_info">Expert in:</span>
+                        <span className="subjects" dangerouslySetInnerHTML={ this.allowHTML(subjectsString) }/>
+                    </p>
+                    <p><span className="label_info">Years of experience:</span> <span className="experience">{this.chunk.t_experience_years}</span></p>
+                    <p><span className="label_info">Words translated last 12 months:</span><span className="translated_words">{translatedWords}</span></p>
+                </div>
+
+
+            </div>
+        </div>
+    }
+
     updateTimezonesDescriptions( selectedTimezone ) {
         $( "#changeTimezone" ).find( "option").each( function() {
             $( this ).text( $( this ).attr( "data-description-long" ) );
@@ -198,11 +236,40 @@ class OutsourceModal extends React.Component {
         selectedElement.text( selectedElement.attr( "data-description-short" ) );
     }
 
+    allowHTML(string) {
+        return { __html: string };
+    }
+
     componentDidMount () {
         if ( config.enable_outsource ) {
             UI.outsourceInit();
             ForceDelivery.init();
             this.updateTimezonesDescriptions(this.getTimeZone());
+        }
+    }
+    componentDidUpdate() {
+        UI.outsourceInit();
+        ForceDelivery.init();
+        if (this.state.outsource) {
+            // a generic error
+            if( this.chunk.quote_result != 1 ){
+                renderGenericErrorQuote();
+                return false;
+            }
+
+            // job already outsourced
+            if( this.chunk.outsourced == 1 ) {
+                renderOutsourcedQuote( chunk );
+                return false;
+            }
+
+            // delivery date too strict
+            if( this.chunk.quote_available != 1 ) {
+                renderNotAvailableQuote();
+                return false;
+            }
+
+            renderNormalQuote( this.chunk );
         }
     }
 
@@ -237,7 +304,9 @@ class OutsourceModal extends React.Component {
                     <input className={this.props.fromManage ? ("out-link from-manage") :("out-link")} type="text" defaultValue={window.location.protocol + '//' + window.location.host + this.props.url} readOnly="true"/>
                     {!this.props.fromManage ? (
                         <a  href={this.props.url} onClick={trackClick( "translate" )} className="uploadbtn in-popup" target="_blank">Open</a>
-                        ) : ('')}
+                        ) : (
+                        <a  href={this.props.url} onClick={trackClick( "translate" )} className="uploadbtn in-popup hide" target="_blank">Open</a>
+                        )}
 
 
                 </div>
@@ -407,22 +476,9 @@ class OutsourceModal extends React.Component {
 
                                 </div>
 
-                                {this.state.showTranslatorInfo ? (
-                                <div className="translator_info_box" >
-                                    <div className="translator_info">
-                                        <div className="translator_bio">
-                                            <span className="translator_name">Translator: <strong></strong></span>
-                                            <p><span className="label_info">Positive feedback:</span><span className="score_number"></span></p>
-                                            <p><span className="label_info">Expert in:</span>
-                                                <span className="subjects"></span>
-                                            </p>
-                                            <p><span className="label_info">Years of experience:</span> <span className="experience"></span></p>
-                                            <p><span className="label_info">Words translated last 12 months:</span><span className="translated_words"></span></p>
-                                        </div>
-
-
-                                    </div>
-                                </div>) : ('')}
+                                {(this.state.showTranslatorInfo && this.state.outsource ) ? (
+                                this.getTranslatorInfoHtml()
+                                    ) : ('')}
 
                             </div>
 
@@ -431,6 +487,7 @@ class OutsourceModal extends React.Component {
                                         {deliveryHtml}
                                     </div>
                                 ) : ('')}
+
 
                             <div className={"tprice " + pricesClass}>
                                 <div className="ErrorMsg ErrorMsgQuoteError hide">
@@ -450,7 +507,7 @@ class OutsourceModal extends React.Component {
                                             </div>
                                         ) : ('')}
                                 </span>
-                                <form id="continueForm" action="${outsource_service_login}" method="POST" target="_blank">
+                                <form id="continueForm" action={config.outsource_service_login} method="POST" target="_blank">
                                     <input type="hidden" name="url_ok" value=""/>
                                     <input type="hidden" name="url_ko" value=""/>
                                     <input type="hidden" name="confirm_urls" value=""/>

@@ -3,6 +3,7 @@ var ForceDelivery = null;
 
 ForceDelivery = {
     init: function () {
+        this.removeEvents();
         $(".needitfaster").click(function () {
             var hours = new Date().getHours() + 1;
             hours += ( hours % 2 == 0 ) ? 1 : 0;
@@ -29,7 +30,8 @@ ForceDelivery = {
             setOutsourceDate(getChosenOutsourceDate());
         });
 
-        $('.outsource-cancel-date').click(function () {
+        $('.outsource-cancel-date').click(function (e) {
+            e.preventDefault();
             $('#out-datepicker').addClass('hide');
         });
 
@@ -38,7 +40,8 @@ ForceDelivery = {
             $('#out-datepicker').addClass('hide');
         });
 
-        $('.modal.outsource .cancelForceDelivery').click(function () {
+        $('.modal.outsource .cancelForceDelivery').click(function (e) {
+            e.preventDefault();
             prepareAndSubmitQuote(0, true);
         });
 
@@ -104,9 +107,22 @@ ForceDelivery = {
                 starts: 0
             });
         };
+        initLayout();
+        // EYE.register(initLayout, 'init');
+        // EYE.init();
+    },
 
-        EYE.register(initLayout, 'init');
-        EYE.init();
+    removeEvents: function () {
+        $(".needitfaster").off('click');
+        $('.out-date').off('click');
+        $('.outsource-select-date').off('click');
+        $('.outsource-cancel-date').off('click');
+        $('.modal.outsource .x-popup2').off('click');
+        $('.modal.outsource .cancelForceDelivery').off('click');
+        $("#forceDeliveryContainer #whenTime, #forceDeliveryContainer #whenTimezone").off('change');
+        $("#forceDeliveryContainer .datepickerDays a, #forceDeliveryContainer .datepickerDays span").off('click');
+        $("#out-datepicker #outsource-assign-date, #out-datepicker #outsource-assign-timezone").off('change');
+        $(".forceDeliveryButtonOk").off('click');
     }
 };
 

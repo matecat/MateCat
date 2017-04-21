@@ -102,19 +102,55 @@ UI = {
 			$(".loadingbar").addClass("closebar");
 		});
 
-		// $("#popupWrapper .x-popup, #popupWrapper .popup-outer, #popupWrapper .popup a.anonymous").click(function(e) {
-		// 	e.preventDefault();
-		// 	APP.doRequest({
-		// 		data: {
-		// 			action: 'ajaxUtils',
-		// 			exec: 'stayAnonymous'
-		// 		},
-		// 		success: function(d) {
-		// 			$(".popup-outer").fadeOut();
-		// 			$(".popup").fadeOut('fast');
-		// 		}
-		// 	});
-		// });
+        // trigger the process for getting and displaying an outsource quote
+        $(".translate").click(function(e) {
+        	e.preventDefault();
+            var linkPieces = $( this ).attr( "href" ).split( "/" );
+            var jPieces = linkPieces[ linkPieces.length - 1 ].split( "-" );
+
+            var words = $( ".tablestats[data-pwd='" + jPieces[ 1 ] + "'] .stat-payable" ).text() ;
+            var sourceTxt = $( "div[data-jid='" + jPieces[ 0 ] + "'] .source_lang" ).text();
+            var targetTxt = $( "div[data-jid='" + jPieces[ 0 ] + "'] .target_lang" ).text();
+
+            $( ".title-source" ).text( sourceTxt );
+            $( ".title-target" ).text( targetTxt );
+            $( ".title-words" ).text( words );
+
+            UI.currentOutsourceJob = {
+                id: jPieces[ 0 ],
+                password: jPieces[ 1 ],
+                stats: {
+                    TOTAL_FORMATTED: words
+                },
+                sourceTxt: sourceTxt,
+                targetTxt: targetTxt
+            };
+            UI.currentOutsourceProject = {
+                id: config.id_project,
+                password: config.password,
+            };
+
+            UI.currentOutsourceUrl = $( this ).attr( "href" );
+
+            let props = {
+                project: UI.currentOutsourceProject,
+                job: UI.currentOutsourceJob,
+                url: UI.currentOutsourceUrl,
+                fromManage: false,
+                translatorOpen: false
+            };
+            let style = {width: '970px',maxWidth: '970px', top: '45%'};
+            APP.ModalWindow.showModalComponent(OutsourceModal, props, "Translate", style);
+            // if(config.enable_outsource) {
+            // e.preventDefault();
+            //     resetOutsourcePopup( false );
+            //     $('body').addClass('showingOutsourceTo');
+            //     $('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
+            //     $('.outsource.modal .uploadbtn:not(.showprices)').attr('href', $(this).attr('href'));
+            //     renderQuote( $( this ) );
+            //     // $('.outsource.modal').show();
+            // }
+        });
 
 		this.pollData();
 
@@ -897,7 +933,7 @@ function precomputeOutsourceQuotes( elementsToAskQuoteFor ) {
 
 $(document).ready(function() {
 	UI.init();
-	if ( config.enable_outsource ) {
-		UI.outsourceInit();
-	}
+	// if ( config.enable_outsource ) {
+	// 	UI.outsourceInit();
+	// }
 });
