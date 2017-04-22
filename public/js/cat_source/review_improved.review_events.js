@@ -75,22 +75,38 @@ if ( ReviewImproved.enabled() && config.isReview ) {
     var textSelectedInsideSelectionArea = function( selection, container ) {
         // return $.inArray( selection.focusNode, container.contents() ) !==  -1 &&
         //     $.inArray( selection.anchorNode, container.contents() ) !== -1 &&
-        return container.contents().text().indexOf(selection.focusNode.wholeText)>=0 &&
-            container.contents().text().indexOf(selection.anchorNode.wholeText)>=0 &&
+        return container.contents().text().indexOf(selection.focusNode.textContent)>=0 &&
+            container.contents().text().indexOf(selection.anchorNode.textContent)>=0 &&
             selection.toString().length > 0 ;
     };
 
     function getSelectionData(selection, container) {
         var data = {};
-
         data.start_node = $.inArray( selection.anchorNode, container.contents() );
-        data.start_offset = selection.anchorOffset;
+        var nodes = container.contents();//array of nodes
+        if (data.start_node ===0)
+          data.start_offset =  selection.anchorOffset;
+        else {
+          data.start_offset = 0;
+          for (var i=0;i<data.start_node;i++) {
+            data.start_offset += nodes[i].textContent.length;
+          }
+          data.start_offset += selection.anchorOffset;
+          data.start_node = 0;
+        }
 
         data.end_node = $.inArray( selection.focusNode, container.contents() );
-        data.end_offset = selection.focusOffset;
-
+        if (data.end_node ===0)
+          data.end_offset =  selection.focusOffset;
+        else {
+          data.end_offset = 0;
+          for (var i=0;i<data.end_node;i++) {
+            data.end_offset += nodes[i].textContent.length;
+          }
+          data.end_offset += selection.focusOffset;
+          data.end_node = 0;
+        }
         data.selected_string = selection.toString() ;
-
         return data ;
     }
 
