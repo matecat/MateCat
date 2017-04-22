@@ -35,7 +35,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         var section = $(e.target).closest('section') ;
 
         if ( section.hasClass('muted') || section.hasClass('readonly') ) {
-            return ; 
+            return ;
         }
 
         if ( ! section.hasClass('opened') ) {
@@ -73,22 +73,50 @@ if ( ReviewImproved.enabled() && config.isReview ) {
     });
 
     var textSelectedInsideSelectionArea = function( selection, container ) {
-        return $.inArray( selection.focusNode, container.contents() ) !==  -1 &&
-            $.inArray( selection.anchorNode, container.contents() ) !== -1 &&
+        // return $.inArray( selection.focusNode, container.contents() ) !==  -1 &&
+        //     $.inArray( selection.anchorNode, container.contents() ) !== -1 &&
+        return container.contents().text().indexOf(selection.focusNode.textContent)>=0 &&
+            container.contents().text().indexOf(selection.anchorNode.textContent)>=0 &&
             selection.toString().length > 0 ;
     };
 
     function getSelectionData(selection, container) {
         var data = {};
-
         data.start_node = $.inArray( selection.anchorNode, container.contents() );
-        data.start_offset = selection.anchorOffset;
+        if (data.start_node<0) {
+          //this means that the selection is probably ending inside a lexiqa tag,
+          //or matecat tag/marking
+          data.start_node = $.inArray( $(selection.anchorNode).parent()[0], container.contents() );
+        }
+        var nodes = container.contents();//array of nodes
+        if (data.start_node ===0)
+          data.start_offset =  selection.anchorOffset;
+        else {
+          data.start_offset = 0;
+          for (var i=0;i<data.start_node;i++) {
+            data.start_offset += nodes[i].textContent.length;
+          }
+          data.start_offset += selection.anchorOffset;
+          data.start_node = 0;
+        }
 
         data.end_node = $.inArray( selection.focusNode, container.contents() );
-        data.end_offset = selection.focusOffset;
-
+        if (data.end_node<0) {
+          //this means that the selection is probably ending inside a lexiqa tag,
+          //or matecat tag/marking
+          data.end_node = $.inArray( $(selection.focusNode).parent()[0], container.contents() );
+        }
+        if (data.end_node ===0)
+          data.end_offset =  selection.focusOffset;
+        else {
+          data.end_offset = 0;
+          for (var i=0;i<data.end_node;i++) {
+            data.end_offset += nodes[i].textContent.length;
+          }
+          data.end_offset += selection.focusOffset;
+          data.end_node = 0;
+        }
         data.selected_string = selection.toString() ;
-
         return data ;
     }
 
@@ -97,17 +125,19 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         UI.gotoNextSegment();
     });
 
-    $(document).on('mouseup', 'section.opened .errorTaggingArea', function(e) {
+
+    $(document).on('mouseup', 'section.opened .errorTaggingArea', function (e) {
         var segment = new UI.Segment( $(e.target).closest('section'));
         var selection = document.getSelection();
         var container = $(e.target);
-
+        if (container.is('lxqwarning')) {
+          container = container.closest('.errorTaggingArea');
+        }
         if ( textSelectedInsideSelectionArea(selection, container ) )  {
             var selection = getSelectionData( selection, container ) ;
             RI.openPanel( { sid: segment.id,  selection : selection });
         }
     });
-
     function renderButtons(segment) {
         if (segment === undefined) {
             segment = UI.Segment.find( UI.currentSegmentId );
