@@ -274,6 +274,7 @@ let ManageActions = {
     },
 
     assignTranslator: function (projectId, jobId, translator) {
+
         AppDispatcher.dispatch({
             actionType: ManageConstants.ASSIGN_TRANSLATOR,
             projectId: projectId,

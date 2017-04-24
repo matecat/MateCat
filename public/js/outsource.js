@@ -253,18 +253,7 @@ $.extend(UI, {
             var date = getChosenOutsourceDate();
             UI.sendTranslatorRequest(email, date).done(function (data) {
                 APP.ModalWindow.onCloseModal();
-                let notification = {
-                    title: 'Job sent',
-                    text: '<div class="translator-notification-sent">' + UI.currentOutsourceJob.sourceTxt + ' > ' + UI.currentOutsourceJob.targetTxt + ' - ' + UI.currentOutsourceJob.stats.TOTAL_FORMATTED + ' words ' +
-                    '<br/>To: <span>' + email + '</span> </div>',
-                    type: 'success',
-                    position: 'tc',
-                    allowHtml: true,
-                    timer: 10000
-                };
-                let boxUndo = APP.addNotification(notification);
-                ManageActions.assignTranslator(UI.currentOutsourceProject.id ,UI.currentOutsourceJob.id, data.job.translator);
-                ManageActions.changeJobPasswordFromOutsource(UI.currentOutsourceProject.id ,UI.currentOutsourceJob.id, UI.currentOutsourceJob.password, data.job.password);
+                UI.checkShareToTranslatorResponse(data);
             }).error(function () {
                 APP.ModalWindow.onCloseModal();
                 let notification = {
@@ -314,6 +303,27 @@ $.extend(UI, {
                     callback(d);
             }
         });
+    },
+
+    checkShareToTranslatorResponse: function (response) {
+        let notification = {
+            title: 'Job sent with <div class="green-label" style="display: inline; background-color: #5ea400; color: white; padding: 2px 5px;">new password </div>',
+            text: '<div style="margin-top: 16px;">To: <a href="mailto:support@matecat.com">support@matecat.com</a> ' +
+            '<div class="job-reference" style="display: inline-block; width: 100%; margin-top: 10px;"> ' +
+            '<div class style="display: inline-block; font-size: 14px; color: grey;">(' + UI.currentOutsourceJob.id +')</div> ' +
+            '<div class="source-target languages-tooltip" style="display: inline-block; font-weight: 700;"> ' +
+            '<div class="source-box" style="display: inherit;">' + UI.currentOutsourceJob.sourceTxt + '</div> ' +
+            '<div class="in-to" style="top: 3px; display: inherit; position: relative;"> <i class="icon-chevron-right icon"></i> </div> ' +
+            '<div class="target-box" style="display: inherit;">' + UI.currentOutsourceJob.targetTxt + '</div> </div> </div></div>',
+            type: 'success',
+            position: 'tc',
+            allowHtml: true,
+            autoDismiss: false,
+            timer: 10000
+        };
+        let boxUndo = APP.addNotification(notification);
+        ManageActions.assignTranslator(UI.currentOutsourceProject.id ,UI.currentOutsourceJob.id, response.job.translator);
+        ManageActions.changeJobPasswordFromOutsource(UI.currentOutsourceProject.id ,UI.currentOutsourceJob.id, UI.currentOutsourceJob.password, response.job.password);
     }
 });
 

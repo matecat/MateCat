@@ -28,23 +28,23 @@ class OutsourceModal extends React.Component {
             self.confirm_urls = quoteData.return_url.confirm_urls;
             self.data_key = self.chunk.id;
 
-            // a generic error
-            if( self.chunk.quote_result != 1 ){
-                renderGenericErrorQuote();
-                return false;
-            }
-
-            // job already outsourced
-            if( self.chunk.outsourced == 1 ) {
-                renderOutsourcedQuote( self.chunk );
-                return false;
-            }
-
-            // delivery date too strict
-            if( self.chunk.quote_available != 1 ) {
-                renderNotAvailableQuote();
-                return false;
-            }
+            // // a generic error
+            // if( self.chunk.quote_result != 1 ){
+            //     renderGenericErrorQuote();
+            //     return false;
+            // }
+            //
+            // // job already outsourced
+            // if( self.chunk.outsourced == 1 ) {
+            //     renderOutsourcedQuote( self.chunk );
+            //     return false;
+            // }
+            //
+            // // delivery date too strict
+            // if( self.chunk.quote_available != 1 ) {
+            //     renderNotAvailableQuote();
+            //     return false;
+            // }
 
             self.setState({
                 outsource: true
@@ -52,8 +52,7 @@ class OutsourceModal extends React.Component {
 
             // renderNormalQuote( chunk );
 
-            // Intercom
-            $(document).trigger('outsource-rendered', { quote_data : self.quoteResponse } );
+
         });
     }
 
@@ -270,6 +269,8 @@ class OutsourceModal extends React.Component {
             }
 
             renderNormalQuote( this.chunk );
+            // Intercom
+            $(document).trigger('outsource-rendered', { quote_data : self.quoteResponse } );
         }
     }
 
