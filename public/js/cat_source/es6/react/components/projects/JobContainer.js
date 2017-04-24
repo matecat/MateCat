@@ -202,7 +202,7 @@ class JobContainer extends React.Component {
                     {splitButton}
                     <a className="item" target="_blank" href={reviseUrl}><i className="icon-edit icon"/> Revise</a>
                     <a className="item" target="_blank" href={qaReportUrl}><i className="icon-qr-matecat icon"/> QA Report</a>
-                    <div className="item" target="_blank" href={editLogUrl}><a><i className="icon-download-logs icon"/> Editing Log</a></div>
+                    <a className="item" target="_blank" href={editLogUrl}><i className="icon-download-logs icon"/> Editing Log</a>
                         {downloadButton}
                     <div className="divider"/>
                     <a className="item" target="_blank" href={originalUrl}><i className="icon-download icon"/> Download Original</a>

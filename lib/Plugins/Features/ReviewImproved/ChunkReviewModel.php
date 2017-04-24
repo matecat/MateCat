@@ -10,6 +10,7 @@ namespace Features\ReviewImproved;
 
 
 use LQA\ChunkReviewDao;
+use LQA\ChunkReviewStruct;
 
 class ChunkReviewModel
 {
@@ -22,7 +23,7 @@ class ChunkReviewModel
     private $penalty_points;
 
 
-    public function __construct( \LQA\ChunkReviewStruct $chunk_review ) {
+    public function __construct( ChunkReviewStruct $chunk_review ) {
         $this->chunk_review = $chunk_review ;
         $this->penalty_points = $this->chunk_review->penalty_points ;
     }

@@ -7,6 +7,7 @@ use INIT;
 use Log ;
 use FilesStorage ;
 use LQA\ChunkReviewDao;
+use LQA\ModelDao;
 use Translations_SegmentTranslationStruct;
 use ZipArchive ;
 use Chunks_ChunkDao  ;
@@ -34,7 +35,7 @@ class ReviewImproved extends BaseFeature {
      *
      */
     public function filter_review_password_to_job_password( $review_password, $id_job ) {
-        $chunk_review = \LQA\ChunkReviewDao::findByReviewPasswordAndJobId(
+        $chunk_review = ChunkReviewDao::findByReviewPasswordAndJobId(
             $review_password, $id_job );
 
         if ( ! $chunk_review ) {
@@ -45,7 +46,7 @@ class ReviewImproved extends BaseFeature {
     }
 
     public function filter_job_password_to_review_password( $password, $id_job ) {
-        $chunk_reviews = \LQA\ChunkReviewDao::findChunkReviewsByChunkIds(
+        $chunk_reviews = ChunkReviewDao::findChunkReviewsByChunkIds(
             array( array($id_job, $password ) )
         );
 
@@ -85,7 +86,7 @@ class ReviewImproved extends BaseFeature {
                 $chunks[] = array( $job['id'], $job['password'] );
         }
 
-        $chunk_reviews = \LQA\ChunkReviewDao::findChunkReviewsByChunkIds( $chunks );
+        $chunk_reviews = ChunkReviewDao::findChunkReviewsByChunkIds( $chunks );
 
         foreach( $project['jobs'] as $kk => $job ) {
             /**
@@ -216,7 +217,7 @@ class ReviewImproved extends BaseFeature {
          * so we could avoid to delegate to an observer. This is done with aim to the future when
          * the SegmentTranslationModel will be used directly into setTranslation controller.
          */
-        $translation_model->attach( new SegmentTranslationObserver());
+        $translation_model->attach( new SegmentTranslationObserver() );
         $translation_model->notify();
     }
 
@@ -239,7 +240,7 @@ class ReviewImproved extends BaseFeature {
                 $data['review_password'] = $options['first_record_password'];
             }
 
-            \LQA\ChunkReviewDao::createRecord( $data );
+            ChunkReviewDao::createRecord( $data );
         }
     }
 
@@ -252,7 +253,7 @@ class ReviewImproved extends BaseFeature {
         $model_json = $projectStructure['features']
             ['review_improved']['__meta']['qa_model'];
 
-        $model_record = \LQA\ModelDao::createModelFromJsonDefinition( $model_json );
+        $model_record = ModelDao::createModelFromJsonDefinition( $model_json );
 
         $project = \Projects_ProjectDao::findById(
             $projectStructure['id_project']

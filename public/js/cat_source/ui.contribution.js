@@ -207,7 +207,7 @@ $.extend(UI, {
         if ((this.segment === '') || (this.translation === '')) return;
 
         var disabled = (this.id == '0') ? true : false;
-        cb = this.created_by;
+        var cb = this.created_by;
 
         if ("sentence_confidence" in this &&
             (

@@ -687,10 +687,13 @@ class ProjectManager {
                 Utils::sendErrMailReport( $output, $exn->getMessage() );
             }
         }
-
+        
+        Database::obtain()->begin();
         $this->features->run('postProjectCreate',
             $this->projectStructure
         );
+        Database::obtain()->commit();
+
     }
 
     private function writeFastAnalysisData(){
@@ -1565,6 +1568,8 @@ class ProjectManager {
                     $show_in_cattool = 0;
                 } else {
 
+                    $trans_unit_reference = self::sanitizedUnitId( $xliff_trans_unit[ 'attr' ][ 'id' ], $fid );
+
                     // If the XLIFF is already segmented (has <seg-source>)
                     if ( isset( $xliff_trans_unit[ 'seg-source' ] ) ) {
                         foreach ( $xliff_trans_unit[ 'seg-source' ] as $position => $seg_source ) {
@@ -1607,10 +1612,10 @@ class ProjectManager {
 
                                         //add an empty string to avoid casting to int: 0001 -> 1
                                         //useful for idiom internal xliff id
-                                        if ( !$this->projectStructure[ 'translations' ]->offsetExists( "" . $xliff_trans_unit[ 'attr' ][ 'id' ] ) ) {
-                                            $this->projectStructure[ 'translations' ]->offsetSet( "" . $xliff_trans_unit[ 'attr' ][ 'id' ], new ArrayObject() );
+                                        if ( !$this->projectStructure[ 'translations' ]->offsetExists( $trans_unit_reference ) ) {
+                                            $this->projectStructure[ 'translations' ]->offsetSet( $trans_unit_reference, new ArrayObject() );
                                         }
-                                        $this->projectStructure[ 'translations' ][ "" . $xliff_trans_unit[ 'attr' ][ 'id' ] ]->offsetSet( $seg_source[ 'mid' ], new ArrayObject( array( 2 => $target ) ) );
+                                        $this->projectStructure[ 'translations' ][ $trans_unit_reference ]->offsetSet( $seg_source[ 'mid' ], new ArrayObject( array( 2 => $target ) ) );
 
                                         //seg-source and target translation can have different mrk id
                                         //override the seg-source surrounding mrk-id with them of target
@@ -1664,7 +1669,7 @@ class ProjectManager {
                         } // end foreach seg-source
 
                         if ( self::notesAllowedByMimeType( $mimeType ) ) {
-                           $this->addNotesToProjectStructure( $xliff_trans_unit );
+                           $this->addNotesToProjectStructure( $xliff_trans_unit, $fid );
                         }
 
                     }
@@ -1693,10 +1698,10 @@ class ProjectManager {
 
                                     //add an empty string to avoid casting to int: 0001 -> 1
                                     //useful for idiom internal xliff id
-                                    if ( !$this->projectStructure[ 'translations' ]->offsetExists( "" . $xliff_trans_unit[ 'attr' ][ 'id' ] ) ) {
-                                        $this->projectStructure[ 'translations' ]->offsetSet( "" . $xliff_trans_unit[ 'attr' ][ 'id' ], new ArrayObject() );
+                                    if ( !$this->projectStructure[ 'translations' ]->offsetExists( $trans_unit_reference ) ) {
+                                        $this->projectStructure[ 'translations' ]->offsetSet( $trans_unit_reference, new ArrayObject() );
                                     }
-                                    $this->projectStructure[ 'translations' ][ "" . $xliff_trans_unit[ 'attr' ][ 'id' ] ]->append( new ArrayObject( array( 2 => $target ) ) );
+                                    $this->projectStructure[ 'translations' ][ $trans_unit_reference ]->append( new ArrayObject( array( 2 => $target ) ) );
 
                                 }
 
@@ -1705,7 +1710,7 @@ class ProjectManager {
                         }
 
                         if ( self::notesAllowedByMimeType( $mimeType ) ) {
-                            $this->addNotesToProjectStructure( $xliff_trans_unit );
+                            $this->addNotesToProjectStructure( $xliff_trans_unit, $fid );
                         }
 
                         $source = $xliff_trans_unit[ 'source' ][ 'raw-content' ];
@@ -1784,6 +1789,8 @@ class ProjectManager {
         //update the last id, if there is another cycle update this value
         $this->min_max_segments_id[ 'job_last_segment' ] = end( $sequenceIds );
 
+
+        $segments_metadata = [];
         foreach ( $sequenceIds as $position => $id_segment ){
 
             /**
@@ -1805,15 +1812,15 @@ class ProjectManager {
 
             $this->projectStructure[ 'segments' ][ $fid ][ $position ] = "( $id_segment,$tuple_string )";
 
-            $this->projectStructure[ 'segments_metadata' ][] = array(
+            $segments_metadata[] = [
                     'id'              => $id_segment,
-                    'internal_id'     => $tuple[ 0 ],
+                    'internal_id'     => self::sanitizedUnitId( $tuple[ 0 ], $fid ),
                     'segment'         => $tuple[ 3 ],
                     'segment_hash'    => $tuple[ 4 ],
                     'raw_word_count'  => $tuple[ 5 ],
                     'xliff_mrk_id'    => $tuple[ 6 ],
                     'show_in_cattool' => $tuple[ 9 ],
-            );
+            ];
 
         }
 
@@ -1846,24 +1853,24 @@ class ProjectManager {
             //internal counter for the segmented translations ( mrk in target )
             $array_internal_segmentation_counter = array();
 
-            foreach ( $this->projectStructure[ 'segments_metadata' ] as $k => $row ) {
+            foreach ( $segments_metadata as $k => $row ) {
 
                 // The following call is to save `id_segment` for notes,
                 // to be used later to insert the record in notes table.
                 $this->setSegmentIdForNotes( $row );
 
                 // The following block of code is for translations
-                if ( $this->projectStructure[ 'translations' ]->offsetExists( "" . $row[ 'internal_id' ] ) ) {
+                if ( $this->projectStructure[ 'translations' ]->offsetExists( $row[ 'internal_id' ] ) ) {
 
-                    if ( !array_key_exists( "" . $row[ 'internal_id' ], $array_internal_segmentation_counter ) ) {
+                    if ( !array_key_exists( $row[ 'internal_id' ], $array_internal_segmentation_counter ) ) {
 
                         //if we don't have segmentation, we have not mrk ID,
                         // so work with positional indexes ( should be only one row )
                         if ( empty( $row[ 'xliff_mrk_id' ] ) ) {
-                            $array_internal_segmentation_counter[ "" . $row[ 'internal_id' ] ] = 0;
+                            $array_internal_segmentation_counter[ $row[ 'internal_id' ] ] = 0;
                         } else {
                             //we have the mark id use them
-                            $array_internal_segmentation_counter[ "" . $row[ 'internal_id' ] ] = $row[ 'xliff_mrk_id' ];
+                            $array_internal_segmentation_counter[ $row[ 'internal_id' ] ] = $row[ 'xliff_mrk_id' ];
                         }
 
                     } else {
@@ -1872,28 +1879,28 @@ class ProjectManager {
                         // so work with positional indexes
                         // ( should be only one row but if we are here increment it )
                         if ( empty( $row[ 'xliff_mrk_id' ] ) ) {
-                            $array_internal_segmentation_counter[ "" . $row[ 'internal_id' ] ]++;
+                            $array_internal_segmentation_counter[ $row[ 'internal_id' ] ]++;
                         } else {
                             //we have the mark id use them
-                            $array_internal_segmentation_counter[ "" . $row[ 'internal_id' ] ] = $row[ 'xliff_mrk_id' ];
+                            $array_internal_segmentation_counter[ $row[ 'internal_id' ] ] = $row[ 'xliff_mrk_id' ];
                         }
 
                     }
 
                     //set this var only for easy reading
-                    $short_var_counter = $array_internal_segmentation_counter[ "" . $row[ 'internal_id' ] ];
+                    $short_var_counter = $array_internal_segmentation_counter[ $row[ 'internal_id' ] ];
 
-                    if ( !$this->projectStructure[ 'translations' ][ "" . $row[ 'internal_id' ] ]->offsetExists( $short_var_counter ) ) {
+                    if ( !$this->projectStructure[ 'translations' ][ $row[ 'internal_id' ] ]->offsetExists( $short_var_counter ) ) {
                         continue;
                     }
 
-                    $this->projectStructure[ 'translations' ][ "" . $row[ 'internal_id' ] ][ $short_var_counter ]->offsetSet( 0, $row[ 'id' ] );
-                    $this->projectStructure[ 'translations' ][ "" . $row[ 'internal_id' ] ][ $short_var_counter ]->offsetSet( 1, $row[ 'internal_id' ] );
+                    $this->projectStructure[ 'translations' ][ $row[ 'internal_id' ] ][ $short_var_counter ]->offsetSet( 0, $row[ 'id' ] );
+                    $this->projectStructure[ 'translations' ][ $row[ 'internal_id' ] ][ $short_var_counter ]->offsetSet( 1, $row[ 'internal_id' ] );
                     //WARNING offset 2 are the target translations
-                    $this->projectStructure[ 'translations' ][ "" . $row[ 'internal_id' ] ][ $short_var_counter ]->offsetSet( 3, $row[ 'segment_hash' ] );
+                    $this->projectStructure[ 'translations' ][ $row[ 'internal_id' ] ][ $short_var_counter ]->offsetSet( 3, $row[ 'segment_hash' ] );
 
                     // Remove an existent translation, we won't send these segment to the analysis because it is marked as locked
-                    unset( $this->projectStructure[ 'segments_metadata' ][ $k ] );
+                    unset( $segments_metadata[ $k ] );
 
                 }
 
@@ -1901,16 +1908,20 @@ class ProjectManager {
 
         }
 
+        $this->projectStructure[ 'segments_metadata' ]->exchangeArray( array_merge( $this->projectStructure[ 'segments_metadata' ]->getArrayCopy(), $segments_metadata ) );
+
+        //free memory
+        $this->projectStructure[ 'segments' ][ $fid ]->exchangeArray( [] );
+
+    }
+
+    protected function _cleanSegmentsMetadata(){
         //More cleaning on the segments, remove show_in_cattool == false
         $this->projectStructure[ 'segments_metadata' ]->exchangeArray(
                 array_filter( $this->projectStructure[ 'segments_metadata' ]->getArrayCopy(), function ( $value ) {
                     return $value[ 'show_in_cattool' ] == 1;
                 } )
         );
-
-        //free memory
-        $this->projectStructure[ 'segments' ][ $fid ]->exchangeArray( [] );
-
     }
 
     /**
@@ -1926,14 +1937,17 @@ class ProjectManager {
      */
 
     private function setSegmentIdForNotes( $row ) {
-        $internal_id = "" . $row[ 'internal_id' ];
+        $internal_id = $row[ 'internal_id' ];
 
         if ( $this->projectStructure[ 'notes' ]->offsetExists( $internal_id ) ) {
             array_push( $this->projectStructure[ 'notes' ][ $internal_id ][ 'segment_ids' ], $row[ 'id' ] );
         }
+
     }
 
     protected function _insertPreTranslations( $jid ) {
+
+        $this->_cleanSegmentsMetadata();
 
         $status = Constants_TranslationStatus::STATUS_TRANSLATED;
 
@@ -1942,7 +1956,7 @@ class ProjectManager {
                 $this->projectStructure
         );
 
-        foreach ( $this->projectStructure[ 'translations' ] as $internal_id => $struct ) {
+        foreach ( $this->projectStructure[ 'translations' ] as $trans_unit_reference => $struct ) {
 
             if ( empty( $struct ) ) {
                 continue;
@@ -2311,9 +2325,9 @@ class ProjectManager {
      *      'id_segment' => (int) to be populated later for the database insert
      *
      */
-    private function addNotesToProjectStructure( $trans_unit ) {
+    private function addNotesToProjectStructure( $trans_unit, $fid ) {
 
-        $internal_id = self::sanitizedUnitId( $trans_unit );
+        $internal_id = self::sanitizedUnitId( $trans_unit[ 'attr' ][ 'id' ], $fid );
         if ( isset( $trans_unit[ 'notes' ] ) ) {
             foreach ( $trans_unit[ 'notes' ] as $note ) {
                 $this->initArrayObject( 'notes', $internal_id );
@@ -2334,8 +2348,8 @@ class ProjectManager {
         }
     }
 
-    private static function sanitizedUnitId( $unit ) {
-        return "" . $unit[ 'attr' ][ 'id' ];
+    private static function sanitizedUnitId( $trans_unitID, $fid ) {
+        return $fid . "|" . $trans_unitID;
     }
 
     private function isConversionToEnforce( $fileName ) {

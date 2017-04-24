@@ -5,7 +5,7 @@ class SearchInput extends React.Component {
         let self = this;
         this.filterByNameDebounce = _.debounce(function(e) {
             self.filterByName(e)
-        }, 250);
+        }, 500);
     }
 
     filterByName(e) {

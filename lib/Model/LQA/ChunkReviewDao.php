@@ -201,13 +201,12 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
             " ( :id_project, :id_job, :password, :review_password ) ";
 
         $conn = \Database::obtain()->getConnection();
-        \Database::obtain()->begin() ;
+
         $stmt = $conn->prepare( $sql );
         $stmt->execute( $attrs );
 
         $lastId = $conn->lastInsertId();
         $record =  self::findById( $lastId );
-        $conn->commit() ;
 
         return $record ;
     }
