@@ -137,6 +137,14 @@ if ( ReviewImproved.enabled() && config.isReview ) {
             return '.errorTaggingArea';
         },
 
+        /**
+         * Never ask for propagation when in revise page
+         * @returns {boolean}
+         */
+        shouldSegmentAutoPropagate : function() {
+            return false;
+        },
+
         getSegmentTarget : function() {
             // read status from DOM? wrong approach, read from
             // database instead

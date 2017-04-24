@@ -350,6 +350,8 @@ body.manage {
                                 float: left;
                                 margin-right: 10px;
                                 font-weight: bold;
+                                position: relative;
+                                top: 1px;
                                 .source-box {
                                     float: left;
                                     max-width: 70px;
@@ -361,9 +363,10 @@ body.manage {
                                 }
                                 .in-to {
                                     float: left;
-                                    margin-top: 2px;
+                                    top: 4px;
                                     color: #5a5a5a;
                                     line-height: 28px;
+                                    position: relative;
                                 }
                                 .target-box {
                                     float: left;
@@ -429,6 +432,8 @@ body.manage {
                                 min-width: 105px;
                                 line-height: 30px;
                                 font-weight: 700;
+                                position: relative;
+                                top: 1px;
                                 &:hover {
                                     text-decoration: none;
                                 }
@@ -755,21 +760,21 @@ footer nav ul a:hover {
     box-shadow: -1px -1px 0px 0px rgb(222, 222, 223);
 }
 
-
+@media only screen and (min-width: 1200px) {
+    .ui.container {
+        width: 1130px;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        transition: 0.3s ease;
+    }
+}
 
 @media only screen and (min-width: 1380px) {
     .ui.container {
         width: 1280px;
         margin-left: auto !important;
         margin-right: auto !important;
-    }
-}
-
-@media only screen and (min-width: 1200px) {
-    .ui.container {
-        width: 1200px;
-        margin-left: auto !important;
-        margin-right: auto !important;
+        transition: 0.3s ease;
     }
 }
 
@@ -778,6 +783,7 @@ footer nav ul a:hover {
         width: 991px;
         margin-left: auto !important;
         margin-right: auto !important;
+        transition: 0.3s ease;
     }
 }
 
@@ -786,6 +792,7 @@ footer nav ul a:hover {
         min-width: 991px;
         margin-left: auto !important;
         margin-right: auto !important;
+        transition: 0.3s ease;
     }
     .project-list {
         padding-top: 50px;
@@ -806,6 +813,7 @@ footer nav ul a:hover {
         margin-left: 1em !important;
         margin-right: 1em !important;
         min-width: 961px;
+        transition: 0.3s ease;
     }
     .project-list {
         padding-top: 50px;
