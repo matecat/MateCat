@@ -63,7 +63,7 @@ class WarningDao extends \DataAccess_AbstractDao {
                 'id' => $chunk->id,
                 'password' => $chunk->password,
                 'level' => WarningModel::ERROR,
-                'statuses' => Constants_TranslationStatus::STATUS_NEW
+                'status' => Constants_TranslationStatus::STATUS_NEW
         ] ) ;
 
         $result = $stmt->fetch() ;
