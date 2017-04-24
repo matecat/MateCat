@@ -687,10 +687,13 @@ class ProjectManager {
                 Utils::sendErrMailReport( $output, $exn->getMessage() );
             }
         }
-
+        
+        Database::obtain()->begin();
         $this->features->run('postProjectCreate',
             $this->projectStructure
         );
+        Database::obtain()->commit();
+
     }
 
     private function writeFastAnalysisData(){
