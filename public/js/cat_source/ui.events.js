@@ -703,12 +703,14 @@ $.extend(UI, {
 			}, 50);
             if (!UI.body.hasClass('searchActive')) {
 
-                if(UI.isCJK() && ( (e.which == '60') || (e.which == '62') ) ) {
-                } else {
+                if( !UI.isCJK() ){
                     setTimeout(function() {
                         UI.lockTags(UI.editarea);
                     }, 10);
-                }
+				} else if( (e.which == '60') || (e.which == '62') ){
+                    // if i press "<" or ">" when the edit area is CJK do nothing
+				}
+
             }
 		}).on('keydown', '.editor .editarea', function(e) {
 
