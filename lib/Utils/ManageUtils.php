@@ -116,7 +116,7 @@ class ManageUtils {
                 $jobStruct = new Jobs_JobStruct( $job_array );
                 $jTranslatorsDao = new JobsTranslatorsDao();
                 $jTranslatorsStruct = $jTranslatorsDao->setCacheTTL( 60 * 60 * 24 )->findByJobsStruct( $jobStruct )[ 0 ];
-                $job[ 'translator' ] = ( !empty( $jTranslatorsStruct ) ? ( new JobTranslator() )->renderItem( $jTranslatorsStruct ) : [] );
+                $job[ 'translator' ] = ( !empty( $jTranslatorsStruct ) ? ( new JobTranslator() )->renderItem( $jTranslatorsStruct ) : null );
             }
 
             $job[ 'open_threads_count' ] = 0 ;

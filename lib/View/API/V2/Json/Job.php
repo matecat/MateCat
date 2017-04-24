@@ -29,7 +29,7 @@ class Job {
                 'source'     => $jStruct->source,
                 'target'     => $jStruct->target,
                 'owner'      => $jStruct->owner,
-                'translator' => ( !empty( $jTranslatorsStruct ) ? ( new JobTranslator() )->renderItem( $jTranslatorsStruct ) : [] )
+                'translator' => ( !empty( $jTranslatorsStruct ) ? ( new JobTranslator() )->renderItem( $jTranslatorsStruct ) : null )
         );
     }
 
