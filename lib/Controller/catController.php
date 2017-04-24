@@ -12,20 +12,15 @@ use Exceptions\NotFoundError;
  */
 class catController extends viewController {
 
-    private $data = array();
     private $cid = "";
     private $jid = "";
     private $password = "";
     private $source = "";
     private $create_date = "";
 
-    private $start_from = 0;
-    private $page = 0;
     private $start_time = 0.00;
 
     private $job_stats = array();
-    private $source_rtl = false;
-    private $target_rtl = false;
     private $job_owner = "";
 
     private $job_not_found = false;
@@ -54,10 +49,6 @@ class catController extends viewController {
      */
     private $project ;
 
-    /**
-     * @var string
-     */
-    private $thisUrl;
     private $translation_engines;
 
     private $mt_id;
@@ -93,39 +84,15 @@ class catController extends viewController {
                 'jid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'password' => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'start'    => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'page'     => array( 'filter' => FILTER_SANITIZE_NUMBER_INT )
+                )
         );
 
         $getInput   = (object)filter_input_array( INPUT_GET, $filterArgs );
 
         $this->jid        = $getInput->jid;
         $this->password   = $getInput->password;
-        $this->start_from = $getInput->start;
-        $this->page       = $getInput->page;
 
         $this->review_password = $getInput->password;
-
-        if ( isset( $_GET[ 'step' ] ) ) {
-            $this->step = $_GET[ 'step' ];
-        } else {
-            $this->step = 1000;
-        };
-
-        if ( is_null( $this->page ) ) {
-            $this->page = 1;
-        }
-        if ( is_null( $this->start_from ) ) {
-            $this->start_from = ( $this->page - 1 ) * $this->step;
-        }
-
-        if ( isset( $_GET[ 'filter' ] ) ) {
-            $this->filter_enabled = true;
-        } else {
-            $this->filter_enabled = false;
-        };
-
 
         $this->project = Projects_ProjectDao::findByJobId( $this->jid );
 
@@ -168,9 +135,6 @@ class catController extends viewController {
     }
 
     public function doAction() {
-        $files_found  = array();
-        $lang_handler = Langs_Languages::getInstance();
-
 
         try {
             // TODO: why is this check here and not in constructor? At least it should be moved in a specific
@@ -225,72 +189,17 @@ class catController extends viewController {
 
         }
 
-        foreach ( $data as $i => $job ) {
-
-            if ( empty( $this->cid ) ) {
-                $this->cid = $job[ 'cid' ];
-            }
-
-            if ( empty( $this->pid ) ) {
-                $this->pid = $job[ 'pid' ];
-            }
-
-            if ( empty( $this->create_date ) ) {
-                $this->create_date = $job[ 'create_date' ];
-            }
-
-            if ( empty( $this->source_code ) ) {
-                $this->source_code = $job[ 'source' ];
-            }
-
-            if ( empty( $this->target_code ) ) {
-                $this->target_code = $job[ 'target' ];
-            }
-
-            if ( empty( $this->source ) ) {
-                $s                = explode( "-", $job[ 'source' ] );
-                $source           = strtoupper( $s[ 0 ] );
-                $this->source     = $source;
-                $this->source_rtl = ( $lang_handler->isRTL( strtolower( $this->source ) ) ) ? ' rtl-source' : '';
-            }
-
-            if ( empty( $this->target ) ) {
-                $t                = explode( "-", $job[ 'target' ] );
-                $target           = strtoupper( $t[ 0 ] );
-                $this->target     = $target;
-                $this->target_rtl = ( $lang_handler->isRTL( strtolower( $this->target ) ) ) ? ' rtl-target' : '';
-            }
-            //check if language belongs to supported right-to-left languages
-
-
-            if ( $job[ 'status' ] == Constants_JobStatus::STATUS_ARCHIVED ) {
-                $this->job_archived = true;
-                $this->job_owner    = $data[ 0 ][ 'job_owner' ];
-            }
-
-            $this->wStruct = CatUtils::getWStructFromJobArray( $job );
-            $this->job_stats = CatUtils::getFastStatsForJob( $this->wStruct );
-
-            unset( $job[ 'id_file' ] );
-            unset( $job[ 'source' ] );
-            unset( $job[ 'target' ] );
-            unset( $job[ 'source_code' ] );
-            unset( $job[ 'target_code' ] );
-            unset( $job[ 'mime_type' ] );
-            unset( $job[ 'filename' ] );
-            unset( $job[ 'jid' ] );
-            unset( $job[ 'pid' ] );
-            unset( $job[ 'cid' ] );
-            unset( $job[ 'create_date' ] );
-            unset( $job[ 'owner' ] );
-
-            unset( $job[ 'new_words' ] );
-            unset( $job[ 'draft_words' ] );
-            unset( $job[ 'translated_words' ] );
-            unset( $job[ 'approved_words' ] );
-            unset( $job[ 'rejected_words' ] );
-
+        $this->pid = $data[0][ 'pid' ];
+        $this->cid = $data[0][ 'cid' ];
+        $this->source_code = $data[0][ 'source' ];
+        $this->target_code = $data[0][ 'target' ];
+        $this->create_date = $data[0][ 'create_date' ];
+        if ( $data[0][ 'status' ] == Constants_JobStatus::STATUS_ARCHIVED ) {
+            $this->job_archived = true;
+            $this->job_owner    = $data[ 0 ][ 'job_owner' ];
         }
+        $this->wStruct = CatUtils::getWStructFromJobArray( $data[0] );
+        $this->job_stats = CatUtils::getFastStatsForJob( $this->wStruct );
 
         /**
          * get first segment of every file
@@ -375,7 +284,7 @@ class catController extends viewController {
                     if ( !$jobKey->owner && $this->userRole != TmKeyManagement_Filter::OWNER ) {
                         $jobKey->r = $jobKey->{TmKeyManagement_Filter::$GRANTS_MAP[ $this->userRole ][ 'r' ]};
                         $jobKey->w = $jobKey->{TmKeyManagement_Filter::$GRANTS_MAP[ $this->userRole ][ 'w' ]};
-                        $jobKey    = $jobKey->hideKey( $uid );
+                        $jobKey    = $jobKey->hideKey( $this->logged_user->uid );
                     } else {
                         if ( $jobKey->owner && $this->userRole != TmKeyManagement_Filter::OWNER ) {
                             // I'm not the job owner, but i know the key because it is in my keyring
@@ -552,8 +461,6 @@ class catController extends viewController {
         $this->template->create_date = $this->create_date;
         $this->template->pname       = $this->project->name;
         $this->template->source      = $this->source;
-        $this->template->source_rtl  = $this->source_rtl;
-        $this->template->target_rtl  = $this->target_rtl;
 
         $this->template->mt_engines = $this->translation_engines;
         $this->template->mt_id      = $this->job->id_mt_engine ;
@@ -582,8 +489,6 @@ class catController extends viewController {
 
         $this->template->warningPollingInterval = 1000 * ( INIT::$WARNING_POLLING_INTERVAL );
         $this->template->segmentQACheckInterval = 1000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL );
-        $this->template->filtered               = $this->filter_enabled;
-        $this->template->filtered_class         = ( $this->filter_enabled ) ? ' open' : '';
 
         $this->template->maxFileSize    = INIT::$MAX_UPLOAD_FILE_SIZE;
         $this->template->maxTMXFileSize = INIT::$MAX_UPLOAD_TMX_FILE_SIZE;
