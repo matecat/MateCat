@@ -8,7 +8,7 @@
 <div metal:define-macro="outsource_modal">
 
     <script>
-
+        config.outsource_service_login = '${outsource_service_login}';
         //TODO REMOVE Temporary PATCH to allow multiple track events
         var ClickMeter_conversion_id = '';
         var ClickMeter_conversion_value = '';
@@ -46,16 +46,16 @@
 
     </script>
     <script type='text/javascript' id='cmconvscript' src='//www.clickmeter.com/js/conversionOnClick.js'></script>
-    <div class="modal outsource" data-type="view">
+   <!-- <div class="modal outsource" data-type="view">
         <div class="popup-outer closeClickingOutside"></div>
         <div class="popup">
             <a href="#" class="x-popup"></a>
 
-       <h1>Translate</h1>
+       <h1>Translate</h1>-->
 
         <!--    <h1>Choose the best way to translate</h1> -->
 
-            <div class="popup-box pricebox">
+            <!--<div class="popup-box pricebox">
              <h2>Choose how to translate: <span class="title-source">English</span> &gt; <span class="title-target">Italian</span> <span class="title-words">1000</span> words</h2>
                 <div class="choose">
                     <div class="onyourown">
@@ -77,7 +77,7 @@
                             <div class="validation-error email-translator-error"><span class="text" style="color: red; font-size: 14px;">A valid email is required</span></div>
                         </div>
 
-                        <!-- begin date picker -->
+                        &lt;!&ndash; begin date picker &ndash;&gt;
                         <div id="out-datepicker" class="modal-outsource-datepicker hide">
                             <div class="delivery-manual">
                                 <div class="delivery-manual-date">
@@ -134,7 +134,7 @@
                                         <option value="13">(GMT +13:00 ) Samoa</option>
                                     </select>
 
-                                    <!--  design took fron validationEngine not the logic. Hardcoded -->
+                                    &lt;!&ndash;  design took fron validationEngine not the logic. Hardcoded &ndash;&gt;
                                     <div id="outsource-delivery_error" class="delivery_manual_error hide">
                                         <div>* Chosen delivery date is in the past</div>
                                     </div>
@@ -218,14 +218,14 @@
                                             <a href="http://www.translated.net" target="_blank"><img src="/public/img/logo_translated.png" title="visit our website" /></a>
                                             <p class="trustbox1">Translated uses the most qualified translator for your subject (<strong>${subject | string:IT}</strong>)
                                                                 and keeps using the same translator for your next projects. <br /><a class="show_translator more"><span>Read more</span></a></p>
-                                               
-                                       
+
+
                                             <p class="trustbox2 hide">
-                                            Translated has over 15 years' experience as a translation company and offers 
+                                            Translated has over 15 years' experience as a translation company and offers
                                             <a href="http://www.translated.net/en/frequently-asked-questions#guarantees" target="_blank">two key guarantees on quality and delivery</a>.
                                             <br />
                                             <a class="hide_translator more minus hide"><span>Close</span></a>
-                                            </p>                                         
+                                            </p>
                                         </div>
                                         <div class="translator_info_box hide">
                                             <div class="translator_info">
@@ -236,10 +236,10 @@
                                                         <span class="subjects"></span>
                                                         </p>
                                                         <p><span class="label_info">Years of experience:</span> <span class="experience"></span></p>
-                                                        <p><span class="label_info">Words translated last 12 months:</span><span class="translated_words"></span></p> 
+                                                        <p><span class="label_info">Words translated last 12 months:</span><span class="translated_words"></span></p>
                                                     </div>
-                                                   
-                                                   
+
+
                                                 </div>
                                             </div>
                                         </div>
@@ -249,14 +249,14 @@
                                                 <div class="delivery_details">
                                                         <div class="ErrorMsgquoteNotAvailable ErrorMsg hide">
                                                             <h3>Not available. </h3>
-                                                            <p>Unfortunately the solution chosen is not available. 
+                                                            <p>Unfortunately the solution chosen is not available.
                                                             Try again with another delivery date.</p>
                                                         </div>
                                                         <div class="ErrorMsg ErrorMsgQuoteError hide">
                                                             <h3><strong>Ooops! </strong>
                                                             <br />Cannot generate quote.</h3>
-                                                        </div>  
-                                                        
+                                                        </div>
+
                                                         <span class="time" data-timezone="" data-rawtime=""></span>
                                                         <a class="tooltip gray hide">i
                                                             <span><strong>We will deliver before the selected date.</strong><br />
@@ -266,8 +266,8 @@
                                                         <br/><span class="zone2"></span>
                                                         <a class="needitfaster">Need it faster?</a>
                                                 </div>
-                                            </div>    
-                                        </div>                                  
+                                            </div>
+                                        </div>
                                         <div class="tprice">
                                             <div class="ErrorMsg ErrorMsgQuoteError hide">
                                                 <p>Contact us at <a href="mailto:info@translated.net">info@translated.net</a> <br />or call +39 06 90 254 001</p>
@@ -286,18 +286,18 @@
                                                     <a href="#" class="continuebtn disabled">Order</a>
                                                 </form>
                                         </div>
-                                                                       
+
                                         <div class="addrevision">
                                              <input type="checkbox" name="revision" value="revision"/><h4>Add revision</h4><span class="revision_delivery"></span><span class="revision_price_box">+ <span class="revision_currency"></span><span class="revision_price"></span></span>
                                         </div>
                                     </div>
-                                   
-                           
-                                    
-                                
+
+
+
+
                             </div>
                              </div>
-                    <!--end outsourceto-->
+                    &lt;!&ndash;end outsourceto&ndash;&gt;
                             <div class="paymentinfo">
                                 <p><strong>Easy payments</strong>: pay a single monthly invoice within 30 days of receipt</p>
                             </div>
@@ -305,9 +305,9 @@
                                 <h3>Have a specific request?</h3>
                                 <p>Contact us at <a href="mailto:info@translated.net">info@translated.net</a> or call +39 06 90 254 001</p>
                             </div>
-                            <!-- end total-->
-                        <!-- end reveal prices-->
-                        <!-- begin date picker -->
+                            &lt;!&ndash; end total&ndash;&gt;
+                        &lt;!&ndash; end reveal prices&ndash;&gt;
+                        &lt;!&ndash; begin date picker &ndash;&gt;
                         <div id="forceDeliveryContainer" class="modal-outsource-datepicker hide">
                              <div class="delivery-manual">
                                 <span id="forceDeliveryChosenDate" class="hide">0</span>
@@ -366,7 +366,7 @@
                                         <option value="13">(GMT +13:00 ) Samoa</option>
                                     </select>
 
-                                    <!--  design took fron validationEngine not the logic. Hardcoded -->
+                                    &lt;!&ndash;  design took fron validationEngine not the logic. Hardcoded &ndash;&gt;
                                     <div id="delivery_manual_error" class="delivery_manual_error hide">
                                         <div>* Chosen delivery date is in the past</div>
                                     </div>
@@ -386,13 +386,13 @@
 
                             </div>
                         </div>
-                        <!-- end date picker -->
-                   
-                    
+                        &lt;!&ndash; end date picker &ndash;&gt;
+
+
                 </div>
-            </div>
-        </div>
-    </div>
+            </div>-->
+<!--        </div>
+    </div>-->
 
 </div>
 

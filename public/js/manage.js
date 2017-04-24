@@ -562,7 +562,17 @@ UI = {
     },
 
     openOutsourceModal: function (project, job, url) {
-        UI.startOutSourceModal(project, job, url);
+        let props = {
+            project: project,
+            job: job,
+            url: url,
+            fromManage: true,
+            translatorOpen: true
+        };
+        let style = {width: '970px',maxWidth: '970px', top: '45%'};
+        APP.ModalWindow.showModalComponent(OutsourceModal, props, "Translate", style);
+
+
     },
 
     //***********************//
@@ -625,7 +635,4 @@ UI = {
 $(document).ready(function(){
     UI.init();
     UI.render();
-    if ( config.enable_outsource ) {
-        UI.outsourceInit();
-    }
 });
