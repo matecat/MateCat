@@ -55,7 +55,7 @@ class TranslatorsModel {
 
     }
 
-    public function showTranslator(){
+    public function getTranslator(){
 
         $jTranslatorsDao = new JobsTranslatorsDao();
         $jTranslatorsStruct = $jTranslatorsDao->setCacheTTL( 60 * 60 * 24 )->findByJobsStruct( $this->jStruct )[ 0 ];
@@ -138,7 +138,7 @@ class TranslatorsModel {
 
     }
 
-    protected function changeJobPassword(){
+    public function changeJobPassword(){
 
         $jobDao = new Jobs_JobDao();
         $jobDao->destroyCache( $this->jStruct );

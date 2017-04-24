@@ -11,8 +11,11 @@ namespace API\App;
 
 
 use API\V2\Exceptions\AuthorizationError;
+use CatUtils;
+use Jobs_JobDao;
 use Outsource\ConfirmationDao;
 use Outsource\TranslatedConfirmationStruct;
+use Translators\TranslatorsModel;
 use Utils;
 
 class OutsourceConfirmationController extends AbstractStatefulKleinController {
@@ -29,6 +32,16 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController {
 
         if ( $params[ 'id_job' ] != $payload[ 'id_job' ] || $params[ 'password' ] != $payload[ 'password' ] ) {
             throw new AuthorizationError( "Invalid Job" );
+        }
+
+        $jStruct = new \Jobs_JobStruct( [ 'id' => $params[ 'id_job' ], 'password' => $params[ 'password' ] ] );
+        $translatorModel = new TranslatorsModel( $this, $jStruct );
+        $jTranslatorStruct = $translatorModel->getTranslator();
+
+        if ( !empty( $jTranslatorStruct ) ) {
+            $jobDao = new Jobs_JobDao();
+            $jobDao->destroyCache( $jStruct );
+            $jobDao->changePassword( $jStruct, CatUtils::generate_password() );
         }
 
         $confirmationStruct = new TranslatedConfirmationStruct( $payload );
