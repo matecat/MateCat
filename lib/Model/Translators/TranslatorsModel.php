@@ -55,6 +55,15 @@ class TranslatorsModel {
 
     }
 
+    public function showTranslator(){
+
+        $jTranslatorsDao = new JobsTranslatorsDao();
+        $jTranslatorsStruct = $jTranslatorsDao->setCacheTTL( 60 * 60 * 24 )->findByJobsStruct( $this->jStruct )[ 0 ];
+
+        return $jTranslatorsStruct;
+
+    }
+
     public function update(){
 
         //create jobs_translator struct to call inside the dao

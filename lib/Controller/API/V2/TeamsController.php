@@ -68,8 +68,6 @@ class TeamsController extends KleinController {
 
     public function update() {
 
-        $requestContent = $this->getPutParams();
-
         $this->addValidatorAccess();
         $this->validateRequest();
 
@@ -78,7 +76,7 @@ class TeamsController extends KleinController {
             $org     = new TeamStruct();
             $org->id = $this->request->id_team;
 
-            $org->name = $requestContent[ 'name' ];
+            $org->name = $this->params[ 'name' ];
             if ( empty( $org->name ) ) {
                 throw new InvalidArgumentException( "Wrong parameter :name ", 400 );
             }
@@ -90,7 +88,7 @@ class TeamsController extends KleinController {
                 throw new AuthorizationError( "Not Authorized", 401 );
             }
 
-            $org->name = $requestContent[ 'name' ];
+            $org->name = $this->params[ 'name' ];
 
             $teamDao = new TeamDao();
 

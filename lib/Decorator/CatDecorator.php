@@ -183,6 +183,11 @@ class CatDecorator {
 
     private function decorateForCJK() {
 
+        //check if language belongs to supported right-to-left languages ( decorate the HTML )
+        $lang_handler = Langs_Languages::getInstance();
+        $this->template->source_rtl = ( $lang_handler->isRTL( $this->controller->source_code ) ) ? ' rtl-source' : '';
+        $this->template->target_rtl = ( $lang_handler->isRTL( $this->controller->target_code ) ) ? ' rtl-target' : '';
+
         //check if it is a composite language, for cjk check that accepts only ISO 639 code
         if ( strpos( $this->controller->target_code, '-' ) !== false ) {
             //pick only first part
@@ -212,7 +217,9 @@ class CatDecorator {
 
         //check if cjk
         if ( array_key_exists( $source_code_no_country, CatUtils::$cjk ) ) {
-            $this->template->isCJK = true;
+            $this->template->isCJK = var_export( true, true );
+        } else{
+            $this->template->isCJK = var_export( false, true );
         }
 
     }
