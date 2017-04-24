@@ -272,7 +272,7 @@ $.extend(UI, {
     sendTranslatorRequest: function (email, date) {
         let data = {
             email: email,
-            delivery_date: date
+            delivery_date: date/1000
         };
         return $.ajax({
             async: true,
