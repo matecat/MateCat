@@ -17,7 +17,7 @@ class WarningDao extends \DataAccess_AbstractDao {
               JOIN segment_translations st ON st.id_job = jobs.id
           WHERE ( st.warning & :level ) = :level
             AND id = :id AND password = :password
-            AND status != :status
+            AND st.status != :status
         " ;
 
     public function getWarningsByProjectIds( $projectIds ) {
