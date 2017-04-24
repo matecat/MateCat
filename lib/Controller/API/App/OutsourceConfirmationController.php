@@ -11,11 +11,9 @@ namespace API\App;
 
 
 use API\V2\Exceptions\AuthorizationError;
-use CatUtils;
-use Jobs_JobDao;
 use Outsource\ConfirmationDao;
 use Outsource\TranslatedConfirmationStruct;
-use Translators\TranslatorsModel;
+use Translators\DetachedTranslatorsModel;
 use Utils;
 
 class OutsourceConfirmationController extends AbstractStatefulKleinController {
@@ -35,15 +33,13 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController {
         }
 
         $jStruct = new \Jobs_JobStruct( [ 'id' => $params[ 'id_job' ], 'password' => $params[ 'password' ] ] );
-        $translatorModel = new TranslatorsModel( $this, $jStruct );
+        $translatorModel = new DetachedTranslatorsModel( $jStruct );
         $jTranslatorStruct = $translatorModel->getTranslator();
 
         $confirmationStruct = new TranslatedConfirmationStruct( $payload );
 
         if ( !empty( $jTranslatorStruct ) ) {
-            $jobDao = new Jobs_JobDao();
-            $jobDao->destroyCache( $jStruct );
-            $jobDao->changePassword( $jStruct, CatUtils::generate_password() );
+            $translatorModel->changeJobPassword();
             $confirmationStruct->password = $jStruct->password;
         }
 

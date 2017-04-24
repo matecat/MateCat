@@ -12,8 +12,10 @@ namespace Translators;
 
 use API\V2\KleinController;
 use CatUtils;
+use InvalidArgumentException;
 use Jobs_JobDao;
 use Jobs_JobStruct;
+use Outsource\ConfirmationDao;
 use Users_UserStruct;
 use Utils;
 
@@ -37,7 +39,7 @@ class TranslatorsModel {
     /**
      * @var array
      */
-    protected $mailsToBeSent = [];
+    protected $mailsToBeSent = [ 'new' => null, 'update' => null, 'change' => null ];
 
     /**
      * TranslatorsModel constructor.
@@ -65,6 +67,13 @@ class TranslatorsModel {
     }
 
     public function update(){
+
+        $confDao = new ConfirmationDao();
+        $confirmationStruct = $confDao->getConfirmation( $this->jStruct );
+
+        if( !empty( $confirmationStruct ) ){
+            throw new InvalidArgumentException( "The Job is Outsourced.", 400 );
+        }
 
         //create jobs_translator struct to call inside the dao
         $jTranslatorsStruct = new JobsTranslatorsStruct();
@@ -143,6 +152,10 @@ class TranslatorsModel {
         $jobDao = new Jobs_JobDao();
         $jobDao->destroyCache( $this->jStruct );
         $jobDao->changePassword( $this->jStruct, CatUtils::generate_password() );
+
+    }
+
+    public function sendEmail(){
 
     }
 
