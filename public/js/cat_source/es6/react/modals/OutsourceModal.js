@@ -468,7 +468,7 @@ class OutsourceModal extends React.Component {
 
                                     {this.state.showTranslatorInfo ? (<p className="trustbox2">
                                             Translated has over 15 years' experience as a translation company and offers
-                                            <a href="http://www.translated.net/en/frequently-asked-questions#guarantees" target="_blank">two key guarantees on quality and delivery</a>.
+                                            <a href="http://www.translated.net/en/frequently-asked-questions#guarantees" target="_blank"> two key guarantees on quality and delivery</a>.
                                             <br />
                                             <a className="hide_translator more minus"
                                                onClick={this.hideTranslatorInfo.bind(this)}><span>Close</span></a>
@@ -499,7 +499,7 @@ class OutsourceModal extends React.Component {
 
                                 {/*//TODO Inserire spazi*/}
                                 <span className="displaypriceperword">about
-                                    <span className="euro currency_per_word"/>
+                                    <span className="euro currency_per_word" style={{marginLeft: '2px', marginRight: '2px'}}/>
                                      <a className="price_p_word"/> / word
                                     { (this.state.showTranslatorInfo) ? (
                                             <div className="delivery_container">

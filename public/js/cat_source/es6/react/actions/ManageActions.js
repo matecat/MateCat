@@ -100,8 +100,18 @@ let ManageActions = {
     changeJobPassword: function (project, job, password, oldPassword) {
         AppDispatcher.dispatch({
             actionType: ManageConstants.CHANGE_JOB_PASS,
-            project: project,
-            job: job,
+            projectId: project.get('id'),
+            jobId: job.get('id'),
+            password: password,
+            oldPassword: oldPassword
+        });
+    },
+
+    changeJobPasswordFromOutsource: function (projectId, jobId, oldPassword, password) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.CHANGE_JOB_PASS,
+            projectId: projectId,
+            jobId: jobId,
             password: password,
             oldPassword: oldPassword
         });
@@ -260,6 +270,15 @@ let ManageActions = {
             console.log("Error change assignee", response);
             UI.showNotificationProjectsChanged();
             UI.reloadProjects();
+        });
+    },
+
+    assignTranslator: function (projectId, jobId, translator) {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.ASSIGN_TRANSLATOR,
+            projectId: projectId,
+            jobId: jobId,
+            translator: translator
         });
     },
 

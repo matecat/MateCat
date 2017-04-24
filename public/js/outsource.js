@@ -249,7 +249,7 @@ $.extend(UI, {
         if (UI.checkSendToTranslatorButton() && UI.checkInputEmailInput()) {
             var email = $('.modal.outsource input.out-email').val();
             var date = getChosenOutsourceDate();
-            UI.sendTranslatorRequest(email, date).done(function () {
+            UI.sendTranslatorRequest(email, date).done(function (data) {
                 APP.ModalWindow.onCloseModal();
                 let notification = {
                     title: 'Job sent',
@@ -261,6 +261,8 @@ $.extend(UI, {
                     timer: 10000
                 };
                 let boxUndo = APP.addNotification(notification);
+                ManageActions.assignTranslator(UI.currentOutsourceProject.id ,UI.currentOutsourceJob.id, data.job.translator);
+                ManageActions.changeJobPasswordFromOutsource(UI.currentOutsourceProject.id ,UI.currentOutsourceJob.id, UI.currentOutsourceJob.password, data.job.password);
             }).error(function () {
                 APP.ModalWindow.onCloseModal();
                 let notification = {
