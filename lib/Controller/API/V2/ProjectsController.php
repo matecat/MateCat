@@ -27,11 +27,9 @@ class ProjectsController extends KleinController {
         $projectModel   = new ProjectModel( $this->project );
         $projectModel->setUser( $this->user ) ;
 
-        $putParams = $this->getPutParams();
-
         foreach ( $acceptedFields as $field ) {
-            if ( array_key_exists($field, $putParams ) ) {
-                $projectModel->prepareUpdate( $field, $putParams[ $field ] );
+            if ( array_key_exists($field, $this->params ) ) {
+                $projectModel->prepareUpdate( $field, $this->params[ $field ] );
             }
         }
 

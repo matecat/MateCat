@@ -703,12 +703,12 @@ $.extend(UI, {
 			}, 50);
             if (!UI.body.hasClass('searchActive')) {
 
-                if(UI.isCJK() && ( (e.which == '60') || (e.which == '62') ) ) {
-                } else {
+                if( !UI.isCJK() || ( (e.which != '60') && (e.which != '62') ) ){
                     setTimeout(function() {
                         UI.lockTags(UI.editarea);
                     }, 10);
-                }
+				}
+
             }
 		}).on('keydown', '.editor .editarea', function(e) {
 

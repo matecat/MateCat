@@ -15,14 +15,23 @@ use Translators\JobsTranslatorsStruct;
 class JobTranslator {
 
     public function renderItem( JobsTranslatorsStruct $jTranslatorsStruct ) {
-        return array(
+
+        $translatorJson = [
                 'email'                 => $jTranslatorsStruct->email,
                 'added_by'              => $jTranslatorsStruct->added_by,
                 'delivery_date'         => $jTranslatorsStruct->delivery_date,
                 'source'                => $jTranslatorsStruct->source,
                 'target'                => $jTranslatorsStruct->target,
-                'id_translator_profile' => $jTranslatorsStruct->id_translator_profile
-        );
+                'id_translator_profile' => $jTranslatorsStruct->id_translator_profile,
+                'user'                  => null
+        ];
+
+        if( !empty( $jTranslatorsStruct->id_translator_profile ) ){
+            $translatorJson[ 'user' ] = User::renderItem( $jTranslatorsStruct->getUser() );
+        }
+
+        return $translatorJson;
+
     }
 
 }
