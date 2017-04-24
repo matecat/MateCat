@@ -38,13 +38,15 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController {
         $translatorModel = new TranslatorsModel( $this, $jStruct );
         $jTranslatorStruct = $translatorModel->getTranslator();
 
+        $confirmationStruct = new TranslatedConfirmationStruct( $payload );
+
         if ( !empty( $jTranslatorStruct ) ) {
             $jobDao = new Jobs_JobDao();
             $jobDao->destroyCache( $jStruct );
             $jobDao->changePassword( $jStruct, CatUtils::generate_password() );
+            $confirmationStruct->password = $jStruct->password;
         }
 
-        $confirmationStruct = new TranslatedConfirmationStruct( $payload );
         $confirmationStruct->create_date = Utils::mysqlTimestamp( time() );
         ConfirmationDao::insertStruct( $confirmationStruct, [ 'ignore' => true, 'no_nulls' => true ] );
 
