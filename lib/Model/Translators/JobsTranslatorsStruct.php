@@ -23,4 +23,11 @@ class JobsTranslatorsStruct extends DataAccess_AbstractDaoSilentStruct implement
     public $source;
     public $target;
 
+    public function getUser(){
+        if( !empty( $this->id_translator_profile ) ){
+            $existentUser = ( new \Users_UserDao() )->setCacheTTL( 60 * 60 )->getByEmail( $this->email );
+            return $existentUser;
+        }
+    }
+
 }
