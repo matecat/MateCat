@@ -117,7 +117,7 @@ let ManageActions = {
                 oldPassword: oldPassword
             });
         } else {
-
+            UI.updateJobPassword(password);
         }
     },
 
@@ -286,7 +286,7 @@ let ManageActions = {
                 translator: translator
             });
         } else {
-
+            UI.updateOutsourceInfo(translator);
         }
     },
 

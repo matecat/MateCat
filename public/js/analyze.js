@@ -774,7 +774,6 @@ UI = {
 			var numw = wordsXjob;
 			if (i < diff)
 				numw++;
-
 			// '<!-- A: la classe Aprox scompare se viene effettuato il calcolo -->' +
 			var item = '<li>' +
 				'   <div><h4>Part ' + (i + 1) + '</h4></div>' +
@@ -844,6 +843,18 @@ UI = {
             var selectedTeam = APP.getLastTeamSelected(data.teams);
             $('.team-name').text(selectedTeam.name);
         })
+    },
+
+    updateJobPassword: function (password) {
+        let $job = $('.tablestats[data-jid='+UI.currentOutsourceJob.id+']');
+        $job.data('pwd', password);
+        let href = $job.find('.uploadbtn.translate').attr('href');
+        $job.find('.uploadbtn.translate').attr('href', href.replace(UI.currentOutsourceJob.password, password));
+        UI.currentOutsourceJob.password = password;
+    },
+
+    updateOutsourceInfo: function (translator) {
+		UI.currentOutsourceJob.translator = translator;
     }
 };
 
