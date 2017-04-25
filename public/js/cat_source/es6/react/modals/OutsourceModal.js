@@ -254,7 +254,7 @@ class OutsourceModal extends React.Component {
     }
 
     render() {
-        let loadingClass = (this.state.outsource) ?  "" : "loading"
+        let loadingClass = (this.state.outsource) ?  "" : "loading";
         let textGuaranteedByClass = (this.state.showTranslatorInfo) ? "expanded" : "";
         let pricesClass = (this.state.showTranslatorInfo) ? "compress" : "";
         let deliveryHtml = this.getDeliveryHtml();
@@ -264,11 +264,11 @@ class OutsourceModal extends React.Component {
         let translatorEmail = '';
         let delivery;
         if (this.props.job.translator) {
-            delivery =  UI.getGMTDate(this.props.job.translator.delivery_date);
+            delivery =  APP.getGMTDate(this.props.job.translator.delivery_date);
             translatorEmail = this.props.job.translator.email;
         } else {
             delivery = $.format.date(new Date(), "yyyy-MM-d hh:mm a");
-            delivery =  UI.getGMTDate(delivery);
+            delivery =  APP.getGMTDate(delivery);
         }
         date =  delivery.day + ' ' + delivery.month + ' at ' + delivery.time + " " + delivery.gmt;
 

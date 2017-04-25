@@ -107,49 +107,30 @@ UI = {
         	e.preventDefault();
             var linkPieces = $( this ).attr( "href" ).split( "/" );
             var jPieces = linkPieces[ linkPieces.length - 1 ].split( "-" );
+			var idJob = jPieces[0];
+            UI.currentOutsourceJob = UI.currentOutsourceProject.jobs.find(function (job) {
+				return job.id === idJob;
+            });
 
-            var words = $( ".tablestats[data-pwd='" + jPieces[ 1 ] + "'] .stat-payable" ).text() ;
-            var sourceTxt = $( "div[data-jid='" + jPieces[ 0 ] + "'] .source_lang" ).text();
-            var targetTxt = $( "div[data-jid='" + jPieces[ 0 ] + "'] .target_lang" ).text();
+            let words = $( ".tablestats[data-pwd='" + jPieces[ 1 ] + "'] .stat-payable" ).text() ;
+            let sourceTxt = UI.currentOutsourceJob.sourceTxt;
+            let targetTxt = UI.currentOutsourceJob.targetTxt;
 
             $( ".title-source" ).text( sourceTxt );
             $( ".title-target" ).text( targetTxt );
             $( ".title-words" ).text( words );
 
-            UI.currentOutsourceJob = {
-                id: jPieces[ 0 ],
-                password: jPieces[ 1 ],
-                stats: {
-                    TOTAL_FORMATTED: words
-                },
-                sourceTxt: sourceTxt,
-                targetTxt: targetTxt
-            };
-            UI.currentOutsourceProject = {
-                id: config.id_project,
-                password: config.password,
-            };
 
             UI.currentOutsourceUrl = $( this ).attr( "href" );
-
             let props = {
                 project: UI.currentOutsourceProject,
                 job: UI.currentOutsourceJob,
                 url: UI.currentOutsourceUrl,
                 fromManage: false,
-                translatorOpen: false
+                translatorOpen: !!(UI.currentOutsourceJob.translator)
             };
             let style = {width: '970px',maxWidth: '970px', top: '45%'};
             APP.ModalWindow.showModalComponent(OutsourceModal, props, "Translate", style);
-            // if(config.enable_outsource) {
-            // e.preventDefault();
-            //     resetOutsourcePopup( false );
-            //     $('body').addClass('showingOutsourceTo');
-            //     $('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
-            //     $('.outsource.modal .uploadbtn:not(.showprices)').attr('href', $(this).attr('href'));
-            //     renderQuote( $( this ) );
-            //     // $('.outsource.modal').show();
-            // }
         });
 
 		this.pollData();
@@ -157,7 +138,32 @@ UI = {
         this.checkQueryParams();
 
         this.setTeamHeader();
+
+        this.getProject(config.id_project).done(function (response) {
+            UI.currentOutsourceProject = response.data[0];
+        });
 	},
+    getProject: function(id) {
+
+        let d = {
+            action: 'getProjects',
+            project: id,
+        };
+
+        if (config.isLoggedIn) {
+            d.id_team = APP.getLastTeamSelected(APP.USER.STORE.teams).id;
+        }
+
+        return APP.doRequest({
+            data: d,
+            success: function(d){
+                data = $.parseJSON(d.data);
+            },
+            error: function(d){
+
+            }
+        });
+    },
 	performPreCheckSplitComputation: function(doStringSanitization) {
 
 		ss = 0;

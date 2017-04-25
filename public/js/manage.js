@@ -305,33 +305,6 @@ UI = {
         ManageActions.changeTeam(personalTeam);
     },
 
-    getGMTDate: function (date) {
-        var timezoneToShow = readCookie( "matecat_timezone" );
-        if ( timezoneToShow == "" ) {
-            timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
-        }
-        var dd = new Date( date.replace(/-/g, "/") );
-        var timeZoneFrom = -1 * ( new Date().getTimezoneOffset() / 60 );
-        dd.setMinutes( dd.getMinutes() + (timezoneToShow - timeZoneFrom) * 60 );
-        var timeZone = this.getGMTZoneString();
-        return {
-            day: $.format.date(dd, "d") ,
-            month: $.format.date(dd, "MMMM"),
-            time: $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a"),
-            gmt: timeZone
-        };
-    },
-
-    getGMTZoneString: function () {
-        var timezoneToShow = readCookie( "matecat_timezone" );
-        if ( timezoneToShow == "" ) {
-            timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
-        }
-        timezoneToShow = (timezoneToShow > 0) ? '+' + timezoneToShow : timezoneToShow;
-        return (timezoneToShow % 1 === 0) ? "GMT " + timezoneToShow + ':00' : "GMT " + parseInt(timezoneToShow) + ':30';
-
-    },
-
     //********** REQUESTS *********************//
 
     /**
@@ -518,7 +491,7 @@ UI = {
     },
 
     removeUserFromTeam: function (team, userId) {
-        return $.ajax({
+        return $.ajax({id_team: team.id,
             type: "delete",
             url : "/api/v2/teams/"+ team.id +"/members/" + userId,
         });
@@ -583,61 +556,7 @@ UI = {
         APP.ModalWindow.showModalComponent(OutsourceModal, props, "Translate", style);
 
 
-    },
-
-    //***********************//
-
-
-    /**
-     * Get Project
-     * @param id
-     */
-    getProject: function(id) {
-        let d = {
-            action: 'getProjects',
-            project: id,
-            page:	UI.Search.currentPage
-        };
-        // Add filters ??
-        ar = $.extend(d,{});
-
-        return APP.doRequest({
-            data: ar,
-            success: function(d){
-                data = $.parseJSON(d.data);
-            },
-            error: function(d){
-                window.location = '/';
-            }
-        });
-    },
-
-    /**
-     * Mistero!
-     * @param pid
-     * @param psw
-     * @param jid
-     * @param jpsw
-     */
-    getOutsourceQuotes: function(pid, psw, jid, jpsw) {
-        $.ajax({
-            async: true,
-            type: "POST",
-            url : "/?action=outsourceTo",
-            data:
-                {
-                    action: 'outsourceTo',
-                    pid: pid,
-                    ppassword: psw,
-                    jobs:
-                        [{
-                            jid: jid,
-                            jpassword: jpsw
-                        }]
-                },
-            success : function ( data ) {}
-        });
-    },
+    }
 };
 
 
