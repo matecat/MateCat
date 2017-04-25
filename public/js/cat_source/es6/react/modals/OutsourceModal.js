@@ -255,6 +255,8 @@ class OutsourceModal extends React.Component {
 
     render() {
         let loadingClass = (this.state.outsource) ?  "" : "loading";
+        let showShareToTranslator = !!this.props.job.outource;
+
         let textGuaranteedByClass = (this.state.showTranslatorInfo) ? "expanded" : "";
         let pricesClass = (this.state.showTranslatorInfo) ? "compress" : "";
         let deliveryHtml = this.getDeliveryHtml();
@@ -295,10 +297,10 @@ class OutsourceModal extends React.Component {
 
                 </div>
 
-                {!this.props.translatorOpen ? (<div id="open-translator" className="open-send-to-translator">Send job to translator</div>)
+                { (!this.props.translatorOpen && showShareToTranslator) ? (<div id="open-translator" className="open-send-to-translator">Send job to translator</div>)
                     : ('')}
 
-                <div className={this.props.translatorOpen ? ("send-to-translator") :("send-to-translator hide")} >
+                <div className={(this.props.translatorOpen && showShareToTranslator) ? ("send-to-translator") :("send-to-translator hide")} >
                     <div className="send-to-translator-container ">
                         <input className="out-email" type="email" placeholder="Insert email" defaultValue={translatorEmail}/>
                         <input className="out-date" type="datetime" placeholder="Date" readOnly defaultValue={date}/>
