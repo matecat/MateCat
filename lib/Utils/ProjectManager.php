@@ -10,11 +10,11 @@
 use ActivityLog\Activity;
 use ActivityLog\ActivityLogStruct;
 use Analysis\DqfQueueHandler;
-
-include_once INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
-
 use ConnectedServices\GDrive as GDrive  ;
 use Teams\TeamStruct;
+use Translators\DetachedTranslatorsModel;
+
+include_once INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
 
 class ProjectManager {
 
@@ -1345,6 +1345,17 @@ class ProjectManager {
 
         $jobInfo = $this->dbHandler->fetch_array( $query_job );
         $jobInfo = $jobInfo[ 0 ];
+
+
+        $jStruct = new Jobs_JobStruct( $jobInfo );
+        $translatorModel = new DetachedTranslatorsModel( $jStruct );
+        $jTranslatorStruct = $translatorModel->getTranslator();
+        if ( !empty( $jTranslatorStruct ) ) {
+            $translatorModel->changeJobPassword();
+            $translatorModel->setEmailChange( $jTranslatorStruct->email );
+            $translatorModel->sendEmail();
+            $jobInfo[ 'password'] = $jStruct->password;
+        }
 
         $data = array();
         $jobs = array();

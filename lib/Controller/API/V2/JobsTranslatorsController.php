@@ -60,7 +60,7 @@ class JobsTranslatorsController extends KleinController {
         ], true );
 
         $translatorModel = new TranslatorsModel( $this, $this->jStruct );
-        $jTranslatorStruct = $translatorModel->showTranslator();
+        $jTranslatorStruct = $translatorModel->getTranslator();
 
         $formatted = new Job();
         $this->response->json( array( 'job' => $formatted->renderItem( $this->jStruct, $jTranslatorStruct ) ) );

@@ -13,6 +13,7 @@ namespace API\App;
 use API\V2\Exceptions\AuthorizationError;
 use Outsource\ConfirmationDao;
 use Outsource\TranslatedConfirmationStruct;
+use Translators\DetachedTranslatorsModel;
 use Utils;
 
 class OutsourceConfirmationController extends AbstractStatefulKleinController {
@@ -31,7 +32,17 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController {
             throw new AuthorizationError( "Invalid Job" );
         }
 
+        $jStruct = new \Jobs_JobStruct( [ 'id' => $params[ 'id_job' ], 'password' => $params[ 'password' ] ] );
+        $translatorModel = new DetachedTranslatorsModel( $jStruct );
+        $jTranslatorStruct = $translatorModel->getTranslator();
+
         $confirmationStruct = new TranslatedConfirmationStruct( $payload );
+
+        if ( !empty( $jTranslatorStruct ) ) {
+            $translatorModel->changeJobPassword();
+            $confirmationStruct->password = $jStruct->password;
+        }
+
         $confirmationStruct->create_date = Utils::mysqlTimestamp( time() );
         ConfirmationDao::insertStruct( $confirmationStruct, [ 'ignore' => true, 'no_nulls' => true ] );
 
