@@ -28,31 +28,10 @@ class OutsourceModal extends React.Component {
             self.confirm_urls = quoteData.return_url.confirm_urls;
             self.data_key = self.chunk.id;
 
-            // // a generic error
-            // if( self.chunk.quote_result != 1 ){
-            //     renderGenericErrorQuote();
-            //     return false;
-            // }
-            //
-            // // job already outsourced
-            // if( self.chunk.outsourced == 1 ) {
-            //     renderOutsourcedQuote( self.chunk );
-            //     return false;
-            // }
-            //
-            // // delivery date too strict
-            // if( self.chunk.quote_available != 1 ) {
-            //     renderNotAvailableQuote();
-            //     return false;
-            // }
 
             self.setState({
                 outsource: true
             });
-
-            // renderNormalQuote( chunk );
-
-
         });
     }
 
@@ -270,7 +249,7 @@ class OutsourceModal extends React.Component {
 
             renderNormalQuote( this.chunk );
             // Intercom
-            $(document).trigger('outsource-rendered', { quote_data : self.quoteResponse } );
+            $(document).trigger('outsource-rendered', { quote_data : this.quoteResponse } );
         }
     }
 
@@ -280,14 +259,18 @@ class OutsourceModal extends React.Component {
         let pricesClass = (this.state.showTranslatorInfo) ? "compress" : "";
         let deliveryHtml = this.getDeliveryHtml();
         let revisionHtml = this.getRevisionHtml();
+
         let date;
-        if (this.props.job.outsource) {
-            let dd = new Date( this.props.job.outsource.delivery_date );
-            date =  $.format.date(dd, "d MMMM") + ' at ' + $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a")
+        let translatorEmail = '';
+        let delivery;
+        if (this.props.job.translator) {
+            delivery =  UI.getGMTDate(this.props.job.translator.delivery_date);
+            translatorEmail = this.props.job.translator.email;
         } else {
-            // date = getChosenOutsourceDateToString();
-            date = '';
+            delivery = $.format.date(new Date(), "yyyy-MM-d hh:mm a");
+            delivery =  UI.getGMTDate(delivery);
         }
+        date =  delivery.day + ' ' + delivery.month + ' at ' + delivery.time + " " + delivery.gmt;
 
         return <div className={"modal outsource " + loadingClass}>
         <div className="popup">
@@ -317,7 +300,7 @@ class OutsourceModal extends React.Component {
 
                 <div className={this.props.translatorOpen ? ("send-to-translator") :("send-to-translator hide")} >
                     <div className="send-to-translator-container ">
-                        <input className="out-email" type="email" placeholder="Insert email"/>
+                        <input className="out-email" type="email" placeholder="Insert email" defaultValue={translatorEmail}/>
                         <input className="out-date" type="datetime" placeholder="Date" readOnly defaultValue={date}/>
                         <a  className="send-to-translator-btn in-popup disabled" target="_blank">Send to translator</a>
                         <div className="validation-error email-translator-error"><span className="text" style={{color: "red", fontsize: "14px"}}>A valid email is required</span></div>

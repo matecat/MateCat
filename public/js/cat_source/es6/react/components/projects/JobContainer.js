@@ -449,7 +449,8 @@ class JobContainer extends React.Component {
                     <a className="outsource-logo-box" href={this.props.job.get('outsource').get('quote_review_link')} target="_blank"><img className='outsource-logo' src="/public/img/logo_translated.png" title="Outsourced to translated.net" alt="Translated logo"/></a>;
             }
         } else if (this.props.job.get('translator')) {
-            outsourceJobLabel = <div className="job-to-translator">{this.props.job.get('translator').get('email')}</div>;
+            let email = this.props.job.get('translator').get('email').substring(0, this.props.job.get('translator').get('email').indexOf('@'));
+            outsourceJobLabel = <div className="job-to-translator">{email}</div>;
         }
         return outsourceJobLabel;
     }

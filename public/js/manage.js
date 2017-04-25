@@ -313,13 +313,23 @@ UI = {
         var dd = new Date( date.replace(/-/g, "/") );
         var timeZoneFrom = -1 * ( new Date().getTimezoneOffset() / 60 );
         dd.setMinutes( dd.getMinutes() + (timezoneToShow - timeZoneFrom) * 60 );
-        var selectedElement = $( "#changeTimezone" ).find( "option[value='" + timezoneToShow + "']");
+        var timeZone = this.getGMTZoneString();
         return {
             day: $.format.date(dd, "d") ,
             month: $.format.date(dd, "MMMM"),
             time: $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a"),
-            gmt: selectedElement.text()
+            gmt: timeZone
         };
+    },
+
+    getGMTZoneString: function () {
+        var timezoneToShow = readCookie( "matecat_timezone" );
+        if ( timezoneToShow == "" ) {
+            timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
+        }
+        timezoneToShow = (timezoneToShow > 0) ? '+' + timezoneToShow : timezoneToShow;
+        return (timezoneToShow % 1 === 0) ? "GMT " + timezoneToShow + ':00' : "GMT " + parseInt(timezoneToShow) + ':30';
+
     },
 
     //********** REQUESTS *********************//

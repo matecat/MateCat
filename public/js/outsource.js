@@ -253,7 +253,7 @@ $.extend(UI, {
             var date = getChosenOutsourceDate();
             UI.sendTranslatorRequest(email, date).done(function (data) {
                 APP.ModalWindow.onCloseModal();
-                UI.checkShareToTranslatorResponse(data);
+                UI.checkShareToTranslatorResponse(data, email);
             }).error(function () {
                 APP.ModalWindow.onCloseModal();
                 let notification = {
@@ -305,10 +305,10 @@ $.extend(UI, {
         });
     },
 
-    checkShareToTranslatorResponse: function (response) {
+    checkShareToTranslatorResponse: function (response, mail) {
         let notification = {
             title: 'Job sent with <div class="green-label" style="display: inline; background-color: #5ea400; color: white; padding: 2px 5px;">new password </div>',
-            text: '<div style="margin-top: 16px;">To: <a href="mailto:support@matecat.com">support@matecat.com</a> ' +
+            text: '<div style="margin-top: 16px;">To: <a href="mailto:' + mail + '">' + mail + '</a> ' +
             '<div class="job-reference" style="display: inline-block; width: 100%; margin-top: 10px;"> ' +
             '<div class style="display: inline-block; font-size: 14px; color: grey;">(' + UI.currentOutsourceJob.id +')</div> ' +
             '<div class="source-target languages-tooltip" style="display: inline-block; font-weight: 700;"> ' +
