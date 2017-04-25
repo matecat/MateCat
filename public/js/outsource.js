@@ -5,16 +5,6 @@ $.extend(UI, {
     changeRates: [],
 	outsourceInit: function() {
         this.removeEvents();
-        // hide/show detailed information about the chosen translator
-        // $('.show_translator, .hide_translator').click(function() {
-        //     $('.show_translator, .hide_translator').toggleClass('hide');
-        //     $('.guaranteed_by').toggleClass('expanded');
-        //     $('.delivery,.tprice,.pricebox').toggleClass('compress');
-        //     $('.trustbox2').toggleClass('hide');
-        //     $('.translator_info_box').toggleClass('hide');
-        //     $('#forceDeliveryContainer').addClass('hide');
-        //     $('.delivery').appendTo( $( this).hasClass( "hide_translator" ) ? ".delivery_container" : ".displaypriceperword" );
-        // });
 
         // add/remove revision service to current job
         $( "input[name='revision']" ).click(function() {
@@ -61,55 +51,6 @@ $.extend(UI, {
         $( ".showprices").click( function() {
             expandOutsourcePopup();
         });
-
-        /*// trigger the process for getting and displaying an outsource quote
-		$(".translate").click(function(e) {
-			var linkPieces = $( this ).attr( "href" ).split( "/" );
-			var jPieces = linkPieces[ linkPieces.length - 1 ].split( "-" );
-
-			var words = $( ".tablestats[data-pwd='" + jPieces[ 1 ] + "'] .stat-payable" ).text() ;
-			var sourceTxt = $( "div[data-jid='" + jPieces[ 0 ] + "'] .source_lang" ).text();
-			var targetTxt = $( "div[data-jid='" + jPieces[ 0 ] + "'] .target_lang" ).text();
-
-			$( ".title-source" ).text( sourceTxt );
-			$( ".title-target" ).text( targetTxt );
-			$( ".title-words" ).text( words );
-
-            UI.currentOutsourceJob = {
-                id: jPieces[ 0 ],
-                password: jPieces[ 1 ],
-                stats: {
-                    TOTAL_FORMATTED: words
-                },
-                sourceTxt: sourceTxt,
-                targetTxt: targetTxt
-            };
-            UI.currentOutsourceProject = {
-                id: config.id_project,
-                password: config.password,
-            };
-
-            UI.currentOutsourceUrl = $( this ).attr( "href" );
-
-            let props = {
-                project: UI.currentOutsourceProject,
-                job: UI.currentOutsourceJob,
-                url: UI.currentOutsourceUrl,
-                fromManage: false,
-                translatorOpen: false
-            };
-            let style = {width: '970px',maxWidth: '970px', top: '45%'};
-            APP.ModalWindow.showModalComponent(OutsourceModal, props, "Translate", style);
-            // if(config.enable_outsource) {
-				// e.preventDefault();
-            //     resetOutsourcePopup( false );
-            //     $('body').addClass('showingOutsourceTo');
-            //     $('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
-            //     $('.outsource.modal .uploadbtn:not(.showprices)').attr('href', $(this).attr('href'));
-            //     renderQuote( $( this ) );
-            //     // $('.outsource.modal').show();
-            // }
-		});*/
 
 		$(".outsource.modal").on('click', '.continuebtn', function(e) {
 			e.preventDefault();
@@ -167,46 +108,7 @@ $.extend(UI, {
         $(".outsource.modal .send-to-translator-btn").off('click');
         $("#open-translator").off('click');
     },
-    startOutSourceModal: function (project, job, url) {
-        this.currentOutsourceProject = project;
-        this.currentOutsourceJob = job;
-        this.currentOutsourceUrl = url;
 
-        // $( ".title-source" ).text( job.sourceTxt);
-        // $( ".title-target" ).text( job.targetTxt);
-        // $( ".title-words" ).text(job.stats.TOTAL_FORMATTED );
-        // $( ".modal.outsource a.uploadbtn.in-popup").hide();
-
-        // if (job.outsource) {
-        //     var dd = new Date( job.outsource.delivery_date );
-        //     $('.modal.outsource .out-date').val( $.format.date(dd, "d MMMM") + ' at ' + $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a") );
-        // } else {
-        //     $('.modal.outsource .out-date').val( getChosenOutsourceDateToString() );
-        //
-        // }
-
-        if(config.enable_outsource) {
-            // resetOutsourcePopup( false );
-            // $('body').addClass('showingOutsourceTo');
-            // $('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + url);
-
-            //TODO Questo ignoro a cosa serva
-            // $('.outsource.modal .uploadbtn:not(.showprices)').attr('href', url);
-
-
-            // $("#open-translator").addClass('hide');
-            // $('.send-to-translator').removeClass('hide');
-            // $('.onyourown').addClass('opened-send-translator');
-            // $('.out-link').addClass('from-manage');
-
-            //TODO
-            // $('.modal.outsource input.out-email').val("");
-            // $('.modal.outsource input.out-email').removeClass("error");
-
-            renderQuoteFromManage(project.id, project.password, job.id, job.password);
-            // $('.outsource.modal').show();
-        }
-    },
     restartOutsourceModal: function () {
         if(config.enable_outsource) {
             resetOutsourcePopup( false );
@@ -253,7 +155,7 @@ $.extend(UI, {
             var date = getChosenOutsourceDate();
             UI.sendTranslatorRequest(email, date).done(function (data) {
                 APP.ModalWindow.onCloseModal();
-                UI.checkShareToTranslatorResponse(data, email);
+                UI.checkShareToTranslatorResponse(data, email, date);
             }).error(function () {
                 APP.ModalWindow.onCloseModal();
                 let notification = {
@@ -305,16 +207,24 @@ $.extend(UI, {
         });
     },
 
-    checkShareToTranslatorResponse: function (response, mail) {
+    checkShareToTranslatorResponse: function (response, mail, date) {
+        let message = '';
+        if (UI.currentOutsourceJob.translator) {
+            let newDate = new Date(date);
+            let oldDate = new Date(UI.currentOutsourceJob.translator.delivery_date);
+            if (oldDate.getTime() != newDate.getTime()) {
+                message = this.shareToTranslatorDateChangeNotification(mail, oldDate, newDate);
+            } else if (UI.currentOutsourceJob.translator != mail) {
+                message = this.shareToTranslatorMailChangeNotification(mail);
+            } else {
+                message = this.shareToTranslatorNotification(mail);
+            }
+        } else {
+            message = this.shareToTranslatorNotification(mail);
+        }
         let notification = {
-            title: 'Job sent with <div class="green-label" style="display: inline; background-color: #5ea400; color: white; padding: 2px 5px;">new password </div>',
-            text: '<div style="margin-top: 16px;">To: <a href="mailto:' + mail + '">' + mail + '</a> ' +
-            '<div class="job-reference" style="display: inline-block; width: 100%; margin-top: 10px;"> ' +
-            '<div class style="display: inline-block; font-size: 14px; color: grey;">(' + UI.currentOutsourceJob.id +')</div> ' +
-            '<div class="source-target languages-tooltip" style="display: inline-block; font-weight: 700;"> ' +
-            '<div class="source-box" style="display: inherit;">' + UI.currentOutsourceJob.sourceTxt + '</div> ' +
-            '<div class="in-to" style="top: 3px; display: inherit; position: relative;"> <i class="icon-chevron-right icon"></i> </div> ' +
-            '<div class="target-box" style="display: inherit;">' + UI.currentOutsourceJob.targetTxt + '</div> </div> </div></div>',
+            title: message.title,
+            text: message.text,
             type: 'success',
             position: 'tc',
             allowHtml: true,
@@ -324,7 +234,61 @@ $.extend(UI, {
         let boxUndo = APP.addNotification(notification);
         ManageActions.assignTranslator(UI.currentOutsourceProject.id ,UI.currentOutsourceJob.id, response.job.translator);
         ManageActions.changeJobPasswordFromOutsource(UI.currentOutsourceProject.id ,UI.currentOutsourceJob.id, UI.currentOutsourceJob.password, response.job.password);
+    },
+
+    shareToTranslatorNotification : function (mail) {
+        return message = {
+            title: 'Job sent',
+            text: '<div style="margin-top: 16px;">To: <a href="mailto:' + mail + '">' + mail + '</a> ' +
+            '<div class="job-reference" style="display: inline-block; width: 100%; margin-top: 10px;"> ' +
+            '<div class style="display: inline-block; font-size: 14px; color: grey;">(' + UI.currentOutsourceJob.id +')</div> ' +
+            '<div class="source-target languages-tooltip" style="display: inline-block; font-weight: 700;"> ' +
+            '<div class="source-box" style="display: inherit;">' + UI.currentOutsourceJob.sourceTxt + '</div> ' +
+            '<div class="in-to" style="top: 3px; display: inherit; position: relative;"> <i class="icon-chevron-right icon"></i> </div> ' +
+            '<div class="target-box" style="display: inherit;">' + UI.currentOutsourceJob.targetTxt + '</div> </div> </div></div>'
+        } ;
+
+    },
+
+    shareToTranslatorDateChangeNotification : function (email, oldDate, newDate) {
+        oldDate = $.format.date(oldDate, "yyyy-MM-d hh:mm a");
+        oldDate =  APP.getGMTDate(oldDate);
+        newDate = $.format.date(newDate, "yyyy-MM-d hh:mm a");
+        newDate =  APP.getGMTDate(newDate);
+        return message = {
+            title: 'Job delivery update',
+            text: '<div style="margin-top: 16px;"><div class="job-reference" style="display: inline-block; width: 100%;"> To: ' +
+            '<div class="job-delivery" title="Delivery date" style="display: inline-block; margin-bottom: 10px; font-weight: 700; margin-right: 10px;"> ' +
+                '<div class="outsource-day-text" style="display: inline-block; margin-right: 3px;">'+ newDate.day +'</div> ' +
+                '<div class="outsource-month-text" style="display: inline-block; margin-right: 5px;">'+ newDate.month +'</div> ' +
+                '<div class="outsource-time-text" style="display: inline-block;">'+ newDate.day +'</div> ' +
+                '<div class="outsource-gmt-text" style="display: inline-block; font-weight: 100;color: grey;">('+ newDate.gmt +')</div> ' +
+            '</div> <div class="job-delivery not-used" title="Delivery date" style="display: inline-block; margin-bottom: 10px; font-weight: 700; text-decoration: line-through; position: relative;"> ' +
+                '<div class="outsource-day-text" style="display: inline-block; margin-right: 3px;">'+ oldDate.day +'</div> ' +
+                '<div class="outsource-month-text" style="display: inline-block; margin-right: 5px;">'+ oldDate.month +'</div> ' +
+                '<div class="outsource-time-text" style="display: inline-block;">'+ oldDate.time +'</div> ' +
+                '<div class="outsource-gmt-text" style="display: inline-block; font-weight: 100; color: grey;">('+ oldDate.gmt +')</div> ' +
+                '<div class="old" style="width: 100%; height: 1px; border-top: 1px solid black; top: -10px; position: relative;"></div> </div> ' +
+            '</div>Translator: <a href="mailto:'+email+'">'+email+'</a> </div></div>'
+        } ;
+
+    },
+
+    shareToTranslatorMailChangeNotification : function (mail) {
+        return message = {
+            title: 'Job sent with <div class="green-label" style="display: inline; background-color: #5ea400; color: white; padding: 2px 5px;">new password </div>',
+            text: '<div style="margin-top: 16px;">To: <a href="mailto:' + mail + '">' + mail + '</a> ' +
+            '<div class="job-reference" style="display: inline-block; width: 100%; margin-top: 10px;"> ' +
+            '<div class style="display: inline-block; font-size: 14px; color: grey;">(' + UI.currentOutsourceJob.id +')</div> ' +
+            '<div class="source-target languages-tooltip" style="display: inline-block; font-weight: 700;"> ' +
+            '<div class="source-box" style="display: inherit;">' + UI.currentOutsourceJob.sourceTxt + '</div> ' +
+            '<div class="in-to" style="top: 3px; display: inherit; position: relative;"> <i class="icon-chevron-right icon"></i> </div> ' +
+            '<div class="target-box" style="display: inherit;">' + UI.currentOutsourceJob.targetTxt + '</div> </div> </div></div>'
+        } ;
+
     }
+
+
 });
 
 

@@ -108,13 +108,17 @@ let ManageActions = {
     },
 
     changeJobPasswordFromOutsource: function (projectId, jobId, oldPassword, password) {
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.CHANGE_JOB_PASS,
-            projectId: projectId,
-            jobId: jobId,
-            password: password,
-            oldPassword: oldPassword
-        });
+        if ($('body').hasClass('manage')) {
+            AppDispatcher.dispatch({
+                actionType: ManageConstants.CHANGE_JOB_PASS,
+                projectId: projectId,
+                jobId: jobId,
+                password: password,
+                oldPassword: oldPassword
+            });
+        } else {
+
+        }
     },
 
     noMoreProjects: function () {
@@ -274,13 +278,16 @@ let ManageActions = {
     },
 
     assignTranslator: function (projectId, jobId, translator) {
+        if ($('body').hasClass('manage')) {
+            AppDispatcher.dispatch({
+                actionType: ManageConstants.ASSIGN_TRANSLATOR,
+                projectId: projectId,
+                jobId: jobId,
+                translator: translator
+            });
+        } else {
 
-        AppDispatcher.dispatch({
-            actionType: ManageConstants.ASSIGN_TRANSLATOR,
-            projectId: projectId,
-            jobId: jobId,
-            translator: translator
-        });
+        }
     },
 
 
