@@ -162,6 +162,7 @@ UI = {
         let d = {
             action: 'getProjects',
             project: id,
+            password: config.password
         };
 
         if (config.isLoggedIn) {

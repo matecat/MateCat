@@ -45,9 +45,17 @@ abstract class SendToTranslatorAbstract extends AbstractEmail {
     }
 
     protected function _getTemplateVariables() {
+
+        $userRecipient = $this->translator->getUser()->getArrayCopy();
+        if( !empty( $userRecipient[ 'uid' ] ) ){
+            $userRecipient[ '_name' ] = $userRecipient[ 'first_name' ] . " " . $userRecipient[ 'last_name' ];
+        } else {
+            $userRecipient[ '_name' ] = $this->translator->email;
+        }
+
         return [
                 'sender'        => $this->user->toArray(),
-                'user'          => $this->translator->getUser()->getArrayCopy(),
+                'user'          => $userRecipient,
                 'email'         => $this->translator->email,
                 'delivery_date' => date( DATE_COOKIE, strtotime( $this->translator->delivery_date ) ),
                 'project_url'   => call_user_func( $this->_RoutesMethod, [
