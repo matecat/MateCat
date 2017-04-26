@@ -155,18 +155,13 @@ $.extend(UI, {
             var date = getChosenOutsourceDate();
             UI.sendTranslatorRequest(email, date).done(function (data) {
                 APP.ModalWindow.onCloseModal();
-                UI.checkShareToTranslatorResponse(data, email, date);
+                if (data.job) {
+                    UI.checkShareToTranslatorResponse(data, email, date);
+                } else {
+                    UI.showShareTranslatorError();
+                }
             }).error(function () {
-                APP.ModalWindow.onCloseModal();
-                let notification = {
-                    title: 'Problems sending the job',
-                    text: 'Please try later or contact <a href="mailto:support@matecat.com">support@matecat.com</a>',
-                    type: 'error',
-                    position: 'tc',
-                    allowHtml: true,
-                    timer: 10000
-                };
-                let boxUndo = APP.addNotification(notification);
+                UI.showShareTranslatorError();
             });
         }
     },
@@ -285,8 +280,19 @@ $.extend(UI, {
             '<div class="target-box" style="display: inherit;">' + UI.currentOutsourceJob.targetTxt + '</div> </div> </div></div>'
         } ;
 
+    },
+    showShareTranslatorError: function () {
+        APP.ModalWindow.onCloseModal();
+        let notification = {
+            title: 'Problems sending the job',
+            text: 'Please try later or contact <a href="mailto:support@matecat.com">support@matecat.com</a>',
+            type: 'error',
+            position: 'tc',
+            allowHtml: true,
+            timer: 10000
+        };
+        APP.addNotification(notification);
     }
-
 
 });
 
