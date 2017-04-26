@@ -11,7 +11,7 @@ namespace Email;
 
 use Teams\TeamStruct;
 
-class EmailInvitedToTeam extends AbstractEmail {
+class InvitedToTeamEmail extends AbstractEmail {
 
     protected $title;
     protected $user;

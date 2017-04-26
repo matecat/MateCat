@@ -255,9 +255,4 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
         return $stmt->fetchAll();
     }
 
-
-
-    protected function _buildResult( $array_result ) {
-
-    }
 }

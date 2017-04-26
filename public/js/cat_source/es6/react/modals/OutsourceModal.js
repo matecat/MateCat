@@ -23,10 +23,10 @@ class OutsourceModal extends React.Component {
             self.quoteResponse = quoteData.data[0];
             self.chunk = quoteData.data[0][0];
 
-            self.url_ok = quoteData.return_url.url_ok;
-            self.url_ko = quoteData.return_url.url_ko;
-            self.confirm_urls = quoteData.return_url.confirm_urls;
-            self.data_key = self.chunk.id;
+            UI.url_ok = quoteData.return_url.url_ok;
+            UI.url_ko = quoteData.return_url.url_ko;
+            UI.confirm_urls = quoteData.return_url.confirm_urls;
+            UI.data_key = self.chunk.id;
 
 
             self.setState({

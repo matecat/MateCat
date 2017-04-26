@@ -41,7 +41,11 @@ class JobsTranslatorsController extends KleinController {
             throw new InvalidArgumentException( "Wrong parameter :email ", 400 );
         }
 
-        $TranslatorsModel = new TranslatorsModel( $this, $this->jStruct );
+        $TranslatorsModel = new TranslatorsModel( $this->jStruct );
+        $TranslatorsModel->setUserInvite( $this->getUser() )
+                ->setDeliveryDate( $this->params[ 'delivery_date' ] )
+                ->setEmail( $this->params[ 'email' ] );
+
         $jTranslatorStruct = $TranslatorsModel->update();
 
         $formatted = new Job();
@@ -59,7 +63,7 @@ class JobsTranslatorsController extends KleinController {
                 ]
         ], true );
 
-        $translatorModel = new TranslatorsModel( $this, $this->jStruct );
+        $translatorModel = new TranslatorsModel( $this->jStruct );
         $jTranslatorStruct = $translatorModel->getTranslator();
 
         $formatted = new Job();

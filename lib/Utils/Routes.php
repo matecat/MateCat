@@ -19,6 +19,47 @@ class Routes {
 
     }
 
+    public static function sendToTranslatorConfirm( $requestInfo, Array $options = [] ){
+
+//        $host = self::httpHost( $options );
+//        $jwtHandler = new SimpleJWT( [
+//                'invited_by_uid' => $requestInfo[ 'invited_by_uid' ],
+//                'email'          => $requestInfo[ 'email' ],
+//                'projects_name'  => $requestInfo[ 'project_name' ],
+//                'id_job'         => $requestInfo[ 'id_job' ],
+//                'password'       => $requestInfo[ 'password' ],
+//                'source'         => $requestInfo[ 'source' ],
+//                'target'         => $requestInfo[ 'target' ],
+//        ] );
+//
+//        $jwtHandler->setTimeToLive( 60 * 60 * 24 * 3 ); //3 days
+
+        return self::translate(
+                $requestInfo[ 'project_name' ],
+                $requestInfo[ 'id_job' ],
+                $requestInfo[ 'password' ],
+                $requestInfo[ 'source' ],
+                $requestInfo[ 'target' ],
+                $options
+        );
+
+//        return "$host/api/app/jobs/translator/share/$jwtHandler";
+
+    }
+
+    public static function sendToTranslatorUpdate( $requestInfo, Array $options = [] ){
+
+        return self::translate(
+                $requestInfo[ 'project_name' ],
+                $requestInfo[ 'id_job' ],
+                $requestInfo[ 'password' ],
+                $requestInfo[ 'source' ],
+                $requestInfo[ 'target' ],
+                $options
+        );
+
+    }
+
     public static function passwordReset( $confirmation_token, $options = array() ) {
         $host = self::httpHost( $options );
 

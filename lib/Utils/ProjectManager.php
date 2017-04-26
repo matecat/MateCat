@@ -12,7 +12,7 @@ use ActivityLog\ActivityLogStruct;
 use Analysis\DqfQueueHandler;
 use ConnectedServices\GDrive as GDrive  ;
 use Teams\TeamStruct;
-use Translators\DetachedTranslatorsModel;
+use Translators\TranslatorsModel;
 
 include_once INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
 
@@ -1347,14 +1347,23 @@ class ProjectManager {
         $jobInfo = $jobInfo[ 0 ];
 
 
+        /*
+         * If a translator is assigned to the job, we must send an email to inform that job is changed
+         */
         $jStruct = new Jobs_JobStruct( $jobInfo );
-        $translatorModel = new DetachedTranslatorsModel( $jStruct );
-        $jTranslatorStruct = $translatorModel->getTranslator();
-        if ( !empty( $jTranslatorStruct ) ) {
-            $translatorModel->changeJobPassword();
-            $translatorModel->setEmailChange( $jTranslatorStruct->email );
-            $translatorModel->sendEmail();
+        $translatorModel = new TranslatorsModel( $jStruct );
+        $jTranslatorStruct = $translatorModel->getTranslator( 0 ); // no cache
+        if ( !empty( $jTranslatorStruct ) && !empty( $this->projectStructure[ 'session' ][ 'uid' ] ) ) {
+
+            $translatorModel->setUserInvite(
+                    ( new Users_UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'session' ][ 'uid' ] )
+            )->setDeliveryDate( $jTranslatorStruct->delivery_date )
+             ->setEmail( $jTranslatorStruct->email )
+             ->setNewJobPassword( CatUtils::generate_password() );
+
+            $translatorModel->update();
             $jobInfo[ 'password'] = $jStruct->password;
+
         }
 
         $data = array();
