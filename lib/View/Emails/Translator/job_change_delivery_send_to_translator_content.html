@@ -1,4 +1,4 @@
-<p>Hi <?= $user['first_name'] ?>, </p>
+<p>Hi <?= $user['_name'] ?>, </p>
 <p>
     <?= $sender['first_name'] . " " . $sender['last_name'] ?> has changed your delivery date.
     <br /><br />
@@ -6,9 +6,10 @@
 </p>
 
 <p>
-    For any question please contact the project manager: <?= $sender[ 'email' ] ?>
+    For any question please contact the project manager: <a href="<?= $sender[ 'email' ] ?>"><?= $sender[ 'email' ] ?></a>
 </p>
 <br />
 <p>
     Here's the link to the job: <br /><br /><a href="<?= $project_url ?>"><?= $project_url ?></a>.
 </p>
+<br />
