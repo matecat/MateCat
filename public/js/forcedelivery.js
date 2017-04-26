@@ -217,6 +217,8 @@ function setOutsourceDate(chosenDate) {
 
 
     $('.outsource .out-date').val( getChosenOutsourceDateToString() );
+    $('.outsource .out-date').data('datesend', getChosenOutsourceDate() );
+
     UI.checkSendToTranslatorButton();
 
 }
