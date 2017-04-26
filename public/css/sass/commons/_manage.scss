@@ -341,13 +341,15 @@ body.manage {
                             padding: 8px 15px;
                             .job-id {
                                 float: left;
-                                min-width: 72px;
+                                min-width: 65px;
                                 color: #969696;
                                 font-size: 13px;
+                                position: relative;
                                 line-height: 28px;
+                                top: 1px;
                             }
                             .source-target {
-                                min-width: 150px;
+                                min-width: 140px;
                                 float: left;
                                 margin-right: 10px;
                                 font-weight: bold;
@@ -355,8 +357,8 @@ body.manage {
                                 top: 1px;
                                 .source-box {
                                     float: left;
-                                    max-width: 70px;
-                                    min-width: 70px;
+                                    max-width: 60px;
+                                    min-width: 60px;
                                     white-space: nowrap;
                                     overflow: hidden;
                                     text-overflow: ellipsis;
@@ -371,7 +373,7 @@ body.manage {
                                 }
                                 .target-box {
                                     float: left;
-                                    width: 70px;
+                                    width: 60px;
                                     white-space: nowrap;
                                     overflow: hidden;
                                     text-overflow: ellipsis;
@@ -427,7 +429,7 @@ body.manage {
                             }
 
                             .job-payable {
-                                padding: 0px 10px 0 !important;
+                                padding: 0 5px 0 7px !important;
                                 float: left;
                                 text-decoration: underline;
                                 min-width: 105px;
@@ -440,17 +442,16 @@ body.manage {
                                 }
                             }
                             .outsource-job {
-                                text-align: left;
+                                //text-align: center;
                                 .translated-outsourced {
                                     top: 6px;
                                     bottom: 6px;
                                     vertical-align: text-bottom;
                                     display: inline-block;
                                     position: relative;
-                                    max-width: 380px;
-                                    margin: 0 10px 0 20px;
+                                    text-align: left;
                                     .outsource-logo-box {
-                                        min-width: 130px;
+                                        min-width: 186px;
                                         display: inherit;
                                         margin-left: 10px;
                                         img.outsource-logo {
@@ -463,14 +464,18 @@ body.manage {
                                 .job-to-translator {
                                     display: inline-block;
                                     margin-right: 0px;
-                                    margin-left: 10px;
+                                    margin-left: 30px;
                                     vertical-align: text-bottom;
                                     color: #969696;
-                                    min-width: 130px;
+                                    width: 150px;
+                                    white-space: nowrap;
+                                    overflow: hidden;
+                                    text-overflow: ellipsis;
                                 }
                                 .job-delivery {
                                     display: inline-block;
                                     margin-right: 10px;
+                                    margin-left: 10px;
                                     vertical-align: text-bottom;
                                     .outsource-day-text {
                                         font-weight: 700;
@@ -506,7 +511,7 @@ body.manage {
                             }
                             .open-translate {
                                 font-family: Calibri, Arial, Helvetica, sans-serif;
-                                padding: 6px 15px;
+                                padding: 6px;
                                 vertical-align: top;
                                 font-size: 16px;
                                 border: 1px solid #797979;
@@ -515,7 +520,7 @@ body.manage {
                             }
                             .open-vendor {
                                 font-family: Calibri, Arial, Helvetica, sans-serif;
-                                padding: 6px 8px;
+                                padding: 6px;
                                 vertical-align: top;
                                 font-size: 16px;
                                 border: 1px solid #7eaf3e;
@@ -542,7 +547,6 @@ body.manage {
                                 border: 1px solid #797979;
                                 border-radius: 2px;
                                 float: right;
-                                //background-color: #7eaf3e;
                             }
                             .open-outsourced {
                                 font-family: Calibri, Arial, Helvetica, sans-serif;
@@ -765,7 +769,7 @@ footer nav ul a:hover {
 
 @media only screen and (min-width: 1200px) {
     .ui.container {
-        width: 1130px;
+        width: 1140px;
         margin-left: auto !important;
         margin-right: auto !important;
         transition: 0.3s ease;
