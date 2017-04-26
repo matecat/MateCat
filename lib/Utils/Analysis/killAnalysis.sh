@@ -29,6 +29,7 @@ fi
 
 if [ ${pid_tm} -eq 0 ] && [ ${pid_fast} -eq 0 ]; then
     echo "No demons found to kill!"
+    exit 1;
 fi
 
 exit 0;

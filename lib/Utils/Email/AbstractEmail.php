@@ -15,6 +15,8 @@ use INIT ;
 abstract class AbstractEmail
 {
 
+    protected $title;
+
     protected $_layout_path ;
     protected $_template_path ;
 
@@ -57,6 +59,7 @@ abstract class AbstractEmail
     protected function _buildMessageContent(){
         ob_start();
         extract( $this->_getTemplateVariables(), EXTR_OVERWRITE );
+        /** @noinspection PhpIncludeInspection */
         include( $this->_template_path ) ;
         return ob_get_clean();
     }
@@ -64,6 +67,7 @@ abstract class AbstractEmail
     protected function _buildHTMLMessage( $messageContent = null ){
         ob_start();
         extract( $this->_getLayoutVariables( $messageContent ), EXTR_OVERWRITE );
+        /** @noinspection PhpIncludeInspection */
         include( $this->_layout_path );
         return ob_get_clean();
     }
@@ -85,6 +89,7 @@ abstract class AbstractEmail
     }
 
     protected function _getDefaultMailConf() {
+
         $mailConf = array();
 
         $mailConf[ 'Host' ]       = INIT::$SMTP_HOST;
@@ -96,12 +101,8 @@ abstract class AbstractEmail
         $mailConf[ 'fromName' ]   = INIT::$MAILER_FROM_NAME;
         $mailConf[ 'returnPath' ] = INIT::$MAILER_RETURN_PATH;
 
-        // TODO: move this into config
-        $mailconf[ 'from' ]       = 'noreply@matecat.com';
-        $mailconf[ 'sender' ]     = 'noreply@matecat.com';
-        $mailconf[ 'returnpath' ] = 'noreply@matecat.com';
-
         return $mailConf ;
+
     }
 
     protected function doSend($address, $subject, $htmlBody, $altBody) {
@@ -119,10 +120,10 @@ abstract class AbstractEmail
     }
 
     /**
-     * @param $title
      * @param $messageBody
      *
      * @return string
+     * @internal param $title
      */
     protected function _buildTxtMessage( $messageBody ){
         $messageBody = preg_replace( "#<[/]*span[^>]*>#i", "\r\n", $messageBody );
