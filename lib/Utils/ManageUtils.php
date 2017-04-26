@@ -1,8 +1,10 @@
 <?php
 
 use Exceptions\NotFoundError;
+use Translators\JobsTranslatorsDao;
 use Outsource\TranslatedConfirmationStruct;
-use \API\App\Json\OutsourceConfirmation;
+use API\App\Json\OutsourceConfirmation;
+use API\V2\Json\JobTranslator;
 
 class ManageUtils {
 
@@ -107,6 +109,14 @@ class ManageUtils {
                         break;
                 }
 
+            }
+
+            $job[ 'translator' ] = null;
+            if( empty(  $job[ 'outsource' ] ) ){
+                $jobStruct = new Jobs_JobStruct( $job_array );
+                $jTranslatorsDao = new JobsTranslatorsDao();
+                $jTranslatorsStruct = $jTranslatorsDao->setCacheTTL( 60 * 60 * 24 )->findByJobsStruct( $jobStruct )[ 0 ];
+                $job[ 'translator' ] = ( !empty( $jTranslatorsStruct ) ? ( new JobTranslator() )->renderItem( $jTranslatorsStruct ) : null );
             }
 
             $job[ 'open_threads_count' ] = 0 ;

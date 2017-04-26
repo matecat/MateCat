@@ -31,12 +31,6 @@ class JobContainer extends React.Component {
             t = 'draft';
         }
         return t ;
-}
-
-    shouldComponentUpdate(nextProps, nextState){
-        return (!nextProps.job.equals(this.props.job) ||
-        nextProps.lastAction !== this.props.lastAction ||
-        nextState.showDownloadProgress !== this.state.showDownloadProgress)
     }
 
     getTranslateUrl() {
@@ -448,16 +442,20 @@ class JobContainer extends React.Component {
                 outsourceJobLabel =
                     <a className="outsource-logo-box" href={this.props.job.get('outsource').get('quote_review_link')} target="_blank"><img className='outsource-logo' src="/public/img/logo_translated.png" title="Outsourced to translated.net" alt="Translated logo"/></a>;
             }
+        } else if (this.props.job.get('translator')) {
+            let email = this.props.job.get('translator').get('email').substring(0, this.props.job.get('translator').get('email').indexOf('@'));
+            outsourceJobLabel = <div className="job-to-translator">{email}</div>;
         }
         return outsourceJobLabel;
     }
 
     getOutsourceDelivery() {
         let outsourceDelivery = '';
+
         if (this.props.job.get('outsource')) {
             if (this.props.job.get('outsource').get('id_vendor') == "1") {
                 let date  = this.props.job.get('outsource').get('delivery_date').substring(0, this.props.job.get('outsource').get('delivery_date').lastIndexOf(":"))
-                let gmtDate = UI.getGMTDate(this.props.job.get('outsource').get('delivery_date'));
+                let gmtDate = APP.getGMTDate(this.props.job.get('outsource').get('delivery_date'));
                 outsourceDelivery = <div className="job-delivery" title="Delivery date">
                     <div className="outsource-day-text">{gmtDate.day}</div>
                     <div className="outsource-month-text">{gmtDate.month}</div>
@@ -465,7 +463,17 @@ class JobContainer extends React.Component {
                     <div className="outsource-gmt-text"> ({gmtDate.gmt})</div>
                 </div>;
             }
+        } else if (this.props.job.get('translator')) {
+            let date  = this.props.job.get('translator').get('delivery_date').substring(0, this.props.job.get('translator').get('delivery_date').lastIndexOf(":"))
+            let gmtDate = APP.getGMTDate(this.props.job.get('translator').get('delivery_date'));
+            outsourceDelivery = <div className="job-delivery" title="Delivery date">
+                <div className="outsource-day-text">{gmtDate.day}</div>
+                <div className="outsource-month-text">{gmtDate.month}</div>
+                <div className="outsource-time-text">{gmtDate.time}</div>
+                <div className="outsource-gmt-text"> ({gmtDate.gmt})</div>
+            </div>;
         }
+
         return outsourceDelivery;
     }
 
@@ -530,10 +538,26 @@ class JobContainer extends React.Component {
         }
     }
 
+    shouldComponentUpdate(nextProps, nextState){
+        if (!nextProps.job.equals(this.props.job) || nextState.showDownloadProgress !== this.state.showDownloadProgress) {
+            this.updated = true;
+        }
+        return (!nextProps.job.equals(this.props.job) ||
+        nextProps.lastAction !== this.props.lastAction ||
+        nextState.showDownloadProgress !== this.state.showDownloadProgress)
+    }
+
     componentDidUpdate() {
+        var self = this;
         $(this.iconsButton).dropdown();
         this.initTooltips();
         console.log("Updated Job : " + this.props.job.get('id'));
+        if (this.updated) {
+            this.container.classList.add('updated-job');
+            setTimeout(function () {
+                self.container.classList.remove('updated-job');
+            }, 2000)
+        }
     }
 
     componentDidMount () {
@@ -578,7 +602,7 @@ class JobContainer extends React.Component {
 
         let idJobLabel = ( !this.props.isChunk ) ? this.props.job.get('id') : this.props.job.get('id') + '-' + this.props.index;
 
-        return <div className="chunk sixteen wide column shadow-1 pad-right-10">
+        return <div className="chunk sixteen wide column shadow-1 pad-right-10" ref={(container) => this.container = container}>
 
                     <div className="job-id" title="Job Id">
                         {"(" + idJobLabel + ")"}
@@ -626,7 +650,6 @@ class JobContainer extends React.Component {
                         {outsourceButton}
                     <div className="outsource-job">
                         <div className="translated-outsourced">
-                            <div className="job-to-translator">alessandro.cattelan</div>
                             {outsourceJobLabel}
                             {outsourceDelivery}
                             {/*{outsourceDeliveryPrice}*/}

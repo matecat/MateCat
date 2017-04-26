@@ -100,11 +100,25 @@ let ManageActions = {
     changeJobPassword: function (project, job, password, oldPassword) {
         AppDispatcher.dispatch({
             actionType: ManageConstants.CHANGE_JOB_PASS,
-            project: project,
-            job: job,
+            projectId: project.get('id'),
+            jobId: job.get('id'),
             password: password,
             oldPassword: oldPassword
         });
+    },
+
+    changeJobPasswordFromOutsource: function (projectId, jobId, oldPassword, password) {
+        if ($('body').hasClass('manage')) {
+            AppDispatcher.dispatch({
+                actionType: ManageConstants.CHANGE_JOB_PASS,
+                projectId: projectId,
+                jobId: jobId,
+                password: password,
+                oldPassword: oldPassword
+            });
+        } else {
+            UI.updateJobPassword(password);
+        }
     },
 
     noMoreProjects: function () {
@@ -261,6 +275,19 @@ let ManageActions = {
             UI.showNotificationProjectsChanged();
             UI.reloadProjects();
         });
+    },
+
+    assignTranslator: function (projectId, jobId, translator) {
+        if ($('body').hasClass('manage')) {
+            AppDispatcher.dispatch({
+                actionType: ManageConstants.ASSIGN_TRANSLATOR,
+                projectId: projectId,
+                jobId: jobId,
+                translator: translator
+            });
+        } else {
+            UI.updateOutsourceInfo(translator);
+        }
     },
 
 

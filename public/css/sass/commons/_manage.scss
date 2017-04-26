@@ -336,6 +336,7 @@ body.manage {
                 .job-body {
                     .chunks {
                         .chunk {
+                            transition: 0.3s ease;
                             background-color: #ffffff;
                             padding: 8px 15px;
                             .job-id {
@@ -608,7 +609,9 @@ body.manage {
                                     animation: progress-active 1s ease infinite;
                                 }
                             }
-
+                            &.updated-job {
+                                background-color: #f9ffb5;
+                            }
                         }
                     }
                 }

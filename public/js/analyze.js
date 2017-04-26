@@ -102,26 +102,68 @@ UI = {
 			$(".loadingbar").addClass("closebar");
 		});
 
-		// $("#popupWrapper .x-popup, #popupWrapper .popup-outer, #popupWrapper .popup a.anonymous").click(function(e) {
-		// 	e.preventDefault();
-		// 	APP.doRequest({
-		// 		data: {
-		// 			action: 'ajaxUtils',
-		// 			exec: 'stayAnonymous'
-		// 		},
-		// 		success: function(d) {
-		// 			$(".popup-outer").fadeOut();
-		// 			$(".popup").fadeOut('fast');
-		// 		}
-		// 	});
-		// });
+        // trigger the process for getting and displaying an outsource quote
+        $(".translate").click(function(e) {
+        	e.preventDefault();
+            var linkPieces = $( this ).attr( "href" ).split( "/" );
+            var jPieces = linkPieces[ linkPieces.length - 1 ].split( "-" );
+			var idJob = jPieces[0];
+            UI.currentOutsourceJob = UI.currentOutsourceProject.jobs.find(function (job) {
+				return job.id === idJob;
+            });
+
+            let words = $( ".tablestats[data-pwd='" + jPieces[ 1 ] + "'] .stat-payable" ).text() ;
+            let sourceTxt = UI.currentOutsourceJob.sourceTxt;
+            let targetTxt = UI.currentOutsourceJob.targetTxt;
+
+            $( ".title-source" ).text( sourceTxt );
+            $( ".title-target" ).text( targetTxt );
+            $( ".title-words" ).text( words );
+
+
+            UI.currentOutsourceUrl = $( this ).attr( "href" );
+            let props = {
+                project: UI.currentOutsourceProject,
+                job: UI.currentOutsourceJob,
+                url: UI.currentOutsourceUrl,
+                fromManage: false,
+                translatorOpen: !!(UI.currentOutsourceJob.translator)
+            };
+            let style = {width: '970px',maxWidth: '970px', top: '45%'};
+            APP.ModalWindow.showModalComponent(OutsourceModal, props, "Translate", style);
+        });
 
 		this.pollData();
 
         this.checkQueryParams();
 
         this.setTeamHeader();
+
+        this.getProject(config.id_project).done(function (response) {
+            UI.currentOutsourceProject = response.data[0];
+        });
 	},
+    getProject: function(id) {
+
+        let d = {
+            action: 'getProjects',
+            project: id,
+        };
+
+        if (config.isLoggedIn) {
+            d.id_team = APP.getLastTeamSelected(APP.USER.STORE.teams).id;
+        }
+
+        return APP.doRequest({
+            data: d,
+            success: function(d){
+                data = $.parseJSON(d.data);
+            },
+            error: function(d){
+
+            }
+        });
+    },
 	performPreCheckSplitComputation: function(doStringSanitization) {
 
 		ss = 0;
@@ -732,7 +774,6 @@ UI = {
 			var numw = wordsXjob;
 			if (i < diff)
 				numw++;
-
 			// '<!-- A: la classe Aprox scompare se viene effettuato il calcolo -->' +
 			var item = '<li>' +
 				'   <div><h4>Part ' + (i + 1) + '</h4></div>' +
@@ -802,6 +843,18 @@ UI = {
             var selectedTeam = APP.getLastTeamSelected(data.teams);
             $('.team-name').text(selectedTeam.name);
         })
+    },
+
+    updateJobPassword: function (password) {
+        let $job = $('.tablestats[data-jid='+UI.currentOutsourceJob.id+']');
+        $job.data('pwd', password);
+        let href = $job.find('.uploadbtn.translate').attr('href');
+        $job.find('.uploadbtn.translate').attr('href', href.replace(UI.currentOutsourceJob.password, password));
+        UI.currentOutsourceJob.password = password;
+    },
+
+    updateOutsourceInfo: function (translator) {
+		UI.currentOutsourceJob.translator = translator;
     }
 };
 
@@ -897,7 +950,7 @@ function precomputeOutsourceQuotes( elementsToAskQuoteFor ) {
 
 $(document).ready(function() {
 	UI.init();
-	if ( config.enable_outsource ) {
-		UI.outsourceInit();
-	}
+	// if ( config.enable_outsource ) {
+	// 	UI.outsourceInit();
+	// }
 });

@@ -14,6 +14,7 @@ module.exports = keyMirror({
     NO_MORE_PROJECTS: null,
     CHANGE_PROJECT_NAME: null,
     HIDE_PROJECT: null,
+    ASSIGN_TRANSLATOR: null,
     //MODALS
     OPEN_CREATE_TEAM_MODAL: null,
     OPEN_MODIFY_TEAM_MODAL: null,
