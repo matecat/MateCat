@@ -13,7 +13,7 @@ namespace API\App;
 use API\V2\Exceptions\AuthorizationError;
 use Outsource\ConfirmationDao;
 use Outsource\TranslatedConfirmationStruct;
-use Translators\DetachedTranslatorsModel;
+use Translators\TranslatorsModel;
 use Utils;
 
 class OutsourceConfirmationController extends AbstractStatefulKleinController {
@@ -33,7 +33,7 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController {
         }
 
         $jStruct = new \Jobs_JobStruct( [ 'id' => $params[ 'id_job' ], 'password' => $params[ 'password' ] ] );
-        $translatorModel = new DetachedTranslatorsModel( $jStruct );
+        $translatorModel = new TranslatorsModel( $jStruct );
         $jTranslatorStruct = $translatorModel->getTranslator();
 
         $confirmationStruct = new TranslatedConfirmationStruct( $payload );
