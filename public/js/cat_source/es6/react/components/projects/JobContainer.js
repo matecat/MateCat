@@ -442,8 +442,11 @@ class JobContainer extends React.Component {
                     <a className="outsource-logo-box" href={this.props.job.get('outsource').get('quote_review_link')} target="_blank"><img className='outsource-logo' src="/public/img/logo_translated.png" title="Outsourced to translated.net" alt="Translated logo"/></a>;
             }
         } else if (this.props.job.get('translator')) {
-            let email = this.props.job.get('translator').get('email').substring(0, this.props.job.get('translator').get('email').indexOf('@'));
-            let tooltipText = '<a href="mailto:' + this.props.job.get('translator').get('email')+'">'+this.props.job.get('translator').get('email')+'</a>';
+            let email = this.props.job.get('translator').get('email');
+            let tooltipText = '';
+            if (this.props.job.get('translator').get('user')) {
+                tooltipText = this.props.job.get('translator').get('user').get('first_name') + ' ' + this.props.job.get('translator').get('user').get('last_name');
+            }
             outsourceJobLabel = <div className="job-to-translator" data-html={tooltipText} data-variation="tiny" ref={(tooltip) => this.emailTooltip = tooltip}>
                                     {email}
                                 </div>;
