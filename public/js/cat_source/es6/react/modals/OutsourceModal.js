@@ -255,7 +255,7 @@ class OutsourceModal extends React.Component {
 
     render() {
         let loadingClass = (this.state.outsource) ?  "" : "loading";
-        let showShareToTranslator = !!this.props.job.outource;
+        let showShareToTranslator = !!!this.props.job.outource;
 
         let textGuaranteedByClass = (this.state.showTranslatorInfo) ? "expanded" : "";
         let pricesClass = (this.state.showTranslatorInfo) ? "compress" : "";
