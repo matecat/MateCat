@@ -218,16 +218,14 @@ class OutsourceModal extends React.Component {
         return { __html: string };
     }
 
-    componentDidMount () {
+    componentDidMount () {}
+
+    componentDidUpdate() {
         if ( config.enable_outsource ) {
             UI.outsourceInit();
             ForceDelivery.init();
             this.updateTimezonesDescriptions(this.getTimeZone());
         }
-    }
-    componentDidUpdate() {
-        UI.outsourceInit();
-        ForceDelivery.init();
         if (this.state.outsource) {
             // a generic error
             if( this.chunk.quote_result != 1 ){
