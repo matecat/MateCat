@@ -31,12 +31,6 @@ class JobContainer extends React.Component {
             t = 'draft';
         }
         return t ;
-}
-
-    shouldComponentUpdate(nextProps, nextState){
-        return (!nextProps.job.equals(this.props.job) ||
-        nextProps.lastAction !== this.props.lastAction ||
-        nextState.showDownloadProgress !== this.state.showDownloadProgress)
     }
 
     getTranslateUrl() {
@@ -544,10 +538,26 @@ class JobContainer extends React.Component {
         }
     }
 
+    shouldComponentUpdate(nextProps, nextState){
+        if (!nextProps.job.equals(this.props.job) || nextState.showDownloadProgress !== this.state.showDownloadProgress) {
+            this.updated = true;
+        }
+        return (!nextProps.job.equals(this.props.job) ||
+        nextProps.lastAction !== this.props.lastAction ||
+        nextState.showDownloadProgress !== this.state.showDownloadProgress)
+    }
+
     componentDidUpdate() {
+        var self = this;
         $(this.iconsButton).dropdown();
         this.initTooltips();
         console.log("Updated Job : " + this.props.job.get('id'));
+        if (this.updated) {
+            this.container.classList.add('updated-job');
+            setTimeout(function () {
+                self.container.classList.remove('updated-job');
+            }, 2000)
+        }
     }
 
     componentDidMount () {
@@ -592,7 +602,7 @@ class JobContainer extends React.Component {
 
         let idJobLabel = ( !this.props.isChunk ) ? this.props.job.get('id') : this.props.job.get('id') + '-' + this.props.index;
 
-        return <div className="chunk sixteen wide column shadow-1 pad-right-10">
+        return <div className="chunk sixteen wide column shadow-1 pad-right-10" ref={(container) => this.container = container}>
 
                     <div className="job-id" title="Job Id">
                         {"(" + idJobLabel + ")"}

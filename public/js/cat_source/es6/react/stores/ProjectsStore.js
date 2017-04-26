@@ -67,7 +67,7 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
 
     changeJobPass: function (projectId, jobId, password, oldPassword) {
         let projectOld = this.projects.find(function (prj) {
-            return prj.get('id') == projectId;
+            return (prj.get('id') == projectId && prj.get('password') === oldPassword);
         });
         let indexProject = this.projects.indexOf(projectOld);
 

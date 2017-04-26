@@ -228,7 +228,6 @@ $.extend(UI, {
             type: 'success',
             position: 'tc',
             allowHtml: true,
-            autoDismiss: false,
             timer: 10000
         };
         let boxUndo = APP.addNotification(notification);
