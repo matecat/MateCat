@@ -167,13 +167,16 @@ class JobContainer extends React.Component {
 
 
         let downloadButton = this.getDownloadLabel();
-        let splitButton = (!this.props.isChunk) ? <a className="item" target="_blank" href={splitUrl}><i className="icon-expand icon"/> Split</a> : <a className="item" target="_blank" href={mergeUrl}><i className="icon-compress icon"/> Merge</a>;
-
+        let splitButton;
+        if (!this.props.job.get('outsource')) {
+            splitButton = (!this.props.isChunk) ?
+                <a className="item" target="_blank" href={splitUrl}><i className="icon-expand icon"/> Split</a> :
+                <a className="item" target="_blank" href={mergeUrl}><i className="icon-compress icon"/> Merge</a>;
+        }
         let menuHtml = <div className="menu">
 
-                {/*<div className="scrolling menu">*/}
                     <a className="item" onClick={this.changePassword.bind(this)}><i className="icon-refresh icon"/> Change Password</a>
-                        {splitButton}
+                    {splitButton}
                     <a className="item" target="_blank" href={reviseUrl}><i className="icon-edit icon"/> Revise</a>
                     <div className="divider"/>
                     <a className="item" target="_blank" href={qaReportUrl}><i className="icon-qr-matecat icon"/> QA Report</a>
@@ -186,14 +189,10 @@ class JobContainer extends React.Component {
                     <div className="divider"/>
                     <a className="item" onClick={this.archiveJob.bind(this)}><i className="icon-drawer icon"/> Archive job</a>
                     <a className="item" onClick={this.cancelJob.bind(this)}><i className="icon-trash-o icon"/> Cancel job</a>
-                </div>
-            /*</div>*/;
+                </div>;
         if ( this.props.job.get('status') === 'archived' ) {
             menuHtml = <div className="menu">
-
-                {/*<div className="scrolling menu">*/}
-                    <a className="item" onClick={this.changePassword.bind(this)}><i className="icon-refresh icon"/> Change Password</a>
-                    {splitButton}
+                        {splitButton}
                     <a className="item" target="_blank" href={reviseUrl}><i className="icon-edit icon"/> Revise</a>
                     <a className="item" target="_blank" href={qaReportUrl}><i className="icon-qr-matecat icon"/> QA Report</a>
                     <a className="item" target="_blank" href={editLogUrl}><i className="icon-download-logs icon"/> Editing Log</a>
@@ -205,13 +204,9 @@ class JobContainer extends React.Component {
                     <div className="divider"/>
                     <a className="item" onClick={this.activateJob.bind(this)}><i className="icon-drawer unarchive-project icon"/> Unarchive job</a>
                     <a className="item" onClick={this.cancelJob.bind(this)}><i className="icon-trash-o icon"/> Cancel job</a>
-                </div>
-            /*</div>*/;
+                </div>;
         } else if ( this.props.job.get('status') === 'cancelled' ) {
             menuHtml = <div className="menu">
-
-                    {/*<div className="scrolling menu">*/}
-                        <a className="item" onClick={this.changePassword.bind(this)}>i className="icon-refresh icon"/> Change Password</a>
                         {splitButton}
                         <a className="item" target="_blank" href={reviseUrl}><i className="icon-edit icon"/> Revise</a>
                         <a className="item" target="_blank" href={qaReportUrl}><i className="icon-qr-matecat icon"/> QA Report</a>
@@ -223,8 +218,7 @@ class JobContainer extends React.Component {
                         <a className="item" target="_blank" href={jobTMXUrl}><i className="icon-download icon"/> Export TMX</a>
                         <div className="divider"/>
                         <a className="item" onClick={this.activateJob.bind(this)}><i className="icon-drawer unarchive-project icon"/> Resume job</a>
-                    </div>
-                /*</div>*/;
+                    </div>;
         }
         return menuHtml;
     }
@@ -431,6 +425,11 @@ class JobContainer extends React.Component {
                     Outsource
                 </a>;
             }
+        } else if (this.props.job.get('translator')) {
+            label = <a className="open-vendor ui basic green button"
+                       onClick={this.openOutsourceModal.bind(this)}>
+                Change vendor
+            </a>;
         }
         return label;
     }
@@ -444,7 +443,10 @@ class JobContainer extends React.Component {
             }
         } else if (this.props.job.get('translator')) {
             let email = this.props.job.get('translator').get('email').substring(0, this.props.job.get('translator').get('email').indexOf('@'));
-            outsourceJobLabel = <div className="job-to-translator">{email}</div>;
+            let tooltipText = '<a href="mailto:' + this.props.job.get('translator').get('email')+'">'+this.props.job.get('translator').get('email')+'</a>';
+            outsourceJobLabel = <div className="job-to-translator" data-html={tooltipText} data-variation="tiny" ref={(tooltip) => this.emailTooltip = tooltip}>
+                                    {email}
+                                </div>;
         }
         return outsourceJobLabel;
     }
@@ -578,6 +580,7 @@ class JobContainer extends React.Component {
         $(this.activityTooltip).popup();
         $(this.commentsTooltip).popup();
         $(this.tmTooltip).popup({hoverable: true});
+        $(this.emailTooltip).popup({hoverable: true});
         $(this.warningTooltip).popup();
         $(this.languageTooltip).popup();
     }

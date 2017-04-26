@@ -260,7 +260,7 @@ $.extend(UI, {
             '<div class="job-delivery" title="Delivery date" style="display: inline-block; margin-bottom: 10px; font-weight: 700; margin-right: 10px;"> ' +
                 '<div class="outsource-day-text" style="display: inline-block; margin-right: 3px;">'+ newDate.day +'</div> ' +
                 '<div class="outsource-month-text" style="display: inline-block; margin-right: 5px;">'+ newDate.month +'</div> ' +
-                '<div class="outsource-time-text" style="display: inline-block;">'+ newDate.day +'</div> ' +
+                '<div class="outsource-time-text" style="display: inline-block;">'+ newDate.time +'</div> ' +
                 '<div class="outsource-gmt-text" style="display: inline-block; font-weight: 100;color: grey;">('+ newDate.gmt +')</div> ' +
             '</div> <div class="job-delivery not-used" title="Delivery date" style="display: inline-block; margin-bottom: 10px; font-weight: 700; text-decoration: line-through; position: relative;"> ' +
                 '<div class="outsource-day-text" style="display: inline-block; margin-right: 3px;">'+ oldDate.day +'</div> ' +

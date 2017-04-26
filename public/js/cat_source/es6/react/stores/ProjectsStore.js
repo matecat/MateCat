@@ -67,12 +67,12 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
 
     changeJobPass: function (projectId, jobId, password, oldPassword) {
         let projectOld = this.projects.find(function (prj) {
-            return (prj.get('id') == projectId && prj.get('password') === oldPassword);
+            return (prj.get('id') == projectId );
         });
         let indexProject = this.projects.indexOf(projectOld);
 
-        let jobOld = this.projects.find(function (j) {
-            return j.get('id') == jobId;
+        let jobOld = projectOld.get('jobs').find(function (j) {
+            return (j.get('id') == jobId && j.get('password') === oldPassword);
         });
 
         let indexJob = projectOld.get('jobs').indexOf(jobOld);

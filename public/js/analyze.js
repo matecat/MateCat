@@ -141,8 +141,22 @@ UI = {
 
         this.getProject(config.id_project).done(function (response) {
             UI.currentOutsourceProject = response.data[0];
+            UI.checkJobsOutsource();
         });
 	},
+
+    checkJobsOutsource: function () {
+	    UI.currentOutsourceProject.jobs.forEach(function (job) {
+            if (job.outsource) {
+                var $job = $('.jobcontainer[data-jid='+ job.id +']');
+                setTimeout(function () {
+                    $job.find('.mergebtn, .splitbtn').addClass('disabled');
+                }, 1000);
+
+            }
+        })
+    },
+	
     getProject: function(id) {
 
         let d = {
@@ -156,12 +170,8 @@ UI = {
 
         return APP.doRequest({
             data: d,
-            success: function(d){
-                data = $.parseJSON(d.data);
-            },
-            error: function(d){
-
-            }
+            success: function(d){},
+            error: function(d){}
         });
     },
 	performPreCheckSplitComputation: function(doStringSanitization) {
