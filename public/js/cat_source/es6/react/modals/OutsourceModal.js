@@ -276,8 +276,8 @@ class OutsourceModal extends React.Component {
         <div className="popup">
         <div className={"popup-box pricebox " + pricesClass}>
             <h2>Choose how to translate:
-                <span className="title-source">{this.props.job.sourceTxt}</span> &gt;
-                <span className="title-target">{this.props.job.targetTxt}</span>
+                <span className="title-source"> {this.props.job.sourceTxt}</span> &gt;
+                <span className="title-target"> {this.props.job.targetTxt}</span>
                 <span className="title-words"> {this.props.job.stats.TOTAL_FORMATTED}</span> words</h2>
             <div className="choose">
                 <div className={this.props.translatorOpen ? ("onyourown opened-send-translator") :("onyourown")}>

@@ -3450,7 +3450,7 @@ only screen and (in-resolution: 2dppx) {
     .extgdoc {background: url(../img/matecat_file_icons2x.png) 6px -1070px no-repeat !important;} /* Google Document */
     .extgsheet {background: url(../img/matecat_file_icons2x.png) 6px -1107px no-repeat !important;} /* Google Sheet */
 
-.popup {background: #fff url(../img/borderfix.png) repeat-x!important;}
+/*.popup {background: #fff url(../img/borderfix.png) repeat-x!important;}*/
 
 
 .fileinput-button {
