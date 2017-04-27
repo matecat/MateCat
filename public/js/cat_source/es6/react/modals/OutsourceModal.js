@@ -253,7 +253,7 @@ class OutsourceModal extends React.Component {
 
     render() {
         let loadingClass = (this.state.outsource) ?  "" : "loading";
-        let showShareToTranslator = !!!this.props.job.outource;
+        let showShareToTranslator = (!!!this.props.job.outource || !config.isLoggedIn);
 
         let textGuaranteedByClass = (this.state.showTranslatorInfo) ? "expanded" : "";
         let pricesClass = (this.state.showTranslatorInfo) ? "compress" : "";
@@ -295,7 +295,7 @@ class OutsourceModal extends React.Component {
 
                 </div>
 
-                { (!this.props.translatorOpen && showShareToTranslator) ? (<div id="open-translator" className="open-send-to-translator">Send job to translator</div>)
+                { (!this.props.translatorOpen && showShareToTranslator && config.isLoggedIn) ? (<div id="open-translator" className="open-send-to-translator">Send job to translator</div>)
                     : ('')}
 
                 <div className={(this.props.translatorOpen && showShareToTranslator) ? ("send-to-translator") :("send-to-translator hide")} >
