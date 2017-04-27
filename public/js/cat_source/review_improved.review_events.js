@@ -129,10 +129,8 @@ if ( ReviewImproved.enabled() && config.isReview ) {
     $(document).on('mouseup', 'section.opened .errorTaggingArea', function (e) {
         var segment = new UI.Segment( $(e.target).closest('section'));
         var selection = document.getSelection();
-        var container = $(e.target);
-        if (container.is('lxqwarning')) {
-          container = container.closest('.errorTaggingArea');
-        }
+        var container = $(e.target).closest('.errorTaggingArea') ;
+
         if ( textSelectedInsideSelectionArea(selection, container ) )  {
             var selection = getSelectionData( selection, container ) ;
             RI.openPanel( { sid: segment.id,  selection : selection });
