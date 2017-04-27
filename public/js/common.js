@@ -901,7 +901,7 @@ APP = {
         }
         var dd = new Date( date.replace(/-/g, "/") );
         var timeZoneFrom = -1 * ( new Date().getTimezoneOffset() / 60 );
-        dd.setMinutes( dd.getMinutes() + (timezoneToShow - timeZoneFrom) * 60 );
+        dd.setMinutes( dd.getMinutes() + (timezoneToShow) * 60 );
         var timeZone = this.getGMTZoneString();
         return {
             day: $.format.date(dd, "d") ,

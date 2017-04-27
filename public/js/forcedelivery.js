@@ -157,6 +157,16 @@ function getChosenOutsourceDate() {
     return new Date ( year, month, day, time, 00 ).getTime() - ( parseFloat( timezone).toFixed( 1 ) * 3600000 ) - ( new Date().getTimezoneOffset() * 60000 );
 }
 
+function getChosenOutsourceDateUTC() {
+    var $elem =     $( "#date-trans" );
+    var day 	 = $elem.DatePickerGetDate().getDate();
+    var month 	 = $elem.DatePickerGetDate().getMonth();
+    var year 	 = $elem.DatePickerGetDate().getFullYear();
+    var time 	 = $( "#outsource-assign-date").val();
+    var timezone = $( "#outsource-assign-timezone").val();
+
+    return new Date ( year, month, day, time, 00 ).getTime() - ( parseFloat( timezone).toFixed( 1 ) * 3600000 );
+}
 
 function getChosenOutsourceDateToString() {
     var $elem =     $( "#date-trans" );
@@ -217,7 +227,7 @@ function setOutsourceDate(chosenDate) {
 
 
     $('.outsource .out-date').val( getChosenOutsourceDateToString() );
-    $('.outsource .out-date').data('datesend', getChosenOutsourceDate() );
+    $('.outsource .out-date').data('datesend', getChosenOutsourceDateUTC() );
 
     UI.checkSendToTranslatorButton();
 

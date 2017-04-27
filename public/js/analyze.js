@@ -156,6 +156,8 @@ UI = {
             APP.ModalWindow.showModalComponent(OutsourceModal, props, "Translate", style);
         });
 
+        this.setFocusEvent();
+
 		this.pollData();
 
         this.checkQueryParams();
@@ -163,12 +165,32 @@ UI = {
         this.setTeamHeader();
 
         this.getProject(config.id_project).done(function (response) {
-        	if (response.data) {
+            if (response.data && response.data.length > 0) {
                 UI.currentOutsourceProject = response.data[0];
                 UI.checkJobsOutsource();
-			}
+            }
         });
 	},
+
+	updateProjectData: function () {
+        this.getProject(config.id_project).done(function (response) {
+            if (response.data  && response.data.length > 0) {
+                UI.currentOutsourceProject = response.data[0];
+                UI.checkJobsOutsource();
+
+                //Update passwords (changed if the job has been outsourced)
+                UI.currentOutsourceProject.jobs.forEach(function (job) {
+                    let $job = $('.tablestats[data-jid='+job.id+']');
+                    let oldPass = $job.data('pwd');
+                    $job.data('pwd', job.password);
+                    let href = $job.find('.uploadbtn.translate').attr('href');
+                    $job.find('.uploadbtn.translate').attr('href', href.replace(oldPass, job.password));
+                });
+
+
+            }
+        });
+    },
 
     checkJobsOutsource: function () {
 	    UI.currentOutsourceProject.jobs.forEach(function (job) {
@@ -177,9 +199,8 @@ UI = {
                 setTimeout(function () {
                     $job.find('.mergebtn, .splitbtn').addClass('disabled');
                 }, 1000);
-
             }
-        })
+        });
     },
 	
     getProject: function(id) {
@@ -891,6 +912,36 @@ UI = {
 
     updateOutsourceInfo: function (translator) {
 		UI.currentOutsourceJob.translator = translator;
+    },
+
+    setFocusEvent: function () {
+		var self = this;
+        $(window).on("blur focus", function(e) {
+            let prevType = $(this).data("prevType");
+
+            if (prevType != e.type) {   //  reduce double fire issues
+                switch (e.type) {
+                    case "blur":
+                        console.log("leave page");
+                        self.pageLeft = true;
+                        // clearInterval(UI.reloadProjectsInterval);
+                        break;
+                    case "focus":
+                        // clearInterval(UI.reloadProjectsInterval);
+                        console.log("Enter page");
+                        // UI.reloadProjectsInterval = setInterval(function () {
+                        //     console.log("Reload Projects");
+                        //     self.reloadProjects();
+                        // }, 5e3);
+                        if (self.pageLeft) {
+                            self.updateProjectData();
+                        }
+                        break;
+                }
+            }
+
+            $(this).data("prevType", e.type);
+        });
     }
 };
 
