@@ -36,27 +36,6 @@ class Chunks_ChunkStruct extends Jobs_JobStruct {
         return new Jobs_JobStruct( $this->attributes() );
     }
 
-    /**
-     * getOpenThreadsCount
-     *
-     */
-    public function getOpenThreadsCount() {
-        $dao = new Comments_CommentDao() ;
-        $openThreads = $dao->getOpenThreadsForProjects( array(
-                $this->id_project
-        ) ) ;
-
-        $result = array_values( array_filter($openThreads, function($item) {
-            return $this->id == $item['id_job'] && $this->password == $item['password'];
-        }));
-
-        if ( count( $result ) > 0 ) {
-            return $result[0]['count'];
-        } else {
-            return 0;
-        }
-    }
-
     public function getQualityOverall() {
         $job_array = array(
                 'new_words'         => $this->new_words,

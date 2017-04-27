@@ -28,7 +28,6 @@ route( '/api/app/user/password_reset/[:token]',                                 
 route( '/api/app/user/confirm/[:token]',                                            'GET',  'API\App\SignupController', 'confirm' );
 route( '/api/app/user/redeem_project',                                              'POST', 'API\App\SignupController', 'redeemProject' );
 
-route( '/api/app/projects/[:id_project]',                                           'PUT',  'API\App\ProjectController', 'update' );
 route( '/api/app/connected_services/[:id_service]/verify',                          'GET',  'ConnectedServices\ConnectedServicesController', 'verify' );
 route( '/api/app/connected_services/[:id_service]',                                 'POST', 'ConnectedServices\ConnectedServicesController', 'update' );
 

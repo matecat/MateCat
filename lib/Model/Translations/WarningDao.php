@@ -4,6 +4,7 @@
 namespace Translations ;
 
 use Constants_TranslationStatus;
+use Jobs\WarningsCountStruct;
 use PDO;
 
 class WarningDao extends \DataAccess_AbstractDao {
@@ -44,10 +45,9 @@ class WarningDao extends \DataAccess_AbstractDao {
         $con = $this->con->getConnection();
 
         $stmt = $con->prepare( $sql );
-        $stmt->execute( $params );
-        $result = $stmt->fetchAll( PDO::FETCH_ASSOC );
 
-        return $result;
+        return $this->_fetchObject( $stmt, new WarningsCountStruct(), $params );
+
     }
 
     /**

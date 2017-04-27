@@ -1,51 +1,40 @@
 <?php
+
+namespace API\V2  ;
+
+use API\V2\Json\ProjectAnonymous;
+use API\V2\Validators\ProjectPasswordValidator;
+
 /**
- * Created by PhpStorm.
- * User: fregini
- * Date: 13/02/2017
- * Time: 10:06
+ * This controller can be called as Anonymous, but only if you already know the id and the password
+ *
+ * Class ProjectsController
+ * @package API\V2
  */
-
-namespace API\V2;
-
-
-use API\V2\Json\Project;
-use API\V2\Validators\LoginValidator;
-use API\V2\Validators\ProjectExistsInTeamValidator;
-use API\V2\Validators\TeamAccessValidator;
-use API\V2\Validators\TeamProjectValidator;
-use Projects\ProjectModel;
-
 class ProjectsController extends KleinController {
 
-    protected $project;
+    /**
+     * @var \Projects_ProjectStruct
+     */
+    private $project;
 
-    public function update() {
+    /**
+     * @var ProjectPasswordValidator
+     */
+    private $projectValidator;
 
-        $acceptedFields = array( 'id_assignee', 'name', 'id_team' );
+    public function get(){
 
-        $projectModel   = new ProjectModel( $this->project );
-        $projectModel->setUser( $this->user ) ;
+        $this->project = $this->projectValidator->getProject();
 
-        foreach ( $acceptedFields as $field ) {
-            if ( array_key_exists($field, $this->params ) ) {
-                $projectModel->prepareUpdate( $field, $this->params[ $field ] );
-            }
-        }
-
-        $updatedStruct = $projectModel->update();
-        $formatted     = new Project();
-        $this->response->json( array( 'project' => $formatted->renderItem( $updatedStruct ) ) );
+        $formatted     = new ProjectAnonymous();
+        $this->response->json( array( 'project' => $formatted->renderItem( $this->project ) ) );
 
     }
 
     protected function afterConstruct() {
-        parent::afterConstruct();
-        $this->project = \Projects_ProjectDao::findById( $this->request->id_project );
-        $this->appendValidator( new LoginValidator( $this ) );
-        $this->appendValidator( new TeamAccessValidator( $this ) );
-        $this->appendValidator( ( new TeamProjectValidator( $this ) )->setProject( $this->project ) );
-        $this->appendValidator( ( new ProjectExistsInTeamValidator( $this ) )->setProject( $this->project ) );
+        $this->projectValidator = new ProjectPasswordValidator( $this );
+        $this->appendValidator( $this->projectValidator );
     }
 
 }

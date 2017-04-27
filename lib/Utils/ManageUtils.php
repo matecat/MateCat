@@ -121,8 +121,8 @@ class ManageUtils {
 
             $job[ 'open_threads_count' ] = 0 ;
             foreach( $openThreads as $openThread ) {
-                if ( $openThread[ 'id_job' ] == $job[ 'id' ] && $openThread[ 'password' ] == $job[ 'password' ] ) {
-                    $job[ 'open_threads_count' ] = (int) $openThread[ 'count' ] ;
+                if ( $openThread->id_job == $job[ 'id' ] && $openThread->password == $job[ 'password' ] ) {
+                    $job[ 'open_threads_count' ] = (int) $openThread->count;
                 }
             }
 
@@ -203,16 +203,11 @@ class ManageUtils {
             $project[ 'id_team' ]        = (int) $item[ 'id_team' ] ;
 
             $project[ 'jobs' ]           = array();
-            $project[ 'no_active_jobs' ] = true;
-            $project[ 'has_cancelled' ]  = 0;
-            $project[ 'has_archived' ]   = 0;
             $project[ 'create_date' ]    = $item[ 'create_date' ];
             $project[ 'password' ]       = $item[ 'password' ];
             $project[ 'tm_analysis' ]    = number_format( $item[ 'tm_analysis_wc' ], 0, ".", "," );
 
             $project[ 'jobs' ] = $project2jobChunk[ $project[ 'id' ] ];
-
-            $project[ 'no_active_jobs' ] = ( $project[ 'no_active_jobs' ] ) ? ' allCancelled' : '';
 
             $project2info[ $project[ 'id' ] ][ 'status' ] = array_unique( $project2info[ $project[ 'id' ] ][ 'status' ] );
 
@@ -228,8 +223,8 @@ class ManageUtils {
             $project['remote_file_service'] = null ;
 
             foreach( $remoteFileServices as $service ) {
-                if ( $project['id'] == $service['id_project'] ) {
-                    $project['remote_file_service'] = $service['service'] ;
+                if ( $project['id'] == $service->id_project ) {
+                    $project['remote_file_service'] = $service->service ;
                 }
             }
 
@@ -248,7 +243,7 @@ class ManageUtils {
      *
      * @return string A formatted date
      */
-    private static function formatJobDate( $my_date ) {
+    public static function formatJobDate( $my_date ) {
 
         $date          = new DateTime( $my_date );
         $formattedDate = $date->format( 'Y M d H:i' );

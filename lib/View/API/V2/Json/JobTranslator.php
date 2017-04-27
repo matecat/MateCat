@@ -18,7 +18,7 @@ class JobTranslator {
 
         $translatorJson = [
                 'email'                 => $jTranslatorsStruct->email,
-                'added_by'              => $jTranslatorsStruct->added_by,
+                'added_by'              => (int)$jTranslatorsStruct->added_by,
                 'delivery_date'         => $jTranslatorsStruct->delivery_date,
                 'source'                => $jTranslatorsStruct->source,
                 'target'                => $jTranslatorsStruct->target,

@@ -1,5 +1,6 @@
 <?php
 
+use RemoteFiles\RemoteFileServiceNameStruct;
 use Teams\TeamStruct;
 
 class Projects_ProjectDao extends DataAccess_AbstractDao {
@@ -130,15 +131,18 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $id
+     * @param     $id
+     * @param int $ttl
+     *
      * @return Projects_ProjectStruct
      */
-    static function findById( $id ) {
-       $conn = Database::obtain()->getConnection();
-       $stmt = $conn->prepare( "SELECT * FROM projects WHERE id = ?");
-       $stmt->execute( array( $id ) );
-       $stmt->setFetchMode(PDO::FETCH_CLASS, 'Projects_ProjectStruct');
-       return $stmt->fetch();
+    static function findById( $id, $ttl = 0 ) {
+
+        $pDao = new self();
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( " SELECT * FROM projects WHERE id = :id " );
+        return $pDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id' => $id ] )[ 0 ];
+
     }
 
     /**
@@ -231,8 +235,8 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
 
     /**
      * @param $project_ids
-     * @return array[]
      *
+     * @return DataAccess_IDaoStruct[]|RemoteFileServiceNameStruct[] *
      */
     public function getRemoteFileServiceName( $project_ids ) {
 
@@ -249,10 +253,9 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
 
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
-        $stmt->execute();
-        $stmt->setFetchMode( PDO::FETCH_ASSOC );
 
-        return $stmt->fetchAll();
+        return $this->_fetchObject( $stmt, new RemoteFileServiceNameStruct(), [] );
+
     }
 
 }

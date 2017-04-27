@@ -1,5 +1,13 @@
 <?php
 
+use Exceptions\NotFoundError;
+use Outsource\ConfirmationDao;
+use Outsource\ConfirmationStruct;
+use Outsource\TranslatedConfirmationStruct;
+use Translations\WarningDao;
+use Translators\JobsTranslatorsDao;
+use Translators\JobsTranslatorsStruct;
+
 class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataAccess_IDaoStruct, \ArrayAccess {
     
     public $id;
@@ -50,6 +58,126 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
     public $total_raw_wc;
 
     /**
+     * @var JobsTranslatorsStruct
+     */
+    protected $_translator;
+
+    /**
+     * @var ConfirmationStruct
+     */
+    protected $_outsource;
+
+    /**
+     * @var array
+     */
+    protected $_openThreads;
+
+    /**
+     * @return JobsTranslatorsStruct
+     */
+    public function getTranslator() {
+
+        $this->_translator = $this->cachable(__METHOD__, $this, function( Jobs_JobStruct $jobStruct ) {
+            $jTranslatorsDao = new JobsTranslatorsDao();
+            return $jTranslatorsDao->setCacheTTL( 60 * 60 )->findByJobsStruct( $jobStruct );
+        });
+
+        return $this->_translator;
+
+    }
+
+    /**
+     * @return ConfirmationStruct
+     * @throws NotFoundError
+     */
+    public function getOutsource() {
+
+        $this->_outsource = $this->cachable(__METHOD__, $this, function( Jobs_JobStruct $jobStruct ) {
+            $outsourceDao = new ConfirmationDao();
+            return $outsourceDao->setCacheTTL( 60 * 60 )->getConfirmation( $jobStruct );
+        });
+
+        switch ( $this->_outsource->id_vendor ) {
+            case TranslatedConfirmationStruct::VENDOR_ID:
+                //Ok Do Nothing
+                break;
+            default:
+                throw new NotFoundError( "Vendor id " . $this->_outsource->id_vendor . " not found." );
+                break;
+        }
+
+        foreach( $this->_outsource as $k => &$value ){
+            if( is_numeric( $value ) ){
+                if( $value == (string)(int)$value ){
+                    $value = (int)$value;
+                } elseif( $value == (string)(float)$value ){
+                    $value = (float)$value;
+                }
+            }
+        }
+
+        return $this->_outsource;
+
+    }
+
+    public function getOpenThreadsCount(){
+
+        $this->_openThreads = $this->cachable( __METHOD__, $this, function ( Jobs_JobStruct $jobStruct ) {
+
+            $dao         = new Comments_CommentDao();
+            $openThreads = $dao->setCacheTTL( 60 * 10 )->getOpenThreadsForProjects( [ $jobStruct->id_project ] ); //ten minutes cache
+            foreach ( $openThreads as $openThread ) {
+                if ( $openThread->id_job == $jobStruct->id && $openThread->password == $jobStruct->password ) {
+                    return (int)$openThread->count;
+                }
+            }
+            return 0;
+
+        } );
+
+        return $this->_openThreads;
+
+    }
+
+    /**
+     * @return null|Projects_MetadataStruct[]
+     */
+    public function getProjectMetadata(){
+
+        return $this->cachable( __function__, $this, function ( $job ) {
+            $mDao = new Projects_MetadataDao();
+            return $mDao->setCacheTTL( 60 * 60 )->allByProjectId( $job->id_project );
+        } );
+
+    }
+
+    public function getProjectFeatures(){
+
+        return $this->cachable( __function__, $this, function () {
+
+            $allMetaData = $this->getProjectMetadata();
+
+            foreach( $allMetaData as $metadataStruct ){
+                if( $metadataStruct->key == Projects_MetadataDao::FEATURES_KEY ){
+                    return $metadataStruct->value;
+                }
+            }
+            return null;
+
+        } );
+
+    }
+
+    public function getWarningsCount(){
+
+        return $this->cachable( __function__, $this, function ( $jobStruct ) {
+            $dao = new WarningDao() ;
+            return $dao->setCacheTTL( 60 * 10 )->getWarningsByProjectIds( [ $jobStruct->id_project ] )[ 0 ] ;
+        } );
+
+    }
+
+    /**
      * @return Files_FileStruct[]
      */
     public function getFile() {
@@ -66,7 +194,7 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
      */
     public function getProject() {
         return $this->cachable( __function__, $this, function ( $job ) {
-            return Projects_ProjectDao::findById( $job->id_project );
+            return Projects_ProjectDao::findById( $job->id_project, 60 * 60 * 24 );
         } );
     }
 
@@ -86,6 +214,26 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
         $dao = new Chunks_ChunkDao( Database::obtain() );
 
         return $dao->getByProjectID( $this->id_project );
+    }
+
+    public function getOwnerKeys(){
+
+        $tm_keys_json = TmKeyManagement_TmKeyManagement::getOwnerKeys( array( $this->tm_keys ) );
+        $tm_keys      = array();
+        foreach ( $tm_keys_json as $tm_key_struct ) {
+            /**
+             * @var $tm_key_struct TmKeyManagement_TmKeyStruct
+             */
+            $tm_keys[] = array(
+                    "key"  => $tm_key_struct->key,
+                    "r"    => ( $tm_key_struct->r ) ? 'Lookup' : '&nbsp;',
+                    "w"    => ( $tm_key_struct->w ) ? 'Update' : '',
+                    "name" => $tm_key_struct->name
+            );
+        }
+
+        return $tm_keys;
+
     }
 
     /**

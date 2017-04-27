@@ -37,6 +37,11 @@ class ConfirmationDao extends \DataAccess_AbstractDao {
 
     }
 
+    /**
+     * @param \Jobs_JobStruct $jobStruct
+     *
+     * @return \DataAccess_IDaoStruct|TranslatedConfirmationStruct
+     */
     public function getConfirmation( \Jobs_JobStruct $jobStruct ){
 
         $query = self::$_query_get_by_job_id_password;

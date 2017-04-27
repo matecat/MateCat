@@ -15,6 +15,7 @@ use API\V2\Validators\JobPasswordValidator;
 use API\V2\Validators\LoginValidator;
 use InvalidArgumentException;
 use Jobs_JobStruct;
+use Outsource\ConfirmationDao;
 use Translators\TranslatorsModel;
 
 class JobsTranslatorsController extends KleinController {
@@ -48,8 +49,10 @@ class JobsTranslatorsController extends KleinController {
 
         $jTranslatorStruct = $TranslatorsModel->update();
 
+        $this->jStruct->_setTranslator( $jTranslatorStruct );
+
         $formatted = new Job();
-        $this->response->json( array( 'job' => $formatted->renderItem( $this->jStruct, $jTranslatorStruct ) ) );
+        $this->response->json( array( 'job' => $formatted->renderItem( $this->jStruct ) ) );
 
     }
 
@@ -63,11 +66,20 @@ class JobsTranslatorsController extends KleinController {
                 ]
         ], true );
 
+        $confDao            = new ConfirmationDao();
+        $confirmationStruct = $confDao->setCacheTTL( 60 * 60 )->getConfirmation( $this->jStruct );
+
+        if ( !empty( $confirmationStruct ) ) {
+            throw new InvalidArgumentException( "The Job is Outsourced.", 400 );
+        }
+
         $translatorModel = new TranslatorsModel( $this->jStruct );
         $jTranslatorStruct = $translatorModel->getTranslator();
 
+        $this->jStruct->_setTranslator( $jTranslatorStruct );
+
         $formatted = new Job();
-        $this->response->json( array( 'job' => $formatted->renderItem( $this->jStruct, $jTranslatorStruct ) ) );
+        $this->response->json( array( 'job' => $formatted->renderItem( $this->jStruct ) ) );
 
     }
 

@@ -21,7 +21,7 @@ class ActivityLogController extends KleinController {
 
     public function lastOnProject(){
 
-        $validator = new Validators\ProjectPasswordValidator( $this->request );
+        $validator = new Validators\ProjectPasswordValidator( $this );
         $validator->validate();
 
         $activityLogDao = new ActivityLogDao();
