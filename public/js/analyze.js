@@ -108,18 +108,41 @@ UI = {
             var linkPieces = $( this ).attr( "href" ).split( "/" );
             var jPieces = linkPieces[ linkPieces.length - 1 ].split( "-" );
 			var idJob = jPieces[0];
-            UI.currentOutsourceJob = UI.currentOutsourceProject.jobs.find(function (job) {
-				return job.id === idJob;
-            });
 
-            let words = $( ".tablestats[data-pwd='" + jPieces[ 1 ] + "'] .stat-payable" ).text() ;
-            let sourceTxt = UI.currentOutsourceJob.sourceTxt;
-            let targetTxt = UI.currentOutsourceJob.targetTxt;
+            let words, sourceTxt, targetTxt;
+
+			if (UI.currentOutsourceProject) {
+                UI.currentOutsourceJob = UI.currentOutsourceProject.jobs.find(function (job) {
+                    return job.id === idJob;
+                });
+
+                words = $(".tablestats[data-pwd='" + jPieces[1] + "'] .stat-payable").text();
+                sourceTxt = UI.currentOutsourceJob.sourceTxt;
+                targetTxt = UI.currentOutsourceJob.targetTxt;
+
+            } else {
+                words = $( ".tablestats[data-pwd='" + jPieces[ 1 ] + "'] .stat-payable" ).text() ;
+                sourceTxt = $( "div[data-jid='" + jPieces[ 0 ] + "'] .source_lang" ).text();
+                targetTxt = $( "div[data-jid='" + jPieces[ 0 ] + "'] .target_lang" ).text();
+
+                UI.currentOutsourceJob = {
+                    id: jPieces[ 0 ],
+                    password: jPieces[ 1 ],
+                    stats: {
+                        TOTAL_FORMATTED: words
+                    },
+                    sourceTxt: sourceTxt,
+                    targetTxt: targetTxt
+                };
+                UI.currentOutsourceProject = {
+                    id: config.id_project,
+                    password: config.password,
+                };
+			}
 
             $( ".title-source" ).text( sourceTxt );
             $( ".title-target" ).text( targetTxt );
             $( ".title-words" ).text( words );
-
 
             UI.currentOutsourceUrl = $( this ).attr( "href" );
             let props = {
@@ -140,8 +163,10 @@ UI = {
         this.setTeamHeader();
 
         this.getProject(config.id_project).done(function (response) {
-            UI.currentOutsourceProject = response.data[0];
-            UI.checkJobsOutsource();
+        	if (response.data) {
+                UI.currentOutsourceProject = response.data[0];
+                UI.checkJobsOutsource();
+			}
         });
 	},
 
@@ -165,7 +190,7 @@ UI = {
             password: config.password
         };
 
-        if (config.isLoggedIn) {
+        if (config.isLoggedIn && APP.USER.STORE.teams) {
             d.id_team = APP.getLastTeamSelected(APP.USER.STORE.teams).id;
         }
 
