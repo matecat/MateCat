@@ -94,7 +94,7 @@ class splitJobController extends ajaxController {
                     $pManager->mergeALL( $pStruct, $jobStructs );
                     break;
                 case 'check':
-                    $this->checkSplitAccess();
+                    $this->checkSplitAccess( $this->project_struct->getJobs() );
 
                     $pStruct[ 'job_to_split' ]      = $this->job_id;
                     $pStruct[ 'job_to_split_pass' ] = $this->job_pass;
@@ -102,7 +102,7 @@ class splitJobController extends ajaxController {
                     $pManager->getSplitData( $pStruct, $this->num_split, $this->split_values );
                     break;
                 case 'apply':
-                    $this->checkSplitAccess();
+                    $this->checkSplitAccess( $this->project_struct->getJobs() );
 
                     $pStruct[ 'job_to_split' ]      = $this->job_id;
                     $pStruct[ 'job_to_split_pass' ] = $this->job_pass;
@@ -130,29 +130,33 @@ class splitJobController extends ajaxController {
      */
     protected function checkMergeAccess( array $jobList ) {
 
-        $found = false;
-        $jid   = $this->job_id;
-        $jobToMerge = array_filter( $jobList, function ( Jobs_JobStruct $jobStruct ) use ( &$found, $jid ) {
-            return $jobStruct->id == $jid;
-        } );
-
-        if ( empty( $jobToMerge ) ) {
-            throw new Exception( "Access denied", -10 );
-        }
-
-        return $jobToMerge;
+        return $this->filterJobsById( $jobList );
 
     }
 
-    protected function checkSplitAccess() {
+    protected function checkSplitAccess( array $jobList ) {
 
-        $passCheck = new AjaxPasswordCheck();
-        $access    = $passCheck->grantProjectJobAccessOnJobPass( $this->project_data, $this->project_pass, $this->job_pass );
+        $jobToSplit = $this->filterJobsById( $jobList );
 
-        if ( !$access ) {
+        if ( $jobToSplit[ 0 ]->password != $this->job_pass ) {
             throw new Exception( "Wrong Password. Access denied", -10 );
         }
 
+    }
+
+    protected function filterJobsById(  array $jobList  ){
+
+        $found = false;
+        $jid   = $this->job_id;
+        $filteredJobs = array_filter( $jobList, function ( Jobs_JobStruct $jobStruct ) use ( &$found, $jid ) {
+            return $jobStruct->id == $jid;
+        } );
+
+        if ( empty( $filteredJobs ) ) {
+            throw new Exception( "Access denied", -10 );
+        }
+
+        return $filteredJobs;
     }
 
 }

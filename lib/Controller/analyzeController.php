@@ -73,7 +73,7 @@ class analyzeController extends viewController {
         $this->jid = $postInput[ 'jid' ];
         $pass      = $postInput[ 'password' ];
 
-        $this->project = Projects_ProjectDao::findById( $this->pid );
+        $this->project = Projects_ProjectDao::findById( $this->pid, 60 * 60 );
 
         if ( !empty( $this->jid ) ) {
             // we are looking for a chunk
@@ -163,7 +163,7 @@ class analyzeController extends viewController {
         $this->template->support_mail    = INIT::$SUPPORT_MAIL;
 
         $langDomains = Langs_LanguageDomains::getInstance();
-        $this->subject = $langDomains::getDisplayDomain($this->subject);  // subject is null !!??!?!?!
+        $this->subject = $langDomains::getDisplayDomain($this->model->subject);  // subject is null !!??!?!?!
         $this->template->subject                    = $this->model->subject;
 
         //first two letter of code lang

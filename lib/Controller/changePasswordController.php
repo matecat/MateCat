@@ -8,7 +8,7 @@ class changePasswordController extends ajaxController {
 
 	public function __construct() {
 
-        parent::checkLogin();
+        parent::checkLogin( false ); //need to write to the sessions
 		parent::__construct();
 
         $filterArgs = array(

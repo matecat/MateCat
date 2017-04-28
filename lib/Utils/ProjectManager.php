@@ -1429,6 +1429,9 @@ class ProjectManager {
                 Utils::sendErrMailReport( $msg );
                 throw new Exception( 'Failed to insert job chunk, project damaged.', -8 );
             }
+
+            Shop_Cart::getInstance( 'outsource_to_external_cache' )->deleteCart();
+
         }
 
     }
@@ -1489,6 +1492,7 @@ class ProjectManager {
         $oldPassword = $first_job[ 'password' ];
         if( $jobStructs[ 0 ]->getTranslator() ){
             $first_job[ 'password' ] = self::generatePassword();
+            Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
         }
 
         $_data = array();
@@ -1522,8 +1526,6 @@ class ProjectManager {
 
         $wCountManager = new WordCount_Counter();
         $wCountManager->initializeJobWordCount( $first_job[ 'id' ], $first_job[ 'password' ] );
-
-        Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
 
         $this->features->run('postJobMerged',
             $projectStructure

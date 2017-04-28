@@ -120,7 +120,7 @@ class TranslatorsModel {
     public function getTranslator( $cache = 86400 ) {
 
         $jTranslatorsDao    = new JobsTranslatorsDao();
-        $jTranslatorsStruct = $this->jobTranslator = $jTranslatorsDao->setCacheTTL( $cache )->findByJobsStruct( $this->jStruct )[ 0 ];
+        $jTranslatorsStruct = $this->jobTranslator = @$jTranslatorsDao->setCacheTTL( $cache )->findByJobsStruct( $this->jStruct )[ 0 ];
 
         return $jTranslatorsStruct;
 

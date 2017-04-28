@@ -116,7 +116,7 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
         return $this->cachable( __function__, $this, function () {
 
             $dao = new Projects_ProjectDao() ;
-            return $dao->setCacheTTL( 60 * 60 * 24 * 7 )->getRemoteFileServiceName( [ $this->id ] )[0] ;
+            return @$dao->setCacheTTL( 60 * 60 * 24 * 7 )->getRemoteFileServiceName( [ $this->id ] )[0] ;
 
         } );
 

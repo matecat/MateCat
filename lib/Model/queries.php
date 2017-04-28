@@ -2070,7 +2070,7 @@ function changeProjectStatus( $pid, $status, $if_status_not = array() ) {
  * @return int|mixed
  *
  * @deprecated
- * TODO: Refactory with Prepared Statements
+ * TODO: Refactory with Prepared Statements and dao
  */
 function changePassword( $res, $id, $password, $new_password ) {
 
@@ -2100,6 +2100,8 @@ function changePassword( $res, $id, $password, $new_password ) {
         $res = $db->query($query);
 
         ( new \Outsource\ConfirmationDao() )->updatePassword( $id, $password, $new_password  );
+
+        Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
 
     } catch( PDOException $e ) {
         Log::doLog( $e->getMessage() );
