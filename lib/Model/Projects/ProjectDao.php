@@ -138,11 +138,24 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      */
     static function findById( $id, $ttl = 0 ) {
 
-        $pDao = new self();
+        $thisDao = new self();
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( " SELECT * FROM projects WHERE id = :id " );
-        return $pDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id' => $id ] )[ 0 ];
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id' => $id ] )[ 0 ];
 
+    }
+
+    /**
+     * @param array $id_list
+     *
+     * @return Projects_ProjectStruct[]|DataAccess_IDaoStruct[]|[]
+     */
+    public function getByIdList( array $id_list ) {
+        if( empty( $id_list ) ) return [];
+        $qMarks = str_repeat( '?,', count( $id_list ) - 1 ) . '?';
+        $conn   = Database::obtain()->getConnection();
+        $stmt   = $conn->prepare( " SELECT * FROM projects WHERE id IN( $qMarks ) " );
+        return $this->_fetchObject( $stmt, new Projects_ProjectStruct(), $id_list );
     }
 
     /**

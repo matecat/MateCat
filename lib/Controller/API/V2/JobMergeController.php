@@ -38,7 +38,7 @@ class JobMergeController extends KleinController {
         $this->validator->validate();
         // TODO: additional validation to be included in a ProjectAndJob Validation object
 
-        $this->job = \Jobs_JobDao::getById( $this->request->id_job );
+        $this->job = \Jobs_JobDao::getById( $this->request->id_job )[0];
 
         if ( !$this->job || $this->job->id_project != $this->validator->getProject()->id ) {
             throw new \Exceptions_RecordNotFound();

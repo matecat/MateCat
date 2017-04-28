@@ -20,7 +20,18 @@ class Project {
      */
     protected $jRenderer;
 
-    public function __construct() {
+    /**
+     * @var Projects_ProjectStruct[]
+     */
+    protected $data = [];
+
+    /**
+     * Project constructor.
+     *
+     * @param Projects_ProjectStruct[] $data
+     */
+    public function __construct( array $data = [] ) {
+        $this->data = $data;
         $this->jRenderer = new Job();
     }
 
@@ -67,6 +78,15 @@ class Project {
 
         return $projectOutputFields;
 
+    }
+
+    public function render() {
+        $out = [];
+        foreach ( $this->data as $membership ) {
+            $out[] = $this->renderItem( $membership );
+        }
+
+        return $out;
     }
 
 }

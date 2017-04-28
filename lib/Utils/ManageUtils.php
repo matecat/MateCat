@@ -1,28 +1,26 @@
 <?php
 
+use API\V2\Json\Project;
 use Exceptions\NotFoundError;
-use Translators\JobsTranslatorsDao;
-use Outsource\TranslatedConfirmationStruct;
-use API\App\Json\OutsourceConfirmation;
-use API\V2\Json\JobTranslator;
 
 class ManageUtils {
 
     /**
-     * @param Users_UserStruct               $user
-     * @param $start
-     * @param $step
-     * @param $search_in_pname
-     * @param $search_source
-     * @param $search_target
-     * @param $search_status
-     * @param $search_only_completed
-     * @param $project_id
+     * @param Users_UserStruct       $user
+     * @param                        $start
+     * @param                        $step
+     * @param                        $search_in_pname
+     * @param                        $search_source
+     * @param                        $search_target
+     * @param                        $search_status
+     * @param                        $search_only_completed
+     * @param                        $project_id
      * @param \Teams\TeamStruct|null $team
-     * @param Users_UserStruct|null          $assignee
-     * @param bool                           $no_assignee
+     * @param Users_UserStruct|null  $assignee
+     * @param bool                   $no_assignee
      *
-*@return array
+     * @return array
+     * @throws NotFoundError
      */
     public static function queryProjects(
             Users_UserStruct $user, $start, $step, $search_in_pname,
@@ -33,205 +31,17 @@ class ManageUtils {
             $no_assignee = false
     ) {
 
-        $data = getProjects(
+        $id_list = getProjects(
             $user, $start, $step, $search_in_pname, $search_source, $search_target,
             $search_status, $search_only_completed, $project_id, $team,
             $assignee, $no_assignee
         );
 
-        $projects     = array();
-        $projectIDs   = array();
-        $project2info = array();
+        $_projects = new Projects_ProjectDao();
+        $projects = $_projects->getByIdList( $id_list );
 
-        //get project IDs from projects array
-        foreach ( $data as $item ) {
-            $projectIDs[ ] = $item[ 'pid' ];
-        }
-
-        if( empty( $projectIDs ) ){
-            return array();
-        }
-
-        //get job data using job IDs
-        $jobData = getJobsFromProjects( $projectIDs, $search_source, $search_target, $search_status, $search_only_completed );
-
-        $dao = new Comments_CommentDao() ;
-        $openThreads = $dao->getOpenThreadsForProjects( $projectIDs ) ;
-
-        $dao = new \Translations\WarningDao() ;
-        $warningsCount = $dao->getWarningsByProjectIds( $projectIDs ) ;
-
-        $lang_handler = Langs_Languages::getInstance();
-
-        //Prepare job data
-        $project2jobChunk = array();
-        foreach ( $jobData as $job_array ) {
-            $job = array();
-
-            /**
-             * Assign job extracted variables
-             */
-            $job[ 'id' ]                    = $job_array[ 'id' ];
-            $job[ 'pid' ]                   = $job_array[ 'id_project' ];
-            $job[ 'password' ]              = $job_array[ 'password' ];
-            $job[ 'source' ]                = $job_array[ 'source' ];
-            $job[ 'target' ]                = $job_array[ 'target' ];
-            $job[ 'subject' ]                = $job_array[ 'subject' ];
-            $job[ 'sourceTxt' ]             = $lang_handler->getLocalizedName( $job[ 'source' ] );
-            $job[ 'targetTxt' ]             = $lang_handler->getLocalizedName( $job[ 'target' ] );
-            $job[ 'create_date' ]           = $job_array[ 'create_date' ];
-            $job[ 'formatted_create_date' ] = self::formatJobDate( $job_array[ 'create_date' ] );
-            $job[ 'job_first_segment' ]     = $job_array[ 'job_first_segment' ];
-            $job[ 'job_last_segment' ]      = $job_array[ 'job_last_segment' ];
-            $job[ 'mt_engine_name' ]        = $job_array[ 'name' ];
-            $job[ 'id_tms' ]                = $job_array[ 'id_tms' ];
-
-            $job[ 'outsource' ] = null;
-            if( $job_array[ 'id_vendor' ] !== null ){
-
-                $_outsource[ 'id_job' ] = $job_array[ 'id' ];
-                $_outsource[ 'password' ] = $job_array[ 'password' ];
-                $_outsource[ 'id_vendor' ] = $job_array[ 'id_vendor' ];
-                $_outsource[ 'vendor_name' ] = $job_array[ 'vendor_name' ];
-                $_outsource[ 'create_date' ] = $job_array[ 'outsource_create_date' ];
-                $_outsource[ 'delivery_date' ] = $job_array[ 'delivery_date' ];
-                $_outsource[ 'price' ] = $job_array[ 'price' ];
-                $_outsource[ 'currency' ] = $job_array[ 'currency' ];
-                $_outsource[ 'quote_pid' ] = $job_array[ 'quote_pid' ];
-
-                switch( $job_array[ 'id_vendor' ] ){
-                    case TranslatedConfirmationStruct::VENDOR_ID:
-                        $confirmStructJson = new OutsourceConfirmation( new TranslatedConfirmationStruct( $_outsource ) );
-                        $job[ 'outsource' ] = $confirmStructJson->render();
-                        break;
-                    default:
-                        throw new NotFoundError( "Vendor id " . $job_array[ 'id_vendor' ] . " not found." );
-                        break;
-                }
-
-            }
-
-            $job[ 'translator' ] = null;
-            if( empty(  $job[ 'outsource' ] ) ){
-                $jobStruct = new Jobs_JobStruct( $job_array );
-                $jTranslatorsDao = new JobsTranslatorsDao();
-                $jTranslatorsStruct = $jTranslatorsDao->setCacheTTL( 60 * 60 * 24 )->findByJobsStruct( $jobStruct )[ 0 ];
-                $job[ 'translator' ] = ( !empty( $jTranslatorsStruct ) ? ( new JobTranslator() )->renderItem( $jTranslatorsStruct ) : null );
-            }
-
-            $job[ 'open_threads_count' ] = 0 ;
-            foreach( $openThreads as $openThread ) {
-                if ( $openThread->id_job == $job[ 'id' ] && $openThread->password == $job[ 'password' ] ) {
-                    $job[ 'open_threads_count' ] = (int) $openThread->count;
-                }
-            }
-
-            $job['warnings_count'] = 0;
-            foreach( $warningsCount as $count ) {
-                if ( $count[ 'id_job' ] == $job[ 'id' ] && $count[ 'password' ] == $job[ 'password' ] ) {
-                    $job[ 'warnings_count' ] = (int) $count[ 'count' ] ;
-                    $job[ 'warning_segments' ] = array_map( function( $id_segment ){ return (int)$id_segment; }, explode( ",", $count[ 'segment_list' ] ) );
-                }
-            }
-
-
-            $job['quality_overall'] = CatUtils::getQualityOverallFromJobArray( $job_array ) ;
-
-
-            //generate and set job stats
-            $jobStats = new WordCount_Struct();
-            $jobStats->setIdJob( $job_array[ 'id' ] );
-            $jobStats->setDraftWords( $job_array[ 'DRAFT' ] );
-            $jobStats->setRejectedWords( $job_array[ 'REJECT' ] );
-            $jobStats->setTranslatedWords( $job_array[ 'TRANSLATED' ] );
-            $jobStats->setApprovedWords( $job_array[ 'APPROVED' ] );
-
-            //These would be redundant in response. Unset them.
-            unset( $job_array[ 'DRAFT' ] );
-            unset( $job_array[ 'REJECT' ] );
-            unset( $job_array[ 'TRANSLATED' ] );
-            unset( $job_array[ 'APPROVED' ] );
-
-            $job[ 'stats' ] = CatUtils::getFastStatsForJob( $jobStats );
-
-            //generate and set job tm_keys
-            $tm_keys_json = $job_array[ 'tm_keys' ];
-
-            $tm_keys_json = TmKeyManagement_TmKeyManagement::getOwnerKeys( array( $tm_keys_json ) );
-
-            $tm_keys = array();
-
-            foreach ( $tm_keys_json as $tm_key_struct ) {
-                /**
-                 * @var $tm_key_struct TmKeyManagement_TmKeyStruct
-                 */
-                $tm_keys[ ] = array(
-                        "key" => $tm_key_struct->key,
-                        "r"   => ( $tm_key_struct->r ) ? 'Lookup' : '&nbsp;',
-                        "w"   => ( $tm_key_struct->w ) ? 'Update' : '',
-                        "name" => $tm_key_struct->name
-                );
-            }
-
-            $job[ 'private_tm_key' ] = json_encode( $tm_keys );
-
-            $job[ 'disabled' ] = ( $job_array[ 'status_owner' ] == Constants_JobStatus::STATUS_CANCELLED ) ? "disabled" : "";
-            $job[ 'status' ]   = $job_array[ 'status_owner' ];
-            $job[ 'show_download_xliff'] =
-              (INIT::$DEPRECATE_LEGACY_XLIFFS == false ||
-                Utils::isJobBasedOnMateCatFilters($job_array[ 'id' ]) == true);
-
-
-            //These vars will be used in projects loop for some flag evaluation.
-            $project2info[ $job[ 'pid' ] ][ 'status' ][ ]      = $job[ 'status' ];
-            $project2info[ $job[ 'pid' ] ][ 'mt_engine_name' ] = $job[ 'mt_engine_name' ];
-            $project2info[ $job[ 'pid' ] ][ 'id_tms' ]         = $job[ 'id_tms' ];
-
-            $project2jobChunk[ $job[ 'pid' ] ][] = $job;
-
-        }
-
-        $dao = new Projects_ProjectDao() ;
-        $remoteFileServices = $dao->getRemoteFileServiceName( $projectIDs ) ;
-
-        //Prepare project data
-        foreach ( $data as $item ) {
-
-            $project                     = array();
-            $project[ 'id' ]             = $item[ 'pid' ];
-            $project[ 'name' ]           = $item[ 'name' ];
-            $project[ 'id_team' ]        = (int) $item[ 'id_team' ] ;
-
-            $project[ 'jobs' ]           = array();
-            $project[ 'create_date' ]    = $item[ 'create_date' ];
-            $project[ 'password' ]       = $item[ 'password' ];
-            $project[ 'tm_analysis' ]    = number_format( $item[ 'tm_analysis_wc' ], 0, ".", "," );
-
-            $project[ 'jobs' ] = $project2jobChunk[ $project[ 'id' ] ];
-
-            $project2info[ $project[ 'id' ] ][ 'status' ] = array_unique( $project2info[ $project[ 'id' ] ][ 'status' ] );
-
-            $project[ 'no_active_jobs' ] = ( !in_array( Constants_JobStatus::STATUS_ACTIVE, $project2info[ $project[ 'id' ] ][ 'status' ] ) ) ? ' allCancelled' : '';;
-            $project[ 'has_cancelled' ]  = ( in_array( Constants_JobStatus::STATUS_CANCELLED, $project2info[ $project[ 'id' ] ][ 'status' ] ) );
-            $project[ 'has_archived' ]   = ( in_array( Constants_JobStatus::STATUS_ARCHIVED, $project2info[ $project[ 'id' ] ][ 'status' ] ) );
-            $project[ 'mt_engine_name' ] = $project2info[ $project[ 'id' ] ][ 'mt_engine_name' ];
-            $project[ 'id_tms' ]         = $project2info[ $project[ 'id' ] ][ 'id_tms' ];
-
-            $project[ 'features' ] = $item[ 'features' ] ;
-            $project[ 'id_assignee' ] = $item[ 'id_assignee' ] ;
-            $project[ 'project_slug' ] = Utils::friendly_slug( $project['name'] ) ;
-            $project['remote_file_service'] = null ;
-
-            foreach( $remoteFileServices as $service ) {
-                if ( $project['id'] == $service->id_project ) {
-                    $project['remote_file_service'] = $service->service ;
-                }
-            }
-
-            $projects[ ] = $project;
-        }
-
-        return $projects;
+        $projectRenderer = new Project( $projects );
+        return $projectRenderer->render();
 
     }
 

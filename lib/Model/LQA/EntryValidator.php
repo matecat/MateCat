@@ -24,7 +24,7 @@ class EntryValidator extends \DataAccess_AbstractValidator {
 
         if (!$this->segment) throw new NotFoundError('segment not found');
 
-        $this->job = \Jobs_JobDao::getById( $this->struct->id_job);
+        $this->job = \Jobs_JobDao::getById( $this->struct->id_job)[0];
         $this->project = \Projects_ProjectDao::findById($this->job->id_project);
 
         $this->validateCategoryId();

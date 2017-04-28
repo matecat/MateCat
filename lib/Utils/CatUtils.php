@@ -1130,7 +1130,7 @@ class CatUtils {
         else {
             $struct = CatUtils::getWStructFromJobStruct( $job, $job->getProject()->status_analysis ) ;
             $jobQA = new Revise_JobQA(
-                    $job->id, $job->jpassword, $struct->getTotal()
+                    $job->id, $job->password, $struct->getTotal()
             );
 
             $jobQA->retrieveJobErrorTotals();

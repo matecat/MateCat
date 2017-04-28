@@ -14,7 +14,14 @@ use Projects_ProjectStruct;
 class ProjectAnonymous extends Project {
 
     /** @noinspection PhpMissingParentConstructorInspection */
-    public function __construct() {
+
+    /**
+     * Project constructor.
+     *
+     * @param Projects_ProjectStruct[] $data
+     */
+    public function __construct( array $data = null ) {
+        $this->data = $data;
         $this->jRenderer = new JobAnonymous();
     }
 
