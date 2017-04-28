@@ -159,22 +159,27 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $id
-     * @param $password
+     * @param     $id
+     * @param     $password
+     *
+     * @param int $ttl
      *
      * @return Projects_ProjectStruct
      * @throws \Exceptions\NotFoundError
      */
-    static function findByIdAndPassword( $id, $password ) {
+    static function findByIdAndPassword( $id, $password, $ttl = 0 ) {
+
+        $thisDao = new self();
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "SELECT * FROM projects WHERE id = ? AND password = ? ");
-        $stmt->execute( array( $id, $password ) );
-        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Projects_ProjectStruct');
-        $fetched =  $stmt->fetch();
+        $stmt = $conn->prepare( "SELECT * FROM projects WHERE id = :id AND password = :password " );
+        $fetched = $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id' => $id, 'password' => $password ] )[ 0 ];
+
         if ( !$fetched) {
-            throw new Exceptions\NotFoundError();
+            throw new Exceptions\NotFoundError( "No project found." );
         }
+
         return $fetched;
+
     }
 
     /**

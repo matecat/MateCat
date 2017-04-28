@@ -43,13 +43,12 @@ class JobsTranslatorsController extends KleinController {
         }
 
         $TranslatorsModel = new TranslatorsModel( $this->jStruct );
-        $TranslatorsModel->setUserInvite( $this->getUser() )
+        $TranslatorsModel
+                ->setUserInvite( $this->getUser() )
                 ->setDeliveryDate( $this->params[ 'delivery_date' ] )
                 ->setEmail( $this->params[ 'email' ] );
 
-        $jTranslatorStruct = $TranslatorsModel->update();
-
-        $this->jStruct->_setTranslator( $jTranslatorStruct );
+        $TranslatorsModel->update();
 
         $formatted = new Job();
         $this->response->json( array( 'job' => $formatted->renderItem( $this->jStruct ) ) );

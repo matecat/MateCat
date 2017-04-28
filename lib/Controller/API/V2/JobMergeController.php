@@ -7,7 +7,9 @@
  */
 
 namespace API\V2;
+use API\V2\Exceptions\NotFoundException;
 use API\V2\Validators\ProjectPasswordValidator;
+use Jobs_JobStruct;
 use ProjectManager ;
 
 
@@ -21,14 +23,18 @@ class JobMergeController extends KleinController {
     private $job ;
 
     public function merge() {
+
         $pManager = new ProjectManager();
-        $pManager->setProjectIdAndLoadProject( $this->validator->getProject()->id );
+        $pManager->setProjectAndReLoadFeatures( $this->validator->getProject() );
 
         $pStruct = $pManager->getProjectStructure();
         $pStruct['id_customer'] = $this->validator->getProject()->id_customer ;
 
         $pStruct[ 'job_to_merge' ] = $this->job->id;
-        $pManager->mergeALL( $pStruct );
+
+        $jobStructs = $this->checkMergeAccess( $this->validator->getProject()->getJobs() );
+
+        $pManager->mergeALL( $pStruct, $jobStructs );
 
         $this->response->code(200);
 
@@ -48,4 +54,27 @@ class JobMergeController extends KleinController {
     protected function afterConstruct() {
         $this->validator = new Validators\ProjectPasswordValidator( $this );
     }
+
+    /**
+     * @param Jobs_JobStruct[] $jobList
+     *
+     * @return Jobs_JobStruct[]
+     * @throws NotFoundException
+     */
+    protected function checkMergeAccess( array $jobList ) {
+
+        $found = false;
+        $jid   = $this->job->id;
+        $jobToMerge = array_filter( $jobList, function ( Jobs_JobStruct $jobStruct ) use ( &$found, $jid ) {
+            return $jobStruct->id == $jid;
+        } );
+
+        if ( empty( $jobToMerge ) ) {
+            throw new NotFoundException( "Access denied", -10 );
+        }
+
+        return $jobToMerge;
+
+    }
+
 }

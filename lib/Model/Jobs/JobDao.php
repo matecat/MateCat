@@ -110,10 +110,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
     /**
      *
-     * Warning: This method returns one record on purpose. Job struct should be used to identify just
-     * the language pair.
-     *
-     * @param     $id_job
+     * @param int $id_job
      *
      * @param int $ttl
      *
@@ -123,7 +120,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
         $thisDao = new self();
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare("SELECT * FROM jobs WHERE id = ?");
+        $stmt = $conn->prepare("SELECT * FROM jobs WHERE id = ? ORDER BY job_first_segment");
         return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Jobs_JobStruct(), [ $id_job ] );
 
     }

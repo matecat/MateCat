@@ -113,7 +113,7 @@ UI = {
 
 			if (UI.currentOutsourceProject) {
                 UI.currentOutsourceJob = UI.currentOutsourceProject.jobs.find(function (job) {
-                    return job.id === idJob;
+                    return parseInt( job.id ) === parseInt( idJob );
                 });
 
                 words = $(".tablestats[data-pwd='" + jPieces[1] + "'] .stat-payable").text();

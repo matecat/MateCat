@@ -171,7 +171,7 @@ class ProjectManager {
      * @throws Exceptions_RecordNotFound
      */
     public function setProjectIdAndLoadProject( $id ) {
-        $this->project = Projects_ProjectDao::findById($id);
+        $this->project = Projects_ProjectDao::findById($id, 60 * 60);
         if ( $this->project == FALSE ) {
             throw new Exceptions_RecordNotFound("Project was not found: id $id ");
         }
@@ -181,6 +181,14 @@ class ProjectManager {
         $this->reloadFeatures();
 
     }
+
+    public function setProjectAndReLoadFeatures( Projects_ProjectStruct $pStruct ){
+        $this->project = $pStruct;
+        $this->projectStructure['id_project'] = $this->project->id ;
+        $this->projectStructure['id_customer'] = $this->project->id_customer ;
+        $this->reloadFeatures();
+    }
+
     private function reloadFeatures() {
         $this->features = new FeatureSet();
         $this->features->loadForProject( $this->project ) ;
@@ -1440,27 +1448,17 @@ class ProjectManager {
 
     }
 
-    public function mergeALL( ArrayObject $projectStructure, $renewPassword = false ) {
-
-        $query_job = "SELECT *
-            FROM jobs
-            WHERE id = %u
-            ORDER BY job_first_segment";
-
-        $query_job = sprintf( $query_job, $projectStructure[ 'job_to_merge' ] );
-        //$projectStructure[ 'job_to_split' ]
-
-        $rows = $this->dbHandler->fetch_array( $query_job );
+    public function mergeALL( ArrayObject $projectStructure, array $jobStructs ) {
 
         $metadata_dao = new Projects_MetadataDao();
-        $metadata_dao->cleanupChunksOptions( $rows );
+        $metadata_dao->cleanupChunksOptions( $jobStructs );
 
         //get the min and
-        $first_job         = reset( $rows );
+        $first_job         = reset( $jobStructs );
         $job_first_segment = $first_job[ 'job_first_segment' ];
 
         //the max segment from job list
-        $last_job         = end( $rows );
+        $last_job         = end( $jobStructs );
         $job_last_segment = $last_job[ 'job_last_segment' ];
 
         //change values of first job
@@ -1469,7 +1467,7 @@ class ProjectManager {
 
         //merge TM keys: preserve only owner's keys
         $tm_keys = array();
-        foreach ( $rows as $chunk_info ) {
+        foreach ( $jobStructs as $chunk_info ) {
             $tm_keys[] = $chunk_info[ 'tm_keys' ];
         }
 
@@ -1489,7 +1487,7 @@ class ProjectManager {
         }
 
         $oldPassword = $first_job[ 'password' ];
-        if ( $renewPassword ) {
+        if( $jobStructs[ 0 ]->getTranslator() ){
             $first_job[ 'password' ] = self::generatePassword();
         }
 
@@ -1503,7 +1501,7 @@ class ProjectManager {
         $queries = array();
 
         $queries[] = "UPDATE jobs SET " . implode( ", \n", $_data ) .
-                " WHERE id = {$first_job['id']} AND password = '{$oldPassword}'"; //ose old password
+                " WHERE id = {$first_job['id']} AND password = '{$oldPassword}'"; //use old password
 
         //delete all old jobs
         $queries[] = "DELETE FROM jobs WHERE id = {$first_job['id']} AND password != '{$first_job['password']}' "; //use new password
@@ -1513,10 +1511,10 @@ class ProjectManager {
         foreach ( $queries as $query ) {
             $res = $this->dbHandler->query( $query );
             if ( $this->dbHandler->affected_rows == 0 ) {
-                $msg = "Failed to merge job  " . $rows[ 0 ][ 'id' ] . " from " . count( $rows ) . " chunks\n";
+                $msg = "Failed to merge job  " . $first_job[ 'id' ] . " from " . count( $jobStructs ) . " chunks\n";
                 $msg .= "Tried to perform SQL: \n" . print_r( $queries, true ) . " \n\n";
                 $msg .= "Failed Statement is: \n" . print_r( $query, true ) . "\n";
-                $msg .= "Original Status for rebuild job and project was: \n" . print_r( $rows, true ) . "\n";
+                $msg .= "Original Status for rebuild job and project was: \n" . print_r( $jobStructs, true ) . "\n";
                 Utils::sendErrMailReport( $msg );
                 throw new Exception( 'Failed to merge jobs, project damaged. Contact Matecat Support to rebuild project.', -8 );
             }

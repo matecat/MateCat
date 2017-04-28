@@ -4,7 +4,7 @@
  * User: domenico
  * Date: 20/11/13
  * Time: 11.32
- * 
+ *
  */
 
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
@@ -31,7 +31,7 @@ class splitJobController extends ajaxController {
      * This is the new variable to use to store all data for the project. This should be
      * used instead of the data provided by `queries.php`.
      */
-    private $project_struct ;
+    private $project_struct;
 
     public function __construct() {
 
@@ -40,13 +40,19 @@ class splitJobController extends ajaxController {
         parent::__construct();
 
         $filterArgs = array(
-            'exec'         => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-            'project_id'   => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'project_pass' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-            'job_id'       => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'job_pass'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-            'num_split'    => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'split_values' => array( 'filter' => FILTER_CALLBACK, 'options' => array( 'self', 'valuesToInt' ) ),
+                'exec'         => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+                'project_id'   => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'project_pass' => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+                'job_id'       => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'job_pass'     => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+                'num_split'    => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'split_values' => array( 'filter' => FILTER_CALLBACK, 'options' => array( 'self', 'valuesToInt' ) ),
         );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -63,35 +69,29 @@ class splitJobController extends ajaxController {
         $this->num_split    = $__postInput[ 'num_split' ];
         $this->split_values = $__postInput[ 'split_values' ];
 
-        $this->project_struct = \Projects_ProjectDao::findById( $__postInput['project_id'] ) ;
+
     }
 
-    protected function valuesToInt( $float_val ){
+    protected function valuesToInt( $float_val ) {
         return (int)$float_val;
     }
 
     public function doAction() {
 
-        $this->project_data = getProjectJobData( $this->project_id );
-
         try {
 
-            if( empty( $this->project_data ) ){
-                throw new Exception( "No Project Found.", -1 );
-            }
+            $this->project_struct = \Projects_ProjectDao::findByIdAndPassword( $this->project_id, $this->project_pass, 60 * 60 );
 
             $pManager = new ProjectManager();
-
-            $project = Projects_ProjectDao::findById( $this->project_id ) ;
-            $pManager->setProjectIdAndLoadProject( $project->id );
+            $pManager->setProjectAndReLoadFeatures( $this->project_struct );
 
             $pStruct = $pManager->getProjectStructure();
 
             switch ( $this->exec ) {
                 case 'merge':
-                    $this->checkMergeAccess();
-                    $pStruct[ 'job_to_merge' ]      = $this->job_id;
-                    $pManager->mergeALL( $pStruct );
+                    $jobStructs = $this->checkMergeAccess( $this->project_struct->getJobs() );
+                    $pStruct[ 'job_to_merge' ] = $this->job_id;
+                    $pManager->mergeALL( $pStruct, $jobStructs );
                     break;
                 case 'check':
                     $this->checkSplitAccess();
@@ -113,32 +113,43 @@ class splitJobController extends ajaxController {
 
             }
 
-            $this->result["data"] = $pStruct['split_result'];
+            $this->result[ "data" ] = $pStruct[ 'split_result' ];
 
-        } catch ( Exception $e ){
-            $this->result['errors'][] = array( "code" => $e->getCode(), "message" => $e->getMessage() );
+        } catch ( Exception $e ) {
+            $this->result[ 'errors' ][] = array( "code" => $e->getCode(), "message" => $e->getMessage() );
         }
 
 
     }
 
-    protected function checkMergeAccess(){
+    /**
+     * @param Jobs_JobStruct[] $jobList
+     *
+     * @return Jobs_JobStruct[]
+     * @throws Exception
+     */
+    protected function checkMergeAccess( array $jobList ) {
 
-        $passCheck = new AjaxPasswordCheck();
-        $access = $passCheck->grantProjectAccessOnJobID( $this->project_data, $this->project_pass, $this->job_id );
+        $found = false;
+        $jid   = $this->job_id;
+        $jobToMerge = array_filter( $jobList, function ( Jobs_JobStruct $jobStruct ) use ( &$found, $jid ) {
+            return $jobStruct->id == $jid;
+        } );
 
-        if( !$access ){
+        if ( empty( $jobToMerge ) ) {
             throw new Exception( "Access denied", -10 );
         }
 
+        return $jobToMerge;
+
     }
 
-    protected function checkSplitAccess(){
+    protected function checkSplitAccess() {
 
         $passCheck = new AjaxPasswordCheck();
-        $access = $passCheck->grantProjectJobAccessOnJobPass( $this->project_data, $this->project_pass, $this->job_pass );
+        $access    = $passCheck->grantProjectJobAccessOnJobPass( $this->project_data, $this->project_pass, $this->job_pass );
 
-        if( !$access ){
+        if ( !$access ) {
             throw new Exception( "Wrong Password. Access denied", -10 );
         }
 

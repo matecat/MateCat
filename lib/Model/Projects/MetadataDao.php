@@ -117,7 +117,7 @@ class Projects_MetadataDao extends DataAccess_AbstractDao {
     /**
      * Clean up the chunks options before the job merging
      *
-     * @param $jobs   Associative array with the Jobs
+     * @param $jobs array Associative array with the Jobs
      */
     public function cleanupChunksOptions( $jobs ) {
         foreach ( $jobs as $job ) {
