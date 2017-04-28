@@ -62,6 +62,7 @@ class Project {
                 'features'             => implode( ",", $data->getFeatures()->getCodes() ),
                 'has_cancelled'        => ( in_array( Constants_JobStatus::STATUS_CANCELLED, $jobStatuses ) ),
                 'has_archived'         => ( in_array( Constants_JobStatus::STATUS_ARCHIVED, $jobStatuses ) ),
+                'remote_file_service'  => $data->getRemoteFileServiceName()
         ];
 
         return $projectOutputFields;

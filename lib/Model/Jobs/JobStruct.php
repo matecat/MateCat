@@ -97,6 +97,8 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
             return $outsourceDao->setCacheTTL( 60 * 60 )->getConfirmation( $jobStruct );
         });
 
+        if ( empty( $this->_outsource->id_vendor ) ) return null;
+
         switch ( $this->_outsource->id_vendor ) {
             case TranslatedConfirmationStruct::VENDOR_ID:
                 //Ok Do Nothing

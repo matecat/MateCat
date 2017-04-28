@@ -9,7 +9,7 @@
 
 $klein->with('/api/v2/projects/[:id_project]/[:password]', function() {
 
-    route( '',                      'GET',  'API\V2\ProjectsController',    'get'     );
+    route( '',                      'GET',  'API\V2\ProjectsController',    'get'     ); //this do not show some info like teams and translators
     route( '/urls',                 'GET',  'API\V2\UrlsController',        'urls'      );
     route( '/jobs/[:id_job]/merge', 'POST', 'API\V2\JobMergeController',    'merge'     );
     route( '/creation_status',      'GET',  'API\V2\ProjectCreationStatusController',   'get' );
@@ -143,6 +143,7 @@ $klein->with('/api/v2/teams', function() {
     route( '/[i:id_team]/members/[i:uid_member]', 'DELETE' , '\API\V2\TeamMembersController', 'delete' );
 
     route( '/[i:id_team]/projects/[i:id_project]', 'PUT', 'API\V2\TeamsProjectsController', 'update' ) ;
+    route( '/[i:id_team]/projects/[i:id_project]', 'GET', 'API\V2\TeamsProjectsController', 'get' ) ;
 
 }) ;
 

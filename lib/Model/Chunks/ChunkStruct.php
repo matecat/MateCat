@@ -49,7 +49,7 @@ class Chunks_ChunkStruct extends Jobs_JobStruct {
                 'features'          => $this->getProject()->getMetadataValue('features')
         );
 
-        return CatUtils::getQualityOverallFromJobArray( $job_array ) ;
+        return CatUtils::getQualityOverallFromJobStruct( $this ) ;
     }
 
     public function getErrorsCount() {

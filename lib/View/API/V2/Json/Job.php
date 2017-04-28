@@ -45,12 +45,6 @@ class Job {
 
         $lang_handler = Langs_Languages::getInstance();
 
-        $jArray                      = $jStruct->getArrayCopy();
-        $jArray[ 'jid' ]             = $jStruct->id;
-        $jArray[ 'jpassword' ]       = $jStruct->password;
-        $jArray[ 'features' ]        = $jStruct->getProjectFeatures();
-        $jArray[ 'status_analysis' ] = $jStruct->getProject()->status_analysis;
-
         return [
                 'id'                    => (int)$jStruct->id,
                 'password'              => $jStruct->password,
@@ -62,9 +56,10 @@ class Job {
                 'subject'               => $jStruct->subject,
                 'owner'                 => $jStruct->owner,
                 'open_threads_count'    => $jStruct->getOpenThreadsCount(),
+                'create_timestamp'      => strtotime( $jStruct->create_date ),
                 'create_date'           => $jStruct->create_date,
                 'formatted_create_date' => ManageUtils::formatJobDate( $jStruct->create_date ),
-                'quality_overall'       => CatUtils::getQualityOverallFromJobArray( $jArray ),
+                'quality_overall'       => CatUtils::getQualityOverallFromJobStruct( $jStruct ),
                 'private_tm_key'        => json_encode( $jStruct->getOwnerKeys() ),
                 'warnings_count'        => $jStruct->getWarningsCount(),
                 'stats'                 => CatUtils::getFastStatsForJob( $jobStats ),

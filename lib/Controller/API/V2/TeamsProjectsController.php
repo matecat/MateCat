@@ -48,4 +48,11 @@ class TeamsProjectsController extends KleinController {
         $this->appendValidator( ( new ProjectExistsInTeamValidator( $this ) )->setProject( $this->project ) );
     }
 
+    public function get(){
+
+        $formatted     = new Project();
+        $this->response->json( array( 'project' => $formatted->renderItem( $this->project ) ) );
+
+    }
+
 }
