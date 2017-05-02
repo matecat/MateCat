@@ -2,6 +2,7 @@
 
 namespace API\V2  ;
 
+use API\V2\Json\Project;
 use API\V2\Json\ProjectAnonymous;
 use API\V2\Validators\ProjectPasswordValidator;
 
@@ -27,7 +28,12 @@ class ProjectsController extends KleinController {
 
         $this->project = $this->projectValidator->getProject();
 
-        $formatted     = new ProjectAnonymous();
+        if ( !empty( $this->user ) ) {
+            $formatted = new ProjectAnonymous();
+        } else {
+            $formatted = new Project();
+        }
+
         $this->response->json( array( 'project' => $formatted->renderItem( $this->project ) ) );
 
     }
