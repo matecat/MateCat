@@ -102,16 +102,39 @@ UI = {
 			$(".loadingbar").addClass("closebar");
 		});
 
+        this.setTranslateButtonEvent();
+
+        this.setFocusEvent();
+
+		this.pollData();
+
+        this.checkQueryParams();
+
+        this.setTeamHeader();
+
+        this.getProjectInfo();
+	},
+
+	getProjectInfo: function () {
+        this.getProject(config.id_project).done(function (response) {
+            if (response.project) {
+                UI.currentOutsourceProject = response.project;
+                UI.checkJobsOutsource();
+            }
+        });
+	},
+
+	setTranslateButtonEvent: function () {
         // trigger the process for getting and displaying an outsource quote
         $(".translate").click(function(e) {
-        	e.preventDefault();
+            e.preventDefault();
             var linkPieces = $( this ).attr( "href" ).split( "/" );
             var jPieces = linkPieces[ linkPieces.length - 1 ].split( "-" );
-			var idJob = jPieces[0];
+            var idJob = jPieces[0];
 
             let words, sourceTxt, targetTxt;
 
-			if (UI.currentOutsourceProject) {
+            if (UI.currentOutsourceProject) {
                 UI.currentOutsourceJob = UI.currentOutsourceProject.jobs.find(function (job) {
                     return parseInt( job.id ) === parseInt( idJob );
                 });
@@ -138,7 +161,7 @@ UI = {
                     id: config.id_project,
                     password: config.password,
                 };
-			}
+            }
 
             $( ".title-source" ).text( sourceTxt );
             $( ".title-target" ).text( targetTxt );
@@ -155,22 +178,7 @@ UI = {
             let style = {width: '970px',maxWidth: '970px', top: '45%'};
             APP.ModalWindow.showModalComponent(OutsourceModal, props, "Translate", style);
         });
-
-        this.setFocusEvent();
-
-		this.pollData();
-
-        this.checkQueryParams();
-
-        this.setTeamHeader();
-
-        this.getProject(config.id_project).done(function (response) {
-            if (response.project) {
-                UI.currentOutsourceProject = response.project;
-                UI.checkJobsOutsource();
-            }
-        });
-	},
+    },
 
 	updateProjectData: function () {
         this.getProject(config.id_project).done(function (response) {

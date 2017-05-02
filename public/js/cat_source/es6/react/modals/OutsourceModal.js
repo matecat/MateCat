@@ -287,9 +287,9 @@ class OutsourceModal extends React.Component {
 
                     <input className={this.props.fromManage ? ("out-link from-manage") :("out-link")} type="text" defaultValue={window.location.protocol + '//' + window.location.host + this.props.url} readOnly="true"/>
                     {!this.props.fromManage ? (
-                        <a  href={this.props.url} onClick={trackClick( "translate" )} className="uploadbtn in-popup" target="_blank">Open</a>
+                        <a  href={this.props.url} className="uploadbtn in-popup" target="_blank">Open</a>
                         ) : (
-                        <a  href={this.props.url} onClick={trackClick( "translate" )} className="uploadbtn in-popup hide" target="_blank">Open</a>
+                        <a  href={this.props.url} className="uploadbtn in-popup hide" target="_blank">Open</a>
                         )}
 
 
