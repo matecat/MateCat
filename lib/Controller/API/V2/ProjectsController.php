@@ -28,7 +28,7 @@ class ProjectsController extends KleinController {
 
         $this->project = $this->projectValidator->getProject();
 
-        if ( !empty( $this->user ) ) {
+        if ( empty( $this->user ) ) {
             $formatted = new ProjectAnonymous();
         } else {
             $formatted = new Project();
