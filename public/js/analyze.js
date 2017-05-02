@@ -165,8 +165,8 @@ UI = {
         this.setTeamHeader();
 
         this.getProject(config.id_project).done(function (response) {
-            if (response.data && response.data.length > 0) {
-                UI.currentOutsourceProject = response.data[0];
+            if (response.project) {
+                UI.currentOutsourceProject = response.project;
                 UI.checkJobsOutsource();
             }
         });
@@ -205,20 +205,10 @@ UI = {
 	
     getProject: function(id) {
 
-        let d = {
-            action: 'getProjects',
-            project: id,
-            password: config.password
-        };
-
-        if (config.isLoggedIn && APP.USER.STORE.teams) {
-            d.id_team = APP.getLastTeamSelected(APP.USER.STORE.teams).id;
-        }
-
-        return APP.doRequest({
-            data: d,
-            success: function(d){},
-            error: function(d){}
+        return $.ajax({
+            async: true,
+            type: "get",
+            url : "/api/v2/projects/" + id +"/" + config.password
         });
     },
 	performPreCheckSplitComputation: function(doStringSanitization) {

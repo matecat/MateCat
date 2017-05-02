@@ -911,6 +911,11 @@ span.subjects, span.experience, span.translated_words, span.score_number {
    display: block;
 }
 
+.tprice span.displaypriceperword .price_p_word {
+    font-size: 15px ;
+    font-weight: normal;
+}
+
 
 .addrevision {
     float: left;

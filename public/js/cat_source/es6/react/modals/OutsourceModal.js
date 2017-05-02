@@ -477,14 +477,14 @@ class OutsourceModal extends React.Component {
                                 <div className="ErrorMsg ErrorMsgQuoteError hide">
                                     <p>Contact us at <a href="mailto:info@translated.net">info@translated.net</a> <br />or call +39 06 90 254 001</p>
                                 </div>
-                                <span className="euro"></span>
-                                <span className="displayprice" data-currency="EUR" data-rawprice="0.00"></span>
+                                <span className="euro"/>
+                                <span className="displayprice" data-currency="EUR" data-rawprice="0.00"/>
                                 <br />
 
                                 {/*//TODO Inserire spazi*/}
                                 <span className="displaypriceperword">about
                                     <span className="euro currency_per_word" style={{marginLeft: '2px', marginRight: '2px'}}/>
-                                     <a className="price_p_word"/> / word
+                                     <span className="price_p_word"/> / word
                                     { (this.state.showTranslatorInfo) ? (
                                             <div className="delivery_container">
                                                 {deliveryHtml}

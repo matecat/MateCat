@@ -255,19 +255,21 @@ class ProjectContainer extends React.Component {
         let chunks = [],  index;
         let tempIdsArray = [];
         let orderedJobs = this.props.project.get('jobs').reverse();
-        let visibleJobsBoxes = 0;
         orderedJobs.map(function(job, i){
 
             let next_job_id = (orderedJobs.get(i+1)) ? orderedJobs.get(i+1).get('id') : 0;
+            let job_chunks = orderedJobs.count(function (currentJob, i) {
+                return currentJob.get('id') === job.get('id');
+            });
             //To check if is a chunk (jobs with same id)
             let isChunk = false;
             if (tempIdsArray.indexOf(job.get('id')) > -1 ) {
                 isChunk = true;
-                index ++;
+                index --;
             }  else if ((orderedJobs.get(i+1) && orderedJobs.get(i+1).get('id') === job.get('id') )) {  //The first of the Chunk
                 isChunk = true;
                 tempIdsArray.push(job.get('id'));
-                index = 1;
+                index = job_chunks;
             }  else {
                 index = 0;
             }
