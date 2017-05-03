@@ -1188,7 +1188,7 @@ var EYE = {
 
         var parentClass = $(ev.currentTarget).closest('.modal-outsource-datepicker').attr('id');
         if ( parentClass == 'out-datepicker' ) {
-            setOutsourceDate(getChosenOutsourceDate());
+            // setOutsourceDate(getChosenOutsourceDate());
             return false;
         }
 
