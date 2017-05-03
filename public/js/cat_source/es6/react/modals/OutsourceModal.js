@@ -65,7 +65,7 @@ class OutsourceModal extends React.Component {
     getCurrency() {
         // if the customer has a currency in the cookie, then use it
         // otherwise use the default one
-        let currToShow = readCookie( "matecat_currency" );
+        let currToShow = APP.readCookie( "matecat_currency" );
         if ( currToShow == "" ) {
             currToShow = "EUR";
         }
@@ -73,15 +73,7 @@ class OutsourceModal extends React.Component {
     }
 
     getTimeZone() {
-        let timezoneToShow = readCookie( "matecat_timezone" );
-        if ( timezoneToShow == "" ) {
-            timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
-        }
-        return timezoneToShow;
-    }
-
-    getTimeZone() {
-        let timezoneToShow = readCookie( "matecat_timezone" );
+        let timezoneToShow = APP.readCookie( "matecat_timezone" );
         if ( timezoneToShow == "" ) {
             timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
         }

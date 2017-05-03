@@ -895,7 +895,7 @@ APP = {
         }
     },
     getGMTDate: function (date) {
-        var timezoneToShow = readCookie( "matecat_timezone" );
+        var timezoneToShow = APP.readCookie( "matecat_timezone" );
         if ( timezoneToShow == "" ) {
             timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
         }
@@ -912,7 +912,7 @@ APP = {
     },
 
     getGMTZoneString: function () {
-        var timezoneToShow = readCookie( "matecat_timezone" );
+        var timezoneToShow = APP.readCookie( "matecat_timezone" );
         if ( timezoneToShow == "" ) {
             timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
         }

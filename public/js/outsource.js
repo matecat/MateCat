@@ -404,7 +404,7 @@ function renderOutsourcedQuote( chunk ) {
 function renderLocalizationInfos( price, delivery, revision_price, revision_delivery ) {
     // if the customer has a timezone in the cookie, then use it
     // otherwise attemp to guess it from his browser infos
-    var timezoneToShow = readCookie( "matecat_timezone" );
+    var timezoneToShow = APP.readCookie( "matecat_timezone" );
     if ( timezoneToShow == "" ) {
         timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
     }
@@ -419,7 +419,7 @@ function renderLocalizationInfos( price, delivery, revision_price, revision_deli
 
     // if the customer has a currency in the cookie, then use it
     // otherwise use the default one
-    var currToShow = readCookie( "matecat_currency" );
+    var currToShow = APP.readCookie( "matecat_currency" );
     if ( currToShow == "" ) {
         currToShow = "EUR";
     }
