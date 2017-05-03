@@ -154,7 +154,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
         if( empty( $id_list ) ) return [];
         $qMarks = str_repeat( '?,', count( $id_list ) - 1 ) . '?';
         $conn   = Database::obtain()->getConnection();
-        $stmt   = $conn->prepare( " SELECT * FROM projects WHERE id IN( $qMarks ) " );
+        $stmt   = $conn->prepare( " SELECT * FROM projects WHERE id IN( $qMarks ) ORDER BY projects.id DESC" );
         return $this->_fetchObject( $stmt, new Projects_ProjectStruct(), $id_list );
     }
 
