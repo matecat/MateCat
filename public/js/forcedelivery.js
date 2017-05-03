@@ -129,8 +129,8 @@ ForceDelivery = {
 
 
 function setTimezoneSelect() {
-    var timezoneToShow = readCookie( "matecat_timezone" );
-    if ( timezoneToShow == "" ) {
+    var timezoneToShow = $.cookie( "matecat_timezone" );
+    if ( !timezoneToShow) {
         timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
     }
     $( "#changeTimezone option[value='" + timezoneToShow + "']").attr( "selected", "selected" );
@@ -194,7 +194,7 @@ function prepareAndSubmitQuote( chosenDate, hideNeedItFaster ) {
         return;
     }
 
-    setCookie( "matecat_timezone", $( "#whenTimezone").val() );
+    APP.setCookie( "matecat_timezone", $( "#whenTimezone").val() );
 
     $( "#delivery_manual_error").addClass( "hide" );
     $('.forceDeliveryButtonOk').removeClass('disabled');
@@ -221,7 +221,7 @@ function setOutsourceDate(chosenDate) {
         return;
     }
 
-    setCookie( "matecat_timezone", $( "#outsource-assign-timezone").val() );
+    APP.setCookie( "matecat_timezone", $( "#outsource-assign-timezone").val() );
 
     $( "#outsource-delivery_error").addClass( "hide" );
     $('.outsource-select-date').removeClass('disabled');

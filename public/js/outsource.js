@@ -530,7 +530,7 @@ function changeCurrency( amount, currencyFrom, currencyTo, elementToUpdateSymbol
         $(".showpricesloading").addClass("hide");
         $(".showprices").removeClass("hide"); $(".showprices").show();
 
-        setCookie( "matecat_currency", currencyTo );
+        APP.setCookie( "matecat_currency", currencyTo );
     });
 }
 
@@ -541,7 +541,7 @@ function fetchChangeRates( callback ) {
         return;
     }
 
-    var changeRates = readCookie( "matecat_changeRates" );
+    var changeRates = APP.readCookie( "matecat_changeRates" );
     if( changeRates != "" && changeRates!="null") {
         UI.changeRates = changeRates;
         if( typeof callback == "function" ) callback();
@@ -554,7 +554,7 @@ function fetchChangeRates( callback ) {
         },
         success: function(d) {
             var now = new Date();
-            setCookie( "matecat_changeRates", d.data, new Date( now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59 ) );
+            APP.setCookie( "matecat_changeRates", d.data, new Date( now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59 ) );
             UI.changeRates = d.data;
             if( typeof callback == "function" ) callback();
         }
@@ -570,7 +570,7 @@ function changeTimezone( date, timezoneFrom, timezoneTo, elementToUpdate ){
     $( elementToUpdate ).attr("data-timezone", timezoneTo);
     $( elementToUpdate ).attr("data-rawtime", dd.toUTCString());
 
-    setCookie( "matecat_timezone", timezoneTo );
+    APP.setCookie( "matecat_timezone", timezoneTo );
 }
 
 
@@ -582,30 +582,6 @@ function updateTimezonesDescriptions( selectedTimezone ) {
     var selectedElement = $( "#changeTimezone" ).find( "option[value='" + selectedTimezone + "']");
     selectedElement.text( selectedElement.attr( "data-description-short" ) );
 }
-
-
-function readCookie( cookieName ) {
-    cookieName += "=";
-    var cookies = document.cookie.split(';');
-
-    for ( var i = 0; i < cookies.length; i++ ) {
-        var cookie = cookies[i].trim();
-
-        if ( cookie.indexOf( cookieName ) == 0 )
-            return cookie.substring( cookieName.length, cookie.length );
-    }
-    return "";
-}
-
-
-function setCookie( cookieName, cookieValue, expiration ) {
-    if( typeof expiration == "undefined" ) {
-        expiration = new Date();
-        expiration.setYear(new Date().getFullYear() + 1);
-    }
-    document.cookie = cookieName + "=" + cookieValue + "; expires=" + expiration.toUTCString() + "; path=/";
-}
-
 
 function updateCartParameters() {
     var linkPieces = $( "a.uploadbtn.in-popup").attr( "href").split( "/" );

@@ -921,6 +921,28 @@ APP = {
 
     },
 
+    readCookie: function( cookieName ) {
+        cookieName += "=";
+        var cookies = document.cookie.split(';');
+
+        for ( var i = 0; i < cookies.length; i++ ) {
+            var cookie = cookies[i].trim();
+
+            if ( cookie.indexOf( cookieName ) == 0 )
+                return cookie.substring( cookieName.length, cookie.length );
+        }
+        return "";
+    },
+
+
+    setCookie: function( cookieName, cookieValue, expiration ) {
+        if( typeof expiration == "undefined" ) {
+            expiration = new Date();
+            expiration.setYear(new Date().getFullYear() + 1);
+        }
+        document.cookie = cookieName + "=" + cookieValue + "; expires=" + expiration.toUTCString() + "; path=/";
+    }
+
 
 };
 
