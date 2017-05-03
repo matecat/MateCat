@@ -217,6 +217,13 @@ AppDispatcher.register(function(action) {
             ProjectsStore.assignTranslator(action.projectId, action.jobId, action.translator);
             ProjectsStore.emitChange(ManageConstants.RENDER_PROJECTS, ProjectsStore.projects);
             break;
+            // Move to Outsource Store
+        case ManageConstants.GET_OUTSOURCE_QUOTE:
+            ProjectsStore.emitChange(action.actionType);
+            break;
+        case ManageConstants.CLOSE_TRANSLATOR:
+            ProjectsStore.emitChange(action.actionType);
+            break;
     }
 });
 

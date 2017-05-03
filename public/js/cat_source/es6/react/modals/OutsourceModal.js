@@ -9,6 +9,8 @@ class OutsourceModal extends React.Component {
             showTranslatorInfo: false,
             outsource: false
         };
+        this.getOutsourceQuote = this.getOutsourceQuote.bind(this);
+        this.hideTranslator = this.hideTranslator.bind(this);
         this.getOutsourceQuote();
     }
 
@@ -35,12 +37,26 @@ class OutsourceModal extends React.Component {
     }
 
     showTranslatorInfo() {
+        $('#forceDeliveryContainer').addClass('hide');
+        $('#out-datepicker').addClass('hide');
+        $("#changeTimezone").removeClass("hide");
+        this.forceDelivery = false;
         this.setState({
             showTranslatorInfo: true
         });
     }
 
     hideTranslatorInfo() {
+        $('#forceDeliveryContainer').addClass('hide');
+        $('#out-datepicker').addClass('hide');
+        $("#changeTimezone").removeClass("hide");
+        this.forceDelivery = false;
+        this.setState({
+            showTranslatorInfo: false
+        });
+    }
+
+    hideTranslator() {
         this.setState({
             showTranslatorInfo: false
         });
@@ -217,12 +233,23 @@ class OutsourceModal extends React.Component {
         return { __html: string };
     }
 
-    componentDidMount () {}
+    componentDidMount () {
+        ProjectsStore.addListener(ManageConstants.GET_OUTSOURCE_QUOTE, this.getOutsourceQuote);
+        ProjectsStore.addListener(ManageConstants.CLOSE_TRANSLATOR, this.hideTranslator);
+    }
+    componentWillUnmount() {
+        ProjectsStore.removeListener(ManageConstants.GET_OUTSOURCE_QUOTE, this.getOutsourceQuote);
+        ProjectsStore.removeListener(ManageConstants.CLOSE_TRANSLATOR, this.hideTranslator);
+    }
+
 
     componentDidUpdate() {
         if ( config.enable_outsource ) {
             UI.outsourceInit();
-            ForceDelivery.init();
+            if (!this.forceDelivery) {
+                ForceDelivery.init();
+                this.forceDelivery = true;
+            }
             this.updateTimezonesDescriptions(this.getTimeZone());
         }
         if (this.state.outsource) {
@@ -269,7 +296,7 @@ class OutsourceModal extends React.Component {
             delivery = $.format.date(new Date(), "yyyy-MM-d hh:mm a");
             delivery =  APP.getGMTDate(delivery);
         }
-        date =  delivery.day + ' ' + delivery.month + ' at ' + delivery.time + " " + delivery.gmt;
+        date =  delivery.day + ' ' + delivery.month + ' at ' + delivery.time + " (" + delivery.gmt + ")";
 
         return <div className={"modal outsource " + loadingClass}>
         <div className="popup">
@@ -445,7 +472,8 @@ class OutsourceModal extends React.Component {
                                             {/*(<strong>${subject | string:IT}</strong>)*/}
                                             and keeps using the same translator for your next projects. <br />
 
-                                            {!this.state.showTranslatorInfo ? (<a className="show_translator more" onClick={this.showTranslatorInfo.bind(this)}><span>Read more</span></a>) : ('')}
+                                            {!this.state.showTranslatorInfo ? (<a className="show_translator more" onClick={this.showTranslatorInfo.bind(this)}><span>Read more</span></a>)
+                                                : (<a className="show_translator more hide" onClick={this.showTranslatorInfo.bind(this)}><span>Read more</span></a>)}
 
                                         </p>
 
@@ -455,7 +483,13 @@ class OutsourceModal extends React.Component {
                                             <br />
                                             <a className="hide_translator more minus"
                                                onClick={this.hideTranslatorInfo.bind(this)}><span>Close</span></a>
-                                        </p>) : ('')}
+                                        </p>) : (<p className="trustbox2 hide">
+                                        Translated has over 15 years' experience as a translation company and offers
+                                        <a href="http://www.translated.net/en/frequently-asked-questions#guarantees" target="_blank"> two key guarantees on quality and delivery</a>.
+                                        <br />
+                                        <a className="hide_translator more minus"
+                                        onClick={this.hideTranslatorInfo.bind(this)}><span>Close</span></a>
+                                        </p>)}
 
                                 </div>
 
@@ -465,11 +499,13 @@ class OutsourceModal extends React.Component {
 
                             </div>
 
-                            { (!this.state.showTranslatorInfo) ? (
+                            {/*{ (!this.state.showTranslatorInfo) ? (*/}
                                     <div className="delivery_container">
                                         {deliveryHtml}
                                     </div>
-                                ) : ('')}
+                                {/*) : (<div className="delivery_container">*/}
+                                    {/*<div className="delivery"/>*/}
+                                {/*</div>)}*/}
 
 
                             <div className={"tprice " + pricesClass}>
@@ -484,11 +520,13 @@ class OutsourceModal extends React.Component {
                                 <span className="displaypriceperword">about
                                     <span className="euro currency_per_word" style={{marginLeft: '2px', marginRight: '2px'}}/>
                                      <span className="price_p_word"/> / word
-                                    { (this.state.showTranslatorInfo) ? (
+                                    {/*{ (this.state.showTranslatorInfo) ? (*/}
                                             <div className="delivery_container">
                                                 {deliveryHtml}
                                             </div>
-                                        ) : ('')}
+                                        {/*) : (<div className="delivery_container">*/}
+                                            {/*<div className="delivery compress"/>*/}
+                                        {/*</div>)}*/}
                                 </span>
                                 <form id="continueForm" action={config.outsource_service_login} method="POST" target="_blank">
                                     <input type="hidden" name="url_ok" value=""/>

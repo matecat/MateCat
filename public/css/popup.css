@@ -940,6 +940,18 @@ span.zone2 {
 .pricebox .tprice .euro, .pricebox .tprice .displayprice {display:inline;}
 .pricebox .tprice, .pricebox delivery {line-height:30px;}
 
+.tprice.compress .delivery_container {
+    display: block;
+}
+
+.tprice .delivery_container {
+    display: none;
+}
+
+.compress .offer > .delivery_container {
+    display: none;
+}
+
 .showpricesloading {
     float: right;
     width: 160px;

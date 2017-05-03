@@ -341,40 +341,8 @@ function renderQuote( clickedButton ) {
 
 function renderQuoteFromManage( idProject, password, jid, jpassword) {
 
-    var typeOfService = $( "input[name='revision']" ).is(":checked") ? "premium" : "professional";
-    var fixedDelivery =  $( "#forceDeliveryChosenDate" ).text();
+    ManageActions.getOutsourceQuote();
 
-    getOutsourceQuoteFromManage( idProject, password, jid, jpassword, fixedDelivery, typeOfService, function(quoteData ){
-        UI.quoteResponse = quoteData.data[0];
-        var chunk = quoteData.data[0][0];
-
-        UI.url_ok = quoteData.return_url.url_ok;
-        UI.url_ko = quoteData.return_url.url_ko;
-        UI.confirm_urls = quoteData.return_url.confirm_urls;
-        UI.data_key = chunk.id;
-
-        // a generic error
-        if( chunk.quote_result != 1 ){
-            renderGenericErrorQuote();
-            return false;
-        }
-
-        // job already outsourced
-        if( chunk.outsourced == 1 ) {
-            renderOutsourcedQuote( chunk );
-            return false;
-        }
-
-        // delivery date too strict
-        if( chunk.quote_available != 1 ) {
-            renderNotAvailableQuote();
-            return false;
-        }
-
-        renderNormalQuote( chunk );
-
-        $(document).trigger('outsource-rendered', { quote_data : UI.quoteResponse } );
-    });
 }
 
 
@@ -397,29 +365,6 @@ function getOutsourceQuote( clickedButton, callback ) {
             ]
         },
         context: clickedButton.parents('.totaltable').find('.languages .splitnum').text(),
-        success: function(d) {
-            if( typeof callback == "function" )
-                callback( d );
-        }
-    });
-}
-
-function getOutsourceQuoteFromManage(idProject, password, jid, jpassword, fixedDelivery, typeOfService, callback ) {
-
-    return APP.doRequest({
-        data: {
-            action: 'outsourceTo',
-            pid: idProject,
-            ppassword: password,
-            fixedDelivery: fixedDelivery,
-            typeOfService: typeOfService,
-            jobs: [
-                {
-                    jid: jid,
-                    jpassword: jpassword
-                }
-            ]
-        },
         success: function(d) {
             if( typeof callback == "function" )
                 callback( d );
@@ -524,7 +469,7 @@ function renderNormalQuote( chunk ) {
     // no info available about translator
     if( chunk.show_translator_data != 1 ) {
         $('.outsourceto').addClass("translatorNotAvailable");
-        $('.outsource.modal .minus').hide();
+        // $('.outsource.modal .minus').hide();
         $('.trustbox2').removeClass('hide');
         $('.translator_bio,.outsource.modal .more,.trustbox1, .translator_not_found,.translator_not_found, .trust_text p:first-child').addClass('hide');
         return false;
@@ -701,11 +646,11 @@ function resetOutsourcePopup( resetHard ) {
     $( ".hide_translator.more").attr( "class", "hide_translator more" );
     $('.popup-box.pricebox.compress').attr( "class", "popup-box pricebox" );
     $('.modal.outsource, .outsource.modal .continuebtn').addClass('loading');
-    $('.delivery').appendTo(".delivery_container").attr("class","delivery");
+    // $('.delivery').appendTo(".delivery_container").attr("class","delivery");
     $('.outsource.modal .continuebtn').addClass('disabled');
     $('.tprice').removeClass('blink');
-    $('.modal.outsource .continuebtn, .modal.outsource .contact_box,.paymentinfo,.outsource #changeTimezone,.outsource #changecurrency,.addrevision, .guaranteed_by .more, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2, .needitfaster, .showpricesloading').removeClass('hide');
-    $('.ErrorMsg,.modal.outsource .tooltip, .outsource_notify, .delivery_before_time, .checkstatus, #delivery_not_available, .trustbox2, .translator_info_box, .hide_translator.more, .showprices').addClass('hide');
+    $('.modal.outsource .continuebtn, .modal.outsource .contact_box,.paymentinfo,.outsource #changeTimezone,.outsource #changecurrency,.addrevision, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2, .needitfaster, .showpricesloading').removeClass('hide');
+    $('.ErrorMsg,.modal.outsource .tooltip, .outsource_notify, .delivery_before_time, .checkstatus, #delivery_not_available, .trustbox2, .translator_info_box, .showprices').addClass('hide');
     $('#out-datepicker').addClass('hide');
     $('.modal.outsource input.out-email').removeClass('error');
     $('.modal.outsource .validation-error.email-translator-error').hide();
