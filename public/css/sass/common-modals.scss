@@ -1263,3 +1263,7 @@ div#matecat-modal p {
 a.login-button.btn-confirm-medium.sing-in.disabled:hover {
     border: 1px solid #848689;
 }
+
+.dropdown > .menu {
+    z-index: 100000000;
+}
