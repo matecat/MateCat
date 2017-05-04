@@ -1380,11 +1380,12 @@ class ProjectManager {
         $jTranslatorStruct = $translatorModel->getTranslator( 0 ); // no cache
         if ( !empty( $jTranslatorStruct ) && !empty( $this->projectStructure[ 'session' ][ 'uid' ] ) ) {
 
-            $translatorModel->setUserInvite(
-                    ( new Users_UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'session' ][ 'uid' ] )
-            )->setDeliveryDate( $jTranslatorStruct->delivery_date )
-             ->setEmail( $jTranslatorStruct->email )
-             ->setNewJobPassword( CatUtils::generate_password() );
+            $translatorModel
+                    ->setUserInvite( ( new Users_UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'session' ][ 'uid' ] ) )
+                    ->setDeliveryDate( $jTranslatorStruct->delivery_date )
+                    ->setJobOwnerTimezone( $jTranslatorStruct->job_owner_timezone )
+                    ->setEmail( $jTranslatorStruct->email )
+                    ->setNewJobPassword( CatUtils::generate_password() );
 
             $translatorModel->update();
             $jobInfo[ 'password'] = $jStruct->password;
