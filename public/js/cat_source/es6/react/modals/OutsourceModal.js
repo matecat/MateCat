@@ -282,10 +282,10 @@ class OutsourceModal extends React.Component {
         let translatorEmail = '';
         let delivery;
         if (this.props.job.translator) {
-            delivery =  APP.getGMTDate(this.props.job.translator.delivery_date);
+            delivery =  APP.getGMTDate(this.props.job.translator.delivery_timestamp * 1000);
             translatorEmail = this.props.job.translator.email;
         } else {
-            delivery = $.format.date(new Date(), "yyyy-MM-d hh:mm a");
+            delivery = new Date().getTime();
             delivery =  APP.getGMTDate(delivery);
         }
         date =  delivery.day + ' ' + delivery.month + ' at ' + delivery.time + " (" + delivery.gmt + ")";

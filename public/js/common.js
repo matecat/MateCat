@@ -899,9 +899,9 @@ APP = {
         if ( timezoneToShow == "" ) {
             timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
         }
-        var dd = new Date( date.replace(/-/g, "/") );
+        var dd = new Date( date );
         var timeZoneFrom = -1 * ( new Date().getTimezoneOffset() / 60 );
-        dd.setMinutes( dd.getMinutes() + (timezoneToShow) * 60 );
+        dd.setMinutes( dd.getMinutes() + (timezoneToShow - timeZoneFrom) * 60 );
         var timeZone = this.getGMTZoneString();
         return {
             day: $.format.date(dd, "d") ,
@@ -912,6 +912,7 @@ APP = {
     },
 
     getGMTZoneString: function () {
+        // var timezoneToShow = "";
         var timezoneToShow = APP.readCookie( "matecat_timezone" );
         if ( timezoneToShow == "" ) {
             timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );

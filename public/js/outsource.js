@@ -153,14 +153,15 @@ $.extend(UI, {
         if (UI.checkSendToTranslatorButton() && UI.checkInputEmailInput()) {
             var email = $('.modal.outsource input.out-email').val();
             var date = $('.modal.outsource input.out-date').data('datesend');
+            var timezone = $( "#outsource-assign-timezone").val();
             if (!date && UI.currentOutsourceJob.translator) {
-                var timezone = $( "#outsource-assign-timezone").val();
+
                 date = new Date ( UI.currentOutsourceJob.translator.delivery_date ).getTime();
             } else if (!date){
                 date = getChosenOutsourceDate();
             }
 
-            UI.sendTranslatorRequest(email, date).done(function (data) {
+            UI.sendTranslatorRequest(email, date, timezone).done(function (data) {
                 APP.ModalWindow.onCloseModal();
                 if (data.job) {
                     UI.checkShareToTranslatorResponse(data, email, date);
@@ -173,10 +174,11 @@ $.extend(UI, {
         }
     },
 
-    sendTranslatorRequest: function (email, date) {
+    sendTranslatorRequest: function (email, date, timezone) {
         let data = {
             email: email,
-            delivery_date: date/1000
+            delivery_date: date/1000,
+            timezone: timezone
         };
         return $.ajax({
             async: true,
