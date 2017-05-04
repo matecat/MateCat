@@ -103,40 +103,40 @@ class NewController extends ajaxController {
         //force client to close connection, avoid UPLOAD_ERR_PARTIAL for keep-alive connections
         header( "Connection: close" );
 
-        $filterArgs = array(
-                'project_name'      => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'source_lang'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'target_lang'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'tms_engine'        => array(
+        $filterArgs = [
+                'project_name'       => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'source_lang'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'target_lang'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'tms_engine'         => [
                         'filter'  => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR,
-                        'options' => array( 'default' => 1, 'min_range' => 0 )
-                ),
-                'mt_engine'         => array(
+                        'options' => [ 'default' => 1, 'min_range' => 0 ]
+                ],
+                'mt_engine'          => [
                         'filter'  => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR,
-                        'options' => array( 'default' => 1, 'min_range' => 0 )
-                ),
-                'private_tm_key'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'subject'           => array(
+                        'options' => [ 'default' => 1, 'min_range' => 0 ]
+                ],
+                'private_tm_key'     => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'subject'            => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'segmentation_rule' => array(
+                ],
+                'segmentation_rule'  => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'owner_email'       => array(
+                ],
+                'owner_email'        => [
                         'filter' => FILTER_VALIDATE_EMAIL
-                ),
-                'metadata' => array(
-                    'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'pretranslate_100' => array(
-                        'filter' => array( 'filter' => FILTER_VALIDATE_INT )
-                ),
-                'id_team'            => array( 'filter' => FILTER_VALIDATE_INT ),
-                'lexiqa'             => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
-                'speech2text'        => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
-                'tag_projection'     => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
-                'project_completion' => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
-        );
+                ],
+                'metadata'           => [
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ],
+                'pretranslate_100'   => [
+                        'filter' => [ 'filter' => FILTER_VALIDATE_INT ]
+                ],
+                'id_team'            => [ 'filter' => FILTER_VALIDATE_INT ],
+                'lexiqa'             => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'speech2text'        => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'tag_projection'     => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+                'project_completion' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+        ];
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
