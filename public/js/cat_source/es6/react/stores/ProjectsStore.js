@@ -78,7 +78,7 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
         let indexJob = projectOld.get('jobs').indexOf(jobOld);
         
         this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'password'], password);
-        this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'oldPassword'], oldPassword);
+        // this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'oldPassword'], oldPassword);
         this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'translator'], null);
     },
 

@@ -895,7 +895,7 @@ APP = {
         }
     },
     getGMTDate: function (date) {
-        var timezoneToShow = readCookie( "matecat_timezone" );
+        var timezoneToShow = APP.readCookie( "matecat_timezone" );
         if ( timezoneToShow == "" ) {
             timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
         }
@@ -912,7 +912,7 @@ APP = {
     },
 
     getGMTZoneString: function () {
-        var timezoneToShow = readCookie( "matecat_timezone" );
+        var timezoneToShow = APP.readCookie( "matecat_timezone" );
         if ( timezoneToShow == "" ) {
             timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
         }
@@ -920,6 +920,28 @@ APP = {
         return (timezoneToShow % 1 === 0) ? "GMT " + timezoneToShow + ':00' : "GMT " + parseInt(timezoneToShow) + ':30';
 
     },
+
+    readCookie: function( cookieName ) {
+        cookieName += "=";
+        var cookies = document.cookie.split(';');
+
+        for ( var i = 0; i < cookies.length; i++ ) {
+            var cookie = cookies[i].trim();
+
+            if ( cookie.indexOf( cookieName ) == 0 )
+                return cookie.substring( cookieName.length, cookie.length );
+        }
+        return "";
+    },
+
+
+    setCookie: function( cookieName, cookieValue, expiration ) {
+        if( typeof expiration == "undefined" ) {
+            expiration = new Date();
+            expiration.setYear(new Date().getFullYear() + 1);
+        }
+        document.cookie = cookieName + "=" + cookieValue + "; expires=" + expiration.toUTCString() + "; path=/";
+    }
 
 
 };

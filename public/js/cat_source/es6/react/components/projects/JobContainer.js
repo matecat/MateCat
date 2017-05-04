@@ -70,7 +70,7 @@ class JobContainer extends React.Component {
             .done(function (data) {
                 let notification = {
                     title: 'Change job password',
-                    text: 'The password has been changed. <a className="undo-password">Undo</a>',
+                    text: 'The password has been changed. <a class="undo-password">Undo</a>',
                     type: 'warning',
                     position: 'tc',
                     allowHtml: true,
@@ -96,7 +96,7 @@ class JobContainer extends React.Component {
                             });
 
                     })
-                });
+                }, 500);
 
             });
     }
