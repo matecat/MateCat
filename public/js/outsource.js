@@ -233,8 +233,8 @@ $.extend(UI, {
             timer: 10000
         };
         let boxUndo = APP.addNotification(notification);
-        ManageActions.assignTranslator(UI.currentOutsourceProject.id ,UI.currentOutsourceJob.id, response.job.translator);
         ManageActions.changeJobPasswordFromOutsource(UI.currentOutsourceProject.id ,UI.currentOutsourceJob.id, UI.currentOutsourceJob.password, response.job.password);
+        ManageActions.assignTranslator(UI.currentOutsourceProject.id ,UI.currentOutsourceJob.id, response.job.translator);
     },
 
     shareToTranslatorNotification : function (mail) {
