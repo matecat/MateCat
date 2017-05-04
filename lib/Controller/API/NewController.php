@@ -69,6 +69,13 @@ class NewController extends ajaxController {
      * @var Users_UserStruct
      */
     private $current_user;
+
+    private $lexiqa = false;
+    private $speech2text = false;
+    private $tag_projection = false;
+
+    private $project_features = [];
+
     private $metadata = array();
 
     const MAX_NUM_KEYS = 5;
@@ -124,7 +131,11 @@ class NewController extends ajaxController {
                 'pretranslate_100' => array(
                         'filter' => array( 'filter' => FILTER_VALIDATE_INT )
                 ),
-                'id_team' => array( 'filter' => FILTER_VALIDATE_INT )
+                'id_team'            => array( 'filter' => FILTER_VALIDATE_INT ),
+                'lexiqa'             => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
+                'speech2text'        => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
+                'tag_projection'     => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
+                'project_completion' => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
         );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -175,8 +186,15 @@ class NewController extends ajaxController {
             }
         }
 
+        $this->setProjectFeatures( $__postInput );
+
         try {
-            $this->validateMetadataParam($__postInput['metadata']);
+
+            $this->lexiqa = $__postInput[ 'lexiqa' ];
+            $this->speech2text = $__postInput[ 'speech2text' ];
+            $this->tag_projection = $__postInput[ 'tag_projection' ];
+            $this->validateMetadataParam( $__postInput['metadata'] );
+
         } catch ( Exception $ex ) {
             $this->api_output[ 'message' ] = 'Error evaluating metadata param';
             Log::doLog( $ex->getMessage() );
@@ -241,6 +259,17 @@ class NewController extends ajaxController {
             $this->api_output[ 'debug' ]   = $e->getMessage();
             Log::doLog( "Error: " . $e->getCode() . " - " . $e->getMessage() );
             return -$e->getCode();
+        }
+
+    }
+
+    private function setProjectFeatures( $__postInput ){
+
+        //change project features
+        if( !empty( $__postInput[ 'project_completion' ] ) ){
+            $feature = new BasicFeatureStruct();
+            $feature->feature_code = 'project_completion';
+            $this->project_features[] = $feature;
         }
 
     }
@@ -563,6 +592,9 @@ class NewController extends ajaxController {
             $projectManager->setTeam( $this->team ) ;
         }
 
+        //set features override
+        $projectStructure[ 'project_features' ] = $this->project_features;
+
         FilesStorage::moveFileFromUploadSessionToQueuePath( $uploadFile->getDirUploadToken() );
 
         //reserve a project id from the sequence
@@ -696,7 +728,26 @@ class NewController extends ajaxController {
             $assoc = TRUE;
             $json_string = html_entity_decode($json_string);
             $this->metadata = json_decode( $json_string, $assoc, $depth );
+            Log::doLog( "Passed parameter metadata as json string." );
         }
+
+        //override metadata with explicitly declared keys ( we maintain metadata for backward compatibility )
+        if ( !empty( $this->lexiqa ) ){
+            $this->metadata[ 'lexiqa' ] = $this->lexiqa;
+        }
+
+        if ( !empty( $this->speech2text ) ){
+            $this->metadata[ 'speech2text' ] = $this->speech2text;
+        }
+
+        if ( !empty( $this->tag_projection ) ){
+            $this->metadata[ 'tag_projection' ] = $this->tag_projection;
+        }
+
+        if ( !empty( $this->project_completion ) ){
+            $this->metadata[ 'project_completion' ] = $this->project_completion;
+        }
+
     }
 
     private static function parseTmKeyInput( $tmKeyString ) {

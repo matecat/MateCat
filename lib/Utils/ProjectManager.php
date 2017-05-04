@@ -77,6 +77,7 @@ class ProjectManager {
                             'id_project'           => null,
                             'create_date'          => date( "Y-m-d H:i:s" ),
                             'id_customer'          => self::TRANSLATED_USER,
+                            'project_features'     => [],
                             'user_ip'              => null,
                             'project_name'         => null,
                             'result'               => [ "errors" => [], "data" => [] ],
@@ -143,7 +144,18 @@ class ProjectManager {
 
         $this->dbHandler = Database::obtain();
 
-        $this->features = new FeatureSet();
+        $features = [];
+        if( !empty( $this->projectStructure[ 'project_features' ] ) ){
+            foreach( $this->projectStructure[ 'project_features' ] as $key => $feature ){
+                /**
+                 * @var $feature RecursiveArrayObject
+                 */
+                $this->projectStructure[ 'project_features' ][ $key ] = new BasicFeatureStruct( $feature->getArrayCopy() );
+            }
+            $features = $this->projectStructure[ 'project_features' ]->getArrayCopy();
+        }
+
+        $this->features = new FeatureSet( $features );
 
         if ( !empty( $this->projectStructure['id_customer']) ) {
            $this->features->loadFromUserEmail( $this->projectStructure['id_customer'] );
