@@ -113,6 +113,23 @@ class newProjectController extends viewController {
         array_multisort( $sort_col, $dir, $arr );
     }
 
+    private function getCurrentSourceLang() {
+        if ( isset ( $_COOKIE[ Constants::COOKIE_SOURCE_LANG ] ) ) {
+            $ckSourceLang = filter_input( INPUT_COOKIE, Constants::COOKIE_SOURCE_LANG );
+
+            if( $ckSourceLang != Constants::EMPTY_VAL ) {
+                $sourceLangHistory   = $ckSourceLang;
+                $sourceLangAr        = explode( '||', urldecode( $sourceLangHistory ) );
+
+                if(count( $sourceLangAr ) > 0) {
+                    return $sourceLangAr[0];
+                }
+            }
+        }
+
+        return Constants::DEFAULT_TARGET_LANG;
+    }
+
     private function evalSourceLangHistory() {
         if ( isset ( $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ] ) and $_COOKIE[ \Constants::COOKIE_SOURCE_LANG ] == \Constants::EMPTY_VAL ) {
             $this->noSourceLangHistory = true;
@@ -288,7 +305,8 @@ class newProjectController extends viewController {
         $this->template->clientId = INIT::$OAUTH_CLIENT_ID;
 
         $this->template->currentTargetLang = $this->getCurrentTargetLang();
-        
+        $this->template->currentSourceLang = $this->getCurrentSourceLang();
+
         $this->template->tag_projection_languages = json_encode( ProjectOptionsSanitizer::$tag_projection_allowed_languages ); 
         LexiQADecorator::getInstance( $this->template )->featureEnabled( $this->featureSet )->decorateViewLexiQA();
 
