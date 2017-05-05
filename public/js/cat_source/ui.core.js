@@ -3301,7 +3301,7 @@ UI = {
         $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
         $(".outer-tm").show();
         $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
-        $.cookie('tmpanel-open', 1, { path: '/' });
+        // $.cookie('tmpanel-open', 1, { path: '/' });
     },
     closeAllMenus: function (e, fromQA) {
         if ($('.searchbox').is(':visible')) {
