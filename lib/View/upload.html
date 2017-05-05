@@ -982,7 +982,13 @@
         APP.changeTargetLang('${currentTargetLang}');
     }
 
+    if( !localStorage.getItem( 'currentSourceLang' ) ) {
+        APP.changeSourceLang('${currentSourceLang}');
+    }
+
     APP.displayCurrentTargetLang();
+    APP.displayCurrentSourceLang();
+
 </script>
 <script type="text/javascript" src="//apis.google.com/js/api.js?onload=onGDriveApiLoad"></script>
 
