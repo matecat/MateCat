@@ -769,7 +769,7 @@ UI = {
             if (!config.last_opened_segment) {
                 config.last_opened_segment = config.first_job_segment;
             }
-			this.startSegmentId = (hash) ? hash : config.last_opened_segment;
+			this.startSegmentId = (hash && hash != "") ? hash : config.last_opened_segment;
 		}
 	},
     getLastSegmentFromLocalStorage: function () {
