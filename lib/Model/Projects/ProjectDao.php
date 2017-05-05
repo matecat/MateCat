@@ -25,7 +25,7 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      * @param $field
      * @param $value
      *
-     * @return bool
+     * @return Projects_ProjectStruct
      */
     public function updateField( $project, $field, $value ) {
 
@@ -45,6 +45,17 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
 
         return $project;
 
+    }
+
+    /**
+     * @param Projects_ProjectStruct $project
+     * @param                        $newPass
+     *
+     * @return Projects_ProjectStruct
+     * @internal param $pid
+     */
+    public function changePassword( Projects_ProjectStruct $project, $newPass ){
+        return $this->updateField( $project, 'password', $newPass );
     }
 
     public function deleteFailedProject( $idProject ){
@@ -136,13 +147,20 @@ class Projects_ProjectDao extends DataAccess_AbstractDao {
      *
      * @return Projects_ProjectStruct
      */
-    static function findById( $id, $ttl = 0 ) {
+    public static function findById( $id, $ttl = 0 ) {
 
         $thisDao = new self();
         $conn = Database::obtain()->getConnection();
         $stmt = $conn->prepare( " SELECT * FROM projects WHERE id = :id " );
         return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Projects_ProjectStruct(), [ 'id' => $id ] )[ 0 ];
 
+    }
+
+    public static function destroyCacheById( $id ){
+        $thisDao = new self();
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare( " SELECT * FROM projects WHERE id = :id " );
+        return $thisDao->_destroyObjectCache( $stmt, [ 'id' => $id ] );
     }
 
     /**

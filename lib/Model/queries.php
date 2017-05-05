@@ -2062,55 +2062,6 @@ function changeProjectStatus( $pid, $status, $if_status_not = array() ) {
 }
 
 /**
- * @param $res
- * @param $id
- * @param $password
- * @param $new_password
- *
- * @return int|mixed
- *
- * @deprecated
- * TODO: Refactory with Prepared Statements and dao
- */
-function changePassword( $res, $id, $password, $new_password ) {
-
-    $db = Database::obtain();
-
-    $query      = "UPDATE %s SET PASSWORD = '%s' WHERE id = %u AND PASSWORD = '%s' ";
-    $sel_query  = "SELECT 1 FROM %s WHERE id = %u AND PASSWORD = '%s'";
-    $row_exists = false;
-
-    if ( $res == "prj" ) {
-
-        $sel_query  = sprintf( $sel_query, 'projects', $id, $db->escape( $password ) );
-        $res        = $db->fetch_array( $sel_query );
-        $row_exists = @(bool)array_pop( $res[ 0 ] );
-
-        $query = sprintf( $query, 'projects', $db->escape( $new_password ), $id, $db->escape( $password ) );
-    } else {
-
-        $sel_query  = sprintf( $sel_query, 'jobs', $id, $db->escape( $password ) );
-        $res        = $db->fetch_array( $sel_query );
-        $row_exists = @(bool)array_pop( $res[ 0 ] );
-
-        $query = sprintf( $query, 'jobs', $db->escape( $new_password ), $id, $db->escape( $password ) );
-    }
-    try {
-
-        $res = $db->query($query);
-
-        ( new \Outsource\ConfirmationDao() )->updatePassword( $id, $password, $new_password  );
-
-        Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
-
-    } catch( PDOException $e ) {
-        Log::doLog( $e->getMessage() );
-        return $e->getCode() * -1;
-    }
-    return ( $db->affected_rows | $row_exists );
-}
-
-/**
  * @param      $res
  * @param      $id
  * @param      $status
