@@ -254,9 +254,9 @@
 
     <div class="cl"></div>
 
-    <p class="warning-message"> Error: the errmsg will appear here... </p>
+    <p class="warning-message"> Ops we got an error... </p>
 
-    <p class="error-message"> Error: the errmsg will appear here... </p>
+    <p class="error-message"> Ops we got an error... </p>
 
     <div class="cl"></div>
 
@@ -982,7 +982,13 @@
         APP.changeTargetLang('${currentTargetLang}');
     }
 
+    if( !localStorage.getItem( 'currentSourceLang' ) ) {
+        APP.changeSourceLang('${currentSourceLang}');
+    }
+
     APP.displayCurrentTargetLang();
+    APP.displayCurrentSourceLang();
+
 </script>
 <script type="text/javascript" src="//apis.google.com/js/api.js?onload=onGDriveApiLoad"></script>
 

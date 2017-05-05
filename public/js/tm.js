@@ -463,7 +463,7 @@
             }, 100);
             $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
             if(elToClick) $(elToClick).click();
-            $.cookie('tmpanel-open', 1, { path: '/' });
+            // $.cookie('tmpanel-open', 1, { path: '/' });
         },
         setTMsortable: function () {
 

@@ -769,7 +769,7 @@ UI = {
             if (!config.last_opened_segment) {
                 config.last_opened_segment = config.first_job_segment;
             }
-			this.startSegmentId = (hash) ? hash : config.last_opened_segment;
+			this.startSegmentId = (hash && hash != "") ? hash : config.last_opened_segment;
 		}
 	},
     getLastSegmentFromLocalStorage: function () {
@@ -3301,7 +3301,7 @@ UI = {
         $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
         $(".outer-tm").show();
         $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
-        $.cookie('tmpanel-open', 1, { path: '/' });
+        // $.cookie('tmpanel-open', 1, { path: '/' });
     },
     closeAllMenus: function (e, fromQA) {
         if ($('.searchbox').is(':visible')) {
