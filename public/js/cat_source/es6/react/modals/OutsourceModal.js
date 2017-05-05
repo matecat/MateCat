@@ -22,17 +22,22 @@ class OutsourceModal extends React.Component {
         UI.currentOutsourceJob = this.props.job;
         UI.currentOutsourceUrl = this.props.url;
         UI.getOutsourceQuoteFromManage(this.props.project.id, this.props.project.password, this.props.job.id, this.props.job.password, fixedDelivery, typeOfService).done(function (quoteData) {
-            self.quoteResponse = quoteData.data[0];
-            self.chunk = quoteData.data[0][0];
+            if (quoteData.data) {
 
-            UI.url_ok = quoteData.return_url.url_ok;
-            UI.url_ko = quoteData.return_url.url_ko;
-            UI.confirm_urls = quoteData.return_url.confirm_urls;
-            UI.data_key = self.chunk.id;
+                self.quoteResponse = quoteData.data[0];
+                self.chunk = quoteData.data[0][0];
 
-            self.setState({
-                outsource: true
-            });
+                UI.url_ok = quoteData.return_url.url_ok;
+                UI.url_ko = quoteData.return_url.url_ko;
+                UI.confirm_urls = quoteData.return_url.confirm_urls;
+                UI.data_key = self.chunk.id;
+
+                self.setState({
+                    outsource: true
+                });
+            } else {
+                self.initOutsourceModal();
+            }
         });
     }
 
@@ -221,6 +226,17 @@ class OutsourceModal extends React.Component {
         selectedElement.text( selectedElement.attr( "data-description-short" ) );
     }
 
+    initOutsourceModal() {
+        if ( config.enable_outsource ) {
+            UI.outsourceInit();
+            if (!this.forceDelivery) {
+                ForceDelivery.init();
+                this.forceDelivery = true;
+            }
+            this.updateTimezonesDescriptions(this.getTimeZone());
+        }
+    }
+
     allowHTML(string) {
         return { __html: string };
     }
@@ -236,14 +252,7 @@ class OutsourceModal extends React.Component {
 
 
     componentDidUpdate() {
-        if ( config.enable_outsource ) {
-            UI.outsourceInit();
-            if (!this.forceDelivery) {
-                ForceDelivery.init();
-                this.forceDelivery = true;
-            }
-            this.updateTimezonesDescriptions(this.getTimeZone());
-        }
+        this.initOutsourceModal();
         if (this.state.outsource) {
             // a generic error
             if( this.chunk.quote_result != 1 ){
