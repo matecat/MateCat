@@ -57,4 +57,15 @@ class ConfirmationDao extends \DataAccess_AbstractDao {
 
     }
 
+    public function destroyConfirmationCache( \Jobs_JobStruct $jobStruct ) {
+        $query = self::$_query_get_by_job_id_password;
+        $stmt  = $this->_getStatementForCache( $query );
+        return $this->_destroyObjectCache( $stmt,
+                array(
+                        'id_job'   => $jobStruct->id,
+                        'password' => $jobStruct->password
+                )
+        );
+    }
+
 }

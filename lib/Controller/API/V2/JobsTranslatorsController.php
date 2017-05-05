@@ -74,11 +74,6 @@ class JobsTranslatorsController extends KleinController {
             throw new InvalidArgumentException( "The Job is Outsourced.", 400 );
         }
 
-        $translatorModel = new TranslatorsModel( $this->jStruct );
-        $jTranslatorStruct = $translatorModel->getTranslator();
-
-        $this->jStruct->_setTranslator( $jTranslatorStruct );
-
         $formatted = new Job();
         $this->response->json( array( 'job' => $formatted->renderItem( $this->jStruct ) ) );
 
