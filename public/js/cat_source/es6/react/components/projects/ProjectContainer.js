@@ -156,15 +156,9 @@ class ProjectContainer extends React.Component {
     }
 
     getProjectMenu(activityLogUrl) {
-        let moveProjectItemMenu = '';
-        if (this.props.teams && this.props.teams.size > 1) {
-            moveProjectItemMenu = <a className="item" onClick={this.openChangeTeamModal.bind(this)}>
-                <i className="icon-forward icon"/>Move project
-            </a>;
-        }
+
         let menuHtml = <div className="menu">
             <div className="scrolling menu">
-                {moveProjectItemMenu}
 
                 <a className="item" href={activityLogUrl} target="_blank"><i className="icon-download-logs icon"/>Activity Log</a>
 
@@ -255,19 +249,21 @@ class ProjectContainer extends React.Component {
         let chunks = [],  index;
         let tempIdsArray = [];
         let orderedJobs = this.props.project.get('jobs').reverse();
-        let visibleJobsBoxes = 0;
         orderedJobs.map(function(job, i){
 
             let next_job_id = (orderedJobs.get(i+1)) ? orderedJobs.get(i+1).get('id') : 0;
+            let job_chunks = orderedJobs.count(function (currentJob, i) {
+                return currentJob.get('id') === job.get('id');
+            });
             //To check if is a chunk (jobs with same id)
             let isChunk = false;
             if (tempIdsArray.indexOf(job.get('id')) > -1 ) {
                 isChunk = true;
-                index ++;
+                index --;
             }  else if ((orderedJobs.get(i+1) && orderedJobs.get(i+1).get('id') === job.get('id') )) {  //The first of the Chunk
                 isChunk = true;
                 tempIdsArray.push(job.get('id'));
-                index = 1;
+                index = job_chunks;
             }  else {
                 index = 0;
             }
@@ -288,7 +284,7 @@ class ProjectContainer extends React.Component {
                                 activityLogUrl =  {self.getActivityLogUrl()}/>;
                 chunks.unshift(item);
                 if ( job.get('id') !== next_job_id) {
-                    let jobList = <div className="job ui grid" key = { (i - 1) + job.get('id')}>
+                    let jobList = <div className="job ui grid" key = { (i - 1) + "-" + job.get('id')}>
                             <div className="job-body sixteen wide column">
                                 <div className="ui grid chunks">
                                 {chunks}

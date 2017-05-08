@@ -65,25 +65,7 @@ $.extend(APP, {
             if ( $('.popup-tm.open').length) {
                 UI.closeTMPanel();
             }
-            var title = '';
-            var style = {
-                'width': '80%',
-                'maxWidth': '800px',
-                'minWidth': '600px'
-            };
-            var props = {
-                googleUrl: config.authURL
-            };
-
-            if (config.showModalBoxLogin == 1) {
-                props.redeemMessage = true;
-                title = 'Add project to your management panel';
-            }
-
-            if (param) {
-                $.extend(props, param);
-            }
-            APP.ModalWindow.showModalComponent(LoginModal, props, title, style);
+            APP.openLoginModal(param);
         });
 
         $('.link-manage-page').on('click', function () {
@@ -115,7 +97,9 @@ $.extend(APP, {
         $( '#sign-in-o, #sign-in-o-mt' ).click( function ( e ) {
             e.preventDefault();
             e.stopPropagation();
-            $( '#sign-in' ).trigger( 'click' );
+            UI.closeTMPanel();
+            APP.openLoginModal();
+            $.cookie('tmpanel-open', 1, { path: '/' });
             return false;
         } );
 
@@ -164,5 +148,27 @@ $.extend(APP, {
         } else {
             window.location = '/manage/';
         }
+    },
+
+    openLoginModal: function (param) {
+        var title = '';
+        var style = {
+            'width': '80%',
+            'maxWidth': '800px',
+            'minWidth': '600px'
+        };
+        var props = {
+            googleUrl: config.authURL
+        };
+
+        if (config.showModalBoxLogin == 1) {
+            props.redeemMessage = true;
+            title = 'Add project to your management panel';
+        }
+
+        if (param) {
+            $.extend(props, param);
+        }
+        APP.ModalWindow.showModalComponent(LoginModal, props, title, style);
     }
 });

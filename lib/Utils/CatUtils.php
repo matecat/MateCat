@@ -1112,6 +1112,63 @@ class CatUtils {
         return $result ;
     }
 
+    /**
+     * Returns the string representing the overall quality for a job,
+     * taking into account both old revision and new revision.
+     *
+     * @param $job
+     * @return string
+     */
+    public static function getQualityOverallFromJobStruct( Jobs_JobStruct $job ) {
+
+        $result = null ;
+
+        if ( in_array( Features::REVIEW_IMPROVED, $job->getProject()->getFeatures()->getCodes() ) ) {
+            $review = \LQA\ChunkReviewDao::findOneChunkReviewByIdJobAndPassword( $job->id, $job->password ) ;
+            $result = @$review->is_pass ? 'excellent' : 'fail' ;
+        }
+        else {
+            $struct = CatUtils::getWStructFromJobStruct( $job, $job->getProject()->status_analysis ) ;
+            $jobQA = new Revise_JobQA(
+                    $job->id, $job->password, $struct->getTotal()
+            );
+
+            $jobQA->retrieveJobErrorTotals();
+            $overall = $jobQA->evalJobVote();
+
+            $result = strtolower( $overall['minText'] ) ;
+        }
+
+        return $result ;
+    }
+
+    /**
+     * @param Jobs_JobStruct $job
+     * @param                $analysis_status
+     *
+     * @return WordCount_Struct
+     */
+    public static function getWStructFromJobStruct( Jobs_JobStruct $job, $analysis_status ) {
+
+        $wStruct = new WordCount_Struct();
+
+        $wStruct->setIdJob( $job->id ) ;
+        $wStruct->setJobPassword( $job->password );
+        $wStruct->setNewWords($job->new_words );
+        $wStruct->setDraftWords($job->draft_words );
+        $wStruct->setTranslatedWords( $job->translated_words );
+        $wStruct->setApprovedWords( $job->approved_words );
+        $wStruct->setRejectedWords( $job->rejected_words );
+
+        // For projects created with No tm analysis enabled
+        if ($wStruct->getTotal() == 0 && ( $analysis_status == Constants_ProjectStatus::STATUS_DONE || $analysis_status == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE)) {
+            $wCounter = new WordCount_Counter();
+            $wStruct = $wCounter->initializeJobWordCount( $job->id, $job->password );
+            Log::doLog("BackWard compatibility set Counter.");
+            return $wStruct;
+        }
+        return $wStruct;
+    }
 
     public static function getTMProps( $job_data ){
 

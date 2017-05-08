@@ -78,7 +78,7 @@ body.manage {
             .project-id {
                 font-size: 14px;
                 font-weight: normal;
-                margin-right: 10px;
+                margin-right: 3px;
                 margin-left: 15px;
                 display: inline-block;
                 vertical-align: text-bottom;
@@ -429,7 +429,7 @@ body.manage {
                             }
 
                             .job-payable {
-                                padding: 0 5px 0 7px !important;
+                                padding: 0 10px !important;
                                 float: left;
                                 text-decoration: underline;
                                 min-width: 105px;
@@ -485,7 +485,7 @@ body.manage {
                                     .outsource-month-text {
                                         display: inherit;
                                         font-weight: 700;
-                                        margin-right: 7px;
+                                        margin-right: 5px;
                                     }
                                     .outsource-time-text {
                                         display: inherit;
@@ -494,6 +494,7 @@ body.manage {
                                     .outsource-gmt-text {
                                         color: #969696;
                                         display: inherit;
+                                        margin-left: 5px;
                                     }
                                     @media only screen and (max-width: 1200px) {
                                         display: none;
@@ -511,7 +512,7 @@ body.manage {
                             }
                             .open-translate {
                                 font-family: Calibri, Arial, Helvetica, sans-serif;
-                                padding: 6px;
+                                padding: 6px 15px;
                                 vertical-align: top;
                                 font-size: 16px;
                                 border: 1px solid #797979;
@@ -520,7 +521,7 @@ body.manage {
                             }
                             .open-vendor {
                                 font-family: Calibri, Arial, Helvetica, sans-serif;
-                                padding: 6px;
+                                padding: 6px 7px;
                                 vertical-align: top;
                                 font-size: 16px;
                                 border: 1px solid #7eaf3e;
@@ -541,7 +542,7 @@ body.manage {
                             }
                             .open-outsource {
                                 font-family: Calibri, Arial, Helvetica, sans-serif;
-                                padding: 6px 21px;
+                                padding: 6px 22px;
                                 vertical-align: top;
                                 font-size: 16px;
                                 border: 1px solid #797979;
@@ -837,4 +838,8 @@ footer nav ul a:hover {
     border-radius: 2px;
     color: #5d5d5d;
     font-weight: 100;
+}
+
+.ui.dropdown .scrolling.menu {
+    border-top:none;
 }

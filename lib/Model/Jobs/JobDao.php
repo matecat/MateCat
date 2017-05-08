@@ -98,49 +98,31 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
         return $stmt->fetch();
     }
 
-    public static function getByProjectId( $id_project ) {
+    public static function getByProjectId( $id_project, $ttl = 0 ) {
+
+        $thisDao = new self();
         $conn = Database::obtain()->getConnection();
-        // TODO: this query should return the minimal data
-        // required for the JobStruct class, to not be confused
-        // with the ChunkStruct class.
-        // Ideally it should return:
-        // - id_project
-        // - id
-        // - source
-        // - target
-        //
-        // about job_first_segment and job_last_segment it should return
-        // the whole segments interval.
-        // Extend this query considering that fields not defined in the
-        // JobStruct class will be ignored.
-        $stmt = $conn->prepare(
-                "SELECT * FROM ( " .
-                " SELECT * FROM jobs " .
-                " WHERE id_project = ? " .
-                " ORDER BY id DESC ) t GROUP BY id ; " );
+        $stmt = $conn->prepare( "SELECT * FROM jobs WHERE id_project = ? ORDER BY job_first_segment ASC;" );
 
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Jobs_JobStruct' );
-        $stmt->execute( array( $id_project ) );
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Jobs_JobStruct(), [ $id_project ] );
 
-        return $stmt->fetchAll();
     }
 
     /**
      *
-     * Warning: This method returns one record on purpose. Job struct should be used to identify just
-     * the language pair.
-     * 
-     * @param $id_job
+     * @param int $id_job
      *
-     * @return Jobs_JobStruct
+     * @param int $ttl
+     *
+     * @return DataAccess_IDaoStruct[]|Jobs_JobStruct[]
      */
-    public static function getById( $id_job ) {
-        $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare("SELECT * FROM jobs WHERE id = ?");
-        $stmt->setFetchMode( PDO::FETCH_CLASS, 'Jobs_JobStruct' );
-        $stmt->execute( array( $id_job ) );
+    public static function getById( $id_job, $ttl = 0 ) {
 
-        return $stmt->fetch();
+        $thisDao = new self();
+        $conn = Database::obtain()->getConnection();
+        $stmt = $conn->prepare("SELECT * FROM jobs WHERE id = ? ORDER BY job_first_segment");
+        return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Jobs_JobStruct(), [ $id_job ] );
+
     }
 
     /**
@@ -182,7 +164,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
         $stmt->execute();
 
-        $job = static::getById( $conn->lastInsertId() );
+        $job = static::getById( $conn->lastInsertId() )[0];
 
         $conn->commit();
 

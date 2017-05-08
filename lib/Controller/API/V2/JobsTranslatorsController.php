@@ -15,6 +15,7 @@ use API\V2\Validators\JobPasswordValidator;
 use API\V2\Validators\LoginValidator;
 use InvalidArgumentException;
 use Jobs_JobStruct;
+use Outsource\ConfirmationDao;
 use Translators\TranslatorsModel;
 
 class JobsTranslatorsController extends KleinController {
@@ -30,6 +31,7 @@ class JobsTranslatorsController extends KleinController {
         $this->params = filter_var_array( $this->params, [
                 'email'         => [ 'filter' => FILTER_SANITIZE_EMAIL ],
                 'delivery_date' => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
+                'timezone'      => [ 'filter' => FILTER_SANITIZE_NUMBER_FLOAT, 'flags' => FILTER_FLAG_ALLOW_FRACTION ],
                 'id_job'        => [ 'filter' => FILTER_SANITIZE_NUMBER_INT ],
                 'password'      => [
                         'filter' => FILTER_SANITIZE_STRING,
@@ -42,14 +44,16 @@ class JobsTranslatorsController extends KleinController {
         }
 
         $TranslatorsModel = new TranslatorsModel( $this->jStruct );
-        $TranslatorsModel->setUserInvite( $this->getUser() )
+        $TranslatorsModel
+                ->setUserInvite( $this->getUser() )
                 ->setDeliveryDate( $this->params[ 'delivery_date' ] )
+                ->setJobOwnerTimezone( $this->params[ 'timezone' ] )
                 ->setEmail( $this->params[ 'email' ] );
 
-        $jTranslatorStruct = $TranslatorsModel->update();
+        $TranslatorsModel->update();
 
         $formatted = new Job();
-        $this->response->json( array( 'job' => $formatted->renderItem( $this->jStruct, $jTranslatorStruct ) ) );
+        $this->response->json( array( 'job' => $formatted->renderItem( $this->jStruct ) ) );
 
     }
 
@@ -63,11 +67,15 @@ class JobsTranslatorsController extends KleinController {
                 ]
         ], true );
 
-        $translatorModel = new TranslatorsModel( $this->jStruct );
-        $jTranslatorStruct = $translatorModel->getTranslator();
+        $confDao            = new ConfirmationDao();
+        $confirmationStruct = $confDao->setCacheTTL( 60 * 60 )->getConfirmation( $this->jStruct );
+
+        if ( !empty( $confirmationStruct ) ) {
+            throw new InvalidArgumentException( "The Job is Outsourced.", 400 );
+        }
 
         $formatted = new Job();
-        $this->response->json( array( 'job' => $formatted->renderItem( $this->jStruct, $jTranslatorStruct ) ) );
+        $this->response->json( array( 'job' => $formatted->renderItem( $this->jStruct ) ) );
 
     }
 

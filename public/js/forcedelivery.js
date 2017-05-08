@@ -42,6 +42,7 @@ ForceDelivery = {
 
         $('.modal.outsource .cancelForceDelivery').click(function (e) {
             e.preventDefault();
+            ManageActions.outsourceCloseTranslatorInfo();
             prepareAndSubmitQuote(0, true);
         });
 
@@ -53,9 +54,9 @@ ForceDelivery = {
             prepareAndSubmitQuote(getChosenDeliveryDate(), false);
         });
 
-        $(".popup").on("change", "#out-datepicker #outsource-assign-date, #out-datepicker #outsource-assign-timezone", function () {
-            setOutsourceDate(getChosenOutsourceDate());
-        });
+        // $(".popup").on("change", "#out-datepicker #outsource-assign-date, #out-datepicker #outsource-assign-timezone", function () {
+        //     setOutsourceDate(getChosenOutsourceDate());
+        // });
 
         $(".forceDeliveryButtonOk").click(function () {
             $('#forceDeliveryContainer').addClass('hide');
@@ -79,7 +80,18 @@ ForceDelivery = {
             var formattedNow = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDate();
             var formattedTomorrow = tomorrow.getFullYear() + "-" + (tomorrow.getMonth() + 1) + "-" + tomorrow.getDate();
 
-            $('#date2, #date-trans').DatePicker({
+            var date = $('.modal.outsource input.out-date').data('datesend');
+            if (!date && UI.currentOutsourceJob.translator) {
+                date = new Date(UI.currentOutsourceJob.translator.delivery_timestamp * 1000);
+            } else if (!date){
+                date = new Date();
+            } else {
+                date = new Date(date);
+            }
+
+            var formattedTranslator = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
+
+            $('#date2').DatePicker({
                 flat: true,
                 date: formattedNow,
                 current: formattedNow,
@@ -106,6 +118,26 @@ ForceDelivery = {
                 },
                 starts: 0
             });
+
+            $('#date-trans').DatePicker({
+                flat: true,
+                date: formattedTranslator,
+                current: formattedNow,
+                format: 'Y-m-d',
+                calendars: 1,
+                mode: 'single',
+                view: 'days',
+
+                onRender: function (date) {
+                    return {
+                        disabled: (date.valueOf() < now.valueOf()),
+                        className: date.valueOf() == now.valueOf() ? '  datepickerSpecial' : false
+                    }
+                },
+                starts: 0
+            });
+
+
         };
         initLayout();
         // EYE.register(initLayout, 'init');
@@ -128,10 +160,11 @@ ForceDelivery = {
 
 
 function setTimezoneSelect() {
-    var timezoneToShow = readCookie( "matecat_timezone" );
-    if ( timezoneToShow == "" ) {
+    var timezoneToShow = $.cookie( "matecat_timezone" );
+    if ( !timezoneToShow) {
         timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
     }
+
     $( "#changeTimezone option[value='" + timezoneToShow + "']").attr( "selected", "selected" );
     $( "#outsource-assign-timezone option[value='" + timezoneToShow + "']").attr( "selected", "selected" );
 }
@@ -157,6 +190,16 @@ function getChosenOutsourceDate() {
     return new Date ( year, month, day, time, 00 ).getTime() - ( parseFloat( timezone).toFixed( 1 ) * 3600000 ) - ( new Date().getTimezoneOffset() * 60000 );
 }
 
+function getChosenOutsourceDateUTC() {
+    var $elem =     $( "#date-trans" );
+    var day 	 = $elem.DatePickerGetDate().getDate();
+    var month 	 = $elem.DatePickerGetDate().getMonth();
+    var year 	 = $elem.DatePickerGetDate().getFullYear();
+    var time 	 = $( "#outsource-assign-date").val();
+    var timezone = $( "#outsource-assign-timezone").val();
+
+    return new Date ( year, month, day, time, 00 ).getTime() - ( parseFloat( timezone).toFixed( 1 ) * 3600000 );
+}
 
 function getChosenOutsourceDateToString() {
     var $elem =     $( "#date-trans" );
@@ -183,7 +226,7 @@ function prepareAndSubmitQuote( chosenDate, hideNeedItFaster ) {
         return;
     }
 
-    setCookie( "matecat_timezone", $( "#whenTimezone").val() );
+    APP.setCookie( "matecat_timezone", $( "#whenTimezone").val() );
 
     $( "#delivery_manual_error").addClass( "hide" );
     $('.forceDeliveryButtonOk').removeClass('disabled');
@@ -210,14 +253,14 @@ function setOutsourceDate(chosenDate) {
         return;
     }
 
-    setCookie( "matecat_timezone", $( "#outsource-assign-timezone").val() );
+    APP.setCookie( "matecat_timezone", $( "#outsource-assign-timezone").val() );
 
     $( "#outsource-delivery_error").addClass( "hide" );
     $('.outsource-select-date').removeClass('disabled');
 
 
     $('.outsource .out-date').val( getChosenOutsourceDateToString() );
-    $('.outsource .out-date').data('datesend', getChosenOutsourceDate() );
+    $('.outsource .out-date').data('datesend', getChosenOutsourceDate());
 
     UI.checkSendToTranslatorButton();
 
@@ -1177,10 +1220,11 @@ var EYE = {
 
         var parentClass = $(ev.currentTarget).closest('.modal-outsource-datepicker').attr('id');
         if ( parentClass == 'out-datepicker' ) {
-            setOutsourceDate(getChosenOutsourceDate());
+            // setOutsourceDate(getChosenOutsourceDate());
             return false;
         }
 
+        ManageActions.outsourceCloseTranslatorInfo();
         if( !checkChosenDeliveryDate( getChosenDeliveryDate() ) ) {
             $( "#delivery_manual_error").removeClass( "hide" );
             $('.delivery_before_time,.delivery_not_available,.modal.outsource .tooltip').addClass('hide');

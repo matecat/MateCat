@@ -138,9 +138,8 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
      * @param array|null $volAnalysis
      */
     public function performQuote( $volAnalysis = null ) {
-        // Shop_Cart::getInstance( 'outsource_to_external' )->emptyCart();
 
-        list( $subject, $volAnalysis ) = $this->__getProjectData( $volAnalysis );
+        list( $subject, $volAnalysis ) = $this->__getProjectData();
 
         $this->__processOutsourcedJobs( $subject, $volAnalysis );
         $this->__processNormalJobs( $subject, $volAnalysis );
@@ -156,54 +155,30 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
      *      -   retrieve project information from session and return them to caller
      * @see GUIDE->"PROCEDURE"->POINT 1 for details
      *
-     * @param array|null $volAnalysis
      * @return array
      */
-    private function __getProjectData( $volAnalysis ) {
-        // API Status url, used as session cache id too
-        $project_url_api = INIT::$HTTPHOST . INIT::$BASEURL . "api/status?id_project=" . $this->pid . "&project_pass=" . $this->ppassword;
+    private function __getProjectData() {
 
-        // if the data (referenced by the above id) is not in session, then retrieve it
-        if( !Shop_Cart::getInstance( 'outsource_to_external_cache' )->itemExists( $project_url_api ) ) {
-            Log::doLog( "Project Not Found in Cache. Call for STATUS: " . $project_url_api );
+        /**
+         ************************** GET VOLUME ANALYSIS FIRST *************************
+         */
+        $x = new StatusController();
+        $x->setIdProject( $this->pid );
+        $x->setPpassword( $this->ppassword );
+        $x->doAction();
+        $volAnalysis = $x->getApiOutput();
 
+        /**
+         *************************** GET SUBJECT **************************************
+         */
+        // subject is retrieved from database: get first job of the project and get its subject
+        $jStruct = new Jobs_JobStruct();
+        $jStruct->id = $this->jobList[ 0 ][ 'jid' ];
+        $jStruct->password = $this->jobList[ 0 ][ 'jpassword' ];
+        $jobDao = new Jobs_JobDao();
+        $jobData = $jobDao->setCacheTTL( 60 * 60 )->read( $jStruct )[0];
 
-            /**
-             ************************** GET VOLUME ANALYSIS FIRST *************************
-             */
-            $x = new StatusController();
-            $x->setIdProject( $this->pid );
-            $x->setPpassword( $this->ppassword );
-            $x->doAction();
-            $volAnalysis = $x->getApiOutput();
-
-            /**
-             *************************** GET SUBJECT **************************************
-             */
-            // subject is retrieved from database: get first job of the project and get its subject
-            $jobData = getJobData( $this->jobList[ 0 ][ 'jid' ], $this->jobList[ 0 ][ 'jpassword' ] );
-
-            // store all the data in a Shop_ItemHTSQuoteJob
-            $projectItemCart                = new Shop_ItemHTSQuoteJob();
-            $projectItemCart[ 'id' ]        = $project_url_api;
-            $projectItemCart[ 'subject' ]   = $jobData[ 'subject' ];
-            $projectItemCart[ 'show_info' ] = $volAnalysis;
-
-            // store the Shop_ItemHTSQuoteJob itself in a Shop_Cart cached in session
-            Shop_Cart::getInstance( 'outsource_to_external_cache' )->addItem( $projectItemCart );
-        }
-
-        // Now we are sure the data is in cache, so retrieve it
-        $projectItemCart = Shop_Cart::getInstance( 'outsource_to_external_cache' )->getItem( $project_url_api );
-
-        // in case volume analysis has been passed as parameter, update the cart, and the cache content consecutively
-        if( $volAnalysis != null ) {
-            $projectItemCart[ 'show_info' ] = $volAnalysis;
-            Shop_Cart::getInstance( 'outsource_to_external_cache' )->delItem( $project_url_api );
-            Shop_Cart::getInstance( 'outsource_to_external_cache' )->addItem( $projectItemCart );
-        }
-
-        return array( $projectItemCart[ 'subject' ], json_decode( $projectItemCart[ 'show_info' ], true ) );
+        return array( $jobData[ 'subject' ], json_decode( $volAnalysis, true ) );
     }
 
 

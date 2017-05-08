@@ -22,6 +22,7 @@ class JobsTranslatorsStruct extends DataAccess_AbstractDaoSilentStruct implement
     public $email;
     public $added_by;
     public $delivery_date;
+    public $job_owner_timezone = 0;
     public $source;
     public $target;
 

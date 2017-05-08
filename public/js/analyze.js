@@ -102,18 +102,41 @@ UI = {
 			$(".loadingbar").addClass("closebar");
 		});
 
+        this.setTranslateButtonEvent();
+
+        this.setFocusEvent();
+
+		this.pollData();
+
+        this.checkQueryParams();
+
+        this.setTeamHeader();
+
+        this.getProjectInfo();
+	},
+
+	getProjectInfo: function () {
+        this.getProject(config.id_project).done(function (response) {
+            if (response.project) {
+                UI.currentOutsourceProject = response.project;
+                UI.checkJobsOutsource();
+            }
+        });
+	},
+
+	setTranslateButtonEvent: function () {
         // trigger the process for getting and displaying an outsource quote
         $(".translate").click(function(e) {
-        	e.preventDefault();
+            e.preventDefault();
             var linkPieces = $( this ).attr( "href" ).split( "/" );
             var jPieces = linkPieces[ linkPieces.length - 1 ].split( "-" );
-			var idJob = jPieces[0];
+            var idJob = jPieces[0];
 
             let words, sourceTxt, targetTxt;
 
-			if (UI.currentOutsourceProject) {
+            if (UI.currentOutsourceProject) {
                 UI.currentOutsourceJob = UI.currentOutsourceProject.jobs.find(function (job) {
-                    return job.id === idJob;
+                    return parseInt( job.id ) === parseInt( idJob );
                 });
 
                 words = $(".tablestats[data-pwd='" + jPieces[1] + "'] .stat-payable").text();
@@ -138,7 +161,7 @@ UI = {
                     id: config.id_project,
                     password: config.password,
                 };
-			}
+            }
 
             $( ".title-source" ).text( sourceTxt );
             $( ".title-target" ).text( targetTxt );
@@ -155,20 +178,27 @@ UI = {
             let style = {width: '970px',maxWidth: '970px', top: '45%'};
             APP.ModalWindow.showModalComponent(OutsourceModal, props, "Translate", style);
         });
+    },
 
-		this.pollData();
-
-        this.checkQueryParams();
-
-        this.setTeamHeader();
-
+	updateProjectData: function () {
         this.getProject(config.id_project).done(function (response) {
-        	if (response.data) {
+            if (response.data  && response.data.length > 0) {
                 UI.currentOutsourceProject = response.data[0];
                 UI.checkJobsOutsource();
-			}
+
+                //Update passwords (changed if the job has been outsourced)
+                UI.currentOutsourceProject.jobs.forEach(function (job) {
+                    let $job = $('.tablestats[data-jid='+job.id+']');
+                    let oldPass = $job.data('pwd');
+                    $job.data('pwd', job.password);
+                    let href = $job.find('.uploadbtn.translate').attr('href');
+                    $job.find('.uploadbtn.translate').attr('href', href.replace(oldPass, job.password));
+                });
+
+
+            }
         });
-	},
+    },
 
     checkJobsOutsource: function () {
 	    UI.currentOutsourceProject.jobs.forEach(function (job) {
@@ -177,27 +207,16 @@ UI = {
                 setTimeout(function () {
                     $job.find('.mergebtn, .splitbtn').addClass('disabled');
                 }, 1000);
-
             }
-        })
+        });
     },
 	
     getProject: function(id) {
 
-        let d = {
-            action: 'getProjects',
-            project: id,
-            password: config.password
-        };
-
-        if (config.isLoggedIn && APP.USER.STORE.teams) {
-            d.id_team = APP.getLastTeamSelected(APP.USER.STORE.teams).id;
-        }
-
-        return APP.doRequest({
-            data: d,
-            success: function(d){},
-            error: function(d){}
+        return $.ajax({
+            async: true,
+            type: "get",
+            url : "/api/v2/projects/" + id +"/" + config.password
         });
     },
 	performPreCheckSplitComputation: function(doStringSanitization) {
@@ -891,6 +910,36 @@ UI = {
 
     updateOutsourceInfo: function (translator) {
 		UI.currentOutsourceJob.translator = translator;
+    },
+
+    setFocusEvent: function () {
+		var self = this;
+        $(window).on("blur focus", function(e) {
+            let prevType = $(this).data("prevType");
+
+            if (prevType != e.type) {   //  reduce double fire issues
+                switch (e.type) {
+                    case "blur":
+                        console.log("leave page");
+                        self.pageLeft = true;
+                        // clearInterval(UI.reloadProjectsInterval);
+                        break;
+                    case "focus":
+                        // clearInterval(UI.reloadProjectsInterval);
+                        console.log("Enter page");
+                        // UI.reloadProjectsInterval = setInterval(function () {
+                        //     console.log("Reload Projects");
+                        //     self.reloadProjects();
+                        // }, 5e3);
+                        if (self.pageLeft) {
+                            self.updateProjectData();
+                        }
+                        break;
+                }
+            }
+
+            $(this).data("prevType", e.type);
+        });
     }
 };
 

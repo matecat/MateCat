@@ -46,6 +46,7 @@ class TranslatorsModel {
     protected $mailsToBeSent = [ 'new' => null, 'update' => null, 'split' => null ];
 
     protected $delivery_date;
+    protected $job_owner_timezone = 0;
     protected $id_job;
     protected $email;
     protected $job_password;
@@ -85,6 +86,16 @@ class TranslatorsModel {
     }
 
     /**
+     * @param int $job_owner_timezone
+     *
+     * @return $this
+     */
+    public function setJobOwnerTimezone( $job_owner_timezone ) {
+        $this->job_owner_timezone = $job_owner_timezone;
+        return $this;
+    }
+
+    /**
      * @param mixed $email
      *
      * @return $this
@@ -120,7 +131,7 @@ class TranslatorsModel {
     public function getTranslator( $cache = 86400 ) {
 
         $jTranslatorsDao    = new JobsTranslatorsDao();
-        $jTranslatorsStruct = $this->jobTranslator = $jTranslatorsDao->setCacheTTL( $cache )->findByJobsStruct( $this->jStruct )[ 0 ];
+        $jTranslatorsStruct = $this->jobTranslator = @$jTranslatorsDao->setCacheTTL( $cache )->findByJobsStruct( $this->jStruct )[ 0 ];
 
         return $jTranslatorsStruct;
 
@@ -181,18 +192,19 @@ class TranslatorsModel {
         }
 
         //set the old id and password to make "ON DUPLICATE KEY UPDATE" possible
-        $translatorStruct->id_job        = $this->jStruct->id;
-        $translatorStruct->job_password  = $this->jStruct->password;
-        $translatorStruct->delivery_date = Utils::mysqlTimestamp( $this->delivery_date );
-        $translatorStruct->added_by      = $this->callingUser->uid;
-        $translatorStruct->email         = $this->email;
-        $translatorStruct->source        = $this->jStruct[ 'source' ];
-        $translatorStruct->target        = $this->jStruct[ 'target' ];
+        $translatorStruct->id_job             = $this->jStruct->id;
+        $translatorStruct->job_password       = $this->jStruct->password;
+        $translatorStruct->delivery_date      = Utils::mysqlTimestamp( $this->delivery_date );
+        $translatorStruct->job_owner_timezone = $this->job_owner_timezone;
+        $translatorStruct->added_by           = $this->callingUser->uid;
+        $translatorStruct->email              = $this->email;
+        $translatorStruct->source             = $this->jStruct[ 'source' ];
+        $translatorStruct->target             = $this->jStruct[ 'target' ];
 
         $jTranslatorsDao->insertStruct( $translatorStruct, [
                 'no_nulls'            => true,
                 'on_duplicate_update' => [
-                        'delivery_date = VALUES( delivery_date ), job_password = VALUES( job_password )'
+                        'delivery_date = VALUES( delivery_date ), job_password = VALUES( job_password ), job_owner_timezone = VALUES( job_owner_timezone )'
                 ]
         ] );
 

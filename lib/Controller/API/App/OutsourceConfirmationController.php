@@ -44,7 +44,9 @@ class OutsourceConfirmationController extends AbstractStatefulKleinController {
         }
 
         $confirmationStruct->create_date = Utils::mysqlTimestamp( time() );
-        ConfirmationDao::insertStruct( $confirmationStruct, [ 'ignore' => true, 'no_nulls' => true ] );
+        $cDao = new ConfirmationDao();
+        $cDao->insertStruct( $confirmationStruct, [ 'ignore' => true, 'no_nulls' => true ] );
+        $cDao->destroyConfirmationCache( $jStruct );
 
         $confirmationArray = $confirmationStruct->toArray();
         unset( $confirmationArray['id'] );

@@ -9,6 +9,8 @@
 namespace Email;
 
 
+use DateTime;
+use DateTimeZone;
 use Translators\JobsTranslatorsStruct;
 use Users_UserStruct;
 

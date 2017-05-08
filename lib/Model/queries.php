@@ -1814,110 +1814,22 @@ function getProjects( Users_UserStruct $user, $start, $step,
 
     $where_query = implode( " AND ", $conditions );
 
-    $features = Projects_MetadataDao::FEATURES_KEY ;
-
     $projectsQuery =
-            "SELECT p.id AS pid,
-                            p.id_team AS id_team,
-                            p.id_assignee AS id_assignee,
-                            p.name,
-                            p.password,
-                            p.create_date,
-                            SUM(draft_words + new_words+translated_words+rejected_words+approved_words) as tm_analysis_wc,
-                            project_metadata.value AS features
-
-            FROM projects p
-
-            INNER JOIN jobs j ON j.id_project = p.id
-
-            LEFT JOIN project_metadata ON project_metadata.id_project = p.id AND project_metadata.`key` = '$features'
-
-            WHERE $where_query
-            GROUP BY 1
-            ORDER BY 1 DESC
-            LIMIT $start, $step " ;
-
+            "SELECT p.id
+                FROM projects p
+                INNER JOIN jobs j ON j.id_project = p.id
+                WHERE $where_query
+                GROUP BY 1
+                ORDER BY 1 DESC
+                LIMIT $start, $step 
+            ";
 
     $stmt = Database::obtain()->getConnection()->prepare( $projectsQuery );
     $stmt->execute( $data );
-    return $stmt->fetchAll( PDO::FETCH_ASSOC ) ;
-}
 
-
-function getJobsFromProjects( array $projectIDs, $search_source, $search_target, $search_status, $search_only_completed ) {
-
-    /**
-     * Do not execute
-     */
-    if( empty( $projectIDs ) ){
-        return [];
-    }
-
-    list( $conditions, $data ) = conditionsForProjectsQuery(
-            null, $search_source, $search_target,
-            $search_status, $search_only_completed
-    );
-
-    $where_query = implode( " AND ", $conditions );
-    if( !empty( $where_query ) ){
-        $where_query = " AND " . $where_query;
-    }
-
-    $jobsQuery = "SELECT
-                 j.id,
-
-				 j.id_project,
-				 j.source,
-				 j.target,
-				 j.create_date,
-				 j.password,
-				 j.tm_keys,
-				 j.status_owner,
-				 j.job_first_segment,
-				 j.job_last_segment,
-				 j.id_mt_engine,
-				 j.id_tms,
-				 j.subject,
-				(draft_words + new_words) AS DRAFT,
-				rejected_words AS REJECT,
-				translated_words AS TRANSLATED,
-				approved_words AS APPROVED,
-                e.name,
-
-
-                -- some fields are repeated with different names to favour the use of the same
-                -- data in CatUtils::getWStructFromJobArray
-                 j.id AS jid,
-                 j.password AS jpassword,
-                 j.draft_words,
-                 j.new_words,
-                 j.translated_words,
-                 j.approved_words,
-                 j.rejected_words,
-                 projects.status_analysis,
-                 project_metadata.value AS features,
-
-                 id_vendor,
-                 vendor_name,
-                 osc.create_date as outsource_create_date,
-                 delivery_date,
-                 quote_pid,
-                 price,
-                 currency
-
-            FROM jobs j
-            JOIN projects ON projects.id = j.id_project
-            LEFT JOIN outsource_confirmation osc  ON osc.id_job = j.id AND osc.password = j.password
-            LEFT JOIN engines e ON j.id_mt_engine=e.id
-            LEFT JOIN project_metadata ON project_metadata.id_project = projects.id AND project_metadata.`key` = '". Projects_MetadataDao::FEATURES_KEY . "'
-
-            WHERE j.id_project IN ( " . implode( ",", $projectIDs ) . " ) $where_query
-            ORDER BY j.id DESC,
-                     j.job_first_segment ASC";
-
-    $stmt = Database::obtain()->getConnection()->prepare( $jobsQuery );
-    $stmt->execute( $data );
-    return $stmt->fetchAll( PDO::FETCH_ASSOC ) ;
+    return array_map( function( $d ){
+        return $d[ 'id' ];
+    }, $stmt->fetchAll( PDO::FETCH_ASSOC ) );
 
 }
 
@@ -2147,53 +2059,6 @@ function changeProjectStatus( $pid, $status, $if_status_not = array() ) {
         return $e->getCode() * -1;
     }
     return $affectedRows;
-}
-
-/**
- * @param $res
- * @param $id
- * @param $password
- * @param $new_password
- *
- * @return int|mixed
- *
- * @deprecated
- * TODO: Refactory with Prepared Statements
- */
-function changePassword( $res, $id, $password, $new_password ) {
-
-    $db = Database::obtain();
-
-    $query      = "UPDATE %s SET PASSWORD = '%s' WHERE id = %u AND PASSWORD = '%s' ";
-    $sel_query  = "SELECT 1 FROM %s WHERE id = %u AND PASSWORD = '%s'";
-    $row_exists = false;
-
-    if ( $res == "prj" ) {
-
-        $sel_query  = sprintf( $sel_query, 'projects', $id, $db->escape( $password ) );
-        $res        = $db->fetch_array( $sel_query );
-        $row_exists = @(bool)array_pop( $res[ 0 ] );
-
-        $query = sprintf( $query, 'projects', $db->escape( $new_password ), $id, $db->escape( $password ) );
-    } else {
-
-        $sel_query  = sprintf( $sel_query, 'jobs', $id, $db->escape( $password ) );
-        $res        = $db->fetch_array( $sel_query );
-        $row_exists = @(bool)array_pop( $res[ 0 ] );
-
-        $query = sprintf( $query, 'jobs', $db->escape( $new_password ), $id, $db->escape( $password ) );
-    }
-    try {
-
-        $res = $db->query($query);
-
-        ( new \Outsource\ConfirmationDao() )->updatePassword( $id, $password, $new_password  );
-
-    } catch( PDOException $e ) {
-        Log::doLog( $e->getMessage() );
-        return $e->getCode() * -1;
-    }
-    return ( $db->affected_rows | $row_exists );
 }
 
 /**

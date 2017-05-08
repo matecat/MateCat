@@ -70,7 +70,7 @@ class JobContainer extends React.Component {
             .done(function (data) {
                 let notification = {
                     title: 'Change job password',
-                    text: 'The password has been changed. <a className="undo-password">Undo</a>',
+                    text: 'The password has been changed. <a class="undo-password">Undo</a>',
                     type: 'warning',
                     position: 'tc',
                     allowHtml: true,
@@ -96,7 +96,7 @@ class JobContainer extends React.Component {
                             });
 
                     })
-                });
+                }, 500);
 
             });
     }
@@ -460,7 +460,7 @@ class JobContainer extends React.Component {
         if (this.props.job.get('outsource')) {
             if (this.props.job.get('outsource').get('id_vendor') == "1") {
                 let date  = this.props.job.get('outsource').get('delivery_date').substring(0, this.props.job.get('outsource').get('delivery_date').lastIndexOf(":"))
-                let gmtDate = APP.getGMTDate(this.props.job.get('outsource').get('delivery_date'));
+                let gmtDate = APP.getGMTDate(this.props.job.get('outsource').get('delivery_timestamp') * 1000);
                 outsourceDelivery = <div className="job-delivery" title="Delivery date">
                     <div className="outsource-day-text">{gmtDate.day}</div>
                     <div className="outsource-month-text">{gmtDate.month}</div>
@@ -470,7 +470,7 @@ class JobContainer extends React.Component {
             }
         } else if (this.props.job.get('translator')) {
             let date  = this.props.job.get('translator').get('delivery_date').substring(0, this.props.job.get('translator').get('delivery_date').lastIndexOf(":"))
-            let gmtDate = APP.getGMTDate(this.props.job.get('translator').get('delivery_date'));
+            let gmtDate = APP.getGMTDate(this.props.job.get('translator').get('delivery_timestamp') * 1000);
             outsourceDelivery = <div className="job-delivery" title="Delivery date">
                 <div className="outsource-day-text">{gmtDate.day}</div>
                 <div className="outsource-month-text">{gmtDate.month}</div>

@@ -95,7 +95,7 @@ class downloadFileController extends downloadController {
             return null;
         }
 
-        $this->job      = Jobs_JobDao::getById($this->id_job);
+        $this->job      = Jobs_JobDao::getById($this->id_job)[0];
         $this->project  = $this->job->getProject();
 
         //get storage object

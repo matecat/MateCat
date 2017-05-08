@@ -77,6 +77,7 @@ class ProjectManager {
                             'id_project'           => null,
                             'create_date'          => date( "Y-m-d H:i:s" ),
                             'id_customer'          => self::TRANSLATED_USER,
+                            'project_features'     => [],
                             'user_ip'              => null,
                             'project_name'         => null,
                             'result'               => [ "errors" => [], "data" => [] ],
@@ -143,7 +144,18 @@ class ProjectManager {
 
         $this->dbHandler = Database::obtain();
 
-        $this->features = new FeatureSet();
+        $features = [];
+        if( !empty( $this->projectStructure[ 'project_features' ] ) ){
+            foreach( $this->projectStructure[ 'project_features' ] as $key => $feature ){
+                /**
+                 * @var $feature RecursiveArrayObject
+                 */
+                $this->projectStructure[ 'project_features' ][ $key ] = new BasicFeatureStruct( $feature->getArrayCopy() );
+            }
+            $features = $this->projectStructure[ 'project_features' ]->getArrayCopy();
+        }
+
+        $this->features = new FeatureSet( $features );
 
         if ( !empty( $this->projectStructure['id_customer']) ) {
            $this->features->loadFromUserEmail( $this->projectStructure['id_customer'] );
@@ -171,7 +183,7 @@ class ProjectManager {
      * @throws Exceptions_RecordNotFound
      */
     public function setProjectIdAndLoadProject( $id ) {
-        $this->project = Projects_ProjectDao::findById($id);
+        $this->project = Projects_ProjectDao::findById($id, 60 * 60);
         if ( $this->project == FALSE ) {
             throw new Exceptions_RecordNotFound("Project was not found: id $id ");
         }
@@ -181,6 +193,14 @@ class ProjectManager {
         $this->reloadFeatures();
 
     }
+
+    public function setProjectAndReLoadFeatures( Projects_ProjectStruct $pStruct ){
+        $this->project = $pStruct;
+        $this->projectStructure['id_project'] = $this->project->id ;
+        $this->projectStructure['id_customer'] = $this->project->id_customer ;
+        $this->reloadFeatures();
+    }
+
     private function reloadFeatures() {
         $this->features = new FeatureSet();
         $this->features->loadForProject( $this->project ) ;
@@ -1296,8 +1316,13 @@ class ProjectManager {
         }
 
         if ( $total_words > $reverse_count[ $count_type ] ) {
-            $counter[ $chunk ][ 'eq_word_count' ]  = round( $row_totals[ 'eq_word_count' ] - $reverse_count[ 'eq_word_count' ] );
-            $counter[ $chunk ][ 'raw_word_count' ] = round( $row_totals[ 'raw_word_count' ] - $reverse_count[ 'raw_word_count' ] );
+            if( !empty( $counter[ $chunk ] ) ){
+                $counter[ $chunk ][ 'eq_word_count' ]  = round( $row_totals[ 'eq_word_count' ] - $reverse_count[ 'eq_word_count' ] );
+                $counter[ $chunk ][ 'raw_word_count' ] = round( $row_totals[ 'raw_word_count' ] - $reverse_count[ 'raw_word_count' ] );
+            } else {
+                $counter[ $chunk -1 ][ 'eq_word_count' ]  += round( $row_totals[ 'eq_word_count' ] - $reverse_count[ 'eq_word_count' ] );
+                $counter[ $chunk -1][ 'raw_word_count' ] += round( $row_totals[ 'raw_word_count' ] - $reverse_count[ 'raw_word_count' ] );
+            }
         }
 
         if ( count( $counter ) < 2 ) {
@@ -1355,11 +1380,12 @@ class ProjectManager {
         $jTranslatorStruct = $translatorModel->getTranslator( 0 ); // no cache
         if ( !empty( $jTranslatorStruct ) && !empty( $this->projectStructure[ 'session' ][ 'uid' ] ) ) {
 
-            $translatorModel->setUserInvite(
-                    ( new Users_UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'session' ][ 'uid' ] )
-            )->setDeliveryDate( $jTranslatorStruct->delivery_date )
-             ->setEmail( $jTranslatorStruct->email )
-             ->setNewJobPassword( CatUtils::generate_password() );
+            $translatorModel
+                    ->setUserInvite( ( new Users_UserDao() )->setCacheTTL( 60 * 60 )->getByUid( $this->projectStructure[ 'session' ][ 'uid' ] ) )
+                    ->setDeliveryDate( $jTranslatorStruct->delivery_date )
+                    ->setJobOwnerTimezone( $jTranslatorStruct->job_owner_timezone )
+                    ->setEmail( $jTranslatorStruct->email )
+                    ->setNewJobPassword( CatUtils::generate_password() );
 
             $translatorModel->update();
             $jobInfo[ 'password'] = $jStruct->password;
@@ -1421,6 +1447,9 @@ class ProjectManager {
                 Utils::sendErrMailReport( $msg );
                 throw new Exception( 'Failed to insert job chunk, project damaged.', -8 );
             }
+
+            Shop_Cart::getInstance( 'outsource_to_external_cache' )->deleteCart();
+
         }
 
     }
@@ -1440,27 +1469,17 @@ class ProjectManager {
 
     }
 
-    public function mergeALL( ArrayObject $projectStructure, $renewPassword = false ) {
-
-        $query_job = "SELECT *
-            FROM jobs
-            WHERE id = %u
-            ORDER BY job_first_segment";
-
-        $query_job = sprintf( $query_job, $projectStructure[ 'job_to_merge' ] );
-        //$projectStructure[ 'job_to_split' ]
-
-        $rows = $this->dbHandler->fetch_array( $query_job );
+    public function mergeALL( ArrayObject $projectStructure, array $jobStructs ) {
 
         $metadata_dao = new Projects_MetadataDao();
-        $metadata_dao->cleanupChunksOptions( $rows );
+        $metadata_dao->cleanupChunksOptions( $jobStructs );
 
         //get the min and
-        $first_job         = reset( $rows );
+        $first_job         = reset( $jobStructs );
         $job_first_segment = $first_job[ 'job_first_segment' ];
 
         //the max segment from job list
-        $last_job         = end( $rows );
+        $last_job         = end( $jobStructs );
         $job_last_segment = $last_job[ 'job_last_segment' ];
 
         //change values of first job
@@ -1469,7 +1488,7 @@ class ProjectManager {
 
         //merge TM keys: preserve only owner's keys
         $tm_keys = array();
-        foreach ( $rows as $chunk_info ) {
+        foreach ( $jobStructs as $chunk_info ) {
             $tm_keys[] = $chunk_info[ 'tm_keys' ];
         }
 
@@ -1489,8 +1508,9 @@ class ProjectManager {
         }
 
         $oldPassword = $first_job[ 'password' ];
-        if ( $renewPassword ) {
+        if( $jobStructs[ 0 ]->getTranslator() ){
             $first_job[ 'password' ] = self::generatePassword();
+            Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
         }
 
         $_data = array();
@@ -1503,7 +1523,7 @@ class ProjectManager {
         $queries = array();
 
         $queries[] = "UPDATE jobs SET " . implode( ", \n", $_data ) .
-                " WHERE id = {$first_job['id']} AND password = '{$oldPassword}'"; //ose old password
+                " WHERE id = {$first_job['id']} AND password = '{$oldPassword}'"; //use old password
 
         //delete all old jobs
         $queries[] = "DELETE FROM jobs WHERE id = {$first_job['id']} AND password != '{$first_job['password']}' "; //use new password
@@ -1513,10 +1533,10 @@ class ProjectManager {
         foreach ( $queries as $query ) {
             $res = $this->dbHandler->query( $query );
             if ( $this->dbHandler->affected_rows == 0 ) {
-                $msg = "Failed to merge job  " . $rows[ 0 ][ 'id' ] . " from " . count( $rows ) . " chunks\n";
+                $msg = "Failed to merge job  " . $first_job[ 'id' ] . " from " . count( $jobStructs ) . " chunks\n";
                 $msg .= "Tried to perform SQL: \n" . print_r( $queries, true ) . " \n\n";
                 $msg .= "Failed Statement is: \n" . print_r( $query, true ) . "\n";
-                $msg .= "Original Status for rebuild job and project was: \n" . print_r( $rows, true ) . "\n";
+                $msg .= "Original Status for rebuild job and project was: \n" . print_r( $jobStructs, true ) . "\n";
                 Utils::sendErrMailReport( $msg );
                 throw new Exception( 'Failed to merge jobs, project damaged. Contact Matecat Support to rebuild project.', -8 );
             }
@@ -1524,8 +1544,6 @@ class ProjectManager {
 
         $wCountManager = new WordCount_Counter();
         $wCountManager->initializeJobWordCount( $first_job[ 'id' ], $first_job[ 'password' ] );
-
-        Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
 
         $this->features->run('postJobMerged',
             $projectStructure

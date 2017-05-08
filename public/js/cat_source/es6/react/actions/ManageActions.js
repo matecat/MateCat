@@ -527,6 +527,19 @@ let ManageActions = {
 
     setPopupTeamsCookie: function () {
         UI.setPopupTeamsCookie();
+    },
+
+    // Move To Outsource Actions
+    outsourceCloseTranslatorInfo: function () {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.CLOSE_TRANSLATOR,
+        });
+    },
+
+    getOutsourceQuote: function () {
+        AppDispatcher.dispatch({
+            actionType: ManageConstants.GET_OUTSOURCE_QUOTE,
+        });
     }
 };
 

@@ -4,24 +4,23 @@ use ProjectQueue\Queue;
 
 class createProjectController extends ajaxController {
 
-    private $file_name;
-    private $project_name;
-    private $source_language;
-    private $target_language;
-    private $job_subject;
-    private $mt_engine;
-    private $tms_engine = 1;  //1 default MyMemory
-    private $private_tm_key;
-    private $private_tm_user;
-    private $private_tm_pass;
-    private $lang_detect_files;
-
+    private   $file_name;
+    private   $project_name;
+    private   $source_language;
+    private   $target_language;
+    private   $job_subject;
+    private   $mt_engine;
+    private   $tms_engine = 1;  //1 default MyMemory
+    private   $private_tm_key;
+    private   $private_tm_user;
+    private   $private_tm_pass;
+    private   $lang_detect_files;
     private $disable_tms_engine_flag;
+
     private $pretranslate_100;
-
     private $dqf_key;
-    private $metadata;
 
+    private $metadata;
     private $lang_handler ;
 
     /**
@@ -34,6 +33,8 @@ class createProjectController extends ajaxController {
      */
     private $featureSet ;
 
+    private $project_features;
+
     public function __construct() {
 
         //SESSION ENABLED
@@ -41,30 +42,28 @@ class createProjectController extends ajaxController {
         parent::__construct();
 
         $filterArgs = array(
-                'file_name'          => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'project_name'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'source_language'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'target_language'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'job_subject'        => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'mt_engine'          => array( 'filter' => FILTER_VALIDATE_INT ),
-                'disable_tms_engine' => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
+                'file_name'          => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'project_name'       => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'source_language'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'target_language'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'job_subject'        => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'mt_engine'          => [ 'filter' => FILTER_VALIDATE_INT ],
+                'disable_tms_engine' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
 
-                'private_tm_user'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'private_tm_pass'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'lang_detect_files'  => array(
+                'private_tm_user'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'private_tm_pass'    => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'lang_detect_files'  => [
                         'filter'  => FILTER_CALLBACK,
                         'options' => "Utils::filterLangDetectArray"
-                ),
-                'private_tm_key'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'pretranslate_100'   => array( 'filter' => FILTER_VALIDATE_INT ),
-                'dqf_key'            => array(
+                ],
+                'private_tm_key'     => [ 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ],
+                'pretranslate_100'   => [ 'filter' => FILTER_VALIDATE_INT ],
+                'dqf_key'            => [
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-                ),
-                'id_team' => array( 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR  )
+                ],
+                'id_team'            => [ 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR ],
 
-                //            This will be sanitized inside the TmKeyManagement class
-                //            SKIP
-                //            'private_keys_list'  => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ),
+                'project_completion' => [ 'filter' => FILTER_VALIDATE_BOOLEAN ], // features customization
 
         );
 
@@ -74,6 +73,8 @@ class createProjectController extends ajaxController {
         $filterArgs = $this->__addFilterForMetadataInput( $filterArgs ) ;
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
+
+        $this->setProjectFeatures( $__postInput );
 
         //first we check the presence of a list from tm management panel
         $array_keys = json_decode( $_POST[ 'private_keys_list' ], true );
@@ -161,6 +162,17 @@ class createProjectController extends ajaxController {
 
         if ( $this->userIsLogged ) {
             $this->__setTeam( $__postInput['id_team'] );
+        }
+
+    }
+
+    private function setProjectFeatures( $__postInput ){
+
+        //change project features
+        if( !empty( $__postInput[ 'project_completion' ] ) ){
+            $feature = new BasicFeatureStruct();
+            $feature->feature_code = 'project_completion';
+            $this->project_features[] = $feature;
         }
 
     }
@@ -284,8 +296,8 @@ class createProjectController extends ajaxController {
 
         $arFiles = $newArFiles;
 
-        \Log::doLog( '------------------------------'); 
-        \Log::doLog( $arFiles ); 
+        \Log::doLog( '------------------------------');
+        \Log::doLog( $arFiles );
 
         FilesStorage::moveFileFromUploadSessionToQueuePath( $_COOKIE[ 'upload_session' ] );
 
@@ -327,6 +339,9 @@ class createProjectController extends ajaxController {
             $projectManager->setTeam( $this->team ); // set the team object to avoid useless query
         }
 
+        //set features override
+        $projectStructure[ 'project_features' ] = $this->project_features;
+
         //reserve a project id from the sequence
         $projectStructure[ 'id_project' ] = Database::obtain()->nextSequence( Database::SEQ_ID_PROJECT )[ 0 ];
         $projectStructure[ 'ppassword' ]  = $projectManager->generatePassword();
@@ -353,12 +368,12 @@ class createProjectController extends ajaxController {
 
     private function __addFilterForMetadataInput( $filterArgs ) {
         $filterArgs = array_merge( $filterArgs, array(
-            'lexiqa'             => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
-            'speech2text'        => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
-            'tag_projection'     => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
-            'segmentation_rule'  => array(
+            'lexiqa'             => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+            'speech2text'        => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+            'tag_projection'     => [ 'filter' => FILTER_VALIDATE_BOOLEAN ],
+            'segmentation_rule'  => [
                 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
-            )
+            ],
         ));
 
         $filterArgs = $this->featureSet->filter('filterCreateProjectInputFilters', $filterArgs );
