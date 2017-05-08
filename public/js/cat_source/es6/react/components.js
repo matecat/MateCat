@@ -52,6 +52,5 @@ window.OutsourceModal = require('./modals/OutsourceModal').default;
 
 window.CreateTeamModal = require('./modals/CreateTeam').default;
 window.ModifyTeamModal = require('./modals/ModifyTeam').default;
-window.ChangeTeamModal = require('./modals/ChangeProjectTeam').default;
 
 
