@@ -342,12 +342,12 @@ class ProjectContainer extends React.Component {
                      {/*onClick={this.openAddMember.bind(this)}>*/}
                     {/*<a href="#">Add New Member <i className="icon-plus3 icon right"/></a>*/}
                 {/*</div>*/}
-                {/*<div className="divider"></div>*/}
+                <div className="divider"></div>
                 <div className="ui icon search input">
                     <i className="icon-search icon"/>
                     <input type="text" name="UserName" placeholder="Search by name." />
                 </div>
-                {/*<div className="scrolling menu">*/}
+                <div className="scrolling menu">
                 {members}
                 <div className="item cancel-item" data-value="-1">
                     <div className="ui not-assigned label">
@@ -355,7 +355,7 @@ class ProjectContainer extends React.Component {
                     </div>
                     Not assigned
                 </div>
-                {/*</div>*/}
+                </div>
             </div>
         </div>;
     }
