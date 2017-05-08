@@ -327,7 +327,7 @@ class OutsourceModal extends React.Component {
 
                 <div className={(this.props.translatorOpen && showShareToTranslator) ? ("send-to-translator") :("send-to-translator hide")} >
                     <div className="send-to-translator-container ">
-                        <input className="out-email" type="email" placeholder="Insert email" defaultValue={translatorEmail}/>
+                        <input className="out-email" type="email" placeholder="Enter email" defaultValue={translatorEmail}/>
                         <input className="out-date" type="datetime" placeholder="Date" readOnly defaultValue={date}/>
                         <a  className="send-to-translator-btn in-popup disabled" target="_blank">Send to translator</a>
                         <div className="validation-error email-translator-error"><span className="text" style={{color: "red", fontsize: "14px"}}>A valid email is required</span></div>

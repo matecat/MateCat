@@ -231,7 +231,7 @@ select:active {
     margin-bottom: 20px;
     font-size: 15px;
     color: #333;
-    width: 95%;
+    width: 95.4%;
     margin: 2%;
     background-color: #f1f1f1;
     box-shadow: inset 0 1px 3px #ddd;
@@ -1848,8 +1848,8 @@ div#open-translator:hover {
     border-radius: 0px 0px 3px 3px;
     margin: 0 auto;
     overflow: hidden;
-    margin-top: -1px;
-    background: linear-gradient(to right, #fff, #fff 37%, #f8f8f8 37%, #fcfcfc 100%);
+    margin-top: -2px;
+    background: #f8f8f8;
 }
 
 .modal.outsource .outsource-divider {
