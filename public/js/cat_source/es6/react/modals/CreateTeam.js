@@ -30,6 +30,12 @@ class CreateTeam extends React.Component {
                 errorDropdown: false
             });
             return true;
+        } else if (text.indexOf(",") > -1) {
+            let members = text.split(",");
+            members.forEach(function (item) {
+                self.onLabelCreate(item, item);
+            });
+            return false;
         } else {
             this.setState({
                 errorDropdown: true
