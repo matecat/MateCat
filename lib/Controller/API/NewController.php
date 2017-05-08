@@ -620,7 +620,7 @@ class NewController extends ajaxController {
             //errors already logged
             $this->api_output[ 'status' ]  = 500;
             $this->api_output[ 'message' ] = 'Project Creation Failure';
-            $this->api_output[ 'debug' ]   = array_values( $this->result );
+            $this->api_output[ 'debug' ]   = array_values( $this->result[ 'errors' ] );
 
         } else {
             //everything ok
