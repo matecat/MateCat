@@ -248,7 +248,7 @@ class ProjectContainer extends React.Component {
         let self = this;
         let chunks = [],  index;
         let tempIdsArray = [];
-        let orderedJobs = this.props.project.get('jobs').reverse();
+        let orderedJobs = this.props.project.get('jobs');
         orderedJobs.map(function(job, i){
 
             let next_job_id = (orderedJobs.get(i+1)) ? orderedJobs.get(i+1).get('id') : 0;
