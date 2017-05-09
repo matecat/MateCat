@@ -1,10 +1,16 @@
 <?php
 
+
+use Features\ProjectCompletion\Model\EventModel ;
+
 class Features_ProjectCompletion_SetChunkCompletedController extends ajaxController {
 
     private $id_job;
     private $password ;
 
+    /**
+     * @var \LQA\ChunkReviewStruct ;
+     */
     private $chunk ;
 
     public function __construct() {
@@ -43,9 +49,8 @@ class Features_ProjectCompletion_SetChunkCompletedController extends ajaxControl
             'is_review' => $this->isRevision()
         );
 
-        $event = Chunks_ChunkCompletionEventDao::createFromChunk(
-            $this->chunk, $params
-        );
+        $model = new EventModel( $this->chunk, $params ) ;
+        $model->save();
 
         $this->result[ 'data' ] = $this->chunk->toArray() ;
     }
