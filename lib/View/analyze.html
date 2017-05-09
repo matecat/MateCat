@@ -56,28 +56,6 @@
     </div>
 </header>
 
-<div class="loadingbar open start">
-
-    <div class="wrapper" id="shortloading">
-        <p class="label">Fast word counting...</p>
-
-    </div>
-
-    <div class="cl"></div>
-
-    <div class="wrapper" id="longloading">
-        <p>Searching for TM matches
-            <span class="detailss">(<span id="analyzedSegmentsReport">0</span> of <span id="totalSegmentsReport">0</span> segments)...</span>
-        </p>
-
-        <div class="meter">
-            <a href="#" class="approved-bar" title="Analyzing 0.0%"></a>
-            <a href="#" id="close">close</a>
-        </div>
-
-    </div>
-</div>
-
 <div class="wrapper-container">
     <div class="wrapper">
         <h1 id="pid" title="" data-pid="" data-pwd="" tal:attributes="title pname|default; data-pid pid; data-pwd project_password">
@@ -165,71 +143,28 @@
         <br/>
 
         <div class="cl"></div>
+    </div>
+    <div class="loadingbar open start">
 
+        <div class="wrapper" id="shortloading">
+            <p class="label">Fast word counting...</p>
 
-
-        <!-- The file upload form used as target for the file upload widget -->
-
-        <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
-        <!-- The loading indicator is shown during file processing -->
-        <!-- The table listing the files available for upload/download -->
-        <table class="upload-table content-table" role="presentation">
-            <tr>
-
-                <td class="preview">
-                    <img src="/public/img/xliff-icon-retina.png" width="30" height="29"/></td>
-                <td class="name">esempio.xliff</td>
-                <td class="size"><span>0.90 KB</span></td>
-                <td colspan="2">0 word found</td>
-
-                <td></td>
-            </tr>
-            <tr>
-
-                <td class="preview">
-                    <img src="/public/img/xliff-icon-retina.png" width="30" height="29"/></td>
-                <td class="name">esempio.xliff</td>
-                <td class="size"><span>0.90 KB</span></td>
-                <td colspan="2">0 word found</td>
-
-                <td></td>
-            </tr>
-            <tr>
-
-                <td class="preview">
-                    <img src="/public/img/xliff-icon-retina.png" width="30" height="29"/></td>
-                <td class="name">esempio.xliff</td>
-                <td class="size"><span>0.90 KB</span></td>
-                <td colspan="2">0 word found</td>
-
-                <td></td>
-            </tr>
-            <tr>
-
-                <td class="preview">
-                    <img src="/public/img/xliff-icon-retina.png" width="30" height="29"/></td>
-                <td class="name">esempio.xliff</td>
-                <td class="size"><span>0.90 KB</span></td>
-                <td colspan="2">0 word found</td>
-
-                <td></td>
-            </tr>
-            <tr>
-
-                <td class="preview">
-                    <img src="/public/img/xliff-icon-retina.png" width="30" height="29"/></td>
-                <td class="name">esempio.xliff</td>
-                <td class="size"><span>0.90 KB</span></td>
-                <td colspan="2">0 word found</td>
-
-                <td></td>
-            </tr>
-        </table>
-        <!-- .upload-footer -->
+        </div>
 
         <div class="cl"></div>
-    </div>
 
+        <div class="wrapper" id="longloading">
+            <p>Searching for TM matches
+                <span class="detailss">(<span id="analyzedSegmentsReport">0</span> of <span id="totalSegmentsReport">0</span> segments)...</span>
+            </p>
+
+            <div class="meter">
+                <a href="#" class="approved-bar" title="Analyzing 0.0%"></a>
+                <a href="#" id="close">close</a>
+            </div>
+
+        </div>
+    </div>
 
 </div>
 
