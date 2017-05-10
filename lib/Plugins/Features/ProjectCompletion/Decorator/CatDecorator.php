@@ -3,6 +3,7 @@
 namespace Features\ProjectCompletion\Decorator ;
 use AbstractDecorator ;
 use Features ;
+use Chunks_ChunkCompletionEventDao  ;
 
 class CatDecorator extends AbstractDecorator {
 
@@ -10,20 +11,21 @@ class CatDecorator extends AbstractDecorator {
     protected $controller;
 
     private $stats;
+
+    private $current_phase  ;
     
     public function decorate() {
         $job = $this->controller->getJob();
+
         $this->stats = $this->controller->getJobStats();
-
-        $this->template->project_completion_feature_enabled = true ;
-
-        $this->template->header_main_button_id  = 'markAsCompleteButton' ;
-
         $completed = $job->isMarkedComplete( array('is_review' => $this->controller->isRevision() ) ) ;
 
         $dao = new \Chunks_ChunkCompletionEventDao();
-        $this->template->job_completion_current_phase = $dao->currentPhase( $this->controller->getJob() );
+        $this->current_phase = $dao->currentPhase( $this->controller->getJob() );
 
+        $this->template->project_completion_feature_enabled = true ;
+        $this->template->header_main_button_id  = 'markAsCompleteButton' ;
+        $this->template->job_completion_current_phase = $this->current_phase ;
         if ( $completed ) {
             $this->varsForComplete();
         }
@@ -54,11 +56,13 @@ class CatDecorator extends AbstractDecorator {
 
     private function completable() {
         if ($this->controller->isRevision()) {
-            return $this->stats['DRAFT'] == 0 &&
-                ($this->stats['APPROVED'] + $this->stats['REJECTED']) > 0;
+            return $this->current_phase == Chunks_ChunkCompletionEventDao::REVISE &&
+                    $this->stats['DRAFT'] == 0 &&
+                    ( $this->stats['APPROVED'] + $this->stats['REJECTED'] ) > 0;
         }
         else {
-            return $this->stats['DRAFT'] == 0 && $this->stats['REJECTED'] == 0 ;
+            return $this->current_phase == Chunks_ChunkCompletionEventDao::TRANSLATE &&
+                    $this->stats['DRAFT'] == 0 && $this->stats['REJECTED'] == 0 ;
         }
     }
 
