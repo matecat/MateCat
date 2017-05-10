@@ -20,7 +20,11 @@ class SubHeader extends React.Component {
         if (this.props.selectedTeam) {
             if (this.teamChanged) {
                 if (!this.dropDownUsersInitialized && this.props.selectedTeam.get('members').size > 1) {
-                    $(this.dropdownUsers).dropdown('set selected', this.selectedUser);
+                    if (this.selectedUser === ManageConstants.ALL_MEMBERS_FILTER) {
+                        $(this.dropdownUsers).dropdown('set selected', "-1");
+                    } else {
+                        $(this.dropdownUsers).dropdown('set selected', this.selectedUser);
+                    }
                     $(this.dropdownUsers).dropdown({
                         fullTextSearch: 'exact',
                         onChange: function(value, text, $selectedItem) {
@@ -41,6 +45,9 @@ class SubHeader extends React.Component {
             nextProps.selectedTeam.get('members') !== this.props.selectedTeam.get('members') ) {
             this.teamChanged = true;
             this.dropDownUsersInitialized = false;
+            if ( !_.isUndefined(this.props.selectedTeam) && nextProps.selectedTeam.get('id') !== this.props.selectedTeam.get('id')) {
+                this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
+            }
             if ( nextProps.selectedTeam && nextProps.selectedTeam.get('type') !== 'personal' && nextProps.selectedTeam.get('members').size == 1) {
                 this.dropDownUsersInitialized = true;
             }
@@ -50,18 +57,22 @@ class SubHeader extends React.Component {
     changeUser(value) {
 
         let self = this;
+        let selectedUser;
         if (value === this.ALL_MEMBERS) {
-            this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
-        } else if ( value === this.NOT_ASSIGNED ) {
-            this.selectedUser = ManageConstants.NOT_ASSIGNED_FILTER;
+            selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
+        } else if ( value === this.NOT_ASSIGNED && value !== this.selectedUser) {
+            selectedUser = ManageConstants.NOT_ASSIGNED_FILTER;
         } else {
-            this.selectedUser = this.props.selectedTeam.get('members').find(function (member) {
+            selectedUser = this.props.selectedTeam.get('members').find(function (member) {
                 if (parseInt(member.get('user').get("uid")) === parseInt(value)) {
                     return true;
                 }
             });
         }
-        ManageActions.filterProjects(self.selectedUser, self.currentText, self.state.currentStatus);
+        if (selectedUser !== this.selectedUser) {
+            this.selectedUser = selectedUser;
+            ManageActions.filterProjects(self.selectedUser, self.currentText, self.state.currentStatus);
+        }
     }
 
     onChangeSearchInput(value) {
