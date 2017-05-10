@@ -136,6 +136,10 @@ class JobContainer extends React.Component {
         }
     }
 
+    openSplitModal() {
+        UI.openSplitJobModal();
+    }
+
     getDownloadLabel() {
         let jobStatus = this.getTranslationStatus();
         let remoteService = this.props.project.get('remote_file_service');
@@ -169,8 +173,11 @@ class JobContainer extends React.Component {
         let downloadButton = this.getDownloadLabel();
         let splitButton;
         if (!this.props.job.get('outsource')) {
+            // splitButton = (!this.props.isChunk) ?
+            //     <a className="item" target="_blank" href={splitUrl}><i className="icon-expand icon"/> Split</a> :
+            //     <a className="item" target="_blank" href={mergeUrl}><i className="icon-compress icon"/> Merge</a>;
             splitButton = (!this.props.isChunk) ?
-                <a className="item" target="_blank" href={splitUrl}><i className="icon-expand icon"/> Split</a> :
+                <a className="item" target="_blank" onClick={this.openSplitModal.bind(this)}><i className="icon-expand icon"/> Split</a> :
                 <a className="item" target="_blank" href={mergeUrl}><i className="icon-compress icon"/> Merge</a>;
         }
         let menuHtml = <div className="menu">

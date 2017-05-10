@@ -557,8 +557,13 @@ UI = {
         };
         let style = {width: '970px',maxWidth: '970px', top: '45%'};
         APP.ModalWindow.showModalComponent(OutsourceModal, props, "Translate", style);
+    },
 
-
+    openSplitJobModal: function () {
+        let props = {
+        };
+        let style = {width: '670px',maxWidth: '670px'};
+        APP.ModalWindow.showModalComponent(SplitJobModal, props, "Split Job", style);
     }
 };
 

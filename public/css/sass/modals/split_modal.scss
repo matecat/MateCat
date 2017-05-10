@@ -1,0 +1,391 @@
+/*Split modal*/
+.popup-split {
+    .popup {
+        margin: 0 auto;
+        position: relative;
+        padding: 0px 0 0px 0;
+        left: 0%;
+        top: 0%;
+        background: #fff;
+        box-shadow: 0px 0px 25px #000;
+        border-radius: 7px;
+        text-align: left;
+        font-size: 18px;
+        border: 1px solid #666;
+    }
+    .popup .splitbtn-cont {
+        margin-left: 10px;
+        margin-top: 10px;
+    }
+
+    .error-count {
+        display: none;
+        margin-right: 15px !important;
+        font-size: 20px;
+        text-align: right;
+        color: #d65757 !important;
+    }
+    .error-number .error-count {
+        display: block;
+        padding: 0;
+        margin-top: 0px;
+    }
+    .error-number .error-count.current {
+        color: black !important;
+    }
+    .splitbtn-cont {
+        margin: 0 auto;
+        overflow: hidden;
+        margin-top: 20px;
+        margin-right: 140px;
+        margin-top: 40px;
+        font-size: 20px;
+        color: #666;
+    }
+    .jobcontainer.splitted .splitbtn-cont {
+        display: none;
+    }
+    .splitbtn-cont .label {
+        padding: 5px 10px;
+    }
+
+    .nosplit {
+        float: right;
+        font-size: 20px;
+        color: #666;
+        display: none;
+        margin: 45px 140px 0 0;
+    }
+    .jobcontainer.splitted .nosplit {
+        display: block;
+    }
+    .btnsplit {
+        width: 300px;
+        float: right;
+        margin: 0 auto;
+        padding: 10px 0 20px 0;
+        overflow: hidden;
+    }
+    .none {
+        display: none;
+    }
+    .splitbtn.done {
+        background: #09beec;
+        float: right;
+        padding: 2px 15px 2px 15px !important;
+        margin-bottom: 0;
+    }
+    .splitbtn.done:hover {
+        background: #12b4df;
+    }
+    input[type="text"][disabled] {
+        background: #f0f0f0;
+    }
+    .stopsplitbtn {
+        display: block;
+        float: right;
+        background: #f26522 url(../img/xbtn.gif) 13px 14px no-repeat !important;
+        font-weight: bold;
+        padding: 5px 15px 5px 30px !important;
+        width: auto !important;
+        -webkit-transition: all 100ms ease-in;
+        -moz-transition: all 100ms ease-in;
+        font-size: 20px !important;
+        cursor: pointer;
+        color: #fff;
+        -moz-box-shadow: 0 1px 2px #ccc;
+        -webkit-box-shadow: 0 1px 2px #ccc;
+        box-shadow: 0 1px 2px #ccc;
+        border: 1px solid #666;
+        -moz-border-radius: 2px;
+        border-radius: 2px;
+        text-decoration: none;
+        opacity: 0.9;
+    }
+
+    h2 {
+        font-size: 24px !important;
+        font-weight: bold !important;
+        padding: 0;
+        margin: 15px 10px !important;
+        margin-bottom: 21px !important;
+    }
+
+    h3 {
+        font-size: 20px !important;
+        font-weight: bold !important;
+        padding: 0;
+        margin: 10px 10px !important;
+        margin-bottom: 15px !important;
+    }
+
+    .popup-split-project-title {
+        display: none;
+    }
+
+    .splitbtn, .mergebtn {
+        margin: 0 0 10px 0;
+        font-weight: bold;
+        width: auto !important;
+        -webkit-transition: all 100ms ease-in;
+        -moz-transition: all 100ms ease-in;
+        font-size: 20px !important;
+        cursor: pointer;
+        color: #fff;
+        background: #12b4df;
+        -moz-box-shadow: 0 1px 2px #ccc;
+        -webkit-box-shadow: 0 1px 2px #ccc;
+        box-shadow: 0 1px 2px #ccc;
+        border: 1px solid #666;
+        -moz-border-radius: 2px;
+        border-radius: 2px;
+        text-decoration: none;
+        opacity: 0.9;
+        padding: 5px 10px 5px 10px !important;
+        margin-left: 12px;
+        float: left;
+    }
+
+    .splitbtn-cont.disabled {
+        background: none;
+        border: none;
+        opacity: 1 !important;
+    }
+
+    .uploadbtn {
+        padding: 2px 15px !important;
+    }
+
+    .splitbtn:hover {
+        -moz-box-shadow: 0 1px 2px #666;
+        -webkit-box-shadow: 0 1px 2px #666;
+        box-shadow: 0 1px 2px #666;
+    }
+
+    .mergebtn:hover {
+        -moz-box-shadow: 0 1px 2px #666;
+        -webkit-box-shadow: 0 1px 2px #666;
+        box-shadow: 0 1px 2px #666;
+    }
+
+    .splitbtn:active, .mergebtn:active, .btn-cancel:active {
+        -moz-box-shadow: inset 0 0 1px 1px #888;
+        -webkit-box-shadow: inset 0 0 1px 1px #888;
+        box-shadow: inset 0 0 1px 1px #888;
+    }
+
+    .splitselect {
+        float: left;
+        width: auto;
+        height: 37px;
+        padding: 4px;
+        color: #666;
+        font-size: 18px;
+        border: 1px solid #ccc;
+    }
+    .split-box2 {
+        display: none;
+        width: 670px;
+        margin: 0 auto;
+        position: fixed;
+        padding: 0px 0 0px 0;
+        top: 50%;
+        left: 50%;
+        margin: -300px 0 0 -350px;
+        z-index: 999999;
+        background: #fff;
+        box-shadow: 0px 0px 25px #000;
+        border-radius: 2px;
+        text-align: left;
+        font-size: 18px;
+        border: 1px solid #666;
+    }
+    .split-box3 .input, .split-box2 .input {
+        font-size: 16px;
+        width: 20px;
+        margin-top: -1px;
+        text-align: center;
+    }
+    .split-box3 {
+        margin: 5px 15px;
+    }
+    .split-box3 .jobs {
+        list-style: none;
+        padding: 0;
+        overflow-y: auto;
+        max-height: 325px;
+        width: 645px;
+        margin-top: 20px;
+    }
+
+    .input-small {
+        height: 20px;
+        float: left;
+        text-align: right;
+        width: 70px;
+        margin-right: 0px;
+        padding: 6px 5px 5px 5px;
+        font-size: 18px;
+        background: #fff;
+        border: 1px solid #ccc;
+        background-size: 13px 11px
+    }
+
+    .btn-cancel {
+        padding: 2px 15px !important;
+    }
+
+    .split-box3 .jobs li {
+        float: left;
+        margin: 0px 0 10px 0;
+        padding: 0px;
+        width: 99%;
+        border-radius: 3px;
+        background: #f0f0f0;
+        border: 1px solid #ccc;
+    }
+
+    .split-box3 .jobs li.void {
+        border: 1px solid red !important;
+    }
+    .error-perc {
+        float: left;
+        width: 82%;
+        margin: 25px 0 -20px 20px;
+        text-align: right;
+        color: #FF0000;
+        font-size: 12px
+    }
+
+    .error-message {
+        background: #d65757;
+        color: #fff;
+        margin: 0 0 10px 0;
+        float: left;
+        font-weight: bold;
+        width: 100%;
+        -moz-border-radius: 2px;
+        border-radius: 2px;
+        border: 1px solid #c45f5f;
+    }
+
+    .jobcontainer {
+        padding-bottom: 50px;
+        border-bottom: 1px dashed #ccc;
+    }
+
+    div.wrapper div:last-child {
+        border: none;
+    }
+
+    .error-message p {
+        padding: 0 10px 0 10px;
+    }
+
+    .jobs h4 {
+        margin: 11px 0 0 10px;
+        float: left;
+    }
+    .job-details {
+        float: right;
+    }
+    .job-perc {
+        color: #999;
+        margin: 0;
+        float: left;
+        padding: 10px;
+        font-size: 18px;
+        color: #000;
+        text-align: right;
+    }
+    .job-perc p {
+        float: left;
+        font-size: 14px;
+        margin: 1px 6px 0 3px !important;
+        padding: 0;
+    }
+
+    .total .wordsum {
+        font-size: 20px;
+        color: #000;
+        text-align: right;
+        margin-right: 15px;
+        margin-top: 10px;
+        padding: 0;
+    }
+    .error-number .error-count.current {
+        color: black !important;
+    }
+
+    .error-number .error-count {
+        display: block;
+        padding: 0;
+        margin-top: 0px;
+    }
+
+    .btnsplit .disabled, .splitbtn.done, div.popup-split .uploadbtn {
+        margin: 0 0 0 35px !important;
+    }
+    div.popup-split .uploadbtn {
+        padding: 2px 15px!important;
+    }
+
+    .disabled, .disabled:hover, .disabled:active {
+        opacity: 0.5 !important;
+        cursor: default;
+        -moz-box-shadow: none;
+        -webkit-box-shadow: none;
+        border: 1px solid #666;
+        background: #ccc;
+    }
+
+    .uploadbtn, .continuebtn, .standardbtn {
+        background: #09beec;
+        font-weight: bold;
+        width: 88px;
+        -webkit-transition: all 100ms ease-in;
+        -moz-transition: all 100ms ease-in;
+        font-size: 20px !important;
+        cursor: pointer;
+        color: #fff;
+        -moz-box-shadow: 0 1px 2px #ccc;
+        -webkit-box-shadow: 0 1px 2px #ccc;
+        box-shadow: 0 1px 2px #ccc;
+        border: 1px solid #666;
+        -moz-border-radius: 2px;
+        border-radius: 2px;
+        text-decoration: none;
+        opacity: 0.9;
+        text-align: center;
+        padding: 5px 10px !important;
+        margin: 0 0 -3px 10px !important;
+        float: right;
+    }
+
+    .uploadloader {
+        background: url(../img/loader.gif) center center no-repeat;
+        width: 20px;
+        height: 20px;
+        float: right;
+        margin-top: 5px;
+        display: none;
+        position: absolute;
+        right: 144px;
+        background-size: 20px 20px;
+    }
+
+    .btn-cancel {
+        padding: 2px 15px!important;
+    }
+
+    .total .wordsum .total-w, .total .curr-w, .total .diff-w {
+        float: right;
+        clear: both;
+        width: 83px;
+        font-weight: bold;
+    }
+
+
+
+}
+/************/
