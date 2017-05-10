@@ -25,7 +25,7 @@ class ActivityLogDao extends DataAccess_AbstractDao {
         $sql = "SELECT users.uid, users.email, users.first_name, users.last_name, activity_log.* FROM activity_log
           JOIN (
            SELECT MAX(id) AS id FROM activity_log WHERE id_project = :id_project GROUP BY id_job
-          ) t ON t.id = activity_log.id JOIN users on activity_log.uid = users.uid " ;
+          ) t ON t.id = activity_log.id JOIN users on activity_log.uid = users.uid ORDER BY activity_log.event_date DESC " ;
 
         $stmt = $conn->prepare( $sql ) ;
         $stmt->setFetchMode( \PDO::FETCH_CLASS, '\ActivityLog\ActivityLogStruct' );
