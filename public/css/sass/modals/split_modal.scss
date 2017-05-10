@@ -69,6 +69,9 @@
     .none {
         display: none;
     }
+    .left {
+        float: left;
+    }
     .splitbtn.done {
         background: #09beec;
         float: right;
@@ -117,7 +120,13 @@
         padding: 0;
         margin: 10px 10px !important;
         margin-bottom: 15px !important;
+        color: #333 !important;
     }
+
+    h4 {
+        font-size: 18px;
+    }
+
 
     .popup-split-project-title {
         display: none;
@@ -228,7 +237,8 @@
         font-size: 18px;
         background: #fff;
         border: 1px solid #ccc;
-        background-size: 13px 11px
+        background-size: 13px 11px;
+        box-sizing: content-box;
     }
 
     .btn-cancel {
@@ -285,6 +295,7 @@
     .jobs h4 {
         margin: 11px 0 0 10px;
         float: left;
+        line-height: 30px;
     }
     .job-details {
         float: right;
@@ -303,6 +314,7 @@
         font-size: 14px;
         margin: 1px 6px 0 3px !important;
         padding: 0;
+        line-height: 30px;
     }
 
     .total .wordsum {
