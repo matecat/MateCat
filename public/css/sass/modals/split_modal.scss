@@ -20,18 +20,20 @@
     }
 
     .error-count {
-        display: none;
+        padding: 0;
+        margin-top: 0px;
         margin-right: 15px !important;
-        font-size: 20px;
+        font-size: 18px;
         text-align: right;
         color: #d65757 !important;
+        display: block;
+        line-height: 13px !important;
     }
     .error-number .error-count {
         display: block;
-        padding: 0;
-        margin-top: 0px;
+
     }
-    .error-number .error-count.current {
+    .error-count.current {
         color: black !important;
     }
     .splitbtn-cont {
@@ -64,7 +66,7 @@
         width: 300px;
         float: right;
         margin: 0 auto;
-        padding: 10px 0 20px 0;
+        padding: 20px 0 20px 0;
         overflow: hidden;
     }
     .none {
@@ -161,6 +163,15 @@
         border: none;
         opacity: 1 !important;
     }
+    .disabled, .disabled:hover, .disabled:active {
+        opacity: 0.5 !important;
+        cursor: default;
+        -moz-box-shadow: none;
+        -webkit-box-shadow: none;
+        border: 1px solid #666;
+        background: #ccc;
+    }
+
 
     .uploadbtn {
         padding: 2px 15px !important;
@@ -326,15 +337,7 @@
         margin-right: 15px;
         margin-top: 10px;
         padding: 0;
-    }
-    .error-number .error-count.current {
-        color: black !important;
-    }
-
-    .error-number .error-count {
-        display: block;
-        padding: 0;
-        margin-top: 0px;
+        line-height: 13px;
     }
 
 
@@ -344,7 +347,7 @@
         -moz-box-shadow: none;
         -webkit-box-shadow: none;
         border: 1px solid #666;
-        background: #ccc;
+        background: #ccc !important;
     }
 
     .uploadbtn, .continuebtn, .standardbtn {
@@ -400,6 +403,12 @@
         clear: both;
         width: 83px;
         font-weight: bold;
+    }
+
+    .empty {
+        border: 0 !important;
+        background: #F0F0F0 !important;
+        width: 120px;
     }
 
 

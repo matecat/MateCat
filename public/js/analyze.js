@@ -938,7 +938,9 @@ UI = {
 
             $(this).data("prevType", e.type);
         });
-    }
+    },
+
+
 };
 
 function wordCountTotalOrPayable( job ) {

@@ -4,23 +4,126 @@ class SplitJobModal extends React.Component {
 
     constructor(props) {
         super(props);
+        var arraySplit = this.calculateSplitComputation(2);
         this.state = {
-            numSplit: 2
+            numSplit: 2,
+            wordsArray: arraySplit,
+            splitChecked: false
         };
     }
 
     changeSplitNumber() {
+        var arraySplit = this.calculateSplitComputation(this.splitSelect.value);
         this.setState({
-            numSplit: this.splitSelect.value
+            numSplit: this.splitSelect.value,
+            wordsArray: arraySplit,
+            splitChecked: false
         });
     }
 
-    getChunksWordsTotal() {
-        return Math.floor(this.props.job.get('stats').get('TOTAL')/this.state.numSplit);
+    calculateSplitComputation(numSplit) {
+        let numWords, array = [];
+        let total = Math.round(this.props.job.get('stats').get('TOTAL'));
+        let wordsXjob = Math.floor(total / numSplit);
+        let diff = total - (wordsXjob * numSplit);
+        for (let i = 0; i < numSplit; i++) {
+            numWords = wordsXjob;
+            if (i < diff) {
+                numWords++;
+            }
+
+            array.push(numWords);
+        }
+        return array;
+    }
+
+    changeWordsCount() {
+
+    }
+
+    changeInputWordsCount(indexChanged , e) {
+        let arraySplit = this.state.wordsArray;
+        arraySplit[indexChanged] = parseInt(e.target.value);
+        this.setState({
+            wordsArray: arraySplit,
+            splitChecked: false
+        });
+
+    }
+
+    checkSplitComputation() {
+
+        let sum = this.state.wordsArray.reduce((a, b) => a + b, 0);
+        let diff = sum - Math.round(this.props.job.get('stats').get('TOTAL'));
+        if ( diff != 0 ) {
+            return {
+                difference: diff,
+                sum: sum
+            }
+        }
+
+    }
+
+    checkSplitJob() {
+        let self = this;
+        UI.checkSplitRequest(this.props.job.toJS(), this.props.project.toJS(), this.state.numSplit, this.state.wordsArray).done(function (d) {
+            let arrayChunks = [];
+            if (d.data && d.data.chunks) {
+
+                d.data.chunks.forEach(function (item, index) {
+                    if( typeof d.data.chunks[index] == 'undefined' ) {
+                        arrayChunks[index] = 0;
+                    } else {
+
+                        if ( config.split_based_on_raw_word_count ) {
+                            arrayChunks[index] = parseInt( d.data.chunks[index].raw_word_count );
+                        }
+                        else {
+                            arrayChunks[index] = parseInt( d.data.chunks[index].eq_word_count );
+                        }
+                    }
+                })
+            }
+            self.setState({
+                wordsArray: arrayChunks,
+                splitChecked: true
+            });
+        });
+    }
+
+    getJobParts() {
+        let html = [];
+        for (let i = 0; i < this.state.numSplit; i++) {
+            let value = (this.state.wordsArray[i] && parseInt(this.state.wordsArray[i]) != 0) ? this.state.wordsArray[i] : 0;
+            let disableClass = (value > 0 ) ? '' : 'void';
+            let emptyClass = (value == 0 && this.state.splitChecked) ? 'empty' : '';
+            let part = <li key={"split-" + i} className={disableClass}>
+                        <div><h4>Part {i+1}</h4></div>
+                        <div className="job-details">
+                            <div className="job-perc"><p>
+
+                                {!this.state.splitChecked? (<span className="aprox">Approx. words:</span>) : ('')}
+
+                                <span className="correct none">Words:</span>
+                            </p>
+                                <input type="text" className={"input-small " + emptyClass} value={value} onBlur={this.changeWordsCount.bind(this)}
+                                onChange={this.changeInputWordsCount.bind(this, i)}/>
+                            </div>
+                        </div>
+                    </li>;
+            html.push(part);
+        }
+        return html;
     }
 
     render() {
-        let wordsTotal = this.getChunksWordsTotal();
+        let splitParts = this.getJobParts();
+        let checkSplit = this.checkSplitComputation();
+        let showSplitDiffError =  !!(checkSplit);
+        let errorLabel =  (checkSplit && checkSplit.difference < 0) ? 'Words remaining' : 'Words exceeding';
+        let errorSplitDisableClass = (checkSplit) ? "disabled" : "";
+
+
         return <div className="modal popup-split">
             <div className="popup">
                 <div className="splitbtn-cont">
@@ -29,7 +132,7 @@ class SplitJobModal extends React.Component {
                     </h3>
                     <span className="label left">Split in</span>
                     <select name="popup-splitselect" className="splitselect left"
-                            ref={(select) => this.splitSelect = select} onChange={this.changeSplitNumber}>
+                            ref={(select) => this.splitSelect = select} onChange={this.changeSplitNumber.bind(this)}>
                         <option value="2">2</option>
                         <option value="3">3</option>
                         <option value="4">4</option>
@@ -84,35 +187,15 @@ class SplitJobModal extends React.Component {
                 </div>
                 <div className="popup-box split-box3">
                     <ul className="jobs">
-                        <li>
-                            <div><h4>Part 1</h4></div>
-
-                            <div className="job-details">
-                                <div className="job-perc"><p><span className="aprox">Approx. words:</span><span className="correct none">Words:</span>
-                                </p>
-                                    {/*<!-- A: la classe Aprox scompare se viene effettuato il calcolo -->*/}
-                                    <input type="text" className="input-small" defaultValue={wordsTotal}/>
-                                </div>
-                            </div>
-                        </li>
-                        <li>
-                            <div><h4>Part 2</h4></div>
-                            <div className="job-details">
-                                <div className="job-perc"><p><span className="aprox">Approx. words:</span><span className="correct none">Words:</span>
-                                </p>
-                                    {/*<!-- A: la classe Aprox scompare se viene effettuato il calcolo -->*/}
-                                    <input type="text" className="input-small" defaultValue={wordsTotal}/>
-                                </div>
-                            </div>
-                        </li>
+                        {splitParts}
                     </ul>
                     <div className="total">
-                        <p className="wordsum">Total words: <span className="total-w">x</span></p>
+                        <p className="wordsum">Total words: <span className="total-w">{this.props.job.get('stats').get('TOTAL_FORMATTED')}</span></p>
+                        {showSplitDiffError ? (<p className="error-count current">Current count: <span className="curr-w">{APP.addCommas(checkSplit.sum)}</span></p>)
+                            : ('')}
 
-                        <p className="error-count current">Current count: <span className="curr-w">x</span></p>
-
-                        <p className="error-count"><span className="txt">Difference</span>: <span className="diff-w">x</span></p>
-                        {/*<!-- A:  il p error appare solo se i valori inseriti negli input dei singoli split job non restituiscono la somma totale -->*/}
+                        {showSplitDiffError ? (<p className="error-count"><span className="txt">{errorLabel}</span>: <span className="diff-w">{APP.addCommas(Math.abs(checkSplit.difference))}</span></p>)
+                            : ('')}
                     </div>
                     <div className="error-message none">
                         <p>Cannot split in # chunks, do this</p>
@@ -120,13 +203,24 @@ class SplitJobModal extends React.Component {
                     <div className="cl"></div>
                     <div className="btnsplit">
 
-                        <a id="exec-split" className="uploadbtn loader">
-                            <span className="uploadloader"></span>
-                            <span className="text">Check</span>
-                        </a>
-                        <a id="exec-split-confirm" className="splitbtn done none">
-                            <span className="text">Confirm</span>
-                        </a>
+
+                        {showSplitDiffError ? (
+                            <a id="exec-split" className="uploadbtn loader disabled" disabled="disabled">
+                                <span className="uploadloader"/>
+                                <span className="text">Check</span>
+                            </a>
+                                ) : ((this.state.splitChecked) ? ('') : (
+                            <a id="exec-split" className="uploadbtn loader" onClick={this.checkSplitJob.bind(this)}>
+                                <span className="uploadloader"/>
+                                <span className="text">Check</span>
+                            </a>
+                                ))}
+
+
+                        {!showSplitDiffError && this.state.splitChecked ? (<a id="exec-split-confirm" className="splitbtn done">
+                                <span className="text">Confirm</span>
+                            </a>) : ('')}
+
                         <span className="btn fileinput-button btn-cancel right">
                     <span>Cancel</span>
                 </span>

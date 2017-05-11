@@ -559,13 +559,32 @@ UI = {
         APP.ModalWindow.showModalComponent(OutsourceModal, props, "Translate", style);
     },
 
-    openSplitJobModal: function (job) {
+    openSplitJobModal: function (job, project) {
         let props = {
-            job: job
+            job: job,
+            project: project
         };
         let style = {width: '670px',maxWidth: '670px'};
         APP.ModalWindow.showModalComponent(SplitJobModal, props, "Split Job", style);
+    },
+
+    /****** Analyze *******/
+    checkSplitRequest: function (job, project, numsplit, arrayValues) {
+        return APP.doRequest({
+            data: {
+                action: "splitJob",
+                exec: "check",
+                project_id: project.id,
+                project_pass: project.password,
+                job_id: job.id,
+                job_pass: job.password,
+                num_split: numsplit,
+                split_values: arrayValues
+            },
+            success: function(d) {}
+        });
     }
+    /**********************/
 };
 
 

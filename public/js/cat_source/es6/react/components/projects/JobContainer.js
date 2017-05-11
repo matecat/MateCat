@@ -137,7 +137,7 @@ class JobContainer extends React.Component {
     }
 
     openSplitModal() {
-        UI.openSplitJobModal(this.props.job);
+        UI.openSplitJobModal(this.props.job, this.props.project);
     }
 
     getDownloadLabel() {
