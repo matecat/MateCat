@@ -344,18 +344,20 @@ class JobContainer extends React.Component {
         let icon = '';
         let openThreads = this.props.job.get("open_threads_count");
         if (openThreads > 0) {
-            let tooltipText = "";
-            if (this.props.job.get("open_threads_count") === 1) {
-                tooltipText = 'There is an open thread';
-            } else {
-                tooltipText = 'There are <span style="font-weight: bold">' + openThreads + '</span> open threads';
-            }
             var translatedUrl = this.getTranslateUrl() + '?action=openComments';
-            icon = <a className=" ui icon basic button "
-                      href={translatedUrl} target="_blank">
-                <i className="icon-uniE96B icon"/>
-                {tooltipText}
-            </a>;
+            if (this.props.job.get("open_threads_count") === 1) {
+                icon = <a className=" ui icon basic button "
+                          href={translatedUrl} target="_blank" >
+                    <i className="icon-uniE96B icon" />
+                    There is an open thread
+                </a>;
+            } else {
+                icon = <a className=" ui icon basic button "
+                          href={translatedUrl} target="_blank" >
+                    <i className="icon-uniE96B icon" />
+                    There are <span style={{fontWeight: 'bold'}}>{openThreads}</span> open threads
+                </a>;
+            }
         }
         return icon;
 
