@@ -8,8 +8,13 @@ class SplitJobModal extends React.Component {
         this.state = {
             numSplit: 2,
             wordsArray: arraySplit,
-            splitChecked: false
+            splitChecked: false,
+            showLoader: false
         };
+    }
+
+    closeModal() {
+        APP.ModalWindow.onCloseModal();
     }
 
     changeSplitNumber() {
@@ -66,7 +71,11 @@ class SplitJobModal extends React.Component {
 
     checkSplitJob() {
         let self = this;
-        UI.checkSplitRequest(this.props.job.toJS(), this.props.project.toJS(), this.state.numSplit, this.state.wordsArray).done(function (d) {
+        this.setState({
+            showLoader: true
+        });
+        UI.checkSplitRequest(this.props.job.toJS(), this.props.project.toJS(), this.state.numSplit, this.state.wordsArray)
+            .done(function (d) {
             let arrayChunks = [];
             if (d.data && d.data.chunks) {
 
@@ -84,10 +93,35 @@ class SplitJobModal extends React.Component {
                     }
                 })
             }
+            if ((typeof d.errors != 'undefined') && (d.errors.length) ) {
+                //TODO show Errors
+            }
             self.setState({
                 wordsArray: arrayChunks,
-                splitChecked: true
+                splitChecked: true,
+                showLoader: false
             });
+        });
+    }
+
+    confirmSplitJob() {
+        let self = this;
+        this.setState({
+            showLoader: true
+        });
+        UI.confirmSplitRequest(this.props.job.toJS(), this.props.project.toJS(), this.state.numSplit, this.state.wordsArray)
+            .done(function (d) {
+                if (d.data && d.data.chunks) {
+                    UI.reloadProjects();
+                    APP.ModalWindow.onCloseModal();
+                }
+                if ((typeof d.errors != 'undefined') && (d.errors.length) ) {
+                    //TODO show Errors
+                    self.setState({
+                        showLoader: false
+                    });
+                }
+
         });
     }
 
@@ -210,19 +244,21 @@ class SplitJobModal extends React.Component {
                                 <span className="text">Check</span>
                             </a>
                                 ) : ((this.state.splitChecked) ? ('') : (
-                            <a id="exec-split" className="uploadbtn loader" onClick={this.checkSplitJob.bind(this)}>
-                                <span className="uploadloader"/>
-                                <span className="text">Check</span>
-                            </a>
+                                <a id="exec-split" className="uploadbtn loader" onClick={this.checkSplitJob.bind(this)}>
+                                    {this.state.showLoader ? (
+                                    <span className="uploadloader"/>
+                                        ):('')}
+                                    <span className="text">Check</span>
+                                </a>
                                 ))}
 
 
                         {!showSplitDiffError && this.state.splitChecked ? (<a id="exec-split-confirm" className="splitbtn done">
-                                <span className="text">Confirm</span>
+                                <span className="text" onClick={this.confirmSplitJob.bind(this)}>Confirm</span>
                             </a>) : ('')}
 
                         <span className="btn fileinput-button btn-cancel right">
-                    <span>Cancel</span>
+                    <span onClick={this.closeModal.bind(this)}>Cancel</span>
                 </span>
                     </div>
                 </div>

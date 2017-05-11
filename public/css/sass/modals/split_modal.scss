@@ -81,6 +81,20 @@
         padding: 2px 15px 2px 15px !important;
         margin-bottom: 0;
     }
+
+    .splitbtn:before {
+        content: "\f065";
+        margin-right: 3px;
+        font-family: 'icomoon';
+        speak: none;
+        font-style: normal;
+        font-weight: normal;
+        font-variant: normal;
+        text-transform: none;
+        line-height: 1;
+        -webkit-font-smoothing: antialiased;
+    }
+
     .splitbtn.done:hover {
         background: #12b4df;
     }
@@ -387,7 +401,7 @@
         height: 20px;
         float: right;
         margin-top: 5px;
-        display: none;
+        //display: none;
         position: absolute;
         right: 144px;
         background-size: 20px 20px;

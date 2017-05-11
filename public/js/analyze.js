@@ -83,8 +83,7 @@ UI = {
 			APP.confirm({
 				name: 'confirmMerge', 
 				cancelTxt: 'Cancel', 
-//				onCancel: 'cancelMerge', 
-				callback: 'confirmMerge', 
+				callback: 'confirmMerge',
 				caller: $(this),
 				okTxt: 'Continue', 
 				msg: "This will cause the merging of all chunks in only one job.<br>This operation cannot be canceled."
@@ -349,12 +348,7 @@ UI = {
 			}
 		});		
 	},
-	cancelMerge: function() {
-//		console.log('cancel callback');
-//		$('.modal[data-name=confirmMerge] .x-popup').click();
-	},
 	confirmSplit: function(job) {
-//        console.log('confirm split');
 
 		var ar = new Array();
 		$('.popup-split ul.jobs li .input-small').each(function() {

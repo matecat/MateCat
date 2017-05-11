@@ -583,7 +583,23 @@ UI = {
             },
             success: function(d) {}
         });
-    }
+    },
+
+    confirmSplitRequest: function(job, project, numsplit, arrayValues) {
+
+        return APP.doRequest({
+            data: {
+                action: "splitJob",
+                exec: "apply",
+                project_id: project.id,
+                project_pass: project.password,
+                job_id: job.id,
+                job_pass: job.password,
+                num_split: numsplit,
+                split_values: arrayValues
+            }
+        });
+    },
     /**********************/
 };
 
