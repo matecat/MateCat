@@ -45,6 +45,8 @@ class Job {
 
         $lang_handler = Langs_Languages::getInstance();
 
+        $warningsCount = $jStruct->getWarningsCount();
+
         return [
                 'id'                    => (int)$jStruct->id,
                 'password'              => $jStruct->password,
@@ -61,7 +63,8 @@ class Job {
                 'formatted_create_date' => ManageUtils::formatJobDate( $jStruct->create_date ),
                 'quality_overall'       => CatUtils::getQualityOverallFromJobStruct( $jStruct ),
                 'private_tm_key'        => json_encode( $jStruct->getOwnerKeys() ),
-                'warnings_count'        => $jStruct->getWarningsCount(),
+                'warnings_count'        => $warningsCount->warnings_count,
+                'warning_segments'      => ( isset( $warningsCount->warning_segments ) ? $warningsCount->warning_segments : [] ),
                 'stats'                 => CatUtils::getFastStatsForJob( $jobStats ),
                 'outsource'             => $outsource,
                 'translator'            => $translator,

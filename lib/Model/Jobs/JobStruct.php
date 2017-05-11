@@ -174,7 +174,16 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
 
         return $this->cachable( __function__, $this, function ( $jobStruct ) {
             $dao = new WarningDao() ;
-            return @$dao->setCacheTTL( 60 * 10 )->getWarningsByProjectIds( [ $jobStruct->id_project ] )[ 0 ] ;
+            $warningsCount = @$dao->setCacheTTL( 60 * 10 )->getWarningsByProjectIds( [ $jobStruct->id_project ] ) ;
+            $ret = [];
+            $ret[ 'warnings_count' ] = 0;
+            foreach( $warningsCount as $count ) {
+                if ( $count->id_job == $jobStruct->id && $count->password == $jobStruct->password ) {
+                    $ret[ 'warnings_count' ] = (int) $count->count;
+                    $ret[ 'warning_segments' ] = array_map( function( $id_segment ){ return (int)$id_segment; }, explode( ",", $count->segment_list ) );
+                }
+            }
+            return (object)$ret;
         } );
 
     }
