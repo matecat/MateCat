@@ -51,6 +51,8 @@ function doSearchQuery( Array $queryParams ) {
 //    $_regexpEscapedTrg = preg_replace( array( "#'#", '#"#' ), array( '&apos;', '&quot;' ), $_regexpEscapedTrg );
     $_regexpEscapedTrg = $db->escape( $_regexpEscapedTrg );
 
+    $segments = Jobs_JobDao::getById( $queryParams['id_job'] )->getSegmentsTableName();
+
     $query = "";
     if ( $key == "source" ) {
 
@@ -58,7 +60,7 @@ function doSearchQuery( Array $queryParams ) {
 			ROUND (
 					( LENGTH( s.segment ) - LENGTH( REPLACE ( $SQL_CASE( segment ), $SQL_CASE( '$src' ), '') ) ) / LENGTH('$src') )
 			) AS count
-			FROM segments s
+			FROM $segments s
 			INNER JOIN files_job fj on s.id_file=fj.id_file
 			LEFT JOIN segment_translations st on st.id_segment = s.id AND st.id_job = fj.id_job
 			WHERE fj.id_job = {$queryParams['job']}
@@ -87,7 +89,7 @@ function doSearchQuery( Array $queryParams ) {
 
         $query = "SELECT st.id_segment as id
 			FROM segment_translations as st
-			JOIN segments as s on id = id_segment
+			JOIN $segments as s on id = id_segment
 			WHERE st.id_job = {$queryParams['job']}
 		AND st.translation LIKE '" . $LIKE . $_regexpEscapedTrg . $LIKE . "'
 			AND s.segment LIKE '" . $LIKE . $_regexpEscapedSrc . $LIKE . "'
@@ -303,7 +305,7 @@ function getReferenceSegment( $jid, $jpass, $sid, $binaries = null ) {
     }
 
     $query = "SELECT serialized_reference_meta $binaries
-		FROM segments s
+		FROM $segments s
 		JOIN files_job using ( id_file )
 		JOIN jobs on files_job.id_job = jobs.id
 		LEFT JOIN file_references fr ON s.id_file_part = fr.id
@@ -406,20 +408,22 @@ function setJobTmKeys( $job_id, $job_password, $tmKeysString ) {
 }
 
 function getFirstSegmentOfFilesInJob( $jid ) {
+    $segments = Jobs_JobDao::getById( $jid )->getSegmentsTableName() ;
+
     $db    = Database::obtain();
     $jid   = intval( $jid );
-    $query = "SELECT DISTINCT id_file, MIN( segments.id ) AS first_segment, filename AS file_name,
+    $query = "SELECT DISTINCT id_file, MIN( $segments.id ) AS first_segment, filename AS file_name,
                     FORMAT(
                         SUM( IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count) )
                         , 0
                     ) AS TOTAL_FORMATTED
                 FROM files_job
-                JOIN segments USING( id_file )
+                JOIN $segments USING( id_file )
                 JOIN files ON files.id = id_file
                 JOIN jobs ON jobs.id = files_job.id_job
-                LEFT JOIN segment_translations AS st ON segments.id = st.id_segment AND st.id_job = jobs.id
+                LEFT JOIN segment_translations AS st ON $segments.id = st.id_segment AND st.id_job = jobs.id
                 WHERE files_job.id_job = $jid
-                AND segments.show_in_cattool = 1
+                AND $segments.show_in_cattool = 1
                 GROUP BY id_file, jobs.id, jobs.password";
 
     $results = $db->fetch_array( $query );
@@ -453,6 +457,7 @@ function getWarning( $jid, $jpassword ) {
  * @return array
  */
 function getTranslationsForTMXExport( $jid, $jPassword ) {
+    $segments = Jobs_JobDao::getById($jid)->getSegmentsTableName();
 
     $db        = Database::obtain();
     $jPassword = $db->escape( $jPassword );
@@ -467,9 +472,9 @@ function getTranslationsForTMXExport( $jid, $jPassword ) {
         translation_date,
         segment_translations.status
         FROM segment_translations
-        JOIN segments ON id = id_segment
+        JOIN $segments ON id = id_segment
 
-        JOIN files ON segments.id_file = files.id
+        JOIN files ON $segments.id_file = files.id
 
         JOIN jobs ON jobs.id = segment_translations.id_job AND password = '" . $db->escape( $jPassword ) . "'
 
@@ -491,6 +496,8 @@ function getTranslationsForTMXExport( $jid, $jPassword ) {
 
 function getMTForTMXExport( $jid, $jPassword ) {
     //TODO: delete this function and put it in a DAO
+    $segments = Jobs_JobDao::getById( $jid )->getSegmentsTableName();
+
     $db        = Database::obtain();
     $jPassword = $db->escape( $jPassword );
 
@@ -499,7 +506,7 @@ function getMTForTMXExport( $jid, $jPassword ) {
         IF( st.status IN ('" . Constants_TranslationStatus::STATUS_TRANSLATED . "','" .
             Constants_TranslationStatus::STATUS_APPROVED . "'), translation_date, j.create_date ) as translation_date
         FROM segment_translations st
-        JOIN segments ON id = id_segment
+        JOIN $segments ON id = id_segment
         JOIN jobs j ON j.id = st.id_job AND password = '" . $db->escape( $jPassword ) . "'
 
             WHERE st.id_job = " . (int)$jid . "
@@ -521,13 +528,15 @@ function getTMForTMXExport( $jid, $jPassword ) {
     $db        = Database::obtain();
     $jPassword = $db->escape( $jPassword );
 
+    $segments = Jobs_JobDao::getById( $jid )->getSegmentsTableName();
+
     $sql = "
         SELECT id_segment, st.id_job, '' as filename, segment, suggestion as translation,
         IF( st.status IN ('" . Constants_TranslationStatus::STATUS_TRANSLATED . "','" .
             Constants_TranslationStatus::STATUS_APPROVED . "'), translation_date, j.create_date ) as translation_date,
             st.status, suggestions_array
         FROM segment_translations st
-        JOIN segments ON id = id_segment
+        JOIN $segments ON id = id_segment
         JOIN jobs j ON j.id = st.id_job AND password = '" . $db->escape( $jPassword ) . "'
 
             WHERE st.id_job = " . (int)$jid . "
@@ -583,6 +592,8 @@ function getSegmentsDownload( $jid, $password, $id_file, $no_status_new = 1 ) {
     } else {
         $select_translation = " if (st.status='NEW', '', st.translation) as translation ";
     }
+
+    $segments = Jobs_JobDao::getById( $jid )->getSegmentsTableName();
     //$where_status ="";
     $query   = "select
 		f.filename, f.mime_type, s.id as sid, s.segment, s.internal_id,
@@ -594,7 +605,7 @@ function getSegmentsDownload( $jid, $password, $id_file, $no_status_new = 1 ) {
 			inner join projects p on p.id=j.id_project
 			inner join files_job fj on fj.id_job=j.id
 			inner join files f on f.id=fj.id_file
-			inner join segments s on s.id_file=f.id
+			inner join $segments s on s.id_file=f.id
 			left join segment_translations st on st.id_segment=s.id and st.id_job=j.id 
 			where j.id=$jid and j.password='$password' and f.id=$id_file 
 
@@ -640,9 +651,10 @@ function getSegmentsInfo( $jid, $password ) {
 }
 
 function getFirstSegmentId( $jid, $password ) {
+    $segments = Jobs_JobDao::getById( $jid )->getSegmentsTableName();
 
     $query   = "SELECT s.id as sid
-                FROM segments s
+                FROM $segments s
                 INNER JOIN files_job fj ON s.id_file = fj.id_file
                 INNER JOIN jobs j ON j.id = fj.id_job
                 WHERE fj.id_job = $jid AND j.password = '$password'
@@ -667,6 +679,7 @@ function getFirstSegmentId( $jid, $password ) {
  * @throws Exception
  */
 function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'after', $options=array() ) {
+    $segments = Jobs_JobDao::getById( $jid )->getSegmentsTableName();
 
     $optional_fields = null;
     if ( isset( $options['optional_fields'] ) ) {
@@ -676,28 +689,28 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 
     $queryAfter = "
                 SELECT * FROM (
-                    SELECT segments.id AS __sid
-                    FROM segments
+                    SELECT $segments.id AS __sid
+                    FROM $segments
                     JOIN segment_translations ON id = id_segment
                     JOIN jobs ON jobs.id = id_job
                     WHERE id_job = $jid
                         AND password = '$password'
                         AND show_in_cattool = 1
-                        AND segments.id > $ref_segment
+                        AND $segments.id > $ref_segment
                     LIMIT %u
                 ) AS TT1
                 ";
 
     $queryBefore = "
                 SELECT * from(
-                    SELECT  segments.id AS __sid
-                    FROM segments
+                    SELECT  $segments.id AS __sid
+                    FROM $segments
                     JOIN segment_translations ON id = id_segment
                     JOIN jobs ON jobs.id =  id_job
                     WHERE id_job = $jid
                         AND password = '$password'
                         AND show_in_cattool = 1
-                        AND segments.id < $ref_segment
+                        AND $segments.id < $ref_segment
                     ORDER BY __sid DESC
                     LIMIT %u
                 ) as TT2
@@ -711,26 +724,26 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
      */
     $queryCenter = "
                   SELECT * FROM ( 
-                        SELECT segments.id AS __sid
-                        FROM segments
+                        SELECT $segments.id AS __sid
+                        FROM $segments
                         JOIN segment_translations ON id = id_segment
                         JOIN jobs ON jobs.id = id_job
                         WHERE id_job = $jid
                             AND password = '$password'
                             AND show_in_cattool = 1
-                            AND segments.id >= $ref_segment
+                            AND $segments.id >= $ref_segment
                         LIMIT %u 
                   ) AS TT1
                   UNION
                   SELECT * from(
-                        SELECT  segments.id AS __sid
-                        FROM segments
+                        SELECT  $segments.id AS __sid
+                        FROM $segments
                         JOIN segment_translations ON id = id_segment
                         JOIN jobs ON jobs.id =  id_job
                         WHERE id_job = $jid
                             AND password = '$password'
                             AND show_in_cattool = 1
-                            AND segments.id < $ref_segment
+                            AND $segments.id < $ref_segment
                         ORDER BY __sid DESC
                         LIMIT %u
                   ) AS TT2
@@ -792,7 +805,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
                 JOIN projects p ON p.id = j.id_project
                 JOIN files_job fj ON fj.id_job = j.id
                 JOIN files f ON f.id = fj.id_file
-                JOIN segments s ON s.id_file = f.id
+                JOIN $segments s ON s.id_file = f.id
                 LEFT JOIN segment_translations st ON st.id_segment = s.id AND st.id_job = j.id
                 LEFT JOIN segment_translations_splits sts ON sts.id_segment = s.id AND sts.id_job = j.id
                 LEFT JOIN file_references fr ON s.id_file_part = fr.id
@@ -818,6 +831,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 }
 
 function countThisTranslatedHashInJob( $jid, $jpassword, $sid ) {
+    $segments = Jobs_JobDao::getById( $jid )->getSegmentsTableName();
 
     $db = Database::obtain();
 
@@ -826,7 +840,7 @@ function countThisTranslatedHashInJob( $jid, $jpassword, $sid ) {
         FROM segment_translations
         JOIN jobs ON id_job = id AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
         WHERE segment_hash = (
-            SELECT segment_hash FROM segments WHERE id = %u
+            SELECT segment_hash FROM $segments WHERE id = %u
         )
         AND id_job = %u
         AND id_segment != %u
@@ -847,6 +861,7 @@ function countThisTranslatedHashInJob( $jid, $jpassword, $sid ) {
 }
 
 function getTranslationsMismatches( $jid, $jpassword, $sid = null ) {
+    $segments = Jobs_JobDao::getById( $jid )->getSegmentsTableName();
 
     $db = Database::obtain();
 
@@ -878,7 +893,7 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ) {
 				FROM segment_translations
 				JOIN jobs ON id_job = id AND id_segment between {$jobStruct[0]->job_first_segment} AND {$jobStruct[0]->job_last_segment}
 				WHERE segment_hash = (
-					SELECT segment_hash FROM segments WHERE id = %u
+					SELECT segment_hash FROM $segments WHERE id = %u
 				)
 				AND segment_translations.status IN( '$st_translated' , '$st_approved' )
 				AND id_job = {$jobStruct[0]->id}
@@ -997,13 +1012,14 @@ function addTranslation( array $_Translation ) {
  * @return int
  */
 function propagateTranslation( $params, $job_data, $_idSegment, Projects_ProjectStruct $project ) {
+    $segments = $project->getSegmentsTableName();
 
     $db = Database::obtain();
 
     if ( $project->getWordCountType() == Projects_MetadataDao::WORD_COUNT_RAW ) {
-        $sum_sql = "SUM(segments.raw_word_count)";
+        $sum_sql = "SUM($segments.raw_word_count)";
     } else {
-        $sum_sql = "SUM( IF( match_type != 'ICE', eq_word_count, segments.raw_word_count ) )";
+        $sum_sql = "SUM( IF( match_type != 'ICE', eq_word_count, $segments.raw_word_count ) )";
     }
 
     /**
@@ -1017,8 +1033,8 @@ function propagateTranslation( $params, $job_data, $_idSegment, Projects_Project
 
            FROM segment_translations
               -- JOIN for raw_word_count and ICE matches
-              INNER JOIN  segments
-              ON segments.id = segment_translations.id_segment
+              INNER JOIN  $segments
+              ON $segments.id = segment_translations.id_segment
               -- JOIN for raw_word_count and ICE matches
 
            WHERE id_job = {$params['id_job']}
@@ -1194,6 +1210,7 @@ function getCurrentTranslation( $id_job, $id_segment ) {
  *
  */
 function getStatsForJob( $id_job, $id_file = null, $jPassword = null ) {
+    $segments = Jobs_JobDao::getById( $id_job )->getSegmentsTableName();
 
     $query = "
 		select
@@ -1232,7 +1249,7 @@ function getStatsForJob( $id_job, $id_file = null, $jPassword = null ) {
 
 			FROM jobs AS j
 			INNER JOIN files_job as fj on j.id=fj.id_job
-			INNER join segments as s on fj.id_file=s.id_file
+			INNER join $segments as s on fj.id_file=s.id_file
 			LEFT join segment_translations as st on s.id=st.id_segment and st.id_job=j.id
 			WHERE j.id = $id_job
 			AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
@@ -1254,6 +1271,9 @@ function getStatsForJob( $id_job, $id_file = null, $jPassword = null ) {
 }
 
 function getStatsForFile( $id_file ) {
+    $file = Files_FileDao::getById( $id_file ) ;
+    $segments = Utils::segmentsTable( $file->id_project ) ;
+
     $db = Database::obtain();
 
     //SQL Injection... cast to int
@@ -1270,7 +1290,7 @@ function getStatsForFile( $id_file ) {
 		SUM(IF(st.status='TRANSLATED',IF( IFNULL( st.eq_word_count, 0 ) = 0, raw_word_count, st.eq_word_count),0)) AS TRANSLATED,
 		SUM(IF(st.status='APPROVED',raw_word_count,0)) AS APPROVED FROM jobs j
 			INNER JOIN files_job fj ON j.id=fj.id_job
-			INNER JOIN segments s ON fj.id_file=s.id_file
+			INNER JOIN $segments s ON fj.id_file=s.id_file
 			LEFT JOIN segment_translations st ON s.id=st.id_segment
 			WHERE s.id_file=" . $id_file;
 
@@ -1301,6 +1321,7 @@ function getLastSegmentIDs( $id_job ) {
 }
 
 function getEQWLastHour( $id_job, $estimation_seg_ids ) {
+    $segments = Jobs_JobDao::getById( $id_job )->getSegmentsTableName();
 
     /**
      * If the translator translated the last ten segments in less than 1 hour
@@ -1321,7 +1342,7 @@ function getEQWLastHour( $id_job, $estimation_seg_ids ) {
                                  Unix_timestamp(Min(translation_date)) ) * 3600) AS words_per_hour,
                    Count(*)
             FROM   segment_translations st
-                   inner join segments ON id = st.id_segment
+                   inner join $segments ON id = st.id_segment
             WHERE  status IN ( 'TRANSLATED', 'APPROVED' )
                    AND id_job = $id_job
                    AND id_segment IN ( $estimation_seg_ids )
@@ -1349,6 +1370,7 @@ function getUpdatedTranslations( $timestamp, $first_segment, $last_segment, $id_
 }
 
 function getEditLog( $jid, $pass ) {
+    $segments = Jobs_JobDao::getById( $jid )->getSegmentsTableName();
 
     $query = "SELECT
 		s.id as sid,
@@ -1370,7 +1392,7 @@ function getEditLog( $jid, $pass ) {
 			FROM
 			jobs j 
 			INNER JOIN segment_translations st ON j.id=st.id_job 
-			INNER JOIN segments s ON s.id = st.id_segment
+			INNER JOIN $segments s ON s.id = st.id_segment
 			INNER JOIN projects p on p.id=j.id_project
 			WHERE
 			id_job = $jid AND
@@ -1398,6 +1420,7 @@ function getEditLog( $jid, $pass ) {
  * @return array
  */
 function getNextSegment( $sid, $jid, $password = '', $getTranslatedInstead = false ) {
+    $segments = Jobs_JobDao::getById( $jid )->getSegmentsTableName();
 
     $db = Database::obtain();
 
@@ -1424,7 +1447,7 @@ function getNextSegment( $sid, $jid, $password = '', $getTranslatedInstead = fal
     }
 
     $query = "SELECT s.id, st.status
-		FROM segments AS s
+		FROM $segments AS s
 		JOIN files_job fj USING (id_file)
 		JOIN jobs ON jobs.id = fj.id_job
 		JOIN files f ON f.id = fj.id_file
@@ -1633,6 +1656,7 @@ function getProjectJobData( $pid ) {
  * @return array
  */
 function getProjectData( $pid, $project_password = null, $jid = null, $jpassword = null ) {
+    $segments = Utils::segmentsTable( $pid );
 
     $query = "
 		SELECT p.name, j.id AS jid, j.password AS jpassword, j.source, j.target, j.payable_rates, f.id, f.id AS id_file,f.filename, p.status_analysis, j.subject,
@@ -1648,7 +1672,7 @@ function getProjectData( $pid, $project_password = null, $jid = null, $jpassword
 				   FROM projects p
 				   INNER JOIN jobs j ON p.id=j.id_project
 				   INNER JOIN files f ON p.id=f.id_project
-				   INNER JOIN segments s ON s.id_file=f.id
+				   INNER JOIN $segments s ON s.id_file=f.id
 				   LEFT JOIN segment_translations st ON st.id_segment=s.id AND st.id_job=j.id
 				   WHERE p.id= '$pid'
 				   %s
@@ -1692,6 +1716,7 @@ function getProjectData( $pid, $project_password = null, $jid = null, $jpassword
  * @return array
  */
 function getJobAnalysisData( $pid, $job_password, $jid = null ) {
+    $segments = Utils::segmentsTable( $pid );
 
     $query = "select p.name, j.id as jid, j.password as jpassword, j.source, j.target, f.id,f.filename, p.status_analysis,
 		sum(s.raw_word_count) as file_raw_word_count, sum(st.eq_word_count) as file_eq_word_count, count(s.id) as total_segments,
@@ -1700,7 +1725,7 @@ function getJobAnalysisData( $pid, $job_password, $jid = null ) {
 			from projects p 
 			inner join jobs j on p.id=j.id_project
 			inner join files f on p.id=f.id_project
-			inner join segments s on s.id_file=f.id
+			inner join $segments s on s.id_file=f.id
 			left join segment_translations st on st.id_segment=s.id and st.id_job=j.id
 
 			where p.id= '$pid' and j.password='$job_password' ";
@@ -1973,6 +1998,7 @@ function getProjectsNumber( Users_UserStruct $user, $search_in_pname, $search_so
  * @return array|int|mixed
  */
 function getProjectStatsVolumeAnalysis( $pid ) {
+    $segments = Utils::segmentsTable( $pid );
 
     $query = "SELECT
 		st.id_job AS jid,
@@ -1995,7 +2021,7 @@ function getProjectStatsVolumeAnalysis( $pid ) {
 			FROM
 			segment_translations AS st
 			JOIN
-			segments AS s ON st.id_segment = s.id
+			$segments AS s ON st.id_segment = s.id
 			JOIN
 			jobs AS j ON j.id = st.id_job
 			JOIN
@@ -2276,6 +2302,7 @@ function updateJobsStatus( $res, $id, $status, $only_if, $jPassword = null ) {
  * @return array
  */
 function getProjectSegmentsTranslationSummary( $pid ) {
+    $segments = Utils::segmentsTable( $pid );
     $db = Database::obtain();
 
     //TOTAL and eq_word should be equals BUT
@@ -2296,7 +2323,7 @@ function getProjectSegmentsTranslationSummary( $pid ) {
             END
         ) AS num_analyzed
         FROM segment_translations st
-        JOIN segments s ON s.id = id_segment
+        JOIN $segments s ON s.id = id_segment
         INNER JOIN jobs j ON j.id=st.id_job
         WHERE j.id_project = $pid
         AND st.locked = 0

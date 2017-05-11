@@ -5,6 +5,32 @@ use TaskRunner\Commons\QueueElement;
 
 class Utils {
 
+    public static function segmentsTable( $pid ) {
+        // TODO: move this parse step in a bootstrap
+
+        if ( !empty( \INIT::$SEGMENTS_PARTITION_RULE ) ) {
+            $table_name = null;
+            $parts      = explode(';', \INIT::$SEGMENTS_PARTITION_RULE );
+
+            foreach( $parts as $part ) {
+                list( $limit, $name ) = explode(':', $part);
+
+                if ( $pid < $limit ) {
+                    $table_name = $name ;
+                }
+            }
+
+            if ( is_null( $table_name ) ) {
+               throw new Exception('Segments partition rule is defined but interval not found.') ;
+            }
+
+            return $table_name ;
+        }
+        else {
+            return 'segments' ;
+        }
+    }
+
     public static function friendly_slug($string) {
         // everything to lower and no spaces begin or end
         $string = strtolower(trim($string));

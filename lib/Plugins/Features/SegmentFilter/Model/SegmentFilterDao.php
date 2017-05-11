@@ -133,28 +133,30 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
         $limit = self::__getLimit($chunk, $filter);
         $where = self::__getWhereFromFilter( $filter );
 
+        $segments_table = $chunk->getSegmentsTableName() ;
+
         $sql = '';
 
         switch ( $filter->sampleType() ) {
             case 'segment_length_high_to_low':
                 $data = self::__getData( $chunk, $filter );
-                $sql = self::getSqlForSegmentLength( $limit, $where, 'high_to_low' );
+                $sql = self::getSqlForSegmentLength( $segments_table, $limit, $where, 'high_to_low' );
                 break;
             case 'segment_length_low_to_high':
                 $data = self::__getData( $chunk, $filter );
-                $sql = self::getSqlForSegmentLength( $limit, $where, 'low_to_high' );
+                $sql = self::getSqlForSegmentLength( $segments_table, $limit, $where, 'low_to_high' );
                 break;
             case 'edit_distance_high_to_low':
                 $data = self::__getData( $chunk, $filter );
-                $sql = self::getSqlForEditDistance( $limit, $where, 'high_to_low' );
+                $sql = self::getSqlForEditDistance( $segments_table, $limit, $where, 'high_to_low' );
                 break;
             case 'edit_distance_low_to_high':
                 $data = self::__getData( $chunk, $filter );
-                $sql = self::getSqlForEditDistance( $limit, $where, 'low_to_high' );
+                $sql = self::getSqlForEditDistance( $segments_table, $limit, $where, 'low_to_high' );
                 break;
             case 'regular_intervals':
                 $data = self::__getData( $chunk, $filter );
-                $sql = self::getSqlForRegularIntervals( $limit, $where );
+                $sql = self::getSqlForRegularIntervals( $segments_table, $limit, $where );
                 break;
             default:
                 throw new \Exception('Sample type is not valid: '. $filter->sampleType());
@@ -173,7 +175,8 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
      *
      * @return string
      */
-    public static function getSqlForRegularIntervals( $limit, $where ) {
+    public static function getSqlForRegularIntervals( $segments_table, $limit, $where ) {
+
 
         $ratio = round($limit->count / $limit->limit ) ;
 
@@ -188,7 +191,7 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
            AND jobs.id = :id_job
            AND st.id_segment
            BETWEEN :job_first_segment AND :job_last_segment
-           JOIN segments s ON s.id = st.id_segment
+           JOIN $segments_table s ON s.id = st.id_segment
            JOIN (SELECT @curRow := -1) r --  using -1 here makes the sample start from the first segment
            WHERE 1
            $where->sql
@@ -198,7 +201,7 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
         return $sql ;
     }
 
-    public static function getSqlForEditDistance( $limit, $where, $sort ) {
+    public static function getSqlForEditDistance( $segments_table, $limit, $where, $sort ) {
         $sqlSort = '';
 
         if( $sort === 'high_to_low' ) {
@@ -217,7 +220,7 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
                AND jobs.id = :id_job
                AND st.id_segment
                BETWEEN :job_first_segment AND :job_last_segment
-               JOIN segments s ON s.id = st.id_segment
+               JOIN $segments_table s ON s.id = st.id_segment
                WHERE 1
                $where->sql
                ORDER BY st.edit_distance $sqlSort
@@ -227,7 +230,7 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
         return $sql ;
     }
 
-    public static function getSqlForSegmentLength( $limit, $where, $sort ) {
+    public static function getSqlForSegmentLength( $segments_table, $limit, $where, $sort ) {
         $sqlSort = '';
 
         if( $sort === 'high_to_low' ) {
@@ -245,7 +248,7 @@ class SegmentFilterDao extends \DataAccess_AbstractDao {
            AND jobs.id = :id_job
            AND st.id_segment
            BETWEEN :job_first_segment AND :job_last_segment
-           JOIN segments s ON s.id = st.id_segment
+           JOIN $segments_table s ON s.id = st.id_segment
            WHERE 1
            $where->sql
            ORDER BY CHAR_LENGTH(s.segment) $sqlSort
