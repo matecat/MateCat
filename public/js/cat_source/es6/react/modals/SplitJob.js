@@ -4,16 +4,32 @@ class SplitJobModal extends React.Component {
 
     constructor(props) {
         super(props);
+        this.state = {
+            numSplit: 2
+        };
+    }
+
+    changeSplitNumber() {
+        this.setState({
+            numSplit: this.splitSelect.value
+        });
+    }
+
+    getChunksWordsTotal() {
+        return Math.floor(this.props.job.get('stats').get('TOTAL')/this.state.numSplit);
     }
 
     render() {
+        let wordsTotal = this.getChunksWordsTotal();
         return <div className="modal popup-split">
             <div className="popup">
                 <div className="splitbtn-cont">
-                    <h2 className="popup-split-project-title"> Job Lang </h2>
-                    <h3><span className="popup-split-job-id"></span><span className="popup-split-job-title"> Job Lang </span></h3>
+                    <h3><span className="popup-split-job-id">({this.props.job.get('id')}) </span>
+                        <span className="popup-split-job-title">{this.props.job.get('sourceTxt') + " > " + this.props.job.get('targetTxt')}</span>
+                    </h3>
                     <span className="label left">Split in</span>
-                    <select name="popup-splitselect" className="splitselect left">
+                    <select name="popup-splitselect" className="splitselect left"
+                            ref={(select) => this.splitSelect = select} onChange={this.changeSplitNumber}>
                         <option value="2">2</option>
                         <option value="3">3</option>
                         <option value="4">4</option>
@@ -75,7 +91,7 @@ class SplitJobModal extends React.Component {
                                 <div className="job-perc"><p><span className="aprox">Approx. words:</span><span className="correct none">Words:</span>
                                 </p>
                                     {/*<!-- A: la classe Aprox scompare se viene effettuato il calcolo -->*/}
-                                    <input type="text" className="input-small" value="50.000"/>
+                                    <input type="text" className="input-small" defaultValue={wordsTotal}/>
                                 </div>
                             </div>
                         </li>
@@ -85,7 +101,7 @@ class SplitJobModal extends React.Component {
                                 <div className="job-perc"><p><span className="aprox">Approx. words:</span><span className="correct none">Words:</span>
                                 </p>
                                     {/*<!-- A: la classe Aprox scompare se viene effettuato il calcolo -->*/}
-                                    <input type="text" className="input-small" value="50.000"/>
+                                    <input type="text" className="input-small" defaultValue={wordsTotal}/>
                                 </div>
                             </div>
                         </li>

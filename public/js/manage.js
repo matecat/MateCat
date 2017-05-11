@@ -559,8 +559,9 @@ UI = {
         APP.ModalWindow.showModalComponent(OutsourceModal, props, "Translate", style);
     },
 
-    openSplitJobModal: function () {
+    openSplitJobModal: function (job) {
         let props = {
+            job: job
         };
         let style = {width: '670px',maxWidth: '670px'};
         APP.ModalWindow.showModalComponent(SplitJobModal, props, "Split Job", style);
