@@ -601,6 +601,7 @@ class JobContainer extends React.Component {
         let warningIcons = this.getWarningsGroup();
         let jobMenu = this.getJobMenu(splitUrl, mergeUrl);
         let tmIcon = this.getTMIcon();
+        let outsourceClass = this.props.job.get('outsource') ? ('outsource') : ('translator');
 
         let idJobLabel = ( !this.props.isChunk ) ? this.props.job.get('id') : this.props.job.get('id') + '-' + this.props.index;
 
@@ -652,7 +653,7 @@ class JobContainer extends React.Component {
                     </a>
                         {outsourceButton}
                     <div className="outsource-job">
-                        <div className="translated-outsourced">
+                        <div className={"translated-outsourced " + outsourceClass}>
                             {outsourceJobLabel}
                             {outsourceDelivery}
                             {/*{outsourceDeliveryPrice}*/}

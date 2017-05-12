@@ -463,6 +463,9 @@ body.manage {
                                             vertical-align: middle;
                                         }
                                     }
+                                    &.outsource {
+                                        margin-top: 6px;
+                                    }
                                 }
                                 .job-to-translator {
                                     display: inline-block;
@@ -489,6 +492,7 @@ body.manage {
                                     margin-right: 10px;
                                     margin-left: 10px;
                                     vertical-align: text-bottom;
+                                    line-height: 20px;
                                     .outsource-day-text {
                                         font-weight: 700;
                                         display: inherit;
@@ -515,6 +519,9 @@ body.manage {
                                 &:hover .job-delivery {
                                     display: none;
                                 }
+                                .outsource:hover .job-delivery {
+                                    display: inline-block;
+                                }
                                 .item {
                                     margin-left: 10px;
                                     display: none;
@@ -524,9 +531,9 @@ body.manage {
                                         margin-left: 0px;
                                     }
                                     .ui.cancel{
-                                        padding: 6px;
+                                        padding: 4px;
                                         background-color: #d6d6d6;
-                                        margin-top: 1px;
+                                        margin-top: 3px;
                                         border-radius: 15px;
                                         position: relative;
                                         line-height: 0px;

@@ -173,7 +173,8 @@ UI = {
                 job: UI.currentOutsourceJob,
                 url: UI.currentOutsourceUrl,
                 fromManage: false,
-                translatorOpen: !!(UI.currentOutsourceJob.translator)
+                translatorOpen: !!(UI.currentOutsourceJob.translator),
+                showTranslatorBox: false
             };
             let style = {width: '970px',maxWidth: '970px', top: '45%'};
             APP.ModalWindow.showModalComponent(OutsourceModal, props, "Translate", style);
