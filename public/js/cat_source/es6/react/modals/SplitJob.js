@@ -78,31 +78,31 @@ class SplitJobModal extends React.Component {
         });
         UI.checkSplitRequest(this.props.job.toJS(), this.props.project.toJS(), this.state.numSplit, this.state.wordsArray)
             .done(function (d) {
-            let arrayChunks = [];
-            if (d.data && d.data.chunks) {
+                let arrayChunks = [];
+                if (d.data && d.data.chunks) {
 
-                d.data.chunks.forEach(function (item, index) {
-                    if( typeof d.data.chunks[index] == 'undefined' ) {
-                        arrayChunks[index] = 0;
-                    } else {
+                    d.data.chunks.forEach(function (item, index) {
+                        if( typeof d.data.chunks[index] == 'undefined' ) {
+                            arrayChunks[index] = 0;
+                        } else {
 
-                        if ( config.split_based_on_raw_word_count ) {
-                            arrayChunks[index] = parseInt( d.data.chunks[index].raw_word_count );
+                            if ( config.split_based_on_raw_word_count ) {
+                                arrayChunks[index] = parseInt( d.data.chunks[index].raw_word_count );
+                            }
+                            else {
+                                arrayChunks[index] = parseInt( d.data.chunks[index].eq_word_count );
+                            }
                         }
-                        else {
-                            arrayChunks[index] = parseInt( d.data.chunks[index].eq_word_count );
-                        }
-                    }
-                })
-            }
-            if ((typeof d.errors != 'undefined') && (d.errors.length) ) {
-                //TODO show Errors
-            }
-            self.setState({
-                wordsArray: arrayChunks,
-                splitChecked: true,
-                showLoader: false
-            });
+                    })
+                }
+                if ((typeof d.errors != 'undefined') && (d.errors.length) ) {
+                    //TODO show Errors
+                }
+                self.setState({
+                    wordsArray: arrayChunks,
+                    splitChecked: true,
+                    showLoader: false
+                });
         });
     }
 
@@ -111,7 +111,11 @@ class SplitJobModal extends React.Component {
         this.setState({
             showLoader: true
         });
-        UI.confirmSplitRequest(this.props.job.toJS(), this.props.project.toJS(), this.state.numSplit, this.state.wordsArray)
+        let array = this.state.wordsArray.filter(function (item) {
+            return item > 0;
+        });
+
+        UI.confirmSplitRequest(this.props.job.toJS(), this.props.project.toJS(), array.length, array)
             .done(function (d) {
                 if (d.data && d.data.chunks) {
                     UI.reloadProjects();

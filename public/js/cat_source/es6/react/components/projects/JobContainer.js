@@ -140,6 +140,10 @@ class JobContainer extends React.Component {
         UI.openSplitJobModal(this.props.job, this.props.project);
     }
 
+    openMergeModal() {
+        ManageActions.openMergeModal(this.props.project, this.props.job);
+    }
+
     getDownloadLabel() {
         let jobStatus = this.getTranslationStatus();
         let remoteService = this.props.project.get('remote_file_service');
@@ -159,7 +163,7 @@ class JobContainer extends React.Component {
     }
 
 
-    getJobMenu(splitUrl, mergeUrl) {
+    getJobMenu() {
         let reviseUrl = this.getReviseUrl();
         let editLogUrl = this.getEditingLogUrl();
         let qaReportUrl = this.getQAReport();
@@ -173,12 +177,9 @@ class JobContainer extends React.Component {
         let downloadButton = this.getDownloadLabel();
         let splitButton;
         if (!this.props.job.get('outsource')) {
-            // splitButton = (!this.props.isChunk) ?
-            //     <a className="item" target="_blank" href={splitUrl}><i className="icon-expand icon"/> Split</a> :
-            //     <a className="item" target="_blank" href={mergeUrl}><i className="icon-compress icon"/> Merge</a>;
-            splitButton = (!this.props.isChunk) ?
+             splitButton = (!this.props.isChunk) ?
                 <a className="item" target="_blank" onClick={this.openSplitModal.bind(this)}><i className="icon-expand icon"/> Split</a> :
-                <a className="item" target="_blank" href={mergeUrl}><i className="icon-compress icon"/> Merge</a>;
+                <a className="item" target="_blank" onClick={this.openMergeModal.bind(this)}><i className="icon-compress icon"/> Merge</a>;
         }
         let menuHtml = <div className="menu">
 
@@ -603,10 +604,10 @@ class JobContainer extends React.Component {
         let outsourceDelivery = this.getOutsourceDelivery();
         // let outsourceDeliveryPrice = this.getOutsourceDeliveryPrice();
         let analysisUrl = this.getProjectAnalyzeUrl();
-        let splitUrl = this.getSplitUrl();
-        let mergeUrl = this.getMergeUrl();
+        // let splitUrl = this.getSplitUrl();
+        // let mergeUrl = this.getMergeUrl();
         let warningIcons = this.getWarningsGroup();
-        let jobMenu = this.getJobMenu(splitUrl, mergeUrl);
+        let jobMenu = this.getJobMenu();
         let tmIcon = this.getTMIcon();
         let outsourceClass = this.props.job.get('outsource') ? ('outsource') : ('translator');
 

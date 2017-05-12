@@ -600,6 +600,37 @@ UI = {
             }
         });
     },
+    openMergeModal: function (project, job) {
+        let props = {
+            text: 'This will cause the merging of all chunks in only one job. ' +
+            'This operation cannot be canceled.',
+            successText: "Continue",
+            successCallback: function () {
+                UI.confirmMerge(project, job);
+                UI.reloadProjects();
+                APP.ModalWindow.onCloseModal();
+            },
+            cancelText: "Cancel",
+            cancelCallback: function () {
+                APP.ModalWindow.onCloseModal();
+            }
+
+        };
+        APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Confirmation required");
+    },
+    confirmMerge: function(project, job) {
+
+        return APP.doRequest({
+            data: {
+                action: "splitJob",
+                exec: "merge",
+                project_id: project.id,
+                project_pass: project.password,
+                job_id: job.id
+            }
+
+        });
+    }
     /**********************/
 };
 

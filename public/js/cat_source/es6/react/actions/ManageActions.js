@@ -556,7 +556,13 @@ let ManageActions = {
         AppDispatcher.dispatch({
             actionType: ManageConstants.GET_OUTSOURCE_QUOTE,
         });
+    },
+
+    // Analyze Actions
+    openMergeModal: function (project, job) {
+        UI.openMergeModal(project.toJS(), job.toJS());
     }
+
 };
 
 module.exports = ManageActions;
