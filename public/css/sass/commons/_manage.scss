@@ -447,7 +447,7 @@ body.manage {
                             .outsource-job {
                                 //text-align: center;
                                 .translated-outsourced {
-                                    top: 6px;
+                                    top: 1px;
                                     bottom: 6px;
                                     vertical-align: text-bottom;
                                     display: inline-block;
@@ -474,7 +474,16 @@ body.manage {
                                     white-space: nowrap;
                                     overflow: hidden;
                                     text-overflow: ellipsis;
+                                    line-height: 20px;
+                                    margin-top: 5px;
+                                    @media only screen and (max-width: 1200px) {
+                                        max-width: 180px;
+                                    }
                                 }
+                                &:hover .job-to-translator{
+                                    width: inherit;
+                                }
+
                                 .job-delivery {
                                     display: inline-block;
                                     margin-right: 10px;
@@ -502,6 +511,35 @@ body.manage {
                                     @media only screen and (max-width: 1200px) {
                                         display: none;
                                     }
+                                }
+                                &:hover .job-delivery {
+                                    display: none;
+                                }
+                                .item {
+                                    margin-left: 25px;
+                                    display: none;
+                                    float: right;
+                                    cursor: pointer;
+                                    @media only screen and (max-width: 1200px) {
+                                        margin-left: 0px;
+                                    }
+                                    .ui.cancel{
+                                        padding: 6px;
+                                        background-color: #d6d6d6;
+                                        margin-top: 1px;
+                                        border-radius: 15px;
+                                        position: relative;
+                                        line-height: 0px;
+                                        right: 3px;
+                                        font-size: 15px;
+                                    }
+                                    &:hover .ui.cancel {
+                                        background-color: #cccccc !important;
+                                    }
+
+                                }
+                                &:hover .item {
+                                    display: inline-block;
                                 }
                                 /*.job-price {
                                     display: inline-block;

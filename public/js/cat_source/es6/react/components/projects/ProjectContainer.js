@@ -282,7 +282,7 @@ class ProjectContainer extends React.Component {
                                 isChunk={isChunk}
                                 lastAction={lastAction}
                                 activityLogUrl =  {self.getActivityLogUrl()}/>;
-                chunks.unshift(item);
+                chunks.push(item);
                 if ( job.get('id') !== next_job_id) {
                     let jobList = <div className="job ui grid" key = { (i - 1) + "-" + job.get('id')}>
                             <div className="job-body sixteen wide column">

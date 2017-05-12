@@ -445,11 +445,8 @@ class JobContainer extends React.Component {
             }
         } else if (this.props.job.get('translator')) {
             let email = this.props.job.get('translator').get('email');
-            let tooltipText = '';
-            if (this.props.job.get('translator').get('user')) {
-                tooltipText = this.props.job.get('translator').get('user').get('first_name') + ' ' + this.props.job.get('translator').get('user').get('last_name');
-            }
-            outsourceJobLabel = <div className="job-to-translator" data-html={tooltipText} data-variation="tiny" ref={(tooltip) => this.emailTooltip = tooltip}>
+
+            outsourceJobLabel = <div className="job-to-translator" data-variation="tiny" ref={(tooltip) => this.emailTooltip = tooltip}>
                                     {email}
                                 </div>;
         }
@@ -461,7 +458,6 @@ class JobContainer extends React.Component {
 
         if (this.props.job.get('outsource')) {
             if (this.props.job.get('outsource').get('id_vendor') == "1") {
-                let date  = this.props.job.get('outsource').get('delivery_date').substring(0, this.props.job.get('outsource').get('delivery_date').lastIndexOf(":"))
                 let gmtDate = APP.getGMTDate(this.props.job.get('outsource').get('delivery_timestamp') * 1000);
                 outsourceDelivery = <div className="job-delivery" title="Delivery date">
                     <div className="outsource-day-text">{gmtDate.day}</div>
@@ -471,7 +467,6 @@ class JobContainer extends React.Component {
                 </div>;
             }
         } else if (this.props.job.get('translator')) {
-            let date  = this.props.job.get('translator').get('delivery_date').substring(0, this.props.job.get('translator').get('delivery_date').lastIndexOf(":"))
             let gmtDate = APP.getGMTDate(this.props.job.get('translator').get('delivery_timestamp') * 1000);
             outsourceDelivery = <div className="job-delivery" title="Delivery date">
                 <div className="outsource-day-text">{gmtDate.day}</div>
@@ -585,7 +580,6 @@ class JobContainer extends React.Component {
         $(this.activityTooltip).popup();
         $(this.commentsTooltip).popup();
         $(this.tmTooltip).popup({hoverable: true});
-        $(this.emailTooltip).popup({hoverable: true});
         $(this.warningTooltip).popup();
         $(this.languageTooltip).popup();
     }
@@ -600,7 +594,7 @@ class JobContainer extends React.Component {
         let outsourceButton = this.getOutsourceButton();
         let outsourceJobLabel = this.getOutsourceJobSent();
         let outsourceDelivery = this.getOutsourceDelivery();
-        let outsourceDeliveryPrice = this.getOutsourceDeliveryPrice();
+        // let outsourceDeliveryPrice = this.getOutsourceDeliveryPrice();
         let analysisUrl = this.getProjectAnalyzeUrl();
         let splitUrl = this.getSplitUrl();
         let mergeUrl = this.getMergeUrl();
@@ -654,6 +648,7 @@ class JobContainer extends React.Component {
                     </div>
                     <a className="open-translate ui primary button open" target="_blank" href={translateUrl}>
                         Open
+
                     </a>
                         {outsourceButton}
                     <div className="outsource-job">
@@ -661,6 +656,13 @@ class JobContainer extends React.Component {
                             {outsourceJobLabel}
                             {outsourceDelivery}
                             {/*{outsourceDeliveryPrice}*/}
+                            {this.props.job.get('translator') ? (
+                                <div className="item" onClick={this.changePassword}>
+                                    <div className="ui cancel label"><i className="icon-cancel3"/></div>
+                                </div>
+                            ) :('') }
+
+
                         </div>
                     </div>
 
