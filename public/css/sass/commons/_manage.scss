@@ -447,7 +447,7 @@ body.manage {
                             .outsource-job {
                                 //text-align: center;
                                 .translated-outsourced {
-                                    top: 6px;
+                                    top: 1px;
                                     bottom: 6px;
                                     vertical-align: text-bottom;
                                     display: inline-block;
@@ -463,6 +463,9 @@ body.manage {
                                             vertical-align: middle;
                                         }
                                     }
+                                    &.outsource {
+                                        margin-top: 6px;
+                                    }
                                 }
                                 .job-to-translator {
                                     display: inline-block;
@@ -474,12 +477,22 @@ body.manage {
                                     white-space: nowrap;
                                     overflow: hidden;
                                     text-overflow: ellipsis;
+                                    line-height: 20px;
+                                    margin-top: 5px;
+                                    @media only screen and (max-width: 1200px) {
+                                        max-width: 180px;
+                                    }
                                 }
+                                &:hover .job-to-translator{
+                                    width: inherit;
+                                }
+
                                 .job-delivery {
                                     display: inline-block;
                                     margin-right: 10px;
                                     margin-left: 10px;
                                     vertical-align: text-bottom;
+                                    line-height: 20px;
                                     .outsource-day-text {
                                         font-weight: 700;
                                         display: inherit;
@@ -502,6 +515,38 @@ body.manage {
                                     @media only screen and (max-width: 1200px) {
                                         display: none;
                                     }
+                                }
+                                &:hover .job-delivery {
+                                    display: none;
+                                }
+                                .outsource:hover .job-delivery {
+                                    display: inline-block;
+                                }
+                                .item {
+                                    margin-left: 10px;
+                                    display: none;
+                                    float: right;
+                                    cursor: pointer;
+                                    @media only screen and (max-width: 1200px) {
+                                        margin-left: 0px;
+                                    }
+                                    .ui.cancel{
+                                        padding: 4px;
+                                        background-color: #d6d6d6;
+                                        margin-top: 3px;
+                                        border-radius: 15px;
+                                        position: relative;
+                                        line-height: 0px;
+                                        right: 3px;
+                                        font-size: 15px;
+                                    }
+                                    &:hover .ui.cancel {
+                                        background-color: #cccccc !important;
+                                    }
+
+                                }
+                                &:hover .item {
+                                    display: inline-block;
                                 }
                                 /*.job-price {
                                     display: inline-block;
