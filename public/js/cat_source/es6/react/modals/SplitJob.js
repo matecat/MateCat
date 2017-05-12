@@ -22,7 +22,8 @@ class SplitJobModal extends React.Component {
         this.setState({
             numSplit: this.splitSelect.value,
             wordsArray: arraySplit,
-            splitChecked: false
+            splitChecked: false,
+            showLoader: false
         });
     }
 
@@ -51,7 +52,8 @@ class SplitJobModal extends React.Component {
         arraySplit[indexChanged] = parseInt(e.target.value);
         this.setState({
             wordsArray: arraySplit,
-            splitChecked: false
+            splitChecked: false,
+            showLoader: false
         });
 
     }
@@ -240,7 +242,9 @@ class SplitJobModal extends React.Component {
 
                         {showSplitDiffError ? (
                             <a id="exec-split" className="uploadbtn loader disabled" disabled="disabled">
+                                {this.state.showLoader ? (
                                 <span className="uploadloader"/>
+                                    ):('')}
                                 <span className="text">Check</span>
                             </a>
                                 ) : ((this.state.splitChecked) ? ('') : (
