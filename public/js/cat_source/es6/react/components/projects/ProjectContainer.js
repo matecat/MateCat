@@ -259,11 +259,11 @@ class ProjectContainer extends React.Component {
             let isChunk = false;
             if (tempIdsArray.indexOf(job.get('id')) > -1 ) {
                 isChunk = true;
-                index --;
+                index ++;
             }  else if ((orderedJobs.get(i+1) && orderedJobs.get(i+1).get('id') === job.get('id') )) {  //The first of the Chunk
                 isChunk = true;
                 tempIdsArray.push(job.get('id'));
-                index = job_chunks;
+                index = 1;
             }  else {
                 index = 0;
             }
