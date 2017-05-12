@@ -516,10 +516,10 @@ body.manage {
                                         display: none;
                                     }
                                 }
-                                &:hover .job-delivery {
+                                &:hover .translator .job-delivery {
                                     display: none;
                                 }
-                                .outsource:hover .job-delivery {
+                                &:hover .outsource .job-delivery {
                                     display: inline-block;
                                 }
                                 .item {
