@@ -33,7 +33,7 @@ class UserController extends AbstractStatefulKleinController  {
                     /** @var $team TeamStruct */
                     return $team;
                 },
-                $membersDao->setCacheTTL( 60 * 60 * 24 )->findUserTeams( $this->user )
+                $membersDao->findUserTeams( $this->user )
         );
 
         // TODO: move this into a formatter class
