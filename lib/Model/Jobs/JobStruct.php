@@ -56,6 +56,10 @@ class Jobs_JobStruct extends DataAccess_AbstractDaoSilentStruct implements DataA
         return Files_FileDao::getByJobId( $this->id );
     }
 
+    public function getSegmentsTableName() {
+        return Utils::segmentsTable( $this->id_project );
+    }
+
     /**
      * getProject
      *

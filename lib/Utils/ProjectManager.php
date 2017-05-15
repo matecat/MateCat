@@ -1207,11 +1207,13 @@ class ProjectManager {
          * +----------------+-------------------+---------+-------------------+------------------+
          *
          */
+        $segments = Jobs_JobDao::getById( $projectStructure['job_to_split'] )->getSegmentsTableName();
+
         $query = "SELECT
                     SUM( raw_word_count ) AS raw_word_count,
                     SUM( eq_word_count ) AS eq_word_count,
                     job_first_segment, job_last_segment, s.id, s.show_in_cattool
-                        FROM segments s
+                        FROM $segments s
                         JOIN files_job fj on fj.id_file=s.id_file
                         JOIN jobs j ON j.id = fj.id_job
                         LEFT  JOIN segment_translations st ON st.id_segment = s.id AND st.id_job = j.id
@@ -1775,7 +1777,8 @@ class ProjectManager {
             $this->show_in_cattool_segs_counter += $_fileCounter_Show_In_Cattool;
         }
 
-        $baseQuery = "INSERT INTO segments ( id, internal_id, id_file, id_file_part, segment, segment_hash, raw_word_count, xliff_mrk_id, xliff_ext_prec_tags, xliff_ext_succ_tags, show_in_cattool,xliff_mrk_ext_prec_tags,xliff_mrk_ext_succ_tags) values ";
+        $segments = $this->project->getSegmentsTableName();
+        $baseQuery = "INSERT INTO $segments ( id, internal_id, id_file, id_file_part, segment, segment_hash, raw_word_count, xliff_mrk_id, xliff_ext_prec_tags, xliff_ext_succ_tags, show_in_cattool,xliff_mrk_ext_prec_tags,xliff_mrk_ext_succ_tags) values ";
 
         Log::doLog( "Segments: Total Rows to insert: " . count( $this->projectStructure[ 'segments' ][ $fid ] ) );
         $sequenceIds = $this->dbHandler->nextSequence( Database::SEQ_ID_SEGMENT, count( $this->projectStructure[ 'segments' ][ $fid ] ) );

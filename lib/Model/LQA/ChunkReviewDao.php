@@ -78,8 +78,10 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
      * @return int
      */
     public static function getReviewedWordsCountForChunk( \Chunks_ChunkStruct $chunk ) {
-        $sql = "select sum(segments.raw_word_count) from segment_translations st
-            JOIN segments ON segments.id = st.id_segment
+        $segments = $chunk->getSegmentsTableName();
+
+        $sql = "select sum($segments.raw_word_count) from segment_translations st
+            JOIN $segments ON $segments.id = st.id_segment
             JOIN jobs on jobs.id = st.id_job
             WHERE jobs.id = :id_job AND jobs.password = :password
             AND st.status IN (:statuses)

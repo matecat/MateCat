@@ -7,7 +7,7 @@
    Thank you for keeping is confidential.
  */
 
-class MyMemory {
+    class MyMemory {
 
     public static function TMS_MATCH( $seg1, $seg2, $penalty_id = 0, $for_semantix = false ) {
         $seg1 = trim( $seg1 );
