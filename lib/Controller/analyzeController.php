@@ -92,7 +92,10 @@ class analyzeController extends viewController {
         }
 
         $this->features = new FeatureSet();
-        $this->features->loadForProject( $this->project );
+
+        if ( $this->project ) {
+            $this->features->loadForProject( $this->project );
+        }
 
     }
 
@@ -100,6 +103,11 @@ class analyzeController extends viewController {
         $this->features->run('beginDoAction', 'analyzeController', array(
                 'project' => $this->project
         ));
+
+        if ( !$this->project ) {
+            $this->render404() ;
+            return ;
+        }
 
         $this->model = new Analysis_AnalysisModel( $this->project, $this->chunk );
         $this->model->loadData();

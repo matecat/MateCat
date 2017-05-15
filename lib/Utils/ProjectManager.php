@@ -158,6 +158,25 @@ class ProjectManager {
     }
 
     /**
+     * Project name is required to build the analyize URL. Project name is memoized in a instance variable
+     * so to perform the check only the first time on $projectStructure['project_name'].
+     *
+     * @return bool|mixed
+     */
+    protected function _sanitizeProjectName() {
+        $newName = self::_sanitizeName( $this->projectStructure[ 'project_name' ] );
+
+        if ( !$newName ) {
+            $this->projectStructure[ 'result' ][ 'errors' ][] = array(
+                    "code"    => -5,
+                    "message" => "Invalid Project Name " . $this->projectStructure['project_name'] . ": it should only contain numbers and letters!"
+            );
+        }
+
+        $this->projectStructure['project_name'] = $newName ;
+    }
+
+    /**
      * @param \Teams\TeamStruct $team
      */
     public function setTeam( TeamStruct $team ) {
@@ -233,16 +252,25 @@ class ProjectManager {
         
         return $sanitizer->sanitize(); 
     }
+
+    /**
+     * Perform sanitization of the projectStructure and assign errors.
+     * Resets the errors array to avoid subsequent calls to pile up errors.
+     *
+     */
+    public function sanitizeProjectStructure() {
+        $this->projectStructure[ 'result' ][ 'errors' ] = new ArrayObject() ;
+
+        $this->_sanitizeProjectName();
+    }
         
     /**
      * Creates record in projects tabele and instantiates the project struct
      * internally.
      *
      */
-    private function createProjectRecord() {
+    private function __createProjectRecord() {
         $this->project = insertProject( $this->projectStructure );
-        $this->projectStructure[ 'id_project' ] = $this->project->id; //redundant
-        $this->projectStructure[ 'ppassword' ]  = $this->project->password; //redundant
     }
 
     private function __checkForProjectAssignment(){
@@ -268,23 +296,13 @@ class ProjectManager {
     }
 
     public function createProject() {
+        $this->sanitizeProjectStructure();
 
         if ( !empty( $this->projectStructure[ 'session' ][ 'uid' ] ) ) {
             $this->gdriveSession = GDrive\Session::getInstanceForCLI( $this->projectStructure[ 'session' ] ) ;
         }
 
         $this->__checkForProjectAssignment();
-
-        // project name sanitize
-        $oldName                                  = $this->projectStructure[ 'project_name' ];
-        $this->projectStructure[ 'project_name' ] = $this->_sanitizeName( $this->projectStructure[ 'project_name' ] );
-
-        if ( $this->projectStructure[ 'project_name' ] == false ) {
-            $this->projectStructure[ 'result' ][ 'errors' ][] = array(
-                    "code"    => -5,
-                    "message" => "Invalid Project Name " . $oldName . ": it should only contain numbers and letters!"
-            );
-        }
 
         /**
          * This is the last chance to perform the validation before the project is created
@@ -300,7 +318,7 @@ class ProjectManager {
             return false;
         }
 
-        $this->createProjectRecord();
+        $this->__createProjectRecord();
         $this->saveMetadata();
 
         //sort files in order to process TMX first
@@ -621,14 +639,14 @@ class ProjectManager {
         $this->projectStructure[ 'result' ][ 'id_job' ]          = $this->projectStructure[ 'array_jobs' ][ 'job_list' ];
         $this->projectStructure[ 'result' ][ 'job_segments' ]    = $this->projectStructure[ 'array_jobs' ][ 'job_segments' ];
         $this->projectStructure[ 'result' ][ 'id_project' ]      = $this->projectStructure[ 'id_project' ];
-        $this->projectStructure[ 'result' ][ 'project_name' ]    = $this->projectStructure[ 'project_name' ];
+        $this->projectStructure[ 'result' ][ 'project_name' ]    = $this->projectStructure[ 'project_name'] ;
         $this->projectStructure[ 'result' ][ 'source_language' ] = $this->projectStructure[ 'source_language' ];
         $this->projectStructure[ 'result' ][ 'target_language' ] = $this->projectStructure[ 'target_language' ];
         $this->projectStructure[ 'result' ][ 'status' ]          = $this->projectStructure[ 'status' ];
         $this->projectStructure[ 'result' ][ 'lang_detect' ]     = $this->projectStructure[ 'lang_detect_files' ];
 
-        if ( INIT::$VOLUME_ANALYSIS_ENABLED ){
-            $this->projectStructure[ 'result' ][ 'analyze_url' ] = $this->analyzeURL( $this->projectStructure[ 'HTTP_HOST' ] );
+        if ( INIT::$VOLUME_ANALYSIS_ENABLED ) {
+            $this->projectStructure[ 'result' ][ 'analyze_url' ] = $this->getAnalyzeURL() ;
         }
 
         $update_project_count = "
@@ -743,16 +761,18 @@ class ProjectManager {
      * @param $http_host string
      * @return string
      */
-    private function analyzeURL( $http_host = null ) {
-
+    public function getAnalyzeURL() {
         return Routes::analyze(
                 [
-                        'project_name' => $this->projectStructure[ 'project_name' ],
-                        'id_project'   => $this->projectStructure[ 'result' ][ 'id_project' ],
-                        'password'     => $this->projectStructure[ 'result' ][ 'ppassword' ]
+                        'project_name' => $this->projectStructure[ 'project_name'],
+                        'id_project'   => $this->projectStructure[ 'id_project' ],
+                        'password'     => $this->projectStructure[ 'ppassword' ]
                 ],
                 [
-                        'http_host'    => ( is_null( $http_host ) ? INIT::$HTTPHOST : $http_host ),
+                        'http_host'    => ( is_null( $this->projectStructure['HTTP_HOST'] ) ?
+                                INIT::$HTTPHOST :
+                                $this->projectStructure['HTTP_HOST']
+                        ),
                 ]
         );
     }
@@ -2222,7 +2242,7 @@ class ProjectManager {
      */
     protected function _extractFileReferences( $project_file_id, $xliff_file_array ) {
 
-        $fName = $this->_sanitizeName( $xliff_file_array[ 'attr' ][ 'original' ] );
+        $fName = self::_sanitizeName( $xliff_file_array[ 'attr' ][ 'original' ] );
 
         if ( $fName != false ) {
             $fName = $this->dbHandler->escape( $fName );
@@ -2293,7 +2313,7 @@ class ProjectManager {
         }
     }
 
-    protected function _sanitizeName( $nameString ) {
+    protected static function _sanitizeName( $nameString ) {
 
         $nameString = preg_replace( '/[^\p{L}0-9a-zA-Z_\.\-]/u', "_", $nameString );
         $nameString = preg_replace( '/[_]{2,}/', "_", $nameString );
