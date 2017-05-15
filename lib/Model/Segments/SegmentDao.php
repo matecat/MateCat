@@ -8,8 +8,10 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      * @return mixed
      */
     function countByChunk( Chunks_ChunkStruct $chunk) {
+        $segments = $chunk->getSegmentsTableName() ;
+
         $conn = $this->con->getConnection();
-        $query = "SELECT COUNT(1) FROM segments s
+        $query = "SELECT COUNT(1) FROM $segments s
             JOIN segment_translations st ON s.id = st.id_segment
             JOIN jobs ON st.id_job = jobs.id
             WHERE jobs.id = :id_job
@@ -31,13 +33,15 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     function getByChunkIdAndSegmentId( $id_job, $password, $id_segment) {
         $conn = $this->con->getConnection();
 
-        $query = " SELECT segments.* FROM segments " .
+        $segments = Jobs_JobDao::getById( $id_job )->getSegmentsTableName() ;
+
+        $query = " SELECT $segments.* FROM $segments " .
                 " INNER JOIN files_job fj USING (id_file) " .
                 " INNER JOIN jobs ON jobs.id = fj.id_job " .
                 " INNER JOIN files f ON f.id = fj.id_file " .
                 " WHERE jobs.id = :id_job AND jobs.password = :password" .
-                " AND segments.id_file = f.id " .
-                " AND segments.id = :id_segment " ;
+                " AND $segments.id_file = f.id " .
+                " AND $segments.id = :id_segment " ;
 
         $stmt = $conn->prepare( $query );
 
@@ -61,14 +65,16 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
     function getByChunkId( $id_job, $password ) {
         $conn = $this->con->getConnection();
 
-        $query = "SELECT segments.* FROM segments
+        $segments = Jobs_JobDao::getById( $id_job )->getSegmentsTableName() ;
+
+        $query = "SELECT $segments.* FROM $segments
                  INNER JOIN files_job fj USING (id_file)
                  INNER JOIN jobs ON jobs.id = fj.id_job
                  AND jobs.id = :id_job AND jobs.password = :password
                  INNER JOIN files f ON f.id = fj.id_file
                  WHERE jobs.id = :id_job AND jobs.password = :password
-                 AND segments.id_file = f.id
-                 AND segments.id BETWEEN jobs.job_first_segment AND jobs.job_last_segment
+                 AND $segments.id_file = f.id
+                 AND $segments.id BETWEEN jobs.job_first_segment AND jobs.job_last_segment
                  ";
 
         $stmt = $conn->prepare( $query );
@@ -88,10 +94,12 @@ class Segments_SegmentDao extends DataAccess_AbstractDao {
      *
      * @return Segments_SegmentStruct
      */
-    public function getById( $id_segment ) {
+    public function getById( $id_segment, $id_project ) {
         $conn = $this->con->getConnection();
 
-        $query = "select * from segments where id = :id";
+        $segments = Utils::segmentsTable( $id_project );
+
+        $query = "select * from $segments where id = :id";
         $stmt  = $conn->prepare( $query );
         $stmt->execute( array( 'id' => (int)$id_segment ) );
 

@@ -19,6 +19,9 @@ class QualityReportDao extends \DataAccess_AbstractDao {
 
 
     public function getAverages( \Chunks_ChunkStruct $chunk ) {
+
+        $segments = $chunk->getSegmentsTableName();
+
         $sql = <<<SQL
 
       SELECT
@@ -32,7 +35,7 @@ class QualityReportDao extends \DataAccess_AbstractDao {
         AND jobs.password = :password
         AND jobs.id = :id_job
 
-      JOIN segments s
+      JOIN $segments s
         ON s.id = st.id_segment
         AND s.id >= jobs.job_first_segment
         AND s.id <= jobs.job_last_segment
@@ -64,6 +67,8 @@ SQL;
      * @return bool
      */
     public static function getSegmentsForQualityReport( \Chunks_ChunkStruct $chunk ) {
+
+        $segments = $chunk->getSegmentsTableName();
 
         $sql = <<<SQL
 
@@ -109,7 +114,7 @@ FROM segment_translations st
     AND jobs.password = :password
     AND jobs.id = :id_job
 
-  JOIN segments s
+  JOIN $segments s
     ON s.id = st.id_segment
     AND s.id >= jobs.job_first_segment
     AND s.id <= jobs.job_last_segment

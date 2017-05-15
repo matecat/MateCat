@@ -64,7 +64,7 @@ class FastAnalysis extends AbstractDaemon {
      */
     protected function _updateConfiguration() {
 
-        $config = @parse_ini_file( $this->_configFile, true );
+        $config = parse_ini_file( $this->_configFile, true );
 
         if( empty( $this->_configFile ) || !isset( $config[ 'context_definitions' ] ) || empty( $config[ 'context_definitions' ] ) ){
             throw new Exception( 'Wrong configuration file provided.' );
@@ -612,6 +612,8 @@ class FastAnalysis extends AbstractDaemon {
         //we want segments that we decided to show in cattool
         //and segments that are NOT locked ( already translated )
 
+        $segments = Utils::segmentsTable( $pid );
+
         $query = <<<HD
             SELECT concat( s.id, '-', group_concat( distinct concat( j.id, ':' , j.password ) ) ) AS jsid, s.segment, 
                 j.source, s.segment_hash, 
@@ -619,7 +621,7 @@ class FastAnalysis extends AbstractDaemon {
                 s.raw_word_count,
                 GROUP_CONCAT( DISTINCT CONCAT( j.id, ':' , j.target ) ) AS target,
                 CONCAT( "{", GROUP_CONCAT( DISTINCT CONCAT( '"', j.id, '"', ':' , j.payable_rates ) SEPARATOR ',' ), "}" ) AS payable_rates
-            FROM segments AS s
+            FROM $segments AS s
             INNER JOIN files_job AS fj ON fj.id_file = s.id_file
             INNER JOIN jobs as j ON fj.id_job = j.id
             LEFT JOIN segment_translations AS st ON st.id_segment = s.id
