@@ -409,15 +409,14 @@ UI = {
                 'or fix the error in MateCat:',
                 successText: "Continue",
                 successCallback: continueDownloadFunction,
-                cancelText: "Fix errors",
-                cancelCallback: openUrl
+                warningText: "Fix errors",
+                warningCallback: openUrl
 
             };
             APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Confirmation required");
         } else {
             continueDownloadFunction();
         }
-
 
     },
 
@@ -557,9 +556,81 @@ UI = {
         };
         let style = {width: '970px',maxWidth: '970px', top: '45%'};
         APP.ModalWindow.showModalComponent(OutsourceModal, props, "Translate", style);
+    },
 
+    openSplitJobModal: function (job, project) {
+        let props = {
+            job: job,
+            project: project
+        };
+        let style = {width: '670px',maxWidth: '670px'};
+        APP.ModalWindow.showModalComponent(SplitJobModal, props, "Split Job", style);
+    },
 
+    /****** Analyze *******/
+    checkSplitRequest: function (job, project, numsplit, arrayValues) {
+        return APP.doRequest({
+            data: {
+                action: "splitJob",
+                exec: "check",
+                project_id: project.id,
+                project_pass: project.password,
+                job_id: job.id,
+                job_pass: job.password,
+                num_split: numsplit,
+                split_values: arrayValues
+            },
+            success: function(d) {}
+        });
+    },
+
+    confirmSplitRequest: function(job, project, numsplit, arrayValues) {
+
+        return APP.doRequest({
+            data: {
+                action: "splitJob",
+                exec: "apply",
+                project_id: project.id,
+                project_pass: project.password,
+                job_id: job.id,
+                job_pass: job.password,
+                num_split: numsplit,
+                split_values: arrayValues
+            }
+        });
+    },
+    openMergeModal: function (project, job) {
+        let props = {
+            text: 'This will cause the merging of all chunks in only one job. ' +
+            'This operation cannot be canceled.',
+            successText: "Continue",
+            successCallback: function () {
+                UI.confirmMerge(project, job);
+                UI.reloadProjects();
+                APP.ModalWindow.onCloseModal();
+            },
+            cancelText: "Cancel",
+            cancelCallback: function () {
+                APP.ModalWindow.onCloseModal();
+            }
+
+        };
+        APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Confirmation required");
+    },
+    confirmMerge: function(project, job) {
+
+        return APP.doRequest({
+            data: {
+                action: "splitJob",
+                exec: "merge",
+                project_id: project.id,
+                project_pass: project.password,
+                job_id: job.id
+            }
+
+        });
     }
+    /**********************/
 };
 
 
