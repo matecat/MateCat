@@ -860,27 +860,6 @@ UI = {
                         $('div[data-jid=' + jobId + '] .uploadbtn.translate').trigger('click');
                     }, 500);
                     break;
-                case 'split':
-                    job$[0].scrollIntoView( true );
-                    interval = setInterval(function () {
-                        if (!$('div[data-jid=' + jobId + '] .dosplit').hasClass('disabled')) {
-                            $('div[data-jid=' + jobId + '] .dosplit').trigger('click');
-                            clearInterval(interval);
-                        }
-                    }, 500);
-					window.history.pushState('',document.title,document.location.href.split('?')[0]);
-					$(".popup-split .popup-split-project-title").show();
-                    break;
-				case 'merge':
-					job$[0].scrollIntoView( true );
-					interval = setInterval(function () {
-						if (!$('div[data-jid=' + jobId + '] .domerge').hasClass('disabled')) {
-							$('div[data-jid=' + jobId + '] .domerge').trigger('click');
-							clearInterval(interval);
-						}
-					}, 500);
-					window.history.pushState('',document.title,document.location.href.split('?')[0]);
-					break;
             }
         }
 

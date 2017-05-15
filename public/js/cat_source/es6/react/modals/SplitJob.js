@@ -9,7 +9,8 @@ class SplitJobModal extends React.Component {
             numSplit: 2,
             wordsArray: arraySplit,
             splitChecked: false,
-            showLoader: false
+            showLoader: false,
+            showError: false
         };
     }
 
@@ -96,7 +97,13 @@ class SplitJobModal extends React.Component {
                     })
                 }
                 if ((typeof d.errors != 'undefined') && (d.errors.length) ) {
-                    //TODO show Errors
+                    self.errorMsg = d.errors[0].message;
+                    self.setState({
+                        showError: true,
+                        showLoader: false,
+                        splitChecked: false
+                    });
+                    return;
                 }
                 self.setState({
                     wordsArray: arrayChunks,
@@ -122,9 +129,11 @@ class SplitJobModal extends React.Component {
                     APP.ModalWindow.onCloseModal();
                 }
                 if ((typeof d.errors != 'undefined') && (d.errors.length) ) {
-                    //TODO show Errors
+                    self.errorMsg = d.errors[0].message;
                     self.setState({
-                        showLoader: false
+                        showError: true,
+                        showLoader: false,
+                        splitChecked: false
                     });
                 }
 
@@ -237,37 +246,39 @@ class SplitJobModal extends React.Component {
                         {showSplitDiffError ? (<p className="error-count"><span className="txt">{errorLabel}</span>: <span className="diff-w">{APP.addCommas(Math.abs(checkSplit.difference))}</span></p>)
                             : ('')}
                     </div>
-                    <div className="error-message none">
-                        <p>Cannot split in # chunks, do this</p>
-                    </div>
+                    {this.state.showError ? (
+                            <div className="error-message">
+                                <p>{this.errorMsg? (this.errorMsg) : ('Error, please try again or contact support@matecat.com')}</p>
+                            </div>
+                    ) :('')}
+
                     <div className="cl"></div>
                     <div className="btnsplit">
 
 
                         {showSplitDiffError ? (
-                            <a id="exec-split" className="uploadbtn loader disabled" disabled="disabled">
+                            <div id="exec-split" className="uploadbtn loader">
                                 {this.state.showLoader ? (
                                 <span className="uploadloader"/>
                                     ):('')}
-                                <span className="text">Check</span>
-                            </a>
+                                <div className="ui button-modal blue disabled">Check</div>
+                            </div>
                                 ) : ((this.state.splitChecked) ? ('') : (
-                                <a id="exec-split" className="uploadbtn loader" onClick={this.checkSplitJob.bind(this)}>
+                                <div id="exec-split" className="uploadbtn loader" onClick={this.checkSplitJob.bind(this)}>
                                     {this.state.showLoader ? (
                                     <span className="uploadloader"/>
                                         ):('')}
-                                    <span className="text">Check</span>
-                                </a>
+                                    <div className="ui button-modal blue">Check</div>
+                                </div>
                                 ))}
 
 
-                        {!showSplitDiffError && this.state.splitChecked ? (<a id="exec-split-confirm" className="splitbtn done">
-                                <span className="text" onClick={this.confirmSplitJob.bind(this)}>Confirm</span>
-                            </a>) : ('')}
+                        {!showSplitDiffError && this.state.splitChecked ? (
+                            <div id="exec-split-confirm" className="uploadbtn">
+                                <div className="ui button-modal blue splitbtn" onClick={this.confirmSplitJob.bind(this)}>Confirm</div>
+                            </div>) : ('')}
 
-                        <span className="btn fileinput-button btn-cancel right">
-                    <span onClick={this.closeModal.bind(this)}>Cancel</span>
-                </span>
+                        <div className="ui button-modal grey margin right-30" onClick={this.closeModal.bind(this)}>Cancel</div>
                     </div>
                 </div>
                 {/*<!-- END DIV SPLIT BOX -->*/}

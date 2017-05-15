@@ -409,15 +409,14 @@ UI = {
                 'or fix the error in MateCat:',
                 successText: "Continue",
                 successCallback: continueDownloadFunction,
-                cancelText: "Fix errors",
-                cancelCallback: openUrl
+                warningText: "Fix errors",
+                warningCallback: openUrl
 
             };
             APP.ModalWindow.showModalComponent(ConfirmMessageModal, props, "Confirmation required");
         } else {
             continueDownloadFunction();
         }
-
 
     },
 

@@ -137,7 +137,7 @@ class JobContainer extends React.Component {
     }
 
     openSplitModal() {
-        UI.openSplitJobModal(this.props.job, this.props.project);
+        ManageActions.openSplitModal(this.props.job, this.props.project);
     }
 
     openMergeModal() {
@@ -237,14 +237,6 @@ class JobContainer extends React.Component {
 
     getProjectAnalyzeUrl() {
         return '/analyze/' + this.props.project.get('project_slug') + '/' +this.props.project.get('id')+ '-' + this.props.project.get('password');
-    }
-
-    getSplitUrl() {
-        return '/analyze/'+ this.props.project.get('project_slug') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=split&jobid=' + this.props.job.get('id');
-    }
-
-    getMergeUrl() {
-        return '/analyze/'+ this.props.project.get('project_slug') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=merge&jobid=' + this.props.job.get('id');
     }
 
     getActivityLogUrl() {
@@ -604,8 +596,6 @@ class JobContainer extends React.Component {
         let outsourceDelivery = this.getOutsourceDelivery();
         // let outsourceDeliveryPrice = this.getOutsourceDeliveryPrice();
         let analysisUrl = this.getProjectAnalyzeUrl();
-        // let splitUrl = this.getSplitUrl();
-        // let mergeUrl = this.getMergeUrl();
         let warningIcons = this.getWarningsGroup();
         let jobMenu = this.getJobMenu();
         let tmIcon = this.getTMIcon();

@@ -559,6 +559,10 @@ let ManageActions = {
     },
 
     // Analyze Actions
+    openSplitModal: function (job, project) {
+        UI.openSplitJobModal(job, project);
+    },
+
     openMergeModal: function (project, job) {
         UI.openMergeModal(project.toJS(), job.toJS());
     }

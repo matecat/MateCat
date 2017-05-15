@@ -63,7 +63,6 @@
         display: block;
     }
     .btnsplit {
-        width: 300px;
         float: right;
         margin: 0 auto;
         padding: 20px 0 20px 0;
@@ -74,12 +73,6 @@
     }
     .left {
         float: left;
-    }
-    .splitbtn.done {
-        background: #09beec;
-        float: right;
-        padding: 2px 15px 2px 15px !important;
-        margin-bottom: 0;
     }
 
     .splitbtn:before {
@@ -95,32 +88,8 @@
         -webkit-font-smoothing: antialiased;
     }
 
-    .splitbtn.done:hover {
-        background: #12b4df;
-    }
     input[type="text"][disabled] {
         background: #f0f0f0;
-    }
-    .stopsplitbtn {
-        display: block;
-        float: right;
-        background: #f26522 url(../img/xbtn.gif) 13px 14px no-repeat !important;
-        font-weight: bold;
-        padding: 5px 15px 5px 30px !important;
-        width: auto !important;
-        -webkit-transition: all 100ms ease-in;
-        -moz-transition: all 100ms ease-in;
-        font-size: 20px !important;
-        cursor: pointer;
-        color: #fff;
-        -moz-box-shadow: 0 1px 2px #ccc;
-        -webkit-box-shadow: 0 1px 2px #ccc;
-        box-shadow: 0 1px 2px #ccc;
-        border: 1px solid #666;
-        -moz-border-radius: 2px;
-        border-radius: 2px;
-        text-decoration: none;
-        opacity: 0.9;
     }
 
     h2 {
@@ -149,29 +118,6 @@
         display: none;
     }
 
-    .splitbtn, .mergebtn {
-        margin: 0 0 10px 0;
-        font-weight: bold;
-        width: auto !important;
-        -webkit-transition: all 100ms ease-in;
-        -moz-transition: all 100ms ease-in;
-        font-size: 20px !important;
-        cursor: pointer;
-        color: #fff;
-        background: #12b4df;
-        -moz-box-shadow: 0 1px 2px #ccc;
-        -webkit-box-shadow: 0 1px 2px #ccc;
-        box-shadow: 0 1px 2px #ccc;
-        border: 1px solid #666;
-        -moz-border-radius: 2px;
-        border-radius: 2px;
-        text-decoration: none;
-        opacity: 0.9;
-        padding: 5px 10px 5px 10px !important;
-        margin-left: 12px;
-        float: left;
-    }
-
     .splitbtn-cont.disabled {
         background: none;
         border: none;
@@ -188,25 +134,7 @@
 
 
     .uploadbtn {
-        padding: 2px 15px !important;
-    }
-
-    .splitbtn:hover {
-        -moz-box-shadow: 0 1px 2px #666;
-        -webkit-box-shadow: 0 1px 2px #666;
-        box-shadow: 0 1px 2px #666;
-    }
-
-    .mergebtn:hover {
-        -moz-box-shadow: 0 1px 2px #666;
-        -webkit-box-shadow: 0 1px 2px #666;
-        box-shadow: 0 1px 2px #666;
-    }
-
-    .splitbtn:active, .mergebtn:active, .btn-cancel:active {
-        -moz-box-shadow: inset 0 0 1px 1px #888;
-        -webkit-box-shadow: inset 0 0 1px 1px #888;
-        box-shadow: inset 0 0 1px 1px #888;
+        float: right;
     }
 
     .splitselect {
@@ -304,6 +232,7 @@
         -moz-border-radius: 2px;
         border-radius: 2px;
         border: 1px solid #c45f5f;
+        margin-top: 10px;
     }
 
     .jobcontainer {
@@ -317,6 +246,21 @@
 
     .error-message p {
         padding: 0 10px 0 10px;
+        line-height: 40px !important;
+
+    }
+
+    .error-message p:before {
+        font-family: 'icomoon';
+        speak: none;
+        font-style: normal;
+        font-weight: normal;
+        font-variant: normal;
+        text-transform: none;
+        line-height: 1;
+        -webkit-font-smoothing: antialiased;
+        content: "\f071";
+        margin-right: 10px;
     }
 
     .jobs h4 {
@@ -364,46 +308,14 @@
         background: #ccc !important;
     }
 
-    .uploadbtn, .continuebtn, .standardbtn {
-        background: #09beec;
-        font-weight: bold;
-        width: 88px;
-        -webkit-transition: all 100ms ease-in;
-        -moz-transition: all 100ms ease-in;
-        font-size: 20px !important;
-        cursor: pointer;
-        color: #fff;
-        -moz-box-shadow: 0 1px 2px #ccc;
-        -webkit-box-shadow: 0 1px 2px #ccc;
-        box-shadow: 0 1px 2px #ccc;
-        border: 1px solid #666;
-        -moz-border-radius: 2px;
-        border-radius: 2px;
-        text-decoration: none;
-        opacity: 0.9;
-        text-align: center;
-        padding: 5px 10px !important;
-        margin: 0 0 -3px 10px !important;
-        float: right;
-    }
-
-    .btnsplit .disabled, .splitbtn.done, .uploadbtn {
-        margin: 0 0 0 35px !important;
-    }
-    .uploadbtn {
-        padding: 2px 15px!important;
-        box-sizing: content-box;
-    }
-
     .uploadloader {
-        background: url(../img/loader.gif) center center no-repeat;
+        background: url(../../img/loader.gif) center center no-repeat;
         width: 20px;
         height: 20px;
         float: right;
-        margin-top: 5px;
-        //display: none;
+        margin-top: 9px;
         position: absolute;
-        right: 144px;
+        right: 115px;
         background-size: 20px 20px;
     }
 
