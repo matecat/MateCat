@@ -206,7 +206,6 @@ class catController extends viewController {
          * get first segment of every file
          */
         $fileInfo     = getFirstSegmentOfFilesInJob( $this->jid );
-        $this->first_job_segment = $fileInfo[ 0 ][ 'first_segment'];
         $TotalPayable = array();
         foreach ( $fileInfo as &$file ) {
             $file[ 'file_name' ] = ZipArchiveExtended::getFileName( $file[ 'file_name' ] );
@@ -467,7 +466,7 @@ class catController extends viewController {
         $this->template->mt_engines = $this->translation_engines;
         $this->template->mt_id      = $this->job->id_mt_engine ;
 
-        $this->template->first_job_segment   = $this->first_job_segment ;
+        $this->template->first_job_segment   = $this->job->job_first_segment ;
         $this->template->last_job_segment    = $this->job->job_last_segment ;
 
         $this->template->owner_email         = $this->job_owner;
