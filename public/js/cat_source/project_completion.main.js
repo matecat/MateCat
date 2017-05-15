@@ -80,8 +80,9 @@ if ( ProjectCompletion.enabled() ) {
              * and 'TRANSLATED' is < 0 and 'APPROVED' + 'REJECTED' > 0.
              */
 
-            return stats.DRAFT <= 0 &&
-                ( stats.APPROVED + stats.REJECTED ) > 0 ;
+            return config.job_completion_current_phase == 'revise' &&
+                stats.DRAFT <= 0 &&
+               ( stats.APPROVED + stats.REJECTED ) > 0 ;
         }
         else {
             /**
@@ -91,7 +92,8 @@ if ( ProjectCompletion.enabled() ) {
              * When a project is pretranslated, the 'translated' count can be 0 or
              * less.
              */
-            return parseInt( stats.DRAFT ) == 0 && parseInt( stats.REJECTED ) == 0 ;
+            return config.job_completion_current_phase == 'translate' &&
+                parseInt( stats.DRAFT ) == 0 && parseInt( stats.REJECTED ) == 0 ;
         }
     }
 
