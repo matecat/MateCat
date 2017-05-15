@@ -21,10 +21,6 @@ class Projects_ProjectStruct extends DataAccess_AbstractDaoSilentStruct implemen
     public $id_assignee ;
 
 
-    public function getSegmentsTableName() {
-        return Utils::segmentsTable( $this->id ) ;
-    }
-
     /**
      * @return bool  
      */
