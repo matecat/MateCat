@@ -34,32 +34,29 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
             throw new Exception( "Job password required" );
         }
 
-
-        $segments = Jobs_JobDao::getById( $job_id )->getSegmentsTableName();
-
         $querySegments = "
                     SELECT * FROM (
-                        SELECT $segments.id AS __sid
-                        FROM $segments
+                        SELECT segments.id AS __sid
+                        FROM segments
                         JOIN segment_translations st ON id = id_segment
                         JOIN jobs ON jobs.id = id_job
                         WHERE id_job = %d
                             AND password = '%s'
                             AND show_in_cattool = 1
-                            AND $segments.id >= %d
+                            AND segments.id >= %d
                             AND st.status not in( '%s', '%s' )
                         LIMIT %u
                     ) AS TT1
                     UNION
                     SELECT * from(
-                            SELECT  $segments.id AS __sid
-                        FROM $segments
+                            SELECT  segments.id AS __sid
+                        FROM segments
                         JOIN segment_translations st ON id = id_segment
                         JOIN jobs ON jobs.id =  id_job
                         WHERE id_job = %d
                             AND password = '%s'
                             AND show_in_cattool = 1
-                            AND $segments.id < %d
+                            AND segments.id < %d
                             AND st.status not in( '%s', '%s' )
                         ORDER BY __sid DESC
                         LIMIT %u
@@ -86,7 +83,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
                 FROM
                 jobs j
                 INNER JOIN segment_translations st ON j.id=st.id_job
-                INNER JOIN $segments s ON s.id = st.id_segment
+                INNER JOIN segments s ON s.id = st.id_segment
                 INNER JOIN projects p on p.id=j.id_project
                 JOIN(
                   %s
@@ -136,10 +133,8 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
      * @return bool
      */
     public function isEditLogEmpty( $job_id, $password ) {
-        $segments = Jobs_JobDao::getById( $job_id )->getSegmentsTableName();
-
-        $query = "SELECT count($segments.id) as num_segs
-                    FROM $segments
+        $query = "SELECT count(segments.id) as num_segs
+                    FROM segments
                     JOIN segment_translations st ON id = id_segment
                     JOIN jobs ON jobs.id = id_job
                     WHERE id_job = %d
@@ -211,16 +206,15 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
             throw new Exception( "Job password required" );
         }
 
-        $segments = Jobs_JobDao::getById( $job_id )->getSegmentsTableName();
         $queryBefore = "select * from (
-                            SELECT $segments.id AS __sid
-                            FROM $segments
+                            SELECT segments.id AS __sid
+                            FROM segments
                             JOIN segment_translations st ON id = id_segment
                             JOIN jobs ON jobs.id =  id_job
                             WHERE id_job = %d
                                 AND password = '%s'
                                 AND show_in_cattool = 1
-                                AND $segments.id < jobs.job_last_segment
+                                AND segments.id < jobs.job_last_segment
                                 AND st.status not in( '%s', '%s' )
                             ORDER BY __sid DESC
                             LIMIT %u
@@ -258,16 +252,14 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
             throw new Exception( "Job password required" );
         }
 
-        $segments = Jobs_JobDao::getById( $job_id )->getSegmentsTableName();
-
-        $queryBefore = "SELECT min($segments.id) AS __sid
-                        FROM $segments
+        $queryBefore = "SELECT min(segments.id) AS __sid
+                        FROM segments
                         JOIN segment_translations st ON id = id_segment
                         JOIN jobs ON jobs.id =  id_job
                         WHERE id_job = %d
                             AND password = '%s'
                             AND show_in_cattool = 1
-                            AND $segments.id >= jobs.job_first_segment
+                            AND segments.id >= jobs.job_first_segment
                             AND st.status not in ( '%s', '%s' )
                         ORDER BY __sid DESC";
 
@@ -301,11 +293,10 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
             throw new Exception( "Job password required" );
         }
 
-        $segments = Jobs_JobDao::getById( $job_id )->getSegmentsTableName();
         $queryBefore = "
         select start_segment, floor(idx / %d ) +1 as page from (
-          SELECT $segments.id AS start_segment, @page := ( @page + 1 ) as idx
-		  FROM $segments
+          SELECT segments.id AS start_segment, @page := ( @page + 1 ) as idx
+		  FROM segments
 			JOIN segment_translations st ON id = id_segment
 			JOIN jobs ON jobs.id =  id_job
 	        JOIN ( SELECT @page:= -1 ) AS page
@@ -347,9 +338,6 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
         if ( empty( $password ) ) {
             throw new Exception( "Job password required" );
         }
-
-        $segments = Jobs_JobDao::getById( $job_id )->getSegmentsTableName();
-
         $queryValidSegments = "
         select
             sum(time_to_edit) as tot_tte,
@@ -357,7 +345,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
             sum(time_to_edit)/sum(raw_word_count) as secs_per_word,
             avg_post_editing_effort / sum(raw_word_count) as avg_pee
         from segment_translations st
-        join $segments s on s.id = st.id_segment
+        join segments s on s.id = st.id_segment
         join jobs j on j.id = st.id_job
         where id_job = %d
             and  password = '%s'
@@ -382,7 +370,7 @@ class EditLog_EditLogDao extends DataAccess_AbstractDao {
             sum(raw_word_count) as raw_words,
             sum(time_to_edit)/sum(raw_word_count) as secs_per_word
           from segment_translations st
-            join $segments s on s.id = st.id_segment
+            join segments s on s.id = st.id_segment
             join jobs j on j.id = st.id_job
           where id_job = %d
             and  password = '%s'";
