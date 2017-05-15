@@ -12,6 +12,12 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
         );
     }
 
+    /**
+     * @param       $chunk
+     * @param array $params
+     *
+     * @return string
+     */
     public static function createFromChunk( $chunk, array $params ) {
         $conn = Database::obtain()->getConnection();
 
@@ -37,6 +43,8 @@ class Chunks_ChunkCompletionEventDao extends DataAccess_AbstractDao {
             'uid'               => $params['uid'],
             'is_review'         => $params['is_review']
         ));
+
+        return $conn->lastInsertId() ;
     }
 
 

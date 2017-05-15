@@ -47,11 +47,6 @@ $.extend(UI, {
             updateTimezonesDescriptions( timezoneTo );
         });
 
-        // expand a compressed popup to show price, delivery and other details
-        $( ".showprices").click( function() {
-            expandOutsourcePopup();
-        });
-
 		$(".outsource.modal").on('click', '.continuebtn', function(e) {
 			e.preventDefault();
 
@@ -380,7 +375,6 @@ function renderGenericErrorQuote() {
     $('#forceDeliveryContainer').css('top','465px');
     $('.ErrorMsgQuoteError').removeClass('hide');
     $('.addrevision, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2, .outsource.modal .continuebtn, .outsource #changeTimezone,.outsource #changecurrency,.paymentinfo,.modal.outsource .contact_box, .modal.outsource .more, .needitfaster').addClass('hide');
-    expandOutsourcePopup();
 }
 
 
@@ -399,7 +393,7 @@ function renderOutsourcedQuote( chunk ) {
 
     renderLocalizationInfos( chunk.price, chunk.delivery );
     $( 'span.zone2').html( $( '#changeTimezone option:selected').attr( "data-description-long" ) );
-    expandOutsourcePopup();
+
 }
 
 
@@ -442,7 +436,6 @@ function renderNotAvailableQuote() {
     $('.outsource.modal .forceDeliveryButtonOk').addClass('disabled');
     $('#forceDeliveryContainer #delivery_not_available, .ErrorMsgquoteNotAvailable').removeClass('hide');
     $('.guaranteed_by .more, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2, .revision_delivery, .revision_price_box,#delivery_before_time').addClass('hide');
-    expandOutsourcePopup();
 }
 
 

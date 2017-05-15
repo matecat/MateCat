@@ -1077,41 +1077,6 @@ class CatUtils {
         return $wStruct;
     }
 
-
-    /**
-     * Returns the string representing the overall quality for a job,
-     * taking into account both old revision and new revision.
-     *
-     * @param $job
-     * @return string
-     */
-    public static function getQualityOverallFromJobArray( $job ) {
-        $job = Utils::ensure_keys($job, array(
-            'new_words', 'draft_words', 'translated_words', 'approved_words', 'rejected_words',
-            'status_analysis', 'jid', 'jpassword', 'features'
-        ));
-
-        $result = null ;
-
-        if ( in_array( Features::REVIEW_IMPROVED, FeatureSet::splitString( $job['features'] ) ) ) {
-            $review = \LQA\ChunkReviewDao::findOneChunkReviewByIdJobAndPassword( $job['jid'], $job['jpassword'] ) ;
-            $result = $review->is_pass ? 'excellent' : 'fail' ;
-        }
-        else {
-            $struct = CatUtils::getWStructFromJobArray( $job ) ;
-            $jobQA = new Revise_JobQA(
-                $job['jid'], $job['jpassword'], $struct->getTotal()
-            );
-
-            $jobQA->retrieveJobErrorTotals();
-            $overall = $jobQA->evalJobVote();
-
-            $result = strtolower( $overall['minText'] ) ;
-        }
-
-        return $result ;
-    }
-
     /**
      * Returns the string representing the overall quality for a job,
      * taking into account both old revision and new revision.

@@ -46,8 +46,8 @@ class GlossaryWorker extends AbstractWorker {
 
     protected function _updateWarnings( ) {
         $params = $this->queueElement->params ;
-        
-        $job = \Jobs_JobDao::getById( $params['id_job'] );
+
+        $job = \Jobs_JobDao::getById( $params['id_job'] )[0];
 
         $glossaryModel = new \GlossaryModel( $job );
 

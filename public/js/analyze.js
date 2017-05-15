@@ -78,15 +78,12 @@ UI = {
 		}).on('click', '.popup-split #exec-split-confirm', function(e) {
 			e.preventDefault();
 			UI.confirmSplit();
-		}).on('click', '.out-link', function(e) {
-			this.select();
 		}).on('click', '.mergebtn:not(.disabled)', function(e) {
 			e.preventDefault();
 			APP.confirm({
 				name: 'confirmMerge', 
 				cancelTxt: 'Cancel', 
-//				onCancel: 'cancelMerge', 
-				callback: 'confirmMerge', 
+				callback: 'confirmMerge',
 				caller: $(this),
 				okTxt: 'Continue', 
 				msg: "This will cause the merging of all chunks in only one job.<br>This operation cannot be canceled."
@@ -173,7 +170,8 @@ UI = {
                 job: UI.currentOutsourceJob,
                 url: UI.currentOutsourceUrl,
                 fromManage: false,
-                translatorOpen: !!(UI.currentOutsourceJob.translator)
+                translatorOpen: !!(UI.currentOutsourceJob.translator),
+                showTranslatorBox: false
             };
             let style = {width: '970px',maxWidth: '970px', top: '45%'};
             APP.ModalWindow.showModalComponent(OutsourceModal, props, "Translate", style);
@@ -351,12 +349,7 @@ UI = {
 			}
 		});		
 	},
-	cancelMerge: function() {
-//		console.log('cancel callback');
-//		$('.modal[data-name=confirmMerge] .x-popup').click();
-	},
 	confirmSplit: function(job) {
-//        console.log('confirm split');
 
 		var ar = new Array();
 		$('.popup-split ul.jobs li .input-small').each(function() {
@@ -867,27 +860,6 @@ UI = {
                         $('div[data-jid=' + jobId + '] .uploadbtn.translate').trigger('click');
                     }, 500);
                     break;
-                case 'split':
-                    job$[0].scrollIntoView( true );
-                    interval = setInterval(function () {
-                        if (!$('div[data-jid=' + jobId + '] .dosplit').hasClass('disabled')) {
-                            $('div[data-jid=' + jobId + '] .dosplit').trigger('click');
-                            clearInterval(interval);
-                        }
-                    }, 500);
-					window.history.pushState('',document.title,document.location.href.split('?')[0]);
-					$(".popup-split .popup-split-project-title").show();
-                    break;
-				case 'merge':
-					job$[0].scrollIntoView( true );
-					interval = setInterval(function () {
-						if (!$('div[data-jid=' + jobId + '] .domerge').hasClass('disabled')) {
-							$('div[data-jid=' + jobId + '] .domerge').trigger('click');
-							clearInterval(interval);
-						}
-					}, 500);
-					window.history.pushState('',document.title,document.location.href.split('?')[0]);
-					break;
             }
         }
 
@@ -940,7 +912,9 @@ UI = {
 
             $(this).data("prevType", e.type);
         });
-    }
+    },
+
+
 };
 
 function wordCountTotalOrPayable( job ) {

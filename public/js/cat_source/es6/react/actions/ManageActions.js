@@ -239,20 +239,19 @@ let ManageActions = {
                         });
                     });
                 });
-            } else {
-                AppDispatcher.dispatch({
-                    actionType: ManageConstants.CHANGE_PROJECT_TEAM,
-                    project: project,
-                    teamId: teamId
-                });
-            }
-            if (teamId !== UI.selectedTeam.id && UI.selectedTeam.type !== 'personal') {
+            } else if (teamId !== UI.selectedTeam.id && UI.selectedTeam.type !== 'personal') {
                 setTimeout(function () {
                     AppDispatcher.dispatch({
                         actionType: ManageConstants.HIDE_PROJECT,
                         project: project
                     });
                 }, 500);
+                setTimeout(function () {
+                    AppDispatcher.dispatch({
+                        actionType: ManageConstants.REMOVE_PROJECT,
+                        project: project
+                    });
+                }, 1000);
                 let notification = {
                     title: 'Project Moved',
                     text: 'The project ' + project.get('name') + ' has been moved to the ' + team.name + ' Team',
@@ -262,13 +261,30 @@ let ManageActions = {
                     timer: 3000
                 };
                 let boxUndo = APP.addNotification(notification);
-                setTimeout(function () {
+                UI.getTeamMembers(UI.selectedTeam.id).then(function (data) {
+                    UI.selectedTeam.members = data.members;
+                    UI.selectedTeam.pending_invitations = data.pending_invitations;
                     AppDispatcher.dispatch({
-                        actionType: ManageConstants.REMOVE_PROJECT,
-                        project: project
+                        actionType: ManageConstants.UPDATE_TEAM,
+                        team: UI.selectedTeam
                     });
-                }, 1000);
+                    setTimeout(function () {
+                        AppDispatcher.dispatch({
+                            actionType: ManageConstants.CHANGE_PROJECT_TEAM,
+                            project: project,
+                            teamId: UI.selectedTeam.id
+                        });
+                    });
+                });
+
             }
+            // else {
+            //     AppDispatcher.dispatch({
+            //         actionType: ManageConstants.CHANGE_PROJECT_TEAM,
+            //         project: project,
+            //         teamId: teamId
+            //     });
+            // }
 
         }).error(function (response) {
             console.log("Error change assignee", response);
@@ -540,7 +556,17 @@ let ManageActions = {
         AppDispatcher.dispatch({
             actionType: ManageConstants.GET_OUTSOURCE_QUOTE,
         });
+    },
+
+    // Analyze Actions
+    openSplitModal: function (job, project) {
+        UI.openSplitJobModal(job, project);
+    },
+
+    openMergeModal: function (project, job) {
+        UI.openMergeModal(project.toJS(), job.toJS());
     }
+
 };
 
 module.exports = ManageActions;

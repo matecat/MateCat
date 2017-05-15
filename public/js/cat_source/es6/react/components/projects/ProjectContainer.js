@@ -248,7 +248,7 @@ class ProjectContainer extends React.Component {
         let self = this;
         let chunks = [],  index;
         let tempIdsArray = [];
-        let orderedJobs = this.props.project.get('jobs').reverse();
+        let orderedJobs = this.props.project.get('jobs');
         orderedJobs.map(function(job, i){
 
             let next_job_id = (orderedJobs.get(i+1)) ? orderedJobs.get(i+1).get('id') : 0;
@@ -259,11 +259,11 @@ class ProjectContainer extends React.Component {
             let isChunk = false;
             if (tempIdsArray.indexOf(job.get('id')) > -1 ) {
                 isChunk = true;
-                index --;
+                index ++;
             }  else if ((orderedJobs.get(i+1) && orderedJobs.get(i+1).get('id') === job.get('id') )) {  //The first of the Chunk
                 isChunk = true;
                 tempIdsArray.push(job.get('id'));
-                index = job_chunks;
+                index = 1;
             }  else {
                 index = 0;
             }
@@ -282,7 +282,7 @@ class ProjectContainer extends React.Component {
                                 isChunk={isChunk}
                                 lastAction={lastAction}
                                 activityLogUrl =  {self.getActivityLogUrl()}/>;
-                chunks.unshift(item);
+                chunks.push(item);
                 if ( job.get('id') !== next_job_id) {
                     let jobList = <div className="job ui grid" key = { (i - 1) + "-" + job.get('id')}>
                             <div className="job-body sixteen wide column">
@@ -338,12 +338,12 @@ class ProjectContainer extends React.Component {
                      {/*onClick={this.openAddMember.bind(this)}>*/}
                     {/*<a href="#">Add New Member <i className="icon-plus3 icon right"/></a>*/}
                 {/*</div>*/}
-                {/*<div className="divider"></div>*/}
+                <div className="divider"></div>
                 <div className="ui icon search input">
                     <i className="icon-search icon"/>
                     <input type="text" name="UserName" placeholder="Search by name." />
                 </div>
-                {/*<div className="scrolling menu">*/}
+                <div className="scrolling menu">
                 {members}
                 <div className="item cancel-item" data-value="-1">
                     <div className="ui not-assigned label">
@@ -351,7 +351,7 @@ class ProjectContainer extends React.Component {
                     </div>
                     Not assigned
                 </div>
-                {/*</div>*/}
+                </div>
             </div>
         </div>;
     }

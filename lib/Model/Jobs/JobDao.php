@@ -102,7 +102,7 @@ class Jobs_JobDao extends DataAccess_AbstractDao {
 
         $thisDao = new self();
         $conn = Database::obtain()->getConnection();
-        $stmt = $conn->prepare( "SELECT * FROM jobs WHERE id_project = ? ORDER BY job_first_segment ASC;" );
+        $stmt = $conn->prepare( "SELECT * FROM jobs WHERE id_project = ? ORDER BY id, job_first_segment ASC;" );
 
         return $thisDao->setCacheTTL( $ttl )->_fetchObject( $stmt, new Jobs_JobStruct(), [ $id_project ] );
 

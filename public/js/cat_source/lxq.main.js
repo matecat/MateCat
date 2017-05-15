@@ -6,10 +6,10 @@
 var LXQ = {
 
     enabled: function () {
-        return !!config.lxq_enabled && !config.deny_lexiqa;
+        return !!config.lxq_enabled;
     },
     enable: function () {
-        if (!config.lxq_enabled && !config.deny_lexiqa) {
+        if ( !config.lxq_enabled ) {
             config.lxq_enabled = 1;
             // Todo Call Service to enable Tag Lexiqa
             var path = sprintf(
@@ -67,8 +67,7 @@ var LXQ = {
     checkCanActivate: function () {
         if (_.isUndefined(this.canActivate)) {
             this.canActivate = config.lexiqa_languages.indexOf(config.source_rfc) > -1 &&
-                config.lexiqa_languages.indexOf(config.target_rfc) > -1 &&
-                !config.deny_lexiqa;
+                config.lexiqa_languages.indexOf(config.target_rfc) > -1 ;
         }
         return this.canActivate;
     },
@@ -98,7 +97,7 @@ LXQ.init  = function () {
         if (data.segment.raw) {
           segment = data.segment.raw
         }
-        var translation = $('.editarea', segment ).text().replace(/\uFEFF/g,'');
+        var translation = $(UI.targetContainerSelector(), segment ).text().replace(/\uFEFF/g,'');
         var id_segment = UI.getSegmentId(segment);
         LXQ.doLexiQA(segment, translation, id_segment,false, function () {}) ;
     });
@@ -116,7 +115,7 @@ LXQ.init  = function () {
     $(document).on('setTranslation:success', function(e, data) {
       console.log('[LEXIQA] got setTranslation:success');
         var segment = data.segment;
-        var translation = $('.editarea', segment ).text().replace(/\uFEFF/g,'');
+        var translation = $(UI.targetContainerSelector(), segment ).text().replace(/\uFEFF/g,'');
         LXQ.doLexiQA(segment,translation,UI.getSegmentId(segment),true,null);
     });
     /* invoked when more segments are loaded...*/
@@ -131,10 +130,10 @@ LXQ.init  = function () {
                       //clean up and redo powertip on any glossaries/blacklists
                       var _segment = UI.getSegmentById(segment.sid)
                       QaCheckGlossary.enabled() && QaCheckGlossary.destroyPowertip(_segment);
-                      QaCheckBlacklist.enabled() && QaCheckBlacklist.destroyPowertip($( ".editarea", _segment ));
+                      QaCheckBlacklist.enabled() && QaCheckBlacklist.destroyPowertip($( UI.targetContainerSelector(), _segment ));
                       LXQ.redoHighlighting(segment.sid,true);
                       LXQ.redoHighlighting(segment.sid,false);
-                      QaCheckBlacklist.enabled() && QaCheckBlacklist.reloadPowertip($( ".editarea", _segment ));
+                      QaCheckBlacklist.enabled() && QaCheckBlacklist.reloadPowertip($( UI.targetContainerSelector(), _segment ));
                       QaCheckGlossary.enabled() && QaCheckGlossary.redoBindEvents(_segment);
                   }
             });
@@ -712,7 +711,7 @@ LXQ.init  = function () {
         };
         var buildPowertipDataForSegment = function (segment) {
             var sourceHighlihts = $('.source', segment).find('lxqwarning#lexiqahighlight');
-            var targetHighlihts = $('.editarea', segment).find('lxqwarning#lexiqahighlight');
+            var targetHighlihts = $(UI.targetContainerSelector(), segment).find('lxqwarning#lexiqahighlight');
 
             $.each(sourceHighlihts, function(i, element) {
                var classlist = element.className.split(/\s+/);
@@ -917,7 +916,7 @@ LXQ.init  = function () {
         }
 
         var replaceWord  = function(word, suggest,target) {
-            if ($(target).closest('.editarea').attr('contenteditable')) {
+            if ($(target).closest(UI.targetContainerSelector()).attr('contenteditable')) {
                 if ($(target).text() === word) {
                     //there is no overlaping errors (like caps after punct...)
                 }
@@ -1013,11 +1012,11 @@ LXQ.init  = function () {
                 $(".source", segment).html(html);
             }
             else {
-                //html = UI.clearMarks($.trim($(".editarea", segment).html()));
-                html = $(".editarea", segment).html();
+                //html = UI.clearMarks($.trim($(UI.targetContainerSelector(), segment).html()));
+                html = $(UI.targetContainerSelector(), segment).html();
                 html = highLightText(html,highlights.target,(segment===UI.currentSegment ? true : false),
                     LXQ.shouldHighlighWarningsForSegment(segment),false,segment);
-                $(".editarea", segment).html(html);
+                $(UI.targetContainerSelector(), segment).html(html);
 
             }
             // $('.lxq-error-seg',segment).attr('numberoferrors',LXQ.getVisibleWarningsCountForSegment(segment));
@@ -1383,19 +1382,19 @@ LXQ.init  = function () {
                             //delete LXQ.lexiqaWarnings[id_segment];
                             LXQ.lexiqaData.lexiqaWarnings[id_segment] = newWarnings[id_segment];
                             QaCheckGlossary.enabled() && QaCheckGlossary.destroyPowertip(segment);
-                            QaCheckBlacklist.enabled() && QaCheckBlacklist.destroyPowertip($( ".editarea", segment ));
+                            QaCheckBlacklist.enabled() && QaCheckBlacklist.destroyPowertip($( UI.targetContainerSelector(), segment ));
                             source_val = LXQ.highLightText( source_val, highlights.source, isSegmentCompleted, true, true, segment );
                             if ( callback != null )
                                 saveSelection();
-                            var target_val = $( ".editarea", segment ).html();
+                            var target_val = $( UI.targetContainerSelector(), segment ).html();
                             target_val = LXQ.highLightText( target_val, highlights.target, isSegmentCompleted, true, false, segment );
 
-                            $( ".editarea", segment ).html( target_val );
+                            $( UI.targetContainerSelector(), segment ).html( target_val );
                             if ( callback != null )
                                 restoreSelection();
                             $( ".source", segment ).html( source_val );
                             LXQ.reloadPowertip( segment );
-                            QaCheckBlacklist.enabled() && QaCheckBlacklist.reloadPowertip($( ".editarea", segment ));
+                            QaCheckBlacklist.enabled() && QaCheckBlacklist.reloadPowertip($( UI.targetContainerSelector(), segment ));
                             QaCheckGlossary.enabled() && QaCheckGlossary.redoBindEvents(segment);
                             //only reload dropdown menu and link, if there was an error...
                             //if ( LXQ.enabled() ) LXQ.refreshElements();
@@ -1411,9 +1410,9 @@ LXQ.init  = function () {
                             source_val = LXQ.cleanUpHighLighting( source_val );
                             if ( callback != null )
                                 saveSelection();
-                            target_val = $( ".editarea", segment ).html();
+                            target_val = $( UI.targetContainerSelector(), segment ).html();
                             target_val = LXQ.cleanUpHighLighting( target_val );
-                            $( ".editarea", segment ).html( target_val );
+                            $( UI.targetContainerSelector(), segment ).html( target_val );
                             if ( callback != null )
                                 restoreSelection();
                             $( ".source", segment ).html( source_val );
@@ -1485,7 +1484,7 @@ LXQ.init  = function () {
                             };
                             LXQ.lexiqaData.lexiqaWarnings[element.segid] = {};
                             var seg = UI.getSegmentById( element.segid );
-                            var translation = $( ".editarea", seg ).text();
+                            var translation = $( UI.targetContainerSelector(), seg ).text();
                             results.results[element.segid].forEach( function ( qadata ) {
                                 LXQ.lexiqaData.lexiqaWarnings[element.segid][qadata.errorid] = qadata;
                                 if ( !qadata.ignored ) {
@@ -1515,14 +1514,14 @@ LXQ.init  = function () {
                             var source_val = $( ".source", seg ).html();
                             QaCheckGlossary.enabled() && QaCheckGlossary.destroyPowertip(seg);
                             source_val = LXQ.highLightText( source_val, highlights.source, true, LXQ.shouldHighlighWarningsForSegment( seg ), true, seg );
-                            QaCheckBlacklist.enabled() && QaCheckBlacklist.destroyPowertip($( ".editarea", seg ));
+                            QaCheckBlacklist.enabled() && QaCheckBlacklist.destroyPowertip($( UI.targetContainerSelector(), seg ));
                             var target_val = $(".targetarea", seg).html();
                             target_val = LXQ.highLightText( target_val, highlights.target, true, LXQ.shouldHighlighWarningsForSegment( seg ), false, seg );
                             $(".targetarea", seg).html(target_val);
                             $( ".source", seg ).html( source_val );
                             LXQ.buildPowertipDataForSegment( seg );
                             QaCheckGlossary.enabled() && QaCheckGlossary.redoBindEvents(seg);
-                            QaCheckBlacklist.enabled() && QaCheckBlacklist.reloadPowertip($( ".editarea", seg ));
+                            QaCheckBlacklist.enabled() && QaCheckBlacklist.reloadPowertip($( UI.targetContainerSelector(), seg ));
                         } );
                         if ( LXQ.enabled() ) {
                             LXQ.reloadPowertip();

@@ -138,7 +138,7 @@ class splitJobController extends ajaxController {
 
         $jobToSplit = $this->filterJobsById( $jobList );
 
-        if ( $jobToSplit[ 0 ]->password != $this->job_pass ) {
+        if ( array_shift( $jobToSplit )->password != $this->job_pass ) {
             throw new Exception( "Wrong Password. Access denied", -10 );
         }
 
