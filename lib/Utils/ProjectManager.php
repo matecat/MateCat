@@ -1515,7 +1515,7 @@ class ProjectManager {
         }
 
         $oldPassword = $first_job[ 'password' ];
-        if( $jobStructs[ 0 ]->getTranslator() ){
+        if( $first_job->getTranslator() ){
             $first_job[ 'password' ] = self::generatePassword();
             Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
         }
