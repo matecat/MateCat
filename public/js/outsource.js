@@ -170,7 +170,7 @@ $.extend(UI, {
     },
 
     sendTranslatorRequest: function (email, date, timezone) {
-        let data = {
+        var data = {
             email: email,
             delivery_date: date/1000,
             timezone: timezone
@@ -207,10 +207,10 @@ $.extend(UI, {
     },
 
     checkShareToTranslatorResponse: function (response, mail, date) {
-        let message = '';
+        var message = '';
         if (UI.currentOutsourceJob.translator) {
-            let newDate = new Date(date);
-            let oldDate = new Date(UI.currentOutsourceJob.translator.delivery_date);
+            var newDate = new Date(date);
+            var oldDate = new Date(UI.currentOutsourceJob.translator.delivery_date);
             if (oldDate.getTime() != newDate.getTime()) {
                 message = this.shareToTranslatorDateChangeNotification(mail, oldDate, newDate);
             } else if (UI.currentOutsourceJob.translator != mail) {
@@ -221,7 +221,7 @@ $.extend(UI, {
         } else {
             message = this.shareToTranslatorNotification(mail);
         }
-        let notification = {
+        var notification = {
             title: message.title,
             text: message.text,
             type: 'success',
@@ -229,7 +229,7 @@ $.extend(UI, {
             allowHtml: true,
             timer: 10000
         };
-        let boxUndo = APP.addNotification(notification);
+        var boxUndo = APP.addNotification(notification);
         ManageActions.changeJobPasswordFromOutsource(UI.currentOutsourceProject.id ,UI.currentOutsourceJob.id, UI.currentOutsourceJob.password, response.job.password);
         ManageActions.assignTranslator(UI.currentOutsourceProject.id ,UI.currentOutsourceJob.id, response.job.translator);
     },
@@ -287,7 +287,7 @@ $.extend(UI, {
     },
     showShareTranslatorError: function () {
         APP.ModalWindow.onCloseModal();
-        let notification = {
+        var notification = {
             title: 'Problems sending the job',
             text: 'Please try later or contact <a href="mailto:support@matecat.com">support@matecat.com</a>',
             type: 'error',
