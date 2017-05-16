@@ -24,8 +24,8 @@ UI = {
     },
 
     render: function () {
-        let self = this;
-        let headerMountPoint = $("header")[0];
+        var self = this;
+        var headerMountPoint = $("header")[0];
         this.Search.currentPage = 1;
         this.pageLeft = false;
         ReactDOM.render(React.createElement(Header), headerMountPoint);
@@ -36,7 +36,7 @@ UI = {
         window.addEventListener('scroll', this.scrollDebounceFn());
 
         $(window).on("blur focus", function(e) {
-            let prevType = $(this).data("prevType");
+            var prevType = $(this).data("prevType");
 
             if (prevType != e.type) {   //  reduce double fire issues
                 switch (e.type) {
@@ -79,26 +79,26 @@ UI = {
     },
 
     reloadProjects: function () {
-        let self = this;
+        var self = this;
         if ( UI.Search.currentPage === 1) {
             this.getProjects(self.selectedTeam).done(function (response) {
-                let projects = response.data;
+                var projects = response.data;
                 ManageActions.updateProjects(projects);
             });
         } else {
             // ManageActions.showReloadSpinner();
-            let total_projects = [];
-            let requests = [];
-            let onDone = function (response) {
-                        let projects = response.data;
+            var total_projects = [];
+            var requests = [];
+            var onDone = function (response) {
+                        var projects = response.data;
                         $.merge(total_projects, projects);
                     };
-            for (let i=1; i<= UI.Search.currentPage; i++ ) {
+            for (var i=1; i<= UI.Search.currentPage; i++ ) {
                 requests.push(this.getProjects(self.selectedTeam, i));
             }
             $.when.apply(this, requests).done(function() {
-                let results = requests.length > 1 ? arguments : [arguments];
-                for( let i = 0; i < results.length; i++ ){
+                var results = requests.length > 1 ? arguments : [arguments];
+                for( var i = 0; i < results.length; i++ ){
                     onDone(results[i][0]);
                 }
                 ManageActions.updateProjects(total_projects);
@@ -114,7 +114,7 @@ UI = {
     renderProjects: function (projects) {
         APP.beforeRenderProjects = new Date();
         if ( !this.ProjectsContainer ) {
-            let mountPoint = $("#manage-container")[0];
+            var mountPoint = $("#manage-container")[0];
             this.ProjectsContainer = ReactDOM.render(React.createElement(ProjectsContainer, {
                 getLastActivity: this.getLastProjectActivityLogAction,
                 changeJobPasswordFn: this.changeJobPassword,
@@ -128,7 +128,7 @@ UI = {
     renderMoreProjects: function () {
         UI.Search.currentPage = UI.Search.currentPage + 1;
         this.getProjects(this.selectedTeam).done(function (response) {
-            let projects = response.data;
+            var projects = response.data;
             if (projects.length > 0) {
                 ManageActions.renderMoreProjects(projects);
             } else {
@@ -147,7 +147,7 @@ UI = {
      * Open the settings for the job
      */
     openJobSettings: function (job, prName) {
-        let url = '/translate/'+ prName +'/'+ job.source +'-'+ job.target +'/'+ job.id +'-'+ job.password + '&openTab=options' ;
+        var url = '/translate/'+ prName +'/'+ job.source +'-'+ job.target +'/'+ job.id +'-'+ job.password + '&openTab=options' ;
         window.open(url, '_blank');
         setTimeout(function () {
             $.cookie('tmpanel-open', 0, { path: '/' });
@@ -157,7 +157,7 @@ UI = {
      * Open the tm panel for the job
      */
     openJobTMPanel: function (job, prName) {
-        let url = '/translate/'+ prName +'/'+ job.source +'-'+ job.target +'/'+ job.id +'-'+ job.password + '&openTab=tm' ;
+        var url = '/translate/'+ prName +'/'+ job.source +'-'+ job.target +'/'+ job.id +'-'+ job.password + '&openTab=tm' ;
         window.open(url, '_blank');
         setTimeout(function () {
             $.cookie('tmpanel-open', 0, { path: '/' });
@@ -176,10 +176,10 @@ UI = {
 
         if(typeof only_if == 'undefined') only_if = 0;
 
-        let id = object.id;
-        let password = object.password;
+        var id = object.id;
+        var password = object.password;
 
-        let data = {
+        var data = {
             action:		"changeJobsStatus",
             new_status: status,
             res: 		type,            //Project or Job:
@@ -202,10 +202,10 @@ UI = {
 
     getAllTeams: function (force) {
         if ( APP.USER.STORE.teams && !force) {
-            let data = {
+            var data = {
                 teams: APP.USER.STORE.teams
             };
-            let deferred = $.Deferred().resolve(data);
+            var deferred = $.Deferred().resolve(data);
             return deferred.promise();
         } else {
             return APP.USER.loadUserData();
@@ -215,7 +215,7 @@ UI = {
 
     changeTeam: function (team) {
 
-        let self = this;
+        var self = this;
         this.selectedTeam = team;
         this.selectedUser = ManageConstants.ALL_MEMBERS_FILTER;
         this.Search.filter = {};
@@ -228,7 +228,7 @@ UI = {
     },
 
     getTeamStructure: function (team) {
-        let self = this;
+        var self = this;
         return this.getTeamMembers(team.id).then(function (data) {
             self.selectedTeam.members = data.members;
             self.selectedTeam.pending_invitations = data.pending_invitations;
@@ -236,10 +236,10 @@ UI = {
     },
 
     filterProjects: function(userUid, name, status) {
-        let self = this;
+        var self = this;
         this.Search.filter = {};
         this.Search.currentPage = 1;
-        let filter = {};
+        var filter = {};
         if (typeof userUid != "undefined") {
              if (userUid === ManageConstants.NOT_ASSIGNED_FILTER) {
                 filter.no_assignee = true;
@@ -262,7 +262,7 @@ UI = {
     },
 
     scrollDebounceFn: function() {
-        let self = this;
+        var self = this;
         return _.debounce(function() {
             self.handleScroll();
         }, 300)
@@ -276,7 +276,7 @@ UI = {
     },
 
     checkPopupInfoTeams: function () {
-        let openPopup = localStorage.getItem(this.popupInfoTeamsStorageName);
+        var openPopup = localStorage.getItem(this.popupInfoTeamsStorageName);
         if (!openPopup) {
             ManageActions.openPopupTeams();
         }
@@ -287,7 +287,7 @@ UI = {
     },
 
     showNotificationProjectsChanged: function () {
-        let notification = {
+        var notification = {
             title: 'Ooops...',
             text: 'Something went wrong, the project has been assigned to another member or moved to another team.',
             type: 'warning',
@@ -295,7 +295,7 @@ UI = {
             allowHtml: true,
             autoDismiss: false,
         };
-        let boxUndo = APP.addNotification(notification);
+        var boxUndo = APP.addNotification(notification);
     },
 
     selectPersonalTeam: function () {
@@ -311,8 +311,8 @@ UI = {
      * Retrieve Projects. Passing filters is possible to retrieve projects
      */
     getProjects: function(team, page) {
-        let pageNumber = (page) ? page : UI.Search.currentPage;
-        let data = {};
+        var pageNumber = (page) ? page : UI.Search.currentPage;
+        var data = {};
         // if (team.type == 'personal') {
         //     this.Search.filter.id_assignee = APP.USER.STORE.user.uid;
         //     data = {
@@ -352,7 +352,7 @@ UI = {
     },
 
     createTeam: function (teamName, members) {
-        let data = {
+        var data = {
             type: 'general',
             name: teamName,
             members: members
@@ -402,7 +402,7 @@ UI = {
 
         //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
         if ( job.warnings_count > 0 ) {
-            let props = {
+            var props = {
                 text: 'Potential errors (e.g. tag mismatches, inconsistencies etc.) found in the text. ' +
                 'If you continue, your download may fail or part of the content be untranslated - search ' +
                 'the string "UNTRANSLATED_CONTENT" in the downloaded file(s).<br><br>Continue downloading ' +
@@ -431,7 +431,7 @@ UI = {
     },
 
     changeProjectName: function (idOrg, idProject, newName) {
-        let data = {
+        var data = {
             name: newName
         };
         return $.ajax({
@@ -444,7 +444,7 @@ UI = {
     changeProjectAssignee: function (idOrg, idProject, newUserId) {
         //Pass null to unassign a Project
         var idAssignee = (newUserId == '-1') ? null : newUserId;
-        let data = {
+        var data = {
             id_assignee: idAssignee
         };
         return $.ajax({
@@ -461,8 +461,8 @@ UI = {
      * @param old_pass
      */
     changeJobPassword: function(job, undo, old_pass) {
-        let id = job.id;
-        let password = job.password;
+        var id = job.id;
+        var password = job.password;
 
         return APP.doRequest({
             data: {
@@ -479,7 +479,7 @@ UI = {
 
     addUserToTeam: function (team, userEmail) {
         var email = (typeof userEmail === "string") ? [userEmail] : userEmail;
-        let data = {
+        var data = {
             members: email
         };
         return $.ajax({
@@ -497,7 +497,7 @@ UI = {
     },
 
     changeTeamName: function (team, newName) {
-        let data = {
+        var data = {
             name: newName
         };
         return $.ajax({
@@ -508,7 +508,7 @@ UI = {
     },
 
     changeProjectTeam: function (newTeamId, project) {
-        let data = {
+        var data = {
             id_team: newTeamId
         };
         return $.ajax({
@@ -527,7 +527,7 @@ UI = {
     },
 
     openModifyTeamModal: function (team, hideChangeName) {
-        let props = {
+        var props = {
             team: team,
             hideChangeName: hideChangeName
         };
@@ -535,7 +535,7 @@ UI = {
     },
 
     openChangeTeamModal: function (teams, project) {
-        let props = {
+        var props = {
             teams: teams,
             project: project,
             selectedTeam: this.selectedTeam.id
@@ -544,7 +544,7 @@ UI = {
     },
 
     openOutsourceModal: function (project, job, url) {
-        let props = {
+        var props = {
             project: project,
             job: job,
             url: url,
@@ -554,16 +554,16 @@ UI = {
                 
             }
         };
-        let style = {width: '970px',maxWidth: '970px', top: '45%'};
+        var style = {width: '970px',maxWidth: '970px', top: '45%'};
         APP.ModalWindow.showModalComponent(OutsourceModal, props, "Translate", style);
     },
 
     openSplitJobModal: function (job, project) {
-        let props = {
+        var props = {
             job: job,
             project: project
         };
-        let style = {width: '670px',maxWidth: '670px'};
+        var style = {width: '670px',maxWidth: '670px'};
         APP.ModalWindow.showModalComponent(SplitJobModal, props, "Split Job", style);
     },
 
@@ -600,7 +600,7 @@ UI = {
         });
     },
     openMergeModal: function (project, job) {
-        let props = {
+        var props = {
             text: 'This will cause the merging of all chunks in only one job. ' +
             'This operation cannot be canceled.',
             successText: "Continue",
