@@ -23,13 +23,6 @@ class LexiQADecorator {
     protected $model;
 
     /**
-     * Switch On/Off the functionality for the MateCat installation
-     *
-     * @var bool
-     */
-    protected $deny_lexiqa = false;
-
-    /**
      * This var means that the job has this functionality enabled
      *
      * @var bool
@@ -66,7 +59,6 @@ class LexiQADecorator {
         }
 
         $this->template->lxq_enabled  = $this->lexiqa_enabled;
-        $this->template->deny_lexiqa  = $this->deny_lexiqa;
         $this->template->lexiqaServer = $this->lexiqa_server;
 
     }
@@ -97,13 +89,6 @@ class LexiQADecorator {
             return $this;
         }
         $this->lexiqa_enabled = true;
-        // if  (
-        //     in_array( Features::QACHECK_GLOSSARY, $featureSet->getCodes() ) ||
-        //     in_array( Features::QACHECK_BLACKLIST, $featureSet->getCodes() )
-        // ) {
-        //         $this->deny_lexiqa = true;
-        //         $this->lexiqa_enabled = false;
-        // }
 
         return $this;
 

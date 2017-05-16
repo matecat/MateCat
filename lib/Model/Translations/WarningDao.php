@@ -4,6 +4,7 @@
 namespace Translations ;
 
 use Constants_TranslationStatus;
+use Jobs\WarningsCountStruct;
 use PDO;
 
 class WarningDao extends \DataAccess_AbstractDao {
@@ -17,6 +18,7 @@ class WarningDao extends \DataAccess_AbstractDao {
               JOIN segment_translations st ON st.id_job = jobs.id
           WHERE ( st.warning & :level ) = :level
             AND id = :id AND password = :password
+            AND st.status != :status
         " ;
 
     public function getWarningsByProjectIds( $projectIds ) {
@@ -43,10 +45,9 @@ class WarningDao extends \DataAccess_AbstractDao {
         $con = $this->con->getConnection();
 
         $stmt = $con->prepare( $sql );
-        $stmt->execute( $params );
-        $result = $stmt->fetchAll( PDO::FETCH_ASSOC );
 
-        return $result;
+        return $this->_fetchObject( $stmt, new WarningsCountStruct(), $params );
+
     }
 
     /**
@@ -61,7 +62,8 @@ class WarningDao extends \DataAccess_AbstractDao {
         $stmt->execute( [
                 'id' => $chunk->id,
                 'password' => $chunk->password,
-                'level' => WarningModel::ERROR
+                'level' => WarningModel::ERROR,
+                'status' => Constants_TranslationStatus::STATUS_NEW
         ] ) ;
 
         $result = $stmt->fetch() ;
@@ -128,7 +130,8 @@ class WarningDao extends \DataAccess_AbstractDao {
     }
 
     public static function insertWarning( WarningStruct $warning ) {
-        $sql = self::buildInsertStatement( $warning->toArray(), array() ) ;
+        $options = [];
+        $sql = self::buildInsertStatement( $warning->toArray(), $options ) ;
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
 

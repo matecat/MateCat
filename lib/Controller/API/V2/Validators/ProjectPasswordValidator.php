@@ -9,7 +9,7 @@
 namespace API\V2\Validators;
 
 
-use Klein\Request;
+use API\V2\KleinController;
 
 class ProjectPasswordValidator extends Base {
     /**
@@ -20,34 +20,30 @@ class ProjectPasswordValidator extends Base {
     private $id_project;
     private $password;
 
-    public function __construct( Request $request ) {
+    public function __construct( KleinController $controller ) {
 
         $filterArgs = array(
                 'id_project' => array(
-                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW
+                        'filter' => FILTER_SANITIZE_NUMBER_INT
                 ),
                 'password'   => array(
                         'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
                 ),
         );
 
-        $postInput = (object)filter_var_array( $request->params(
-                array(
-                        'id_project',
-                        'password',
-                )
-        ), $filterArgs );
+        $postInput = (object)filter_var_array( $controller->params, $filterArgs );
 
         $this->id_project = $postInput->id_project;
         $this->password   = $postInput->password;
 
-        $request->id_project = $this->id_project;
-        $request->password   = $this->password;
+        $controller->params[ 'id_project' ] = $this->id_project;
+        $controller->params[ 'password' ]   = $this->password;
 
-        parent::__construct( $request );
+        parent::__construct( $controller->getRequest() );
     }
 
     public function validate() {
+
         $this->project = \Projects_ProjectDao::findByIdAndPassword(
                 $this->id_project,
                 $this->password

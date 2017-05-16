@@ -31,12 +31,6 @@ class JobContainer extends React.Component {
             t = 'draft';
         }
         return t ;
-}
-
-    shouldComponentUpdate(nextProps, nextState){
-        return (!nextProps.job.equals(this.props.job) ||
-        nextProps.lastAction !== this.props.lastAction ||
-        nextState.showDownloadProgress !== this.state.showDownloadProgress)
     }
 
     getTranslateUrl() {
@@ -76,7 +70,7 @@ class JobContainer extends React.Component {
             .done(function (data) {
                 let notification = {
                     title: 'Change job password',
-                    text: 'The password has been changed. <a className="undo-password">Undo</a>',
+                    text: 'The password has been changed. <a class="undo-password">Undo</a>',
                     type: 'warning',
                     position: 'tc',
                     allowHtml: true,
@@ -102,7 +96,7 @@ class JobContainer extends React.Component {
                             });
 
                     })
-                });
+                }, 500);
 
             });
     }
@@ -142,6 +136,14 @@ class JobContainer extends React.Component {
         }
     }
 
+    openSplitModal() {
+        ManageActions.openSplitModal(this.props.job, this.props.project);
+    }
+
+    openMergeModal() {
+        ManageActions.openMergeModal(this.props.project, this.props.job);
+    }
+
     getDownloadLabel() {
         let jobStatus = this.getTranslationStatus();
         let remoteService = this.props.project.get('remote_file_service');
@@ -161,7 +163,7 @@ class JobContainer extends React.Component {
     }
 
 
-    getJobMenu(splitUrl, mergeUrl) {
+    getJobMenu() {
         let reviseUrl = this.getReviseUrl();
         let editLogUrl = this.getEditingLogUrl();
         let qaReportUrl = this.getQAReport();
@@ -173,13 +175,16 @@ class JobContainer extends React.Component {
 
 
         let downloadButton = this.getDownloadLabel();
-        let splitButton = (!this.props.isChunk) ? <a className="item" target="_blank" href={splitUrl}><i className="icon-expand icon"/> Split</a> : <a className="item" target="_blank" href={mergeUrl}><i className="icon-compress icon"/> Merge</a>;
-
+        let splitButton;
+        if (!this.props.job.get('outsource')) {
+             splitButton = (!this.props.isChunk) ?
+                <a className="item" target="_blank" onClick={this.openSplitModal.bind(this)}><i className="icon-expand icon"/> Split</a> :
+                <a className="item" target="_blank" onClick={this.openMergeModal.bind(this)}><i className="icon-compress icon"/> Merge</a>;
+        }
         let menuHtml = <div className="menu">
 
-                {/*<div className="scrolling menu">*/}
                     <a className="item" onClick={this.changePassword.bind(this)}><i className="icon-refresh icon"/> Change Password</a>
-                        {splitButton}
+                    {splitButton}
                     <a className="item" target="_blank" href={reviseUrl}><i className="icon-edit icon"/> Revise</a>
                     <div className="divider"/>
                     <a className="item" target="_blank" href={qaReportUrl}><i className="icon-qr-matecat icon"/> QA Report</a>
@@ -192,17 +197,13 @@ class JobContainer extends React.Component {
                     <div className="divider"/>
                     <a className="item" onClick={this.archiveJob.bind(this)}><i className="icon-drawer icon"/> Archive job</a>
                     <a className="item" onClick={this.cancelJob.bind(this)}><i className="icon-trash-o icon"/> Cancel job</a>
-                </div>
-            /*</div>*/;
+                </div>;
         if ( this.props.job.get('status') === 'archived' ) {
             menuHtml = <div className="menu">
-
-                {/*<div className="scrolling menu">*/}
-                    <a className="item" onClick={this.changePassword.bind(this)}><i className="icon-refresh icon"/> Change Password</a>
-                    {splitButton}
+                        {splitButton}
                     <a className="item" target="_blank" href={reviseUrl}><i className="icon-edit icon"/> Revise</a>
                     <a className="item" target="_blank" href={qaReportUrl}><i className="icon-qr-matecat icon"/> QA Report</a>
-                    <div className="item" target="_blank" href={editLogUrl}><a><i className="icon-download-logs icon"/> Editing Log</a></div>
+                    <a className="item" target="_blank" href={editLogUrl}><i className="icon-download-logs icon"/> Editing Log</a>
                         {downloadButton}
                     <div className="divider"/>
                     <a className="item" target="_blank" href={originalUrl}><i className="icon-download icon"/> Download Original</a>
@@ -211,13 +212,9 @@ class JobContainer extends React.Component {
                     <div className="divider"/>
                     <a className="item" onClick={this.activateJob.bind(this)}><i className="icon-drawer unarchive-project icon"/> Unarchive job</a>
                     <a className="item" onClick={this.cancelJob.bind(this)}><i className="icon-trash-o icon"/> Cancel job</a>
-                </div>
-            /*</div>*/;
+                </div>;
         } else if ( this.props.job.get('status') === 'cancelled' ) {
             menuHtml = <div className="menu">
-
-                    {/*<div className="scrolling menu">*/}
-                        <a className="item" onClick={this.changePassword.bind(this)}>i className="icon-refresh icon"/> Change Password</a>
                         {splitButton}
                         <a className="item" target="_blank" href={reviseUrl}><i className="icon-edit icon"/> Revise</a>
                         <a className="item" target="_blank" href={qaReportUrl}><i className="icon-qr-matecat icon"/> QA Report</a>
@@ -229,8 +226,7 @@ class JobContainer extends React.Component {
                         <a className="item" target="_blank" href={jobTMXUrl}><i className="icon-download icon"/> Export TMX</a>
                         <div className="divider"/>
                         <a className="item" onClick={this.activateJob.bind(this)}><i className="icon-drawer unarchive-project icon"/> Resume job</a>
-                    </div>
-                /*</div>*/;
+                    </div>;
         }
         return menuHtml;
     }
@@ -241,14 +237,6 @@ class JobContainer extends React.Component {
 
     getProjectAnalyzeUrl() {
         return '/analyze/' + this.props.project.get('project_slug') + '/' +this.props.project.get('id')+ '-' + this.props.project.get('password');
-    }
-
-    getSplitUrl() {
-        return '/analyze/'+ this.props.project.get('project_slug') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=split&jobid=' + this.props.job.get('id');
-    }
-
-    getMergeUrl() {
-        return '/analyze/'+ this.props.project.get('project_slug') +'/'+this.props.project.get('id')+'-' + this.props.project.get('password') + '?open=merge&jobid=' + this.props.job.get('id');
     }
 
     getActivityLogUrl() {
@@ -356,18 +344,20 @@ class JobContainer extends React.Component {
         let icon = '';
         let openThreads = this.props.job.get("open_threads_count");
         if (openThreads > 0) {
-            let tooltipText = "";
-            if (this.props.job.get("open_threads_count") === 1) {
-                tooltipText = 'There is an open thread';
-            } else {
-                tooltipText = 'There are <span style="font-weight: bold">' + openThreads + '</span> open threads';
-            }
             var translatedUrl = this.getTranslateUrl() + '?action=openComments';
-            icon = <a className=" ui icon basic button "
-                      href={translatedUrl} target="_blank">
-                <i className="icon-uniE96B icon"/>
-                {tooltipText}
-            </a>;
+            if (this.props.job.get("open_threads_count") === 1) {
+                icon = <a className=" ui icon basic button "
+                          href={translatedUrl} target="_blank" >
+                    <i className="icon-uniE96B icon" />
+                    There is an open thread
+                </a>;
+            } else {
+                icon = <a className=" ui icon basic button "
+                          href={translatedUrl} target="_blank" >
+                    <i className="icon-uniE96B icon" />
+                    There are <span style={{fontWeight: 'bold'}}>{openThreads}</span> open threads
+                </a>;
+            }
         }
         return icon;
 
@@ -437,6 +427,11 @@ class JobContainer extends React.Component {
                     Outsource
                 </a>;
             }
+        } else if (this.props.job.get('translator')) {
+            label = <a className="open-vendor ui basic green button"
+                       onClick={this.openOutsourceModal.bind(this)}>
+                Change vendor
+            </a>;
         }
         return label;
     }
@@ -446,24 +441,41 @@ class JobContainer extends React.Component {
         if (this.props.job.get('outsource')) {
             if (this.props.job.get('outsource').get('id_vendor') == "1") {
                 outsourceJobLabel =
-                    <a href="http://www.translated.net" target="_blank"><img className='outsource-logo' src="/public/img/logo_translated.png" title="Outsourced to translated.net" alt="Translated logo"/></a>;
+                    <a className="outsource-logo-box" href={this.props.job.get('outsource').get('quote_review_link')} target="_blank"><img className='outsource-logo' src="/public/img/logo_translated.png" title="Outsourced to translated.net" alt="Translated logo"/></a>;
             }
+        } else if (this.props.job.get('translator')) {
+            let email = this.props.job.get('translator').get('email');
+
+            outsourceJobLabel = <div className="job-to-translator" data-variation="tiny" ref={(tooltip) => this.emailTooltip = tooltip}>
+                                    {email}
+                                </div>;
         }
         return outsourceJobLabel;
     }
 
     getOutsourceDelivery() {
         let outsourceDelivery = '';
+
         if (this.props.job.get('outsource')) {
             if (this.props.job.get('outsource').get('id_vendor') == "1") {
-                let date  = this.props.job.get('outsource').get('delivery_date').substring(0, this.props.job.get('outsource').get('delivery_date').lastIndexOf(":"))
-                let gmtDate = UI.getGMTDate(this.props.job.get('outsource').get('delivery_date'));
+                let gmtDate = APP.getGMTDate(this.props.job.get('outsource').get('delivery_timestamp') * 1000);
                 outsourceDelivery = <div className="job-delivery" title="Delivery date">
-                    <span className="outsource-date-text">{gmtDate.date}</span>
-                    <span className="outsource-gmt-text"> ({gmtDate.gmt})</span>
+                    <div className="outsource-day-text">{gmtDate.day}</div>
+                    <div className="outsource-month-text">{gmtDate.month}</div>
+                    <div className="outsource-time-text">{gmtDate.time}</div>
+                    <div className="outsource-gmt-text"> ({gmtDate.gmt})</div>
                 </div>;
             }
+        } else if (this.props.job.get('translator')) {
+            let gmtDate = APP.getGMTDate(this.props.job.get('translator').get('delivery_timestamp') * 1000);
+            outsourceDelivery = <div className="job-delivery" title="Delivery date">
+                <div className="outsource-day-text">{gmtDate.day}</div>
+                <div className="outsource-month-text">{gmtDate.month}</div>
+                <div className="outsource-time-text">{gmtDate.time}</div>
+                <div className="outsource-gmt-text"> ({gmtDate.gmt})</div>
+            </div>;
         }
+
         return outsourceDelivery;
     }
 
@@ -528,10 +540,26 @@ class JobContainer extends React.Component {
         }
     }
 
+    shouldComponentUpdate(nextProps, nextState){
+        if (!nextProps.job.equals(this.props.job) || nextState.showDownloadProgress !== this.state.showDownloadProgress) {
+            this.updated = true;
+        }
+        return (!nextProps.job.equals(this.props.job) ||
+        nextProps.lastAction !== this.props.lastAction ||
+        nextState.showDownloadProgress !== this.state.showDownloadProgress)
+    }
+
     componentDidUpdate() {
+        var self = this;
         $(this.iconsButton).dropdown();
         this.initTooltips();
         console.log("Updated Job : " + this.props.job.get('id'));
+        if (this.updated) {
+            this.container.classList.add('updated-job');
+            setTimeout(function () {
+                self.container.classList.remove('updated-job');
+            }, 2000)
+        }
     }
 
     componentDidMount () {
@@ -566,17 +594,16 @@ class JobContainer extends React.Component {
         let outsourceButton = this.getOutsourceButton();
         let outsourceJobLabel = this.getOutsourceJobSent();
         let outsourceDelivery = this.getOutsourceDelivery();
-        let outsourceDeliveryPrice = this.getOutsourceDeliveryPrice();
+        // let outsourceDeliveryPrice = this.getOutsourceDeliveryPrice();
         let analysisUrl = this.getProjectAnalyzeUrl();
-        let splitUrl = this.getSplitUrl();
-        let mergeUrl = this.getMergeUrl();
         let warningIcons = this.getWarningsGroup();
-        let jobMenu = this.getJobMenu(splitUrl, mergeUrl);
+        let jobMenu = this.getJobMenu();
         let tmIcon = this.getTMIcon();
+        let outsourceClass = this.props.job.get('outsource') ? ('outsource') : ('translator');
 
         let idJobLabel = ( !this.props.isChunk ) ? this.props.job.get('id') : this.props.job.get('id') + '-' + this.props.index;
 
-        return <div className="chunk sixteen wide column shadow-1 pad-right-10">
+        return <div className="chunk sixteen wide column shadow-1 pad-right-10" ref={(container) => this.container = container}>
 
                     <div className="job-id" title="Job Id">
                         {"(" + idJobLabel + ")"}
@@ -620,13 +647,21 @@ class JobContainer extends React.Component {
                     </div>
                     <a className="open-translate ui primary button open" target="_blank" href={translateUrl}>
                         Open
+
                     </a>
                         {outsourceButton}
                     <div className="outsource-job">
-                        <div className="translated-outsourced">
+                        <div className={"translated-outsourced " + outsourceClass}>
                             {outsourceJobLabel}
                             {outsourceDelivery}
-                            {outsourceDeliveryPrice}
+                            {/*{outsourceDeliveryPrice}*/}
+                            {this.props.job.get('translator') ? (
+                                <div className="item" onClick={this.changePassword}>
+                                    <div className="ui cancel label"><i className="icon-cancel3"/></div>
+                                </div>
+                            ) :('') }
+
+
                         </div>
                     </div>
 

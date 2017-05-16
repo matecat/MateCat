@@ -8,16 +8,15 @@
 
 namespace Features\ReviewImproved\Controller\API;
 
-use API\V2\Validators\JobPasswordValidator;
+use API\V2\Validators\ChunkPasswordValidator;
 use API\V2\KleinController;
-use LQA\ChunkReviewDao;
 use Features\ReviewImproved\Model\QualityReportModel ;
 
 class QualityReportController extends KleinController
 {
 
     /**
-     * @var JobPasswordValidator
+     * @var ChunkPasswordValidator
      */
     protected $validator;
 
@@ -37,7 +36,7 @@ class QualityReportController extends KleinController
     }
 
     protected function afterConstruct() {
-        $this->validator = new JobPasswordValidator( $this->request );
+        $this->validator = new ChunkPasswordValidator( $this->request );
     }
 
     protected function validateRequest() {

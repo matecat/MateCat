@@ -55,12 +55,13 @@ ul
 
     .wrapper
     {
-        min-width: 960px;
+        width: 98%;
+        min-width: 910px;
         margin: 0px auto 0 auto;
-        padding: 3px 0 0 0;
-        width: 100%;
+        padding: 5px 0 0 0;
+        width: 92%;
         font-size: 14px;
-        position: absolute;
+        position: relative;
         text-align: left;
     }
 
@@ -844,9 +845,9 @@ color:#333;}
 	    box-shadow: 0 1px 20px #000;
 	    width: 500px;
 	    background: #fff;
-	    margin: -200px 0 0 -250px;
+	    /*margin: -200px 0 0 -250px;*/
 	    padding: 0 0px 20px 0px;
-	    position: fixed;
+	    /*position: fixed;*/
         top: 50%;
 	    left: 50%;
 	    z-index: 999999999999999999999999999;
@@ -937,9 +938,10 @@ color:#333;}
 }
 
 .advanced-options-box .options-box.qa-box img {
-     width: 55px!important;
+     width: 65px!important;
     margin-right: 10px!important;
     vertical-align: middle;
+    margin-left: 5px;
     } 
 
 
@@ -3422,8 +3424,7 @@ only screen and (in-resolution: 2dppx) {
     .extgdoc {background: url(../img/matecat_file_icons2x.png) 6px -1070px no-repeat !important;} /* Google Document */
     .extgsheet {background: url(../img/matecat_file_icons2x.png) 6px -1107px no-repeat !important;} /* Google Sheet */
 
-.popup {background: #fff url(../img/borderfix.png) repeat-x!important;}
-
+/*.popup {background: #fff url(../img/borderfix.png) repeat-x!important;}*/
 
 .fileinput-button {
 	background: #09beec;

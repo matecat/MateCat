@@ -42,11 +42,28 @@ abstract class KleinController {
      */
     protected $api_record;
 
+    /**
+     * @var array
+     */
+    public $params;
+
+    /**
+     * @return mixed
+     */
+    public function getParams() {
+        return $this->params;
+    }
+
     public function __construct( $request, $response, $service, $app ) {
         $this->request  = $request;
         $this->response = $response;
         $this->service  = $service;
         $this->app      = $app;
+
+        $paramsPut = $this->getPutParams();
+        $paramsGet = $this->request->paramsNamed()->getIterator()->getArrayCopy();
+        $this->params = $this->request->paramsPost()->getIterator()->getArrayCopy();
+        $this->params = array_merge( $this->params, $paramsGet, ( empty( $paramsPut ) ? [] : $paramsPut ) );
 
         $this->afterConstruct();
 

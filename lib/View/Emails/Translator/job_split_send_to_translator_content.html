@@ -1,0 +1,15 @@
+<p>Hi <?= $user['_name'] ?>, </p>
+<p>
+    <?= $sender['first_name'] . " " . $sender['last_name'] ?>  splitted a job you were translating. The link to your job changed since only part of it is assigned to you now.
+    <br /><br />
+    The delivery deadline is: <b><?= $delivery_date ?></b>
+</p>
+
+<p>
+    For any question please contact your project manager: <a href="<?= $sender[ 'email' ] ?>"><?= $sender[ 'email' ] ?></a>
+</p>
+<br />
+<p>
+    Here's the new link to your <strong>new</strong> job: <br /><br /><a href="<?= $project_url ?>"><?= $project_url ?></a>.
+</p>
+<br />

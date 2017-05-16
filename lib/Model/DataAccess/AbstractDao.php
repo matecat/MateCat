@@ -42,9 +42,14 @@ abstract class DataAccess_AbstractDao {
     protected static $primary_keys = [];
 
     /**
+     * @var array
+     */
+    protected static $auto_increment_fields = [];
+
+    /**
      * @var string
      */
-    protected static $TABLE = '';
+    const TABLE = '';
 
     public function __construct( $con = null ) {
         /**
@@ -380,20 +385,21 @@ abstract class DataAccess_AbstractDao {
      * @internal param array $options of options for the SQL statement
      *
      */
-    protected static function buildInsertStatement( $attrs, &$mask, $ignore = false, $no_nulls = false ) {
+    protected static function buildInsertStatement( $attrs, &$mask, $ignore = false, $no_nulls = false, $on_duplicate_fields = null ) {
 
         $first  = array();
         $second = array();
-        $pks    = static::$primary_keys;
 
         $sql_ignore = $ignore ? " IGNORE " : "";
+
+        $sql_on_duplicate_update = !empty( $on_duplicate_fields ) ? " ON DUPLICATE KEY UPDATE " . implode( ", ", $on_duplicate_fields ) : null;
 
         if ( empty( $mask ) ) {
             $mask = array_keys( $attrs );
         }
 
         foreach ( $attrs as $key => $value ) {
-            if ( !in_array( $key, $pks ) && in_array( $key, $mask ) ) {
+            if ( in_array( $key, $mask ) ) {
                 if ( $no_nulls && is_null( $value ) ) {
                     unset( $mask[ array_search( $key, $mask ) ] );
                     continue;
@@ -405,7 +411,7 @@ abstract class DataAccess_AbstractDao {
 
         $sql = "INSERT $sql_ignore INTO " . static::TABLE . "(" .
                 implode( ', ', $first ) . ") VALUES (" .
-                implode( ', ', $second ) . ");";
+                implode( ', ', $second ) . ") $sql_on_duplicate_update ;";
 
         return $sql;
     }
@@ -538,12 +544,13 @@ abstract class DataAccess_AbstractDao {
 
         $ignore   = isset( $options[ 'ignore' ] ) && $options[ 'ignore' ] == true;
         $no_nulls = isset( $options[ 'no_nulls' ] ) && $options[ 'no_nulls' ] == true;
+        $on_duplicate_fields = ( isset( $options[ 'on_duplicate_update' ] ) && !empty( $options[ 'on_duplicate_update' ] ) ? $options[ 'on_duplicate_update' ] : null );
 
         // TODO: allow the mask to be passed as option.
         $mask = array_keys( $struct->toArray() );
         $mask = array_diff( $mask, static::$auto_increment_fields );
 
-        $sql  = self::buildInsertStatement( $struct->toArray(), $mask, $ignore, $no_nulls );
+        $sql  = self::buildInsertStatement( $struct->toArray(), $mask, $ignore, $no_nulls, $on_duplicate_fields );
         $conn = \Database::obtain()->getConnection();
         $stmt = $conn->prepare( $sql );
         $data = $struct->toArray( $mask );

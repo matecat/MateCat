@@ -412,7 +412,7 @@ function insertHtmlAfterSelection(html) {
         sel = window.getSelection();
         if (sel.getRangeAt && sel.rangeCount) {
             range = window.getSelection().getRangeAt(0);
-            range.collapse(false);
+            // range.collapse(false);
 
             // Range.createContextualFragment() would be useful here but is
             // non-standard and not supported in all browsers (IE9, for one)

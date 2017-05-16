@@ -5,6 +5,7 @@ namespace Features;
 use Utils ;
 use Chunks_ChunkCompletionUpdateDao;
 use Chunks_ChunkCompletionUpdateStruct ;
+use Chunks_ChunkCompletionEventDao ;
 
 class ProjectCompletion extends BaseFeature {
 
@@ -23,6 +24,18 @@ class ProjectCompletion extends BaseFeature {
         $chunk_completion_update_struct->id_job = $chunk->id ;
         $chunk_completion_update_struct->setTimestamp('last_translation_at', strtotime('now'));
 
-        Chunks_ChunkCompletionUpdateDao::createOrUpdateFromStruct( $chunk_completion_update_struct );
+        $dao = new Chunks_ChunkCompletionEventDao();
+        $current_phase = $dao->currentPhase( $chunk );
+
+        /**
+         * Only save the record if current phase is compatible
+         */
+        if (
+                ( $current_phase == Chunks_ChunkCompletionEventDao::REVISE && $chunk_completion_update_struct->is_review ) ||
+                ( $current_phase == Chunks_ChunkCompletionEventDao::TRANSLATE && !$chunk_completion_update_struct->is_review )
+        ) {
+            Chunks_ChunkCompletionUpdateDao::createOrUpdateFromStruct( $chunk_completion_update_struct );
+        }
+
     }
 }

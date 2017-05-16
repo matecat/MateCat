@@ -632,7 +632,7 @@ h2.payoff
 /*button*/
 
 .uploadbtn{background: #09beec;width:240px;font-weight:bold;padding:6px 30px 6px 30px;width:auto !important;min-width:250px; margin:20px 0px 8px 0px;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;font-size:26px !important;cursor:pointer;color:#fff;-moz-box-shadow: 0 1px 2px #ccc;-webkit-box-shadow: 0 1px 2px #ccc;box-shadow: 0 1px 2px #ccc;border:1px solid #666;-moz-border-radius: 2px;border-radius: 2px;}
-.uploadbtn:hover{-moz-box-shadow: 0 1px 2px #666;-webkit-box-shadow: 0 1px 2px #666;box-shadow: 0 1px 2px #666;background:#12b4df}
+.uploadbtn:hover{-moz-box-shadow: 0 1px 2px #666;-webkit-box-shadow: 0 1px 2px #666;box-shadow: 0 1px 2px #666;background:#12b4df; color: #fff}
 .uploadbtn:active{-moz-box-shadow: inset 0 1px 1px #888;-webkit-box-shadow: inset 0 1px 1px #888;}
 .disabled, .disabled:hover, .disabled:active{cursor:default;-moz-box-shadow: none;-webkit-box-shadow: none;background:#d6d6d6;}
 .uploadbtn-box{text-align:center;float:right; margin-bottom: 30px;}
@@ -703,9 +703,9 @@ body{font-family:Calibri, Arial, Helvetica, sans-serif;}
 	{
 	margin: 0;
 	}
-.translate-box select, .mgmt-table-mt select{width:257px;height:37px;padding:5px;font-size:18px;border:1px solid #ccc;margin:0 0 5px 0;font-family: system-ui, Calibri, Arial, Helvetica, sans-serif}
+.translate-box select, .mgmt-table-mt select{width:257px;height:37px;padding:5px;font-size:18px;border:1px solid #ccc;margin:0 0 5px 0;font-family: system-ui, Calibri, Arial, Helvetica, sans-serif; border-radius: 2px;}
 .mgmt-table-mt select {font-size:14px;}
-.upload-input{width:95%;padding:4px 5px 3px 5px;font-size:22px !important; -moz-border-radius: 2px;border-radius: 2px;border:1px solid #ccc}
+.upload-input{width:95%;padding:8px 5px 3px 5px;font-size:22px !important; -moz-border-radius: 2px;border-radius: 2px;border:1px solid #ccc}
 #private-tm-key
 {
 	width:220px;
@@ -864,7 +864,7 @@ color: white;
 {
 	background:#d65757 url(../../img/error-symbol.png) 10px center no-repeat;
 	color:#fff;
-	padding:10px 0 10px;
+	padding:10px 0 10px 3%;
 	margin:10px 0;
 	float:left;
 	font-weight:bold;
@@ -1189,7 +1189,7 @@ ul.test li
 footer {
     height: 28px;
     z-index: 4;
-    position: absolute;
+    position: fixed;
     .wrapper {
         margin: 0px auto 0 auto;
         padding: 5px 0 0 0;
@@ -1517,4 +1517,18 @@ header .nav-mc-bar .dropdown.select-org span.text {
 header .nav-mc-bar .dropdown.select-org i.dropdown.icon {
     top: 12px;
     margin-left: -25px !important;
+}
+
+.translate-box input:focus {
+    border-color: #85B7D9;
+    background: #FFFFFF;
+    color: rgba(0, 0, 0, 0.8);
+    outline: none;
+}
+
+select:focus {
+    border-color: #85B7D9;
+    background: #FFFFFF;
+    color: rgba(0, 0, 0, 0.8);
+    outline: none;
 }

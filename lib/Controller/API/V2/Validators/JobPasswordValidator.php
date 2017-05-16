@@ -6,33 +6,48 @@ namespace API\V2\Validators;
  * @deprecated use Validators\ChunkPasswordValidator
  */
 
-use Chunks_ChunkDao;
-use Klein\Request;
+use API\V2\Exceptions\NotFoundException;
+use API\V2\KleinController;
+use Jobs_JobDao;
+use Jobs_JobStruct;
 
-class JobPasswordValidator {
+class JobPasswordValidator extends Base {
     /**
-     * @var \Chunks_ChunkStruct
+     * @var \Jobs_JobStruct
      */
-    private $chunk;
+    private $jStruct;
 
-    private $id_job;
-    private $password;
+    /**
+     * @var KleinController
+     */
+    protected $controller;
 
-    public function __construct( Request $request ) {
-        $this->id_job   = $request->id_job;
-        $this->password = $request->password;
+
+    public function __construct( KleinController $controller ) {
+
+        parent::__construct( $controller->getRequest() );
+        $this->controller = $controller;
+
+        $this->jStruct = new Jobs_JobStruct();
+        $this->jStruct->id = $this->controller->params[ 'id_job' ];
+        $this->jStruct->password = $this->controller->params[ 'password' ];
+        $this->jStruct = ( new Jobs_JobDao() )->setCacheTTL( 60 * 60 * 24 )->read( $this->jStruct )[ 0 ];
+
     }
 
     public function validate() {
-        $this->chunk = Chunks_ChunkDao::getByIdAndPassword(
-                $this->id_job,
-                $this->password
-        );
+
+        if ( empty( $this->jStruct ) ) {
+            throw new NotFoundException( "Not Found.", 404 );
+        }
 
     }
 
-    public function getChunk() {
-        return $this->chunk;
+    /**
+     * @return Jobs_JobStruct
+     */
+    public function getJob() {
+        return $this->jStruct;
     }
 
 }

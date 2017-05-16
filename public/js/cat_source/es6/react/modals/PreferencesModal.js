@@ -8,10 +8,11 @@ class PreferencesModal extends React.Component {
             service: this.props.service,
             coupon: this.props.metadata.coupon,
             couponError: '',
-            validCoupon : false
+            validCoupon : false,
+            openCoupon: false
         };
 
-        this.onKeyPressCopupon = this.onKeyPressCopupon.bind( this );
+        this.onKeyPressCoupon = this.onKeyPressCoupon.bind( this );
     }
 
     openResetPassword() {
@@ -90,7 +91,7 @@ class PreferencesModal extends React.Component {
         });
     }
 
-    onKeyPressCopupon(e) {
+    onKeyPressCoupon(e) {
         var length = this.couponInput.value.length;
         var validCoupon = false;
         if ( length >= 8 ) {
@@ -120,6 +121,12 @@ class PreferencesModal extends React.Component {
         });
     }
 
+    openCoupon() {
+        this.setState({
+            openCoupon: true
+        });
+    }
+
     render() {
         var gdriveMessage = '';
         if (this.props.showGDriveMessage) {
@@ -143,23 +150,34 @@ class PreferencesModal extends React.Component {
         if ( !this.state.coupon) {
             var buttonClass = (this.state.validCoupon) ? '' : 'disabled';
             couponHtml = <div className="coupon-container">
-                <h2 htmlFor="user-coupon">Coupon</h2>
-                <input type="text" name="coupon" id="user-coupon" placeholder="Insert your code"
-                       onKeyUp={this.onKeyPressCopupon.bind(this)}
-                       ref={(input) => this.couponInput = input}/>
-                <a className={"btn-confirm-medium " + buttonClass}  onClick={this.submitUserChanges.bind(this)}>Apply</a>
-                <div className="coupon-message">
-                    <span style={{color: 'red', fontSize: '14px',position: 'absolute', right: '27%', lineHeight: '24px'}} className="coupon-message">{this.state.couponError}</span>
-                </div>
+                {!this.state.openCoupon ? (
+                        <div className="open-coupon-link"
+                        onClick={this.openCoupon.bind(this)}>Add a coupon</div>
+                    ): (
+                    <div>
+                        <h2 htmlFor="user-coupon">Coupon</h2>
+                        <span>If you have received a code, you may be eligible for free credit that you can use for the Outsourcing feature.</span>
+                        <input type="text" name="coupon" id="user-coupon" placeholder="Insert your code"
+                        onKeyUp={this.onKeyPressCoupon.bind(this)}
+                        ref={(input) => this.couponInput = input}/>
+                        <a className={"btn-confirm-medium " + buttonClass}  onClick={this.submitUserChanges.bind(this)}>Apply</a>
+                        <div className="coupon-message">
+                            <span style={{color: 'red', fontSize: '14px',position: 'absolute', right: '27%', lineHeight: '24px'}} className="coupon-message">{this.state.couponError}</span>
+                        </div>
+                    </div>
+                    ) }
+
+
             </div>
         } else {
 
             couponHtml = <div className="coupon-container coupon-success">
 
                 <h2 htmlFor="user-coupon">Coupon</h2>
+                <span>Credit is available when you outsource translation services.</span>
                 <input type="text" name="coupon" id="user-coupon" defaultValue={this.state.coupon} disabled /><br/>
                 <div className="coupon-message">
-                    <span style={{color: 'green', fontSize: '14px', position: 'absolute', right: '42%', lineHeight: '24px'}} className="coupon-message">Coupon activated</span>
+                    <span style={{color: 'green', fontSize: '14px', position: 'absolute', right: '3%', lineHeight: '24px', top: '-38px'}} className="coupon-message">Coupon activated</span>
                 </div>
 
 

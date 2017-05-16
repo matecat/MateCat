@@ -764,7 +764,7 @@ APP = {
                     if(parseInt(tokenData.code) < 0) {
                         var notification = {
                             title: 'Error',
-                            text: 'Download failed. Please, fix any tag issues and try again in 5 minutes. If it still fails, please, contactsupport@matecat.com',
+                            text: 'Download failed. Please, fix any tag issues and try again in 5 minutes. If it still fails, please, contact support@matecat.com',
                             type: 'error'
                         };
                         APP.addNotification(notification);
@@ -894,7 +894,55 @@ APP = {
             setTimeout(this.setUserImage.bind(this), 500);
         }
     },
+    getGMTDate: function (date) {
+        var timezoneToShow = APP.readCookie( "matecat_timezone" );
+        if ( timezoneToShow == "" ) {
+            timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
+        }
+        var dd = new Date( date );
+        var timeZoneFrom = -1 * ( new Date().getTimezoneOffset() / 60 );
+        dd.setMinutes( dd.getMinutes() + (timezoneToShow - timeZoneFrom) * 60 );
+        var timeZone = this.getGMTZoneString();
+        return {
+            day: $.format.date(dd, "d") ,
+            month: $.format.date(dd, "MMMM"),
+            time: $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a"),
+            gmt: timeZone
+        };
+    },
 
+    getGMTZoneString: function () {
+        // var timezoneToShow = "";
+        var timezoneToShow = APP.readCookie( "matecat_timezone" );
+        if ( timezoneToShow == "" ) {
+            timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
+        }
+        timezoneToShow = (timezoneToShow > 0) ? '+' + timezoneToShow : timezoneToShow;
+        return (timezoneToShow % 1 === 0) ? "GMT " + timezoneToShow + ':00' : "GMT " + parseInt(timezoneToShow) + ':30';
+
+    },
+
+    readCookie: function( cookieName ) {
+        cookieName += "=";
+        var cookies = document.cookie.split(';');
+
+        for ( var i = 0; i < cookies.length; i++ ) {
+            var cookie = cookies[i].trim();
+
+            if ( cookie.indexOf( cookieName ) == 0 )
+                return cookie.substring( cookieName.length, cookie.length );
+        }
+        return "";
+    },
+
+
+    setCookie: function( cookieName, cookieValue, expiration ) {
+        if( typeof expiration == "undefined" ) {
+            expiration = new Date();
+            expiration.setYear(new Date().getFullYear() + 1);
+        }
+        document.cookie = cookieName + "=" + cookieValue + "; expires=" + expiration.toUTCString() + "; path=/";
+    }
 
 
 };

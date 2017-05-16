@@ -57,7 +57,7 @@ class BlacklistWorker extends AbstractWorker {
             return ;
         }
 
-        $job = \Jobs_JobDao::getById( $params['id_job'] );
+        $job = \Jobs_JobDao::getById( $params['id_job'] )[0];
 
         $blacklist = new BlacklistFromZip( $job->getProject()->getFirstOriginalZipPath(),  $job->id ) ;
 

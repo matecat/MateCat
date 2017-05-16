@@ -610,4 +610,4 @@ class Stomp
         $this->disconnect();
     }
 }
-?>
+

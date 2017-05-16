@@ -1,10 +1,17 @@
 <?php
 
+namespace Projects;
+
 use API\V2\Exceptions\AuthorizationError;
+use Constants_Teams;
 use Features\QaCheckBlacklist\BlacklistFromZip;
+use Projects_ProjectDao;
+use Projects_ProjectStruct;
 use Teams\MembershipDao;
 use Teams\MembershipStruct;
 use Teams\TeamDao;
+use Users_UserDao;
+use Users_UserStruct;
 
 class ProjectModel {
 

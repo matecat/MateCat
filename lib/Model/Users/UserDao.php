@@ -15,6 +15,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
     protected static $primary_keys = array('uid');
 
     protected static $_query_user_by_uid = " SELECT * FROM users WHERE uid = :uid ";
+    protected static $_query_user_by_email = " SELECT * FROM users WHERE email = :email ";
 
     public function getByUids( $uids_array ) {
         $sanitized_array = array();
@@ -92,7 +93,7 @@ class Users_UserDao extends DataAccess_AbstractDao {
         $stmt = $this->_getStatementForCache( self::$_query_user_by_uid );
         $userQuery = new Users_UserStruct();
         $userQuery->uid = $id;
-        return $this->_fetchObject( $stmt,
+        return @$this->_fetchObject( $stmt,
                 $userQuery,
                 array(
                         'uid' => $userQuery->uid,
@@ -117,11 +118,13 @@ class Users_UserDao extends DataAccess_AbstractDao {
      * @return Users_UserStruct
      */
     public function getByEmail( $email ) {
-        $conn = $this->con->getConnection();
-        $stmt = $conn->prepare( " SELECT * FROM users WHERE email = ? " );
-        $stmt->execute( array( $email ) ) ;
-        $stmt->setFetchMode(PDO::FETCH_CLASS, '\Users_UserStruct');
-        return $stmt->fetch();
+        $stmt = $this->_getStatementForCache( self::$_query_user_by_email );
+        $UserQuery = new Users_UserStruct();
+        $UserQuery->email = $email;
+        return $this->_fetchObject( $stmt,
+                $UserQuery,
+                [ 'email' => $UserQuery->email ]
+        )[ 0 ];
     }
 
     /**

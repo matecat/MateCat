@@ -1093,9 +1093,9 @@
                 "en":"Nyanja"
             }],
             "isocode":"ny",
-            "enabled":false,
+            "enabled":true,
             "rtl":false,
-            "rfc3066code":"ny-NY"
+            "rfc3066code":"ny-NYA"
         }
     ,
         {
@@ -1390,7 +1390,7 @@
             }],
             "isocode":"so",
             "enabled":true,
-            "rtl":true,
+            "rtl":false,
             "rfc3066code":"so-SO"
         }
     ,

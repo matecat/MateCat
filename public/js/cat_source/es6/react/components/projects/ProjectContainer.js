@@ -156,15 +156,9 @@ class ProjectContainer extends React.Component {
     }
 
     getProjectMenu(activityLogUrl) {
-        let moveProjectItemMenu = '';
-        if (this.props.teams && this.props.teams.size > 1) {
-            moveProjectItemMenu = <a className="item" onClick={this.openChangeTeamModal.bind(this)}>
-                <i className="icon-forward icon"/>Move project
-            </a>;
-        }
+
         let menuHtml = <div className="menu">
             <div className="scrolling menu">
-                {moveProjectItemMenu}
 
                 <a className="item" href={activityLogUrl} target="_blank"><i className="icon-download-logs icon"/>Activity Log</a>
 
@@ -254,11 +248,13 @@ class ProjectContainer extends React.Component {
         let self = this;
         let chunks = [],  index;
         let tempIdsArray = [];
-        let orderedJobs = this.props.project.get('jobs').reverse();
-        let visibleJobsBoxes = 0;
+        let orderedJobs = this.props.project.get('jobs');
         orderedJobs.map(function(job, i){
 
             let next_job_id = (orderedJobs.get(i+1)) ? orderedJobs.get(i+1).get('id') : 0;
+            let job_chunks = orderedJobs.count(function (currentJob, i) {
+                return currentJob.get('id') === job.get('id');
+            });
             //To check if is a chunk (jobs with same id)
             let isChunk = false;
             if (tempIdsArray.indexOf(job.get('id')) > -1 ) {
@@ -288,7 +284,7 @@ class ProjectContainer extends React.Component {
                                 activityLogUrl =  {self.getActivityLogUrl()}/>;
                 chunks.push(item);
                 if ( job.get('id') !== next_job_id) {
-                    let jobList = <div className="job ui grid" key = { (i - 1) + job.get('id')}>
+                    let jobList = <div className="job ui grid" key = { (i - 1) + "-" + job.get('id')}>
                             <div className="job-body sixteen wide column">
                                 <div className="ui grid chunks">
                                 {chunks}
@@ -342,12 +338,12 @@ class ProjectContainer extends React.Component {
                      {/*onClick={this.openAddMember.bind(this)}>*/}
                     {/*<a href="#">Add New Member <i className="icon-plus3 icon right"/></a>*/}
                 {/*</div>*/}
-                {/*<div className="divider"></div>*/}
+                <div className="divider"></div>
                 <div className="ui icon search input">
                     <i className="icon-search icon"/>
                     <input type="text" name="UserName" placeholder="Search by name." />
                 </div>
-                {/*<div className="scrolling menu">*/}
+                <div className="scrolling menu">
                 {members}
                 <div className="item cancel-item" data-value="-1">
                     <div className="ui not-assigned label">
@@ -355,7 +351,7 @@ class ProjectContainer extends React.Component {
                     </div>
                     Not assigned
                 </div>
-                {/*</div>*/}
+                </div>
             </div>
         </div>;
     }
@@ -424,7 +420,6 @@ class ProjectContainer extends React.Component {
 
     componentWillUnmount() {
         ProjectsStore.removeListener(ManageConstants.HIDE_PROJECT, this.hideProject);
-        $(this.project).transition('fly right');
     }
 
     shouldComponentUpdate(nextProps, nextState){

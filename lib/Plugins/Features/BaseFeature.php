@@ -23,6 +23,7 @@ class BaseFeature {
      * The ideal solution would be to use a ProjectStruct for both persisted and
      * unpersisted scenarios, so to work with the same input structure every time.
      *
+     * @param \BasicFeatureStruct $feature
      */
     public function __construct( \BasicFeatureStruct $feature ) {
         $this->feature = $feature ;

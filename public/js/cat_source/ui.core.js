@@ -728,7 +728,7 @@ UI = {
             if (!config.last_opened_segment) {
                 config.last_opened_segment = config.first_job_segment;
             }
-			this.startSegmentId = (hash) ? hash : config.last_opened_segment;
+			this.startSegmentId = (hash && hash != "") ? hash : config.last_opened_segment;
 		}
 	},
     getLastSegmentFromLocalStorage: function () {
@@ -2579,8 +2579,7 @@ UI = {
 		$('#jobMenu li.currSegment').attr('data-segment', UI.currentSegmentId);
 	},
     isCJK: function () {
-        var l = config.target_rfc;
-        return !!((l == 'zh-CN') || (l == 'zh-TW') || (l == 'ja-JP') || (l == 'ko-KR'));
+        return config.targetIsCJK;
     },
     isKorean: function () {
         var l = config.target_rfc;
@@ -2596,7 +2595,6 @@ UI = {
         UI.checkSegmentsArray = {} ;
         UI.localStorageCurrentSegmentId = "currentSegmentId-"+config.id_job+config.password;
 
-        APP.init();
         // If some icon is added on the top header menu, the file name is resized
         APP.addDomObserver($('.header-menu')[0], function() {
             APP.fitText($('.breadcrumbs'), $('#pname'), 30);
@@ -2786,7 +2784,7 @@ UI = {
         $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
         $(".outer-tm").show();
         $('.mgmt-panel-tm .nav-tabs .mgmt-' + tab).click();
-        $.cookie('tmpanel-open', 1, { path: '/' });
+        // $.cookie('tmpanel-open', 1, { path: '/' });
     },
     closeAllMenus: function (e, fromQA) {
         if ($('.searchbox').is(':visible')) {

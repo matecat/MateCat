@@ -76,8 +76,18 @@ APP.changeTargetLang = function( lang ) {
     }
 };
 
+APP.changeSourceLang = function( lang ) {
+    if( localStorage.getItem( 'currentSourceLang' ) != lang ) {
+        localStorage.setItem( 'currentSourceLang', lang );
+    }
+};
+
 APP.displayCurrentTargetLang = function() {
     $( '#target-lang' ).val( localStorage.getItem( 'currentTargetLang' ) );
+};
+
+APP.displayCurrentSourceLang = function() {
+    $( '#source-lang' ).val( localStorage.getItem( 'currentSourceLang' ) );
 };
 
 /**
@@ -299,6 +309,7 @@ $.extend(UI.UPLOAD_PAGE, {
         $("#source-lang").on('change', function(e){
             console.log('source language changed');
             UI.checkRTL();
+            APP.changeSourceLang( $(this).val() );
             if($('.template-download').length) { //.template-download is present when jquery file upload is used and a file is found
                 if (UI.conversionsAreToRestart()) {
                     APP.confirm({msg: 'Source language has been changed.<br/>The files will be reimported.', callback: 'confirmRestartConversions'});

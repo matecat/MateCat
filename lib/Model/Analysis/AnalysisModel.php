@@ -161,8 +161,6 @@ class Analysis_AnalysisModel {
 
 
             unset( $p_jdata[ 'name' ] );
-            unset( $p_jdata[ 'source' ] );
-            unset( $p_jdata[ 'target' ] );
             unset( $p_jdata[ 'jpassword' ] );
 
 
@@ -217,6 +215,8 @@ class Analysis_AnalysisModel {
             $raw_wc_time  = $this->total_raw_word_count / ( INIT::$ANALYSIS_WORDS_PER_DAYS + 1000 );
             $tm_wc_time   = $this->tm_analysis_wc / ( INIT::$ANALYSIS_WORDS_PER_DAYS + 1000 );
             $fast_wc_time = $this->fast_analysis_wc / ( INIT::$ANALYSIS_WORDS_PER_DAYS + 1000 );
+            unset( $p_jdata[ 'source' ] );
+            unset( $p_jdata[ 'target' ] );
         }
 
         $raw_wc_unit  = 'day';

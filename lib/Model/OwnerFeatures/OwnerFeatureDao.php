@@ -21,15 +21,19 @@ class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param OwnerFeatures_OwnerFeatureStruct $obj
+     * @param DataAccess_IDaoStruct|OwnerFeatures_OwnerFeatureStruct $obj
      *
-     * @return mixed
+     * @return int
      */
-    public function create( OwnerFeatures_OwnerFeatureStruct $obj ) {
+    public function create( DataAccess_IDaoStruct $obj ) {
+
         $conn = Database::obtain()->getConnection();
 
         \Database::obtain()->begin();
 
+        /**
+         * @var OwnerFeatures_OwnerFeatureStruct $obj
+         */
         $obj->create_date = date('Y-m-d H:i:s');
         $obj->last_update = date('Y-m-d H:i:s');
 
@@ -75,10 +79,6 @@ class OwnerFeatures_OwnerFeatureDao extends DataAccess_AbstractDao {
         $stmt->execute( array( $id ) );
         $stmt->setFetchMode(PDO::FETCH_CLASS, 'OwnerFeatures_OwnerFeatureStruct');
         return $stmt->fetch();
-    }
-
-    protected function _buildResult( $array_result ) {
-
     }
 
 }

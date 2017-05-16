@@ -358,7 +358,7 @@ if (true)
                         if ( (this.segment === '') || (this.translation === '') )
                             return;
                         var disabled = (this.id == '0') ? true : false;
-                        cb = this.created_by;
+                        var cb = this.created_by;
 
 
                         var sourceNoteEmpty = (typeof this.source_note == 'undefined' || this.source_note == '');

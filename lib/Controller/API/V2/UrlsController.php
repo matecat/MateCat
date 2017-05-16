@@ -32,7 +32,7 @@ class UrlsController extends KleinController {
     }
 
     protected function afterConstruct() {
-        $this->validator = new Validators\ProjectPasswordValidator( $this->request );
+        $this->validator = new Validators\ProjectPasswordValidator( $this );
     }
 
 }

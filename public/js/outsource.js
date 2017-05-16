@@ -3,18 +3,8 @@ $.extend(UI, {
     },
     showPopupDetails: '1',
     changeRates: [],
-    outsourceInit: function() {
-
-        // hide/show detailed information about the chosen translator
-        $('.show_translator, .hide_translator').click(function() {
-            $('.show_translator, .hide_translator').toggleClass('hide');
-            $('.guaranteed_by').toggleClass('expanded');
-            $('.delivery,.tprice,.pricebox').toggleClass('compress');
-            $('.trustbox2').toggleClass('hide');
-            $('.translator_info_box').toggleClass('hide');
-            $('#forceDeliveryContainer').addClass('hide');
-            $('.delivery').appendTo( $( this).hasClass( "hide_translator" ) ? ".delivery_container" : ".displaypriceperword" );
-        });
+	outsourceInit: function() {
+        this.removeEvents();
 
         // add/remove revision service to current job
         $( "input[name='revision']" ).click(function() {
@@ -32,7 +22,7 @@ $.extend(UI, {
         $("body").on('click', '.modal .x-popup', function(e) {
             e.preventDefault();
             $( "body").removeClass( "showingOutsourceTo" );
-            APP.closePopup();
+            APP.ModalWindow.onCloseModal();
         });
 
         // close and reset the popup to its default state
@@ -57,34 +47,8 @@ $.extend(UI, {
             updateTimezonesDescriptions( timezoneTo );
         });
 
-        // expand a compressed popup to show price, delivery and other details
-        $( ".showprices").click( function() {
-            expandOutsourcePopup();
-        });
-
-        // trigger the process for getting and displaying an outsource quote
-        $(".translate").click(function(e) {
-            var linkPieces = $( this ).attr( "href" ).split( "/" );
-            var jPieces = linkPieces[ linkPieces.length - 1 ].split( "-" );
-
-            $( ".title-source" ).text( $( "div[data-jid='" + jPieces[ 0 ] + "'] .source_lang" ).text() );
-            $( ".title-target" ).text( $( "div[data-jid='" + jPieces[ 0 ] + "'] .target_lang" ).text() );
-            $( ".title-words" ).text( $( ".tablestats[data-pwd='" + jPieces[ 1 ] + "'] .stat-payable" ).text() );
-
-            if(config.enable_outsource) {
-                e.preventDefault();
-                resetOutsourcePopup( false );
-                $('body').addClass('showingOutsourceTo');
-                $('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
-                $('.outsource.modal .uploadbtn:not(.showprices)').attr('href', $(this).attr('href'));
-                showOutsourcePopup( UI.showPopupDetails );
-                renderQuote( $( this ) );
-                $('.outsource.modal').show();
-            }
-        });
-
-        $(".outsource.modal").on('click', '.continuebtn', function(e) {
-            e.preventDefault();
+		$(".outsource.modal").on('click', '.continuebtn', function(e) {
+			e.preventDefault();
 
             if( $( this ).hasClass( 'disabled' ) ) {
                 return;
@@ -100,14 +64,16 @@ $.extend(UI, {
             UI.populateOutsourceForm();
 
             //IMPORTANT post out the quotes
-            $('#continueForm input[name=quoteData]').attr('value', JSON.stringify( UI.quoteResponse ) );
-            $('#continueForm').submit();
+			$('#continueForm input[name=quoteData]').attr('value', JSON.stringify( UI.quoteResponse ) );
+			$('#continueForm').submit();
             $('#continueForm input[name=quoteData]').attr('value', '' );
-        });
+            APP.closePopup();
+
+		});
 
         $('.modal.outsource input.out-email').on('keyup', function () {
             _.debounce(function() {
-                UI.checkInputEmailInput();
+                // UI.checkInputEmailInput();
                 UI.checkSendToTranslatorButton();
             }, 300)();
         });
@@ -124,59 +90,43 @@ $.extend(UI, {
         });
 
         fetchChangeRates();
+	},
+    removeEvents: function () {
+        $( "input[name='revision']" ).off("click");
+        $("body .modal .x-popup").off('click');
+        $('.modal.outsource .x-popup').off('click');
+        $( "#changecurrency" ).off('change');
+        $( "#changeTimezone" ).off('change');
+        $( ".showprices").off('click');
+        $(".outsource.modal .continuebtn").off('click');
+        $('.modal.outsource input.out-email').off('keyup');
+        $(".outsource.modal .send-to-translator-btn").off('click');
+        $("#open-translator").off('click');
     },
-    startOutSourceModal: function (project, job, url) {
-        this.currentOutsourceProject = project;
-        this.currentOutsourceJob = job;
-        this.currentOutsourceUrl = url;
 
-        $( ".title-source" ).text( job.sourceTxt);
-        $( ".title-target" ).text( job.targetTxt);
-        $( ".title-words" ).text(job.stats.TOTAL_FORMATTED );
-
-        // if (job.outsource) {
-        //     var dd = new Date( job.outsource.delivery_date );
-        //     $('.modal.outsource .out-date').val( $.format.date(dd, "d MMMM") + ' at ' + $.format.date(dd, "hh") + ":" + $.format.date(dd, "mm") + " " + $.format.date(dd, "a") );
-        // } else {
-        //     $('.modal.outsource .out-date').val( getChosenOutsourceDateToString() );
-        //
-        // }
-
-        if(config.enable_outsource) {
-            resetOutsourcePopup( false );
-            $('body').addClass('showingOutsourceTo');
-            $('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + url);
-            $('.outsource.modal .uploadbtn:not(.showprices)').attr('href', url);
-            // $("#open-translator").addClass('hide');
-            // $('.send-to-translator').removeClass('hide');
-            $('.onyourown').addClass('opened-send-translator');
-            //TODO
-            $('.modal.outsource input.out-email').val("");
-            $('.modal.outsource input.out-email').removeClass("error");
-
-            showOutsourcePopup( UI.showPopupDetails );
-            renderQuoteFromManage(project.id, project.password, job.id, job.password);
-            $('.outsource.modal').show();
-        }
-    },
     restartOutsourceModal: function () {
         if(config.enable_outsource) {
             resetOutsourcePopup( false );
-            showOutsourcePopup( UI.showPopupDetails );
             renderQuoteFromManage(this.currentOutsourceProject.id, this.currentOutsourceProject.password, this.currentOutsourceJob.id, this.currentOutsourceJob.password);
             $('.outsource.modal').show();
         }
     },
 
     checkSendToTranslatorButton: function () {
-        var email = UI.checkInputEmailInput();
+        var $email = $('.modal.outsource input.out-email');
+        var email = $email.val();
         var date = $('.outsource .out-date').val();
 
-        if (email.length > 0 && date.length > 0 && APP.checkEmail(email)) {
-            // $('.send-to-translator-btn').removeClass('disabled');
+        if ($email.hasClass('error') ) {
+            $email.removeClass('error');
+            $('.modal.outsource .validation-error.email-translator-error').hide();
+        }
+
+        if (email.length > 0 && date.length > 0 ) {
+            $('.send-to-translator-btn').removeClass('disabled');
             return true;
         } else {
-            // $('.send-to-translator-btn').addClass('disabled');
+            $('.send-to-translator-btn').addClass('disabled');
             return false;
         }
     },
@@ -185,55 +135,169 @@ $.extend(UI, {
         var email = $('.modal.outsource input.out-email').val();
         if (!APP.checkEmail(email)) {
             $('.modal.outsource input.out-email').addClass('error');
+            $('.modal.outsource .validation-error.email-translator-error').show();
             return false;
         } else {
             $('.modal.outsource input.out-email').removeClass('error');
+            $('.modal.outsource .validation-error.email-translator-error').hide();
             return true;
         }
     },
 
     sendJobToTranslator: function () {
-        if (UI.checkSendToTranslatorButton()) {
+        if (UI.checkSendToTranslatorButton() && UI.checkInputEmailInput()) {
             var email = $('.modal.outsource input.out-email').val();
-            var date = getChosenOutsourceDate();
-            UI.sendTranslatorRequest(email, date).done(function () {
-                let notification = {
-                    title: 'Job sent',
-                    text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-                    type: 'success',
-                    position: 'tc',
-                    allowHtml: true,
-                    timer: 100000
-                };
-                let boxUndo = APP.addNotification(notification);
+            var date = $('.modal.outsource input.out-date').data('datesend');
+            var timezone = $( "#outsource-assign-timezone").val();
+            if (!date && UI.currentOutsourceJob.translator) {
+
+                date = new Date ( UI.currentOutsourceJob.translator.delivery_date ).getTime();
+            } else if (!date){
+                date = getChosenOutsourceDate();
+            }
+
+            UI.sendTranslatorRequest(email, date, timezone).done(function (data) {
+                APP.ModalWindow.onCloseModal();
+                if (data.job) {
+                    UI.checkShareToTranslatorResponse(data, email, date);
+                } else {
+                    UI.showShareTranslatorError();
+                }
             }).error(function () {
-                let notification = {
-                    title: 'Problems',
-                    text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-                    type: 'error',
-                    position: 'tc',
-                    allowHtml: true,
-                    timer: 100000
-                };
-                let boxUndo = APP.addNotification(notification);
+                UI.showShareTranslatorError();
             });
         }
     },
 
-    sendTranslatorRequest: function (email, date) {
+    sendTranslatorRequest: function (email, date, timezone) {
         let data = {
             email: email,
-            date: date
+            delivery_date: date/1000,
+            timezone: timezone
         };
         return $.ajax({
             async: true,
             data: data,
             type: "POST",
-            url : "/api/v2/jobs/" + UI.currentOutsourceJob.id +"/" + UI.currentOutsourceJob.password
+            url : "/api/v2/jobs/" + UI.currentOutsourceJob.id +"/" + UI.currentOutsourceJob.password + "/translator"
         });
     },
 
-    getOutsourceQuoteFromManage: getOutsourceQuoteFromManage
+    getOutsourceQuoteFromManage: function(idProject, password, jid, jpassword, fixedDelivery, typeOfService, callback ) {
+
+        return APP.doRequest({
+            data: {
+                action: 'outsourceTo',
+                pid: idProject,
+                ppassword: password,
+                fixedDelivery: fixedDelivery,
+                typeOfService: typeOfService,
+                jobs: [
+                    {
+                        jid: jid,
+                        jpassword: jpassword
+                    }
+                ]
+            },
+            success: function (d) {
+                if (typeof callback == "function")
+                    callback(d);
+            }
+        });
+    },
+
+    checkShareToTranslatorResponse: function (response, mail, date) {
+        let message = '';
+        if (UI.currentOutsourceJob.translator) {
+            let newDate = new Date(date);
+            let oldDate = new Date(UI.currentOutsourceJob.translator.delivery_date);
+            if (oldDate.getTime() != newDate.getTime()) {
+                message = this.shareToTranslatorDateChangeNotification(mail, oldDate, newDate);
+            } else if (UI.currentOutsourceJob.translator != mail) {
+                message = this.shareToTranslatorMailChangeNotification(mail);
+            } else {
+                message = this.shareToTranslatorNotification(mail);
+            }
+        } else {
+            message = this.shareToTranslatorNotification(mail);
+        }
+        let notification = {
+            title: message.title,
+            text: message.text,
+            type: 'success',
+            position: 'tc',
+            allowHtml: true,
+            timer: 10000
+        };
+        let boxUndo = APP.addNotification(notification);
+        ManageActions.changeJobPasswordFromOutsource(UI.currentOutsourceProject.id ,UI.currentOutsourceJob.id, UI.currentOutsourceJob.password, response.job.password);
+        ManageActions.assignTranslator(UI.currentOutsourceProject.id ,UI.currentOutsourceJob.id, response.job.translator);
+    },
+
+    shareToTranslatorNotification : function (mail) {
+        return message = {
+            title: 'Job sent',
+            text: '<div style="margin-top: 16px;">To: <a href="mailto:' + mail + '">' + mail + '</a> ' +
+            '<div class="job-reference" style="display: inline-block; width: 100%; margin-top: 10px;"> ' +
+            '<div class style="display: inline-block; font-size: 14px; color: grey;">(' + UI.currentOutsourceJob.id +')</div> ' +
+            '<div class="source-target languages-tooltip" style="display: inline-block; font-weight: 700;"> ' +
+            '<div class="source-box" style="display: inherit;">' + UI.currentOutsourceJob.sourceTxt + '</div> ' +
+            '<div class="in-to" style="top: 3px; display: inherit; position: relative;"> <i class="icon-chevron-right icon"></i> </div> ' +
+            '<div class="target-box" style="display: inherit;">' + UI.currentOutsourceJob.targetTxt + '</div> </div> </div></div>'
+        } ;
+
+    },
+
+    shareToTranslatorDateChangeNotification : function (email, oldDate, newDate) {
+        oldDate = $.format.date(oldDate, "yyyy-MM-d hh:mm a");
+        oldDate =  APP.getGMTDate(oldDate);
+        newDate = $.format.date(newDate, "yyyy-MM-d hh:mm a");
+        newDate =  APP.getGMTDate(newDate);
+        return message = {
+            title: 'Job delivery update',
+            text: '<div style="margin-top: 16px;"><div class="job-reference" style="display: inline-block; width: 100%;"> To: ' +
+            '<div class="job-delivery" title="Delivery date" style="display: inline-block; margin-bottom: 10px; font-weight: 700; margin-right: 10px;"> ' +
+                '<div class="outsource-day-text" style="display: inline-block; margin-right: 3px;">'+ newDate.day +'</div> ' +
+                '<div class="outsource-month-text" style="display: inline-block; margin-right: 5px;">'+ newDate.month +'</div> ' +
+                '<div class="outsource-time-text" style="display: inline-block;">'+ newDate.time +'</div> ' +
+                '<div class="outsource-gmt-text" style="display: inline-block; font-weight: 100;color: grey;">('+ newDate.gmt +')</div> ' +
+            '</div> <div class="job-delivery not-used" title="Delivery date" style="display: inline-block; margin-bottom: 10px; font-weight: 700; text-decoration: line-through; position: relative;"> ' +
+                '<div class="outsource-day-text" style="display: inline-block; margin-right: 3px;">'+ oldDate.day +'</div> ' +
+                '<div class="outsource-month-text" style="display: inline-block; margin-right: 5px;">'+ oldDate.month +'</div> ' +
+                '<div class="outsource-time-text" style="display: inline-block;">'+ oldDate.time +'</div> ' +
+                '<div class="outsource-gmt-text" style="display: inline-block; font-weight: 100; color: grey;">('+ oldDate.gmt +')</div> ' +
+                '<div class="old" style="width: 100%; height: 1px; border-top: 1px solid black; top: -10px; position: relative;"></div> </div> ' +
+            '</div>Translator: <a href="mailto:'+email+'">'+email+'</a> </div></div>'
+        } ;
+
+    },
+
+    shareToTranslatorMailChangeNotification : function (mail) {
+        return message = {
+            title: 'Job sent with <div class="green-label" style="display: inline; background-color: #5ea400; color: white; padding: 2px 5px;">new password </div>',
+            text: '<div style="margin-top: 16px;">To: <a href="mailto:' + mail + '">' + mail + '</a> ' +
+            '<div class="job-reference" style="display: inline-block; width: 100%; margin-top: 10px;"> ' +
+            '<div class style="display: inline-block; font-size: 14px; color: grey;">(' + UI.currentOutsourceJob.id +')</div> ' +
+            '<div class="source-target languages-tooltip" style="display: inline-block; font-weight: 700;"> ' +
+            '<div class="source-box" style="display: inherit;">' + UI.currentOutsourceJob.sourceTxt + '</div> ' +
+            '<div class="in-to" style="top: 3px; display: inherit; position: relative;"> <i class="icon-chevron-right icon"></i> </div> ' +
+            '<div class="target-box" style="display: inherit;">' + UI.currentOutsourceJob.targetTxt + '</div> </div> </div></div>'
+        } ;
+
+    },
+    showShareTranslatorError: function () {
+        APP.ModalWindow.onCloseModal();
+        let notification = {
+            title: 'Problems sending the job',
+            text: 'Please try later or contact <a href="mailto:support@matecat.com">support@matecat.com</a>',
+            type: 'error',
+            position: 'tc',
+            allowHtml: true,
+            timer: 10000
+        };
+        APP.addNotification(notification);
+    }
+
 });
 
 
@@ -243,7 +307,6 @@ function renderQuote( clickedButton ) {
         UI.quoteResponse = quoteData.data[0];
         var chunk = quoteData.data[0][0];
 
-        showOutsourcePopup( UI.showPopupDetails );
         UI.url_ok = quoteData.return_url.url_ok;
         UI.url_ko = quoteData.return_url.url_ko;
         UI.confirm_urls = quoteData.return_url.confirm_urls;
@@ -269,47 +332,14 @@ function renderQuote( clickedButton ) {
 
         renderNormalQuote( chunk );
 
-        $(document).trigger('outsource-rendered', { quote_data : quoteData } );
+        $(document).trigger('outsource-rendered', { quote_data : UI.quoteResponse } );
     });
 }
 
 function renderQuoteFromManage( idProject, password, jid, jpassword) {
 
-    var typeOfService = $( "input[name='revision']" ).is(":checked") ? "premium" : "professional";
-    var fixedDelivery =  $( "#forceDeliveryChosenDate" ).text();
+    ManageActions.getOutsourceQuote();
 
-    getOutsourceQuoteFromManage( idProject, password, jid, jpassword, fixedDelivery, typeOfService, function(quoteData ){
-        UI.quoteResponse = quoteData.data[0];
-        var chunk = quoteData.data[0][0];
-
-        showOutsourcePopup( UI.showPopupDetails );
-        UI.url_ok = quoteData.return_url.url_ok;
-        UI.url_ko = quoteData.return_url.url_ko;
-        UI.confirm_urls = quoteData.return_url.confirm_urls;
-        UI.data_key = chunk.id;
-
-        // a generic error
-        if( chunk.quote_result != 1 ){
-            renderGenericErrorQuote();
-            return false;
-        }
-
-        // job already outsourced
-        if( chunk.outsourced == 1 ) {
-            renderOutsourcedQuote( chunk );
-            return false;
-        }
-
-        // delivery date too strict
-        if( chunk.quote_available != 1 ) {
-            renderNotAvailableQuote();
-            return false;
-        }
-
-        renderNormalQuote( chunk );
-
-        $(document).trigger('outsource-rendered', { quote_data : quoteData } );
-    });
 }
 
 
@@ -339,36 +369,12 @@ function getOutsourceQuote( clickedButton, callback ) {
     });
 }
 
-function getOutsourceQuoteFromManage(idProject, password, jid, jpassword, fixedDelivery, typeOfService, callback ) {
-
-    return APP.doRequest({
-        data: {
-            action: 'outsourceTo',
-            pid: idProject,
-            ppassword: password,
-            fixedDelivery: fixedDelivery,
-            typeOfService: typeOfService,
-            jobs: [
-                {
-                    jid: jid,
-                    jpassword: jpassword
-                }
-            ]
-        },
-        success: function(d) {
-            if( typeof callback == "function" )
-                callback( d );
-        }
-    });
-}
-
 
 function renderGenericErrorQuote() {
     $('.modal.outsource').removeClass('loading');
     $('#forceDeliveryContainer').css('top','465px');
     $('.ErrorMsgQuoteError').removeClass('hide');
     $('.addrevision, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2, .outsource.modal .continuebtn, .outsource #changeTimezone,.outsource #changecurrency,.paymentinfo,.modal.outsource .contact_box, .modal.outsource .more, .needitfaster').addClass('hide');
-    expandOutsourcePopup();
 }
 
 
@@ -387,7 +393,40 @@ function renderOutsourcedQuote( chunk ) {
 
     renderLocalizationInfos( chunk.price, chunk.delivery );
     $( 'span.zone2').html( $( '#changeTimezone option:selected').attr( "data-description-long" ) );
-    expandOutsourcePopup();
+
+}
+
+
+function renderLocalizationInfos( price, delivery, revision_price, revision_delivery ) {
+    // if the customer has a timezone in the cookie, then use it
+    // otherwise attemp to guess it from his browser infos
+    var timezoneToShow = APP.readCookie( "matecat_timezone" );
+    if ( timezoneToShow == "" ) {
+        timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
+    }
+
+    // update the timezone (both the displayed and the stored ones)
+    changeTimezone(delivery, -1 * ( new Date().getTimezoneOffset() / 60 ), timezoneToShow, "span.time");
+    if( revision_delivery ) {
+        changeTimezone(revision_delivery, -1 * ( new Date().getTimezoneOffset() / 60 ), timezoneToShow, "span.revision_delivery");
+    }
+    updateTimezonesDescriptions( timezoneToShow );
+
+
+    // if the customer has a currency in the cookie, then use it
+    // otherwise use the default one
+    var currToShow = APP.readCookie( "matecat_currency" );
+    if ( currToShow == "" ) {
+        currToShow = "EUR";
+    }
+
+    // update the currency (both the displayed and the stored ones)
+    changeCurrency( price, "EUR", currToShow, ".euro", ".displayprice", ".price_p_word");
+    if( revision_price ) {
+        changeCurrency(revision_price, "EUR", currToShow, ".revision_currency", ".revision_price", "");
+    }
+
+    $( "#changecurrency option[value='" + currToShow + "']").attr( "selected", "selected" );
 }
 
 
@@ -397,7 +436,6 @@ function renderNotAvailableQuote() {
     $('.outsource.modal .forceDeliveryButtonOk').addClass('disabled');
     $('#forceDeliveryContainer #delivery_not_available, .ErrorMsgquoteNotAvailable').removeClass('hide');
     $('.guaranteed_by .more, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2, .revision_delivery, .revision_price_box,#delivery_before_time').addClass('hide');
-    expandOutsourcePopup();
 }
 
 
@@ -426,7 +464,7 @@ function renderNormalQuote( chunk ) {
     // no info available about translator
     if( chunk.show_translator_data != 1 ) {
         $('.outsourceto').addClass("translatorNotAvailable");
-        $('.outsource.modal .minus').hide();
+        // $('.outsource.modal .minus').hide();
         $('.trustbox2').removeClass('hide');
         $('.translator_bio,.outsource.modal .more,.trustbox1, .translator_not_found,.translator_not_found, .trust_text p:first-child').addClass('hide');
         return false;
@@ -455,39 +493,6 @@ function renderNormalQuote( chunk ) {
     }
 
     $(".score_number").text(parseInt(voteToShow) + "%");
-}
-
-
-function renderLocalizationInfos( price, delivery, revision_price, revision_delivery ) {
-    // if the customer has a timezone in the cookie, then use it
-    // otherwise attemp to guess it from his browser infos
-    var timezoneToShow = readCookie( "matecat_timezone" );
-    if ( timezoneToShow == "" ) {
-        timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
-    }
-
-    // update the timezone (both the displayed and the stored ones)
-    changeTimezone(delivery, -1 * ( new Date().getTimezoneOffset() / 60 ), timezoneToShow, "span.time");
-    if( revision_delivery ) {
-        changeTimezone(revision_delivery, -1 * ( new Date().getTimezoneOffset() / 60 ), timezoneToShow, "span.revision_delivery");
-    }
-    updateTimezonesDescriptions( timezoneToShow );
-
-
-    // if the customer has a currency in the cookie, then use it
-    // otherwise use the default one
-    var currToShow = readCookie( "matecat_currency" );
-    if ( currToShow == "" ) {
-        currToShow = "EUR";
-    }
-
-    // update the currency (both the displayed and the stored ones)
-    changeCurrency( price, "EUR", currToShow, ".euro", ".displayprice", ".price_p_word");
-    if( revision_price ) {
-        changeCurrency(revision_price, "EUR", currToShow, ".revision_currency", ".revision_price", "");
-    }
-
-    $( "#changecurrency option[value='" + currToShow + "']").attr( "selected", "selected" );
 }
 
 
@@ -520,7 +525,7 @@ function changeCurrency( amount, currencyFrom, currencyTo, elementToUpdateSymbol
         $(".showpricesloading").addClass("hide");
         $(".showprices").removeClass("hide"); $(".showprices").show();
 
-        setCookie( "matecat_currency", currencyTo );
+        APP.setCookie( "matecat_currency", currencyTo );
     });
 }
 
@@ -531,8 +536,8 @@ function fetchChangeRates( callback ) {
         return;
     }
 
-    var changeRates = readCookie( "matecat_changeRates" );
-    if( changeRates != "" ) {
+    var changeRates = APP.readCookie( "matecat_changeRates" );
+    if( changeRates != "" && changeRates!="null") {
         UI.changeRates = changeRates;
         if( typeof callback == "function" ) callback();
         return;
@@ -544,7 +549,7 @@ function fetchChangeRates( callback ) {
         },
         success: function(d) {
             var now = new Date();
-            setCookie( "matecat_changeRates", d.data, new Date( now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59 ) );
+            APP.setCookie( "matecat_changeRates", d.data, new Date( now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59 ) );
             UI.changeRates = d.data;
             if( typeof callback == "function" ) callback();
         }
@@ -560,7 +565,7 @@ function changeTimezone( date, timezoneFrom, timezoneTo, elementToUpdate ){
     $( elementToUpdate ).attr("data-timezone", timezoneTo);
     $( elementToUpdate ).attr("data-rawtime", dd.toUTCString());
 
-    setCookie( "matecat_timezone", timezoneTo );
+    APP.setCookie( "matecat_timezone", timezoneTo );
 }
 
 
@@ -572,30 +577,6 @@ function updateTimezonesDescriptions( selectedTimezone ) {
     var selectedElement = $( "#changeTimezone" ).find( "option[value='" + selectedTimezone + "']");
     selectedElement.text( selectedElement.attr( "data-description-short" ) );
 }
-
-
-function readCookie( cookieName ) {
-    cookieName += "=";
-    var cookies = document.cookie.split(';');
-
-    for ( var i = 0; i < cookies.length; i++ ) {
-        var cookie = cookies[i].trim();
-
-        if ( cookie.indexOf( cookieName ) == 0 )
-            return cookie.substring( cookieName.length, cookie.length );
-    }
-    return "";
-}
-
-
-function setCookie( cookieName, cookieValue, expiration ) {
-    if( typeof expiration == "undefined" ) {
-        expiration = new Date();
-        expiration.setYear(new Date().getFullYear() + 1);
-    }
-    document.cookie = cookieName + "=" + cookieValue + "; expires=" + expiration.toUTCString() + "; path=/";
-}
-
 
 function updateCartParameters() {
     var linkPieces = $( "a.uploadbtn.in-popup").attr( "href").split( "/" );
@@ -636,35 +617,21 @@ function resetOutsourcePopup( resetHard ) {
     $( ".hide_translator.more").attr( "class", "hide_translator more" );
     $('.popup-box.pricebox.compress').attr( "class", "popup-box pricebox" );
     $('.modal.outsource, .outsource.modal .continuebtn').addClass('loading');
-    $('.delivery').appendTo(".delivery_container").attr("class","delivery");
+    // $('.delivery').appendTo(".delivery_container").attr("class","delivery");
     $('.outsource.modal .continuebtn').addClass('disabled');
     $('.tprice').removeClass('blink');
-    $('.modal.outsource .continuebtn, .modal.outsource .contact_box,.paymentinfo,.outsource #changeTimezone,.outsource #changecurrency,.addrevision, .guaranteed_by .more, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2, .needitfaster, .showpricesloading').removeClass('hide');
-    $('.ErrorMsg,.modal.outsource .tooltip, .outsource_notify, .delivery_before_time, .checkstatus, #delivery_not_available, .trustbox2, .translator_info_box, .hide_translator.more, .showprices').addClass('hide');
+    $('.modal.outsource .continuebtn, .modal.outsource .contact_box,.paymentinfo,.outsource #changeTimezone,.outsource #changecurrency,.addrevision, .delivery_details span.time, .delivery_label,.euro,.displayprice,.displaypriceperword, .delivery_details span.zone2, .needitfaster, .showpricesloading').removeClass('hide');
+    $('.ErrorMsg,.modal.outsource .tooltip, .outsource_notify, .delivery_before_time, .checkstatus, #delivery_not_available, .trustbox2, .translator_info_box, .showprices').addClass('hide');
     $('#out-datepicker').addClass('hide');
+    $('.modal.outsource input.out-email').removeClass('error');
+    $('.modal.outsource .validation-error.email-translator-error').hide();
+    $('.send-to-translator-btn').addClass('disabled');
     if( resetHard ) {
         $('.modal.outsource .displayprice').empty();
         $('.modal.outsource .delivery .time').empty();
         $('.modal.outsource .revealprices, .modal.outsource').hide();
-        $('#forceDeliveryContainer, .viewvendors').addClass("hide");
+        $('#forceDeliveryContainer').addClass("hide");
     }
 }
 
 
-function showOutsourcePopup( showExpanded ) {
-    if( $( ".outsource" ).css("display") == "none" ) {
-        ( showExpanded == '0' ) ? compressOutsourcePopup() : expandOutsourcePopup();
-    }
-}
-
-
-function expandOutsourcePopup() {
-    $( ".outsourceto, .paymentinfo, .contact_box").removeClass( "hide" );
-    $( ".viewvendors").addClass("hide");
-}
-
-
-function compressOutsourcePopup() {
-    $( ".outsourceto, .paymentinfo, .contact_box").addClass( "hide" );
-    $( ".viewvendors").removeClass( "hide" );
-}

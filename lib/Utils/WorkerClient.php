@@ -54,7 +54,14 @@ class WorkerClient {
         $element->params    = $data;
         $element->classLoad = $class_name;
 
-        self::$_HANDLER->send( self::$_QUEUES[ $queue ]->queue_name, $element, $options );
+        $queue_name = self::$_QUEUES[ $queue ]->queue_name ;
+
+        if ( empty( $queue_name ) ) {
+            throw new InvalidArgumentException( 'Empty queue_name: ' . var_export( self::$_QUEUES, true ) . "\n" . var_export( $queue, true )
+            ) ;
+        }
+
+        self::$_HANDLER->send( $queue_name, $element, $options );
     }
 
 }

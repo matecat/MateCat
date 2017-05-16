@@ -554,16 +554,6 @@ class FilesStorage {
         foreach ( $results as $k => $result ) {
             //try fetching from files dir
             $filePath = $this->getOriginalFromFileDir( $result[ 'id_file' ], $result[ 'sha1_original_file' ] );
-
-            if ( !$filePath ) {
-                //file is on the database; let's copy it to disk to make it compliant to file-on-disk structure
-                //this moves both original and xliff
-                $this->migrateFileDB2FS( $result );
-
-                //now, try again fetching from disk :)
-                $filePath = $this->getOriginalFromFileDir( $result[ 'id_file' ], $result[ 'sha1_original_file' ] );
-            }
-
             $results[ $k ][ 'originalFilePath' ] = $filePath;
         }
 
@@ -598,15 +588,6 @@ class FilesStorage {
             //try fetching from files dir
             $originalPath = $this->getOriginalFromFileDir( $result[ 'id_file' ], $result[ 'sha1_original_file' ] );
 
-            if ( !$originalPath || !file_exists( $originalPath ) ) {
-                //file is on the database; let's copy it to disk to make it compliant to file-on-disk structure
-                //this moves both original and xliff
-                $this->migrateFileDB2FS( $result );
-
-                //now, try again fetching from disk :)
-                $originalPath = $this->getOriginalFromFileDir( $result[ 'id_file' ], $result[ 'sha1_original_file' ] );
-            }
-
             $results[ $k ][ 'originalFilePath' ] = $originalPath;
 
             //note that we trust this to succeed on first try since, at this stage, we already built the file package
@@ -614,118 +595,6 @@ class FilesStorage {
         }
 
         return $results;
-    }
-
-    /**
-     * Backwards compatibility method and forward
-     *
-     * Works by Reference variable
-     *
-     * @param $fileMetaData [
-     *                          "id_file",
-     *                          "filename",
-     *                          "source",
-     *                          "mime_type",
-     *                          "sha1_original_file"
-     *                      ]
-     */
-    private function migrateFileDB2FS( &$fileMetaData ) {
-
-        //create temporary storage to place stuff
-        $tempDir = "/tmp" . DIRECTORY_SEPARATOR . uniqid( "", true );
-        mkdir( $tempDir, 0755 );
-
-        //fetch xliff from the files database
-        $xliffContent = $this->getXliffFromDB( $fileMetaData[ 'id_file' ] );
-
-        //try pulling the original content too (if it's empty it means that it was an unconverted xliff)
-        $fileContent = $this->getOriginalFromDB( $fileMetaData[ 'id_file' ] );
-
-        if ( !empty( $fileContent ) ) {
-            //it's a converted file
-
-            //i'd like to know it's real extension....
-            //create temporary file with appropriately modified name
-            $result = DetectProprietaryXliff::getInfoByStringData( $xliffContent );
-            if( $result['proprietary_short_name'] == 'trados' ){
-                $tempXliff = $tempDir . DIRECTORY_SEPARATOR . $fileMetaData[ 'filename' ] . ".sdlxliff";
-            } else {
-                $tempXliff = $tempDir . DIRECTORY_SEPARATOR . $fileMetaData[ 'filename' ] . ".xlf";
-            }
-
-            //create file
-            $tempOriginal = $tempDir . DIRECTORY_SEPARATOR . $fileMetaData[ 'filename' ];
-
-            //flush content
-            file_put_contents( $tempOriginal, $fileContent );
-
-            //get hash, based on original
-            $sha1 = sha1( $fileContent );
-
-            //free memory
-            unset( $fileContent );
-        } else {
-            //if it's a unconverted xliff
-            //create temporary file with original name
-            $tempXliff = $tempDir . DIRECTORY_SEPARATOR . $fileMetaData[ 'filename' ];
-
-            // set original to empty
-            $tempOriginal = false;
-
-            //get hash
-            $sha1 = sha1( $xliffContent );
-        }
-
-        //flush xliff file content
-        file_put_contents( $tempXliff, $xliffContent );
-
-        //free memory
-        unset( $xliffContent );
-
-        if( stripos( $fileMetaData[ 'sha1_original_file' ], DIRECTORY_SEPARATOR ) === false ){
-
-            $query        = "select create_date from projects where id = {$fileMetaData[ 'id_project' ]}";
-            $db           = Database::obtain();
-            $results      = $db->fetch_array( $query );
-            $dateHashPath = date_create( $results[ 0 ][ 'create_date' ] )->format( 'Ymd' ) . DIRECTORY_SEPARATOR . $sha1;
-            $db->update(
-                    'files',
-                    array( "sha1_original_file" => $dateHashPath ),
-                    'id = ' . $fileMetaData[ 'id_file' ]
-            );
-
-            //update Reference
-            $fileMetaData[ 'sha1_original_file' ] = $dateHashPath;
-
-        }
-
-        //build a cache package
-        $this->makeCachePackage( $sha1, $fileMetaData[ 'source' ], $tempOriginal, $tempXliff );
-
-        //build a file package
-        $this->moveFromCacheToFileDir( $fileMetaData[ 'sha1_original_file' ], $fileMetaData[ 'source' ], $fileMetaData[ 'id_file' ] );
-
-        //clean temporary stuff
-        Utils::deleteDir( $tempDir );
-    }
-
-    public function getOriginalFromDB( $id_file ) {
-        $query = "select original_file from files where id= $id_file";
-
-        $db      = Database::obtain();
-        $results = $db->fetch_array( $query );
-
-        return gzinflate( $results[ 0 ][ 'original_file' ] );
-
-    }
-
-    public function getXliffFromDB( $id_file ) {
-        $query = "select xliff_file from files where id= $id_file";
-
-        $db      = Database::obtain();
-        $results = $db->fetch_array( $query );
-
-        return $results[ 0 ][ 'xliff_file' ];
     }
 
     /**

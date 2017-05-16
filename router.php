@@ -34,8 +34,8 @@ $klein->onError( function ( \Klein\Klein $klein, $err_msg, $err_type, Exception 
     try {
         throw $exception;
     }  catch( InvalidArgumentException $e ){
-        $this->response->code( 400 );
-        $this->response->json( ( new Error( [ $e ] ) )->render() );
+        $klein->response()->code( 400 );
+        $klein->response()->json( ( new Error( [ $e ] ) )->render() );
     } catch ( AuthenticationError $e ) {
         $klein->response()->code( 401 );
         $klein->response()->json( ( new Error( [ $e ] ) )->render() );

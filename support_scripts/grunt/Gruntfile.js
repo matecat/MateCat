@@ -282,6 +282,22 @@ module.exports = function(grunt) {
                     basePath + 'login.js'
                 ],
                 dest: buildPath + 'common.js'
+            },
+            manage: {
+                src: [
+                    basePath + 'manage.js',
+                    basePath + 'forcedelivery.js',
+                    basePath + 'outsource.js'
+                ],
+                dest: buildPath + 'manage.js'
+            },
+            analyze: {
+                src: [
+                    basePath + 'analyze.js',
+                    basePath + 'forcedelivery.js',
+                    basePath + 'outsource.js'
+                ],
+                dest: buildPath + 'analyze.js'
             }
 
         },
@@ -476,6 +492,8 @@ module.exports = function(grunt) {
         'concat:semantic',
         'concat:app',
         'concat:common',
+        'concat:manage',
+        'concat:analyze',
         'replace:version'
     ]);
 

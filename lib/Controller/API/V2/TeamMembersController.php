@@ -10,15 +10,16 @@
 namespace API\V2;
 
 use API\V2\Json\Membership;
+use API\V2\Validators\LoginValidator;
 use API\V2\Validators\TeamAccessValidator;
 use TeamModel;
-use Teams\MembershipDao;
 use Teams\TeamDao;
 use Teams\PendingInvitations;
 
 class TeamMembersController extends KleinController {
 
     protected function afterConstruct() {
+        $this->appendValidator( new LoginValidator( $this ) );
         $this->appendValidator( new TeamAccessValidator( $this ) );
     }
 

@@ -1,6 +1,6 @@
 <?php
 
-use Email\EmailInvitedToTeam;
+use Email\InvitedToTeamEmail;
 use Email\MembershipCreatedEmail;
 use Email\MembershipDeletedEmail;
 use Teams\MembershipDao;
@@ -153,7 +153,7 @@ class TeamModel {
 
     public function _sendEmailsToInvited() {
         foreach ( $this->getInvitedEmails() as $email ) {
-            $email = new EmailInvitedToTeam( $this->user, $email, $this->struct );
+            $email = new InvitedToTeamEmail( $this->user, $email, $this->struct );
             $email->send();
         }
     }

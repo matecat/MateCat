@@ -758,7 +758,7 @@ convertFile = function ( fname, filerow, filesize, enforceConversion ) {
                     }
                 }
 
-            } else if ( d.code <= 0 ) {
+            } else if ( d.code <= 0 || d.errors.length > 0 ) {
 
                 console.log( d.errors[0].message );
 

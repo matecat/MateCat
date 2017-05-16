@@ -154,3 +154,15 @@
   @extend .notification-title;
   color: $notification-info;
 }
+
+.notifications-wrapper-inside {
+    .translator-notification-sent {
+        font-weight: bold;
+        line-height: 28px;
+        span {
+            color: #4183C4;
+        }
+    }
+}
+
+

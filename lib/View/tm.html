@@ -44,9 +44,9 @@
                             </div>
                             <div class="active-tm-container">
                                 <h3 class="pull-left">Active Resources</h3>
-                                <p class="tm-warning-message notification-message" style="display: none;">Warning: the errmsg will appear here... </p>
-                                <p class="tm-error-message notification-message" style="display: none;"> Error: the errmsg will appear here... </p>
-                                <p class="tm-success-message activetm notification-message" style="display: none;"> Success: the success msg will appear here... </p>
+                                <p class="tm-warning-message notification-message" style="display: none;"></p>
+                                <p class="tm-error-message notification-message" style="display: none;"></p>
+                                <p class="tm-success-message activetm notification-message" style="display: none;"></p>
                                 <table class="mgmt-tm scroll" id="activetm">
                                     <thead>
                                     <tr>
@@ -180,9 +180,9 @@
                                         <input id="filterInactive" onfocus="if(this.value == 'Filter resources') { this.value = ''; }" value="Filter resources" type="text"/>
                                         <span class="icon-search"></span>
                                     </div>
-                                    <p class="tm-warning-message notification-message" style="display: none;">Warning: the errmsg will appear here... </p>
-                                    <p class="tm-error-message notification-message" style="display: none;"> Error: the errmsg will appear here... </p>
-                                    <p class="tm-success-message activetm notification-message" style="display: none;"> Success: the success msg will appear here... </p>
+                                    <p class="tm-warning-message notification-message" style="display: none;"> </p>
+                                    <p class="tm-error-message notification-message" style="display: none;">  </p>
+                                    <p class="tm-success-message activetm notification-message" style="display: none;">  </p>
                                     <table class="mgmt-tm mgmt-tm-nested scroll" id="inactivetm">
                                         <thead>
                                         <tr>
@@ -469,7 +469,7 @@
                                 </div>
                             </div>
 
-                            <div tal:condition="not: deny_lexiqa" class="options-box qa-box">
+                            <div class="options-box qa-box">
                                 <h3>QA by <img src="/public/img/lexiqa-new-2.png" /> </h3>
                                 <p tal:condition="php: INIT::$LXQ_LICENSE">
                                     <span class="option-qa-box-languages">Not available for:

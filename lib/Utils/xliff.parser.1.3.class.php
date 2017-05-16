@@ -144,6 +144,7 @@ class Xliff_Parser {
 				// Getting Trans-units
 				$trans_units = preg_split('|<trans-unit[\s>]|si', $file, -1, PREG_SPLIT_NO_EMPTY);
 				$j = 0;
+				$trans_unit_id_array_for_uniqueness_check = [];
 				foreach ($trans_units as $trans_unit) {
 
 					// First element in the XLIFF split is the header, not the first file
@@ -155,6 +156,8 @@ class Xliff_Parser {
 
                         if ( trim( $temp[ 1 ] ) == "" ) {
                             throw new DomainException( "Invalid trans-unit id found. EMPTY value", 400 );
+                        } else {
+                            $trans_unit_id_array_for_uniqueness_check[] = trim( $temp[ 1 ] );
                         }
 
                         $xliff[ 'files' ][ $i ][ 'trans-units' ][ $j ][ 'attr' ][ 'id' ] = $temp[ 1 ];
@@ -270,7 +273,11 @@ class Xliff_Parser {
 						$j++;
 
 				} // End of trans-units
-
+                $total_trans_units_id = count( $trans_unit_id_array_for_uniqueness_check );
+				$trans_units_unique_id = count( array_unique( $trans_unit_id_array_for_uniqueness_check ) );
+				if( $total_trans_units_id != $trans_units_unique_id ){
+                    throw new DomainException( "Invalid trans-unit id, duplicate found.", 400 );
+                }
 			} // End of files
 
 			$i++;
