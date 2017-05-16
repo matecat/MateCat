@@ -245,18 +245,6 @@ $.extend( UI, {
                 return false;
             }
         }
-
-        if (
-            (code == 13) || // return
-            (code == 32) || // space
-            (code == 49) || // semicomma
-            (code == 188) || // comma
-            (code == 186) || // semicomma
-            (code == 190) || // mark
-            (code == 191) || // question mark
-            (code == 222)) { // apostrophe
-            UI.spellCheck();
-        }
     },
     /**
      * Edit area click

@@ -200,7 +200,7 @@ UI = {
         SegmentActions.hideSegmentHeader(options.segment_id, UI.getSegmentFileId(segment));
 
         this.setTranslation({
-            id_segment: segment.id,
+            id_segment: options.segment_id,
             status: status,
             caller: false,
             byStatus: byStatus,
@@ -1017,7 +1017,10 @@ UI = {
         $('[data-mount=translation-issues-button]').each( function() {
             ReactDOM.unmountComponentAtNode(this);
         });
-
+        $('.article-segments-container').each(function (index, value) {
+            ReactDOM.unmountComponentAtNode(value);
+            delete UI.SegmentsContainers;
+        });
         $('#outer').empty();
     },
 
@@ -1088,11 +1091,7 @@ UI = {
 	renderFiles: function(files, where, starting) {
         // If we are going to re-render the articles first we remove them
         if (where === "center" && !starting) {
-            $('.article-segments-container').each(function (index, value) {
-                ReactDOM.unmountComponentAtNode(value);
-                delete UI.SegmentsContainer;
-            });
-            $('article').remove();
+            this.unmountSegments();
         }
         $.each(files, function(k) {
 			var newFile = '';
@@ -1169,9 +1168,12 @@ UI = {
     renderSegments: function (segments, justCreated, fid, where) {
 
         if((typeof this.split_points_source == 'undefined') || (!this.split_points_source.length) || justCreated) {
-            if ( !this.SegmentsContainer ) {
+            if ( !this.SegmentsContainers || !this.SegmentsContainers[fid] ) {
+                if (!this.SegmentsContainers) {
+                    this.SegmentsContainers = [];
+                }
                 var mountPoint = $(".article-segments-container-" + fid)[0];
-                this.SegmentsContainer = ReactDOM.render(React.createElement(SegmentsContainer, {
+                this.SegmentsContainers[fid] = ReactDOM.render(React.createElement(SegmentsContainer, {
                     fid: fid,
                     enableTagProjection: UI.enableTagProjection,
                     decodeTextFn: UI.decodeText,
@@ -1201,37 +1203,6 @@ UI = {
 			caller: 'link2file',
 			segmentToScroll: sid,
 			scrollToFile: true
-		});
-	},
-    // TODO: Deprecated
-	spellCheck: function(ed) {
-		if (!UI.customSpellcheck)
-			return false;
-		var editarea = (typeof ed == 'undefined') ? UI.editarea : $(ed);
-
-		APP.doRequest({
-			data: {
-				action: 'getSpellcheck',
-				lang: config.target_rfc,
-				sentence: UI.editarea.text()
-			},
-			context: editarea,
-			error: function() {
-				UI.failedConnection(0, 'getSpellcheck');
-			},
-			success: function(data) {
-				ed = this;
-				$.each(data.result, function(key, value) { //key --> 0: { 'word': { 'offset':20, 'misses':['word1','word2'] } }
-
-					var word = Object.keys(value)[0];
-					replacements = value[word].misses.join(",");
-
-					var re = new RegExp("(\\b" + word + "\\b)", "gi");
-					$(ed).html($(ed).html().replace(re, '<span class="misspelled" data-replacements="' + replacements + '">$1</span>'));
-					// fix nested encapsulation
-					$(ed).html($(ed).html().replace(/(<span class=\"misspelled\" data-replacements=\"(.*?)\"\>)(<span class=\"misspelled\" data-replacements=\"(.*?)\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
-				});
-			}
 		});
 	},
 	addWord: function(word) {

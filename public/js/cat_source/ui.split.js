@@ -65,7 +65,7 @@ if(config.splitSegmentEnabled) {
     }).bind('keydown', 'ctrl+w', function(e) {
         e.preventDefault();
         UI.currentSegment.find('.sid .actions .split').click();
-    })
+    });
 
     $.extend(UI, {
         splitSegment: function (segment) {

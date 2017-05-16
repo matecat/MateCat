@@ -6,7 +6,7 @@
         },
         /**
          * Return che Suggestion, if exist, used by the current segment
-         * retrun json
+         * return json
          */
         getCurrentSegmentContribution: function (segment) {
             var currentSegment = (segment)? segment : UI.currentSegment;

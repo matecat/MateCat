@@ -19,7 +19,6 @@ $.extend(UI, {
 		this.blockGetMoreSegments = true;
 		this.searchParams = {};
 		this.searchParams.search = 0;
-		this.customSpellcheck = false;
 		this.noGlossary = false;
 		this.displayedMessages = [];
 		setTimeout(function() {
