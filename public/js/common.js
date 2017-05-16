@@ -706,8 +706,8 @@ APP = {
 
     getLastTeamSelected: function (teams) {
         if (localStorage.getItem(this.teamStorageName)) {
-            let lastId = localStorage.getItem(this.teamStorageName);
-            let team = teams.find(function (t, i) {
+            var lastId = localStorage.getItem(this.teamStorageName);
+            var team = teams.find(function (t, i) {
                 return parseInt(t.id) === parseInt(lastId);
             });
             if (team) {
