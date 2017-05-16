@@ -129,7 +129,7 @@ UI = {
             var jPieces = linkPieces[ linkPieces.length - 1 ].split( "-" );
             var idJob = jPieces[0];
 
-            let words, sourceTxt, targetTxt;
+            var words, sourceTxt, targetTxt;
 
             if (UI.currentOutsourceProject) {
                 UI.currentOutsourceJob = UI.currentOutsourceProject.jobs.find(function (job) {
@@ -165,7 +165,7 @@ UI = {
             $( ".title-words" ).text( words );
 
             UI.currentOutsourceUrl = $( this ).attr( "href" );
-            let props = {
+            var props = {
                 project: UI.currentOutsourceProject,
                 job: UI.currentOutsourceJob,
                 url: UI.currentOutsourceUrl,
@@ -173,7 +173,7 @@ UI = {
                 translatorOpen: !!(UI.currentOutsourceJob.translator),
                 showTranslatorBox: false
             };
-            let style = {width: '970px',maxWidth: '970px', top: '45%'};
+            var style = {width: '970px',maxWidth: '970px', top: '45%'};
             APP.ModalWindow.showModalComponent(OutsourceModal, props, "Translate", style);
         });
     },
@@ -186,10 +186,10 @@ UI = {
 
                 //Update passwords (changed if the job has been outsourced)
                 UI.currentOutsourceProject.jobs.forEach(function (job) {
-                    let $job = $('.tablestats[data-jid='+job.id+']');
-                    let oldPass = $job.data('pwd');
+                    var $job = $('.tablestats[data-jid='+job.id+']');
+                    var oldPass = $job.data('pwd');
                     $job.data('pwd', job.password);
-                    let href = $job.find('.uploadbtn.translate').attr('href');
+                    var href = $job.find('.uploadbtn.translate').attr('href');
                     $job.find('.uploadbtn.translate').attr('href', href.replace(oldPass, job.password));
                 });
 
@@ -873,9 +873,9 @@ UI = {
     },
 
     updateJobPassword: function (password) {
-        let $job = $('.tablestats[data-jid='+UI.currentOutsourceJob.id+']');
+        var $job = $('.tablestats[data-jid='+UI.currentOutsourceJob.id+']');
         $job.data('pwd', password);
-        let href = $job.find('.uploadbtn.translate').attr('href');
+        var href = $job.find('.uploadbtn.translate').attr('href');
         $job.find('.uploadbtn.translate').attr('href', href.replace(UI.currentOutsourceJob.password, password));
         UI.currentOutsourceJob.password = password;
     },
@@ -887,7 +887,7 @@ UI = {
     setFocusEvent: function () {
 		var self = this;
         $(window).on("blur focus", function(e) {
-            let prevType = $(this).data("prevType");
+            var prevType = $(this).data("prevType");
 
             if (prevType != e.type) {   //  reduce double fire issues
                 switch (e.type) {
