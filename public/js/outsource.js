@@ -199,7 +199,7 @@ $.extend(UI, {
             var email = $('.modal.outsource input.out-email').val();
             var date = getChosenOutsourceDate();
             UI.sendTranslatorRequest(email, date).done(function () {
-                let notification = {
+                var notification = {
                     title: 'Job sent',
                     text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
                     type: 'success',
@@ -207,9 +207,9 @@ $.extend(UI, {
                     allowHtml: true,
                     timer: 100000
                 };
-                let boxUndo = APP.addNotification(notification);
+                var boxUndo = APP.addNotification(notification);
             }).error(function () {
-                let notification = {
+                var notification = {
                     title: 'Problems',
                     text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
                     type: 'error',
@@ -217,13 +217,13 @@ $.extend(UI, {
                     allowHtml: true,
                     timer: 100000
                 };
-                let boxUndo = APP.addNotification(notification);
+                var boxUndo = APP.addNotification(notification);
             });
         }
     },
 
     sendTranslatorRequest: function (email, date) {
-        let data = {
+        var data = {
             email: email,
             date: date
         };
