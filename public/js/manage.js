@@ -551,7 +551,7 @@ UI = {
             fromManage: true,
             translatorOpen: true,
             onCloseCallback: function () {
-                
+
             }
         };
         var style = {width: '970px',maxWidth: '970px', top: '45%'};
