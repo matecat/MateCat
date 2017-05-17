@@ -176,7 +176,7 @@ function getChosenDeliveryDate() {
     var time 	 = $( "#whenTime" ).val();
     var timezone = $( "#whenTimezone" ).val();
 
-    return new Date ( year, month, day, time, 00 ).getTime() - ( parseFloat( timezone).toFixed( 1 ) * 3600000 ) - ( new Date().getTimezoneOffset() * 60000 );
+    return new Date ( year, month, day, time, 0 ).getTime() - ( parseFloat( timezone).toFixed( 1 ) * 3600000 ) - ( new Date().getTimezoneOffset() * 60000 );
 }
 
 function getChosenOutsourceDate() {
@@ -187,18 +187,7 @@ function getChosenOutsourceDate() {
     var time 	 = $( "#outsource-assign-date").val();
     var timezone = $( "#outsource-assign-timezone").val();
 
-    return new Date ( year, month, day, time, 00 ).getTime() - ( parseFloat( timezone).toFixed( 1 ) * 3600000 ) - ( new Date().getTimezoneOffset() * 60000 );
-}
-
-function getChosenOutsourceDateUTC() {
-    var $elem =     $( "#date-trans" );
-    var day 	 = $elem.DatePickerGetDate().getDate();
-    var month 	 = $elem.DatePickerGetDate().getMonth();
-    var year 	 = $elem.DatePickerGetDate().getFullYear();
-    var time 	 = $( "#outsource-assign-date").val();
-    var timezone = $( "#outsource-assign-timezone").val();
-
-    return new Date ( year, month, day, time, 00 ).getTime() - ( parseFloat( timezone).toFixed( 1 ) * 3600000 );
+    return new Date ( year, month, day, time, 0 ).getTime() - ( parseFloat( timezone).toFixed( 1 ) * 3600000 ) - ( new Date().getTimezoneOffset() * 60000 );
 }
 
 function getChosenOutsourceDateToString() {
@@ -265,34 +254,6 @@ function setOutsourceDate(chosenDate) {
     UI.checkSendToTranslatorButton();
 
 }
-
-(function() {
-    var cache = {};
-
-    this.tmpl = function tmpl(str, data) {
-        var fn = !/\W/.test(str) ?
-            cache[str] = cache[str] ||
-            tmpl(document.getElementById(str).innerHTML) :
-
-            new Function("obj",
-                "var p=[],print=function(){p.push.apply(p,arguments);};" +
-                "with(obj){p.push('" +
-                str
-	                .replace(/[\r\t\n]/g, " ")
-	                .split("<%").join("\t")
-	                .replace(/((^|%>)[^\t]*)'/g, "$1\r")
-	                .replace(/\t=(.*?)%>/g, "',$1,'")
-	                .split("\t").join("');")
-	                .split("%>").join("p.push('")
-	                .split("\r").join("\\'") + "');}return p.join('');");
-
-        return data ? fn(data) : fn;
-    };
-})();
-
-// var EYE = window.EYE = (function() {
-//
-// })();
 
 var EYE = {
     _registered : {
