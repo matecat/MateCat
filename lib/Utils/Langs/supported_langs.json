@@ -866,6 +866,16 @@
     ,
         {
             "localized":[{
+                "en":"Lingala"
+            }],
+            "isocode":"ln",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"ln-LIN"
+        }
+    ,
+        {
+            "localized":[{
                 "en":"Lithuanian"
             }],
             "isocode":"lt",
