@@ -80,6 +80,7 @@ class QualityReportModel {
         return $this->chunk_review_model;
     }
 
+
     /**
      * @param $format
      */

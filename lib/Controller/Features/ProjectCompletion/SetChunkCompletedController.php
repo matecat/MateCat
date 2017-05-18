@@ -3,6 +3,8 @@
 
 use Features\ProjectCompletion\Model\EventModel ;
 
+use Features\ProjectCompletion\Model\EventStruct ;
+
 class Features_ProjectCompletion_SetChunkCompletedController extends ajaxController {
 
     private $id_job;
@@ -42,14 +44,14 @@ class Features_ProjectCompletion_SetChunkCompletedController extends ajaxControl
 
     private function processInsert() {
 
-        $params = array(
-            'uid' => $this->getUid(),
+        $eventStruct = new EventStruct(array(
+            'uid'               => $this->getUid(),
             'remote_ip_address' => Utils::getRealIpAddr(),
-            'source' => Chunks_ChunkCompletionEventStruct::SOURCE_USER,
-            'is_review' => $this->isRevision()
-        );
+            'source'            => Chunks_ChunkCompletionEventStruct::SOURCE_USER,
+            'is_review'         => $this->isRevision()
+        ) );
 
-        $model = new EventModel( $this->chunk, $params ) ;
+        $model = new EventModel( $this->chunk, $eventStruct ) ;
         $model->save();
 
         $this->result[ 'data' ] = $this->chunk->toArray() ;

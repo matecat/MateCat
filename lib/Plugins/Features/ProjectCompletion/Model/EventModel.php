@@ -16,11 +16,14 @@ use Exception ;
 
 class EventModel {
 
+    /**
+     * @var EventStruct
+     */
     protected $params ;
     protected $chunk ;
     protected $chunkCompletionEventId ;
 
-    public function __construct( $chunk, $params ) {
+    public function __construct( $chunk, EventStruct $params ) {
         $this->params = $params ;
         $this->chunk = $chunk ;
     }
@@ -42,8 +45,8 @@ class EventModel {
         $current_phase = $dao->currentPhase( $this->chunk );
 
         if (
-                ( $this->params['is_review'] && $current_phase != Chunks_ChunkCompletionEventDao::REVISE ) ||
-                ( !$this->params['is_review'] && $current_phase != Chunks_ChunkCompletionEventDao::TRANSLATE )
+                ( $this->params->is_review && $current_phase != Chunks_ChunkCompletionEventDao::REVISE ) ||
+                ( !$this->params->is_review && $current_phase != Chunks_ChunkCompletionEventDao::TRANSLATE )
         ) {
             throw new Exception('Cannot save event, current status mismatch.') ;
         }

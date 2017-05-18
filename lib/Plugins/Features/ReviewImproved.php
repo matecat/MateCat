@@ -7,6 +7,7 @@ use INIT;
 use Log ;
 use FilesStorage ;
 use LQA\ChunkReviewDao;
+use LQA\ChunkReviewStruct;
 use LQA\ModelDao;
 use Translations_SegmentTranslationStruct;
 use ZipArchive ;
@@ -16,6 +17,13 @@ use Features\ReviewImproved\Observer\SegmentTranslationObserver ;
 use Features\ReviewImproved\Controller;
 use Projects_MetadataDao;
 use ChunkOptionsModel;
+use Features\ReviewImproved\Model\QualityReportModel ;
+use Features\ProjectCompletion\Model\EventStruct ;
+
+use Features ;
+use Chunks_ChunkStruct ;
+use Features\ReviewImproved\Model\ArchivedQualityReportModel ;
+use Features\ReviewImproved\Model\ArchivedQualityReportDao;
 
 class ReviewImproved extends BaseFeature {
 
@@ -219,6 +227,20 @@ class ReviewImproved extends BaseFeature {
          */
         $translation_model->attach( new SegmentTranslationObserver() );
         $translation_model->notify();
+    }
+
+    /**
+     * project_completion_event_saved
+     *
+     * @param Chunks_ChunkStruct $chunk
+     * @param                    $params
+     * @param                    $lastId
+     */
+    public function project_completion_event_saved( Chunks_ChunkStruct $chunk, EventStruct $event, $lastId ) {
+        if ( $chunk->getProject()->hasFeature( Features::REVIEW_IMPROVED ) && $event->is_review ) {
+            $model = new ArchivedQualityReportModel( $chunk );
+            $model->saveWithUID( $event->uid );
+        }
     }
 
     /**
