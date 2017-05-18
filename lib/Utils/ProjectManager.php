@@ -466,6 +466,7 @@ class ProjectManager {
 
         //now, upload dir contains only hash-links
         //we start copying files to "file" dir, inserting metadata in db and extracting segments
+        $totalFilesStructure = [];
         foreach ( $linkFiles[ 'conversionHashes' ][ 'sha' ] as $linkFile ) {
             //converted file is inside cache directory
             //get hash from file name inside UUID dir
@@ -549,12 +550,17 @@ class ProjectManager {
 
             }
 
-            //Try to store segments after all checks for the CURRENT file (
+            //Try to extract segments after all checks for the CURRENT file ( we are iterating through files )
             try{
 
                 foreach( $filesStructure as $fid => $file_info ){
                     $this->_extractSegments( $fid, $file_info );
-                    $this->_storeSegments( $fid );
+                    if ( $this->show_in_cattool_segs_counter > 120000 || ( $this->show_in_cattool_segs_counter * count( $this->projectStructure[ 'target_language' ] ) ) > 420000 ) {
+                        //Allow projects with only one target language and 120000 segments ( ~ 800.000 words )
+                        //OR
+                        //A multi language project with max 420000 segments ( EX: 42000 segments in 10 languages ~ 2.700.000 words )
+                        throw new Exception( "Project too large. Skip.", 128 );
+                    }
                 }
 
             } catch( Exception $e ){
@@ -574,11 +580,6 @@ class ProjectManager {
                     $this->projectStructure[ 'result' ][ 'errors' ][] = array(
                             "code" => $e->getCode(), "message" => $e->getPrevious()->getMessage() . " in {$e->getMessage()}"
                     );
-                } elseif ( $e->getCode() == -2 ) {
-                    //code == -2
-                    $this->projectStructure[ 'result' ][ 'errors' ][] = array(
-                            "code" => -7, "message" => "Failed to store segments in database for {$file_info[ 'original_filename' ]}"
-                    );
                 } else {
 
                     //Generic error
@@ -592,10 +593,17 @@ class ProjectManager {
                 return false;
             }
 
+            //array append like array_merge but it do not renumber the numeric keys, so we can preserve the files id
+            $totalFilesStructure += $filesStructure;
+
         } //end of conversion hash-link loop
 
         //Throws exception
         try {
+
+            foreach ( $totalFilesStructure as $fid => $file_info ) {
+                $this->_storeSegments( $fid );
+            }
 
             $this->_createJobs( $this->projectStructure );
             $this->writeFastAnalysisData();
@@ -603,7 +611,7 @@ class ProjectManager {
         } catch ( Exception $e ) {
 
             $this->projectStructure[ 'result' ][ 'errors' ][] = array(
-                    "code" => -9, "message" => "Fail to create Job. ( {$e->getMessage()} )"
+                    "code" => -9, "message" => "Failed to create Job. ( {$e->getMessage()} )"
             );
 
             //EXIT
