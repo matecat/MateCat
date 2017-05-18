@@ -24,7 +24,7 @@ class CreateQaArchivedReports extends AbstractMatecatMigration
 
           PRIMARY KEY (`id`),
 
-          UNIQUE INDEX `id_job_password_idx` (
+          KEY `id_job_password_idx` (
             `id_job` ASC,
             `password` ASC,
             `job_first_segment` ASC,

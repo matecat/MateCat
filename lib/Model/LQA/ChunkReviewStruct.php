@@ -14,6 +14,7 @@ class ChunkReviewStruct extends \DataAccess_AbstractDaoSilentStruct implements \
     public $is_pass ;
     public $force_pass_at ;
     public $reviewed_words_count ;
+    public $undo_data ;
 
     /**
      * Sets default values for an empty struct

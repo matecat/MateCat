@@ -45,8 +45,6 @@ class ChunkReviewDao extends \DataAccess_AbstractDao {
 
     }
 
-
-
     /**
      * @param \Chunks_ChunkStruct $chunk
      *

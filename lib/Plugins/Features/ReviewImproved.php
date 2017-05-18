@@ -4,10 +4,8 @@ namespace Features ;
 
 use Features\ReviewImproved\ChunkReviewModel;
 use INIT;
-use Log ;
 use FilesStorage ;
 use LQA\ChunkReviewDao;
-use LQA\ChunkReviewStruct;
 use LQA\ModelDao;
 use Translations_SegmentTranslationStruct;
 use ZipArchive ;
@@ -15,15 +13,12 @@ use Chunks_ChunkDao  ;
 use SegmentTranslationModel;
 use Features\ReviewImproved\Observer\SegmentTranslationObserver ;
 use Features\ReviewImproved\Controller;
-use Projects_MetadataDao;
-use ChunkOptionsModel;
-use Features\ReviewImproved\Model\QualityReportModel ;
 use Features\ProjectCompletion\Model\EventStruct ;
 
 use Features ;
 use Chunks_ChunkStruct ;
 use Features\ReviewImproved\Model\ArchivedQualityReportModel ;
-use Features\ReviewImproved\Model\ArchivedQualityReportDao;
+use Features\ReviewImproved\Model\QualityReportModel ;
 
 class ReviewImproved extends BaseFeature {
 
@@ -233,13 +228,19 @@ class ReviewImproved extends BaseFeature {
      * project_completion_event_saved
      *
      * @param Chunks_ChunkStruct $chunk
-     * @param                    $params
-     * @param                    $lastId
+     * @param EventStruct $event
+     * @param $completion_event_id
      */
-    public function project_completion_event_saved( Chunks_ChunkStruct $chunk, EventStruct $event, $lastId ) {
-        if ( $chunk->getProject()->hasFeature( Features::REVIEW_IMPROVED ) && $event->is_review ) {
-            $model = new ArchivedQualityReportModel( $chunk );
-            $model->saveWithUID( $event->uid );
+    public function project_completion_event_saved( Chunks_ChunkStruct $chunk, EventStruct $event, $completion_event_id ) {
+        if ( $chunk->getProject()->hasFeature( Features::REVIEW_IMPROVED ) ) {
+            if ( $event->is_review ) {
+                $model = new ArchivedQualityReportModel( $chunk );
+                $model->saveWithUID( $event->uid );
+            }
+            else {
+                $model = new QualityReportModel( $chunk ) ;
+                $model->resetScore( $completion_event_id );
+            }
         }
     }
 
