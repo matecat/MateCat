@@ -18,7 +18,7 @@ var buttons = React.createClass({
     anyRebuttedIssue : function( data ) {
         var issuesRebutted = MateCat.db.segment_translation_issues.find( {
             '$and': [
-                { id_segment: this.props.sid  },
+                { id_segment: parseInt(this.props.sid)  },
                 {
                     rebutted_at: {  '$ne': null }
                 }

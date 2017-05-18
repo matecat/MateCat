@@ -4,7 +4,7 @@ export default React.createClass({
         var segment = MateCat.db.segments.by('sid', this.props.sid); 
         var issues = MateCat.db.segment_translation_issues
             .findObjects({ 
-                id_segment :  '' + this.props.sid, 
+                id_segment :  parseInt(this.props.sid),
                 translation_version : segment.version_number 
             });
 

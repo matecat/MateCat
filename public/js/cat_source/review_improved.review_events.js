@@ -49,7 +49,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         var version ;
         var prevBase = record.version_number ;
         version = db.segment_versions.findObject({
-            id_segment : record.sid,
+            id_segment : parseInt(record.sid),
             version_number : (prevBase -1) + ''
         });
         if ( version ) {
@@ -173,7 +173,7 @@ if ( ReviewImproved.enabled() && config.isReview ) {
         }
         var db_segment = MateCat.db.segments.findObject({ sid : '' + segment.absId });
         var latest_issues = MateCat.db.segment_translation_issues.findObjects({
-            id_segment : '' + segment.absId ,
+            id_segment : parseInt(segment.absId) ,
             translation_version : '' + db_segment.version_number
         });
 
