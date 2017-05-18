@@ -293,12 +293,13 @@ let ManageActions = {
         });
     },
 
-    assignTranslator: function (projectId, jobId, translator) {
+    assignTranslator: function (projectId, jobId, jobPassword, translator) {
         if ($('body').hasClass('manage')) {
             AppDispatcher.dispatch({
                 actionType: ManageConstants.ASSIGN_TRANSLATOR,
                 projectId: projectId,
                 jobId: jobId,
+                jobPassword: jobPassword,
                 translator: translator
             });
         } else {

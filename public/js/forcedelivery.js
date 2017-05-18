@@ -226,13 +226,8 @@ function prepareAndSubmitQuote( chosenDate, hideNeedItFaster ) {
         $( "#changeTimezone").removeClass( "hide" );
     }
 
-    var fullTranslateUrl = $(".onyourown a.uploadbtn").attr("href");
-    if ($(".translate[href='" + fullTranslateUrl.substr(fullTranslateUrl.indexOf("/translate/")) + "']").length > 0) {
-        $(".translate[href='" + fullTranslateUrl.substr(fullTranslateUrl.indexOf("/translate/")) + "']").trigger( "click" );
-    } else {
-        UI.restartOutsourceModal()
-    }
-    // $(".translate[href='" + fullTranslateUrl.substr(fullTranslateUrl.indexOf("/translate/")) + "']").trigger( "click" );
+
+    UI.restartOutsourceModal();
 }
 
 function setOutsourceDate(chosenDate) {
@@ -254,6 +249,30 @@ function setOutsourceDate(chosenDate) {
     UI.checkSendToTranslatorButton();
 
 }
+
+(function() {
+    var cache = {};
+
+    this.tmpl = function tmpl(str, data) {
+        var fn = !/\W/.test(str) ?
+            cache[str] = cache[str] ||
+                tmpl(document.getElementById(str).innerHTML) :
+
+            new Function("obj",
+                "var p=[],print=function(){p.push.apply(p,arguments);};" +
+                "with(obj){p.push('" +
+                str
+                    .replace(/[\r\t\n]/g, " ")
+                    .split("<%").join("\t")
+                    .replace(/((^|%>)[^\t]*)'/g, "$1\r")
+                    .replace(/\t=(.*?)%>/g, "',$1,'")
+                    .split("\t").join("');")
+                    .split("%>").join("p.push('")
+                    .split("\r").join("\\'") + "');}return p.join('');");
+
+        return data ? fn(data) : fn;
+    };
+})();
 
 var EYE = {
     _registered : {

@@ -123,13 +123,13 @@ let ProjectsStore = assign({}, EventEmitter.prototype, {
         }
     },
 
-    assignTranslator: function (prId, jobId, translator) {
+    assignTranslator: function (prId, jobId, jobPassword, translator) {
         let project = this.projects.find(function (prj) {
             return prj.get('id') == prId;
         });
         let indexProject = this.projects.indexOf(project);
         let job = project.get('jobs').find(function (j) {
-            return j.get('id') == jobId;
+            return j.get('id') == jobId && j.get('password') === jobPassword;
         });
         let indexJob = project.get('jobs').indexOf(job);
         this.projects = this.projects.setIn([indexProject,'jobs', indexJob, 'translator'], Immutable.fromJS(translator));
@@ -214,7 +214,7 @@ AppDispatcher.register(function(action) {
             ProjectsStore.emitChange(action.actionType, action.idProject);
             break;
         case ManageConstants.ASSIGN_TRANSLATOR:
-            ProjectsStore.assignTranslator(action.projectId, action.jobId, action.translator);
+            ProjectsStore.assignTranslator(action.projectId, action.jobId, action.jobPassword, action.translator);
             ProjectsStore.emitChange(ManageConstants.RENDER_PROJECTS, ProjectsStore.projects);
             break;
             // Move to Outsource Store

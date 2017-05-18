@@ -290,17 +290,20 @@ class OutsourceModal extends React.Component {
         let deliveryHtml = this.getDeliveryHtml();
         let revisionHtml = this.getRevisionHtml();
 
-        let date;
+        let date = '';
         let translatorEmail = '';
-        let delivery;
+        let delivery = '';
         if (this.props.job.translator) {
             delivery =  APP.getGMTDate(this.props.job.translator.delivery_timestamp * 1000);
+            date =  delivery.day + ' ' + delivery.month + ' at ' + delivery.time + " (" + delivery.gmt + ")";
             translatorEmail = this.props.job.translator.email;
-        } else {
-            delivery = new Date().getTime();
-            delivery =  APP.getGMTDate(delivery);
+        } else if (this.state.outsource) {
+                // let timeZone = this.getTimeZone();
+                // let dateString =  this.getDateString(deliveryToShow, timeZone);
+            delivery = APP.getGMTDate(this.chunk.delivery);
+            date =  delivery.day + ' ' + delivery.month + ' at ' + delivery.time + " (" + delivery.gmt + ")";
         }
-        date =  delivery.day + ' ' + delivery.month + ' at ' + delivery.time + " (" + delivery.gmt + ")";
+
 
         return <div className={"modal outsource " + loadingClass}>
         <div className="popup">
@@ -332,7 +335,7 @@ class OutsourceModal extends React.Component {
                     <div className={(this.props.translatorOpen && showShareToTranslator) ? ("send-to-translator") :("send-to-translator hide")} >
                         <div className="send-to-translator-container ">
                             <input className="out-email" type="email" placeholder="Enter email" defaultValue={translatorEmail}/>
-                            <input className="out-date" type="datetime" placeholder="Date" readOnly defaultValue={date}/>
+                            <input className="out-date" type="datetime" placeholder="Date" value={date}/>
                             <a  className="send-to-translator-btn in-popup disabled" target="_blank">Send to translator</a>
                             <div className="validation-error email-translator-error"><span className="text" style={{color: "red", fontsize: "14px"}}>A valid email is required</span></div>
                         </div>
