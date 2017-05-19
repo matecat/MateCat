@@ -29,35 +29,23 @@
     <!-- jQuery UI styles -->
 
     <link rel="stylesheet" href="${basepath}public/css/build/upload-build.css?build=${build_number}"/>
-    <link rel="stylesheet" href="${basepath}public/js/lib/colorbox/colorbox.css?build=${build_number}"/>
     <tal:block  tal:repeat="css_url css_resources">
         <link rel="stylesheet" tal:attributes="href css_url"/>
     </tal:block>
 
-    <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
+
 
     <!-- Shim to make HTML5 elements usable in older Internet Explorer versions -->
     <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 
-
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery.js?build=${build_number}"></script>
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery-ui-1.8.20.custom.min.js?build=${build_number}"></script>
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery.tablesorter-fork-mottie.js?build=${build_number}"></script>
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery.powertip.min.js?build=${build_number}"></script>
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery.cookie.js?build=${build_number}"></script>
-
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery.colorbox-min.js?build=${build_number}"></script>
-
-    <script type="text/javascript" src="${basepath}public/js/build/semantic.js?build=${build_number}"></script>
-
+    <script type="text/javascript" src="${basepath}public/js/build/libs_upload.js?build=${build_number}"></script>
     <script type="text/javascript" src="${basepath}public/js/build/common.js?build=${build_number}"></script>
-    <script type="text/javascript" src="${basepath}public/js/gdrive.upload.js"></script>
-    <script type="text/javascript" src="${basepath}public/js/gdrive.picker.js"></script>
-    <script type="text/javascript" src="${basepath}public/js/upload.js"></script>
+    <script type="text/javascript" src="${basepath}public/js/build/upload.js"></script>
     <script type="text/javascript" src="${basepath}public/js/build/react.js?build=${build_number}"></script>
     <script type="text/javascript" src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
 
+    <div metal:use-macro="${php: INIT::$TRACKING_CODES_VIEW_PATH}/external_sources.html/header_common"/>
 
     <script type="text/javascript" >
         /*<![CDATA[*/
@@ -163,7 +151,7 @@
 
     <div class="translate-box target">
         <h2>To</h2>
-        <select name="target-lang" id="target-lang">
+        <select name="target-lang" id="target-lang" class="ui search dropdown">
             <tal:block tal:define="language php:array()" tal:repeat="language targetLangHistory">
                 <option class="custom" tal:condition="language/selected" selected="selected" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name"></option>
                 <option class="custom" tal:condition="not:language/selected" tal:attributes="value language/code; data-direction language/direction" tal:content="language/name"></option>
@@ -793,34 +781,34 @@
 </script>
 
 <!-- The Templates plugin is included to render the upload/download listings -->
-<script src="${basepath}public/js/lib/fileupload/tmpl.min.js"></script>
+<!--<script src="${basepath}public/js/lib/fileupload/tmpl.min.js"></script>-->
 
 <!-- The Load Image plugin is included for the preview images and image resizing functionality -->
-<script src="${basepath}public/js/lib/fileupload/load-image.min.js"></script>
+<!--<script src="${basepath}public/js/lib/fileupload/load-image.min.js"></script>-->
 
 <!-- The Canvas to Blob plugin is included for image resizing functionality -->
-<script src="${basepath}public/js/lib/fileupload/canvas-to-blob.min.js"></script>
+<!--<script src="${basepath}public/js/lib/fileupload/canvas-to-blob.min.js"></script>-->
 
 <!-- jQuery Image Gallery -->
-<script src="${basepath}public/js/lib/fileupload/jquery.image-gallery.min.js"></script>
+<!--<script src="${basepath}public/js/lib/fileupload/jquery.image-gallery.min.js"></script>-->
 
 <!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
-<script src="${basepath}public/js/lib/fileupload/jquery.iframe-transport.js"></script>
+<!--<script src="${basepath}public/js/lib/fileupload/jquery.iframe-transport.js"></script>-->
 <!-- The basic File Upload plugin -->
-<script src="${basepath}public/js/lib/fileupload/jquery.fileupload.js"></script>
+<!--<script src="${basepath}public/js/lib/fileupload/jquery.fileupload.js"></script>-->
 <!-- The File Upload file processing plugin -->
-<script src="${basepath}public/js/lib/fileupload/jquery.fileupload-fp.js"></script>
+<!--<script src="${basepath}public/js/lib/fileupload/jquery.fileupload-fp.js"></script>-->
 <!-- The File Upload user interface plugin -->
-<script src="${basepath}public/js/lib/fileupload/jquery.fileupload-ui.js"></script>
+<!--<script src="${basepath}public/js/lib/fileupload/jquery.fileupload-ui.js"></script>-->
 <!-- The File Upload jQuery UI plugin -->
-<script src="${basepath}public/js/lib/fileupload/jquery.fileupload-jui.js"></script>
+<!--<script src="${basepath}public/js/lib/fileupload/jquery.fileupload-jui.js"></script>-->
 <!-- The localization script -->
-<script src="${basepath}public/js/lib/fileupload/locale.js"></script>
+<!--<script src="${basepath}public/js/lib/fileupload/locale.js"></script>-->
 <!-- The main application script -->
-<script src="${basepath}public/js/lib/fileupload/main.js"></script>
+<!--<script src="${basepath}public/js/lib/fileupload/main.js"></script>-->
 
-<script src="${basepath}public/js/new-project.js"></script>
-<script src="${basepath}public/js/tm.js"></script>
+<!--<script src="${basepath}public/js/new-project.js"></script>-->
+<!--<script src="${basepath}public/js/tm.js"></script>-->
 
 
 <div class="modal supported-formats" data-type="view">
