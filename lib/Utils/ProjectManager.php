@@ -25,6 +25,7 @@ class ProjectManager {
      */
     protected $show_in_cattool_segs_counter = 0;
     protected $files_word_count = 0;
+    protected $total_segments = 0;
     protected $min_max_segments_id = [];
 
     /**
@@ -555,11 +556,11 @@ class ProjectManager {
 
                 foreach( $filesStructure as $fid => $file_info ){
                     $this->_extractSegments( $fid, $file_info );
-                    if ( $this->show_in_cattool_segs_counter > 120000 || ( $this->show_in_cattool_segs_counter * count( $this->projectStructure[ 'target_language' ] ) ) > 420000 ) {
-                        //Allow projects with only one target language and 120000 segments ( ~ 800.000 words )
+                    if ( $this->total_segments > 100000 || ( $this->total_segments * count( $this->projectStructure[ 'target_language' ] ) ) > 420000 ) {
+                        //Allow projects with only one target language and 100000 segments ( ~ 550.000 words )
                         //OR
                         //A multi language project with max 420000 segments ( EX: 42000 segments in 10 languages ~ 2.700.000 words )
-                        throw new Exception( "Project too large. Skip.", 128 );
+                        throw new Exception( "Project too large.", 128 );
                     }
                 }
 
@@ -1847,6 +1848,9 @@ class ProjectManager {
                 $_fileCounter_Show_In_Cattool += $show_in_cattool;
 
             }
+
+            $this->total_segments += count( $xliff_file[ 'trans-units' ] );
+
         }
 
         // *NOTE*: PHP>=5.3 throws UnexpectedValueException, but PHP 5.2 throws ErrorException
