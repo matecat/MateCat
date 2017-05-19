@@ -365,19 +365,22 @@ class ReviewImproved extends BaseFeature {
 
     }
 
+
     /**
      * Install routes for this plugin
      *
      * @param \Klein\Klein $klein
      */
-
     public static function loadRoutes( \Klein\Klein $klein ) {
-        $klein->respond('GET', '/quality_report/[:id_job]/[:password]', function ($request, $response, $service, $app) {
-            $controller = new Controller\QualityReportController( $request, $response, $service, $app);
-            $template_path = dirname(__FILE__) . '/ReviewImproved/View/Html/quality_report.html' ;
-            $controller->setView( $template_path );
-            $controller->respond();
-        });
+        $klein->respond('GET', '/quality_report/[:id_job]/[:password]',                    array(__CLASS__, 'callbackQualityReport')  );
+        $klein->respond('GET', '/quality_report/[:id_job]/[:password]/version/[:version]', array(__CLASS__, 'callbackQualityReport')  );
+    }
+
+    public static function callbackQualityReport($request, $response, $service, $app) {
+        $controller = new Controller\QualityReportController( $request, $response, $service, $app);
+        $template_path = dirname(__FILE__) . '/ReviewImproved/View/Html/quality_report.html' ;
+        $controller->setView( $template_path );
+        $controller->respond();
     }
 
 }

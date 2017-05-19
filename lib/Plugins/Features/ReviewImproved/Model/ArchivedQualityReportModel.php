@@ -8,9 +8,6 @@
 
 namespace Features\ReviewImproved\Model;
 
-
-use Features\ProjectCompletion\Model\EventStruct;
-
 class ArchivedQualityReportModel {
 
     protected $chunk ;

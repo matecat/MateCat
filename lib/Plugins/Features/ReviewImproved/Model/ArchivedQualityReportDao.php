@@ -22,6 +22,47 @@ class ArchivedQualityReportDao extends \DataAccess_AbstractDao  {
         self::insertStruct( $report, [ 'no_nulls' => true ] );
     }
 
+    /**
+     * @param Chunks_ChunkStruct $chunk
+     * @param                    $versionNumbero
+     * @return ArchivedQualityReportStruct
+     */
+    public function getByChunkAndVersionNumber( Chunks_ChunkStruct $chunk, $versionNumber ) {
+        $sql = "SELECT * FROM qa_archived_reports WHERE
+                id_job = :id_job AND password = :password AND
+                job_first_segment = :job_first_segment AND job_last_segment = :job_last_segment AND
+                version = :version " ;
+
+        $stmt = $this->getConnection()->getConnection()->prepare( $sql ) ;
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'Features\ReviewImproved\Model\ArchivedQualityReportStruct' );
+        $stmt->execute( array(
+                'id_job'              => $chunk->id,
+                'password'            => $chunk->password,
+                'job_first_segment'   => $chunk->job_first_segment,
+                'job_last_segment'    => $chunk->job_last_segment,
+                'version'             => $versionNumber
+        ) ) ;
+
+        return $stmt->fetch() ;
+    }
+
+    public function getAllByChunk( Chunks_ChunkStruct $chunk ) {
+        $sql = "SELECT * FROM qa_archived_reports WHERE
+                id_job = :id_job AND password = :password AND
+                job_first_segment = :job_first_segment AND job_last_segment = :job_last_segment ";
+
+        $stmt = $this->getConnection()->getConnection()->prepare( $sql ) ;
+        $stmt->setFetchMode( \PDO::FETCH_CLASS, 'Features\ReviewImproved\Model\ArchivedQualityReportStruct' );
+        $stmt->execute( array(
+                'id_job'              => $chunk->id,
+                'password'            => $chunk->password,
+                'job_first_segment'   => $chunk->job_first_segment,
+                'job_last_segment'    => $chunk->job_last_segment,
+        ) ) ;
+
+        return $stmt->fetchAll() ;
+    }
+
     public function getLastVersionNumber( Chunks_ChunkStruct $chunk ) {
         $conn = $this->getConnection()->getConnection();
         $stmt = $conn->prepare("

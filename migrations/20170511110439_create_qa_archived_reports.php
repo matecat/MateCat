@@ -33,7 +33,5 @@ class CreateQaArchivedReports extends AbstractMatecatMigration
     );
     ";
 
-    public $sql_down = "
-        DROP TABLE `qa_archived_reports` ;
-    ";
+    public $sql_down = "DROP TABLE `qa_archived_reports`;";
 }
