@@ -53,6 +53,10 @@ class QualityReportModel {
         $this->version = $version;
     }
 
+    public function getVersionNumber() {
+        return $this->version ;
+    }
+
     public function getChunk() {
         return $this->chunk;
     }

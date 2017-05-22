@@ -43,6 +43,7 @@ class QualityReportDecorator extends \AbstractModelViewDecorator {
         $template->project = $this->model->getProject();
         $template->job     = $this->model->getChunk()->getJob();
         $template->chunk   = $this->model->getChunk();
+        $template->version_number = $this->model->getVersionNumber() ;
 
         $template->download_uri = $this->download_uri ;
 
