@@ -140,6 +140,20 @@ module.exports = function(grunt) {
                 ],
                 dest: buildPath + 'cat-react.js'
             },
+            qaReportsVersions: {
+                options: {
+                    transform: [
+                        [ 'babelify', { presets: [ es2015Preset, reactPreset ] } ]
+                    ],
+                    browserifyOptions: {
+                        paths: [ __dirname + '/node_modules' ]
+                    }
+                },
+                src: [
+                    basePath + 'cat_source/es6/react/components/review_improved/review_improved.qa_report.js',
+                ],
+                dest: buildPath + 'qa-report-improved.js'
+            },
         },
 
 
@@ -452,6 +466,7 @@ module.exports = function(grunt) {
         'handlebars',
         'browserify:libs',
         'browserify:components',
+        'browserify:qaReportsVersions',
         'concat:libs',
         'concat:semantic',
         'concat:app',

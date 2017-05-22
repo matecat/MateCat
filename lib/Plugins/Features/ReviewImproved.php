@@ -373,7 +373,7 @@ class ReviewImproved extends BaseFeature {
      */
     public static function loadRoutes( \Klein\Klein $klein ) {
         $klein->respond('GET', '/quality_report/[:id_job]/[:password]',                    array(__CLASS__, 'callbackQualityReport')  );
-        $klein->respond('GET', '/quality_report/[:id_job]/[:password]/version/[:version]', array(__CLASS__, 'callbackQualityReport')  );
+        $klein->respond('GET', '/quality_report/[:id_job]/[:password]/versions/[:version]', array(__CLASS__, 'callbackQualityReport')  );
     }
 
     public static function callbackQualityReport($request, $response, $service, $app) {

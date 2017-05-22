@@ -7,7 +7,9 @@
     <meta name="viewport" content="width=device-width"/>
     <link href="${basepath}public/css/build/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
     <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
+    <link href="${basepath}public/css/build/manage-build.css?build=${build_number}" rel="stylesheet" type="text/css"/>
     <link rel="stylesheet" href="${basepath}public/css/manage.css?build=${build_number}"/>
+
 
     <script type="text/javascript">
         var config = {
@@ -19,13 +21,74 @@
             score : ${score}
         };
     </script>
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery.js?build=${build_number}"></script>
-    <script type="text/javascript" src="${basepath}public/js/lib/jquery.cookie.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
     <script type="text/javascript" src="${basepath}public/js/build/common.js?build=${build_number}"></script>
 
     <script src="${basepath}public/js/build/react.js?build=${build_number}"></script>
     <script src="${basepath}public/js/build/cat-react.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/build/qa-report-improved.js?build=${build_number}"></script>
+    <style>
+        header {
+            box-sizing: initial;
+        }
 
+        #quality-report-select {
+            float: right;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        #report-versions-select {
+            min-width: 500px;
+            background-color: #d7d7d7;
+        }
+
+        #report-versions-select > .text {
+            background: none !important;
+            box-shadow: none !important;
+            position: initial !important;
+        }
+
+        #report-versions-select .report-item,
+        #report-versions-select > .text {
+            font-size: 15px;
+            font-weight: bold;
+            line-height: 15px;
+            min-height: 37px;
+        }
+
+        .report-item .version-green,
+        .report-item .version-red,
+        #report-versions-select > .text .version-green,
+        #report-versions-select > .text .version-red{
+            position: absolute;
+            width: 10px;
+            top: -1px;
+            height: 37px;
+            left: -1px;
+            background-color: green;
+        }
+
+        .report-item .version-red,
+        #report-versions-select > .text .version-red{
+            background-color: red;
+        }
+
+        #report-versions-select .report-date {
+            float: right !important;
+            color: grey;
+            font-size: 13px;
+            float: right;
+            margin-top: 0px;
+        }
+
+        #report-versions-select .report-text {
+            float: left;
+        }
+
+        .onoffswitch-drive {
+            zoom: 0.65;
+        }
+    </style>
 </head>
 
 <body>
@@ -39,11 +102,13 @@
     </div>
 </header>
 
-<div class="wrapper">
+<div class="wrapper" style="margin-top: 38px;">
 
-    <h1>Quality Report - Project: <span id="pname" tal:content="project/name"></span>
+    <h1 style="float: left">Quality Report - Project: <span id="pname" tal:content="project/name"></span>
 
     </h1>
+
+    <div id="quality-report-select"></div>
 
     <table class="tablestats left-aligned" border="0" cellpadding="0" cellspacing="0">
         <tr>
