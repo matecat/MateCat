@@ -25,6 +25,7 @@ class QualityReportVersions extends React.Component {
             <div className="report-text">QUALITY REPORT ({config.score})</div>
             <span className="report-date">Current</span>
         </div>;
+        versions = versions.reverse();
         versions.unshift(current);
         return versions;
     }
