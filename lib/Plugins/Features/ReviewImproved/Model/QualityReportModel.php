@@ -84,6 +84,14 @@ class QualityReportModel {
         return $this->chunk_review;
     }
 
+    public function getScore() {
+        return number_format( $this->getChunkReviewModel()->getScore(), 2, '.', ',' );
+    }
+
+    public function isPass() {
+        return (bool) $this->getChunkReview()->is_pass ;
+    }
+
     public function getChunkReviewModel() {
         if ( $this->chunk_review_model == null ) {
             $this->chunk_review_model = new ChunkReviewModel( $this->getChunkReview() );
@@ -126,7 +134,7 @@ class QualityReportModel {
 
         $this->__setAverages();
 
-        $scoreFormatted = number_format( $this->getChunkReviewModel()->getScore(), 2, '.', ',' );
+        $scoreFormatted = $this->getScore() ;
 
         $this->quality_report_structure = array(
                 'chunk'   => array(

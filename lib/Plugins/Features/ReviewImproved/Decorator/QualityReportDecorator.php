@@ -40,10 +40,12 @@ class QualityReportDecorator extends \AbstractModelViewDecorator {
         $template->basepath     = INIT::$BASEURL;
         $template->build_number = INIT::$BUILD_NUMBER;
 
-        $template->project = $this->model->getProject();
-        $template->job     = $this->model->getChunk()->getJob();
-        $template->chunk   = $this->model->getChunk();
+        $template->project = $this->model->getProject() ;
+        $template->job     = $this->model->getChunk()->getJob() ;
+        $template->chunk   = $this->model->getChunk() ;
         $template->version_number = $this->model->getVersionNumber() ;
+        $template->is_pass = $this->model->isPass() ;
+        $template->score   = $this->model->getScore() ;
 
         $template->download_uri = $this->download_uri ;
 

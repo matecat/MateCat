@@ -14,7 +14,9 @@
             basepath: '${basepath | string:/}',
             id_job: '${job/id}',
             password: '${job/password}',
-            version_number: ${version_number | string: null}
+            version_number: ${version_number | string: null},
+            is_pass : ${is_pass},
+            score : ${score}
         };
     </script>
     <script type="text/javascript" src="${basepath}public/js/lib/jquery.js?build=${build_number}"></script>
