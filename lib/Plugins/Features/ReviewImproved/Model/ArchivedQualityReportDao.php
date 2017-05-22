@@ -9,6 +9,8 @@
 namespace Features\ReviewImproved\Model;
 use Chunks_ChunkStruct ;
 
+use Features\ReviewImproved\Model\ArchivedQualityReportStruct ;
+
 class ArchivedQualityReportDao extends \DataAccess_AbstractDao  {
 
     const TABLE       = "qa_archived_reports";
@@ -46,6 +48,13 @@ class ArchivedQualityReportDao extends \DataAccess_AbstractDao  {
         return $stmt->fetch() ;
     }
 
+
+    /**
+     * @param Chunks_ChunkStruct $chunk
+     *
+     * @return \Features\ReviewImproved\Model\ArchivedQualityReportStruct[]
+     *
+     */
     public function getAllByChunk( Chunks_ChunkStruct $chunk ) {
         $sql = "SELECT * FROM qa_archived_reports WHERE
                 id_job = :id_job AND password = :password AND

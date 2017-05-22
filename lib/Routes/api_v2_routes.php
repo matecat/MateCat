@@ -34,12 +34,8 @@ $klein->with('/api/v2/jobs/[:id_job]/[:password]', function() {
     route( '',              'GET', 'API\V2\ChunkController', 'show' );
     route( '/comments',     'GET', 'API\V2\CommentsController', 'index' );
 
-    /**
-     * This should be moved in plugin space
-     */
-    route( '/quality-report', 'GET',
-        'Features\ReviewImproved\Controller\API\QualityReportController', 'show'
-    );
+    route( '/quality-report',          'GET', 'Features\ReviewImproved\Controller\API\QualityReportController', 'show' );
+    route( '/quality-report/versions', 'GET', 'Features\ReviewImproved\Controller\API\QualityReportController', 'versions' );
 });
 
 route(
