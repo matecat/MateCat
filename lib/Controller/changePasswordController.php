@@ -60,6 +60,9 @@ class changePasswordController extends ajaxController {
             $pDao->changePassword( $pStruct, $new_password );
             $pDao->destroyCacheById( $this->res_id );
 
+            $pStruct->getFeatures()
+                    ->run('project_password_changed', $pStruct, $actual_pwd );
+
         } else {
 
             $jStruct = Jobs_JobDao::getByIdAndPassword( $this->res_id, $actual_pwd );
@@ -67,6 +70,9 @@ class changePasswordController extends ajaxController {
             $jDao->changePassword( $jStruct, $new_password );
             $jDao->destroyCache( $jStruct );
 
+            $jStruct->getProject()
+                    ->getFeatures()
+                    ->run('job_password_changed', $jStruct, $actual_pwd );
         }
 
     }
