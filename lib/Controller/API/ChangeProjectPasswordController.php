@@ -51,6 +51,8 @@ class ChangeProjectPasswordController  extends ajaxController {
 
         $pDao->changePassword( $pStruct, $this->new_password );
 
+        $pStruct->getFeatures()->run('project_password_changed', $pStruct, $this->old_password );
+
         $this->api_output[ 'status' ]       = 'OK';
         $this->api_output[ 'id_project' ]   = $this->id_project;
         $this->api_output[ 'project_pass' ] = $this->new_password;
