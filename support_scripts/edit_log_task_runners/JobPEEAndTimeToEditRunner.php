@@ -3,7 +3,7 @@
 $root = realpath( dirname( __FILE__ ) . '/../../' );
 include_once $root . "/inc/Bootstrap.php";
 Bootstrap::start();
-require_once INIT::$MODEL_ROOT . '/queries.php';
+//require_once INIT::$MODEL_ROOT . '/queries.php';
 include_once INIT::$UTILS_ROOT . "/MyMemory.copyrighted.php";
 
 use TaskRunner\Commons\AbstractDaemon;
@@ -21,6 +21,34 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
 
     private static $last_job_file_name = '';
 
+    private static $queryMaxJob = "
+                SELECT min(id) AS min, max(id) AS max
+                    FROM jobs
+                    WHERE completed = 1
+                    AND id > :id ";
+
+    private static $queryFirst = "
+                SELECT jobs.id, password, job_first_segment, job_last_segment, source, target, class_load
+                    FROM jobs
+                    JOIN engines ON id_mt_engine = engines.id
+                    WHERE completed = 1
+                    AND jobs.id >= :min_id AND jobs.id <= :max_id ";
+
+    private static $querySegments = "
+                SELECT suggestion,
+                    translation,
+                    raw_word_count,
+                    time_to_edit, 
+                    match_type
+                    FROM segment_translations st
+                    JOIN segments s ON st.id_segment = s.id
+                    AND s.id BETWEEN :job_first_seg_id AND :job_last_seg_id
+                    WHERE status IN( :translated_status, :approved_status )
+                    AND id_job = :id_job
+                    AND show_in_cattool = 1
+                    AND id_segment >= :actual_seg_id
+                    LIMIT ";
+
     public function __construct() {
         parent::__construct();
         self::$last_job_file_name = dirname( __FILE__ ) . DIRECTORY_SEPARATOR . '.lastjobprocessed_jpeer';
@@ -33,49 +61,13 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
         $lastProcessedJob = (int)file_get_contents( self::$last_job_file_name );
 
         do {
-            $queryMaxJob = "select min(id) as min, max(id) as max
-                            from jobs
-                            where completed = 1
-                            and id > %d";
 
-            $queryFirst = "select id, password, job_first_segment, job_last_segment, source, target
-                            from jobs
-                            where completed = 1
-                            and id >= %d and id <= %d";
-
-            $querySegments = "select suggestion,
-                         translation,
-                         raw_word_count,
-                         time_to_edit, 
-                         match_type
-                         from segment_translations st
-                         join segments s on st.id_segment = s.id
-                            and s.id between %d and %d
-                         where status in( %s )
-                         and id_job = %d
-                         and show_in_cattool = 1
-                         and id_segment >= %d
-                         limit %d;";
-
-            $queryUpdateJob = "insert into jobs_stats 
-                                (id_job, password, fuzzy_band, source, target, total_time_to_edit, avg_post_editing_effort, total_raw_wc)
-                                VALUES (%d, '%s', '%s','%s','%s',%f, %f, %d)
-                                on duplicate key update 
-                                    avg_post_editing_effort = VALUES (avg_post_editing_effort),
-                                    total_time_to_edit = VALUES (total_time_to_edit),
-                                    total_raw_wc       = VALUES (total_raw_wc)";
-
-            $segment_statuses = array(
-                $db->getConnection()->quote( Constants_TranslationStatus::STATUS_TRANSLATED ),
-                $db->getConnection()->quote( Constants_TranslationStatus::STATUS_APPROVED )
-            );
-
-            $minJobMaxJob = $db->query_first(
-                sprintf(
-                    $queryMaxJob,
-                    (int)$lastProcessedJob
-                )
-            );
+            $stmt = $db->getConnection()->prepare( self::$queryMaxJob );
+            $stmt->setFetchMode( PDO::FETCH_ASSOC );
+            $stmt->execute([
+                    'id' => (int)$lastProcessedJob
+            ]);
+            $minJobMaxJob = $stmt->fetch();
             $maxJob       = (int)$minJobMaxJob[ 'max' ];
             $minJob       = (int)$minJobMaxJob[ 'min' ];
 
@@ -84,13 +76,13 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
             //get a chunk of self::NR_OF_JOBS each time.
             for ( $firstJob = $minJob; $this->RUNNING && ( $firstJob < $maxJob ); $firstJob += self::NR_OF_JOBS ) {
 
-                $jobs = $db->fetch_array(
-                    sprintf(
-                        $queryFirst,
-                        $firstJob,
-                        ( $firstJob + self::NR_OF_JOBS )
-                    )
-                );
+                $stmt = $db->getConnection()->prepare( self::$queryFirst );
+                $stmt->setFetchMode( PDO::FETCH_ASSOC );
+                $stmt->execute( [
+                        'min_id' => $firstJob,
+                        'max_id' => ( $firstJob + self::NR_OF_JOBS )
+                ] );
+                $jobs = $stmt->fetchAll();
 
                 //iterate over completed jobs, evaluate incremental PEE and save it in the job row
                 //Incremental PEE = sum( segment_pee * segment_raw_wordcount)
@@ -101,12 +93,13 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                     //BEGIN TRANSACTION
                     $db->begin();
 
-                    $_jid               = $job[ 'id' ];
-                    $_password          = $job[ 'password' ];
-                    $_job_first_segment = $job[ 'job_first_segment' ];
-                    $_job_last_segment  = $job[ 'job_last_segment' ];
-                    $_source            = $job[ 'source' ];
-                    $_target            = $job[ 'target' ];
+                    $_jid                  = $job[ 'id' ];
+                    $_password             = $job[ 'password' ];
+                    $_job_first_segment    = $job[ 'job_first_segment' ];
+                    $_job_last_segment     = $job[ 'job_last_segment' ];
+                    $_source               = $job[ 'source' ];
+                    $_target               = $job[ 'target' ];
+                    $_mt_engine_class_name = $job[ 'class_load' ];
 
                     Log::doLog( "job $_jid -> " . ( $_job_last_segment - $_job_first_segment ) . " segments" );
                     echo "job $_jid -> " . ( $_job_last_segment - $_job_first_segment ) . " segments\n";
@@ -136,17 +129,18 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                         Log::doLog( "starting from segment $firstSeg" );
                         echo "starting from segment $firstSeg\n";
 
-                        $segments = $db->fetch_array(
-                            sprintf(
-                                $querySegments,
-                                $_job_first_segment,
-                                $_job_last_segment,
-                                implode(",", $segment_statuses),
-                                $_jid,
-                                $firstSeg,
-                                self::NR_OF_SEGS
-                            )
-                        );
+                        $stmt = $db->getConnection()->prepare( self::$querySegments . self::NR_OF_SEGS );
+                        $stmt->setFetchMode( PDO::FETCH_ASSOC );
+                        $stmt->execute( [
+                                'job_first_seg_id'  => $_job_first_segment,
+                                'job_last_seg_id'   => $_job_last_segment,
+                                'translated_status' => Constants_TranslationStatus::STATUS_TRANSLATED,
+                                'approved_status'   => Constants_TranslationStatus::STATUS_APPROVED,
+                                'id_job'            => $_jid,
+                                'actual_seg_id'     => $firstSeg
+                        ] );
+                        $segments = $stmt->fetchAll();
+
 
                         //iterate over segments.
                         foreach ( $segments as $i => $segment ) {
@@ -156,6 +150,10 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                                 $job_stats[ 'ALL' ][ 'raw_wc_job' ] += $segment->raw_word_count;
                                 $job_stats[ 'ALL' ][ 'time_to_edit_job' ] += $segment->time_to_edit;
                                 $job_stats[ 'ALL' ][ 'raw_post_editing_effort' ] += $segment->getPEE() * $segment->raw_word_count;
+
+                                if( strpos( $segment->match_type, 'MT' ) !== false ){
+                                    $segment->match_type = $segment->match_type . "_" . $_mt_engine_class_name;
+                                }
 
                                 $job_stats[ $segment->match_type ][ 'raw_wc_job' ] += $segment->raw_word_count;
                                 $job_stats[ $segment->match_type ][ 'time_to_edit_job' ] += $segment->time_to_edit;
@@ -187,6 +185,7 @@ class JobPEEAndTimeToEditRunner extends AbstractDaemon
                         $jobStatsObj->total_raw_wc = $raw_wc_job;
 
                         $jobsStatsDao->create( $jobStatsObj );
+
                     }
 
                     Log::doLog( "done" );

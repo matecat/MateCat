@@ -124,13 +124,16 @@ class Jobs_JobStatsDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param Jobs_JobStatsStruct $obj
+     * @param DataAccess_IDaoStruct|Jobs_JobStatsStruct $obj
+     *
+     * @return Jobs_JobStatsStruct|null
      */
-    public function create( Jobs_JobStatsStruct $obj ) {
-        $query = "insert into jobs_stats 
+    public function create( DataAccess_IDaoStruct $obj ) {
+
+        $query = "INSERT INTO jobs_stats 
                        (id_job, password, fuzzy_band, source, target, total_time_to_edit, avg_post_editing_effort, total_raw_wc)
                   VALUES (:id_job, :password, :fuzzy_band, :source, :target, :total_time_to_edit, :avg_post_editing_effort, :total_raw_wc)
-                  on duplicate key update 
+                  ON DUPLICATE KEY UPDATE 
                        avg_post_editing_effort = VALUES (avg_post_editing_effort),
                        total_time_to_edit = VALUES (total_time_to_edit),
                        total_raw_wc       = VALUES (total_raw_wc)";
@@ -139,21 +142,21 @@ class Jobs_JobStatsDao extends DataAccess_AbstractDao {
 
         $stmt = $con->prepare( $query );
 
-        $stmt->bindParam(':id_job', $obj->id_job );
-        $stmt->bindParam(':password', $obj->password );
-        $stmt->bindParam(':fuzzy_band', $obj->fuzzy_band );
-        $stmt->bindParam(':source', $obj->source );
-        $stmt->bindParam(':target', $obj->target );
-        $stmt->bindParam(':total_time_to_edit', $obj->total_time_to_edit );
-        $stmt->bindParam(':avg_post_editing_effort', $obj->avg_post_editing_effort );
-        $stmt->bindParam(':total_raw_wc', $obj->total_raw_wc );
+        $stmt->bindParam( ':id_job', $obj->id_job );
+        $stmt->bindParam( ':password', $obj->password );
+        $stmt->bindParam( ':fuzzy_band', $obj->fuzzy_band );
+        $stmt->bindParam( ':source', $obj->source );
+        $stmt->bindParam( ':target', $obj->target );
+        $stmt->bindParam( ':total_time_to_edit', $obj->total_time_to_edit );
+        $stmt->bindParam( ':avg_post_editing_effort', $obj->avg_post_editing_effort );
+        $stmt->bindParam( ':total_raw_wc', $obj->total_raw_wc );
 
         $stmt->execute();
 
-        if($stmt->rowCount()){
+        if ( $stmt->rowCount() ) {
             return $obj;
         }
-        return null;
+
     }
 
     /**
