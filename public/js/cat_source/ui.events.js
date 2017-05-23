@@ -927,18 +927,6 @@ $.extend(UI, {
 				}
 			}
 
-			if (
-					(e.which == 13) || // return
-					(e.which == 32) || // space
-					(e.which == 49) || // semicomma
-					(e.which == 188) || // comma
-					(e.which == 186) || // semicomma
-					(e.which == 190) || // mark
-					(e.which == 191) || // question mark
-					(e.which == 222)) { // apostrophe
-				UI.spellCheck();
-			}
-
 		}).on('input', '.editarea', function( e ) { //inputineditarea
 			e.preventDefault();
 			UI.currentSegment.addClass('modified').removeClass('waiting_for_check_result');
