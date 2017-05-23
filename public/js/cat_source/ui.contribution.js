@@ -82,7 +82,6 @@ $.extend(UI, {
 		var current = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
 
 		if ($(current).hasClass('loaded') && current.find('.footer .matches .overflow').text().length) {
-            this.spellCheck();
             if (!next) {
                 this.currentIsLoaded = true;
                 this.blockButtons = false;
@@ -167,7 +166,6 @@ $.extend(UI, {
 		if(!d) return true;
 		this.renderContributions(d, segment);
 		this.lockTags(this.editarea);
-		this.spellCheck();
 		this.saveInUndoStack();
 		this.blockButtons = false;
 		if (d.data.matches && d.data.matches.length > 0) {
