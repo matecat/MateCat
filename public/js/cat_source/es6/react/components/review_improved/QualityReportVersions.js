@@ -13,17 +13,17 @@ class QualityReportVersions extends React.Component {
             return <div className="item report-item" data-value={item.version_number} key={item.version_number}
                     onClick={self.openVersion.bind(this, item)}>
                 <div className={classPassed}/>
-                <div className="report-text">QUALITY REPORT
-                    ({item['quality-report'].chunk.review.score})-V{item.version_number}</div>
+                <div className="report-text">Version {item.version_number} ({item['quality-report'].chunk.review.score})</div>
                 <span className="report-date">{date.toString()}</span>
             </div>
         });
+
         let currentIsPass = (config.is_pass == 1) ? 'version-green' : 'version-red';
         let current = <div className="item report-item" data-value="0" key="0"
                            onClick={self.openCurrentVersion.bind(this)}>
             <div className={currentIsPass}/>
-            <div className="report-text">QUALITY REPORT ({config.score})</div>
-            <span className="report-date">Current</span>
+            <div className="report-text">Current version ({config.score})</div>
+            <span className="report-date"></span>
         </div>;
         versions = versions.reverse();
         versions.unshift(current);
@@ -58,7 +58,7 @@ class QualityReportVersions extends React.Component {
                     ref={(dropdown) => this.dropdown = dropdown}>
             <input type="hidden" name="versions"/>
                 <i className="dropdown icon"/>
-                <div className="default text">Select Friend</div>
+                <div className="default text">Select version</div>
                 <div className="menu">
                     {versions}
                 </div>

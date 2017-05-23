@@ -18,7 +18,7 @@
             password: '${job/password}',
             version_number: ${version_number | string: null},
             is_pass : ${is_pass},
-            score : ${score}
+            score : '${score}'
         };
     </script>
     <script type="text/javascript" src="${basepath}public/js/build/libs.js?build=${build_number}"></script>
@@ -88,6 +88,16 @@
         .onoffswitch-drive {
             zoom: 0.65;
         }
+
+        .project_name_subtitle {
+            font-size: 36px;
+            font-weight: bold;
+        }
+
+        .quality_report_header {
+            margin: 0 0 20px 0 ;
+        }
+
     </style>
 </head>
 
@@ -104,11 +114,18 @@
 
 <div class="wrapper" style="margin-top: 38px; margin-bottom: 50px;">
 
-    <h1 style="float: left">Quality Report - Project: <span id="pname" tal:content="project/name"></span>
+    <div class="quality_report_header">
 
-    </h1>
+        <div style="float: left;">
+            <h1 >Quality Report </h1>
+            <div class="project_name_subtitle">Project: <span id="pname" tal:content="project/name"></span></div>
+        </div>
 
-    <div id="quality-report-select"></div>
+        <div id="quality-report-select"></div>
+
+        <div class="clear"></div>
+    </div>
+
 
     <table class="tablestats left-aligned" border="0" cellpadding="0" cellspacing="0">
         <tr>
